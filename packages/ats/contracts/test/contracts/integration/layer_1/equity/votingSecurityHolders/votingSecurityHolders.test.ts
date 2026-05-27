@@ -31,8 +31,8 @@ describe("VotingSecurityHoldersFacet Tests", () => {
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
     await executeRbac(asset, [
-      { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
-      { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+      { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
     ]);
 
     await asset.connect(signer_A).addIssuer(signer_A.address);
@@ -49,8 +49,8 @@ describe("VotingSecurityHoldersFacet Tests", () => {
   });
 
   it("GIVEN voting with executed snapshot WHEN getting voting holders THEN returns holders from snapshot", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
     await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
 
     await asset.connect(signer_C).issueByPartition({
@@ -98,8 +98,8 @@ describe("VotingSecurityHoldersFacet Tests", () => {
   });
 
   it("GIVEN voting without executed snapshot WHEN getting total voting holders THEN returns current total holders", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
 
     // Issue tokens before creating voting
     await asset.connect(signer_C).issueByPartition({

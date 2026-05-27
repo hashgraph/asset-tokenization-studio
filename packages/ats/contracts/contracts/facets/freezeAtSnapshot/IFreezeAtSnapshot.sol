@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey FreezeAtSnapshot
+bytes32 constant RESOLVER_KEY_FREEZE_AT_SNAPSHOT = 0x8ca462bf28ae4e7c5b77b86245cfff3caf7f6bdb6308a608cd9315feb2c28631;
+
 /**
  * @title IFreezeAtSnapshot
  * @author Asset Tokenization Studio Team

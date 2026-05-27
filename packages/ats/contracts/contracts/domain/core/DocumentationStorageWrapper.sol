@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _DOCUMENTATION_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IDocumentation } from "../../facets/documentation/IDocumentation.sol";
+
+/// @custom:hash storage Documentation
+bytes32 constant STORAGE_LOCATION_DOCUMENTATION = 0x724dca8e53dc19ee715164fa580caf24fc00a1e0ac5f55ff641bfd61b36cdf00;
 
 /**
  * @notice Represents a single off-chain document referenced by the contract.
@@ -18,16 +20,18 @@ struct Document {
 
 /**
  * @notice Diamond storage layout for the documentation domain.
- * @param documents  Mapping from document name to its `Document` record.
- * @param docIndexes Mapping from document name to its one-based position in `docNames`,
- *                   used for O(1) existence checks and swap-and-pop removal.
- * @param docNames   Ordered array of all registered document names; maintains the
- *                   enumerable set of active documents.
+ * @dev `documents` maps each name to its `Document` record. `docIndexes` holds the
+ *      one-based position of each name within `docNames` to enable O(1) existence checks
+ *      and swap-and-pop removal. `docNames` is the ordered enumerable set of active
+ *      document names.
+ * @custom:storage-location erc7201:security.token.standard.storage.Documentation
  */
 struct DocumentationDataStorage {
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(bytes32 => Document) documents;
     mapping(bytes32 => uint256) docIndexes;
     bytes32[] docNames;
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 /**
@@ -35,7 +39,7 @@ struct DocumentationDataStorage {
  * @notice Library providing diamond storage access and all read/write operations for
  *         the documentation domain.
  * @dev Uses the ERC-2535 diamond storage pattern to isolate state under
- *      `_DOCUMENTATION_STORAGE_POSITION`. The raw storage getter is `private` so that
+ *      `STORAGE_LOCATION_DOCUMENTATION`. The raw storage getter is `private` so that
  *      all storage access from external contracts is channelled through the library's
  *      typed API, preventing uncontrolled direct slot manipulation.
  *      All public-facing functions are `internal` so they inline into callers without
@@ -108,9 +112,9 @@ library DocumentationStorageWrapper {
      * @notice Returns the names of all documents currently registered.
      * @dev Ordering reflects the internal `docNames` array and may change when
      *      documents are removed via swap-and-pop.
-     * @return Array of `bytes32` document names.
+     * @return names_ Array of `bytes32` document names currently registered.
      */
-    function getDocumentNames() internal view returns (bytes32[] memory) {
+    function getDocumentNames() internal view returns (bytes32[] memory names_) {
         return _documentationStorage().docNames;
     }
 
@@ -157,7 +161,7 @@ library DocumentationStorageWrapper {
      * @return docStorage_ Reference to the `DocumentationStorage` struct.
      */
     function _documentationStorage() private pure returns (DocumentationDataStorage storage docStorage_) {
-        bytes32 position = _DOCUMENTATION_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_DOCUMENTATION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             docStorage_.slot := position

@@ -49,6 +49,10 @@ typechain-types
 # The sibling `atsRoles.generated.ts` stays in git (small, audit-relevant).
 scripts/domain/atsRegistry.generated.ts
 
+# Legacy auto-generated registry-data mirror. Superseded by atsRegistry.generated.ts;
+# kept gitignored so a stale local copy never re-enters version control.
+scripts/domain/atsRegistry.data.ts
+
 #Slither
 Slither/*
 slither.db.json

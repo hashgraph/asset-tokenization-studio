@@ -30,23 +30,23 @@ describe("TransferAndLockByPartition Tests", () => {
   function set_initRbacs(): any[] {
     return [
       {
-        role: ATS_ROLES.ISSUER_ROLE,
+        role: ATS_ROLES.ROLE_ISSUER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.LOCKER_ROLE,
+        role: ATS_ROLES.ROLE_LOCKER,
         members: [signer_C.address],
       },
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_D.address],
       },
       {
-        role: ATS_ROLES.KYC_ROLE,
+        role: ATS_ROLES.ROLE_KYC,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.SSI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_SSI_MANAGER,
         members: [signer_A.address],
       },
     ];
@@ -233,7 +233,7 @@ describe("TransferAndLockByPartition Tests", () => {
     it("GIVEN a deactivated asset WHEN transferAndLockByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset

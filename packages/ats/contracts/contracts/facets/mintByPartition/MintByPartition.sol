@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { AGENT_ROLE, ISSUER_ROLE, _buildRoles } from "../../constants/roles.sol";
+import { ROLE_AGENT, ROLE_ISSUER, _buildRoles } from "../../constants/roles.sol";
 import { IMintByPartition } from "./IMintByPartition.sol";
 import { IERC1410Types } from "../layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
@@ -27,7 +27,7 @@ abstract contract MintByPartition is IMintByPartition, Modifiers {
         override
         onlyActivated
         onlyUnpaused
-        onlyAnyRole(_buildRoles(ISSUER_ROLE, AGENT_ROLE))
+        onlyAnyRole(_buildRoles(ROLE_ISSUER, ROLE_AGENT))
         onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyDefaultPartitionWithSinglePartition(_issueData.partition)
         onlyWithinMaxSupply(_issueData.value, TimeTravelStorageWrapper.getBlockTimestamp())

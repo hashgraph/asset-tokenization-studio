@@ -1,18 +1,19 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ISecurityHoldersAtSnapshot } from "./ISecurityHoldersAtSnapshot.sol";
+import {
+    ISecurityHoldersAtSnapshot,
+    RESOLVER_KEY_SECURITY_HOLDERS_AT_SNAPSHOT
+} from "./ISecurityHoldersAtSnapshot.sol";
 import { SecurityHoldersAtSnapshot } from "./SecurityHoldersAtSnapshot.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { _SECURITY_HOLDERS_AT_SNAPSHOT_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-
 /**
  * @title  SecurityHoldersAtSnapshotFacet
  * @author Asset Tokenization Studio Team
  * @notice Diamond facet that exposes paginated token-holder queries at a given snapshot via
  *         `ISecurityHoldersAtSnapshot`, registered under
- *         `_SECURITY_HOLDERS_AT_SNAPSHOT_RESOLVER_KEY`.
+ *         `RESOLVER_KEY_SECURITY_HOLDERS_AT_SNAPSHOT`.
  * @dev    Exposes two selectors: `getTokenHoldersAtSnapshot` and
  *         `getTotalTokenHoldersAtSnapshot`. Inherits read logic from
  *         `SecurityHoldersAtSnapshot` and satisfies `IStaticFunctionSelectors` for Diamond
@@ -21,7 +22,7 @@ import { _SECURITY_HOLDERS_AT_SNAPSHOT_RESOLVER_KEY } from "../../constants/reso
 contract SecurityHoldersAtSnapshotFacet is SecurityHoldersAtSnapshot, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _SECURITY_HOLDERS_AT_SNAPSHOT_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_SECURITY_HOLDERS_AT_SNAPSHOT;
     }
 
     /// @inheritdoc IStaticFunctionSelectors

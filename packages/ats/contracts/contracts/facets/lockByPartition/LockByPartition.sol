@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ILockByPartition } from "./ILockByPartition.sol";
-import { LOCKER_ROLE } from "../../constants/roles.sol";
+import { ROLE_LOCKER } from "../../constants/roles.sol";
 import { LockStorageWrapper } from "../../domain/asset/LockStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
@@ -24,7 +24,7 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 abstract contract LockByPartition is ILockByPartition, Modifiers {
     /**
      * @inheritdoc ILockByPartition
-     * @dev Pause-gated, restricted to `LOCKER_ROLE`, validated against the
+     * @dev Pause-gated, restricted to `ROLE_LOCKER`, validated against the
      *      single-partition / default-partition rule and against unrecovered token
      *      holders. Delegates to `LockStorageWrapper.lockByPartition` and emits
      *      `LockedByPartition`.
@@ -39,20 +39,14 @@ abstract contract LockByPartition is ILockByPartition, Modifiers {
         override
         onlyActivated
         onlyUnpaused
-        onlyRole(LOCKER_ROLE)
+        onlyRole(ROLE_LOCKER)
         onlyValidExpirationTimestamp(_expirationTimestamp)
         onlyUnrecoveredAddress(_tokenHolder)
         onlyDefaultPartitionWithSinglePartition(_partition)
-        returns (bool success_, uint256 lockId_)
+        returns (uint256 lockId_)
     {
         address sender = EvmAccessors.getMsgSender();
-        (success_, lockId_) = LockStorageWrapper.lockByPartition(
-            _partition,
-            _amount,
-            _tokenHolder,
-            _expirationTimestamp,
-            sender
-        );
+        lockId_ = LockStorageWrapper.lockByPartition(_partition, _amount, _tokenHolder, _expirationTimestamp, sender);
         emit LockedByPartition(sender, _tokenHolder, _partition, lockId_, _amount, _expirationTimestamp);
     }
 

@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey CoreAtSnapshot
+bytes32 constant RESOLVER_KEY_CORE_AT_SNAPSHOT = 0x9f1ab2bcf2a5668b07a2b26155b1c04f30721db434dff2f1e69a3a9b1dc0a039;
+
 /**
  * @title ICoreAtSnapshot
  * @notice Interface for querying core token properties resolved against a previously taken

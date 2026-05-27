@@ -77,7 +77,7 @@ describe("SetNominalValueCurrencyCommandHandler", () => {
       expect(validationServiceMock.checkPause).toHaveBeenCalledWith(command.securityId);
     });
 
-    it("throws SetNominalValueCurrencyCommandError when account does not have NOMINAL_VALUE_ROLE", async () => {
+    it("throws SetNominalValueCurrencyCommandError when account does not have ROLE_NOMINAL_VALUE", async () => {
       const fakeError = new NotGrantedRole(SecurityRole._NOMINAL_VALUE_ROLE);
 
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(evmAddress);

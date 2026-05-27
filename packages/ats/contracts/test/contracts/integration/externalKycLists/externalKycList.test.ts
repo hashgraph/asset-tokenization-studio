@@ -45,8 +45,8 @@ describe("ExternalKycList Management Tests", () => {
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
 
-    await base.accessControlFacet.grantRole(ATS_ROLES.KYC_MANAGER_ROLE, signer_A.address);
-    await base.accessControlFacet.grantRole(ATS_ROLES.PAUSER_ROLE, signer_A.address);
+    await base.accessControlFacet.grantRole(ATS_ROLES.ROLE_KYC_MANAGER, signer_A.address);
+    await base.accessControlFacet.grantRole(ATS_ROLES.ROLE_PAUSER, signer_A.address);
 
     externalKycListMock1 = await (await ethers.getContractFactory("MockedExternalKycList", signer_A)).deploy();
     await externalKycListMock1.waitForDeployment();
@@ -303,7 +303,7 @@ describe("ExternalKycList Management Tests", () => {
   });
 
   describe("Access Control Tests", () => {
-    it("GIVEN an account without ATS_ROLES.KYC_MANAGER_ROLE WHEN adding an external kyc list THEN it reverts with AccessControl", async () => {
+    it("GIVEN an account without ATS_ROLES.ROLE_KYC_MANAGER WHEN adding an external kyc list THEN it reverts with AccessControl", async () => {
       const newKycList = externalKycListMock3.target as string;
       await expect(
         asset.connect(signer_B).addExternalKycList(newKycList, {
@@ -312,7 +312,7 @@ describe("ExternalKycList Management Tests", () => {
       ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
 
-    it("GIVEN an account with ATS_ROLES.KYC_MANAGER_ROLE WHEN adding an external kyc list THEN it succeeds", async () => {
+    it("GIVEN an account with ATS_ROLES.ROLE_KYC_MANAGER WHEN adding an external kyc list THEN it succeeds", async () => {
       const newKycList = externalKycListMock3.target as string;
       expect(await asset.isExternalKycList(newKycList)).to.be.false;
       await expect(
@@ -325,7 +325,7 @@ describe("ExternalKycList Management Tests", () => {
       expect(await asset.isExternalKycList(newKycList)).to.be.true;
     });
 
-    it("GIVEN an account without ATS_ROLES.KYC_MANAGER_ROLE WHEN removing an external kyc list THEN it reverts with AccessControl", async () => {
+    it("GIVEN an account without ATS_ROLES.ROLE_KYC_MANAGER WHEN removing an external kyc list THEN it reverts with AccessControl", async () => {
       expect(await asset.isExternalKycList(externalKycListMock1.target as string)).to.be.true;
       await expect(
         asset.connect(signer_B).removeExternalKycList(externalKycListMock1.target as string, {
@@ -334,7 +334,7 @@ describe("ExternalKycList Management Tests", () => {
       ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
 
-    it("GIVEN an account with ATS_ROLES.KYC_MANAGER_ROLE WHEN removing an external kyc list THEN it succeeds", async () => {
+    it("GIVEN an account with ATS_ROLES.ROLE_KYC_MANAGER WHEN removing an external kyc list THEN it succeeds", async () => {
       expect(await asset.isExternalKycList(externalKycListMock1.target as string)).to.be.true;
       await expect(
         asset.connect(signer_A).removeExternalKycList(externalKycListMock1.target as string, {
@@ -346,7 +346,7 @@ describe("ExternalKycList Management Tests", () => {
       expect(await asset.isExternalKycList(externalKycListMock1.target as string)).to.be.false;
     });
 
-    it("GIVEN an account without ATS_ROLES.KYC_MANAGER_ROLE WHEN updating external kyc lists THEN it reverts with AccessControl", async () => {
+    it("GIVEN an account without ATS_ROLES.ROLE_KYC_MANAGER WHEN updating external kyc lists THEN it reverts with AccessControl", async () => {
       const kycLists = [externalKycListMock1.target as string];
       const actives = [false];
       expect(await asset.isExternalKycList(externalKycListMock1.target as string)).to.be.true;
@@ -357,7 +357,7 @@ describe("ExternalKycList Management Tests", () => {
       ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
 
-    it("GIVEN an account with ATS_ROLES.KYC_MANAGER_ROLE WHEN updating external kyc lists THEN it succeeds", async () => {
+    it("GIVEN an account with ATS_ROLES.ROLE_KYC_MANAGER WHEN updating external kyc lists THEN it succeeds", async () => {
       expect(await asset.isExternalKycList(externalKycListMock1.target as string)).to.be.true;
       expect(await asset.isExternalKycList(externalKycListMock2.target as string)).to.be.true;
       const kycLists = [externalKycListMock1.target as string, externalKycListMock2.target as string];
@@ -420,7 +420,7 @@ describe("ExternalKycList Management Tests", () => {
     it("GIVEN a deactivated asset WHEN addExternalKycList THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).addExternalKycList(ethers.ZeroAddress),
@@ -430,7 +430,7 @@ describe("ExternalKycList Management Tests", () => {
     it("GIVEN a deactivated asset WHEN updateExternalKycLists THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).updateExternalKycLists([], []),
@@ -440,7 +440,7 @@ describe("ExternalKycList Management Tests", () => {
     it("GIVEN a deactivated asset WHEN removeExternalKycList THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).removeExternalKycList(ethers.ZeroAddress),

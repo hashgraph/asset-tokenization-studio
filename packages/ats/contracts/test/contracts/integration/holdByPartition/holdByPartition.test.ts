@@ -60,7 +60,7 @@ describe("HoldByPartition Tests", () => {
 
   const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
     ["bytes32", "bytes32"],
-    [ATS_ROLES.PROTECTED_PARTITIONS_PARTICIPANT_ROLE, DEFAULT_PARTITION],
+    [ATS_ROLES.ROLE_PROTECTED_PARTITIONS_PARTICIPANT, DEFAULT_PARTITION],
   );
   const packedDataWithoutPrefix = packedData.slice(2);
   const ProtectedPartitionRole_1 = ethers.keccak256("0x" + packedDataWithoutPrefix);
@@ -68,43 +68,43 @@ describe("HoldByPartition Tests", () => {
   function set_initRbacs() {
     return [
       {
-        role: ATS_ROLES.ISSUER_ROLE,
+        role: ATS_ROLES.ROLE_ISSUER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_D.address],
       },
       {
-        role: ATS_ROLES.KYC_ROLE,
+        role: ATS_ROLES.ROLE_KYC,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.SSI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_SSI_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.CLEARING_ROLE,
+        role: ATS_ROLES.ROLE_CLEARING,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.CORPORATE_ACTION_ROLE,
+        role: ATS_ROLES.ROLE_CORPORATE_ACTION,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.CONTROL_LIST_ROLE,
+        role: ATS_ROLES.ROLE_CONTROL_LIST,
         members: [signer_E.address],
       },
       {
-        role: ATS_ROLES.CONTROLLER_ROLE,
+        role: ATS_ROLES.ROLE_CONTROLLER,
         members: [signer_C.address],
       },
       {
-        role: ATS_ROLES.PROTECTED_PARTITIONS_ROLE,
+        role: ATS_ROLES.ROLE_PROTECTED_PARTITIONS,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.AGENT_ROLE,
+        role: ATS_ROLES.ROLE_AGENT,
         members: [signer_A.address],
       },
       { role: ProtectedPartitionRole_1, members: [signer_B.address] },
@@ -227,9 +227,9 @@ describe("HoldByPartition Tests", () => {
       it("GIVEN an account with snapshot role WHEN takeSnapshot and Hold THEN transaction succeeds", async () => {
         const EXPIRATION_TIMESTAMP = dateToUnixTimestamp(`2030-01-01T00:00:35Z`);
 
-        await asset.connect(signer_A).grantRole(ATS_ROLES.SNAPSHOT_ROLE, signer_A.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.LOCKER_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_SNAPSHOT, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_LOCKER, signer_A.address);
 
         // snapshot
         await asset.connect(signer_A).takeSnapshot();
@@ -1010,10 +1010,10 @@ describe("HoldByPartition Tests", () => {
 
     describe("Adjust balances", () => {
       async function setPreBalanceAdjustment() {
-        await asset.connect(signer_A).grantRole(ATS_ROLES.ADJUSTMENT_BALANCE_ROLE, signer_C.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_A.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROLLER_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ADJUSTMENT_BALANCE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CAP, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CONTROLLER, signer_A.address);
 
         await asset.connect(signer_A).setMaxSupply(maxSupply_Original);
         await asset.connect(signer_A).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply_Partition_1_Original);
@@ -1353,7 +1353,7 @@ describe("HoldByPartition Tests", () => {
     it("GIVEN a deactivated asset WHEN createHoldByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).createHoldByPartition(ethers.ZeroHash, {
@@ -1369,7 +1369,7 @@ describe("HoldByPartition Tests", () => {
     it("GIVEN a deactivated asset WHEN createHoldFromByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset
@@ -1386,7 +1386,7 @@ describe("HoldByPartition Tests", () => {
     it("GIVEN a deactivated asset WHEN executeHoldByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset
@@ -1402,7 +1402,7 @@ describe("HoldByPartition Tests", () => {
     it("GIVEN a deactivated asset WHEN releaseHoldByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset
@@ -1414,7 +1414,7 @@ describe("HoldByPartition Tests", () => {
     it("GIVEN a deactivated asset WHEN reclaimHoldByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset

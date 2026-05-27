@@ -99,16 +99,16 @@ describe("ClearingHoldByPartitionFacet Tests", () => {
     asset = await ethers.getContractAt("IAsset", diamond.target);
 
     await executeRbac(asset, [
-      { role: ATS_ROLES.ISSUER_ROLE, members: [signer_B.address] },
-      { role: ATS_ROLES.CONTROLLER_ROLE, members: [signer_C.address] },
-      { role: ATS_ROLES.PAUSER_ROLE, members: [signer_D.address] },
-      { role: ATS_ROLES.CONTROL_LIST_ROLE, members: [signer_E.address] },
-      { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
-      { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
-      { role: ATS_ROLES.CLEARING_ROLE, members: [signer_A.address] },
-      { role: ATS_ROLES.CLEARING_VALIDATOR_ROLE, members: [signer_A.address] },
-      { role: ATS_ROLES.PROTECTED_PARTITIONS_ROLE, members: [signer_B.address] },
-      { role: ATS_ROLES.AGENT_ROLE, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_ISSUER, members: [signer_B.address] },
+      { role: ATS_ROLES.ROLE_CONTROLLER, members: [signer_C.address] },
+      { role: ATS_ROLES.ROLE_PAUSER, members: [signer_D.address] },
+      { role: ATS_ROLES.ROLE_CONTROL_LIST, members: [signer_E.address] },
+      { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+      { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_CLEARING, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_CLEARING_VALIDATOR, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_PROTECTED_PARTITIONS, members: [signer_B.address] },
+      { role: ATS_ROLES.ROLE_AGENT, members: [signer_A.address] },
     ]);
 
     await setFacets(asset);
@@ -253,7 +253,7 @@ describe("ClearingHoldByPartitionFacet Tests", () => {
 
         it("GIVEN protected partitions with wildcard role WHEN clearingCreateHoldByPartition THEN transaction succeeds", async () => {
           await asset.connect(signer_B).protectPartitions();
-          await asset.grantRole(ATS_ROLES.WILD_CARD_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_WILD_CARD, signer_A.address);
           await expect(asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold)).to.not.be
             .reverted;
         });
@@ -325,7 +325,7 @@ describe("ClearingHoldByPartitionFacet Tests", () => {
           clearingId: 1,
         };
 
-        await asset.grantRole(ATS_ROLES.CLEARING_VALIDATOR_ROLE, signer_E.address);
+        await asset.grantRole(ATS_ROLES.ROLE_CLEARING_VALIDATOR, signer_E.address);
         await asset.connect(signer_E).approveClearingOperationByPartition(identifier);
         const allowanceAfterClearingApproval = await asset.allowance(signer_A.address, signer_D.address);
 
@@ -428,7 +428,7 @@ describe("ClearingHoldByPartitionFacet Tests", () => {
         it("GIVEN protected partitions with wildcard role WHEN clearingCreateHoldFromByPartition THEN transaction succeeds", async () => {
           await asset.connect(signer_A).increaseAllowance(signer_B.address, _AMOUNT);
           await asset.connect(signer_B).protectPartitions();
-          await asset.grantRole(ATS_ROLES.WILD_CARD_ROLE, signer_B.address);
+          await asset.grantRole(ATS_ROLES.ROLE_WILD_CARD, signer_B.address);
           await expect(asset.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom, hold)).to.not.be
             .reverted;
         });
@@ -564,13 +564,13 @@ describe("ClearingHoldByPartitionFacet Tests", () => {
 
       it("A12: GIVEN protectedClearingCreateHoldByPartition WHEN transfer to address(0) THEN emits Transfer to ZeroAddress", async () => {
         // Setup protected partitions
-        await asset.grantRole(ATS_ROLES.PROTECTED_PARTITIONS_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_PROTECTED_PARTITIONS, signer_A.address);
         await asset.protectPartitions();
 
         // Grant role for protected partition
         const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
           ["bytes32", "bytes32"],
-          [ATS_ROLES.PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
+          [ATS_ROLES.ROLE_PROTECTED_PARTITIONS_PARTICIPANT, _DEFAULT_PARTITION],
         );
         const packedDataWithoutPrefix = packedData.slice(2);
         const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
@@ -657,7 +657,7 @@ describe("ClearingHoldByPartitionFacet Tests", () => {
     it("GIVEN a deactivated asset WHEN clearingCreateHoldByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset
@@ -672,7 +672,7 @@ describe("ClearingHoldByPartitionFacet Tests", () => {
     it("GIVEN a deactivated asset WHEN clearingCreateHoldFromByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).clearingCreateHoldFromByPartition(

@@ -44,10 +44,10 @@ describe("MintByPartitionFacet Tests", () => {
       asset = await ethers.getContractAt("IAsset", diamond.target);
 
       await executeRbac(asset, [
-        { role: ATS_ROLES.ISSUER_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES.PAUSER_ROLE, members: [signer_C.address] },
+        { role: ATS_ROLES.ROLE_ISSUER, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+        { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_PAUSER, members: [signer_C.address] },
       ]);
 
       await asset.addIssuer(signer_A.address);
@@ -84,7 +84,7 @@ describe("MintByPartitionFacet Tests", () => {
         }),
       )
         .to.be.revertedWithCustomError(asset, "AccountHasNoRoles")
-        .withArgs(signer_B.address, [ATS_ROLES.ISSUER_ROLE, ATS_ROLES.AGENT_ROLE]);
+        .withArgs(signer_B.address, [ATS_ROLES.ROLE_ISSUER, ATS_ROLES.ROLE_AGENT]);
     });
 
     it("GIVEN a paused token WHEN issueByPartition THEN reverts with IsPaused", async () => {
@@ -114,7 +114,7 @@ describe("MintByPartitionFacet Tests", () => {
     });
 
     it("GIVEN a caller with agent role WHEN issueByPartition THEN emits IssuedByPartition and updates balances", async () => {
-      await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_B.address);
+      await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_B.address);
 
       await expect(
         asset.connect(signer_B).issueByPartition({
@@ -131,7 +131,7 @@ describe("MintByPartitionFacet Tests", () => {
     });
 
     it("GIVEN a recovered caller WHEN issueByPartition THEN reverts with WalletRecovered", async () => {
-      await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_C.address);
+      await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_C.address);
       await asset.connect(signer_C).recoveryAddress(signer_A.address, signer_E.address, ethers.ZeroAddress);
 
       await expect(
@@ -170,7 +170,7 @@ describe("MintByPartitionFacet Tests", () => {
 
     it("GIVEN a recovered token holder WHEN issueByPartition THEN reverts with WalletRecovered", async () => {
       await asset.connect(signer_B).grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-      await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_C.address);
+      await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_C.address);
       await asset.connect(signer_C).recoveryAddress(signer_E.address, signer_D.address, ethers.ZeroAddress);
 
       await expect(
@@ -240,9 +240,9 @@ describe("MintByPartitionFacet Tests", () => {
       asset = await ethers.getContractAt("IAsset", diamond.target);
 
       await executeRbac(asset, [
-        { role: ATS_ROLES.ISSUER_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_ISSUER, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+        { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
       ]);
 
       await asset.addIssuer(signer_A.address);
@@ -286,7 +286,7 @@ describe("MintByPartitionFacet Tests", () => {
     });
 
     it("GIVEN per-partition max supply is set WHEN issueByPartition exceeds partition cap THEN reverts with MaxSupplyReachedForPartition", async () => {
-      await asset.grantRole(ATS_ROLES.CAP_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_CAP, signer_A.address);
       await asset.setMaxSupplyByPartition(CUSTOM_PARTITION, PARTITION_CAP);
 
       await expect(
@@ -307,8 +307,8 @@ describe("MintByPartitionFacet Tests", () => {
       };
 
       await asset.changeSystemTimestamp(100n);
-      await asset.grantRole(ATS_ROLES.CAP_ROLE, signer_A.address);
-      await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_CAP, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
 
       await asset.setMaxSupplyByPartition(CUSTOM_PARTITION, AMOUNT);
       await asset.issueByPartition({
@@ -338,7 +338,7 @@ describe("MintByPartitionFacet Tests", () => {
     it("GIVEN a deactivated asset WHEN issueByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset
@@ -350,7 +350,7 @@ describe("MintByPartitionFacet Tests", () => {
     it("GIVEN a deactivated asset WHEN issue THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).issue(ethers.ZeroAddress, 0, "0x"),

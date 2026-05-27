@@ -46,7 +46,7 @@ const regulationSubType = RegulationSubType.NONE;
 const countries = "AF,HG,BN";
 const info = "Anything";
 const configId = "0x0000000000000000000000000000000000000000000000000000000000000000";
-const configVersion = 0;
+const configVersion = 1;
 
 const mirrorNode: MirrorNode = {
   name: "testmirrorNode",

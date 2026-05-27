@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey Principal
+bytes32 constant RESOLVER_KEY_PRINCIPAL = 0xa3dc20804ebd6f2a06a7e8b8de31712f3d18a73b1963acfa1d25ed86907bd0e6;
+
 /**
  * @title IPrincipal
  * @author Asset Tokenization Studio Team

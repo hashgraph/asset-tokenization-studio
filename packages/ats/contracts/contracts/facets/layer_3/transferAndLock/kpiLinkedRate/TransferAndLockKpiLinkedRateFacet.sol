@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _TRANSFER_AND_LOCK_KPI_LINKED_RATE_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
+import { RESOLVER_KEY_TRANSFER_AND_LOCK_KPI_LINKED_RATE } from "../../../IAsset.sol";
+
 import { TransferAndLockFacetBase } from "../TransferAndLockFacetBase.sol";
 
 contract TransferAndLockKpiLinkedRateFacet is TransferAndLockFacetBase {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _TRANSFER_AND_LOCK_KPI_LINKED_RATE_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_TRANSFER_AND_LOCK_KPI_LINKED_RATE;
     }
 }

@@ -41,9 +41,9 @@ describe("TransferByPartition Facet Tests", () => {
     asset = await ethers.getContractAt("IAsset", diamond.target);
 
     await executeRbac(asset, [
-      { role: ATS_ROLES.ISSUER_ROLE, members: [signer_B.address] },
-      { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
-      { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_ISSUER, members: [signer_B.address] },
+      { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+      { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
     ]);
 
     await asset.connect(signer_A).addIssuer(signer_A.address);
@@ -67,10 +67,10 @@ describe("TransferByPartition Facet Tests", () => {
     asset = await ethers.getContractAt("IAsset", diamond.target);
 
     await executeRbac(asset, [
-      { role: ATS_ROLES.ISSUER_ROLE, members: [signer_B.address] },
-      { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
-      { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
-      { role: ATS_ROLES.CLEARING_ROLE, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_ISSUER, members: [signer_B.address] },
+      { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+      { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_CLEARING, members: [signer_A.address] },
     ]);
 
     await asset.connect(signer_A).addIssuer(signer_A.address);
@@ -140,7 +140,7 @@ describe("TransferByPartition Facet Tests", () => {
     it("GIVEN a deactivated asset WHEN transferByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset

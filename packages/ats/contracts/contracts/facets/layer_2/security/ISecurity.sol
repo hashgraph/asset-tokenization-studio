@@ -3,6 +3,21 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { RegulationData, AdditionalSecurityData } from "../../../constants/regulation.sol";
 
+/// @custom:hash resolverKey Security
+bytes32 constant RESOLVER_KEY_SECURITY = 0x4a0ea8dcc902efa355c705fe7211cb0da08f05ad9fc8888237dd67a8c4dc6f1a;
+
+/**
+ * @notice DTO returned by `ISecurity.getSecurityRegulationData`.
+ * @dev Public input/output shape only. Persistent on-chain layout is owned by
+ *      `SecurityStorageWrapper.SecurityRegulationDataStorage` — a separate type with the
+ *      same fields by coincidence, not by inheritance. The facet copies fields at the
+ *      boundary.
+ */
+struct SecurityRegulationData {
+    RegulationData regulationData;
+    AdditionalSecurityData additionalSecurityData;
+}
+
 /**
  * @title ISecurity
  * @author Asset Tokenization Studio Team
@@ -12,17 +27,6 @@ import { RegulationData, AdditionalSecurityData } from "../../../constants/regul
  *      is one-shot and gated by `onlyNotSecurityInitialized` on the implementation.
  */
 interface ISecurity {
-    /**
-     * @notice Aggregated view of the regulation data and supplementary security configuration
-     *         stored for a token.
-     * @dev Returned by `getSecurityRegulationData` as a memory copy of the two flat storage
-     *      fields held in `SecurityStorageWrapper`.
-     */
-    struct SecurityRegulationData {
-        RegulationData regulationData;
-        AdditionalSecurityData additionalSecurityData;
-    }
-
     /**
      * @notice Initialises the security regulation capability with regulation and additional data.
      * @dev Callable once per token; subsequent calls revert with `AlreadyInitialized` via the
@@ -38,11 +42,8 @@ interface ISecurity {
         AdditionalSecurityData calldata _additionalSecurityData
     ) external;
 
-    /**
-     * @notice Returns the security regulation data stored for this token.
-     * @dev Reads from the dedicated `SecurityStorageWrapper` slot. Zero-value structs are returned
-     *      when the slot has never been initialised.
-     * @return securityRegulationData_ The packed `SecurityRegulationData` value from storage.
-     */
+    /// @notice Returns the security regulation data associated with the token.
+    /// @return securityRegulationData_ DTO bundling the core regulation payload and any
+    ///         additional security metadata.
     function getSecurityRegulationData() external view returns (SecurityRegulationData memory securityRegulationData_);
 }

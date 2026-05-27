@@ -92,16 +92,16 @@ describe("Transfer Facet Tests", () => {
       assetSignerD = await ethers.getContractAt("IAsset", diamond.target, signer_D);
 
       await executeRbac(asset, [
-        { role: ATS_ROLES.ISSUER_ROLE, members: [signer_B.address, signer_C.address] },
-        { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES.PAUSER_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES.CLEARING_ROLE, members: [signer_A.address, signer_B.address] },
-        { role: ATS_ROLES.CONTROL_LIST_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES.PROTECTED_PARTITIONS_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_ISSUER, members: [signer_B.address, signer_C.address] },
+        { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+        { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_PAUSER, members: [signer_B.address] },
+        { role: ATS_ROLES.ROLE_CLEARING, members: [signer_A.address, signer_B.address] },
+        { role: ATS_ROLES.ROLE_CONTROL_LIST, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_PROTECTED_PARTITIONS, members: [signer_A.address] },
       ]);
 
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
       await asset.connect(signer_A).addIssuer(signer_E.address);
       await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
       await asset.connect(signer_B).grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
@@ -400,11 +400,11 @@ describe("Transfer Facet Tests", () => {
 
         asset = await ethers.getContractAt("IAsset", diamond.target);
         await executeRbac(asset, [
-          { role: ATS_ROLES.ISSUER_ROLE, members: [signer_C.address] },
-          { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
-          { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
-          { role: ATS_ROLES.PROTECTED_PARTITIONS_ROLE, members: [signer_A.address] },
-          { role: ATS_ROLES.WILD_CARD_ROLE, members: [signer_E.address] },
+          { role: ATS_ROLES.ROLE_ISSUER, members: [signer_C.address] },
+          { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+          { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
+          { role: ATS_ROLES.ROLE_PROTECTED_PARTITIONS, members: [signer_A.address] },
+          { role: ATS_ROLES.ROLE_WILD_CARD, members: [signer_E.address] },
         ]);
 
         await asset.connect(signer_A).addIssuer(signer_E.address);
@@ -452,7 +452,7 @@ describe("Transfer Facet Tests", () => {
 
     describe("Recovered Addresses", () => {
       beforeEach(async () => {
-        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
         await asset.connect(signer_C).issue(signer_E.address, amount, DATA);
         await asset.connect(signer_C).issue(signer_C.address, amount, DATA);
       });
@@ -491,7 +491,7 @@ describe("Transfer Facet Tests", () => {
     it("GIVEN a deactivated asset WHEN transfer THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).transfer(ethers.ZeroAddress, 0),
@@ -501,7 +501,7 @@ describe("Transfer Facet Tests", () => {
     it("GIVEN a deactivated asset WHEN transferFrom THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).transferFrom(ethers.ZeroAddress, ethers.ZeroAddress, 0),
@@ -511,7 +511,7 @@ describe("Transfer Facet Tests", () => {
     it("GIVEN a deactivated asset WHEN transferWithData THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).transferWithData(ethers.ZeroAddress, 0, "0x"),
@@ -521,7 +521,7 @@ describe("Transfer Facet Tests", () => {
     it("GIVEN a deactivated asset WHEN transferFromWithData THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).transferFromWithData(ethers.ZeroAddress, ethers.ZeroAddress, 0, "0x"),

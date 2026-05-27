@@ -3,6 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ILockTypes } from "./ILockTypes.sol";
 
+/// @custom:hash resolverKey Lock
+bytes32 constant RESOLVER_KEY_LOCK = 0xc2e37f639e1d61db1015540583b9d71f8a33da6410aed2826c6caef1304ebd3a;
+
 /**
  * @title ILock
  * @author Asset Tokenization Studio Team
@@ -35,20 +38,19 @@ interface ILock is ILockTypes {
      * @notice Locks `_amount` tokens of `_tokenHolder` on the default partition until
      *         `_expirationTimestamp`.
      * @dev Single-partition convenience for `lockByPartition` against the default
-     *      partition. The implementation enforces the unpaused state, the `LOCKER_ROLE`,
+     *      partition. The implementation enforces the unpaused state, the `ROLE_LOCKER`,
      *      single-partition mode, an unrecovered token holder and a future expiration
      *      timestamp; it emits `LockedByPartition`.
      * @param _amount The amount of tokens to lock.
      * @param _tokenHolder The address whose tokens are locked.
      * @param _expirationTimestamp Unix timestamp at which the lock becomes releasable.
-     * @return success_ True when the lock has been recorded.
      * @return lockId_ Identifier assigned to the new lock for the token holder.
      */
     function lock(
         uint256 _amount,
         address _tokenHolder,
         uint256 _expirationTimestamp
-    ) external returns (bool success_, uint256 lockId_);
+    ) external returns (uint256 lockId_);
 
     /**
      * @notice Releases a lock on the default partition previously created with `lock`.

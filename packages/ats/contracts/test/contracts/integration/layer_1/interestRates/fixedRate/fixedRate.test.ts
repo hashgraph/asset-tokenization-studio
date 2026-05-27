@@ -28,11 +28,11 @@ describe("Fixed Rate Tests", () => {
 
     await executeRbac(asset, [
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.INTEREST_RATE_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_INTEREST_RATE_MANAGER,
         members: [signer_A.address],
       },
     ]);
@@ -91,7 +91,7 @@ describe("Fixed Rate Tests", () => {
     it("GIVEN a deactivated asset WHEN setRate THEN transaction fails with Deactivated", async () => {
       const base = await deployBondFixedRateTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(deactivatedAsset.connect(base.deployer).setRate(0, 0)).to.be.revertedWithCustomError(
         deactivatedAsset,

@@ -34,10 +34,10 @@ describe("SecurityHoldersAtSnapshot Tests", () => {
     asset = await ethers.getContractAt("IAsset", diamond.target);
 
     await executeRbac(asset, [
-      { role: ATS_ROLES.ISSUER_ROLE, members: [signer_B.address] },
-      { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
-      { role: ATS_ROLES.SNAPSHOT_ROLE, members: [signer_A.address] },
-      { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_ISSUER, members: [signer_B.address] },
+      { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+      { role: ATS_ROLES.ROLE_SNAPSHOT, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
     ]);
 
     await asset.connect(signer_A).addIssuer(signer_B.address);
@@ -78,7 +78,7 @@ describe("SecurityHoldersAtSnapshot Tests", () => {
     });
 
     it("GIVEN multiple holders WHEN getTokenHoldersAtSnapshot with pagination THEN returns correct pages", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.SNAPSHOT_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_SNAPSHOT, signer_C.address);
 
       await asset.connect(signer_B).issueByPartition({
         partition: _PARTITION_ID_1,

@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ITransferAndLockByPartition } from "./ITransferAndLockByPartition.sol";
-import { LOCKER_ROLE } from "../../constants/roles.sol";
+import { ROLE_LOCKER } from "../../constants/roles.sol";
 import { IERC1410Types } from "../layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
@@ -16,7 +16,7 @@ import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
  * @dev    Delegates the ERC-1410 transfer to
  *         `ERC1410StorageWrapper.transferByPartition` and the lock recording to
  *         `LockStorageWrapper.lockByPartition`. Access is restricted via
- *         `onlyUnpaused`, `onlyRole(LOCKER_ROLE)`,
+ *         `onlyUnpaused`, `onlyRole(ROLE_LOCKER)`,
  *         `onlyWithValidExpirationTimestamp`, `onlyDefaultPartitionWithSinglePartition`,
  *         and `onlyUnProtectedPartitionsOrWildCardRole`. Intended to be inherited
  *         solely by `TransferAndLockByPartitionFacet`.
@@ -40,11 +40,11 @@ abstract contract TransferAndLockByPartition is ITransferAndLockByPartition, Mod
         override
         onlyActivated
         onlyUnpaused
-        onlyRole(LOCKER_ROLE)
+        onlyRole(ROLE_LOCKER)
         onlyWithValidExpirationTimestamp(_expirationTimestamp)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnProtectedPartitionsOrWildCardRole
-        returns (bool success_, uint256 lockId_)
+        returns (uint256 lockId_)
     {
         TokenCoreOps.transferByPartition(
             EvmAccessors.getMsgSender(),
@@ -54,7 +54,7 @@ abstract contract TransferAndLockByPartition is ITransferAndLockByPartition, Mod
             EvmAccessors.getMsgSender(),
             ""
         );
-        (success_, lockId_) = LockStorageWrapper.lockByPartition(
+        lockId_ = LockStorageWrapper.lockByPartition(
             _partition,
             _amount,
             _to,

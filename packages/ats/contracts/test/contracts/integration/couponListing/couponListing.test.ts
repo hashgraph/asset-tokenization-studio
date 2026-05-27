@@ -39,7 +39,7 @@ describe("CouponListing Tests", () => {
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
 
-    await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
+    await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
   }
 
   beforeEach(async () => {
@@ -64,7 +64,7 @@ describe("CouponListing Tests", () => {
     const kpiDiamond = kpiLinkedRateBase.diamond;
     const kpiAsset = await ethers.getContractAt("IAsset", kpiDiamond.target, signer_A);
 
-    await kpiAsset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
+    await kpiAsset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
 
     const timestamp = await getDltTimestamp();
 

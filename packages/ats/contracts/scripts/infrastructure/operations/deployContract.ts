@@ -38,6 +38,12 @@ export interface DeployContractOptions {
   verifyDeployment?: boolean;
   /** Verification options for bytecode and interface checks */
   verificationOptions?: VerificationOptions;
+  /**
+   * Called immediately after the deploy transaction is sent and the hash is
+   * available, before waiting for confirmation. Use this to persist the hash
+   * so that a crash during waitForDeployment is recoverable on resume.
+   */
+  onTransactionSent?: (txHash: string) => void | Promise<void>;
 }
 
 /**
@@ -78,6 +84,7 @@ export async function deployContract(
     silent = false,
     verifyDeployment = true,
     verificationOptions = {},
+    onTransactionSent,
   } = options;
 
   // Get contract name from factory for logging
@@ -103,6 +110,10 @@ export async function deployContract(
     const deployTx = contract.deploymentTransaction();
     if (!silent && deployTx) {
       info(`Transaction sent: ${deployTx.hash}`);
+    }
+
+    if (deployTx?.hash) {
+      await onTransactionSent?.(deployTx.hash);
     }
 
     // Wait for deployment with timeout to avoid hanging on Hedera

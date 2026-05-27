@@ -6,6 +6,9 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IERC5805 } from "./IERC5805.sol";
 import { Checkpoints } from "../../../../infrastructure/utils/Checkpoints.sol";
 
+/// @custom:hash resolverKey Erc20votes
+bytes32 constant RESOLVER_KEY_ERC20VOTES = 0x9619bb38c76aac49afb1df75430aefc1314778fe926136a688bf3ae3b5f8c3b7;
+
 interface IERC20Votes is IERC5805 {
     /// @notice Emitted when an account changes their delegate
     /// @param delegator The account that changed their delegation
@@ -29,8 +32,7 @@ interface IERC20Votes is IERC5805 {
     /// @param currentClock The current clock value
     error FutureLookup(uint256 timepoint, uint256 currentClock);
 
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC20Votes(bool _activated) external;
+    function initializeERC20Votes(bool _activated) external;
 
     function isActivated() external view returns (bool);
 

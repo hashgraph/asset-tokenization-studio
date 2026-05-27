@@ -33,19 +33,19 @@ describe("Scheduled Tasks Tests", () => {
 
     await executeRbac(asset, [
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.ISSUER_ROLE,
+        role: ATS_ROLES.ROLE_ISSUER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.KYC_ROLE,
+        role: ATS_ROLES.ROLE_KYC,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.SSI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_SSI_MANAGER,
         members: [signer_A.address],
       },
     ]);
@@ -75,7 +75,7 @@ describe("Scheduled Tasks Tests", () => {
 
   it("GIVEN a token WHEN triggerTasks THEN transaction succeeds", async () => {
     // Granting Role to account C
-    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
     await asset.connect(signer_B).issueByPartition({
       partition: _PARTITION_ID_1,
@@ -186,11 +186,51 @@ describe("Scheduled Tasks Tests", () => {
     expect(scheduledTasks.length).to.equal(scheduledTasksCount);
   });
 
+  describe("Sub-task fires at exact scheduled timestamp", () => {
+    const taskTimestamp = dateToUnixTimestamp("2030-01-01T00:00:15Z");
+    const executionDate = dateToUnixTimestamp("2030-01-01T00:02:30Z");
+
+    beforeEach(async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+    });
+
+    it("GIVEN a snapshot sub-task scheduled at T WHEN block.timestamp equals T THEN SnapshotTriggered is emitted", async () => {
+      await asset.connect(signer_C).setDividend({
+        recordDate: taskTimestamp.toString(),
+        executionDate: executionDate.toString(),
+        amount: 1,
+        amountDecimals: 2,
+      });
+
+      await asset.changeSystemTimestamp(taskTimestamp);
+
+      await expect(asset.connect(signer_A).triggerPendingScheduledCrossOrderedTasks()).to.emit(
+        asset,
+        "SnapshotTriggered",
+      );
+    });
+
+    it("GIVEN a balance adjustment sub-task scheduled at T WHEN block.timestamp equals T THEN sub-task is removed from the queue", async () => {
+      await asset.connect(signer_C).setScheduledBalanceAdjustment({
+        executionDate: taskTimestamp.toString(),
+        factor: 1,
+        decimals: 2,
+      });
+
+      expect(await asset.getPendingBalanceAdjustmentCount()).to.equal(1);
+
+      await asset.changeSystemTimestamp(taskTimestamp);
+      await asset.connect(signer_A).triggerPendingScheduledCrossOrderedTasks();
+
+      expect(await asset.getPendingBalanceAdjustmentCount()).to.equal(0);
+    });
+  });
+
   describe("Deactivated", () => {
     it("GIVEN a deactivated asset WHEN triggerPendingScheduledCrossOrderedTasks THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).triggerPendingScheduledCrossOrderedTasks(),
@@ -200,7 +240,7 @@ describe("Scheduled Tasks Tests", () => {
     it("GIVEN a deactivated asset WHEN triggerScheduledCrossOrderedTasks THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).triggerScheduledCrossOrderedTasks(0),
@@ -212,7 +252,7 @@ describe("Scheduled Tasks Tests", () => {
 describe("Scheduled Tasks Failure Recovery", () => {
   async function deployWithCorporateActionRole() {
     const base = await deployEquityTokenFixture();
-    await base.asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, base.deployer.address);
+    await base.asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, base.deployer.address);
     return base;
   }
 
@@ -348,13 +388,13 @@ describe("Scheduled Tasks Failure Recovery", () => {
 
   async function deployEquityWithCorporateActionRole() {
     const base = await deployEquityTokenFixture();
-    await base.asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, base.deployer.address);
+    await base.asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, base.deployer.address);
     return { ...base, diamondAddress: base.diamond.target as string };
   }
 
   async function deployBondWithCorporateActionRole() {
     const base = await deployBondKpiLinkedRateTokenFixture();
-    await base.asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, base.deployer.address);
+    await base.asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, base.deployer.address);
     return { ...base, diamondAddress: base.diamond.target as string };
   }
 
@@ -430,8 +470,6 @@ describe("Scheduled Tasks Failure Recovery", () => {
   });
 
   it("GIVEN failing crossOrdered COUPON_LISTING task WHEN triggered THEN coupon listing action cancelled and TaskExecutionFailed emitted", async () => {
-    const COUPON_LISTING_TASK_TYPE = "0xc0025ea024305bcaedb7e0a5d9ef6f0bca23bb36ee261794fdfb21cd810563ce";
-
     const { asset, deployer, diamondAddress } = await loadFixture(deployBondWithCorporateActionRole);
     await injectMockDispatch();
 
@@ -458,7 +496,7 @@ describe("Scheduled Tasks Failure Recovery", () => {
 
     await expect(asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks())
       .to.emit(asset, "TaskExecutionFailed")
-      .withArgs(COUPON_LISTING_TASK_TYPE, ethers.encodeBytes32String("crossOrdered"), fixingDate);
+      .withArgs(ATS_TASK.COUPON_LISTING, ethers.encodeBytes32String("crossOrdered"), fixingDate);
 
     expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(0);
     expect(await asset.scheduledCouponListingCount()).to.equal(1);

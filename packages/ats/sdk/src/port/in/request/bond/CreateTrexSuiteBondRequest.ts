@@ -4,6 +4,7 @@ import { OptionalField } from "@core/decorator/OptionalDecorator";
 import { Security } from "@domain/context/security/Security";
 import ValidatedRequest from "@core/validation/ValidatedArgs";
 import FormatValidation from "../FormatValidation";
+import { MIN_CONFIG_VERSION } from "@core/Constants";
 
 import { SecurityDate } from "@domain/context/shared/SecurityDate";
 import { Factory } from "@domain/context/factory/Factories";
@@ -202,6 +203,7 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
         return Factory.checkRegulationSubType(val, this.regulationType);
       },
       configId: FormatValidation.checkBytes32Format(),
+      configVersion: FormatValidation.checkNumber({ min: MIN_CONFIG_VERSION }),
       externalPauses: (val) => {
         return FormatValidation.checkHederaIdOrEvmAddressArray(val ?? [], "externalPauses", true);
       },

@@ -18,6 +18,7 @@ import {
   createBatchConfiguration,
   OperationResult,
   DEFAULT_BATCH_SIZE,
+  RetryOptions,
 } from "@scripts/infrastructure";
 import { BOND_CONFIG_ID } from "../constants";
 import { atsRegistry } from "../atsRegistry";
@@ -210,6 +211,7 @@ export async function createBondConfiguration(
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
+  retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
   // Build facet list based on time travel mode
   // When useTimeTravel=true, ALL facets get TimeTravel suffix (universal mapping)
@@ -240,5 +242,6 @@ export async function createBondConfiguration(
     partialBatchDeploy,
     batchSize,
     confirmations,
+    retryOptions,
   });
 }

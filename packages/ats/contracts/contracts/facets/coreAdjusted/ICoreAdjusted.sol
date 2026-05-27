@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey CoreAdjusted
+bytes32 constant RESOLVER_KEY_CORE_ADJUSTED = 0xe190b52312c215f8e240bb53f0aa3e51e31b3005b7fcfb49c730ae523e675cfd;
+
 /**
  * @title ICoreAdjusted
  * @notice Interface exposing time-adjusted ERC-20 decimal reads for the CoreAdjusted facet.

@@ -353,7 +353,7 @@ npx hardhat console --network hedera-testnet
 2n  // New configuration version
 
 > // Verify BondFacet address
-> await blr.resolveLatestBusinessLogic(BOND_RESOLVER_KEY)
+> await blr.resolveLatestBusinessLogic(RESOLVER_KEY_BOND)
 '0xNEW_BOND_FACET_ADDRESS'
 ```
 
@@ -378,7 +378,7 @@ const facetsToRegister = [
   {
     name: "RewardsFacet",
     address: await rewardsFacet.getAddress(),
-    resolverKey: _REWARDS_RESOLVER_KEY,
+    resolverKey: RESOLVER_KEY_REWARDS,
   },
 ];
 
@@ -668,7 +668,7 @@ const facetsToRegister = [
   {
     name: "BondFacet",
     address: previousBondFacetAddress, // Old working version
-    resolverKey: BOND_RESOLVER_KEY,
+    resolverKey: RESOLVER_KEY_BOND,
   },
   // ... all other facets
 ];

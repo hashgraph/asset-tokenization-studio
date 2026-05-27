@@ -7,7 +7,10 @@ import { IDiamondCutManager } from "./IDiamondCutManager.sol";
 import { IStaticFunctionSelectors } from "../proxy/IStaticFunctionSelectors.sol";
 import { IDiamondLoupe } from "../proxy/IDiamondLoupe.sol";
 import { BusinessLogicResolverWrapper } from "./BusinessLogicResolverWrapper.sol";
-import { _DIAMOND_CUT_MANAGER_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+
+/// @custom:hash storage DiamondCutManager
+// solhint-disable-next-line max-line-length
+bytes32 constant STORAGE_LOCATION_DIAMOND_CUT_MANAGER = 0xc9161810d6144bfe5b28041c8a23ceedf202e65acda5c323c5b387259e601000;
 
 abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicResolverWrapper {
     struct DiamondCutManagerStorage {
@@ -35,13 +38,17 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         mapping(bytes32 => bool) supportsInterface;
     }
 
+    modifier validateConfigurationVersion(bytes32 _configurationId, uint256 _version) {
+        _checkExplicitVersion(_configurationId, _version);
+        _;
+    }
+
     function _createConfiguration(
         bytes32 _configurationId,
         FacetConfiguration[] calldata _facetConfigurations
     ) internal returns (uint256 latestVersion_) {
-        latestVersion_ = _isOngoingConfiguration(_configurationId)
-            ? _getBatchConfigurationVersion(_configurationId)
-            : _startBatchConfiguration(_configurationId);
+        if (_isOngoingConfiguration(_configurationId)) revert OngoingBatchConfigurationNotPermitted(_configurationId);
+        latestVersion_ = _startBatchConfiguration(_configurationId);
         _addFacetsToBatchConfiguration(_configurationId, _facetConfigurations, latestVersion_);
         _activateConfiguration(_configurationId, true);
     }
@@ -166,9 +173,7 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         uint256 _version,
         bytes4 _selector
     ) internal view returns (address facetAddress_) {
-        facetAddress_ = _dcms.facetAddress[
-            _buildHashSelector(_configurationId, _resolveVersion(_dcms, _configurationId, _version), _selector)
-        ];
+        facetAddress_ = _dcms.facetAddress[_buildHashSelector(_configurationId, _version, _selector)];
     }
 
     function _resolveSupportsInterface(
@@ -177,9 +182,7 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         uint256 _version,
         bytes4 _interfaceId
     ) internal view returns (bool exists_) {
-        exists_ = _dcms.supportsInterface[
-            _buildHashSelector(_configurationId, _resolveVersion(_dcms, _configurationId, _version), _interfaceId)
-        ];
+        exists_ = _dcms.supportsInterface[_buildHashSelector(_configurationId, _version, _interfaceId)];
     }
 
     function _isResolverProxyConfigurationRegistered(
@@ -195,7 +198,10 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         bytes32 _configurationId,
         uint256 _version
     ) internal view returns (bool isRegistered_) {
-        return !_dcms.activeConfigurations[_configurationId] || _version > _dcms.latestVersion[_configurationId];
+        return
+            _version == 0 ||
+            !_dcms.activeConfigurations[_configurationId] ||
+            _version > _dcms.latestVersion[_configurationId];
     }
 
     function _checkResolverProxyConfigurationRegistered(
@@ -221,9 +227,7 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         bytes32 _configurationId,
         uint256 _version
     ) internal view returns (uint256 facetsLength_) {
-        facetsLength_ = _dcms
-            .facetIds[_buildHash(_configurationId, _resolveVersion(_dcms, _configurationId, _version))]
-            .length;
+        facetsLength_ = _dcms.facetIds[_buildHash(_configurationId, _version)].length;
     }
 
     function _getFacetsByConfigurationIdAndVersion(
@@ -233,18 +237,15 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (IDiamondLoupe.Facet[] memory facets_) {
-        bytes32[] memory facetIds = _dcms.facetIds[
-            _buildHash(_configurationId, _resolveVersion(_dcms, _configurationId, _version))
-        ];
+        bytes32[] memory facetIds = _dcms.facetIds[_buildHash(_configurationId, _version)];
         (uint256 start, uint256 end) = Pagination.getStartAndEnd(_pageIndex, _pageLength);
         uint256 size = Pagination.getSize(start, end, facetIds.length);
         facets_ = new IDiamondLoupe.Facet[](size);
-        uint256 version = _resolveVersion(_dcms, _configurationId, _version);
         for (uint256 index; index < size; ) {
             facets_[index] = _getFacetByConfigurationIdVersionAndFacetId(
                 _dcms,
                 _configurationId,
-                version,
+                _version,
                 facetIds[start]
             );
             unchecked {
@@ -260,9 +261,7 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         uint256 _version,
         bytes32 _facetId
     ) internal view returns (uint256 facetSelectorsLength_) {
-        facetSelectorsLength_ = _dcms
-            .selectors[_buildHash(_configurationId, _resolveVersion(_dcms, _configurationId, _version), _facetId)]
-            .length;
+        facetSelectorsLength_ = _dcms.selectors[_buildHash(_configurationId, _version, _facetId)].length;
     }
 
     function _getFacetSelectorsByConfigurationIdVersionAndFacetId(
@@ -274,7 +273,7 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         uint256 _pageLength
     ) internal view returns (bytes4[] memory facetSelectors_) {
         facetSelectors_ = _buildPaginated(
-            _dcms.selectors[_buildHash(_configurationId, _resolveVersion(_dcms, _configurationId, _version), _facetId)],
+            _dcms.selectors[_buildHash(_configurationId, _version, _facetId)],
             _pageIndex,
             _pageLength
         );
@@ -287,24 +286,19 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (bytes32[] memory facetIds_) {
-        facetIds_ = _buildPaginated(
-            _dcms.facetIds[_buildHash(_configurationId, _resolveVersion(_dcms, _configurationId, _version))],
-            _pageIndex,
-            _pageLength
-        );
+        facetIds_ = _buildPaginated(_dcms.facetIds[_buildHash(_configurationId, _version)], _pageIndex, _pageLength);
     }
 
     /**
      * @notice Returns paginated facet configurations for a configuration version.
-     * @dev Resolves `_version` before deriving the storage key. Pagination bounds
-     * determine the returned slice and may revert through `Pagination.getSize` if
-     * invalid. The function reads facet IDs and versions from aligned storage
-     * arrays and assumes both arrays remain length-synchronised for each resolved
-     * configuration version.
+     * @dev The non-zero `_version` precondition is enforced by the
+     * `validateConfigurationVersion` modifier on the external entry point. Pagination bounds
+     * determine the returned slice and may revert through
+     * `Pagination.getSize` if invalid. Facet IDs and versions are read from aligned storage
+     * arrays which are assumed to remain length-synchronised for each configuration version.
      * @param _dcms Diamond cut manager storage containing registered facet data.
      * @param _configurationId Identifier of the facet configuration set.
-     * @param _version Requested configuration version, or the sentinel handled by
-     * `_resolveVersion`.
+     * @param _version Requested configuration version; must be > 0.
      * @param _start Inclusive start index of the requested page.
      * @param _end Exclusive end index of the requested page.
      * @return facetConfigurations_ Facet configuration entries within the requested
@@ -317,7 +311,7 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         uint256 _start,
         uint256 _end
     ) internal view returns (FacetConfiguration[] memory facetConfigurations_) {
-        bytes32 configVersionHash = _buildHash(_configurationId, _resolveVersion(_dcms, _configurationId, _version));
+        bytes32 configVersionHash = _buildHash(_configurationId, _version);
 
         uint256 size = Pagination.getSize(_start, _end, _dcms.facetIds[configVersionHash].length);
 
@@ -344,16 +338,12 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory facetAddresses_) {
-        bytes32[] memory facetIds = _dcms.facetIds[
-            _buildHash(_configurationId, _resolveVersion(_dcms, _configurationId, _version))
-        ];
+        bytes32[] memory facetIds = _dcms.facetIds[_buildHash(_configurationId, _version)];
         (uint256 start, uint256 end) = Pagination.getStartAndEnd(_pageIndex, _pageLength);
         uint256 size = Pagination.getSize(start, end, facetIds.length);
         facetAddresses_ = new address[](size);
         for (uint256 index; index < size; ) {
-            facetAddresses_[index] = _dcms.addr[
-                _buildHash(_configurationId, _resolveVersion(_dcms, _configurationId, _version), facetIds[start])
-            ];
+            facetAddresses_[index] = _dcms.addr[_buildHash(_configurationId, _version, facetIds[start])];
             unchecked {
                 ++index;
                 ++start;
@@ -367,9 +357,7 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         uint256 _version,
         bytes4 _selector
     ) internal view returns (bytes32 facetId_) {
-        facetId_ = _dcms.selectorToFacetId[
-            _buildHashSelector(_configurationId, _resolveVersion(_dcms, _configurationId, _version), _selector)
-        ];
+        facetId_ = _dcms.selectorToFacetId[_buildHashSelector(_configurationId, _version, _selector)];
     }
 
     function _getFacetByConfigurationIdVersionAndFacetId(
@@ -378,11 +366,7 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         uint256 _version,
         bytes32 _facetId
     ) internal view returns (IDiamondLoupe.Facet memory facet_) {
-        bytes32 facetIdHash = _buildHash(
-            _configurationId,
-            _resolveVersion(_dcms, _configurationId, _version),
-            _facetId
-        );
+        bytes32 facetIdHash = _buildHash(_configurationId, _version, _facetId);
         facet_ = IDiamondLoupe.Facet({
             id: _facetId,
             addr: _dcms.addr[facetIdHash],
@@ -397,9 +381,7 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         uint256 _version,
         bytes32 _facetId
     ) internal view returns (address facetAddress_) {
-        facetAddress_ = _dcms.addr[
-            _buildHash(_configurationId, _resolveVersion(_dcms, _configurationId, _version), _facetId)
-        ];
+        facetAddress_ = _dcms.addr[_buildHash(_configurationId, _version, _facetId)];
     }
 
     /**
@@ -431,7 +413,7 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
     }
 
     function _diamondCutManagerStorage() internal pure returns (DiamondCutManagerStorage storage ds) {
-        bytes32 position = _DIAMOND_CUT_MANAGER_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_DIAMOND_CUT_MANAGER;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             ds.slot := position
@@ -521,14 +503,6 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         }
     }
 
-    function _resolveVersion(
-        DiamondCutManagerStorage storage _dcms,
-        bytes32 _configurationId,
-        uint256 _version
-    ) private view returns (uint256 version_) {
-        version_ = _version > 0 ? _version : _dcms.latestVersion[_configurationId];
-    }
-
     function _checkEmptyFacetConfiguration(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId
@@ -553,6 +527,10 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
                 ++index;
             }
         }
+    }
+
+    function _checkExplicitVersion(bytes32 _configurationId, uint256 _version) private pure {
+        if (_version == 0) revert VersionZero(_configurationId);
     }
 
     function _buildHash(bytes32 _configurationId, uint256 _version) private pure returns (bytes32 hash_) {

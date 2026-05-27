@@ -2,8 +2,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ILoan } from "./ILoan.sol";
-import { LOAN_MANAGER_ROLE } from "../../../constants/roles.sol";
-import { LoanStorageWrapper } from "../../../domain/asset/loan/LoanStorageWrapper.sol";
+import { ROLE_LOAN_MANAGER } from "../../../constants/roles.sol";
+import { LoanStorageWrapper } from "../../../domain/asset/LoanStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 
 /**
@@ -13,6 +13,7 @@ import { Modifiers } from "../../../services/Modifiers.sol";
  * @author Hashgraph
  */
 abstract contract Loan is ILoan, Modifiers {
+    /// @inheritdoc ILoan
     function initializeLoan(
         LoanDetailsData calldata _loanDetailsData
     )
@@ -25,6 +26,7 @@ abstract contract Loan is ILoan, Modifiers {
         LoanStorageWrapper.initializeLoan(_loanDetailsData);
     }
 
+    /// @inheritdoc ILoan
     function setLoanDetails(
         LoanDetailsData calldata loanDetailsData_
     )
@@ -32,7 +34,7 @@ abstract contract Loan is ILoan, Modifiers {
         override
         onlyActivated
         onlyUnpaused
-        onlyRole(LOAN_MANAGER_ROLE)
+        onlyRole(ROLE_LOAN_MANAGER)
         onlyValidTimestamp(loanDetailsData_.loanBasicData.startingDate)
         onlyValidTimestamp(loanDetailsData_.loanBasicData.maturityDate)
         onlyValidTimestamp(loanDetailsData_.loanBasicData.signingDate)
@@ -44,6 +46,7 @@ abstract contract Loan is ILoan, Modifiers {
         LoanStorageWrapper.setLoanDetails(loanDetailsData_);
     }
 
+    /// @inheritdoc ILoan
     function getLoanDetails() external view override returns (LoanDetailsData memory loanDetailsData_) {
         return LoanStorageWrapper.getLoanDetails();
     }

@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey NominalValueAtSnapshot
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_NOMINAL_VALUE_AT_SNAPSHOT = 0xca313777aee568dc14b1700e7be675b73932bbbc4e4f974a9f1321e6d653af74;
+
 /**
  * @title  INominalValueAtSnapshot
  * @author Asset Tokenization Studio Team

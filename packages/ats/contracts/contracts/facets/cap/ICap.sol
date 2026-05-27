@@ -1,14 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey Cap
+bytes32 constant RESOLVER_KEY_CAP = 0x88a28e7c45a3ce8d4ca60cd480c98e1b46feb84caec725cb0a6cf96b2c5143b5;
+
 /**
  * @title ICap
  * @author Asset Tokenization Studio Team
  * @notice Interface for managing the maximum token supply of a security token, both globally and
  *         per partition. The cap enforces an upper bound on minting and may be updated by
  *         authorised callers provided the new cap is not below the current total supply.
- * @dev Part of the Diamond facet system. Cap state is stored at `_CAP_STORAGE_POSITION` via
- *      `CapStorageWrapper`. `CAP_ROLE` is required to update the cap after initialisation.
+ * @dev Part of the Diamond facet system. Cap state is stored at `STORAGE_LOCATION_CAP` via
+ *      `CapStorageWrapper`. `ROLE_CAP` is required to update the cap after initialisation.
  *      `getMaxSupply` returns the cap adjusted for any pending scheduled balance-adjustment
  *      factor (ABAF); if the adjusted value would overflow `uint256` it saturates to
  *      `MAX_UINT256`. Partition caps are initialised once alongside the global cap and updated
@@ -95,7 +98,7 @@ interface ICap {
 
     /**
      * @notice Updates the global maximum supply of the token.
-     * @dev Requires `CAP_ROLE` and the token to be unpaused. The new cap must be non-zero and
+     * @dev Requires `ROLE_CAP` and the token to be unpaused. The new cap must be non-zero and
      *      at least equal to the current adjusted total supply. Emits `MaxSupplySet`.
      * @param _maxSupply The new global maximum supply.
      * @return success_ True if the cap was successfully updated.

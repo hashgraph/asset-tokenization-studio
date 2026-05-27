@@ -61,19 +61,19 @@ describe("ERC20Votes Tests", () => {
     asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
     await executeRbac(asset, [
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.ADJUSTMENT_BALANCE_ROLE,
+        role: ATS_ROLES.ROLE_ADJUSTMENT_BALANCE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.CORPORATE_ACTION_ROLE,
+        role: ATS_ROLES.ROLE_CORPORATE_ACTION,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.ISSUER_ROLE,
+        role: ATS_ROLES.ROLE_ISSUER,
         members: [signer_A.address],
       },
     ]);
@@ -85,7 +85,7 @@ describe("ERC20Votes Tests", () => {
 
   describe("Initialization", () => {
     it("GIVEN a initialized ERC20Votes WHEN initialize again THEN transaction fails with AlreadyInitialized", async () => {
-      await expect(asset.initialize_ERC20Votes(true)).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+      await expect(asset.initializeERC20Votes(true)).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
     });
 
     it("GIVEN ERC20Votes activated WHEN calling isActivated THEN returns true", async () => {
@@ -497,10 +497,10 @@ describe("ERC20Votes Tests", () => {
     const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
 
     beforeEach(async () => {
-      await asset.grantRole(ATS_ROLES.LOCKER_ROLE, signer_A.address);
-      await asset.grantRole(ATS_ROLES.FREEZE_MANAGER_ROLE, signer_A.address);
-      await asset.grantRole(ATS_ROLES.CLEARING_ROLE, signer_A.address);
-      await asset.grantRole(ATS_ROLES.CLEARING_VALIDATOR_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_LOCKER, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_FREEZE_MANAGER, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_CLEARING, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_CLEARING_VALIDATOR, signer_A.address);
 
       await asset.issueByPartition({
         partition: DEFAULT_PARTITION,
@@ -580,8 +580,8 @@ describe("ERC20Votes Tests", () => {
       });
       const singlePartitionAsset = await ethers.getContractAt("IAsset", base.diamond.target, base.deployer);
       await executeRbac(singlePartitionAsset, [
-        { role: ATS_ROLES.ISSUER_ROLE, members: [base.deployer.address] },
-        { role: ATS_ROLES.FREEZE_MANAGER_ROLE, members: [base.deployer.address] },
+        { role: ATS_ROLES.ROLE_ISSUER, members: [base.deployer.address] },
+        { role: ATS_ROLES.ROLE_FREEZE_MANAGER, members: [base.deployer.address] },
       ]);
 
       await singlePartitionAsset.issueByPartition({
@@ -781,7 +781,7 @@ describe("ERC20Votes Tests", () => {
     it("GIVEN a deactivated asset WHEN delegate THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(deactivatedAsset.connect(base.deployer).delegate(ethers.ZeroAddress)).to.be.revertedWithCustomError(
         deactivatedAsset,

@@ -3,9 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IDividend } from "./IDividend.sol";
 import { IDividendTypes } from "./IDividendTypes.sol";
-import { CORPORATE_ACTION_ROLE } from "../../constants/roles.sol";
-import { DIVIDEND_CORPORATE_ACTION_TYPE } from "../../constants/values.sol";
-import { DividendStorageWrapper } from "../../domain/asset/dividend/DividendStorageWrapper.sol";
+import { ROLE_CORPORATE_ACTION } from "../../constants/roles.sol";
+import { CORPORATE_ACTION_TYPE_DIVIDEND } from "../../constants/dispatchTypes.sol";
+import { DividendStorageWrapper } from "../../domain/asset/DividendStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 
 /**
@@ -15,14 +15,14 @@ import { Modifiers } from "../../services/Modifiers.sol";
  *         (`setDividend`, `cancelDividend`) plus the record/per-account read helpers consumers
  *         need before executing a dividend.
  * @dev Thin forwarder over `DividendStorageWrapper`; holds no storage of its own. All write
- *      paths are restricted to `CORPORATE_ACTION_ROLE` and gated by the unpaused state. Read
- *      paths are guarded by `onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE,
+ *      paths are restricted to `ROLE_CORPORATE_ACTION` and gated by the unpaused state. Read
+ *      paths are guarded by `onlyMatchingActionType(CORPORATE_ACTION_TYPE_DIVIDEND,
  *      dividendId - 1)` so an attacker cannot use a non-dividend corporate-action id to read
  *      dividend slots.
  */
 abstract contract Dividend is IDividend, Modifiers {
     /// @inheritdoc IDividend
-    /// @dev Restricted to `CORPORATE_ACTION_ROLE`; gated by `onlyUnpaused`,
+    /// @dev Restricted to `ROLE_CORPORATE_ACTION`; gated by `onlyUnpaused`,
     ///      `onlyValidDates(recordDate, executionDate)`, and `onlyValidTimestamp(recordDate)`.
     function setDividend(
         IDividendTypes.Dividend calldata newDividend
@@ -31,7 +31,7 @@ abstract contract Dividend is IDividend, Modifiers {
         override
         onlyActivated
         onlyUnpaused
-        onlyRole(CORPORATE_ACTION_ROLE)
+        onlyRole(ROLE_CORPORATE_ACTION)
         onlyValidDates(newDividend.recordDate, newDividend.executionDate)
         onlyValidTimestamp(newDividend.recordDate)
         returns (uint256 dividendId_)
@@ -40,17 +40,17 @@ abstract contract Dividend is IDividend, Modifiers {
     }
 
     /// @inheritdoc IDividend
-    /// @dev Restricted to `CORPORATE_ACTION_ROLE`; gated by `onlyUnpaused` and
-    ///      `onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, dividendId - 1)`.
+    /// @dev Restricted to `ROLE_CORPORATE_ACTION`; gated by `onlyUnpaused` and
+    ///      `onlyMatchingActionType(CORPORATE_ACTION_TYPE_DIVIDEND, dividendId - 1)`.
     function cancelDividend(
         uint256 dividendId
     )
         external
         override
         onlyActivated
-        onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, dividendId - 1)
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_DIVIDEND, dividendId - 1)
         onlyUnpaused
-        onlyRole(CORPORATE_ACTION_ROLE)
+        onlyRole(ROLE_CORPORATE_ACTION)
         returns (bool success_)
     {
         success_ = DividendStorageWrapper.cancelDividend(dividendId);
@@ -65,7 +65,7 @@ abstract contract Dividend is IDividend, Modifiers {
         external
         view
         override
-        onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, dividendId - 1)
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_DIVIDEND, dividendId - 1)
         returns (IDividendTypes.RegisteredDividend memory registeredDividend_, bool isDisabled_)
     {
         (registeredDividend_, , isDisabled_) = DividendStorageWrapper.getDividend(dividendId);
@@ -81,7 +81,7 @@ abstract contract Dividend is IDividend, Modifiers {
         external
         view
         override
-        onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, dividendId - 1)
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_DIVIDEND, dividendId - 1)
         returns (IDividendTypes.DividendFor memory dividendFor_)
     {
         return DividendStorageWrapper.getDividendFor(dividendId, account);
@@ -97,7 +97,7 @@ abstract contract Dividend is IDividend, Modifiers {
         external
         view
         override
-        onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, dividendId - 1)
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_DIVIDEND, dividendId - 1)
         returns (IDividendTypes.DividendAmountFor memory dividendAmountFor_)
     {
         return DividendStorageWrapper.getDividendAmountFor(dividendId, account);

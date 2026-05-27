@@ -3,8 +3,12 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IVotingTypes } from "./IVotingTypes.sol";
 
+/// @custom:hash resolverKey Voting
+bytes32 constant RESOLVER_KEY_VOTING = 0x88b1621426a5ad16c2399cdc8a04b7da54bf8ddf04c60aeb2fe17ad903891b58;
+
 /// @title IVoting
 /// @notice Interface for voting rights management functionality
+
 interface IVoting is IVotingTypes {
     /// @notice Emitted when a voting is set
     /// @param corporateActionId The ID of the corporate action

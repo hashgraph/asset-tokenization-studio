@@ -3,10 +3,15 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC1410Types } from "../layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 
+/// @custom:hash resolverKey TransferByPartition
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_TRANSFER_BY_PARTITION = 0xfb16c0ead8e476dfd6f2201a386b6a761b76e01aa6e21786c2d90f10036197d9;
+
 /// @title ITransferByPartition
 /// @author Asset Tokenization Studio Team
 /// @notice Interface for the TransferByPartition facet, exposing token-holder-initiated
 ///         partition transfers.
+
 interface ITransferByPartition is IERC1410Types {
     /// @notice Transfers the ownership of tokens from a specified partition to another address.
     /// @dev Caller must be the token holder. Reverts in multi-partition mode unless the

@@ -7,6 +7,7 @@ import {
   UpdateConfigRequest,
   UpdateConfigVersionRequest,
   UpdateResolverRequest,
+  ResolveLatestConfigVersionRequest,
 } from "../request";
 import { EvmAddressPropsFixture, HederaIdPropsFixture, TransactionIdFixture } from "@test/fixtures/shared/DataFixture";
 import LogService from "@service/log/LogService";
@@ -27,6 +28,7 @@ import ContractId from "@domain/context/contract/ContractId";
 import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
 import { DiamondConfiguration } from "@domain/context/security/DiamondConfiguration";
 import { GetConfigInfoQuery } from "@query/management/GetConfigInfoQuery";
+import { ResolveLatestConfigVersionQuery } from "@query/management/resolveLatestConfigVersion/ResolveLatestConfigVersionQuery";
 describe("Management", () => {
   let commandBusMock: jest.Mocked<CommandBus>;
   let queryBusMock: jest.Mocked<QueryBus>;
@@ -119,6 +121,16 @@ describe("Management", () => {
 
       await expect(Management.updateConfigVersion(updateConfigVersionRequest)).rejects.toThrow(ValidationError);
     });
+
+    it("should throw error if configVersion is zero", async () => {
+      updateConfigVersionRequest = new UpdateConfigVersionRequest({
+        ...UpdateConfigVersionRequestFixture.create({
+          configVersion: 0,
+        }),
+      });
+
+      await expect(Management.updateConfigVersion(updateConfigVersionRequest)).rejects.toThrow(ValidationError);
+    });
   });
 
   describe("updateConfig", () => {
@@ -180,6 +192,15 @@ describe("Management", () => {
       updateConfigRequest = new UpdateConfigRequest({
         ...UpdateConfigRequestFixture.create({
           configVersion: "invalid" as unknown as number,
+        }),
+      });
+
+      await expect(Management.updateConfig(updateConfigRequest)).rejects.toThrow(ValidationError);
+    });
+    it("should throw error if configVersion is zero", async () => {
+      updateConfigRequest = new UpdateConfigRequest({
+        ...UpdateConfigRequestFixture.create({
+          configVersion: 0,
         }),
       });
 
@@ -253,6 +274,15 @@ describe("Management", () => {
 
       await expect(Management.updateResolver(updateResolverRequest)).rejects.toThrow(ValidationError);
     });
+    it("should throw error if configVersion is zero", async () => {
+      updateResolverRequest = new UpdateResolverRequest({
+        ...UpdateResolverRequestFixture.create({
+          configVersion: 0,
+        }),
+      });
+
+      await expect(Management.updateResolver(updateResolverRequest)).rejects.toThrow(ValidationError);
+    });
     it("should throw error if resolver is invalid", async () => {
       updateResolverRequest = new UpdateResolverRequest({
         ...UpdateResolverRequestFixture.create({
@@ -261,6 +291,54 @@ describe("Management", () => {
       });
 
       await expect(Management.updateResolver(updateResolverRequest)).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe("resolveLatestConfigVersion", () => {
+    const configurationId = "0x0000000000000000000000000000000000000000000000000000000000000001";
+    const resolverHederaId = HederaIdPropsFixture.create().value;
+
+    const buildRequest = (): ResolveLatestConfigVersionRequest =>
+      new ResolveLatestConfigVersionRequest({
+        resolverAddress: resolverHederaId,
+        configurationId,
+      });
+
+    it("should resolve the latest configuration version successfully", async () => {
+      queryBusMock.execute.mockResolvedValue({ payload: 5 });
+
+      const request = buildRequest();
+      const result = await Management.resolveLatestConfigVersion(request);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith("ResolveLatestConfigVersionRequest", request);
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new ResolveLatestConfigVersionQuery(request.resolverAddress, request.configurationId),
+      );
+      expect(result).toEqual({ payload: 5 });
+    });
+
+    it("should propagate query bus failures", async () => {
+      queryBusMock.execute.mockRejectedValue(new Error("Query execution failed"));
+
+      await expect(Management.resolveLatestConfigVersion(buildRequest())).rejects.toThrow("Query execution failed");
+    });
+
+    it("should throw error if resolverAddress is invalid", async () => {
+      const bad = new ResolveLatestConfigVersionRequest({
+        resolverAddress: "invalid",
+        configurationId,
+      });
+
+      await expect(Management.resolveLatestConfigVersion(bad)).rejects.toThrow(ValidationError);
+    });
+
+    it("should throw error if configurationId is not bytes32", async () => {
+      const bad = new ResolveLatestConfigVersionRequest({
+        resolverAddress: resolverHederaId,
+        configurationId: "not-bytes32",
+      });
+
+      await expect(Management.resolveLatestConfigVersion(bad)).rejects.toThrow(ValidationError);
     });
   });
 

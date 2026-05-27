@@ -34,8 +34,8 @@ describe("Proceed Recipients Tests", () => {
 
     asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
 
-    await asset.grantRole(ATS_ROLES.PROCEED_RECIPIENT_MANAGER_ROLE, signer_A.address);
-    await asset.grantRole(ATS_ROLES.PAUSER_ROLE, signer_A.address);
+    await asset.grantRole(ATS_ROLES.ROLE_PROCEED_RECIPIENT_MANAGER, signer_A.address);
+    await asset.grantRole(ATS_ROLES.ROLE_PAUSER, signer_A.address);
   }
 
   beforeEach(async () => {
@@ -205,7 +205,7 @@ describe("Proceed Recipients Tests", () => {
     it("GIVEN a deactivated asset WHEN addProceedRecipient THEN transaction fails with Deactivated", async () => {
       const base = await deployBondTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).addProceedRecipient(ethers.ZeroAddress, "0x"),
@@ -215,7 +215,7 @@ describe("Proceed Recipients Tests", () => {
     it("GIVEN a deactivated asset WHEN removeProceedRecipient THEN transaction fails with Deactivated", async () => {
       const base = await deployBondTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).removeProceedRecipient(ethers.ZeroAddress),
@@ -225,7 +225,7 @@ describe("Proceed Recipients Tests", () => {
     it("GIVEN a deactivated asset WHEN updateProceedRecipientData THEN transaction fails with Deactivated", async () => {
       const base = await deployBondTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).updateProceedRecipientData(ethers.ZeroAddress, "0x"),

@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey FixedRate
+bytes32 constant RESOLVER_KEY_FIXED_RATE = 0x82f13d957a7f7af45723926c5ca1a184f2d667df5221c37434ce37278a9af521;
+
 interface IFixedRate {
     struct FixedRateData {
         uint256 rate;

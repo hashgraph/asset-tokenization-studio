@@ -27,11 +27,11 @@ describe("Kpi Linked Rate Tests", () => {
     asset = await ethers.getContractAt("IAsset", diamond.target);
     await executeRbac(asset, [
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.INTEREST_RATE_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_INTEREST_RATE_MANAGER,
         members: [signer_A.address],
       },
     ]);
@@ -63,6 +63,56 @@ describe("Kpi Linked Rate Tests", () => {
         },
       ),
     ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+  });
+
+  describe("initializeKpiLinkedRate", () => {
+    it("GIVEN Min Rate larger than Base Rate WHEN initializeKpiLinkedRate THEN transaction fails with WrongInterestRateValues", async () => {
+      await expect(
+        deployBondKpiLinkedRateTokenFixture({
+          interestRateParams: { maxRate: 4, baseRate: 2, minRate: 3 },
+        }),
+      ).to.be.revertedWithCustomError(asset, "WrongInterestRateValues");
+    });
+
+    it("GIVEN Base Rate larger than Max Rate WHEN initializeKpiLinkedRate THEN transaction fails with WrongInterestRateValues", async () => {
+      await expect(
+        deployBondKpiLinkedRateTokenFixture({
+          interestRateParams: { maxRate: 4, baseRate: 5, minRate: 3 },
+        }),
+      ).to.be.revertedWithCustomError(asset, "WrongInterestRateValues");
+    });
+
+    it("GIVEN Max deviation floor larger than Base Line WHEN initializeKpiLinkedRate THEN transaction fails with WrongImpactDataValues", async () => {
+      await expect(
+        deployBondKpiLinkedRateTokenFixture({
+          impactDataParams: { maxDeviationCap: 1000, baseLine: 700, maxDeviationFloor: 800 },
+        }),
+      ).to.be.revertedWithCustomError(asset, "WrongImpactDataValues");
+    });
+
+    it("GIVEN Max deviation floor equal to Base Line WHEN initializeKpiLinkedRate THEN transaction fails with WrongImpactDataValues", async () => {
+      await expect(
+        deployBondKpiLinkedRateTokenFixture({
+          impactDataParams: { maxDeviationCap: 1000, baseLine: 700, maxDeviationFloor: 700 },
+        }),
+      ).to.be.revertedWithCustomError(asset, "WrongImpactDataValues");
+    });
+
+    it("GIVEN Base Line larger than Max Deviation Cap WHEN initializeKpiLinkedRate THEN transaction fails with WrongImpactDataValues", async () => {
+      await expect(
+        deployBondKpiLinkedRateTokenFixture({
+          impactDataParams: { maxDeviationCap: 1000, baseLine: 7000, maxDeviationFloor: 800 },
+        }),
+      ).to.be.revertedWithCustomError(asset, "WrongImpactDataValues");
+    });
+
+    it("GIVEN Base Line equal to Max Deviation Cap WHEN initializeKpiLinkedRate THEN transaction fails with WrongImpactDataValues", async () => {
+      await expect(
+        deployBondKpiLinkedRateTokenFixture({
+          impactDataParams: { maxDeviationCap: 1000, baseLine: 1000, maxDeviationFloor: 800 },
+        }),
+      ).to.be.revertedWithCustomError(asset, "WrongImpactDataValues");
+    });
   });
 
   describe("Paused", () => {
@@ -287,7 +337,7 @@ describe("Kpi Linked Rate Tests", () => {
     it("GIVEN a deactivated asset WHEN setKpiLinkedRateInterestRate THEN transaction fails with Deactivated", async () => {
       const base = await deployBondKpiLinkedRateTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).setKpiLinkedRateInterestRate({
@@ -306,7 +356,7 @@ describe("Kpi Linked Rate Tests", () => {
     it("GIVEN a deactivated asset WHEN setKpiLinkedRateImpactData THEN transaction fails with Deactivated", async () => {
       const base = await deployBondKpiLinkedRateTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).setKpiLinkedRateImpactData({

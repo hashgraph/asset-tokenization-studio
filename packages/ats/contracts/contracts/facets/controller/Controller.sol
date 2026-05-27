@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IController } from "./IController.sol";
 import { IERC3643Types } from "../layer_1/ERC3643/IERC3643Types.sol";
-import { DEFAULT_ADMIN_ROLE, CONTROLLER_ROLE, AGENT_ROLE, _buildRoles } from "../../constants/roles.sol";
+import { DEFAULT_ADMIN_ROLE, ROLE_CONTROLLER, ROLE_AGENT, _buildRoles } from "../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
 import { ERC1644StorageWrapper } from "../../domain/asset/ERC1644StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
@@ -36,7 +36,7 @@ abstract contract Controller is IController, Modifiers {
         onlyUnpaused
         onlyControllable
         onlyWithoutMultiPartition
-        onlyAnyRole(_buildRoles(CONTROLLER_ROLE, AGENT_ROLE))
+        onlyAnyRole(_buildRoles(ROLE_CONTROLLER, ROLE_AGENT))
     {
         TokenCoreOps.transfer(_from, _to, _value);
         emit IController.ControllerTransfer(EvmAccessors.getMsgSender(), _from, _to, _value, _data, _operatorData);
@@ -55,7 +55,7 @@ abstract contract Controller is IController, Modifiers {
         onlyUnpaused
         onlyControllable
         onlyWithoutMultiPartition
-        onlyAnyRole(_buildRoles(CONTROLLER_ROLE, AGENT_ROLE))
+        onlyAnyRole(_buildRoles(ROLE_CONTROLLER, ROLE_AGENT))
     {
         TokenCoreOps.burn(_tokenHolder, _value);
         emit IController.ControllerRedemption(EvmAccessors.getMsgSender(), _tokenHolder, _value, _data, _operatorData);
@@ -78,7 +78,7 @@ abstract contract Controller is IController, Modifiers {
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyControllable
-        onlyAnyRole(_buildRoles(CONTROLLER_ROLE, AGENT_ROLE))
+        onlyAnyRole(_buildRoles(ROLE_CONTROLLER, ROLE_AGENT))
         returns (bool)
     {
         TokenCoreOps.transfer(_from, _to, _amount);
@@ -105,6 +105,6 @@ abstract contract Controller is IController, Modifiers {
 
     /// @inheritdoc IController
     function isAgent(address _agent) external view override returns (bool) {
-        return AccessControlStorageWrapper.hasRole(AGENT_ROLE, _agent);
+        return AccessControlStorageWrapper.hasRole(ROLE_AGENT, _agent);
     }
 }

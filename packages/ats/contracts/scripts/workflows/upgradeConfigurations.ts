@@ -47,6 +47,7 @@ import {
   createBondConfiguration,
   deployOrchestratorLibraries,
   hasOrchestratorLibraryAddresses,
+  setOrchestratorLibraryAddresses,
 } from "@scripts/domain";
 import { BusinessLogicResolver__factory } from "@contract-types";
 
@@ -384,9 +385,18 @@ async function deployFacetsPhase(ctx: UpgradePhaseContext): Promise<void> {
   }
 
   // Deploy orchestrator libraries first (required for facet factory linking)
-  if (!hasOrchestratorLibraryAddresses()) {
+  if (checkpoint.steps.libraries) {
+    const { deployedAt: _deployedAt, ...libAddrs } = checkpoint.steps.libraries;
+    setOrchestratorLibraryAddresses(libAddrs);
+    info("   Orchestrator libraries restored from checkpoint");
+  } else if (!hasOrchestratorLibraryAddresses()) {
     info("   Deploying orchestrator libraries (required for facet linking)...");
-    await deployOrchestratorLibraries(signer);
+    const libEnableRetry = options.enableRetry ?? networkConfig.retryOptions.maxRetries > 0;
+    const libAddrs = await deployOrchestratorLibraries(signer, {
+      retryOptions: libEnableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
+    });
+    checkpoint.steps.libraries = { ...libAddrs, deployedAt: new Date().toISOString() };
+    await checkpointManager.saveCheckpoint(checkpoint);
   }
 
   info("\n📦 Step 1/5: Deploying all facets...");
@@ -597,8 +607,11 @@ async function registerFacetsPhase(ctx: UpgradePhaseContext): Promise<void> {
     `   Total facets to register: ${facetsToRegister.length} (${existingFacets.length} existing + ${newFacets.length} new)`,
   );
 
+  const upgradeNetworkConfig = getDeploymentConfig(ctx.network);
+  const upgradeEnableRetry = ctx.options.enableRetry ?? upgradeNetworkConfig.retryOptions.maxRetries > 0;
   const registerResult = await registerFacets(blrContract, {
     facets: facetsToRegister,
+    retryOptions: upgradeEnableRetry ? upgradeNetworkConfig.retryOptions : { maxRetries: 0 },
   });
 
   if (!registerResult.success) {
@@ -676,6 +689,7 @@ async function createOrResumeConfiguration(params: {
     configId: result.data.configurationId,
     version: result.data.version,
     facetCount: result.data.facetKeys.length,
+    facets: result.data.facetKeys,
     txHash: "",
   };
   checkpoint.currentStep = stepNumber;
@@ -704,6 +718,8 @@ async function createConfigurationsPhase(ctx: UpgradePhaseContext): Promise<{
   // CRITICAL FIX: Get confirmations from options or fall back to network config
   const networkConfig = getDeploymentConfig(network);
   const confirmations = options.confirmations ?? networkConfig.confirmations;
+  const cfgEnableRetry = options.enableRetry ?? networkConfig.retryOptions.maxRetries > 0;
+  const cfgRetryOptions = cfgEnableRetry ? networkConfig.retryOptions : { maxRetries: 0 };
 
   // Build facet addresses from checkpoint
   const facetAddresses: Record<string, string> = {};
@@ -733,6 +749,7 @@ async function createConfigurationsPhase(ctx: UpgradePhaseContext): Promise<{
           false, // partialBatchDeploy
           batchSize,
           confirmations,
+          cfgRetryOptions,
         ),
       logPrefix: "Creating Equity configuration",
     });
@@ -756,6 +773,7 @@ async function createConfigurationsPhase(ctx: UpgradePhaseContext): Promise<{
           false, // partialBatchDeploy
           batchSize,
           confirmations,
+          cfgRetryOptions,
         ),
       logPrefix: "Creating Bond configuration",
     });

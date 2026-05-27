@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IMint } from "./IMint.sol";
+import { IMint, RESOLVER_KEY_MINT } from "./IMint.sol";
 import { Mint } from "./Mint.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { _MINT_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-
 /**
  * @title MintFacet
  * @author Asset Tokenization Studio Team
@@ -17,7 +15,7 @@ import { _MINT_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 contract MintFacet is Mint, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _MINT_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_MINT;
     }
 
     /// @inheritdoc IStaticFunctionSelectors

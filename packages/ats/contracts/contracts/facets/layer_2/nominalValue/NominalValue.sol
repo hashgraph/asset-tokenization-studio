@@ -2,9 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { INominalValue } from "./INominalValue.sol";
-import { NOMINAL_VALUE_ROLE } from "../../../constants/roles.sol";
+import { ROLE_NOMINAL_VALUE } from "../../../constants/roles.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
-import { NominalValueStorageWrapper } from "../../../domain/asset/nominalValue/NominalValueStorageWrapper.sol";
+import { NominalValueStorageWrapper } from "../../../domain/asset/NominalValueStorageWrapper.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 /**
@@ -35,7 +35,7 @@ abstract contract NominalValue is INominalValue, Modifiers {
     function setNominalValue(
         uint256 _nominalValue,
         uint8 _nominalValueDecimals
-    ) external override onlyActivated onlyRole(NOMINAL_VALUE_ROLE) {
+    ) external override onlyActivated onlyRole(ROLE_NOMINAL_VALUE) {
         NominalValueStorageWrapper.setNominalValue(_nominalValue, _nominalValueDecimals);
         emit NominalValueSet(EvmAccessors.getMsgSender(), _nominalValue, _nominalValueDecimals);
     }
@@ -43,7 +43,7 @@ abstract contract NominalValue is INominalValue, Modifiers {
     /// @inheritdoc INominalValue
     function setNominalValueCurrency(
         bytes3 _nominalValueCurrency
-    ) external override onlyActivated onlyRole(NOMINAL_VALUE_ROLE) {
+    ) external override onlyActivated onlyRole(ROLE_NOMINAL_VALUE) {
         NominalValueStorageWrapper.setNominalValueCurrency(_nominalValueCurrency);
         emit NominalValueCurrencySet(EvmAccessors.getMsgSender(), _nominalValueCurrency);
     }

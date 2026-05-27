@@ -1360,7 +1360,7 @@ The registry system **automatically extracts metadata** from Solidity contracts 
 - Function signatures and selectors
 - Event signatures and topics
 - Custom error definitions
-- Resolver keys (from `constants/resolverKeys.sol`)
+- Resolver keys (file-scope `RESOLVER_KEY_<NAME>` constant inside each `I<Feature>.sol`)
 - Role constants (from `constants/roles.sol`)
 - Inheritance chains
 - NatSpec documentation
@@ -1372,7 +1372,7 @@ Regenerate the registry when:
 - ✅ You **add a new facet contract** to the codebase
 - ✅ You **modify function signatures** in existing facets
 - ✅ You **add/remove events or errors** in facets
-- ✅ You **change resolver keys** in `constants/resolverKeys.sol`
+- ✅ You **change a resolver key** declared at file scope in an `I<Feature>.sol`
 - ❌ NOT needed when just changing configuration facet lists
 
 ### How to Regenerate
@@ -1398,8 +1398,8 @@ export const FACET_REGISTRY = {
     layer: 1,
     category: "core",
     resolverKey: {
-      name: "_ACCESS_CONTROL_RESOLVER_KEY",
-      value: "0x011768a41cb4fe76...",
+      name: "RESOLVER_KEY_ACCESS_CONTROL",
+      value: "0xccc2e755f9225e65...",
     },
     methods: [
       {
@@ -1443,7 +1443,7 @@ const allFacets = getAllFacets();
 console.log(`Total facets: ${allFacets.length}`);
 
 // Access roles
-console.log(ROLES._PAUSER_ROLE); // bytes32 value from contracts
+console.log(ROLES.ROLE_PAUSER); // bytes32 value from contracts
 ```
 
 ### Registry in Operations
@@ -1675,16 +1675,18 @@ This generates TypeChain types in `build/typechain/`.
 
 **Error**: `Facet AccessControlFacet found in registry but missing resolverKey.value.`
 
-**Cause**: The facet exists but doesn't have a resolver key defined in `constants/resolverKeys.sol`.
+**Cause**: The facet exists but doesn't have a file-scope `RESOLVER_KEY_<FEATURE>` constant declared inside its `I<Feature>.sol` interface file.
 
 **Solution**:
 
-1. Check if resolver key exists in [contracts/constants/resolverKeys.sol](../contracts/constants/resolverKeys.sol)
-2. If missing, add it:
+1. Check the facet's `I<Feature>.sol` for a file-scope constant:
    ```solidity
-   bytes32 constant _NEW_FACET_RESOLVER_KEY = keccak256("NewFacet resolver key");
+   /// @custom:hash resolverKey <PascalName>
+   bytes32 constant RESOLVER_KEY_<FEATURE> = 0x0000000000000000000000000000000000000000000000000000000000000000;
    ```
-3. Regenerate registry: `npm run generate:registry`
+2. If missing, add it with a placeholder hex (any 32-byte value). The hex is rewritten by codegen.
+3. Run `npm run -w packages/ats/contracts generate:hashes` (or rely on the post-compile hook in `npx hardhat compile`) to populate the canonical hex from `asset.tokenization.standard.resolverKey.<PascalName>`.
+4. Regenerate the contract registry: `npm run generate:registry`.
 
 ---
 

@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IClearingByPartition } from "./IClearingByPartition.sol";
-import { CLEARING_VALIDATOR_ROLE } from "../../constants/roles.sol";
+import { ROLE_CLEARING_VALIDATOR } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { ClearingOps } from "../../domain/orchestrator/ClearingOps.sol";
@@ -29,7 +29,7 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
         override
         onlyActivated
         onlyUnpaused
-        onlyRole(CLEARING_VALIDATOR_ROLE)
+        onlyRole(ROLE_CLEARING_VALIDATOR)
         onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
         onlyWithValidClearingId(_clearingOperationIdentifier)
         onlyValidExpirationTimestampForClearing(_clearingOperationIdentifier, false)
@@ -59,7 +59,7 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
         override
         onlyActivated
         onlyUnpaused
-        onlyRole(CLEARING_VALIDATOR_ROLE)
+        onlyRole(ROLE_CLEARING_VALIDATOR)
         onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
         onlyWithValidClearingId(_clearingOperationIdentifier)
         onlyValidExpirationTimestampForClearing(_clearingOperationIdentifier, false)
@@ -288,6 +288,16 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
             );
     }
 
+    /**
+     * @notice Creates a clearing transfer entry on behalf of an authorised operator.
+     * @dev Dispatches into {ClearingOps.clearingTransferCreation} with the
+     *      {ThirdPartyType.AUTHORIZED} tag and reduces the operator's clearing allowance.
+     * @param _clearingOperationFrom Operator envelope (clearing operation, holder, operator data).
+     * @param _amount Amount to clear for transfer.
+     * @param _to Destination address that will receive the cleared transfer.
+     * @return success_ True when the clearing entry was created.
+     * @return clearingId_ Identifier assigned to the new clearing record.
+     */
     function _clearingTransferFromByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
         uint256 _amount,

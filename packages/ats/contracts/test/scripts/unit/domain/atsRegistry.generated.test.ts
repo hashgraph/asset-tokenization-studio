@@ -259,9 +259,9 @@ describe("atsRegistry - Registry Helper Functions", () => {
       expect(Object.keys(ROLES).length).to.be.greaterThan(0);
     });
 
-    it("should have PAUSER_ROLE defined", () => {
-      expect(ROLES.PAUSER_ROLE).to.not.be.undefined;
-      expect(ROLES.PAUSER_ROLE).to.match(/^0x[a-fA-F0-9]{64}$/);
+    it("should have ROLE_PAUSER defined", () => {
+      expect(ROLES.ROLE_PAUSER).to.not.be.undefined;
+      expect(ROLES.ROLE_PAUSER).to.match(/^0x[a-fA-F0-9]{64}$/);
     });
   });
 

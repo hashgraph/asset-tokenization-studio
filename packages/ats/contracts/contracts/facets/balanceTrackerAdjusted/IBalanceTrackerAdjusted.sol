@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey BalanceTrackerAdjusted
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_BALANCE_TRACKER_ADJUSTED = 0xde8fb5b2c9dd63c753422ecea8bad989281451fa65dff90dd686eff691b03805;
+
 /**
  * @title IBalanceTrackerAdjusted
  * @notice Interface for querying historical token balances at a specific timestamp,
