@@ -217,12 +217,12 @@ describe("Scheduled Tasks Tests", () => {
         decimals: 2,
       });
 
-      expect(await asset.getPendingBalanceAdjustmentCount()).to.equal(1);
+      expect(await asset.getPendingBalanceAdjustmentCount(false)).to.equal(1);
 
       await asset.changeSystemTimestamp(taskTimestamp);
       await asset.connect(signer_A).triggerPendingScheduledCrossOrderedTasks();
 
-      expect(await asset.getPendingBalanceAdjustmentCount()).to.equal(0);
+      expect(await asset.getPendingBalanceAdjustmentCount(false)).to.equal(0);
     });
   });
 
