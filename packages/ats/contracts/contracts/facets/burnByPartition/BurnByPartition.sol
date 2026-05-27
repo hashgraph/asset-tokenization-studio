@@ -38,6 +38,7 @@ abstract contract BurnByPartition is IBurnByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnProtectedPartitionsOrWildCardRole

@@ -95,6 +95,25 @@ interface ILock is ILockTypes {
     ) external returns (bool success_);
 
     /**
+     * @notice Releases a lock unconditionally, before its expiration timestamp.
+     * @dev Authorised path used to recover locked balances when the holder is unable to do
+     *      so. Pause-gated, partition validated against single-partition mode and
+     *      restricted to callers holding `LOCKER_ROLE` or `CONTROLLER_ROLE` (checked
+     *      explicitly via `AccessControlStorageWrapper.checkAnyRole`). Skips the
+     *      `LockExpirationNotReached` guard that `releaseByPartition` enforces. Emits
+     *      `LockByPartitionReleased`.
+     * @param _partition The partition the lock lives on.
+     * @param _lockId Identifier of the lock to release.
+     * @param _tokenHolder The address whose tokens are returned.
+     * @return success_ True when the lock has been removed and the balance returned.
+     */
+    function forceReleaseByPartition(
+        bytes32 _partition,
+        uint256 _lockId,
+        address _tokenHolder
+    ) external returns (bool success_);
+
+    /**
      * @notice Returns the total amount currently locked for `_tokenHolder` across every
      *         partition, adjusted by any pending balance-adjustment factors.
      * @param _tokenHolder The address whose total locked amount is queried.

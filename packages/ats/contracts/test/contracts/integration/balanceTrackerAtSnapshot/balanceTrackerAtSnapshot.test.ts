@@ -3,9 +3,9 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ATS_ROLES, EMPTY_STRING, ZERO } from "@scripts";
+import { ATS_ROLES, EMPTY_STRING, ZERO, BALANCE_TRACKER_AT_SNAPSHOT_RESOLVER_KEY } from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
@@ -18,6 +18,7 @@ describe("BalanceTrackerAtSnapshot Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deployEquity() {
     const base = await deployEquityTokenFixture();
@@ -27,6 +28,7 @@ describe("BalanceTrackerAtSnapshot Tests", () => {
     signer_C = base.user2;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
       {
@@ -166,32 +168,24 @@ describe("BalanceTrackerAtSnapshot Tests", () => {
       expect(await asset.totalSupplyAtSnapshot(1)).to.equal(mintAmount);
     });
   });
-  describe.skip("initializeBalanceTrackerAtSnapshot", () => {
-    it("GIVEN an already-initialised facet WHEN initializeBalanceTrackerAtSnapshot is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-      const base = await deployEquityTokenFixture();
-      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await freshAsset.connect(base.deployer).initializeBalanceTrackerAtSnapshot();
-      await expect(
-        freshAsset.connect(base.deployer).initializeBalanceTrackerAtSnapshot(),
-      ).to.be.revertedWithCustomError(freshAsset, "FacetAlreadyRegistered");
+  describe("initializeBalanceTrackerAtSnapshot", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeBalanceTrackerAtSnapshot is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeBalanceTrackerAtSnapshot())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeBalanceTrackerAtSnapshot is called THEN it reverts with AccountHasNoRole", async () => {
-      const base = await deployEquityTokenFixture();
-      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await expect(freshAsset.connect(base.user3).initializeBalanceTrackerAtSnapshot()).to.be.revertedWithCustomError(
-        freshAsset,
-        "AccountHasNoRole",
-      );
+    it("GIVEN already-initialised WHEN initializeBalanceTrackerAtSnapshot is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeBalanceTrackerAtSnapshot())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(BALANCE_TRACKER_AT_SNAPSHOT_RESOLVER_KEY, 1);
     });
+  });
 
-    it("GIVEN a fresh deployment WHEN initializeBalanceTrackerAtSnapshot is called THEN it emits BalanceTrackerAtSnapshotInitialized", async () => {
-      const base = await deployEquityTokenFixture();
-      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await expect(freshAsset.connect(base.deployer).initializeBalanceTrackerAtSnapshot()).to.emit(
-        freshAsset,
-        "BalanceTrackerAtSnapshotInitialized",
-      );
+  describe("initializeBalanceTrackerAtSnapshot event", () => {
+    it("GIVEN a fresh deployment WHEN initializeBalanceTrackerAtSnapshot is called THEN emits BalanceTrackerAtSnapshotInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(BALANCE_TRACKER_AT_SNAPSHOT_RESOLVER_KEY);
+      await expect(asset.initializeBalanceTrackerAtSnapshot()).to.emit(asset, "BalanceTrackerAtSnapshotInitialized");
     });
   });
 });

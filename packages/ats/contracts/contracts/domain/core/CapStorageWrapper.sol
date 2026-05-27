@@ -4,7 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { MAX_UINT256 } from "../../constants/values.sol";
 import { ICap } from "../../facets/cap/ICap.sol";
 import { AdjustBalancesStorageWrapper } from "../asset/AdjustBalancesStorageWrapper.sol";
-import { ERC1410StorageWrapper } from "../asset/ERC1410StorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /// @custom:hash storage Cap

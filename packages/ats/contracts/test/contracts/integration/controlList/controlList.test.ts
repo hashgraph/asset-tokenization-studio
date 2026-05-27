@@ -9,7 +9,7 @@ import {
   type BusinessLogicResolver,
   IAsset__factory,
 } from "@contract-types";
-import { ATS_ROLES, GAS_LIMIT } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, GAS_LIMIT } from "@scripts";
 import { deployEquityTokenFixture, getSecurityData, getEquityDetails, getRegulationData } from "@test";
 import { grantRoleAndPauseToken } from "@test";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
@@ -222,6 +222,23 @@ describe("Control List Tests", () => {
       await expect(
         deactivatedAsset.connect(base.deployer).removeFromControlList(ethers.ZeroAddress),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      const cut = await ethers.getContractAt("MockDiamondCut", diamond.target);
+      await cut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN addToControlList THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.addToControlList(ADDRESS_ZERO)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN removeFromControlList THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.removeFromControlList(ADDRESS_ZERO)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
     });
   });
 });

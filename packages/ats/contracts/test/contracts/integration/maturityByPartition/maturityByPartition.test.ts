@@ -3,8 +3,16 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { ResolverProxy, type IAsset } from "@contract-types";
-import { DEFAULT_PARTITION, ATS_ROLES, TIME_PERIODS_S, ADDRESS_ZERO, ZERO, EMPTY_STRING } from "@scripts";
+import { ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import {
+  DEFAULT_PARTITION,
+  ATS_ROLES,
+  TIME_PERIODS_S,
+  ADDRESS_ZERO,
+  ZERO,
+  EMPTY_STRING,
+  MATURITY_BY_PARTITION_RESOLVER_KEY,
+} from "@scripts";
 import { getDltTimestamp, grantRoleAndPauseToken } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployBondTokenFixture, executeRbac, MAX_UINT256 } from "@test";
@@ -27,6 +35,7 @@ describe("MaturityByPartition Tests", () => {
   let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixture(isMultiPartition = false) {
     const base = await deployBondTokenFixture({
@@ -47,6 +56,7 @@ describe("MaturityByPartition Tests", () => {
     signer_D = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
       {
@@ -259,35 +269,35 @@ describe("MaturityByPartition Tests", () => {
     });
   });
 
-  describe.skip("initializeMaturityByPartition", () => {
+  describe("initializeMaturityByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeMaturityByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeMaturityByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeMaturityByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeMaturityByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(MATURITY_BY_PARTITION_RESOLVER_KEY, 1);
+    });
+  });
+
+  describe("initializeMaturityByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeMaturityByPartition is called THEN emits MaturityByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(MATURITY_BY_PARTITION_RESOLVER_KEY);
+      await expect(asset.initializeMaturityByPartition()).to.emit(asset, "MaturityByPartitionInitialized");
+    });
+  });
+  describe("nonOperational", () => {
     beforeEach(async () => {
-      await loadFixture(deploySecurityFixture);
+      await mockDiamondCut.forceNonOperational();
     });
 
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeMaturityByPartition is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeMaturityByPartition()).to.be.revertedWithCustomError(
+    it("GIVEN non-operational asset WHEN redeemAtMaturityByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.redeemAtMaturityByPartition(ADDRESS_ZERO, DEFAULT_PARTITION, 0)).to.be.revertedWithCustomError(
         asset,
-        "AccountHasNoRole",
-      );
-    });
-
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeMaturityByPartition();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeMaturityByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeMaturityByPartition()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
-    });
-
-    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeMaturityByPartition is called THEN it emits MaturityByPartitionInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeMaturityByPartition()).to.emit(
-        asset,
-        "MaturityByPartitionInitialized",
+        "AssetNotOperational",
       );
     });
   });

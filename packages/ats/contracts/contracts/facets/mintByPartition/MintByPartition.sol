@@ -39,6 +39,7 @@ abstract contract MintByPartition is IMintByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyAnyRole(_buildRoles(ROLE_ISSUER, ROLE_AGENT))

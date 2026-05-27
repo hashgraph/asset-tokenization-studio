@@ -3,15 +3,16 @@
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { ATS_ROLES } from "@scripts";
+import { ATS_ROLES, DEACTIVATE_RESOLVER_KEY } from "@scripts";
 import { deployEquityTokenFixture, grantRoleAndPauseToken } from "@test";
-import { type ResolverProxy, type IAsset } from "@contract-types";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 import { Signer } from "ethers";
 import { ethers } from "hardhat";
 
 describe("Deactivate Tests", () => {
   let diamond: ResolverProxy;
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
   let deployer: HardhatEthersSigner;
   let unknownSigner: Signer;
 
@@ -20,6 +21,7 @@ describe("Deactivate Tests", () => {
     const base = await deployEquityTokenFixture();
     diamond = base.diamond;
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     deployer = base.deployer;
     unknownSigner = base.unknownSigner;
   }
@@ -88,29 +90,34 @@ describe("Deactivate Tests", () => {
     });
   });
 
-  describe.skip("initializeDeactivate", () => {
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeDeactivate is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(unknownSigner).initializeDeactivate()).to.be.revertedWithCustomError(
-        asset,
-        "AccountHasNoRole",
-      );
+  describe("initializeDeactivate", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeDeactivate is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(unknownSigner).initializeDeactivate())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(await unknownSigner.getAddress(), ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(deployer).initializeDeactivate();
-      });
+    it("GIVEN already-initialised WHEN initializeDeactivate is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeDeactivate())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(DEACTIVATE_RESOLVER_KEY, 1);
+    });
+  });
 
-      it("GIVEN an already-initialised facet WHEN initializeDeactivate is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(deployer).initializeDeactivate()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
+  describe("initializeDeactivate event", () => {
+    it("GIVEN a fresh deployment WHEN initializeDeactivate is called THEN emits DeactivateInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(DEACTIVATE_RESOLVER_KEY);
+      await expect(asset.initializeDeactivate()).to.emit(asset, "DeactivateInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
     });
 
-    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeDeactivate is called THEN it emits DeactivateInitialized", async () => {
-      await expect(asset.connect(deployer).initializeDeactivate()).to.emit(asset, "DeactivateInitialized");
+    it("GIVEN non-operational asset WHEN deactivate THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.deactivate()).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
   });
 });

@@ -16,7 +16,7 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  *         globally and per partition.
  * @dev Implements `ICap`. Cap state is stored at `STORAGE_LOCATION_CAP` via
  *      `CapStorageWrapper`. All timestamp-sensitive operations delegate to
- *      `TimeTravelStorageWrapper.getBlockTimestamp()` so the same code path is exercisable in
+ *      `TimeTravelStorageiWrapper.getBlockTimestamp()` so the same code path is exercisable in
  *      test environments. `setMaxSupply` and `getMaxSupply` use the adjusted supply
  *      (`AdjustBalancesStorageWrapper`) to account for pending scheduled balance adjustments.
  *      Intended to be inherited exclusively by `CapFacet`.
@@ -47,6 +47,7 @@ abstract contract Cap is ICap, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_CAP)

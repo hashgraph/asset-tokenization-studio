@@ -3,12 +3,12 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { grantRoleAndPauseToken } from "../../../../common";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac } from "@test";
-import { ATS_ROLES } from "@scripts";
+import { ATS_ROLES, DOCUMENTATION_RESOLVER_KEY } from "@scripts";
 
 const documentName_1 = "0x000000000000000000000000000000000000000000000000000000000000aa23";
 const documentName_2 = "0x000000000000000000000000000000000000000000000000000000000000bb23";
@@ -24,6 +24,7 @@ describe("Documentation Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityTokenFixture() {
     const base = await deployEquityTokenFixture();
@@ -33,6 +34,7 @@ describe("Documentation Tests", () => {
     signer_C = base.user2;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
       {
@@ -237,29 +239,40 @@ describe("Documentation Tests", () => {
     });
   });
 
-  describe.skip("initializeDocumentation", () => {
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeDocumentation is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeDocumentation()).to.be.revertedWithCustomError(
+  describe("initializeDocumentation", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeDocumentation is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeDocumentation())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeDocumentation is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeDocumentation())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(DOCUMENTATION_RESOLVER_KEY, 1);
+    });
+  });
+
+  describe("initializeDocumentation event", () => {
+    it("GIVEN a fresh deployment WHEN initializeDocumentation is called THEN emits DocumentationInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(DOCUMENTATION_RESOLVER_KEY);
+      await expect(asset.initializeDocumentation()).to.emit(asset, "DocumentationInitialized");
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setDocument THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.setDocument(ethers.ZeroHash, "", ethers.ZeroHash)).to.be.revertedWithCustomError(
         asset,
-        "AccountHasNoRole",
+        "AssetNotOperational",
       );
     });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeDocumentation();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeDocumentation is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeDocumentation()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
-    });
-
-    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeDocumentation is called THEN it emits DocumentationInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeDocumentation()).to.emit(asset, "DocumentationInitialized");
+    it("GIVEN non-operational asset WHEN removeDocument THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.removeDocument(ethers.ZeroHash)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
   });
 });

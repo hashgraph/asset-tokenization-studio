@@ -4,8 +4,15 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { type IAsset, type ResolverProxy } from "@contract-types";
-import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
+import { type IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
+import {
+  ATS_ROLES,
+  DEFAULT_PARTITION,
+  EMPTY_HEX_BYTES,
+  EMPTY_STRING,
+  OPERATOR_BY_PARTITION_RESOLVER_KEY,
+  ZERO,
+} from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
@@ -20,6 +27,7 @@ describe("OperatorByPartitionFacet Tests", () => {
   let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deployFixture() {
     const base = await deployEquityTokenFixture();
@@ -30,7 +38,7 @@ describe("OperatorByPartitionFacet Tests", () => {
     signer_D = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
-
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       { role: ATS_ROLES.ROLE_ISSUER, members: [signer_A.address] },
       { role: ATS_ROLES.ROLE_KYC, members: [signer_A.address] },
@@ -329,39 +337,65 @@ describe("OperatorByPartitionFacet Tests", () => {
     });
   });
 
-  describe.skip("initializeOperatorByPartition", () => {
+  describe("initializeOperatorByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeOperatorByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeOperatorByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeOperatorByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeOperatorByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(OPERATOR_BY_PARTITION_RESOLVER_KEY, 1);
+    });
+  });
+
+  describe("initializeOperatorByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeOperatorByPartition is called THEN emits OperatorByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(OPERATOR_BY_PARTITION_RESOLVER_KEY);
+      await expect(asset.initializeOperatorByPartition()).to.emit(asset, "OperatorByPartitionInitialized");
+    });
+  });
+  describe("nonOperational", () => {
     beforeEach(async () => {
-      const base = await deployEquityTokenFixture();
-      signer_A = base.deployer;
-      signer_C = base.user2;
-      asset = await ethers.getContractAt("IAsset", base.diamond.target, signer_A);
+      await mockDiamondCut.forceNonOperational();
     });
 
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeOperatorByPartition is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeOperatorByPartition()).to.be.revertedWithCustomError(
+    it("GIVEN non-operational asset WHEN authorizeOperatorByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.authorizeOperatorByPartition(DEFAULT_PARTITION, signer_B.address),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN revokeOperatorByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.revokeOperatorByPartition(DEFAULT_PARTITION, signer_B.address)).to.be.revertedWithCustomError(
         asset,
-        "AccountHasNoRole",
+        "AssetNotOperational",
       );
     });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeOperatorByPartition();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeOperatorByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeOperatorByPartition()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
+    it("GIVEN non-operational asset WHEN operatorTransferByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.operatorTransferByPartition({
+          partition: DEFAULT_PARTITION,
+          from: signer_A.address,
+          to: signer_B.address,
+          value: 0,
+          data: EMPTY_HEX_BYTES,
+          operatorData: EMPTY_HEX_BYTES,
+        }),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
 
-    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeOperatorByPartition is called THEN it emits OperatorByPartitionInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeOperatorByPartition()).to.emit(
-        asset,
-        "OperatorByPartitionInitialized",
-      );
+    it("GIVEN non-operational asset WHEN operatorRedeemByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.operatorRedeemByPartition(DEFAULT_PARTITION, signer_A.address, 0, EMPTY_HEX_BYTES, EMPTY_HEX_BYTES),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN revokeOperator THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.revokeOperator(signer_B.address)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
   });
 });

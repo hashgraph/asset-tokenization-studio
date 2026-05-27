@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ICouponSecurityHolders } from "./ICouponSecurityHolders.sol";
+import { ICouponSecurityHolders, RESOLVER_KEY_COUPON_SECURITY_HOLDERS } from "./ICouponSecurityHolders.sol";
 import { ICouponTypes } from "../coupon/ICouponTypes.sol";
 import { CORPORATE_ACTION_TYPE_COUPON } from "../../constants/dispatchTypes.sol";
 import { CouponStorageWrapper } from "../../domain/asset/coupon/CouponStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _COUPON_SECURITY_HOLDERS_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title CouponSecurityHolders
@@ -23,9 +22,9 @@ abstract contract CouponSecurityHolders is ICouponSecurityHolders, Modifiers {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_COUPON_SECURITY_HOLDERS_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_COUPON_SECURITY_HOLDERS)
     {
-        InitializerStorageWrapper.setFacetToReady(_COUPON_SECURITY_HOLDERS_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_COUPON_SECURITY_HOLDERS);
         emit CouponSecurityHoldersInitialized();
     }
 
@@ -38,6 +37,7 @@ abstract contract CouponSecurityHolders is ICouponSecurityHolders, Modifiers {
         external
         view
         override
+        onlyOperational
         onlyMatchingActionType(CORPORATE_ACTION_TYPE_COUPON, _couponID - 1)
         returns (address[] memory holders_)
     {
@@ -53,6 +53,7 @@ abstract contract CouponSecurityHolders is ICouponSecurityHolders, Modifiers {
         external
         view
         override
+        onlyOperational
         onlyMatchingActionType(CORPORATE_ACTION_TYPE_COUPON, _couponID - 1)
         returns (ICouponTypes.CouponFor[] memory couponFor_, address[] memory holders_)
     {

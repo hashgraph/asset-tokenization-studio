@@ -8,7 +8,6 @@ import {
     ExternalListDataStorage
 } from "./ExternalListManagementStorageWrapper.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /// @custom:hash storage PauseManagement
 bytes32 constant STORAGE_LOCATION_PAUSE_MANAGEMENT = 0x930ab19e093b9d470c1f7056ddf51dcaf1bdf62558a355b33b78972be23e2500;

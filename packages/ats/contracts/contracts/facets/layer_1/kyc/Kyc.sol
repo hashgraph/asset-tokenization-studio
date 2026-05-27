@@ -9,7 +9,17 @@ import { InitializerStorageWrapper } from "../../../domain/core/InitializerStora
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
+/**
+ * @title Kyc
+ * @notice Manages internal KYC records and exposes paginated KYC status queries.
+ * @dev Implements `IKyc` and delegates persistent state to `KycStorageWrapper`.
+ *      Mutating operations require the token to be operational, activated and unpaused, except
+ *      initialisation, which is restricted to an unregistered facet. Time-dependent status checks
+ *      use `TimeTravelStorageWrapper` as the canonical timestamp source.
+ * @author Asset Tokenization Studio Team
+ */
 abstract contract Kyc is IKyc, Modifiers {
+    /// @inheritdoc IKyc
     function initializeInternalKyc(
         bool _internalKycActivated
     ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_KYC) {
@@ -18,8 +28,11 @@ abstract contract Kyc is IKyc, Modifiers {
         emit IKyc.KycInitialized(_internalKycActivated);
     }
 
+    /// @inheritdoc IKyc
     function activateInternalKyc()
         external
+        override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_INTERNAL_KYC_MANAGER)
@@ -29,8 +42,11 @@ abstract contract Kyc is IKyc, Modifiers {
         emit InternalKycStatusUpdated(EvmAccessors.getMsgSender(), true);
     }
 
+    /// @inheritdoc IKyc
     function deactivateInternalKyc()
         external
+        override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_INTERNAL_KYC_MANAGER)
@@ -40,6 +56,7 @@ abstract contract Kyc is IKyc, Modifiers {
         emit InternalKycStatusUpdated(EvmAccessors.getMsgSender(), false);
     }
 
+    /// @inheritdoc IKyc
     function grantKyc(
         address _account,
         string memory _vcId,
@@ -50,6 +67,7 @@ abstract contract Kyc is IKyc, Modifiers {
         external
         virtual
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_KYC)
@@ -63,12 +81,14 @@ abstract contract Kyc is IKyc, Modifiers {
         emit KycGranted(_account, EvmAccessors.getMsgSender());
     }
 
+    /// @inheritdoc IKyc
     function revokeKyc(
         address _account
     )
         external
         virtual
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_KYC)
@@ -79,20 +99,24 @@ abstract contract Kyc is IKyc, Modifiers {
         emit KycRevoked(_account, EvmAccessors.getMsgSender());
     }
 
+    /// @inheritdoc IKyc
     function getKycStatusFor(address _account) external view virtual override returns (KycStatus kycStatus_) {
         kycStatus_ = KycStorageWrapper.getKycStatusFor(_account, TimeTravelStorageWrapper.getBlockTimestamp());
     }
 
+    /// @inheritdoc IKyc
     function getKycFor(address _account) external view virtual override returns (KycData memory kyc_) {
         kyc_ = KycStorageWrapper.getKycFor(_account);
     }
 
+    /// @inheritdoc IKyc
     function getKycAccountsCount(
         KycStatus _kycStatus
     ) external view virtual override returns (uint256 kycAccountsCount_) {
         kycAccountsCount_ = KycStorageWrapper.getKycAccountsCount(_kycStatus);
     }
 
+    /// @inheritdoc IKyc
     function getKycAccountsData(
         KycStatus _kycStatus,
         uint256 _pageIndex,
@@ -101,6 +125,7 @@ abstract contract Kyc is IKyc, Modifiers {
         (accounts_, kycData_) = KycStorageWrapper.getKycAccountsData(_kycStatus, _pageIndex, _pageLength);
     }
 
+    /// @inheritdoc IKyc
     function isInternalKycActivated() external view virtual override returns (bool) {
         return KycStorageWrapper.isInternalKycActivated();
     }

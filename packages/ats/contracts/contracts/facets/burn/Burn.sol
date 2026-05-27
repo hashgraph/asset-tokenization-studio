@@ -5,7 +5,6 @@ import { ROLE_CONTROLLER, ROLE_AGENT, _buildRoles, DEFAULT_ADMIN_ROLE } from "..
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { IBurn, RESOLVER_KEY_BURN } from "./IBurn.sol";
 import { IController } from "../controller/IController.sol";
-import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
@@ -41,6 +40,7 @@ abstract contract Burn is IBurn, Modifiers, ProtectedPartitionRoleValidator {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
@@ -59,6 +59,7 @@ abstract contract Burn is IBurn, Modifiers, ProtectedPartitionRoleValidator {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
@@ -77,6 +78,7 @@ abstract contract Burn is IBurn, Modifiers, ProtectedPartitionRoleValidator {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyUnrecoveredAddress(_tokenHolder)

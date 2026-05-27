@@ -12,10 +12,10 @@ import {
   dateToUnixTimestamp,
   EMPTY_HEX_BYTES,
   EMPTY_STRING,
-  EQUITY_CONFIG_ID,
+  CLEARING_RESOLVER_KEY,
   ZERO,
 } from "@scripts";
-import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
+import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
 const _WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
@@ -3075,19 +3075,10 @@ describe("Clearing Tests", () => {
         );
       });
 
-      it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeClearing is called THEN ClearingInitialized event is emitted", async () => {
-        // Use factory.deployProxy to deploy WITHOUT running any initializers,
-        // so the clearing facet is not yet registered.
-        const { decodeEvent: decodeInfraEvent } = await import("@scripts/infrastructure");
-        const infra = await loadFixture(deployAtsInfrastructureFixture);
-        const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
-          { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
-        ]);
-        const proxyReceipt = await proxyTx.wait();
-        const { proxyAddress } = await decodeInfraEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
-        const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
-        const deploymentReceipt = await (await freshAsset.connect(infra.deployer).initializeClearing(true)).wait();
-        await expect(deploymentReceipt).to.emit(freshAsset, "ClearingInitialized").withArgs(true);
+      it("GIVEN a fresh deployment WHEN initializeClearing is called THEN emits ClearingInitialized", async () => {
+        const mockDC = await ethers.getContractAt("MockDiamondCut", diamond.target);
+        await mockDC.forceFacetNotRegistered(CLEARING_RESOLVER_KEY);
+        await expect(asset.initializeClearing(true)).to.emit(asset, "ClearingInitialized");
       });
     });
 
@@ -5323,6 +5314,20 @@ describe("Clearing Tests", () => {
         deactivatedAsset,
         "Deactivated",
       );
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      const cut = await ethers.getContractAt("MockDiamondCut", diamond.target);
+      await cut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN activateClearing THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.activateClearing()).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN deactivateClearing THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.deactivateClearing()).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
   });
 });

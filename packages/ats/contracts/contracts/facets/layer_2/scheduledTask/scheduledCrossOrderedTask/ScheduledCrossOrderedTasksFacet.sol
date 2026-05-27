@@ -13,6 +13,7 @@ contract ScheduledCrossOrderedTasksFacet is ScheduledCrossOrderedTasks, IStaticF
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeScheduledCrossOrderedTasks.selector,
                 this.triggerPendingScheduledCrossOrderedTasks.selector,
                 this.triggerScheduledCrossOrderedTasks.selector,
                 this.scheduledCrossOrderedTaskCount.selector,
@@ -22,5 +23,9 @@ contract ScheduledCrossOrderedTasksFacet is ScheduledCrossOrderedTasks, IStaticF
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
         return Bytes4Builder.build(type(IScheduledCrossOrderedTasks).interfaceId);
+    }
+
+    function _getResolverKey() internal pure override returns (bytes32) {
+        return _SCHEDULED_TASKS_RESOLVER_KEY;
     }
 }

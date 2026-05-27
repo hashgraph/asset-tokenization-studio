@@ -6,8 +6,16 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
-import { DEFAULT_PARTITION, EMPTY_STRING, ZERO, ADDRESS_ZERO, ATS_ROLES } from "@scripts";
-import { ResolverProxy, IAsset } from "@contract-types";
+import {
+  DEFAULT_PARTITION,
+  EMPTY_STRING,
+  ZERO,
+  ADDRESS_ZERO,
+  ATS_ROLES,
+  EQUITY_CONFIG_ID,
+  PROTECTED_HOLD_BY_PARTITION_RESOLVER_KEY,
+} from "@scripts";
+import { ResolverProxy, IAsset, MockDiamondCut } from "@contract-types";
 
 interface HoldData {
   amount: number;
@@ -34,6 +42,7 @@ enum ThirdPartyType {
 
 describe("ProtectedHoldByPartition Tests", () => {
   let diamond: ResolverProxy;
+  let mockDiamondCut: MockDiamondCut;
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
@@ -134,6 +143,7 @@ describe("ProtectedHoldByPartition Tests", () => {
     signer_B = base.user2;
     signer_C = base.user3;
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, set_initRbacs());
 
     domain.name = (await asset.getERC20Metadata()).info.name;
@@ -626,39 +636,78 @@ describe("ProtectedHoldByPartition Tests", () => {
     });
   });
 
-  describe.skip("initializeProtectedHoldByPartition", () => {
+  describe("initializeProtectedHoldByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeProtectedHoldByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeProtectedHoldByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeProtectedHoldByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeProtectedHoldByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(PROTECTED_HOLD_BY_PARTITION_RESOLVER_KEY, 1);
+    });
+  });
+
+  describe("initializeProtectedHoldByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeProtectedHoldByPartition is called THEN emits ProtectedHoldByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(PROTECTED_HOLD_BY_PARTITION_RESOLVER_KEY);
+      await expect(asset.initializeProtectedHoldByPartition()).to.emit(asset, "ProtectedHoldByPartitionInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
     beforeEach(async () => {
-      const base = await deployEquityTokenFixture();
-      signer_A = base.deployer;
-      signer_C = base.user2;
-      asset = await ethers.getContractAt("IAsset", base.diamond.target, signer_A);
+      await mockDiamondCut.forceNonOperational();
     });
 
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeProtectedHoldByPartition is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeProtectedHoldByPartition()).to.be.revertedWithCustomError(
-        asset,
-        "AccountHasNoRole",
-      );
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeProtectedHoldByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeProtectedHoldByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeProtectedHoldByPartition();
-      });
+    it("GIVEN already-initialised WHEN initializeProtectedHoldByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeProtectedHoldByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(PROTECTED_HOLD_BY_PARTITION_RESOLVER_KEY, 1);
+    });
+  });
 
-      it("GIVEN an already-initialised facet WHEN initializeProtectedHoldByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeProtectedHoldByPartition()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
+  describe("initializeProtectedHoldByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeProtectedHoldByPartition is called THEN emits ProtectedHoldByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(PROTECTED_HOLD_BY_PARTITION_RESOLVER_KEY);
+      await expect(asset.initializeProtectedHoldByPartition()).to.emit(asset, "ProtectedHoldByPartitionInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
     });
 
-    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeProtectedHoldByPartition is called THEN it emits ProtectedHoldByPartitionInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeProtectedHoldByPartition()).to.emit(
-        asset,
-        "ProtectedHoldByPartitionInitialized",
-      );
+    it("GIVEN non-operational WHEN protectedCreateHoldByPartition is called THEN AssetNotOperational", async () => {
+      await expect(
+        asset.protectedCreateHoldByPartition(
+          ethers.ZeroHash,
+          ethers.ZeroAddress,
+          {
+            hold: {
+              amount: 0n,
+              expirationTimestamp: 0n,
+              escrow: ethers.ZeroAddress,
+              to: ethers.ZeroAddress,
+              data: "0x",
+            },
+            deadline: 0n,
+            nonce: 0n,
+          },
+          "0x",
+        ),
+      )
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 });

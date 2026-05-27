@@ -42,6 +42,7 @@ abstract contract MaturityByPartition is IMaturityByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyClearingDisabled

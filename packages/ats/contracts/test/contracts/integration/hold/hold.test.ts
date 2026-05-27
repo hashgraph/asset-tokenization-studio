@@ -5,8 +5,8 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
-import { ADDRESS_ZERO, ATS_ROLES, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
-import { IAsset, ResolverProxy } from "@contract-types";
+import { ADDRESS_ZERO, ATS_ROLES, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO, HOLD_RESOLVER_KEY } from "@scripts";
+import { IAsset, ResolverProxy, MockDiamondCut } from "@contract-types";
 
 const _PARTITION_ID_1 = "0x0000000000000000000000000000000000000000000000000000000000000001";
 const _PARTITION_ID_2 = "0x0000000000000000000000000000000000000000000000000000000000000002";
@@ -29,6 +29,7 @@ describe("Hold Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
   let expirationTimestamp = 0;
@@ -66,6 +67,7 @@ describe("Hold Tests", () => {
       signer_C = base.user2;
 
       asset = await ethers.getContractAt("IAsset", diamond.target);
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
       await executeRbac(asset, baseRbacs());
       await grantKycAndIssue(_PARTITION_ID_1, _AMOUNT);
     }
@@ -231,26 +233,24 @@ describe("Hold Tests", () => {
       });
     });
 
-    describe.skip("initializeHold", () => {
-      it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeHold is called THEN it reverts with AccountHasNoRole", async () => {
-        await expect(asset.connect(signer_C).initializeHold()).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+    describe("initializeHold", () => {
+      it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeHold is called THEN AccountHasNoRole", async () => {
+        await expect(asset.connect(signer_C).initializeHold())
+          .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+          .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
       });
 
-      describe("when already initialised", () => {
-        beforeEach(async () => {
-          await asset.connect(signer_A).initializeHold();
-        });
-
-        it("GIVEN an already-initialised facet WHEN initializeHold is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-          await expect(asset.connect(signer_A).initializeHold()).to.be.revertedWithCustomError(
-            asset,
-            "FacetAlreadyRegistered",
-          );
-        });
+      it("GIVEN already-initialised WHEN initializeHold is called again THEN FacetAlreadyRegistered", async () => {
+        await expect(asset.initializeHold())
+          .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+          .withArgs(HOLD_RESOLVER_KEY, 1);
       });
+    });
 
-      it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeHold is called THEN it emits HoldInitialized", async () => {
-        await expect(asset.connect(signer_A).initializeHold()).to.emit(asset, "HoldInitialized");
+    describe("initializeHold event", () => {
+      it("GIVEN a fresh deployment WHEN initializeHold is called THEN emits HoldInitialized", async () => {
+        await mockDiamondCut.forceFacetNotRegistered(HOLD_RESOLVER_KEY);
+        await expect(asset.initializeHold()).to.emit(asset, "HoldInitialized");
       });
     });
   });

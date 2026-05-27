@@ -4,12 +4,13 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { isinGenerator } from "@thomaschaplin/isin-generator";
-import { ComplianceMock, IdentityRegistryMock, type ResolverProxy, type IAsset } from "@contract-types";
+import { ComplianceMock, IdentityRegistryMock, type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 import { ADDRESS_ZERO, ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac } from "@test";
 
 const name = "TEST";
+const IDENTITY_RESOLVER_KEY = "0x10f18bbac52ee688501dc4b08de190f748b8a00622cb165ccdce1f14beb74dab";
 const symbol = "TAC";
 const decimals = 6;
 const version = "1";
@@ -22,8 +23,10 @@ describe("Identity Tests", () => {
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
+  let unknownSigner: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   let identityRegistryMock: IdentityRegistryMock;
   let complianceMock: ComplianceMock;
@@ -54,8 +57,11 @@ describe("Identity Tests", () => {
     signer_A = base.deployer;
     signer_B = base.user1;
     signer_C = base.user2;
+    const signers = await ethers.getSigners();
+    unknownSigner = signers[signers.length - 1];
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
       {
@@ -148,6 +154,47 @@ describe("Identity Tests", () => {
       await expect(
         deactivatedAsset.connect(base.deployer).setIdentityRegistry(ethers.ZeroAddress),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("initializeIdentity", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeIdentity THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(unknownSigner).initializeIdentity())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(await unknownSigner.getAddress(), ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeIdentity THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeIdentity())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(IDENTITY_RESOLVER_KEY, 1);
+    });
+  });
+
+  describe("initializeIdentity event", () => {
+    it("GIVEN fresh facet WHEN initializeIdentity THEN emits IdentityInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(IDENTITY_RESOLVER_KEY);
+      await expect(asset.initializeIdentity()).to.emit(asset, "IdentityInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setOnchainID THEN AssetNotOperational", async () => {
+      await expect(asset.setOnchainID(ethers.Wallet.createRandom().address)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN setIdentityRegistry THEN AssetNotOperational", async () => {
+      await expect(asset.setIdentityRegistry(ethers.Wallet.createRandom().address)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
     });
   });
 });

@@ -36,6 +36,7 @@ abstract contract OperatorClearingHoldByPartition is IOperatorClearingHoldByPart
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyClearingActivated

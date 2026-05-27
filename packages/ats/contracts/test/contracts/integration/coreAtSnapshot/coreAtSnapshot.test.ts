@@ -3,8 +3,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ATS_ROLES, EMPTY_STRING, ZERO } from "@scripts";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import { ATS_ROLES, CORE_AT_SNAPSHOT_RESOLVER_KEY, EMPTY_STRING, ZERO } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
@@ -18,6 +18,7 @@ describe("CoreAtSnapshot Tests", () => {
   let signer_B: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deployEquity() {
     const base = await deployEquityTokenFixture();
@@ -26,6 +27,7 @@ describe("CoreAtSnapshot Tests", () => {
     signer_B = base.user1;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
       {
@@ -77,29 +79,24 @@ describe("CoreAtSnapshot Tests", () => {
       expect(await asset.decimalsAtSnapshot(snapshotId)).to.equal(DEFAULT_DECIMALS);
     });
   });
-  describe.skip("initializeCoreAtSnapshot", () => {
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeCoreAtSnapshot is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_B).initializeCoreAtSnapshot()).to.be.revertedWithCustomError(
-        asset,
-        "AccountHasNoRole",
-      );
+  describe("initializeCoreAtSnapshot", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeCoreAtSnapshot is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_B).initializeCoreAtSnapshot())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_B.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeCoreAtSnapshot();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeCoreAtSnapshot is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeCoreAtSnapshot()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
+    it("GIVEN already-initialised WHEN initializeCoreAtSnapshot is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeCoreAtSnapshot())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(CORE_AT_SNAPSHOT_RESOLVER_KEY, 1);
     });
+  });
 
-    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeCoreAtSnapshot is called THEN it emits CoreAtSnapshotInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeCoreAtSnapshot()).to.emit(asset, "CoreAtSnapshotInitialized");
+  describe("initializeCoreAtSnapshot event", () => {
+    it("GIVEN a fresh deployment WHEN initializeCoreAtSnapshot is called THEN emits CoreAtSnapshotInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(CORE_AT_SNAPSHOT_RESOLVER_KEY);
+      await expect(asset.initializeCoreAtSnapshot()).to.emit(asset, "CoreAtSnapshotInitialized");
     });
   });
 });

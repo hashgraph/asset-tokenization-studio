@@ -3,12 +3,17 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { ResolverProxy, type IAsset } from "@contract-types";
-import { DEFAULT_PARTITION, ATS_ROLES, TIME_PERIODS_S, ZERO, EMPTY_STRING } from "@scripts";
-import { getDltTimestamp, executeRbac } from "@test";
+import { ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import {
+  DEFAULT_PARTITION,
+  ATS_ROLES,
+  TIME_PERIODS_S,
+  ZERO,
+  EMPTY_STRING,
+  COUPON_SECURITY_HOLDERS_RESOLVER_KEY,
+} from "@scripts";
+import { getDltTimestamp, executeRbac, deployBondTokenFixture, MAX_UINT256 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployBondTokenFixture } from "@test";
-import { MAX_UINT256 } from "@test";
 
 const numberOfCoupons = 50;
 const frequency = TIME_PERIODS_S.DAY;
@@ -32,6 +37,7 @@ describe("CouponSecurityHolders Tests", () => {
   let signer_B: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixture() {
     const base = await deployBondTokenFixture({
@@ -47,6 +53,7 @@ describe("CouponSecurityHolders Tests", () => {
     signer_B = base.user1;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       {
         role: ATS_ROLES.ROLE_PAUSER,
@@ -221,32 +228,37 @@ describe("CouponSecurityHolders Tests", () => {
     expect(accounts).to.include(signer_A.address);
   });
 
-  describe.skip("initializeCouponSecurityHolders", () => {
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeCouponSecurityHolders is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_B).initializeCouponSecurityHolders()).to.be.revertedWithCustomError(
-        asset,
-        "AccountHasNoRole",
-      );
+  describe("initializeCouponSecurityHolders", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeCouponSecurityHolders is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_B).initializeCouponSecurityHolders())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_B.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeCouponSecurityHolders();
-      });
+    it("GIVEN already-initialised WHEN initializeCouponSecurityHolders is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeCouponSecurityHolders())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(COUPON_SECURITY_HOLDERS_RESOLVER_KEY, 1);
+    });
+  });
 
-      it("GIVEN an already-initialised facet WHEN initializeCouponSecurityHolders is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeCouponSecurityHolders()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
+  describe("initializeCouponSecurityHolders event", () => {
+    it("GIVEN a fresh deployment WHEN initializeCouponSecurityHolders is called THEN emits CouponSecurityHoldersInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(COUPON_SECURITY_HOLDERS_RESOLVER_KEY);
+      await expect(asset.initializeCouponSecurityHolders()).to.emit(asset, "CouponSecurityHoldersInitialized");
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
     });
 
-    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeCouponSecurityHolders is called THEN it emits CouponSecurityHoldersInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeCouponSecurityHolders()).to.emit(
-        asset,
-        "CouponSecurityHoldersInitialized",
-      );
+    it("GIVEN non-operational asset WHEN getCouponHolders THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.getCouponHolders(1, 0, 0)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN getCouponsFor THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.getCouponsFor(1, 0, 0)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
   });
 });

@@ -32,7 +32,7 @@ abstract contract ControlList is IControlList, Modifiers {
     /// @inheritdoc IControlList
     function addToControlList(
         address _account
-    ) external override onlyActivated onlyUnpaused onlyRole(ROLE_CONTROL_LIST) returns (bool success_) {
+    ) external override onlyOperational onlyActivated onlyUnpaused onlyRole(ROLE_CONTROL_LIST) returns (bool success_) {
         success_ = ControlListStorageWrapper.addToControlList(_account);
         if (!success_) {
             revert ListedAccount(_account);
@@ -43,7 +43,7 @@ abstract contract ControlList is IControlList, Modifiers {
     /// @inheritdoc IControlList
     function removeFromControlList(
         address _account
-    ) external override onlyActivated onlyUnpaused onlyRole(ROLE_CONTROL_LIST) returns (bool success_) {
+    ) external override onlyOperational onlyActivated onlyUnpaused onlyRole(ROLE_CONTROL_LIST) returns (bool success_) {
         success_ = ControlListStorageWrapper.removeFromControlList(_account);
         if (!success_) {
             revert UnlistedAccount(_account);

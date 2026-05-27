@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type IAsset, type ResolverProxy, ComplianceMock, IdentityRegistryMock } from "@contract-types";
+import { type IAsset, type ResolverProxy, ComplianceMock, IdentityRegistryMock, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 import {
@@ -15,6 +15,8 @@ import {
   EMPTY_HEX_BYTES,
   dateToUnixTimestamp,
   EIP1066_CODES,
+  EQUITY_CONFIG_ID,
+  RECOVERY_RESOLVER_KEY,
 } from "@scripts";
 
 const name = "TEST";
@@ -34,6 +36,7 @@ describe("Recovery Tests", () => {
   let signer_F: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   let identityRegistryMock: IdentityRegistryMock;
   let complianceMock: ComplianceMock;
@@ -70,7 +73,7 @@ describe("Recovery Tests", () => {
       signer_F = base.user5;
 
       asset = await ethers.getContractAt("IAsset", diamond.target);
-
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
       await executeRbac(asset, [
         {
           role: ATS_ROLES.ROLE_PAUSER,
@@ -751,36 +754,36 @@ describe("Recovery Tests", () => {
     });
   });
 
-  describe.skip("initializeRecovery", () => {
+  describe("initializeRecovery", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeRecovery is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeRecovery())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeRecovery is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeRecovery())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RECOVERY_RESOLVER_KEY, 1);
+    });
+  });
+
+  describe("initializeRecovery event", () => {
+    it("GIVEN a fresh deployment WHEN initializeRecovery is called THEN emits RecoveryInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RECOVERY_RESOLVER_KEY);
+      await expect(asset.initializeRecovery()).to.emit(asset, "RecoveryInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
     beforeEach(async () => {
-      const base = await deployEquityTokenFixture();
-      signer_A = base.deployer;
-      signer_C = base.user2;
-      asset = await ethers.getContractAt("IAsset", base.diamond.target, signer_A);
+      await mockDiamondCut.forceNonOperational();
     });
 
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeRecovery is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeRecovery()).to.be.revertedWithCustomError(
-        asset,
-        "AccountHasNoRole",
-      );
-    });
-
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeRecovery();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeRecovery is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeRecovery()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
-    });
-
-    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeRecovery is called THEN it emits RecoveryInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeRecovery()).to.emit(asset, "RecoveryInitialized");
+    it("GIVEN non-operational WHEN recoveryAddress is called THEN AssetNotOperational", async () => {
+      await expect(asset.recoveryAddress(ethers.ZeroAddress, ethers.ZeroAddress, ethers.ZeroAddress))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 });

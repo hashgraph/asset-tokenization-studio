@@ -41,6 +41,7 @@ abstract contract ProtectedClearingByPartition is IProtectedClearingByPartition,
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyProtectedPartitions
@@ -72,6 +73,7 @@ abstract contract ProtectedClearingByPartition is IProtectedClearingByPartition,
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyProtectedPartitions
@@ -99,7 +101,7 @@ abstract contract ProtectedClearingByPartition is IProtectedClearingByPartition,
 
     /**
      * @notice Emits `ProtectedClearedRedeemByPartition` for a successful protected clearing redeem.
-     * @dev Extracted to a `private` helper so the external entry point's stack stays within the
+     * @dev Extracted to a `private` helper so the external onlyOperational entry point's stack stays within the
      *      Solidity 16-slot limit; the helper is called exactly once, after the
      *      `ClearingProtectedOps.protectedClearingRedeemByPartition` call returns.
      * @param _operation  The protected clearing operation (partition, from, expiration, data, ...).
@@ -125,7 +127,7 @@ abstract contract ProtectedClearingByPartition is IProtectedClearingByPartition,
 
     /**
      * @notice Emits `ProtectedClearedTransferByPartition` for a successful protected clearing transfer.
-     * @dev Extracted to a `private` helper so the external entry point's stack stays within the
+     * @dev Extracted to a `private` helper so the external onlyOperational entry point's stack stays within the
      *      Solidity 16-slot limit; the helper is called exactly once, after the
      *      `ClearingProtectedOps.protectedClearingTransferByPartition` call returns.
      * @param _operation  The protected clearing operation (partition, from, expiration, data, ...).

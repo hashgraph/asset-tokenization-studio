@@ -7,7 +7,6 @@ import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC20StorageWrapper } from "../../domain/asset/ERC20StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 /**
@@ -27,12 +26,16 @@ abstract contract Core is ICore, Modifiers {
     }
 
     /// @inheritdoc ICore
-    function setName(string calldata _name) external override onlyActivated onlyUnpaused onlyRole(ROLE_TREX_OWNER) {
+    function setName(
+        string calldata _name
+    ) external override onlyOperational onlyActivated onlyUnpaused onlyRole(ROLE_TREX_OWNER) {
         ERC3643StorageWrapper.setName(_name);
     }
 
     /// @inheritdoc ICore
-    function setSymbol(string calldata _symbol) external override onlyActivated onlyUnpaused onlyRole(ROLE_TREX_OWNER) {
+    function setSymbol(
+        string calldata _symbol
+    ) external override onlyOperational onlyActivated onlyUnpaused onlyRole(ROLE_TREX_OWNER) {
         ERC3643StorageWrapper.setSymbol(_symbol);
     }
 

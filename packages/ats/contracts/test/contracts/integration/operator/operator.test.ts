@@ -4,8 +4,8 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ATS_ROLES, EMPTY_STRING, ZERO } from "@scripts";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import { ATS_ROLES, EMPTY_STRING, OPERATOR_RESOLVER_KEY, ZERO } from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const EMPTY_VC_ID = EMPTY_STRING;
@@ -17,6 +17,7 @@ describe("Operator Facet Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deployFixture() {
     const base = await deployEquityTokenFixture();
@@ -26,7 +27,7 @@ describe("Operator Facet Tests", () => {
     signer_C = base.user2;
 
     asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
-
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       { role: ATS_ROLES.ROLE_ISSUER, members: [signer_A.address] },
       { role: ATS_ROLES.ROLE_KYC, members: [signer_A.address] },
@@ -144,36 +145,41 @@ describe("Operator Facet Tests", () => {
     });
   });
 
-  describe.skip("initializeOperator", () => {
+  describe("initializeOperator", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeOperator is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeOperator())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeOperator is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeOperator())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(OPERATOR_RESOLVER_KEY, 1);
+    });
+  });
+
+  describe("initializeOperator event", () => {
+    it("GIVEN a fresh deployment WHEN initializeOperator is called THEN emits OperatorInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(OPERATOR_RESOLVER_KEY);
+      await expect(asset.initializeOperator()).to.emit(asset, "OperatorInitialized");
+    });
+  });
+
+  it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeOperator is called THEN it reverts with AccountHasNoRole", async () => {
+    await expect(asset.connect(signer_C).initializeOperator()).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+  });
+
+  describe("nonOperational", () => {
     beforeEach(async () => {
-      const base = await deployEquityTokenFixture();
-      signer_A = base.deployer;
-      signer_C = base.user2;
-      asset = await ethers.getContractAt("IAsset", base.diamond.target, signer_A);
+      await mockDiamondCut.forceNonOperational();
     });
 
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeOperator is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeOperator()).to.be.revertedWithCustomError(
+    it("GIVEN non-operational asset WHEN authorizeOperator THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.authorizeOperator("0x0000000000000000000000000000000000000001")).to.be.revertedWithCustomError(
         asset,
-        "AccountHasNoRole",
+        "AssetNotOperational",
       );
-    });
-
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeOperator();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeOperator is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeOperator()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
-    });
-
-    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeOperator is called THEN it emits OperatorInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeOperator()).to.emit(asset, "OperatorInitialized");
     });
   });
 });

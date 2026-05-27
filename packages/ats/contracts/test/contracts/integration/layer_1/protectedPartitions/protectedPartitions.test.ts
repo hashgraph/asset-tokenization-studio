@@ -4,8 +4,15 @@ import { expect } from "chai";
 import { ethers, network } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
-import { type ResolverProxy, type IAsset, ComplianceMock } from "@contract-types";
-import { DEFAULT_PARTITION, ZERO, EMPTY_STRING, ADDRESS_ZERO, ATS_ROLES, EQUITY_CONFIG_ID } from "@scripts";
+import { type ResolverProxy, type IAsset, ComplianceMock, MockDiamondCut } from "@contract-types";
+import {
+  DEFAULT_PARTITION,
+  ZERO,
+  EMPTY_STRING,
+  ADDRESS_ZERO,
+  ATS_ROLES,
+  PROTECTED_PARTITIONS_RESOLVER_KEY,
+} from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import {
   deployAtsInfrastructureFixture,
@@ -169,6 +176,7 @@ describe("ProtectedPartitions Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
   let hold: HoldData;
   let clearingOperation: ClearingOperationData;
   let clearingOperationFrom: ClearingOperationFromData;
@@ -309,6 +317,7 @@ describe("ProtectedPartitions Tests", () => {
     await executeRbac(asset, set_initRbacs());
 
     await setFacets(diamond_ProtectedPartitions.target as string, complianceMockAddress);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond_ProtectedPartitions.target);
   }
 
   beforeEach(async () => {
@@ -359,12 +368,26 @@ describe("ProtectedPartitions Tests", () => {
     };
   });
 
-  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with FacetAlreadyRegistered", async () => {
-    await setProtected();
-    await expect(asset.initializeProtectedPartitions(true)).to.be.revertedWithCustomError(
-      asset,
-      "FacetAlreadyRegistered",
-    );
+  describe("initializeProtectedPartitions", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeProtectedPartitions is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeProtectedPartitions(true))
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeProtectedPartitions is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeProtectedPartitions(true)).to.be.revertedWithCustomError(
+        asset,
+        "FacetAlreadyRegistered",
+      );
+    });
+  });
+
+  describe("initializeProtectedPartitions event", () => {
+    it("GIVEN a fresh deployment WHEN initializeProtectedPartitions is called THEN emits ProtectedPartitionsInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(PROTECTED_PARTITIONS_RESOLVER_KEY);
+      await expect(asset.initializeProtectedPartitions(true)).to.emit(asset, "ProtectedPartitionsInitialized");
+    });
   });
 
   describe("Generic set Partition Status Tests", () => {
@@ -1163,19 +1186,158 @@ describe("ProtectedPartitions Tests", () => {
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
-});
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
 
-describe("initializeProtectedPartitions", () => {
-  it("GIVEN a new deployment WHEN initializeProtectedPartitions is called THEN it emits ProtectedPartitionsInitialized", async () => {
-    const { decodeEvent } = await import("@scripts/infrastructure");
-    const infra = await loadFixture(deployAtsInfrastructureFixture);
-    const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
-      { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
-    ]);
-    const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", (await proxyTx.wait())!);
-    const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
-    await expect(freshAsset.connect(infra.deployer).initializeProtectedPartitions(true))
-      .to.emit(freshAsset, "ProtectedPartitionsInitialized")
-      .withArgs(true);
+    it("GIVEN non-operational asset WHEN protectPartitions THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.protectPartitions()).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN unprotectPartitions THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.unprotectPartitions()).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN protectedTransferFromByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.protectedTransferFromByPartition(ethers.ZeroHash, ethers.ZeroAddress, ethers.ZeroAddress, 0, {
+          deadline: 0,
+          nonce: 0,
+          signature: "0x",
+        }),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN protectedRedeemFromByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.protectedRedeemFromByPartition(ethers.ZeroHash, ethers.ZeroAddress, 0, {
+          deadline: 0,
+          nonce: 0,
+          signature: "0x",
+        }),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN protectedClearingRedeemByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.protectedClearingRedeemByPartition(
+          {
+            clearingOperation: { partition: ethers.ZeroHash, expirationTimestamp: 0, data: "0x" },
+            from: ethers.ZeroAddress,
+            deadline: 0,
+            nonce: 0,
+          },
+          0,
+          "0x",
+        ),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN protectedClearingTransferByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.protectedClearingTransferByPartition(
+          {
+            clearingOperation: { partition: ethers.ZeroHash, expirationTimestamp: 0, data: "0x" },
+            from: ethers.ZeroAddress,
+            deadline: 0,
+            nonce: 0,
+          },
+          0,
+          ethers.ZeroAddress,
+          "0x",
+        ),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN protectedClearingCreateHoldByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.protectedClearingCreateHoldByPartition(
+          {
+            clearingOperation: { partition: ethers.ZeroHash, expirationTimestamp: 0, data: "0x" },
+            from: ethers.ZeroAddress,
+            deadline: 0,
+            nonce: 0,
+          },
+          { amount: 0, expirationTimestamp: 0, escrow: ethers.ZeroAddress, to: ethers.ZeroAddress, data: "0x" },
+          "0x",
+        ),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+  });
+
+  const PROTECTED_BY_PARTITION_RESOLVER_KEY = "0x9d0a49341d6d9216381bfd989b60c6b453acb5b2ca6994948003527bd029090d";
+  const PROTECTED_CLEARING_BY_PARTITION_RESOLVER_KEY =
+    "0x8ff5ef351ec23515036118e8ee3bf7860d29fbf2fca641e84846ec3cf562a82c";
+  const PROTECTED_CLEARING_HOLD_BY_PARTITION_RESOLVER_KEY =
+    "0x0bf393aaf463471c18ecd6634ac52b2c166f21709cbca597fa7136a0810897a4";
+
+  describe("initializeProtectedByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeProtectedByPartition THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeProtectedByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeProtectedByPartition THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeProtectedByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(PROTECTED_BY_PARTITION_RESOLVER_KEY, 1);
+    });
+  });
+
+  describe("initializeProtectedByPartition event", () => {
+    it("GIVEN fresh facet WHEN initializeProtectedByPartition THEN emits ProtectedByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(PROTECTED_BY_PARTITION_RESOLVER_KEY);
+      await expect(asset.initializeProtectedByPartition()).to.emit(asset, "ProtectedByPartitionInitialized");
+    });
+  });
+
+  describe("initializeProtectedClearingByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeProtectedClearingByPartition THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeProtectedClearingByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeProtectedClearingByPartition THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeProtectedClearingByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(PROTECTED_CLEARING_BY_PARTITION_RESOLVER_KEY, 1);
+    });
+  });
+
+  describe("initializeProtectedClearingByPartition event", () => {
+    it("GIVEN fresh facet WHEN initializeProtectedClearingByPartition THEN emits ProtectedClearingByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(PROTECTED_CLEARING_BY_PARTITION_RESOLVER_KEY);
+      await expect(asset.initializeProtectedClearingByPartition()).to.emit(
+        asset,
+        "ProtectedClearingByPartitionInitialized",
+      );
+    });
+  });
+
+  describe("initializeProtectedClearingHoldByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeProtectedClearingHoldByPartition THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeProtectedClearingHoldByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeProtectedClearingHoldByPartition THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeProtectedClearingHoldByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(PROTECTED_CLEARING_HOLD_BY_PARTITION_RESOLVER_KEY, 1);
+    });
+  });
+
+  describe("initializeProtectedClearingHoldByPartition event", () => {
+    it("GIVEN fresh facet WHEN initializeProtectedClearingHoldByPartition THEN emits ProtectedClearingHoldByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(PROTECTED_CLEARING_HOLD_BY_PARTITION_RESOLVER_KEY);
+      await expect(asset.initializeProtectedClearingHoldByPartition()).to.emit(
+        asset,
+        "ProtectedClearingHoldByPartitionInitialized",
+      );
+    });
   });
 });

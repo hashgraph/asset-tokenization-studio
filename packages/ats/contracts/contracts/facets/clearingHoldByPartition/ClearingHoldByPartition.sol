@@ -4,12 +4,14 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IClearingHoldByPartition } from "./IClearingHoldByPartition.sol";
 import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
-import { ProtectedPartitionsStorageWrapper } from "../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ClearingOps } from "../../domain/orchestrator/ClearingOps.sol";
 import { ClearingReadOps } from "../../domain/orchestrator/ClearingReadOps.sol";
 import { ThirdPartyType } from "../../domain/asset/types/ThirdPartyType.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _CLEARING_HOLDBYPARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title ClearingHoldByPartition
@@ -21,13 +23,24 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract ClearingHoldByPartition is IClearingHoldByPartition, Modifiers {
     /// @inheritdoc IClearingHoldByPartition
-    /// @dev Emits {ClearedHoldByPartition} via ClearingOps.clearingHoldCreationCreation.
+    function initializeClearingHoldByPartition()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_CLEARING_HOLDBYPARTITION_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_CLEARING_HOLDBYPARTITION_RESOLVER_KEY);
+        emit ClearingHoldByPartitionInitialized();
+    }
+
+    /// @inheritdoc IClearingHoldByPartition
     function clearingCreateHoldByPartition(
         ClearingOperation calldata _clearingOperation,
         IHoldTypes.Hold calldata _hold
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyClearingActivated
@@ -57,6 +70,7 @@ abstract contract ClearingHoldByPartition is IClearingHoldByPartition, Modifiers
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyClearingActivated

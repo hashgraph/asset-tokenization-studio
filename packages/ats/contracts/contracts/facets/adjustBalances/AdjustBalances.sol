@@ -38,6 +38,7 @@ abstract contract AdjustBalances is IAdjustBalances, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_ADJUSTMENT_BALANCE)
@@ -56,7 +57,7 @@ abstract contract AdjustBalances is IAdjustBalances, Modifiers {
         bytes32 _partition,
         address _from,
         address _to
-    ) external override onlyActivated onlyUnpaused {
+    ) external override onlyOperational onlyActivated onlyUnpaused {
         TokenCoreOps.triggerAndSyncAll(_partition, _from, _to);
     }
 }

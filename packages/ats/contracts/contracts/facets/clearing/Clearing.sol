@@ -35,6 +35,7 @@ abstract contract Clearing is IClearing, Modifiers {
     function activateClearing()
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_CLEARING)
@@ -48,6 +49,7 @@ abstract contract Clearing is IClearing, Modifiers {
     function deactivateClearing()
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_CLEARING)

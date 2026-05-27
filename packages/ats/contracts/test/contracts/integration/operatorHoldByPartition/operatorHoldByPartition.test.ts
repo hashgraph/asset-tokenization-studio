@@ -6,8 +6,17 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
-import { EMPTY_STRING, ATS_ROLES, ZERO, EMPTY_HEX_BYTES, ADDRESS_ZERO, DEFAULT_PARTITION } from "@scripts";
-import { ResolverProxy, IAsset } from "@contract-types";
+import {
+  EMPTY_STRING,
+  ATS_ROLES,
+  ZERO,
+  EQUITY_CONFIG_ID,
+  EMPTY_HEX_BYTES,
+  ADDRESS_ZERO,
+  DEFAULT_PARTITION,
+  OPERATOR_HOLD_BY_PARTITION_RESOLVER_KEY,
+} from "@scripts";
+import { ResolverProxy, IAsset, MockDiamondCut } from "@contract-types";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
 const _WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
@@ -33,6 +42,7 @@ describe("operatorCreateHoldByPartition", () => {
   let signer_E: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
   let currentTimestamp = 0;
@@ -123,6 +133,7 @@ describe("operatorCreateHoldByPartition", () => {
     signer_E = base.user4;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, set_initRbacs());
 
     await setFacets(asset);
@@ -429,39 +440,68 @@ describe("operatorCreateHoldByPartition", () => {
     });
   });
 
-  describe.skip("initializeOperatorHoldByPartition", () => {
+  describe("initializeOperatorHoldByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeOperatorHoldByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeOperatorHoldByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeOperatorHoldByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeOperatorHoldByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(OPERATOR_HOLD_BY_PARTITION_RESOLVER_KEY, 1);
+    });
+  });
+
+  describe("initializeOperatorHoldByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeOperatorHoldByPartition is called THEN emits OperatorHoldByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(OPERATOR_HOLD_BY_PARTITION_RESOLVER_KEY);
+      await expect(asset.initializeOperatorHoldByPartition()).to.emit(asset, "OperatorHoldByPartitionInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
     beforeEach(async () => {
-      const base = await deployEquityTokenFixture();
-      signer_A = base.deployer;
-      signer_C = base.user2;
-      asset = await ethers.getContractAt("IAsset", base.diamond.target, signer_A);
+      await mockDiamondCut.forceNonOperational();
     });
 
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeOperatorHoldByPartition is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeOperatorHoldByPartition()).to.be.revertedWithCustomError(
-        asset,
-        "AccountHasNoRole",
-      );
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeOperatorHoldByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeOperatorHoldByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeOperatorHoldByPartition();
-      });
+    it("GIVEN already-initialised WHEN initializeOperatorHoldByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeOperatorHoldByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(OPERATOR_HOLD_BY_PARTITION_RESOLVER_KEY, 1);
+    });
+  });
 
-      it("GIVEN an already-initialised facet WHEN initializeOperatorHoldByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeOperatorHoldByPartition()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
+  describe("initializeOperatorHoldByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeOperatorHoldByPartition is called THEN emits OperatorHoldByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(OPERATOR_HOLD_BY_PARTITION_RESOLVER_KEY);
+      await expect(asset.initializeOperatorHoldByPartition()).to.emit(asset, "OperatorHoldByPartitionInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
     });
 
-    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeOperatorHoldByPartition is called THEN it emits OperatorHoldByPartitionInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeOperatorHoldByPartition()).to.emit(
-        asset,
-        "OperatorHoldByPartitionInitialized",
-      );
+    it("GIVEN non-operational WHEN operatorCreateHoldByPartition is called THEN AssetNotOperational", async () => {
+      await expect(
+        asset.operatorCreateHoldByPartition(
+          ethers.ZeroHash,
+          ethers.ZeroAddress,
+          { amount: 0n, expirationTimestamp: 0n, escrow: ethers.ZeroAddress, to: ethers.ZeroAddress, data: "0x" },
+          "0x",
+        ),
+      )
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 });

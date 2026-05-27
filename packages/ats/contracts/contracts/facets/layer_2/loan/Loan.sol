@@ -39,6 +39,7 @@ abstract contract Loan is ILoan, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_LOAN_MANAGER)

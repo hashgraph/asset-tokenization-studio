@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type IAsset } from "@contract-types";
+import { type IAsset, MockDiamondCut } from "@contract-types";
 import { ZERO, EMPTY_STRING, ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
@@ -15,12 +15,17 @@ const _PARTITION_ID_1 = "0x00000000000000000000000000000000000000000000000000000
 const _PARTITION_ID_2 = "0x0000000000000000000000000000000000000000000000000000000000000002";
 const EMPTY_VC_ID = EMPTY_STRING;
 
+const CLEARING_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY =
+  "0x28a0e168340e454e3c0e6fbe7dccb80c91178f4e2ee50776e28bbc5c19063e88";
+
 describe("ClearingAtSnapshotByPartition Tests", () => {
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
+  let unknownSigner: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixtureMultiPartition() {
     const base = await deployEquityTokenFixture({
@@ -33,8 +38,11 @@ describe("ClearingAtSnapshotByPartition Tests", () => {
     signer_A = base.deployer;
     signer_B = base.user2;
     signer_C = base.user3;
+    const signers = await ethers.getSigners();
+    unknownSigner = signers[signers.length - 1];
 
     asset = await ethers.getContractAt("IAsset", base.diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", base.diamond.target);
     await executeRbac(asset, set_initRbacs());
   }
 
@@ -180,5 +188,45 @@ describe("ClearingAtSnapshotByPartition Tests", () => {
 
     const currentBalance_C_Partition_2 = await asset.balanceOfByPartition(_PARTITION_ID_2, signer_C.address);
     expect(currentBalance_C_Partition_2).to.equal(amount - clearedAmount_Partition_2);
+  });
+
+  describe("initializeClearingAtSnapshotByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeClearingAtSnapshotByPartition THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(unknownSigner).initializeClearingAtSnapshotByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(await unknownSigner.getAddress(), ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeClearingAtSnapshotByPartition THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeClearingAtSnapshotByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(CLEARING_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY, 1);
+    });
+  });
+
+  describe("initializeClearingAtSnapshotByPartition event", () => {
+    it("GIVEN fresh facet WHEN initializeClearingAtSnapshotByPartition THEN emits ClearingAtSnapshotByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(CLEARING_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY);
+      await expect(asset.initializeClearingAtSnapshotByPartition()).to.emit(
+        asset,
+        "ClearingAtSnapshotByPartitionInitialized",
+      );
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN clearingTransferByPartition THEN AssetNotOperational", async () => {
+      await expect(
+        asset.clearingTransferByPartition(
+          { partition: _PARTITION_ID_1, expirationTimestamp: MAX_UINT256, data: "0x" },
+          amount,
+          signer_A.address,
+        ),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
   });
 });

@@ -23,8 +23,6 @@ import { KycStorageWrapper } from "../core/KycStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 import { AccessControlStorageWrapper } from "../core/AccessControlStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-import { IMint } from "../../facets/mint/IMint.sol";
-import { IBurn } from "../../facets/burn/IBurn.sol";
 
 /// @custom:hash storage Erc1594
 bytes32 constant STORAGE_LOCATION_ERC1594 = 0x6bb5986b529cbe1ac563af7efd06b91a80c235aad83852a102d3c187f67c5400;

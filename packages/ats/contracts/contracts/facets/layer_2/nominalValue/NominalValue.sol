@@ -13,7 +13,7 @@ import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
  * @author Asset Tokenization Studio Team
  * @notice Writer abstract for the nominal value capability; sole emit site for the events
  *         declared on `INominalValue`.
- * @dev Concrete facet `NominalValueFacet` registers the external selectors. Storage operations
+ * @dev Concrete facet `NominalValueFacet` registers the external onlyOperational selectors. Storage operations
  *      delegate to `NominalValueStorageWrapper`, which holds the dedicated slot.
  */
 abstract contract NominalValue is INominalValue, Modifiers {
@@ -32,7 +32,7 @@ abstract contract NominalValue is INominalValue, Modifiers {
     function setNominalValue(
         uint256 _nominalValue,
         uint8 _nominalValueDecimals
-    ) external override onlyActivated onlyRole(ROLE_NOMINAL_VALUE) {
+    ) external override onlyOperational onlyActivated onlyRole(ROLE_NOMINAL_VALUE) {
         NominalValueStorageWrapper.setNominalValue(_nominalValue, _nominalValueDecimals);
         emit NominalValueSet(EvmAccessors.getMsgSender(), _nominalValue, _nominalValueDecimals);
     }
@@ -40,7 +40,7 @@ abstract contract NominalValue is INominalValue, Modifiers {
     /// @inheritdoc INominalValue
     function setNominalValueCurrency(
         bytes3 _nominalValueCurrency
-    ) external override onlyActivated onlyRole(ROLE_NOMINAL_VALUE) {
+    ) external override onlyOperational onlyActivated onlyRole(ROLE_NOMINAL_VALUE) {
         NominalValueStorageWrapper.setNominalValueCurrency(_nominalValueCurrency);
         emit NominalValueCurrencySet(EvmAccessors.getMsgSender(), _nominalValueCurrency);
     }

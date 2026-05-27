@@ -3,11 +3,10 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ATS_ROLES } from "@scripts";
-import { BOND_FIXED_RATE_CONFIG_ID } from "@scripts/domain";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import { ATS_ROLES, FIXED_RATE_RESOLVER_KEY } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployAtsInfrastructureFixture, DEFAULT_BOND_FIXED_RATE_PARAMS, deployBondFixedRateTokenFixture } from "@test";
+import { DEFAULT_BOND_FIXED_RATE_PARAMS, deployBondFixedRateTokenFixture } from "@test";
 import { executeRbac } from "@test";
 
 describe("Fixed Rate Tests", () => {
@@ -17,6 +16,7 @@ describe("Fixed Rate Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixtureMultiPartition() {
     const base = await deployBondFixedRateTokenFixture();
@@ -26,6 +26,7 @@ describe("Fixed Rate Tests", () => {
     signer_C = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
       {
@@ -43,10 +44,25 @@ describe("Fixed Rate Tests", () => {
     await loadFixture(deploySecurityFixtureMultiPartition);
   });
 
-  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with FacetAlreadyRegistered", async () => {
-    await expect(
-      asset.connect(signer_A).initializeFixedRate({ rate: 1, rateDecimals: 0 }),
-    ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+  describe("initializeFixedRate", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeFixedRate is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeFixedRate({ rate: 1, rateDecimals: 0 }))
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeFixedRate is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(
+        asset.connect(signer_A).initializeFixedRate({ rate: 1, rateDecimals: 0 }),
+      ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+    });
+  });
+
+  describe("initializeFixedRate event", () => {
+    it("GIVEN a fresh deployment WHEN initializeFixedRate is called THEN emits FixedRateInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(FIXED_RATE_RESOLVER_KEY);
+      await expect(asset.initializeFixedRate({ rate: 1, rateDecimals: 0 })).to.emit(asset, "FixedRateInitialized");
+    });
   });
 
   describe("Paused", () => {
@@ -100,22 +116,18 @@ describe("Fixed Rate Tests", () => {
       );
     });
   });
-});
 
-describe("initializeFixedRate", () => {
-  it("GIVEN a new deployment WHEN initializeFixedRate is called THEN it emits FixedRateInitialized", async () => {
-    const { decodeEvent } = await import("@scripts/infrastructure");
-    const infra = await loadFixture(deployAtsInfrastructureFixture);
-    const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, BOND_FIXED_RATE_CONFIG_ID, 1, [
-      { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
-    ]);
-    const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", (await proxyTx.wait())!);
-    const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
-    const initData = { rate: 1, rateDecimals: 0 };
-    const tx = await freshAsset.connect(infra.deployer).initializeFixedRate(initData);
-    const receipt = await tx.wait();
-    const emitted = await decodeEvent(freshAsset, "FixedRateInitialized", receipt!);
-    expect(emitted.initData.rate).to.equal(initData.rate);
-    expect(emitted.initData.rateDecimals).to.equal(initData.rateDecimals);
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setCouponRateType THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.setCouponRateType(2)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN setRate THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.setRate(0, 0)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
   });
 });

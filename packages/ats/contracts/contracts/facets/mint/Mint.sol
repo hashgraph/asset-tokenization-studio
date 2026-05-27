@@ -39,6 +39,7 @@ abstract contract Mint is IMint, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
@@ -59,6 +60,7 @@ abstract contract Mint is IMint, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition

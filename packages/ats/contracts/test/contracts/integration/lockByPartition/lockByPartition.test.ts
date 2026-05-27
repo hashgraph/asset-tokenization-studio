@@ -4,12 +4,20 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { type ResolverProxy, type IAsset } from "@contract-types";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 
 import { deployEquityTokenFixture } from "@test";
 
 import { executeRbac, MAX_UINT256 } from "@test";
-import { EMPTY_STRING, ATS_ROLES, ZERO, dateToUnixTimestamp } from "@scripts";
+import {
+  ADDRESS_ZERO,
+  DEFAULT_PARTITION,
+  EMPTY_STRING,
+  ATS_ROLES,
+  ZERO,
+  dateToUnixTimestamp,
+  LOCK_BY_PARTITION_RESOLVER_KEY,
+} from "@scripts";
 import { Rbac } from "@scripts/domain";
 
 const _NON_DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000011";
@@ -35,6 +43,7 @@ describe("LockByPartition Tests", () => {
   let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
   let currentTimestamp = 0;
@@ -90,6 +99,7 @@ describe("LockByPartition Tests", () => {
     signer_D = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, set_initRbacs());
 
@@ -105,6 +115,7 @@ describe("LockByPartition Tests", () => {
     signer_D = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, set_initRbacs());
 
@@ -826,36 +837,51 @@ describe("LockByPartition Tests", () => {
     });
   });
 
-  describe.skip("initializeLockByPartition", () => {
-    beforeEach(async () => {
-      const base = await deployEquityTokenFixture();
-      signer_A = base.deployer;
-      signer_C = base.user2;
-      asset = await ethers.getContractAt("IAsset", base.diamond.target, signer_A);
+  describe("initializeLockByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeLockByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeLockByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeLockByPartition is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeLockByPartition()).to.be.revertedWithCustomError(
+    it("GIVEN already-initialised WHEN initializeLockByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeLockByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(LOCK_BY_PARTITION_RESOLVER_KEY, 1);
+    });
+  });
+
+  describe("initializeLockByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeLockByPartition is called THEN emits LockByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(LOCK_BY_PARTITION_RESOLVER_KEY);
+      await expect(asset.initializeLockByPartition()).to.emit(asset, "LockByPartitionInitialized");
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await loadFixture(deploySecurityFixtureSinglePartition);
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN lockByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.lockByPartition(DEFAULT_PARTITION, 0, ADDRESS_ZERO, 0)).to.be.revertedWithCustomError(
         asset,
-        "AccountHasNoRole",
+        "AssetNotOperational",
       );
     });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeLockByPartition();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeLockByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeLockByPartition()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
+    it("GIVEN non-operational asset WHEN releaseByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.releaseByPartition(DEFAULT_PARTITION, 0, ADDRESS_ZERO)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
     });
 
-    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeLockByPartition is called THEN it emits LockByPartitionInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeLockByPartition()).to.emit(asset, "LockByPartitionInitialized");
+    it("GIVEN non-operational asset WHEN forceReleaseByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.forceReleaseByPartition(DEFAULT_PARTITION, 0, ADDRESS_ZERO)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
     });
   });
 });

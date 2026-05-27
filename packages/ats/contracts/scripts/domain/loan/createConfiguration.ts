@@ -22,6 +22,8 @@ import {
 } from "@scripts/infrastructure";
 import { BusinessLogicResolver } from "@contract-types";
 import { LOAN_CONFIG_ID } from "../constants";
+import { buildFacetList } from "../facetEnvironment";
+import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
 import { atsRegistry } from "../atsRegistry";
 
 /**
@@ -74,6 +76,7 @@ const LOAN_FACETS = [
   // ERC Standards
   "TransferFacet",
   "CoreAdjustedFacet",
+  "InitializerFacet", // Core initializer facet
   "MetadataFacet",
   "ERC20PermitFacet",
   "EIP712Facet",
@@ -211,15 +214,11 @@ export async function createLoanConfiguration(
   confirmations: number = 0,
   retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  // Build facet data with resolver keys from registry
-  const baseFacets = useTimeTravel ? [...LOAN_FACETS, "TimeTravelFacet"] : LOAN_FACETS;
-  const facetNames = useTimeTravel
-    ? baseFacets.map((name) => (name === "TimeTravelFacet" || name.endsWith("TimeTravel") ? name : `${name}TimeTravel`))
-    : baseFacets;
+  const facetNames = buildFacetList(LOAN_FACETS, useTimeTravel);
 
   const facets = facetNames.map((name) => {
     const baseName = name.replace(/TimeTravel$/, "");
-    const facetDef = atsRegistry.getFacetDefinition(baseName);
+    const facetDef = atsRegistry.getFacetDefinition(baseName) ?? getMockFacetDefinition(baseName);
     if (!facetDef?.resolverKey?.value) {
       throw new Error(`No resolver key found for facet: ${baseName}`);
     }

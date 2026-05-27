@@ -42,6 +42,7 @@ abstract contract ControllerByPartition is IControllerByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
@@ -71,6 +72,7 @@ abstract contract ControllerByPartition is IControllerByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)

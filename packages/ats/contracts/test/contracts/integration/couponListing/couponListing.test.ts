@@ -3,10 +3,10 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 import { deployBondKpiLinkedRateTokenFixture, getDltTimestamp } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ATS_ROLES, TIME_PERIODS_S } from "@scripts";
+import { ATS_ROLES, TIME_PERIODS_S, COUPON_LISTING_RESOLVER_KEY } from "@scripts";
 
 describe("CouponListing Tests", () => {
   let diamond: ResolverProxy;
@@ -14,6 +14,7 @@ describe("CouponListing Tests", () => {
   let signer_B: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   let startingDate = 0;
   let maturityDate = 0;
@@ -40,6 +41,7 @@ describe("CouponListing Tests", () => {
     signer_B = base.user1;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
   }
@@ -66,7 +68,7 @@ describe("CouponListing Tests", () => {
     const kpiDiamond = kpiLinkedRateBase.diamond;
     const kpiAsset = await ethers.getContractAt("IAsset", kpiDiamond.target, signer_A);
 
-    await kpiAsset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
+    await kpiAsset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
 
     const timestamp = await getDltTimestamp();
 
@@ -221,29 +223,25 @@ describe("CouponListing Tests", () => {
       expect(coupon.data).to.not.equal("0x");
     });
   });
-  describe.skip("initializeCouponListing", () => {
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeCouponListing is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_B).initializeCouponListing()).to.be.revertedWithCustomError(
-        asset,
-        "AccountHasNoRole",
-      );
+
+  describe("initializeCouponListing", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeCouponListing is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_B).initializeCouponListing())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_B.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeCouponListing();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeCouponListing is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeCouponListing()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
+    it("GIVEN already-initialised WHEN initializeCouponListing is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeCouponListing())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(COUPON_LISTING_RESOLVER_KEY, 1);
     });
+  });
 
-    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeCouponListing is called THEN it emits CouponListingInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeCouponListing()).to.emit(asset, "CouponListingInitialized");
+  describe("initializeCouponListing event", () => {
+    it("GIVEN a fresh deployment WHEN initializeCouponListing is called THEN emits CouponListingInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(COUPON_LISTING_RESOLVER_KEY);
+      await expect(asset.initializeCouponListing()).to.emit(asset, "CouponListingInitialized");
     });
   });
 });

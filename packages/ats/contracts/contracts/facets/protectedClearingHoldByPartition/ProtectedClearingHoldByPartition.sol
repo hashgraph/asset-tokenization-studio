@@ -43,6 +43,7 @@ abstract contract ProtectedClearingHoldByPartition is IProtectedClearingHoldByPa
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyUnrecoveredAddress(_protectedClearingOperation.from)
@@ -68,7 +69,7 @@ abstract contract ProtectedClearingHoldByPartition is IProtectedClearingHoldByPa
 
     /**
      * @notice Emits `ProtectedClearedHoldByPartition` for a successful protected clearing hold.
-     * @dev Extracted to a `private` helper so the external entry point's stack stays within the
+     * @dev Extracted to a `private` helper so the external onlyOperational entry point's stack stays within the
      *      Solidity 16-slot limit; the helper is called exactly once, after the
      *      `ClearingProtectedOps.protectedClearingCreateHoldByPartition` call returns.
      * @param _operation  The protected clearing operation (partition, from, expiration, data, ...).

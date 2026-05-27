@@ -50,6 +50,7 @@ abstract contract Coupon is ICoupon, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_CORPORATE_ACTION)
@@ -75,6 +76,7 @@ abstract contract Coupon is ICoupon, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_CORPORATE_ACTION)

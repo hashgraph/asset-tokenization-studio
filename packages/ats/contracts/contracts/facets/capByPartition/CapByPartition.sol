@@ -40,6 +40,7 @@ abstract contract CapByPartition is ICapByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_CAP)

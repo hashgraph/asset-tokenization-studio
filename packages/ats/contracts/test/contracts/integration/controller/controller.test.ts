@@ -521,4 +521,43 @@ describe("Controller Tests", () => {
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      const cut = await ethers.getContractAt("MockDiamondCut", diamond.target);
+      await cut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN controllerTransfer THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.controllerTransfer(ADDRESS_ZERO, ADDRESS_ZERO, 0, "0x", "0x")).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN controllerRedeem THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.controllerRedeem(ADDRESS_ZERO, 0, "0x", "0x")).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN finalizeControllable THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.finalizeControllable()).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN forcedTransfer THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.forcedTransfer(ADDRESS_ZERO, ADDRESS_ZERO, 0)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN addAgent THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.addAgent(ADDRESS_ZERO)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN removeAgent THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.removeAgent(ADDRESS_ZERO)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+  });
 });

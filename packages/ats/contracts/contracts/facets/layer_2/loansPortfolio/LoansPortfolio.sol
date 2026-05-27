@@ -38,6 +38,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_LOANS_PORTFOLIO_MANAGER)
@@ -55,6 +56,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_LOANS_PORTFOLIO_MANAGER)
@@ -72,6 +74,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_LOANS_PORTFOLIO_MANAGER)
@@ -90,6 +93,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_LOANS_PORTFOLIO_MANAGER)

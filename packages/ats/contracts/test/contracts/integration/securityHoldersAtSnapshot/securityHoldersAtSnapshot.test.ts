@@ -3,9 +3,9 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ATS_ROLES, EMPTY_STRING, ZERO } from "@scripts";
+import { ATS_ROLES, EMPTY_STRING, SECURITY_HOLDERS_AT_SNAPSHOT_RESOLVER_KEY, ZERO } from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const _PARTITION_ID_1 = "0x0000000000000000000000000000000000000000000000000000000000000001";
@@ -19,6 +19,7 @@ describe("SecurityHoldersAtSnapshot Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deployEquity() {
     const base = await deployEquityTokenFixture({
@@ -32,6 +33,7 @@ describe("SecurityHoldersAtSnapshot Tests", () => {
     signer_C = base.user2;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
       { role: ATS_ROLES.ROLE_ISSUER, members: [signer_B.address] },
@@ -198,39 +200,24 @@ describe("SecurityHoldersAtSnapshot Tests", () => {
     });
   });
 
-  describe.skip("initializeSecurityHoldersAtSnapshot", () => {
-    beforeEach(async () => {
-      const base = await deployEquityTokenFixture();
-      signer_A = base.deployer;
-      signer_C = base.user2;
-      asset = await ethers.getContractAt("IAsset", base.diamond.target, signer_A);
+  describe("initializeSecurityHoldersAtSnapshot", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeSecurityHoldersAtSnapshot is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeSecurityHoldersAtSnapshot())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeSecurityHoldersAtSnapshot is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeSecurityHoldersAtSnapshot()).to.be.revertedWithCustomError(
-        asset,
-        "AccountHasNoRole",
-      );
+    it("GIVEN already-initialised WHEN initializeSecurityHoldersAtSnapshot is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeSecurityHoldersAtSnapshot())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(SECURITY_HOLDERS_AT_SNAPSHOT_RESOLVER_KEY, 1);
     });
+  });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeSecurityHoldersAtSnapshot();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeSecurityHoldersAtSnapshot is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeSecurityHoldersAtSnapshot()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
-    });
-
-    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeSecurityHoldersAtSnapshot is called THEN it emits SecurityHoldersAtSnapshotInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeSecurityHoldersAtSnapshot()).to.emit(
-        asset,
-        "SecurityHoldersAtSnapshotInitialized",
-      );
+  describe("initializeSecurityHoldersAtSnapshot event", () => {
+    it("GIVEN a fresh deployment WHEN initializeSecurityHoldersAtSnapshot is called THEN emits SecurityHoldersAtSnapshotInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(SECURITY_HOLDERS_AT_SNAPSHOT_RESOLVER_KEY);
+      await expect(asset.initializeSecurityHoldersAtSnapshot()).to.emit(asset, "SecurityHoldersAtSnapshotInitialized");
     });
   });
 });

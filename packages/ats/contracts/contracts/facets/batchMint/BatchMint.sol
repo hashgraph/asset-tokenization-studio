@@ -6,7 +6,6 @@ import { IBatchMint, RESOLVER_KEY_BATCH_MINT } from "./IBatchMint.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { CapStorageWrapper } from "../../domain/core/CapStorageWrapper.sol";
-import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { IMint } from "../mint/IMint.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
@@ -15,7 +14,7 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
 /**
  * @title BatchMint
  * @notice Abstract contract implementing the `batchMint` operation for the ERC-3643 standard.
- * @dev Provides a single external function, `batchMint`, which issues tokens to an ordered
+ * @dev Provides a single external onlyOperational function, `batchMint`, which issues tokens to an ordered
  *      list of recipients in a single transaction. The function enforces two sequential
  *      passes: a validation pass (identity, compliance, and cap checks for every address)
  *      followed by an issuance pass (calling `TokenCoreOps.issue` for each).
@@ -41,6 +40,8 @@ abstract contract BatchMint is IBatchMint, Modifiers {
         uint256[] calldata _amounts
     )
         external
+        override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyValidInputAmountsArrayLength(_toList, _amounts)

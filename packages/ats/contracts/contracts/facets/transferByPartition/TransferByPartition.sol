@@ -36,6 +36,7 @@ abstract contract TransferByPartition is ITransferByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnProtectedPartitionsOrWildCardRole

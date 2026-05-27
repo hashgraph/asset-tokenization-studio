@@ -3,16 +3,10 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type IAsset } from "@contract-types";
+import { type IAsset, MockDiamondCut } from "@contract-types";
 import { ZERO, EMPTY_STRING, ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import {
-  deployAtsInfrastructureFixture,
-  deployLoanTokenFixture,
-  executeRbac,
-  getLoanDetails,
-  MAX_UINT256,
-} from "@test";
+import { deployAtsInfrastructureFixture, deployLoanTokenFixture, getLoanDetails, MAX_UINT256 } from "@test";
 
 const EMPTY_VC_ID = EMPTY_STRING;
 
@@ -22,6 +16,7 @@ describe("Loan Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let _mockDiamondCut: MockDiamondCut;
 
   let startingDate: number;
   let maturityDate: number;
@@ -38,6 +33,7 @@ describe("Loan Tests", () => {
     maturityDate = startingDate + 100_000;
 
     asset = await ethers.getContractAt("IAsset", base.tokenAddress);
+    _mockDiamondCut = await ethers.getContractAt("MockDiamondCut", base.tokenAddress);
 
     await executeRbac(asset, [
       {
@@ -244,6 +240,17 @@ describe("Loan Tests", () => {
           },
         }),
       ).to.be.revertedWithCustomError(asset, "WrongDates");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await _mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setLoanDetails THEN AssetNotOperational", async () => {
+      const loanDetails = await getLoanDetails();
+      await expect(asset.setLoanDetails(loanDetails)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
   });
 

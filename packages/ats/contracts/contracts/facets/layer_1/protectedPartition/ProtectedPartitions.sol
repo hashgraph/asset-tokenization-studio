@@ -6,9 +6,9 @@ import { ROLE_PROTECTED_PARTITIONS, DEFAULT_ADMIN_ROLE } from "../../../constant
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
-import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ProtectedPartitions is IProtectedPartitions, Modifiers {
+    /// @inheritdoc IProtectedPartitions
     function initializeProtectedPartitions(
         bool _protectPartitions
     )
@@ -23,9 +23,11 @@ abstract contract ProtectedPartitions is IProtectedPartitions, Modifiers {
         emit IProtectedPartitions.ProtectedPartitionsInitialized(_protectPartitions);
     }
 
+    /// @inheritdoc IProtectedPartitions
     function protectPartitions()
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_PROTECTED_PARTITIONS)
@@ -35,9 +37,11 @@ abstract contract ProtectedPartitions is IProtectedPartitions, Modifiers {
         success_ = true;
     }
 
+    /// @inheritdoc IProtectedPartitions
     function unprotectPartitions()
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_PROTECTED_PARTITIONS)
@@ -47,10 +51,12 @@ abstract contract ProtectedPartitions is IProtectedPartitions, Modifiers {
         success_ = true;
     }
 
+    /// @inheritdoc IProtectedPartitions
     function arePartitionsProtected() external view override returns (bool) {
         return ProtectedPartitionsStorageWrapper.arePartitionsProtected();
     }
 
+    /// @inheritdoc IProtectedPartitions
     function calculateRoleForPartition(bytes32 partition) external pure override returns (bytes32 role) {
         role = ProtectedPartitionsStorageWrapper.calculateRoleForPartition(partition);
     }

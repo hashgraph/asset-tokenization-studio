@@ -13,6 +13,7 @@ import {
   MockFacet1__factory,
   MockFacet2__factory,
   MockFacet3__factory,
+  MockFactoryFacet__factory,
 } from "@contract-types";
 
 // Resolver keys mirror the `bytes32("...")` literals declared in the mock
@@ -22,7 +23,7 @@ import {
 const _MOCK_FACET_1_RESOLVER_KEY = "0x4d6f636b46616365743100000000000000000000000000000000000000000000";
 const _MOCK_FACET_2_RESOLVER_KEY = "0x4d6f636b46616365743200000000000000000000000000000000000000000000";
 const _MOCK_FACET_3_RESOLVER_KEY = "0x4d6f636b46616365743300000000000000000000000000000000000000000000";
-const _MOCK_DIAMOND_CUT_RESOLVER_KEY = "0x4d6f636b4469616d6f6e64437574000000000000000000000000000000000000";
+const _DIAMOND_RESOLVER_KEY = "0x1b5212ea37fb29e99afa2812a5d7d7e662a477424d3de1a18cc3871a2ee94d78";
 
 // TEST-ONLY: registry of the mock facets, keyed by the contract name used in
 // `INITIALIZE_MOCK_FACETS`. Shape matches the production `FACET_REGISTRY` so
@@ -31,7 +32,7 @@ export const MOCK_FACET_REGISTRY: Record<string, FacetDefinition> = {
   MockDiamondCut: {
     name: "MockDiamondCut",
     description: "TEST-ONLY mock variant of DiamondFacet used by InitializeMock domain",
-    resolverKey: { name: "_MOCK_DIAMOND_CUT_RESOLVER_KEY", value: _MOCK_DIAMOND_CUT_RESOLVER_KEY },
+    resolverKey: { name: "_DIAMOND_RESOLVER_KEY", value: _DIAMOND_RESOLVER_KEY },
     factory: (signer) => new MockDiamondCut__factory(signer),
   },
   MockFacet1: {
@@ -51,6 +52,15 @@ export const MOCK_FACET_REGISTRY: Record<string, FacetDefinition> = {
     description: "TEST-ONLY mock facet used by InitializeMock domain",
     resolverKey: { name: "_MOCK_FACET_3_RESOLVER_KEY", value: _MOCK_FACET_3_RESOLVER_KEY },
     factory: (signer) => new MockFacet3__factory(signer),
+  },
+  MockFactoryFacet: {
+    name: "MockFactoryFacet",
+    description: "TEST-ONLY factory facet that initialises TimeTravel on deployed securities",
+    resolverKey: {
+      name: "_FACTORY_RESOLVER_KEY",
+      value: "0xa5472d34be801f744a73bce4e1851e67767286307e3203726a3261b280a667b3",
+    },
+    factory: (signer) => new MockFactoryFacet__factory(signer),
   },
 };
 

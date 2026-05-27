@@ -491,7 +491,7 @@ contract MyContract {}
         for (const name of mockNames) {
           if (name.startsWith("I") && name[1] === name[1]?.toUpperCase()) {
             // Extract the specific entry
-            const entryRegex = new RegExp(`${name}:\\s*\\{[\\s\\S]*?\\n\\s{4}\\}`);
+            const entryRegex = new RegExp(`${name}:\\s*\\{[\\s\\S]*?\\n\\s{2}\\}`);
             const entryMatch = mockSection?.[0].match(entryRegex);
             if (entryMatch) {
               expect(entryMatch[0]).to.not.include(

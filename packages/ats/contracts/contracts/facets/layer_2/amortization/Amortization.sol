@@ -24,6 +24,7 @@ import { InitializerStorageWrapper } from "../../../domain/core/InitializerStora
  */
 abstract contract Amortization is IAmortization, Modifiers {
     /// @inheritdoc IAmortization
+    /// @dev Registers the amortization facet as ready and can only be executed once by an admin.
     function initializeAmortization()
         external
         override
@@ -34,11 +35,14 @@ abstract contract Amortization is IAmortization, Modifiers {
         emit AmortizationInitialized();
     }
 
+    /// @inheritdoc IAmortization
+    /// @dev Requires an operational, activated, unpaused, single-partition token and valid dates.
     function setAmortization(
         IAmortization.Amortization calldata _amortization
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
@@ -53,11 +57,13 @@ abstract contract Amortization is IAmortization, Modifiers {
     }
 
     /// @inheritdoc IAmortization
+    /// @dev Requires no active amortization holds for the specified corporate action.
     function cancelAmortization(
         uint256 _amortizationID
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
@@ -87,12 +93,15 @@ abstract contract Amortization is IAmortization, Modifiers {
         emit IAmortization.AmortizationForceCancelled(_amortizationID, EvmAccessors.getMsgSender());
     }
 
+    /// @inheritdoc IAmortization
+    /// @dev Releases a holder-specific amortization hold for a valid amortization action.
     function releaseAmortizationHold(
         uint256 _amortizationID,
         address _tokenHolder
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
@@ -103,6 +112,7 @@ abstract contract Amortization is IAmortization, Modifiers {
     }
 
     /// @inheritdoc IAmortization
+    /// @dev Creates or updates a positive holder-specific hold for a valid amortization action.
     function setAmortizationHold(
         uint256 _amortizationID,
         address _tokenHolder,
@@ -110,6 +120,7 @@ abstract contract Amortization is IAmortization, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition

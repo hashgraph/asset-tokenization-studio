@@ -2,7 +2,6 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { ResolverProxyStorageWrapper } from "../../domain/core/ResolverProxyStorageWrapper.sol";
 
 /**
  * @title InitializerModifiers

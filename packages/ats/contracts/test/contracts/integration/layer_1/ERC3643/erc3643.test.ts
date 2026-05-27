@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { isinGenerator } from "@thomaschaplin/isin-generator";
-import { IAsset, type ResolverProxy, ComplianceMock, IdentityRegistryMock } from "@contract-types";
+import { IAsset, type ResolverProxy, ComplianceMock, IdentityRegistryMock, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
@@ -16,7 +16,7 @@ import {
   ADDRESS_ZERO,
   EMPTY_HEX_BYTES,
   dateToUnixTimestamp,
-  EQUITY_CONFIG_ID,
+  ERC3643_MANAGEMENT_RESOLVER_KEY,
 } from "@scripts";
 
 const name = "TEST";
@@ -41,6 +41,7 @@ describe("ERC3643 Tests", () => {
   let signer_F: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   let identityRegistryMock: IdentityRegistryMock;
   let complianceMock: ComplianceMock;
@@ -83,6 +84,7 @@ describe("ERC3643 Tests", () => {
       signer_F = base.user5;
 
       asset = await ethers.getContractAt("IAsset", diamond.target);
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
       await executeRbac(asset, [
         {
@@ -150,11 +152,30 @@ describe("ERC3643 Tests", () => {
       expect(parsed["Version"]).to.equal(configVersion.toString());
     });
 
-    describe("initialize", () => {
-      it("GIVEN an already initialized token WHEN attempting to initialize again THEN transaction fails with FacetAlreadyRegistered", async () => {
+    describe("initializeERC3643", () => {
+      it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeERC3643 is called THEN AccountHasNoRole", async () => {
+        await expect(
+          asset
+            .connect(signer_D)
+            .initializeERC3643(complianceMock.target as string, identityRegistryMock.target as string),
+        )
+          .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+          .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+      });
+
+      it("GIVEN already-initialised WHEN initializeERC3643 is called again THEN FacetAlreadyRegistered", async () => {
         await expect(
           asset.initializeERC3643(complianceMock.target as string, identityRegistryMock.target as string),
         ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+      });
+    });
+
+    describe("initializeERC3643 event", () => {
+      it("GIVEN a fresh deployment WHEN initializeERC3643 is called THEN emits ERC3643Initialized", async () => {
+        await mockDiamondCut.forceFacetNotRegistered(ERC3643_MANAGEMENT_RESOLVER_KEY);
+        await expect(
+          asset.initializeERC3643(complianceMock.target as string, identityRegistryMock.target as string),
+        ).to.emit(asset, "ERC3643Initialized");
       });
     });
 
@@ -1454,48 +1475,5 @@ describe("ERC3643 Tests", () => {
         deactivatedAsset.connect(base.deployer).unfreezePartialTokens(ethers.ZeroAddress, 0),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
-  });
-});
-
-describe("initializeERC3643", () => {
-  let signer_D: HardhatEthersSigner;
-  before(async () => {
-    const s = await ethers.getSigners();
-    signer_D = s[3];
-  });
-
-  it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeERC3643 is called THEN it reverts with AccountHasNoRole", async () => {
-    const { decodeEvent } = await import("@scripts/infrastructure");
-    const infra = await loadFixture(deployAtsInfrastructureFixture);
-    const cm = await (await ethers.getContractFactory("ComplianceMock")).connect(infra.deployer).deploy(true, false);
-    const im = await (await ethers.getContractFactory("IdentityRegistryMock"))
-      .connect(infra.deployer)
-      .deploy(true, false);
-    const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
-      { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
-    ]);
-    const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", (await proxyTx.wait())!);
-    const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
-    await expect(freshAsset.connect(signer_D).initializeERC3643(cm.target, im.target)).to.be.revertedWithCustomError(
-      freshAsset,
-      "AccountHasNoRole",
-    );
-  });
-
-  it("GIVEN a new deployment WHEN initializeERC3643 is called THEN it emits ERC3643Initialized", async () => {
-    const { decodeEvent } = await import("@scripts/infrastructure");
-    const infra = await loadFixture(deployAtsInfrastructureFixture);
-    const cm = await (await ethers.getContractFactory("ComplianceMock")).connect(infra.deployer).deploy(true, false);
-    const im = await (await ethers.getContractFactory("IdentityRegistryMock"))
-      .connect(infra.deployer)
-      .deploy(true, false);
-    const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
-      { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
-    ]);
-    const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", (await proxyTx.wait())!);
-    const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
-    await expect(freshAsset.connect(infra.deployer).initializeERC3643(cm.target, im.target))
-      .to.emit(freshAsset, "ERC3643Initialized")
-      .withArgs(cm.target, im.target);
   });
 });

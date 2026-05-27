@@ -34,6 +34,7 @@ abstract contract Transfer is ITransfer, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
@@ -52,6 +53,7 @@ abstract contract Transfer is ITransfer, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
@@ -70,6 +72,7 @@ abstract contract Transfer is ITransfer, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
@@ -88,6 +91,7 @@ abstract contract Transfer is ITransfer, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyUnrecoveredAddress(_to)
