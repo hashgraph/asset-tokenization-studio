@@ -1,6 +1,145 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import { IFactory } from "./IFactory.sol";
+import { _checkUnexpectedError } from "../infrastructure/utils/UnexpectedError.sol";
+import { FACTORY_OPERATIONAL_STATUS } from "../constants/values.sol";
+import { ResolverProxy } from "../infrastructure/proxy/ResolverProxy.sol";
+import { IResolverProxy } from "../infrastructure/proxy/IResolverProxy.sol";
+import { DEFAULT_ADMIN_ROLE } from "../constants/roles.sol";
+import { IAccessControl } from "../facets/accessControl/IAccessControl.sol";
+import { IInitializer } from "../facets/initializer/IInitializer.sol";
+import { IControlList } from "../facets/controlList/IControlList.sol";
+import { ICore } from "../facets/core/ICore.sol";
+import { IERC20Votes } from "../facets/layer_1/ERC1400/ERC20Votes/IERC20Votes.sol";
+import { IController } from "../facets/controller/IController.sol";
+import { IERC1410Management } from "../facets/layer_1/ERC1400/ERC1410/IERC1410Management.sol";
+import { ICap } from "../facets/cap/ICap.sol";
+import { IMint } from "../facets/mint/IMint.sol";
+import { IClearing } from "../facets/clearing/IClearing.sol";
+import { IDiamondFacet } from "../infrastructure/diamond/IDiamondFacet.sol";
+import { IBusinessLogicResolver } from "../infrastructure/diamond/IBusinessLogicResolver.sol";
+import {
+    FactoryRegulationData,
+    _buildRegulationData,
+    RegulationData,
+    RegulationType,
+    RegulationSubType,
+    _checkRegulationTypeAndSubType
+} from "../constants/regulation.sol";
+import { IEquityUSA } from "../facets/layer_3/equityUSA/IEquityUSA.sol";
+import { IBondUSA } from "../facets/layer_3/bondUSA/IBondUSA.sol";
+import { ISecurity } from "../facets/layer_2/security/ISecurity.sol";
+import { IBondRead } from "../facets/layer_2/bond/IBondRead.sol";
+import { IClearingAtSnapshot } from "../facets/clearingAtSnapshot/IClearingAtSnapshot.sol";
+import {
+    IClearingAtSnapshotByPartition
+} from "../facets/clearingAtSnapshotByPartition/IClearingAtSnapshotByPartition.sol";
+import { IClearingByPartition } from "../facets/clearingByPartition/IClearingByPartition.sol";
+import { IClearingHoldByPartition } from "../facets/clearingHoldByPartition/IClearingHoldByPartition.sol";
+import { IERC20Permit } from "../facets/layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
+import { IIdentity } from "../facets/identity/IIdentity.sol";
+import {
+    IScheduledCrossOrderedTasks
+} from "../facets/layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
+import { ISnapshots } from "../facets/layer_1/snapshot/ISnapshots.sol";
+import { IProceedRecipients } from "../facets/layer_2/proceedRecipient/IProceedRecipients.sol";
+
+import { INominalValue } from "../facets/layer_2/nominalValue/INominalValue.sol";
+import { ScheduledTasksStorageWrapper } from "../domain/asset/ScheduledTasksStorageWrapper.sol";
+import { IProtectedPartitions } from "../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
+import { IExternalPauseManagement } from "../facets/externalPauseManagement/IExternalPauseManagement.sol";
+import {
+    IExternalControlListManagement
+} from "../facets/externalControlListManagement/IExternalControlListManagement.sol";
+import { IExternalKycListManagement } from "../facets/externalKycListManagement/IExternalKycListManagement.sol";
+import { IKyc } from "../facets/layer_1/kyc/IKyc.sol";
+import { IERC3643 } from "../facets/layer_1/ERC3643/IERC3643.sol";
+import { _validateISIN } from "./isinValidator.sol";
+import { IFixedRate } from "../facets/layer_2/interestRate/fixedRate/IFixedRate.sol";
+import { IKpiLinkedRate } from "../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
+import { InterestRateStorageWrapper } from "../domain/asset/InterestRateStorageWrapper.sol";
+import { IInterestRate } from "../facets/interestRate/IInterestRate.sol";
+import { EvmAccessors } from "../infrastructure/utils/EvmAccessors.sol";
+import { DatesValidation } from "../infrastructure/utils/DatesValidation.sol";
+import { IAdjustBalances } from "../facets/adjustBalances/IAdjustBalances.sol";
+import { IKpis } from "../facets/layer_2/kpi/kpiLatest/IKpis.sol";
+import { IAllowance } from "../facets/allowance/IAllowance.sol";
+import { IBalanceTracker } from "../facets/balanceTracker/IBalanceTracker.sol";
+import { IBalanceTrackerAdjusted } from "../facets/balanceTrackerAdjusted/IBalanceTrackerAdjusted.sol";
+import { IBalanceTrackerAtSnapshot } from "../facets/balanceTrackerAtSnapshot/IBalanceTrackerAtSnapshot.sol";
+import {
+    IBalanceTrackerAtSnapshotByPartition
+} from "../facets/balanceTrackerAtSnapshotByPartition/IBalanceTrackerAtSnapshotByPartition.sol";
+import { IBalanceTrackerByPartition } from "../facets/balanceTrackerByPartition/IBalanceTrackerByPartition.sol";
+import { IBatchBurn } from "../facets/batchBurn/IBatchBurn.sol";
+import { IBatchController } from "../facets/batchController/IBatchController.sol";
+import { IBatchFreeze } from "../facets/batchFreeze/IBatchFreeze.sol";
+import { IBatchMint } from "../facets/batchMint/IBatchMint.sol";
+import { IBatchTransfer } from "../facets/batchTransfer/IBatchTransfer.sol";
+import { IBurn } from "../facets/burn/IBurn.sol";
+import { IBurnByPartition } from "../facets/burnByPartition/IBurnByPartition.sol";
+import { ICapByPartition } from "../facets/capByPartition/ICapByPartition.sol";
+import { IComplianceFacet } from "../facets/compliance/IComplianceFacet.sol";
+import { IComplianceByPartition } from "../facets/complianceByPartition/IComplianceByPartition.sol";
+import { IControllerByPartition } from "../facets/controllerByPartition/IControllerByPartition.sol";
+import { IControllerHoldByPartition } from "../facets/controllerHoldByPartition/IControllerHoldByPartition.sol";
+import { ICoreAdjusted } from "../facets/coreAdjusted/ICoreAdjusted.sol";
+import { ICoreAtSnapshot } from "../facets/coreAtSnapshot/ICoreAtSnapshot.sol";
+import { ICorporateActions } from "../facets/corporateActions/ICorporateActions.sol";
+import { ICoupon } from "../facets/coupon/ICoupon.sol";
+import { ICouponListing } from "../facets/couponListing/ICouponListing.sol";
+import { ICouponSecurityHolders } from "../facets/couponSecurityHolders/ICouponSecurityHolders.sol";
+import { IDeactivate } from "../facets/deactivate/IDeactivate.sol";
+import { IDividend } from "../facets/dividend/IDividend.sol";
+import { IDividendSecurityHolders } from "../facets/dividendSecurityHolders/IDividendSecurityHolders.sol";
+import { IDocumentation } from "../facets/documentation/IDocumentation.sol";
+import { IEIP712 } from "../facets/eip712/IEIP712.sol";
+import { IFreeze } from "../facets/freeze/IFreeze.sol";
+import { IFreezeAtSnapshot } from "../facets/freezeAtSnapshot/IFreezeAtSnapshot.sol";
+import { IFreezeAtSnapshotByPartition } from "../facets/freezeAtSnapshotByPartition/IFreezeAtSnapshotByPartition.sol";
+import { IHoldFacet } from "../facets/hold/IHoldFacet.sol";
+import { IHoldAtSnapshot } from "../facets/holdAtSnapshot/IHoldAtSnapshot.sol";
+import { IHoldAtSnapshotByPartition } from "../facets/holdAtSnapshotByPartition/IHoldAtSnapshotByPartition.sol";
+import { IHoldByPartition } from "../facets/holdByPartition/IHoldByPartition.sol";
+import { ILock } from "../facets/layer_1/lock/ILock.sol";
+import { ILockAtSnapshot } from "../facets/lockAtSnapshot/ILockAtSnapshot.sol";
+import { ILockAtSnapshotByPartition } from "../facets/lockAtSnapshotByPartition/ILockAtSnapshotByPartition.sol";
+import { ILockByPartition } from "../facets/lockByPartition/ILockByPartition.sol";
+import { IMaturity } from "../facets/maturity/IMaturity.sol";
+import { IMaturityByPartition } from "../facets/maturityByPartition/IMaturityByPartition.sol";
+import { IMetadata } from "../facets/metadata/IMetadata.sol";
+import { IMintByPartition } from "../facets/mintByPartition/IMintByPartition.sol";
+import { INominalValueAtSnapshot } from "../facets/nominalValueAtSnapshot/INominalValueAtSnapshot.sol";
+import { INonces } from "../facets/nonces/INonces.sol";
+import { IOperator } from "../facets/operator/IOperator.sol";
+import { IOperatorByPartition } from "../facets/operatorByPartition/IOperatorByPartition.sol";
+import { IOperatorClearingByPartition } from "../facets/operatorClearingByPartition/IOperatorClearingByPartition.sol";
+import {
+    IOperatorClearingHoldByPartition
+} from "../facets/layer_1/clearing/operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol";
+import { IOperatorHoldByPartition } from "../facets/operatorHoldByPartition/IOperatorHoldByPartition.sol";
+import { IPartitions } from "../facets/partitions/IPartitions.sol";
+import { IPause } from "../facets/pause/IPause.sol";
+import { IPrincipal } from "../facets/principal/IPrincipal.sol";
+import { IProtectedByPartition } from "../facets/protectedByPartition/IProtectedByPartition.sol";
+import {
+    IProtectedClearingByPartition
+} from "../facets/protectedClearingByPartition/IProtectedClearingByPartition.sol";
+import {
+    IProtectedClearingHoldByPartition
+} from "../facets/protectedClearingHoldByPartition/IProtectedClearingHoldByPartition.sol";
+import { IProtectedHoldByPartition } from "../facets/protectedHoldByPartition/IProtectedHoldByPartition.sol";
+import { IRecovery } from "../facets/recovery/IRecovery.sol";
+import { IScheduledBalanceAdjustment } from "../facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol";
+import { ISecurityHolders } from "../facets/securityHolders/ISecurityHolders.sol";
+import { ISecurityHoldersAtSnapshot } from "../facets/securityHoldersAtSnapshot/ISecurityHoldersAtSnapshot.sol";
+import { ISnapshotsByPartition } from "../facets/snapshotsByPartition/ISnapshotsByPartition.sol";
+import { ISsiManagement } from "../facets/ssiManagement/ISsiManagement.sol";
+import { ITransfer } from "../facets/transfer/ITransfer.sol";
+import { ITransferAndLock } from "../facets/layer_3/transferAndLock/ITransferAndLock.sol";
+import { ITransferAndLockByPartition } from "../facets/transferAndLockByPartition/ITransferAndLockByPartition.sol";
+import { ITransferByPartition } from "../facets/transferByPartition/ITransferByPartition.sol";
 import { IVoting } from "../facets/layer_2/voting/IVoting.sol";
 import { IVotingSecurityHolders } from "../facets/votingSecurityHolders/IVotingSecurityHolders.sol";
 
@@ -356,13 +495,13 @@ abstract contract Factory is IFactory {
         );
         securityAddress_ = address(equity);
         _initializeSecurityMetadata(securityAddress_, _securityData, _securityType);
-        _initializeSecurityCompliance(securityAddress_, _securityData);
+        _initializeSecurityCompliance(securityAddress_);
         _initializeCoreFacets(securityAddress_);
         _initializeSnapshotFacets(securityAddress_);
         _initializeManagementFacets(securityAddress_);
         _initializeHoldFacets(securityAddress_);
         _initializeClearingFacets(securityAddress_);
-        _initializeMiscellaneousFacets(securityAddress_, _securityData);
+        _initializeMiscellaneousFacets(securityAddress_);
     }
 
     /**
