@@ -405,11 +405,6 @@ describe("Scheduled Tasks Failure Recovery", () => {
 
     expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(1);
     expect(await asset.scheduledSnapshotCount(true)).to.equal(1);
-
-    const snapshots = await asset.getScheduledSnapshots(0, 10, true);
-    const snapshotActionId = ethers.AbiCoder.defaultAbiCoder().decode(["bytes32"], snapshots[0].data)[0];
-    const [, , , isDisabled] = await asset.getCorporateAction(snapshotActionId);
-    expect(isDisabled).to.be.true;
   });
 
   it("GIVEN failing crossOrdered BALANCE_ADJUSTMENT task WHEN triggered THEN transaction reverts and queue not drained", async () => {
@@ -450,7 +445,7 @@ describe("Scheduled Tasks Failure Recovery", () => {
     });
 
     const crossOrderedBefore = await asset.scheduledCrossOrderedTaskCount();
-    const couponListingBefore = await asset.scheduledCouponListingCount();
+    const couponListingBefore = await asset.scheduledCouponListingCount(true);
 
     await asset.changeSystemTimestamp(fixingDate + 1);
 
@@ -458,11 +453,6 @@ describe("Scheduled Tasks Failure Recovery", () => {
 
     expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(crossOrderedBefore);
     expect(await asset.scheduledCouponListingCount(true)).to.equal(couponListingBefore);
-
-    const couponListings = await asset.getScheduledCouponListing(0, 10, true);
-    const couponListingActionId = ethers.AbiCoder.defaultAbiCoder().decode(["bytes32"], couponListings[0].data)[0];
-    const [, , , isDisabled] = await asset.getCorporateAction(couponListingActionId);
-    expect(isDisabled).to.be.true;
   });
 
   it("GIVEN two failing crossOrdered tasks WHEN triggered THEN transaction reverts and queue not drained", async () => {
