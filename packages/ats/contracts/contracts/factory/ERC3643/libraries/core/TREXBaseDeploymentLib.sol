@@ -96,21 +96,22 @@ library TREXBaseDeploymentLib {
         );
 
         /**
-         * @dev Track which infrastructure contracts were newly deployed in this call. Only
-         *      those have their ownership transferred to `_tokenDetails.owner` below;
+         * @dev Tracks which infrastructure contracts were newly deployed in this call as a
+         *      bitmask: bit 0 → modular compliance, bit 1 → identity registry suite
+         *      (IR / TIR / CTR), bit 2 → identity registry storage. Only newly deployed
+         *      contracts have their ownership transferred to `_tokenDetails.owner` below;
          *      pre-existing contracts keep their current owner to avoid hijacking admin
          *      control of shared infrastructure already used by previously deployed tokens.
+         *      Packed into a single slot so the function stays within the EVM stack limit.
          */
-        bool deployedNewCompliance;
-        bool deployedNewIdentityRegistry;
-        bool deployedNewIdentityRegistryStorage;
+        uint256 deployedInfrastructure;
 
         IModularCompliance modularCompliance;
         if (_compliance == address(0)) {
             modularCompliance = IModularCompliance(_deployMC(_salt, _implementationAuthority));
             _token.setCompliance(address(modularCompliance));
             modularCompliance.bindToken(address(_token));
-            deployedNewCompliance = true;
+            deployedInfrastructure |= 1;
         } else {
             modularCompliance = IModularCompliance(_compliance);
         }
@@ -122,7 +123,7 @@ library TREXBaseDeploymentLib {
             claimTopicsRegistry = IClaimTopicsRegistry(_deployCTR(_salt, _implementationAuthority));
             if (_tokenDetails.irs == address(0)) {
                 identityRegistryStorage = IIdentityRegistryStorage(_deployIRS(_salt, _implementationAuthority));
-                deployedNewIdentityRegistryStorage = true;
+                deployedInfrastructure |= 1 << 2;
             } else {
                 identityRegistryStorage = IIdentityRegistryStorage(_tokenDetails.irs);
             }
@@ -136,7 +137,7 @@ library TREXBaseDeploymentLib {
             );
             identityRegistryStorage.bindIdentityRegistry(_identityRegistry);
             _token.setIdentityRegistry(_identityRegistry);
-            deployedNewIdentityRegistry = true;
+            deployedInfrastructure |= 1 << 1;
         } else {
             trustedIssuersRegistry = ITrustedIssuersRegistry(IIdentityRegistry(_identityRegistry).issuersRegistry());
             claimTopicsRegistry = IClaimTopicsRegistry(IIdentityRegistry(_identityRegistry).topicsRegistry());
@@ -164,11 +165,7 @@ library TREXBaseDeploymentLib {
         ) {
             AgentRole(_identityRegistry).addAgent(_tokenDetails.irAgents[identityRegistryAgentIndex]);
         }
-        for (
-            uint256 tokenAgentIndex = 0;
-            tokenAgentIndex < (_tokenDetails.tokenAgents).length;
-            tokenAgentIndex++
-        ) {
+        for (uint256 tokenAgentIndex = 0; tokenAgentIndex < (_tokenDetails.tokenAgents).length; tokenAgentIndex++) {
             AgentRole(address(_token)).addAgent(_tokenDetails.tokenAgents[tokenAgentIndex]);
         }
         for (uint256 moduleIndex = 0; moduleIndex < (_tokenDetails.complianceModules).length; moduleIndex++) {
@@ -186,15 +183,15 @@ library TREXBaseDeploymentLib {
         // Equivalent to transfer ownership of the token to the new owner
         TRexIAccessControl(address(_token)).renounceRole(TREX_OWNER_ROLE);
         TRexIAccessControl(address(_token)).renounceRole(DEFAULT_ADMIN_ROLE);
-        if (deployedNewIdentityRegistry) {
+        if (deployedInfrastructure & (1 << 1) != 0) {
             (Ownable(_identityRegistry)).transferOwnership(_tokenDetails.owner);
             (Ownable(address(trustedIssuersRegistry))).transferOwnership(_tokenDetails.owner);
             (Ownable(address(claimTopicsRegistry))).transferOwnership(_tokenDetails.owner);
         }
-        if (deployedNewCompliance) {
+        if (deployedInfrastructure & 1 != 0) {
             (Ownable(address(modularCompliance))).transferOwnership(_tokenDetails.owner);
         }
-        if (deployedNewIdentityRegistryStorage) {
+        if (deployedInfrastructure & (1 << 2) != 0) {
             (Ownable(address(identityRegistryStorage))).transferOwnership(_tokenDetails.owner);
         }
 
