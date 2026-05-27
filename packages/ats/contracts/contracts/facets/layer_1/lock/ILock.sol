@@ -64,6 +64,24 @@ interface ILock is ILockTypes {
     function release(uint256 _lockId, address _tokenHolder) external returns (bool success_);
 
     /**
+     * @notice Updates the expiration timestamp of an existing lock on the default partition.
+     * @dev Callers must hold `ROLE_LOCKER`. The new timestamp must be in the future. Both
+     *      shortening and extending are allowed — this is an intentional trusted-role design: a
+     *      second locker can correct an excessively far expiration set by a compromised account,
+     *      while an admin can revoke the malicious locker's role if needed. Emits
+     *      `LockExpirationUpdated`.
+     * @param _tokenHolder The address whose lock expiration is being updated.
+     * @param _lockId Identifier of the lock to update.
+     * @param _newExpirationTimestamp New Unix timestamp at which the lock becomes releasable.
+     * @return oldExpirationTimestamp_ The expiration timestamp that was replaced.
+     */
+    function updateLockExpiration(
+        address _tokenHolder,
+        uint256 _lockId,
+        uint256 _newExpirationTimestamp
+    ) external returns (uint256 oldExpirationTimestamp_);
+
+    /**
      * @notice Returns the total amount currently locked for `_tokenHolder` across every
      *         partition, adjusted by any pending balance-adjustment factors.
      * @param _tokenHolder The address whose total locked amount is queried.

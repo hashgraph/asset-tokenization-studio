@@ -31,7 +31,8 @@ contract LockByPartitionFacet is LockByPartition, IStaticFunctionSelectors {
                 this.getLockedAmountForByPartition.selector,
                 this.getLockCountForByPartition.selector,
                 this.getLocksIdForByPartition.selector,
-                this.getLockForByPartition.selector
+                this.getLockForByPartition.selector,
+                this.updateLockExpirationByPartition.selector
             );
     }
 

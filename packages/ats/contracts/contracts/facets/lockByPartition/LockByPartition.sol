@@ -79,6 +79,46 @@ abstract contract LockByPartition is ILockByPartition, Modifiers {
 
     /**
      * @inheritdoc ILockByPartition
+     * @dev Pause-gated, restricted to `ROLE_LOCKER`, validated against the
+     *      single-partition / default-partition rule and the lock-id existence check.
+     *      Delegates the storage mutation to `LockStorageWrapper.updateLockExpiration` and
+     *      emits `LockExpirationUpdated` with both the old and new timestamps.
+     */
+    function updateLockExpirationByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId,
+        uint256 _newExpirationTimestamp
+    )
+        external
+        override
+        onlyActivated
+        onlyUnpaused
+        onlyRole(ROLE_LOCKER)
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyWithValidLockId(_partition, _tokenHolder, _lockId)
+        onlyValidExpirationTimestamp(_newExpirationTimestamp)
+        returns (uint256 oldExpirationTimestamp_)
+    {
+        address sender = EvmAccessors.getMsgSender();
+        oldExpirationTimestamp_ = LockStorageWrapper.updateLockExpiration(
+            _partition,
+            _tokenHolder,
+            _lockId,
+            _newExpirationTimestamp
+        );
+        emit LockExpirationUpdated(
+            sender,
+            _tokenHolder,
+            _partition,
+            _lockId,
+            oldExpirationTimestamp_,
+            _newExpirationTimestamp
+        );
+    }
+
+    /**
+     * @inheritdoc ILockByPartition
      * @dev Returns the partition figure adjusted by any pending balance-adjustment factors,
      *      evaluated at `TimeTravelStorageWrapper.getBlockTimestamp()`.
      */

@@ -55,6 +55,26 @@ interface ILockByPartition is ILockTypes {
     ) external returns (bool success_);
 
     /**
+     * @notice Updates the expiration timestamp of an existing lock on `_partition`.
+     * @dev Callers must hold `ROLE_LOCKER`. The new timestamp must be in the future. Both
+     *      shortening and extending are allowed — this is an intentional trusted-role design: a
+     *      second locker can correct an excessively far expiration set by a compromised account,
+     *      while an admin can revoke the malicious locker's role if needed. Emits
+     *      `LockExpirationUpdated`.
+     * @param _partition The partition the lock lives on.
+     * @param _tokenHolder The address whose lock expiration is being updated.
+     * @param _lockId Identifier of the lock to update.
+     * @param _newExpirationTimestamp New Unix timestamp at which the lock becomes releasable.
+     * @return oldExpirationTimestamp_ The expiration timestamp that was replaced.
+     */
+    function updateLockExpirationByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId,
+        uint256 _newExpirationTimestamp
+    ) external returns (uint256 oldExpirationTimestamp_);
+
+    /**
      * @notice Returns the total locked amount of `_tokenHolder` on `_partition`, adjusted
      *         by any pending balance-adjustment factors.
      * @param _partition The partition the query is scoped to.
