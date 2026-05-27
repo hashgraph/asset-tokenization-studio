@@ -247,6 +247,46 @@ abstract contract Factory is IFactory {
     }
 
     /**
+     * @notice Deploys and fully initialises a deposit token proxy.
+     * @dev DepositToken is a minimal cash-style asset: the diamond exposes only the
+     *      controller / hold / issue verb set, plus the ERC-3643 compliance and identity
+     *      read/setter surface. No asset-specific detail data initialisers (BondUSA,
+     *      EquityUSA, FixedRate, KpiLinkedRate, ProceedRecipients, NominalValue, InterestRate)
+     *      are invoked from here — the only initialisers run are the unconditional ones in
+     *      `_deploySecurity` and `_tryInitializeSecurity`. See `docs/DEPOSIT_TOKEN_PLAN.md`.
+     * @param _depositTokenData Deposit token creation data wrapping the shared `SecurityData`.
+     * @param _factoryRegulationData Regulation type and sub-type to apply to the deposit token.
+     * @return depositTokenAddress_ Address of the newly deployed deposit token proxy.
+     */
+    function deployDepositToken(
+        DepositTokenData calldata _depositTokenData,
+        FactoryRegulationData calldata _factoryRegulationData
+    )
+        external
+        checkResolver(_depositTokenData.security.resolver)
+        checkISIN(_depositTokenData.security.erc20MetadataInfo.isin)
+        checkAdmins(_depositTokenData.security.rbacs)
+        checkRegulation(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType)
+        returns (address depositTokenAddress_)
+    {
+        depositTokenAddress_ = _deploySecurity(_depositTokenData.security, SecurityType.DepositToken);
+
+        // Initialize security regulation data (SecurityFacet may not be present)
+        _tryInitializeSecurity(
+            depositTokenAddress_,
+            _buildRegulationData(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType),
+            _factoryRegulationData.additionalSecurityData
+        );
+
+        emit DepositTokenDeployed(
+            EvmAccessors.getMsgSender(),
+            depositTokenAddress_,
+            _depositTokenData,
+            _factoryRegulationData
+        );
+    }
+
+    /**
      * @notice Builds and returns the full `RegulationData` struct for a given regulation type
      *         and sub-type combination.
      * @param _regulationType The primary regulation category.

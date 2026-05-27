@@ -19,7 +19,8 @@ interface IFactory {
         Equity,
         BondFixedRate,
         BondKpiLinkedRate,
-        Loan
+        Loan,
+        DepositToken
     }
 
     struct ResolverProxyConfiguration {
@@ -72,6 +73,10 @@ interface IFactory {
         IFixedRate.FixedRateData fixedRateData;
     }
 
+    struct DepositTokenData {
+        SecurityData security;
+    }
+
     event EquityDeployed(
         address indexed deployer,
         address equityAddress,
@@ -92,6 +97,13 @@ interface IFactory {
         address indexed deployer,
         address bondAddress,
         BondKpiLinkedRateData bondKpiLinkedRateData
+    );
+
+    event DepositTokenDeployed(
+        address indexed deployer,
+        address depositTokenAddress,
+        DepositTokenData depositTokenData,
+        FactoryRegulationData regulationData
     );
 
     event ProxyDeployed(
@@ -136,6 +148,14 @@ interface IFactory {
     function deployBondKpiLinkedRate(
         BondKpiLinkedRateData calldata _bondKpiLinkedRateData
     ) external returns (address bondAddress_);
+
+    /**
+     * @notice Deploys a new deposit token given the input deposit token data
+     */
+    function deployDepositToken(
+        DepositTokenData calldata _depositTokenData,
+        FactoryRegulationData calldata _factoryRegulationData
+    ) external returns (address depositTokenAddress_);
 
     function getAppliedRegulationData(
         RegulationType _regulationType,

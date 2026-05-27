@@ -43,6 +43,7 @@ const WORKFLOW_STEPS: Record<string, readonly string[]> = {
     "Bond Configuration",
     "Bond Fixed Rate Configuration",
     "Bond KpiLinked Rate Configuration",
+    "Deposit Token Configuration",
     "Loan Configuration",
     "Loans Portfolio Configuration",
     "Factory Configuration",

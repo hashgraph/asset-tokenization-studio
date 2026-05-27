@@ -49,6 +49,14 @@ export const BOND_FIXED_RATE_CONFIG_ID = "0x000000000000000000000000000000000000
 export const BOND_KPI_LINKED_RATE_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000004";
 
 /**
+ * Deposit Token configuration ID.
+ *
+ * bytes32(uint256(5)) = 0x00...05
+ * Used by BusinessLogicResolver to identify deposit token facet configuration.
+ */
+export const DEPOSIT_TOKEN_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000005";
+
+/**
  * Loan configuration ID.
  *
  * bytes32(uint256(6)) = 0x00...06
