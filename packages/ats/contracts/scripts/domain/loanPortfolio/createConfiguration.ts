@@ -56,7 +56,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "TransferFacet",
   "CoreAdjustedFacet",
   "InitializerFacet", // Core initializer facet
-  "MetadataFacet",
+  "CustomDataFacet",
   "FreezeFacet",
   "BatchFreezeFacet",
   "KycFacet",

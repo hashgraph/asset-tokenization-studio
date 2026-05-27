@@ -77,7 +77,7 @@ const LOAN_FACETS = [
   "TransferFacet",
   "CoreAdjustedFacet",
   "InitializerFacet", // Core initializer facet
-  "MetadataFacet",
+  "CustomDataFacet",
   "ERC20PermitFacet",
   "EIP712Facet",
   "ERC20VotesFacet",

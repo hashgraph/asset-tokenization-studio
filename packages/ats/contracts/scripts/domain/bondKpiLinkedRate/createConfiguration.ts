@@ -47,7 +47,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "TransferFacet",
   "CoreAdjustedFacet",
   "InitializerFacet", // Core initializer facet
-  "MetadataFacet",
+  "CustomDataFacet",
   "FreezeFacet",
   "BatchFreezeFacet",
   "KycFacet",
