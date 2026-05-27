@@ -7,10 +7,12 @@ import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageW
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
+import { DecimalsLib } from "../../infrastructure/utils/DecimalsLib.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { IDividend } from "../../facets/dividend/IDividend.sol";
 import { IDividendTypes } from "../../facets/dividend/IDividendTypes.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
+import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
@@ -190,6 +192,11 @@ library DividendStorageWrapper {
      *      with `recordDateReached` set to false. Otherwise sets
      *      `recordDateReached` to true and calculates the proportional amount as
      *      `tokenBalance * amount / 10^(tokenDecimals + amountDecimals)`.
+     *      The numerator is staged via `Math.mulDiv(tokenBalance, amount, 10^tokenDecimals)`
+     *      to avoid a direct two-value overflow: the token-decimal scale is consumed inside
+     *      a 512-bit intermediate, and the denominator is reduced to `10^amountDecimals`.
+     *      The resulting fraction is mathematically equivalent; intermediate products remain
+     *      bounded even for large institutional balances or high-precision dividend amounts.
      * @param dividendId The dividend identifier
      * @param account The holder address
      * @return dividendAmountFor_ Struct containing the fraction (numerator,
@@ -205,9 +212,13 @@ library DividendStorageWrapper {
 
         dividendAmountFor_.recordDateReached = true;
 
-        dividendAmountFor_.numerator = dividendFor.tokenBalance * dividendFor.amount;
+        dividendAmountFor_.numerator = Math.mulDiv(
+            dividendFor.tokenBalance,
+            dividendFor.amount,
+            DecimalsLib.pow10(dividendFor.decimals)
+        );
 
-        dividendAmountFor_.denominator = 10 ** (dividendFor.decimals + dividendFor.amountDecimals);
+        dividendAmountFor_.denominator = DecimalsLib.pow10(dividendFor.amountDecimals);
     }
 
     /**

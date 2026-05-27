@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
+import { type ResolverProxy, type IAsset, type MockEIP712 } from "@contract-types";
 import { deployEquityTokenFixture } from "@test";
 
 describe("EIP712 Tests", () => {
@@ -35,6 +35,41 @@ describe("EIP712 Tests", () => {
         const domainHash = ethers.TypedDataEncoder.hashDomain(domain);
         expect(domainSeparator).to.equal(domainHash);
       });
+    });
+  });
+
+  describe("recoverSigner zero-address validation", () => {
+    let mock: MockEIP712;
+
+    // 65-byte all-zero signature: r=0x00..00, s=0x00..00, v=0x00
+    // ecrecover returns address(0) for v not in {27, 28}
+    const INVALID_SIGNATURE = "0x" + "00".repeat(65);
+    const DUMMY_HASH = ethers.keccak256(ethers.toUtf8Bytes("test"));
+
+    beforeEach(async () => {
+      const factory = await ethers.getContractFactory("MockEIP712");
+      mock = (await factory.deploy()) as unknown as MockEIP712;
+    });
+
+    it("GIVEN a malformed signature that causes ecrecover to return address(0) WHEN recoverSigner is called THEN it reverts with WrongSignature", async () => {
+      await expect(mock.exposed_recoverSigner(DUMMY_HASH, INVALID_SIGNATURE)).to.be.revertedWithCustomError(
+        mock,
+        "WrongSignature",
+      );
+    });
+
+    it("GIVEN address(0) as signer and a malformed signature WHEN verify is called THEN it reverts with WrongSignature instead of returning true", async () => {
+      await expect(
+        mock.exposed_verify(
+          ethers.ZeroAddress,
+          DUMMY_HASH,
+          INVALID_SIGNATURE,
+          "TestContract",
+          "1",
+          1n,
+          await mock.getAddress(),
+        ),
+      ).to.be.revertedWithCustomError(mock, "WrongSignature");
     });
   });
 });
