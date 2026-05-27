@@ -33,7 +33,6 @@ interface ITransferAndLockByPartition is ITransferAndLockTypes {
      * @param _data                Additional data forwarded to the recipient.
      * @param _expirationTimestamp Unix timestamp until which the transferred tokens
      *                             are locked.
-     * @return success_  True when the transfer and lock have been recorded.
      * @return lockId_   Identifier assigned to the resulting lock for
      *                   `(_partition, _to)`.
      */
@@ -43,5 +42,5 @@ interface ITransferAndLockByPartition is ITransferAndLockTypes {
         uint256 _amount,
         bytes calldata _data,
         uint256 _expirationTimestamp
-    ) external returns (bool success_, uint256 lockId_);
+    ) external returns (uint256 lockId_);
 }

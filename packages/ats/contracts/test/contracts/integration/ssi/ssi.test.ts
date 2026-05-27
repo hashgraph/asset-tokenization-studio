@@ -113,6 +113,13 @@ describe("SSI Tests", () => {
         "UnlistedIssuer",
       );
     });
+
+    it("GIVEN zero address WHEN addIssuer THEN fails with ZeroAddressNotAllowed", async () => {
+      await expect(asset.connect(signer_C).addIssuer(ethers.ZeroAddress)).to.be.revertedWithCustomError(
+        asset,
+        "ZeroAddressNotAllowed",
+      );
+    });
   });
 
   describe("SsiManagement OK", () => {

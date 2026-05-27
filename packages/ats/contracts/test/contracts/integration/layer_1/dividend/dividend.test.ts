@@ -319,8 +319,10 @@ describe("Dividends", () => {
     expect(dividendHolders.length).to.equal(dividendTotalHolder);
     expect([...dividendHolders]).to.have.members([signer_A.address]);
     expect(dividendAmountFor.recordDateReached).to.equal(dividendFor.recordDateReached);
-    expect(dividendAmountFor.numerator).to.equal(dividendFor.tokenBalance * dividendFor.amount);
-    expect(dividendAmountFor.denominator).to.equal(10n ** (dividendFor.decimals + dividendFor.amountDecimals));
+    expect(dividendAmountFor.numerator).to.equal(
+      (dividendFor.tokenBalance * dividendFor.amount) / 10n ** BigInt(dividendFor.decimals),
+    );
+    expect(dividendAmountFor.denominator).to.equal(10n ** BigInt(dividendFor.amountDecimals));
   });
 
   it("GIVEN an account with corporateActions role WHEN setDividend and hold THEN transaction succeeds", async () => {
@@ -371,8 +373,10 @@ describe("Dividends", () => {
     expect(dividendHolders.length).to.equal(dividendTotalHolder);
     expect([...dividendHolders]).to.have.members([signer_A.address]);
     expect(dividendAmountFor.recordDateReached).to.equal(dividendFor.recordDateReached);
-    expect(dividendAmountFor.numerator).to.equal(dividendFor.tokenBalance * dividendFor.amount);
-    expect(dividendAmountFor.denominator).to.equal(10n ** (dividendFor.decimals + dividendFor.amountDecimals));
+    expect(dividendAmountFor.numerator).to.equal(
+      (dividendFor.tokenBalance * dividendFor.amount) / 10n ** BigInt(dividendFor.decimals),
+    );
+    expect(dividendAmountFor.denominator).to.equal(10n ** BigInt(dividendFor.amountDecimals));
   });
 
   it("GIVEN scheduled dividends WHEN record date is reached AND scheduled balance adjustments is set after record date THEN dividends are paid without adjusted balance", async () => {
@@ -432,8 +436,10 @@ describe("Dividends", () => {
     expect(dividendFor.amount).to.equal(dividendsAmountPerEquity);
     expect(dividendFor.amountDecimals).to.equal(dividendsAmountDecimalsPerEquity);
     expect(dividendAmountFor.recordDateReached).to.equal(dividendFor.recordDateReached);
-    expect(dividendAmountFor.numerator).to.equal(dividendFor.tokenBalance * dividendFor.amount);
-    expect(dividendAmountFor.denominator).to.equal(10n ** (dividendFor.decimals + dividendFor.amountDecimals));
+    expect(dividendAmountFor.numerator).to.equal(
+      (dividendFor.tokenBalance * dividendFor.amount) / 10n ** BigInt(dividendFor.decimals),
+    );
+    expect(dividendAmountFor.denominator).to.equal(10n ** BigInt(dividendFor.amountDecimals));
   });
 
   it("GIVEN frozen tokens WHEN calculating dividends without snapshot THEN frozen tokens are included in dividend calculation", async () => {
@@ -473,15 +479,50 @@ describe("Dividends", () => {
     expect(dividendFor.tokenBalance).to.equal(totalAmount);
     expect(dividendFor.recordDateReached).to.equal(true);
 
-    // Verify dividend calculation: (tokenBalance * amount) / (10^(decimals + amountDecimals))
-    const expectedDividendNumerator = dividendFor.tokenBalance * dividendFor.amount;
-    const expectedDividendDenominator = 10n ** (dividendFor.decimals + dividendFor.amountDecimals);
+    // Verify dividend calculation: mulDiv(tokenBalance, amount, 10^decimals) / 10^amountDecimals
+    const expectedDividendNumerator =
+      (dividendFor.tokenBalance * dividendFor.amount) / 10n ** BigInt(dividendFor.decimals);
+    const expectedDividendDenominator = 10n ** BigInt(dividendFor.amountDecimals);
     // Division result: expectedDividendNumerator / expectedDividendDenominator
 
     // Also get the dividendAmountFor to verify
     const dividendAmountFor = await asset.getDividendAmountFor(1, signer_A.address);
     expect(dividendAmountFor.numerator).to.equal(expectedDividendNumerator);
     expect(dividendAmountFor.denominator).to.equal(expectedDividendDenominator);
+  });
+
+  it("GIVEN a holder with very large balance WHEN computing dividend amount THEN it does not overflow", async () => {
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
+
+    // tokenBalance * amount = 1e40 * 1e40 = 1e80 > 2^256 → overflow without mulDiv
+    const largeBalance = 10n ** 40n;
+    const largeAmount = 10n ** 40n;
+    const amountDecimals = 0;
+
+    await asset.connect(signer_C).issueByPartition({
+      partition: DEFAULT_PARTITION,
+      tokenHolder: signer_A.address,
+      value: largeBalance,
+      data: "0x",
+    });
+
+    const overflowDividendData = {
+      recordDate: dividendsRecordDateInSeconds.toString(),
+      executionDate: dividendsExecutionDateInSeconds.toString(),
+      amount: largeAmount,
+      amountDecimals,
+    };
+
+    await asset.connect(signer_C).setDividend(overflowDividendData);
+    await asset.changeSystemTimestamp(dividendsRecordDateInSeconds + 1);
+
+    const dividendAmountFor = await asset.getDividendAmountFor(1, signer_A.address);
+    const decimals = BigInt((await asset.getDividendFor(1, signer_A.address)).decimals);
+
+    expect(dividendAmountFor.recordDateReached).to.equal(true);
+    expect(dividendAmountFor.numerator).to.equal((largeBalance * largeAmount) / 10n ** decimals);
+    expect(dividendAmountFor.denominator).to.equal(10n ** BigInt(amountDecimals));
   });
 
   it("GIVEN a dividend created WHEN calling dividend methods with a wrong dividendId THEN transactions fail with WrongIndexForAction", async () => {

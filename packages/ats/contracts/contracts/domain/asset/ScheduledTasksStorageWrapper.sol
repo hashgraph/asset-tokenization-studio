@@ -101,7 +101,7 @@ library ScheduledTasksStorageWrapper {
                 pos
             );
 
-            if (currentScheduledTask.scheduledTimestamp >= currentBlockTimestamp) break;
+            if (currentScheduledTask.scheduledTimestamp > currentBlockTimestamp) break;
 
             ScheduledTasksLib.popScheduledTask(_scheduledTasks);
 
@@ -516,7 +516,7 @@ library ScheduledTasksStorageWrapper {
         }
 
         ScheduledTask memory subTask = ScheduledTasksLib.getScheduledTasksByIndex(subQueue_, pos);
-        if (subTask.scheduledTimestamp >= currentBlockTimestamp) return;
+        if (subTask.scheduledTimestamp > currentBlockTimestamp) return;
 
         ScheduledTasksLib.popScheduledTask(subQueue_);
 
