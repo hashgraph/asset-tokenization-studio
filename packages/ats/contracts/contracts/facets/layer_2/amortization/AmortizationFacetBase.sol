@@ -7,24 +7,26 @@ import { Amortization } from "./Amortization.sol";
 
 abstract contract AmortizationFacetBase is Amortization, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        staticFunctionSelectors_ = new bytes4[](16);
-        uint256 selectorIndex;
-        staticFunctionSelectors_[selectorIndex++] = this.setAmortization.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.cancelAmortization.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.forceCancelAmortization.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getAmortization.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getAmortizationFor.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getAmortizationsFor.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getAmortizationsCount.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getAmortizationHolders.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getTotalAmortizationHolders.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.setAmortizationHold.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.releaseAmortizationHold.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getAmortizationActiveHolders.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getTotalAmortizationActiveHolders.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getActiveAmortizationIds.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getTotalActiveAmortizationIds.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getTotalHoldByAmortizationId.selector;
+        uint256 selectorIndex = 16;
+        staticFunctionSelectors_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticFunctionSelectors_[--selectorIndex] = this.getTotalHoldByAmortizationId.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getTotalActiveAmortizationIds.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getActiveAmortizationIds.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getTotalAmortizationActiveHolders.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getAmortizationActiveHolders.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.releaseAmortizationHold.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.setAmortizationHold.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getTotalAmortizationHolders.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getAmortizationHolders.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getAmortizationsCount.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getAmortizationsFor.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getAmortizationFor.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getAmortization.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.forceCancelAmortization.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.cancelAmortization.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.setAmortization.selector;
+        }
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {

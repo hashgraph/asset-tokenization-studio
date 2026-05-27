@@ -82,7 +82,7 @@ library DividendStorageWrapper {
             revert IDividend.DividendAlreadyExecuted(corporateActionId, dividendId);
         }
 
-        CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
+        _executeCancelDividend(corporateActionId);
         success_ = true;
 
         emit IDividend.DividendCancelled(dividendId, EvmAccessors.getMsgSender());
@@ -91,13 +91,13 @@ library DividendStorageWrapper {
     /**
      * @notice Cancels a dividend unconditionally, bypassing the execution-date guard.
      * @dev Use when administrative override is required after the execution date has passed.
-     *      Delegates to `CorporateActionsStorageWrapper.cancelCorporateAction` directly.
+     *      Delegates to `_executeCancelDividend` directly.
      * @param dividendId The identifier of the dividend to cancel.
      * @return success_ Always true if no revert occurred.
      */
     function forceCancelDividend(uint256 dividendId) internal returns (bool success_) {
         (, bytes32 corporateActionId, ) = getDividend(dividendId);
-        CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
+        _executeCancelDividend(corporateActionId);
         success_ = true;
     }
 
@@ -304,6 +304,14 @@ library DividendStorageWrapper {
      * @return decimals_ The token decimals at the date (or zero)
      * @return dateReached_ True if the date is in the past, false otherwise
      */
+    /**
+     * @notice Performs the storage write that cancels a dividend corporate action.
+     * @param corporateActionId The corporate-action identifier linked to the dividend.
+     */
+    function _executeCancelDividend(bytes32 corporateActionId) private {
+        CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
+    }
+
     function _getSnapshotBalanceForIfDateReached(
         uint256 date,
         uint256 snapshotId,

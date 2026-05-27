@@ -71,7 +71,7 @@ library VotingStorageWrapper {
             revert IVoting.VotingAlreadyRecorded(corporateActionId, voteId);
         }
 
-        CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
+        _executeCancelVoting(corporateActionId);
         success_ = true;
 
         emit IVoting.VotingCancelled(voteId, EvmAccessors.getMsgSender());
@@ -80,13 +80,13 @@ library VotingStorageWrapper {
     /**
      * @notice Cancels a voting unconditionally, bypassing the record-date guard.
      * @dev Use when administrative override is required after the record date has passed.
-     *      Delegates to `CorporateActionsStorageWrapper.cancelCorporateAction` directly.
+     *      Delegates to `_executeCancelVoting` directly.
      * @param voteId The identifier of the voting to cancel.
      * @return success_ Always true if no revert occurred.
      */
     function forceCancelVoting(uint256 voteId) internal returns (bool success_) {
         (, bytes32 corporateActionId, ) = getVoting(voteId);
-        CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
+        _executeCancelVoting(corporateActionId);
         success_ = true;
     }
 
@@ -235,6 +235,14 @@ library VotingStorageWrapper {
      * @return decimals_    Token decimals at the resolved point in time.
      * @return dateReached_ True when the record date has been reached.
      */
+    /**
+     * @notice Performs the storage write that cancels a voting corporate action.
+     * @param corporateActionId The corporate-action identifier linked to the voting.
+     */
+    function _executeCancelVoting(bytes32 corporateActionId) private {
+        CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
+    }
+
     function _getSnapshotBalanceForIfDateReached(
         uint256 date,
         uint256 snapshotId,
