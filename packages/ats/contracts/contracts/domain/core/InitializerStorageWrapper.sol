@@ -102,7 +102,12 @@ library InitializerStorageWrapper {
             .getBusinessLogicResolver()
             .getFacetConfigurationsByConfigurationIdAndVersion(configId_, versionId_, nextFacetIndex, lastFacetIndex_);
 
-        (isOperational_, lastFacetIndex_) = _checkFacetsReady(facetConfigurations, nextFacetIndex, facetsLength);
+        (isOperational_, lastFacetIndex_) = _checkFacetsReady(
+            facetConfigurations,
+            nextFacetIndex,
+            facetsLength,
+            lastFacetIndex_
+        );
 
         unchecked {
             initializerStorage().configVersionStatus[configId_][versionId_] = isOperational_ ? 1 : lastFacetIndex_ + 1;
@@ -308,9 +313,10 @@ library InitializerStorageWrapper {
     function _checkFacetsReady(
         IDiamondCutManager.FacetConfiguration[] memory _facetConfigurations,
         uint256 _nextFacetIndex,
-        uint256 _facetsLength
+        uint256 _facetsLength,
+        uint256 _requestedLastFacetIndex
     ) private view returns (bool allReady_, uint256 lastFacetIndex_) {
-        lastFacetIndex_ = _facetsLength;
+        lastFacetIndex_ = _requestedLastFacetIndex;
         uint256 facetConfigurationsLength = _facetConfigurations.length;
 
         for (uint256 facetIndex; facetIndex < facetConfigurationsLength; ) {
