@@ -40,6 +40,10 @@ describe("Hedera Utilities", () => {
         expect(isHederaNetwork(TEST_NETWORKS.PREVIEWNET)).to.be.true;
       });
 
+      it("should return true for hedera-hashsphere", () => {
+        expect(isHederaNetwork(TEST_NETWORKS.HASHSPHERE)).to.be.true;
+      });
+
       it("should return true for testnet (without hedera prefix)", () => {
         expect(isHederaNetwork(TEST_NETWORKS.TESTNET_SHORT)).to.be.true;
       });

@@ -126,7 +126,7 @@ export const DEPLOYMENT_CONFIGS: Record<string, DeploymentConfig> = {
    * - Typical: 3 × 5-10s + 15s = ~30 seconds
    */
   "hedera-previewnet": {
-    confirmations: 1,
+    confirmations: 2,
     timeout: 120_000, // 2 minutes per attempt
     retryOptions: {
       maxRetries: 2, // 3 total attempts
@@ -171,7 +171,7 @@ export const DEPLOYMENT_CONFIGS: Record<string, DeploymentConfig> = {
     confirmations: 1,
     timeout: 120_000, // 2 minutes per attempt
     retryOptions: {
-      maxRetries: 3, // 3 retries after initial attempt (4 total attempts)
+      maxRetries: 2, // 3 retries after initial attempt (4 total attempts)
       baseDelay: 2000,
       maxDelay: 8000,
       logRetries: true,
