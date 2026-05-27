@@ -35,9 +35,15 @@ interface IFactory {
         DepositToken
     }
 
+    /**
+     * @notice Categories of dividend entitlement an equity token may carry.
+     */
     enum DividendType {
+        /// No dividend right.
         NONE,
+        /// Preferential dividend — paid before common holders.
         PREFERRED,
+        /// Ordinary dividend distributed pro-rata across common holders.
         COMMON
     }
 
@@ -93,6 +99,20 @@ interface IFactory {
         bool erc20VotesActivated;
     }
 
+    /**
+     * @notice Economic and rights parameters specific to equity tokens.
+     * @param votingRight          Whether holders carry voting rights.
+     * @param informationRight     Whether holders are entitled to company information.
+     * @param liquidationRight     Whether holders have a claim on assets upon liquidation.
+     * @param subscriptionRight    Whether holders may subscribe to new issuances.
+     * @param conversionRight      Whether holders may convert their tokens into another class.
+     * @param redemptionRight      Whether holders may redeem tokens for the underlying asset.
+     * @param putRight             Whether holders may force the issuer to repurchase tokens.
+     * @param dividendRight        Category of dividend entitlement this equity class carries.
+     * @param currency             ISO 4217 currency code encoded as `bytes3`.
+     * @param nominalValue         Face value of one equity unit (raw integer).
+     * @param nominalValueDecimals Number of decimal places applied to `nominalValue`.
+     */
     struct EquityDetailsData {
         bool votingRight;
         bool informationRight;

@@ -16,11 +16,10 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
 /**
  * @title  Maturity
  * @author Asset Tokenization Studio Team
- * @notice Interface for bond maturity redemption and maturity date management.
- * @dev    `fullRedeemAtMaturity` and `updateMaturityDate` are extracted from the Bond facet
- *         into a dedicated Maturity facet registered under `RESOLVER_KEY_MATURITY`.
- *         Events and errors — `MaturityDateUpdated` and `BondMaturityDateWrong`
- * @author Asset Tokenization Studio Team
+ * @notice Maturity facet for token redemption and maturity date management.
+ * @dev    `fullRedeemAtMaturity` and `updateMaturityDate` manage the token maturity lifecycle,
+ *         registered under `RESOLVER_KEY_MATURITY`.
+ *         Events: `MaturityDateUpdated`. Errors: `MaturityDateInvalid`.
  */
 abstract contract Maturity is IMaturity, Modifiers {
     /// @inheritdoc IMaturity
