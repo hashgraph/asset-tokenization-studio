@@ -97,6 +97,20 @@ library CouponStorageWrapper {
     }
 
     /**
+     * @notice Cancels a coupon unconditionally, bypassing the execution-date guard.
+     * @dev Use when administrative override is required after the execution date has passed.
+     *      Delegates to `CorporateActionsStorageWrapper.cancelCorporateAction` directly.
+     * @param couponId One-indexed identifier of the coupon to cancel.
+     * @return success_ Always true if no revert occurred.
+     */
+    function forceCancelCoupon(uint256 couponId) internal returns (bool success_) {
+        bytes32 corporateActionId;
+        (, corporateActionId, ) = getCoupon(couponId);
+        CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
+        success_ = true;
+    }
+
+    /**
      * @notice Schedules snapshot and optional coupon-listing tasks for a newly
      *         persisted coupon.
      * @dev Reverts if `actionId` is zero (indicates prior corporate-action creation

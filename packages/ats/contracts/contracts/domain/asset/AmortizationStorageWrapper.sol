@@ -55,9 +55,13 @@ struct AmortizationDataStorage {
 
 /**
  * @title AmortizationStorageWrapper
- * @notice Storage wrapper for amortization management operations
- * @dev Manages amortization schedules, payments, and related calculations
- * @author Hashgraph
+ * @author Asset Tokenization Studio Team
+ * @notice Library managing the full lifecycle of amortisation corporate actions:
+ *         creation, hold placement and release, cancellation, and paginated holder queries.
+ * @dev All state resides at `_AMORTIZATION_STORAGE_POSITION` via the diamond-storage pattern.
+ *      Hold management writes directly to `HoldStorageWrapper` storage rather than going
+ *      through the facet call surface, avoiding calldata-conversion overhead.
+ *      Snapshot balances are used after the record date; live ERC1410 state is used before it.
  */
 library AmortizationStorageWrapper {
     using EnumerableSet for EnumerableSet.AddressSet;
@@ -122,11 +126,24 @@ library AmortizationStorageWrapper {
             revert IAmortization.AmortizationAlreadyExecuted(corporateActionId, _amortizationID);
         }
 
-        _amortizationStorage().disabledAmortizations[corporateActionId] = true;
-        _amortizationStorage().activeAmortizationIds.remove(_amortizationID);
-        CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
+        _executeCancelAmortization(corporateActionId, _amortizationID);
 
         emit IAmortization.AmortizationCancelled(_amortizationID, EvmAccessors.getMsgSender());
+        success_ = true;
+    }
+
+    /**
+     * @notice Cancels an amortisation unconditionally, bypassing the execution-date guard.
+     * @dev Use when administrative override is required after the execution date has passed.
+     *      Delegates to `_executeCancelAmortization` for the actual storage mutation.
+     * @param _amortizationID The identifier of the amortisation to cancel.
+     * @return success_ Always true if no revert occurred.
+     */
+    function forceCancelAmortization(uint256 _amortizationID) internal returns (bool success_) {
+        (, bytes32 corporateActionId, ) = getAmortization(_amortizationID);
+
+        _executeCancelAmortization(corporateActionId, _amortizationID);
+
         success_ = true;
     }
 
@@ -519,6 +536,19 @@ library AmortizationStorageWrapper {
      */
     function checkPositiveTokenAmount(uint256 _tokenAmount, uint256 _amortizationID) internal pure {
         if (_tokenAmount == 0) revert IAmortization.InvalidAmortizationHoldAmount(_amortizationID);
+    }
+
+    /**
+     * @notice Performs the storage writes that cancel an amortisation.
+     * @dev Marks the corporate action as disabled, removes the amortisation from the
+     *      active-IDs set, and delegates to `CorporateActionsStorageWrapper.cancelCorporateAction`.
+     * @param corporateActionId The corporate-action identifier linked to the amortisation.
+     * @param _amortizationID   The one-indexed amortisation identifier to remove from the active set.
+     */
+    function _executeCancelAmortization(bytes32 corporateActionId, uint256 _amortizationID) private {
+        _amortizationStorage().disabledAmortizations[corporateActionId] = true;
+        _amortizationStorage().activeAmortizationIds.remove(_amortizationID);
+        CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
     }
 
     /**

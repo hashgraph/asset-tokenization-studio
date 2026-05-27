@@ -19,17 +19,9 @@ bytes32 constant RESOLVER_KEY_SCHEDULED_CROSS_ORDERED_TASKS_KPI_LINKED_RATE = 0x
  */
 interface IScheduledCrossOrderedTasks {
     /**
-     * @notice Emitted when execution of a scheduled task fails.
-     * @param actionId Corporate action identifier or task type associated with the failed task.
-     * @param taskType Scheduled task category or dispatch type that failed.
-     * @param scheduledTimestamp Timestamp at which the failed task was scheduled to become due.
-     */
-    event TaskExecutionFailed(bytes32 indexed actionId, bytes32 indexed taskType, uint256 scheduledTimestamp);
-
-    /**
      * @notice Triggers all currently due cross-ordered scheduled tasks.
      * @dev Mutates scheduled task queues and may trigger one due downstream task per
-     *      cross-ordered task. Implementations may emit `TaskExecutionFailed` for failed tasks.
+     *      cross-ordered task. A failing task reverts the entire call.
      * @return Number of cross-ordered tasks processed from the queue.
      */
     function triggerPendingScheduledCrossOrderedTasks() external returns (uint256);
