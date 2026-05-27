@@ -22,6 +22,7 @@ import {
 import { BusinessLogicResolver } from "@contract-types";
 import { EQUITY_CONFIG_ID } from "../constants";
 import { atsRegistry } from "../atsRegistry";
+import { buildFacetList } from "../facetEnvironment";
 import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
 
 /**
@@ -43,7 +44,7 @@ const EQUITY_FACETS = [
   "CapByPartitionFacet",
   "ControlListFacet",
   "CorporateActionsFacet",
-  "MockDiamondCut", // TEST-ONLY: Replaces DiamondFacet for integration tests
+  "DiamondFacet",
   "CoreFacet",
   "TransferFacet",
   "CoreAdjustedFacet",
@@ -201,12 +202,7 @@ export async function createEquityConfiguration(
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  // Build facet list based on time travel mode
-  // When useTimeTravel=true, ALL facets get TimeTravel suffix (universal mapping)
-  // plus TimeTravelFacet controller. No filtering needed — simplifies deployment logic.
-  const facetNames = useTimeTravel
-    ? [...EQUITY_FACETS.map((name) => `${name}TimeTravel`), "TimeTravelFacet"]
-    : [...EQUITY_FACETS];
+  const facetNames = buildFacetList(EQUITY_FACETS, useTimeTravel);
 
   // Build facet data with resolver keys from registry
   const facets = facetNames.map((name) => {

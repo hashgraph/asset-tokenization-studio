@@ -19,7 +19,7 @@ import {
   OperationResult,
   DEFAULT_BATCH_SIZE,
 } from "@scripts/infrastructure";
-import { BOND_KPI_LINKED_RATE_CONFIG_ID, atsRegistry } from "@scripts/domain";
+import { BOND_KPI_LINKED_RATE_CONFIG_ID, atsRegistry, buildFacetList, getMockFacetDefinition } from "@scripts/domain";
 import { BusinessLogicResolver } from "@contract-types";
 
 /**
@@ -207,19 +207,14 @@ export async function createBondKpiLinkedRateConfiguration(
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  // Build facet list based on time travel mode
-  // When useTimeTravel=true, ALL facets get TimeTravel suffix (universal mapping)
-  // plus TimeTravelFacet controller. No filtering needed — simplifies deployment logic.
-  const facetNames = useTimeTravel
-    ? [...BOND_KPI_LINKED_RATE_FACETS.map((name) => `${name}TimeTravel`), "TimeTravelFacet"]
-    : [...BOND_KPI_LINKED_RATE_FACETS];
+  const facetNames = buildFacetList(BOND_KPI_LINKED_RATE_FACETS, useTimeTravel);
 
   // Build facet data with resolver keys from registry
   const facets = facetNames.map((name) => {
     // Strip "TimeTravel" suffix to get base name for registry lookup
     const baseName = name.replace(/TimeTravel$/, "");
 
-    const facetDef = atsRegistry.getFacetDefinition(baseName);
+    const facetDef = atsRegistry.getFacetDefinition(baseName) ?? getMockFacetDefinition(baseName);
     if (!facetDef?.resolverKey?.value) {
       throw new Error(`No resolver key found for facet: ${baseName}`);
     }
