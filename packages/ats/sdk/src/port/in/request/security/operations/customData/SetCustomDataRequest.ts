@@ -3,7 +3,7 @@
 import ValidatedRequest from "@core/validation/ValidatedArgs";
 import FormatValidation from "@port/in/request/FormatValidation";
 
-export default class SetMetadataRequest extends ValidatedRequest<SetMetadataRequest> {
+export default class SetCustomDataRequest extends ValidatedRequest<SetCustomDataRequest> {
   securityId: string;
   key: string;
   value: string[];

@@ -3,14 +3,14 @@
 import { Command } from "@core/command/Command";
 import { CommandResponse } from "@core/command/CommandResponse";
 
-export class SetMetadataCommandResponse implements CommandResponse {
+export class SetCustomDataCommandResponse implements CommandResponse {
   constructor(
     public readonly payload: boolean,
     public readonly transactionId: string,
   ) {}
 }
 
-export class SetMetadataCommand extends Command<SetMetadataCommandResponse> {
+export class SetCustomDataCommand extends Command<SetCustomDataCommandResponse> {
   constructor(
     public readonly securityId: string,
     public readonly key: string,

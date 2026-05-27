@@ -155,8 +155,8 @@ import GrantKycMockRequest from "./security/externalKycLists/mock/GrantKycMockRe
 import RevokeKycMockRequest from "./security/externalKycLists/mock/RevokeKycMockRequest";
 import GetKycStatusMockRequest from "./security/externalKycLists/mock/GetKycStatusMockRequest";
 import SetNameRequest from "./security/operations/tokeMetadata/SetNameRequest";
-import SetMetadataRequest from "./security/operations/metadata/SetMetadataRequest";
-import GetMetadataRequest from "./security/operations/metadata/GetMetadataRequest";
+import SetCustomDataRequest from "./security/operations/customData/SetCustomDataRequest";
+import GetCustomDataRequest from "./security/operations/customData/GetCustomDataRequest";
 import SetSymbolRequest from "./security/operations/tokeMetadata/SetSymbolRequest";
 import SetNominalValueRequest from "./security/operations/nominalValue/SetNominalValueRequest";
 import SetNominalValueCurrencyRequest from "./security/operations/nominalValue/SetNominalValueCurrencyRequest";
@@ -411,8 +411,8 @@ export {
   RevokeKycMockRequest,
   GetKycStatusMockRequest,
   SetNameRequest,
-  SetMetadataRequest,
-  GetMetadataRequest,
+  SetCustomDataRequest,
+  GetCustomDataRequest,
   SetSymbolRequest,
   SetOnchainIDRequest,
   SetComplianceRequest,

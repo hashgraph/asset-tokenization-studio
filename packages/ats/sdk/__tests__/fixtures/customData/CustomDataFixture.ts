@@ -2,16 +2,16 @@
 
 import { createFixture } from "../config";
 import { HederaIdPropsFixture } from "../shared/DataFixture";
-import { SetMetadataCommand } from "@command/security/operations/metadata/setMetadata/SetMetadataCommand";
-import SetMetadataRequest from "@port/in/request/security/operations/metadata/SetMetadataRequest";
+import { SetCustomDataCommand } from "@command/security/operations/customData/setCustomData/SetCustomDataCommand";
+import SetCustomDataRequest from "@port/in/request/security/operations/customData/SetCustomDataRequest";
 
-export const SetMetadataCommandFixture = createFixture<SetMetadataCommand>((command) => {
+export const SetCustomDataCommandFixture = createFixture<SetCustomDataCommand>((command) => {
   command.securityId.as(() => HederaIdPropsFixture.create().value);
   command.key.faker((faker) => faker.string.alpha({ length: 10 }));
   command.value.as(() => ["value1", "value2"]);
 });
 
-export const SetMetadataRequestFixture = createFixture<SetMetadataRequest>((request) => {
+export const SetCustomDataRequestFixture = createFixture<SetCustomDataRequest>((request) => {
   request.securityId.as(() => HederaIdPropsFixture.create().value);
   request.key.faker((faker) => faker.string.alpha({ length: 10 }));
   request.value.as(() => ["value1", "value2"]);

@@ -6,11 +6,11 @@ import { lazyInject } from "@core/decorator/LazyInjectDecorator";
 import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
 import ContractService from "@service/contract/ContractService";
 import EvmAddress from "@domain/context/contract/EvmAddress";
-import { GetMetadataQuery, GetMetadataQueryResponse } from "./GetMetadataQuery";
-import { GetMetadataQueryError } from "./error/GetMetadataQueryError";
+import { GetCustomDataQuery, GetCustomDataQueryResponse } from "./GetCustomDataQuery";
+import { GetCustomDataQueryError } from "./error/GetCustomDataQueryError";
 
-@QueryHandler(GetMetadataQuery)
-export class GetMetadataQueryHandler implements IQueryHandler<GetMetadataQuery> {
+@QueryHandler(GetCustomDataQuery)
+export class GetCustomDataQueryHandler implements IQueryHandler<GetCustomDataQuery> {
   constructor(
     @lazyInject(RPCQueryAdapter)
     private readonly queryAdapter: RPCQueryAdapter,
@@ -18,16 +18,16 @@ export class GetMetadataQueryHandler implements IQueryHandler<GetMetadataQuery> 
     private readonly contractService: ContractService,
   ) {}
 
-  async execute(query: GetMetadataQuery): Promise<GetMetadataQueryResponse> {
+  async execute(query: GetCustomDataQuery): Promise<GetCustomDataQueryResponse> {
     try {
       const { securityId, key } = query;
 
       const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
-      const res = await this.queryAdapter.getMetadata(securityEvmAddress, key);
+      const res = await this.queryAdapter.getCustomData(securityEvmAddress, key);
 
-      return new GetMetadataQueryResponse(res);
+      return new GetCustomDataQueryResponse(res);
     } catch (error) {
-      throw new GetMetadataQueryError(error as Error);
+      throw new GetCustomDataQueryError(error as Error);
     }
   }
 }
