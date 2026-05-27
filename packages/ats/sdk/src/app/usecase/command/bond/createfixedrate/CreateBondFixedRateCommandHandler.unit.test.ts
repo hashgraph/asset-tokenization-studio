@@ -107,9 +107,7 @@ describe("CreateBondFixedRateCommandHandler", () => {
 
         const resultPromise = handler.execute(commandWithNotConfigVersion);
         await expect(resultPromise).rejects.toMatchObject({
-          message: expect.stringContaining(
-            `An error occurred while creating the bond fixed rate: Config Version not found in request`,
-          ),
+          message: expect.stringContaining("Config Version not found in request"),
           errorCode: ErrorCode.InvalidRequest,
         });
       });

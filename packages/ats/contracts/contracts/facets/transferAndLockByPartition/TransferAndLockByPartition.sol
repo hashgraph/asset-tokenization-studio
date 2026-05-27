@@ -44,7 +44,7 @@ abstract contract TransferAndLockByPartition is ITransferAndLockByPartition, Mod
         onlyWithValidExpirationTimestamp(_expirationTimestamp)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnProtectedPartitionsOrWildCardRole
-        returns (bool success_, uint256 lockId_)
+        returns (uint256 lockId_)
     {
         TokenCoreOps.transferByPartition(
             EvmAccessors.getMsgSender(),
@@ -54,7 +54,7 @@ abstract contract TransferAndLockByPartition is ITransferAndLockByPartition, Mod
             EvmAccessors.getMsgSender(),
             ""
         );
-        (success_, lockId_) = LockStorageWrapper.lockByPartition(
+        lockId_ = LockStorageWrapper.lockByPartition(
             _partition,
             _amount,
             _to,

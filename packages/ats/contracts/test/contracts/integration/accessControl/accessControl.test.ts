@@ -243,7 +243,13 @@ describe("Access Control Tests", () => {
         .applyRoles([ATS_ROLES.ROLE_PAUSER, ATS_ROLES.DEFAULT_ADMIN_ROLE], [false, true], signer_C.address),
     )
       .to.emit(asset, "RolesApplied")
-      .withArgs([ATS_ROLES.ROLE_PAUSER, ATS_ROLES.DEFAULT_ADMIN_ROLE], [false, true], signer_C.address);
+      .withArgs(
+        [ATS_ROLES.ROLE_PAUSER, ATS_ROLES.DEFAULT_ADMIN_ROLE],
+        [false, true],
+        signer_C.address,
+        [ATS_ROLES.ROLE_PAUSER, ATS_ROLES.DEFAULT_ADMIN_ROLE],
+        [false, true],
+      );
 
     // check that C has the role
     expect(await asset.hasRole(ATS_ROLES.ROLE_PAUSER, signer_C.address)).to.equal(false);
@@ -285,6 +291,8 @@ describe("Access Control Tests", () => {
         [ATS_ROLES.ROLE_PAUSER, ATS_ROLES.DEFAULT_ADMIN_ROLE, ATS_ROLES.DEFAULT_ADMIN_ROLE],
         [true, false, false],
         signer_C.address,
+        [],
+        [],
       );
 
     // check that C has the role
@@ -297,6 +305,40 @@ describe("Access Control Tests", () => {
     expect(roleCountFor_C).to.equal(1);
     expect(rolesFor_C.length).to.equal(roleCountFor_C);
     expect(rolesFor_C[0].toUpperCase()).to.equal(ATS_ROLES.ROLE_PAUSER.toUpperCase());
+  });
+
+  it("GIVEN a mixed batch of effective and no-op entries WHEN applyRoles THEN RolesApplied carries only the effectively changed entries in input order", async () => {
+    // Pre-state: signer_C holds ROLE_PAUSER and ROLE_AGENT, nothing else.
+    await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_PAUSER, signer_C.address);
+    await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_AGENT, signer_C.address);
+
+    // Five entries, alternating no-op / effective. The interleaving is the point:
+    // it exercises the count-cursor vs index-write path that all-effective and
+    // all-no-op batches cannot distinguish (audit FIND-142 cursor correctness).
+    const requestedRoles = [
+      ATS_ROLES.ROLE_CAP, // revoke unheld → no-op
+      ATS_ROLES.DEFAULT_ADMIN_ROLE, // grant new → effective
+      ATS_ROLES.ROLE_PAUSER, // grant held → no-op
+      ATS_ROLES.ROLE_AGENT, // revoke held → effective
+      ATS_ROLES.ROLE_BOND_MANAGER, // revoke unheld → no-op
+    ];
+    const requestedStates = [false, true, true, false, false];
+
+    await expect(asset.connect(deployer).applyRoles(requestedRoles, requestedStates, signer_C.address))
+      .to.emit(asset, "RolesApplied")
+      .withArgs(
+        requestedRoles,
+        requestedStates,
+        signer_C.address,
+        [ATS_ROLES.DEFAULT_ADMIN_ROLE, ATS_ROLES.ROLE_AGENT],
+        [true, false],
+      );
+
+    expect(await asset.hasRole(ATS_ROLES.ROLE_CAP, signer_C.address)).to.equal(false);
+    expect(await asset.hasRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, signer_C.address)).to.equal(true);
+    expect(await asset.hasRole(ATS_ROLES.ROLE_PAUSER, signer_C.address)).to.equal(true);
+    expect(await asset.hasRole(ATS_ROLES.ROLE_AGENT, signer_C.address)).to.equal(false);
+    expect(await asset.hasRole(ATS_ROLES.ROLE_BOND_MANAGER, signer_C.address)).to.equal(false);
   });
 
   it("GIVEN an account that already has a role WHEN grantRole is called again THEN transaction fails with AccountAssignedToRole", async () => {

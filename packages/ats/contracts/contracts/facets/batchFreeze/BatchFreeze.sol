@@ -52,6 +52,7 @@ abstract contract BatchFreeze is IBatchFreeze, Modifiers {
         onlyUnpaused
         onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
         onlyWithoutMultiPartition
+        onlyFreezeRoles(EvmAccessors.getMsgSender())
     {
         uint256 length = _userAddresses.length;
         for (uint256 i; i < length; ) {
@@ -75,6 +76,7 @@ abstract contract BatchFreeze is IBatchFreeze, Modifiers {
         onlyUnpaused
         onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
         onlyWithoutMultiPartition
+        onlyFreezeRoles(EvmAccessors.getMsgSender())
     {
         uint256 length = _userAddresses.length;
         for (uint256 i; i < length; ) {

@@ -5,6 +5,7 @@ import { UpdateConfigVersionCommandHandler } from "@command/management/updateCon
 import { UpdateConfigCommandHandler } from "@command/management/updateConfig/updateConfigCommandHandler";
 import { UpdateResolverCommandHandler } from "@command/management/updateResolver/updateResolverCommandHandler";
 import { GetConfigInfoQueryHandler } from "@query/management/GetConfigInfoQueryHandler";
+import { ResolveLatestConfigVersionQueryHandler } from "@query/management/resolveLatestConfigVersion/ResolveLatestConfigVersionQueryHandler";
 
 export const COMMAND_HANDLERS_RESOLVER = [
   {
@@ -25,5 +26,9 @@ export const QUERY_HANDLERS_RESOLVER = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetConfigInfoQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: ResolveLatestConfigVersionQueryHandler,
   },
 ];

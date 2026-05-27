@@ -67,7 +67,8 @@ interface ISsiManagement {
     /**
      * @notice Adds an address to the trusted issuer list.
      * @dev Requires `ROLE_SSI_MANAGER` and the token to be unpaused. Reverts with `ListedIssuer`
-     *      if the address is already listed. Emits `AddedToIssuerList`.
+     *      if the address is already listed, or with `ZeroAddressNotAllowed` if the address is
+     *      zero. Emits `AddedToIssuerList`.
      * @param _issuer Address of the issuer to add.
      * @return success_ True if the issuer was added successfully.
      */
