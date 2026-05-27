@@ -275,7 +275,7 @@ describe("TransferAndLockByPartition Tests", () => {
     });
 
     it("GIVEN non-operational WHEN transferAndLockByPartition is called THEN AssetNotOperational", async () => {
-      await expect(asset.transferAndLockByPartition(ethers.ZeroHash, { to: ethers.ZeroAddress, value: 0n }, "0x", 0n))
+      await expect(asset.transferAndLockByPartition(ethers.ZeroHash, ethers.ZeroAddress, 0n, "0x", 0n))
         .to.be.revertedWithCustomError(asset, "AssetNotOperational")
         .withArgs(EQUITY_CONFIG_ID, 1);
     });

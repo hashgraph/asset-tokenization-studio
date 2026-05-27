@@ -104,7 +104,7 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
     }
 
     function getStaticInterfaceIds() external pure returns (bytes4[] memory staticInterfaceIds_) {
-        return Bytes4Builder.build(type(IMockDiamondCut).interfaceId);
+        return Bytes4Builder.build(type(IERC165).interfaceId, type(IMockDiamondCut).interfaceId);
     }
 }
 /* solhint-enable */

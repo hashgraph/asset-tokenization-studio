@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type IAsset, MockDiamondCut } from "@contract-types";
-import { ZERO, EMPTY_STRING, ATS_ROLES, ADDRESS_ZERO, EQUITY_CONFIG_ID } from "@scripts";
+import { ZERO, EMPTY_STRING, ATS_ROLES, ADDRESS_ZERO } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";

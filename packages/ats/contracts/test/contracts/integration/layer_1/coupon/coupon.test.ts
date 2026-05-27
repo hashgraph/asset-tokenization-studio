@@ -12,14 +12,13 @@ import {
   ZERO,
   EMPTY_HEX_BYTES,
   EMPTY_STRING,
-  EQUITY_CONFIG_ID,
+  BOND_FIXED_RATE_CONFIG_ID,
   COUPON_RESOLVER_KEY,
 } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import {
   getDltTimestamp,
   grantRoleAndPauseToken,
-  deployEquityTokenFixture,
   deployBondTokenFixture,
   deployBondFixedRateTokenFixture,
   executeRbac,
@@ -990,6 +989,7 @@ describe("Coupon Fixed-Rate Variant Tests", () => {
     signer_C = base.user2;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
       { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
@@ -1072,9 +1072,6 @@ describe("Coupon Fixed-Rate Variant Tests", () => {
 
   describe("nonOperational", () => {
     beforeEach(async () => {
-      const base = await deployEquityTokenFixture();
-      asset = await ethers.getContractAt("IAsset", base.diamond.target);
-      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", base.diamond.target);
       await mockDiamondCut.forceNonOperational();
     });
 
@@ -1095,7 +1092,7 @@ describe("Coupon Fixed-Rate Variant Tests", () => {
     it("GIVEN non-operational WHEN cancelCoupon is called THEN AssetNotOperational", async () => {
       await expect(asset.cancelCoupon(0n))
         .to.be.revertedWithCustomError(asset, "AssetNotOperational")
-        .withArgs(EQUITY_CONFIG_ID, 1);
+        .withArgs(BOND_FIXED_RATE_CONFIG_ID, 1);
     });
   });
 });

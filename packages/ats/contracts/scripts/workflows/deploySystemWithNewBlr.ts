@@ -1311,43 +1311,50 @@ export async function deploySystemWithNewBlr(
           // Use type guard to safely access .data property
           if (!isSuccess(equityConfig)) return [];
           const equityKeys = new Set(equityConfig.data.facetKeys.map((f) => f.key));
-          return output.facets.filter((facet) => equityKeys.has(facet.key));
+          const filtered = output.facets.filter((facet) => equityKeys.has(facet.key));
+          return Array.from(new Map(filtered.map((f) => [f.key, f])).values());
         },
         getBondFacets() {
           // Use type guard to safely access .data property
           if (!isSuccess(bondConfig)) return [];
           const bondKeys = new Set(bondConfig.data.facetKeys.map((f) => f.key));
-          return output.facets.filter((facet) => bondKeys.has(facet.key));
+          const filtered = output.facets.filter((facet) => bondKeys.has(facet.key));
+          return Array.from(new Map(filtered.map((f) => [f.key, f])).values());
         },
         getBondFixedRateFacets() {
           // Use type guard to safely access .data property
           if (!isSuccess(bondFixedRateConfig)) return [];
           const bondFixedRateKeys = new Set(bondFixedRateConfig.data.facetKeys.map((f) => f.key));
-          return output.facets.filter((facet) => bondFixedRateKeys.has(facet.key));
+          const filtered = output.facets.filter((facet) => bondFixedRateKeys.has(facet.key));
+          return Array.from(new Map(filtered.map((f) => [f.key, f])).values());
         },
         getBondKpiLinkedRateFacets() {
           // Use type guard to safely access .data property
           if (!isSuccess(bondKpiLinkedRateConfig)) return [];
           const bondKpiLinkedRateKeys = new Set(bondKpiLinkedRateConfig.data.facetKeys.map((f) => f.key));
-          return output.facets.filter((facet) => bondKpiLinkedRateKeys.has(facet.key));
+          const filtered = output.facets.filter((facet) => bondKpiLinkedRateKeys.has(facet.key));
+          return Array.from(new Map(filtered.map((f) => [f.key, f])).values());
         },
         getLoanFacets() {
           // Use type guard to safely access .data property
           if (!isSuccess(loanConfig)) return [];
           const loanKeys = new Set(loanConfig.data.facetKeys.map((f) => f.key));
-          return output.facets.filter((facet) => loanKeys.has(facet.key));
+          const filtered = output.facets.filter((facet) => loanKeys.has(facet.key));
+          return Array.from(new Map(filtered.map((f) => [f.key, f])).values());
         },
         getLoansPortfolioFacets() {
           // Use type guard to safely access .data property
           if (!isSuccess(loansPortfolioConfig)) return [];
           const loansPortfolioKeys = new Set(loansPortfolioConfig.data.facetKeys.map((f) => f.key));
-          return output.facets.filter((facet) => loansPortfolioKeys.has(facet.key));
+          const filtered = output.facets.filter((facet) => loansPortfolioKeys.has(facet.key));
+          return Array.from(new Map(filtered.map((f) => [f.key, f])).values());
         },
         getFactoryFacets() {
           // Use type guard to safely access .data property
           if (!isSuccess(factoryConfig)) return [];
           const factoryKeys = new Set(factoryConfig.data.facetKeys.map((f) => f.key));
-          return output.facets.filter((facet) => factoryKeys.has(facet.key));
+          const filtered = output.facets.filter((facet) => factoryKeys.has(facet.key));
+          return Array.from(new Map(filtered.map((f) => [f.key, f])).values());
         },
       },
     };
