@@ -9,7 +9,6 @@ import { Checkpoints } from "../../../../infrastructure/utils/Checkpoints.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
 import { ERC20VotesStorageWrapper } from "../../../../domain/asset/ERC20VotesStorageWrapper.sol";
 import { InitializerStorageWrapper } from "../../../../domain/core/InitializerStorageWrapper.sol";
-import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
 import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
 
 /**

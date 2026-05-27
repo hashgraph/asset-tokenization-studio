@@ -7,7 +7,6 @@ import { _PROTECTED_PARTITIONS_RESOLVER_KEY } from "../../../constants/resolverK
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
-import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ProtectedPartitions is IProtectedPartitions, Modifiers {
     /// @inheritdoc IProtectedPartitions

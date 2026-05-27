@@ -6,7 +6,6 @@ import { IBatchMint } from "./IBatchMint.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { CapStorageWrapper } from "../../domain/core/CapStorageWrapper.sol";
-import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { IMint } from "../mint/IMint.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";

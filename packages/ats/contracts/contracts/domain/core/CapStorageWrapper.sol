@@ -5,7 +5,6 @@ import { _CAP_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { MAX_UINT256 } from "../../constants/values.sol";
 import { ICap } from "../../facets/cap/ICap.sol";
 import { AdjustBalancesStorageWrapper } from "../asset/AdjustBalancesStorageWrapper.sol";
-import { ERC1410StorageWrapper } from "../asset/ERC1410StorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 struct CapDataStorage {

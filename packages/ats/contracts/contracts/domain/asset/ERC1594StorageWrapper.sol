@@ -24,8 +24,6 @@ import { KycStorageWrapper } from "../core/KycStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 import { AccessControlStorageWrapper } from "../core/AccessControlStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-import { IMint } from "../../facets/mint/IMint.sol";
-import { IBurn } from "../../facets/burn/IBurn.sol";
 
 /**
  * @notice Tracks whether token issuance is enabled and whether the module

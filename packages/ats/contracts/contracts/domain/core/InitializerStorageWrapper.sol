@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { IDiamondCutManager } from "../../infrastructure/diamond/IDiamondCutManager.sol";
 import { IInitializer } from "../../facets/initializer/IInitializer.sol";
 import { ResolverProxyStorageWrapper } from "./ResolverProxyStorageWrapper.sol";
@@ -82,14 +81,11 @@ library InitializerStorageWrapper {
             return (true, 0, configId_, versionId_);
         }
 
-        // Resume from previously stored progress (status > 1 encodes "resume index + 1"); 0 means start fresh.
         uint256 nextFacetIndex;
-
         unchecked {
             nextFacetIndex = operationStatus > 1 ? operationStatus - 1 : 0;
         }
 
-        // Upper bound of this batch; clamped below to the actual facet count.
         unchecked {
             lastFacetIndex_ = getMaxInitializerFacetIndex() + nextFacetIndex;
         }
@@ -106,26 +102,8 @@ library InitializerStorageWrapper {
             .getBusinessLogicResolver()
             .getFacetConfigurationsByConfigurationIdAndVersion(configId_, versionId_, nextFacetIndex, lastFacetIndex_);
 
-        uint256 facetConfigurationsLength = facetConfigurations.length;
+        (isOperational_, lastFacetIndex_) = _checkFacetsReady(facetConfigurations, nextFacetIndex, facetsLength);
 
-        // Walk the batch; stop at the first facet that is not ready and record where to resume next call.
-        for (uint256 facetIndex; facetIndex < facetConfigurationsLength; ) {
-            uint256 facetStatus = getFacetVersionStatus(
-                facetConfigurations[facetIndex].id,
-                facetConfigurations[facetIndex].version
-            );
-
-            unchecked {
-                if (facetStatus != 1) {
-                    isOperational_ = false;
-                    lastFacetIndex_ = nextFacetIndex + facetIndex;
-                    break;
-                }
-                ++facetIndex;
-            }
-        }
-
-        isOperational_ = lastFacetIndex_ == facetsLength;
         unchecked {
             initializerStorage().configVersionStatus[configId_][versionId_] = isOperational_ ? 1 : lastFacetIndex_ + 1;
         }
@@ -325,6 +303,32 @@ library InitializerStorageWrapper {
                 ResolverProxyStorageWrapper.getResolverProxyVersion(),
                 _facetId
             );
+    }
+
+    function _checkFacetsReady(
+        IDiamondCutManager.FacetConfiguration[] memory _facetConfigurations,
+        uint256 _nextFacetIndex,
+        uint256 _facetsLength
+    ) private view returns (bool allReady_, uint256 lastFacetIndex_) {
+        lastFacetIndex_ = _facetsLength;
+        uint256 facetConfigurationsLength = _facetConfigurations.length;
+
+        for (uint256 facetIndex; facetIndex < facetConfigurationsLength; ) {
+            uint256 facetStatus = getFacetVersionStatus(
+                _facetConfigurations[facetIndex].id,
+                _facetConfigurations[facetIndex].version
+            );
+
+            unchecked {
+                if (facetStatus != 1) {
+                    lastFacetIndex_ = _nextFacetIndex + facetIndex;
+                    return (false, lastFacetIndex_);
+                }
+                ++facetIndex;
+            }
+        }
+
+        allReady_ = lastFacetIndex_ == _facetsLength;
     }
 
     /**

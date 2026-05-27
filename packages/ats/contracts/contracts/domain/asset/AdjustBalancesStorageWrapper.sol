@@ -10,7 +10,6 @@ import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { CapStorageWrapper } from "../core/CapStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { IAdjustBalances } from "../../facets/adjustBalances/IAdjustBalances.sol";
-import { ScheduledTask } from "../../facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { MAX_UINT256, MAX_UINT8 } from "../../constants/values.sol";
 
 struct AdjustBalancesStorage {

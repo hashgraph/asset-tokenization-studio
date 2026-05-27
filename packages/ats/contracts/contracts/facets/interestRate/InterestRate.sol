@@ -7,7 +7,6 @@ import { Modifiers } from "../../services/Modifiers.sol";
 import { DEFAULT_ADMIN_ROLE, INTEREST_RATE_MANAGER_ROLE } from "../../constants/roles.sol";
 import { _INTEREST_RATE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title InterestRate

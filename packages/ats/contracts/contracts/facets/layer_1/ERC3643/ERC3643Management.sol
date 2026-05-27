@@ -7,7 +7,6 @@ import { _ERC3643_MANAGEMENT_RESOLVER_KEY } from "../../../constants/resolverKey
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
 import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
-import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title ERC3643 Management

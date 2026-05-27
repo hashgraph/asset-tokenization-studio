@@ -7,7 +7,6 @@ import { _ERC1410_MANAGEMENT_RESOLVER_KEY } from "../../../../constants/resolver
 import { Modifiers } from "../../../../services/Modifiers.sol";
 import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
 import { InitializerStorageWrapper } from "../../../../domain/core/InitializerStorageWrapper.sol";
-import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ERC1410Management is IERC1410Management, Modifiers {
     function initializeERC1410(
