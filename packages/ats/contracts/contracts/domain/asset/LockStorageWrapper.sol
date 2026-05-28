@@ -315,13 +315,13 @@ library LockStorageWrapper {
      * @param partition Partition the lock belongs to.
      * @param tokenHolder Holder that owns the lock.
      * @param lockId Identifier of the lock being inspected.
-     * @return isExpired_ `true` if the lock can be released, `false` otherwise.
+     * @return `true` if the lock can be released, `false` otherwise.
      */
     function isLockedExpirationTimestamp(
         bytes32 partition,
         address tokenHolder,
         uint256 lockId
-    ) internal view returns (bool isExpired_) {
+    ) internal view returns (bool) {
         return
             getLock(partition, tokenHolder, lockId).expirationTimestamp <= TimeTravelStorageWrapper.getBlockTimestamp();
     }
@@ -333,13 +333,9 @@ library LockStorageWrapper {
      * @param partition Partition the lock would belong to.
      * @param tokenHolder Holder that would own the lock.
      * @param lockId Identifier being checked.
-     * @return isValid_ `true` when the lock exists; `false` otherwise.
+     * @return `true` when the lock exists; `false` otherwise.
      */
-    function isLockIdValid(
-        bytes32 partition,
-        address tokenHolder,
-        uint256 lockId
-    ) internal view returns (bool isValid_) {
+    function isLockIdValid(bytes32 partition, address tokenHolder, uint256 lockId) internal view returns (bool) {
         return lockStorage().lockIdsByAccountAndPartition[tokenHolder][partition].contains(lockId);
     }
 
