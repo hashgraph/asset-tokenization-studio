@@ -139,7 +139,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   // Interest Rate (rate-specific - keep variant names)
   "CouponFacet",
   "KpiLinkedRateFacet",
-  "KpisKpiLinkedRateFacet",
+  "KpisFacet",
   "InterestRateFacet",
 
   // Maturity By Partition
