@@ -45,6 +45,9 @@ import {
   hederaGasOverrides,
   warn,
   GAS_LIMIT,
+  RetryOptions,
+  retryTransaction,
+  withNonceReset,
 } from "@scripts/infrastructure";
 
 // Types imported from centralized types module
@@ -168,6 +171,7 @@ export async function processFacetLists(
   batchSize: number = DEFAULT_BATCH_SIZE,
   gasLimit?: number,
   confirmations: number = 0,
+  retryOptions?: RetryOptions,
 ): Promise<void> {
   // Get network name for instant mining check
   let networkName = "unknown";
@@ -206,7 +210,7 @@ export async function processFacetLists(
     // partialBatchDeploy only indicates if more configurations follow after this one
     const isLastBatch = i + chunkSize >= facetIdList.length;
 
-    await sendBatchConfiguration(configId, batch, isLastBatch, blrContract, gasLimit, confirmations);
+    await sendBatchConfiguration(configId, batch, isLastBatch, blrContract, gasLimit, confirmations, retryOptions);
   }
 }
 
@@ -248,6 +252,7 @@ export async function sendBatchConfiguration(
   blrContract: BusinessLogicResolver,
   gasLimit?: number,
   confirmations: number = 0,
+  retryOptions?: RetryOptions,
 ): Promise<void> {
   const finalBatch = isFinalBatch;
 
@@ -356,6 +361,9 @@ export async function createBatchConfiguration(
     /** Number of confirmations to wait for (default: 0 for test environments) */
     confirmations?: number;
 
+    /** Optional retry configuration */
+    retryOptions?: RetryOptions;
+
     /**
      * Optional map of facet name -> explicit BLR version to pin in the
      * configuration. When provided, every facet in `facets` must have an entry,
@@ -373,6 +381,7 @@ export async function createBatchConfiguration(
     batchSize = DEFAULT_BATCH_SIZE,
     gasLimit,
     confirmations = 0,
+    retryOptions,
     facetVersions,
   } = options;
 
@@ -481,6 +490,7 @@ export async function createBatchConfiguration(
       batchSize,
       gasLimit,
       confirmations,
+      retryOptions,
     );
 
     // Query the actual configuration-specific version after batch processing

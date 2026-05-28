@@ -624,7 +624,9 @@ describe("LockByPartition Tests", () => {
     describe("multi-partition transactions arent enabled", () => {
       it("GIVEN a token with multi-partition enabled GIVEN lockByPartition THEN fails with PartitionNotAllowedInSinglePartitionMode", async () => {
         await expect(
-          asset.connect(signer_C).lockByPartition(_NON_DEFAULT_PARTITION, _AMOUNT, signer_A.address, currentTimestamp),
+          asset
+            .connect(signer_C)
+            .lockByPartition(_NON_DEFAULT_PARTITION, _AMOUNT, signer_A.address, expirationTimestamp),
         )
           .to.be.revertedWithCustomError(asset, "PartitionNotAllowedInSinglePartitionMode")
           .withArgs(_NON_DEFAULT_PARTITION);
