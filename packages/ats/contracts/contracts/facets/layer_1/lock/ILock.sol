@@ -73,13 +73,13 @@ interface ILock is ILockTypes {
      * @param _tokenHolder The address whose lock expiration is being updated.
      * @param _lockId Identifier of the lock to update.
      * @param _newExpirationTimestamp New Unix timestamp at which the lock becomes releasable.
-     * @return oldExpirationTimestamp_ The expiration timestamp that was replaced.
+     * @return success_ True when the expiration timestamp has been updated.
      */
     function updateLockExpiration(
         address _tokenHolder,
         uint256 _lockId,
         uint256 _newExpirationTimestamp
-    ) external returns (uint256 oldExpirationTimestamp_);
+    ) external returns (bool success_);
 
     /**
      * @notice Returns the total amount currently locked for `_tokenHolder` across every

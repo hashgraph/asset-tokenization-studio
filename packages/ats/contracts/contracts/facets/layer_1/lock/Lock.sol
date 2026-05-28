@@ -143,23 +143,23 @@ abstract contract Lock is ILock, Modifiers {
         onlyWithoutMultiPartition
         onlyWithValidLockId(_DEFAULT_PARTITION, _tokenHolder, _lockId)
         onlyValidExpirationTimestamp(_newExpirationTimestamp)
-        returns (uint256 oldExpirationTimestamp_)
+        returns (bool success_)
     {
-        address sender = EvmAccessors.getMsgSender();
-        oldExpirationTimestamp_ = LockStorageWrapper.updateLockExpiration(
+        uint256 oldExpirationTimestamp = LockStorageWrapper.updateLockExpiration(
             _DEFAULT_PARTITION,
             _tokenHolder,
             _lockId,
             _newExpirationTimestamp
         );
         emit LockExpirationUpdated(
-            sender,
+            EvmAccessors.getMsgSender(),
             _tokenHolder,
             _DEFAULT_PARTITION,
             _lockId,
-            oldExpirationTimestamp_,
+            oldExpirationTimestamp,
             _newExpirationTimestamp
         );
+        success_ = true;
     }
 
     /**
