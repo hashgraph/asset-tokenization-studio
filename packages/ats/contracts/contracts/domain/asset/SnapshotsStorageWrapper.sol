@@ -164,15 +164,14 @@ library SnapshotsStorageWrapper {
      * @notice Captures the pre-mutation partition id at position `index` for `holder` under the
      *         active snapshot.
      * @dev Must be invoked BEFORE the slot is overwritten or popped so that historical readers
-     *      observe the original value. Bails when no snapshot is active or when the holder is the
-     *      zero address, and is idempotent within a snapshot via {updateSnapshotBytes32}.
-     *      Coupled with {updateTotalPartitionsSnapshot}, mutations cost O(1) regardless of the
-     *      partition-list size — the per-index pattern mirrors the security-holders snapshot.
+     *      observe the original value. Self-guards via {updateSnapshotBytes32}: a no-op while no
+     *      snapshot is active and idempotent within a snapshot. Coupled with
+     *      {updateTotalPartitionsSnapshot}, mutations cost O(1) regardless of the partition-list
+     *      size — the per-index pattern mirrors {updateTokenHolderSnapshot} for security holders.
      * @param holder Address whose partition slot is being captured.
      * @param index  Zero-based slot of the partition array about to change.
      */
     function updatePartitionAtIndexSnapshot(address holder, uint256 index) internal {
-        if (getCurrentSnapshotId() == 0 || holder == address(0)) return;
         updateSnapshotBytes32(
             _snapshotStorage().accountPartitionsByIndexSnapshots[holder][index],
             ERC1410StorageWrapper.partitionAt(holder, index)
@@ -185,11 +184,10 @@ library SnapshotsStorageWrapper {
      * @dev Must be invoked BEFORE a push or pop on `partitions[holder]`. Pairs with
      *      {updatePartitionAtIndexSnapshot} so {partitionsOfAtSnapshot} can both bound its
      *      reconstruction loop and tell apart slots that existed at snapshot time from slots that
-     *      did not. Idempotent within a snapshot.
+     *      did not. Self-guards via {updateSnapshot}, mirroring {updateTotalTokenHolderSnapshot}.
      * @param holder Address whose partition-list length is being captured.
      */
     function updateTotalPartitionsSnapshot(address holder) internal {
-        if (getCurrentSnapshotId() == 0 || holder == address(0)) return;
         updateSnapshot(
             _snapshotStorage().accountTotalPartitionsSnapshots[holder],
             ERC1410StorageWrapper.partitionsLength(holder)
