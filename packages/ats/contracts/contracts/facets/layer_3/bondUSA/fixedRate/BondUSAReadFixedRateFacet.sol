@@ -11,6 +11,6 @@ contract BondUSAReadFixedRateFacet is BondUSAReadFacetBase {
     }
 
     function _bondReadInitializerKey() internal pure override returns (bytes32) {
-        return _BOND_FIXED_READ_RESOLVER_KEY;
+        return RESOLVER_KEY_BOND_FIXED_READ;
     }
 }

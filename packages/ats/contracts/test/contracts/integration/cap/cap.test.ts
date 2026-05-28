@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
-import { ZERO, EMPTY_STRING, dateToUnixTimestamp, ATS_ROLES, CAP_RESOLVER_KEY } from "@scripts";
+import { ZERO, EMPTY_STRING, dateToUnixTimestamp, ATS_ROLES, RESOLVER_KEY_CAP } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
@@ -103,7 +103,7 @@ describe("Cap Tests", () => {
 
   describe("initializeCap event", () => {
     it("GIVEN a fresh deployment WHEN initializeCap is called THEN emits CapInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(CAP_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_CAP);
       await expect(asset.initializeCap(5, [])).to.emit(asset, "CapInitialized");
     });
   });

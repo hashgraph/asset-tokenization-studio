@@ -18,10 +18,10 @@ contract ProceedRecipientsKpiLinkedRateFacet is ProceedRecipients, IStaticFuncti
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_PROCEED_RECIPIENTS_KPI_LINKED_RATE_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_PROCEED_RECIPIENTS_KPI_LINKED_RATE)
     {
         ProceedRecipientsStorageWrapper.initializeProceedRecipients(_proceedRecipients, _data);
-        InitializerStorageWrapper.setFacetToReady(_PROCEED_RECIPIENTS_KPI_LINKED_RATE_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_PROCEED_RECIPIENTS_KPI_LINKED_RATE);
         emit IProceedRecipients.ProceedRecipientsInitialized(_proceedRecipients, _data);
     }
 

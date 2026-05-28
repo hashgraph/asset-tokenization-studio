@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ISsiManagement } from "./ISsiManagement.sol";
+import { ISsiManagement, RESOLVER_KEY_SSI_MANAGEMENT } from "./ISsiManagement.sol";
 import { ROLE_SSI_MANAGER } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { SsiManagementStorageWrapper } from "../../domain/core/SsiManagementStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _SSI_MANAGEMENT_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title SsiManagement
@@ -27,9 +26,9 @@ abstract contract SsiManagement is ISsiManagement, Modifiers {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_SSI_MANAGEMENT_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_SSI_MANAGEMENT)
     {
-        InitializerStorageWrapper.setFacetToReady(_SSI_MANAGEMENT_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_SSI_MANAGEMENT);
         emit SsiManagementInitialized();
     }
 
@@ -48,7 +47,11 @@ abstract contract SsiManagement is ISsiManagement, Modifiers {
     /// @inheritdoc ISsiManagement
     function addIssuer(
         address _issuer
-    ) external override onlyOperational onlyActivated
+    )
+        external
+        override
+        onlyOperational
+        onlyActivated
         onlyUnpaused
         onlyRole(ROLE_SSI_MANAGER)
         notZeroAddress(_issuer)

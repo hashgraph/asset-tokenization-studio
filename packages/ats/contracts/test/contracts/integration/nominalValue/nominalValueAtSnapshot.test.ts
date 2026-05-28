@@ -4,11 +4,9 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type IAsset, MockDiamondCut } from "@contract-types";
-import { ATS_ROLES } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEY_NOMINAL_VALUE_AT_SNAPSHOT } from "@scripts";
 import { deployBondTokenFixture } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-
-const NOMINAL_VALUE_AT_SNAPSHOT_RESOLVER_KEY = "0xa9eb978fb9b2f23119fbe6dc3a3f6010398d58b37b5221961eaa584486c8c6fb";
 
 describe("NominalValueAtSnapshot Tests", () => {
   let asset: IAsset;
@@ -37,13 +35,13 @@ describe("NominalValueAtSnapshot Tests", () => {
     it("GIVEN already-initialised WHEN initializeNominalValueAtSnapshot THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeNominalValueAtSnapshot())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(NOMINAL_VALUE_AT_SNAPSHOT_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_NOMINAL_VALUE_AT_SNAPSHOT, 1);
     });
   });
 
   describe("initializeNominalValueAtSnapshot event", () => {
     it("GIVEN fresh facet WHEN initializeNominalValueAtSnapshot THEN emits NominalValueAtSnapshotInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(NOMINAL_VALUE_AT_SNAPSHOT_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_NOMINAL_VALUE_AT_SNAPSHOT);
       await expect(asset.initializeNominalValueAtSnapshot()).to.emit(asset, "NominalValueAtSnapshotInitialized");
     });
   });

@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ICoreAdjusted } from "./ICoreAdjusted.sol";
+import { ICoreAdjusted, RESOLVER_KEY_CORE_ADJUSTED } from "./ICoreAdjusted.sol";
 import { ERC20StorageWrapper } from "../../domain/asset/ERC20StorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _CORE_ADJUSTED_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title CoreAdjusted
@@ -22,9 +21,9 @@ abstract contract CoreAdjusted is ICoreAdjusted, Modifiers {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_CORE_ADJUSTED_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_CORE_ADJUSTED)
     {
-        InitializerStorageWrapper.setFacetToReady(_CORE_ADJUSTED_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_CORE_ADJUSTED);
         emit CoreAdjustedInitialized();
     }
 

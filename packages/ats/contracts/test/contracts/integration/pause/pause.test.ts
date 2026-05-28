@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { GAS_LIMIT, ATS_ROLES, PAUSE_RESOLVER_KEY } from "@scripts";
+import { GAS_LIMIT, ATS_ROLES, RESOLVER_KEY_PAUSE } from "@scripts";
 import { grantRoleAndPauseToken } from "@test";
 import { deployEquityTokenFixture } from "@test";
 import { type ResolverProxy, type IAsset, MockedExternalPause, MockDiamondCut } from "@contract-types";
@@ -176,13 +176,13 @@ describe("Pause Tests", () => {
     it("GIVEN already-initialised WHEN initializePause is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializePause())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(PAUSE_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_PAUSE, 1);
     });
   });
 
   describe("initializePause event", () => {
     it("GIVEN a fresh deployment WHEN initializePause is called THEN emits PauseInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(PAUSE_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_PAUSE);
       await expect(asset.initializePause()).to.emit(asset, "PauseInitialized");
     });
   });

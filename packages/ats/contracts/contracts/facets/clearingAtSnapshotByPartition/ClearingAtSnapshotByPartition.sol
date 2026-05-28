@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IClearingAtSnapshotByPartition } from "./IClearingAtSnapshotByPartition.sol";
+import {
+    IClearingAtSnapshotByPartition,
+    RESOLVER_KEY_CLEARING_AT_SNAPSHOT_BY_PARTITION
+} from "./IClearingAtSnapshotByPartition.sol";
 import { SnapshotsStorageWrapper } from "../../domain/asset/SnapshotsStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _CLEARING_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title ClearingAtSnapshotByPartition
@@ -22,9 +24,9 @@ abstract contract ClearingAtSnapshotByPartition is IClearingAtSnapshotByPartitio
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_CLEARING_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_CLEARING_AT_SNAPSHOT_BY_PARTITION)
     {
-        InitializerStorageWrapper.setFacetToReady(_CLEARING_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_CLEARING_AT_SNAPSHOT_BY_PARTITION);
         emit ClearingAtSnapshotByPartitionInitialized();
     }
 

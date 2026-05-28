@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ATS_ROLES, EMPTY_STRING, ZERO, BALANCE_TRACKER_AT_SNAPSHOT_RESOLVER_KEY } from "@scripts";
+import { ATS_ROLES, EMPTY_STRING, ZERO, RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT } from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
@@ -178,13 +178,13 @@ describe("BalanceTrackerAtSnapshot Tests", () => {
     it("GIVEN already-initialised WHEN initializeBalanceTrackerAtSnapshot is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeBalanceTrackerAtSnapshot())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(BALANCE_TRACKER_AT_SNAPSHOT_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT, 1);
     });
   });
 
   describe("initializeBalanceTrackerAtSnapshot event", () => {
     it("GIVEN a fresh deployment WHEN initializeBalanceTrackerAtSnapshot is called THEN emits BalanceTrackerAtSnapshotInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(BALANCE_TRACKER_AT_SNAPSHOT_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT);
       await expect(asset.initializeBalanceTrackerAtSnapshot()).to.emit(asset, "BalanceTrackerAtSnapshotInitialized");
     });
   });

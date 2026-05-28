@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
-import { ATS_ROLES, KPI_LINKED_RATE_RESOLVER_KEY } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEY_KPI_LINKED_RATE } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { DEFAULT_BOND_KPI_LINKED_RATE_PARAMS, deployBondKpiLinkedRateTokenFixture, executeRbac } from "@test";
 
@@ -96,7 +96,7 @@ describe("Kpi Linked Rate Tests", () => {
 
   describe("initializeKpiLinkedRate event", () => {
     it("GIVEN a fresh deployment WHEN initializeKpiLinkedRate is called THEN emits KpiLinkedRateInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(KPI_LINKED_RATE_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_KPI_LINKED_RATE);
       await expect(
         asset.initializeKpiLinkedRate(
           {

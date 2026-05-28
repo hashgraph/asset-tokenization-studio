@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ICap, RESOLVER_KEY_CAP } from "./ICap.sol";
-import { CAP_ROLE, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { ROLE_CAP, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { CapStorageWrapper } from "../../domain/core/CapStorageWrapper.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
@@ -29,9 +29,8 @@ abstract contract Cap is ICap, Modifiers {
     )
         external
         override
-        onlyFacetNotRegistered(RESOLVER_KEY_CAP)
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_CAP_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_CAP)
         onlyValidNewMaxSupply(maxSupply, TimeTravelStorageWrapper.getBlockTimestamp())
     {
         CapStorageWrapper.initializeCap(maxSupply, partitionCap);

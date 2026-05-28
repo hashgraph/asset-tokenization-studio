@@ -11,7 +11,7 @@ import {
   ATS_ROLES,
   ATS_TASK,
   TIME_PERIODS_S,
-  SCHEDULED_TASKS_RESOLVER_KEY,
+  RESOLVER_KEY_SCHEDULED_TASKS,
 } from "@scripts";
 import { getOrchestratorLibraryAddresses } from "@scripts/domain";
 import { loadFixture, takeSnapshot } from "@nomicfoundation/hardhat-network-helpers";
@@ -274,7 +274,7 @@ describe("Scheduled Tasks Tests", () => {
     });
 
     it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeScheduledCrossOrderedTasks is called THEN it emits ScheduledCrossOrderedTasksInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(SCHEDULED_TASKS_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_SCHEDULED_TASKS);
       await expect(asset.connect(signer_A).initializeScheduledCrossOrderedTasks()).to.emit(
         asset,
         "ScheduledCrossOrderedTasksInitialized",

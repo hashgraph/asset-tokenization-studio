@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IMaturity } from "./IMaturity.sol";
+import { IMaturity, RESOLVER_KEY_MATURITY } from "./IMaturity.sol";
 import { IKyc } from "../layer_1/kyc/IKyc.sol";
 import { ROLE_BOND_MANAGER, ROLE_MATURITY_REDEEMER } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
@@ -12,14 +12,13 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _MATURITY_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title  Maturity
  * @author Asset Tokenization Studio Team
  * @notice Interface for bond maturity redemption and maturity date management.
  * @dev    `fullRedeemAtMaturity` and `updateMaturityDate` are extracted from the Bond facet
- *         into a dedicated Maturity facet registered under `_MATURITY_RESOLVER_KEY`.
+ *         into a dedicated Maturity facet registered under `RESOLVER_KEY_MATURITY`.
  *         Events and errors — `MaturityDateUpdated` and `BondMaturityDateWrong` — are
  *         inherited from `IBondTypes`.
  * @author Asset Tokenization Studio Team
@@ -30,9 +29,9 @@ abstract contract Maturity is IMaturity, Modifiers {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_MATURITY_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_MATURITY)
     {
-        InitializerStorageWrapper.setFacetToReady(_MATURITY_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_MATURITY);
         emit MaturityInitialized();
     }
 

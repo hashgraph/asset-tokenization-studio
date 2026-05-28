@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IMaturityByPartition } from "./IMaturityByPartition.sol";
+import { IMaturityByPartition, RESOLVER_KEY_MATURITY_BY_PARTITION } from "./IMaturityByPartition.sol";
 import { IKyc } from "../layer_1/kyc/IKyc.sol";
 import { ROLE_MATURITY_REDEEMER } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
@@ -11,7 +11,6 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _MATURITY_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title MaturityByPartition
@@ -28,9 +27,9 @@ abstract contract MaturityByPartition is IMaturityByPartition, Modifiers {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_MATURITY_BY_PARTITION_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_MATURITY_BY_PARTITION)
     {
-        InitializerStorageWrapper.setFacetToReady(_MATURITY_BY_PARTITION_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_MATURITY_BY_PARTITION);
         emit MaturityByPartitionInitialized();
     }
 

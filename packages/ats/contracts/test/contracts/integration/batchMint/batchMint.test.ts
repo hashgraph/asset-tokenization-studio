@@ -7,7 +7,7 @@ import { IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
-import { EMPTY_STRING, ATS_ROLES, ZERO, EQUITY_CONFIG_ID, BATCH_MINT_RESOLVER_KEY } from "@scripts";
+import { EMPTY_STRING, ATS_ROLES, ZERO, EQUITY_CONFIG_ID, RESOLVER_KEY_BATCH_MINT } from "@scripts";
 
 const AMOUNT = 1000;
 const MAX_SUPPLY = 10000000;
@@ -199,13 +199,13 @@ describe("BatchMint Tests", () => {
     it("GIVEN already-initialised WHEN initializeBatchMint is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeBatchMint())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(BATCH_MINT_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_BATCH_MINT, 1);
     });
   });
 
   describe("initializeBatchMint event", () => {
     it("GIVEN a fresh deployment WHEN initializeBatchMint is called THEN emits BatchMintInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(BATCH_MINT_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_BATCH_MINT);
       await expect(asset.initializeBatchMint()).to.emit(asset, "BatchMintInitialized");
     });
   });

@@ -2,14 +2,13 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC1410Types } from "../layer_1/ERC1400/ERC1410/IERC1410Types.sol";
-import { IOperatorByPartition } from "./IOperatorByPartition.sol";
+import { IOperatorByPartition, RESOLVER_KEY_OPERATOR_BY_PARTITION } from "./IOperatorByPartition.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _OPERATOR_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title  OperatorByPartition
@@ -25,9 +24,9 @@ abstract contract OperatorByPartition is IOperatorByPartition, Modifiers {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_OPERATOR_BY_PARTITION_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_OPERATOR_BY_PARTITION)
     {
-        InitializerStorageWrapper.setFacetToReady(_OPERATOR_BY_PARTITION_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_OPERATOR_BY_PARTITION);
         emit OperatorByPartitionInitialized();
     }
 

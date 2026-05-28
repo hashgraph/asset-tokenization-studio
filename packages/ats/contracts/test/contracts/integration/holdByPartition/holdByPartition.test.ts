@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { HOLD_BY_PARTITION_RESOLVER_KEY } from "@scripts";
+import { RESOLVER_KEY_HOLD_BY_PARTITION } from "@scripts";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
 import {
@@ -1440,13 +1440,13 @@ describe("HoldByPartition Tests", () => {
     it("GIVEN already-initialised WHEN initializeHoldByPartition is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeHoldByPartition())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(HOLD_BY_PARTITION_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_HOLD_BY_PARTITION, 1);
     });
   });
 
   describe("initializeHoldByPartition event", () => {
     it("GIVEN a fresh deployment WHEN initializeHoldByPartition is called THEN emits HoldByPartitionInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(HOLD_BY_PARTITION_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_HOLD_BY_PARTITION);
       await expect(asset.initializeHoldByPartition()).to.emit(asset, "HoldByPartitionInitialized");
     });
   });

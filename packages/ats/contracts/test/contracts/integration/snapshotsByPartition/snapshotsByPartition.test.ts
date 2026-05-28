@@ -10,7 +10,7 @@ import {
   MockDiamondCut,
   ISnapshotsByPartition,
 } from "@contract-types";
-import { ZERO, EMPTY_STRING, ATS_ROLES, SNAPSHOTS_BY_PARTITION_RESOLVER_KEY } from "@scripts";
+import { ZERO, EMPTY_STRING, ATS_ROLES, RESOLVER_KEY_SNAPSHOTS_BY_PARTITION } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
@@ -187,13 +187,13 @@ describe("SnapshotsByPartition Tests", () => {
     it("GIVEN already-initialised WHEN initializeSnapshotsByPartition is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeSnapshotsByPartition())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(SNAPSHOTS_BY_PARTITION_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_SNAPSHOTS_BY_PARTITION, 1);
     });
   });
 
   describe("initializeSnapshotsByPartition event", () => {
     it("GIVEN a fresh deployment WHEN initializeSnapshotsByPartition is called THEN emits SnapshotsByPartitionInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(SNAPSHOTS_BY_PARTITION_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_SNAPSHOTS_BY_PARTITION);
       await expect(asset.initializeSnapshotsByPartition()).to.emit(asset, "SnapshotsByPartitionInitialized");
     });
   });

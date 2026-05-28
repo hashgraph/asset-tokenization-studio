@@ -13,7 +13,7 @@ import {
   EMPTY_HEX_BYTES,
   EMPTY_STRING,
   ZERO,
-  COMPLIANCE_BY_PARTITION_RESOLVER_KEY,
+  RESOLVER_KEY_COMPLIANCE_BY_PARTITION,
 } from "@scripts";
 import { getSelector } from "@scripts/infrastructure";
 
@@ -334,13 +334,13 @@ describe("ComplianceByPartition Tests", () => {
     it("GIVEN already-initialised WHEN initializeComplianceByPartition is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeComplianceByPartition())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(COMPLIANCE_BY_PARTITION_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_COMPLIANCE_BY_PARTITION, 1);
     });
   });
 
   describe("initializeComplianceByPartition event", () => {
     it("GIVEN a fresh deployment WHEN initializeComplianceByPartition is called THEN emits ComplianceByPartitionInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(COMPLIANCE_BY_PARTITION_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_COMPLIANCE_BY_PARTITION);
       await expect(asset.initializeComplianceByPartition()).to.emit(asset, "ComplianceByPartitionInitialized");
     });
   });

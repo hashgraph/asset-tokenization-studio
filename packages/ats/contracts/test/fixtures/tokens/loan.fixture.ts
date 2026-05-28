@@ -221,13 +221,7 @@ export async function deployLoanTokenFixture({
   // Deploy TestFactory
 
   // Deploy ResolverProxy via TestFactory
-  const rbacs = [
-    { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [deployer.address] },
-    { role: ATS_ROLES.PAUSER_ROLE, members: [infrastructure.user2.address] },
-    { role: ATS_ROLES.KYC_ROLE, members: [deployer.address, infrastructure.user2.address] },
-    { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [deployer.address] },
-    { role: ATS_ROLES.LOAN_MANAGER_ROLE, members: [deployer.address] },
-  ];
+  const rbacs = [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [deployer.address] }];
 
   // Get BLR proxy address (use deployment data to avoid TypeScript type mismatch)
   const blrProxyAddress = infrastructure.deployment.infrastructure.blr.proxy;

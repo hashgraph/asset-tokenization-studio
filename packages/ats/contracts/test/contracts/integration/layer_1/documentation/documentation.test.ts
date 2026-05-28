@@ -8,7 +8,7 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { grantRoleAndPauseToken } from "../../../../common";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac } from "@test";
-import { ATS_ROLES, DOCUMENTATION_RESOLVER_KEY } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEY_DOCUMENTATION } from "@scripts";
 
 const documentName_1 = "0x000000000000000000000000000000000000000000000000000000000000aa23";
 const documentName_2 = "0x000000000000000000000000000000000000000000000000000000000000bb23";
@@ -249,13 +249,13 @@ describe("Documentation Tests", () => {
     it("GIVEN already-initialised WHEN initializeDocumentation is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeDocumentation())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(DOCUMENTATION_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_DOCUMENTATION, 1);
     });
   });
 
   describe("initializeDocumentation event", () => {
     it("GIVEN a fresh deployment WHEN initializeDocumentation is called THEN emits DocumentationInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(DOCUMENTATION_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_DOCUMENTATION);
       await expect(asset.initializeDocumentation()).to.emit(asset, "DocumentationInitialized");
     });
   });

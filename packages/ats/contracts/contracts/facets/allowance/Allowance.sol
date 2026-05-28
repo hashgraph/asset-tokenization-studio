@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IAllowance } from "./IAllowance.sol";
+import { IAllowance, RESOLVER_KEY_ALLOWANCE } from "./IAllowance.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC20StorageWrapper } from "../../domain/asset/ERC20StorageWrapper.sol";
@@ -9,7 +9,6 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _ALLOWANCE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title Allowance Facet
@@ -26,9 +25,9 @@ abstract contract Allowance is IAllowance, Modifiers {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_ALLOWANCE_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_ALLOWANCE)
     {
-        InitializerStorageWrapper.setFacetToReady(_ALLOWANCE_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_ALLOWANCE);
         emit IAllowance.AllowanceInitialized();
     }
 

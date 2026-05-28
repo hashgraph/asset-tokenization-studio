@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
-import { ATS_ROLES, FIXED_RATE_RESOLVER_KEY } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEY_FIXED_RATE } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { DEFAULT_BOND_FIXED_RATE_PARAMS, deployBondFixedRateTokenFixture } from "@test";
 import { executeRbac } from "@test";
@@ -60,7 +60,7 @@ describe("Fixed Rate Tests", () => {
 
   describe("initializeFixedRate event", () => {
     it("GIVEN a fresh deployment WHEN initializeFixedRate is called THEN emits FixedRateInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(FIXED_RATE_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_FIXED_RATE);
       await expect(asset.initializeFixedRate({ rate: 1, rateDecimals: 0 })).to.emit(asset, "FixedRateInitialized");
     });
   });

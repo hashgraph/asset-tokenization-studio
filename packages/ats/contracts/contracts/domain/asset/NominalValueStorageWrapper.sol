@@ -41,12 +41,6 @@ struct NominalValueDataStorage {
  * @author Asset Tokenization Studio Team
  */
 library NominalValueStorageWrapper {
-    struct NominalValueDataStorage {
-        uint256 nominalValue;
-        uint8 nominalValueDecimals;
-        bytes3 nominalValueCurrency;
-    }
-
     /**
      * @notice Initialises the dedicated nominal value storage with amount, decimals, and currency.
      * @param _nominalValue Initial nominal value amount.

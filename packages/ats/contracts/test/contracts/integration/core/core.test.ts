@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { isinGenerator } from "@thomaschaplin/isin-generator";
 import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
-import { ATS_ROLES, CORE_RESOLVER_KEY } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEY_CORE } from "@scripts";
 import { SecurityType } from "@scripts/domain";
 import { assertObject, deployEquityTokenFixture, executeRbac } from "@test";
 
@@ -76,7 +76,7 @@ describe("Core Facet Tests", () => {
 
   describe("initializeCore event", () => {
     it("GIVEN a fresh deployment WHEN initializeCore is called THEN emits CoreInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(CORE_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_CORE);
       await expect(
         asset.initializeCore({
           info: { name, symbol, decimals, isin },

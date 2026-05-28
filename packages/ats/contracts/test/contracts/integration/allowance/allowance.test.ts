@@ -12,7 +12,7 @@ import {
   EMPTY_STRING,
   ZERO,
   EQUITY_CONFIG_ID,
-  ALLOWANCE_RESOLVER_KEY,
+  RESOLVER_KEY_ALLOWANCE,
 } from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
@@ -388,13 +388,13 @@ describe("Allowance Facet Tests", () => {
     it("GIVEN already-initialised WHEN initializeAllowance is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeAllowance())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(ALLOWANCE_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_ALLOWANCE, 1);
     });
   });
 
   describe("initializeAllowance event", () => {
     it("GIVEN a fresh deployment WHEN initializeAllowance is called THEN emits AllowanceInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(ALLOWANCE_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_ALLOWANCE);
       await expect(asset.initializeAllowance()).to.emit(asset, "AllowanceInitialized");
     });
   });

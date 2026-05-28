@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
-import { dateToUnixTimestamp, ATS_ROLES, SCHEDULED_BALANCE_ADJUSTMENT_RESOLVER_KEY } from "@scripts";
+import { dateToUnixTimestamp, ATS_ROLES, RESOLVER_KEY_SCHEDULED_BALANCE_ADJUSTMENT } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac } from "@test";
@@ -162,13 +162,13 @@ describe("Scheduled BalanceAdjustments Tests", () => {
     it("GIVEN already-initialised WHEN initializeScheduledBalanceAdjustment is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeScheduledBalanceAdjustment())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(SCHEDULED_BALANCE_ADJUSTMENT_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_SCHEDULED_BALANCE_ADJUSTMENT, 1);
     });
   });
 
   describe("initializeScheduledBalanceAdjustment event", () => {
     it("GIVEN a fresh deployment WHEN initializeScheduledBalanceAdjustment is called THEN emits ScheduledBalanceAdjustmentInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(SCHEDULED_BALANCE_ADJUSTMENT_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_SCHEDULED_BALANCE_ADJUSTMENT);
       await expect(asset.initializeScheduledBalanceAdjustment()).to.emit(
         asset,
         "ScheduledBalanceAdjustmentInitialized",

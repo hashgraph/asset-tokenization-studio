@@ -16,7 +16,7 @@ import {
   dateToUnixTimestamp,
   EIP1066_CODES,
   EQUITY_CONFIG_ID,
-  RECOVERY_RESOLVER_KEY,
+  RESOLVER_KEY_RECOVERY,
 } from "@scripts";
 
 const name = "TEST";
@@ -764,13 +764,13 @@ describe("Recovery Tests", () => {
     it("GIVEN already-initialised WHEN initializeRecovery is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeRecovery())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(RECOVERY_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_RECOVERY, 1);
     });
   });
 
   describe("initializeRecovery event", () => {
     it("GIVEN a fresh deployment WHEN initializeRecovery is called THEN emits RecoveryInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(RECOVERY_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_RECOVERY);
       await expect(asset.initializeRecovery()).to.emit(asset, "RecoveryInitialized");
     });
   });

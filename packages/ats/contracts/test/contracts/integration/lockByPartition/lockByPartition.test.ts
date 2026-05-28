@@ -16,7 +16,7 @@ import {
   ATS_ROLES,
   ZERO,
   dateToUnixTimestamp,
-  LOCK_BY_PARTITION_RESOLVER_KEY,
+  RESOLVER_KEY_LOCK_BY_PARTITION,
 } from "@scripts";
 import { Rbac } from "@scripts/domain";
 
@@ -847,13 +847,13 @@ describe("LockByPartition Tests", () => {
     it("GIVEN already-initialised WHEN initializeLockByPartition is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeLockByPartition())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(LOCK_BY_PARTITION_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_LOCK_BY_PARTITION, 1);
     });
   });
 
   describe("initializeLockByPartition event", () => {
     it("GIVEN a fresh deployment WHEN initializeLockByPartition is called THEN emits LockByPartitionInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(LOCK_BY_PARTITION_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_LOCK_BY_PARTITION);
       await expect(asset.initializeLockByPartition()).to.emit(asset, "LockByPartitionInitialized");
     });
   });

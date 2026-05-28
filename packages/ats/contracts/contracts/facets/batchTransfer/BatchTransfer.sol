@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBatchTransfer } from "./IBatchTransfer.sol";
+import { IBatchTransfer, RESOLVER_KEY_BATCH_TRANSFER } from "./IBatchTransfer.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
@@ -9,7 +9,6 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _BATCH_TRANSFER_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title BatchTransfer
@@ -27,9 +26,9 @@ abstract contract BatchTransfer is IBatchTransfer, Modifiers {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_BATCH_TRANSFER_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_BATCH_TRANSFER)
     {
-        InitializerStorageWrapper.setFacetToReady(_BATCH_TRANSFER_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_BATCH_TRANSFER);
         emit BatchTransferInitialized();
     }
 

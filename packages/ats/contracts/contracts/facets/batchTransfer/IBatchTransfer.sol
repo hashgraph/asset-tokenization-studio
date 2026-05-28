@@ -9,7 +9,7 @@ bytes32 constant RESOLVER_KEY_BATCH_TRANSFER = 0x01e13672eac45bef2d8d3f1c56eaca6
  * @notice Interface for batch transferring tokens to multiple addresses in a single transaction.
  * @dev Intended for use by token holders operating on ERC3643-compliant tokens under single
  *      partition mode. Exposes the `batchTransfer` selector registered in the Diamond proxy
- *      under `_BATCH_TRANSFER_RESOLVER_KEY`.
+ *      under `RESOLVER_KEY_BATCH_TRANSFER`.
  * @author Asset Tokenization Studio Team
  */
 interface IBatchTransfer {

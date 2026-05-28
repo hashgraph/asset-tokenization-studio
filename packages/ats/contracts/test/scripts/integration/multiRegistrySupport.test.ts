@@ -44,7 +44,7 @@ describe("Multi-Registry Support - Integration Tests", () => {
           name: "AccessControlFacet",
           description: "Role-based access control",
           resolverKey: {
-            name: "_ACCESS_CONTROL_RESOLVER_KEY",
+            name: "_ACCESS_CONTROL",
             value: "0x011768a4153571b743e8cf07b54dc25e1f8d330fbecb7d3b1b34acfc2842e179",
           },
         },
@@ -52,7 +52,7 @@ describe("Multi-Registry Support - Integration Tests", () => {
           name: "PauseFacet",
           description: "Emergency pause functionality",
           resolverKey: {
-            name: "_PAUSE_RESOLVER_KEY",
+            name: "_PAUSE",
             value: "0x0e3ba2c890ef9e74adac48c0f611be7ebbb3b7c74db3d8d32ea9b7d1f9e73c2d",
           },
         },
@@ -64,7 +64,7 @@ describe("Multi-Registry Support - Integration Tests", () => {
         name: "AccessControlFacet",
         description: "Role-based access control",
         resolverKey: {
-          name: "_ACCESS_CONTROL_RESOLVER_KEY",
+          name: "_ACCESS_CONTROL",
           value: "0x011768a4153571b743e8cf07b54dc25e1f8d330fbecb7d3b1b34acfc2842e179",
         },
       },
@@ -72,7 +72,7 @@ describe("Multi-Registry Support - Integration Tests", () => {
         name: "PauseFacet",
         description: "Emergency pause functionality",
         resolverKey: {
-          name: "_PAUSE_RESOLVER_KEY",
+          name: "_PAUSE",
           value: "0x0e3ba2c890ef9e74adac48c0f611be7ebbb3b7c74db3d8d32ea9b7d1f9e73c2d",
         },
       },
@@ -86,7 +86,7 @@ describe("Multi-Registry Support - Integration Tests", () => {
           name: "CustomComplianceFacet",
           description: "Custom compliance rules",
           resolverKey: {
-            name: "_CUSTOM_COMPLIANCE_RESOLVER_KEY",
+            name: "_CUSTOM_COMPLIANCE",
             value: "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
           },
         },
@@ -94,7 +94,7 @@ describe("Multi-Registry Support - Integration Tests", () => {
           name: "CustomRewardsFacet",
           description: "Custom rewards system",
           resolverKey: {
-            name: "_CUSTOM_REWARDS_RESOLVER_KEY",
+            name: "_CUSTOM_REWARDS",
             value: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
           },
         },
@@ -106,7 +106,7 @@ describe("Multi-Registry Support - Integration Tests", () => {
         name: "CustomComplianceFacet",
         description: "Custom compliance rules",
         resolverKey: {
-          name: "_CUSTOM_COMPLIANCE_RESOLVER_KEY",
+          name: "_CUSTOM_COMPLIANCE",
           value: "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
         },
       },
@@ -114,7 +114,7 @@ describe("Multi-Registry Support - Integration Tests", () => {
         name: "CustomRewardsFacet",
         description: "Custom rewards system",
         resolverKey: {
-          name: "_CUSTOM_REWARDS_RESOLVER_KEY",
+          name: "_CUSTOM_REWARDS",
           value: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
         },
       },
@@ -129,7 +129,7 @@ describe("Multi-Registry Support - Integration Tests", () => {
           name: "PauseFacet",
           description: "Different pause implementation",
           resolverKey: {
-            name: "_CUSTOM_PAUSE_RESOLVER_KEY",
+            name: "_CUSTOM_PAUSE",
             value: "0xdifferent1234567890different1234567890different1234567890diff",
           },
         };
@@ -141,7 +141,7 @@ describe("Multi-Registry Support - Integration Tests", () => {
         name: "PauseFacet",
         description: "Different pause implementation",
         resolverKey: {
-          name: "_CUSTOM_PAUSE_RESOLVER_KEY",
+          name: "_CUSTOM_PAUSE",
           value: "0xdifferent1234567890different1234567890different1234567890diff",
         },
       },

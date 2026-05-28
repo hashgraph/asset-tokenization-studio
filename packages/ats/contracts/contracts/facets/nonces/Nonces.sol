@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { INonces } from "./INonces.sol";
+import { INonces, RESOLVER_KEY_NONCES } from "./INonces.sol";
 import { NonceStorageWrapper } from "../../domain/core/NonceStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _NONCES_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title Nonces
@@ -24,9 +23,9 @@ abstract contract Nonces is INonces, Modifiers {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_NONCES_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_NONCES)
     {
-        InitializerStorageWrapper.setFacetToReady(_NONCES_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_NONCES);
         emit NoncesInitialized();
     }
 

@@ -16,14 +16,13 @@ import { IDiamondFacet } from "../../infrastructure/diamond/IDiamondFacet.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 import { DiamondCut } from "../../infrastructure/diamond/DiamondCut.sol";
 import { DiamondLoupe } from "../../infrastructure/diamond/DiamondLoupe.sol";
-import { IDiamond } from "../../infrastructure/proxy/IDiamond.sol";
+import { IDiamond, RESOLVER_KEY_DIAMOND } from "../../infrastructure/proxy/IDiamond.sol";
 import { IDiamondCut } from "../../infrastructure/proxy/IDiamondCut.sol";
 import { IDiamondLoupe } from "../../infrastructure/proxy/IDiamondLoupe.sol";
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import { InitializerModifiers } from "../../services/core/InitializerModifiers.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { ResolverProxyStorageWrapper } from "../../domain/core/ResolverProxyStorageWrapper.sol";
-import { _DIAMOND_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 
 /* solhint-disable */
@@ -38,12 +37,8 @@ interface IMockDiamondCut {
 // here would break C3 linearization. Mirrors `DiamondFacet`'s parent layout
 // with one test-only addition: `IMockDiamondCut` (for the mock controls).
 contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, InitializerModifiers, IMockDiamondCut {
-    function initializeDiamondCut()
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_DIAMOND_RESOLVER_KEY)
-    {
-        InitializerStorageWrapper.setFacetToReady(_DIAMOND_RESOLVER_KEY);
+    function initializeDiamondCut() external onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_DIAMOND) {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_DIAMOND);
         emit DiamondCutInitialized();
     }
 
@@ -70,11 +65,11 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
     }
 
     function getStaticResolverKey() external pure returns (bytes32 staticResolverKey_) {
-        // Must return the production `_DIAMOND_RESOLVER_KEY` so the BLR
+        // Must return the production `RESOLVER_KEY_DIAMOND` so the BLR
         // registration matches the `atsRegistry.data.ts` entry. The internal
         // initializer uses `_MOCK_DIAMOND_CUT_RESOLVER_KEY` which is what
         // `mockDiamondCutId` in the initializer test checks.
-        staticResolverKey_ = _DIAMOND_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_DIAMOND;
     }
 
     function getStaticFunctionSelectors() external pure returns (bytes4[] memory staticFunctionSelectors_) {

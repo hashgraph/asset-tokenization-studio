@@ -10,7 +10,7 @@ import {
   ZERO,
   dateToUnixTimestamp,
   EQUITY_CONFIG_ID,
-  BALANCE_ADJUSTMENTS_RESOLVER_KEY,
+  RESOLVER_KEY_BALANCE_ADJUSTMENTS,
 } from "@scripts";
 import { deployEquityTokenFixture, executeRbac, grantRoleAndPauseToken, MAX_UINT256, MAX_UINT8 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -727,13 +727,13 @@ describe("AdjustBalancesFacet Tests", () => {
     it("GIVEN already-initialised WHEN initializeBalanceAdjustments is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeBalanceAdjustments())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(BALANCE_ADJUSTMENTS_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_BALANCE_ADJUSTMENTS, 1);
     });
   });
 
   describe("initializeBalanceAdjustments event", () => {
     it("GIVEN a fresh deployment WHEN initializeBalanceAdjustments is called THEN emits BalanceAdjustmentsInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(BALANCE_ADJUSTMENTS_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_BALANCE_ADJUSTMENTS);
       await expect(asset.initializeBalanceAdjustments()).to.emit(asset, "BalanceAdjustmentsInitialized");
     });
   });

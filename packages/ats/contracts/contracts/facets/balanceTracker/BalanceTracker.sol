@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBalanceTracker } from "./IBalanceTracker.sol";
+import { IBalanceTracker, RESOLVER_KEY_BALANCE_TRACKER } from "./IBalanceTracker.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _BALANCE_TRACKER_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title BalanceTracker
@@ -24,9 +23,9 @@ abstract contract BalanceTracker is IBalanceTracker, Modifiers {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_BALANCE_TRACKER_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_BALANCE_TRACKER)
     {
-        InitializerStorageWrapper.setFacetToReady(_BALANCE_TRACKER_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_BALANCE_TRACKER);
         emit IBalanceTracker.BalanceTrackerInitialized();
     }
 

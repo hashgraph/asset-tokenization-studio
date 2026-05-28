@@ -21,12 +21,7 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
  */
 abstract contract Burn is IBurn, Modifiers, ProtectedPartitionRoleValidator {
     /// @inheritdoc IBurn
-    function initializeBurn()
-        external
-        override
-        onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(RESOLVER_KEY_BURN)
-    {
+    function initializeBurn() external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_BURN) {
         InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_BURN);
         emit BurnInitialized();
     }

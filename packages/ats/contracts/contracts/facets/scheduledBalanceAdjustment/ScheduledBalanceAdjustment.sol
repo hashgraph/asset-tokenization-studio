@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IScheduledBalanceAdjustment } from "./IScheduledBalanceAdjustment.sol";
+import {
+    IScheduledBalanceAdjustment,
+    RESOLVER_KEY_SCHEDULED_BALANCE_ADJUSTMENT
+} from "./IScheduledBalanceAdjustment.sol";
 import { ROLE_CORPORATE_ACTION, ROLE_CORPORATE_ACTION_FORCE_CANCEL } from "../../constants/roles.sol";
 import { CORPORATE_ACTION_TYPE_BALANCE_ADJUSTMENT } from "../../constants/dispatchTypes.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
@@ -11,7 +14,6 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { ScheduledTask } from "../layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _SCHEDULED_BALANCE_ADJUSTMENT_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title ScheduledBalanceAdjustment
@@ -28,9 +30,9 @@ abstract contract ScheduledBalanceAdjustment is IScheduledBalanceAdjustment, Mod
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_SCHEDULED_BALANCE_ADJUSTMENT_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_SCHEDULED_BALANCE_ADJUSTMENT)
     {
-        InitializerStorageWrapper.setFacetToReady(_SCHEDULED_BALANCE_ADJUSTMENT_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_SCHEDULED_BALANCE_ADJUSTMENT);
         emit ScheduledBalanceAdjustmentInitialized();
     }
 

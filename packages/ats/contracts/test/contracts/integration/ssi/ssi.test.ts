@@ -11,10 +11,15 @@ import {
   MockedT3RevocationRegistry,
   RevertingRevocationRegistry,
 } from "@contract-types";
-import { ATS_ROLES, ZERO, DEFAULT_PARTITION, EMPTY_HEX_BYTES, EMPTY_STRING } from "@scripts";
+import {
+  ATS_ROLES,
+  ZERO,
+  DEFAULT_PARTITION,
+  EMPTY_HEX_BYTES,
+  EMPTY_STRING,
+  RESOLVER_KEY_SSI_MANAGEMENT,
+} from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
-
-const SSI_MANAGEMENT_RESOLVER_KEY = "0x46df6aaf3742e0cbad136a74fb679b686e087dcc3a3d92d1c4ce2f3ef1b508a0";
 
 describe("SSI Tests", () => {
   let diamond: ResolverProxy;
@@ -273,13 +278,13 @@ describe("SSI Tests", () => {
     it("GIVEN already-initialised WHEN initializeSsiManagement THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeSsiManagement())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(SSI_MANAGEMENT_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_SSI_MANAGEMENT, 1);
     });
   });
 
   describe("initializeSsiManagement event", () => {
     it("GIVEN fresh facet WHEN initializeSsiManagement THEN emits SsiManagementInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(SSI_MANAGEMENT_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_SSI_MANAGEMENT);
       await expect(asset.initializeSsiManagement()).to.emit(asset, "SsiManagementInitialized");
     });
   });

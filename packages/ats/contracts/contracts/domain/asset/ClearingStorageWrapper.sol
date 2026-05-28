@@ -26,7 +26,7 @@ bytes32 constant STORAGE_LOCATION_CLEARING = 0xd7a6e2f3304ec7238486e8af625921e3c
  */
 struct ClearingDataStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
-    bool activated;// ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
+    bool activated; // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(address => uint256) totalClearedAmountByAccount;
     mapping(address => mapping(bytes32 => uint256)) totalClearedAmountByAccountAndPartition;
     // solhint-disable-next-line max-line-length

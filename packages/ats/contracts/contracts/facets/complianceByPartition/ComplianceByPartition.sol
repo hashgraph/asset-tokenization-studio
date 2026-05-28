@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IComplianceByPartition } from "./IComplianceByPartition.sol";
+import { IComplianceByPartition, RESOLVER_KEY_COMPLIANCE_BY_PARTITION } from "./IComplianceByPartition.sol";
 import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.sol";
 import { PauseStorageWrapper } from "../../domain/core/PauseStorageWrapper.sol";
 import { IPause } from "../pause/IPause.sol";
@@ -9,7 +9,6 @@ import { Eip1066 } from "../../constants/eip1066.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _COMPLIANCE_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title ComplianceByPartition
@@ -27,9 +26,9 @@ abstract contract ComplianceByPartition is IComplianceByPartition, Modifiers {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_COMPLIANCE_BY_PARTITION_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_COMPLIANCE_BY_PARTITION)
     {
-        InitializerStorageWrapper.setFacetToReady(_COMPLIANCE_BY_PARTITION_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_COMPLIANCE_BY_PARTITION);
         emit ComplianceByPartitionInitialized();
     }
 

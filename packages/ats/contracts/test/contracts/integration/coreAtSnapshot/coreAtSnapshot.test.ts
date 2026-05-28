@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
-import { ATS_ROLES, CORE_AT_SNAPSHOT_RESOLVER_KEY, EMPTY_STRING, ZERO } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEY_CORE_AT_SNAPSHOT, EMPTY_STRING, ZERO } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
@@ -89,13 +89,13 @@ describe("CoreAtSnapshot Tests", () => {
     it("GIVEN already-initialised WHEN initializeCoreAtSnapshot is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeCoreAtSnapshot())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(CORE_AT_SNAPSHOT_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_CORE_AT_SNAPSHOT, 1);
     });
   });
 
   describe("initializeCoreAtSnapshot event", () => {
     it("GIVEN a fresh deployment WHEN initializeCoreAtSnapshot is called THEN emits CoreAtSnapshotInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(CORE_AT_SNAPSHOT_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_CORE_AT_SNAPSHOT);
       await expect(asset.initializeCoreAtSnapshot()).to.emit(asset, "CoreAtSnapshotInitialized");
     });
   });

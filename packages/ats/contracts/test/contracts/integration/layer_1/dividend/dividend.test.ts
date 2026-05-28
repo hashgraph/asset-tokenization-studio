@@ -11,7 +11,7 @@ import {
   dateToUnixTimestamp,
   EMPTY_STRING,
   EQUITY_CONFIG_ID,
-  DIVIDEND_RESOLVER_KEY,
+  RESOLVER_KEY_DIVIDEND,
 } from "@scripts";
 import { MAX_UINT256, deployEquityTokenFixture, executeRbac } from "@test";
 import { ethers } from "hardhat";
@@ -753,13 +753,13 @@ describe("Dividends", () => {
     it("GIVEN already-initialised WHEN initializeDividend is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeDividend())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(DIVIDEND_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_DIVIDEND, 1);
     });
   });
 
   describe("initializeDividend event", () => {
     it("GIVEN a fresh deployment WHEN initializeDividend is called THEN emits DividendInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(DIVIDEND_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_DIVIDEND);
       await expect(asset.initializeDividend()).to.emit(asset, "DividendInitialized");
     });
   });

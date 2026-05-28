@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { type IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
-import { ADDRESS_ZERO, ATS_ROLES, FREEZE_RESOLVER_KEY } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, RESOLVER_KEY_FREEZE } from "@scripts";
 
 describe("Freeze Tests", () => {
   let diamond: ResolverProxy;
@@ -40,13 +40,13 @@ describe("Freeze Tests", () => {
     it("GIVEN already-initialised WHEN initializeFreeze is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeFreeze())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(FREEZE_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_FREEZE, 1);
     });
   });
 
   describe("initializeFreeze event", () => {
     it("GIVEN a fresh deployment WHEN initializeFreeze is called THEN emits FreezeInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(FREEZE_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_FREEZE);
       await expect(asset.initializeFreeze()).to.emit(asset, "FreezeInitialized");
     });
   });

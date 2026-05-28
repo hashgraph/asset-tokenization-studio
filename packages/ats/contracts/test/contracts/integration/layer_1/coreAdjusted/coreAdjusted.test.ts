@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
-import { ATS_ROLES, CORE_ADJUSTED_RESOLVER_KEY } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEY_CORE_ADJUSTED } from "@scripts";
 import { deployEquityTokenFixture, executeRbac } from "@test";
 
 const decimals = 6;
@@ -81,13 +81,13 @@ describe("CoreAdjusted Facet Tests", () => {
     it("GIVEN already-initialised WHEN initializeCoreAdjusted is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeCoreAdjusted())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(CORE_ADJUSTED_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_CORE_ADJUSTED, 1);
     });
   });
 
   describe("initializeCoreAdjusted event", () => {
     it("GIVEN a fresh deployment WHEN initializeCoreAdjusted is called THEN emits CoreAdjustedInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(CORE_ADJUSTED_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_CORE_ADJUSTED);
       await expect(asset.initializeCoreAdjusted()).to.emit(asset, "CoreAdjustedInitialized");
     });
   });

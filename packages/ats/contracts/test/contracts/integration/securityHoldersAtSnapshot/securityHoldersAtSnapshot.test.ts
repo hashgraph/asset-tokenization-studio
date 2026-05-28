@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ATS_ROLES, EMPTY_STRING, SECURITY_HOLDERS_AT_SNAPSHOT_RESOLVER_KEY, ZERO } from "@scripts";
+import { ATS_ROLES, EMPTY_STRING, RESOLVER_KEY_SECURITY_HOLDERS_AT_SNAPSHOT, ZERO } from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const _PARTITION_ID_1 = "0x0000000000000000000000000000000000000000000000000000000000000001";
@@ -210,13 +210,13 @@ describe("SecurityHoldersAtSnapshot Tests", () => {
     it("GIVEN already-initialised WHEN initializeSecurityHoldersAtSnapshot is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeSecurityHoldersAtSnapshot())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(SECURITY_HOLDERS_AT_SNAPSHOT_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_SECURITY_HOLDERS_AT_SNAPSHOT, 1);
     });
   });
 
   describe("initializeSecurityHoldersAtSnapshot event", () => {
     it("GIVEN a fresh deployment WHEN initializeSecurityHoldersAtSnapshot is called THEN emits SecurityHoldersAtSnapshotInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(SECURITY_HOLDERS_AT_SNAPSHOT_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_SECURITY_HOLDERS_AT_SNAPSHOT);
       await expect(asset.initializeSecurityHoldersAtSnapshot()).to.emit(asset, "SecurityHoldersAtSnapshotInitialized");
     });
   });

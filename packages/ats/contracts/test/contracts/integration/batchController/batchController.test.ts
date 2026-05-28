@@ -7,7 +7,7 @@ import { IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
-import { EMPTY_STRING, ATS_ROLES, ZERO, EQUITY_CONFIG_ID, BATCH_CONTROLLER_RESOLVER_KEY } from "@scripts";
+import { EMPTY_STRING, ATS_ROLES, ZERO, EQUITY_CONFIG_ID, RESOLVER_KEY_BATCH_CONTROLLER } from "@scripts";
 
 const AMOUNT = 1000;
 const MAX_SUPPLY = 10000000;
@@ -253,13 +253,13 @@ describe("BatchController Tests", () => {
     it("GIVEN already-initialised WHEN initializeBatchController is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeBatchController())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(BATCH_CONTROLLER_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_BATCH_CONTROLLER, 1);
     });
   });
 
   describe("initializeBatchController event", () => {
     it("GIVEN a fresh deployment WHEN initializeBatchController is called THEN emits BatchControllerInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(BATCH_CONTROLLER_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_BATCH_CONTROLLER);
       await expect(asset.initializeBatchController()).to.emit(asset, "BatchControllerInitialized");
     });
   });

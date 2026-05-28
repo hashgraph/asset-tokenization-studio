@@ -11,6 +11,6 @@ contract TransferAndLockFacet is TransferAndLockFacetBase {
     }
 
     function _transferAndLockInitializerKey() internal pure override returns (bytes32) {
-        return _TRANSFER_AND_LOCK_RESOLVER_KEY;
+        return RESOLVER_KEY_TRANSFER_AND_LOCK;
     }
 }

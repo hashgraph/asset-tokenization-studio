@@ -11,7 +11,7 @@ import {
   ADDRESS_ZERO,
   ZERO,
   EMPTY_STRING,
-  MATURITY_RESOLVER_KEY,
+  RESOLVER_KEY_MATURITY,
 } from "@scripts";
 import { grantRoleAndPauseToken, deployBondTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -326,13 +326,13 @@ describe("Maturity Tests", () => {
     it("GIVEN already-initialised WHEN initializeMaturity is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeMaturity())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(MATURITY_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_MATURITY, 1);
     });
   });
 
   describe("initializeMaturity event", () => {
     it("GIVEN a fresh deployment WHEN initializeMaturity is called THEN emits MaturityInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(MATURITY_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_MATURITY);
       await expect(asset.initializeMaturity()).to.emit(asset, "MaturityInitialized");
     });
   });

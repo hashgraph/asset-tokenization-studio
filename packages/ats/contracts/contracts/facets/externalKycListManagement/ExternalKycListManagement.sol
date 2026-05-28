@@ -27,9 +27,9 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
     /// @inheritdoc IExternalKycListManagement
     function initializeExternalKycLists(
         address[] calldata _kycLists
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_EXTERNAL_KYC_LIST_RESOLVER_KEY) {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_EXTERNAL_KYC_LIST) {
         ExternalListManagementStorageWrapper.initializeExternalKycLists(_kycLists);
-        InitializerStorageWrapper.setFacetToReady(_EXTERNAL_KYC_LIST_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_EXTERNAL_KYC_LIST);
         emit IExternalKycListManagement.ExternalKycListInitialized(_kycLists);
     }
 

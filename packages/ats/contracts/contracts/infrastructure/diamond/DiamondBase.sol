@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { DiamondCut } from "./DiamondCut.sol";
 import { DiamondLoupe } from "./DiamondLoupe.sol";
 import { IDiamondFacet } from "./IDiamondFacet.sol";
-import { _DIAMOND_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
+import { RESOLVER_KEY_DIAMOND } from "../proxy/IDiamond.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { InitializerModifiers } from "../../services/core/InitializerModifiers.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
@@ -23,9 +23,9 @@ abstract contract DiamondBase is IDiamondFacet, DiamondCut, DiamondLoupe, Initia
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_DIAMOND_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_DIAMOND)
     {
-        InitializerStorageWrapper.setFacetToReady(_DIAMOND_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_DIAMOND);
         emit DiamondCutInitialized();
     }
 }

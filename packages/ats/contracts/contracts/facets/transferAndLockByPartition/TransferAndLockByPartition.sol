@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ITransferAndLockByPartition } from "./ITransferAndLockByPartition.sol";
+import {
+    ITransferAndLockByPartition,
+    RESOLVER_KEY_TRANSFER_AND_LOCK_BY_PARTITION
+} from "./ITransferAndLockByPartition.sol";
 import { ROLE_LOCKER } from "../../constants/roles.sol";
 import { IERC1410Types } from "../layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
@@ -11,7 +14,6 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _TRANSFER_AND_LOCK_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title  TransferAndLockByPartition
@@ -31,9 +33,9 @@ abstract contract TransferAndLockByPartition is ITransferAndLockByPartition, Mod
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_TRANSFER_AND_LOCK_BY_PARTITION_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_TRANSFER_AND_LOCK_BY_PARTITION)
     {
-        InitializerStorageWrapper.setFacetToReady(_TRANSFER_AND_LOCK_BY_PARTITION_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_TRANSFER_AND_LOCK_BY_PARTITION);
         emit TransferAndLockByPartitionInitialized();
     }
 

@@ -12,7 +12,7 @@ import {
   dateToUnixTimestamp,
   EMPTY_HEX_BYTES,
   EMPTY_STRING,
-  ERC1410_MANAGEMENT_RESOLVER_KEY,
+  RESOLVER_KEY_ERC1410_MANAGEMENT,
   ZERO,
 } from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
@@ -5153,7 +5153,7 @@ describe("Clearing Tests", () => {
 
     describe("initializeERC1410 event", () => {
       it("GIVEN a fresh deployment WHEN initializeERC1410 is called THEN emits ERC1410Initialized", async () => {
-        await mockDiamondCut.forceFacetNotRegistered(ERC1410_MANAGEMENT_RESOLVER_KEY);
+        await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_ERC1410_MANAGEMENT);
         await expect(asset.initializeERC1410(true)).to.emit(asset, "ERC1410Initialized");
       });
     });

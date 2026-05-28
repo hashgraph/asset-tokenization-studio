@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 import { deployEquityTokenFixture } from "@test";
-import { ATS_ROLES, NONCES_RESOLVER_KEY } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEY_NONCES } from "@scripts";
 
 describe("Nonces Tests", () => {
   let diamond: ResolverProxy;
@@ -42,13 +42,13 @@ describe("Nonces Tests", () => {
     it("GIVEN already-initialised WHEN initializeNonces is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeNonces())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(NONCES_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_NONCES, 1);
     });
   });
 
   describe("initializeNonces event", () => {
     it("GIVEN a fresh deployment WHEN initializeNonces is called THEN emits NoncesInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(NONCES_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_NONCES);
       await expect(asset.initializeNonces()).to.emit(asset, "NoncesInitialized");
     });
   });

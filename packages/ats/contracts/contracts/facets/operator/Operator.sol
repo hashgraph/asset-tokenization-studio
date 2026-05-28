@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IOperator } from "./IOperator.sol";
+import { IOperator, RESOLVER_KEY_OPERATOR } from "./IOperator.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _OPERATOR_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title  Operator
@@ -22,9 +21,9 @@ abstract contract Operator is IOperator, Modifiers {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_OPERATOR_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_OPERATOR)
     {
-        InitializerStorageWrapper.setFacetToReady(_OPERATOR_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_OPERATOR);
         emit OperatorInitialized();
     }
 

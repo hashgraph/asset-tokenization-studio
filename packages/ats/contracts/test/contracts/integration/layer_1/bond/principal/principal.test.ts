@@ -4,13 +4,11 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
-import { DEFAULT_PARTITION, ATS_ROLES, ZERO, EMPTY_STRING } from "@scripts";
+import { DEFAULT_PARTITION, ATS_ROLES, ZERO, EMPTY_STRING, RESOLVER_KEY_PRINCIPAL } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployBondTokenFixture, getDltTimestamp } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
 import { TIME_PERIODS_S } from "@scripts";
-
-const PRINCIPAL_RESOLVER_KEY = "0xee3abfaeccdcebe74dafa848dd3d3e8c9ad4e286bdb263b740f7c1ae90d9191d";
 
 const DECIMALS = 6;
 const _PARTITION_ID = "0x0000000000000000000000000000000000000000000000000000000000000002";
@@ -162,13 +160,13 @@ describe("PrincipalFacet Tests", () => {
     it("GIVEN already-initialised WHEN initializePrincipal THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializePrincipal())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(PRINCIPAL_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_PRINCIPAL, 1);
     });
   });
 
   describe("initializePrincipal event", () => {
     it("GIVEN fresh facet WHEN initializePrincipal THEN emits PrincipalInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(PRINCIPAL_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_PRINCIPAL);
       await expect(asset.initializePrincipal()).to.emit(asset, "PrincipalInitialized");
     });
   });

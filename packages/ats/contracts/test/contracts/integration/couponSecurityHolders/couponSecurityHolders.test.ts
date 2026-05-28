@@ -10,7 +10,7 @@ import {
   TIME_PERIODS_S,
   ZERO,
   EMPTY_STRING,
-  COUPON_SECURITY_HOLDERS_RESOLVER_KEY,
+  RESOLVER_KEY_COUPON_SECURITY_HOLDERS,
 } from "@scripts";
 import { getDltTimestamp, executeRbac, deployBondTokenFixture, MAX_UINT256 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -238,13 +238,13 @@ describe("CouponSecurityHolders Tests", () => {
     it("GIVEN already-initialised WHEN initializeCouponSecurityHolders is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeCouponSecurityHolders())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(COUPON_SECURITY_HOLDERS_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_COUPON_SECURITY_HOLDERS, 1);
     });
   });
 
   describe("initializeCouponSecurityHolders event", () => {
     it("GIVEN a fresh deployment WHEN initializeCouponSecurityHolders is called THEN emits CouponSecurityHoldersInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(COUPON_SECURITY_HOLDERS_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_COUPON_SECURITY_HOLDERS);
       await expect(asset.initializeCouponSecurityHolders()).to.emit(asset, "CouponSecurityHoldersInitialized");
     });
   });

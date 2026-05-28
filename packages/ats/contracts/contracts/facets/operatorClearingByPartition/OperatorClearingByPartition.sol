@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IOperatorClearingByPartition } from "./IOperatorClearingByPartition.sol";
+import {
+    IOperatorClearingByPartition,
+    RESOLVER_KEY_OPERATOR_CLEARING_BY_PARTITION
+} from "./IOperatorClearingByPartition.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ClearingOps } from "../../domain/orchestrator/ClearingOps.sol";
 import { ThirdPartyType } from "../../domain/asset/types/ThirdPartyType.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _OPERATOR_CLEARING_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title OperatorClearingByPartition
@@ -22,9 +24,9 @@ abstract contract OperatorClearingByPartition is IOperatorClearingByPartition, M
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_OPERATOR_CLEARING_BY_PARTITION_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_OPERATOR_CLEARING_BY_PARTITION)
     {
-        InitializerStorageWrapper.setFacetToReady(_OPERATOR_CLEARING_BY_PARTITION_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_OPERATOR_CLEARING_BY_PARTITION);
         emit OperatorClearingByPartitionInitialized();
     }
 

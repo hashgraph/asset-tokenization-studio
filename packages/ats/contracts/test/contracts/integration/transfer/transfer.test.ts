@@ -12,7 +12,7 @@ import {
   EMPTY_STRING,
   ZERO,
   EQUITY_CONFIG_ID,
-  TRANSFER_RESOLVER_KEY,
+  RESOLVER_KEY_TRANSFER,
 } from "@scripts";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
@@ -556,7 +556,7 @@ describe("Transfer Facet Tests", () => {
     it("GIVEN already-initialised WHEN initializeTransfer is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeTransfer())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(TRANSFER_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_TRANSFER, 1);
     });
   });
 
@@ -568,7 +568,7 @@ describe("Transfer Facet Tests", () => {
     });
 
     it("GIVEN a fresh deployment WHEN initializeTransfer is called THEN emits TransferInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(TRANSFER_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_TRANSFER);
       await expect(asset.initializeTransfer()).to.emit(asset, "TransferInitialized");
     });
   });

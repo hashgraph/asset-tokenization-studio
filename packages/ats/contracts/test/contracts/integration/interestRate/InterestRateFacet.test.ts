@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type IAsset, MockDiamondCut } from "@contract-types";
-import { ATS_ROLES, INTEREST_RATE_RESOLVER_KEY } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEY_INTEREST_RATE } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployBondFixedRateTokenFixture, deployBondTokenFixture, executeRbac } from "@test";
 
@@ -52,7 +52,7 @@ describe("InterestRateFacet Tests", () => {
 
   describe("initializeInterestRateType event", () => {
     it("GIVEN a fresh deployment WHEN initializeInterestRateType is called THEN emits InterestRateTypeInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(INTEREST_RATE_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_INTEREST_RATE);
       await expect(asset.initializeInterestRateType(RateType.FIXED))
         .to.emit(asset, "InterestRateTypeInitialized")
         .withArgs(RateType.FIXED);

@@ -5,13 +5,12 @@ import { HoldOps } from "../../domain/orchestrator/HoldOps.sol";
 import { HoldStorageWrapper } from "../../domain/asset/HoldStorageWrapper.sol";
 import { ThirdPartyType } from "../../domain/asset/types/ThirdPartyType.sol";
 import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
-import { IHoldByPartition } from "./IHoldByPartition.sol";
+import { IHoldByPartition, RESOLVER_KEY_HOLD_BY_PARTITION } from "./IHoldByPartition.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _HOLD_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title HoldByPartition
@@ -31,9 +30,9 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_HOLD_BY_PARTITION_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_HOLD_BY_PARTITION)
     {
-        InitializerStorageWrapper.setFacetToReady(_HOLD_BY_PARTITION_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_HOLD_BY_PARTITION);
         emit HoldByPartitionInitialized();
     }
 

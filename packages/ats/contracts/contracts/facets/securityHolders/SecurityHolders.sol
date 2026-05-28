@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ISecurityHolders } from "./ISecurityHolders.sol";
+import { ISecurityHolders, RESOLVER_KEY_SECURITYHOLDERS } from "./ISecurityHolders.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _SECURITYHOLDERS_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title SecurityHolders
@@ -21,9 +20,9 @@ abstract contract SecurityHolders is ISecurityHolders, Modifiers {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_SECURITYHOLDERS_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_SECURITYHOLDERS)
     {
-        InitializerStorageWrapper.setFacetToReady(_SECURITYHOLDERS_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_SECURITYHOLDERS);
         emit SecurityHoldersInitialized();
     }
     /// @inheritdoc ISecurityHolders

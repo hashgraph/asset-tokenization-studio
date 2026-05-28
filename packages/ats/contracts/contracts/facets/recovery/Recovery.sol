@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IRecovery } from "./IRecovery.sol";
+import { IRecovery, RESOLVER_KEY_RECOVERY } from "./IRecovery.sol";
 import { ROLE_AGENT } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _RECOVERY_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /// @title Recovery
 /// @author Asset Tokenization Studio Team
@@ -21,9 +20,9 @@ abstract contract Recovery is IRecovery, Modifiers {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_RECOVERY_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_RECOVERY)
     {
-        InitializerStorageWrapper.setFacetToReady(_RECOVERY_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_RECOVERY);
         emit RecoveryInitialized();
     }
 

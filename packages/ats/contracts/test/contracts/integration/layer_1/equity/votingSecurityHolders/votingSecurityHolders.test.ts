@@ -4,14 +4,13 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
-import { DEFAULT_PARTITION, ATS_ROLES, ZERO, EMPTY_STRING } from "@scripts";
+import { DEFAULT_PARTITION, ATS_ROLES, ZERO, EMPTY_STRING, RESOLVER_KEY_VOTING_SECURITY_HOLDERS } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
 
 const voteData = "0x";
 const EMPTY_VC_ID = EMPTY_STRING;
-const VOTING_SECURITY_HOLDERS_RESOLVER_KEY = "0xa8793316b6a7c7511ede839fefe35986fc60ee1b014e99873627ab40febd5924";
 
 describe("VotingSecurityHoldersFacet Tests", () => {
   let diamond: ResolverProxy;
@@ -154,13 +153,13 @@ describe("VotingSecurityHoldersFacet Tests", () => {
     it("GIVEN already-initialised WHEN initializeVotingSecurityHolders THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeVotingSecurityHolders())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(VOTING_SECURITY_HOLDERS_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_VOTING_SECURITY_HOLDERS, 1);
     });
   });
 
   describe("initializeVotingSecurityHolders event", () => {
     it("GIVEN fresh facet WHEN initializeVotingSecurityHolders THEN emits VotingSecurityHoldersInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(VOTING_SECURITY_HOLDERS_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_VOTING_SECURITY_HOLDERS);
       await expect(asset.initializeVotingSecurityHolders()).to.emit(asset, "VotingSecurityHoldersInitialized");
     });
   });

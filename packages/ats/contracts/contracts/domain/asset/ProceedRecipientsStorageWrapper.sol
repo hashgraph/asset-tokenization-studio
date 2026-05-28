@@ -57,8 +57,6 @@ library ProceedRecipientsStorageWrapper {
                 ++index;
             }
         }
-
-        ExternalListManagementStorageWrapper.setExternalListInitialized(STORAGE_LOCATION_PROCEED_RECIPIENTS);
     }
 
     /**

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IClearingHoldByPartition } from "./IClearingHoldByPartition.sol";
+import { IClearingHoldByPartition, RESOLVER_KEY_CLEARING_HOLDBYPARTITION } from "./IClearingHoldByPartition.sol";
 import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ClearingOps } from "../../domain/orchestrator/ClearingOps.sol";
@@ -11,7 +11,6 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _CLEARING_HOLDBYPARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title ClearingHoldByPartition
@@ -27,9 +26,9 @@ abstract contract ClearingHoldByPartition is IClearingHoldByPartition, Modifiers
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_CLEARING_HOLDBYPARTITION_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_CLEARING_HOLDBYPARTITION)
     {
-        InitializerStorageWrapper.setFacetToReady(_CLEARING_HOLDBYPARTITION_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_CLEARING_HOLDBYPARTITION);
         emit ClearingHoldByPartitionInitialized();
     }
 

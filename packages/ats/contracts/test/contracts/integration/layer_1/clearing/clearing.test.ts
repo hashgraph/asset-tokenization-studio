@@ -12,7 +12,7 @@ import {
   dateToUnixTimestamp,
   EMPTY_HEX_BYTES,
   EMPTY_STRING,
-  CLEARING_RESOLVER_KEY,
+  RESOLVER_KEY_CLEARING,
   ZERO,
 } from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
@@ -3077,7 +3077,7 @@ describe("Clearing Tests", () => {
 
       it("GIVEN a fresh deployment WHEN initializeClearing is called THEN emits ClearingInitialized", async () => {
         const mockDC = await ethers.getContractAt("MockDiamondCut", diamond.target);
-        await mockDC.forceFacetNotRegistered(CLEARING_RESOLVER_KEY);
+        await mockDC.forceFacetNotRegistered(RESOLVER_KEY_CLEARING);
         await expect(asset.initializeClearing(true)).to.emit(asset, "ClearingInitialized");
       });
     });

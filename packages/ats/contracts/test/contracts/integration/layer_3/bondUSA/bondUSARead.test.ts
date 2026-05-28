@@ -4,11 +4,9 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type IAsset, MockDiamondCut } from "@contract-types";
-import { ATS_ROLES } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEY_BOND_VARIABLE_READ } from "@scripts";
 import { deployBondTokenFixture } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-
-const BOND_VARIABLE_READ_RESOLVER_KEY = "0x624866e79d4c0a78a8dc32cbce49563cdf86eba627bd05a9821dbaa1674ac231";
 
 describe("BondUSARead Tests", () => {
   let asset: IAsset;
@@ -37,13 +35,13 @@ describe("BondUSARead Tests", () => {
     it("GIVEN already-initialised WHEN initializeBondUSARead THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeBondUSARead())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(BOND_VARIABLE_READ_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_BOND_VARIABLE_READ, 1);
     });
   });
 
   describe("initializeBondUSARead event", () => {
     it("GIVEN fresh facet WHEN initializeBondUSARead THEN emits BondUSAReadInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(BOND_VARIABLE_READ_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_BOND_VARIABLE_READ);
       await expect(asset.initializeBondUSARead()).to.emit(asset, "BondUSAReadInitialized");
     });
   });

@@ -2,10 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { MockFactory } from "./MockFactory.sol";
-import { IFactory } from "../../factory/IFactory.sol";
+import { IFactory, RESOLVER_KEY_FACTORY } from "../../factory/IFactory.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { _FACTORY_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title Mock Factory Facet
@@ -18,7 +17,7 @@ import { _FACTORY_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 contract MockFactoryFacet is MockFactory, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _FACTORY_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_FACTORY;
     }
 
     /// @inheritdoc IStaticFunctionSelectors

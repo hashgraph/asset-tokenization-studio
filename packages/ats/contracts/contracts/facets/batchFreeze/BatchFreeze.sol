@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBatchFreeze } from "./IBatchFreeze.sol";
+import { IBatchFreeze, RESOLVER_KEY_BATCH_FREEZE } from "./IBatchFreeze.sol";
 import { IFreeze } from "../freeze/IFreeze.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
@@ -10,7 +10,6 @@ import { ExternalListManagementStorageWrapper } from "../../domain/core/External
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _BATCH_FREEZE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title BatchFreeze
@@ -25,9 +24,9 @@ abstract contract BatchFreeze is IBatchFreeze, Modifiers {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_BATCH_FREEZE_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_BATCH_FREEZE)
     {
-        InitializerStorageWrapper.setFacetToReady(_BATCH_FREEZE_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_BATCH_FREEZE);
         emit IBatchFreeze.BatchFreezeInitialized();
     }
 

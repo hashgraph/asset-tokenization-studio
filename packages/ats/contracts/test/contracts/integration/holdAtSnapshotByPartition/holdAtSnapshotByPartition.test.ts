@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type IAsset, MockDiamondCut } from "@contract-types";
-import { ZERO, EMPTY_STRING, ADDRESS_ZERO, ATS_ROLES, HOLD_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY } from "@scripts";
+import { ZERO, EMPTY_STRING, ADDRESS_ZERO, ATS_ROLES, RESOLVER_KEY_HOLD_AT_SNAPSHOT_BY_PARTITION } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
@@ -205,13 +205,13 @@ describe("HoldAtSnapshotByPartition Tests", () => {
     it("GIVEN already-initialised WHEN initializeHoldAtSnapshotByPartition is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeHoldAtSnapshotByPartition())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(HOLD_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_HOLD_AT_SNAPSHOT_BY_PARTITION, 1);
     });
   });
 
   describe("initializeHoldAtSnapshotByPartition event", () => {
     it("GIVEN a fresh deployment WHEN initializeHoldAtSnapshotByPartition is called THEN emits HoldAtSnapshotByPartitionInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(HOLD_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_HOLD_AT_SNAPSHOT_BY_PARTITION);
       await expect(asset.initializeHoldAtSnapshotByPartition()).to.emit(asset, "HoldAtSnapshotByPartitionInitialized");
     });
   });

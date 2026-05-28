@@ -1,14 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IPause } from "./IPause.sol";
+import { IPause, RESOLVER_KEY_PAUSE } from "./IPause.sol";
 import { PauseRead } from "./PauseRead.sol";
-import { PAUSER_ROLE } from "../../constants/roles.sol";
+import { ROLE_PAUSER, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { PauseStorageWrapper } from "../../domain/core/PauseStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
-import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _PAUSE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title PauseOperational
@@ -25,9 +23,9 @@ abstract contract PauseOperational is PauseRead {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_PAUSE_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_PAUSE)
     {
-        InitializerStorageWrapper.setFacetToReady(_PAUSE_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_PAUSE);
         emit PauseInitialized();
     }
 
@@ -38,7 +36,7 @@ abstract contract PauseOperational is PauseRead {
         onlyOperational
         onlyActivated
         onlyUnpaused
-        onlyRole(PAUSER_ROLE)
+        onlyRole(ROLE_PAUSER)
         returns (bool success_)
     {
         PauseStorageWrapper.setPause(true);
@@ -52,7 +50,7 @@ abstract contract PauseOperational is PauseRead {
         override
         onlyOperational
         onlyActivated
-        onlyRole(PAUSER_ROLE)
+        onlyRole(ROLE_PAUSER)
         onlyPaused
         returns (bool success_)
     {

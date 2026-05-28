@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
-import { ADDRESS_ZERO, ATS_ROLES, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO, HOLD_RESOLVER_KEY } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO, RESOLVER_KEY_HOLD } from "@scripts";
 import { IAsset, ResolverProxy, MockDiamondCut } from "@contract-types";
 
 const _PARTITION_ID_1 = "0x0000000000000000000000000000000000000000000000000000000000000001";
@@ -243,13 +243,13 @@ describe("Hold Tests", () => {
       it("GIVEN already-initialised WHEN initializeHold is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeHold())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(HOLD_RESOLVER_KEY, 1);
+          .withArgs(RESOLVER_KEY_HOLD, 1);
       });
     });
 
     describe("initializeHold event", () => {
       it("GIVEN a fresh deployment WHEN initializeHold is called THEN emits HoldInitialized", async () => {
-        await mockDiamondCut.forceFacetNotRegistered(HOLD_RESOLVER_KEY);
+        await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_HOLD);
         await expect(asset.initializeHold()).to.emit(asset, "HoldInitialized");
       });
     });

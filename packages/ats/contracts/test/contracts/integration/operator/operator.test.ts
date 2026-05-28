@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
-import { ATS_ROLES, EMPTY_STRING, OPERATOR_RESOLVER_KEY, ZERO } from "@scripts";
+import { ATS_ROLES, EMPTY_STRING, RESOLVER_KEY_OPERATOR, ZERO } from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const EMPTY_VC_ID = EMPTY_STRING;
@@ -155,13 +155,13 @@ describe("Operator Facet Tests", () => {
     it("GIVEN already-initialised WHEN initializeOperator is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeOperator())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(OPERATOR_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_OPERATOR, 1);
     });
   });
 
   describe("initializeOperator event", () => {
     it("GIVEN a fresh deployment WHEN initializeOperator is called THEN emits OperatorInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(OPERATOR_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_OPERATOR);
       await expect(asset.initializeOperator()).to.emit(asset, "OperatorInitialized");
     });
   });

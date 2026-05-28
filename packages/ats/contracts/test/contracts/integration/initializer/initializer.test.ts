@@ -31,23 +31,29 @@ import {
   MockFacet3__factory,
 } from "@contract-types";
 import { deployAtsInfrastructureFixture } from "@test";
-import { INITIALIZE_MOCK_CONFIG_ID, EQUITY_CONFIG_ID, ATS_ROLES, atsRegistry, DIAMOND_RESOLVER_KEY } from "@scripts";
+import {
+  INITIALIZE_MOCK_CONFIG_ID,
+  EQUITY_CONFIG_ID,
+  ATS_ROLES,
+  RESOLVER_KEY_DIAMOND,
+  RESOLVER_KEY_INITIALIZER,
+} from "@scripts";
 import { decodeEvent } from "@scripts/infrastructure";
 
 describe("Initializer — InitializeMock domain", () => {
   // TEST-ONLY: mirrors `RESOLVER_KEY_INITIALIZER` declared file-scope in
   // `contracts/facets/initializer/IInitializer.sol`. Sourced from the
   // auto-generated atsRegistry so the test stays in sync with the codegen.
-  const initializerFacetId = atsRegistry.getFacetDefinition("InitializerFacet")!.resolverKey!.value;
-  // TEST-ONLY: mirrors the `_MOCK_FACET_N_RESOLVER_KEY = bytes32("MockFacetN")`
+  const initializerFacetId = RESOLVER_KEY_INITIALIZER;
+  // TEST-ONLY: mirrors the `_MOCK_FACET_N = bytes32("MockFacetN")`
   // constants declared in `contracts/test/mocks/MockFacets.sol`.
   const mockFacet1Id = "0x4d6f636b46616365743100000000000000000000000000000000000000000000";
   const mockFacet2Id = "0x4d6f636b46616365743200000000000000000000000000000000000000000000";
   const mockFacet3Id = "0x4d6f636b46616365743300000000000000000000000000000000000000000000";
-  // TEST-ONLY: mirrors the production `_DIAMOND_RESOLVER_KEY` from
+  // TEST-ONLY: mirrors the production `_DIAMOND` from
   // `contracts/constants/resolverKeys.sol`. MockDiamondCut shares the same
   // key so that BLR registration and facet-version-status assertions align.
-  const mockDiamondCutId = DIAMOND_RESOLVER_KEY;
+  const mockDiamondCutId = RESOLVER_KEY_DIAMOND;
 
   let factory: IFactory;
   let blrAddress: string;

@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type IAsset, MockDiamondCut } from "@contract-types";
-import { ZERO, EMPTY_STRING, ATS_ROLES } from "@scripts";
+import { ZERO, EMPTY_STRING, ATS_ROLES, RESOLVER_KEY_CLEARING_AT_SNAPSHOT_BY_PARTITION } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
@@ -14,9 +14,6 @@ const balanceOf_C_Original = 2 * amount;
 const _PARTITION_ID_1 = "0x0000000000000000000000000000000000000000000000000000000000000001";
 const _PARTITION_ID_2 = "0x0000000000000000000000000000000000000000000000000000000000000002";
 const EMPTY_VC_ID = EMPTY_STRING;
-
-const CLEARING_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY =
-  "0x28a0e168340e454e3c0e6fbe7dccb80c91178f4e2ee50776e28bbc5c19063e88";
 
 describe("ClearingAtSnapshotByPartition Tests", () => {
   let signer_A: HardhatEthersSigner;
@@ -200,13 +197,13 @@ describe("ClearingAtSnapshotByPartition Tests", () => {
     it("GIVEN already-initialised WHEN initializeClearingAtSnapshotByPartition THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeClearingAtSnapshotByPartition())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(CLEARING_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_CLEARING_AT_SNAPSHOT_BY_PARTITION, 1);
     });
   });
 
   describe("initializeClearingAtSnapshotByPartition event", () => {
     it("GIVEN fresh facet WHEN initializeClearingAtSnapshotByPartition THEN emits ClearingAtSnapshotByPartitionInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(CLEARING_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_CLEARING_AT_SNAPSHOT_BY_PARTITION);
       await expect(asset.initializeClearingAtSnapshotByPartition()).to.emit(
         asset,
         "ClearingAtSnapshotByPartitionInitialized",

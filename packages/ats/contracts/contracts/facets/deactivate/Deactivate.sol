@@ -24,9 +24,9 @@ abstract contract Deactivate is IDeactivate, Modifiers {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_DEACTIVATE_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_DEACTIVATE)
     {
-        InitializerStorageWrapper.setFacetToReady(_DEACTIVATE_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_DEACTIVATE);
         emit DeactivateInitialized();
     }
 

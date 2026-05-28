@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { type IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ATS_ROLES, DIVIDEND_SECURITY_HOLDERS_RESOLVER_KEY } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEY_DIVIDEND_SECURITY_HOLDERS } from "@scripts";
 import { deployEquityTokenFixture } from "@test";
 
 describe("DividendSecurityHolders Tests", () => {
@@ -40,13 +40,13 @@ describe("DividendSecurityHolders Tests", () => {
     it("GIVEN already-initialised WHEN initializeDividendSecurityHolders is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeDividendSecurityHolders())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(DIVIDEND_SECURITY_HOLDERS_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_DIVIDEND_SECURITY_HOLDERS, 1);
     });
   });
 
   describe("initializeDividendSecurityHolders event", () => {
     it("GIVEN a fresh deployment WHEN initializeDividendSecurityHolders is called THEN emits DividendSecurityHoldersInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(DIVIDEND_SECURITY_HOLDERS_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_DIVIDEND_SECURITY_HOLDERS);
       await expect(asset.initializeDividendSecurityHolders()).to.emit(asset, "DividendSecurityHoldersInitialized");
     });
   });

@@ -7,7 +7,6 @@ import { Modifiers } from "../../../../services/Modifiers.sol";
 import { ScheduledTasksStorageWrapper } from "../../../../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../../../domain/core/InitializerStorageWrapper.sol";
-import { _SCHEDULED_TASKS_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 
 /**
  * @title Scheduled Cross-Ordered Tasks Facet

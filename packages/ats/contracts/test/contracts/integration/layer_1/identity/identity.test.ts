@@ -5,12 +5,11 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { isinGenerator } from "@thomaschaplin/isin-generator";
 import { ComplianceMock, IdentityRegistryMock, type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
-import { ADDRESS_ZERO, ATS_ROLES } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, RESOLVER_KEY_IDENTITY } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac } from "@test";
 
 const name = "TEST";
-const IDENTITY_RESOLVER_KEY = "0x10f18bbac52ee688501dc4b08de190f748b8a00622cb165ccdce1f14beb74dab";
 const symbol = "TAC";
 const decimals = 6;
 const version = "1";
@@ -167,13 +166,13 @@ describe("Identity Tests", () => {
     it("GIVEN already-initialised WHEN initializeIdentity THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeIdentity())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(IDENTITY_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_IDENTITY, 1);
     });
   });
 
   describe("initializeIdentity event", () => {
     it("GIVEN fresh facet WHEN initializeIdentity THEN emits IdentityInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(IDENTITY_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_IDENTITY);
       await expect(asset.initializeIdentity()).to.emit(asset, "IdentityInitialized");
     });
   });

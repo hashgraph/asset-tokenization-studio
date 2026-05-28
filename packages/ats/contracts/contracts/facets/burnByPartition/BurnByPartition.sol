@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBurnByPartition } from "./IBurnByPartition.sol";
+import { IBurnByPartition, RESOLVER_KEY_BURN_BY_PARTITION } from "./IBurnByPartition.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _BURN_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title BurnByPartition
@@ -24,9 +23,9 @@ abstract contract BurnByPartition is IBurnByPartition, Modifiers {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_BURN_BY_PARTITION_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_BURN_BY_PARTITION)
     {
-        InitializerStorageWrapper.setFacetToReady(_BURN_BY_PARTITION_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_BURN_BY_PARTITION);
         emit BurnByPartitionInitialized();
     }
 

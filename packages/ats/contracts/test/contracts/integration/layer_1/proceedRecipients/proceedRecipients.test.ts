@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type IAsset, ResolverProxy, MockDiamondCut } from "@contract-types";
-import { ATS_ROLES, ADDRESS_ZERO, PROCEED_RECIPIENTS_RESOLVER_KEY, GAS_LIMIT } from "@scripts";
+import { ATS_ROLES, ADDRESS_ZERO, RESOLVER_KEY_PROCEED_RECIPIENTS, GAS_LIMIT } from "@scripts";
 import { deployBondTokenFixture } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
@@ -60,7 +60,7 @@ describe("Proceed Recipients Tests", () => {
 
   describe("initializeProceedRecipients event", () => {
     it("GIVEN a fresh deployment WHEN initializeProceedRecipients is called THEN emits ProceedRecipientsInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(PROCEED_RECIPIENTS_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_PROCEED_RECIPIENTS);
       await expect(asset.initializeProceedRecipients([PROCEED_RECIPIENT_1], [PROCEED_RECIPIENT_1_DATA])).to.emit(
         asset,
         "ProceedRecipientsInitialized",

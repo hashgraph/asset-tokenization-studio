@@ -21,9 +21,9 @@ abstract contract VotingSecurityHolders is IVotingSecurityHolders, Modifiers {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_VOTING_SECURITY_HOLDERS_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_VOTING_SECURITY_HOLDERS)
     {
-        InitializerStorageWrapper.setFacetToReady(_VOTING_SECURITY_HOLDERS_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_VOTING_SECURITY_HOLDERS);
         emit VotingSecurityHoldersInitialized();
     }
 

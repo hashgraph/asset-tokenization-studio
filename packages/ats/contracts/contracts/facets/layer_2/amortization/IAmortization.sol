@@ -48,18 +48,6 @@ interface IAmortization {
         uint256 nominalValue; // face value of the token
         uint8 nominalValueDecimals; // decimals of the nominal value
     }
-    /**
-     * @notice Emitted once when the amortization capability is initialised on a token.
-     * @dev Fires exclusively from `initializeAmortization`.
-     */
-    event AmortizationInitialized();
-
-    /**
-     * @notice Initialises the amortization capability on the token.
-     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
-     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
-     */
-    function initializeAmortization() external;
 
     /**
      * @notice Emitted when an amortization is created or updated for a security.
@@ -122,6 +110,12 @@ interface IAmortization {
     );
 
     /**
+     * @notice Emitted once when the amortization capability is initialised on a token.
+     * @dev Fires exclusively from `initializeAmortization`.
+     */
+    event AmortizationInitialized();
+
+    /**
      * @notice Amortization creation failed due to an internal failure.
      */
     error AmortizationCreationFailed();
@@ -167,6 +161,13 @@ interface IAmortization {
      * @param amortizationID The amortization ID.
      */
     error InvalidAmortizationHoldAmount(uint256 amortizationID);
+
+    /**
+     * @notice Initialises the amortization capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeAmortization() external;
 
     /**
      * @notice Sets a new amortization for the security.

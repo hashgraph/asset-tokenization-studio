@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 import { deployBondKpiLinkedRateTokenFixture, getDltTimestamp } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ATS_ROLES, TIME_PERIODS_S, COUPON_LISTING_RESOLVER_KEY } from "@scripts";
+import { ATS_ROLES, TIME_PERIODS_S, RESOLVER_KEY_COUPON_LISTING } from "@scripts";
 
 describe("CouponListing Tests", () => {
   let diamond: ResolverProxy;
@@ -68,7 +68,7 @@ describe("CouponListing Tests", () => {
     const kpiDiamond = kpiLinkedRateBase.diamond;
     const kpiAsset = await ethers.getContractAt("IAsset", kpiDiamond.target, signer_A);
 
-    await kpiAsset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
+    await kpiAsset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
 
     const timestamp = await getDltTimestamp();
 
@@ -234,13 +234,13 @@ describe("CouponListing Tests", () => {
     it("GIVEN already-initialised WHEN initializeCouponListing is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeCouponListing())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(COUPON_LISTING_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_COUPON_LISTING, 1);
     });
   });
 
   describe("initializeCouponListing event", () => {
     it("GIVEN a fresh deployment WHEN initializeCouponListing is called THEN emits CouponListingInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(COUPON_LISTING_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_COUPON_LISTING);
       await expect(asset.initializeCouponListing()).to.emit(asset, "CouponListingInitialized");
     });
   });

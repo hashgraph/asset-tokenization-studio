@@ -13,7 +13,7 @@ import { IStaticFunctionSelectors } from "../proxy/IStaticFunctionSelectors.sol"
  * @title DiamondFacet
  * @notice Exposes Diamond management, loupe, and ERC-165 selectors for proxy registration.
  * @dev Provides static resolver metadata for the core Diamond facet under
- *      `_DIAMOND_RESOLVER_KEY`. The returned selectors include Diamond cut, resolver
+ *      `RESOLVER_KEY_DIAMOND`. The returned selectors include Diamond cut, resolver
  *      configuration, Diamond loupe pagination, facet lookup, and interface support
  *      functions inherited through `DiamondBase`.
  * @author Asset Tokenization Studio Team

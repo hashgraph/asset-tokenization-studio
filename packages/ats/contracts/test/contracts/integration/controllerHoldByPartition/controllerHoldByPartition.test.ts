@@ -14,7 +14,7 @@ import {
   ADDRESS_ZERO,
   ATS_ROLES,
   EQUITY_CONFIG_ID,
-  CONTROLLER_HOLD_BY_PARTITION_RESOLVER_KEY,
+  RESOLVER_KEY_CONTROLLER_HOLD_BY_PARTITION,
 } from "@scripts";
 import { ResolverProxy, IAsset, IHoldTypes, MockDiamondCut } from "@contract-types";
 
@@ -365,13 +365,13 @@ describe("ControllerHoldByPartition Tests", () => {
     it("GIVEN already-initialised WHEN initializeControllerHoldByPartition is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeControllerHoldByPartition())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(CONTROLLER_HOLD_BY_PARTITION_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_CONTROLLER_HOLD_BY_PARTITION, 1);
     });
   });
 
   describe("initializeControllerHoldByPartition event", () => {
     it("GIVEN a fresh deployment WHEN initializeControllerHoldByPartition is called THEN emits ControllerHoldByPartitionInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(CONTROLLER_HOLD_BY_PARTITION_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_CONTROLLER_HOLD_BY_PARTITION);
       await expect(asset.initializeControllerHoldByPartition()).to.emit(asset, "ControllerHoldByPartitionInitialized");
     });
   });

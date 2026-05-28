@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { ComplianceMock, IdentityRegistryMock, IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
-import { ATS_ROLES, EMPTY_STRING, ZERO, ADDRESS_ZERO, EQUITY_CONFIG_ID, BATCH_TRANSFER_RESOLVER_KEY } from "@scripts";
+import { ATS_ROLES, EMPTY_STRING, ZERO, ADDRESS_ZERO, EQUITY_CONFIG_ID, RESOLVER_KEY_BATCH_TRANSFER } from "@scripts";
 
 const AMOUNT = 1000;
 const MAX_SUPPLY = 10000000;
@@ -329,13 +329,13 @@ describe("BatchTransfer Tests", () => {
     it("GIVEN already-initialised WHEN initializeBatchTransfer is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeBatchTransfer())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(BATCH_TRANSFER_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_BATCH_TRANSFER, 1);
     });
   });
 
   describe("initializeBatchTransfer event", () => {
     it("GIVEN a fresh deployment WHEN initializeBatchTransfer is called THEN emits BatchTransferInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(BATCH_TRANSFER_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_BATCH_TRANSFER);
       await expect(asset.initializeBatchTransfer()).to.emit(asset, "BatchTransferInitialized");
     });
   });

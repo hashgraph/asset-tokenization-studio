@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
-import { ERC20VOTES_RESOLVER_KEY } from "@scripts";
+import { RESOLVER_KEY_ERC20VOTES } from "@scripts";
 
 import { executeRbac } from "@test";
 import { ATS_ROLES, DEFAULT_PARTITION } from "@scripts";
@@ -100,7 +100,7 @@ describe("ERC20Votes Tests", () => {
 
   describe("initializeERC20Votes event", () => {
     it("GIVEN a fresh deployment WHEN initializeERC20Votes is called THEN emits ERC20VotesInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(ERC20VOTES_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_ERC20VOTES);
       await expect(asset.initializeERC20Votes(true)).to.emit(asset, "ERC20VotesInitialized");
     });
   });

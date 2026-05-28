@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { type IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
-import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO, MINT_RESOLVER_KEY } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO, RESOLVER_KEY_MINT } from "@scripts";
 
 const AMOUNT = 1000;
 const DATA = "0x1234";
@@ -38,7 +38,7 @@ describe("MintFacet Tests", () => {
     signer_E = base.user4;
     asset = await ethers.getContractAt("IAsset", diamond.target);
     mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
-    await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+    await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
   }
 
   beforeEach(async () => {
@@ -59,7 +59,7 @@ describe("MintFacet Tests", () => {
 
   describe("initializeERC1594 event", () => {
     it("GIVEN a fresh deployment WHEN initializeERC1594 is called THEN emits ERC1594Initialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(MINT_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_MINT);
       await expect(asset.initializeERC1594()).to.emit(asset, "ERC1594Initialized");
     });
   });

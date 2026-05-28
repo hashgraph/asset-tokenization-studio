@@ -12,7 +12,7 @@ import {
   EMPTY_HEX_BYTES,
   ATS_ROLES,
   EQUITY_CONFIG_ID,
-  CONTROLLER_BY_PARTITION_RESOLVER_KEY,
+  RESOLVER_KEY_CONTROLLER_BY_PARTITION,
 } from "@scripts";
 import { ResolverProxy, IAsset, MockDiamondCut } from "@contract-types";
 
@@ -348,13 +348,13 @@ describe("ControllerByPartition Tests", () => {
     it("GIVEN already-initialised WHEN initializeControllerByPartition is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeControllerByPartition())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(CONTROLLER_BY_PARTITION_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_CONTROLLER_BY_PARTITION, 1);
     });
   });
 
   describe("initializeControllerByPartition event", () => {
     it("GIVEN a fresh deployment WHEN initializeControllerByPartition is called THEN emits ControllerByPartitionInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(CONTROLLER_BY_PARTITION_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_CONTROLLER_BY_PARTITION);
       await expect(asset.initializeControllerByPartition()).to.emit(asset, "ControllerByPartitionInitialized");
     });
   });

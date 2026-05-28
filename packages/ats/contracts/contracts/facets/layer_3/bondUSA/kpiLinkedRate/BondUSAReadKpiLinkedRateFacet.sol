@@ -11,6 +11,6 @@ contract BondUSAReadKpiLinkedRateFacet is BondUSAReadFacetBase {
     }
 
     function _bondReadInitializerKey() internal pure override returns (bytes32) {
-        return _BOND_KPI_LINKED_READ_RESOLVER_KEY;
+        return RESOLVER_KEY_BOND_KPI_LINKED_READ;
     }
 }

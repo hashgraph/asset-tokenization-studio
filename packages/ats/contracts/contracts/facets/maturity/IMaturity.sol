@@ -10,7 +10,7 @@ bytes32 constant RESOLVER_KEY_MATURITY = 0x16825792debc7c17efd86bdf71500575f9ff5
  * @title  IMaturity
  * @notice Interface for bond maturity redemption and maturity date management.
  * @dev    `fullRedeemAtMaturity` and `updateMaturityDate` are extracted from the Bond facet
- *         into a dedicated Maturity facet registered under `_MATURITY_RESOLVER_KEY`.
+ *         into a dedicated Maturity facet registered under `RESOLVER_KEY_MATURITY`.
  *         Events and errors — `MaturityDateUpdated` and `BondMaturityDateWrong` — are
  *         inherited from `IBondTypes`.
  * @author Asset Tokenization Studio Team

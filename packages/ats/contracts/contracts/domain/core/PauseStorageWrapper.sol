@@ -67,7 +67,6 @@ library PauseStorageWrapper {
                 ++index;
             }
         }
-        ExternalListManagementStorageWrapper.setExternalListInitialized(STORAGE_LOCATION_PAUSE_MANAGEMENT);
     }
 
     /**

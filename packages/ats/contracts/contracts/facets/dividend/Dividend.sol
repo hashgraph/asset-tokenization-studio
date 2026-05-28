@@ -1,9 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IDividend, RESOLVER_KEY_DIVIDED } from "./IDividend.sol";
+import { IDividend, RESOLVER_KEY_DIVIDEND } from "./IDividend.sol";
 import { IDividendTypes } from "./IDividendTypes.sol";
-import { ROLE_CORPORATE_ACTION, ROLE_CORPORATE_ACTION_FORCE_CANCEL, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import {
+    ROLE_CORPORATE_ACTION,
+    ROLE_CORPORATE_ACTION_FORCE_CANCEL,
+    DEFAULT_ADMIN_ROLE
+} from "../../constants/roles.sol";
 import { CORPORATE_ACTION_TYPE_DIVIDEND } from "../../constants/dispatchTypes.sol";
 import { DividendStorageWrapper } from "../../domain/asset/DividendStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
@@ -28,9 +32,9 @@ abstract contract Dividend is IDividend, Modifiers {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_DIVIDEND_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_DIVIDEND)
     {
-        InitializerStorageWrapper.setFacetToReady(_DIVIDEND_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_DIVIDEND);
         emit DividendInitialized();
     }
 

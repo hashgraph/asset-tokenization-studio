@@ -124,7 +124,6 @@ library ExternalListManagementStorageWrapper {
                 ++index;
             }
         }
-        setExternalListInitialized(STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT);
     }
 
     /**
@@ -141,7 +140,6 @@ library ExternalListManagementStorageWrapper {
                 ++index;
             }
         }
-        setExternalListInitialized(STORAGE_LOCATION_KYC_MANAGEMENT);
     }
 
     /**

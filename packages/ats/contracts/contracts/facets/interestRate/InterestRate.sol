@@ -23,11 +23,11 @@ abstract contract InterestRate is IInterestRate, Modifiers {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_INTEREST_RATE_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_INTEREST_RATE)
         onlyValidRateType(rateType)
     {
         InterestRateStorageWrapper.initializeCouponRateType(rateType);
-        InitializerStorageWrapper.setFacetToReady(_INTEREST_RATE_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_INTEREST_RATE);
         emit IInterestRate.InterestRateTypeInitialized(rateType);
     }
 

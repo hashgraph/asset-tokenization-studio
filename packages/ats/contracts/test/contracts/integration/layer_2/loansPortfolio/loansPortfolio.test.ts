@@ -12,7 +12,7 @@ import {
   getLoanDetails,
 } from "@test";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO, LOANS_PORTFOLIO_RESOLVER_KEY } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO, LOANS_PORTFOLIO } from "@scripts";
 import { HoldingsAssetType } from "@scripts/domain";
 import { ethers } from "hardhat";
 
@@ -39,6 +39,7 @@ describe("LoansPortfolio Token Tests", () => {
     await executeRbac(asset, [
       { role: ATS_ROLES.ROLE_LOANS_PORTFOLIO_MANAGER, members: [signer_A.address] },
       { role: ATS_ROLES.ROLE_PAUSER, members: [signer_B.address] },
+      { role: ATS_ROLES.ROLE_DEACTIVATE, members: [signer_A.address] },
     ]);
 
     loanAsset = await deployLoanToken();
@@ -104,7 +105,7 @@ describe("LoansPortfolio Token Tests", () => {
     });
 
     it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeLoansPortfolio is called THEN it emits LoansPortfolioInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(LOANS_PORTFOLIO_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(LOANS_PORTFOLIO);
       const loansPortfolioData = {
         portfolioType: DEFAULT_LOANS_PORTFOLIO_PARAMS.portfolioType,
         distributionPolicy: DEFAULT_LOANS_PORTFOLIO_PARAMS.distributionPolicy,

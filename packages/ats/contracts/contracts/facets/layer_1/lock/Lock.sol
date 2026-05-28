@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ROLE_LOCKER, ROLE_CONTROLLER } from "../../../constants/roles.sol";
-import { ILock } from "./ILock.sol";
+import { ILock, RESOLVER_KEY_LOCK } from "./ILock.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
 import { _DEFAULT_PARTITION } from "../../../constants/values.sol";
@@ -11,7 +11,6 @@ import { Modifiers } from "../../../services/Modifiers.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
-import { _LOCK_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 
 /**
  * @title Lock
@@ -28,13 +27,8 @@ import { _LOCK_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
  */
 abstract contract Lock is ILock, Modifiers {
     /// @inheritdoc ILock
-    function initializeLock()
-        external
-        override
-        onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_LOCK_RESOLVER_KEY)
-    {
-        InitializerStorageWrapper.setFacetToReady(_LOCK_RESOLVER_KEY);
+    function initializeLock() external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_LOCK) {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_LOCK);
         emit LockInitialized();
     }
 

@@ -56,7 +56,6 @@ struct ERC1410BasicStorage {
     /// @dev Mapping from (investor, partition) to index of corresponding partition in partitions
     /// @dev Stored value is always greater by 1 to avoid the 0 value of every index
     mapping(address => mapping(bytes32 => uint256)) partitionToIndex;
-    bool multiPartition;
     mapping(address => uint256) tokenHolderIndex;
     mapping(uint256 => address) tokenHolders;
 

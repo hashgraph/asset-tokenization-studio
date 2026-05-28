@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type IAsset, type MockEIP712, MockDiamondCut } from "@contract-types";
 import { deployEquityTokenFixture } from "@test";
-import { ATS_ROLES, EIP712_RESOLVER_KEY } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEY_EIP712 } from "@scripts";
 
 describe("EIP712 Tests", () => {
   let diamond: ResolverProxy;
@@ -88,13 +88,13 @@ describe("EIP712 Tests", () => {
     it("GIVEN already-initialised WHEN initializeEIP712 is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeEIP712())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(EIP712_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_EIP712, 1);
     });
   });
 
   describe("initializeEIP712 event", () => {
     it("GIVEN a fresh deployment WHEN initializeEIP712 is called THEN emits EIP712Initialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(EIP712_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_EIP712);
       await expect(asset.initializeEIP712()).to.emit(asset, "EIP712Initialized");
     });
   });

@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type IAsset, MockDiamondCut } from "@contract-types";
-import { ZERO, EMPTY_STRING, ATS_ROLES, ADDRESS_ZERO } from "@scripts";
+import { ZERO, EMPTY_STRING, ATS_ROLES, ADDRESS_ZERO, RESOLVER_KEY_CLEARING_AT_SNAPSHOT } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
@@ -14,8 +14,6 @@ const balanceOf_C_Original = 2 * amount;
 const _PARTITION_ID_1 = "0x0000000000000000000000000000000000000000000000000000000000000001";
 const _PARTITION_ID_2 = "0x0000000000000000000000000000000000000000000000000000000000000002";
 const EMPTY_VC_ID = EMPTY_STRING;
-
-const CLEARING_AT_SNAPSHOT_RESOLVER_KEY = "0x88a00625e4e1a614a4cc0587b393c50817f00c10065905ecc7d65fce85e951dc";
 
 describe("ClearingAtSnapshot Tests", () => {
   let signer_A: HardhatEthersSigner;
@@ -242,13 +240,13 @@ describe("ClearingAtSnapshot Tests", () => {
     it("GIVEN already-initialised WHEN initializeClearingAtSnapshot THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeClearingAtSnapshot())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(CLEARING_AT_SNAPSHOT_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_CLEARING_AT_SNAPSHOT, 1);
     });
   });
 
   describe("initializeClearingAtSnapshot event", () => {
     it("GIVEN fresh facet WHEN initializeClearingAtSnapshot THEN emits ClearingAtSnapshotInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(CLEARING_AT_SNAPSHOT_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_CLEARING_AT_SNAPSHOT);
       await expect(asset.initializeClearingAtSnapshot()).to.emit(asset, "ClearingAtSnapshotInitialized");
     });
   });

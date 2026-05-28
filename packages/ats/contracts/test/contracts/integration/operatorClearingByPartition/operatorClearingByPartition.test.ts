@@ -11,7 +11,7 @@ import {
   ATS_ROLES,
   EMPTY_HEX_BYTES,
   EMPTY_STRING,
-  OPERATOR_CLEARING_BY_PARTITION_RESOLVER_KEY,
+  RESOLVER_KEY_OPERATOR_CLEARING_BY_PARTITION,
   ZERO,
 } from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
@@ -340,13 +340,13 @@ describe("OperatorClearingByPartition Tests", () => {
     it("GIVEN already-initialised WHEN initializeOperatorClearingByPartition is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeOperatorClearingByPartition())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(OPERATOR_CLEARING_BY_PARTITION_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_OPERATOR_CLEARING_BY_PARTITION, 1);
     });
   });
 
   describe("initializeOperatorClearingByPartition event", () => {
     it("GIVEN a fresh deployment WHEN initializeOperatorClearingByPartition is called THEN emits OperatorClearingByPartitionInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(OPERATOR_CLEARING_BY_PARTITION_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_OPERATOR_CLEARING_BY_PARTITION);
       await expect(asset.initializeOperatorClearingByPartition()).to.emit(
         asset,
         "OperatorClearingByPartitionInitialized",

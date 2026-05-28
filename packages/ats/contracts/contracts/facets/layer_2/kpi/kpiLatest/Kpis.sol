@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IKpis, RESOLVER_KEY_KPIS_LATEST_KIP_LINKED_RATE } from "./IKpis.sol";
+import { IKpis, RESOLVER_KEY_KPIS_LATEST_KPI_LINKED_RATE } from "./IKpis.sol";
 import { ROLE_KPI_MANAGER } from "../../../../constants/roles.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
 import { KpisStorageWrapper } from "../../../../domain/asset/KpisStorageWrapper.sol";
@@ -25,9 +25,9 @@ abstract contract Kpis is IKpis, Modifiers {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(RESOLVER_KEY_KPIS_LATEST_KIP_LINKED_RATE)
+        onlyFacetNotRegistered(RESOLVER_KEY_KPIS_LATEST_KPI_LINKED_RATE)
     {
-        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_KPIS_LATEST_KIP_LINKED_RATE);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_KPIS_LATEST_KPI_LINKED_RATE);
         emit KpisInitialized();
     }
 

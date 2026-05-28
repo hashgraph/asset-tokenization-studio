@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IPrincipal } from "./IPrincipal.sol";
+import { IPrincipal, RESOLVER_KEY_PRINCIPAL } from "./IPrincipal.sol";
 import { BondStorageWrapper } from "../../domain/asset/BondStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _PRINCIPAL_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title Principal
@@ -21,9 +20,9 @@ abstract contract Principal is IPrincipal, Modifiers {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_PRINCIPAL_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_PRINCIPAL)
     {
-        InitializerStorageWrapper.setFacetToReady(_PRINCIPAL_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_PRINCIPAL);
         emit PrincipalInitialized();
     }
 

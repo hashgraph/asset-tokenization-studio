@@ -16,7 +16,7 @@ import {
   ADDRESS_ZERO,
   EMPTY_HEX_BYTES,
   dateToUnixTimestamp,
-  ERC3643_MANAGEMENT_RESOLVER_KEY,
+  RESOLVER_KEY_ERC3643_MANAGEMENT,
 } from "@scripts";
 
 const name = "TEST";
@@ -172,7 +172,7 @@ describe("ERC3643 Tests", () => {
 
     describe("initializeERC3643 event", () => {
       it("GIVEN a fresh deployment WHEN initializeERC3643 is called THEN emits ERC3643Initialized", async () => {
-        await mockDiamondCut.forceFacetNotRegistered(ERC3643_MANAGEMENT_RESOLVER_KEY);
+        await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_ERC3643_MANAGEMENT);
         await expect(
           asset.initializeERC3643(complianceMock.target as string, identityRegistryMock.target as string),
         ).to.emit(asset, "ERC3643Initialized");

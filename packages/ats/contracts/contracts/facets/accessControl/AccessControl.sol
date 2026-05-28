@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IAccessControl } from "./IAccessControl.sol";
+import { IAccessControl, RESOLVER_KEY_ACCESS_CONTROL } from "./IAccessControl.sol";
 import { AccessControlRead } from "./AccessControlRead.sol";
 import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
-import { _ACCESS_CONTROL_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title AccessControl
@@ -26,9 +25,9 @@ abstract contract AccessControl is AccessControlRead {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_ACCESS_CONTROL_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_ACCESS_CONTROL)
     {
-        InitializerStorageWrapper.setFacetToReady(_ACCESS_CONTROL_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_ACCESS_CONTROL);
         emit IAccessControl.AccessControlInitialized();
     }
 

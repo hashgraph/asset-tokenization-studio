@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IExternalPauseManagement, RESOLVER_KEY_EXTERNAL_PAUSE_MANAGEMENT } from "./IExternalPauseManagement.sol";
+import { IExternalPauseManagement, RESOLVER_KEY_EXTERNAL_PAUSE } from "./IExternalPauseManagement.sol";
 import { ROLE_PAUSE_MANAGER, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { PauseStorageWrapper, STORAGE_LOCATION_PAUSE_MANAGEMENT } from "../../domain/core/PauseStorageWrapper.sol";
 import { ExternalListManagementStorageWrapper } from "../../domain/core/ExternalListManagementStorageWrapper.sol";
@@ -26,9 +26,9 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers
     /// @inheritdoc IExternalPauseManagement
     function initializeExternalPauses(
         address[] calldata _pauses
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_EXTERNAL_PAUSE_MANAGEMENT) {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_EXTERNAL_PAUSE) {
         PauseStorageWrapper.initializeExternalPauses(_pauses);
-        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_EXTERNAL_PAUSE_MANAGEMENT);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_EXTERNAL_PAUSE);
         emit IExternalPauseManagement.ExternalPauseInitialized(_pauses);
     }
 

@@ -6,7 +6,13 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { type IAsset, MockDiamondCut } from "@contract-types";
 import { ZERO, EMPTY_STRING, ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployAtsInfrastructureFixture, deployLoanTokenFixture, getLoanDetails, MAX_UINT256 } from "@test";
+import {
+  deployAtsInfrastructureFixture,
+  deployLoanTokenFixture,
+  executeRbac,
+  getLoanDetails,
+  MAX_UINT256,
+} from "@test";
 
 const EMPTY_VC_ID = EMPTY_STRING;
 
@@ -50,6 +56,10 @@ describe("Loan Tests", () => {
       },
       {
         role: ATS_ROLES.ROLE_LOAN_MANAGER,
+        members: [signer_A.address],
+      },
+      {
+        role: ATS_ROLES.ROLE_ISSUER,
         members: [signer_A.address],
       },
     ]);

@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IERC20Votes } from "./IERC20Votes.sol";
+import { IERC20Votes, RESOLVER_KEY_ERC20VOTES } from "./IERC20Votes.sol";
 import { IVotes } from "./IVotes.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../../../constants/roles.sol";
-import { _ERC20VOTES_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 import { Checkpoints } from "../../../../infrastructure/utils/Checkpoints.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
 import { ERC20VotesStorageWrapper } from "../../../../domain/asset/ERC20VotesStorageWrapper.sol";
@@ -23,9 +22,9 @@ abstract contract ERC20Votes is IERC20Votes, Modifiers {
     /// @dev Requires DEFAULT_ADMIN_ROLE and rejects repeated facet registration.
     function initializeERC20Votes(
         bool _activated
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_ERC20VOTES_RESOLVER_KEY) {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_ERC20VOTES) {
         ERC20VotesStorageWrapper.initializeERC20Votes(_activated);
-        InitializerStorageWrapper.setFacetToReady(_ERC20VOTES_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_ERC20VOTES);
         emit IERC20Votes.ERC20VotesInitialized(_activated);
     }
 

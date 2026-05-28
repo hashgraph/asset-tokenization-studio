@@ -26,9 +26,9 @@ abstract contract Security is ISecurity, Modifiers {
     function initializeSecurity(
         RegulationData memory _regulationData,
         AdditionalSecurityData calldata _additionalSecurityData
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_SECURITY_RESOLVER_KEY) {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_SECURITY) {
         SecurityStorageWrapper.initializeSecurity(_regulationData, _additionalSecurityData);
-        InitializerStorageWrapper.setFacetToReady(_SECURITY_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_SECURITY);
         emit SecurityInitialized(_regulationData, _additionalSecurityData);
     }
 

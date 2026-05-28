@@ -5,8 +5,7 @@ import { ethers } from "hardhat";
 import { type IAsset, MockDiamondCut } from "@contract-types";
 import { deployEquityTokenFixture } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-
-const EQUITY_RESOLVER_KEY = "0xfe85fe0513f5a5676011f59495ae16b2b93c981c190e99e61903e5603542c810";
+import { RESOLVER_KEY_EQUITY } from "@scripts";
 
 describe("EquityUSATests", () => {
   let asset: IAsset;
@@ -24,7 +23,7 @@ describe("EquityUSATests", () => {
 
   describe("initializeEquityUSA event", () => {
     it("GIVEN fresh facet WHEN initializeEquityUSA THEN emits EquityUSAInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(EQUITY_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_EQUITY);
       const equityDetails = {
         votingRight: true,
         informationRight: true,

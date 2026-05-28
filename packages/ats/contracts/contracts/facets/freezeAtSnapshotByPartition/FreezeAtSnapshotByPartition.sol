@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IFreezeAtSnapshotByPartition } from "./IFreezeAtSnapshotByPartition.sol";
+import {
+    IFreezeAtSnapshotByPartition,
+    RESOLVER_KEY_FREEZE_AT_SNAPSHOT_BY_PARTITION
+} from "./IFreezeAtSnapshotByPartition.sol";
 import { SnapshotsStorageWrapper } from "../../domain/asset/SnapshotsStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _FREEZE_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title FreezeAtSnapshotByPartition
@@ -22,9 +24,9 @@ abstract contract FreezeAtSnapshotByPartition is IFreezeAtSnapshotByPartition, M
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_FREEZE_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_FREEZE_AT_SNAPSHOT_BY_PARTITION)
     {
-        InitializerStorageWrapper.setFacetToReady(_FREEZE_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_FREEZE_AT_SNAPSHOT_BY_PARTITION);
         emit FreezeAtSnapshotByPartitionInitialized();
     }
 

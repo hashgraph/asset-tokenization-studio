@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
-import { ATS_ROLES, METADATA_RESOLVER_KEY } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEY_METADATA } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, executeRbac } from "@test";
 
@@ -135,13 +135,13 @@ describe("Metadata Tests", () => {
     it("GIVEN already-initialised WHEN initializeMetadata is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeMetadata())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(METADATA_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_METADATA, 1);
     });
   });
 
   describe("initializeMetadata event", () => {
     it("GIVEN a fresh deployment WHEN initializeMetadata is called THEN emits MetadataInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(METADATA_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_METADATA);
       await expect(asset.initializeMetadata()).to.emit(asset, "MetadataInitialized");
     });
   });

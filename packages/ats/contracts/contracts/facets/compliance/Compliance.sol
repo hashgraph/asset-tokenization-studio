@@ -39,7 +39,7 @@ abstract contract Compliance is IComplianceFacet, Modifiers {
     /// @dev Requires an operational, activated, unpaused token and `TREX_OWNER_ROLE`.
     function setCompliance(
         address _compliance
-    ) external override onlyOperational onlyActivated onlyUnpaused onlyRole(TREX_OWNER_ROLE) {
+    ) external override onlyOperational onlyActivated onlyUnpaused onlyRole(ROLE_TREX_OWNER) {
         ERC3643StorageWrapper.setCompliance(_compliance);
     }
 

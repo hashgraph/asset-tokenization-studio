@@ -13,7 +13,7 @@ import {
   EMPTY_HEX_BYTES,
   EMPTY_STRING,
   BOND_FIXED_RATE_CONFIG_ID,
-  COUPON_RESOLVER_KEY,
+  RESOLVER_KEY_COUPON,
 } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import {
@@ -1064,13 +1064,13 @@ describe("Coupon Tests", () => {
     it("GIVEN already-initialised WHEN initializeCoupon is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeCoupon())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(COUPON_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_COUPON, 1);
     });
   });
 
   describe("initializeCoupon event", () => {
     it("GIVEN a fresh deployment WHEN initializeCoupon is called THEN emits CouponInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(COUPON_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_COUPON);
       await expect(asset.initializeCoupon()).to.emit(asset, "CouponInitialized");
     });
   });

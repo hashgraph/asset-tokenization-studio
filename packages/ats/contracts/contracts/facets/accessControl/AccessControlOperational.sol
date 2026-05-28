@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IAccessControl } from "./IAccessControl.sol";
+import { IAccessControl, RESOLVER_KEY_ACCESS_CONTROL } from "./IAccessControl.sol";
 import { AccessControlRead } from "./AccessControlRead.sol";
 import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
-import { _ACCESS_CONTROL_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title AccessControlOperational
@@ -24,9 +23,9 @@ abstract contract AccessControlOperational is AccessControlRead {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_ACCESS_CONTROL_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_ACCESS_CONTROL)
     {
-        InitializerStorageWrapper.setFacetToReady(_ACCESS_CONTROL_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_ACCESS_CONTROL);
         emit IAccessControl.AccessControlInitialized();
     }
 
@@ -102,12 +101,12 @@ abstract contract AccessControlOperational is AccessControlRead {
         onlyUnpaused
         onlySameRolesAndActivesLength(_roles.length, _actives.length)
         onlyConsistentRoles(_roles, _actives)
-        returns (bool success_)
     {
-        success_ = AccessControlStorageWrapper.applyRoles(_roles, _actives, _account);
-        if (!success_) {
-            revert RolesNotApplied(_roles, _actives, _account);
-        }
-        emit RolesApplied(_roles, _actives, _account);
+        (bytes32[] memory appliedRoles, bool[] memory appliedStates) = AccessControlStorageWrapper.applyRoles(
+            _roles,
+            _actives,
+            _account
+        );
+        emit RolesApplied(_roles, _actives, _account, appliedRoles, appliedStates);
     }
 }

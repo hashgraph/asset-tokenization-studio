@@ -11,7 +11,7 @@ import {
   ADDRESS_ZERO,
   ZERO,
   EMPTY_STRING,
-  MATURITY_BY_PARTITION_RESOLVER_KEY,
+  RESOLVER_KEY_MATURITY_BY_PARTITION,
 } from "@scripts";
 import { getDltTimestamp, grantRoleAndPauseToken } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -279,13 +279,13 @@ describe("MaturityByPartition Tests", () => {
     it("GIVEN already-initialised WHEN initializeMaturityByPartition is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeMaturityByPartition())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(MATURITY_BY_PARTITION_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_MATURITY_BY_PARTITION, 1);
     });
   });
 
   describe("initializeMaturityByPartition event", () => {
     it("GIVEN a fresh deployment WHEN initializeMaturityByPartition is called THEN emits MaturityByPartitionInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(MATURITY_BY_PARTITION_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_MATURITY_BY_PARTITION);
       await expect(asset.initializeMaturityByPartition()).to.emit(asset, "MaturityByPartitionInitialized");
     });
   });

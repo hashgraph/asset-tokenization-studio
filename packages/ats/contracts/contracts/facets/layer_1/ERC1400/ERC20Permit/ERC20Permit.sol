@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IERC20Permit } from "./IERC20Permit.sol";
+import { IERC20Permit, RESOLVER_KEY_ERC20PERMIT } from "./IERC20Permit.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
 import { ERC20PermitStorageWrapper } from "../../../../domain/asset/ERC20PermitStorageWrapper.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../../../domain/core/InitializerStorageWrapper.sol";
-import { _ERC20PERMIT_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 
 /**
  * @title ERC20 Permit
@@ -22,9 +21,9 @@ abstract contract ERC20Permit is IERC20Permit, Modifiers {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_ERC20PERMIT_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_ERC20PERMIT)
     {
-        InitializerStorageWrapper.setFacetToReady(_ERC20PERMIT_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_ERC20PERMIT);
         emit ERC20PermitInitialized();
     }
 

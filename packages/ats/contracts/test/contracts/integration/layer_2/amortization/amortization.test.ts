@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { type IAsset, MockDiamondCut } from "@contract-types";
-import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES, LOAN_CONFIG_ID, AMORTIZATION_RESOLVER_KEY } from "@scripts";
+import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES, LOAN_CONFIG_ID, RESOLVER_KEY_AMORTIZATION } from "@scripts";
 import { deployLoanTokenFixture, getDltTimestamp } from "@test";
 import { DEFAULT_SECURITY_PARAMS } from "@test/fixtures/tokens/common.fixture";
 
@@ -1599,13 +1599,13 @@ describe("AmortizationFacet", () => {
     it("GIVEN already-initialised WHEN initializeAmortization is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeAmortization())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(AMORTIZATION_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_AMORTIZATION, 1);
     });
   });
 
   describe("initializeAmortization event", () => {
     it("GIVEN a fresh deployment WHEN initializeAmortization is called THEN emits AmortizationInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(AMORTIZATION_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_AMORTIZATION);
       await expect(asset.initializeAmortization()).to.emit(asset, "AmortizationInitialized");
     });
   });

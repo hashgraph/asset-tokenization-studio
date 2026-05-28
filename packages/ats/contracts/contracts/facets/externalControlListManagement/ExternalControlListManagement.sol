@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IExternalControlListManagement, RESOLVER_KEY_EXTERNAL_CONTROL_LIST } from "./IExternalControlListManagement.sol";
+import {
+    IExternalControlListManagement,
+    RESOLVER_KEY_EXTERNAL_CONTROL_LIST
+} from "./IExternalControlListManagement.sol";
 import { ROLE_CONTROL_LIST_MANAGER, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT } from "../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { ExternalListManagementStorageWrapper } from "../../domain/core/ExternalListManagementStorageWrapper.sol";

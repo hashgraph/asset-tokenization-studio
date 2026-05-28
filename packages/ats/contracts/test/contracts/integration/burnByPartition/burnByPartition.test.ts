@@ -12,7 +12,7 @@ import {
   EMPTY_STRING,
   ZERO,
   EQUITY_CONFIG_ID,
-  BURN_BY_PARTITION_RESOLVER_KEY,
+  RESOLVER_KEY_BURN_BY_PARTITION,
 } from "@scripts";
 import { deployEquityTokenFixture, EVENT_NAMES, executeRbac, expectExactlyOneEvent, MAX_UINT256 } from "@test";
 
@@ -352,13 +352,13 @@ describe("BurnByPartitionFacet Tests", () => {
     it("GIVEN already-initialised WHEN initializeBurnByPartition is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeBurnByPartition())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(BURN_BY_PARTITION_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_BURN_BY_PARTITION, 1);
     });
   });
 
   describe("initializeBurnByPartition event", () => {
     it("GIVEN a fresh deployment WHEN initializeBurnByPartition is called THEN emits BurnByPartitionInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(BURN_BY_PARTITION_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_BURN_BY_PARTITION);
       await expect(asset.initializeBurnByPartition()).to.emit(asset, "BurnByPartitionInitialized");
     });
   });

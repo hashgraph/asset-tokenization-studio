@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IFreeze } from "./IFreeze.sol";
+import { IFreeze, RESOLVER_KEY_FREEZE } from "./IFreeze.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
@@ -9,7 +9,6 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _FREEZE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title Freeze
@@ -30,9 +29,9 @@ abstract contract Freeze is IFreeze, Modifiers {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_FREEZE_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_FREEZE)
     {
-        InitializerStorageWrapper.setFacetToReady(_FREEZE_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_FREEZE);
         emit FreezeInitialized();
     }
 

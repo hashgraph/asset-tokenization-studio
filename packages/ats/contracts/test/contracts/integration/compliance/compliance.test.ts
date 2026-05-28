@@ -13,7 +13,7 @@ import {
   EMPTY_STRING,
   ZERO,
   dateToUnixTimestamp,
-  COMPLIANCE_RESOLVER_KEY,
+  RESOLVER_KEY_COMPLIANCE,
 } from "@scripts";
 import { getSelector } from "@scripts/infrastructure";
 
@@ -758,13 +758,13 @@ describe("Compliance Tests", () => {
     it("GIVEN already-initialised WHEN initializeCompliance is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeCompliance())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(COMPLIANCE_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_COMPLIANCE, 1);
     });
   });
 
   describe("initializeCompliance event", () => {
     it("GIVEN a fresh deployment WHEN initializeCompliance is called THEN emits ComplianceInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(COMPLIANCE_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_COMPLIANCE);
       await expect(asset.initializeCompliance()).to.emit(asset, "ComplianceInitialized");
     });
   });

@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { type IAsset, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
-import { VOTING_RESOLVER_KEY } from "@scripts";
+import { RESOLVER_KEY_VOTING } from "@scripts";
 
 describe("Voting Tests", () => {
   let signer_A: HardhatEthersSigner;
@@ -36,13 +36,13 @@ describe("Voting Tests", () => {
     it("GIVEN already-initialised WHEN initializeVoting is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeVoting())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(VOTING_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_VOTING, 1);
     });
   });
 
   describe("initializeVoting event", () => {
     it("GIVEN a fresh deployment WHEN initializeVoting is called THEN emits VotingInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(VOTING_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_VOTING);
       await expect(asset.initializeVoting()).to.emit(asset, "VotingInitialized");
     });
   });

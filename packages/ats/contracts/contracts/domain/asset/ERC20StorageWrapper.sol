@@ -32,9 +32,6 @@ struct ERC20Storage {
     string name;
     string symbol;
     string isin;
-    uint8 decimals;
-    mapping(address => mapping(address => uint256)) allowed;
-    IFactory.SecurityType securityType;
     uint256 totalSupply;
     // ─── R3 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(address => uint256) balances;

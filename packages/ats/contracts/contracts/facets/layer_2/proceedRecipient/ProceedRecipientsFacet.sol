@@ -14,16 +14,18 @@ contract ProceedRecipientsFacet is ProceedRecipients, IStaticFunctionSelectors {
     function initializeProceedRecipients(
         address[] calldata _proceedRecipients,
         bytes[] calldata _data
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_PROCEED_RECIPIENTS_RESOLVER_KEY) {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_PROCEED_RECIPIENTS) {
         ProceedRecipientsStorageWrapper.initializeProceedRecipients(_proceedRecipients, _data);
-        InitializerStorageWrapper.setFacetToReady(_PROCEED_RECIPIENTS_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_PROCEED_RECIPIENTS);
         emit IProceedRecipients.ProceedRecipientsInitialized(_proceedRecipients, _data);
     }
 
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = RESOLVER_KEY_PROCEED_RECIPIENTS;
     }
 
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
@@ -38,6 +40,7 @@ contract ProceedRecipientsFacet is ProceedRecipients, IStaticFunctionSelectors {
             );
     }
 
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
         return Bytes4Builder.build(type(IProceedRecipients).interfaceId);
     }

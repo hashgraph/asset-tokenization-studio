@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { type IAsset, type ResolverProxy, ITransferByPartition__factory, MockDiamondCut } from "@contract-types";
-import { TRANSFER_BY_PARTITION_RESOLVER_KEY } from "@scripts";
+import { RESOLVER_KEY_TRANSFER_BY_PARTITION } from "@scripts";
 import {
   ADDRESS_ZERO,
   ATS_ROLES,
@@ -170,13 +170,13 @@ describe("TransferByPartition Facet Tests", () => {
     it("GIVEN already-initialised WHEN initializeTransferByPartition is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeTransferByPartition())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(TRANSFER_BY_PARTITION_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_TRANSFER_BY_PARTITION, 1);
     });
   });
 
   describe("initializeTransferByPartition event", () => {
     it("GIVEN a fresh deployment WHEN initializeTransferByPartition is called THEN emits TransferByPartitionInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(TRANSFER_BY_PARTITION_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_TRANSFER_BY_PARTITION);
       await expect(asset.initializeTransferByPartition()).to.emit(asset, "TransferByPartitionInitialized");
     });
   });

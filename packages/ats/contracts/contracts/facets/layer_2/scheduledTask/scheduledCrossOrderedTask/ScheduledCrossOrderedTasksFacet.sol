@@ -5,9 +5,10 @@ import { IScheduledCrossOrderedTasks, RESOLVER_KEY_SCHEDULED_TASKS } from "./ISc
 import { ScheduledCrossOrderedTasks } from "./ScheduledCrossOrderedTasks.sol";
 import { IStaticFunctionSelectors } from "../../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../../../infrastructure/proxy/Bytes4Builder.sol";
+
 contract ScheduledCrossOrderedTasksFacet is ScheduledCrossOrderedTasks, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = RESOLVER_KEY_SCHEDULED_TASKS;
+        staticResolverKey_ = _getResolverKey();
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
@@ -26,6 +27,6 @@ contract ScheduledCrossOrderedTasksFacet is ScheduledCrossOrderedTasks, IStaticF
     }
 
     function _getResolverKey() internal pure override returns (bytes32) {
-        return _SCHEDULED_TASKS_RESOLVER_KEY;
+        return RESOLVER_KEY_SCHEDULED_TASKS;
     }
 }

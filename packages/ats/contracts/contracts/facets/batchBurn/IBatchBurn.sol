@@ -8,7 +8,7 @@ bytes32 constant RESOLVER_KEY_BATCH_BURN = 0x60fbdebafe46599d2a6d6cbec0e554cfdf6
  * @title IBatchBurn
  * @notice Interface for batch burning tokens from multiple addresses in a single transaction.
  * @dev Intended for use by authorised controllers and agents operating on ERC3643-compliant tokens.
- *      Exposes the `batchBurn` selector registered in the Diamond proxy under `_BATCH_BURN_RESOLVER_KEY`.
+ *      Exposes the `batchBurn` selector registered in the Diamond proxy under `RESOLVER_KEY_BATCH_BURN`.
  * @author Asset Tokenization Studio Team
  */
 interface IBatchBurn {

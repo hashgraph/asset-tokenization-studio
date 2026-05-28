@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IHoldAtSnapshot } from "./IHoldAtSnapshot.sol";
+import { IHoldAtSnapshot, RESOLVER_KEY_HOLD_AT_SNAPSHOT } from "./IHoldAtSnapshot.sol";
 import { SnapshotsStorageWrapper } from "../../domain/asset/SnapshotsStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _HOLD_AT_SNAPSHOT_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title  HoldAtSnapshot
@@ -21,9 +20,9 @@ abstract contract HoldAtSnapshot is IHoldAtSnapshot, Modifiers {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_HOLD_AT_SNAPSHOT_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_HOLD_AT_SNAPSHOT)
     {
-        InitializerStorageWrapper.setFacetToReady(_HOLD_AT_SNAPSHOT_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_HOLD_AT_SNAPSHOT);
         emit HoldAtSnapshotInitialized();
     }
 

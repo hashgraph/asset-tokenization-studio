@@ -8,7 +8,6 @@ import { Modifiers } from "../../services/Modifiers.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _BATCH_BURN_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title BatchBurn

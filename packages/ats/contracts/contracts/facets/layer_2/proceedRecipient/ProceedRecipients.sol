@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IProceedRecipients, RESOLVER_KEY_PROCEED_RECIPIENT } from "./IProceedRecipients.sol";
+import { IProceedRecipients, RESOLVER_KEY_PROCEED_RECIPIENTS } from "./IProceedRecipients.sol";
 import { ROLE_PROCEED_RECIPIENT_MANAGER, DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ProceedRecipientsStorageWrapper } from "../../../domain/asset/ProceedRecipientsStorageWrapper.sol";
 import { DefaultValueValidation } from "../../../infrastructure/utils/DefaultValueValidation.sol";
+import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 /**
@@ -16,16 +17,6 @@ import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
  * @author Hashgraph
  */
 abstract contract ProceedRecipients is IProceedRecipients, Modifiers {
-    /// @inheritdoc IProceedRecipients
-    function initializeProceedRecipients(
-        address[] calldata _proceedRecipients,
-        bytes[] calldata _data
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_PROCEED_RECIPIENT) {
-        ProceedRecipientsStorageWrapper.initializeProceedRecipients(_proceedRecipients, _data);
-        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_PROCEED_RECIPIENT);
-        emit IProceedRecipients.ProceedRecipientsInitialized(_proceedRecipients, _data);
-    }
-
     /// @inheritdoc IProceedRecipients
     function addProceedRecipient(
         address _proceedRecipient,

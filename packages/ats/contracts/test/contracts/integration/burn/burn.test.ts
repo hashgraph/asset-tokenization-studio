@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { type IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO, EQUITY_CONFIG_ID, BURN_RESOLVER_KEY } from "@scripts";
+import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO, EQUITY_CONFIG_ID, RESOLVER_KEY_BURN } from "@scripts";
 
 const AMOUNT = 1000;
 const BALANCE_OF_C_ORIGINAL = 2 * AMOUNT;
@@ -490,13 +490,13 @@ describe("Burn Tests", () => {
     it("GIVEN already-initialised WHEN initializeBurn is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeBurn())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(BURN_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_BURN, 1);
     });
   });
 
   describe("initializeBurn event", () => {
     it("GIVEN a fresh deployment WHEN initializeBurn is called THEN emits BurnInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(BURN_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_BURN);
       await expect(asset.initializeBurn()).to.emit(asset, "BurnInitialized");
     });
   });

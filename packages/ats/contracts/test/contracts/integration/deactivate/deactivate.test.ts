@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { ATS_ROLES, DEACTIVATE_RESOLVER_KEY } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEY_DEACTIVATE } from "@scripts";
 import { deployEquityTokenFixture, grantRoleAndPauseToken } from "@test";
 import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 import { Signer } from "ethers";
@@ -100,13 +100,13 @@ describe("Deactivate Tests", () => {
     it("GIVEN already-initialised WHEN initializeDeactivate is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeDeactivate())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(DEACTIVATE_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_DEACTIVATE, 1);
     });
   });
 
   describe("initializeDeactivate event", () => {
     it("GIVEN a fresh deployment WHEN initializeDeactivate is called THEN emits DeactivateInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(DEACTIVATE_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_DEACTIVATE);
       await expect(asset.initializeDeactivate()).to.emit(asset, "DeactivateInitialized");
     });
   });

@@ -5,10 +5,8 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type IAsset, MockDiamondCut } from "@contract-types";
 import { deployBondTokenFixture } from "@test";
-import { ATS_ROLES } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEY_NOMINAL_VALUE } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-
-const NOMINAL_VALUE_RESOLVER_KEY = "0x48903d4da8b1f0a5e9a9874be74ec5d2f8043d4d5b65cc093173c3dae103df8f";
 
 describe("NominalValue Tests", () => {
   let asset: IAsset;
@@ -37,13 +35,13 @@ describe("NominalValue Tests", () => {
     it("GIVEN already-initialised WHEN initializeNominalValue THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeNominalValue(1, 6, "0x000000"))
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(NOMINAL_VALUE_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_NOMINAL_VALUE, 1);
     });
   });
 
   describe("initializeNominalValue event", () => {
     it("GIVEN fresh facet WHEN initializeNominalValue THEN emits NominalValueInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(NOMINAL_VALUE_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_NOMINAL_VALUE);
       await expect(asset.initializeNominalValue(1, 6, "0x000000")).to.emit(asset, "NominalValueInitialized");
     });
   });

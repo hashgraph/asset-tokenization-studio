@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBalanceTrackerByPartition } from "./IBalanceTrackerByPartition.sol";
+import {
+    IBalanceTrackerByPartition,
+    RESOLVER_KEY_BALANCE_TRACKER_BY_PARTITION
+} from "./IBalanceTrackerByPartition.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _BALANCE_TRACKER_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title BalanceTrackerByPartition
@@ -24,9 +26,9 @@ abstract contract BalanceTrackerByPartition is IBalanceTrackerByPartition, Modif
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_BALANCE_TRACKER_BY_PARTITION_RESOLVER_KEY)
+        onlyFacetNotRegistered(RESOLVER_KEY_BALANCE_TRACKER_BY_PARTITION)
     {
-        InitializerStorageWrapper.setFacetToReady(_BALANCE_TRACKER_BY_PARTITION_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_BALANCE_TRACKER_BY_PARTITION);
         emit IBalanceTrackerByPartition.BalanceTrackerByPartitionInitialized();
     }
 

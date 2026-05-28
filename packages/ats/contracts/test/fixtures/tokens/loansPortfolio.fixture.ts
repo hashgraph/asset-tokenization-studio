@@ -123,16 +123,7 @@ export async function deployLoansPortfolioTokenFixture({
 
   await createLoansPortfolioConfiguration(blr, facetAddresses, true);
 
-  const rbacs = [
-    { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [deployer.address] },
-    { role: ATS_ROLES.PAUSER_ROLE, members: [infrastructure.user2.address] },
-    { role: ATS_ROLES.KYC_ROLE, members: [deployer.address, infrastructure.user2.address] },
-    { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [deployer.address] },
-    { role: ATS_ROLES.LOAN_MANAGER_ROLE, members: [deployer.address] },
-    { role: ATS_ROLES.LOANS_PORTFOLIO_MANAGER_ROLE, members: [deployer.address] },
-    { role: ATS_ROLES.ISSUER_ROLE, members: [deployer.address] },
-    { role: ATS_ROLES.DEACTIVATE_ROLE, members: [deployer.address] },
-  ];
+  const rbacs = [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [deployer.address] }];
 
   const blrProxyAddress = infrastructure.deployment.infrastructure.blr.proxy;
 

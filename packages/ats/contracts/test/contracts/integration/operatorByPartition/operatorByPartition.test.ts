@@ -10,7 +10,7 @@ import {
   DEFAULT_PARTITION,
   EMPTY_HEX_BYTES,
   EMPTY_STRING,
-  OPERATOR_BY_PARTITION_RESOLVER_KEY,
+  RESOLVER_KEY_OPERATOR_BY_PARTITION,
   ZERO,
 } from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
@@ -347,13 +347,13 @@ describe("OperatorByPartitionFacet Tests", () => {
     it("GIVEN already-initialised WHEN initializeOperatorByPartition is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeOperatorByPartition())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(OPERATOR_BY_PARTITION_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_OPERATOR_BY_PARTITION, 1);
     });
   });
 
   describe("initializeOperatorByPartition event", () => {
     it("GIVEN a fresh deployment WHEN initializeOperatorByPartition is called THEN emits OperatorByPartitionInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(OPERATOR_BY_PARTITION_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_OPERATOR_BY_PARTITION);
       await expect(asset.initializeOperatorByPartition()).to.emit(asset, "OperatorByPartitionInitialized");
     });
   });

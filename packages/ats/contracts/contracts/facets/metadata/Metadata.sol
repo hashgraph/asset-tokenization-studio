@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IMetadata, METADATA_RESOLVER_KEY } from "./IMetadata.sol";
+import { IMetadata, RESOLVER_KEY_METADATA } from "./IMetadata.sol";
 import { ROLE_METADATA_MANAGER } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { MetadataStorageWrapper } from "../../domain/core/MetadataStorageWrapper.sol";
@@ -21,12 +21,12 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
 abstract contract Metadata is IMetadata, Modifiers {
     /// @inheritdoc IMetadata
     function initializeMetadata()
-    external
-    override
-    onlyRole(DEFAULT_ADMIN_ROLE)
-    onlyFacetNotRegistered(_METADATA_RESOLVER_KEY)
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_METADATA)
     {
-        InitializerStorageWrapper.setFacetToReady(_METADATA_RESOLVER_KEY);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_METADATA);
         emit MetadataInitialized();
     }
 

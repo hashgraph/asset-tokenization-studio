@@ -4,12 +4,11 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
-import { ATS_ROLES, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
+import { ATS_ROLES, EMPTY_HEX_BYTES, EMPTY_STRING, RESOLVER_KEY_PARTITIONS, ZERO } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
-const PARTITIONS_RESOLVER_KEY = "0xf62cc7e91a59870f983c915c1fc851fa5fee5e694318052473e4dd769bf464a2";
 const _CUSTOM_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000002";
 const EMPTY_VC_ID = EMPTY_STRING;
 const _AMOUNT = 1000;
@@ -146,13 +145,13 @@ describe("Partitions Tests", () => {
     it("GIVEN already-initialised WHEN initializePartitions THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializePartitions())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(PARTITIONS_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_PARTITIONS, 1);
     });
   });
 
   describe("initializePartitions event", () => {
     it("GIVEN fresh facet WHEN initializePartitions THEN emits PartitionsInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(PARTITIONS_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_PARTITIONS);
       await expect(asset.initializePartitions()).to.emit(asset, "PartitionsInitialized");
     });
   });

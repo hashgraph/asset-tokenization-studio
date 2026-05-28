@@ -11,6 +11,6 @@ contract BondUSAFixedRateFacet is BondUSAFacetBase {
     }
 
     function _bondInitializerKey() internal pure override returns (bytes32) {
-        return _BOND_FIXED_RATE_RESOLVER_KEY;
+        return RESOLVER_KEY_BOND_FIXED_RATE;
     }
 }

@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
-import { ZERO, EMPTY_STRING, ATS_ROLES, DEFAULT_PARTITION, FREEZE_AT_SNAPSHOT_RESOLVER_KEY } from "@scripts";
+import { ZERO, EMPTY_STRING, ATS_ROLES, DEFAULT_PARTITION, RESOLVER_KEY_FREEZE_AT_SNAPSHOT } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
@@ -152,13 +152,13 @@ describe("FreezeAtSnapshot Tests", () => {
     it("GIVEN already-initialised WHEN initializeFreezeAtSnapshot is called again THEN FacetAlreadyRegistered", async () => {
       await expect(asset.initializeFreezeAtSnapshot())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(FREEZE_AT_SNAPSHOT_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_FREEZE_AT_SNAPSHOT, 1);
     });
   });
 
   describe("initializeFreezeAtSnapshot event", () => {
     it("GIVEN a fresh deployment WHEN initializeFreezeAtSnapshot is called THEN emits FreezeAtSnapshotInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(FREEZE_AT_SNAPSHOT_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_FREEZE_AT_SNAPSHOT);
       await expect(asset.initializeFreezeAtSnapshot()).to.emit(asset, "FreezeAtSnapshotInitialized");
     });
   });

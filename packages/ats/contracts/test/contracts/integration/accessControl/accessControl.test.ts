@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
-import { ATS_ROLES, EQUITY_CONFIG_ID, ACCESS_CONTROL_RESOLVER_KEY } from "@scripts";
+import { ATS_ROLES, EQUITY_CONFIG_ID, RESOLVER_KEY_ACCESS_CONTROL } from "@scripts";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac } from "@test";
 import { ethers } from "hardhat";
@@ -414,13 +414,13 @@ describe("Access Control Tests", () => {
     it("GIVEN an already-initialised facet WHEN initializeAccessControl is called again THEN it reverts with FacetAlreadyRegistered", async () => {
       await expect(asset.initializeAccessControl())
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(ACCESS_CONTROL_RESOLVER_KEY, 1);
+        .withArgs(RESOLVER_KEY_ACCESS_CONTROL, 1);
     });
   });
 
   describe("initializeAccessControl event", () => {
     it("GIVEN a fresh deployment WHEN initializeAccessControl is called THEN it emits AccessControlInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(ACCESS_CONTROL_RESOLVER_KEY);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_ACCESS_CONTROL);
       await expect(asset.initializeAccessControl()).to.emit(asset, "AccessControlInitialized");
     });
   });
