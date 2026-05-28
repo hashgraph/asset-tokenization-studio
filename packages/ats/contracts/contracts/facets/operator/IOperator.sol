@@ -9,6 +9,12 @@ bytes32 constant RESOLVER_KEY_OPERATOR = 0x5c2062c6ba02b76ae0c3884d5c0fdd3416b20
  * @notice Interface for operator management: query, authorize and revoke operators for all partitions.
  */
 interface IOperator {
+    /**
+     * @notice Emitted once when the operator capability is initialised on a token.
+     * @dev Fires exclusively from `initializeOperator`.
+     */
+    event OperatorInitialized();
+
     /// @notice Emitted when an operator is authorized by an account for all partitions of the account
     /// @param operator The account that changed their delegation
     /// @param tokenHolder The account who authorized the operator
@@ -18,6 +24,13 @@ interface IOperator {
     /// @param operator The account that changed their delegation
     /// @param tokenHolder The account who revoked the operator
     event OperatorRevoked(address indexed operator, address indexed tokenHolder);
+
+    /**
+     * @notice Initialises the operator capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeOperator() external;
 
     /**
      * @notice Authorises an operator for all partitions of `msg.sender`

@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { type IAsset, type ResolverProxy } from "@contract-types";
+import { type IAsset, MockDiamondCut, type ResolverProxy } from "@contract-types";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import {
@@ -10,6 +10,8 @@ import {
   EMPTY_HEX_BYTES,
   dateToUnixTimestamp,
   EMPTY_STRING,
+  EQUITY_CONFIG_ID,
+  RESOLVER_KEY_DIVIDEND,
 } from "@scripts";
 import { MAX_UINT256, deployEquityTokenFixture, executeRbac } from "@test";
 import { ethers } from "hardhat";
@@ -45,6 +47,7 @@ describe("Dividends", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
   async function deploySecurityFixtureSinglePartition() {
     const base = await deployEquityTokenFixture();
     diamond = base.diamond;
@@ -53,6 +56,7 @@ describe("Dividends", () => {
     signer_C = base.user2;
 
     asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       {
         role: ATS_ROLES.ROLE_PAUSER,
@@ -736,6 +740,52 @@ describe("Dividends", () => {
         deactivatedAsset,
         "Deactivated",
       );
+    });
+  });
+
+  describe("initializeDividend", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeDividend is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeDividend())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeDividend is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeDividend())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_DIVIDEND, 1);
+    });
+  });
+
+  describe("initializeDividend event", () => {
+    it("GIVEN a fresh deployment WHEN initializeDividend is called THEN emits DividendInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_DIVIDEND);
+      await expect(asset.initializeDividend()).to.emit(asset, "DividendInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational WHEN setDividend is called THEN AssetNotOperational", async () => {
+      await expect(
+        asset.setDividend({
+          recordDate: 0n,
+          executionDate: 0n,
+          amount: 0n,
+          amountDecimals: 0n,
+        }),
+      )
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN cancelDividend is called THEN AssetNotOperational", async () => {
+      await expect(asset.cancelDividend(0n))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 });

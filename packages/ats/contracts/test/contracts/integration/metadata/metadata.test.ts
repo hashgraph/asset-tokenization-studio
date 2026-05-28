@@ -3,8 +3,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ATS_ROLES } from "@scripts";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import { ATS_ROLES, RESOLVER_KEY_METADATA } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, executeRbac } from "@test";
 
@@ -18,6 +18,7 @@ const PAYLOAD_3 = ethers.hexlify(ethers.toUtf8Bytes("payload-three"));
 describe("Metadata Tests", () => {
   let diamond: ResolverProxy;
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   let signer_A: HardhatEthersSigner; // admin / metadata manager
   let signer_B: HardhatEthersSigner; // pauser
@@ -31,6 +32,7 @@ describe("Metadata Tests", () => {
     signer_C = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
       {
@@ -120,6 +122,36 @@ describe("Metadata Tests", () => {
       await expect(
         deactivatedAsset.connect(base.deployer).setMetadata(ethers.ZeroHash, []),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("initializeMetadata", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeMetadata is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeMetadata())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeMetadata is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeMetadata())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_METADATA, 1);
+    });
+  });
+
+  describe("initializeMetadata event", () => {
+    it("GIVEN a fresh deployment WHEN initializeMetadata is called THEN emits MetadataInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_METADATA);
+      await expect(asset.initializeMetadata()).to.emit(asset, "MetadataInitialized");
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setMetadata THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.setMetadata(ethers.ZeroHash, [])).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
   });
 });

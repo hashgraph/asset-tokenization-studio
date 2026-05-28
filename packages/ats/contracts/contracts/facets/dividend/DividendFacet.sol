@@ -28,6 +28,7 @@ contract DividendFacet is Dividend, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeDividend.selector,
                 this.setDividend.selector,
                 this.cancelDividend.selector,
                 this.forceCancelDividend.selector,

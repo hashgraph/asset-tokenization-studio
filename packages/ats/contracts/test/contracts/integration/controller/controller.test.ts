@@ -6,9 +6,17 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { type ResolverProxy, type IAsset } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { grantRoleAndPauseToken } from "@test";
-import { deployEquityTokenFixture } from "@test";
+import { deployAtsInfrastructureFixture, deployEquityTokenFixture } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
-import { EMPTY_STRING, ZERO, DEFAULT_PARTITION, ATS_ROLES, ADDRESS_ZERO, EMPTY_HEX_BYTES } from "@scripts";
+import {
+  EMPTY_STRING,
+  ZERO,
+  DEFAULT_PARTITION,
+  ATS_ROLES,
+  ADDRESS_ZERO,
+  EMPTY_HEX_BYTES,
+  EQUITY_CONFIG_ID,
+} from "@scripts";
 
 const amount = 1;
 const data = "0x1234";
@@ -64,8 +72,36 @@ describe("Controller Tests", () => {
       await loadFixture(deploySecurityFixtureSinglePartition);
     });
 
-    it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-      await expect(asset.initializeController(false)).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+    it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeController(false)).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeController is called THEN it reverts with AccountHasNoRole", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(signer_C).initializeController(false)).to.be.revertedWithCustomError(
+        freshAsset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeController is called THEN ControllerInitialized event is emitted", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      const deploymentReceipt = await (await freshAsset.connect(infra.deployer).initializeController(false)).wait();
+      await expect(deploymentReceipt).to.emit(freshAsset, "ControllerInitialized").withArgs(false);
     });
 
     describe("Paused", () => {
@@ -483,6 +519,45 @@ describe("Controller Tests", () => {
       await expect(
         deactivatedAsset.connect(base.deployer).removeAgent(ethers.ZeroAddress),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      const cut = await ethers.getContractAt("MockDiamondCut", diamond.target);
+      await cut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN controllerTransfer THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.controllerTransfer(ADDRESS_ZERO, ADDRESS_ZERO, 0, "0x", "0x")).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN controllerRedeem THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.controllerRedeem(ADDRESS_ZERO, 0, "0x", "0x")).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN finalizeControllable THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.finalizeControllable()).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN forcedTransfer THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.forcedTransfer(ADDRESS_ZERO, ADDRESS_ZERO, 0)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN addAgent THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.addAgent(ADDRESS_ZERO)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN removeAgent THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.removeAgent(ADDRESS_ZERO)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
   });
 });

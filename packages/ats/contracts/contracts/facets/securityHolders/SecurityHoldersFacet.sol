@@ -18,7 +18,12 @@ contract SecurityHoldersFacet is SecurityHolders, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.getSecurityHolders.selector, this.getTotalSecurityHolders.selector);
+        return
+            Bytes4Builder.build(
+                this.initializeSecurityHolders.selector,
+                this.getSecurityHolders.selector,
+                this.getTotalSecurityHolders.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors

@@ -3,8 +3,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ZERO, EMPTY_STRING, ATS_ROLES } from "@scripts";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import { ZERO, EMPTY_STRING, ATS_ROLES, EQUITY_CONFIG_ID, RESOLVER_KEY_TRANSFER_AND_LOCK } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, getDltTimestamp, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
@@ -21,6 +21,7 @@ describe("Transfer and lock Tests", () => {
   let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
   let currentTimestamp = 0;
@@ -72,6 +73,7 @@ describe("Transfer and lock Tests", () => {
     signer_D = base.user4;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, set_initRbacs());
     await setFacets(asset);
   }
@@ -183,6 +185,39 @@ describe("Transfer and lock Tests", () => {
       await expect(
         deactivatedAsset.connect(base.deployer).transferAndLock(ethers.ZeroAddress, 0, "0x", 0),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("initializeTransferAndLock", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeTransferAndLock is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeTransferAndLock())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeTransferAndLock is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeTransferAndLock())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_TRANSFER_AND_LOCK, 1);
+    });
+  });
+
+  describe("initializeTransferAndLock event", () => {
+    it("GIVEN a fresh deployment WHEN initializeTransferAndLock is called THEN emits TransferAndLockInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_TRANSFER_AND_LOCK);
+      await expect(asset.initializeTransferAndLock()).to.emit(asset, "TransferAndLockInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational WHEN transferAndLock is called THEN AssetNotOperational", async () => {
+      await expect(asset.transferAndLock(ethers.ZeroAddress, 0n, "0x", 0n))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 });

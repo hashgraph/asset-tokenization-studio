@@ -2,7 +2,6 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { PauseStorageWrapper } from "../../domain/core/PauseStorageWrapper.sol";
-import { _checkNotInitialized } from "../InitializationErrors.sol";
 
 /**
  * @title PauseModifiers
@@ -35,13 +34,6 @@ abstract contract PauseModifiers {
     ///      external contract cannot block its own removal from the registry.
     modifier onlyNotInternallyPaused() {
         PauseStorageWrapper.checkNotInternallyPaused();
-        _;
-    }
-
-    /// @notice Reverts with `AlreadyInitialized` when the external-pause registry has already
-    ///         been initialised, preventing a second call to `initializeExternalPauses`.
-    modifier onlyNotExternalPauseInitialized() {
-        _checkNotInitialized(PauseStorageWrapper.isExternalPauseInitialized());
         _;
     }
 }

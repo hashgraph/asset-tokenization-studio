@@ -31,9 +31,7 @@ bytes32 constant STORAGE_LOCATION_KYC_MANAGEMENT = 0x44eb866201f22832539d7232090
  * @custom:storage-location erc7201:security.token.standard.storage.ControlListManagement
  */
 struct ExternalListDataStorage {
-    // ─── R1 Lifecycle (bool flags) ───────────────────────────
-    bool initialized;
-    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
+    // ─── R3 Aggregates (mapping, array, EnumerableSet) ───────
     EnumerableSet.AddressSet list;
     // ─── APPEND-ONLY ZONE BELOW ───
 }
@@ -111,14 +109,6 @@ library ExternalListManagementStorageWrapper {
     }
 
     /**
-     * @notice Marks the external-list namespace at `_position` as initialised.
-     * @param _position ERC-7201 slot whose initialised flag is set.
-     */
-    function setExternalListInitialized(bytes32 _position) internal {
-        externalListStorage(_position).initialized = true;
-    }
-
-    /**
      * @notice Initialises the external control-list namespace with `_controlLists` and marks it
      *         initialised.
      * @dev Each entry is validated for non-zero before insertion. Gas scales with
@@ -134,7 +124,6 @@ library ExternalListManagementStorageWrapper {
                 ++index;
             }
         }
-        setExternalListInitialized(STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT);
     }
 
     /**
@@ -151,7 +140,6 @@ library ExternalListManagementStorageWrapper {
                 ++index;
             }
         }
-        setExternalListInitialized(STORAGE_LOCATION_KYC_MANAGEMENT);
     }
 
     /**
@@ -212,14 +200,6 @@ library ExternalListManagementStorageWrapper {
     }
 
     /**
-     * @notice Reports whether the external control-list namespace has been initialised.
-     * @return True when `initializeExternalControlLists` has populated the namespace.
-     */
-    function isExternalControlListInitialized() internal view returns (bool) {
-        return externalListStorage(STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT).initialized;
-    }
-
-    /**
      * @notice Reports whether every registered external KYC list reports `_kycStatus` for `_account`.
      * @dev Returns false on the first registered list whose stored status differs from
      *      `_kycStatus`. An empty list trivially returns true. Gas is bounded by the number of
@@ -239,14 +219,6 @@ library ExternalListManagementStorageWrapper {
             }
         }
         return true;
-    }
-
-    /**
-     * @notice Reports whether the external KYC-list namespace has been initialised.
-     * @return True when `initializeExternalKycLists` has populated the namespace.
-     */
-    function isKycExternalInitialized() internal view returns (bool) {
-        return externalListStorage(STORAGE_LOCATION_KYC_MANAGEMENT).initialized;
     }
 
     /**

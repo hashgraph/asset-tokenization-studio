@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ROLE_CONTROLLER, ROLE_AGENT, _buildRoles } from "../../constants/roles.sol";
-import { IBatchBurn } from "./IBatchBurn.sol";
+import { ROLE_CONTROLLER, ROLE_AGENT, DEFAULT_ADMIN_ROLE, _buildRoles } from "../../constants/roles.sol";
+import { IBatchBurn, RESOLVER_KEY_BATCH_BURN } from "./IBatchBurn.sol";
 import { IController } from "../controller/IController.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title BatchBurn
@@ -20,11 +21,24 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract BatchBurn is IBatchBurn, Modifiers {
     /// @inheritdoc IBatchBurn
+    function initializeBatchBurn()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_BATCH_BURN)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_BATCH_BURN);
+        emit IBatchBurn.BatchBurnInitialized();
+    }
+
+    /// @inheritdoc IBatchBurn
     function batchBurn(
         address[] calldata _userAddresses,
         uint256[] calldata _amounts
     )
         external
+        override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyValidInputAmountsArrayLength(_userAddresses, _amounts)

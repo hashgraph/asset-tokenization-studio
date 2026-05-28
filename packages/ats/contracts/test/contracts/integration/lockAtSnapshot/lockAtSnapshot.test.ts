@@ -3,9 +3,9 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ATS_ROLES, EMPTY_STRING, ZERO } from "@scripts";
+import { ATS_ROLES, EMPTY_STRING, ZERO, RESOLVER_KEY_LOCK_AT_SNAPSHOT } from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const _PARTITION_ID_1 = "0x0000000000000000000000000000000000000000000000000000000000000001";
@@ -20,6 +20,7 @@ describe("LockAtSnapshot Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deployEquity() {
     const base = await deployEquityTokenFixture({
@@ -33,6 +34,7 @@ describe("LockAtSnapshot Tests", () => {
     signer_C = base.user2;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
       { role: ATS_ROLES.ROLE_ISSUER, members: [signer_B.address] },
@@ -154,6 +156,27 @@ describe("LockAtSnapshot Tests", () => {
 
       expect(balanceA).to.equal(lockedAmountA);
       expect(balanceC).to.equal(lockedAmountC);
+    });
+  });
+
+  describe("initializeLockAtSnapshot", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeLockAtSnapshot is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeLockAtSnapshot())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeLockAtSnapshot is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeLockAtSnapshot())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_LOCK_AT_SNAPSHOT, 1);
+    });
+  });
+
+  describe("initializeLockAtSnapshot event", () => {
+    it("GIVEN a fresh deployment WHEN initializeLockAtSnapshot is called THEN emits LockAtSnapshotInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_LOCK_AT_SNAPSHOT);
+      await expect(asset.initializeLockAtSnapshot()).to.emit(asset, "LockAtSnapshotInitialized");
     });
   });
 });

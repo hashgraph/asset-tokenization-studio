@@ -3,8 +3,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type IAsset, ResolverProxy } from "@contract-types";
-import { GAS_LIMIT, ATS_ROLES, ADDRESS_ZERO } from "@scripts";
+import { type IAsset, ResolverProxy, MockDiamondCut } from "@contract-types";
+import { ATS_ROLES, ADDRESS_ZERO, RESOLVER_KEY_PROCEED_RECIPIENTS, GAS_LIMIT } from "@scripts";
 import { deployBondTokenFixture } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
@@ -19,6 +19,7 @@ describe("Proceed Recipients Tests", () => {
 
   let diamond: ResolverProxy;
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixtureR() {
     const base = await deployBondTokenFixture({
@@ -33,6 +34,7 @@ describe("Proceed Recipients Tests", () => {
     signer_B = base.user2;
 
     asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await asset.grantRole(ATS_ROLES.ROLE_PROCEED_RECIPIENT_MANAGER, signer_A.address);
     await asset.grantRole(ATS_ROLES.ROLE_PAUSER, signer_A.address);
@@ -42,13 +44,27 @@ describe("Proceed Recipients Tests", () => {
     await loadFixture(deploySecurityFixtureR);
   });
 
-  describe("Initialization Tests", () => {
-    it("GIVEN a token WHEN initializing the proceed recipient again THEN it reverts with AlreadyInitialized", async () => {
+  describe("initializeProceedRecipients", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeProceedRecipients is called THEN AccountHasNoRole", async () => {
       await expect(
-        asset.initialize_ProceedRecipients([PROCEED_RECIPIENT_1], [PROCEED_RECIPIENT_1_DATA], {
-          gasLimit: GAS_LIMIT.default,
-        }),
-      ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+        asset.connect(signer_B).initializeProceedRecipients([PROCEED_RECIPIENT_1], [PROCEED_RECIPIENT_1_DATA]),
+      ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+    });
+
+    it("GIVEN already-initialised WHEN initializeProceedRecipients is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(
+        asset.initializeProceedRecipients([PROCEED_RECIPIENT_1], [PROCEED_RECIPIENT_1_DATA]),
+      ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+    });
+  });
+
+  describe("initializeProceedRecipients event", () => {
+    it("GIVEN a fresh deployment WHEN initializeProceedRecipients is called THEN emits ProceedRecipientsInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_PROCEED_RECIPIENTS);
+      await expect(asset.initializeProceedRecipients([PROCEED_RECIPIENT_1], [PROCEED_RECIPIENT_1_DATA])).to.emit(
+        asset,
+        "ProceedRecipientsInitialized",
+      );
     });
   });
 
@@ -230,6 +246,32 @@ describe("Proceed Recipients Tests", () => {
       await expect(
         deactivatedAsset.connect(base.deployer).updateProceedRecipientData(ethers.ZeroAddress, "0x"),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN addProceedRecipient THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.addProceedRecipient(ADDRESS_ZERO, "0x")).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN removeProceedRecipient THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.removeProceedRecipient(ADDRESS_ZERO)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN updateProceedRecipientData THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.updateProceedRecipientData(ADDRESS_ZERO, "0x")).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
     });
   });
 });

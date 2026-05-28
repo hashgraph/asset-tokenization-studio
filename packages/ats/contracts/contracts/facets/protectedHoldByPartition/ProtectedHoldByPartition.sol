@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IProtectedHoldByPartition } from "./IProtectedHoldByPartition.sol";
+import { IProtectedHoldByPartition, RESOLVER_KEY_PROTECTED_HOLD_BY_PARTITION } from "./IProtectedHoldByPartition.sol";
 import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { HoldOps } from "../../domain/orchestrator/HoldOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title ProtectedHoldByPartition
@@ -22,6 +24,17 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract ProtectedHoldByPartition is IProtectedHoldByPartition, Modifiers {
     /// @inheritdoc IProtectedHoldByPartition
+    function initializeProtectedHoldByPartition()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_PROTECTED_HOLD_BY_PARTITION)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_PROTECTED_HOLD_BY_PARTITION);
+        emit ProtectedHoldByPartitionInitialized();
+    }
+
+    /// @inheritdoc IProtectedHoldByPartition
     function protectedCreateHoldByPartition(
         bytes32 _partition,
         address _from,
@@ -30,6 +43,7 @@ abstract contract ProtectedHoldByPartition is IProtectedHoldByPartition, Modifie
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition))

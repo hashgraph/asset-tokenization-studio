@@ -35,6 +35,19 @@ interface ILock is ILockTypes {
     }
 
     /**
+     * @notice Emitted once when the lock capability is initialised on a token.
+     * @dev Fires exclusively from `initializeLock`.
+     */
+    event LockInitialized();
+
+    /**
+     * @notice Initialises the lock capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeLock() external;
+
+    /**
      * @notice Locks `_amount` tokens of `_tokenHolder` on the default partition until
      *         `_expirationTimestamp`.
      * @dev Single-partition convenience for `lockByPartition` against the default
@@ -79,6 +92,25 @@ interface ILock is ILockTypes {
         address _tokenHolder,
         uint256 _lockId,
         uint256 _newExpirationTimestamp
+    ) external returns (bool success_);
+
+    /**
+     * @notice Releases a lock unconditionally, before its expiration timestamp.
+     * @dev Authorised path used to recover locked balances when the holder is unable to do
+     *      so. Pause-gated, partition validated against single-partition mode and
+     *      restricted to callers holding `LOCKER_ROLE` or `CONTROLLER_ROLE` (checked
+     *      explicitly via `AccessControlStorageWrapper.checkAnyRole`). Skips the
+     *      `LockExpirationNotReached` guard that `releaseByPartition` enforces. Emits
+     *      `LockByPartitionReleased`.
+     * @param _partition The partition the lock lives on.
+     * @param _lockId Identifier of the lock to release.
+     * @param _tokenHolder The address whose tokens are returned.
+     * @return success_ True when the lock has been removed and the balance returned.
+     */
+    function forceReleaseByPartition(
+        bytes32 _partition,
+        uint256 _lockId,
+        address _tokenHolder
     ) external returns (bool success_);
 
     /**

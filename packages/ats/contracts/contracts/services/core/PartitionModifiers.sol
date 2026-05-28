@@ -2,7 +2,6 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ProtectedPartitionsStorageWrapper } from "../../domain/core/ProtectedPartitionsStorageWrapper.sol";
-import { _checkNotInitialized } from "../InitializationErrors.sol";
 
 /**
  * @title PartitionModifiers
@@ -12,13 +11,6 @@ import { _checkNotInitialized } from "../InitializationErrors.sol";
  * @author Asset Tokenization Studio Team
  */
 abstract contract PartitionModifiers {
-    /// @notice Modifier to ensure protected partitions have not been initialized
-    /// @dev Calls _checkNotProtectedPartitionInitialized from ProtectedPartitionsStorageWrapper
-    modifier onlyNotProtectedPartitionInitialized() {
-        _checkNotInitialized(ProtectedPartitionsStorageWrapper.isProtectedPartitionInitialized());
-        _;
-    }
-
     modifier onlyProtectedPartitions() {
         ProtectedPartitionsStorageWrapper.requireProtectedPartitions();
         _;

@@ -21,6 +21,12 @@ bytes32 constant RESOLVER_KEY_DIVIDEND = 0xfcc58d1d55d14a1359461bb9cef220b267b98
  */
 interface IDividend is IDividendTypes {
     /**
+     * @notice Emitted once when the dividend capability is initialised on a token.
+     * @dev Fires exclusively from `initializeDividend`.
+     */
+    event DividendInitialized();
+
+    /**
      * @notice Emitted when an operator schedules a new dividend corporate action.
      * @param corporateActionId Identifier of the underlying corporate action.
      * @param dividendId One-indexed dividend identifier within the dividend corporate action type.
@@ -69,6 +75,13 @@ interface IDividend is IDividendTypes {
      * @param dividendId One-indexed identifier of the dividend that cannot be cancelled.
      */
     error DividendAlreadyExecuted(bytes32 corporateActionId, uint256 dividendId);
+
+    /**
+     * @notice Initialises the dividend capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeDividend() external;
 
     /**
      * @notice Schedules a new dividend corporate action and registers the snapshot/record-date

@@ -15,8 +15,8 @@ import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
  *         `RESOLVER_KEY_BALANCE_TRACKER_BY_PARTITION`.
  * @dev Inherits balance logic from `BalanceTrackerByPartition` and satisfies the
  *      `IStaticFunctionSelectors` contract required by the Diamond proxy for selector registration.
- *      Exposes three selectors: `balanceOfByPartition`, `totalSupplyByPartition`, and
- *      `getTotalBalanceForByPartition`.
+ *      Exposes four selectors: `initializeBalanceTrackerByPartition`, `balanceOfByPartition`,
+ *      `totalSupplyByPartition`, and `getTotalBalanceForByPartition`.
  */
 contract BalanceTrackerByPartitionFacet is BalanceTrackerByPartition, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
@@ -28,6 +28,7 @@ contract BalanceTrackerByPartitionFacet is BalanceTrackerByPartition, IStaticFun
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeBalanceTrackerByPartition.selector,
                 this.balanceOfByPartition.selector,
                 this.totalSupplyByPartition.selector,
                 this.getTotalBalanceForByPartition.selector

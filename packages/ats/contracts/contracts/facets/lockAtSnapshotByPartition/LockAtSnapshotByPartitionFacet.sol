@@ -26,7 +26,11 @@ contract LockAtSnapshotByPartitionFacet is LockAtSnapshotByPartition, IStaticFun
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.lockedBalanceOfAtSnapshotByPartition.selector);
+        return
+            Bytes4Builder.build(
+                this.initializeLockAtSnapshotByPartition.selector,
+                this.lockedBalanceOfAtSnapshotByPartition.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors

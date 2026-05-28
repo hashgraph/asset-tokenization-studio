@@ -323,7 +323,7 @@ function parseConstantByPredicate(
  * Resolver key definition with name and value.
  */
 export interface ResolverKeyDefinition {
-  /** Resolver key name (e.g., _ACCESS_CONTROL_RESOLVER_KEY) */
+  /** Resolver key name (e.g., _ACCESS_CONTROL) */
   name: string;
 
   /** bytes32 value (e.g., 0x011768a41...) */
@@ -334,8 +334,8 @@ export interface ResolverKeyDefinition {
  * Extract resolver key definitions from Solidity code.
  *
  * Matches patterns like:
- * - bytes32 constant FACET_NAME_RESOLVER_KEY = 0x...;
- * - bytes32 constant _FACET_NAME_RESOLVER_KEY = 0x...; (legacy)
+ * - bytes32 constant FACET_NAME = 0x...;
+ * - bytes32 constant _FACET_NAME = 0x...; (legacy)
  *
  * Supports both with and without underscore prefix (underscore is incorrectly
  * used in ATS for public constants - will be removed in future).
@@ -346,8 +346,8 @@ export interface ResolverKeyDefinition {
  * @example
  * ```typescript
  * const keys = extractResolverKeys(source)
- * // [{name: 'ACCESS_CONTROL_RESOLVER_KEY', value: '0x011768a41...'}]
- * // [{name: '_ACCESS_CONTROL_RESOLVER_KEY', value: '0x011768a41...'}] (legacy ATS)
+ * // [{name: 'ACCESS_CONTROL', value: '0x011768a41...'}]
+ * // [{name: '_ACCESS_CONTROL', value: '0x011768a41...'}] (legacy ATS)
  * ```
  */
 export function extractResolverKeys(source: string): ResolverKeyDefinition[] {
@@ -553,7 +553,7 @@ function cleanNatspecValue(value: string): string {
  * @example
  * ```typescript
  * const keyName = extractFacetResolverKeyImport(facetSource)
- * // Returns: '_ACCESS_CONTROL_RESOLVER_KEY'
+ * // Returns: '_ACCESS_CONTROL'
  * ```
  */
 export function extractFacetResolverKeyImport(source: string): string | undefined {

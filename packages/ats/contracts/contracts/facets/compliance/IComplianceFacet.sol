@@ -8,6 +8,19 @@ bytes32 constant RESOLVER_KEY_COMPLIANCE = 0x0e30d654f46079d52767224a07d1fe1adc9
 
 interface IComplianceFacet {
     /**
+     * @notice Emitted once when the compliance capability is initialised on a token.
+     * @dev Fires exclusively from `initializeCompliance`.
+     */
+    event ComplianceInitialized();
+
+    /**
+     * @notice Initialises the compliance capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeCompliance() external;
+
+    /**
      * @notice Sets the compliance contract address
      * @param _compliance The address of the new compliance contract
      */
@@ -47,7 +60,7 @@ interface IComplianceFacet {
 
     /**
      * @notice Returns the address of the compliance contract
-     * @return ICompliance The compliance contract interface
+     * @return ICompliance The compliance contract
      */
     function compliance() external view returns (ICompliance);
 }

@@ -3,8 +3,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { DEFAULT_PARTITION, ATS_ROLES, ZERO, EMPTY_STRING } from "@scripts";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import { DEFAULT_PARTITION, ATS_ROLES, ZERO, EMPTY_STRING, RESOLVER_KEY_VOTING_SECURITY_HOLDERS } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
@@ -17,8 +17,10 @@ describe("VotingSecurityHoldersFacet Tests", () => {
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
+  let unknownSigner: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
   let votingRecordDateInSeconds = 0;
   let votingData = { recordDate: "0", data: voteData };
 
@@ -28,8 +30,11 @@ describe("VotingSecurityHoldersFacet Tests", () => {
     signer_A = base.deployer;
     signer_B = base.user1;
     signer_C = base.user2;
+    const signers = await ethers.getSigners();
+    unknownSigner = signers[signers.length - 1];
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
       { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
@@ -136,5 +141,26 @@ describe("VotingSecurityHoldersFacet Tests", () => {
     // Also verify getVotingHolders returns current holders
     const holders = await asset.getVotingHolders(1, 0, 99);
     expect([...holders]).to.have.members([signer_A.address]);
+  });
+
+  describe("initializeVotingSecurityHolders", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeVotingSecurityHolders THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(unknownSigner).initializeVotingSecurityHolders())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(await unknownSigner.getAddress(), ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeVotingSecurityHolders THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeVotingSecurityHolders())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_VOTING_SECURITY_HOLDERS, 1);
+    });
+  });
+
+  describe("initializeVotingSecurityHolders event", () => {
+    it("GIVEN fresh facet WHEN initializeVotingSecurityHolders THEN emits VotingSecurityHoldersInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_VOTING_SECURITY_HOLDERS);
+      await expect(asset.initializeVotingSecurityHolders()).to.emit(asset, "VotingSecurityHoldersInitialized");
+    });
   });
 });

@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBatchFreeze } from "./IBatchFreeze.sol";
+import { IBatchFreeze, RESOLVER_KEY_BATCH_FREEZE } from "./IBatchFreeze.sol";
 import { IFreeze } from "../freeze/IFreeze.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ExternalListManagementStorageWrapper } from "../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
-import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title BatchFreeze
@@ -19,11 +20,24 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract BatchFreeze is IBatchFreeze, Modifiers {
     /// @inheritdoc IBatchFreeze
+    function initializeBatchFreeze()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_BATCH_FREEZE)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_BATCH_FREEZE);
+        emit IBatchFreeze.BatchFreezeInitialized();
+    }
+
+    /// @inheritdoc IBatchFreeze
     function batchSetAddressFrozen(
         address[] calldata _userAddresses,
         bool[] calldata _freeze
     )
         external
+        override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyValidInputBoolArrayLength(_userAddresses, _freeze)
@@ -48,6 +62,8 @@ abstract contract BatchFreeze is IBatchFreeze, Modifiers {
         uint256[] calldata _amounts
     )
         external
+        override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
@@ -72,6 +88,8 @@ abstract contract BatchFreeze is IBatchFreeze, Modifiers {
         uint256[] calldata _amounts
     )
         external
+        override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
