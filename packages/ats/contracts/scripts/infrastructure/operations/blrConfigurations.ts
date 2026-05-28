@@ -259,9 +259,11 @@ export async function sendBatchConfiguration(
   info(`  Is final batch: ${finalBatch}`);
   info(`  Confirmations to wait: ${confirmations}`);
 
-  try {
-    const { GAS_LIMIT, retryTransaction, withNonceReset } = await import("@scripts/infrastructure");
+  // Dynamic import for parallel test performance (see module JSDoc for explanation).
+  // Declared outside try-catch so GAS_LIMIT is also available in the catch block.
+  const { GAS_LIMIT, retryTransaction, withNonceReset } = await import("@scripts/infrastructure");
 
+  try {
     const signer = blrContract.runner;
     const retryOpts = withNonceReset(signer, retryOptions);
 
