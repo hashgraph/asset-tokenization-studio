@@ -124,6 +124,45 @@ abstract contract Lock is ILock, Modifiers {
     }
 
     /**
+     * @inheritdoc ILock
+     * @dev Pause-gated, restricted to `ROLE_LOCKER`, only valid in single-partition mode and
+     *      against a valid lock id. Delegates the storage mutation to
+     *      `LockStorageWrapper.updateLockExpiration` against the default partition and emits
+     *      `LockExpirationUpdated` with both the old and new timestamps.
+     */
+    function updateLockExpiration(
+        address _tokenHolder,
+        uint256 _lockId,
+        uint256 _newExpirationTimestamp
+    )
+        external
+        override
+        onlyActivated
+        onlyUnpaused
+        onlyRole(ROLE_LOCKER)
+        onlyWithoutMultiPartition
+        onlyWithValidLockId(_DEFAULT_PARTITION, _tokenHolder, _lockId)
+        onlyValidExpirationTimestamp(_newExpirationTimestamp)
+        returns (bool success_)
+    {
+        uint256 oldExpirationTimestamp = LockStorageWrapper.updateLockExpiration(
+            _DEFAULT_PARTITION,
+            _tokenHolder,
+            _lockId,
+            _newExpirationTimestamp
+        );
+        emit LockExpirationUpdated(
+            EvmAccessors.getMsgSender(),
+            _tokenHolder,
+            _DEFAULT_PARTITION,
+            _lockId,
+            oldExpirationTimestamp,
+            _newExpirationTimestamp
+        );
+        success_ = true;
+    }
+
+    /**
      * @notice Returns the raw `LockData` entry for a given partition, scoped to the caller.
      * @dev Reads the lock keyed by the message sender (resolved through `EvmAccessors`),
      *      not by an explicit token holder. Returns the unadjusted on-chain entry — callers
