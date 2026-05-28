@@ -107,7 +107,7 @@ export const TEST_NETWORKS = {
   /** Hedera previewnet network identifier */
   PREVIEWNET: "hedera-previewnet",
 
-  /** Hedera previewnet network identifier */
+  /** Hedera HashSphere network identifier */
   HASHSPHERE: "hedera-hashsphere",
 
   /** Hedera local network identifier */
