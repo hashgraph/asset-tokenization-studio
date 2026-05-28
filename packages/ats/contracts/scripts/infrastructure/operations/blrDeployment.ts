@@ -20,6 +20,7 @@ import {
   success,
   GAS_LIMIT,
   hederaGasOverrides,
+  gasLimitOverride,
 } from "@scripts/infrastructure";
 
 /**
@@ -98,7 +99,7 @@ export async function deployBlr(signer: Signer, options: DeployBlrOptions = {}):
       existingProxyAdmin,
       initData: "0x",
       overrides: {
-        gasLimit: GAS_LIMIT.high,
+        ...gasLimitOverride(GAS_LIMIT.high),
         ...hederaGasOverrides(),
       },
     });
@@ -116,7 +117,7 @@ export async function deployBlr(signer: Signer, options: DeployBlrOptions = {}):
       const blr = BusinessLogicResolver__factory.connect(blrAddress, signer);
 
       const initTx = await blr.initializeBusinessLogicResolver({
-        gasLimit: GAS_LIMIT.initialize.businessLogicResolver,
+        ...gasLimitOverride(GAS_LIMIT.initialize.businessLogicResolver),
         ...hederaGasOverrides(),
       });
       await initTx.wait();

@@ -43,11 +43,9 @@ import {
   waitForTransaction,
   isInstantMiningNetwork,
   hederaGasOverrides,
+  gasLimitOverride,
   warn,
-  GAS_LIMIT,
   RetryOptions,
-  retryTransaction,
-  withNonceReset,
 } from "@scripts/infrastructure";
 
 // Types imported from centralized types module
@@ -262,25 +260,27 @@ export async function sendBatchConfiguration(
   info(`  Confirmations to wait: ${confirmations}`);
 
   try {
-    // Dynamic import for parallel test performance (see module JSDoc for explanation)
-    const { GAS_LIMIT } = await import("@scripts/infrastructure");
+    const { GAS_LIMIT, retryTransaction, withNonceReset } = await import("@scripts/infrastructure");
 
-    const txResponse = await blrContract.createBatchConfiguration(configId, configurations, finalBatch, {
-      gasLimit: gasLimit || GAS_LIMIT.businessLogicResolver.createConfiguration,
-      ...hederaGasOverrides(),
-    });
+    const signer = blrContract.runner;
+    const retryOpts = withNonceReset(signer, retryOptions);
 
-    info(`Batch configuration transaction sent: ${txResponse.hash}`);
+    await retryTransaction(async () => {
+      const txResponse = await blrContract.createBatchConfiguration(configId, configurations, finalBatch, {
+        ...gasLimitOverride(gasLimit || GAS_LIMIT.businessLogicResolver.createConfiguration),
+        ...hederaGasOverrides(),
+      });
 
-    // Wait for transaction confirmation with configurable confirmations
-    const receipt = await waitForTransaction(txResponse, confirmations, DEFAULT_TRANSACTION_TIMEOUT);
+      info(`Batch configuration transaction sent: ${txResponse.hash}`);
 
-    const gasUsed = formatGasUsage(receipt, txResponse.gasLimit);
-    debug(gasUsed);
+      // Wait for transaction confirmation with configurable confirmations
+      const receipt = await waitForTransaction(txResponse, confirmations, DEFAULT_TRANSACTION_TIMEOUT);
+
+      const gasUsed = formatGasUsage(receipt, txResponse.gasLimit);
+      debug(gasUsed);
+    }, retryOpts);
 
     success(`Batch configuration ${finalBatch ? "(final)" : "(partial)"} completed successfully`);
-    info(`  Transaction: ${receipt.hash}`);
-    info(`  Block: ${receipt.blockNumber}`);
   } catch (err) {
     // Re-simulate with staticCall to surface the decoded revert reason (custom
     // errors, panic codes, etc.) that status=0 receipts don't carry.
@@ -469,7 +469,7 @@ export async function createBatchConfiguration(
           `Cancelling to allow clean retry...`,
       );
       const cancelTx = await blrContract.cancelBatchConfiguration(configurationId, {
-        gasLimit: GAS_LIMIT.businessLogicResolver.createConfiguration,
+        ...gasLimitOverride(GAS_LIMIT.businessLogicResolver.createConfiguration),
         ...hederaGasOverrides(),
       });
       await cancelTx.wait(confirmations);
