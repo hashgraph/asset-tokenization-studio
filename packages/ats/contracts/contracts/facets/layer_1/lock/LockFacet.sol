@@ -34,7 +34,8 @@ contract LockFacet is Lock, IStaticFunctionSelectors {
                 this.getLockedAmountFor.selector,
                 this.getLockCountFor.selector,
                 this.getLocksIdFor.selector,
-                this.getLockFor.selector
+                this.getLockFor.selector,
+                this.updateLockExpiration.selector
             );
     }
 

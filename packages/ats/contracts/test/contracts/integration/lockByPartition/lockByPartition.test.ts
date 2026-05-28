@@ -493,6 +493,118 @@ describe("LockByPartition Tests", () => {
     });
   });
 
+  describe("updateLockExpirationByPartition (multi-partition)", () => {
+    beforeEach(async () => {
+      await loadFixture(deploySecurityFixtureMultiPartition);
+    });
+
+    async function issuedAndLocked(expiration: number | bigint): Promise<void> {
+      await asset.connect(signer_B).issueByPartition({
+        partition: _NON_DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: _AMOUNT,
+        data: "0x",
+      });
+      await asset.connect(signer_C).lockByPartition(_NON_DEFAULT_PARTITION, _AMOUNT, signer_A.address, expiration);
+    }
+
+    it("GIVEN a paused token WHEN updateLockExpirationByPartition THEN fails with IsPaused", async () => {
+      await asset.connect(signer_D).pause();
+      await expect(
+        asset
+          .connect(signer_C)
+          .updateLockExpirationByPartition(_NON_DEFAULT_PARTITION, signer_A.address, 1, expirationTimestamp),
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
+    });
+
+    it("GIVEN an account without LOCKER role WHEN updateLockExpirationByPartition THEN fails with AccountHasNoRole", async () => {
+      await expect(
+        asset
+          .connect(signer_D)
+          .updateLockExpirationByPartition(_NON_DEFAULT_PARTITION, signer_A.address, 1, expirationTimestamp),
+      ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+    });
+
+    it("GIVEN an invalid lockId WHEN updateLockExpirationByPartition THEN fails with WrongLockId", async () => {
+      await expect(
+        asset
+          .connect(signer_C)
+          .updateLockExpirationByPartition(_NON_DEFAULT_PARTITION, signer_A.address, 99, expirationTimestamp),
+      ).to.be.revertedWithCustomError(asset, "WrongLockId");
+    });
+
+    it("GIVEN a new timestamp in the past WHEN updateLockExpirationByPartition THEN fails with WrongExpirationTimestamp", async () => {
+      await issuedAndLocked(expirationTimestamp);
+      await expect(
+        asset
+          .connect(signer_C)
+          .updateLockExpirationByPartition(_NON_DEFAULT_PARTITION, signer_A.address, 1, currentTimestamp - ONE_SECOND),
+      ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
+    });
+
+    it("GIVEN a lock with type(uint256).max expiration (FIND-059) WHEN updateLockExpirationByPartition THEN shortens expiration and lock becomes releasable", async () => {
+      await issuedAndLocked(MAX_UINT256);
+
+      const shortenedExpiration = expirationTimestamp;
+
+      await expect(
+        asset
+          .connect(signer_C)
+          .updateLockExpirationByPartition(_NON_DEFAULT_PARTITION, signer_A.address, 1, shortenedExpiration),
+      )
+        .to.emit(asset, "LockExpirationUpdated")
+        .withArgs(signer_C.address, signer_A.address, _NON_DEFAULT_PARTITION, 1, MAX_UINT256, shortenedExpiration);
+
+      const [, updatedExpiration] = await asset.getLockForByPartition(_NON_DEFAULT_PARTITION, signer_A.address, 1);
+      expect(updatedExpiration).to.equal(shortenedExpiration);
+
+      // Verify lock is now releasable after advancing time
+      await asset.changeSystemTimestamp(shortenedExpiration + ONE_SECOND);
+      await expect(asset.connect(signer_C).releaseByPartition(_NON_DEFAULT_PARTITION, 1, signer_A.address))
+        .to.emit(asset, "LockByPartitionReleased")
+        .withArgs(signer_C.address, signer_A.address, _NON_DEFAULT_PARTITION, 1);
+    });
+
+    it("GIVEN a lock WHEN updateLockExpirationByPartition extends expiration THEN getLockForByPartition reflects new timestamp", async () => {
+      await issuedAndLocked(expirationTimestamp);
+
+      const extendedExpiration = expirationTimestamp + ONE_YEAR_IN_SECONDS;
+
+      await expect(
+        asset
+          .connect(signer_C)
+          .updateLockExpirationByPartition(_NON_DEFAULT_PARTITION, signer_A.address, 1, extendedExpiration),
+      )
+        .to.emit(asset, "LockExpirationUpdated")
+        .withArgs(
+          signer_C.address,
+          signer_A.address,
+          _NON_DEFAULT_PARTITION,
+          1,
+          expirationTimestamp,
+          extendedExpiration,
+        );
+
+      const [lockedAmount, updatedExpiration] = await asset.getLockForByPartition(
+        _NON_DEFAULT_PARTITION,
+        signer_A.address,
+        1,
+      );
+      expect(lockedAmount).to.equal(_AMOUNT);
+      expect(updatedExpiration).to.equal(extendedExpiration);
+    });
+
+    it("GIVEN a lock WHEN updateLockExpirationByPartition THEN locked amount is unchanged", async () => {
+      await issuedAndLocked(expirationTimestamp);
+      await asset
+        .connect(signer_C)
+        .updateLockExpirationByPartition(_NON_DEFAULT_PARTITION, signer_A.address, 1, expirationTimestamp + ONE_SECOND);
+
+      expect(await asset.getLockedAmountForByPartition(_NON_DEFAULT_PARTITION, signer_A.address)).to.equal(_AMOUNT);
+      expect(await asset.getLockCountForByPartition(_NON_DEFAULT_PARTITION, signer_A.address)).to.equal(1);
+    });
+  });
+
   describe("Multi-partition disabled", () => {
     beforeEach(async () => {
       await loadFixture(deploySecurityFixtureSinglePartition);
@@ -641,6 +753,54 @@ describe("LockByPartition Tests", () => {
         expect(await asset.balanceOfByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(_AMOUNT);
         expect(await asset.totalSupplyByPartition(_DEFAULT_PARTITION)).to.equal(_AMOUNT);
       });
+    });
+  });
+
+  describe("updateLockExpirationByPartition (single-partition)", () => {
+    beforeEach(async () => {
+      await loadFixture(deploySecurityFixtureSinglePartition);
+    });
+
+    async function issuedAndLocked(expiration: number | bigint): Promise<void> {
+      await asset.connect(signer_B).issueByPartition({
+        partition: _DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: _AMOUNT,
+        data: "0x",
+      });
+      await asset.connect(signer_C).lockByPartition(_DEFAULT_PARTITION, _AMOUNT, signer_A.address, expiration);
+    }
+
+    it("GIVEN a lock with type(uint256).max expiration (FIND-059) WHEN updateLockExpirationByPartition THEN shortens expiration and lock becomes releasable", async () => {
+      await issuedAndLocked(MAX_UINT256);
+
+      const shortenedExpiration = expirationTimestamp;
+
+      await expect(
+        asset
+          .connect(signer_C)
+          .updateLockExpirationByPartition(_DEFAULT_PARTITION, signer_A.address, 1, shortenedExpiration),
+      )
+        .to.emit(asset, "LockExpirationUpdated")
+        .withArgs(signer_C.address, signer_A.address, _DEFAULT_PARTITION, 1, MAX_UINT256, shortenedExpiration);
+
+      await asset.changeSystemTimestamp(shortenedExpiration + ONE_SECOND);
+      await expect(asset.connect(signer_C).releaseByPartition(_DEFAULT_PARTITION, 1, signer_A.address))
+        .to.emit(asset, "LockByPartitionReleased")
+        .withArgs(signer_C.address, signer_A.address, _DEFAULT_PARTITION, 1);
+    });
+
+    it("GIVEN a lock with type(uint256).max WHEN updateLockExpiration (default-partition helper) THEN shortens expiration", async () => {
+      await issuedAndLocked(MAX_UINT256);
+
+      const shortenedExpiration = expirationTimestamp;
+
+      await expect(asset.connect(signer_C).updateLockExpiration(signer_A.address, 1, shortenedExpiration))
+        .to.emit(asset, "LockExpirationUpdated")
+        .withArgs(signer_C.address, signer_A.address, _DEFAULT_PARTITION, 1, MAX_UINT256, shortenedExpiration);
+
+      const [, updatedExpiration] = await asset.getLockFor(signer_A.address, 1);
+      expect(updatedExpiration).to.equal(shortenedExpiration);
     });
   });
 
