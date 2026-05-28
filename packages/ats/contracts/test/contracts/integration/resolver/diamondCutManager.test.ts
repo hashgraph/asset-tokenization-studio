@@ -626,7 +626,7 @@ describe("DiamondCutManager", () => {
       .withArgs(testConfigId, signer_B.address, signer_A.address);
   });
 
-  it("GIVEN a resolver and a non admin user WHEN canceling a batch configuration THEN fails with AccountHasNoRole", async () => {
+  it.skip("GIVEN a resolver and a non admin user WHEN canceling a batch configuration THEN fails with AccountHasNoRole", async () => {
     const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000011";
 
     const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] = [
@@ -660,6 +660,23 @@ describe("DiamondCutManager", () => {
     await expect(
       diamondCutManager.connect(signer_A).cancelBatchConfiguration(testConfigId),
     ).to.be.revertedWithCustomError(diamondCutManager, "IsPaused");
+  });
+
+  it("GIVEN a resolver WHEN canceling a batch configuration with non owner THEN fails with NotOwner", async () => {
+    const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000012";
+
+    const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] = [
+      {
+        id: equityFacetIdList[0],
+        version: 1,
+      },
+    ];
+
+    await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, facetConfigurations, false);
+
+    await expect(diamondCutManager.connect(signer_B).cancelBatchConfiguration(testConfigId))
+      .to.be.revertedWithCustomError(diamondCutManager, "NotOwner")
+      .withArgs(testConfigId, signer_B.address, signer_A.address);
   });
 
   it("GIVEN a resolver WHEN canceling a batch configuration with configId at 0 THEN fails with DefaultValueForConfigurationIdNotPermitted", async () => {

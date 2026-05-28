@@ -44,14 +44,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
 
     function cancelBatchConfiguration(
         bytes32 _configurationId
-    )
-        external
-        override
-        validateConfigurationId(_configurationId)
-        onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyUnpaused
-        checkOwnership(_configurationId)
-    {
+    ) external override validateConfigurationId(_configurationId) onlyUnpaused checkOwnership(_configurationId) {
         uint256 version = _cancelBatchConfiguration(_configurationId);
         emit DiamondBatchConfigurationCanceled(_configurationId, version);
     }
