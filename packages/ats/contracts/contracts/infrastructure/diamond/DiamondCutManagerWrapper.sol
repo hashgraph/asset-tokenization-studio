@@ -7,12 +7,14 @@ import { IDiamondCutManager } from "./IDiamondCutManager.sol";
 import { IStaticFunctionSelectors } from "../proxy/IStaticFunctionSelectors.sol";
 import { IDiamondLoupe } from "../proxy/IDiamondLoupe.sol";
 import { BusinessLogicResolverWrapper } from "./BusinessLogicResolverWrapper.sol";
+import { Ownership } from "./Ownership.sol";
+import { EvmAccessors } from "../utils/EvmAccessors.sol";
 
 /// @custom:hash storage DiamondCutManager
 // solhint-disable-next-line max-line-length
 bytes32 constant STORAGE_LOCATION_DIAMOND_CUT_MANAGER = 0xc9161810d6144bfe5b28041c8a23ceedf202e65acda5c323c5b387259e601000;
 
-abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicResolverWrapper {
+abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, BusinessLogicResolverWrapper {
     struct DiamondCutManagerStorage {
         bytes32[] configurations;
         mapping(bytes32 => bool) activeConfigurations;
@@ -84,6 +86,8 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
             _dcms.batchVersion[_configurationId] = _dcms.latestVersion[_configurationId] + 1;
         }
         batchVersion_ = _getBatchConfigurationVersion(_configurationId);
+
+        _setOwner(_configurationId, EvmAccessors.getMsgSender());
     }
 
     function _addFacetsToBatchConfiguration(

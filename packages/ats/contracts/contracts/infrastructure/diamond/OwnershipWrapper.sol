@@ -6,7 +6,7 @@ import { IOwnership } from "./IOwnership.sol";
 
 /// @custom:hash storage Ownership
 // solhint-disable-next-line max-line-length
-bytes32 constant STORAGE_LOCATION_OWNERSHIP = 0x0;
+bytes32 constant STORAGE_LOCATION_OWNERSHIP = 0x0c49888622360137ef830a76ef93872bc0aefaf60fb012c3941df4da0397c000;
 
 /**
  * @title OwnershipWrapper

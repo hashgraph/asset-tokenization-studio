@@ -6,17 +6,15 @@ import { Pause } from "../../facets/pause/Pause.sol";
 import { AccessControl } from "../../facets/accessControl/AccessControl.sol";
 import { DiamondCutManagerWrapper } from "./DiamondCutManagerWrapper.sol";
 import { IDiamondLoupe } from "../proxy/IDiamondLoupe.sol";
-import { Ownership } from "./Ownership.sol";
 
-abstract contract DiamondCutManager is AccessControl, Pause, Ownership, DiamondCutManagerWrapper {
+abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWrapper {
     modifier validateConfigurationId(bytes32 _configurationId) {
         _checkConfigurationId(_configurationId);
         _;
     }
 
     modifier checkOwnership(bytes32 _configurationId) {
-        DiamondCutManagerStorage storage _dcms = _diamondCutManagerStorage();
-        if (_dcms.latestVersion[_configurationId] != 0) _checkOwnership(_configurationId);
+        if (_getOwner(_configurationId) != address(0)) _checkOwnership(_configurationId);
         _;
     }
 

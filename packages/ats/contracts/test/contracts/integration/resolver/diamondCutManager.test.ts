@@ -578,6 +578,54 @@ describe("DiamondCutManager", () => {
       .withArgs(testConfigId);
   });
 
+  it("GIVEN a resolver WHEN creating configuration with a non owner on an ongoing batch THEN fails with NotOwner", async () => {
+    const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000010";
+
+    const firstBatchFacets: IDiamondCutManager.FacetConfigurationStruct[] = [
+      {
+        id: equityFacetIdList[0],
+        version: 1,
+      },
+    ];
+
+    await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, firstBatchFacets, false);
+
+    const secondBatchFacets: IDiamondCutManager.FacetConfigurationStruct[] = [
+      {
+        id: equityFacetIdList[1],
+        version: 1,
+      },
+    ];
+
+    await expect(diamondCutManager.connect(signer_B).createConfiguration(testConfigId, secondBatchFacets))
+      .to.be.revertedWithCustomError(diamondCutManager, "NotOwner")
+      .withArgs(testConfigId, signer_B.address, signer_A.address);
+  });
+
+  it("GIVEN a resolver WHEN providing second batch of configuration with a non owner on an ongoing batch THEN fails with NotOwner", async () => {
+    const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000010";
+
+    const firstBatchFacets: IDiamondCutManager.FacetConfigurationStruct[] = [
+      {
+        id: equityFacetIdList[0],
+        version: 1,
+      },
+    ];
+
+    await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, firstBatchFacets, false);
+
+    const secondBatchFacets: IDiamondCutManager.FacetConfigurationStruct[] = [
+      {
+        id: equityFacetIdList[1],
+        version: 1,
+      },
+    ];
+
+    await expect(diamondCutManager.connect(signer_B).createBatchConfiguration(testConfigId, secondBatchFacets, true))
+      .to.be.revertedWithCustomError(diamondCutManager, "NotOwner")
+      .withArgs(testConfigId, signer_B.address, signer_A.address);
+  });
+
   it("GIVEN a resolver and a non admin user WHEN canceling a batch configuration THEN fails with AccountHasNoRole", async () => {
     const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000011";
 
@@ -659,6 +707,40 @@ describe("DiamondCutManager", () => {
     const configIds = await diamondCutManager.getConfigurations(0, configLength);
     const countOfTestConfigId = configIds.filter((id: string) => id === testConfigId).length;
     expect(countOfTestConfigId).to.equal(1);
+  });
+
+  it("GIVEN a configuration WHEN creating a new version (v2) with a Non owner THEN failswith NotOwner", async () => {
+    const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000013";
+
+    const firstVersionFacets: IDiamondCutManager.FacetConfigurationStruct[] = [
+      {
+        id: equityFacetIdList[0],
+        version: 1,
+      },
+    ];
+
+    await diamondCutManager.connect(signer_A).createConfiguration(testConfigId, firstVersionFacets);
+
+    await expect(diamondCutManager.connect(signer_B).createConfiguration(testConfigId, firstVersionFacets))
+      .to.be.revertedWithCustomError(diamondCutManager, "NotOwner")
+      .withArgs(testConfigId, signer_B.address, signer_A.address);
+  });
+
+  it("GIVEN a configuration WHEN creating a new version (v2) with a Non owner THEN failswith NotOwner", async () => {
+    const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000013";
+
+    const firstVersionFacets: IDiamondCutManager.FacetConfigurationStruct[] = [
+      {
+        id: equityFacetIdList[0],
+        version: 1,
+      },
+    ];
+
+    await diamondCutManager.connect(signer_A).createConfiguration(testConfigId, firstVersionFacets);
+
+    await expect(diamondCutManager.connect(signer_B).createBatchConfiguration(testConfigId, firstVersionFacets, true))
+      .to.be.revertedWithCustomError(diamondCutManager, "NotOwner")
+      .withArgs(testConfigId, signer_B.address, signer_A.address);
   });
 
   it("GIVEN a non-existent configuration WHEN checking if registered THEN returns false", async () => {
