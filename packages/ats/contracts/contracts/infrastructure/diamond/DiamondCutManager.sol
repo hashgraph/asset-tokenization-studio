@@ -16,7 +16,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
     function createConfiguration(
         bytes32 _configurationId,
         FacetConfiguration[] calldata _facetConfigurations
-    ) external override validateConfigurationId(_configurationId) onlyRole(DEFAULT_ADMIN_ROLE) onlyUnpaused {
+    ) external override validateConfigurationId(_configurationId) onlyUnpaused {
         emit DiamondConfigurationCreated(
             _configurationId,
             _facetConfigurations,
@@ -28,7 +28,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         bytes32 _configurationId,
         FacetConfiguration[] calldata _facetConfigurations,
         bool _isLastBatch
-    ) external override validateConfigurationId(_configurationId) onlyRole(DEFAULT_ADMIN_ROLE) onlyUnpaused {
+    ) external override validateConfigurationId(_configurationId) onlyUnpaused {
         emit DiamondBatchConfigurationCreated(
             _configurationId,
             _facetConfigurations,
