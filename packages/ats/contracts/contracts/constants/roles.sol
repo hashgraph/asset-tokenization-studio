@@ -55,6 +55,10 @@ bytes32 constant ROLE_CONTROL_LIST_MANAGER = 0xccf29bda8369877bcc921e38f30df8615
 /// @custom:hash role CorporateAction
 bytes32 constant ROLE_CORPORATE_ACTION = 0xa1acfc499025c99f55059195e6276f639d34a18aad7b8121b9192b7f438c55cd;
 
+/// @custom:hash role CorporateActionForceCancel
+// solhint-disable-next-line max-line-length
+bytes32 constant ROLE_CORPORATE_ACTION_FORCE_CANCEL = 0x34c18461eba17dd4b2a410f90e80f2a3d6e466af7753bf1b9519c24697c199f5;
+
 /// @custom:hash role Deactivate
 bytes32 constant ROLE_DEACTIVATE = 0x31e3e0f7cd6b1bdc19162dd52d4ce1ed67de0aff8f89b768dcbfad8776b2ae4d;
 

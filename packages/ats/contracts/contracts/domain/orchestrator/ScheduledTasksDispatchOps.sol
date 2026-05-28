@@ -15,8 +15,9 @@ import { ICouponTypes } from "../../facets/coupon/ICouponTypes.sol";
 import { CouponRateDispatch } from "../../domain/asset/coupon/CouponRateDispatch.sol";
 
 /// @title ScheduledTasksDispatchOps - External library for isolated scheduled task dispatch
-/// @notice Deployed once as a separate contract. Called via DELEGATECALL through try/catch for
-///         failure isolation. Handles only leaf-task business logic (snapshot, coupon, balance).
+/// @notice Deployed once as a separate contract. Called via DELEGATECALL. Handles only
+///         leaf-task business logic (snapshot, coupon, balance). A revert propagates to the
+///         caller, blocking the queue until an authorised caller force-cancels the task.
 ///         Cross-ordered sub-task routing and all queue storage access live in
 ///         ScheduledTasksStorageWrapper to avoid circular imports.
 library ScheduledTasksDispatchOps {

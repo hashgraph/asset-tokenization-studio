@@ -249,6 +249,78 @@ describe("AmortizationFacet", () => {
     });
   });
 
+  describe("forceCancelAmortization", () => {
+    let amortizationData: Awaited<ReturnType<typeof makeAmortizationData>>;
+
+    beforeEach(async () => {
+      await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, user2.address);
+      await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, user2.address);
+      amortizationData = await makeAmortizationData();
+      await asset.connect(user2).setAmortization(amortizationData);
+    });
+
+    it("GIVEN account with ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelAmortization before execution date THEN emits AmortizationForceCancelled and isDisabled is true", async () => {
+      await expect(asset.connect(user2).forceCancelAmortization(1))
+        .to.emit(asset, "AmortizationForceCancelled")
+        .withArgs(1n, user2.address);
+
+      const [, isDisabled] = await asset.getAmortization(1);
+      expect(isDisabled).to.equal(true);
+    });
+
+    it("GIVEN account with ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelAmortization after execution date THEN transaction succeeds bypassing date guard", async () => {
+      await asset.changeSystemTimestamp(amortizationData.executionDate + 1);
+
+      await expect(asset.connect(user2).forceCancelAmortization(1))
+        .to.emit(asset, "AmortizationForceCancelled")
+        .withArgs(1n, user2.address);
+
+      const [, isDisabled] = await asset.getAmortization(1);
+      expect(isDisabled).to.equal(true);
+    });
+
+    it("GIVEN account without ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelAmortization THEN reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(user3).forceCancelAmortization(1))
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(user3.address, ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL);
+    });
+
+    it("GIVEN paused token WHEN forceCancelAmortization THEN reverts with IsPaused", async () => {
+      await asset.grantRole(ATS_ROLES.ROLE_PAUSER, user1.address);
+
+      await asset.connect(user1).pause();
+
+      await expect(asset.connect(user2).forceCancelAmortization(1)).to.be.revertedWithCustomError(asset, "IsPaused");
+    });
+
+    it("GIVEN non-existent amortization ID WHEN forceCancelAmortization THEN reverts with WrongIndexForAction", async () => {
+      await expect(asset.connect(user2).forceCancelAmortization(999)).to.be.revertedWithCustomError(
+        asset,
+        "WrongIndexForAction",
+      );
+    });
+
+    it("GIVEN amortization with one active hold WHEN forceCancelAmortization THEN succeeds bypassing hold guard", async () => {
+      await asset.grantRole(ATS_ROLES.ROLE_AMORTIZATION, user2.address);
+      await asset.grantRole(ATS_ROLES.ROLE_ISSUER, user2.address);
+
+      await asset.connect(user2).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: deployer.address,
+        value: TOTAL_UNITS,
+        data: EMPTY_HEX_BYTES,
+      });
+
+      await asset.connect(user2).setAmortizationHold(1, deployer.address, BigInt(TOKENS_TO_REDEEM));
+
+      await expect(asset.connect(user2).forceCancelAmortization(1))
+        .to.emit(asset, "AmortizationForceCancelled")
+        .withArgs(1n, user2.address);
+      const [, isDisabled] = await asset.getAmortization(1);
+      expect(isDisabled).to.equal(true);
+    });
+  });
+
   describe("getAmortizationsCount", () => {
     it("GIVEN no amortizations WHEN getAmortizationsCount THEN returns 0", async () => {
       const count = await asset.getAmortizationsCount();

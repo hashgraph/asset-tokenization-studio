@@ -32,6 +32,7 @@ const NETWORK_ENV_PREFIX_SEPARATOR_REGEX = /-/g;
  * - hedera-previewnet: Hedera previewnet (public test network)
  * - hedera-testnet: Hedera testnet (primary test network)
  * - hedera-mainnet: Hedera mainnet (production network)
+ * - hedera-hashsphere: Hedera Hashsphere (private enterprise network)
  */
 export const NETWORKS = [
   "hardhat",
@@ -40,6 +41,7 @@ export const NETWORKS = [
   "hedera-previewnet",
   "hedera-testnet",
   "hedera-mainnet",
+  "hedera-hashsphere",
 ] as const;
 export type Network = (typeof NETWORKS)[number];
 

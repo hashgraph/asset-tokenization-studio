@@ -31,6 +31,7 @@ contract ScheduledBalanceAdjustmentFacet is ScheduledBalanceAdjustment, IStaticF
             Bytes4Builder.build(
                 this.setScheduledBalanceAdjustment.selector,
                 this.cancelScheduledBalanceAdjustment.selector,
+                this.forceCancelScheduledBalanceAdjustment.selector,
                 this.getScheduledBalanceAdjustment.selector,
                 this.getBalanceAdjustmentCount.selector,
                 this.getPendingBalanceAdjustmentCount.selector,

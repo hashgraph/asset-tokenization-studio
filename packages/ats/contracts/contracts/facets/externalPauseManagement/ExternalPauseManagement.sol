@@ -67,7 +67,7 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers
     /// @inheritdoc IExternalPauseManagement
     function removeExternalPause(
         address _pause
-    ) external override onlyActivated onlyUnpaused onlyRole(ROLE_PAUSE_MANAGER) returns (bool success_) {
+    ) external override onlyActivated onlyNotInternallyPaused onlyRole(ROLE_PAUSE_MANAGER) returns (bool success_) {
         success_ = ExternalListManagementStorageWrapper.removeExternalList(STORAGE_LOCATION_PAUSE_MANAGEMENT, _pause);
         if (!success_) {
             revert UnlistedPause(_pause);

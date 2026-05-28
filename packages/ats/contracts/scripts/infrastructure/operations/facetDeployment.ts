@@ -9,7 +9,7 @@
  * @module core/operations/facetDeployment
  */
 
-import { ContractFactory, NonceManager, Overrides, Signer } from "ethers";
+import { BaseContract, ContractFactory, NonceManager, Overrides, Signer } from "ethers";
 import {
   DeploymentResult,
   deployContract,
@@ -20,6 +20,10 @@ import {
   retryTransaction,
   RetryOptions,
   withNonceReset,
+  hederaGasOverrides,
+  DEFAULT_TRANSACTION_TIMEOUT,
+  validateAddress,
+  extractRevertReason,
 } from "@scripts/infrastructure";
 import { shouldFailAtFacet, createTestFailureMessage } from "../testing/failureInjection";
 
@@ -224,10 +228,61 @@ export async function deployFacets(
       // NonceManager's sequential-nonce guarantee within each chunk.
       for (let chunkStart = 0; chunkStart < facetNames.length; chunkStart += concurrency) {
         const chunk = facetNames.slice(chunkStart, chunkStart + concurrency);
-        const settled = await Promise.allSettled(chunk.map((name) => deployOne(name)));
+
+        // Phase 1: submit transactions sequentially so the relay receives them
+        // in strict nonce order. factory.deploy() resolves when the relay accepts
+        // the tx (hash is available) — not when the block is mined — so this adds
+        // only relay round-trip latency per tx (~ms), not block time.
+        type PendingEntry =
+          | { ok: true; name: string; contract: BaseContract }
+          | { ok: false; name: string; error: string };
+
+        const pending: PendingEntry[] = [];
+        for (const name of chunk) {
+          const factory = facetFactories[name];
+          try {
+            const deployOverrides: Overrides = { ...hederaGasOverrides(), ...overrides };
+            const contract = await factory.deploy(deployOverrides);
+            const txHash = contract.deploymentTransaction()?.hash;
+            if (txHash) info(`Transaction sent: ${txHash}`);
+            pending.push({ ok: true, name, contract });
+          } catch (err) {
+            const errMsg = extractRevertReason(err);
+            warn(`Failed to send ${name}: ${errMsg}`);
+            pending.push({ ok: false, name, error: errMsg });
+          }
+        }
+
+        // Phase 2: wait for confirmations in parallel now that all txs are
+        // in the relay's mempool in the correct nonce order.
+        const settled = await Promise.allSettled(
+          pending.map(async (entry): Promise<DeploymentResult> => {
+            if (!entry.ok) throw new Error(entry.error);
+            const { name, contract } = entry;
+            const deployTimeout = DEFAULT_TRANSACTION_TIMEOUT * 3;
+            await Promise.race([
+              contract.waitForDeployment(),
+              new Promise<never>((_, reject) =>
+                setTimeout(() => reject(new Error(`waitForDeployment timed out for ${name}`)), deployTimeout),
+              ),
+            ]);
+            const address = await contract.getAddress();
+            validateAddress(address, `deployed contract address for ${name}`);
+            const tx = contract.deploymentTransaction();
+            const receipt = tx ? await tx.wait(confirmations) : null;
+            success(`${name} deployed at ${address}`);
+            return {
+              success: true,
+              address,
+              transactionHash: receipt?.hash,
+              blockNumber: receipt?.blockNumber,
+              gasUsed: receipt ? Number(receipt.gasUsed) : undefined,
+            };
+          }),
+        );
 
         settled.forEach((outcome, i) => {
-          const facetName = chunk[i];
+          const facetName = pending[i].name;
           const globalIndex = chunkStart + i;
           if (outcome.status === "fulfilled" && outcome.value.address) {
             deployed.set(facetName, outcome.value);

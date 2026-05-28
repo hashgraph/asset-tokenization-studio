@@ -76,6 +76,11 @@ const config: HardhatUserConfig = {
       accounts: Configuration.privateKeys["hedera-mainnet"],
       timeout: 120_000,
     },
+    "hedera-hashsphere": {
+      url: Configuration.endpoints["hedera-hashsphere"].jsonRpc,
+      accounts: Configuration.privateKeys["hedera-hashsphere"],
+      timeout: 120_000,
+    },
   },
   contractSizer: {
     alphaSort: true,

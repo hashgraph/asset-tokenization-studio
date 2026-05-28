@@ -115,6 +115,26 @@ jobs:
             exit 1
           fi
 
+      - name: Validate changeset contents
+        if: ${{ steps.bypass.outputs.bypass == 'false' }}
+        run: |
+          echo "🔍 Validating that all pending changesets reference known workspace packages..."
+          if ! npx changeset status; then
+            echo ""
+            echo "❌ CHANGESET CONTENT VALIDATION FAILED"
+            echo ""
+            echo "One or more .changeset/*.md files reference a package name that does not"
+            echo "exist in this workspace (see .changeset/config.json 'fixed' groups for the"
+            echo "authoritative names). Open the failing changeset and replace the package"
+            echo "name with the correct workspace name, e.g.:"
+            echo ""
+            echo "  @asset-tokenization-studio/ats-contracts  ->  @hashgraph/asset-tokenization-contracts"
+            echo ""
+            echo "Then re-run \`npx changeset status\` locally to confirm before pushing."
+            exit 1
+          fi
+          echo "✅ All pending changesets reference valid workspace packages"
+
       - name: Success summary
         if: ${{ always() }}
         run: |

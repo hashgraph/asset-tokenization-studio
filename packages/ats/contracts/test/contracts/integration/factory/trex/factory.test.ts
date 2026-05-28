@@ -1709,6 +1709,180 @@ describe("TREX Factory Tests", () => {
     });
   });
 
+  describe("Shared infrastructure ownership protection", () => {
+    // Regression tests for the audit issue where deployTREXSuite unconditionally called
+    // transferOwnership on IR/TIR/CTR/MC/IRS to _tokenDetails.owner, even when the caller
+    // supplied pre-existing infrastructure. That allowed a new deployment to hijack the
+    // ownership of contracts already used by previously deployed tokens.
+
+    it("GIVEN existing compliance WHEN deploying equity THEN compliance ownership is NOT transferred to tokenDetails.owner", async () => {
+      const ModularComplianceProxy = await ethers.getContractFactory("ModularComplianceProxy");
+      const compliance = await ModularComplianceProxy.deploy(
+        trexDeployment.authorities.trexImplementationAuthority.target,
+      );
+      await compliance.waitForDeployment();
+
+      const complianceContract = ModularCompliance__factory.connect(compliance.target.toString(), deployer);
+      await complianceContract.transferOwnership(factoryAts.target);
+
+      const equityData = {
+        security: getSecurityData(businessLogicResolver, {
+          rbacs: init_rbacs,
+          compliance: compliance.target as string,
+        }),
+        equityDetails: getEquityDetails(),
+      };
+      equityData.security.resolverProxyConfiguration = { key: EQUITY_CONFIG_ID, version: 1 };
+
+      await factoryAts
+        .connect(deployer)
+        .deployTREXSuiteAtsEquity(
+          "salt-equity-shared-mc-owner",
+          tokenDetails,
+          claimDetails,
+          equityData,
+          getRegulationData(),
+        );
+
+      const ownableMc = OwnableUpgradeable__factory.connect(compliance.target.toString(), ethers.provider);
+      expect(await ownableMc.owner()).to.equal(factoryAts.target);
+      expect(await ownableMc.owner()).to.not.equal(deployer.address);
+    });
+
+    it("GIVEN existing IRS WHEN deploying equity THEN IRS ownership is NOT transferred to tokenDetails.owner", async () => {
+      const IdentityRegistryStorageProxy = await ethers.getContractFactory("IdentityRegistryStorageProxy");
+      const irs = await IdentityRegistryStorageProxy.deploy(
+        trexDeployment.authorities.trexImplementationAuthority.target,
+      );
+      await irs.waitForDeployment();
+
+      const irsContract = IdentityRegistryStorage__factory.connect(irs.target.toString(), deployer);
+      await irsContract.transferOwnership(factoryAts.target);
+
+      tokenDetails.irs = irs.target as string;
+
+      const equityData = {
+        security: getSecurityData(businessLogicResolver, { rbacs: init_rbacs }),
+        equityDetails: getEquityDetails(),
+      };
+      equityData.security.resolverProxyConfiguration = { key: EQUITY_CONFIG_ID, version: 1 };
+
+      await factoryAts
+        .connect(deployer)
+        .deployTREXSuiteAtsEquity(
+          "salt-equity-shared-irs-owner",
+          tokenDetails,
+          claimDetails,
+          equityData,
+          getRegulationData(),
+        );
+
+      const ownableIrs = OwnableUpgradeable__factory.connect(irs.target.toString(), ethers.provider);
+      expect(await ownableIrs.owner()).to.equal(factoryAts.target);
+      expect(await ownableIrs.owner()).to.not.equal(deployer.address);
+
+      tokenDetails.irs = ethers.ZeroAddress;
+    });
+
+    it("GIVEN existing IR WHEN deploying equity THEN IR/TIR/CTR/IRS ownership is NOT transferred to tokenDetails.owner", async () => {
+      const equityDataFirst = {
+        security: getSecurityData(businessLogicResolver, { rbacs: init_rbacs }),
+        equityDetails: getEquityDetails(),
+      };
+      equityDataFirst.security.resolverProxyConfiguration = { key: EQUITY_CONFIG_ID, version: 1 };
+
+      await (
+        await factoryAts
+          .connect(deployer)
+          .deployTREXSuiteAtsEquity(
+            "salt-equity-shared-ir-first",
+            tokenDetails,
+            claimDetails,
+            equityDataFirst,
+            getRegulationData(),
+          )
+      ).wait();
+
+      const firstToken = await factoryAts.getToken("salt-equity-shared-ir-first");
+      const firstTokenContract = IdentityFacet__factory.connect(firstToken.toString(), ethers.provider);
+      const firstIR = await firstTokenContract.identityRegistry();
+      const ir = IIdentityRegistry__factory.connect(firstIR.toString(), ethers.provider);
+      const tirAddress = await ir.issuersRegistry();
+      const ctrAddress = await ir.topicsRegistry();
+      const irsAddress = await ir.identityStorage();
+
+      // The first deployment legitimately transferred ownership to deployer. Hand it all
+      // back to the factory so it can act as a pre-existing shared component, just as a
+      // multi-tenant operator would do before reusing the infra for a new token.
+      await OwnableUpgradeable__factory.connect(firstIR.toString(), deployer).transferOwnership(factoryAts.target);
+      await OwnableUpgradeable__factory.connect(tirAddress.toString(), deployer).transferOwnership(factoryAts.target);
+      await OwnableUpgradeable__factory.connect(ctrAddress.toString(), deployer).transferOwnership(factoryAts.target);
+      await OwnableUpgradeable__factory.connect(irsAddress.toString(), deployer).transferOwnership(factoryAts.target);
+
+      const [, , , , , attackerOwner] = await ethers.getSigners();
+      const tokenDetailsAttack = { ...tokenDetails, irAgents: [], owner: attackerOwner.address };
+
+      const equityData = {
+        security: getSecurityData(businessLogicResolver, {
+          rbacs: init_rbacs,
+          identityRegistry: firstIR,
+        }),
+        equityDetails: getEquityDetails(),
+      };
+      equityData.security.resolverProxyConfiguration = { key: EQUITY_CONFIG_ID, version: 1 };
+
+      await factoryAts
+        .connect(deployer)
+        .deployTREXSuiteAtsEquity(
+          "salt-equity-shared-ir-second",
+          tokenDetailsAttack,
+          claimDetails,
+          equityData,
+          getRegulationData(),
+        );
+
+      // None of the pre-existing shared contracts may end up owned by the attacker.
+      expect(await OwnableUpgradeable__factory.connect(firstIR.toString(), ethers.provider).owner()).to.not.equal(
+        attackerOwner.address,
+      );
+      expect(await OwnableUpgradeable__factory.connect(tirAddress.toString(), ethers.provider).owner()).to.not.equal(
+        attackerOwner.address,
+      );
+      expect(await OwnableUpgradeable__factory.connect(ctrAddress.toString(), ethers.provider).owner()).to.not.equal(
+        attackerOwner.address,
+      );
+      expect(await OwnableUpgradeable__factory.connect(irsAddress.toString(), ethers.provider).owner()).to.not.equal(
+        attackerOwner.address,
+      );
+    });
+
+    it("GIVEN all-new infrastructure WHEN deploying equity THEN ownership IS transferred to tokenDetails.owner", async () => {
+      const equityData = {
+        security: getSecurityData(businessLogicResolver, { rbacs: init_rbacs }),
+        equityDetails: getEquityDetails(),
+      };
+      equityData.security.resolverProxyConfiguration = { key: EQUITY_CONFIG_ID, version: 1 };
+
+      const deploymentResult = await factoryAts
+        .connect(deployer)
+        .deployTREXSuiteAtsEquity(
+          "salt-equity-all-new-owner",
+          tokenDetails,
+          claimDetails,
+          equityData,
+          getRegulationData(),
+        );
+      const deploymentReceipt = await deploymentResult.wait();
+      const decoded = await decodeEvent(factoryAts, "TREXSuiteDeployed", deploymentReceipt);
+
+      for (const addr of [decoded._ir, decoded._tir, decoded._ctr, decoded._mc, decoded._irs]) {
+        expect(await OwnableUpgradeable__factory.connect(addr.toString(), ethers.provider).owner()).to.equal(
+          deployer.address,
+        );
+      }
+    });
+  });
+
   describe("Administrative functions tests", () => {
     let otherAccount: HardhatEthersSigner;
 
