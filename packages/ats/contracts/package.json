@@ -77,6 +77,7 @@
     "deploy:newBlr:hedera:previewnet": "NETWORK=hedera-previewnet npm run deploy:newBlr",
     "deploy:newBlr:hedera:testnet": "NETWORK=hedera-testnet npm run deploy:newBlr",
     "deploy:newBlr:hedera:mainnet": "NETWORK=hedera-mainnet npm run deploy:newBlr",
+    "deploy:newBlr:hedera:hashsphere": "NETWORK=hedera-hashsphere npm run deploy:newBlr",
     "deploy:existingBlr": "npm run build && npx tsx scripts/cli/deploySystemWithExistingBlr.ts",
     "deploy:existingBlr:local": "NETWORK=local npm run deploy:existingBlr",
     "deploy:existingBlr:hedera:local": "NETWORK=hedera-local npm run deploy:existingBlr",

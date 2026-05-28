@@ -71,6 +71,14 @@ describe("Network Configuration", () => {
       expect(config.retryOptions.maxRetries).to.equal(2);
     });
 
+    it("should return hedera-hashsphere config", () => {
+      const config = getDeploymentConfig("hedera-hashsphere");
+
+      expect(config.confirmations).to.equal(1);
+      expect(config.timeout).to.equal(120_000);
+      expect(config.retryOptions.maxRetries).to.equal(2);
+    });
+
     it("should return hedera-mainnet config with conservative settings", () => {
       const config = getDeploymentConfig("hedera-mainnet");
 

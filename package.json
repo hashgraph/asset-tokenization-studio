@@ -107,6 +107,7 @@
     "ats:contracts:deploy:newBlr:hedera:previewnet": "npm run deploy:newBlr:hedera:previewnet --workspace=packages/ats/contracts",
     "ats:contracts:deploy:newBlr:hedera:testnet": "npm run deploy:newBlr:hedera:testnet --workspace=packages/ats/contracts",
     "ats:contracts:deploy:newBlr:hedera:mainnet": "npm run deploy:newBlr:hedera:mainnet --workspace=packages/ats/contracts",
+    "ats:contracts:deploy:newBlr:hedera:hashsphere": "npm run deploy:newBlr:hedera:hashsphere --workspace=packages/ats/contracts",
     "ats:contracts:deploy:existingBlr": "npm run deploy:existingBlr --workspace=packages/ats/contracts",
     "ats:contracts:deploy:existingBlr:local": "npm run deploy:existingBlr:local --workspace=packages/ats/contracts",
     "ats:contracts:deploy:existingBlr:hedera:local": "npm run deploy:existingBlr:hedera:local --workspace=packages/ats/contracts",
