@@ -386,7 +386,7 @@ export async function createBatchConfiguration(
   } = options;
 
   // Dynamic imports for parallel test performance (see module JSDoc for explanation)
-  const { info } = await import("@scripts/infrastructure");
+  const { info, GAS_LIMIT } = await import("@scripts/infrastructure");
   const { ok, err } = await import("@scripts/infrastructure");
 
   if (facets.length === 0) {
