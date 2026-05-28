@@ -7,8 +7,7 @@ import {
     ISnapshots,
     Snapshots,
     SnapshotsAddress,
-    PartitionSnapshots,
-    ListOfPartitions,
+    SnapshotsBytes32,
     HolderBalance
 } from "../../facets/layer_1/snapshot/ISnapshots.sol";
 import { ISnapshotsTypes } from "../../facets/layer_1/snapshot/ISnapshotsTypes.sol";
@@ -39,16 +38,24 @@ bytes32 constant STORAGE_LOCATION_SNAPSHOT = 0x2e9cb27cc6da952dbadc3ddf8f7c0573a
  */
 struct SnapshotStorage {
     // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
-    /// @dev Snapshot ids increase monotonically, with the first value being 1. An id of 0 is invalid.
-    /// Unique ID for the current snapshot
+    /**
+     * @dev Unique ID of the current snapshot. Ids increase monotonically, with the first value
+     *      being 1; an id of 0 is reserved as "no snapshot taken".
+     */
     CountersUpgradeable.Counter currentSnapshotId;
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     /// @dev Snapshots for total balances per account
     mapping(address => Snapshots) accountBalanceSnapshots;
     /// @dev Snapshots for balances per account and partition
     mapping(address => mapping(bytes32 => Snapshots)) accountPartitionBalanceSnapshots;
-    /// @dev Metadata for partitions associated with each account
-    mapping(address => PartitionSnapshots) accountPartitionMetadata;
+    /// @dev Per-holder, per-partition-index history of the partition `bytes32` at that index.
+    ///      Mirrors the `tokenHoldersSnapshots[index]` pattern so the partition list can be
+    ///      reconstructed slot-by-slot in `partitionsOfAtSnapshot` without copying the whole
+    ///      array on every mutation.
+    mapping(address => mapping(uint256 => SnapshotsBytes32)) accountPartitionsByIndexSnapshots;
+    /// @dev Per-holder history of the partition-list length. Pairs with
+    ///      `accountPartitionsByIndexSnapshots` to drive the reconstruction reader.
+    mapping(address => Snapshots) accountTotalPartitionsSnapshots;
     /// @dev Snapshots for the total supply
     Snapshots totalSupplySnapshots;
     /// @dev Snapshots for locked balances per account
@@ -140,24 +147,53 @@ library SnapshotsStorageWrapper {
     }
 
     /**
-     * @notice Records the holder's partition list into the active snapshot before it is mutated.
-     * @dev Must be invoked BEFORE any mutation to `partitions[account]` so the stored snapshot
-     *      reflects the pre-mutation list, matching the "lazy snapshot before mutation" semantics
-     *      used throughout this library. No-ops when no snapshot is active (`currentSnapshotId == 0`),
-     *      when `account` is the zero address, or when this snapshot id has already been captured
-     *      for the holder — keeping the call idempotent within a single snapshot. Only the two
-     *      partition-list mutation points (`addPartitionToOnly`, `deletePartitionForHolder`) call
-     *      this; the per-transfer hot path no longer touches the partition list, which keeps it
-     *      O(1) instead of O(N) in the holder's partition count.
-     * @param account Token holder whose partition list is being captured.
+     * @notice Records a `bytes32` value under the active snapshot id if not already recorded.
+     * @dev Mirrors {updateSnapshot} for `bytes32`-valued series, used by the per-index partition
+     *      snapshot path. Idempotent within a single snapshot id.
+     * @param snapshots    The `bytes32`-typed snapshot history to mutate.
+     * @param currentValue The value to associate with the active snapshot id.
      */
-    function updatePartitionListSnapshot(address account) internal {
+    function updateSnapshotBytes32(SnapshotsBytes32 storage snapshots, bytes32 currentValue) internal {
         uint256 currentId = getCurrentSnapshotId();
-        if (currentId == 0 || account == address(0)) return;
-        PartitionSnapshots storage partitionSnapshots = _snapshotStorage().accountPartitionMetadata[account];
-        if (lastSnapshotId(partitionSnapshots.ids) >= currentId) return;
-        partitionSnapshots.ids.push(currentId);
-        partitionSnapshots.values.push(ListOfPartitions(ERC1410StorageWrapper.partitionsOf(account)));
+        if (lastSnapshotId(snapshots.ids) >= currentId) return;
+        snapshots.ids.push(currentId);
+        snapshots.values.push(currentValue);
+    }
+
+    /**
+     * @notice Captures the pre-mutation partition id at position `index` for `holder` under the
+     *         active snapshot.
+     * @dev Must be invoked BEFORE the slot is overwritten or popped so that historical readers
+     *      observe the original value. Bails when no snapshot is active or when the holder is the
+     *      zero address, and is idempotent within a snapshot via {updateSnapshotBytes32}.
+     *      Coupled with {updateTotalPartitionsSnapshot}, mutations cost O(1) regardless of the
+     *      partition-list size — the per-index pattern mirrors the security-holders snapshot.
+     * @param holder Address whose partition slot is being captured.
+     * @param index  Zero-based slot of the partition array about to change.
+     */
+    function updatePartitionAtIndexSnapshot(address holder, uint256 index) internal {
+        if (getCurrentSnapshotId() == 0 || holder == address(0)) return;
+        updateSnapshotBytes32(
+            _snapshotStorage().accountPartitionsByIndexSnapshots[holder][index],
+            ERC1410StorageWrapper.partitionAt(holder, index)
+        );
+    }
+
+    /**
+     * @notice Captures the pre-mutation length of `holder`'s partition list under the active
+     *         snapshot.
+     * @dev Must be invoked BEFORE a push or pop on `partitions[holder]`. Pairs with
+     *      {updatePartitionAtIndexSnapshot} so {partitionsOfAtSnapshot} can both bound its
+     *      reconstruction loop and tell apart slots that existed at snapshot time from slots that
+     *      did not. Idempotent within a snapshot.
+     * @param holder Address whose partition-list length is being captured.
+     */
+    function updateTotalPartitionsSnapshot(address holder) internal {
+        if (getCurrentSnapshotId() == 0 || holder == address(0)) return;
+        updateSnapshot(
+            _snapshotStorage().accountTotalPartitionsSnapshots[holder],
+            ERC1410StorageWrapper.partitionsLength(holder)
+        );
     }
 
     /**
@@ -215,8 +251,10 @@ library SnapshotsStorageWrapper {
      *      When the ABAF has drifted since the active snapshot was opened, the recorded values
      *      are back-scaled by `abaf / abafAtSnapshot` so the snapshot stays consistent with the
      *      adjustment factor in force at snapshot time. Does NOT touch the holder's partition
-     *      list — that is captured separately by `updatePartitionListSnapshot` at partition
-     *      add/remove sites, decoupling the per-transfer hot path from the O(N) list copy.
+     *      list — that is captured per-index by {updatePartitionAtIndexSnapshot} and
+     *      {updateTotalPartitionsSnapshot} at the partition add/remove sites, keeping the
+     *      per-transfer hot path free of the O(N) list copy and the partition mutation sites at
+     *      O(1) regardless of the holder's partition count.
      * @param account   Token holder whose balances are being snapshotted.
      * @param partition Partition whose balance, along with the account total, is recorded.
      */
@@ -267,7 +305,8 @@ library SnapshotsStorageWrapper {
      *      ABAF factor). Each `Snapshots` slot is only written when its last recorded id is older
      *      than the current snapshot, so repeated calls within the same snapshot are idempotent.
      *      Does NOT touch the partition list metadata; that lives behind
-     *      `updatePartitionListSnapshot` and is only captured at partition add/remove sites.
+     *      {updatePartitionAtIndexSnapshot} and {updateTotalPartitionsSnapshot} and is only
+     *      captured at partition add/remove sites.
      * @param balanceSnapshots            Storage handle for the account's total balance history.
      * @param currentValue                Total balance to record for the current snapshot id.
      * @param partitionBalanceSnapshots   Storage handle for the account+partition balance history.
@@ -495,8 +534,13 @@ library SnapshotsStorageWrapper {
 
     /**
      * @notice Returns the partition ids that `tokenHolder` held at snapshot `snapshotID`.
-     * @dev Falls back to the live partition list from {ERC1410StorageWrapper} when no
-     *      partition-membership entry exists at the requested snapshot.
+     * @dev Reconstructs the list slot-by-slot from the per-index snapshot history. Reads the
+     *      historical length from `accountTotalPartitionsSnapshots` (falling back to the live
+     *      length when no length capture exists), then for each index queries
+     *      `accountPartitionsByIndexSnapshots`, falling back to the live partition slot when no
+     *      capture exists — slots that did not change since the snapshot still hold their
+     *      original value in `partitions[holder]`. The whole reader is `view`, so the O(N)
+     *      reconstruction cost is paid by the caller, never by an on-chain mutation.
      * @param snapshotID  The snapshot identifier to resolve.
      * @param tokenHolder The account whose partition membership is queried.
      * @return partitions_ The partition ids active for `tokenHolder` at the snapshot.
@@ -505,15 +549,23 @@ library SnapshotsStorageWrapper {
         uint256 snapshotID,
         address tokenHolder
     ) internal view returns (bytes32[] memory partitions_) {
-        PartitionSnapshots storage partitionSnapshots = _snapshotStorage().accountPartitionMetadata[tokenHolder];
+        (bool foundTotal, uint256 snapshottedTotal) = valueAt(
+            snapshotID,
+            _snapshotStorage().accountTotalPartitionsSnapshots[tokenHolder]
+        );
+        uint256 total = foundTotal ? snapshottedTotal : ERC1410StorageWrapper.partitionsLength(tokenHolder);
 
-        (bool found, uint256 index) = indexFor(snapshotID, partitionSnapshots.ids);
-
-        if (!found) {
-            return ERC1410StorageWrapper.partitionsOf(tokenHolder);
+        partitions_ = new bytes32[](total);
+        for (uint256 i; i < total; ) {
+            (bool foundSlot, bytes32 slotValue) = bytes32ValueAt(
+                snapshotID,
+                _snapshotStorage().accountPartitionsByIndexSnapshots[tokenHolder][i]
+            );
+            partitions_[i] = foundSlot ? slotValue : ERC1410StorageWrapper.partitionAt(tokenHolder, i);
+            unchecked {
+                ++i;
+            }
         }
-
-        return partitionSnapshots.values[index].partitions;
     }
 
     /**
@@ -928,6 +980,22 @@ library SnapshotsStorageWrapper {
     ) internal view returns (bool, address) {
         (bool found, uint256 index) = indexFor(snapshotId, snapshots.ids);
         return (found, found ? snapshots.values[index] : address(0));
+    }
+
+    /**
+     * @notice Reads the recorded `bytes32` value of `snapshots` at `snapshotId`.
+     * @dev Returns `(true, value)` when a record exists, or `(false, bytes32(0))` otherwise.
+     *      Reverts via {indexFor} for invalid ids.
+     * @param snapshotId The snapshot identifier to resolve.
+     * @param snapshots  The `bytes32`-typed snapshot history to read.
+     * @return           Tuple of (found-flag, `bytes32`-value).
+     */
+    function bytes32ValueAt(
+        uint256 snapshotId,
+        SnapshotsBytes32 storage snapshots
+    ) internal view returns (bool, bytes32) {
+        (bool found, uint256 index) = indexFor(snapshotId, snapshots.ids);
+        return (found, found ? snapshots.values[index] : bytes32(0));
     }
 
     /**

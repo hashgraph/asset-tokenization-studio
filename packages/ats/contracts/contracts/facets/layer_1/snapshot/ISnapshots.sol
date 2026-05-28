@@ -19,12 +19,9 @@ struct SnapshotsAddress {
     address[] values;
 }
 
-struct ListOfPartitions {
-    bytes32[] partitions;
-}
-struct PartitionSnapshots {
+struct SnapshotsBytes32 {
     uint256[] ids;
-    ListOfPartitions[] values;
+    bytes32[] values;
 }
 
 struct HolderBalance {

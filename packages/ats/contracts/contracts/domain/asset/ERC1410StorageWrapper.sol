@@ -102,11 +102,13 @@ library ERC1410StorageWrapper {
         erc1410BasicStorage().initialized = true;
     }
 
-    /// @notice Reduces the ERC-1410 partition balance only — does NOT touch ERC-20 storage.
-    /// @dev Callers are responsible for emitting Transfer via `ERC20StorageWrapper.performTransfer`.
-    /// @param from      Token holder whose partition balance is reduced.
-    /// @param value     Amount to deduct.
-    /// @param partition Partition identifier.
+    /**
+     * @notice Reduces the ERC-1410 partition balance only — does NOT touch ERC-20 storage.
+     * @dev Callers are responsible for emitting Transfer via `ERC20StorageWrapper.performTransfer`.
+     * @param from      Token holder whose partition balance is reduced.
+     * @param value     Amount to deduct.
+     * @param partition Partition identifier.
+     */
     function reducePartitionOnly(address from, uint256 value, bytes32 partition) internal {
         if (!validPartition(partition, from)) {
             revert IERC1410Types.InvalidPartition(from, partition);
@@ -129,11 +131,13 @@ library ERC1410StorageWrapper {
         }
     }
 
-    /// @notice Increases the ERC-1410 partition balance only — does NOT touch ERC-20 storage.
-    /// @dev Callers are responsible for emitting Transfer via `ERC20StorageWrapper.performTransfer`.
-    /// @param from      Token holder whose partition balance is increased.
-    /// @param value     Amount to credit.
-    /// @param partition Partition identifier.
+    /**
+     * @notice Increases the ERC-1410 partition balance only — does NOT touch ERC-20 storage.
+     * @dev Callers are responsible for emitting Transfer via `ERC20StorageWrapper.performTransfer`.
+     * @param from      Token holder whose partition balance is increased.
+     * @param value     Amount to credit.
+     * @param partition Partition identifier.
+     */
     function increasePartitionOnly(address from, uint256 value, bytes32 partition) internal {
         if (!validPartition(partition, from)) {
             revert IERC1410Types.InvalidPartition(from, partition);
@@ -144,16 +148,19 @@ library ERC1410StorageWrapper {
         erc1410Storage.partitions[from][erc1410Storage.partitionToIndex[from][partition] - 1].amount += value;
     }
 
-    /// @notice Adds a new partition entry for an account — does NOT touch ERC-20 storage.
-    /// @dev Callers are responsible for emitting Transfer via `ERC20StorageWrapper.performTransfer`.
-    ///      Captures the holder's partition list into the active snapshot BEFORE the new entry is
-    ///      pushed, so historical reads still observe the pre-mutation set. Also extends the LABAF
-    ///      array so the new partition index has a matching adjustment factor entry.
-    /// @param value     Initial partition amount.
-    /// @param account   Token holder receiving the partition.
-    /// @param partition Partition identifier.
+    /**
+     * @notice Adds a new partition entry for an account — does NOT touch ERC-20 storage.
+     * @dev Callers are responsible for emitting Transfer via `ERC20StorageWrapper.performTransfer`.
+     *      Captures the holder's partition-list length into the active snapshot BEFORE the push so
+     *      `partitionsOfAtSnapshot` knows the pre-mutation size; the new slot itself does not need
+     *      a per-index snapshot because it did not exist at snapshot time. Also extends the LABAF
+     *      array so the new partition index has a matching adjustment factor entry.
+     * @param value     Initial partition amount.
+     * @param account   Token holder receiving the partition.
+     * @param partition Partition identifier.
+     */
     function addPartitionToOnly(uint256 value, address account, bytes32 partition) internal {
-        SnapshotsStorageWrapper.updatePartitionListSnapshot(account);
+        SnapshotsStorageWrapper.updateTotalPartitionsSnapshot(account);
         AdjustBalancesStorageWrapper.pushLabafUserPartition(account, AdjustBalancesStorageWrapper.getAbaf());
 
         ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
@@ -862,6 +869,29 @@ library ERC1410StorageWrapper {
     }
 
     /**
+     * @notice Returns the partition identifier stored at position `index` of `holder`'s partition list.
+     * @dev Slot-level accessor used by the per-index partition snapshot reader to avoid copying the
+     *      whole array. Reverts via array bounds if `index >= partitions[holder].length`.
+     * @param holder Address whose partition list is queried.
+     * @param index  Zero-based slot in the holder's partition array.
+     * @return The partition identifier stored at that slot.
+     */
+    function partitionAt(address holder, uint256 index) internal view returns (bytes32) {
+        return erc1410BasicStorage().partitions[holder][index].partition;
+    }
+
+    /**
+     * @notice Returns the current length of `holder`'s partition array.
+     * @dev Used by the per-index partition snapshot path to know how many slots to iterate without
+     *      materialising the full list.
+     * @param holder Address whose partition list is queried.
+     * @return The number of partitions currently owned by the holder.
+     */
+    function partitionsLength(address holder) internal view returns (uint256) {
+        return erc1410BasicStorage().partitions[holder].length;
+    }
+
+    /**
      * @notice Reports whether `holder` already owns a partition entry for `partition`.
      * @dev Delegates to `validPartitionForReceiver` since the membership test is symmetric.
      * @param partition Partition identifier being checked.
@@ -1121,17 +1151,29 @@ library ERC1410StorageWrapper {
 
     /**
      * @notice Removes a partition entry from a holder's partition array.
-     * @dev Performs a swap-with-last to keep the partition array dense, repoints the moved entry's
-     *      reverse index, drops the partition's reverse-index slot, pops the trailing array element
-     *      and finally pops the matching LABAF entry tracked by `AdjustBalancesStorageWrapper`.
+     * @dev Captures the snapshot bookkeeping BEFORE the swap-with-last + pop so historical reads
+     *      keep observing the pre-mutation set: the partition-list length, the slot at `index`
+     *      (only when distinct from `lastIndex`, since it is about to be overwritten by the swap),
+     *      and the slot at `lastIndex` (which is about to be popped). Total cost is O(1) regardless
+     *      of the holder's partition count — the per-index pattern mirrors the security-holders
+     *      snapshot and closes the partition-spam DoS surface. Then performs the swap-with-last,
+     *      repoints the moved entry's reverse index, drops the partition's reverse-index slot,
+     *      pops the trailing array element and finally pops the matching LABAF entry tracked by
+     *      `AdjustBalancesStorageWrapper`.
      * @param holder    Account whose partition entry is removed.
      * @param partition Partition identifier being removed.
      * @param index     Zero-based position of the partition entry in the holder's array.
      */
     function deletePartitionForHolder(address holder, bytes32 partition, uint256 index) private {
-        SnapshotsStorageWrapper.updatePartitionListSnapshot(holder);
         ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
         uint256 lastIndex = erc1410Storage.partitions[holder].length - 1;
+
+        SnapshotsStorageWrapper.updateTotalPartitionsSnapshot(holder);
+        if (index != lastIndex) {
+            SnapshotsStorageWrapper.updatePartitionAtIndexSnapshot(holder, index);
+        }
+        SnapshotsStorageWrapper.updatePartitionAtIndexSnapshot(holder, lastIndex);
+
         if (index != lastIndex) {
             erc1410Storage.partitions[holder][index] = erc1410Storage.partitions[holder][lastIndex];
             unchecked {
