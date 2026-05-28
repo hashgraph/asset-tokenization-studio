@@ -26,12 +26,14 @@ contract LockByPartitionFacet is LockByPartition, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeLockByPartition.selector,
                 this.lockByPartition.selector,
                 this.releaseByPartition.selector,
                 this.getLockedAmountForByPartition.selector,
                 this.getLockCountForByPartition.selector,
                 this.getLocksIdForByPartition.selector,
-                this.getLockForByPartition.selector
+                this.getLockForByPartition.selector,
+                this.updateLockExpirationByPartition.selector
             );
     }
 

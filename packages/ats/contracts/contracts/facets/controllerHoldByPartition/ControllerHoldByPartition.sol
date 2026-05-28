@@ -1,13 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IControllerHoldByPartition } from "./IControllerHoldByPartition.sol";
-import { ROLE_CONTROLLER } from "../../constants/roles.sol";
+import {
+    IControllerHoldByPartition,
+    RESOLVER_KEY_CONTROLLER_HOLD_BY_PARTITION
+} from "./IControllerHoldByPartition.sol";
+import { ROLE_CONTROLLER, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { HoldOps } from "../../domain/orchestrator/HoldOps.sol";
 import { ThirdPartyType } from "../../domain/asset/types/ThirdPartyType.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title ControllerHoldByPartition
@@ -20,6 +24,17 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract ControllerHoldByPartition is IControllerHoldByPartition, Modifiers {
     /// @inheritdoc IControllerHoldByPartition
+    function initializeControllerHoldByPartition()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_CONTROLLER_HOLD_BY_PARTITION)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_CONTROLLER_HOLD_BY_PARTITION);
+        emit ControllerHoldByPartitionInitialized();
+    }
+
+    /// @inheritdoc IControllerHoldByPartition
     function controllerCreateHoldByPartition(
         bytes32 _partition,
         address _from,
@@ -28,6 +43,7 @@ abstract contract ControllerHoldByPartition is IControllerHoldByPartition, Modif
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_CONTROLLER)

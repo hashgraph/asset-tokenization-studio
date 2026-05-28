@@ -18,6 +18,19 @@ bytes32 constant RESOLVER_KEY_HOLD_AT_SNAPSHOT = 0xe4ec7231213c656d430571c2b40cf
  */
 interface IHoldAtSnapshot {
     /**
+     * @notice Emitted once when the hold-at-snapshot capability is initialised on a token.
+     * @dev Fires exclusively from `initializeHoldAtSnapshot`.
+     */
+    event HoldAtSnapshotInitialized();
+
+    /**
+     * @notice Initialises the hold-at-snapshot capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeHoldAtSnapshot() external;
+
+    /**
      * @notice Returns the held balance of a token holder at the time of a given snapshot.
      * @dev    Sums all hold escrow amounts active at `_snapshotID`, adjusted for any
      *         balance-adjustment factor recorded at that snapshot timestamp.

@@ -17,6 +17,19 @@ bytes32 constant RESOLVER_KEY_OPERATOR_HOLD_BY_PARTITION = 0x2ac9004b9c057e04ee6
  */
 interface IOperatorHoldByPartition is IHoldTypes {
     /**
+     * @notice Emitted once when the operator-hold-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeOperatorHoldByPartition`.
+     */
+    event OperatorHoldByPartitionInitialized();
+
+    /**
+     * @notice Initialises the operator-hold-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeOperatorHoldByPartition() external;
+
+    /**
      * @notice Creates a hold on the tokens of a token holder, on behalf of an operator,
      *         for a specific partition.
      * @dev    Requires the token to be unpaused and clearing to be disabled. The caller

@@ -10,6 +10,12 @@ bytes32 constant RESOLVER_KEY_VOTING = 0x88b1621426a5ad16c2399cdc8a04b7da54bf8dd
 /// @notice Interface for voting rights management functionality
 
 interface IVoting is IVotingTypes {
+    /**
+     * @notice Emitted once when the voting capability is initialised on a token.
+     * @dev Fires exclusively from `initializeVoting`.
+     */
+    event VotingInitialized();
+
     /// @notice Emitted when a voting is set
     /// @param corporateActionId The ID of the corporate action
     /// @param voteId The ID of the voting
@@ -41,6 +47,13 @@ interface IVoting is IVotingTypes {
     /// @param corporateActionId The ID of the corporate action
     /// @param voteId The ID of the voting
     error VotingAlreadyRecorded(bytes32 corporateActionId, uint256 voteId);
+
+    /**
+     * @notice Initialises the voting capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeVoting() external;
 
     /// @notice Sets a new voting for the security
     /// @param _newVoting The new voting to be set

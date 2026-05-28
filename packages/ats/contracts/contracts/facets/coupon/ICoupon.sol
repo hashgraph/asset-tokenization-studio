@@ -21,6 +21,12 @@ bytes32 constant RESOLVER_KEY_COUPON = 0xe292dde7a8154c59d06fe2333acc2b54d003262
  */
 interface ICoupon is ICouponTypes {
     /**
+     * @notice Emitted once when the coupon capability is initialised on a token.
+     * @dev Fires exclusively from `initializeCoupon`.
+     */
+    event CouponInitialized();
+
+    /**
      * @notice Emitted when an operator schedules a new coupon corporate action.
      * @param corporateActionId Identifier of the underlying corporate action.
      * @param couponId One-indexed coupon identifier within the coupon corporate action type.
@@ -76,6 +82,13 @@ interface ICoupon is ICouponTypes {
      * @param couponID The coupon identifier that was not found.
      */
     error CouponNotFound(uint256 couponID);
+
+    /**
+     * @notice Initialises the coupon capability on the token.
+     * @dev Callable once; subsequent calls revert with FacetAlreadyRegistered.
+     *      Requires DEFAULT_ADMIN_ROLE. Called by the factory during deployment.
+     */
+    function initializeCoupon() external;
 
     /**
      * @notice Schedules a new coupon corporate action and registers the snapshot/record-date

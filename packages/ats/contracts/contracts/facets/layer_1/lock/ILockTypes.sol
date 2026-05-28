@@ -53,6 +53,26 @@ interface ILockTypes {
     );
 
     /**
+     * @notice Emitted when a lock's expiration timestamp is updated by a locker.
+     * @dev Emitted by both `updateLockExpiration` (default partition) and
+     *      `updateLockExpirationByPartition` (any partition).
+     * @param operator The caller that requested the update (must hold `ROLE_LOCKER`).
+     * @param tokenHolder The address whose lock expiration is being updated.
+     * @param partition The partition the lock lives on.
+     * @param lockId The identifier of the lock being updated.
+     * @param oldExpirationTimestamp The expiration timestamp before the update.
+     * @param newExpirationTimestamp The new expiration timestamp after the update.
+     */
+    event LockExpirationUpdated(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 indexed partition,
+        uint256 lockId,
+        uint256 oldExpirationTimestamp,
+        uint256 newExpirationTimestamp
+    );
+
+    /**
      * @notice Reverts when a release is attempted before the lock's expiration timestamp.
      * @dev Used by the `onlyWithLockedExpirationTimestamp` modifier and by
      *      `LockStorageWrapper.checkLockedExpirationTimestamp`.

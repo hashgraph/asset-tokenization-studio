@@ -9,6 +9,10 @@ bytes32 constant RESOLVER_KEY_PROCEED_RECIPIENTS = 0x63388aa198df5944c611b8fcbfd
 bytes32 constant RESOLVER_KEY_PROCEED_RECIPIENTS_KPI_LINKED_RATE = 0x0e3f0300490c976e8984dcc9a9d086f30a32e8112eea1fd40457bd63404feb42;
 
 interface IProceedRecipients {
+    /// @notice Emitted once when the ProceedRecipients capability is initialised on a token.
+    /// @dev Fires exclusively from `initializeProceedRecipients` after the storage write succeeds.
+    event ProceedRecipientsInitialized(address[] proceedRecipients, bytes[] data);
+
     event ProceedRecipientAdded(address indexed operator, address indexed proceedRecipient, bytes data);
 
     event ProceedRecipientRemoved(address indexed operator, address indexed proceedRecipient);
@@ -22,8 +26,7 @@ interface IProceedRecipients {
      * @notice Initializes the proceedRecipients contract with a list of initial proceedRecipients.
      * @param _proceedRecipients An array of addresses representing the initial proceedRecipients.
      */
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ProceedRecipients(address[] calldata _proceedRecipients, bytes[] calldata _data) external;
+    function initializeProceedRecipients(address[] calldata _proceedRecipients, bytes[] calldata _data) external;
 
     function addProceedRecipient(address _proceedRecipient, bytes calldata _data) external;
 

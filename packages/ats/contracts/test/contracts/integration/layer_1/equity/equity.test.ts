@@ -114,10 +114,17 @@ describe("Equity Tests", () => {
   });
 
   describe("Initialization", () => {
-    it("GIVEN an initialized equity WHEN trying to initialize again THEN transaction fails with AlreadyInitialized", async () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeEquityUSA is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeEquityUSA(getEquityDetails())).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN an initialized equity WHEN trying to initialize again THEN transaction fails with FacetAlreadyRegistered", async () => {
       await expect(asset.initializeEquityUSA(getEquityDetails())).to.be.revertedWithCustomError(
         asset,
-        "AlreadyInitialized",
+        "FacetAlreadyRegistered",
       );
     });
 

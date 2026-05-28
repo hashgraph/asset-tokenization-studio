@@ -4,8 +4,16 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO } from "@scripts";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import {
+  ADDRESS_ZERO,
+  ATS_ROLES,
+  DEFAULT_PARTITION,
+  EMPTY_STRING,
+  ZERO,
+  EQUITY_CONFIG_ID,
+  RESOLVER_KEY_ALLOWANCE,
+} from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const amount = 1000;
@@ -19,6 +27,7 @@ describe("Allowance Facet Tests", () => {
   let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   describe("Multi partition", () => {
     async function deployMultiPartitionFixture() {
@@ -33,6 +42,7 @@ describe("Allowance Facet Tests", () => {
       signer_D = base.user3;
 
       asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target, signer_A);
     }
 
     beforeEach(async () => {
@@ -68,6 +78,7 @@ describe("Allowance Facet Tests", () => {
       signer_D = base.user3;
 
       asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
       assetSignerC = await ethers.getContractAt("IAsset", diamond.target, signer_C);
       assetSignerD = await ethers.getContractAt("IAsset", diamond.target, signer_D);
 
@@ -365,6 +376,50 @@ describe("Allowance Facet Tests", () => {
       await expect(
         deactivatedAsset.connect(base.deployer).decreaseAllowance(ethers.ZeroAddress, 0),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+  describe("initializeAllowance", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeAllowance is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeAllowance())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeAllowance is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeAllowance())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_ALLOWANCE, 1);
+    });
+  });
+
+  describe("initializeAllowance event", () => {
+    it("GIVEN a fresh deployment WHEN initializeAllowance is called THEN emits AllowanceInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_ALLOWANCE);
+      await expect(asset.initializeAllowance()).to.emit(asset, "AllowanceInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational WHEN approve is called THEN AssetNotOperational", async () => {
+      await expect(asset.approve(ethers.ZeroAddress, 0n))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN increaseAllowance is called THEN AssetNotOperational", async () => {
+      await expect(asset.increaseAllowance(ethers.ZeroAddress, 0n))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN decreaseAllowance is called THEN AssetNotOperational", async () => {
+      await expect(asset.decreaseAllowance(ethers.ZeroAddress, 0n))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 });

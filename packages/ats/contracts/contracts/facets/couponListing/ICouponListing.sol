@@ -14,6 +14,19 @@ bytes32 constant RESOLVER_KEY_COUPON_LISTING = 0x91e4a085c95cddedc7143dae7647c32
  *      methods from the former `IScheduledCouponListing`.
  */
 interface ICouponListing {
+    /**
+     * @notice Emitted once when the coupon listing capability is initialised on a token.
+     * @dev Fires exclusively from `initializeCouponListing`.
+     */
+    event CouponListingInitialized();
+
+    /**
+     * @notice Initialises the coupon listing capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeCouponListing() external;
+
     /// @notice Retrieves a coupon ID from the ordered list at a specific position.
     /// @param _pos The position in the ordered coupon list.
     /// @return couponID_ The coupon ID at the specified position.

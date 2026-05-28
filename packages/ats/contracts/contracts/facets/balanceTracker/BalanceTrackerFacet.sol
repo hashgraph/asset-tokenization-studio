@@ -5,38 +5,34 @@ import { IBalanceTracker, RESOLVER_KEY_BALANCE_TRACKER } from "./IBalanceTracker
 import { BalanceTracker } from "./BalanceTracker.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
+
 /**
  * @title BalanceTrackerFacet
+ * @author Asset Tokenization Studio Team
  * @notice Diamond facet that exposes token balance and total supply queries through the
  *         `IBalanceTracker` interface, registered under `RESOLVER_KEY_BALANCE_TRACKER`.
  * @dev Inherits balance logic from `BalanceTracker` and satisfies the `IStaticFunctionSelectors`
- *      contract required by the Diamond proxy for selector registration. Exposes three selectors:
- *      `balanceOf`, `totalSupply`, and `getTotalBalanceFor`.
- * @author Hashgraph
+ *      contract required by the Diamond proxy for selector registration. Exposes four selectors:
+ *      `initializeBalanceTracker`, `balanceOf`, `totalSupply`, and `getTotalBalanceFor`.
  */
 contract BalanceTrackerFacet is BalanceTracker, IStaticFunctionSelectors {
-    /**
-     * @notice Returns the resolver key used to register this facet in the Diamond proxy.
-     * @return staticResolverKey_ The `RESOLVER_KEY_BALANCE_TRACKER` constant.
-     */
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = RESOLVER_KEY_BALANCE_TRACKER;
     }
 
-    /**
-     * @notice Returns the function selectors exposed by this facet for Diamond registration.
-     * @return staticFunctionSelectors_ Array containing selectors for `balanceOf`,
-     *         `totalSupply`, and `getTotalBalanceFor`.
-     */
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
-            Bytes4Builder.build(this.balanceOf.selector, this.totalSupply.selector, this.getTotalBalanceFor.selector);
+            Bytes4Builder.build(
+                this.initializeBalanceTracker.selector,
+                this.balanceOf.selector,
+                this.totalSupply.selector,
+                this.getTotalBalanceFor.selector
+            );
     }
 
-    /**
-     * @notice Returns the interface IDs supported by this facet for ERC-165 introspection.
-     * @return staticInterfaceIds_ Array containing the `IBalanceTracker` interface ID.
-     */
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
         return Bytes4Builder.build(type(IBalanceTracker).interfaceId);
     }

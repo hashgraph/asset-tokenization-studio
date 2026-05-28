@@ -14,6 +14,7 @@ contract KpisFacet is Kpis, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeKpis.selector,
                 this.addKpiData.selector,
                 this.getLatestKpiData.selector,
                 this.getMinDate.selector,

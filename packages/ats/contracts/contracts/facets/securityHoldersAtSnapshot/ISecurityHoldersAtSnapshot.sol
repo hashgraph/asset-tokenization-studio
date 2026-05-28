@@ -17,6 +17,19 @@ bytes32 constant RESOLVER_KEY_SECURITY_HOLDERS_AT_SNAPSHOT = 0xf7707140407ccf0d6
  */
 interface ISecurityHoldersAtSnapshot {
     /**
+     * @notice Emitted once when the security-holders-at-snapshot capability is initialised on a token.
+     * @dev Fires exclusively from `initializeSecurityHoldersAtSnapshot`.
+     */
+    event SecurityHoldersAtSnapshotInitialized();
+
+    /**
+     * @notice Initialises the security-holders-at-snapshot capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeSecurityHoldersAtSnapshot() external;
+
+    /**
      * @notice Returns a paginated list of token holders recorded at the time of a given
      *         snapshot.
      * @dev    Pagination is zero-indexed. An empty page (when `_pageIndex` is beyond the

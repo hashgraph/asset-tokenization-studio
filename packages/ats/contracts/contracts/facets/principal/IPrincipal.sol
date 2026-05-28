@@ -28,6 +28,19 @@ interface IPrincipal {
     }
 
     /**
+     * @notice Emitted once when the principal capability is initialised on a token.
+     * @dev Fires exclusively from `initializePrincipal`.
+     */
+    event PrincipalInitialized();
+
+    /**
+     * @notice Initialises the principal capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializePrincipal() external;
+
+    /**
      * @notice Returns the principal numerator and denominator for a given account.
      * @param _account The address of the token holder.
      * @return principalFor_ Struct containing the numerator and denominator of the principal.

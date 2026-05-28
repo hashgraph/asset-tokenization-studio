@@ -11,6 +11,19 @@ bytes32 constant RESOLVER_KEY_RECOVERY = 0x087cb866f812745e77608e4eb4b359ae96b8a
 /// @notice Interface for the Recovery facet, exposing lost-wallet recovery and recovery-status reads.
 
 interface IRecovery is IERC3643Types {
+    /**
+     * @notice Emitted once when the recovery capability is initialised on a token.
+     * @dev Fires exclusively from `initializeRecovery`.
+     */
+    event RecoveryInitialized();
+
+    /**
+     * @notice Initialises the recovery capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeRecovery() external;
+
     /// @notice Transfers the token balance and frozen amounts of a lost wallet to a new wallet,
     ///         marking the lost wallet as recovered.
     /// @dev Caller must hold `ROLE_AGENT`. The lost wallet must not have already been recovered,

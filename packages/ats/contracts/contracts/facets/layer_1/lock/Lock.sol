@@ -2,13 +2,15 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ROLE_LOCKER, ROLE_CONTROLLER } from "../../../constants/roles.sol";
-import { ILock } from "./ILock.sol";
+import { ILock, RESOLVER_KEY_LOCK } from "./ILock.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
 import { _DEFAULT_PARTITION } from "../../../constants/values.sol";
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title Lock
@@ -24,6 +26,12 @@ import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
  *      time-travel testing.
  */
 abstract contract Lock is ILock, Modifiers {
+    /// @inheritdoc ILock
+    function initializeLock() external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_LOCK) {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_LOCK);
+        emit LockInitialized();
+    }
+
     /**
      * @inheritdoc ILock
      * @dev Pause-gated, restricted to `ROLE_LOCKER`, only valid in single-partition mode and
@@ -38,6 +46,7 @@ abstract contract Lock is ILock, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_LOCKER)
@@ -75,6 +84,7 @@ abstract contract Lock is ILock, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
@@ -109,7 +119,15 @@ abstract contract Lock is ILock, Modifiers {
         bytes32 _partition,
         uint256 _lockId,
         address _tokenHolder
-    ) external onlyActivated onlyUnpaused onlyDefaultPartitionWithSinglePartition(_partition) returns (bool success_) {
+    )
+        external
+        override
+        onlyOperational
+        onlyActivated
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        returns (bool success_)
+    {
         bytes32[] memory roles = new bytes32[](2);
         roles[0] = ROLE_LOCKER;
         roles[1] = ROLE_CONTROLLER;
@@ -121,6 +139,45 @@ abstract contract Lock is ILock, Modifiers {
             EvmAccessors.getMsgSender()
         );
         emit LockByPartitionReleased(EvmAccessors.getMsgSender(), _tokenHolder, _partition, _lockId);
+    }
+
+    /**
+     * @inheritdoc ILock
+     * @dev Pause-gated, restricted to `ROLE_LOCKER`, only valid in single-partition mode and
+     *      against a valid lock id. Delegates the storage mutation to
+     *      `LockStorageWrapper.updateLockExpiration` against the default partition and emits
+     *      `LockExpirationUpdated` with both the old and new timestamps.
+     */
+    function updateLockExpiration(
+        address _tokenHolder,
+        uint256 _lockId,
+        uint256 _newExpirationTimestamp
+    )
+        external
+        override
+        onlyActivated
+        onlyUnpaused
+        onlyRole(ROLE_LOCKER)
+        onlyWithoutMultiPartition
+        onlyWithValidLockId(_DEFAULT_PARTITION, _tokenHolder, _lockId)
+        onlyValidExpirationTimestamp(_newExpirationTimestamp)
+        returns (bool success_)
+    {
+        uint256 oldExpirationTimestamp = LockStorageWrapper.updateLockExpiration(
+            _DEFAULT_PARTITION,
+            _tokenHolder,
+            _lockId,
+            _newExpirationTimestamp
+        );
+        emit LockExpirationUpdated(
+            EvmAccessors.getMsgSender(),
+            _tokenHolder,
+            _DEFAULT_PARTITION,
+            _lockId,
+            oldExpirationTimestamp,
+            _newExpirationTimestamp
+        );
+        success_ = true;
     }
 
     /**

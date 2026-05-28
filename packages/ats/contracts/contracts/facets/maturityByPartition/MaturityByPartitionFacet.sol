@@ -23,7 +23,8 @@ contract MaturityByPartitionFacet is MaturityByPartition, IStaticFunctionSelecto
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.redeemAtMaturityByPartition.selector);
+        return
+            Bytes4Builder.build(this.initializeMaturityByPartition.selector, this.redeemAtMaturityByPartition.selector);
     }
 
     /// @inheritdoc IStaticFunctionSelectors

@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBalanceTracker } from "./IBalanceTracker.sol";
+import { IBalanceTracker, RESOLVER_KEY_BALANCE_TRACKER } from "./IBalanceTracker.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title BalanceTracker
@@ -14,7 +17,18 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
  *      passing the resolved timestamp from `TimeTravelStorageWrapper` to support
  *      non-triggered adjustment simulation. Intended to be inherited by `BalanceTrackerFacet`.
  */
-abstract contract BalanceTracker is IBalanceTracker {
+abstract contract BalanceTracker is IBalanceTracker, Modifiers {
+    /// @inheritdoc IBalanceTracker
+    function initializeBalanceTracker()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_BALANCE_TRACKER)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_BALANCE_TRACKER);
+        emit IBalanceTracker.BalanceTrackerInitialized();
+    }
+
     /**
      * @notice Returns the total token balance of a token holder across all partitions,
      *         simulating non-triggered balance adjustments up to the current timestamp.

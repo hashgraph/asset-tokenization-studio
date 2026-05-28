@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
-
+/// solhint-disable
 /**
  * @title Time Travel Controller interface
  * @notice Interface for the TimeTravel contract
@@ -32,6 +32,11 @@ interface ITimeTravel {
     // * Functions
 
     /**
+     * @notice Initializes the time travel contract
+     */
+    function initializeTimeTravel() external;
+
+    /**
      * @notice Changes the system timestamp
      *         emits SystemTimestampChanged event
      * @param _newSystemTime The new system timestamp
@@ -53,3 +58,4 @@ interface ITimeTravel {
      */
     function blockTimestamp() external view returns (uint256);
 }
+/// solhint-enable

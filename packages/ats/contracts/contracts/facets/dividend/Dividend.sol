@@ -1,12 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IDividend } from "./IDividend.sol";
+import { IDividend, RESOLVER_KEY_DIVIDEND } from "./IDividend.sol";
 import { IDividendTypes } from "./IDividendTypes.sol";
-import { ROLE_CORPORATE_ACTION, ROLE_CORPORATE_ACTION_FORCE_CANCEL } from "../../constants/roles.sol";
+import {
+    ROLE_CORPORATE_ACTION,
+    ROLE_CORPORATE_ACTION_FORCE_CANCEL,
+    DEFAULT_ADMIN_ROLE
+} from "../../constants/roles.sol";
 import { CORPORATE_ACTION_TYPE_DIVIDEND } from "../../constants/dispatchTypes.sol";
 import { DividendStorageWrapper } from "../../domain/asset/DividendStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
@@ -23,6 +28,17 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract Dividend is IDividend, Modifiers {
     /// @inheritdoc IDividend
+    function initializeDividend()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_DIVIDEND)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_DIVIDEND);
+        emit DividendInitialized();
+    }
+
+    /// @inheritdoc IDividend
     /// @dev Restricted to `ROLE_CORPORATE_ACTION`; gated by `onlyUnpaused`,
     ///      `onlyValidDates(recordDate, executionDate)`, and `onlyValidTimestamp(recordDate)`.
     function setDividend(
@@ -30,6 +46,7 @@ abstract contract Dividend is IDividend, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_CORPORATE_ACTION)
@@ -48,6 +65,7 @@ abstract contract Dividend is IDividend, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyMatchingActionType(CORPORATE_ACTION_TYPE_DIVIDEND, dividendId - 1)
         onlyUnpaused

@@ -21,7 +21,6 @@ bytes32 constant STORAGE_LOCATION_KYC = 0x88f619eb35d79dd51bdbedb0638479d77479fa
  */
 struct KycStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
-    bool initialized;
     bool internalKycActivated;
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(address => IKyc.KycData) kyc;
@@ -45,9 +44,7 @@ library KycStorageWrapper {
      * @param _internalKycActivated Initial value of the internal-KYC activation flag.
      */
     function initializeInternalKyc(bool _internalKycActivated) internal {
-        KycStorage storage ks = kycStorage();
-        ks.initialized = true;
-        ks.internalKycActivated = _internalKycActivated;
+        kycStorage().internalKycActivated = _internalKycActivated;
     }
 
     /**
@@ -216,14 +213,6 @@ library KycStorageWrapper {
      */
     function isInternalKycActivated() internal view returns (bool) {
         return kycStorage().internalKycActivated;
-    }
-
-    /**
-     * @notice Reports whether the internal KYC subsystem has been initialised.
-     * @return True when `initializeInternalKyc` has run.
-     */
-    function isKycInitialized() internal view returns (bool) {
-        return kycStorage().initialized;
     }
 
     /**
