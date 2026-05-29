@@ -270,7 +270,7 @@ library ScheduledTasksStorageWrapper {
     ) internal view returns (ScheduledTask[] memory scheduledSnapshots_) {
         scheduledSnapshots_ = _includeDisabled
             ? ScheduledTasksLib.getScheduledTasks(scheduledSnapshotStorage(), _pageIndex, _pageLength)
-            : _getFilteredPage(scheduledSnapshotStorage(), _pageIndex, _pageLength);
+            : _getActivePage(scheduledSnapshotStorage(), _pageIndex, _pageLength);
     }
 
     /**
@@ -312,7 +312,7 @@ library ScheduledTasksStorageWrapper {
     ) internal view returns (ScheduledTask[] memory scheduledCouponListing_) {
         scheduledCouponListing_ = _includeDisabled
             ? ScheduledTasksLib.getScheduledTasks(scheduledCouponListingStorage(), _pageIndex, _pageLength)
-            : _getFilteredPage(scheduledCouponListingStorage(), _pageIndex, _pageLength);
+            : _getActivePage(scheduledCouponListingStorage(), _pageIndex, _pageLength);
     }
 
     /**
@@ -435,7 +435,7 @@ library ScheduledTasksStorageWrapper {
     ) internal view returns (ScheduledTask[] memory scheduledBalanceAdjustment_) {
         scheduledBalanceAdjustment_ = _includeDisabled
             ? ScheduledTasksLib.getScheduledTasks(scheduledBalanceAdjustmentStorage(), _pageIndex, _pageLength)
-            : _getFilteredPage(scheduledBalanceAdjustmentStorage(), _pageIndex, _pageLength);
+            : _getActivePage(scheduledBalanceAdjustmentStorage(), _pageIndex, _pageLength);
     }
 
     /**
@@ -612,46 +612,40 @@ library ScheduledTasksStorageWrapper {
     }
 
     /**
-     * @notice Paginates a task queue excluding disabled corporate actions.
-     * @dev Single-pass O(n): allocates a worst-case buffer of `_pageLength`, fills it with
-     *      active tasks in the requested window, then returns a right-sized array. Used by
-     *      `getScheduledCouponListing` and `getScheduledBalanceAdjustments` when
-     *      `_includeDisabled` is `false`.
+     * @notice Returns a page of active (non-disabled) tasks from a queue.
+     * @dev O(_pageLength): iterates only the raw queue slots `[start, end)` computed from
+     *      `_pageIndex` and `_pageLength`. Disabled tasks within that window are skipped, so
+     *      a page may return fewer than `_pageLength` items when disabled tasks fall in range.
+     *      The returned array is trimmed to the actual collected count via assembly.
      * @param _store      Storage pointer to the task queue to paginate.
      * @param _pageIndex  Zero-based page index.
      * @param _pageLength Maximum number of tasks per page.
      * @return result_ Active tasks in the requested page, never longer than `_pageLength`.
      */
-    function _getFilteredPage(
+    function _getActivePage(
         ScheduledTasksDataStorage storage _store,
         uint256 _pageIndex,
         uint256 _pageLength
     ) private view returns (ScheduledTask[] memory result_) {
         uint256 total = ScheduledTasksLib.getScheduledTaskCount(_store);
         (uint256 start, uint256 end) = Pagination.getStartAndEnd(_pageIndex, _pageLength);
-        result_ = new ScheduledTask[](_pageLength);
-        uint256 activeIdx;
+        result_ = new ScheduledTask[](Pagination.getSize(start, end, total));
         uint256 collected;
 
-        for (uint256 i; i < total; ) {
-            ScheduledTask memory task = ScheduledTasksLib.getScheduledTasksByIndex(_store, i);
+        if (end > total) end = total;
+
+        for (; start < end; ) {
+            ScheduledTask memory task = ScheduledTasksLib.getScheduledTasksByIndex(_store, start);
             unchecked {
-                ++i;
+                ++start;
             }
 
             if (CorporateActionsStorageWrapper.isCorporateActionDisabled(abi.decode(task.data, (bytes32)))) continue;
 
-            if (activeIdx >= start) {
-                result_[collected] = task;
-                unchecked {
-                    ++collected;
-                }
-            }
-
+            result_[collected] = task;
             unchecked {
-                ++activeIdx;
+                ++collected;
             }
-            if (activeIdx == end) break;
         }
 
         if (collected < _pageLength) {
