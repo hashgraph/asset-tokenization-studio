@@ -232,26 +232,23 @@ library ScheduledTasksStorageWrapper {
      *      belonging to a disabled corporate action (O(n)). When `true`, returns the raw
      *      queue length in O(1).
      * @param _includeDisabled When `false`, disabled tasks are excluded from the count.
-     * @return Number of queued snapshot tasks, optionally filtered.
+     * @return count_ Number of queued snapshot tasks, optionally filtered.
      */
-    function getScheduledSnapshotCount(bool _includeDisabled) internal view returns (uint256) {
+    function getScheduledSnapshotCount(bool _includeDisabled) internal view returns (uint256 count_) {
         ScheduledTasksDataStorage storage store = scheduledSnapshotStorage();
         uint256 total = ScheduledTasksLib.getScheduledTaskCount(store);
         if (_includeDisabled) return total;
 
-        uint256 active;
         for (uint256 i; i < total; ) {
-            bytes32 actionId = abi.decode(ScheduledTasksLib.getScheduledTasksByIndex(store, i).data, (bytes32));
-            if (!CorporateActionsStorageWrapper.isCorporateActionDisabled(actionId)) {
-                unchecked {
-                    ++active;
-                }
-            }
             unchecked {
+                count_ += CorporateActionsStorageWrapper.isCorporateActionDisabled(
+                    abi.decode(ScheduledTasksLib.getScheduledTasksByIndex(store, i).data, (bytes32))
+                )
+                    ? 0
+                    : 1;
                 ++i;
             }
         }
-        return active;
     }
 
     /**
@@ -270,10 +267,9 @@ library ScheduledTasksStorageWrapper {
         uint256 _pageLength,
         bool _includeDisabled
     ) internal view returns (ScheduledTask[] memory scheduledSnapshots_) {
-        if (_includeDisabled) {
-            return ScheduledTasksLib.getScheduledTasks(scheduledSnapshotStorage(), _pageIndex, _pageLength);
-        }
-        return _getFilteredPage(scheduledSnapshotStorage(), _pageIndex, _pageLength);
+        scheduledSnapshots_ = _includeDisabled
+            ? ScheduledTasksLib.getScheduledTasks(scheduledSnapshotStorage(), _pageIndex, _pageLength)
+            : _getFilteredPage(scheduledSnapshotStorage(), _pageIndex, _pageLength);
     }
 
     /**
@@ -283,24 +279,18 @@ library ScheduledTasksStorageWrapper {
      *      queue length in O(1) — use this form for internal iteration where the full
      *      queue size is needed.
      * @param _includeDisabled When `false`, disabled tasks are excluded from the count.
-     * @return Number of queued coupon listing tasks, optionally filtered.
+     * @return count_ Number of queued coupon listing tasks, optionally filtered.
      */
-    function getScheduledCouponListingCount(bool _includeDisabled) internal view returns (uint256) {
+    function getScheduledCouponListingCount(bool _includeDisabled) internal view returns (uint256 count_) {
         uint256 total = ScheduledTasksLib.getScheduledTaskCount(scheduledCouponListingStorage());
         if (_includeDisabled) return total;
 
-        uint256 active;
         for (uint256 i; i < total; ) {
-            if (!isScheduledCouponListingDisabledAtIndex(i)) {
-                unchecked {
-                    ++active;
-                }
-            }
             unchecked {
+                count_ += isScheduledCouponListingDisabledAtIndex(i) ? 0 : 1;
                 ++i;
             }
         }
-        return active;
     }
 
     /**
@@ -319,10 +309,9 @@ library ScheduledTasksStorageWrapper {
         uint256 _pageLength,
         bool _includeDisabled
     ) internal view returns (ScheduledTask[] memory scheduledCouponListing_) {
-        if (_includeDisabled) {
-            return ScheduledTasksLib.getScheduledTasks(scheduledCouponListingStorage(), _pageIndex, _pageLength);
-        }
-        return _getFilteredPage(scheduledCouponListingStorage(), _pageIndex, _pageLength);
+        scheduledCouponListing_ = _includeDisabled
+            ? ScheduledTasksLib.getScheduledTasks(scheduledCouponListingStorage(), _pageIndex, _pageLength)
+            : _getFilteredPage(scheduledCouponListingStorage(), _pageIndex, _pageLength);
     }
 
     /**
@@ -408,26 +397,23 @@ library ScheduledTasksStorageWrapper {
      *      belonging to a disabled corporate action (O(n)). When `true`, returns the raw
      *      queue length in O(1).
      * @param _includeDisabled When `false`, disabled tasks are excluded from the count.
-     * @return Number of queued balance adjustment tasks, optionally filtered.
+     * @return count_ Number of queued balance adjustment tasks, optionally filtered.
      */
-    function getScheduledBalanceAdjustmentCount(bool _includeDisabled) internal view returns (uint256) {
+    function getScheduledBalanceAdjustmentCount(bool _includeDisabled) internal view returns (uint256 count_) {
         ScheduledTasksDataStorage storage store = scheduledBalanceAdjustmentStorage();
         uint256 total = ScheduledTasksLib.getScheduledTaskCount(store);
         if (_includeDisabled) return total;
 
-        uint256 active;
         for (uint256 i; i < total; ) {
-            bytes32 actionId = abi.decode(ScheduledTasksLib.getScheduledTasksByIndex(store, i).data, (bytes32));
-            if (!CorporateActionsStorageWrapper.isCorporateActionDisabled(actionId)) {
-                unchecked {
-                    ++active;
-                }
-            }
             unchecked {
+                count_ += CorporateActionsStorageWrapper.isCorporateActionDisabled(
+                    abi.decode(ScheduledTasksLib.getScheduledTasksByIndex(store, i).data, (bytes32))
+                )
+                    ? 0
+                    : 1;
                 ++i;
             }
         }
-        return active;
     }
 
     /**
@@ -446,10 +432,9 @@ library ScheduledTasksStorageWrapper {
         uint256 _pageLength,
         bool _includeDisabled
     ) internal view returns (ScheduledTask[] memory scheduledBalanceAdjustment_) {
-        if (_includeDisabled) {
-            return ScheduledTasksLib.getScheduledTasks(scheduledBalanceAdjustmentStorage(), _pageIndex, _pageLength);
-        }
-        return _getFilteredPage(scheduledBalanceAdjustmentStorage(), _pageIndex, _pageLength);
+        scheduledBalanceAdjustment_ = _includeDisabled
+            ? ScheduledTasksLib.getScheduledTasks(scheduledBalanceAdjustmentStorage(), _pageIndex, _pageLength)
+            : _getFilteredPage(scheduledBalanceAdjustmentStorage(), _pageIndex, _pageLength);
     }
 
     /**
@@ -466,15 +451,15 @@ library ScheduledTasksStorageWrapper {
         uint256 _timestamp,
         bool _includeDisabled
     ) internal view returns (uint256 pendingABAF_, uint8 pendingDecimals_) {
-        // * Initialization
         pendingABAF_ = 1;
         ScheduledTasksDataStorage storage scheduledBalanceAdjustments = scheduledBalanceAdjustmentStorage();
         uint256 length = ScheduledTasksLib.getScheduledTaskCount(scheduledBalanceAdjustments);
-        uint256 pos;
+        uint256 pos = length;
 
         for (uint256 i; i < length; ) {
             unchecked {
-                pos = length - 1 - i;
+                --pos;
+                ++i;
             }
 
             ScheduledTask memory scheduledTask = ScheduledTasksLib.getScheduledTasksByIndex(
@@ -482,30 +467,19 @@ library ScheduledTasksStorageWrapper {
                 pos
             );
 
-            if (scheduledTask.scheduledTimestamp < _timestamp) {
-                bytes32 actionId = abi.decode(scheduledTask.data, (bytes32));
+            if (scheduledTask.scheduledTimestamp >= _timestamp) break;
 
-                if (_includeDisabled || !CorporateActionsStorageWrapper.isCorporateActionDisabled(actionId)) {
-                    bytes memory balanceAdjustmentData = CorporateActionsStorageWrapper.getCorporateActionData(
-                        actionId
-                    );
+            bytes32 actionId = abi.decode(scheduledTask.data, (bytes32));
 
-                    IScheduledBalanceAdjustment.ScheduledBalanceAdjustment memory balanceAdjustment = abi.decode(
-                        balanceAdjustmentData,
-                        (IScheduledBalanceAdjustment.ScheduledBalanceAdjustment)
-                    );
+            if (_includeDisabled || !CorporateActionsStorageWrapper.isCorporateActionDisabled(actionId)) {
+                IScheduledBalanceAdjustment.ScheduledBalanceAdjustment memory balanceAdjustment = abi.decode(
+                    CorporateActionsStorageWrapper.getCorporateActionData(actionId),
+                    (IScheduledBalanceAdjustment.ScheduledBalanceAdjustment)
+                );
 
-                    pendingABAF_ *= balanceAdjustment.factor;
-                    pendingDecimals_ += balanceAdjustment.decimals;
-                }
-
-                unchecked {
-                    ++i;
-                }
-                continue;
+                pendingABAF_ *= balanceAdjustment.factor;
+                pendingDecimals_ += balanceAdjustment.decimals;
             }
-
-            break;
         }
     }
 
@@ -654,7 +628,7 @@ library ScheduledTasksStorageWrapper {
     ) private view returns (ScheduledTask[] memory result_) {
         uint256 total = ScheduledTasksLib.getScheduledTaskCount(_store);
         uint256 start = _pageIndex * _pageLength;
-        ScheduledTask[] memory buffer = new ScheduledTask[](_pageLength);
+        result_ = new ScheduledTask[](_pageLength);
         uint256 activeIdx;
         uint256 collected;
 
@@ -662,7 +636,7 @@ library ScheduledTasksStorageWrapper {
             ScheduledTask memory task = ScheduledTasksLib.getScheduledTasksByIndex(_store, i);
             if (!CorporateActionsStorageWrapper.isCorporateActionDisabled(abi.decode(task.data, (bytes32)))) {
                 if (activeIdx >= start) {
-                    buffer[collected] = task;
+                    result_[collected] = task;
                     unchecked {
                         ++collected;
                     }
@@ -677,13 +651,10 @@ library ScheduledTasksStorageWrapper {
             }
         }
 
-        if (collected == _pageLength) return buffer;
-
-        result_ = new ScheduledTask[](collected);
-        for (uint256 i; i < collected; ) {
-            result_[i] = buffer[i];
-            unchecked {
-                ++i;
+        if (collected < _pageLength) {
+            // solhint-disable-next-line no-inline-assembly
+            assembly {
+                mstore(result_, collected)
             }
         }
     }

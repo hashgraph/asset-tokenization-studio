@@ -419,15 +419,16 @@ library CouponStorageWrapper {
         uint256 pendingIndexOffset = pos - actualOrderedListLengthTotal;
 
         if (_includeDisabled) {
-            uint256 index = ScheduledTasksStorageWrapper.getScheduledCouponListingCount(true) - 1 - pendingIndexOffset;
-            return ScheduledTasksStorageWrapper.getScheduledCouponListingIdAtIndex(index);
+            return
+                ScheduledTasksStorageWrapper.getScheduledCouponListingIdAtIndex(
+                    ScheduledTasksStorageWrapper.getScheduledCouponListingCount(true) - 1 - pendingIndexOffset
+                );
         }
 
         // When excluding disabled, iterate the queue skipping disabled tasks to find the
         // correct coupon at the filtered pending index.
-        uint256 queueLen = ScheduledTasksStorageWrapper.getScheduledCouponListingCount(true);
-        uint256 seen = 0;
-        for (uint256 j = queueLen; j > 0; ) {
+        uint256 seen;
+        for (uint256 j = ScheduledTasksStorageWrapper.getScheduledCouponListingCount(true); j > 0; ) {
             unchecked {
                 --j;
             }
@@ -440,7 +441,6 @@ library CouponStorageWrapper {
                 }
             }
         }
-        return 0;
     }
 
     /**
