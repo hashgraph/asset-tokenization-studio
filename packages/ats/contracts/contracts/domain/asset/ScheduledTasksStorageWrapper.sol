@@ -10,6 +10,7 @@ import {
     SCHEDULED_TASK_TYPE_COUPON_LISTING
 } from "../../constants/dispatchTypes.sol";
 import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageWrapper.sol";
+import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { ScheduledTasksDispatchOps } from "../orchestrator/ScheduledTasksDispatchOps.sol";
 
@@ -627,28 +628,30 @@ library ScheduledTasksStorageWrapper {
         uint256 _pageLength
     ) private view returns (ScheduledTask[] memory result_) {
         uint256 total = ScheduledTasksLib.getScheduledTaskCount(_store);
-        uint256 start = _pageIndex * _pageLength;
+        (uint256 start, uint256 end) = Pagination.getStartAndEnd(_pageIndex, _pageLength);
         result_ = new ScheduledTask[](_pageLength);
         uint256 activeIdx;
         uint256 collected;
 
         for (uint256 i; i < total; ) {
             ScheduledTask memory task = ScheduledTasksLib.getScheduledTasksByIndex(_store, i);
-            if (!CorporateActionsStorageWrapper.isCorporateActionDisabled(abi.decode(task.data, (bytes32)))) {
-                if (activeIdx >= start) {
-                    result_[collected] = task;
-                    unchecked {
-                        ++collected;
-                    }
-                    if (collected == _pageLength) break;
-                }
-                unchecked {
-                    ++activeIdx;
-                }
-            }
             unchecked {
                 ++i;
             }
+
+            if (CorporateActionsStorageWrapper.isCorporateActionDisabled(abi.decode(task.data, (bytes32)))) continue;
+
+            if (activeIdx >= start) {
+                result_[collected] = task;
+                unchecked {
+                    ++collected;
+                }
+            }
+
+            unchecked {
+                ++activeIdx;
+            }
+            if (activeIdx == end) break;
         }
 
         if (collected < _pageLength) {

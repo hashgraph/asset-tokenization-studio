@@ -432,14 +432,14 @@ library CouponStorageWrapper {
             unchecked {
                 --j;
             }
-            if (!ScheduledTasksStorageWrapper.isScheduledCouponListingDisabledAtIndex(j)) {
-                if (seen == pendingIndexOffset) {
-                    return ScheduledTasksStorageWrapper.getScheduledCouponListingIdAtIndex(j);
-                }
+            if (ScheduledTasksStorageWrapper.isScheduledCouponListingDisabledAtIndex(j)) continue;
+            if (seen != pendingIndexOffset) {
                 unchecked {
                     ++seen;
                 }
+                continue;
             }
+            return ScheduledTasksStorageWrapper.getScheduledCouponListingIdAtIndex(j);
         }
     }
 
