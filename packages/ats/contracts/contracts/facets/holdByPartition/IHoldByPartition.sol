@@ -19,6 +19,19 @@ bytes32 constant RESOLVER_KEY_HOLD_BY_PARTITION = 0x3bd50b70b7e42003cb9761c133e8
  */
 interface IHoldByPartition is IHoldTypes {
     /**
+     * @notice Emitted once when the hold-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeHoldByPartition`.
+     */
+    event HoldByPartitionInitialized();
+
+    /**
+     * @notice Initialises the hold-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeHoldByPartition() external;
+
+    /**
      * @notice Creates a hold on the tokens of a token holder on a specific partition.
      * @param _partition The partition on which the hold is created.
      * @param _hold The hold details.

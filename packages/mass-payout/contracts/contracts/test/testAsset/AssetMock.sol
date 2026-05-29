@@ -340,6 +340,10 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
+    function initializeBalanceAdjustments() external pure {
+        revert NotImplemented();
+    }
+
     function transfer(address, uint256) external pure returns (bool) {
         revert NotImplemented();
     }
@@ -413,6 +417,18 @@ contract AssetMock is IAssetMock {
     }
 
     function getCouponsOrderedListTotal(bool) external pure returns (uint256) {
+        revert NotImplemented();
+    }
+
+    function initializeCoupon() external pure {
+        revert NotImplemented();
+    }
+
+    function initializeScheduledBalanceAdjustment() external pure {
+        revert NotImplemented();
+    }
+
+    function initializeVoting() external pure {
         revert NotImplemented();
     }
 

@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IMetadata } from "../../facets/metadata/IMetadata.sol";
-
 /// @custom:hash storage Metadata
 bytes32 constant STORAGE_LOCATION_METADATA = 0x88e64aeb880d89a6f66a0868c82854ac54e6006a5ff8da89887d8a89ca5c8700;
 

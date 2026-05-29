@@ -21,6 +21,12 @@ bytes32 constant RESOLVER_KEY_PROTECTED_CLEARING_BY_PARTITION = 0x3cbb73b8ee5db7
  */
 interface IProtectedClearingByPartition is IClearingTypes {
     /**
+     * @notice Emitted once when the protected-clearing-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeProtectedClearingByPartition`.
+     */
+    event ProtectedClearingByPartitionInitialized();
+
+    /**
      * @notice Emitted when a protected clearing redeem operation is successfully created
      *         for a partition.
      * @param operator The address that initiated the protected clearing operation.
@@ -67,6 +73,13 @@ interface IProtectedClearingByPartition is IClearingTypes {
         bytes data,
         bytes operatorData
     );
+
+    /**
+     * @notice Initialises the protected-clearing-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeProtectedClearingByPartition() external;
 
     /**
      * @notice Creates a protected clearing redeem operation for a partition.

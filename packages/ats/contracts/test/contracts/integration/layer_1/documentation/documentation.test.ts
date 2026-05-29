@@ -3,12 +3,12 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { grantRoleAndPauseToken } from "../../../../common";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac } from "@test";
-import { ATS_ROLES } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEY_DOCUMENTATION } from "@scripts";
 
 const documentName_1 = "0x000000000000000000000000000000000000000000000000000000000000aa23";
 const documentName_2 = "0x000000000000000000000000000000000000000000000000000000000000bb23";
@@ -24,6 +24,7 @@ describe("Documentation Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityTokenFixture() {
     const base = await deployEquityTokenFixture();
@@ -33,6 +34,7 @@ describe("Documentation Tests", () => {
     signer_C = base.user2;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
       {
@@ -234,6 +236,43 @@ describe("Documentation Tests", () => {
       await expect(
         deactivatedAsset.connect(base.deployer).removeDocument(ethers.ZeroHash),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("initializeDocumentation", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeDocumentation is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeDocumentation())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeDocumentation is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeDocumentation())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_DOCUMENTATION, 1);
+    });
+  });
+
+  describe("initializeDocumentation event", () => {
+    it("GIVEN a fresh deployment WHEN initializeDocumentation is called THEN emits DocumentationInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_DOCUMENTATION);
+      await expect(asset.initializeDocumentation()).to.emit(asset, "DocumentationInitialized");
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setDocument THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.setDocument(ethers.ZeroHash, "", ethers.ZeroHash)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN removeDocument THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.removeDocument(ethers.ZeroHash)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
   });
 });

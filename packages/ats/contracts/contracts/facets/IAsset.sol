@@ -143,6 +143,7 @@ import { IMetadata } from "./metadata/IMetadata.sol";
 import { IDeactivate } from "./deactivate/IDeactivate.sol";
 import { IOperatorByPartition } from "./operatorByPartition/IOperatorByPartition.sol";
 import { IInterestRate } from "./interestRate/IInterestRate.sol";
+import { IInitializer } from "./initializer/IInitializer.sol";
 
 /// @custom:hash resolverKey TransferAndLock
 bytes32 constant RESOLVER_KEY_TRANSFER_AND_LOCK = 0xe92a301947f21b973cb1007aeba48f2eecd916d05107b6355fc499b783b8f7d9;
@@ -291,5 +292,6 @@ interface IAsset is
     IDeactivate,
     IOperatorByPartition,
     ISecurityHolders,
-    IInterestRate
+    IInterestRate,
+    IInitializer
 {}

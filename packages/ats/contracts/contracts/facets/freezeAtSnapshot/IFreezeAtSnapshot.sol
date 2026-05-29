@@ -14,6 +14,19 @@ bytes32 constant RESOLVER_KEY_FREEZE_AT_SNAPSHOT = 0x8ca462bf28ae4e7c5b77b86245c
  */
 interface IFreezeAtSnapshot {
     /**
+     * @notice Emitted once when the freeze-at-snapshot capability is initialised on a token.
+     * @dev Fires exclusively from `initializeFreezeAtSnapshot`.
+     */
+    event FreezeAtSnapshotInitialized();
+
+    /**
+     * @notice Initialises the freeze-at-snapshot capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeFreezeAtSnapshot() external;
+
+    /**
      * @notice Returns the frozen balance of an account at the time of a given snapshot.
      * @param _snapshotID The identifier of the snapshot to query.
      * @param _tokenHolder The address whose frozen balance is being queried.

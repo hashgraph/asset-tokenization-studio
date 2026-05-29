@@ -21,7 +21,8 @@ contract ClearingAtSnapshotFacet is ClearingAtSnapshot, IStaticFunctionSelectors
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.clearedBalanceOfAtSnapshot.selector);
+        return
+            Bytes4Builder.build(this.initializeClearingAtSnapshot.selector, this.clearedBalanceOfAtSnapshot.selector);
     }
 
     /// @inheritdoc IStaticFunctionSelectors

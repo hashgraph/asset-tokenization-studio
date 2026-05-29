@@ -16,6 +16,12 @@ bytes32 constant RESOLVER_KEY_OPERATOR_CLEARING_HOLDBYPARTITION = 0xab5e4afdccea
  */
 interface IOperatorClearingHoldByPartition is IClearingTypes {
     /**
+     * @notice Emitted once when the operator-clearing-hold-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeOperatorClearingHoldByPartition`.
+     */
+    event OperatorClearingHoldByPartitionInitialized();
+
+    /**
      * @notice Emitted when an authorised operator schedules a hold creation through the clearing flow.
      * @param operator Account that invoked the clearing hold creation (the operator).
      * @param tokenHolder Address whose balance is being committed to the hold.
@@ -36,6 +42,13 @@ interface IOperatorClearingHoldByPartition is IClearingTypes {
         bytes data,
         bytes operatorData
     );
+
+    /**
+     * @notice Initialises the operator-clearing-hold-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeOperatorClearingHoldByPartition() external;
 
     /**
      * @notice Creates a hold for a clearing operation by partition from a third party.

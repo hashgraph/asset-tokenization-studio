@@ -1,8 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IClearingAtSnapshot } from "./IClearingAtSnapshot.sol";
+import { IClearingAtSnapshot, RESOLVER_KEY_CLEARING_AT_SNAPSHOT } from "./IClearingAtSnapshot.sol";
 import { SnapshotsStorageWrapper } from "../../domain/asset/SnapshotsStorageWrapper.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title ClearingAtSnapshot
@@ -12,7 +15,18 @@ import { SnapshotsStorageWrapper } from "../../domain/asset/SnapshotsStorageWrap
  * @dev Delegates storage reads to `SnapshotsStorageWrapper`. Intended to be inherited by
  *      `ClearingAtSnapshotFacet`.
  */
-abstract contract ClearingAtSnapshot is IClearingAtSnapshot {
+abstract contract ClearingAtSnapshot is IClearingAtSnapshot, Modifiers {
+    /// @inheritdoc IClearingAtSnapshot
+    function initializeClearingAtSnapshot()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_CLEARING_AT_SNAPSHOT)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_CLEARING_AT_SNAPSHOT);
+        emit ClearingAtSnapshotInitialized();
+    }
+
     /// @inheritdoc IClearingAtSnapshot
     function clearedBalanceOfAtSnapshot(
         uint256 _snapshotID,

@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ISnapshots } from "./ISnapshots.sol";
+import { ISnapshots, RESOLVER_KEY_SNAPSHOTS } from "./ISnapshots.sol";
 import { ROLE_SNAPSHOT } from "../../../constants/roles.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { SnapshotsStorageWrapper } from "../../../domain/asset/SnapshotsStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "../../../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { ScheduledTask } from "../../layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title Snapshots
@@ -23,9 +25,21 @@ import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract Snapshots is ISnapshots, Modifiers {
     /// @inheritdoc ISnapshots
+    function initializeSnapshots()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_SNAPSHOTS)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_SNAPSHOTS);
+        emit SnapshotsInitialized();
+    }
+
+    /// @inheritdoc ISnapshots
     function takeSnapshot()
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_SNAPSHOT)

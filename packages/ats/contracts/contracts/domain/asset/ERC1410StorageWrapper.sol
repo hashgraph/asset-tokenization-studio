@@ -46,7 +46,6 @@ struct Partition {
  */
 struct ERC1410BasicStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
-    bool initialized;
     bool multiPartition;
     // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     uint256 totalTokenHolders;
@@ -99,7 +98,6 @@ library ERC1410StorageWrapper {
      */
     function initializeERC1410(bool multiPartition) internal {
         erc1410BasicStorage().multiPartition = multiPartition;
-        erc1410BasicStorage().initialized = true;
     }
 
     /// @notice Reduces the ERC-1410 partition balance only — does NOT touch ERC-20 storage.
@@ -939,15 +937,6 @@ library ERC1410StorageWrapper {
      */
     function isMultiPartition() internal view returns (bool) {
         return erc1410BasicStorage().multiPartition;
-    }
-
-    /**
-     * @notice Reports whether the ERC-1410 module has been initialised on this token.
-     * @dev Used by the `onlyNotERC1410Initialized` modifier to prevent double-initialisation.
-     * @return `true` when `initializeERC1410` has already run.
-     */
-    function isERC1410Initialized() internal view returns (bool) {
-        return erc1410BasicStorage().initialized;
     }
 
     /**

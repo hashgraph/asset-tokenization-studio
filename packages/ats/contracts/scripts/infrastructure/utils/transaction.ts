@@ -21,6 +21,17 @@ import { isInstantMiningNetwork } from "../networkConfig";
 import { info, warn, debug } from "./logging";
 
 /**
+ * Returns `{ gasLimit: limit }` under normal operation.
+ * Under solidity-coverage (`COVERAGE=true`), contracts are instrumented and grow
+ * substantially, so we use a higher fixed limit instead of auto-estimation — the
+ * auto-estimate is based on the unmodified bytecode and will be too low.
+ * 30M sits well within the 300M blockGasLimit configured for coverage runs.
+ */
+export function gasLimitOverride(limit: number): { gasLimit: number } {
+  return { gasLimit: process.env.COVERAGE ? 30_000_000 : limit };
+}
+
+/**
  * Returns `{ gasPrice: GAS_LIMIT.gasPrice }` on real networks (Hedera) and `{}`
  * on instant-mining networks (Hardhat/local).
  *

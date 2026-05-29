@@ -3,9 +3,10 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
+import { RESOLVER_KEY_ERC20VOTES } from "@scripts";
 
 import { executeRbac } from "@test";
 import { ATS_ROLES, DEFAULT_PARTITION } from "@scripts";
@@ -20,6 +21,7 @@ describe("ERC20Votes Tests", () => {
   let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   const ABAF = 200;
   const DECIMALS = 2;
@@ -59,6 +61,7 @@ describe("ERC20Votes Tests", () => {
     signer_C = base.user2;
     signer_D = base.user3;
     asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       {
         role: ATS_ROLES.ROLE_PAUSER,
@@ -83,11 +86,26 @@ describe("ERC20Votes Tests", () => {
     await loadFixture(deploySecurityFixture);
   });
 
-  describe("Initialization", () => {
-    it("GIVEN a initialized ERC20Votes WHEN initialize again THEN transaction fails with AlreadyInitialized", async () => {
-      await expect(asset.initializeERC20Votes(true)).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+  describe("initializeERC20Votes", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeERC20Votes is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeERC20Votes(true))
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
+    it("GIVEN already-initialised WHEN initializeERC20Votes is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeERC20Votes(true)).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+    });
+  });
+
+  describe("initializeERC20Votes event", () => {
+    it("GIVEN a fresh deployment WHEN initializeERC20Votes is called THEN emits ERC20VotesInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_ERC20VOTES);
+      await expect(asset.initializeERC20Votes(true)).to.emit(asset, "ERC20VotesInitialized");
+    });
+  });
+
+  describe("Initialization", () => {
     it("GIVEN ERC20Votes activated WHEN calling isActivated THEN returns true", async () => {
       const isActivated = await asset.isActivated();
       expect(isActivated).to.equal(true);
@@ -787,6 +805,15 @@ describe("ERC20Votes Tests", () => {
         deactivatedAsset,
         "Deactivated",
       );
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN delegate THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.delegate(ethers.ZeroAddress)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
   });
 });

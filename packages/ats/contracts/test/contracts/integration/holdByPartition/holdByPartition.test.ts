@@ -4,6 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { RESOLVER_KEY_HOLD_BY_PARTITION } from "@scripts";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
 import {
@@ -15,7 +16,7 @@ import {
   dateToUnixTimestamp,
   DEFAULT_PARTITION,
 } from "@scripts";
-import { ResolverProxy, IAsset } from "@contract-types";
+import { ResolverProxy, IAsset, MockDiamondCut } from "@contract-types";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
 const _WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
@@ -51,6 +52,7 @@ describe("HoldByPartition Tests", () => {
   let signer_E: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
   let currentTimestamp = 0;
@@ -142,6 +144,7 @@ describe("HoldByPartition Tests", () => {
     signer_E = base.user4;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, set_initRbacs());
 
     await setFacets(asset);
@@ -157,6 +160,7 @@ describe("HoldByPartition Tests", () => {
     signer_E = base.user4;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, set_initRbacs());
 
     await setFacets(asset);
@@ -954,6 +958,7 @@ describe("HoldByPartition Tests", () => {
       await executeRbac(asset, set_initRbacs());
       diamond = base.diamond;
       asset = await ethers.getContractAt("IAsset", diamond.target);
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
       await setFacets(asset);
 
       currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
@@ -984,6 +989,7 @@ describe("HoldByPartition Tests", () => {
       await executeRbac(asset, set_initRbacs());
       diamond = base.diamond;
       asset = await ethers.getContractAt("IAsset", diamond.target);
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
       await setFacets(asset);
 
       currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
@@ -1421,6 +1427,68 @@ describe("HoldByPartition Tests", () => {
           .connect(base.deployer)
           .reclaimHoldByPartition({ partition: ethers.ZeroHash, tokenHolder: ethers.ZeroAddress, holdId: 0 }),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("initializeHoldByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeHoldByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeHoldByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeHoldByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeHoldByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_HOLD_BY_PARTITION, 1);
+    });
+  });
+
+  describe("initializeHoldByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeHoldByPartition is called THEN emits HoldByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_HOLD_BY_PARTITION);
+      await expect(asset.initializeHoldByPartition()).to.emit(asset, "HoldByPartitionInitialized");
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN createHoldByPartition THEN reverts with AssetNotOperational", async () => {
+      const minimalHold = { amount: 0, expirationTimestamp: 0, escrow: ADDRESS_ZERO, to: ADDRESS_ZERO, data: "0x" };
+      await expect(asset.createHoldByPartition(_DEFAULT_PARTITION, minimalHold)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN createHoldFromByPartition THEN reverts with AssetNotOperational", async () => {
+      const minimalHold = { amount: 0, expirationTimestamp: 0, escrow: ADDRESS_ZERO, to: ADDRESS_ZERO, data: "0x" };
+      await expect(
+        asset.createHoldFromByPartition(_DEFAULT_PARTITION, ADDRESS_ZERO, minimalHold, "0x"),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN executeHoldByPartition THEN reverts with AssetNotOperational", async () => {
+      const minimalId = { partition: _DEFAULT_PARTITION, tokenHolder: ADDRESS_ZERO, holdId: 0 };
+      await expect(asset.executeHoldByPartition(minimalId, ADDRESS_ZERO, 0)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN releaseHoldByPartition THEN reverts with AssetNotOperational", async () => {
+      const minimalId = { partition: _DEFAULT_PARTITION, tokenHolder: ADDRESS_ZERO, holdId: 0 };
+      await expect(asset.releaseHoldByPartition(minimalId, 0)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN reclaimHoldByPartition THEN reverts with AssetNotOperational", async () => {
+      const minimalId = { partition: _DEFAULT_PARTITION, tokenHolder: ADDRESS_ZERO, holdId: 0 };
+      await expect(asset.reclaimHoldByPartition(minimalId)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
   });
 });

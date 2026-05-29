@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IExternalKycListManagement } from "./IExternalKycListManagement.sol";
-import { ROLE_KYC_MANAGER } from "../../constants/roles.sol";
+import { IExternalKycListManagement, RESOLVER_KEY_EXTERNAL_KYC_LIST } from "./IExternalKycListManagement.sol";
+import { ROLE_KYC_MANAGER, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { STORAGE_LOCATION_KYC_MANAGEMENT } from "../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { ExternalListManagementStorageWrapper } from "../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { ArrayValidation } from "../../infrastructure/utils/ArrayValidation.sol";
 import { IKyc } from "../layer_1/kyc/IKyc.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
@@ -13,10 +14,10 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 /**
  * @title ExternalKycListManagement
  * @author Asset Tokenization Studio Team
- * @notice Abstract contract implementing external KYC list management logic for a security token.
+ * @notice Abstract contract implementing external onlyOperational KYC list management logic for a security token.
  *         Maintains a list of trusted third-party KYC provider contracts whose combined KYC
  *         evaluation must be satisfied for an account to be considered externally KYC-granted.
- * @dev Implements `IExternalKycListManagement`. The external KYC list is stored in diamond storage
+ * @dev Implements `IExternalKycListManagement`. The external onlyOperational KYC list is stored in diamond storage
  *      at `STORAGE_LOCATION_KYC_MANAGEMENT` via `ExternalListManagementStorageWrapper`.
  *      All mutating functions after initialisation are gated by `ROLE_KYC_MANAGER` and the
  *      `onlyUnpaused` modifier inherited from `Modifiers`. Intended to be inherited exclusively
@@ -24,16 +25,19 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract ExternalKycListManagement is IExternalKycListManagement, Modifiers {
     /// @inheritdoc IExternalKycListManagement
-    // solhint-disable-next-line func-name-mixedcase
-    function initializeExternalKycLists(address[] calldata _kycLists) external override onlyNotKycExternalInitialized {
+    function initializeExternalKycLists(
+        address[] calldata _kycLists
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_EXTERNAL_KYC_LIST) {
         ExternalListManagementStorageWrapper.initializeExternalKycLists(_kycLists);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_EXTERNAL_KYC_LIST);
+        emit IExternalKycListManagement.ExternalKycListInitialized(_kycLists);
     }
 
     /// @inheritdoc IExternalKycListManagement
     function updateExternalKycLists(
         address[] calldata _kycLists,
         bool[] calldata _actives
-    ) external override onlyActivated onlyUnpaused onlyRole(ROLE_KYC_MANAGER) returns (bool success_) {
+    ) external override onlyOperational onlyActivated onlyUnpaused onlyRole(ROLE_KYC_MANAGER) returns (bool success_) {
         ArrayValidation.checkUniqueValues(_kycLists, _actives);
         success_ = ExternalListManagementStorageWrapper.updateExternalLists(
             STORAGE_LOCATION_KYC_MANAGEMENT,
@@ -52,6 +56,7 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_KYC_MANAGER)
@@ -68,7 +73,7 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
     /// @inheritdoc IExternalKycListManagement
     function removeExternalKycList(
         address _kycLists
-    ) external override onlyActivated onlyUnpaused onlyRole(ROLE_KYC_MANAGER) returns (bool success_) {
+    ) external override onlyOperational onlyActivated onlyUnpaused onlyRole(ROLE_KYC_MANAGER) returns (bool success_) {
         success_ = ExternalListManagementStorageWrapper.removeExternalList(STORAGE_LOCATION_KYC_MANAGEMENT, _kycLists);
         if (!success_) {
             revert UnlistedKycList(_kycLists);

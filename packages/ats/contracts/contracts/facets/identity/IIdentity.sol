@@ -18,6 +18,19 @@ bytes32 constant RESOLVER_KEY_IDENTITY = 0xbb0d93867bfe08218b429804914b1d345b2c8
  */
 interface IIdentity {
     /**
+     * @notice Emitted once when the identity capability is initialised on a token.
+     * @dev Fires exclusively from `initializeIdentity`.
+     */
+    event IdentityInitialized();
+
+    /**
+     * @notice Initialises the identity capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeIdentity() external;
+
+    /**
      * @notice Sets the onchainID of the token to `_onchainID`.
      * @dev Restricted to `ROLE_TREX_OWNER` and only callable when the token is not paused.
      *      Emits an `UpdatedTokenInformation` event from the underlying storage wrapper.

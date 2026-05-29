@@ -3,10 +3,18 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type IAsset, type ResolverProxy, ComplianceMock, IdentityRegistryMock } from "@contract-types";
+import { type IAsset, type ResolverProxy, ComplianceMock, IdentityRegistryMock, MockDiamondCut } from "@contract-types";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ATS_ROLES, EIP1066_CODES, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO, dateToUnixTimestamp } from "@scripts";
+import {
+  ATS_ROLES,
+  EIP1066_CODES,
+  EMPTY_HEX_BYTES,
+  EMPTY_STRING,
+  ZERO,
+  dateToUnixTimestamp,
+  RESOLVER_KEY_COMPLIANCE,
+} from "@scripts";
 import { getSelector } from "@scripts/infrastructure";
 
 const AMOUNT = 1000;
@@ -24,6 +32,7 @@ describe("Compliance Tests", () => {
   let signer_F: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   enum ClearingOperationType {
     Transfer,
@@ -49,6 +58,7 @@ describe("Compliance Tests", () => {
       signer_E = base.user4;
 
       asset = await ethers.getContractAt("IAsset", diamond.target);
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
       await executeRbac(asset, [
         {
           role: ATS_ROLES.ROLE_PAUSER,
@@ -104,6 +114,7 @@ describe("Compliance Tests", () => {
       signer_E = base.user4;
 
       asset = await ethers.getContractAt("IAsset", diamond.target);
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
       await executeRbac(asset, [
         {
           role: ATS_ROLES.ROLE_PAUSER,
@@ -327,6 +338,7 @@ describe("Compliance Tests", () => {
       signer_E = base.user4;
 
       asset = await ethers.getContractAt("IAsset", diamond.target);
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
       await executeRbac(asset, [
         {
@@ -412,6 +424,7 @@ describe("Compliance Tests", () => {
       signer_F = base.user5;
 
       asset = await ethers.getContractAt("IAsset", diamond.target);
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
       await executeRbac(asset, [
         { role: ATS_ROLES.ROLE_PAUSER, members: [signer_B.address] },
@@ -590,6 +603,7 @@ describe("Compliance Tests", () => {
       signer_E = base.user4;
 
       asset = await ethers.getContractAt("IAsset", diamond.target);
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
       await executeRbac(asset, [
         { role: ATS_ROLES.ROLE_PAUSER, members: [signer_B.address] },
@@ -732,6 +746,39 @@ describe("Compliance Tests", () => {
           clearingOperationType: ClearingOperationType.Redeem,
         }),
       ).to.not.be.reverted;
+    });
+  });
+  describe("initializeCompliance", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeCompliance is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeCompliance())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeCompliance is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeCompliance())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_COMPLIANCE, 1);
+    });
+  });
+
+  describe("initializeCompliance event", () => {
+    it("GIVEN a fresh deployment WHEN initializeCompliance is called THEN emits ComplianceInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_COMPLIANCE);
+      await expect(asset.initializeCompliance()).to.emit(asset, "ComplianceInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setCompliance THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.setCompliance("0x0000000000000000000000000000000000000001")).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
     });
   });
 });

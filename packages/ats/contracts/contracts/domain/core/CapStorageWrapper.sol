@@ -4,7 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { MAX_UINT256 } from "../../constants/values.sol";
 import { ICap } from "../../facets/cap/ICap.sol";
 import { AdjustBalancesStorageWrapper } from "../asset/AdjustBalancesStorageWrapper.sol";
-import { ERC1410StorageWrapper } from "../asset/ERC1410StorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /// @custom:hash storage Cap
@@ -17,11 +16,9 @@ bytes32 constant STORAGE_LOCATION_CAP = 0xabd29859a2443302b9905d8be07aab508a353c
  * @custom:storage-location erc7201:security.token.standard.storage.Cap
  */
 struct CapDataStorage {
-    // ─── R1 Lifecycle (bool flags) ───────────────────────────
-    bool initialized;
-    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R2 Single-slot scalars (uint256, bytes32, string) ───
     uint256 maxSupply;
-    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
+    // ─── R3 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(bytes32 => uint256) maxSupplyByPartition;
     // ─── APPEND-ONLY ZONE BELOW ───
 }
@@ -51,7 +48,6 @@ library CapStorageWrapper {
                 ++i;
             }
         }
-        cs.initialized = true;
     }
 
     /**
@@ -225,15 +221,6 @@ library CapStorageWrapper {
 
         uint256 limit = MAX_UINT256 / factor;
         return (cs.maxSupplyByPartition[partition] > limit) ? MAX_UINT256 : cs.maxSupplyByPartition[partition] * factor;
-    }
-
-    /**
-     * @notice Checks whether the cap system has been initialised.
-     * @dev Returns the `initialized` flag from storage.
-     * @return True if `initializeCap` has been called; false otherwise.
-     */
-    function isCapInitialized() internal view returns (bool) {
-        return capStorage().initialized;
     }
 
     /**

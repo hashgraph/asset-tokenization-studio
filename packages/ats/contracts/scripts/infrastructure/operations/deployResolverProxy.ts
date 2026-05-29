@@ -22,6 +22,7 @@ import {
   GAS_LIMIT,
   DEFAULT_TRANSACTION_TIMEOUT,
   hederaGasOverrides,
+  gasLimitOverride,
 } from "@scripts/infrastructure";
 
 /**
@@ -147,7 +148,7 @@ export async function deployResolverProxy(
     version,
     rbac = [],
     network: _network,
-    overrides = { gasLimit: GAS_LIMIT.default, ...hederaGasOverrides() },
+    overrides = { ...gasLimitOverride(GAS_LIMIT.default), ...hederaGasOverrides() },
     confirmations = 1,
   } = options;
 

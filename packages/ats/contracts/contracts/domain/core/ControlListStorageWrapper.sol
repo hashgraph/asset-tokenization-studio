@@ -17,7 +17,6 @@ bytes32 constant STORAGE_LOCATION_CONTROL_LIST = 0x880786188890a6f111c4f0814d49d
  */
 struct ControlListStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
-    bool initialized;
     bool isWhiteList;
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     EnumerableSet.AddressSet list;
@@ -37,57 +36,14 @@ library ControlListStorageWrapper {
     using EnumerableSet for EnumerableSet.AddressSet;
 
     /**
-     * @notice Loads the control list storage struct from its ERC-7201 namespace
-     *         slot.
-     * @dev Uses inline assembly to set the storage slot for the returned reference,
-     *      allowing access to the control list data at its designated storage
-     *      location.
-     * @return controlList_ A storage reference to `ControlListStorage` at the
-     *         ERC-7201 slot.
-     */
-    function controlListStorage() internal pure returns (ControlListStorage storage controlList_) {
-        bytes32 position = STORAGE_LOCATION_CONTROL_LIST;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            controlList_.slot := position
-        }
-    }
-
-    /**
      * @notice Initialises the control list as whitelist or blacklist mode.
      * @dev Sets the control list type and marks the system initialised. Must be
      *      guarded by an `onlyNotControlListInitialized` modifier in the calling
      *      facet.
      * @param _isWhiteList True for whitelist mode; false for blacklist mode.
      */
-    // solhint-disable-next-line ordering
     function initializeControlList(bool _isWhiteList) internal {
-        ControlListStorage storage cls = controlListStorage();
-        cls.isWhiteList = _isWhiteList;
-        cls.initialized = true;
-    }
-
-    /**
-     * @notice Checks whether the control list has been initialised.
-     * @dev Returns the `initialized` flag from storage.
-     * @return True if `initializeControlList` has been called; false otherwise.
-     */
-    function isControlListInitialized() internal view returns (bool) {
-        return controlListStorage().initialized;
-    }
-
-    /**
-     * @notice Validates that an account is able to access based on control list
-     *         membership and external-list authorisation.
-     * @dev Reverts with `ICommonErrors.AccountIsBlocked` if the account is
-     *      blocked by the control list policy.
-     * @param _account The address to check.
-     */
-    // solhint-disable-next-line ordering
-    function checkControlList(address _account) internal view {
-        if (!isAbleToAccess(_account)) {
-            revert ICommonErrors.AccountIsBlocked(_account);
-        }
+        controlListStorage().isWhiteList = _isWhiteList;
     }
 
     /**
@@ -115,13 +71,25 @@ library ControlListStorageWrapper {
     }
 
     /**
+     * @notice Validates that an account is able to access based on control list
+     *         membership and external-list authorisation.
+     * @dev Reverts with `ICommonErrors.AccountIsBlocked` if the account is
+     *      blocked by the control list policy.
+     * @param _account The address to check.
+     */
+    function checkControlList(address _account) internal view {
+        if (!isAbleToAccess(_account)) {
+            revert ICommonErrors.AccountIsBlocked(_account);
+        }
+    }
+
+    /**
      * @notice Checks whether an address is a member of the control list.
      * @dev Returns true regardless of control-list type (whitelist or blacklist);
      *      use `isAbleToAccess` to evaluate the full access policy.
      * @param _account The address to check.
      * @return True if the address is in the control list; false otherwise.
      */
-    // solhint-disable-next-line ordering
     function isInControlList(address _account) internal view returns (bool) {
         return controlListStorage().list.contains(_account);
     }
@@ -173,5 +141,22 @@ library ControlListStorageWrapper {
         uint256 _pageLength
     ) internal view returns (address[] memory members_) {
         members_ = controlListStorage().list.getFromSet(_pageIndex, _pageLength);
+    }
+
+    /**
+     * @notice Loads the control list storage struct from its ERC-7201 namespace
+     *         slot.
+     * @dev Uses inline assembly to set the storage slot for the returned reference,
+     *      allowing access to the control list data at its designated storage
+     *      location.
+     * @return controlList_ A storage reference to `ControlListStorage` at the
+     *         ERC-7201 slot.
+     */
+    function controlListStorage() internal pure returns (ControlListStorage storage controlList_) {
+        bytes32 position = STORAGE_LOCATION_CONTROL_LIST;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            controlList_.slot := position
+        }
     }
 }

@@ -5,8 +5,16 @@ import { ethers, network } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
-import { IAsset, type ResolverProxy } from "@contract-types";
-import { ADDRESS_ZERO, ATS_ROLES, dateToUnixTimestamp, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
+import { IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
+import {
+  ADDRESS_ZERO,
+  ATS_ROLES,
+  dateToUnixTimestamp,
+  EMPTY_HEX_BYTES,
+  EMPTY_STRING,
+  RESOLVER_KEY_ERC1410_MANAGEMENT,
+  ZERO,
+} from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
@@ -83,6 +91,7 @@ describe("Clearing Tests", () => {
   let signer_C: HardhatEthersSigner;
   let signer_D: HardhatEthersSigner;
   let signer_E: HardhatEthersSigner;
+  let mockDiamondCut: MockDiamondCut;
 
   function set_initRbacs() {
     return [
@@ -173,7 +182,7 @@ describe("Clearing Tests", () => {
     signer_E = base.user4;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
-
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       {
         role: ATS_ROLES.ROLE_ISSUER,
@@ -2826,8 +2835,8 @@ describe("Clearing Tests", () => {
     });
 
     describe("onlyUninitialized modifier", () => {
-      it("GIVEN clearing already initialized WHEN calling initializeClearing THEN transaction fails with AlreadyInitialized", async () => {
-        await expect(asset.initializeClearing(true)).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+      it("GIVEN clearing already initialized WHEN calling initializeClearing THEN transaction fails with FacetAlreadyRegistered", async () => {
+        await expect(asset.initializeClearing(true)).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
       });
     });
 
@@ -5127,6 +5136,25 @@ describe("Clearing Tests", () => {
             .connect(signer_B)
             .protectedClearingCreateHoldByPartition(protectedClearingOp, holdForClearing, signature),
         ).to.be.reverted;
+      });
+    });
+  });
+
+  describe("initializeERC1410", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeERC1410 is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeERC1410(true))
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeERC1410 is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeERC1410(true)).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+    });
+
+    describe("initializeERC1410 event", () => {
+      it("GIVEN a fresh deployment WHEN initializeERC1410 is called THEN emits ERC1410Initialized", async () => {
+        await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_ERC1410_MANAGEMENT);
+        await expect(asset.initializeERC1410(true)).to.emit(asset, "ERC1410Initialized");
       });
     });
   });

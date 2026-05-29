@@ -52,7 +52,6 @@ library NominalValueStorageWrapper {
         uint8 _nominalValueDecimals,
         bytes3 _nominalValueCurrency
     ) internal {
-        _nominalValueStorage().initialized = true;
         setNominalValue(_nominalValue, _nominalValueDecimals);
         setNominalValueCurrency(_nominalValueCurrency);
     }
@@ -103,14 +102,6 @@ library NominalValueStorageWrapper {
      */
     function getNominalValueCurrency() internal view returns (bytes3) {
         return _nominalValueStorage().nominalValueCurrency;
-    }
-
-    /**
-     * @notice Reports whether the nominal value storage has been initialised.
-     * @return True once `initializeNominalValue` has been called, false otherwise.
-     */
-    function isNominalValueInitialized() internal view returns (bool) {
-        return _nominalValueStorage().initialized;
     }
 
     /**

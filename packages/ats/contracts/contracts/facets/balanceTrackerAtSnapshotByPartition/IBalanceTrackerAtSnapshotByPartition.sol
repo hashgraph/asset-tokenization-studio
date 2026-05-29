@@ -16,6 +16,19 @@ bytes32 constant RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT_BY_PARTITION = 0x58443
  */
 interface IBalanceTrackerAtSnapshotByPartition {
     /**
+     * @notice Emitted once when the partition snapshot balance tracker capability is initialised on a token.
+     * @dev Fires exclusively from `initializeBalanceTrackerAtSnapshotByPartition` after the storage write succeeds.
+     */
+    event BalanceTrackerAtSnapshotByPartitionInitialized();
+
+    /**
+     * @notice Initialises the partition snapshot balance tracker capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeBalanceTrackerAtSnapshotByPartition() external;
+
+    /**
      * @notice Returns the balance of an account for a given partition at the time of a given snapshot.
      * @param _partition   The partition identifier.
      * @param _snapshotID  The snapshot identifier returned by a prior `takeSnapshot` call.

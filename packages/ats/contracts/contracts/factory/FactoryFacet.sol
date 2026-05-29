@@ -17,6 +17,7 @@ import { Bytes4Builder } from "../infrastructure/proxy/Bytes4Builder.sol";
  *      CREATE operations (deployProxy, deployEquity, etc.) execute in the proxy's context,
  *      so created contracts are correctly owned and funded by the proxy, not a separate
  *      factory contract. This is the intended behaviour for a factory-as-proxy pattern.
+ * @author Asset Tokenization Studio Team
  */
 contract FactoryFacet is Factory, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors

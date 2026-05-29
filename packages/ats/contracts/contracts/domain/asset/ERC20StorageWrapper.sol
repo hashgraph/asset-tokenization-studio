@@ -25,17 +25,15 @@ bytes32 constant STORAGE_LOCATION_ERC20 = 0xba2beddc557de36eb4836f4ff1fd9d33a28d
  * @custom:storage-location erc7201:security.token.standard.storage.Erc20
  */
 struct ERC20Storage {
-    // ─── R1 Lifecycle (bool flags) ───────────────────────────
-    bool initialized;
-    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R1 Packed scalars (uint8, bytes3, address, enum) ────
     uint8 decimals;
     IFactory.SecurityType securityType;
-    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R2 Single-slot scalars (uint256, bytes32, string) ───
     string name;
     string symbol;
     string isin;
     uint256 totalSupply;
-    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
+    // ─── R3 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(address => uint256) balances;
     mapping(address => mapping(address => uint256)) allowed;
 
@@ -68,7 +66,6 @@ library ERC20StorageWrapper {
         erc20Stor.isin = erc20Metadata.info.isin;
         erc20Stor.decimals = erc20Metadata.info.decimals;
         erc20Stor.securityType = erc20Metadata.securityType;
-        erc20Stor.initialized = true;
     }
 
     /**
@@ -455,14 +452,6 @@ library ERC20StorageWrapper {
      */
     function decimals() internal view returns (uint8) {
         return erc20Storage().decimals;
-    }
-
-    /**
-     * @notice Returns whether the ERC-20 capability has been initialised.
-     * @return `true` if `initializeERC20` has been called at least once; `false` otherwise.
-     */
-    function isERC20Initialized() internal view returns (bool) {
-        return erc20Storage().initialized;
     }
 
     /**
