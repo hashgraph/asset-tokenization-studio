@@ -290,48 +290,33 @@ describe("Bond KpiLinked Rate Tests", () => {
     it("GIVEN a kpiLinked rate bond WHEN no report is found THEN transaction success and rate is previous rate plus penalty", async () => {
       await setKpiConfiguration(-10);
 
+      const firstCouponRate = newInterestRate.baseRate + newInterestRate.missedPenalty;
+      const firstCouponRateDecimals = newInterestRate.rateDecimals;
+
       // Test missed penalty when there is a single coupon
       await asset.connect(signer_A).setCoupon(couponData);
 
       await asset.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
 
-      await checkCouponPostValues(
-        0 + newInterestRate.missedPenalty,
-        newInterestRate.rateDecimals,
-        amount,
-        1,
-        signer_A.address,
-      );
+      await checkCouponPostValues(firstCouponRate, firstCouponRateDecimals, amount, 1, signer_A.address);
 
       // Test missed penalty when there are two coupons
       updateCouponDates();
 
+      const secondCouponRate = firstCouponRate + newInterestRate.missedPenalty;
+      const secondCouponRateDecimals = newInterestRate.rateDecimals;
+
       await asset.connect(signer_A).setCoupon(couponData);
 
       await asset.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
 
-      await checkCouponPostValues(
-        0 + newInterestRate.missedPenalty,
-        newInterestRate.rateDecimals,
-        amount,
-        1,
-        signer_A.address,
-      );
+      await checkCouponPostValues(firstCouponRate, firstCouponRateDecimals, amount, 1, signer_A.address);
 
-      await checkCouponPostValues(
-        newInterestRate.missedPenalty + newInterestRate.missedPenalty,
-        newInterestRate.rateDecimals,
-        amount,
-        2,
-        signer_A.address,
-      );
+      await checkCouponPostValues(secondCouponRate, secondCouponRateDecimals, amount, 2, signer_A.address);
 
-      // Test missed penalty when previous coupon had less decimals
-      const previousCouponRate = 2 * newInterestRate.missedPenalty;
-      const previousCouponRateDecimals = newInterestRate.rateDecimals;
-
-      newInterestRate.missedPenalty = previousCouponRate;
-      newInterestRate.rateDecimals = previousCouponRateDecimals + 1;
+      newInterestRate.missedPenalty = 2 * newInterestRate.missedPenalty;
+      newInterestRate.rateDecimals = secondCouponRateDecimals + 1;
+      newInterestRate.maxRate = 10 * newInterestRate.maxRate;
 
       await asset.connect(signer_A).setKpiLinkedRateInterestRate(newInterestRate);
 
@@ -341,20 +326,17 @@ describe("Bond KpiLinked Rate Tests", () => {
 
       await asset.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
 
-      const rate = previousCouponRate * 10 + newInterestRate.missedPenalty;
+      const thirdCouponRate = secondCouponRate * 10 + newInterestRate.missedPenalty;
+      const thirdCouponRateDecimals = newInterestRate.rateDecimals;
 
-      await checkCouponPostValues(previousCouponRate / 2, previousCouponRateDecimals, amount, 1, signer_A.address);
+      await checkCouponPostValues(firstCouponRate, firstCouponRateDecimals, amount, 1, signer_A.address);
 
-      await checkCouponPostValues(previousCouponRate, previousCouponRateDecimals, amount, 2, signer_A.address);
+      await checkCouponPostValues(secondCouponRate, secondCouponRateDecimals, amount, 2, signer_A.address);
 
-      await checkCouponPostValues(rate, newInterestRate.rateDecimals, amount, 3, signer_A.address);
+      await checkCouponPostValues(thirdCouponRate, thirdCouponRateDecimals, amount, 3, signer_A.address);
 
-      // Test missed penalty when previous coupon had more decimals
-      const previousCouponRate_2 = rate;
-      const previousCouponRateDecimals_2 = newInterestRate.rateDecimals;
-
-      newInterestRate.missedPenalty = previousCouponRate_2;
-      newInterestRate.rateDecimals = previousCouponRateDecimals_2 - 1;
+      newInterestRate.missedPenalty = thirdCouponRate;
+      newInterestRate.rateDecimals = thirdCouponRateDecimals - 1;
 
       await asset.connect(signer_A).setKpiLinkedRateInterestRate(newInterestRate);
 
@@ -364,15 +346,16 @@ describe("Bond KpiLinked Rate Tests", () => {
 
       await asset.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
 
-      const rate_2 = previousCouponRate_2 / 10 + newInterestRate.missedPenalty;
+      const fourthCouponRate = thirdCouponRate / 10 + newInterestRate.missedPenalty;
+      const fourthCouponRateDecimals = newInterestRate.rateDecimals;
 
-      await checkCouponPostValues(previousCouponRate / 2, previousCouponRateDecimals, amount, 1, signer_A.address);
+      await checkCouponPostValues(firstCouponRate, firstCouponRateDecimals, amount, 1, signer_A.address);
 
-      await checkCouponPostValues(previousCouponRate, previousCouponRateDecimals, amount, 2, signer_A.address);
+      await checkCouponPostValues(secondCouponRate, secondCouponRateDecimals, amount, 2, signer_A.address);
 
-      await checkCouponPostValues(previousCouponRate_2, previousCouponRateDecimals_2, amount, 3, signer_A.address);
+      await checkCouponPostValues(thirdCouponRate, thirdCouponRateDecimals, amount, 3, signer_A.address);
 
-      await checkCouponPostValues(rate_2, newInterestRate.rateDecimals, amount, 4, signer_A.address);
+      await checkCouponPostValues(fourthCouponRate, fourthCouponRateDecimals, amount, 4, signer_A.address);
     });
 
     it("GIVEN a kpiLinked rate bond WHEN reportPeriod is greater than fixingDate THEN no underflow and rate falls back to missed penalty", async () => {
