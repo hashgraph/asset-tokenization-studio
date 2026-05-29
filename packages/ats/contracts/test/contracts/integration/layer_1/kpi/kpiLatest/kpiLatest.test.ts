@@ -4,12 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type IAsset, MockDiamondCut, type ResolverProxy } from "@contract-types";
-import {
-  ATS_ROLES,
-  dateToUnixTimestamp,
-  RESOLVER_KEY_KPIS_LATEST_KPI_LINKED_RATE,
-  BOND_KPI_LINKED_RATE_CONFIG_ID,
-} from "@scripts";
+import { ATS_ROLES, dateToUnixTimestamp, RESOLVER_KEY_KPIS, BOND_KPI_LINKED_RATE_CONFIG_ID } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployBondKpiLinkedRateTokenFixture } from "@test";
 import { executeRbac } from "@test";
@@ -297,7 +292,7 @@ describe("Kpi Latest Tests", () => {
 
   describe("initializeKpis event", () => {
     it("GIVEN a fresh deployment WHEN initializeKpis is called THEN emits KpisInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_KPIS_LATEST_KPI_LINKED_RATE);
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_KPIS);
       await expect(asset.initializeKpis()).to.emit(asset, "KpisInitialized");
     });
   });

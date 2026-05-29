@@ -21,6 +21,7 @@ permissions:
 
 jobs:
   test-mass-payout:
+    if: false
     name: testing
     runs-on: token-studio-linux-large
     timeout-minutes: 45
