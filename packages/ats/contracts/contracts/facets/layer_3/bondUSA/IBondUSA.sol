@@ -22,5 +22,17 @@ bytes32 constant RESOLVER_KEY_BOND_FIXED_RATE = 0xed82bfcb3081f78d7592451f5f09a9
 bytes32 constant RESOLVER_KEY_BOND_FIXED_READ = 0x022f5bb77103df6269ed7962189745c5fa816a3f85295ed85df8a5e4c662098f;
 
 interface IBondUSA is IBondTypes {
+    /**
+     * @notice Emitted once when the bond-USA capability is initialised on a token.
+     * @dev Fires exclusively from `initializeBondUSA`.
+     */
+    event BondUSAInitialized();
+
+    /**
+     * @notice Initialises the bond-USA capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     * @param _bondDetailsData Bond configuration data to store during initialisation.
+     */
     function initializeBondUSA(IBondTypes.BondDetailsData calldata _bondDetailsData) external;
 }

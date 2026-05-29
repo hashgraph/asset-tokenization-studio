@@ -10,6 +10,10 @@ import { Checkpoints } from "../../../../infrastructure/utils/Checkpoints.sol";
 bytes32 constant RESOLVER_KEY_ERC20VOTES = 0x9619bb38c76aac49afb1df75430aefc1314778fe926136a688bf3ae3b5f8c3b7;
 
 interface IERC20Votes is IERC5805 {
+    /// @notice Emitted once when the ERC-20Votes capability is initialised on a token.
+    /// @dev Fires exclusively from `initializeERC20Votes` after the storage write succeeds.
+    event ERC20VotesInitialized(bool activated);
+
     /// @notice Emitted when an account changes their delegate
     /// @param delegator The account that changed their delegation
     /// @param fromDelegate The previous delegate address

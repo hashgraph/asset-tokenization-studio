@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { type IAsset, type ResolverProxy } from "@contract-types";
+import { type IAsset, MockDiamondCut, type ResolverProxy } from "@contract-types";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import {
@@ -10,6 +10,8 @@ import {
   EMPTY_HEX_BYTES,
   dateToUnixTimestamp,
   EMPTY_STRING,
+  EQUITY_CONFIG_ID,
+  RESOLVER_KEY_DIVIDEND,
 } from "@scripts";
 import { MAX_UINT256, deployEquityTokenFixture, executeRbac } from "@test";
 import { ethers } from "hardhat";
@@ -45,6 +47,7 @@ describe("Dividends", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
   async function deploySecurityFixtureSinglePartition() {
     const base = await deployEquityTokenFixture();
     diamond = base.diamond;
@@ -53,6 +56,7 @@ describe("Dividends", () => {
     signer_C = base.user2;
 
     asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       {
         role: ATS_ROLES.ROLE_PAUSER,
@@ -655,6 +659,65 @@ describe("Dividends", () => {
     });
   });
 
+  describe("Force Cancel Dividend", () => {
+    it("GIVEN account with ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelDividend before execution date THEN transaction succeeds and isDisabled is true", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C.address);
+
+      await asset.connect(signer_C).setDividend(dividendData);
+
+      await expect(asset.connect(signer_C).forceCancelDividend(1))
+        .to.emit(asset, "DividendForceCancelled")
+        .withArgs(1, signer_C.address);
+      expect((await asset.getDividend(1)).isDisabled_).to.equal(true);
+    });
+
+    it("GIVEN account with ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelDividend after execution date THEN transaction succeeds bypassing date guard", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C.address);
+
+      await asset.connect(signer_C).setDividend(dividendData);
+
+      await asset.changeSystemTimestamp(dividendsExecutionDateInSeconds + 1000);
+
+      await expect(asset.connect(signer_C).forceCancelDividend(1))
+        .to.emit(asset, "DividendForceCancelled")
+        .withArgs(1, signer_C.address);
+      expect((await asset.getDividend(1)).isDisabled_).to.equal(true);
+    });
+
+    it("GIVEN account without ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelDividend THEN transaction fails with AccountHasNoRole", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_B.address);
+
+      await asset.connect(signer_B).setDividend(dividendData);
+
+      await expect(asset.connect(signer_C).forceCancelDividend(1)).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN paused token WHEN forceCancelDividend THEN transaction fails with IsPaused", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_B.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_B.address);
+
+      await asset.connect(signer_B).setDividend(dividendData);
+
+      await asset.connect(signer_B).pause();
+
+      await expect(asset.connect(signer_B).forceCancelDividend(1)).to.be.revertedWithCustomError(asset, "IsPaused");
+    });
+
+    it("GIVEN no existing dividend WHEN forceCancelDividend with invalid ID THEN transaction fails with WrongIndexForAction", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C.address);
+
+      await expect(asset.connect(signer_C).forceCancelDividend(999)).to.be.revertedWithCustomError(
+        asset,
+        "WrongIndexForAction",
+      );
+    });
+  });
+
   describe("Deactivated", () => {
     it("GIVEN a deactivated asset WHEN setDividend THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
@@ -677,6 +740,52 @@ describe("Dividends", () => {
         deactivatedAsset,
         "Deactivated",
       );
+    });
+  });
+
+  describe("initializeDividend", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeDividend is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeDividend())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeDividend is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeDividend())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_DIVIDEND, 1);
+    });
+  });
+
+  describe("initializeDividend event", () => {
+    it("GIVEN a fresh deployment WHEN initializeDividend is called THEN emits DividendInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_DIVIDEND);
+      await expect(asset.initializeDividend()).to.emit(asset, "DividendInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational WHEN setDividend is called THEN AssetNotOperational", async () => {
+      await expect(
+        asset.setDividend({
+          recordDate: 0n,
+          executionDate: 0n,
+          amount: 0n,
+          amountDecimals: 0n,
+        }),
+      )
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN cancelDividend is called THEN AssetNotOperational", async () => {
+      await expect(asset.cancelDividend(0n))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 });

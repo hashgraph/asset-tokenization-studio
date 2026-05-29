@@ -4,8 +4,15 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ATS_ROLES, ADDRESS_ZERO, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import {
+  ATS_ROLES,
+  ADDRESS_ZERO,
+  EMPTY_HEX_BYTES,
+  EMPTY_STRING,
+  ZERO,
+  RESOLVER_KEY_BALANCE_TRACKER_BY_PARTITION,
+} from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
@@ -34,6 +41,7 @@ describe("Balance Tracker By Partition Tests", () => {
   let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
   let currentTimestamp = 0;
@@ -56,6 +64,7 @@ describe("Balance Tracker By Partition Tests", () => {
     signer_D = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       {
         role: ATS_ROLES.ROLE_ISSUER,
@@ -368,6 +377,26 @@ describe("Balance Tracker By Partition Tests", () => {
         const totalBalanceByPartition = await asset.getTotalBalanceForByPartition(_DEFAULT_PARTITION, tokenHolder);
         expect(totalBalanceByPartition).to.equal(totalMintAmount);
       });
+    });
+  });
+  describe("initializeBalanceTrackerByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeBalanceTrackerByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeBalanceTrackerByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeBalanceTrackerByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeBalanceTrackerByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_BALANCE_TRACKER_BY_PARTITION, 1);
+    });
+  });
+
+  describe("initializeBalanceTrackerByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeBalanceTrackerByPartition is called THEN emits BalanceTrackerByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_BALANCE_TRACKER_BY_PARTITION);
+      await expect(asset.initializeBalanceTrackerByPartition()).to.emit(asset, "BalanceTrackerByPartitionInitialized");
     });
   });
 });

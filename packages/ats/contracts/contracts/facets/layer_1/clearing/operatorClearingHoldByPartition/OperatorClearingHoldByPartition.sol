@@ -1,12 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IOperatorClearingHoldByPartition } from "./IOperatorClearingHoldByPartition.sol";
+import {
+    IOperatorClearingHoldByPartition,
+    RESOLVER_KEY_OPERATOR_CLEARING_HOLDBYPARTITION
+} from "./IOperatorClearingHoldByPartition.sol";
 import { IHoldTypes } from "../../hold/IHoldTypes.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
 import { ClearingOps } from "../../../../domain/orchestrator/ClearingOps.sol";
 import { ThirdPartyType } from "../../../../domain/asset/types/ThirdPartyType.sol";
 import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title OperatorClearingHoldByPartition
@@ -16,12 +21,24 @@ import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol"
  */
 abstract contract OperatorClearingHoldByPartition is IOperatorClearingHoldByPartition, Modifiers {
     /// @inheritdoc IOperatorClearingHoldByPartition
+    function initializeOperatorClearingHoldByPartition()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_OPERATOR_CLEARING_HOLDBYPARTITION)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_OPERATOR_CLEARING_HOLDBYPARTITION);
+        emit OperatorClearingHoldByPartitionInitialized();
+    }
+
+    /// @inheritdoc IOperatorClearingHoldByPartition
     function operatorClearingCreateHoldByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
         IHoldTypes.Hold calldata _hold
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyClearingActivated

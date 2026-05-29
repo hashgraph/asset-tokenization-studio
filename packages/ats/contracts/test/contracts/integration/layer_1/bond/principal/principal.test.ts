@@ -3,8 +3,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { DEFAULT_PARTITION, ATS_ROLES, ZERO, EMPTY_STRING } from "@scripts";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import { DEFAULT_PARTITION, ATS_ROLES, ZERO, EMPTY_STRING, RESOLVER_KEY_PRINCIPAL } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployBondTokenFixture, getDltTimestamp } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
@@ -20,8 +20,10 @@ describe("PrincipalFacet Tests", () => {
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
+  let unknownSigner: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
   let startingDate = 0;
   let maturityDate = 0;
 
@@ -40,8 +42,11 @@ describe("PrincipalFacet Tests", () => {
     signer_A = base.deployer;
     signer_B = base.user1;
     signer_C = base.user2;
+    const signers = await ethers.getSigners();
+    unknownSigner = signers[signers.length - 1];
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
       { role: ATS_ROLES.ROLE_ISSUER, members: [signer_A.address] },
@@ -142,6 +147,27 @@ describe("PrincipalFacet Tests", () => {
       const principalFor = await asset.getPrincipalFor(signer_C.address);
 
       expect(principalFor.numerator).to.equal(0n);
+    });
+  });
+
+  describe("initializePrincipal", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializePrincipal THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(unknownSigner).initializePrincipal())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(await unknownSigner.getAddress(), ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializePrincipal THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializePrincipal())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_PRINCIPAL, 1);
+    });
+  });
+
+  describe("initializePrincipal event", () => {
+    it("GIVEN fresh facet WHEN initializePrincipal THEN emits PrincipalInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_PRINCIPAL);
+      await expect(asset.initializePrincipal()).to.emit(asset, "PrincipalInitialized");
     });
   });
 

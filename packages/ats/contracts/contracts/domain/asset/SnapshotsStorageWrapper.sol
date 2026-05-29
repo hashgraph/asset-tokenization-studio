@@ -4,7 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ArraysUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ArraysUpgradeable.sol";
 import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import {
-    ISnapshots,
     Snapshots,
     SnapshotsAddress,
     SnapshotsBytes32,

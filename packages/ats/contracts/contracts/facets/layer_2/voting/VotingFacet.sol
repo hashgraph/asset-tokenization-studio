@@ -17,8 +17,10 @@ contract VotingFacet is Voting, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeVoting.selector,
                 this.setVoting.selector,
                 this.cancelVoting.selector,
+                this.forceCancelVoting.selector,
                 this.getVoting.selector,
                 this.getVotingFor.selector,
                 this.getVotingCount.selector

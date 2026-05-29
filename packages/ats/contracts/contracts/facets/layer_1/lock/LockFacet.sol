@@ -27,6 +27,7 @@ contract LockFacet is Lock, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeLock.selector,
                 this.forceReleaseByPartition.selector,
                 this.getLockByPartition.selector,
                 this.lock.selector,
@@ -34,7 +35,8 @@ contract LockFacet is Lock, IStaticFunctionSelectors {
                 this.getLockedAmountFor.selector,
                 this.getLockCountFor.selector,
                 this.getLocksIdFor.selector,
-                this.getLockFor.selector
+                this.getLockFor.selector,
+                this.updateLockExpiration.selector
             );
     }
 

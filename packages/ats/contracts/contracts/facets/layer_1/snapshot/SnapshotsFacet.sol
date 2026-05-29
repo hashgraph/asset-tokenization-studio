@@ -25,6 +25,7 @@ contract SnapshotsFacet is Snapshots, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeSnapshots.selector,
                 this.scheduledSnapshotCount.selector,
                 this.getScheduledSnapshots.selector,
                 this.takeSnapshot.selector

@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { isinGenerator } from "@thomaschaplin/isin-generator";
-import { IAsset, type ResolverProxy, ComplianceMock, IdentityRegistryMock } from "@contract-types";
+import { IAsset, type ResolverProxy, ComplianceMock, IdentityRegistryMock, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
@@ -16,6 +16,7 @@ import {
   ADDRESS_ZERO,
   EMPTY_HEX_BYTES,
   dateToUnixTimestamp,
+  RESOLVER_KEY_ERC3643_MANAGEMENT,
 } from "@scripts";
 
 const name = "TEST";
@@ -40,6 +41,7 @@ describe("ERC3643 Tests", () => {
   let signer_F: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   let identityRegistryMock: IdentityRegistryMock;
   let complianceMock: ComplianceMock;
@@ -82,6 +84,7 @@ describe("ERC3643 Tests", () => {
       signer_F = base.user5;
 
       asset = await ethers.getContractAt("IAsset", diamond.target);
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
       await executeRbac(asset, [
         {
@@ -149,11 +152,30 @@ describe("ERC3643 Tests", () => {
       expect(parsed["Version"]).to.equal(configVersion.toString());
     });
 
-    describe("initialize", () => {
-      it("GIVEN an already initialized token WHEN attempting to initialize again THEN transaction fails with AlreadyInitialized", async () => {
+    describe("initializeERC3643", () => {
+      it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeERC3643 is called THEN AccountHasNoRole", async () => {
         await expect(
-          asset.initialize_ERC3643(complianceMock.target as string, identityRegistryMock.target as string),
-        ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+          asset
+            .connect(signer_D)
+            .initializeERC3643(complianceMock.target as string, identityRegistryMock.target as string),
+        )
+          .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+          .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+      });
+
+      it("GIVEN already-initialised WHEN initializeERC3643 is called again THEN FacetAlreadyRegistered", async () => {
+        await expect(
+          asset.initializeERC3643(complianceMock.target as string, identityRegistryMock.target as string),
+        ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+      });
+    });
+
+    describe("initializeERC3643 event", () => {
+      it("GIVEN a fresh deployment WHEN initializeERC3643 is called THEN emits ERC3643Initialized", async () => {
+        await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_ERC3643_MANAGEMENT);
+        await expect(
+          asset.initializeERC3643(complianceMock.target as string, identityRegistryMock.target as string),
+        ).to.emit(asset, "ERC3643Initialized");
       });
     });
 

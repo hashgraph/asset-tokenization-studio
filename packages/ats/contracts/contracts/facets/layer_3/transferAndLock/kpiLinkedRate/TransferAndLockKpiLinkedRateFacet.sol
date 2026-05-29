@@ -9,4 +9,8 @@ contract TransferAndLockKpiLinkedRateFacet is TransferAndLockFacetBase {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = RESOLVER_KEY_TRANSFER_AND_LOCK_KPI_LINKED_RATE;
     }
+
+    function _transferAndLockInitializerKey() internal pure override returns (bytes32) {
+        return RESOLVER_KEY_TRANSFER_AND_LOCK_KPI_LINKED_RATE;
+    }
 }

@@ -31,8 +31,10 @@ contract CouponFacet is Coupon, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeCoupon.selector,
                 this.setCoupon.selector,
                 this.cancelCoupon.selector,
+                this.forceCancelCoupon.selector,
                 this.getCoupon.selector,
                 this.getCouponFor.selector,
                 this.getCouponAmountFor.selector,

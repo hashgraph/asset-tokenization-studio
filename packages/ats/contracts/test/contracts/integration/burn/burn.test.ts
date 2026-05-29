@@ -3,10 +3,10 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type IAsset, type ResolverProxy } from "@contract-types";
+import { type IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO } from "@scripts";
+import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO, EQUITY_CONFIG_ID, RESOLVER_KEY_BURN } from "@scripts";
 
 const AMOUNT = 1000;
 const BALANCE_OF_C_ORIGINAL = 2 * AMOUNT;
@@ -23,6 +23,7 @@ describe("Burn Tests", () => {
   let signer_E: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   describe("Multi partition mode", () => {
     async function deploySecurityFixtureMultiPartition() {
@@ -42,6 +43,7 @@ describe("Burn Tests", () => {
       signer_E = base.user4;
 
       asset = await ethers.getContractAt("IAsset", diamond.target);
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
       await executeRbac(asset, [
         {
           role: ATS_ROLES.ROLE_PAUSER,
@@ -413,6 +415,8 @@ describe("Burn Tests", () => {
       signer_E = base.user4;
 
       asset = await ethers.getContractAt("IAsset", diamond.target);
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
+
       await executeRbac(asset, [
         {
           role: ATS_ROLES.ROLE_KYC,
@@ -473,6 +477,51 @@ describe("Burn Tests", () => {
       await expect(
         deactivatedAsset.connect(base.deployer).redeemFrom(ethers.ZeroAddress, 0, "0x"),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("initializeBurn", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeBurn is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeBurn())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeBurn is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeBurn())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_BURN, 1);
+    });
+  });
+
+  describe("initializeBurn event", () => {
+    it("GIVEN a fresh deployment WHEN initializeBurn is called THEN emits BurnInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_BURN);
+      await expect(asset.initializeBurn()).to.emit(asset, "BurnInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational WHEN burn is called THEN AssetNotOperational", async () => {
+      await expect(asset.burn(ethers.ZeroAddress, 0n))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN redeem is called THEN AssetNotOperational", async () => {
+      await expect(asset.redeem(0n, "0x"))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN redeemFrom is called THEN AssetNotOperational", async () => {
+      await expect(asset.redeemFrom(ethers.ZeroAddress, 0n, "0x"))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 });

@@ -114,10 +114,17 @@ describe("Equity Tests", () => {
   });
 
   describe("Initialization", () => {
-    it("GIVEN an initialized equity WHEN trying to initialize again THEN transaction fails with AlreadyInitialized", async () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeEquityUSA is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeEquityUSA(getEquityDetails())).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN an initialized equity WHEN trying to initialize again THEN transaction fails with FacetAlreadyRegistered", async () => {
       await expect(asset.initializeEquityUSA(getEquityDetails())).to.be.revertedWithCustomError(
         asset,
-        "AlreadyInitialized",
+        "FacetAlreadyRegistered",
       );
     });
 
@@ -906,6 +913,62 @@ describe("Equity Tests", () => {
         const [voting2, isDisabled2] = await asset.getVoting(2);
         expect(isDisabled2).to.equal(false);
         expect(voting2.voting.recordDate).to.equal(votingRecordDateInSeconds + 10000);
+      });
+    });
+
+    describe("Force Cancel Voting", () => {
+      it("GIVEN account with ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelVoting before record date THEN transaction succeeds and isDisabled is true", async () => {
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C.address);
+
+        await asset.connect(signer_C).setVoting(votingData);
+
+        await expect(asset.connect(signer_C).forceCancelVoting(1))
+          .to.emit(asset, "VotingForceCancelled")
+          .withArgs(1, signer_C.address);
+        expect((await asset.getVoting(1)).isDisabled_).to.equal(true);
+      });
+
+      it("GIVEN account with ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelVoting after record date THEN transaction succeeds bypassing date guard", async () => {
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C.address);
+
+        await asset.connect(signer_C).setVoting(votingData);
+
+        await asset.changeSystemTimestamp(votingRecordDateInSeconds + 1);
+
+        await expect(asset.connect(signer_C).forceCancelVoting(1))
+          .to.emit(asset, "VotingForceCancelled")
+          .withArgs(1, signer_C.address);
+        expect((await asset.getVoting(1)).isDisabled_).to.equal(true);
+      });
+
+      it("GIVEN account without ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelVoting THEN transaction fails with AccountHasNoRole", async () => {
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_B.address);
+
+        await asset.connect(signer_B).setVoting(votingData);
+
+        await expect(asset.connect(signer_C).forceCancelVoting(1)).to.be.revertedWithCustomError(
+          asset,
+          "AccountHasNoRole",
+        );
+      });
+
+      it("GIVEN paused token WHEN forceCancelVoting THEN transaction fails with IsPaused", async () => {
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_B.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_B.address);
+
+        await asset.connect(signer_B).setVoting(votingData);
+
+        await asset.connect(signer_B).pause();
+
+        await expect(asset.connect(signer_B).forceCancelVoting(1)).to.be.revertedWithCustomError(asset, "IsPaused");
+      });
+
+      it("GIVEN no existing voting WHEN forceCancelVoting with invalid ID THEN transaction fails with WrongIndexForAction", async () => {
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C.address);
+
+        await expect(asset.connect(signer_C).forceCancelVoting(999)).to.be.rejected;
       });
     });
   });

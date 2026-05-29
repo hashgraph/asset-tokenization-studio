@@ -26,11 +26,9 @@ bytes32 constant STORAGE_LOCATION_FIXED_RATE = 0x577d3b71f198de7595699f8f2861298
  * @custom:storage-location erc7201:security.token.standard.storage.FixedRate
  */
 struct FixedRateDataStorage {
-    // ─── R1 Lifecycle (bool flags) ───────────────────────────
-    bool initialized;
-    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R1 Packed scalars (uint8, bytes3, address, enum) ────
     uint8 decimals;
-    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R2 Single-slot scalars (uint256, bytes32, string) ───
     uint256 rate;
 
     // ─── APPEND-ONLY ZONE BELOW ───
@@ -179,30 +177,6 @@ library InterestRateStorageWrapper {
      */
     function getCouponRateType() internal view returns (IInterestRate.RateType rateType_) {
         return interestRateTypeStorage().rateType;
-    }
-
-    /**
-     * @notice Checks whether the fixed rate data has been initialised.
-     * @return True if fixed rate data is initialised, false otherwise.
-     */
-    function isFixedRateInitialized() internal view returns (bool) {
-        return fixedRateStorage().initialized;
-    }
-
-    /**
-     * @notice Checks whether the KPI-linked rate data has been initialised.
-     * @return True if KPI-linked rate data is initialised, false otherwise.
-     */
-    function isKpiLinkedRateInitialized() internal view returns (bool) {
-        return kpiLinkedRateStorage().initialized;
-    }
-
-    /**
-     * @notice Checks whether the coupon rate type has been initialised.
-     * @return True if the coupon rate type has been initialised, false otherwise.
-     */
-    function isInterestRateTypeInitialized() internal view returns (bool) {
-        return interestRateTypeStorage().initialized;
     }
 
     /**

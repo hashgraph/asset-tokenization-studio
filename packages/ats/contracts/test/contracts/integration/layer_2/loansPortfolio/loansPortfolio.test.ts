@@ -2,7 +2,7 @@
 
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { type IAsset } from "@contract-types";
+import { type IAsset, MockDiamondCut } from "@contract-types";
 import {
   executeRbac,
   deployLoanTokenFixture,
@@ -12,12 +12,13 @@ import {
   getLoanDetails,
 } from "@test";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO } from "@scripts";
-import { ethers } from "hardhat";
+import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO, LOANS_PORTFOLIO } from "@scripts";
 import { HoldingsAssetType } from "@scripts/domain";
+import { ethers } from "hardhat";
 
 describe("LoansPortfolio Token Tests", () => {
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
@@ -33,10 +34,12 @@ describe("LoansPortfolio Token Tests", () => {
     signer_C = base.user3;
 
     asset = await ethers.getContractAt("IAsset", base.tokenAddress, signer_A);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", base.tokenAddress);
 
     await executeRbac(asset, [
       { role: ATS_ROLES.ROLE_LOANS_PORTFOLIO_MANAGER, members: [signer_A.address] },
       { role: ATS_ROLES.ROLE_PAUSER, members: [signer_B.address] },
+      { role: ATS_ROLES.ROLE_DEACTIVATE, members: [signer_A.address] },
     ]);
 
     loanAsset = await deployLoanToken();
@@ -83,13 +86,31 @@ describe("LoansPortfolio Token Tests", () => {
       expect(data.distributionPolicy).to.equal(DEFAULT_LOANS_PORTFOLIO_PARAMS.distributionPolicy);
     });
 
-    it("GIVEN an already initialized portfolio WHEN initializing again THEN reverts with AlreadyInitialized", async () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeLoansPortfolio is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(
+        asset.connect(signer_C).initializeLoansPortfolio({
+          portfolioType: DEFAULT_LOANS_PORTFOLIO_PARAMS.portfolioType,
+          distributionPolicy: DEFAULT_LOANS_PORTFOLIO_PARAMS.distributionPolicy,
+        }),
+      ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+    });
+
+    it("GIVEN an already initialized portfolio WHEN initializing again THEN reverts with FacetAlreadyRegistered", async () => {
       await expect(
         asset.initializeLoansPortfolio({
           portfolioType: DEFAULT_LOANS_PORTFOLIO_PARAMS.portfolioType,
           distributionPolicy: DEFAULT_LOANS_PORTFOLIO_PARAMS.distributionPolicy,
         }),
-      ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+      ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeLoansPortfolio is called THEN it emits LoansPortfolioInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(LOANS_PORTFOLIO);
+      const loansPortfolioData = {
+        portfolioType: DEFAULT_LOANS_PORTFOLIO_PARAMS.portfolioType,
+        distributionPolicy: DEFAULT_LOANS_PORTFOLIO_PARAMS.distributionPolicy,
+      };
+      await expect(asset.initializeLoansPortfolio(loansPortfolioData)).to.emit(asset, "LoansPortfolioInitialized");
     });
   });
 
@@ -995,6 +1016,42 @@ describe("LoansPortfolio Token Tests", () => {
       await expect(
         deactivatedAsset.connect(base.deployer).loansPortfolioWithdraw(ethers.ZeroAddress, ethers.ZeroAddress, 0),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN addHoldingsAsset THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.addHoldingsAsset({ assetAddress: ADDRESS_ZERO, holdingsAssetType: HoldingsAssetType.LOAN, country: "" }),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN removeHoldingsAsset THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.removeHoldingsAsset({
+          assetAddress: ADDRESS_ZERO,
+          holdingsAssetType: HoldingsAssetType.LOAN,
+          country: "",
+        }),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN notifyLoanHoldingsAssetUpdate THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.notifyLoanHoldingsAssetUpdate(ADDRESS_ZERO)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN loansPortfolioWithdraw THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.loansPortfolioWithdraw(ADDRESS_ZERO, ADDRESS_ZERO, 0)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
     });
   });
 });

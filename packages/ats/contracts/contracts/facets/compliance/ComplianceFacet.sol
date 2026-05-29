@@ -21,6 +21,7 @@ contract ComplianceFacet is Compliance, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeCompliance.selector,
                 this.canTransfer.selector,
                 this.canTransferFrom.selector,
                 this.setCompliance.selector,

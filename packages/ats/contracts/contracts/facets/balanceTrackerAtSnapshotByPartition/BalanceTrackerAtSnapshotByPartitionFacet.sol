@@ -28,6 +28,7 @@ contract BalanceTrackerAtSnapshotByPartitionFacet is BalanceTrackerAtSnapshotByP
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeBalanceTrackerAtSnapshotByPartition.selector,
                 this.balanceOfAtSnapshotByPartition.selector,
                 this.totalSupplyAtSnapshotByPartition.selector
             );

@@ -8,7 +8,7 @@ import { TransferAndLock } from "./TransferAndLock.sol";
 
 abstract contract TransferAndLockFacetBase is TransferAndLock, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.transferAndLock.selector);
+        return Bytes4Builder.build(this.initializeTransferAndLock.selector, this.transferAndLock.selector);
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {

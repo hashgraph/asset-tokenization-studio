@@ -21,6 +21,12 @@ bytes32 constant RESOLVER_KEY_DIVIDEND = 0xfcc58d1d55d14a1359461bb9cef220b267b98
  */
 interface IDividend is IDividendTypes {
     /**
+     * @notice Emitted once when the dividend capability is initialised on a token.
+     * @dev Fires exclusively from `initializeDividend`.
+     */
+    event DividendInitialized();
+
+    /**
      * @notice Emitted when an operator schedules a new dividend corporate action.
      * @param corporateActionId Identifier of the underlying corporate action.
      * @param dividendId One-indexed dividend identifier within the dividend corporate action type.
@@ -50,6 +56,13 @@ interface IDividend is IDividendTypes {
     event DividendCancelled(uint256 dividendId, address indexed operator);
 
     /**
+     * @notice Emitted when an admin force-cancels a dividend, bypassing date guards.
+     * @param dividendId One-indexed identifier of the force-cancelled dividend.
+     * @param operator Address that performed the force-cancellation.
+     */
+    event DividendForceCancelled(uint256 dividendId, address indexed operator);
+
+    /**
      * @notice Reverts when the underlying corporate-action creation step returns the zero id,
      *         indicating the dividend could not be persisted.
      */
@@ -62,6 +75,13 @@ interface IDividend is IDividendTypes {
      * @param dividendId One-indexed identifier of the dividend that cannot be cancelled.
      */
     error DividendAlreadyExecuted(bytes32 corporateActionId, uint256 dividendId);
+
+    /**
+     * @notice Initialises the dividend capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeDividend() external;
 
     /**
      * @notice Schedules a new dividend corporate action and registers the snapshot/record-date
@@ -84,6 +104,16 @@ interface IDividend is IDividendTypes {
      * @return success_ True if the cancellation was recorded.
      */
     function cancelDividend(uint256 dividendId) external returns (bool success_);
+
+    /**
+     * @notice Force-cancels a dividend regardless of its execution date.
+     * @dev Restricted to `ROLE_CORPORATE_ACTION_FORCE_CANCEL` and gated by the unpaused state
+     *      and `onlyMatchingActionType`. Marks the corporate action disabled unconditionally —
+     *      bypasses `DividendAlreadyExecuted` — and emits `DividendForceCancelled`.
+     * @param dividendId One-indexed identifier of the dividend to force-cancel.
+     * @return success_ True if the force-cancellation was recorded.
+     */
+    function forceCancelDividend(uint256 dividendId) external returns (bool success_);
 
     /**
      * @notice Returns the persisted dividend record together with its cancelled flag.

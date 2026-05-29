@@ -18,6 +18,12 @@ bytes32 constant RESOLVER_KEY_EXTERNAL_PAUSE = 0x7a8980089ef3860d6c0e831805ee281
  */
 interface IExternalPauseManagement {
     /**
+     * @notice Emitted once when the external pause capability is initialised on a token.
+     * @dev Fires exclusively from `initializeExternalPauses` after the storage write succeeds.
+     */
+    event ExternalPauseInitialized(address[] pauses);
+
+    /**
      * @notice Emitted when multiple external pause addresses are added or removed in a single
      *         batch.
      * @param operator Address of the caller who performed the update.
@@ -61,7 +67,7 @@ interface IExternalPauseManagement {
 
     /**
      * @notice One-time initialiser that populates the external pause list at token deployment.
-     * @dev Can only be called once; subsequent calls revert via `onlyNotExternalPauseInitialized`.
+     * @dev Can only be called once; subsequent calls revert via `onlyFacetNotRegistered`.
      *      The leading-underscore naming convention signals this is an initialiser function.
      * @param _pauses Initial array of external pause contract addresses to register.
      */

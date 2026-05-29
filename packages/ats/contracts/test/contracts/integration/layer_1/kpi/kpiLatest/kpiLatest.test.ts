@@ -3,8 +3,13 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type IAsset, type ResolverProxy } from "@contract-types";
-import { ATS_ROLES, dateToUnixTimestamp } from "@scripts";
+import { type IAsset, MockDiamondCut, type ResolverProxy } from "@contract-types";
+import {
+  ATS_ROLES,
+  dateToUnixTimestamp,
+  RESOLVER_KEY_KPIS_LATEST_KPI_LINKED_RATE,
+  BOND_KPI_LINKED_RATE_CONFIG_ID,
+} from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployBondKpiLinkedRateTokenFixture } from "@test";
 import { executeRbac } from "@test";
@@ -18,6 +23,7 @@ describe("Kpi Latest Tests", () => {
   let project2: string;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixtureMultiPartition() {
     const base = await deployBondKpiLinkedRateTokenFixture();
@@ -31,6 +37,7 @@ describe("Kpi Latest Tests", () => {
     project2 = signer_B.address;
 
     asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target, signer_A);
     await executeRbac(asset, [
       {
         role: ATS_ROLES.ROLE_PAUSER,
@@ -273,6 +280,37 @@ describe("Kpi Latest Tests", () => {
       await expect(
         deactivatedAsset.connect(base.deployer).addKpiData(0, 0, ethers.ZeroAddress),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("initializeKpis", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeKpis is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeKpis())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeKpis is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeKpis()).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+    });
+  });
+
+  describe("initializeKpis event", () => {
+    it("GIVEN a fresh deployment WHEN initializeKpis is called THEN emits KpisInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_KPIS_LATEST_KPI_LINKED_RATE);
+      await expect(asset.initializeKpis()).to.emit(asset, "KpisInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational WHEN addKpiData is called THEN AssetNotOperational", async () => {
+      await expect(asset.connect(signer_A).addKpiData(0n, 0n, ethers.ZeroAddress))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(BOND_KPI_LINKED_RATE_CONFIG_ID, 1);
     });
   });
 });
