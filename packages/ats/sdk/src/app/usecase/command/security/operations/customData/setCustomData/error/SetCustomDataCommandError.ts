@@ -3,9 +3,9 @@
 import { CommandError } from "@command/error/CommandError";
 import BaseError from "@core/error/BaseError";
 
-export class SetMetadataCommandError extends CommandError {
+export class SetCustomDataCommandError extends CommandError {
   constructor(error: Error) {
-    const msg = `An error occurred while setting metadata: ${error.message}`;
+    const msg = `An error occurred while setting custom data: ${error.message}`;
     super(msg, error instanceof BaseError ? error.errorCode : undefined);
   }
 }

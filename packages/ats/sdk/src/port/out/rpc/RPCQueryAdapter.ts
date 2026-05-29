@@ -1814,11 +1814,11 @@ export class RPCQueryAdapter {
     return Number(total);
   }
 
-  async getMetadata(address: EvmAddress, key: string): Promise<string[]> {
-    LogService.logTrace(`Getting metadata for the security: ${address.toString()}`);
-    const result = await this.connect(IAsset__factory, address.toString()).getMetadata(
+  async getCustomData(address: EvmAddress, key: string): Promise<string[]> {
+    LogService.logTrace(`Getting custom data for the security: ${address.toString()}`);
+    const result = await this.connect(IAsset__factory, address.toString()).getCustomData(
       ethers.encodeBytes32String(key),
     );
-    return result.map((v) => ethers.toUtf8String(v));
+    return result.map((v: string) => ethers.toUtf8String(v));
   }
 }

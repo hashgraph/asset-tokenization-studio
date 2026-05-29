@@ -71,8 +71,8 @@ const BOND_FIXED_RATE_FACETS = [
   "CoreAdjustedFacet",
   "InitializerFacet", // Core initializer facet
 
-  //Metadata
-  "MetadataFacet",
+  //CustomData
+  "CustomDataFacet",
 
   // ERC Standards
   "TransferFacet",

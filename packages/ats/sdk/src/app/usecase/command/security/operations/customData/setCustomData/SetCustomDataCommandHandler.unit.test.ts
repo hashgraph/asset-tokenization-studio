@@ -14,15 +14,15 @@ import EvmAddress from "@domain/context/contract/EvmAddress";
 import ValidationService from "@service/validation/ValidationService";
 import Account from "@domain/context/account/Account";
 import { SecurityRole } from "@domain/context/security/SecurityRole";
-import { SetMetadataCommand, SetMetadataCommandResponse } from "./SetMetadataCommand";
-import { SetMetadataCommandHandler } from "./SetMetadataCommandHandler";
-import { SetMetadataCommandFixture } from "@test/fixtures/metadata/MetadataFixture";
-import { SetMetadataCommandError } from "./error/SetMetadataCommandError";
+import { SetCustomDataCommand, SetCustomDataCommandResponse } from "./SetCustomDataCommand";
+import { SetCustomDataCommandHandler } from "./SetCustomDataCommandHandler";
+import { SetCustomDataCommandFixture } from "@test/fixtures/customData/CustomDataFixture";
+import { SetCustomDataCommandError } from "./error/SetCustomDataCommandError";
 import { ErrorCode } from "@core/error/BaseError";
 
-describe("SetMetadataCommandHandler", () => {
-  let handler: SetMetadataCommandHandler;
-  let command: SetMetadataCommand;
+describe("SetCustomDataCommandHandler", () => {
+  let handler: SetCustomDataCommandHandler;
+  let command: SetCustomDataCommand;
 
   const transactionServiceMock = createMock<TransactionService>();
   const validationServiceMock = createMock<ValidationService>();
@@ -38,13 +38,13 @@ describe("SetMetadataCommandHandler", () => {
   const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
-    handler = new SetMetadataCommandHandler(
+    handler = new SetCustomDataCommandHandler(
       accountServiceMock,
       transactionServiceMock,
       validationServiceMock,
       contractServiceMock,
     );
-    command = SetMetadataCommandFixture.create();
+    command = SetCustomDataCommandFixture.create();
   });
 
   afterEach(() => {
@@ -52,32 +52,32 @@ describe("SetMetadataCommandHandler", () => {
   });
 
   describe("execute", () => {
-    it("throws SetMetadataCommandError when command fails with uncaught error", async () => {
+    it("throws SetCustomDataCommandError when command fails with uncaught error", async () => {
       const fakeError = new Error(errorMsg);
 
       contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
 
       const resultPromise = handler.execute(command);
 
-      await expect(resultPromise).rejects.toBeInstanceOf(SetMetadataCommandError);
+      await expect(resultPromise).rejects.toBeInstanceOf(SetCustomDataCommandError);
       await expect(resultPromise).rejects.toMatchObject({
-        message: expect.stringContaining(`An error occurred while setting metadata: ${errorMsg}`),
+        message: expect.stringContaining(`An error occurred while setting custom data: ${errorMsg}`),
         errorCode: ErrorCode.UncaughtCommandError,
       });
     });
 
-    it("should successfully set metadata", async () => {
+    it("should successfully set custom data", async () => {
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(evmAddress);
       accountServiceMock.getCurrentAccount.mockReturnValue(account);
       validationServiceMock.checkPause.mockResolvedValue(undefined);
       validationServiceMock.checkRole.mockResolvedValue(undefined);
-      transactionServiceMock.getHandler().setMetadata.mockResolvedValue({
+      transactionServiceMock.getHandler().setCustomData.mockResolvedValue({
         id: transactionId,
       });
 
       const result = await handler.execute(command);
 
-      expect(result).toBeInstanceOf(SetMetadataCommandResponse);
+      expect(result).toBeInstanceOf(SetCustomDataCommandResponse);
       expect(result.payload).toBe(true);
       expect(result.transactionId).toBe(transactionId);
 
@@ -85,7 +85,7 @@ describe("SetMetadataCommandHandler", () => {
       expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
       expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
       expect(accountServiceMock.getCurrentAccount).toHaveBeenCalledTimes(1);
-      expect(transactionServiceMock.getHandler().setMetadata).toHaveBeenCalledTimes(1);
+      expect(transactionServiceMock.getHandler().setCustomData).toHaveBeenCalledTimes(1);
 
       expect(validationServiceMock.checkPause).toHaveBeenCalledWith(command.securityId);
       expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
@@ -95,7 +95,7 @@ describe("SetMetadataCommandHandler", () => {
       );
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(command.securityId);
 
-      expect(transactionServiceMock.getHandler().setMetadata).toHaveBeenCalledWith(
+      expect(transactionServiceMock.getHandler().setCustomData).toHaveBeenCalledWith(
         evmAddress,
         command.key,
         command.value,

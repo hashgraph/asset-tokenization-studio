@@ -50,7 +50,7 @@ const EQUITY_FACETS = [
   "TransferFacet",
   "CoreAdjustedFacet",
   "InitializerFacet",
-  "MetadataFacet",
+  "CustomDataFacet",
   "FreezeFacet",
   "BatchFreezeFacet",
   "KycFacet",

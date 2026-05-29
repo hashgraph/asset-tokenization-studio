@@ -108,7 +108,7 @@ import { ILockAtSnapshotByPartition } from "../facets/lockAtSnapshotByPartition/
 import { ILockByPartition } from "../facets/lockByPartition/ILockByPartition.sol";
 import { IMaturity } from "../facets/maturity/IMaturity.sol";
 import { IMaturityByPartition } from "../facets/maturityByPartition/IMaturityByPartition.sol";
-import { IMetadata } from "../facets/metadata/IMetadata.sol";
+import { ICustomData } from "../facets/customData/ICustomData.sol";
 import { IMintByPartition } from "../facets/mintByPartition/IMintByPartition.sol";
 import { INominalValueAtSnapshot } from "../facets/nominalValueAtSnapshot/INominalValueAtSnapshot.sol";
 import { INonces } from "../facets/nonces/INonces.sol";
@@ -568,8 +568,8 @@ abstract contract Factory is IFactory {
         ITransfer(_securityAddress).initializeTransfer();
         // configure core adjusted
         ICoreAdjusted(_securityAddress).initializeCoreAdjusted();
-        // configure metadata
-        IMetadata(_securityAddress).initializeMetadata();
+        // configure custom data
+        ICustomData(_securityAddress).initializeCustomData();
         // configure freeze
         IFreeze(_securityAddress).initializeFreeze();
         // configure batch freeze

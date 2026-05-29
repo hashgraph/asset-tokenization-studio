@@ -78,8 +78,8 @@ const BOND_FACETS = [
   "CoreAdjustedFacet",
   "InitializerFacet", // Core initializer facet
 
-  //Metadata
-  "MetadataFacet",
+  //CustomData
+  "CustomDataFacet",
 
   // ERC Standards
   "TransferFacet",

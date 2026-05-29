@@ -98,8 +98,8 @@ bytes32 constant ROLE_LOCKER = 0xd327cd9a2be405896f3d4584b3b437d798833cc4aa0aafb
 /// @custom:hash role MaturityRedeemer
 bytes32 constant ROLE_MATURITY_REDEEMER = 0x433f48f8aca23480f6ab07666cbc9131d32a0b4672033453f65e18f4dd390523;
 
-/// @custom:hash role MetadataManager
-bytes32 constant ROLE_METADATA_MANAGER = 0x4f7e4b68edeb0f234a42d9cbed9d053fbaf6637d8ba9159a9d83f8e42ffc6733;
+/// @custom:hash role CustomDataManager
+bytes32 constant ROLE_CUSTOM_DATA_MANAGER = 0x0b348f171b6004b74a59b08b77c142a65c416e0e20c855602b8b2510951101b0;
 
 /// @custom:hash role NominalValue
 bytes32 constant ROLE_NOMINAL_VALUE = 0xebf9ab6852aef7bc1e4068a64bd360845c54d5d95d4fed9fd47c52bbe7c15b8b;

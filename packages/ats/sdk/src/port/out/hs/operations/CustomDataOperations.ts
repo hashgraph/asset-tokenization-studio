@@ -9,22 +9,22 @@ import LogService from "@service/log/LogService";
 import { encodeBytes32String, toUtf8Bytes } from "ethers";
 import { TransactionExecutor } from "../TransactionExecutor";
 
-export class MetadataOperations {
+export class CustomDataOperations {
   constructor(private readonly executor: TransactionExecutor) {}
 
-  async setMetadata(
+  async setCustomData(
     security: EvmAddress,
     key: string,
     value: string[],
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    LogService.logTrace(`Setting metadata for security: ${security.toString()}`);
+    LogService.logTrace(`Setting custom data for security: ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
       IAsset__factory.createInterface(),
-      "setMetadata",
+      "setCustomData",
       [encodeBytes32String(key), value.map((v) => toUtf8Bytes(v))],
-      GAS.SET_METADATA,
+      GAS.SET_CUSTOM_DATA,
     );
   }
 }

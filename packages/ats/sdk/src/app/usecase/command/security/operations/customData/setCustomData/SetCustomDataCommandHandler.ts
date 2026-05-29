@@ -3,17 +3,17 @@
 import { ICommandHandler } from "@core/command/CommandHandler";
 import { CommandHandler } from "@core/decorator/CommandHandlerDecorator";
 import AccountService from "@service/account/AccountService";
-import { SetMetadataCommand, SetMetadataCommandResponse } from "./SetMetadataCommand";
+import { SetCustomDataCommand, SetCustomDataCommandResponse } from "./SetCustomDataCommand";
 import TransactionService from "@service/transaction/TransactionService";
 import { lazyInject } from "@core/decorator/LazyInjectDecorator";
 import EvmAddress from "@domain/context/contract/EvmAddress";
 import { SecurityRole } from "@domain/context/security/SecurityRole";
 import ValidationService from "@service/validation/ValidationService";
 import ContractService from "@service/contract/ContractService";
-import { SetMetadataCommandError } from "./error/SetMetadataCommandError";
+import { SetCustomDataCommandError } from "./error/SetCustomDataCommandError";
 
-@CommandHandler(SetMetadataCommand)
-export class SetMetadataCommandHandler implements ICommandHandler<SetMetadataCommand> {
+@CommandHandler(SetCustomDataCommand)
+export class SetCustomDataCommandHandler implements ICommandHandler<SetCustomDataCommand> {
   constructor(
     @lazyInject(AccountService)
     private readonly accountService: AccountService,
@@ -25,7 +25,7 @@ export class SetMetadataCommandHandler implements ICommandHandler<SetMetadataCom
     private readonly contractService: ContractService,
   ) {}
 
-  async execute(command: SetMetadataCommand): Promise<SetMetadataCommandResponse> {
+  async execute(command: SetCustomDataCommand): Promise<SetCustomDataCommandResponse> {
     try {
       const { securityId, key, value } = command;
       const handler = this.transactionService.getHandler();
@@ -37,11 +37,11 @@ export class SetMetadataCommandHandler implements ICommandHandler<SetMetadataCom
 
       await this.validationService.checkRole(SecurityRole._METADATA_MANAGER_ROLE, account.id.toString(), securityId);
 
-      const res = await handler.setMetadata(securityEvmAddress, key, value, securityId);
+      const res = await handler.setCustomData(securityEvmAddress, key, value, securityId);
 
-      return Promise.resolve(new SetMetadataCommandResponse(res.error === undefined, res.id!));
+      return Promise.resolve(new SetCustomDataCommandResponse(res.error === undefined, res.id!));
     } catch (error) {
-      throw new SetMetadataCommandError(error as Error);
+      throw new SetCustomDataCommandError(error as Error);
     }
   }
 }

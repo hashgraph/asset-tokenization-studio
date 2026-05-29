@@ -3,11 +3,11 @@
 import { Query } from "@core/query/Query";
 import { QueryResponse } from "@core/query/QueryResponse";
 
-export class GetMetadataQueryResponse implements QueryResponse {
+export class GetCustomDataQueryResponse implements QueryResponse {
   constructor(public readonly value: string[]) {}
 }
 
-export class GetMetadataQuery extends Query<GetMetadataQueryResponse> {
+export class GetCustomDataQuery extends Query<GetCustomDataQueryResponse> {
   constructor(
     public readonly securityId: string,
     public readonly key: string,

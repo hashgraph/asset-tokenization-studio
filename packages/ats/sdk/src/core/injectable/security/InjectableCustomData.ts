@@ -3,8 +3,8 @@
 import { SetNameCommandHandler } from "@command/security/operations/tokenMetadata/setName/SetNameCommandHandler";
 import { TOKENS } from "../Tokens";
 import { SetSymbolCommandHandler } from "@command/security/operations/tokenMetadata/setSymbol/SetSymbolCommandHandler";
-import { SetMetadataCommandHandler } from "@command/security/operations/metadata/setMetadata/SetMetadataCommandHandler";
-import { GetMetadataQueryHandler } from "@query/security/getMetadata/GetMetadataQueryHandler";
+import { SetCustomDataCommandHandler } from "@command/security/operations/customData/setCustomData/SetCustomDataCommandHandler";
+import { GetCustomDataQueryHandler } from "@query/security/getCustomData/GetCustomDataQueryHandler";
 
 export const COMMAND_HANDLERS_METADATA = [
   {
@@ -17,13 +17,13 @@ export const COMMAND_HANDLERS_METADATA = [
   },
   {
     token: TOKENS.COMMAND_HANDLER,
-    useClass: SetMetadataCommandHandler,
+    useClass: SetCustomDataCommandHandler,
   },
 ];
 
 export const QUERY_HANDLERS_METADATA = [
   {
     token: TOKENS.QUERY_HANDLER,
-    useClass: GetMetadataQueryHandler,
+    useClass: GetCustomDataQueryHandler,
   },
 ];

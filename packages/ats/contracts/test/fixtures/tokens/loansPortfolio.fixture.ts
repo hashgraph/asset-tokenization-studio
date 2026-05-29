@@ -264,7 +264,7 @@ export async function deployLoansPortfolioTokenFixture({
   await asset.initializeDeactivate();
   await asset.initializeOperatorHoldByPartition();
   await asset.initializeCoreAdjusted();
-  await asset.initializeMetadata();
+  await asset.initializeCustomData();
   await asset.initializeCompliance();
   await asset.initializeCouponListing();
   await asset.initializeCapByPartition();

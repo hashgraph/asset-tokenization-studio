@@ -139,7 +139,7 @@ import { IControlList } from "./controlList/IControlList.sol";
 import { IBatchBurn } from "./batchBurn/IBatchBurn.sol";
 import { IBatchMint } from "./batchMint/IBatchMint.sol";
 import { IBatchTransfer } from "./batchTransfer/IBatchTransfer.sol";
-import { IMetadata } from "./metadata/IMetadata.sol";
+import { ICustomData } from "./customData/ICustomData.sol";
 import { IDeactivate } from "./deactivate/IDeactivate.sol";
 import { IOperatorByPartition } from "./operatorByPartition/IOperatorByPartition.sol";
 import { IInterestRate } from "./interestRate/IInterestRate.sol";
@@ -288,7 +288,7 @@ interface IAsset is
     IBatchBurn,
     IBatchMint,
     IBatchTransfer,
-    IMetadata,
+    ICustomData,
     IDeactivate,
     IOperatorByPartition,
     ISecurityHolders,
