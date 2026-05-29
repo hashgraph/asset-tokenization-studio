@@ -34,6 +34,7 @@ contract DocumentationFacet is Documentation, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeDocumentation.selector,
                 this.getDocument.selector,
                 this.setDocument.selector,
                 this.removeDocument.selector,

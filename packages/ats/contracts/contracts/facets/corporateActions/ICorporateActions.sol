@@ -20,6 +20,12 @@ bytes32 constant RESOLVER_KEY_CORPORATE_ACTIONS = 0x4f091e1f288c10131ffc090469e6
  */
 interface ICorporateActions is ICommonErrors {
     /**
+     * @notice Emitted once when the corporate actions capability is initialised on a token.
+     * @dev Fires exclusively from `initializeCorporateActions`.
+     */
+    event CorporateActionsInitialized();
+
+    /**
      * @notice Emitted when a new corporate action is registered on the token.
      * @param operator Address of the caller who added the corporate action.
      * @param actionType Classification key for the corporate action (e.g. dividend, vote).
@@ -68,6 +74,13 @@ interface ICorporateActions is ICommonErrors {
      * @param corporateActionId The identifier of the already-disabled corporate action.
      */
     error CorporateActionAlreadyDisabled(bytes32 corporateActionId);
+
+    /**
+     * @notice Initialises the corporate actions capability on the token.
+     * @dev Callable once; subsequent calls revert with FacetAlreadyRegistered.
+     *      Requires DEFAULT_ADMIN_ROLE. Called by the factory during deployment.
+     */
+    function initializeCorporateActions() external;
 
     /**
      * @notice Returns the stored details for a single corporate action.

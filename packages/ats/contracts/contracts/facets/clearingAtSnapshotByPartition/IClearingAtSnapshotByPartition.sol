@@ -16,6 +16,19 @@ bytes32 constant RESOLVER_KEY_CLEARING_AT_SNAPSHOT_BY_PARTITION = 0xf55083b17a9b
  */
 interface IClearingAtSnapshotByPartition {
     /**
+     * @notice Emitted once when the clearing-at-snapshot-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeClearingAtSnapshotByPartition`.
+     */
+    event ClearingAtSnapshotByPartitionInitialized();
+
+    /**
+     * @notice Initialises the clearing-at-snapshot-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeClearingAtSnapshotByPartition() external;
+
+    /**
      * @notice Returns the cleared balance of a token holder for a given partition at the time of
      *         a given snapshot.
      * @param _partition   The partition identifier.

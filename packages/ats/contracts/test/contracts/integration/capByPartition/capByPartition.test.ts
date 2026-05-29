@@ -3,8 +3,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ZERO, EMPTY_STRING, ATS_ROLES } from "@scripts";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import { DEFAULT_PARTITION, ZERO, EMPTY_STRING, ATS_ROLES, RESOLVER_KEY_CAP_BY_PARTITION } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
@@ -21,6 +21,7 @@ describe("CapByPartition Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixtureMultiPartition() {
     const base = await deployEquityTokenFixture({
@@ -37,6 +38,7 @@ describe("CapByPartition Tests", () => {
     signer_C = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
       {
@@ -142,6 +144,27 @@ describe("CapByPartition Tests", () => {
     });
   });
 
+  describe("initializeCapByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeCapByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeCapByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeCapByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeCapByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_CAP_BY_PARTITION, 1);
+    });
+  });
+
+  describe("initializeCapByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeCapByPartition is called THEN emits CapByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_CAP_BY_PARTITION);
+      await expect(asset.initializeCapByPartition()).to.emit(asset, "CapByPartitionInitialized");
+    });
+  });
+
   describe("Deactivated", () => {
     it("GIVEN a deactivated asset WHEN setMaxSupplyByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
@@ -151,6 +174,18 @@ describe("CapByPartition Tests", () => {
       await expect(
         deactivatedAsset.connect(base.deployer).setMaxSupplyByPartition(ethers.ZeroHash, 0),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setMaxSupplyByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.setMaxSupplyByPartition(DEFAULT_PARTITION, 0)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
     });
   });
 });

@@ -15,6 +15,13 @@ bytes32 constant RESOLVER_KEY_MINT = 0x394ec838636f78e91b7dbb3e4ea567e07bbb3886a
  */
 interface IMint {
     /**
+    /**
+     * @notice Emitted once when the ERC-1594 capability is initialised on a token.
+     * @dev Fires exclusively from `initializeERC1594` after the storage write succeeds.
+     */
+    event ERC1594Initialized();
+
+    /**
      * @notice Emitted when new tokens are issued to a holder.
      * @param _operator Account that invoked the issuance (issuer or agent).
      * @param _to Recipient of the newly issued tokens.
@@ -25,11 +32,10 @@ interface IMint {
 
     /**
      * @notice Initialises the ERC-1594 StorageWrapper on the calling contract.
-     * @dev Can only be invoked once per contract; subsequent calls revert via the
-     *      `onlyNotERC1594Initialized` modifier on the implementation.
+     * @dev Can only be invoked once per contract; subsequent calls revert via
+     *      `onlyFacetNotRegistered`.
      */
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1594() external;
+    function initializeERC1594() external;
 
     /**
      * @notice Issues new tokens to a token holder under the ERC-1594 semantics.

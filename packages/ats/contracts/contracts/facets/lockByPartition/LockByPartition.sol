@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ILockByPartition } from "./ILockByPartition.sol";
+import { ILockByPartition, RESOLVER_KEY_LOCK_BY_PARTITION } from "./ILockByPartition.sol";
 import { ROLE_LOCKER } from "../../constants/roles.sol";
 import { LockStorageWrapper } from "../../domain/asset/LockStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
@@ -22,6 +24,17 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  *      `LockByPartitionFacet`.
  */
 abstract contract LockByPartition is ILockByPartition, Modifiers {
+    /// @inheritdoc ILockByPartition
+    function initializeLockByPartition()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_LOCK_BY_PARTITION)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_LOCK_BY_PARTITION);
+        emit LockByPartitionInitialized();
+    }
+
     /**
      * @inheritdoc ILockByPartition
      * @dev Pause-gated, restricted to `ROLE_LOCKER`, validated against the
@@ -37,6 +50,7 @@ abstract contract LockByPartition is ILockByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_LOCKER)
@@ -64,6 +78,7 @@ abstract contract LockByPartition is ILockByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
@@ -75,6 +90,46 @@ abstract contract LockByPartition is ILockByPartition, Modifiers {
         address sender = EvmAccessors.getMsgSender();
         success_ = LockStorageWrapper.releaseByPartition(_partition, _lockId, _tokenHolder, sender);
         emit LockByPartitionReleased(sender, _tokenHolder, _partition, _lockId);
+    }
+
+    /**
+     * @inheritdoc ILockByPartition
+     * @dev Pause-gated, restricted to `ROLE_LOCKER`, validated against the
+     *      single-partition / default-partition rule and the lock-id existence check.
+     *      Delegates the storage mutation to `LockStorageWrapper.updateLockExpiration` and
+     *      emits `LockExpirationUpdated` with both the old and new timestamps.
+     */
+    function updateLockExpirationByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId,
+        uint256 _newExpirationTimestamp
+    )
+        external
+        override
+        onlyActivated
+        onlyUnpaused
+        onlyRole(ROLE_LOCKER)
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyWithValidLockId(_partition, _tokenHolder, _lockId)
+        onlyValidExpirationTimestamp(_newExpirationTimestamp)
+        returns (bool success_)
+    {
+        uint256 oldExpirationTimestamp = LockStorageWrapper.updateLockExpiration(
+            _partition,
+            _tokenHolder,
+            _lockId,
+            _newExpirationTimestamp
+        );
+        emit LockExpirationUpdated(
+            EvmAccessors.getMsgSender(),
+            _tokenHolder,
+            _partition,
+            _lockId,
+            oldExpirationTimestamp,
+            _newExpirationTimestamp
+        );
+        success_ = true;
     }
 
     /**

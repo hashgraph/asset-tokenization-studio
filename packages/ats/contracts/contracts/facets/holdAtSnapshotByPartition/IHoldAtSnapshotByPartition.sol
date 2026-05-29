@@ -15,6 +15,19 @@ bytes32 constant RESOLVER_KEY_HOLD_AT_SNAPSHOT_BY_PARTITION = 0xe6aa6abeda5257bb
  */
 interface IHoldAtSnapshotByPartition {
     /**
+     * @notice Emitted once when the hold-at-snapshot-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeHoldAtSnapshotByPartition`.
+     */
+    event HoldAtSnapshotByPartitionInitialized();
+
+    /**
+     * @notice Initialises the hold-at-snapshot-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeHoldAtSnapshotByPartition() external;
+
+    /**
      * @notice Returns the held balance of a token holder for a given partition at the time of a
      *         given snapshot.
      * @param _partition   The partition identifier.

@@ -5,8 +5,16 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
-import { IAsset, type ResolverProxy } from "@contract-types";
-import { ADDRESS_ZERO, ATS_ROLES, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
+import { IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
+import {
+  ADDRESS_ZERO,
+  ATS_ROLES,
+  EMPTY_HEX_BYTES,
+  EMPTY_STRING,
+  ZERO,
+  EQUITY_CONFIG_ID,
+  RESOLVER_KEY_OPERATOR_CLEARING_HOLDBYPARTITION,
+} from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
@@ -40,6 +48,7 @@ let hold: Hold;
 
 describe("OperatorClearingHoldByPartition Tests", () => {
   let diamond: ResolverProxy;
+  let mockDiamondCut: MockDiamondCut;
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
@@ -90,7 +99,7 @@ describe("OperatorClearingHoldByPartition Tests", () => {
     signer_E = base.user4;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
-
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       { role: ATS_ROLES.ROLE_ISSUER, members: [signer_B.address] },
       { role: ATS_ROLES.ROLE_CONTROLLER, members: [signer_C.address] },
@@ -256,6 +265,51 @@ describe("OperatorClearingHoldByPartition Tests", () => {
           { amount: 0, expirationTimestamp: 0, escrow: ethers.ZeroAddress, to: ethers.ZeroAddress, data: "0x" },
         ),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("initializeOperatorClearingHoldByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeOperatorClearingHoldByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeOperatorClearingHoldByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeOperatorClearingHoldByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeOperatorClearingHoldByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_OPERATOR_CLEARING_HOLDBYPARTITION, 1);
+    });
+  });
+
+  describe("initializeOperatorClearingHoldByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeOperatorClearingHoldByPartition is called THEN emits OperatorClearingHoldByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_OPERATOR_CLEARING_HOLDBYPARTITION);
+      await expect(asset.initializeOperatorClearingHoldByPartition()).to.emit(
+        asset,
+        "OperatorClearingHoldByPartitionInitialized",
+      );
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational WHEN operatorClearingCreateHoldByPartition is called THEN AssetNotOperational", async () => {
+      await expect(
+        asset.operatorClearingCreateHoldByPartition(
+          {
+            clearingOperation: { partition: ethers.ZeroHash, expirationTimestamp: 0n, data: "0x" },
+            from: ethers.ZeroAddress,
+            operatorData: "0x",
+          },
+          { amount: 0n, expirationTimestamp: 0n, escrow: ethers.ZeroAddress, to: ethers.ZeroAddress, data: "0x" },
+        ),
+      )
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 });

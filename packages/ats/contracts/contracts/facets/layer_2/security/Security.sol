@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ISecurity, SecurityRegulationData } from "./ISecurity.sol";
+import { ISecurity, SecurityRegulationData, RESOLVER_KEY_SECURITY } from "./ISecurity.sol";
 import {
     SecurityStorageWrapper,
     SecurityRegulationDataStorage
 } from "../../../domain/asset/SecurityStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { RegulationData, AdditionalSecurityData } from "../../../constants/regulation.sol";
-import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
+import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
 
 /**
  * @title Security
@@ -25,8 +26,10 @@ abstract contract Security is ISecurity, Modifiers {
     function initializeSecurity(
         RegulationData memory _regulationData,
         AdditionalSecurityData calldata _additionalSecurityData
-    ) external override onlyNotSecurityInitialized {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_SECURITY) {
         SecurityStorageWrapper.initializeSecurity(_regulationData, _additionalSecurityData);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_SECURITY);
+        emit SecurityInitialized(_regulationData, _additionalSecurityData);
     }
 
     /// @inheritdoc ISecurity

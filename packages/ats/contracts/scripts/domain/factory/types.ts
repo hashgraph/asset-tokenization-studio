@@ -136,6 +136,8 @@ export enum SecurityType {
   EQUITY = 1,
   BOND_FIXED_RATE = 2,
   BOND_KPI_LINKED_RATE = 3,
+  LOAN = 4,
+  LOAN_PORTFOLIO = 5,
   BOND_SPT_RATE = 4,
   DEPOSIT_TOKEN = 5,
 }

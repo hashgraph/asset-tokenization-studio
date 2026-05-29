@@ -18,8 +18,14 @@ bytes32 constant RESOLVER_KEY_CLEARING = 0xb101eca2006801ca94d6bc86288da88fc7f2d
  */
 interface IClearing is IClearingTypes {
     /**
+     * @notice Emitted once when the clearing module is initialised on a token.
+     * @dev Fires exclusively from `initializeClearing` after the storage write succeeds.
+     */
+    event ClearingInitialized(bool clearingActive);
+
+    /**
      * @notice Initializes the clearing module with the given activation state
-     * @dev Can only be called once per token; subsequent calls revert with `AlreadyInitialized`
+     * @dev Can only be called once per token; subsequent calls revert with `FacetAlreadyRegistered`
      * @param _activateClearing Whether clearing should be activated on initialization
      */
     function initializeClearing(bool _activateClearing) external;

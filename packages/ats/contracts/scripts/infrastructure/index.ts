@@ -232,6 +232,7 @@ export {
 export {
   waitForTransaction,
   hederaGasOverrides,
+  gasLimitOverride,
   extractRevertReason,
   getGasPrice,
   estimateGasLimit,
@@ -282,6 +283,7 @@ export { fetchHederaContractId, getMirrorNodeUrl, isHederaNetwork } from "./util
 
 export { getSelector } from "./utils/selector";
 export { decodeEvent } from "./utils/decodeEvent";
+export { decodeCustomError } from "./utils/decodeCustomError";
 export { dateToUnixTimestamp, generateTimestamp } from "./utils/time";
 
 export { withRetry, withRetryFn, DEFAULT_RETRYABLE_ERRORS } from "./utils/retry";

@@ -19,6 +19,19 @@ bytes32 constant RESOLVER_KEY_PROTECTED_HOLD_BY_PARTITION = 0x5b77b995d3e53c3e46
  */
 interface IProtectedHoldByPartition is IHoldTypes {
     /**
+     * @notice Emitted once when the protected-hold-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeProtectedHoldByPartition`.
+     */
+    event ProtectedHoldByPartitionInitialized();
+
+    /**
+     * @notice Initialises the protected-hold-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeProtectedHoldByPartition() external;
+
+    /**
      * @notice Creates a hold on a protected partition on behalf of a token holder, authorised by
      *         an off-chain signature.
      * @dev Caller must hold the partition-specific role returned by

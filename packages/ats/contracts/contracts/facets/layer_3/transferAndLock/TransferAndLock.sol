@@ -10,8 +10,30 @@ import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapp
 import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 import { TokenCoreOps } from "../../../domain/orchestrator/TokenCoreOps.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
 
+/**
+ * @title TransferAndLock
+ * @notice Provides default-partition transfer and lock operations for security tokens.
+ * @dev Implements `ITransferAndLock` for tokens without multi-partition support. Transfers
+ *      tokens through `TokenCoreOps` before creating a lock in `LockStorageWrapper`, so the
+ *      transfer must succeed before any lock state is written. Intended for diamond facet use.
+ * @author Asset Tokenization Studio Team
+ */
 abstract contract TransferAndLock is ITransferAndLock, Modifiers {
+    /// @inheritdoc ITransferAndLock
+    function initializeTransferAndLock()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_transferAndLockInitializerKey())
+    {
+        InitializerStorageWrapper.setFacetToReady(_transferAndLockInitializerKey());
+        emit TransferAndLockInitialized();
+    }
+
+    /// @inheritdoc ITransferAndLock
     function transferAndLock(
         address _to,
         uint256 _amount,
@@ -20,6 +42,7 @@ abstract contract TransferAndLock is ITransferAndLock, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_LOCKER)
@@ -53,4 +76,12 @@ abstract contract TransferAndLock is ITransferAndLock, Modifiers {
             lockId_
         );
     }
+
+    /**
+     * @notice Returns the unique initialisation key for this transfer-and-lock facet.
+     * @dev Implementations must return a stable key used to prevent repeated facet
+     *      initialisation.
+     * @return The resolver key used by `InitializerStorageWrapper` for this facet.
+     */
+    function _transferAndLockInitializerKey() internal view virtual returns (bytes32);
 }

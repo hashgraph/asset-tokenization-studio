@@ -44,8 +44,7 @@ library ProceedRecipientsStorageWrapper {
      * @param _proceedRecipients Addresses to register as proceed recipients.
      * @param _data Payload bytes associated 1:1 with each recipient.
      */
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ProceedRecipients(address[] calldata _proceedRecipients, bytes[] calldata _data) internal {
+    function initializeProceedRecipients(address[] calldata _proceedRecipients, bytes[] calldata _data) internal {
         uint256 length = _proceedRecipients.length;
         for (uint256 index; index < length; ) {
             ExternalListManagementStorageWrapper.checkValidAddress(_proceedRecipients[index]);
@@ -58,8 +57,6 @@ library ProceedRecipientsStorageWrapper {
                 ++index;
             }
         }
-
-        ExternalListManagementStorageWrapper.setExternalListInitialized(STORAGE_LOCATION_PROCEED_RECIPIENTS);
     }
 
     /**
@@ -161,15 +158,6 @@ library ProceedRecipientsStorageWrapper {
                 _pageIndex,
                 _pageLength
             );
-    }
-
-    /**
-     * @notice Reports whether the proceed-recipient list has been initialised.
-     * @return True once `initialize_ProceedRecipients` has been called, false otherwise.
-     */
-    function isProceedRecipientsInitialized() internal view returns (bool) {
-        return
-            ExternalListManagementStorageWrapper.externalListStorage(STORAGE_LOCATION_PROCEED_RECIPIENTS).initialized;
     }
 
     /**

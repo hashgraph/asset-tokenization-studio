@@ -45,6 +45,9 @@ export * from "./atsRoles.generated";
 // Domain constants
 export * from "./constants";
 
+// Test-environment facet substitution
+export * from "./facetEnvironment";
+
 // Orchestrator library management
 export * from "./orchestratorLibraries";
 

@@ -16,6 +16,19 @@ bytes32 constant RESOLVER_KEY_HOLD = 0x7c2ef14067e573a8580a580634bd7547099c4b82c
  */
 interface IHoldFacet is IHoldTypes {
     /**
+     * @notice Emitted once when the hold capability is initialised on a token.
+     * @dev Fires exclusively from `initializeHold`.
+     */
+    event HoldInitialized();
+
+    /**
+     * @notice Initialises the hold capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeHold() external;
+
+    /**
      * @notice Returns the adjusted held amount for an account across every partition.
      * @dev The returned value reflects any balance adjustments applicable at the current timestamp.
      * @param _tokenHolder Address whose aggregate held balance is queried.

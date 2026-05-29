@@ -4,8 +4,16 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { type IAsset, type ResolverProxy } from "@contract-types";
-import { ATS_ROLES, DEFAULT_PARTITION, EIP1066_CODES, EMPTY_STRING, ZERO } from "@scripts";
+import { type IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
+import {
+  ATS_ROLES,
+  DEFAULT_PARTITION,
+  EIP1066_CODES,
+  EMPTY_STRING,
+  ZERO,
+  EQUITY_CONFIG_ID,
+  RESOLVER_KEY_TRANSFER,
+} from "@scripts";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const amount = 1000;
@@ -22,6 +30,7 @@ describe("Transfer Facet Tests", () => {
   let signer_E: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   describe("Multi partition", () => {
     async function deployMultiPartitionFixture() {
@@ -36,6 +45,7 @@ describe("Transfer Facet Tests", () => {
       signer_D = base.user3;
 
       asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target, signer_A);
     }
 
     beforeEach(async () => {
@@ -526,6 +536,73 @@ describe("Transfer Facet Tests", () => {
       await expect(
         deactivatedAsset.connect(base.deployer).transferFromWithData(ethers.ZeroAddress, ethers.ZeroAddress, 0, "0x"),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  // TODO: Fix asset redeploy.
+  describe("initializeTransfer", () => {
+    beforeEach(async () => {
+      const base = await deployEquityTokenFixture();
+      asset = await ethers.getContractAt("IAsset", base.diamond.target);
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", base.diamond.target);
+    });
+
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeTransfer is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeTransfer())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeTransfer is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeTransfer())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_TRANSFER, 1);
+    });
+  });
+
+  describe("initializeTransfer event", () => {
+    beforeEach(async () => {
+      const base = await deployEquityTokenFixture();
+      asset = await ethers.getContractAt("IAsset", base.diamond.target);
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", base.diamond.target);
+    });
+
+    it("GIVEN a fresh deployment WHEN initializeTransfer is called THEN emits TransferInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_TRANSFER);
+      await expect(asset.initializeTransfer()).to.emit(asset, "TransferInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      const base = await deployEquityTokenFixture();
+      asset = await ethers.getContractAt("IAsset", base.diamond.target);
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", base.diamond.target);
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational WHEN transfer is called THEN AssetNotOperational", async () => {
+      await expect(asset.transfer(ethers.ZeroAddress, 0n))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN transferFrom is called THEN AssetNotOperational", async () => {
+      await expect(asset.transferFrom(ethers.ZeroAddress, ethers.ZeroAddress, 0n))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN transferWithData is called THEN AssetNotOperational", async () => {
+      await expect(asset.transferWithData(ethers.ZeroAddress, 0n, "0x"))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN transferFromWithData is called THEN AssetNotOperational", async () => {
+      await expect(asset.transferFromWithData(ethers.ZeroAddress, ethers.ZeroAddress, 0n, "0x"))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 });

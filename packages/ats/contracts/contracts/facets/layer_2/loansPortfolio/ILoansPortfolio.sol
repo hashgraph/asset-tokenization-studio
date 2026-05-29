@@ -56,6 +56,10 @@ interface ILoansPortfolio {
         uint256 count;
     }
 
+    /// @notice Emitted once when the LoansPortfolio capability is initialised on a token.
+    /// @dev Fires exclusively from `initializeLoansPortfolio` after the storage write succeeds.
+    event LoansPortfolioInitialized(LoansPortfolioDetailsData loansPortfolioData);
+
     /// @notice Emitted when a new holdings asset is added to the portfolio.
     /// @param holdingsAsset The asset descriptor that was registered.
     event HoldingsAssetAdded(HoldingsAsset holdingsAsset);
@@ -90,7 +94,6 @@ interface ILoansPortfolio {
     /// @dev Populates the portfolio configuration alongside the security-level regulation
     ///      and additional security metadata; intended to be called exactly once per token.
     /// @param _loansPortfolioData     Portfolio-level configuration (type, distribution policy).
-    // solhint-disable-next-line func-name-mixedcase
     function initializeLoansPortfolio(ILoansPortfolio.LoansPortfolioDetailsData calldata _loansPortfolioData) external;
 
     /// @notice Registers a new holdings asset within the portfolio.

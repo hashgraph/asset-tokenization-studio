@@ -11,8 +11,8 @@ import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
  * @notice Diamond facet that exposes the per-partition maximum supply cap surface through the
  *         `ICapByPartition` interface, registered under `RESOLVER_KEY_CAP_BY_PARTITION`.
  * @dev Inherits behaviour from `CapByPartition` and satisfies `IStaticFunctionSelectors` for
- *      Diamond proxy selector registration. Exposes two selectors:
- *      `setMaxSupplyByPartition`, `getMaxSupplyByPartition`.
+ *      Diamond proxy selector registration. Exposes three selectors:
+ *      `initializeCapByPartition`, `setMaxSupplyByPartition`, `getMaxSupplyByPartition`.
  */
 contract CapByPartitionFacet is CapByPartition, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
@@ -22,7 +22,12 @@ contract CapByPartitionFacet is CapByPartition, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.setMaxSupplyByPartition.selector, this.getMaxSupplyByPartition.selector);
+        return
+            Bytes4Builder.build(
+                this.initializeCapByPartition.selector,
+                this.setMaxSupplyByPartition.selector,
+                this.getMaxSupplyByPartition.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors

@@ -28,8 +28,18 @@ struct SecurityRegulationData {
  */
 interface ISecurity {
     /**
+     * @notice Emitted once when the Security capability is initialised on a token.
+     * @dev Fires exclusively from `initializeSecurity` after the storage write succeeds.
+     * @param regulationData Full regulation parameters (type, sub-type, deal size, investor
+     *        constraints, resale hold period).
+     * @param additionalSecurityData Supplementary data: country list type, list of countries,
+     *        and a free-text info field.
+     */
+    event SecurityInitialized(RegulationData regulationData, AdditionalSecurityData additionalSecurityData);
+
+    /**
      * @notice Initialises the security regulation capability with regulation and additional data.
-     * @dev Callable once per token; subsequent calls revert with `AlreadyInitialized` via the
+     * @dev Callable once per token; subsequent calls revert with `onlyFacetNotRegistered` via the
      *      `onlyNotSecurityInitialized` modifier. The factory calls this automatically when
      *      deploying a security token, forwarding the regulation data supplied at deployment time.
      * @param _regulationData Full regulation parameters (type, sub-type, deal size, investor
