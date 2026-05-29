@@ -25,6 +25,8 @@ bytes32 constant STORAGE_LOCATION_ERC20VOTES = 0xb9759d8916f84f61d52de275f833caf
 struct ERC20VotesStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
     bool activated;
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(address => address) delegates;
     mapping(address => Checkpoints.Checkpoint[]) checkpoints;

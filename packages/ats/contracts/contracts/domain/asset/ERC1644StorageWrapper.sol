@@ -17,7 +17,9 @@ bytes32 constant STORAGE_LOCATION_ERC1644 = 0x96356235f59c9d131a29a98816b8ce8d9e
 struct ERC1644Storage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
     bool isControllable;
-
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     // ─── APPEND-ONLY ZONE BELOW ───
 }
 

@@ -26,6 +26,9 @@ bytes32 constant STORAGE_LOCATION_PAUSE = 0x3bf57dcdaf5f1e5afff95a10b7216bcff83f
 struct PauseDataStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
     bool paused;
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     // ─── APPEND-ONLY ZONE BELOW ───
 }
 

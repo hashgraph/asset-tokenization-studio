@@ -76,7 +76,7 @@ struct LoanDataStorage {
     uint256 totalCollateralValue;
     uint256 loanToValue;
     uint256 daysPastDue;
-
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     // ─── APPEND-ONLY ZONE BELOW ───
 }
 

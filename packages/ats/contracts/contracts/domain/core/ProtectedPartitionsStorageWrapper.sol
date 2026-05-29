@@ -34,6 +34,9 @@ bytes32 constant STORAGE_LOCATION_PROTECTED_PARTITIONS = 0x5b38507d21e10ec4c8c85
 struct ProtectedPartitionsDataStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
     bool arePartitionsProtected;
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     // ─── APPEND-ONLY ZONE BELOW ───
 }
 

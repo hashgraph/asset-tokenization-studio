@@ -29,6 +29,9 @@ struct ActionData {
  * @custom:storage-location erc7201:security.token.standard.storage.CorporateAction
  */
 struct CorporateActionDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     EnumerableSet.Bytes32Set actions;
     mapping(bytes32 => ActionData) actionsData;

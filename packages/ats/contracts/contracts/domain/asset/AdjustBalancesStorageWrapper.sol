@@ -26,6 +26,8 @@ bytes32 constant STORAGE_LOCATION_ADJUST_BALANCES = 0x155c219135942fbe253879a75d
  * @custom:storage-location erc7201:security.token.standard.storage.AdjustBalances
  */
 struct AdjustBalancesStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
     // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     uint256 abaf;
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────

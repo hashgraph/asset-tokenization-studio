@@ -34,6 +34,9 @@ bytes32 constant STORAGE_LOCATION_COUPON = 0x83419e6b8093975a3157050eb9f883164e1
  * @custom:storage-location erc7201:security.token.standard.storage.Coupon
  */
 struct CouponDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     uint256[] couponsOrderedListByIds;
     // ─── APPEND-ONLY ZONE BELOW ───

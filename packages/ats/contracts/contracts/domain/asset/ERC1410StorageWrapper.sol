@@ -47,6 +47,7 @@ struct Partition {
 struct ERC1410BasicStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
     bool multiPartition;
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
     // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     uint256 totalTokenHolders;
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
@@ -69,6 +70,9 @@ struct ERC1410BasicStorage {
  * @custom:storage-location erc7201:security.token.standard.storage.Erc1410Operator
  */
 struct ERC1410OperatorStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     /// @dev Mapping from (investor, partition, operator) to approved status
     mapping(address => mapping(bytes32 => mapping(address => bool))) partitionApprovals;

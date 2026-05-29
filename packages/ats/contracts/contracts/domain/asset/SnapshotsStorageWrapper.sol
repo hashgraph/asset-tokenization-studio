@@ -36,6 +36,8 @@ bytes32 constant STORAGE_LOCATION_SNAPSHOT = 0x2e9cb27cc6da952dbadc3ddf8f7c0573a
  * @custom:storage-location erc7201:security.token.standard.storage.Snapshot
  */
 struct SnapshotStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
     // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     /**
      * @dev Unique ID of the current snapshot. Ids increase monotonically, with the first value

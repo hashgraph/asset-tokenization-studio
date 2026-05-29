@@ -42,6 +42,8 @@ bytes32 constant STORAGE_LOCATION_SCHEDULED_CROSS_ORDERED_TASKS = 0xc0ba5b9a8206
  *      constants in this file directly.
  */
 struct ScheduledTasksDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
     // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     uint256 scheduledTaskCount;
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────

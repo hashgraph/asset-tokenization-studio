@@ -25,15 +25,16 @@ bytes32 constant STORAGE_LOCATION_ERC20 = 0xba2beddc557de36eb4836f4ff1fd9d33a28d
  * @custom:storage-location erc7201:security.token.standard.storage.Erc20
  */
 struct ERC20Storage {
-    // ─── R1 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
     uint8 decimals;
     IFactory.SecurityType securityType;
-    // ─── R2 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     string name;
     string symbol;
     string isin;
     uint256 totalSupply;
-    // ─── R3 Aggregates (mapping, array, EnumerableSet) ───────
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(address => uint256) balances;
     mapping(address => mapping(address => uint256)) allowed;
 

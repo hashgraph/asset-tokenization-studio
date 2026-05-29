@@ -15,8 +15,12 @@ bytes32 constant STORAGE_LOCATION_CUSTOM_DATA = 0x92acc34fbd05df4f7a3d758b1a1755
  * @custom:storage-location erc7201:security.token.standard.storage.CustomData
  */
 struct CustomDataDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(bytes32 => bytes[]) customData;
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 /**

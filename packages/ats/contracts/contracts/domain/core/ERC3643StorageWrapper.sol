@@ -35,11 +35,13 @@ bytes32 constant STORAGE_LOCATION_ERC3643 = 0x167d628abbc681171e3e4d784cf450a7f9
  * @custom:storage-location erc7201:security.token.standard.storage.Erc3643
  */
 struct ERC3643Storage {
-    // ─── R1 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
     address onchainID;
     address identityRegistry;
     address compliance;
-    // ─── R3 Aggregates (mapping, array, EnumerableSet) ───────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(address => uint256) frozenTokens;
     mapping(address => mapping(bytes32 => uint256)) frozenTokensByPartition;
     mapping(address => bool) addressRecovered;
