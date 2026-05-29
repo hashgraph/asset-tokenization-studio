@@ -29,22 +29,9 @@ struct SnapshotsAddress {
     address[] values;
 }
 
-/**
- * @notice Represents a set of token partitions.
- * @param partitions Partition identifiers included in the set.
- */
-struct ListOfPartitions {
-    bytes32[] partitions;
-}
-
-/**
- * @notice Stores partition lists indexed by snapshot identifier.
- * @param ids Snapshot identifiers associated with the recorded partition lists.
- * @param values Partition lists recorded for each snapshot identifier.
- */
-struct PartitionSnapshots {
+struct SnapshotsBytes32 {
     uint256[] ids;
-    ListOfPartitions[] values;
+    bytes32[] values;
 }
 
 /**
