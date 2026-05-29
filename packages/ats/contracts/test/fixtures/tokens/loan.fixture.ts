@@ -255,7 +255,6 @@ export async function deployLoanTokenFixture({
   const timeTravelFacet = IAsset__factory.connect(proxyAddress, deployer);
 
   await controlListFacet.initializeControlList(securityData.isWhiteList);
-  await erc1410ManagementFacet.initializeERC1410(securityData.isMultiPartition);
   await controllerFacet.initializeController(securityData.isControllable);
   await coreFacet.initializeCore({
     info: {
@@ -275,7 +274,6 @@ export async function deployLoanTokenFixture({
   await kycFacet.initializeInternalKyc(securityData.internalKycActivated);
   await externalKycListManagementFacet.initializeExternalKycLists([]);
   await erc20VotesFacet.initializeERC20Votes(securityData.erc20VotesActivated);
-  await erc3643ManagementFacet.initializeERC3643(ZeroAddress, ZeroAddress);
   await nominalValueFacet.initializeNominalValue(
     loanParams?.nominalValue ?? DEFAULT_LOAN_PARAMS.nominalValue,
     loanParams?.nominalValueDecimals ?? DEFAULT_LOAN_PARAMS.nominalValueDecimals,
@@ -321,7 +319,7 @@ export async function deployLoanTokenFixture({
   await asset.initializeBatchFreeze();
   await asset.initializeClearingByPartition();
   await asset.initializeSnapshotsByPartition();
-  await asset.initializeIdentity();
+  await asset.initializeIdentity(ZeroAddress);
   await asset.initializeSecurityHoldersAtSnapshot();
   await asset.initializeFreezeAtSnapshotByPartition();
   await asset.initializeProtectedByPartition();
@@ -342,7 +340,7 @@ export async function deployLoanTokenFixture({
   await asset.initializeCouponSecurityHolders();
   await asset.initializeTransferByPartition();
   await asset.initializeBalanceTrackerAtSnapshot();
-  await asset.initializePartitions();
+  await asset.initializePartitions(securityData.isMultiPartition);
   await asset.initializeBalanceTrackerByPartition();
   await asset.initializeSsiManagement();
   await asset.initializeOperatorByPartition();
@@ -362,7 +360,7 @@ export async function deployLoanTokenFixture({
   await asset.initializeOperatorHoldByPartition();
   await asset.initializeCoreAdjusted();
   await asset.initializeCustomData();
-  await asset.initializeCompliance();
+  await asset.initializeCompliance(ZeroAddress);
   await asset.initializeCouponListing();
   await asset.initializeCapByPartition();
   await asset.initializePause();

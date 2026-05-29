@@ -12,7 +12,7 @@ import {
   dateToUnixTimestamp,
   EMPTY_HEX_BYTES,
   EMPTY_STRING,
-  RESOLVER_KEY_ERC1410_MANAGEMENT,
+  RESOLVER_KEY_PARTITIONS,
   ZERO,
 } from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
@@ -5140,21 +5140,21 @@ describe("Clearing Tests", () => {
     });
   });
 
-  describe("initializeERC1410", () => {
-    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeERC1410 is called THEN AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_D).initializeERC1410(true))
+  describe("initializePartitions", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializePartitions is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializePartitions(true))
         .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
         .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
-    it("GIVEN already-initialised WHEN initializeERC1410 is called again THEN FacetAlreadyRegistered", async () => {
-      await expect(asset.initializeERC1410(true)).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+    it("GIVEN already-initialised WHEN initializePartitions is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializePartitions(true)).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
     });
 
-    describe("initializeERC1410 event", () => {
-      it("GIVEN a fresh deployment WHEN initializeERC1410 is called THEN emits ERC1410Initialized", async () => {
-        await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_ERC1410_MANAGEMENT);
-        await expect(asset.initializeERC1410(true)).to.emit(asset, "ERC1410Initialized");
+    describe("initializePartitions event", () => {
+      it("GIVEN a fresh deployment WHEN initializePartitions is called THEN emits PartitionsInitialized", async () => {
+        await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_PARTITIONS);
+        await expect(asset.initializePartitions(true)).to.emit(asset, "PartitionsInitialized");
       });
     });
   });

@@ -29,11 +29,9 @@ import {
   ControlListFacet__factory,
   NominalValueFacet__factory,
   CoreFacet__factory,
-  ERC3643ManagementFacet__factory,
   ERC20VotesFacet__factory,
   ControllerFacet__factory,
   MintFacet__factory,
-  ERC1410ManagementFacet__factory,
   FreezeFacet__factory,
   KycFacet__factory,
   PauseFacet__factory,
@@ -140,8 +138,6 @@ export async function deployLoansPortfolioTokenFixture({
   const capFacet = CapFacet__factory.connect(proxyAddress, deployer);
   const controllerFacet = ControllerFacet__factory.connect(proxyAddress, deployer);
   const mintFacet = MintFacet__factory.connect(proxyAddress, deployer);
-  const erc1410ManagementFacet = ERC1410ManagementFacet__factory.connect(proxyAddress, deployer);
-  const erc3643ManagementFacet = ERC3643ManagementFacet__factory.connect(proxyAddress, deployer);
   const erc20VotesFacet = ERC20VotesFacet__factory.connect(proxyAddress, deployer);
   const nominalValueFacet = NominalValueFacet__factory.connect(proxyAddress, deployer);
   const protectedPartitionsFacet = ProtectedPartitionsFacet__factory.connect(proxyAddress, deployer);
@@ -159,7 +155,6 @@ export async function deployLoansPortfolioTokenFixture({
   const asset = await ethers.getContractAt("IAsset", proxyAddress, deployer);
 
   await controlListFacet.initializeControlList(securityData.isWhiteList);
-  await erc1410ManagementFacet.initializeERC1410(securityData.isMultiPartition);
   await controllerFacet.initializeController(securityData.isControllable);
   await coreFacet.initializeCore({
     info: {
@@ -179,7 +174,6 @@ export async function deployLoansPortfolioTokenFixture({
   await kycFacet.initializeInternalKyc(securityData.internalKycActivated);
   await externalKycListManagementFacet.initializeExternalKycLists([]);
   await erc20VotesFacet.initializeERC20Votes(false);
-  await erc3643ManagementFacet.initializeERC3643(ZeroAddress, ZeroAddress);
   // Loan portfolios don't carry a per-token currency; pass bytes3(0).
   await nominalValueFacet.initializeNominalValue(
     loanPortfolioDetails.nominalValue,
@@ -228,7 +222,7 @@ export async function deployLoansPortfolioTokenFixture({
   await asset.initializeBatchFreeze();
   await asset.initializeClearingByPartition();
   await asset.initializeSnapshotsByPartition();
-  await asset.initializeIdentity();
+  await asset.initializeIdentity(ZeroAddress);
   await asset.initializeSecurityHoldersAtSnapshot();
   await asset.initializeFreezeAtSnapshotByPartition();
   await asset.initializeProtectedByPartition();
@@ -248,7 +242,7 @@ export async function deployLoansPortfolioTokenFixture({
   await asset.initializeBalanceTrackerAtSnapshotByPartition();
   await asset.initializeTransferByPartition();
   await asset.initializeBalanceTrackerAtSnapshot();
-  await asset.initializePartitions();
+  await asset.initializePartitions(securityData.isMultiPartition);
   await asset.initializeBalanceTrackerByPartition();
   await asset.initializeSsiManagement();
   await asset.initializeOperatorByPartition();
@@ -265,7 +259,7 @@ export async function deployLoansPortfolioTokenFixture({
   await asset.initializeOperatorHoldByPartition();
   await asset.initializeCoreAdjusted();
   await asset.initializeCustomData();
-  await asset.initializeCompliance();
+  await asset.initializeCompliance(ZeroAddress);
   await asset.initializeCouponListing();
   await asset.initializeCapByPartition();
   await asset.initializePause();

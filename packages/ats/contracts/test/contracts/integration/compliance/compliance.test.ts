@@ -750,13 +750,13 @@ describe("Compliance Tests", () => {
   });
   describe("initializeCompliance", () => {
     it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeCompliance is called THEN AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_D).initializeCompliance())
+      await expect(asset.connect(signer_D).initializeCompliance(ethers.ZeroAddress))
         .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
         .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
     it("GIVEN already-initialised WHEN initializeCompliance is called again THEN FacetAlreadyRegistered", async () => {
-      await expect(asset.initializeCompliance())
+      await expect(asset.initializeCompliance(ethers.ZeroAddress))
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
         .withArgs(RESOLVER_KEY_COMPLIANCE, 1);
     });
@@ -765,7 +765,7 @@ describe("Compliance Tests", () => {
   describe("initializeCompliance event", () => {
     it("GIVEN a fresh deployment WHEN initializeCompliance is called THEN emits ComplianceInitialized", async () => {
       await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_COMPLIANCE);
-      await expect(asset.initializeCompliance()).to.emit(asset, "ComplianceInitialized");
+      await expect(asset.initializeCompliance(ethers.ZeroAddress)).to.emit(asset, "ComplianceInitialized");
     });
   });
 
