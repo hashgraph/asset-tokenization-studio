@@ -1160,10 +1160,6 @@ library ERC1410StorageWrapper {
         SnapshotsStorageWrapper.updateTotalPartitionsSnapshot(holder);
         if (index != lastIndex) {
             SnapshotsStorageWrapper.updatePartitionAtIndexSnapshot(holder, index);
-        }
-        SnapshotsStorageWrapper.updatePartitionAtIndexSnapshot(holder, lastIndex);
-
-        if (index != lastIndex) {
             erc1410Storage.partitions[holder][index] = erc1410Storage.partitions[holder][lastIndex];
             unchecked {
                 AdjustBalancesStorageWrapper.updateLabafByTokenHolderAndPartitionIndex(
@@ -1175,6 +1171,8 @@ library ERC1410StorageWrapper {
 
             erc1410Storage.partitionToIndex[holder][erc1410Storage.partitions[holder][index].partition] = index + 1;
         }
+        SnapshotsStorageWrapper.updatePartitionAtIndexSnapshot(holder, lastIndex);
+
         delete erc1410Storage.partitionToIndex[holder][partition];
         erc1410Storage.partitions[holder].pop();
         AdjustBalancesStorageWrapper.popLabafUserPartition(holder);
