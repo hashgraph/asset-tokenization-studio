@@ -82,7 +82,6 @@ const LOANS_PORTFOLIO_FACETS = [
 
   // ERC Standards
   "MintByPartitionFacet",
-  "ERC1410ManagementFacet",
   "ProtectedByPartitionFacet",
   "OperatorFacet",
   "TransferByPartitionFacet",
@@ -100,7 +99,6 @@ const LOANS_PORTFOLIO_FACETS = [
   "BatchBurnFacet",
   "BatchMintFacet",
   "BatchTransferFacet",
-  "ERC3643ManagementFacet",
   "RecoveryFacet",
   "IdentityFacet",
   "ComplianceFacet",

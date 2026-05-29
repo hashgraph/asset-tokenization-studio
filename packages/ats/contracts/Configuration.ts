@@ -87,7 +87,6 @@ export const CONTRACT_NAMES = [
   "EIP712Facet",
   "ERC1410ScheduledTasksFacet",
   "ERC20Votes", //TODO
-  "ERC1410ManagementFacet",
   "PartitionsFacet",
   "MintByPartitionFacet",
   "ERC1410TokenHolderFacet",
@@ -150,7 +149,6 @@ export const CONTRACT_NAMES = [
   "ExternalKycListManagementFacet",
   "ERC3643",
   "FreezeFacet",
-  "ERC3643ManagementFacet",
   "ERC3643ReadFacet",
   "IdentityFacet",
   "BatchControllerFacet",

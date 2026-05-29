@@ -64,19 +64,6 @@ library ERC3643StorageWrapper {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     /**
-     * @notice Initialises the ERC3643 capability by wiring the compliance and identity-registry
-     *         addresses and marking the namespace as initialised.
-     * @dev Single-shot setup; subsequent calls should be guarded upstream by the initialiser
-     *      modifier so the storage flag cannot be flipped twice.
-     * @param _compliance Address of the compliance contract that authorises transfers.
-     * @param _identityRegistry Address of the identity registry that vets token holders.
-     */
-    function initializeERC3643(address _compliance, address _identityRegistry) internal {
-        setCompliance(_compliance);
-        setIdentityRegistry(_identityRegistry);
-    }
-
-    /**
      * @notice Sets the freeze status of a wallet by toggling its presence on the control list.
      * @dev Branch dispatches on the control-list semantics (allow- versus block-list) so that
      *      the resulting state always represents "frozen" or "unfrozen" consistently regardless

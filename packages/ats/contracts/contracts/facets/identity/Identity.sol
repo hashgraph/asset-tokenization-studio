@@ -19,14 +19,14 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
  */
 abstract contract Identity is IIdentity, Modifiers {
     /// @inheritdoc IIdentity
-    function initializeIdentity()
-        external
-        override
-        onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(RESOLVER_KEY_IDENTITY)
-    {
+    /// @dev Wires the identity-registry address, marks the identity facet as ready, and emits
+    ///      `IdentityInitialized`. One-shot is enforced by `onlyFacetNotRegistered`.
+    function initializeIdentity(
+        address _identityRegistry
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_IDENTITY) {
+        ERC3643StorageWrapper.setIdentityRegistry(_identityRegistry);
         InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_IDENTITY);
-        emit IdentityInitialized();
+        emit IdentityInitialized(_identityRegistry);
     }
 
     /// @inheritdoc IIdentity

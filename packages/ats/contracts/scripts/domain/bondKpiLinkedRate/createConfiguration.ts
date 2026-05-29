@@ -72,7 +72,6 @@ const BOND_KPI_LINKED_RATE_FACETS = [
 
   // ERC Standards
   "MintByPartitionFacet",
-  "ERC1410ManagementFacet",
   "ProtectedByPartitionFacet",
   "OperatorFacet",
   "TransferByPartitionFacet",
@@ -90,7 +89,6 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "BatchBurnFacet",
   "BatchMintFacet",
   "BatchTransferFacet",
-  "ERC3643ManagementFacet",
   "RecoveryFacet",
   "IdentityFacet",
   "ComplianceFacet",

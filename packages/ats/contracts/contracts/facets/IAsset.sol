@@ -28,7 +28,6 @@ import { ICoreAdjusted } from "./coreAdjusted/ICoreAdjusted.sol";
 import { IAllowance } from "./allowance/IAllowance.sol";
 
 // Layer 1 — External lists
-import { IERC1410Management } from "./layer_1/ERC1400/ERC1410/IERC1410Management.sol";
 import { ITransferByPartition } from "./transferByPartition/ITransferByPartition.sol";
 
 import { IOperator } from "./operator/IOperator.sol";
@@ -165,10 +164,10 @@ bytes32 constant RESOLVER_KEY_TRANSFER_AND_LOCK_FIXED_RATE = 0x0405063ec31286ce4
  * @dev Intended for use in tests and external tooling to interact with all Diamond methods
  *      through a single typed object, rather than multiple per-facet instances.
  *
- *      Note: IHold already transitively includes IAccessControl, IERC1410Management,
- *      IHoldRead, and IHoldTokenHolder. IERC3643 already includes its
- *      sub-interfaces. IERC20Votes includes IERC5805 and IVotes. Solidity C3 linearisation
- *      handles the resulting diamond inheritance without conflicts.
+ *      Note: IHold already transitively includes IAccessControl,
+ *      IHoldRead, and IHoldTokenHolder. IERC3643 surfaces the shared ERC-3643 types,
+ *      events and errors (IERC3643Types). IERC20Votes includes IERC5805 and IVotes.
+ *      Solidity C3 linearisation handles the resulting diamond inheritance without conflicts.
  *
  *      Note: IKpiLinkedRate is intentionally excluded due to an irreconcilable function selector
  *      conflict on getInterestRate(). Consumers that need the KPI-linked rate surface must use
@@ -191,7 +190,6 @@ interface IAsset is
     IOperatorHoldByPartition,
     ITransfer,
     IERC20Votes,
-    IERC1410Management,
     ITransferByPartition,
     IOperator,
     IERC3643,

@@ -10,15 +10,17 @@ interface IComplianceFacet {
     /**
      * @notice Emitted once when the compliance capability is initialised on a token.
      * @dev Fires exclusively from `initializeCompliance`.
+     * @param compliance The compliance contract address wired at initialisation.
      */
-    event ComplianceInitialized();
+    event ComplianceInitialized(address compliance);
 
     /**
-     * @notice Initialises the compliance capability on the token.
+     * @notice Initialises the compliance capability on the token and wires the compliance contract.
      * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
      *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     * @param _compliance Address of the compliance contract that authorises transfers.
      */
-    function initializeCompliance() external;
+    function initializeCompliance(address _compliance) external;
 
     /**
      * @notice Sets the compliance contract address
