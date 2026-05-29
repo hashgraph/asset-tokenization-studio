@@ -758,7 +758,10 @@ library ERC1410StorageWrapper {
      * @return Supply scaled by the pending adjustment factor at `timestamp`.
      */
     function totalSupplyAdjustedAt(uint256 timestamp) internal view returns (uint256) {
-        (uint256 pendingABAF, ) = ScheduledTasksStorageWrapper.getPendingScheduledBalanceAdjustmentsAt(timestamp);
+        (uint256 pendingABAF, ) = ScheduledTasksStorageWrapper.getPendingScheduledBalanceAdjustmentsAt(
+            timestamp,
+            false
+        );
         return totalSupply() * pendingABAF;
     }
 

@@ -93,20 +93,25 @@ interface ISnapshots is ISnapshotsTypes {
     /**
      * @notice Returns the number of snapshots scheduled to run on this asset.
      * @dev Does not mutate state and reflects the current scheduled-task registry state.
-     * @return Number of scheduled snapshot tasks.
+     * @param _includeDisabled When true, snapshots belonging to cancelled corporate actions are
+     *                         counted; when false, only active scheduled snapshots are counted.
+     * @return Count of scheduled snapshot tasks.
      */
-    function scheduledSnapshotCount() external view returns (uint256);
+    function scheduledSnapshotCount(bool _includeDisabled) external view returns (uint256);
 
     /**
      * @notice Returns a paginated list of scheduled snapshots.
      * @dev Does not mutate state. Pagination bounds are interpreted by the implementation
      *      and should be selected to avoid excessive gas in on-chain callers.
-     * @param _pageIndex Zero-based page index or start offset, as defined by the scheduler.
-     * @param _pageLength Maximum number of scheduled snapshot tasks to return.
-     * @return scheduledSnapshot_ Scheduled snapshot tasks in the requested page.
+     * @param _pageIndex       Zero-based page number.
+     * @param _pageLength      Maximum number of tasks to return per page.
+     * @param _includeDisabled When true, snapshots belonging to cancelled corporate actions are
+     *                         included; when false, only active scheduled snapshots are returned.
+     * @return scheduledSnapshot_ Array of `ScheduledTask` structs for the requested page.
      */
     function getScheduledSnapshots(
         uint256 _pageIndex,
-        uint256 _pageLength
+        uint256 _pageLength,
+        bool _includeDisabled
     ) external view returns (ScheduledTask[] memory scheduledSnapshot_);
 }

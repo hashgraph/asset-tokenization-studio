@@ -191,7 +191,8 @@ library KpisStorageWrapper {
         minDate_ = kpisDataStorage().minDate;
 
         uint256 total = CouponStorageWrapper.getCouponsOrderedListTotalAdjustedAt(
-            TimeTravelStorageWrapper.getBlockTimestamp()
+            TimeTravelStorageWrapper.getBlockTimestamp(),
+            true
         );
 
         if (total == 0) return minDate_;
@@ -199,7 +200,7 @@ library KpisStorageWrapper {
         ICouponTypes.Coupon memory rawCoupon;
 
         (rawCoupon, , ) = CouponStorageWrapper.getRawCouponData(
-            CouponStorageWrapper.getCouponFromOrderedListAt(total - 1)
+            CouponStorageWrapper.getCouponFromOrderedListAt(total - 1, true)
         );
         uint256 lastFixingDate = rawCoupon.fixingDate;
 

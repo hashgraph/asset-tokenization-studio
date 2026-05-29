@@ -481,7 +481,10 @@ library ERC20StorageWrapper {
     function getERC20MetadataAdjustedAt(
         uint256 timestamp
     ) internal view returns (ICore.ERC20Metadata memory erc20Metadata_) {
-        (, uint8 pendingDecimals) = ScheduledTasksStorageWrapper.getPendingScheduledBalanceAdjustmentsAt(timestamp);
+        (, uint8 pendingDecimals) = ScheduledTasksStorageWrapper.getPendingScheduledBalanceAdjustmentsAt(
+            timestamp,
+            false
+        );
         erc20Metadata_ = getERC20Metadata();
         erc20Metadata_.info.decimals += pendingDecimals;
     }
