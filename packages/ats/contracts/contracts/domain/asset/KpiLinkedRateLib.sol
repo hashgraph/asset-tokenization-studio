@@ -61,16 +61,17 @@ library KpiLinkedRateLib {
         (uint256 previousRate, uint8 previousRateDecimals, bool found) = _previousRate(couponID);
 
         if (!found) {
-            return (kpiData.baseRate + kpiData.missedPenalty, kpiData.rateDecimals);
+            rate_ = kpiData.baseRate + kpiData.missedPenalty;
+        } else {
+            uint256 adjustedPreviousRate = DecimalsLib.calculateDecimalsAdjustment(
+                previousRate,
+                previousRateDecimals,
+                kpiData.rateDecimals
+            );
+
+            rate_ = adjustedPreviousRate + kpiData.missedPenalty;
         }
 
-        uint256 adjustedPreviousRate = DecimalsLib.calculateDecimalsAdjustment(
-            previousRate,
-            previousRateDecimals,
-            kpiData.rateDecimals
-        );
-
-        rate_ = adjustedPreviousRate + kpiData.missedPenalty;
         if (rate_ > kpiData.maxRate) {
             rate_ = kpiData.maxRate;
         }

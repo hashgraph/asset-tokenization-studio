@@ -372,7 +372,7 @@ describe("Bond KpiLinked Rate Tests", () => {
       // windowStart collapses to fixingDate -> empty lookup window -> no report found
       // -> _getRateWhenNoReport branch -> rate = 0 + missedPenalty (no previous coupon).
       await checkCouponPostValues(
-        newInterestRate.missedPenalty,
+        newInterestRate.baseRate + newInterestRate.missedPenalty,
         newInterestRate.rateDecimals,
         amount,
         1,
@@ -417,7 +417,7 @@ describe("Bond KpiLinked Rate Tests", () => {
       // getPreviousCouponInOrderedList(2) on list [1, 3] must return 0 (not found),
       // so the rate equals 0 + missedPenalty rather than coupon1.rate + missedPenalty.
       const coupon2 = (await asset.getCoupon(2)).registeredCoupon_;
-      expect(coupon2.coupon.rate).to.equal(newInterestRate.missedPenalty);
+      expect(coupon2.coupon.rate).to.equal(newInterestRate.baseRate + newInterestRate.missedPenalty);
     });
 
     it("GIVEN a kpiLinked rate bond WHEN impact data is above baseline THEN transaction success and rate is calculated", async () => {
