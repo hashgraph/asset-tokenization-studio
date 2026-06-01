@@ -1,6 +1,6 @@
 ---
 name: solidity-natspec
-description: Produce and validate comprehensive NatSpec documentation on Solidity files. Use whenever a `.sol` file is created or modified — contracts, interfaces, libraries, facets under `packages/ats/contracts/**`. Ensures every contract element (contract/interface/library, enums, structs, events, custom errors, state variables, modifiers, functions) carries audit-ready NatSpec in the project's house style (British English, ≤100-char lines, intent-focused). Also use on explicit request (`/solidity-natspec`) to document or re-document an existing `.sol` file.
+description: Produce and validate comprehensive NatSpec documentation on Solidity files. Use whenever a `.sol` file is created or modified — contracts, interfaces, libraries, facets under `packages/ats/contracts/**`. Ensures every contract element (contract/interface/library, enums, structs, events, custom errors, state variables, modifiers, functions) carries audit-ready NatSpec in the project's house style (British English, ≤100-char lines, intent-focused). Also use on explicit request (`/solidity-natspec`) to document or re-document an existing `.sol` file. Also use whenever a facet interface under `packages/ats/contracts/contracts/facets/**` changes, or when asked to update, regenerate, or refresh `packages/ats/contracts/FACETS_METHODS.md` (the generated facet method index) — the skill regenerates it by running `scripts/gen_facets_methods.mjs`, never by hand-editing.
 ---
 
 # Solidity NatSpec Documentation

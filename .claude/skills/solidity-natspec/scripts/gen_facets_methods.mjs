@@ -308,8 +308,13 @@ for (const f of facets) f.anchor = slug(f.name);
 const out = [];
 out.push("# ATS Facet Methods");
 out.push("");
-out.push("> Generated and maintained via the `solidity-natspec` skill. Update the relevant section whenever a");
-out.push("> facet interface changes.");
+out.push("> **Generated file — do not edit by hand.** Regenerate after any facet interface change with:");
+out.push("> ");
+out.push("> ```bash");
+out.push("> node .claude/skills/solidity-natspec/scripts/gen_facets_methods.mjs");
+out.push("> ```");
+out.push("> ");
+out.push("> Maintained via the `solidity-natspec` skill.");
 out.push("");
 
 // Table of contents: flat list of every facet in document order.

@@ -1,7 +1,12 @@
 # ATS Facet Methods
 
-> Generated and maintained via the `solidity-natspec` skill. Update the relevant section whenever a
-> facet interface changes.
+> **Generated file — do not edit by hand.** Regenerate after any facet interface change with:
+>
+> ```bash
+> node .claude/skills/solidity-natspec/scripts/gen_facets_methods.mjs
+> ```
+>
+> Maintained via the `solidity-natspec` skill.
 
 ## Contents
 
