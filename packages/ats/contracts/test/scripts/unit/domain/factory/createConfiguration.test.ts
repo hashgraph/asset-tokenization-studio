@@ -108,7 +108,7 @@ describe("createFactoryConfiguration", () => {
     expect(EXPECTED_FACTORY).to.equal("0xa5472d34be801f744a73bce4e1851e67767286307e3203726a3261b280a667b3");
   });
 
-  it("should accept useTimeTravel=false by default", async () => {
+  it("should resolve facet versions without legacy useTimeTravel flag", async () => {
     const facetAddresses: Record<string, string> = {
       FactoryFacet: MOCK_FACTORY_FACET_ADDRESS,
     };

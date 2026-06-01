@@ -638,8 +638,7 @@ npm run checkpoint:reset -- <checkpoint-id>
 
   "options": {
     "confirmations": 2,
-    "batchSize": 10,
-    "useTimeTravel": false
+    "batchSize": 10
   },
 
   "failure": {

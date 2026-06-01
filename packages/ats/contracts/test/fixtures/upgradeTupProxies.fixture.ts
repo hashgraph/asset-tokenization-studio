@@ -73,7 +73,7 @@ export async function deployTupUpgradeTestFixture(): Promise<TupUpgradeTestFixtu
   configureLogger({ level: LogLevel.SILENT });
 
   // Deploy full ATS infrastructure (provides BLR proxy)
-  const infrastructure = await deployAtsInfrastructureFixture(true, false);
+  const infrastructure = await deployAtsInfrastructureFixture(false);
 
   const { deployer, unknownSigner, proxyAdmin, blr } = infrastructure;
 
@@ -113,7 +113,7 @@ export async function deployTupUpgradeTestFixture(): Promise<TupUpgradeTestFixtu
 export async function deployTupInfrastructureOnlyFixture(): Promise<TupInfrastructureOnlyFixture> {
   configureLogger({ level: LogLevel.SILENT });
 
-  const infrastructure = await deployAtsInfrastructureFixture(true, false);
+  const infrastructure = await deployAtsInfrastructureFixture(false);
   const { deployer, proxyAdmin } = infrastructure;
 
   return {

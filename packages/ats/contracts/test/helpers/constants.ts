@@ -511,8 +511,8 @@ export const TEST_STANDARD_CONTRACTS = {
   /** CapTable facet */
   CAP_TABLE_FACET: "CapTableFacet",
 
-  /** TimeTravel facet (invariant - no TimeTravel variant) */
-  TIME_TRAVEL_FACET: "TimeTravelFacet",
+  /** EvmAccessors test-only writer facet */
+  EVM_ACCESSORS_FACET: "EvmAccessorsFacet",
 
   /** Pausable facet (for CheckpointManager tests) */
   PAUSABLE_FACET: "PausableFacet",
@@ -533,24 +533,6 @@ export const TEST_STANDARD_CONTRACTS = {
 
   /** MyFacetContract (has Facet in middle, not at end) */
   MY_FACET_CONTRACT: "MyFacetContract",
-} as const;
-
-// ============================================================================
-// Time Travel Variants
-// ============================================================================
-
-/**
- * TimeTravel variant names for testing.
- */
-export const TEST_TIME_TRAVEL_VARIANTS = {
-  /** AccessControlFacet TimeTravel variant */
-  ACCESS_CONTROL: "AccessControlFacetTimeTravel",
-
-  /** PauseFacet TimeTravel variant */
-  PAUSE: "PauseFacetTimeTravel",
-
-  /** Generic TimeTravel suffix */
-  SUFFIX: "TimeTravel",
 } as const;
 
 // ============================================================================
@@ -1309,4 +1291,20 @@ export const EVENT_NAMES = {
   NOMINAL_VALUE_SET: "NominalValueSet",
   /** Emitted by `NominalValue.setNominalValueCurrency`. */
   NOMINAL_VALUE_CURRENCY_SET: "NominalValueCurrencySet",
+  /** Emitted by `EvmAccessorsFacet.changeSystemTimestamp` (test-only). */
+  SYSTEM_TIMESTAMP_CHANGED: "SystemTimestampChanged",
+  /** Emitted by `EvmAccessorsFacet.resetSystemTimestamp` (test-only). */
+  SYSTEM_TIMESTAMP_RESET: "SystemTimestampReset",
+  /** Emitted by `EvmAccessorsFacet.changeSystemBlockNumber` (test-only). */
+  SYSTEM_BLOCK_NUMBER_CHANGED: "SystemBlockNumberChanged",
+  /** Emitted by `EvmAccessorsFacet.resetSystemBlockNumber` (test-only). */
+  SYSTEM_BLOCK_NUMBER_RESET: "SystemBlockNumberReset",
+  /** Emitted by `EvmAccessorsFacet.changeSystemChainId` (test-only). */
+  SYSTEM_CHAIN_ID_CHANGED: "SystemChainIdChanged",
+  /** Emitted by `EvmAccessorsFacet.resetSystemChainId` (test-only). */
+  SYSTEM_CHAIN_ID_RESET: "SystemChainIdReset",
+  /** Emitted by `EvmAccessorsFacet.changeSystemSender` (test-only). */
+  SYSTEM_SENDER_CHANGED: "SystemSenderChanged",
+  /** Emitted by `EvmAccessorsFacet.resetSystemSender` (test-only). */
+  SYSTEM_SENDER_RESET: "SystemSenderReset",
 } as const;

@@ -1,0 +1,88 @@
+// SPDX-License-Identifier: Apache-2.0
+/* solhint-disable */
+
+// AUTO-GENERATED — DO NOT EDIT.
+// Source: scripts/tools/accessor-generator/
+// Regenerated on every `npx hardhat compile` by the
+// `generate-evm-accessors` task in `tasks/compile.ts`.
+// Edits to this file will be silently overwritten.
+
+pragma solidity >=0.8.0 <0.9.0;
+
+/// @custom:hash storage EvmAccessorsOverrides
+bytes32 constant STORAGE_LOCATION_EVM_ACCESSORS_OVERRIDES = 0xc57b34d282ab0da9f29d34083d370897ab84c2fa5593690e1d78511a8ac87100;
+
+/// @custom:storage-location erc7201:asset.tokenization.standard.storage.EvmAccessorsOverrides
+struct EvmAccessorsOverridesDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    address msgSenderOverride;
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    uint256 blockTimestampOverride;
+    uint256 blockNumberOverride;
+    uint256 chainIdOverride;
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
+    // ─── APPEND-ONLY ZONE BELOW ───
+}
+
+library EvmAccessors {
+    function getBlockTimestamp() internal view returns (uint256 value_) {
+        value_ = evmAccessorsOverridesStorage().blockTimestampOverride;
+        return value_ == 0 ? block.timestamp : value_;
+    }
+
+    function getBlockNumber() internal view returns (uint256 value_) {
+        value_ = evmAccessorsOverridesStorage().blockNumberOverride;
+        return value_ == 0 ? block.number : value_;
+    }
+
+    function getMsgSender() internal view returns (address value_) {
+        value_ = evmAccessorsOverridesStorage().msgSenderOverride;
+        return value_ == address(0) ? msg.sender : value_;
+    }
+
+    function getChainId() internal view returns (uint256 value_) {
+        value_ = evmAccessorsOverridesStorage().chainIdOverride;
+        return value_ == 0 ? block.chainid : value_;
+    }
+
+    function getBlockTimestampOverride() internal view returns (uint256 value_) {
+        value_ = evmAccessorsOverridesStorage().blockTimestampOverride;
+    }
+
+    function getBlockNumberOverride() internal view returns (uint256 value_) {
+        value_ = evmAccessorsOverridesStorage().blockNumberOverride;
+    }
+
+    function getMsgSenderOverride() internal view returns (address value_) {
+        value_ = evmAccessorsOverridesStorage().msgSenderOverride;
+    }
+
+    function getChainIdOverride() internal view returns (uint256 value_) {
+        value_ = evmAccessorsOverridesStorage().chainIdOverride;
+    }
+
+    function setBlockTimestampOverride(uint256 value) internal {
+        evmAccessorsOverridesStorage().blockTimestampOverride = value;
+    }
+
+    function setBlockNumberOverride(uint256 value) internal {
+        evmAccessorsOverridesStorage().blockNumberOverride = value;
+    }
+
+    function setMsgSenderOverride(address value) internal {
+        evmAccessorsOverridesStorage().msgSenderOverride = value;
+    }
+
+    function setChainIdOverride(uint256 value) internal {
+        evmAccessorsOverridesStorage().chainIdOverride = value;
+    }
+
+    function evmAccessorsOverridesStorage() private pure returns (EvmAccessorsOverridesDataStorage storage overrides_) {
+        bytes32 position = STORAGE_LOCATION_EVM_ACCESSORS_OVERRIDES;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            overrides_.slot := position
+        }
+    }
+}

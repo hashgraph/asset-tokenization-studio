@@ -17,27 +17,17 @@
 
 import { ethers } from "hardhat";
 import { deploySystemWithNewBlr, configureLogger, LogLevel, DEFAULT_BATCH_SIZE } from "../../scripts";
-import {
-  Factory__factory,
-  BusinessLogicResolver__factory,
-  ProxyAdmin__factory,
-  IMockFactory__factory,
-} from "@contract-types";
-import type { IFactory, IMockFactory, BusinessLogicResolver, ProxyAdmin } from "@contract-types";
+import { IMockFactory__factory, BusinessLogicResolver__factory, ProxyAdmin__factory } from "@contract-types";
+import type { IMockFactory, BusinessLogicResolver, ProxyAdmin } from "@contract-types";
 
 /**
  * Fixture: Deploy complete ATS infrastructure
  *
  * Deploys: ProxyAdmin, BLR, Factory, all Facets, Equity & Bond configurations
  *
- * @param useTimeTravel - Use TimeTravel facet variants (default: true for tests)
  * @returns Complete deployment output + test utilities including separated equity/bond facet addresses
  */
-export async function deployAtsInfrastructureFixture(
-  useTimeTravel = true,
-  partialBatchDeploy = false,
-  batchSize = DEFAULT_BATCH_SIZE,
-) {
+export async function deployAtsInfrastructureFixture(partialBatchDeploy = false, batchSize = DEFAULT_BATCH_SIZE) {
   // Configure logger to SILENT for tests (suppress all deployment logs)
   configureLogger({ level: LogLevel.SILENT });
 
@@ -49,17 +39,16 @@ export async function deployAtsInfrastructureFixture(
   // Deploy system with new BLR using new scripts with signer
   // Network config automatically sets: confirmations=0, enableRetry=false, verifyDeployment=false for hardhat
   const deployment = await deploySystemWithNewBlr(deployer, "hardhat", {
-    useTimeTravel,
     saveOutput: false, // Don't save deployment files during tests
     partialBatchDeploy,
     batchSize,
     ignoreCheckpoint: true, // Disable checkpoints for tests to prevent cross-worker contamination in parallel execution
   });
 
-  // Get typed contract instances using TypeChain factories
-  const factory = useTimeTravel
-    ? (IMockFactory__factory.connect(deployment.infrastructure.factory.proxy, deployer) as IMockFactory)
-    : (Factory__factory.connect(deployment.infrastructure.factory.proxy, deployer) as IFactory);
+  // Get typed contract instances using TypeChain factories.
+  // In test mode the deployed factory is MockFactory, which exposes the bond-variant deploy
+  // helpers (deployBondFixedRate / deployBondKpiLinkedRate) the base Factory does not.
+  const factory = IMockFactory__factory.connect(deployment.infrastructure.factory.proxy, deployer) as IMockFactory;
 
   const blr = BusinessLogicResolver__factory.connect(
     deployment.infrastructure.blr.proxy,

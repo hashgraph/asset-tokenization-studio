@@ -252,7 +252,7 @@ export async function deployLoanTokenFixture({
   const externalControlListManagementFacet = IAsset__factory.connect(proxyAddress, deployer);
   const externalPauseManagementFacet = IAsset__factory.connect(proxyAddress, deployer);
   const proceedRecipientsFacet = IAsset__factory.connect(proxyAddress, deployer);
-  const timeTravelFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const evmAccessorsFacet = IAsset__factory.connect(proxyAddress, deployer);
 
   await controlListFacet.initializeControlList(securityData.isWhiteList);
   await controllerFacet.initializeController(securityData.isControllable);
@@ -362,7 +362,7 @@ export async function deployLoanTokenFixture({
   await asset.initializeBalanceTracker();
   await asset.initializeBalanceAdjustments();
   await asset.initializeScheduledBalanceAdjustment();
-  await asset.initializeTimeTravel();
+  await asset.initializeEvmAccessors();
 
   await asset.connect(deployer).initializeInitializer(150);
   await asset.connect(deployer).setOperationalStatus();
@@ -398,6 +398,6 @@ export async function deployLoanTokenFixture({
     externalControlListManagementFacet,
     externalPauseManagementFacet,
     proceedRecipientsFacet,
-    timeTravelFacet,
+    evmAccessorsFacet,
   };
 }
