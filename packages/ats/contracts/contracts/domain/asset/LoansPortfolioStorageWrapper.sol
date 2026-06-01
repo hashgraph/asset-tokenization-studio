@@ -9,6 +9,7 @@ import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Type
 import { ITransferByPartition } from "../../facets/transferByPartition/ITransferByPartition.sol";
 import { IBalanceTrackerByPartition } from "../../facets/balanceTrackerByPartition/IBalanceTrackerByPartition.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
+import { ScheduledTasksOps } from "../orchestrator/ScheduledTasksOps.sol";
 
 /// @custom:hash storage LoansPortfolio
 bytes32 constant STORAGE_LOCATION_LOANS_PORTFOLIO = 0x5981f3997a6cf8235e2e8b5dd35e430c9a70b916501c3c7672c830ad91b0d400;
@@ -88,6 +89,7 @@ library LoansPortfolioStorageWrapper {
     function storeLoansPortfolioDetails(
         ILoansPortfolio.LoansPortfolioDetailsData memory _loansPortfolioDetails
     ) internal {
+        ScheduledTasksOps.triggerPendingScheduledCrossOrderedTasks();
         LoansPortfolioDataStorage storage s = loansPortfolioStorage();
         s.portfolioType = _loansPortfolioDetails.portfolioType;
         s.distributionPolicy = _loansPortfolioDetails.distributionPolicy;
