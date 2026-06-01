@@ -159,77 +159,76 @@ abstract contract Factory is IFactory {
     uint256 private constant _SECURITY_FACETS_MAX = 150;
 
     /**
-     * @notice Ensures a non-zero business logic resolver is provided.
-     * @dev Reverts with `EmptyResolver` when the resolver address is zero.
+     * @notice Guarantees a non-zero business logic resolver is provided.
+     * @dev Delegates to `_checkResolver`, which reverts with `EmptyResolver` when the resolver
+     *      address is zero.
      * @param resolver Resolver that will supply facet configuration for the proxy.
      */
-    modifier checkResolver(IBusinessLogicResolver resolver) {
-        if (address(resolver) == address(0)) {
-            revert EmptyResolver(resolver);
-        }
+    modifier onlyValidResolver(IBusinessLogicResolver resolver) {
+        _checkResolver(resolver);
         _;
     }
 
     /**
-     * @notice Ensures the provided ISIN satisfies the project validator.
-     * @dev Reverts according to `_validateISIN` when the identifier is malformed.
+     * @notice Guarantees the provided ISIN satisfies the project validator.
+     * @dev Delegates to `_checkISIN`, which reverts when the identifier is malformed.
      * @param isin International Securities Identification Number to validate.
      */
-    modifier checkISIN(string calldata isin) {
-        _validateISIN(isin);
+    modifier onlyValidISIN(string calldata isin) {
+        _checkISIN(isin);
         _;
     }
 
     /**
-     * @notice Ensures the initial RBAC configuration includes at least one admin.
-     * @dev Reverts with `NoInitialAdmins` unless a non-zero `DEFAULT_ADMIN_ROLE` member
-     *      exists in the supplied RBAC entries.
+     * @notice Guarantees the initial RBAC configuration includes at least one admin.
+     * @dev Delegates to `_checkAdmins`, which reverts with `NoInitialAdmins` unless a non-zero
+     *      `DEFAULT_ADMIN_ROLE` member exists in the supplied RBAC entries.
      * @param rbacs Initial role assignments passed to the deployed proxy.
      */
-    modifier checkAdmins(IResolverProxy.Rbac[] calldata rbacs) {
+    modifier onlyValidAdmins(IResolverProxy.Rbac[] calldata rbacs) {
         _checkAdmins(rbacs);
         _;
     }
 
     /**
-     * @notice Ensures the regulation type and sub-type combination is supported.
-     * @dev Reverts according to `_checkRegulationTypeAndSubType` for invalid combinations.
+     * @notice Guarantees the regulation type and sub-type combination is supported.
+     * @dev Delegates to `_checkRegulationTypeAndSubType`, which reverts for invalid combinations.
      * @param _regulationType Primary regulation category.
      * @param _regulationSubType Secondary regulation category.
      */
-    modifier checkRegulation(RegulationType _regulationType, RegulationSubType _regulationSubType) {
+    modifier onlyValidRegulation(RegulationType _regulationType, RegulationSubType _regulationSubType) {
         _checkRegulationTypeAndSubType(_regulationType, _regulationSubType);
         _;
     }
 
     /**
-     * @notice Ensures KPI-linked interest rate data is valid before deployment.
-     * @dev Reverts according to `InterestRateStorageWrapper.requireValidInterestRate`.
+     * @notice Guarantees KPI-linked interest rate data is valid before deployment.
+     * @dev Delegates to `_checkInterestRate`, which reverts for invalid interest-rate data.
      * @param _newInterestRate KPI-linked interest rate configuration to validate.
      */
-    modifier checkInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) {
-        InterestRateStorageWrapper.requireValidInterestRate(_newInterestRate);
+    modifier onlyValidInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) {
+        _checkInterestRate(_newInterestRate);
         _;
     }
 
     /**
-     * @notice Ensures KPI impact data is valid before deployment.
-     * @dev Reverts according to `InterestRateStorageWrapper.requireValidImpactData`.
+     * @notice Guarantees KPI impact data is valid before deployment.
+     * @dev Delegates to `_checkImpactData`, which reverts for invalid impact data.
      * @param _newImpactData KPI impact configuration to validate.
      */
-    modifier checkImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) {
-        InterestRateStorageWrapper.requireValidImpactData(_newImpactData);
+    modifier onlyValidImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) {
+        _checkImpactData(_newImpactData);
         _;
     }
 
     /**
-     * @notice Ensures bond dates are chronologically valid and schedulable.
-     * @dev Reverts when the maturity date is not after the start date or is an invalid
-     *      scheduled-task timestamp.
+     * @notice Guarantees bond dates are chronologically valid and schedulable.
+     * @dev Delegates to `_checkBondDates`, which reverts when the maturity date is not after the
+     *      start date or is an invalid scheduled-task timestamp.
      * @param startingDate Bond start timestamp.
      * @param maturityDate Bond maturity timestamp.
      */
-    modifier checkBondDates(uint256 startingDate, uint256 maturityDate) {
+    modifier onlyValidBondDates(uint256 startingDate, uint256 maturityDate) {
         _checkBondDates(startingDate, maturityDate);
         _;
     }
@@ -249,7 +248,7 @@ abstract contract Factory is IFactory {
         bytes32 _configKey,
         uint256 _version,
         IResolverProxy.Rbac[] calldata _rbacs
-    ) external checkResolver(_resolver) checkAdmins(_rbacs) returns (address proxyAddress_) {
+    ) external onlyValidResolver(_resolver) onlyValidAdmins(_rbacs) returns (address proxyAddress_) {
         proxyAddress_ = address(new ResolverProxy(_resolver, _configKey, _version, _rbacs));
         emit ProxyDeployed(proxyAddress_, _resolver, _configKey, _version, _rbacs);
     }
@@ -269,10 +268,10 @@ abstract contract Factory is IFactory {
         FactoryRegulationData calldata _factoryRegulationData
     )
         external
-        checkResolver(_equityData.security.resolver)
-        checkISIN(_equityData.security.erc20MetadataInfo.isin)
-        checkAdmins(_equityData.security.rbacs)
-        checkRegulation(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType)
+        onlyValidResolver(_equityData.security.resolver)
+        onlyValidISIN(_equityData.security.erc20MetadataInfo.isin)
+        onlyValidAdmins(_equityData.security.rbacs)
+        onlyValidRegulation(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType)
         returns (address equityAddress_)
     {
         equityAddress_ = _deploySecurity(_equityData.security, SecurityType.Equity);
@@ -312,11 +311,11 @@ abstract contract Factory is IFactory {
         FactoryRegulationData calldata _factoryRegulationData
     )
         external
-        checkResolver(_bondData.security.resolver)
-        checkISIN(_bondData.security.erc20MetadataInfo.isin)
-        checkAdmins(_bondData.security.rbacs)
-        checkRegulation(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType)
-        checkBondDates(_bondData.bondDetails.startingDate, _bondData.bondDetails.maturityDate)
+        onlyValidResolver(_bondData.security.resolver)
+        onlyValidISIN(_bondData.security.erc20MetadataInfo.isin)
+        onlyValidAdmins(_bondData.security.rbacs)
+        onlyValidRegulation(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType)
+        onlyValidBondDates(_bondData.bondDetails.startingDate, _bondData.bondDetails.maturityDate)
         returns (address bondAddress_)
     {
         bondAddress_ = _deployBond(_bondData, _factoryRegulationData, SecurityType.BondVariableRate);
@@ -339,14 +338,14 @@ abstract contract Factory is IFactory {
         BondFixedRateData calldata _bondFixedRateData
     )
         external
-        checkResolver(_bondFixedRateData.bondData.security.resolver)
-        checkISIN(_bondFixedRateData.bondData.security.erc20MetadataInfo.isin)
-        checkAdmins(_bondFixedRateData.bondData.security.rbacs)
-        checkRegulation(
+        onlyValidResolver(_bondFixedRateData.bondData.security.resolver)
+        onlyValidISIN(_bondFixedRateData.bondData.security.erc20MetadataInfo.isin)
+        onlyValidAdmins(_bondFixedRateData.bondData.security.rbacs)
+        onlyValidRegulation(
             _bondFixedRateData.factoryRegulationData.regulationType,
             _bondFixedRateData.factoryRegulationData.regulationSubType
         )
-        checkBondDates(
+        onlyValidBondDates(
             _bondFixedRateData.bondData.bondDetails.startingDate,
             _bondFixedRateData.bondData.bondDetails.maturityDate
         )
@@ -378,16 +377,16 @@ abstract contract Factory is IFactory {
         BondKpiLinkedRateData calldata _bondKpiLinkedRateData
     )
         external
-        checkResolver(_bondKpiLinkedRateData.bondData.security.resolver)
-        checkISIN(_bondKpiLinkedRateData.bondData.security.erc20MetadataInfo.isin)
-        checkAdmins(_bondKpiLinkedRateData.bondData.security.rbacs)
-        checkRegulation(
+        onlyValidResolver(_bondKpiLinkedRateData.bondData.security.resolver)
+        onlyValidISIN(_bondKpiLinkedRateData.bondData.security.erc20MetadataInfo.isin)
+        onlyValidAdmins(_bondKpiLinkedRateData.bondData.security.rbacs)
+        onlyValidRegulation(
             _bondKpiLinkedRateData.factoryRegulationData.regulationType,
             _bondKpiLinkedRateData.factoryRegulationData.regulationSubType
         )
-        checkInterestRate(_bondKpiLinkedRateData.interestRate)
-        checkImpactData(_bondKpiLinkedRateData.impactData)
-        checkBondDates(
+        onlyValidInterestRate(_bondKpiLinkedRateData.interestRate)
+        onlyValidImpactData(_bondKpiLinkedRateData.impactData)
+        onlyValidBondDates(
             _bondKpiLinkedRateData.bondData.bondDetails.startingDate,
             _bondKpiLinkedRateData.bondData.bondDetails.maturityDate
         )
@@ -405,7 +404,7 @@ abstract contract Factory is IFactory {
      * @dev Creates the proxy and initialises its facets via `_deployDepositToken`, marks the
      *      proxy operational and renounces this factory's temporary `DEFAULT_ADMIN_ROLE`. The
      *      deposit token configuration does not include `SecurityFacet`, so
-     *      `_factoryRegulationData` is validated by `checkRegulation` and emitted in
+     *      `_factoryRegulationData` is validated by `onlyValidRegulation` and emitted in
      *      `DepositTokenDeployed` but not persisted on-chain.
      * @param _depositTokenData Deposit token creation data wrapping the shared `SecurityData`.
      * @param _factoryRegulationData Regulation type and sub-type validated for the deposit token.
@@ -416,10 +415,10 @@ abstract contract Factory is IFactory {
         FactoryRegulationData calldata _factoryRegulationData
     )
         external
-        checkResolver(_depositTokenData.security.resolver)
-        checkISIN(_depositTokenData.security.erc20MetadataInfo.isin)
-        checkAdmins(_depositTokenData.security.rbacs)
-        checkRegulation(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType)
+        onlyValidResolver(_depositTokenData.security.resolver)
+        onlyValidISIN(_depositTokenData.security.erc20MetadataInfo.isin)
+        onlyValidAdmins(_depositTokenData.security.rbacs)
+        onlyValidRegulation(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType)
         returns (address depositTokenAddress_)
     {
         depositTokenAddress_ = _deployDepositToken(_depositTokenData.security, SecurityType.DepositToken);

@@ -93,7 +93,7 @@ describe("Factory Tests", () => {
   });
 
   describe("Modifier Tests - Comprehensive Coverage", () => {
-    describe("checkResolver modifier", () => {
+    describe("onlyValidResolver modifier", () => {
       it("GIVEN empty resolver (address(0)) WHEN deploying equity THEN reverts with EmptyResolver", async () => {
         const equityData = {
           security: getSecurityData(businessLogicResolver, {
@@ -134,7 +134,7 @@ describe("Factory Tests", () => {
         );
       });
 
-      it("GIVEN valid resolver WHEN deploying equity THEN passes checkResolver validation", async () => {
+      it("GIVEN valid resolver WHEN deploying equity THEN passes onlyValidResolver validation", async () => {
         const equityData = {
           security: getSecurityData(businessLogicResolver, {
             rbacs: init_rbacs,
@@ -150,7 +150,7 @@ describe("Factory Tests", () => {
       });
     });
 
-    describe("checkISIN modifier", () => {
+    describe("onlyValidISIN modifier", () => {
       it("GIVEN ISIN with length < 12 WHEN deploying equity THEN reverts with WrongISIN", async () => {
         const equityData = {
           security: getSecurityData(businessLogicResolver, {
@@ -248,7 +248,7 @@ describe("Factory Tests", () => {
         );
       });
 
-      it("GIVEN valid ISIN WHEN deploying bond THEN passes checkISIN validation", async () => {
+      it("GIVEN valid ISIN WHEN deploying bond THEN passes onlyValidISIN validation", async () => {
         const bondData = {
           security: getSecurityData(businessLogicResolver, {
             rbacs: init_rbacs,
@@ -266,7 +266,7 @@ describe("Factory Tests", () => {
       });
     });
 
-    describe("checkAdmins modifier", () => {
+    describe("onlyValidAdmins modifier", () => {
       it("GIVEN rbacs with empty members array for admin role WHEN deploying equity THEN reverts with NoInitialAdmins", async () => {
         const emptyAdminRbacs: Rbac[] = [
           {
@@ -395,7 +395,7 @@ describe("Factory Tests", () => {
       });
     });
 
-    describe("checkRegulation modifier", () => {
+    describe("onlyValidRegulation modifier", () => {
       it("GIVEN NONE regulation type with non-NONE subtype WHEN deploying equity THEN reverts with RegulationTypeAndSubTypeForbidden", async () => {
         const equityData = {
           security: getSecurityData(businessLogicResolver, {
@@ -1826,7 +1826,7 @@ describe("Factory Tests", () => {
     });
   });
 
-  describe("checkAdmins edge cases", () => {
+  describe("onlyValidAdmins edge cases", () => {
     it("GIVEN rbacs with empty members array for admin role WHEN deploying equity THEN transaction fails", async () => {
       const emptyAdminRbacs: Rbac[] = [
         {
