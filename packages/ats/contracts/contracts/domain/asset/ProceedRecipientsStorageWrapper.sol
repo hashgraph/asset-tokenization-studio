@@ -51,11 +51,7 @@ library ProceedRecipientsStorageWrapper {
         uint256 length = _proceedRecipients.length;
         for (uint256 index; index < length; ) {
             ExternalListManagementStorageWrapper.checkValidAddress(_proceedRecipients[index]);
-            ExternalListManagementStorageWrapper.addExternalList(
-                STORAGE_LOCATION_PROCEED_RECIPIENTS,
-                _proceedRecipients[index]
-            );
-            setProceedRecipientData(_proceedRecipients[index], _data[index]);
+            addProceedRecipient(_proceedRecipients[index], _data[index]);
             unchecked {
                 ++index;
             }

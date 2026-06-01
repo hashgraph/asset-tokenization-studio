@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IKpiLinkedRateErrors } from "../../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRateErrors.sol";
 import { IInterestRate } from "../../facets/interestRate/IInterestRate.sol";
+import { ScheduledTasksOps } from "../orchestrator/ScheduledTasksOps.sol";
 
 /// @custom:hash storage InterestRateType
 // solhint-disable-next-line max-line-length
@@ -153,7 +154,8 @@ library InterestRateStorageWrapper {
      * @param _rateType The `IInterestRate.RateType` to persist.
      */
     function initializeCouponRateType(IInterestRate.RateType _rateType) internal {
-        interestRateTypeStorage().rateType = _rateType;
+        ScheduledTasksOps.triggerPendingScheduledCrossOrderedTasks();
+        setCouponRateType(_rateType);
     }
 
     /**
