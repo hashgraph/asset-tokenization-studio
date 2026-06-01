@@ -16,15 +16,17 @@ interface IPartitions {
     /**
      * @notice Emitted once when the partitions capability is initialised on a token.
      * @dev Fires exclusively from `initializePartitions`.
+     * @param multiPartition Whether the token operates in multi-partition mode.
      */
-    event PartitionsInitialized();
+    event PartitionsInitialized(bool multiPartition);
 
     /**
-     * @notice Initialises the partitions capability on the token.
+     * @notice Initialises the partitions capability on the token and sets multi-partition mode.
      * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
      *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     * @param _multiPartition When `true`, the token accepts partitions other than the default.
      */
-    function initializePartitions() external;
+    function initializePartitions(bool _multiPartition) external;
 
     /**
      * @notice Use to get the list of partitions `_tokenHolder` is associated with.

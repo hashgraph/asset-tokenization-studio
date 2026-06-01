@@ -16,8 +16,10 @@ bytes32 constant STORAGE_LOCATION_SSI_MANAGEMENT = 0xce722d9244e395d588d86bfe231
  * @custom:storage-location erc7201:security.token.standard.storage.SsiManagement
  */
 struct SsiManagementStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
     // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
     address revocationRegistry;
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     EnumerableSet.AddressSet issuerList;
     // ─── APPEND-ONLY ZONE BELOW ───

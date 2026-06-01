@@ -24,15 +24,14 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
  */
 abstract contract Compliance is IComplianceFacet, Modifiers {
     /// @inheritdoc IComplianceFacet
-    /// @dev Marks the compliance facet as ready and emits `ComplianceInitialized`.
-    function initializeCompliance()
-        external
-        override
-        onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(RESOLVER_KEY_COMPLIANCE)
-    {
+    /// @dev Wires the compliance contract address, marks the compliance facet as ready, and emits
+    ///      `ComplianceInitialized`. One-shot is enforced by `onlyFacetNotRegistered`.
+    function initializeCompliance(
+        address _compliance
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_COMPLIANCE) {
+        ERC3643StorageWrapper.setCompliance(_compliance);
         InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_COMPLIANCE);
-        emit ComplianceInitialized();
+        emit ComplianceInitialized(_compliance);
     }
 
     /// @inheritdoc IComplianceFacet

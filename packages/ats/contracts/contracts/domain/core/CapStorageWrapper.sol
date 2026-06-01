@@ -16,9 +16,11 @@ bytes32 constant STORAGE_LOCATION_CAP = 0xabd29859a2443302b9905d8be07aab508a353c
  * @custom:storage-location erc7201:security.token.standard.storage.Cap
  */
 struct CapDataStorage {
-    // ─── R2 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     uint256 maxSupply;
-    // ─── R3 Aggregates (mapping, array, EnumerableSet) ───────
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(bytes32 => uint256) maxSupplyByPartition;
     // ─── APPEND-ONLY ZONE BELOW ───
 }
@@ -195,7 +197,10 @@ library CapStorageWrapper {
      */
     function getMaxSupplyAdjustedAt(uint256 timestamp) internal view returns (uint256) {
         CapDataStorage storage cs = capStorage();
-        (uint256 pendingAbaf, ) = AdjustBalancesStorageWrapper.getPendingScheduledBalanceAdjustmentsAt(timestamp);
+        (uint256 pendingAbaf, ) = AdjustBalancesStorageWrapper.getPendingScheduledBalanceAdjustmentsAt(
+            timestamp,
+            false
+        );
         return (cs.maxSupply > (MAX_UINT256 / pendingAbaf)) ? MAX_UINT256 : cs.maxSupply * pendingAbaf;
     }
 

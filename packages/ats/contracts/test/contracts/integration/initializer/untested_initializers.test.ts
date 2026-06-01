@@ -61,7 +61,7 @@ describe("Integration — Untested Initializers", () => {
       method: "initializeIdentity",
       event: "IdentityInitialized",
       preInitialized: true,
-      params: [],
+      params: [ethers.ZeroAddress],
     },
     {
       name: "Kyc",

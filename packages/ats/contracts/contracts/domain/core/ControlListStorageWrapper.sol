@@ -18,6 +18,8 @@ bytes32 constant STORAGE_LOCATION_CONTROL_LIST = 0x880786188890a6f111c4f0814d49d
 struct ControlListStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
     bool isWhiteList;
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     EnumerableSet.AddressSet list;
     // ─── APPEND-ONLY ZONE BELOW ───

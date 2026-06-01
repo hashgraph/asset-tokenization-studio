@@ -34,6 +34,9 @@ bytes32 constant STORAGE_LOCATION_HOLD = 0xaee7bac248b1ceeb630aa06b36647d0582529
  * @custom:storage-location erc7201:security.token.standard.storage.Hold
  */
 struct HoldDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(address => uint256) totalHeldAmountByAccount;
     mapping(address => mapping(bytes32 => uint256)) totalHeldAmountByAccountAndPartition;

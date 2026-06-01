@@ -21,6 +21,8 @@ bytes32 constant STORAGE_LOCATION_INITIALIZER = 0x7f2d07b09acba6319339222a47bfb1
  * @custom:storage-location erc7201:security.token.standard.storage.Initializer
  */
 struct InitializerDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
     // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     uint256 maxInitializerFacetIndex;
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────

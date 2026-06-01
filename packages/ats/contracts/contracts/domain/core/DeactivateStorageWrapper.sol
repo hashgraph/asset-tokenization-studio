@@ -17,6 +17,9 @@ bytes32 constant STORAGE_LOCATION_DEACTIVATE = 0x572f1b7cd92e0f948542520f56d2d4e
 struct DeactivateDataStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
     bool deactivated;
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     // ─── APPEND-ONLY ZONE BELOW ───
 }
 

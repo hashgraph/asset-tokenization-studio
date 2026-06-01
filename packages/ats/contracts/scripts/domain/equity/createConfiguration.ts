@@ -50,7 +50,7 @@ const EQUITY_FACETS = [
   "TransferFacet",
   "CoreAdjustedFacet",
   "InitializerFacet",
-  "MetadataFacet",
+  "CustomDataFacet",
   "FreezeFacet",
   "BatchFreezeFacet",
   "KycFacet",
@@ -75,7 +75,6 @@ const EQUITY_FACETS = [
 
   // ERC Standards (13)
   "MintByPartitionFacet",
-  "ERC1410ManagementFacet",
   "ProtectedByPartitionFacet",
   "OperatorFacet",
   "TransferByPartitionFacet",
@@ -93,7 +92,6 @@ const EQUITY_FACETS = [
   "BatchBurnFacet",
   "BatchMintFacet",
   "BatchTransferFacet",
-  "ERC3643ManagementFacet",
   "RecoveryFacet",
   "IdentityFacet",
   "ComplianceFacet",

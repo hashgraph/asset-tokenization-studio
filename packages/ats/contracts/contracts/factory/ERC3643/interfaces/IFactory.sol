@@ -26,20 +26,56 @@ bytes32 constant RESOLVER_KEY_FACTORY = 0x9fc26269cc1cb994e66f269ed6b58a5bb0c344
  *         business-logic resolvers, and role-based access control.
  */
 interface TRexIFactory {
+    /**
+     * @notice Distinguishes the security variant being deployed.
+     * @dev Used internally to select the correct initialisation path in the factory.
+     */
     enum SecurityType {
+        /// @notice A bond whose coupon rate floats against an external index.
         BondVariableRate,
+        /// @notice An equity instrument (shares).
         Equity,
+        /// @notice A bond with a fixed coupon rate.
         BondFixedRate,
+        /// @notice A bond whose coupon is tied to KPI performance metrics.
         BondKpiLinkedRate,
+        /// @notice A loan instrument.
         Loan,
         DepositToken
     }
 
+    /**
+     * @notice Identifies the business-logic resolver version to wire into a new proxy.
+     * @param key     Resolver key that maps to the registered BusinessLogicResolver address.
+     * @param version Configuration version to load from the resolver.
+     */
     struct ResolverProxyConfiguration {
         bytes32 key;
         uint256 version;
     }
 
+    /**
+     * @notice Core configuration shared across all security types.
+     * @dev Passed verbatim to the proxy initialiser; all addresses must be non-zero where
+     *      the corresponding feature is activated.
+     * @param arePartitionsProtected     Whether token partitions are protected from arbitrary transfer.
+     * @param isMultiPartition           Whether the token supports multiple partitions.
+     * @param resolver                   BusinessLogicResolver that backs the new Diamond proxy.
+     * @param resolverProxyConfiguration Resolver key and version used during deployment.
+     * @param rbacs                      Initial role assignments applied at proxy creation.
+     * @param isControllable             Whether an operator can forcibly transfer tokens.
+     * @param isWhiteList                Whether transfers are gated by a whitelist.
+     * @param maxSupply                  Hard cap on total token supply (0 means unlimited).
+     * @param erc20MetadataInfo          ERC-20 name, symbol, and decimals.
+     * @param clearingActive             Whether clearing and settlement is activated.
+     * @param internalKycActivated       Whether the internal KYC module is activated.
+     * @param externalPauses             External pause contract addresses consulted on transfer.
+     * @param externalControlLists       External control-list contract addresses.
+     * @param externalKycLists           External KYC-list contract addresses.
+     * @param erc20VotesActivated        Whether ERC-20 vote delegation is activated.
+     * @param compliance                 Address of the compliance contract (address(0) to disable).
+     * @param identityRegistry           Address of the identity registry (address(0) to disable).
+     */
     struct SecurityData {
         bool arePartitionsProtected;
         bool isMultiPartition;
@@ -60,11 +96,23 @@ interface TRexIFactory {
         address identityRegistry;
     }
 
+    /**
+     * @notice Full configuration for deploying an equity token.
+     * @param security      Core security configuration shared across all security types.
+     * @param equityDetails Equity-specific details such as dividend type and voting rights.
+     */
     struct EquityData {
         SecurityData security;
         IEquity.EquityDetailsData equityDetails;
     }
 
+    /**
+     * @notice Full configuration for deploying a bond token.
+     * @param security              Core security configuration shared across all security types.
+     * @param bondDetails           Bond-specific details such as maturity date and nominal value.
+     * @param proceedRecipients     Addresses that receive the bond proceeds at issuance.
+     * @param proceedRecipientsData ABI-encoded data forwarded to each proceed recipient.
+     */
     struct BondData {
         SecurityData security;
         IBondRead.BondDetailsData bondDetails;
@@ -72,6 +120,13 @@ interface TRexIFactory {
         bytes[] proceedRecipientsData;
     }
 
+    /**
+     * @notice Full configuration for deploying a KPI-linked-rate bond.
+     * @param bondData              Base bond configuration.
+     * @param factoryRegulationData Regulatory classification applied at deployment.
+     * @param interestRate          Initial KPI-linked interest-rate parameters.
+     * @param impactData            KPI impact metrics used to compute the variable coupon.
+     */
     struct BondKpiLinkedRateData {
         BondData bondData;
         FactoryRegulationData factoryRegulationData;
@@ -79,6 +134,12 @@ interface TRexIFactory {
         IKpiLinkedRate.ImpactData impactData;
     }
 
+    /**
+     * @notice Full configuration for deploying a fixed-rate bond.
+     * @param bondData              Base bond configuration.
+     * @param factoryRegulationData Regulatory classification applied at deployment.
+     * @param fixedRateData         Fixed coupon rate and day-count convention parameters.
+     */
     struct BondFixedRateData {
         BondData bondData;
         FactoryRegulationData factoryRegulationData;
@@ -160,7 +221,15 @@ interface TRexIFactory {
         IResolverProxy.Rbac[] rbac
     );
 
+    /**
+     * @notice Raised when the supplied resolver address is the zero address.
+     * @param resolver The zero-address resolver that caused the revert.
+     */
     error EmptyResolver(IBusinessLogicResolver resolver);
+
+    /**
+     * @notice Raised when no admin role assignments are provided for the new proxy.
+     */
     error NoInitialAdmins();
 
     /**

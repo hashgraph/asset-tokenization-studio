@@ -13,7 +13,6 @@ import { IControlList } from "../facets/controlList/IControlList.sol";
 import { ICore } from "../facets/core/ICore.sol";
 import { IERC20Votes } from "../facets/layer_1/ERC1400/ERC20Votes/IERC20Votes.sol";
 import { IController } from "../facets/controller/IController.sol";
-import { IERC1410Management } from "../facets/layer_1/ERC1400/ERC1410/IERC1410Management.sol";
 import { ICap } from "../facets/cap/ICap.sol";
 import { IMint } from "../facets/mint/IMint.sol";
 import { IClearing } from "../facets/clearing/IClearing.sol";
@@ -54,7 +53,6 @@ import {
 } from "../facets/externalControlListManagement/IExternalControlListManagement.sol";
 import { IExternalKycListManagement } from "../facets/externalKycListManagement/IExternalKycListManagement.sol";
 import { IKyc } from "../facets/layer_1/kyc/IKyc.sol";
-import { IERC3643 } from "../facets/layer_1/ERC3643/IERC3643.sol";
 import { _validateISIN } from "./isinValidator.sol";
 import { IFixedRate } from "../facets/layer_2/interestRate/fixedRate/IFixedRate.sol";
 import { IKpiLinkedRate } from "../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
@@ -108,7 +106,7 @@ import { ILockAtSnapshotByPartition } from "../facets/lockAtSnapshotByPartition/
 import { ILockByPartition } from "../facets/lockByPartition/ILockByPartition.sol";
 import { IMaturity } from "../facets/maturity/IMaturity.sol";
 import { IMaturityByPartition } from "../facets/maturityByPartition/IMaturityByPartition.sol";
-import { IMetadata } from "../facets/metadata/IMetadata.sol";
+import { ICustomData } from "../facets/customData/ICustomData.sol";
 import { IMintByPartition } from "../facets/mintByPartition/IMintByPartition.sol";
 import { INominalValueAtSnapshot } from "../facets/nominalValueAtSnapshot/INominalValueAtSnapshot.sol";
 import { INonces } from "../facets/nonces/INonces.sol";
@@ -567,7 +565,7 @@ abstract contract Factory is IFactory {
         // configure Control List
         IControlList(_securityAddress).initializeControlList(_securityData.isWhiteList);
         // configure multi partition flag
-        IERC1410Management(_securityAddress).initializeERC1410(_securityData.isMultiPartition);
+        IPartitions(_securityAddress).initializePartitions(_securityData.isMultiPartition);
         // configure controller flag
         IController(_securityAddress).initializeController(_securityData.isControllable);
         // configure erc20 metadata
@@ -596,8 +594,9 @@ abstract contract Factory is IFactory {
         IExternalKycListManagement(_securityAddress).initializeExternalKycLists(_securityData.externalKycLists);
         // configure ERC20Votes
         IERC20Votes(_securityAddress).initializeERC20Votes(_securityData.erc20VotesActivated);
-        // configure ERC3643
-        IERC3643(_securityAddress).initializeERC3643(_securityData.compliance, _securityData.identityRegistry);
+        // configure Compliance + Identity (ERC3643)
+        IComplianceFacet(_securityAddress).initializeCompliance(_securityData.compliance);
+        IIdentity(_securityAddress).initializeIdentity(_securityData.identityRegistry);
     }
 
     /**
@@ -615,8 +614,8 @@ abstract contract Factory is IFactory {
         ITransfer(_securityAddress).initializeTransfer();
         // configure core adjusted
         ICoreAdjusted(_securityAddress).initializeCoreAdjusted();
-        // configure metadata
-        IMetadata(_securityAddress).initializeMetadata();
+        // configure custom data
+        ICustomData(_securityAddress).initializeCustomData();
         // configure freeze
         IFreeze(_securityAddress).initializeFreeze();
         // configure batch freeze
@@ -679,8 +678,6 @@ abstract contract Factory is IFactory {
         IOperator(_securityAddress).initializeOperator();
         // configure transfer by partition
         ITransferByPartition(_securityAddress).initializeTransferByPartition();
-        // configure partitions
-        IPartitions(_securityAddress).initializePartitions();
         // configure operator by partition
         IOperatorByPartition(_securityAddress).initializeOperatorByPartition();
         // configure burn by partition
@@ -714,8 +711,6 @@ abstract contract Factory is IFactory {
      * @param _securityAddress Address of the proxy being initialised.
      */
     function _initializeComplianceFacets(address _securityAddress) private {
-        // configure compliance
-        IComplianceFacet(_securityAddress).initializeCompliance();
         // configure compliance by partition
         IComplianceByPartition(_securityAddress).initializeComplianceByPartition();
     }
@@ -794,7 +789,6 @@ abstract contract Factory is IFactory {
         // configure cap by partition
         ICapByPartition(_securityAddress).initializeCapByPartition();
         IERC20Permit(_securityAddress).initializeERC20Permit();
-        IIdentity(_securityAddress).initializeIdentity();
         IScheduledCrossOrderedTasks(_securityAddress).initializeScheduledCrossOrderedTasks();
         IDiamondFacet(_securityAddress).initializeDiamondCut();
         // Seed the initializer facet's batch size so that setOperationalStatus

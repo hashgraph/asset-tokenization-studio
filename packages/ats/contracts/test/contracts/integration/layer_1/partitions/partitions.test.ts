@@ -137,13 +137,13 @@ describe("Partitions Tests", () => {
 
   describe("initializePartitions", () => {
     it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializePartitions THEN AccountHasNoRole", async () => {
-      await expect(asset.connect(unknownSigner).initializePartitions())
+      await expect(asset.connect(unknownSigner).initializePartitions(false))
         .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
         .withArgs(await unknownSigner.getAddress(), ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
     it("GIVEN already-initialised WHEN initializePartitions THEN FacetAlreadyRegistered", async () => {
-      await expect(asset.initializePartitions())
+      await expect(asset.initializePartitions(false))
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
         .withArgs(RESOLVER_KEY_PARTITIONS, 1);
     });
@@ -152,7 +152,7 @@ describe("Partitions Tests", () => {
   describe("initializePartitions event", () => {
     it("GIVEN fresh facet WHEN initializePartitions THEN emits PartitionsInitialized", async () => {
       await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_PARTITIONS);
-      await expect(asset.initializePartitions()).to.emit(asset, "PartitionsInitialized");
+      await expect(asset.initializePartitions(false)).to.emit(asset, "PartitionsInitialized");
     });
   });
 });

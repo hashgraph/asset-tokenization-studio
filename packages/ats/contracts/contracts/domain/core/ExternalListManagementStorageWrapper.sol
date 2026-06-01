@@ -25,13 +25,15 @@ bytes32 constant STORAGE_LOCATION_KYC_MANAGEMENT = 0x44eb866201f22832539d7232090
  *          (STORAGE_LOCATION_PAUSE_MANAGEMENT in PauseStorageWrapper.sol)
  *        - erc7201:security.token.standard.storage.ProceedRecipients
  *          (STORAGE_LOCATION_PROCEED_RECIPIENTS in ProceedRecipientsStorageWrapper.sol)
- *      The annotation below names the first slot for tooling discovery; the other three are
- *      documented via their STORAGE_LOCATION_* constants. No single annotation can capture
- *      the four-slot reuse.
- * @custom:storage-location erc7201:security.token.standard.storage.ControlListManagement
+ *      No single `@custom:storage-location` annotation is present because one line cannot
+ *      capture the four-slot reuse and would mislead tooling into binding the struct to a
+ *      single namespace; each slot is defined by its `STORAGE_LOCATION_*` constant instead.
  */
 struct ExternalListDataStorage {
-    // ─── R3 Aggregates (mapping, array, EnumerableSet) ───────
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     EnumerableSet.AddressSet list;
     // ─── APPEND-ONLY ZONE BELOW ───
 }

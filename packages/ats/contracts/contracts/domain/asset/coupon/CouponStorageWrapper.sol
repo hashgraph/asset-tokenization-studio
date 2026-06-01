@@ -34,6 +34,9 @@ bytes32 constant STORAGE_LOCATION_COUPON = 0x83419e6b8093975a3157050eb9f883164e1
  * @custom:storage-location erc7201:security.token.standard.storage.Coupon
  */
 struct CouponDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     uint256[] couponsOrderedListByIds;
     // ─── APPEND-ONLY ZONE BELOW ───
@@ -403,11 +406,13 @@ library CouponStorageWrapper {
      *      reads from storage; otherwise reads from pending scheduled tasks,
      *      traversing in reverse order. Returns zero if position is out of bounds.
      * @param pos Zero-indexed position in the adjusted ordered list.
+     * @param _includeDisabled Whether to include disabled coupons in the traversal.
      * @return couponID_ The coupon identifier at that position, or zero if out
      *         of bounds.
      */
-    function getCouponFromOrderedListAt(uint256 pos) internal view returns (uint256 couponID_) {
-        if (pos >= getCouponsOrderedListTotalAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp())) return 0;
+    function getCouponFromOrderedListAt(uint256 pos, bool _includeDisabled) internal view returns (uint256 couponID_) {
+        if (pos >= getCouponsOrderedListTotalAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp(), _includeDisabled))
+            return 0;
 
         uint256 actualOrderedListLengthTotal = getCouponsOrderedListTotal();
         if (pos < actualOrderedListLengthTotal) {
@@ -415,8 +420,30 @@ library CouponStorageWrapper {
         }
 
         uint256 pendingIndexOffset = pos - actualOrderedListLengthTotal;
-        uint256 index = ScheduledTasksStorageWrapper.getScheduledCouponListingCount() - 1 - pendingIndexOffset;
-        return ScheduledTasksStorageWrapper.getScheduledCouponListingIdAtIndex(index);
+
+        if (_includeDisabled) {
+            return
+                ScheduledTasksStorageWrapper.getScheduledCouponListingIdAtIndex(
+                    ScheduledTasksStorageWrapper.getScheduledCouponListingCount(true) - 1 - pendingIndexOffset
+                );
+        }
+
+        // When excluding disabled, iterate the queue skipping disabled tasks to find the
+        // correct coupon at the filtered pending index.
+        uint256 seen;
+        for (uint256 j = ScheduledTasksStorageWrapper.getScheduledCouponListingCount(true); j > 0; ) {
+            unchecked {
+                --j;
+            }
+            if (ScheduledTasksStorageWrapper.isScheduledCouponListingDisabledAtIndex(j)) continue;
+            if (seen != pendingIndexOffset) {
+                unchecked {
+                    ++seen;
+                }
+                continue;
+            }
+            return ScheduledTasksStorageWrapper.getScheduledCouponListingIdAtIndex(j);
+        }
     }
 
     /**
@@ -430,7 +457,8 @@ library CouponStorageWrapper {
      */
     function getCouponsOrderedList(
         uint256 pageIndex,
-        uint256 pageLength
+        uint256 pageLength,
+        bool _includeDisabled
     ) internal view returns (uint256[] memory couponIDs_) {
         (uint256 start, uint256 end) = Pagination.getStartAndEnd(pageIndex, pageLength);
 
@@ -438,14 +466,14 @@ library CouponStorageWrapper {
             Pagination.getSize(
                 start,
                 end,
-                getCouponsOrderedListTotalAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp())
+                getCouponsOrderedListTotalAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp(), _includeDisabled)
             )
         );
 
         uint256 length = couponIDs_.length;
         for (uint256 i; i < length; ) {
             unchecked {
-                couponIDs_[i] = getCouponFromOrderedListAt(start + i);
+                couponIDs_[i] = getCouponFromOrderedListAt(start + i, _includeDisabled);
                 ++i;
             }
         }
@@ -457,13 +485,17 @@ library CouponStorageWrapper {
      * @dev Sums the stored coupon count with the pending scheduled-coupon-listing
      *      count at the specified time.
      * @param timestamp The point in time at which to measure pending coupons.
+     * @param _includeDisabled Whether to include disabled coupons in the count.
      * @return total_ The adjusted total coupon count (executed + pending at
      *         timestamp).
      */
-    function getCouponsOrderedListTotalAdjustedAt(uint256 timestamp) internal view returns (uint256 total_) {
+    function getCouponsOrderedListTotalAdjustedAt(
+        uint256 timestamp,
+        bool _includeDisabled
+    ) internal view returns (uint256 total_) {
         return
             getCouponsOrderedListTotal() +
-            ScheduledTasksStorageWrapper.getPendingScheduledCouponListingTotalAt(timestamp);
+            ScheduledTasksStorageWrapper.getPendingScheduledCouponListingTotalAt(timestamp, _includeDisabled);
     }
 
     /**
@@ -483,15 +515,22 @@ library CouponStorageWrapper {
      *      predecessor. Returns zero if the coupon is not found, is the first in
      *      the list, or the list contains fewer than two coupons.
      * @param couponID One-indexed coupon identifier to search for.
+     * @param _includeDisabled Whether to include disabled coupons in the traversal.
      * @return previousCouponID_ The identifier of the preceding coupon, or zero if
      *         not applicable.
      */
-    function getPreviousCouponInOrderedList(uint256 couponID) internal view returns (uint256 previousCouponID_) {
-        uint256 orderedListLength = getCouponsOrderedListTotalAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp());
+    function getPreviousCouponInOrderedList(
+        uint256 couponID,
+        bool _includeDisabled
+    ) internal view returns (uint256 previousCouponID_) {
+        uint256 orderedListLength = getCouponsOrderedListTotalAdjustedAt(
+            TimeTravelStorageWrapper.getBlockTimestamp(),
+            _includeDisabled
+        );
 
         if (orderedListLength < 2) return (0);
 
-        if (getCouponFromOrderedListAt(0) == couponID) return (0);
+        if (getCouponFromOrderedListAt(0, _includeDisabled) == couponID) return (0);
 
         unchecked {
             --orderedListLength;
@@ -499,8 +538,8 @@ library CouponStorageWrapper {
         uint256 previousCouponId;
 
         for (uint256 i; i < orderedListLength; ) {
-            previousCouponId = getCouponFromOrderedListAt(i);
-            uint256 couponId = getCouponFromOrderedListAt(i + 1);
+            previousCouponId = getCouponFromOrderedListAt(i, _includeDisabled);
+            uint256 couponId = getCouponFromOrderedListAt(i + 1, _includeDisabled);
             if (couponId == couponID) return previousCouponId;
 
             unchecked {

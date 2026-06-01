@@ -685,6 +685,7 @@ export class RPCQueryAdapter {
     const snapshots = await this.connect(IAsset__factory, address.toString()).getScheduledSnapshots(
       start,
       end,
+      true,
     );
 
     return snapshots.map(
@@ -698,7 +699,7 @@ export class RPCQueryAdapter {
     const scheduledSnapshotsCount = await this.connect(
       IAsset__factory,
       address.toString(),
-    ).scheduledSnapshotCount();
+    ).scheduledSnapshotCount(true);
 
     return Number(scheduledSnapshotsCount);
   }
@@ -831,7 +832,7 @@ export class RPCQueryAdapter {
     const pendingBalanceAdjustmentCount = await this.connect(
       IAsset__factory,
       address.toString(),
-    ).getPendingBalanceAdjustmentCount();
+    ).getPendingBalanceAdjustmentCount(true);
 
     return Number(pendingBalanceAdjustmentCount);
   }
@@ -1379,7 +1380,7 @@ export class RPCQueryAdapter {
   async getCouponFromOrderedListAt(address: EvmAddress, pos: number): Promise<number> {
     LogService.logTrace(`Getting coupon from ordered list at position ${pos} for security ${address.toString()}`);
 
-    const couponId = await this.connect(IAsset__factory, address.toString()).getCouponFromOrderedListAt(pos);
+    const couponId = await this.connect(IAsset__factory, address.toString()).getCouponFromOrderedListAt(pos, true);
 
     return Number(couponId);
   }
@@ -1394,19 +1395,20 @@ export class RPCQueryAdapter {
       const couponIds = await this.connect(IAsset__factory, address.toString()).getCouponsOrderedList(
         pageIndex,
         pageLength,
+        true,
       );
       return couponIds.map((id: bigint) => Number(id));
     }
 
     // Otherwise get all coupons (simulate by getting first page with large length)
-    const couponIds = await this.connect(IAsset__factory, address.toString()).getCouponsOrderedList(0, 1000);
+    const couponIds = await this.connect(IAsset__factory, address.toString()).getCouponsOrderedList(0, 1000, true);
     return couponIds.map((id: bigint) => Number(id));
   }
 
   async getCouponsOrderedListTotal(address: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting coupons ordered list total for security ${address.toString()}`);
 
-    const total = await this.connect(IAsset__factory, address.toString()).getCouponsOrderedListTotal();
+    const total = await this.connect(IAsset__factory, address.toString()).getCouponsOrderedListTotal(true);
 
     return Number(total);
   }
@@ -1614,7 +1616,7 @@ export class RPCQueryAdapter {
     const result = await this.connect(
       IAsset__factory,
       address.toString(),
-    ).scheduledCouponListingCount();
+    ).scheduledCouponListingCount(true);
     return Number(result);
   }
 
@@ -1623,6 +1625,7 @@ export class RPCQueryAdapter {
     return await this.connect(IAsset__factory, address.toString()).getScheduledCouponListing(
       pageIndex,
       pageLength,
+      true,
     );
   }
 
@@ -1814,11 +1817,11 @@ export class RPCQueryAdapter {
     return Number(total);
   }
 
-  async getMetadata(address: EvmAddress, key: string): Promise<string[]> {
-    LogService.logTrace(`Getting metadata for the security: ${address.toString()}`);
-    const result = await this.connect(IAsset__factory, address.toString()).getMetadata(
+  async getCustomData(address: EvmAddress, key: string): Promise<string[]> {
+    LogService.logTrace(`Getting custom data for the security: ${address.toString()}`);
+    const result = await this.connect(IAsset__factory, address.toString()).getCustomData(
       ethers.encodeBytes32String(key),
     );
-    return result.map((v) => ethers.toUtf8String(v));
+    return result.map((v: string) => ethers.toUtf8String(v));
   }
 }
