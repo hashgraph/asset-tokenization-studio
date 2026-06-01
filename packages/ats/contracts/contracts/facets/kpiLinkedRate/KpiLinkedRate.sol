@@ -2,12 +2,12 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IKpiLinkedRate, RESOLVER_KEY_KPI_LINKED_RATE } from "./IKpiLinkedRate.sol";
-import { ROLE_INTEREST_RATE_MANAGER, DEFAULT_ADMIN_ROLE } from "../../../../constants/roles.sol";
-import { InterestRateStorageWrapper } from "../../../../domain/asset/InterestRateStorageWrapper.sol";
-import { ScheduledTasksOps } from "../../../../domain/orchestrator/ScheduledTasksOps.sol";
-import { Modifiers } from "../../../../services/Modifiers.sol";
-import { InitializerStorageWrapper } from "../../../../domain/core/InitializerStorageWrapper.sol";
-import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
+import { ROLE_INTEREST_RATE_MANAGER, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InterestRateStorageWrapper } from "../../domain/asset/InterestRateStorageWrapper.sol";
+import { ScheduledTasksOps } from "../../domain/orchestrator/ScheduledTasksOps.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title KpiLinkedRate

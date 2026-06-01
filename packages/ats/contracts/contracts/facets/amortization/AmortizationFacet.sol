@@ -1,11 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import { IAmortization } from "./IAmortization.sol";
+import { IAmortization, RESOLVER_KEY_AMORTIZATION } from "./IAmortization.sol";
 import { Amortization } from "./Amortization.sol";
+import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 
-abstract contract AmortizationFacetBase is Amortization, IStaticFunctionSelectors {
+contract AmortizationFacet is Amortization, IStaticFunctionSelectors {
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
+        staticResolverKey_ = RESOLVER_KEY_AMORTIZATION;
+    }
+
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex = 17;
         staticFunctionSelectors_ = new bytes4[](selectorIndex);

@@ -7,8 +7,8 @@ import { ICore } from "../facets/core/ICore.sol";
 import { IBondRead } from "../facets/layer_2/bond/IBondRead.sol";
 import { IEquity } from "../facets/layer_2/equity/IEquity.sol";
 import { FactoryRegulationData, RegulationData, RegulationType, RegulationSubType } from "../constants/regulation.sol";
-import { IFixedRate } from "../facets/layer_2/interestRate/fixedRate/IFixedRate.sol";
-import { IKpiLinkedRate } from "../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
+import { IFixedRate } from "../facets/fixedRate/IFixedRate.sol";
+import { IKpiLinkedRate } from "../facets/kpiLinkedRate/IKpiLinkedRate.sol";
 
 /// @custom:hash resolverKey Factory
 bytes32 constant RESOLVER_KEY_FACTORY = 0x9fc26269cc1cb994e66f269ed6b58a5bb0c344a134b9dabd342ac466d48f95c7;

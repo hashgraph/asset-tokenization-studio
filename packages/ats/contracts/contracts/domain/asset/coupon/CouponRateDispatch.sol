@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ICoupon } from "../../../facets/coupon/ICoupon.sol";
 import { ICouponTypes } from "../../../facets/coupon/ICouponTypes.sol";
 import { IInterestRate } from "../../../facets/interestRate/IInterestRate.sol";
-import { IFixedRate } from "../../../facets/layer_2/interestRate/fixedRate/IFixedRate.sol";
+import { IFixedRate } from "../../../facets/fixedRate/IFixedRate.sol";
 import { InterestRateStorageWrapper } from "../InterestRateStorageWrapper.sol";
 import { KpiLinkedRateLib } from "../KpiLinkedRateLib.sol";
 

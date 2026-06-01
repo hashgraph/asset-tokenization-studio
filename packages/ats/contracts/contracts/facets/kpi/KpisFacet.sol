@@ -3,8 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IKpis, RESOLVER_KEY_KPIS } from "./IKpis.sol";
 import { Kpis } from "./Kpis.sol";
-import { IStaticFunctionSelectors } from "../../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import { Bytes4Builder } from "../../../../infrastructure/proxy/Bytes4Builder.sol";
+import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 
 contract KpisFacet is Kpis, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

@@ -2,11 +2,11 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IKpis, RESOLVER_KEY_KPIS } from "./IKpis.sol";
-import { ROLE_KPI_MANAGER } from "../../../../constants/roles.sol";
-import { Modifiers } from "../../../../services/Modifiers.sol";
-import { KpisStorageWrapper } from "../../../../domain/asset/KpisStorageWrapper.sol";
-import { DEFAULT_ADMIN_ROLE } from "../../../../constants/roles.sol";
-import { InitializerStorageWrapper } from "../../../../domain/core/InitializerStorageWrapper.sol";
+import { ROLE_KPI_MANAGER } from "../../constants/roles.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { KpisStorageWrapper } from "../../domain/asset/KpisStorageWrapper.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title KPI Management Facet
