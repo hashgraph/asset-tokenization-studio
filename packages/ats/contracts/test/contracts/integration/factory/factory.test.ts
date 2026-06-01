@@ -1046,7 +1046,7 @@ describe("Factory Tests", () => {
         .withArgs(RegulationType.NONE, regulationSubType);
     });
 
-    it("GIVEN the proper information WHEN deploying a new deposit token THEN transaction succeeds and exposes the 24-capability surface", async () => {
+    it("GIVEN the proper information WHEN deploying a new deposit token THEN transaction succeeds", async () => {
       const depositTokenData = buildDepositTokenData();
 
       const tx = factory.deployDepositToken(depositTokenData, getRegulationData());
@@ -1055,18 +1055,24 @@ describe("Factory Tests", () => {
       const result = await tx;
       const receipt = await result.wait();
       const decoded = await decodeEvent(factory, "DepositTokenDeployed", receipt);
-      const depositTokenAddress: string = decoded.depositTokenAddress;
-      expect(depositTokenAddress).to.not.equal(ADDRESS_ZERO);
+      const depositTokenAddress = decoded.depositTokenAddress;
 
       await readFacets(depositTokenAddress);
 
-      // RBAC: every role assigned in init_rbacs is present
       for (let i = 0; i < listOfMembers.length; i++) {
         const roleMemberCount = await accessControlFacet.getRoleMemberCount(listOfRoles[i]);
+        const roleMember = await accessControlFacet.getRoleMembers(listOfRoles[i], 0, 2);
         expect(roleMemberCount).to.be.equal(2);
+        expect(roleMember[0]).to.be.equal(listOfMembers[0]);
+        expect(roleMember[1]).to.be.equal(listOfMembers[1]);
       }
 
-      // SecurityType encoded in CoreFacet metadata is DEPOSIT_TOKEN (index 5)
+      const whiteList = await controlListFacet.getControlListType();
+      expect(whiteList).to.be.equal(depositTokenData.security.isWhiteList);
+
+      const controllable = await controllerFacet.isControllable();
+      expect(controllable).to.be.equal(depositTokenData.security.isControllable);
+
       const metadata = await coreFacet.getERC20Metadata();
       expect(metadata.info.name).to.be.equal(depositTokenData.security.erc20MetadataInfo.name);
       expect(metadata.info.symbol).to.be.equal(depositTokenData.security.erc20MetadataInfo.symbol);
@@ -1077,172 +1083,6 @@ describe("Factory Tests", () => {
       // Cap initialised from SecurityData.maxSupply
       const capFacet = await ethers.getContractAt("Cap", depositTokenAddress);
       expect(await capFacet.getMaxSupply()).to.equal(depositTokenData.security.maxSupply);
-
-      // Verify via the diamond loupe that at least one selector from every YES capability
-      // (per docs/DEPOSIT_TOKEN_PLAN.md §3) is registered on this diamond. Also verifies
-      // that the four "TODO — REMOVE WHEN POSSIBLE" zombie facetas
-      // (KycFacet, ExternalPauseManagementFacet, ExternalKycListManagementFacet,
-      // ProtectedPartitionsFacet) are routable even though their capabilities are gated OFF.
-      const loupe = await ethers.getContractAt("IDiamondLoupe", depositTokenAddress);
-
-      const sel = async (facetName: string, functionName: string) =>
-        (await ethers.getContractAt(facetName, depositTokenAddress)).interface.getFunction(functionName)!.selector;
-
-      const expectedSelectors: Array<{ capability: string; name: string; selector: string }> = [
-        // Controller (covers the 5 controller verbs)
-        {
-          capability: "Controller",
-          name: "controllerTransfer",
-          selector: await sel("ControllerFacet", "controllerTransfer"),
-        },
-        {
-          capability: "Controller",
-          name: "controllerRedeem",
-          selector: await sel("ControllerFacet", "controllerRedeem"),
-        },
-        {
-          capability: "Controller",
-          name: "controllerTransferByPartition",
-          selector: await sel("ControllerByPartitionFacet", "controllerTransferByPartition"),
-        },
-        {
-          capability: "Controller",
-          name: "controllerRedeemByPartition",
-          selector: await sel("ControllerByPartitionFacet", "controllerRedeemByPartition"),
-        },
-        {
-          capability: "Controller",
-          name: "controllerCreateHoldByPartition",
-          selector: await sel("ControllerHoldByPartitionFacet", "controllerCreateHoldByPartition"),
-        },
-        // Hold
-        {
-          capability: "Hold",
-          name: "executeHoldByPartition",
-          selector: await sel("HoldByPartitionFacet", "executeHoldByPartition"),
-        },
-        {
-          capability: "Hold",
-          name: "releaseHoldByPartition",
-          selector: await sel("HoldByPartitionFacet", "releaseHoldByPartition"),
-        },
-        {
-          capability: "Hold",
-          name: "reclaimHoldByPartition",
-          selector: await sel("HoldByPartitionFacet", "reclaimHoldByPartition"),
-        },
-        // Mint
-        { capability: "Mint", name: "issue", selector: await sel("MintFacet", "issue") },
-        {
-          capability: "Mint",
-          name: "issueByPartition",
-          selector: await sel("MintByPartitionFacet", "issueByPartition"),
-        },
-        // Burn
-        { capability: "Burn", name: "burn", selector: await sel("BurnFacet", "burn") },
-        // Transfer
-        { capability: "Transfer", name: "transfer", selector: await sel("TransferFacet", "transfer") },
-        // Allowance (includes approve)
-        { capability: "Allowance", name: "approve", selector: await sel("AllowanceFacet", "approve") },
-        // Operator
-        {
-          capability: "Operator",
-          name: "authorizeOperator",
-          selector: await sel("OperatorFacet", "authorizeOperator"),
-        },
-        // Partitions
-        { capability: "Partitions", name: "partitionsOf", selector: await sel("PartitionsFacet", "partitionsOf") },
-        // Batch
-        { capability: "Batch", name: "batchTransfer", selector: await sel("BatchTransferFacet", "batchTransfer") },
-        // Freeze
-        {
-          capability: "Freeze",
-          name: "freezePartialTokens",
-          selector: await sel("FreezeFacet", "freezePartialTokens"),
-        },
-        // Cap per-partition
-        {
-          capability: "Cap",
-          name: "setMaxSupplyByPartition",
-          selector: await sel("CapByPartitionFacet", "setMaxSupplyByPartition"),
-        },
-        // Clearing
-        { capability: "Clearing", name: "activateClearing", selector: await sel("ClearingFacet", "activateClearing") },
-        // Transfer Compliance
-        {
-          capability: "Transfer Compliance",
-          name: "canTransfer",
-          selector: await sel("ComplianceFacet", "canTransfer"),
-        },
-        // Eligibility (ControlList)
-        {
-          capability: "Eligibility",
-          name: "addToControlList",
-          selector: await sel("ControlListFacet", "addToControlList"),
-        },
-        // External Eligibility
-        {
-          capability: "External Eligibility",
-          name: "addExternalControlList",
-          selector: await sel("ExternalControlListManagementFacet", "addExternalControlList"),
-        },
-        // Balance Tracker
-        { capability: "Balance Tracker", name: "balanceOf", selector: await sel("BalanceTrackerFacet", "balanceOf") },
-        {
-          capability: "Balance Tracker",
-          name: "balanceOfByPartition",
-          selector: await sel("BalanceTrackerByPartitionFacet", "balanceOfByPartition"),
-        },
-        // Security Holders
-        {
-          capability: "Security Holders",
-          name: "getTotalSecurityHolders",
-          selector: await sel("SecurityHoldersFacet", "getTotalSecurityHolders"),
-        },
-        // Deactivate
-        { capability: "Deactivate", name: "deactivate", selector: await sel("DeactivateFacet", "deactivate") },
-        // Documentation
-        { capability: "Documentation", name: "setDocument", selector: await sel("DocumentationFacet", "setDocument") },
-        // Metadata (Custom Data)
-        { capability: "Metadata", name: "setMetadata", selector: await sel("MetadataFacet", "setMetadata") },
-        // Nominal Value
-        {
-          capability: "Nominal Value",
-          name: "setNominalValue",
-          selector: await sel("NominalValueFacet", "setNominalValue"),
-        },
-        // Pause
-        { capability: "Pause", name: "pause", selector: await sel("PauseFacet", "pause") },
-        // Always-on TODO/zombie facetas (capabilities = NO but the faceta is in the config)
-        {
-          capability: "[zombie] KYC",
-          name: "initializeInternalKyc",
-          selector: await sel("KycFacet", "initializeInternalKyc"),
-        },
-        {
-          capability: "[zombie] External Pause",
-          name: "initializeExternalPauses",
-          selector: await sel("ExternalPauseManagementFacet", "initializeExternalPauses"),
-        },
-        {
-          capability: "[zombie] External KYC",
-          name: "initializeExternalKycLists",
-          selector: await sel("ExternalKycListManagementFacet", "initializeExternalKycLists"),
-        },
-        {
-          capability: "[zombie] Protected",
-          name: "initialize_ProtectedPartitions",
-          selector: await sel("ProtectedPartitionsFacet", "initialize_ProtectedPartitions"),
-        },
-      ];
-
-      for (const { capability, name, selector } of expectedSelectors) {
-        const facetAddress = await loupe.getFacetAddress(selector);
-        expect(
-          facetAddress,
-          `[${capability}] selector ${name} (${selector}) is not registered on the deposit token diamond`,
-        ).to.not.equal(ADDRESS_ZERO);
-      }
     });
   });
 

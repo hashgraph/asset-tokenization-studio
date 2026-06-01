@@ -402,14 +402,15 @@ abstract contract Factory is IFactory {
 
     /**
      * @notice Deploys and fully initialises a deposit token proxy.
-     * @dev DepositToken is a minimal cash-style asset: the diamond exposes only the
-     *      controller / hold / issue verb set, plus the ERC-3643 compliance and identity
-     *      read/setter surface. No asset-specific detail data initialisers (BondUSA,
-     *      EquityUSA, FixedRate, KpiLinkedRate, ProceedRecipients, NominalValue, InterestRate)
-     *      are invoked from here — the only initialisers run are the unconditional ones in
-     *      `_deploySecurity` and `_tryInitializeSecurity`. See `docs/DEPOSIT_TOKEN_PLAN.md`.
+     * @dev DepositToken is a minimal cash-style asset. Only the facets in the deposit-token
+     *      capability matrix are deployed and initialised, via `_deployDepositToken`
+     *      (see `docs/DEPOSIT_TOKEN_PLAN.md` §3). The deposit-token configuration intentionally
+     *      excludes `SecurityFacet`, so no regulation metadata is persisted on-chain; the
+     *      supplied `FactoryRegulationData` is validated by `checkRegulation` and emitted for
+     *      indexing only. The proxy is marked operational and this factory's temporary
+     *      `DEFAULT_ADMIN_ROLE` is renounced before emitting `DepositTokenDeployed`.
      * @param _depositTokenData Deposit token creation data wrapping the shared `SecurityData`.
-     * @param _factoryRegulationData Regulation type and sub-type to apply to the deposit token.
+     * @param _factoryRegulationData Regulation type and sub-type validated for the deposit token.
      * @return depositTokenAddress_ Address of the newly deployed deposit token proxy.
      */
     function deployDepositToken(
@@ -423,15 +424,10 @@ abstract contract Factory is IFactory {
         checkRegulation(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType)
         returns (address depositTokenAddress_)
     {
-        depositTokenAddress_ = _deploySecurity(_depositTokenData.security, SecurityType.DepositToken);
-
-        // Initialize security regulation data (SecurityFacet may not be present)
-        _tryInitializeSecurity(
-            depositTokenAddress_,
-            _buildRegulationData(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType),
-            _factoryRegulationData.additionalSecurityData
-        );
-
+        depositTokenAddress_ = _deployDepositToken(_depositTokenData.security, SecurityType.DepositToken);
+        (bool isOperational_, ) = IInitializer(depositTokenAddress_).setOperationalStatus();
+        _checkUnexpectedError(!isOperational_, FACTORY_OPERATIONAL_STATUS);
+        IAccessControl(depositTokenAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
         emit DepositTokenDeployed(
             EvmAccessors.getMsgSender(),
             depositTokenAddress_,
@@ -520,8 +516,126 @@ abstract contract Factory is IFactory {
         SecurityData calldata _securityData,
         SecurityType _securityType
     ) internal virtual returns (address securityAddress_) {
-        // Build extended rbacs array that includes the factory as a temporary
-        // DEFAULT_ADMIN_ROLE holder during initialisation.
+        securityAddress_ = _deploySecurityProxy(_securityData);
+        _initializeSecurityMetadata(securityAddress_, _securityData, _securityType);
+        _initializeSecurityCompliance(securityAddress_);
+        _initializeCoreFacets(securityAddress_);
+        _initializeSnapshotFacets(securityAddress_);
+        _initializeManagementFacets(securityAddress_);
+        _initializeHoldFacets(securityAddress_);
+        _initializeClearingFacets(securityAddress_);
+        _initializeMiscellaneousFacets(securityAddress_);
+    }
+
+    /**
+     * @notice Deploys a deposit-token proxy and initialises ONLY the facets that belong to the
+     *         deposit-token configuration.
+     * @dev DepositToken is a minimal cash-style asset. Unlike `_deploySecurity`, this routine
+     *      deliberately omits the snapshot, lock, transfer-and-lock, corporate-action, identity,
+     *      recovery, SSI, balance-adjustment, scheduled-task, ERC20-permit, ERC20-votes and
+     *      protected-by-partition initialisers — none of those facets are part of the
+     *      deposit-token capability matrix (see `docs/DEPOSIT_TOKEN_PLAN.md` §3) and therefore
+     *      are not registered in `DEPOSIT_TOKEN_FACETS`. Every facet that IS registered there
+     *      must be initialised here, otherwise `IInitializer.setOperationalStatus` would never
+     *      mark the proxy operational. The `InitializerFacet` batch size is seeded last so a
+     *      single `setOperationalStatus` pass can validate every facet above.
+     * @param _securityData Common security deployment configuration.
+     * @param _securityType Security type recorded in core metadata (DepositToken).
+     * @return securityAddress_ Address of the fully initialised deposit-token proxy.
+     */
+    function _deployDepositToken(
+        SecurityData calldata _securityData,
+        SecurityType _securityType
+    ) internal virtual returns (address securityAddress_) {
+        securityAddress_ = _deploySecurityProxy(_securityData);
+
+        // Always-on diamond infrastructure and access control
+        IAccessControl(securityAddress_).initializeAccessControl();
+        IDiamondFacet(securityAddress_).initializeDiamondCut();
+
+        // Core metadata, supply, nominal value and eligibility
+        ICore.ERC20Metadata memory erc20Metadata = ICore.ERC20Metadata({
+            info: _securityData.erc20MetadataInfo,
+            securityType: _securityType
+        });
+        ICore(securityAddress_).initializeCore(erc20Metadata);
+        IControlList(securityAddress_).initializeControlList(_securityData.isWhiteList);
+        IExternalControlListManagement(securityAddress_).initializeExternalControlLists(
+            _securityData.externalControlLists
+        );
+        ICap(securityAddress_).initializeCap(_securityData.maxSupply, new ICap.PartitionCap[](0));
+        ICapByPartition(securityAddress_).initializeCapByPartition();
+        // DepositToken carries no nominal value; the facet is initialised to its zero default.
+        INominalValue(securityAddress_).initializeNominalValue(0, 0, bytes3(0));
+        ICustomData(securityAddress_).initializeCustomData();
+        IDocumentation(securityAddress_).initializeDocumentation();
+
+        // Partitions and controller flag (initializeERC1410 was folded into initializePartitions)
+        IPartitions(securityAddress_).initializePartitions(_securityData.isMultiPartition);
+        IController(securityAddress_).initializeController(_securityData.isControllable);
+
+        // Token verbs: allowance, transfer, mint, burn, freeze, pause, deactivate
+        IAllowance(securityAddress_).initializeAllowance();
+        ITransfer(securityAddress_).initializeTransfer();
+        ITransferByPartition(securityAddress_).initializeTransferByPartition();
+        IMint(securityAddress_).initializeERC1594();
+        IMintByPartition(securityAddress_).initializeMintByPartition();
+        IBurn(securityAddress_).initializeBurn();
+        IBurnByPartition(securityAddress_).initializeBurnByPartition();
+        IFreeze(securityAddress_).initializeFreeze();
+        IPause(securityAddress_).initializePause();
+        IDeactivate(securityAddress_).initializeDeactivate();
+
+        // Balance tracking and security holders
+        IBalanceTracker(securityAddress_).initializeBalanceTracker();
+        IBalanceTrackerByPartition(securityAddress_).initializeBalanceTrackerByPartition();
+        ISecurityHolders(securityAddress_).initializeSecurityHolders();
+
+        // Operator
+        IOperator(securityAddress_).initializeOperator();
+        IOperatorByPartition(securityAddress_).initializeOperatorByPartition();
+        IOperatorHoldByPartition(securityAddress_).initializeOperatorHoldByPartition();
+        IOperatorClearingByPartition(securityAddress_).initializeOperatorClearingByPartition();
+        IOperatorClearingHoldByPartition(securityAddress_).initializeOperatorClearingHoldByPartition();
+
+        // Controller
+        IControllerByPartition(securityAddress_).initializeControllerByPartition();
+        IControllerHoldByPartition(securityAddress_).initializeControllerHoldByPartition();
+
+        // Batch
+        IBatchController(securityAddress_).initializeBatchController();
+        IBatchBurn(securityAddress_).initializeBatchBurn();
+        IBatchMint(securityAddress_).initializeBatchMint();
+        IBatchTransfer(securityAddress_).initializeBatchTransfer();
+        IBatchFreeze(securityAddress_).initializeBatchFreeze();
+
+        // Clearing
+        IClearing(securityAddress_).initializeClearing(_securityData.clearingActive);
+        IClearingByPartition(securityAddress_).initializeClearingByPartition();
+        IClearingHoldByPartition(securityAddress_).initializeClearingHoldByPartition();
+
+        // Hold
+        IHoldFacet(securityAddress_).initializeHold();
+        IHoldByPartition(securityAddress_).initializeHoldByPartition();
+
+        // NOTE: per capabilities.txt the deposit token excludes Compliance, KYC, External KYC,
+        // External Pause, Protected Partitions and Identity & Claims — those facets are NOT in
+        // DEPOSIT_TOKEN_FACETS and so their initialisers are intentionally not called here.
+
+        // Seed the initializer batch size LAST so setOperationalStatus covers every facet above.
+        IInitializer(securityAddress_).initializeInitializer(_SECURITY_FACETS_MAX);
+    }
+
+    /**
+     * @notice Deploys a bare security proxy and seeds this factory as a temporary admin.
+     * @dev Builds an extended RBAC array that appends `address(this)` as a `DEFAULT_ADMIN_ROLE`
+     *      member so the factory can run facet initialisers. Callers MUST renounce that role
+     *      once initialisation completes (see `IAccessControl.renounceRole`). The proxy is
+     *      returned uninitialised; facet initialisers are the caller's responsibility.
+     * @param _securityData Common security deployment configuration.
+     * @return securityAddress_ Address of the freshly deployed, uninitialised security proxy.
+     */
+    function _deploySecurityProxy(SecurityData calldata _securityData) private returns (address securityAddress_) {
         uint256 rbacsLen = _securityData.rbacs.length;
         IResolverProxy.Rbac[] memory extendedRbacs = new IResolverProxy.Rbac[](rbacsLen + 1);
         for (uint256 i; i < rbacsLen; ) {
@@ -532,21 +646,13 @@ abstract contract Factory is IFactory {
         }
         extendedRbacs[rbacsLen] = IResolverProxy.Rbac({ role: DEFAULT_ADMIN_ROLE, members: new address[](1) });
         extendedRbacs[rbacsLen].members[0] = address(this);
-        ResolverProxy equity = new ResolverProxy(
+        ResolverProxy proxy = new ResolverProxy(
             _securityData.resolver,
             _securityData.resolverProxyConfiguration.key,
             _securityData.resolverProxyConfiguration.version,
             extendedRbacs
         );
-        securityAddress_ = address(equity);
-        _initializeSecurityMetadata(securityAddress_, _securityData, _securityType);
-        _initializeSecurityCompliance(securityAddress_);
-        _initializeCoreFacets(securityAddress_);
-        _initializeSnapshotFacets(securityAddress_);
-        _initializeManagementFacets(securityAddress_);
-        _initializeHoldFacets(securityAddress_);
-        _initializeClearingFacets(securityAddress_);
-        _initializeMiscellaneousFacets(securityAddress_);
+        securityAddress_ = address(proxy);
     }
 
     /**

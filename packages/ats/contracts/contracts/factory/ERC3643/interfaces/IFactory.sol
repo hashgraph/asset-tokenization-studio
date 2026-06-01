@@ -146,6 +146,10 @@ interface TRexIFactory {
         IFixedRate.FixedRateData fixedRateData;
     }
 
+    /**
+     * @notice Full configuration for deploying a deposit token.
+     * @param security Core security configuration shared across all security types.
+     */
     struct DepositTokenData {
         SecurityData security;
     }
@@ -199,12 +203,11 @@ interface TRexIFactory {
     );
 
     /**
-     * @notice Emitted when a new resolver proxy is deployed.
-     * @param proxyAddress Address of the newly deployed proxy.
-     * @param resolver Business-logic resolver attached to the proxy.
-     * @param configKey Configuration identifier used by the proxy.
-     * @param version Initial configuration version.
-     * @param rbac Role-based access control entries seeded at deployment.
+     * @notice Emitted when a new deposit token is deployed.
+     * @param deployer Address that initiated the deployment.
+     * @param depositTokenAddress Address of the newly deployed deposit token proxy.
+     * @param depositTokenData Full deposit token configuration.
+     * @param regulationData Regulation data validated for the deposit token.
      */
     event DepositTokenDeployed(
         address indexed deployer,
@@ -213,6 +216,14 @@ interface TRexIFactory {
         FactoryRegulationData regulationData
     );
 
+    /**
+     * @notice Emitted when a new resolver proxy is deployed.
+     * @param proxyAddress Address of the newly deployed proxy.
+     * @param resolver Business-logic resolver attached to the proxy.
+     * @param configKey Configuration identifier used by the proxy.
+     * @param version Initial configuration version.
+     * @param rbac Role-based access control entries seeded at deployment.
+     */
     event ProxyDeployed(
         address indexed proxyAddress,
         IBusinessLogicResolver resolver,
@@ -286,7 +297,12 @@ interface TRexIFactory {
     ) external returns (address bondAddress_);
 
     /**
-     * @notice Deploys a new deposit token given the input deposit token data
+     * @notice Deploys a new deposit token from the supplied configuration.
+     * @dev DepositToken is a minimal cash-style asset; the regulation data is validated and
+     *      emitted for indexing but not persisted on-chain.
+     * @param _depositTokenData Deposit token creation data wrapping the shared `SecurityData`.
+     * @param _factoryRegulationData Regulation type and sub-type validated for the deposit token.
+     * @return depositTokenAddress_ Address of the newly deployed deposit token proxy.
      */
     function deployDepositToken(
         DepositTokenData calldata _depositTokenData,
