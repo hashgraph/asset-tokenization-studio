@@ -34,6 +34,7 @@ contract FactoryFacet is Factory, IStaticFunctionSelectors {
                 this.deployBondFixedRate.selector,
                 this.deployBond.selector,
                 this.deployEquity.selector,
+                this.deployDepositToken.selector,
                 this.deployProxy.selector
             );
     }

@@ -21,4 +21,14 @@ abstract contract MockFactory is Factory {
         securityAddress_ = super._deploySecurity(_securityData, _securityType);
         ITimeTravel(securityAddress_).initializeTimeTravel();
     }
+
+    /// @inheritdoc Factory
+    /// @dev Initialises time-travel state on the deployed deposit token after the base deployment.
+    function _deployDepositToken(
+        SecurityData calldata _securityData,
+        SecurityType _securityType
+    ) internal override returns (address securityAddress_) {
+        securityAddress_ = super._deployDepositToken(_securityData, _securityType);
+        ITimeTravel(securityAddress_).initializeTimeTravel();
+    }
 }

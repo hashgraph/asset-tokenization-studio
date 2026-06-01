@@ -49,6 +49,7 @@ import {
   createBondConfiguration,
   createBondFixedRateConfiguration,
   createBondKpiLinkedRateConfiguration,
+  createDepositTokenConfiguration,
   createFactoryConfiguration,
   deployOrchestratorLibraries,
   hasOrchestratorLibraryAddresses,
@@ -132,6 +133,16 @@ export interface DeploymentWithExistingBlrOutput {
       }>;
     };
     bondKpiLinkedRate: {
+      configId: string;
+      version: number;
+      facetCount: number;
+      facets: Array<{
+        facetName: string;
+        key: string;
+        address: string;
+      }>;
+    };
+    depositToken: {
       configId: string;
       version: number;
       facetCount: number;
@@ -650,6 +661,7 @@ export async function deploySystemWithExistingBlr(
     let bondConfig: Awaited<ReturnType<typeof createBondConfiguration>> | undefined;
     let bondFixedRateConfig: Awaited<ReturnType<typeof createBondFixedRateConfiguration>> | undefined;
     let bondKpiLinkedRateConfig: Awaited<ReturnType<typeof createBondKpiLinkedRateConfiguration>> | undefined;
+    let depositTokenConfig: Awaited<ReturnType<typeof createDepositTokenConfiguration>> | undefined;
     if (shouldCreateConfigurations) {
       if (Object.keys(facetAddresses).length === 0) {
         info(`\n⚠️  Step 5/${totalSteps}: Skipping configurations (no facets deployed)...`);
@@ -837,14 +849,61 @@ export async function deploySystemWithExistingBlr(
           checkpoint.currentStep = 6;
           await checkpointManager.saveCheckpoint(checkpoint);
         }
+
+        // Step 7: Create Deposit Token Configuration
+        if (checkpoint.steps.configurations?.depositToken && checkpoint.currentStep >= 7) {
+          info(`\n✓ Step 8/${totalSteps}: Deposit Token configuration already created (resuming)`);
+          const depositTokenConfigData = checkpoint.steps.configurations.depositToken;
+          info(`✅ Deposit Token Config ID: ${depositTokenConfigData.configId}`);
+          info(`✅ Deposit Token Version: ${depositTokenConfigData.version}`);
+          info(`✅ Deposit Token Facets: ${depositTokenConfigData.facetCount}`);
+
+          depositTokenConfig = toConfigurationData(depositTokenConfigData);
+        } else {
+          info(`\n💵 Step 8/${totalSteps}: Creating Deposit Token configuration...`);
+
+          depositTokenConfig = await createDepositTokenConfiguration(
+            blrContract,
+            facetAddresses,
+            useTimeTravel,
+            false,
+            batchSize,
+            confirmations,
+            enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
+          );
+
+          if (!depositTokenConfig.success) {
+            throw new Error(
+              `Deposit Token config creation failed: ${depositTokenConfig.error} - ${depositTokenConfig.message}`,
+            );
+          }
+
+          info(`✅ Deposit Token Config ID: ${depositTokenConfig.data.configurationId}`);
+          info(`✅ Deposit Token Version: ${depositTokenConfig.data.version}`);
+          info(`✅ Deposit Token Facets: ${depositTokenConfig.data.facetKeys.length}`);
+
+          if (!checkpoint.steps.configurations) {
+            checkpoint.steps.configurations = {};
+          }
+          checkpoint.steps.configurations.depositToken = {
+            configId: depositTokenConfig.data.configurationId,
+            version: depositTokenConfig.data.version,
+            facetCount: depositTokenConfig.data.facetKeys.length,
+            facets: depositTokenConfig.data.facetKeys,
+            txHash: "",
+          };
+          checkpoint.currentStep = 7;
+          await checkpointManager.saveCheckpoint(checkpoint);
+        }
       }
     } else {
-      info(`\n💼 Step 4-7/${totalSteps}: Skipping configurations...`);
+      info(`\n💼 Step 4-8/${totalSteps}: Skipping configurations...`);
       skippedSteps.push(
         "Equity configuration",
         "Bond configuration",
         "Bond Fixed Rate configuration",
         "Bond KpiLinked Rate configuration",
+        "Deposit Token configuration",
       );
     }
 
@@ -1095,6 +1154,20 @@ export async function deploySystemWithExistingBlr(
                 facetCount: 0,
                 facets: [],
               },
+        depositToken:
+          depositTokenConfig && depositTokenConfig.success
+            ? {
+                configId: depositTokenConfig.data.configurationId,
+                version: depositTokenConfig.data.version,
+                facetCount: depositTokenConfig.data.facetKeys.length,
+                facets: depositTokenConfig.data.facetKeys,
+              }
+            : {
+                configId: "N/A (Not created)",
+                version: 0,
+                facetCount: 0,
+                facets: [],
+              },
       },
 
       summary: {
@@ -1104,7 +1177,8 @@ export async function deploySystemWithExistingBlr(
           (equityConfig ? 1 : 0) +
           (bondConfig ? 1 : 0) +
           (bondFixedRateConfig ? 1 : 0) +
-          (bondKpiLinkedRateConfig ? 1 : 0),
+          (bondKpiLinkedRateConfig ? 1 : 0) +
+          (depositTokenConfig ? 1 : 0),
         deploymentTime: endTime - startTime,
         gasUsed: totalGasUsed.toString(),
         success: true,
