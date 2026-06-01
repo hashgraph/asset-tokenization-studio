@@ -3,11 +3,11 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC20Votes, RESOLVER_KEY_ERC20VOTES } from "./IERC20Votes.sol";
 import { IVotes } from "./IVotes.sol";
-import { DEFAULT_ADMIN_ROLE } from "../../../../constants/roles.sol";
-import { Checkpoints } from "../../../../infrastructure/utils/Checkpoints.sol";
-import { Modifiers } from "../../../../services/Modifiers.sol";
-import { ERC20VotesStorageWrapper } from "../../../../domain/asset/ERC20VotesStorageWrapper.sol";
-import { InitializerStorageWrapper } from "../../../../domain/core/InitializerStorageWrapper.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { Checkpoints } from "../../infrastructure/utils/Checkpoints.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { ERC20VotesStorageWrapper } from "../../domain/asset/ERC20VotesStorageWrapper.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
 
 /**

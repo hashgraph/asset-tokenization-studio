@@ -11,7 +11,7 @@ import { IAccessControl } from "../facets/accessControl/IAccessControl.sol";
 import { IInitializer } from "../facets/initializer/IInitializer.sol";
 import { IControlList } from "../facets/controlList/IControlList.sol";
 import { ICore } from "../facets/core/ICore.sol";
-import { IERC20Votes } from "../facets/layer_1/ERC1400/ERC20Votes/IERC20Votes.sol";
+import { IERC20Votes } from "../facets/erc20Votes/IERC20Votes.sol";
 import { IController } from "../facets/controller/IController.sol";
 import { ICap } from "../facets/cap/ICap.sol";
 import { IMint } from "../facets/mint/IMint.sol";
