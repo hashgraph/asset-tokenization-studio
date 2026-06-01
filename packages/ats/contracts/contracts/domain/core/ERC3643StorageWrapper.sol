@@ -35,11 +35,13 @@ bytes32 constant STORAGE_LOCATION_ERC3643 = 0x167d628abbc681171e3e4d784cf450a7f9
  * @custom:storage-location erc7201:security.token.standard.storage.Erc3643
  */
 struct ERC3643Storage {
-    // ─── R1 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
     address onchainID;
     address identityRegistry;
     address compliance;
-    // ─── R3 Aggregates (mapping, array, EnumerableSet) ───────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(address => uint256) frozenTokens;
     mapping(address => mapping(bytes32 => uint256)) frozenTokensByPartition;
     mapping(address => bool) addressRecovered;
@@ -60,19 +62,6 @@ library ERC3643StorageWrapper {
     using LowLevelCall for address;
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.Bytes32Set;
-
-    /**
-     * @notice Initialises the ERC3643 capability by wiring the compliance and identity-registry
-     *         addresses and marking the namespace as initialised.
-     * @dev Single-shot setup; subsequent calls should be guarded upstream by the initialiser
-     *      modifier so the storage flag cannot be flipped twice.
-     * @param _compliance Address of the compliance contract that authorises transfers.
-     * @param _identityRegistry Address of the identity registry that vets token holders.
-     */
-    function initializeERC3643(address _compliance, address _identityRegistry) internal {
-        setCompliance(_compliance);
-        setIdentityRegistry(_identityRegistry);
-    }
 
     /**
      * @notice Sets the freeze status of a wallet by toggling its presence on the control list.

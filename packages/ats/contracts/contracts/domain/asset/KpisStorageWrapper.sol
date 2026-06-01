@@ -24,6 +24,8 @@ bytes32 constant STORAGE_LOCATION_KPIS = 0x0016dc918f7b373bc12e22119ae85cf4b20c3
  * @custom:storage-location erc7201:security.token.standard.storage.Kpis
  */
 struct KpisDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
     // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     uint256 minDate;
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
@@ -191,7 +193,8 @@ library KpisStorageWrapper {
         minDate_ = kpisDataStorage().minDate;
 
         uint256 total = CouponStorageWrapper.getCouponsOrderedListTotalAdjustedAt(
-            TimeTravelStorageWrapper.getBlockTimestamp()
+            TimeTravelStorageWrapper.getBlockTimestamp(),
+            true
         );
 
         if (total == 0) return minDate_;
@@ -199,7 +202,7 @@ library KpisStorageWrapper {
         ICouponTypes.Coupon memory rawCoupon;
 
         (rawCoupon, , ) = CouponStorageWrapper.getRawCouponData(
-            CouponStorageWrapper.getCouponFromOrderedListAt(total - 1)
+            CouponStorageWrapper.getCouponFromOrderedListAt(total - 1, true)
         );
         uint256 lastFixingDate = rawCoupon.fixingDate;
 

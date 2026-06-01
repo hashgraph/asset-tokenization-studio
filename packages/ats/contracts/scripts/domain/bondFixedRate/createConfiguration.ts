@@ -71,13 +71,12 @@ const BOND_FIXED_RATE_FACETS = [
   "CoreAdjustedFacet",
   "InitializerFacet", // Core initializer facet
 
-  //Metadata
-  "MetadataFacet",
+  //CustomData
+  "CustomDataFacet",
 
   // ERC Standards
   "TransferFacet",
   "MintByPartitionFacet",
-  "ERC1410ManagementFacet",
   "ProtectedByPartitionFacet",
   "OperatorFacet",
   "TransferByPartitionFacet",
@@ -95,7 +94,6 @@ const BOND_FIXED_RATE_FACETS = [
   "BatchBurnFacet",
   "BatchMintFacet",
   "BatchTransferFacet",
-  "ERC3643ManagementFacet",
   "RecoveryFacet",
   "IdentityFacet",
   "ComplianceFacet",

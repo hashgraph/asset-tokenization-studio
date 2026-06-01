@@ -10,21 +10,22 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
 /**
  * @title Partitions
  * @author Asset Tokenization Studio Team
- * @notice Abstract implementation of `IPartitions`, exposing the partition-discovery accessors
- *         (`partitionsOf`, `isMultiPartition`) backed by ERC-1410 storage.
- * @dev Stateless wrapper that delegates the actual reads to {ERC1410StorageWrapper}. Intended to
- *      be inherited by `PartitionsFacet`.
+ * @notice Abstract implementation of `IPartitions`, exposing the one-shot `initializePartitions`
+ *         initialiser and the partition-discovery accessors (`partitionsOf`, `isMultiPartition`)
+ *         backed by ERC-1410 storage.
+ * @dev Delegates the initialiser write and the reads to {ERC1410StorageWrapper}. Intended to be
+ *      inherited by `PartitionsFacet`.
  */
 abstract contract Partitions is IPartitions, Modifiers {
     /// @inheritdoc IPartitions
-    function initializePartitions()
-        external
-        override
-        onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(RESOLVER_KEY_PARTITIONS)
-    {
+    /// @dev Writes the multi-partition flag to ERC-1410 storage, marks the facet ready, and emits
+    ///      `PartitionsInitialized`. One-shot is enforced by `onlyFacetNotRegistered`.
+    function initializePartitions(
+        bool _multiPartition
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_PARTITIONS) {
+        ERC1410StorageWrapper.initializeERC1410(_multiPartition);
         InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_PARTITIONS);
-        emit PartitionsInitialized();
+        emit PartitionsInitialized(_multiPartition);
     }
 
     /// @inheritdoc IPartitions

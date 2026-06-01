@@ -31,35 +31,45 @@ abstract contract CouponListing is ICouponListing, Modifiers {
     }
 
     /// @inheritdoc ICouponListing
-    function getCouponFromOrderedListAt(uint256 _pos) external view override returns (uint256 couponID_) {
-        couponID_ = CouponStorageWrapper.getCouponFromOrderedListAt(_pos);
+    function getCouponFromOrderedListAt(
+        uint256 _pos,
+        bool _includeDisabled
+    ) external view override returns (uint256 couponID_) {
+        couponID_ = CouponStorageWrapper.getCouponFromOrderedListAt(_pos, _includeDisabled);
     }
 
     /// @inheritdoc ICouponListing
     function getCouponsOrderedList(
         uint256 _pageIndex,
-        uint256 _pageLength
+        uint256 _pageLength,
+        bool _includeDisabled
     ) external view override returns (uint256[] memory couponIDs_) {
-        couponIDs_ = CouponStorageWrapper.getCouponsOrderedList(_pageIndex, _pageLength);
+        couponIDs_ = CouponStorageWrapper.getCouponsOrderedList(_pageIndex, _pageLength, _includeDisabled);
     }
 
     /// @inheritdoc ICouponListing
-    function getCouponsOrderedListTotal() external view override returns (uint256 total_) {
+    function getCouponsOrderedListTotal(bool _includeDisabled) external view override returns (uint256 total_) {
         total_ = CouponStorageWrapper.getCouponsOrderedListTotalAdjustedAt(
-            TimeTravelStorageWrapper.getBlockTimestamp()
+            TimeTravelStorageWrapper.getBlockTimestamp(),
+            _includeDisabled
         );
     }
 
     /// @inheritdoc ICouponListing
-    function scheduledCouponListingCount() external view override returns (uint256) {
-        return ScheduledTasksStorageWrapper.getScheduledCouponListingCount();
+    function scheduledCouponListingCount(bool _includeDisabled) external view override returns (uint256) {
+        return ScheduledTasksStorageWrapper.getScheduledCouponListingCount(_includeDisabled);
     }
 
     /// @inheritdoc ICouponListing
     function getScheduledCouponListing(
         uint256 _pageIndex,
-        uint256 _pageLength
+        uint256 _pageLength,
+        bool _includeDisabled
     ) external view override returns (ScheduledTask[] memory scheduledCouponListing_) {
-        scheduledCouponListing_ = ScheduledTasksStorageWrapper.getScheduledCouponListing(_pageIndex, _pageLength);
+        scheduledCouponListing_ = ScheduledTasksStorageWrapper.getScheduledCouponListing(
+            _pageIndex,
+            _pageLength,
+            _includeDisabled
+        );
     }
 }

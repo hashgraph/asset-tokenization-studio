@@ -158,13 +158,13 @@ describe("Identity Tests", () => {
 
   describe("initializeIdentity", () => {
     it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeIdentity THEN AccountHasNoRole", async () => {
-      await expect(asset.connect(unknownSigner).initializeIdentity())
+      await expect(asset.connect(unknownSigner).initializeIdentity(ADDRESS_ZERO))
         .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
         .withArgs(await unknownSigner.getAddress(), ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
     it("GIVEN already-initialised WHEN initializeIdentity THEN FacetAlreadyRegistered", async () => {
-      await expect(asset.initializeIdentity())
+      await expect(asset.initializeIdentity(ADDRESS_ZERO))
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
         .withArgs(RESOLVER_KEY_IDENTITY, 1);
     });
@@ -173,7 +173,7 @@ describe("Identity Tests", () => {
   describe("initializeIdentity event", () => {
     it("GIVEN fresh facet WHEN initializeIdentity THEN emits IdentityInitialized", async () => {
       await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_IDENTITY);
-      await expect(asset.initializeIdentity()).to.emit(asset, "IdentityInitialized");
+      await expect(asset.initializeIdentity(ADDRESS_ZERO)).to.emit(asset, "IdentityInitialized");
     });
   });
 

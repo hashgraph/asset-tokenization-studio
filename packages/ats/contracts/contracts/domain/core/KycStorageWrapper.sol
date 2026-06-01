@@ -22,6 +22,8 @@ bytes32 constant STORAGE_LOCATION_KYC = 0x88f619eb35d79dd51bdbedb0638479d77479fa
 struct KycStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
     bool internalKycActivated;
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(address => IKyc.KycData) kyc;
     mapping(IKyc.KycStatus => EnumerableSet.AddressSet) kycAddressesByStatus;

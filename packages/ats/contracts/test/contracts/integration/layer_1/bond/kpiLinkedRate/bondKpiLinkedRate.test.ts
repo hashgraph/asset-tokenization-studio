@@ -546,7 +546,7 @@ describe("Bond KpiLinked Rate Tests", () => {
 
       await asset.connect(signer_A).triggerScheduledCrossOrderedTasks(100);
 
-      const orderedList = await asset.getCouponsOrderedList(0, 10);
+      const orderedList = await asset.getCouponsOrderedList(0, 10, false);
       expect(orderedList).to.be.an("array").with.lengthOf(1);
       expect(orderedList[0]).to.equal(2); // couponId 2 is the only one in the ordered list
     });
@@ -561,7 +561,7 @@ describe("Bond KpiLinked Rate Tests", () => {
 
     describe("getCouponsOrderedListTotal", () => {
       it("should return 0 when no coupons have been created", async () => {
-        const total = await asset.getCouponsOrderedListTotal();
+        const total = await asset.getCouponsOrderedListTotal(false);
         expect(total).to.equal(0);
       });
 
@@ -609,14 +609,14 @@ describe("Bond KpiLinked Rate Tests", () => {
         // Move time forward past all fixing dates
         await asset.changeSystemTimestamp(currentBlockTimestamp + TIME_PERIODS_S.DAY * 6);
 
-        const total = await asset.getCouponsOrderedListTotal();
+        const total = await asset.getCouponsOrderedListTotal(false);
         expect(total).to.equal(3);
       });
     });
 
     describe("getCouponFromOrderedListAt", () => {
       it("should return 0 for invalid position when no coupons exist", async () => {
-        const couponId = await asset.getCouponFromOrderedListAt(0);
+        const couponId = await asset.getCouponFromOrderedListAt(0, false);
         expect(couponId).to.equal(0);
       });
 
@@ -639,7 +639,7 @@ describe("Bond KpiLinked Rate Tests", () => {
         await asset.changeSystemTimestamp(currentBlockTimestamp + TIME_PERIODS_S.DAY * 2);
 
         // Try to get position 1 (second item) when only 1 exists (index 0)
-        const couponId = await asset.getCouponFromOrderedListAt(1);
+        const couponId = await asset.getCouponFromOrderedListAt(1, false);
         expect(couponId).to.equal(0);
       });
 
@@ -691,22 +691,22 @@ describe("Bond KpiLinked Rate Tests", () => {
         await asset.changeSystemTimestamp(currentBlockTimestamp + TIME_PERIODS_S.DAY * 6);
 
         // Get coupon at position 0 (first coupon)
-        const couponId0 = await asset.getCouponFromOrderedListAt(0);
+        const couponId0 = await asset.getCouponFromOrderedListAt(0, false);
         expect(couponId0).to.equal(1);
 
         // Get coupon at position 1 (second coupon)
-        const couponId1 = await asset.getCouponFromOrderedListAt(1);
+        const couponId1 = await asset.getCouponFromOrderedListAt(1, false);
         expect(couponId1).to.equal(2);
 
         // Get coupon at position 2 (third coupon)
-        const couponId2 = await asset.getCouponFromOrderedListAt(2);
+        const couponId2 = await asset.getCouponFromOrderedListAt(2, false);
         expect(couponId2).to.equal(3);
       });
     });
 
     describe("getCouponsOrderedList", () => {
       it("should return empty array when no coupons exist", async () => {
-        const coupons = await asset.getCouponsOrderedList(0, 10);
+        const coupons = await asset.getCouponsOrderedList(0, 10, false);
         expect(coupons).to.be.an("array").that.is.empty;
       });
 
@@ -754,7 +754,7 @@ describe("Bond KpiLinked Rate Tests", () => {
         // Move time forward past all fixing dates
         await asset.changeSystemTimestamp(currentBlockTimestamp + TIME_PERIODS_S.DAY * 6);
 
-        const coupons = await asset.getCouponsOrderedList(0, 10);
+        const coupons = await asset.getCouponsOrderedList(0, 10, false);
         expect(coupons).to.be.an("array").with.lengthOf(3);
         expect(coupons[0]).to.equal(1);
         expect(coupons[1]).to.equal(2);
@@ -782,24 +782,24 @@ describe("Bond KpiLinked Rate Tests", () => {
         await asset.changeSystemTimestamp(currentBlockTimestamp + TIME_PERIODS_S.DAY * 11);
 
         // Get first page (2 items)
-        const page1 = await asset.getCouponsOrderedList(0, 2);
+        const page1 = await asset.getCouponsOrderedList(0, 2, false);
         expect(page1).to.be.an("array").with.lengthOf(2);
         expect(page1[0]).to.equal(1);
         expect(page1[1]).to.equal(2);
 
         // Get second page (2 items)
-        const page2 = await asset.getCouponsOrderedList(1, 2);
+        const page2 = await asset.getCouponsOrderedList(1, 2, false);
         expect(page2).to.be.an("array").with.lengthOf(2);
         expect(page2[0]).to.equal(3);
         expect(page2[1]).to.equal(4);
 
         // Get third page (1 item remaining)
-        const page3 = await asset.getCouponsOrderedList(2, 2);
+        const page3 = await asset.getCouponsOrderedList(2, 2, false);
         expect(page3).to.be.an("array").with.lengthOf(1);
         expect(page3[0]).to.equal(5);
 
         // Get page beyond available data
-        const page4 = await asset.getCouponsOrderedList(3, 2);
+        const page4 = await asset.getCouponsOrderedList(3, 2, false);
         expect(page4).to.be.an("array").that.is.empty;
       });
 
@@ -824,17 +824,17 @@ describe("Bond KpiLinked Rate Tests", () => {
         await asset.changeSystemTimestamp(currentBlockTimestamp + TIME_PERIODS_S.DAY * 7);
 
         // Get page 0 (first item)
-        const page0 = await asset.getCouponsOrderedList(0, 1);
+        const page0 = await asset.getCouponsOrderedList(0, 1, false);
         expect(page0).to.be.an("array").with.lengthOf(1);
         expect(page0[0]).to.equal(1);
 
         // Get page 1 (second item)
-        const page1 = await asset.getCouponsOrderedList(1, 1);
+        const page1 = await asset.getCouponsOrderedList(1, 1, false);
         expect(page1).to.be.an("array").with.lengthOf(1);
         expect(page1[0]).to.equal(2);
 
         // Get page 2 (third item)
-        const page2 = await asset.getCouponsOrderedList(2, 1);
+        const page2 = await asset.getCouponsOrderedList(2, 1, false);
         expect(page2).to.be.an("array").with.lengthOf(1);
         expect(page2[0]).to.equal(3);
       });

@@ -37,10 +37,12 @@ bytes32 constant STORAGE_LOCATION_LOANS_PORTFOLIO = 0x5981f3997a6cf8235e2e8b5dd3
  * @custom:storage-location erc7201:security.token.standard.storage.LoansPortfolio
  */
 struct LoansPortfolioDataStorage {
-    // ─── R1 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
     ILoansPortfolio.PortfolioType portfolioType;
     ILoansPortfolio.DistributionPolicy distributionPolicy;
-    // ─── R3 Aggregates (mapping, array, EnumerableSet) ───────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     EnumerableSet.AddressSet holdingsAssets;
     EnumerableSet.AddressSet loanHoldingsAssets;
     EnumerableSet.AddressSet cashHoldingsAssets;

@@ -227,12 +227,12 @@ describe("Scheduled Tasks Tests", () => {
         decimals: 2,
       });
 
-      expect(await asset.getPendingBalanceAdjustmentCount()).to.equal(1);
+      expect(await asset.getPendingBalanceAdjustmentCount(false)).to.equal(1);
 
       await asset.changeSystemTimestamp(taskTimestamp);
       await asset.connect(signer_A).triggerPendingScheduledCrossOrderedTasks();
 
-      expect(await asset.getPendingBalanceAdjustmentCount()).to.equal(0);
+      expect(await asset.getPendingBalanceAdjustmentCount(false)).to.equal(0);
     });
   });
 
@@ -385,7 +385,7 @@ describe("Scheduled Tasks Failure Recovery", () => {
     await asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks();
 
     expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(0);
-    expect(await asset.scheduledSnapshotCount()).to.equal(0);
+    expect(await asset.scheduledSnapshotCount(false)).to.equal(0);
   });
 
   // ─── Failure path: hardhat_setCode injection ───────────────────────────────
@@ -445,7 +445,7 @@ describe("Scheduled Tasks Failure Recovery", () => {
     await expect(asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks()).to.be.reverted;
 
     expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(1);
-    expect(await asset.scheduledSnapshotCount()).to.equal(1);
+    expect(await asset.scheduledSnapshotCount(true)).to.equal(1);
   });
 
   it("GIVEN failing crossOrdered BALANCE_ADJUSTMENT task WHEN triggered THEN transaction reverts and queue not drained", async () => {
@@ -465,7 +465,7 @@ describe("Scheduled Tasks Failure Recovery", () => {
     await expect(asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks()).to.be.reverted;
 
     expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(1);
-    expect((await asset.getScheduledBalanceAdjustments(0, 10)).length).to.equal(1);
+    expect((await asset.getScheduledBalanceAdjustments(0, 10, true)).length).to.equal(1);
   });
 
   it("GIVEN failing crossOrdered COUPON_LISTING task WHEN triggered THEN transaction reverts and queue not drained", async () => {
@@ -486,14 +486,14 @@ describe("Scheduled Tasks Failure Recovery", () => {
     });
 
     const crossOrderedBefore = await asset.scheduledCrossOrderedTaskCount();
-    const couponListingBefore = await asset.scheduledCouponListingCount();
+    const couponListingBefore = await asset.scheduledCouponListingCount(true);
 
     await asset.changeSystemTimestamp(fixingDate + 1);
 
     await expect(asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks()).to.be.reverted;
 
     expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(crossOrderedBefore);
-    expect(await asset.scheduledCouponListingCount()).to.equal(couponListingBefore);
+    expect(await asset.scheduledCouponListingCount(true)).to.equal(couponListingBefore);
   });
 
   it("GIVEN two failing crossOrdered tasks WHEN triggered THEN transaction reverts and queue not drained", async () => {

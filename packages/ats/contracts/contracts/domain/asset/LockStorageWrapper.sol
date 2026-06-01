@@ -26,6 +26,9 @@ bytes32 constant STORAGE_LOCATION_LOCK = 0xd42ee8bdd326f30f9a4764fdaf28dd7191689
  * @custom:storage-location erc7201:security.token.standard.storage.Lock
  */
 struct LockDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(address => uint256) totalLockedAmountByAccount;
     mapping(address => mapping(bytes32 => uint256)) totalLockedAmountByAccountAndPartition;

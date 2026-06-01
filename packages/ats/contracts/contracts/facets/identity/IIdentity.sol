@@ -20,15 +20,17 @@ interface IIdentity {
     /**
      * @notice Emitted once when the identity capability is initialised on a token.
      * @dev Fires exclusively from `initializeIdentity`.
+     * @param identityRegistry The identity-registry address wired at initialisation.
      */
-    event IdentityInitialized();
+    event IdentityInitialized(address identityRegistry);
 
     /**
-     * @notice Initialises the identity capability on the token.
+     * @notice Initialises the identity capability on the token and wires the identity registry.
      * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
      *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     * @param _identityRegistry Address of the identity registry that vets token holders.
      */
-    function initializeIdentity() external;
+    function initializeIdentity(address _identityRegistry) external;
 
     /**
      * @notice Sets the onchainID of the token to `_onchainID`.

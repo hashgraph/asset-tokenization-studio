@@ -96,6 +96,9 @@ bytes4 constant KPI_ERC1410_REMOVE_HOLDER = 0x0000000C;
 /// @dev ID for the defensive operational-status guard in Factory deploy functions.
 bytes4 constant FACTORY_OPERATIONAL_STATUS = 0x0000000D;
 
+/// @dev ID for CouponRateDispatch.unrecognizedRateType()
+bytes4 constant UNRECOGNIZED_RATE_TYPE = 0x0000000E;
+
 /// @dev Precomputed constants for powers of 10 (0-18)
 uint256 constant POW10_0 = 1;
 uint256 constant POW10_1 = 10;

@@ -11,10 +11,15 @@ bytes32 constant STORAGE_LOCATION_SECURITY = 0x45ae5065a0bedd1836ba9c199c3e3b4f0
  * @notice Backing storage for the security regulation configuration of an asset.
  * @dev Sole source of truth for regulation and additional security fields on this asset;
  *      mutated only via `SecurityStorageWrapper` against the deterministic ERC-7201 slot.
+ *      `regulationData` and `additionalSecurityData` are inline struct-typed fields, each
+ *      spanning multiple contiguous slots, so they live in the R4 aggregates region.
  * @custom:storage-location erc7201:security.token.standard.storage.Security
  */
 struct SecurityRegulationDataStorage {
-    // ─── R2 Single-slot scalars / aggregates ─────────────────
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     RegulationData regulationData;
     AdditionalSecurityData additionalSecurityData;
 

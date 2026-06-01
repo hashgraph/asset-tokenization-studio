@@ -10,9 +10,9 @@ import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
  * @author Asset Tokenization Studio Team
  * @notice Diamond facet exposing identity-registry and onchainID configuration via
  *         `IIdentity`, registered under `RESOLVER_KEY_IDENTITY`.
- * @dev Consolidates `setIdentityRegistry` and `setOnchainID` previously hosted in
- *      `ERC3643ManagementFacet`, and `identityRegistry` and `onchainID` previously hosted
- *      in `ERC3643ReadFacet`. Exposes 4 selectors.
+ * @dev Hosts the one-shot `initializeIdentity` initialiser, the `setIdentityRegistry` and
+ *      `setOnchainID` setters, and the `identityRegistry` and `onchainID` getters previously
+ *      hosted in `ERC3643ReadFacet`. Exposes 5 selectors.
  */
 contract IdentityFacet is Identity, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors

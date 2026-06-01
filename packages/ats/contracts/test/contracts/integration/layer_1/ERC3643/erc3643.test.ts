@@ -16,7 +16,8 @@ import {
   ADDRESS_ZERO,
   EMPTY_HEX_BYTES,
   dateToUnixTimestamp,
-  RESOLVER_KEY_ERC3643_MANAGEMENT,
+  RESOLVER_KEY_COMPLIANCE,
+  RESOLVER_KEY_IDENTITY,
 } from "@scripts";
 
 const name = "TEST";
@@ -152,30 +153,49 @@ describe("ERC3643 Tests", () => {
       expect(parsed["Version"]).to.equal(configVersion.toString());
     });
 
-    describe("initializeERC3643", () => {
-      it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeERC3643 is called THEN AccountHasNoRole", async () => {
-        await expect(
-          asset
-            .connect(signer_D)
-            .initializeERC3643(complianceMock.target as string, identityRegistryMock.target as string),
-        )
+    describe("initializeCompliance / initializeIdentity", () => {
+      it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeCompliance is called THEN AccountHasNoRole", async () => {
+        await expect(asset.connect(signer_D).initializeCompliance(complianceMock.target as string))
           .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
           .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
       });
 
-      it("GIVEN already-initialised WHEN initializeERC3643 is called again THEN FacetAlreadyRegistered", async () => {
-        await expect(
-          asset.initializeERC3643(complianceMock.target as string, identityRegistryMock.target as string),
-        ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+      it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeIdentity is called THEN AccountHasNoRole", async () => {
+        await expect(asset.connect(signer_D).initializeIdentity(identityRegistryMock.target as string))
+          .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+          .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+      });
+
+      it("GIVEN already-initialised WHEN initializeCompliance is called again THEN FacetAlreadyRegistered", async () => {
+        await expect(asset.initializeCompliance(complianceMock.target as string)).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
+      });
+
+      it("GIVEN already-initialised WHEN initializeIdentity is called again THEN FacetAlreadyRegistered", async () => {
+        await expect(asset.initializeIdentity(identityRegistryMock.target as string)).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
       });
     });
 
-    describe("initializeERC3643 event", () => {
-      it("GIVEN a fresh deployment WHEN initializeERC3643 is called THEN emits ERC3643Initialized", async () => {
-        await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_ERC3643_MANAGEMENT);
-        await expect(
-          asset.initializeERC3643(complianceMock.target as string, identityRegistryMock.target as string),
-        ).to.emit(asset, "ERC3643Initialized");
+    describe("initializeCompliance / initializeIdentity events", () => {
+      it("GIVEN a fresh deployment WHEN initializeCompliance is called THEN emits ComplianceInitialized", async () => {
+        await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_COMPLIANCE);
+        await expect(asset.initializeCompliance(complianceMock.target as string)).to.emit(
+          asset,
+          "ComplianceInitialized",
+        );
+      });
+
+      it("GIVEN a fresh deployment WHEN initializeIdentity is called THEN emits IdentityInitialized", async () => {
+        await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_IDENTITY);
+        await expect(asset.initializeIdentity(identityRegistryMock.target as string)).to.emit(
+          asset,
+          "IdentityInitialized",
+        );
       });
     });
 

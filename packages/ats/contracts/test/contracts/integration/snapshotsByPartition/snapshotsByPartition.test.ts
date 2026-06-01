@@ -16,6 +16,7 @@ import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const _PARTITION_ID_1 = "0x0000000000000000000000000000000000000000000000000000000000000001";
 const _PARTITION_ID_2 = "0x0000000000000000000000000000000000000000000000000000000000000002";
+const _PARTITION_ID_3 = "0x0000000000000000000000000000000000000000000000000000000000000003";
 const EMPTY_VC_ID = EMPTY_STRING;
 const amount = 1000;
 
@@ -174,6 +175,130 @@ describe("SnapshotsByPartition Tests", () => {
       const partitionsAtSnapshot2 = await snapshotsByPartitionFacet.partitionsOfAtSnapshot(2, signer_C.address);
       expect(partitionsAtSnapshot2.length).to.equal(2);
       expect([...partitionsAtSnapshot2]).to.have.members([_PARTITION_ID_1, _PARTITION_ID_2]);
+    });
+
+    it("GIVEN a middle partition emptied after snapshot THEN snapshot keeps the full pre-delete list (swap branch)", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_SNAPSHOT, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
+      await asset.connect(signer_A).addIssuer(signer_A.address);
+      await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+
+      await asset.connect(signer_A).issueByPartition({
+        partition: _PARTITION_ID_1,
+        tokenHolder: signer_C.address,
+        value: amount,
+        data: "0x",
+      });
+      await asset.connect(signer_A).issueByPartition({
+        partition: _PARTITION_ID_2,
+        tokenHolder: signer_C.address,
+        value: amount,
+        data: "0x",
+      });
+      await asset.connect(signer_A).issueByPartition({
+        partition: _PARTITION_ID_3,
+        tokenHolder: signer_C.address,
+        value: amount,
+        data: "0x",
+      });
+
+      // Snapshot 1: C has [P1, P2, P3]
+      await asset.connect(signer_C).takeSnapshot();
+
+      // C empties the middle partition P2 → deletePartitionForHolder with swap (P3 moves into P2's slot)
+      await asset.connect(signer_C).redeemByPartition(_PARTITION_ID_2, amount, "0x");
+
+      // Snapshot 2: C now has [P1, P3]
+      await asset.connect(signer_C).takeSnapshot();
+
+      const atSnapshot1 = await snapshotsByPartitionFacet.partitionsOfAtSnapshot(1, signer_C.address);
+      expect(atSnapshot1.length).to.equal(3);
+      expect([...atSnapshot1]).to.have.members([_PARTITION_ID_1, _PARTITION_ID_2, _PARTITION_ID_3]);
+
+      const atSnapshot2 = await snapshotsByPartitionFacet.partitionsOfAtSnapshot(2, signer_C.address);
+      expect(atSnapshot2.length).to.equal(2);
+      expect([...atSnapshot2]).to.have.members([_PARTITION_ID_1, _PARTITION_ID_3]);
+
+      const live = await asset.partitionsOf(signer_C.address);
+      expect([...live]).to.have.members([_PARTITION_ID_1, _PARTITION_ID_3]);
+    });
+
+    it("GIVEN the last partition emptied after snapshot THEN snapshot keeps the full pre-delete list (no-swap branch)", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_SNAPSHOT, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
+      await asset.connect(signer_A).addIssuer(signer_A.address);
+      await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+
+      await asset.connect(signer_A).issueByPartition({
+        partition: _PARTITION_ID_1,
+        tokenHolder: signer_C.address,
+        value: amount,
+        data: "0x",
+      });
+      await asset.connect(signer_A).issueByPartition({
+        partition: _PARTITION_ID_2,
+        tokenHolder: signer_C.address,
+        value: amount,
+        data: "0x",
+      });
+
+      // Snapshot 1: C has [P1, P2]
+      await asset.connect(signer_C).takeSnapshot();
+
+      // C empties the last partition P2 → deletePartitionForHolder without swap (plain pop)
+      await asset.connect(signer_C).redeemByPartition(_PARTITION_ID_2, amount, "0x");
+
+      // Snapshot 2: C now has [P1]
+      await asset.connect(signer_C).takeSnapshot();
+
+      const atSnapshot1 = await snapshotsByPartitionFacet.partitionsOfAtSnapshot(1, signer_C.address);
+      expect(atSnapshot1.length).to.equal(2);
+      expect([...atSnapshot1]).to.have.members([_PARTITION_ID_1, _PARTITION_ID_2]);
+
+      const atSnapshot2 = await snapshotsByPartitionFacet.partitionsOfAtSnapshot(2, signer_C.address);
+      expect(atSnapshot2.length).to.equal(1);
+      expect(atSnapshot2[0]).to.equal(_PARTITION_ID_1);
+    });
+
+    it("GIVEN several partitions emptied within the same snapshot THEN earlier snapshots stay intact (idempotency)", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_SNAPSHOT, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
+      await asset.connect(signer_A).addIssuer(signer_A.address);
+      await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+
+      await asset.connect(signer_A).issueByPartition({
+        partition: _PARTITION_ID_1,
+        tokenHolder: signer_C.address,
+        value: amount,
+        data: "0x",
+      });
+      await asset.connect(signer_A).issueByPartition({
+        partition: _PARTITION_ID_2,
+        tokenHolder: signer_C.address,
+        value: amount,
+        data: "0x",
+      });
+      await asset.connect(signer_A).issueByPartition({
+        partition: _PARTITION_ID_3,
+        tokenHolder: signer_C.address,
+        value: amount,
+        data: "0x",
+      });
+
+      // Snapshot 1: C has [P1, P2, P3]
+      await asset.connect(signer_C).takeSnapshot();
+
+      // Two deletes under the SAME active snapshot (snapshot 1 stays open).
+      await asset.connect(signer_C).redeemByPartition(_PARTITION_ID_2, amount, "0x");
+      await asset.connect(signer_C).redeemByPartition(_PARTITION_ID_3, amount, "0x");
+
+      // Snapshot 1 must still reflect the original three partitions.
+      const atSnapshot1 = await snapshotsByPartitionFacet.partitionsOfAtSnapshot(1, signer_C.address);
+      expect(atSnapshot1.length).to.equal(3);
+      expect([...atSnapshot1]).to.have.members([_PARTITION_ID_1, _PARTITION_ID_2, _PARTITION_ID_3]);
+
+      const live = await asset.partitionsOf(signer_C.address);
+      expect([...live]).to.have.members([_PARTITION_ID_1]);
     });
   });
 

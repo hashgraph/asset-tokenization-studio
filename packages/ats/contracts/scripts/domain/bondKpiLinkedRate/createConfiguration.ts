@@ -47,7 +47,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "TransferFacet",
   "CoreAdjustedFacet",
   "InitializerFacet", // Core initializer facet
-  "MetadataFacet",
+  "CustomDataFacet",
   "FreezeFacet",
   "BatchFreezeFacet",
   "KycFacet",
@@ -72,7 +72,6 @@ const BOND_KPI_LINKED_RATE_FACETS = [
 
   // ERC Standards
   "MintByPartitionFacet",
-  "ERC1410ManagementFacet",
   "ProtectedByPartitionFacet",
   "OperatorFacet",
   "TransferByPartitionFacet",
@@ -90,7 +89,6 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "BatchBurnFacet",
   "BatchMintFacet",
   "BatchTransferFacet",
-  "ERC3643ManagementFacet",
   "RecoveryFacet",
   "IdentityFacet",
   "ComplianceFacet",
@@ -140,7 +138,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   // Interest Rate (rate-specific - keep variant names)
   "CouponFacet",
   "KpiLinkedRateFacet",
-  "KpisKpiLinkedRateFacet",
+  "KpisFacet",
   "InterestRateFacet",
 
   // Maturity By Partition
