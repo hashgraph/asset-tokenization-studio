@@ -18,11 +18,10 @@ bytes32 constant STORAGE_LOCATION_NOMINAL_VALUE = 0xf4ae98634996e72bf90c5471fce1
  * @custom:storage-location erc7201:security.token.standard.storage.NominalValue
  */
 struct NominalValueDataStorage {
-    // ─── R1 Lifecycle (bool flags) ───────────────────────────
-    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R1 Packed scalars (uint8, bytes3, address, enum) ────
     uint8 nominalValueDecimals;
     bytes3 nominalValueCurrency;
-    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R2 Single-slot scalars (uint256, bytes32, string) ───
     uint256 nominalValue;
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     // ─── APPEND-ONLY ZONE BELOW ───

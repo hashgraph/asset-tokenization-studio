@@ -22,10 +22,7 @@ bytes32 constant STORAGE_LOCATION_BOND = 0xa99cdff87e8b13602d53b3661888bce1eb21f
  * @custom:storage-location erc7201:security.token.standard.storage.Bond
  */
 struct BondDataStorage {
-    // ─── R1 Lifecycle (bool flags) ───────────────────────────
-    bool initialized;
-    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
-    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R2 Single-slot scalars (uint256, bytes32, string) ───
     uint256 startingDate;
     uint256 maturityDate;
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
@@ -46,7 +43,6 @@ library BondStorageWrapper {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_bond(IBondTypes.BondDetailsData calldata bondDetailsData) internal {
         BondDataStorage storage bs = _bondStorage();
-        bs.initialized = true;
         bs.startingDate = bondDetailsData.startingDate;
         bs.maturityDate = bondDetailsData.maturityDate;
     }
@@ -107,14 +103,6 @@ library BondStorageWrapper {
             DecimalsLib.pow10(bondDetails.nominalValueDecimals)
         );
         principalFor_.denominator = DecimalsLib.pow10(ERC20StorageWrapper.decimalsAdjustedAt(blockTimestamp));
-    }
-
-    /**
-     * @notice Indicates whether the bond storage has been initialised.
-     * @return Whether {initialize_bond} has already been executed for this token.
-     */
-    function isBondInitialized() internal view returns (bool) {
-        return _bondStorage().initialized;
     }
 
     /**

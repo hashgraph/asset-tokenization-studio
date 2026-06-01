@@ -3,11 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ActionValidationModifiers } from "./ActionValidationModifiers.sol";
 import { AdjustBalancesModifiers } from "./AdjustBalancesModifiers.sol";
-import { BondModifiers } from "./BondModifiers.sol";
 import { ClearingModifiers } from "./ClearingModifiers.sol";
 import { CouponModifiers } from "./CouponModifiers.sol";
 import { ComplianceModifiers } from "./ComplianceModifiers.sol";
-import { EquityModifiers } from "./EquityModifiers.sol";
 import { ERC1410Modifiers } from "./ERC1410Modifiers.sol";
 import { ERC3643Modifiers } from "./ERC3643Modifiers.sol";
 import { ExpirationModifiers } from "./ExpirationModifiers.sol";
@@ -31,11 +29,9 @@ import { LoansPortfolioModifiers } from "./LoansPortfolioModifiers.sol";
  * Asset Modifiers:
  * - ActionValidationModifiers: Action validation
  * - AdjustBalancesModifiers: Adjust balances validation
- * - BondModifiers: Bond-specific validation
  * - ClearingModifiers: Clearing state validation
  * - CouponModifiers: Coupon date validation
  * - ComplianceModifiers: Compliance validation
- * - EquityModifiers: Equity-specific validation
  * - ERC3643Modifiers: ERC3643 initialization validation
  * - ExpirationModifiers: Expiration validation
  * - HoldModifiers: Hold validation
@@ -52,11 +48,9 @@ abstract contract AssetModifiers is
     ActionValidationModifiers,
     AdjustBalancesModifiers,
     AmortizationModifiers,
-    BondModifiers,
     ClearingModifiers,
     CouponModifiers,
     ComplianceModifiers,
-    EquityModifiers,
     ERC1410Modifiers,
     ERC3643Modifiers,
     ExpirationModifiers,

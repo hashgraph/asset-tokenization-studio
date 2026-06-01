@@ -45,9 +45,7 @@ bytes32 constant STORAGE_LOCATION_LOAN = 0x2af22e338cd16bdeda633a06c0ad54c1b9d04
  * @custom:storage-location erc7201:security.token.standard.storage.Loan
  */
 struct LoanDataStorage {
-    // ─── R1 Lifecycle (bool flags) ───────────────────────────
-    bool initialized;
-    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R1 Packed scalars (uint8, bytes3, address, enum) ────
     bytes3 currency;
     uint8 loanStructureType;
     uint8 repaymentType;
@@ -59,7 +57,7 @@ struct LoanDataStorage {
     uint8 performanceStatus;
     address originatorAccount;
     address servicerAccount;
-    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R2 Single-slot scalars (uint256, bytes32, string) ───
     uint256 startingDate;
     uint256 maturityDate;
     uint256 signingDate;
@@ -96,7 +94,6 @@ library LoanStorageWrapper {
      */
     function initializeLoan(ILoan.LoanDetailsData calldata _loanDetailsData) internal {
         LoanDataStorage storage ls = _loanStorage();
-        ls.initialized = true;
         _writeLoanDetails(_loanDetailsData, ls);
     }
 
@@ -160,14 +157,6 @@ library LoanStorageWrapper {
             performanceStatus: ILoan.PerformanceStatus(ls.performanceStatus),
             daysPastDue: ls.daysPastDue
         });
-    }
-
-    /**
-     * @notice Reports whether the loan storage has been initialised.
-     * @return True once `initializeLoan` has been called, false otherwise.
-     */
-    function isLoanInitialized() internal view returns (bool) {
-        return _loanStorage().initialized;
     }
 
     /**
