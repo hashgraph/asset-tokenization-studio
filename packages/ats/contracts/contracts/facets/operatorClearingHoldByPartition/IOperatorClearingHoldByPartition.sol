@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IHoldTypes } from "../../hold/IHoldTypes.sol";
-import { IClearingTypes } from "../IClearingTypes.sol";
+import { IHoldTypes } from "../hold/IHoldTypes.sol";
+import { IClearingTypes } from "../clearing/IClearingTypes.sol";
 
 /// @custom:hash resolverKey OperatorClearingHoldbypartition
 // solhint-disable-next-line max-line-length

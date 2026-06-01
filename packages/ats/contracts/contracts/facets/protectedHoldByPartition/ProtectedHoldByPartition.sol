@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IProtectedHoldByPartition, RESOLVER_KEY_PROTECTED_HOLD_BY_PARTITION } from "./IProtectedHoldByPartition.sol";
-import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
+import { IHoldTypes } from "../hold/IHoldTypes.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { HoldOps } from "../../domain/orchestrator/HoldOps.sol";

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
+import { ThirdPartyType } from "../../domain/asset/types/ThirdPartyType.sol";
 
 /**
  * @title IHoldTypes
@@ -14,6 +14,9 @@ interface IHoldTypes {
     /**
      * @notice Lifecycle operation applicable to an existing hold.
      * @dev Used by storage helpers to dispatch the appropriate event and balance update.
+     * @param Execute Transfer the held amount to the hold's designated recipient.
+     * @param Release Return the held amount (partially or fully) to the holder's available balance.
+     * @param Reclaim Return the full held amount to the holder after the expiration timestamp has passed.
      */
     enum OperationType {
         Execute,
@@ -24,6 +27,9 @@ interface IHoldTypes {
     /**
      * @notice Composite identifier locating a single hold within partitioned storage.
      * @dev Three-tuple keyed by partition, holder, and the hold's sequence id.
+     * @param partition The ERC-1410 partition byte identifier under which the hold is registered.
+     * @param tokenHolder Address of the account whose balance is held.
+     * @param holdId Sequence identifier assigned to the hold within the (partition, holder) scope.
      */
     struct HoldIdentifier {
         bytes32 partition;
@@ -35,6 +41,12 @@ interface IHoldTypes {
      * @notice Definition of a hold placed over part of a holder's partitioned balance.
      * @dev `expirationTimestamp` is compared against the configurable block timestamp;
      *      `escrow` is the only address authorised to execute the hold.
+     * @param amount Number of tokens placed under hold.
+     * @param expirationTimestamp Unix timestamp after which the hold may be reclaimed by the holder;
+     *        zero means the hold never expires and can only be released or executed.
+     * @param escrow Address exclusively authorised to execute the hold before expiration.
+     * @param to Intended recipient of tokens when the hold is executed.
+     * @param data Arbitrary payload attached to the hold by its creator.
      */
     struct Hold {
         uint256 amount;
@@ -47,6 +59,9 @@ interface IHoldTypes {
     /**
      * @notice Protected hold envelope authorised by an off-chain EIP-712 signature.
      * @dev `deadline` and `nonce` are validated against the holder's nonce slot.
+     * @param hold The underlying hold definition (amount, escrow, recipient, expiration, data).
+     * @param deadline Latest block timestamp at which the EIP-712 signature remains valid.
+     * @param nonce Per-holder nonce consumed on submission to prevent signature replay.
      */
     struct ProtectedHold {
         Hold hold;
@@ -57,6 +72,11 @@ interface IHoldTypes {
     /**
      * @notice Persisted hold record carrying the dispatch tag for its originating flow.
      * @dev `thirdPartyType` selects which downstream event variant fires on creation.
+     * @param id Sequence identifier of this hold record within the (partition, holder) scope.
+     * @param hold The hold definition including amount, escrow, recipient, expiration, and data.
+     * @param operatorData Operator-supplied metadata recorded at hold creation time.
+     * @param thirdPartyType Tag identifying which originating flow created the hold,
+     *        used to emit the correct event variant.
      */
     struct HoldData {
         uint256 id;

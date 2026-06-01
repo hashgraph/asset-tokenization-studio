@@ -115,7 +115,7 @@ import { IOperatorByPartition } from "../facets/operatorByPartition/IOperatorByP
 import { IOperatorClearingByPartition } from "../facets/operatorClearingByPartition/IOperatorClearingByPartition.sol";
 import {
     IOperatorClearingHoldByPartition
-} from "../facets/layer_1/clearing/operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol";
+} from "../facets/operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol";
 import { IOperatorHoldByPartition } from "../facets/operatorHoldByPartition/IOperatorHoldByPartition.sol";
 import { IPartitions } from "../facets/partitions/IPartitions.sol";
 import { IPause } from "../facets/pause/IPause.sol";

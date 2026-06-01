@@ -5,8 +5,8 @@ import {
     IProtectedClearingHoldByPartition,
     RESOLVER_KEY_PROTECTED_CLEARING_HOLD_BY_PARTITION
 } from "./IProtectedClearingHoldByPartition.sol";
-import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
-import { IClearingTypes } from "../layer_1/clearing/IClearingTypes.sol";
+import { IHoldTypes } from "../hold/IHoldTypes.sol";
+import { IClearingTypes } from "../clearing/IClearingTypes.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ClearingProtectedOps } from "../../domain/orchestrator/ClearingProtectedOps.sol";
