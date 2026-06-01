@@ -2,11 +2,21 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IProtectedPartitions, RESOLVER_KEY_PROTECTED_PARTITIONS } from "./IProtectedPartitions.sol";
-import { ROLE_PROTECTED_PARTITIONS, DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
-import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
-import { Modifiers } from "../../../services/Modifiers.sol";
-import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
+import { ROLE_PROTECTED_PARTITIONS, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { ProtectedPartitionsStorageWrapper } from "../../domain/core/ProtectedPartitionsStorageWrapper.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
+/**
+ * @title ProtectedPartitions
+ * @author Asset Tokenization Studio Team
+ * @notice Abstract base implementing the protected-partitions toggle and partition-role
+ *         derivation declared in `IProtectedPartitions`.
+ * @dev Delegates all storage reads and writes to `ProtectedPartitionsStorageWrapper`.
+ *      `protectPartitions` and `unprotectPartitions` are guarded by `onlyOperational`,
+ *      `onlyActivated`, `onlyUnpaused`, and `ROLE_PROTECTED_PARTITIONS`; initialisation
+ *      is guarded by `DEFAULT_ADMIN_ROLE` and the one-shot `onlyFacetNotRegistered` gate.
+ */
 abstract contract ProtectedPartitions is IProtectedPartitions, Modifiers {
     /// @inheritdoc IProtectedPartitions
     function initializeProtectedPartitions(

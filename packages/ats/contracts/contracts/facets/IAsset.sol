@@ -73,7 +73,7 @@ import { ICoupon } from "./coupon/ICoupon.sol";
 import { IDividend } from "./dividend/IDividend.sol";
 import { IDividendSecurityHolders } from "./dividendSecurityHolders/IDividendSecurityHolders.sol";
 import { IKpis } from "./layer_2/kpi/kpiLatest/IKpis.sol";
-import { IProtectedPartitions } from "./layer_1/protectedPartition/IProtectedPartitions.sol";
+import { IProtectedPartitions } from "./protectedPartition/IProtectedPartitions.sol";
 import { IProceedRecipients } from "./layer_2/proceedRecipient/IProceedRecipients.sol";
 import { ICap } from "./cap/ICap.sol";
 import { ICapByPartition } from "./capByPartition/ICapByPartition.sol";
