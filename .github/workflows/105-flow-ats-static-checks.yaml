@@ -47,6 +47,9 @@ jobs:
       - name: Hash codegen — no drift, no duplicates, no shape violations
         run: npm run ats:contracts:hashes:check
 
+      - name: EVM accessors — prod artifact carries no test-override machinery
+        run: npm run ats:contracts:accessors:check:prod
+
       - name: Fetch base ref for stability check
         if: github.event_name == 'pull_request'
         run: git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"

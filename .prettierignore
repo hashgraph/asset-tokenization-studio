@@ -17,6 +17,9 @@ artifacts
 cache
 *.snap
 
+# Auto-generated EVM accessor library (gitignored; regenerated on every compile)
+packages/ats/contracts/contracts/infrastructure/utils/EvmAccessors.sol
+
 # Asset files
 *.png
 *.jpg

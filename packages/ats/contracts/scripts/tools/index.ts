@@ -39,7 +39,6 @@ export {
   // Core components
   findAllContracts as standalonesFindAllContracts,
   categorizeContracts as standaloneCategorizeContracts,
-  pairTimeTravelVariants as standalonePairTimeTravelVariants,
   extractMetadata as standaloneExtractMetadata,
   generateRegistry as standaloneGenerateRegistry,
   generateSummary as standaloneGenerateSummary,
@@ -57,17 +56,31 @@ export {
 export type { RegistryConfig, RegistryResult, CacheEntry, RegistryCache } from "./registry-generator/exports";
 
 // ============================================================================
+// EVM Accessor Generator
+// ============================================================================
+
+export {
+  generate as generateEvmAccessorsSource,
+  overrideReaderName,
+  writerName,
+  storageFieldName,
+  STORAGE_STRUCT as EVM_ACCESSORS_STORAGE_STRUCT,
+  STORAGE_LOCATION_CONSTANT as EVM_ACCESSORS_STORAGE_LOCATION_CONSTANT,
+  STORAGE_HASH_NAME as EVM_ACCESSORS_STORAGE_HASH_NAME,
+  STORAGE_NAMESPACE as EVM_ACCESSORS_STORAGE_NAMESPACE,
+  STORAGE_REF as EVM_ACCESSORS_STORAGE_REF,
+  evmAccessorsStorageSlot,
+} from "./accessor-generator/generator";
+export { ACCESSORS } from "./accessor-generator/manifest";
+export type { AccessorDefinition } from "./accessor-generator/manifest";
+
+// ============================================================================
 // Contract Scanner
 // ============================================================================
 
 export type { ContractFile, CategorizedContracts } from "./scanner/contractFinder";
 
-export {
-  findAllContracts,
-  categorizeContracts,
-  pairTimeTravelVariants,
-  findTimeTravelPair,
-} from "./scanner/contractFinder";
+export { findAllContracts, categorizeContracts } from "./scanner/contractFinder";
 
 // ============================================================================
 // Metadata Extractor
@@ -121,8 +134,6 @@ export {
   implementsInterface,
   // Naming utilities
   isFacetName,
-  isTimeTravelVariant,
-  getBaseName,
   // Roles and keys
   extractRoles,
   extractResolverKeys,
