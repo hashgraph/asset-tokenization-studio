@@ -12,8 +12,6 @@ import { TRexICore as ICore } from "./ICore.sol";
 import { TRexIBondRead as IBondRead } from "./IBondRead.sol";
 import { TRexIEquity as IEquity } from "./IEquity.sol";
 import { FactoryRegulationData, RegulationData, RegulationType, RegulationSubType } from "./regulation.sol";
-import { TRexIFixedRate as IFixedRate } from "./IFixedRate.sol";
-import { TRexIKpiLinkedRate as IKpiLinkedRate } from "./IKpiLinkedRate.sol";
 
 /// @custom:hash resolverKey Factory
 bytes32 constant RESOLVER_KEY_FACTORY = 0x9fc26269cc1cb994e66f269ed6b58a5bb0c344a134b9dabd342ac466d48f95c7;
@@ -31,10 +29,10 @@ interface TRexIFactory {
      * @dev Used internally to select the correct initialisation path in the factory.
      */
     enum SecurityType {
-        /// @notice A bond whose coupon rate floats against an external index.
-        BondVariableRate,
         /// @notice An equity instrument (shares).
         Equity,
+        /// @notice A bond whose coupon rate floats against an external index.
+        BondVariableRate,
         /// @notice A bond with a fixed coupon rate.
         BondFixedRate,
         /// @notice A bond whose coupon is tied to KPI performance metrics.
@@ -77,23 +75,23 @@ interface TRexIFactory {
      * @param identityRegistry           Address of the identity registry (address(0) to disable).
      */
     struct SecurityData {
-        bool arePartitionsProtected;
-        bool isMultiPartition;
         IBusinessLogicResolver resolver;
-        ResolverProxyConfiguration resolverProxyConfiguration;
-        IResolverProxy.Rbac[] rbacs;
-        bool isControllable;
-        bool isWhiteList;
         uint256 maxSupply;
+        ResolverProxyConfiguration resolverProxyConfiguration;
         ICore.ERC20MetadataInfo erc20MetadataInfo;
-        bool clearingActive;
-        bool internalKycActivated;
+        IResolverProxy.Rbac[] rbacs;
         address[] externalPauses;
         address[] externalControlLists;
         address[] externalKycLists;
-        bool erc20VotesActivated;
         address compliance;
         address identityRegistry;
+        bool arePartitionsProtected;
+        bool isMultiPartition;
+        bool isControllable;
+        bool isWhiteList;
+        bool clearingActive;
+        bool internalKycActivated;
+        bool erc20VotesActivated;
     }
 
     /**
@@ -118,32 +116,6 @@ interface TRexIFactory {
         IBondRead.BondDetailsData bondDetails;
         address[] proceedRecipients;
         bytes[] proceedRecipientsData;
-    }
-
-    /**
-     * @notice Full configuration for deploying a KPI-linked-rate bond.
-     * @param bondData              Base bond configuration.
-     * @param factoryRegulationData Regulatory classification applied at deployment.
-     * @param interestRate          Initial KPI-linked interest-rate parameters.
-     * @param impactData            KPI impact metrics used to compute the variable coupon.
-     */
-    struct BondKpiLinkedRateData {
-        BondData bondData;
-        FactoryRegulationData factoryRegulationData;
-        IKpiLinkedRate.InterestRate interestRate;
-        IKpiLinkedRate.ImpactData impactData;
-    }
-
-    /**
-     * @notice Full configuration for deploying a fixed-rate bond.
-     * @param bondData              Base bond configuration.
-     * @param factoryRegulationData Regulatory classification applied at deployment.
-     * @param fixedRateData         Fixed coupon rate and day-count convention parameters.
-     */
-    struct BondFixedRateData {
-        BondData bondData;
-        FactoryRegulationData factoryRegulationData;
-        IFixedRate.FixedRateData fixedRateData;
     }
 
     /**
@@ -180,26 +152,6 @@ interface TRexIFactory {
         address bondAddress,
         BondData bondData,
         FactoryRegulationData regulationData
-    );
-
-    /**
-     * @notice Emitted when a new fixed-rate bond is deployed.
-     * @param deployer Address that initiated the deployment.
-     * @param bondAddress Address of the newly deployed bond proxy.
-     * @param bondFixedRateData Full fixed-rate bond configuration.
-     */
-    event BondFixedRateDeployed(address indexed deployer, address bondAddress, BondFixedRateData bondFixedRateData);
-
-    /**
-     * @notice Emitted when a new KPI-linked-rate bond is deployed.
-     * @param deployer Address that initiated the deployment.
-     * @param bondAddress Address of the newly deployed bond proxy.
-     * @param bondKpiLinkedRateData Full KPI-linked-rate bond configuration.
-     */
-    event BondKpiLinkedRateDeployed(
-        address indexed deployer,
-        address bondAddress,
-        BondKpiLinkedRateData bondKpiLinkedRateData
     );
 
     /**
@@ -244,6 +196,25 @@ interface TRexIFactory {
     error NoInitialAdmins();
 
     /**
+     * @notice Raised when the provided ISIN does not meet the expected format or length.
+     * @param isin The invalid ISIN string.
+     */
+    error WrongISIN(string isin);
+
+    /**
+     * @notice Raised when the ISIN checksum is invalid.
+     * @param isin The invalid ISIN string.
+     */
+    error WrongISINChecksum(string isin);
+
+    /**
+     * @notice Raised when the requested regulation type and sub-type combination is not permitted.
+     * @param regulationType Primary regulation category.
+     * @param regulationSubType Sub-category within the regulation.
+     */
+    error RegulationTypeAndSubTypeForbidden(RegulationType regulationType, RegulationSubType regulationSubType);
+
+    /**
      * @notice Deploys a new resolver proxy and initialises its RBAC.
      * @param _resolver Business-logic resolver to attach.
      * @param _configKey Configuration identifier for the proxy.
@@ -278,22 +249,6 @@ interface TRexIFactory {
     function deployBond(
         BondData calldata _bondData,
         FactoryRegulationData calldata _factoryRegulationData
-    ) external returns (address bondAddress_);
-
-    /**
-     * @notice Deploys a new fixed-rate bond with the supplied data.
-     * @param _bondFixedRateData Full fixed-rate bond configuration.
-     * @return bondAddress_ Address of the deployed bond proxy.
-     */
-    function deployBondFixedRate(BondFixedRateData calldata _bondFixedRateData) external returns (address bondAddress_);
-
-    /**
-     * @notice Deploys a new KPI-linked-rate bond with the supplied data.
-     * @param _bondKpiLinkedRateData Full KPI-linked-rate bond configuration.
-     * @return bondAddress_ Address of the deployed bond proxy.
-     */
-    function deployBondKpiLinkedRate(
-        BondKpiLinkedRateData calldata _bondKpiLinkedRateData
     ) external returns (address bondAddress_);
 
     /**

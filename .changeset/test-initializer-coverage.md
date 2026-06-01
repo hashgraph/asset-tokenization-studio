@@ -36,9 +36,38 @@ Test and mock changes:
   available to every facet that extends `AssetModifiers` without a direct dependency.
 - `Burn` no longer directly inherits `ProtectedPartitionRoleValidator`.
 
+Factory refactor:
+
+- `BondFixedRateData`, `BondKpiLinkedRateData` structs removed from `IFactory`; moved to a new
+  `IMockFactory` interface that lives exclusively in the test mock layer.
+- `deployBondFixedRate` and `deployBondKpiLinkedRate` functions removed from `Factory` and
+  `IFactory`; `MockFactory` now implements `IMockFactory` alongside `Factory` and provides these
+  functions for test contexts only.
+- `BondFixedRateDeployed` and `BondKpiLinkedRateDeployed` events removed from `IFactory`; declared
+  in `IMockFactory`.
+- `onlyValidInterestRate` and `onlyValidImpactData` modifiers and their corresponding private
+  validators (`_checkInterestRate`, `_checkImpactData`) removed from `Factory`.
+- `SecurityData` struct booleans moved to the end of the struct to improve ABI packing.
+- `SecurityType.Equity` reordered before `BondVariableRate` in the enum.
+- Deploy scripts and integration tests updated to reference `IMockFactory` types.
+
+TypeScript type fixes:
+
+- `controllerHoldByPartition` test: `holdIdentifier` typed inline; `hold.amount`, `hold.escrow`,
+  `hold.data`, `hold.to` cast to match `checkCreatedHold_expected` parameter types.
+- `mintByPartition` test: removed `operatorData` field absent from `IssueDataStruct`.
+- `deploy-full-suite.fixture.ts`: `aliceIdentity` and `bobIdentity` cast to `any` for
+  `addKey`/`addClaim` calls on OnchainID contracts that lack generated typechain types.
+- `DeployFactoryResult`: added optional `implementationAddress` field referenced in tests.
+- `deploymentFiles` test mock: added missing `getDepositTokenFacets` method.
+
 Breaking changes: `setOperationalStatus` now reverts for any caller without `DEFAULT_ADMIN_ROLE`.
 `ContextProvider` and `LocalContext` are removed from the contract surface; any external project
 that inherited these abstract contracts must migrate to direct library calls.
 `ProtectedPartitionRoleValidator` is removed; replace with `ProtectedPartitionRoleValidatorModifiers`
 at `services/asset/ProtectedPartitionRoleValidatorModifiers.sol`. `ProtectedPartitionRoleRequired`
 is now declared on `IProtectedByPartition`, not on the validator contract.
+`IFactory.BondFixedRateData`, `IFactory.BondKpiLinkedRateData`, `IFactory.deployBondFixedRate`,
+`IFactory.deployBondKpiLinkedRate`, `IFactory.BondFixedRateDeployed` and
+`IFactory.BondKpiLinkedRateDeployed` removed from the production interface; use `IMockFactory`
+equivalents in test and script contexts.
