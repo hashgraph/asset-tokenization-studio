@@ -4,7 +4,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC5805 } from "./IERC5805.sol";
-import { Checkpoints } from "../../../../infrastructure/utils/Checkpoints.sol";
+import { Checkpoints } from "../../infrastructure/utils/Checkpoints.sol";
 
 /// @custom:hash resolverKey Erc20votes
 bytes32 constant RESOLVER_KEY_ERC20VOTES = 0x9619bb38c76aac49afb1df75430aefc1314778fe926136a688bf3ae3b5f8c3b7;
