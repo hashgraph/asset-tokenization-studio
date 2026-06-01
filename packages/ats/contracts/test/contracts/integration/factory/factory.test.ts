@@ -974,21 +974,22 @@ describe("Factory Tests", () => {
   });
 
   describe("Deposit Token tests", () => {
+    let depositTokenData: ReturnType<typeof buildDepositTokenData>;
+
     function buildDepositTokenData() {
-      const depositTokenData = {
+      return {
         security: getSecurityData(businessLogicResolver, {
           rbacs: init_rbacs,
+          resolverProxyConfiguration: { key: DEPOSIT_TOKEN_CONFIG_ID, version: 1 },
         }),
       };
-      depositTokenData.security.resolverProxyConfiguration = {
-        key: DEPOSIT_TOKEN_CONFIG_ID,
-        version: 1,
-      };
-      return depositTokenData;
     }
 
+    beforeEach(() => {
+      depositTokenData = buildDepositTokenData();
+    });
+
     it("GIVEN an empty Resolver WHEN deploying a new deposit token THEN transaction fails", async () => {
-      const depositTokenData = buildDepositTokenData();
       depositTokenData.security.resolver = ADDRESS_ZERO;
 
       await expect(factory.deployDepositToken(depositTokenData, getRegulationData())).to.be.revertedWithCustomError(
@@ -998,7 +999,6 @@ describe("Factory Tests", () => {
     });
 
     it("GIVEN a wrong ISIN WHEN deploying a new deposit token THEN transaction fails", async () => {
-      const depositTokenData = buildDepositTokenData();
       depositTokenData.security.erc20MetadataInfo.isin = "short";
 
       await expect(
@@ -1015,13 +1015,7 @@ describe("Factory Tests", () => {
     });
 
     it("GIVEN no admin WHEN deploying a new deposit token THEN transaction fails", async () => {
-      const depositTokenData = {
-        security: getSecurityData(businessLogicResolver),
-      };
-      depositTokenData.security.resolverProxyConfiguration = {
-        key: DEPOSIT_TOKEN_CONFIG_ID,
-        version: 1,
-      };
+      depositTokenData.security.rbacs = [];
 
       await expect(factory.deployDepositToken(depositTokenData, getRegulationData())).to.be.revertedWithCustomError(
         factory,
@@ -1030,7 +1024,6 @@ describe("Factory Tests", () => {
     });
 
     it("GIVEN wrong regulation type WHEN deploying a new deposit token THEN transaction fails", async () => {
-      const depositTokenData = buildDepositTokenData();
       const factoryRegulationData = getRegulationData({
         regulationType: RegulationType.NONE,
         regulationSubType,
@@ -1047,8 +1040,6 @@ describe("Factory Tests", () => {
     });
 
     it("GIVEN the proper information WHEN deploying a new deposit token THEN transaction succeeds", async () => {
-      const depositTokenData = buildDepositTokenData();
-
       const tx = factory.deployDepositToken(depositTokenData, getRegulationData());
       await expect(tx).to.emit(factory, "DepositTokenDeployed");
 
