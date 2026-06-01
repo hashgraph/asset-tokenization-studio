@@ -3,8 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { Lock } from "./Lock.sol";
 import { ILock, RESOLVER_KEY_LOCK } from "./ILock.sol";
-import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import { Bytes4Builder } from "../../../infrastructure/proxy/Bytes4Builder.sol";
+import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 /**
  * @title LockFacet
  * @author Asset Tokenization Studio Team

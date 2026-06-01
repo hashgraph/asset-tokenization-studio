@@ -95,7 +95,7 @@ import { IScheduledBalanceAdjustment } from "./scheduledBalanceAdjustment/ISched
 import { ICouponSecurityHolders } from "./couponSecurityHolders/ICouponSecurityHolders.sol";
 import { ISecurityHolders } from "./securityHolders/ISecurityHolders.sol";
 
-import { ILock } from "./layer_1/lock/ILock.sol";
+import { ILock } from "./lock/ILock.sol";
 import { ILockByPartition } from "./lockByPartition/ILockByPartition.sol";
 import { IFreeze } from "./freeze/IFreeze.sol";
 import { IBatchFreeze } from "./batchFreeze/IBatchFreeze.sol";

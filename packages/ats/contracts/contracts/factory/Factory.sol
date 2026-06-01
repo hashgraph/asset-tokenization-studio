@@ -100,7 +100,7 @@ import { IHoldFacet } from "../facets/hold/IHoldFacet.sol";
 import { IHoldAtSnapshot } from "../facets/holdAtSnapshot/IHoldAtSnapshot.sol";
 import { IHoldAtSnapshotByPartition } from "../facets/holdAtSnapshotByPartition/IHoldAtSnapshotByPartition.sol";
 import { IHoldByPartition } from "../facets/holdByPartition/IHoldByPartition.sol";
-import { ILock } from "../facets/layer_1/lock/ILock.sol";
+import { ILock } from "../facets/lock/ILock.sol";
 import { ILockAtSnapshot } from "../facets/lockAtSnapshot/ILockAtSnapshot.sol";
 import { ILockAtSnapshotByPartition } from "../facets/lockAtSnapshotByPartition/ILockAtSnapshotByPartition.sol";
 import { ILockByPartition } from "../facets/lockByPartition/ILockByPartition.sol";
