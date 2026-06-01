@@ -26,6 +26,19 @@ Test and mock changes:
   three-case tests (AccountHasNoRole, happy path, FacetAlreadyRegistered) in their respective
   facet test files, making the file pure duplication.
 
+- `ProtectedPartitionRoleValidator.sol` (`infrastructure/utils/`) deleted and replaced by
+  `ProtectedPartitionRoleValidatorModifiers.sol` (`services/asset/`); the contract is renamed
+  and the three modifiers (`onlyProtectedPartitionRole`, `onlyWildCardOrPartitionRole`,
+  `onlySelfOrPartitionRole`) are backed by private `_check*` helpers instead of inline logic.
+- `ProtectedPartitionRoleRequired` error relocated from the abstract contract to
+  `IProtectedByPartition`, where it semantically belongs.
+- `AssetModifiers` inherits `ProtectedPartitionRoleValidatorModifiers`, making all modifiers
+  available to every facet that extends `AssetModifiers` without a direct dependency.
+- `Burn` no longer directly inherits `ProtectedPartitionRoleValidator`.
+
 Breaking changes: `setOperationalStatus` now reverts for any caller without `DEFAULT_ADMIN_ROLE`.
 `ContextProvider` and `LocalContext` are removed from the contract surface; any external project
 that inherited these abstract contracts must migrate to direct library calls.
+`ProtectedPartitionRoleValidator` is removed; replace with `ProtectedPartitionRoleValidatorModifiers`
+at `services/asset/ProtectedPartitionRoleValidatorModifiers.sol`. `ProtectedPartitionRoleRequired`
+is now declared on `IProtectedByPartition`, not on the validator contract.
