@@ -86,6 +86,45 @@ returns the value"). Inventing behaviour not in the code — read the implementa
 Referencing the current task/PR/commit — NatSpec lives with the code. Duplicating interface
 NatSpec on the implementation.
 
+## FACETS_METHODS.md (facet method index)
+
+`packages/ats/contracts/FACETS_METHODS.md` is a generated reference listing every external entry
+point of the ATS facets, so a developer integrating with the contracts has the full call surface
+in one place. **Keep it in sync** whenever a facet interface changes: any time you add, remove,
+rename, or change the signature of a function (or a struct/enum it references) on an `I*.sol`
+interface under `packages/ats/contracts/contracts/facets/**` (including the `layer_1` / `layer_2`
+/ `layer_3` subfolders), regenerate the document in the same change.
+
+Regenerate it deterministically — do **not** hand-edit FACETS_METHODS.md:
+
+```bash
+cd packages/ats/contracts
+node ../../../.claude/skills/solidity-natspec/scripts/gen_facets_methods.mjs
+```
+
+The generator (`scripts/gen_facets_methods.mjs`) parses the interface ASTs via
+`@solidity-parser/parser` and produces the document with these rules — useful to know when
+verifying its output or extending the script:
+
+- **One section per facet interface.** Covers every `I<PascalName>.sol` under `contracts/facets/**`
+  that declares at least one function. Skips pure type interfaces (`*Types.sol`, or any interface
+  with no functions) and concrete contracts (`Identity.sol`, `*Facet.sol`) — type definitions
+  surface in the **Types** block of the facets that use them.
+- **Facet name.** Heading is derived from the interface name minus the leading `I`, split into
+  words (`IAccessControl` → "Access Control"); the on-chain `resolverKey` is shown verbatim as a
+  field (it is inconsistently cased in source, so it is not used for the heading). Colliding
+  headings are disambiguated with the interface stem.
+- **Methods.** Every function as its full Solidity signature — name, input parameters (type +
+  storage location + name, in order), and the `returns (...)` clause. `view` / `pure` mutability is
+  kept; declaration order is preserved; long signatures wrap one parameter per line. **No prose.**
+- **Types.** Referenced `struct`/`enum` definitions are reproduced verbatim (dedented) in a
+  per-facet **Types** block, resolved transitively (a struct field's custom type is pulled in too),
+  with a `// declared in <path>` note.
+- Facets are ordered to mirror the layer layout (top-level, then `layer_1`, `layer_2`, `layer_3`).
+
+If a facet interface legitimately needs to fall outside these rules, adjust the generator rather
+than the output.
+
 ## Validate before finishing
 
 For each touched file:
