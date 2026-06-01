@@ -543,76 +543,15 @@ abstract contract Factory is IFactory {
         SecurityType _securityType
     ) internal virtual returns (address securityAddress_) {
         securityAddress_ = _deploySecurityProxy(_securityData);
-
-        // Always-on diamond infrastructure and access control
-        IAccessControl(securityAddress_).initializeAccessControl();
-        IDiamondFacet(securityAddress_).initializeDiamondCut();
-
-        // Core metadata, supply, nominal value and eligibility
-        ICore.ERC20Metadata memory erc20Metadata = ICore.ERC20Metadata({
-            info: _securityData.erc20MetadataInfo,
-            securityType: _securityType
-        });
-        ICore(securityAddress_).initializeCore(erc20Metadata);
-        IControlList(securityAddress_).initializeControlList(_securityData.isWhiteList);
-        IExternalControlListManagement(securityAddress_).initializeExternalControlLists(
-            _securityData.externalControlLists
-        );
-        ICap(securityAddress_).initializeCap(_securityData.maxSupply, new ICap.PartitionCap[](0));
-        ICapByPartition(securityAddress_).initializeCapByPartition();
-        // DepositToken carries no nominal value; the facet is initialised to its zero default.
+        _initializeBaseConfiguration(securityAddress_, _securityData, _securityType);
+        // DepositToken carries no nominal value; seed the facet with its zero default.
         INominalValue(securityAddress_).initializeNominalValue(0, 0, bytes3(0));
-        ICustomData(securityAddress_).initializeCustomData();
-        IDocumentation(securityAddress_).initializeDocumentation();
-
-        // Partitions and controller flag
-        IPartitions(securityAddress_).initializePartitions(_securityData.isMultiPartition);
-        IController(securityAddress_).initializeController(_securityData.isControllable);
-
-        // allowance, transfer, mint, burn, freeze, pause, deactivate
-        IAllowance(securityAddress_).initializeAllowance();
-        ITransfer(securityAddress_).initializeTransfer();
-        ITransferByPartition(securityAddress_).initializeTransferByPartition();
-        IMint(securityAddress_).initializeERC1594();
-        IMintByPartition(securityAddress_).initializeMintByPartition();
-        IBurn(securityAddress_).initializeBurn();
-        IBurnByPartition(securityAddress_).initializeBurnByPartition();
-        IFreeze(securityAddress_).initializeFreeze();
-        IPause(securityAddress_).initializePause();
-        IDeactivate(securityAddress_).initializeDeactivate();
-
-        // Balance tracking and security holders
-        IBalanceTracker(securityAddress_).initializeBalanceTracker();
-        IBalanceTrackerByPartition(securityAddress_).initializeBalanceTrackerByPartition();
-        ISecurityHolders(securityAddress_).initializeSecurityHolders();
-
-        // Operator
-        IOperator(securityAddress_).initializeOperator();
-        IOperatorByPartition(securityAddress_).initializeOperatorByPartition();
-        IOperatorHoldByPartition(securityAddress_).initializeOperatorHoldByPartition();
-        IOperatorClearingByPartition(securityAddress_).initializeOperatorClearingByPartition();
-        IOperatorClearingHoldByPartition(securityAddress_).initializeOperatorClearingHoldByPartition();
-
-        // Controller
-        IControllerByPartition(securityAddress_).initializeControllerByPartition();
-        IControllerHoldByPartition(securityAddress_).initializeControllerHoldByPartition();
-
-        // Batch
-        IBatchController(securityAddress_).initializeBatchController();
-        IBatchBurn(securityAddress_).initializeBatchBurn();
-        IBatchMint(securityAddress_).initializeBatchMint();
-        IBatchTransfer(securityAddress_).initializeBatchTransfer();
-        IBatchFreeze(securityAddress_).initializeBatchFreeze();
-
-        // Clearing
-        IClearing(securityAddress_).initializeClearing(_securityData.clearingActive);
-        IClearingByPartition(securityAddress_).initializeClearingByPartition();
-        IClearingHoldByPartition(securityAddress_).initializeClearingHoldByPartition();
-
-        // Hold
-        IHoldFacet(securityAddress_).initializeHold();
-        IHoldByPartition(securityAddress_).initializeHoldByPartition();
-
+        _initializeTransferAndSupply(securityAddress_);
+        _initializeStateControls(securityAddress_);
+        _initializeBalances(securityAddress_);
+        _initializeOperatorsAndControllers(securityAddress_);
+        _initializeBatchOperations(securityAddress_);
+        _initializeClearingAndHold(securityAddress_, _securityData.clearingActive);
         // Seed the initializer batch size last so a single setOperationalStatus pass
         // can validate every facet initialised above.
         IInitializer(securityAddress_).initializeInitializer(_SECURITY_FACETS_MAX);
@@ -645,6 +584,117 @@ abstract contract Factory is IFactory {
             extendedRbacs
         );
         securityAddress_ = address(proxy);
+    }
+
+    /**
+     * @notice Initialises a security's metadata, eligibility, supply caps and partition
+     *         configuration.
+     * @dev Covers the always-on infrastructure (access control, diamond cut) plus core metadata,
+     *      control lists, caps, custom data, documentation and the partition and controller flags.
+     *      Nominal value is asset-specific and initialised separately by each deployer.
+     * @param _securityAddress Address of the security proxy being initialised.
+     * @param _securityData Common security deployment configuration.
+     * @param _securityType Security type recorded in core metadata.
+     */
+    function _initializeBaseConfiguration(
+        address _securityAddress,
+        SecurityData calldata _securityData,
+        SecurityType _securityType
+    ) private {
+        IAccessControl(_securityAddress).initializeAccessControl();
+        IDiamondFacet(_securityAddress).initializeDiamondCut();
+
+        ICore.ERC20Metadata memory erc20Metadata = ICore.ERC20Metadata({
+            info: _securityData.erc20MetadataInfo,
+            securityType: _securityType
+        });
+        ICore(_securityAddress).initializeCore(erc20Metadata);
+        IControlList(_securityAddress).initializeControlList(_securityData.isWhiteList);
+        IExternalControlListManagement(_securityAddress).initializeExternalControlLists(
+            _securityData.externalControlLists
+        );
+        ICap(_securityAddress).initializeCap(_securityData.maxSupply, new ICap.PartitionCap[](0));
+        ICapByPartition(_securityAddress).initializeCapByPartition();
+        ICustomData(_securityAddress).initializeCustomData();
+        IDocumentation(_securityAddress).initializeDocumentation();
+
+        IPartitions(_securityAddress).initializePartitions(_securityData.isMultiPartition);
+        IController(_securityAddress).initializeController(_securityData.isControllable);
+    }
+
+    /**
+     * @notice Initialises the transfer, allowance and supply (mint/burn) facets.
+     * @param _securityAddress Address of the security proxy being initialised.
+     */
+    function _initializeTransferAndSupply(address _securityAddress) private {
+        IAllowance(_securityAddress).initializeAllowance();
+        ITransfer(_securityAddress).initializeTransfer();
+        ITransferByPartition(_securityAddress).initializeTransferByPartition();
+        IMint(_securityAddress).initializeERC1594();
+        IMintByPartition(_securityAddress).initializeMintByPartition();
+        IBurn(_securityAddress).initializeBurn();
+        IBurnByPartition(_securityAddress).initializeBurnByPartition();
+    }
+
+    /**
+     * @notice Initialises the state-control facets: freeze, pause and deactivate.
+     * @param _securityAddress Address of the security proxy being initialised.
+     */
+    function _initializeStateControls(address _securityAddress) private {
+        IFreeze(_securityAddress).initializeFreeze();
+        IPause(_securityAddress).initializePause();
+        IDeactivate(_securityAddress).initializeDeactivate();
+    }
+
+    /**
+     * @notice Initialises the balance-tracking and security-holder facets.
+     * @param _securityAddress Address of the security proxy being initialised.
+     */
+    function _initializeBalances(address _securityAddress) private {
+        IBalanceTracker(_securityAddress).initializeBalanceTracker();
+        IBalanceTrackerByPartition(_securityAddress).initializeBalanceTrackerByPartition();
+        ISecurityHolders(_securityAddress).initializeSecurityHolders();
+    }
+
+    /**
+     * @notice Initialises the operator and controller delegation facets.
+     * @param _securityAddress Address of the security proxy being initialised.
+     */
+    function _initializeOperatorsAndControllers(address _securityAddress) private {
+        IOperator(_securityAddress).initializeOperator();
+        IOperatorByPartition(_securityAddress).initializeOperatorByPartition();
+        IOperatorHoldByPartition(_securityAddress).initializeOperatorHoldByPartition();
+        IOperatorClearingByPartition(_securityAddress).initializeOperatorClearingByPartition();
+        IOperatorClearingHoldByPartition(_securityAddress).initializeOperatorClearingHoldByPartition();
+
+        IControllerByPartition(_securityAddress).initializeControllerByPartition();
+        IControllerHoldByPartition(_securityAddress).initializeControllerHoldByPartition();
+    }
+
+    /**
+     * @notice Initialises the batch-operation facets.
+     * @param _securityAddress Address of the security proxy being initialised.
+     */
+    function _initializeBatchOperations(address _securityAddress) private {
+        IBatchController(_securityAddress).initializeBatchController();
+        IBatchBurn(_securityAddress).initializeBatchBurn();
+        IBatchMint(_securityAddress).initializeBatchMint();
+        IBatchTransfer(_securityAddress).initializeBatchTransfer();
+        IBatchFreeze(_securityAddress).initializeBatchFreeze();
+    }
+
+    /**
+     * @notice Initialises the clearing and hold facets.
+     * @param _securityAddress Address of the security proxy being initialised.
+     * @param _clearingActive Whether clearing is initially active.
+     */
+    function _initializeClearingAndHold(address _securityAddress, bool _clearingActive) private {
+        IClearing(_securityAddress).initializeClearing(_clearingActive);
+        IClearingByPartition(_securityAddress).initializeClearingByPartition();
+        IClearingHoldByPartition(_securityAddress).initializeClearingHoldByPartition();
+
+        IHoldFacet(_securityAddress).initializeHold();
+        IHoldByPartition(_securityAddress).initializeHoldByPartition();
     }
 
     /**
@@ -929,6 +979,47 @@ abstract contract Factory is IFactory {
     function _checkBondDates(uint256 startingDate, uint256 maturityDate) private view {
         DatesValidation.checkDates(startingDate, maturityDate);
         ScheduledTasksStorageWrapper.requireValidTimestamp(maturityDate);
+    }
+
+    /**
+     * @notice Asserts that a non-zero business logic resolver is provided.
+     * @dev Reverts with `EmptyResolver` when the resolver address is zero.
+     * @param resolver Resolver that will supply facet configuration for the proxy.
+     */
+    function _checkResolver(IBusinessLogicResolver resolver) private pure {
+        if (address(resolver) == address(0)) {
+            revert EmptyResolver(resolver);
+        }
+    }
+
+    /**
+     * @notice Asserts that the provided ISIN satisfies the project validator.
+     * @dev Forwards to the `_validateISIN` free function, which reverts when the identifier is
+     *      malformed.
+     * @param isin International Securities Identification Number to validate.
+     */
+    function _checkISIN(string calldata isin) private pure {
+        _validateISIN(isin);
+    }
+
+    /**
+     * @notice Asserts that KPI-linked interest rate data is valid.
+     * @dev Forwards to `InterestRateStorageWrapper.requireValidInterestRate`, which reverts for
+     *      invalid interest-rate data.
+     * @param _newInterestRate KPI-linked interest rate configuration to validate.
+     */
+    function _checkInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) private pure {
+        InterestRateStorageWrapper.requireValidInterestRate(_newInterestRate);
+    }
+
+    /**
+     * @notice Asserts that KPI impact data is valid.
+     * @dev Forwards to `InterestRateStorageWrapper.requireValidImpactData`, which reverts for
+     *      invalid impact data.
+     * @param _newImpactData KPI impact configuration to validate.
+     */
+    function _checkImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) private pure {
+        InterestRateStorageWrapper.requireValidImpactData(_newImpactData);
     }
 
     /**
