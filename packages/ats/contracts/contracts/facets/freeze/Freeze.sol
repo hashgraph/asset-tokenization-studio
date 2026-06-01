@@ -5,7 +5,6 @@ import { IFreeze, RESOLVER_KEY_FREEZE } from "./IFreeze.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
@@ -20,7 +19,7 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
  *      freeze/unfreeze operations are restricted to single-partition tokens via the
  *      `onlyWithoutMultiPartition` modifier. All mutating functions require `ROLE_FREEZE_MANAGER`
  *      or `ROLE_AGENT` via `onlyFreezeRoles`. `getFrozenTokens` delegates timestamp resolution
- *      to `TimeTravelStorageWrapper` so the same code path is exercisable in test environments.
+ *      to `EvmAccessors` so the same code path is exercisable in test environments.
  *      Intended to be inherited exclusively by `FreezeFacet`.
  */
 abstract contract Freeze is IFreeze, Modifiers {
@@ -93,11 +92,7 @@ abstract contract Freeze is IFreeze, Modifiers {
 
     /// @inheritdoc IFreeze
     function getFrozenTokens(address _userAddress) external view override returns (uint256) {
-        return
-            ERC3643StorageWrapper.getFrozenAmountForAdjustedAt(
-                _userAddress,
-                TimeTravelStorageWrapper.getBlockTimestamp()
-            );
+        return ERC3643StorageWrapper.getFrozenAmountForAdjustedAt(_userAddress, EvmAccessors.getBlockTimestamp());
     }
 
     /// @inheritdoc IFreeze

@@ -15,9 +15,9 @@ import { ClearingStorageWrapper } from "./ClearingStorageWrapper.sol";
 import { ClearingReadOps } from "../orchestrator/ClearingReadOps.sol";
 import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { NominalValueStorageWrapper } from "./NominalValueStorageWrapper.sol";
 
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 /// @custom:hash storage Snapshot
 bytes32 constant STORAGE_LOCATION_SNAPSHOT = 0x2e9cb27cc6da952dbadc3ddf8f7c0573a7ed5a7613f07ac9a8da248ab9442000;
 
@@ -258,7 +258,7 @@ library SnapshotsStorageWrapper {
         if (currentSnapshotId == 0 || account == address(0)) return;
 
         uint256 abafAtCurrentSnapshot = abafAtSnapshot(currentSnapshotId);
-        uint256 abaf = AdjustBalancesStorageWrapper.getAbafAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp());
+        uint256 abaf = AdjustBalancesStorageWrapper.getAbafAdjustedAt(EvmAccessors.getBlockTimestamp());
 
         if (abaf == abafAtCurrentSnapshot) {
             updateAccountSnapshot(
@@ -270,14 +270,11 @@ library SnapshotsStorageWrapper {
             return;
         }
 
-        uint256 balance = AdjustBalancesStorageWrapper.balanceOfAdjustedAt(
-            account,
-            TimeTravelStorageWrapper.getBlockTimestamp()
-        );
+        uint256 balance = AdjustBalancesStorageWrapper.balanceOfAdjustedAt(account, EvmAccessors.getBlockTimestamp());
         uint256 balanceForPartition = AdjustBalancesStorageWrapper.balanceOfByPartitionAdjustedAt(
             partition,
             account,
-            TimeTravelStorageWrapper.getBlockTimestamp()
+            EvmAccessors.getBlockTimestamp()
         );
         uint256 factor = abaf / abafAtCurrentSnapshot;
 
@@ -426,10 +423,7 @@ library SnapshotsStorageWrapper {
      */
     function abafAtSnapshot(uint256 snapshotID) internal view returns (uint256 abaf_) {
         (bool snapshotted, uint256 value) = valueAt(snapshotID, _snapshotStorage().abafSnapshots);
-        return
-            snapshotted
-                ? value
-                : AdjustBalancesStorageWrapper.getAbafAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp());
+        return snapshotted ? value : AdjustBalancesStorageWrapper.getAbafAdjustedAt(EvmAccessors.getBlockTimestamp());
     }
 
     /**
@@ -440,10 +434,7 @@ library SnapshotsStorageWrapper {
      */
     function decimalsAtSnapshot(uint256 snapshotID) internal view returns (uint8 decimals_) {
         (bool snapshotted, uint256 value) = valueAt(snapshotID, _snapshotStorage().decimals);
-        return
-            snapshotted
-                ? uint8(value)
-                : ERC20StorageWrapper.decimalsAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp());
+        return snapshotted ? uint8(value) : ERC20StorageWrapper.decimalsAdjustedAt(EvmAccessors.getBlockTimestamp());
     }
 
     /**
@@ -586,10 +577,7 @@ library SnapshotsStorageWrapper {
             balanceOfAtAdjusted(
                 snapshotId,
                 _snapshotStorage().accountBalanceSnapshots[tokenHolder],
-                AdjustBalancesStorageWrapper.balanceOfAdjustedAt(
-                    tokenHolder,
-                    TimeTravelStorageWrapper.getBlockTimestamp()
-                )
+                AdjustBalancesStorageWrapper.balanceOfAdjustedAt(tokenHolder, EvmAccessors.getBlockTimestamp())
             );
     }
 
@@ -659,7 +647,7 @@ library SnapshotsStorageWrapper {
                 AdjustBalancesStorageWrapper.balanceOfByPartitionAdjustedAt(
                     partition,
                     account,
-                    TimeTravelStorageWrapper.getBlockTimestamp()
+                    EvmAccessors.getBlockTimestamp()
                 )
             );
     }
@@ -683,7 +671,7 @@ library SnapshotsStorageWrapper {
                 _snapshotStorage().totalSupplyByPartitionSnapshots[partition],
                 AdjustBalancesStorageWrapper.totalSupplyByPartitionAdjustedAt(
                     partition,
-                    TimeTravelStorageWrapper.getBlockTimestamp()
+                    EvmAccessors.getBlockTimestamp()
                 )
             );
     }
@@ -703,10 +691,7 @@ library SnapshotsStorageWrapper {
             balanceOfAtAdjusted(
                 snapshotID,
                 _snapshotStorage().accountLockedBalanceSnapshots[tokenHolder],
-                LockStorageWrapper.getLockedAmountForAdjustedAt(
-                    tokenHolder,
-                    TimeTravelStorageWrapper.getBlockTimestamp()
-                )
+                LockStorageWrapper.getLockedAmountForAdjustedAt(tokenHolder, EvmAccessors.getBlockTimestamp())
             );
     }
 
@@ -732,7 +717,7 @@ library SnapshotsStorageWrapper {
                 LockStorageWrapper.getLockedAmountForByPartitionAdjustedAt(
                     partition,
                     tokenHolder,
-                    TimeTravelStorageWrapper.getBlockTimestamp()
+                    EvmAccessors.getBlockTimestamp()
                 )
             );
     }
@@ -749,7 +734,7 @@ library SnapshotsStorageWrapper {
             balanceOfAtAdjusted(
                 snapshotID,
                 _snapshotStorage().accountHeldBalanceSnapshots[tokenHolder],
-                HoldStorageWrapper.getHeldAmountForAdjustedAt(tokenHolder, TimeTravelStorageWrapper.getBlockTimestamp())
+                HoldStorageWrapper.getHeldAmountForAdjustedAt(tokenHolder, EvmAccessors.getBlockTimestamp())
             );
     }
 
@@ -775,7 +760,7 @@ library SnapshotsStorageWrapper {
                 HoldStorageWrapper.getHeldAmountForByPartitionAdjustedAt(
                     partition,
                     tokenHolder,
-                    TimeTravelStorageWrapper.getBlockTimestamp()
+                    EvmAccessors.getBlockTimestamp()
                 )
             );
     }
@@ -796,10 +781,7 @@ library SnapshotsStorageWrapper {
             balanceOfAtAdjusted(
                 snapshotID,
                 _snapshotStorage().accountFrozenBalanceSnapshots[tokenHolder],
-                ERC3643StorageWrapper.getFrozenAmountForAdjustedAt(
-                    tokenHolder,
-                    TimeTravelStorageWrapper.getBlockTimestamp()
-                )
+                ERC3643StorageWrapper.getFrozenAmountForAdjustedAt(tokenHolder, EvmAccessors.getBlockTimestamp())
             );
     }
 
@@ -825,7 +807,7 @@ library SnapshotsStorageWrapper {
                 ERC3643StorageWrapper.getFrozenAmountForByPartitionAdjustedAt(
                     partition,
                     tokenHolder,
-                    TimeTravelStorageWrapper.getBlockTimestamp()
+                    EvmAccessors.getBlockTimestamp()
                 )
             );
     }
@@ -846,7 +828,7 @@ library SnapshotsStorageWrapper {
             balanceOfAtAdjusted(
                 snapshotID,
                 _snapshotStorage().accountClearedBalanceSnapshots[tokenHolder],
-                ClearingReadOps.getClearedAmountForAdjustedAt(tokenHolder, TimeTravelStorageWrapper.getBlockTimestamp())
+                ClearingReadOps.getClearedAmountForAdjustedAt(tokenHolder, EvmAccessors.getBlockTimestamp())
             );
     }
 
@@ -872,7 +854,7 @@ library SnapshotsStorageWrapper {
                 ClearingReadOps.getClearedAmountForByPartitionAdjustedAt(
                     partition,
                     tokenHolder,
-                    TimeTravelStorageWrapper.getBlockTimestamp()
+                    EvmAccessors.getBlockTimestamp()
                 )
             );
     }
@@ -898,7 +880,7 @@ library SnapshotsStorageWrapper {
         if (snapshotted) return value;
 
         uint256 abafAtSnapshot_ = abafAtSnapshot(snapshotId);
-        uint256 abaf = AdjustBalancesStorageWrapper.getAbafAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp());
+        uint256 abaf = AdjustBalancesStorageWrapper.getAbafAdjustedAt(EvmAccessors.getBlockTimestamp());
 
         if (abafAtSnapshot_ == abaf) return currentBalanceAdjusted;
 
@@ -1050,7 +1032,7 @@ library SnapshotsStorageWrapper {
         uint256 _snapshotId,
         address _account
     ) internal view returns (uint256 balance_, uint8 decimals_, bool snapshotTaken_) {
-        if (_date >= TimeTravelStorageWrapper.getBlockTimestamp()) return (balance_, decimals_, snapshotTaken_);
+        if (_date >= EvmAccessors.getBlockTimestamp()) return (balance_, decimals_, snapshotTaken_);
         snapshotTaken_ = true;
 
         balance_ = (_snapshotId != 0)

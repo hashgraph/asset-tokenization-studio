@@ -16,7 +16,7 @@ import { IPrincipal } from "../../facets/principal/IPrincipal.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { DecimalsLib } from "../../infrastructure/utils/DecimalsLib.sol";
 import { NominalValueStorageWrapper } from "../asset/NominalValueStorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /// @title TokenCoreOps - Orchestrator for core token operations
 /// @notice Deployed once as a separate contract. Facets call via DELEGATECALL.
@@ -200,7 +200,7 @@ library TokenCoreOps {
      * @return principalFor_ Numerator/denominator pair representing the holder's principal.
      */
     function getPrincipalFor(address account) internal view returns (IPrincipal.PrincipalFor memory principalFor_) {
-        uint256 blockTimestamp = TimeTravelStorageWrapper.getBlockTimestamp();
+        uint256 blockTimestamp = EvmAccessors.getBlockTimestamp();
 
         // Pre-apply the nominal-value scale via 512-bit mulDiv: balance * nominal stays bounded
         // even at high precision, and the equivalent fraction keeps the token-decimal scale on

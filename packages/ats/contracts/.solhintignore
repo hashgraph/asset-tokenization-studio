@@ -5,6 +5,7 @@ contracts/hts-precompile/IHederaTokenService.sol
 contracts/constants/
 contracts/test/
 contracts/hardhat-dependency-compiler/
+contracts/infrastructure/utils/EvmAccessors.sol
 export/
 deployments/
 artifacts/

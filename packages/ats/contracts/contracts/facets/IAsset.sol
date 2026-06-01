@@ -57,7 +57,8 @@ import { IVotingSecurityHolders } from "./votingSecurityHolders/IVotingSecurityH
 
 // Layer 3
 import { ISsiManagement } from "./ssiManagement/ISsiManagement.sol";
-import { ITimeTravel } from "../test/testTimeTravel/ITimeTravel.sol";
+// Test-only writer interface; its facet impl is excluded from prod compiles by the tasks/compile.ts filter.
+import { IEvmAccessorsFacet } from "../test/testAccessors/IEvmAccessorsFacet.sol";
 import { IBalanceTracker } from "./balanceTracker/IBalanceTracker.sol";
 import { IBalanceTrackerAdjusted } from "./balanceTrackerAdjusted/IBalanceTrackerAdjusted.sol";
 import { ITransferAndLock } from "./transferAndLock/ITransferAndLock.sol";
@@ -178,7 +179,7 @@ interface IAsset is
     IExternalKycList,
     IExternalKycListManagement,
     IKpis,
-    ITimeTravel,
+    IEvmAccessorsFacet,
     IDiamond,
     IOperatorHoldByPartition,
     ITransfer,

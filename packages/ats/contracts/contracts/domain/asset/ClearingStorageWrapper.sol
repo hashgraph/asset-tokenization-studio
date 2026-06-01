@@ -8,9 +8,9 @@ import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { LockStorageWrapper } from "./LockStorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { ThirdPartyType } from "./types/ThirdPartyType.sol";
 
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 /// @custom:hash storage Clearing
 bytes32 constant STORAGE_LOCATION_CLEARING = 0xd7a6e2f3304ec7238486e8af625921e3cfd501a713f0b2036d4a701fd3e81800;
 
@@ -717,8 +717,7 @@ library ClearingStorageWrapper {
         bool _mustBeExpired
     ) internal view {
         if (
-            TimeTravelStorageWrapper.getBlockTimestamp() >=
-            isClearingBasicInfo(_clearingOperationIdentifier).expirationTimestamp !=
+            EvmAccessors.getBlockTimestamp() >= isClearingBasicInfo(_clearingOperationIdentifier).expirationTimestamp !=
             _mustBeExpired
         ) {
             if (_mustBeExpired) revert IClearingTypes.ExpirationDateNotReached();

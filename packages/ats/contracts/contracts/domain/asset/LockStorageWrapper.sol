@@ -11,9 +11,9 @@ import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 /// @custom:hash storage Lock
 bytes32 constant STORAGE_LOCATION_LOCK = 0xd42ee8bdd326f30f9a4764fdaf28dd719168978dba1e4949fbeb1a3fd1c09000;
 
@@ -311,7 +311,7 @@ library LockStorageWrapper {
 
     /**
      * @notice Reports whether the lock's expiration timestamp has elapsed.
-     * @dev Reads block time through `TimeTravelStorageWrapper` so that on test networks the
+     * @dev Reads block time through `EvmAccessors` so that on test networks the
      *      virtual clock is honoured rather than `block.timestamp`. The lock is considered
      *      expired (releasable) when its stored expiration is less than or equal to the active
      *      timestamp.
@@ -325,8 +325,7 @@ library LockStorageWrapper {
         address tokenHolder,
         uint256 lockId
     ) internal view returns (bool) {
-        return
-            getLock(partition, tokenHolder, lockId).expirationTimestamp <= TimeTravelStorageWrapper.getBlockTimestamp();
+        return getLock(partition, tokenHolder, lockId).expirationTimestamp <= EvmAccessors.getBlockTimestamp();
     }
 
     /**
@@ -345,13 +344,12 @@ library LockStorageWrapper {
     /**
      * @notice Reverts unless the supplied expiration timestamp is at or after the active block
      *         time.
-     * @dev Uses `TimeTravelStorageWrapper` for the active time so the guard honours the virtual
+     * @dev Uses `EvmAccessors` for the active time so the guard honours the virtual
      *      clock on test networks. Raises `ICommonErrors.WrongExpirationTimestamp`.
      * @param expirationTimestamp Candidate expiration being validated.
      */
     function requireValidExpirationTimestamp(uint256 expirationTimestamp) internal view {
-        if (expirationTimestamp < TimeTravelStorageWrapper.getBlockTimestamp())
-            revert ICommonErrors.WrongExpirationTimestamp();
+        if (expirationTimestamp < EvmAccessors.getBlockTimestamp()) revert ICommonErrors.WrongExpirationTimestamp();
     }
 
     /**

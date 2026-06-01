@@ -23,7 +23,7 @@ import { NominalValueStorageWrapper } from "../NominalValueStorageWrapper.sol";
 import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
 import { ScheduledTasksStorageWrapper } from "../ScheduledTasksStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "../SnapshotsStorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 import { InterestRateStorageWrapper } from "../InterestRateStorageWrapper.sol";
 import { IInterestRate } from "../../../facets/interestRate/IInterestRate.sol";
 
@@ -92,7 +92,7 @@ library CouponStorageWrapper {
         ICouponTypes.RegisteredCoupon memory registeredCoupon;
         bytes32 corporateActionId;
         (registeredCoupon, corporateActionId, ) = getCoupon(couponId);
-        if (registeredCoupon.coupon.executionDate <= TimeTravelStorageWrapper.getBlockTimestamp()) {
+        if (registeredCoupon.coupon.executionDate <= EvmAccessors.getBlockTimestamp()) {
             revert ICoupon.CouponAlreadyExecuted(corporateActionId, couponId);
         }
         CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
@@ -283,7 +283,7 @@ library CouponStorageWrapper {
         couponFor_.coupon = registeredCoupon.coupon;
         couponFor_.isDisabled = isDisabled;
 
-        if (registeredCoupon.coupon.recordDate < TimeTravelStorageWrapper.getBlockTimestamp() && !isDisabled) {
+        if (registeredCoupon.coupon.recordDate < EvmAccessors.getBlockTimestamp() && !isDisabled) {
             couponFor_.recordDateReached = true;
             if (registeredCoupon.snapshotId != 0) {
                 couponFor_.tokenBalance = SnapshotsStorageWrapper.getTotalBalanceOfAtSnapshot(
@@ -360,7 +360,7 @@ library CouponStorageWrapper {
     ) internal view returns (address[] memory holders_) {
         (ICouponTypes.RegisteredCoupon memory registeredCoupon, , ) = getCoupon(couponID);
 
-        if (registeredCoupon.coupon.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return holders_;
+        if (registeredCoupon.coupon.recordDate >= EvmAccessors.getBlockTimestamp()) return holders_;
 
         if (registeredCoupon.snapshotId != 0)
             return SnapshotsStorageWrapper.tokenHoldersAt(registeredCoupon.snapshotId, pageIndex, pageLength);
@@ -380,7 +380,7 @@ library CouponStorageWrapper {
     function getTotalCouponHolders(uint256 couponID) internal view returns (uint256 total_) {
         (ICouponTypes.RegisteredCoupon memory registeredCoupon, , ) = getCoupon(couponID);
 
-        if (registeredCoupon.coupon.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return 0;
+        if (registeredCoupon.coupon.recordDate >= EvmAccessors.getBlockTimestamp()) return 0;
 
         if (registeredCoupon.snapshotId != 0)
             return SnapshotsStorageWrapper.totalTokenHoldersAt(registeredCoupon.snapshotId);
@@ -400,8 +400,7 @@ library CouponStorageWrapper {
      *         of bounds.
      */
     function getCouponFromOrderedListAt(uint256 pos, bool _includeDisabled) internal view returns (uint256 couponID_) {
-        if (pos >= getCouponsOrderedListTotalAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp(), _includeDisabled))
-            return 0;
+        if (pos >= getCouponsOrderedListTotalAdjustedAt(EvmAccessors.getBlockTimestamp(), _includeDisabled)) return 0;
 
         uint256 actualOrderedListLengthTotal = getCouponsOrderedListTotal();
         if (pos < actualOrderedListLengthTotal) {
@@ -456,7 +455,7 @@ library CouponStorageWrapper {
             Pagination.getSize(
                 start,
                 end,
-                getCouponsOrderedListTotalAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp(), _includeDisabled)
+                getCouponsOrderedListTotalAdjustedAt(EvmAccessors.getBlockTimestamp(), _includeDisabled)
             )
         );
 
@@ -514,7 +513,7 @@ library CouponStorageWrapper {
         bool _includeDisabled
     ) internal view returns (uint256 previousCouponID_) {
         uint256 orderedListLength = getCouponsOrderedListTotalAdjustedAt(
-            TimeTravelStorageWrapper.getBlockTimestamp(),
+            EvmAccessors.getBlockTimestamp(),
             _includeDisabled
         );
 
