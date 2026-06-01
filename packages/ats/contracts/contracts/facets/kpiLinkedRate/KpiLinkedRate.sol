@@ -79,20 +79,12 @@ contract KpiLinkedRate is IKpiLinkedRate, Modifiers {
         emit ImpactDataUpdated(EvmAccessors.getMsgSender(), _newImpactData);
     }
 
-    /**
-     * @notice Returns the current KPI-linked interest rate configuration.
-     * @dev Reads the persisted rate data without mutating state.
-     * @return interestRate_ Current interest rate parameters.
-     */
+    /// @inheritdoc IKpiLinkedRate
     function getKpiLinkedRateInterestRate() external view returns (InterestRate memory interestRate_) {
         interestRate_ = InterestRateStorageWrapper.getInterestRate();
     }
 
-    /**
-     * @notice Returns the current KPI-linked impact data configuration.
-     * @dev Reads the persisted impact data without mutating state.
-     * @return impactData_ Current impact data parameters.
-     */
+    /// @inheritdoc IKpiLinkedRate
     function getKpiLinkedRateImpactData() external view returns (ImpactData memory impactData_) {
         impactData_ = InterestRateStorageWrapper.getImpactData();
     }
