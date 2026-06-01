@@ -1499,6 +1499,13 @@ export async function deploySystemWithNewBlr(
           const filtered = output.facets.filter((facet) => loanKeys.has(facet.key));
           return Array.from(new Map(filtered.map((f) => [f.key, f])).values());
         },
+        getDepositTokenFacets() {
+          // Use type guard to safely access .data property
+          if (!isSuccess(depositTokenConfig)) return [];
+          const depositTokenKeys = new Set(depositTokenConfig.data.facetKeys.map((f) => f.key));
+          const filtered = output.facets.filter((facet) => depositTokenKeys.has(facet.key));
+          return Array.from(new Map(filtered.map((f) => [f.key, f])).values());
+        },
         getLoansPortfolioFacets() {
           // Use type guard to safely access .data property
           if (!isSuccess(loansPortfolioConfig)) return [];
