@@ -60,6 +60,10 @@ bytes32 constant ROLE_CONTROL_LIST_MANAGER = 0xccf29bda8369877bcc921e38f30df8615
 /// @custom:hash role CorporateAction
 bytes32 constant ROLE_CORPORATE_ACTION = 0xa1acfc499025c99f55059195e6276f639d34a18aad7b8121b9192b7f438c55cd;
 
+/// @custom:hash role CorporateActionForceCancel
+// solhint-disable-next-line max-line-length
+bytes32 constant ROLE_CORPORATE_ACTION_FORCE_CANCEL = 0x34c18461eba17dd4b2a410f90e80f2a3d6e466af7753bf1b9519c24697c199f5;
+
 /// @custom:hash role Deactivate
 bytes32 constant ROLE_DEACTIVATE = 0x31e3e0f7cd6b1bdc19162dd52d4ce1ed67de0aff8f89b768dcbfad8776b2ae4d;
 
@@ -99,8 +103,8 @@ bytes32 constant ROLE_LOCKER = 0xd327cd9a2be405896f3d4584b3b437d798833cc4aa0aafb
 /// @custom:hash role MaturityRedeemer
 bytes32 constant ROLE_MATURITY_REDEEMER = 0x433f48f8aca23480f6ab07666cbc9131d32a0b4672033453f65e18f4dd390523;
 
-/// @custom:hash role MetadataManager
-bytes32 constant ROLE_METADATA_MANAGER = 0x4f7e4b68edeb0f234a42d9cbed9d053fbaf6637d8ba9159a9d83f8e42ffc6733;
+/// @custom:hash role CustomDataManager
+bytes32 constant ROLE_CUSTOM_DATA_MANAGER = 0x0b348f171b6004b74a59b08b77c142a65c416e0e20c855602b8b2510951101b0;
 
 /// @custom:hash role NominalValue
 bytes32 constant ROLE_NOMINAL_VALUE = 0xebf9ab6852aef7bc1e4068a64bd360845c54d5d95d4fed9fd47c52bbe7c15b8b;

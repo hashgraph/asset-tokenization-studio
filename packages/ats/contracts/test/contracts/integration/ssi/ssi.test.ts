@@ -7,10 +7,18 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import {
   type ResolverProxy,
   type IAsset,
+  MockDiamondCut,
   MockedT3RevocationRegistry,
   RevertingRevocationRegistry,
 } from "@contract-types";
-import { ATS_ROLES, ZERO, DEFAULT_PARTITION, EMPTY_HEX_BYTES, EMPTY_STRING } from "@scripts";
+import {
+  ATS_ROLES,
+  ZERO,
+  DEFAULT_PARTITION,
+  EMPTY_HEX_BYTES,
+  EMPTY_STRING,
+  RESOLVER_KEY_SSI_MANAGEMENT,
+} from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 describe("SSI Tests", () => {
@@ -18,8 +26,10 @@ describe("SSI Tests", () => {
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
+  let unknownSigner: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
   let revocationList: MockedT3RevocationRegistry;
 
   async function deploySecurityFixture() {
@@ -28,8 +38,11 @@ describe("SSI Tests", () => {
     signer_A = base.deployer;
     signer_B = base.user2;
     signer_C = base.user3;
+    const signers = await ethers.getSigners();
+    unknownSigner = signers[signers.length - 1];
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       {
         role: ATS_ROLES.ROLE_PAUSER,
@@ -111,6 +124,13 @@ describe("SSI Tests", () => {
       await expect(asset.connect(signer_C).removeIssuer(signer_B.address)).to.be.revertedWithCustomError(
         asset,
         "UnlistedIssuer",
+      );
+    });
+
+    it("GIVEN zero address WHEN addIssuer THEN fails with ZeroAddressNotAllowed", async () => {
+      await expect(asset.connect(signer_C).addIssuer(ethers.ZeroAddress)).to.be.revertedWithCustomError(
+        asset,
+        "ZeroAddressNotAllowed",
       );
     });
   });
@@ -245,6 +265,48 @@ describe("SSI Tests", () => {
       await expect(
         deactivatedAsset.connect(base.deployer).setRevocationRegistryAddress(ethers.ZeroAddress),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("initializeSsiManagement", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeSsiManagement THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(unknownSigner).initializeSsiManagement())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(await unknownSigner.getAddress(), ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeSsiManagement THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeSsiManagement())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_SSI_MANAGEMENT, 1);
+    });
+  });
+
+  describe("initializeSsiManagement event", () => {
+    it("GIVEN fresh facet WHEN initializeSsiManagement THEN emits SsiManagementInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_SSI_MANAGEMENT);
+      await expect(asset.initializeSsiManagement()).to.emit(asset, "SsiManagementInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN addIssuer THEN AssetNotOperational", async () => {
+      await expect(asset.addIssuer(ethers.ZeroAddress)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN removeIssuer THEN AssetNotOperational", async () => {
+      await expect(asset.removeIssuer(ethers.ZeroAddress)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN setRevocationRegistryAddress THEN AssetNotOperational", async () => {
+      await expect(asset.setRevocationRegistryAddress(ethers.ZeroAddress)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
     });
   });
 });

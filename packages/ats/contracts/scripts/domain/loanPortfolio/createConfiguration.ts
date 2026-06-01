@@ -22,6 +22,8 @@ import {
 } from "@scripts/infrastructure";
 import { LOANS_PORTFOLIO_CONFIG_ID } from "../constants";
 import { atsRegistry } from "../atsRegistry";
+import { buildFacetList } from "../facetEnvironment";
+import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
 import { BusinessLogicResolver } from "@contract-types";
 
 /**
@@ -53,7 +55,8 @@ const LOANS_PORTFOLIO_FACETS = [
   "CoreFacet",
   "TransferFacet",
   "CoreAdjustedFacet",
-  "MetadataFacet",
+  "InitializerFacet", // Core initializer facet
+  "CustomDataFacet",
   "FreezeFacet",
   "BatchFreezeFacet",
   "KycFacet",
@@ -79,7 +82,6 @@ const LOANS_PORTFOLIO_FACETS = [
 
   // ERC Standards
   "MintByPartitionFacet",
-  "ERC1410ManagementFacet",
   "ProtectedByPartitionFacet",
   "OperatorFacet",
   "TransferByPartitionFacet",
@@ -97,7 +99,6 @@ const LOANS_PORTFOLIO_FACETS = [
   "BatchBurnFacet",
   "BatchMintFacet",
   "BatchTransferFacet",
-  "ERC3643ManagementFacet",
   "RecoveryFacet",
   "IdentityFacet",
   "ComplianceFacet",
@@ -157,14 +158,12 @@ export async function createLoansPortfolioConfiguration(
   confirmations: number = 0,
   retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  const facetNames = useTimeTravel
-    ? [...LOANS_PORTFOLIO_FACETS.map((name) => `${name}TimeTravel`), "TimeTravelFacet"]
-    : [...LOANS_PORTFOLIO_FACETS];
+  const facetNames = buildFacetList(LOANS_PORTFOLIO_FACETS, useTimeTravel);
 
   // Build facet data with resolver keys from registry
   const facets = facetNames.map((name) => {
     const baseName = name.replace(/TimeTravel$/, "");
-    const facetDef = atsRegistry.getFacetDefinition(baseName);
+    const facetDef = atsRegistry.getFacetDefinition(baseName) ?? getMockFacetDefinition(baseName);
     if (!facetDef?.resolverKey?.value) {
       throw new Error(`No resolver key found for facet: ${baseName}`);
     }

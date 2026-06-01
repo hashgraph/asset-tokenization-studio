@@ -25,6 +25,12 @@ interface IKyc {
     }
 
     /**
+     * @notice Emitted once when the KYC capability is initialised on a token.
+     * @dev Fires exclusively from `initializeInternalKyc` after the storage write succeeds.
+     */
+    event KycInitialized(bool internalKycActivated);
+
+    /**
      * @dev Emitted when a Kyc is granted
      *
      * @param account The address for which the Kyc is granted

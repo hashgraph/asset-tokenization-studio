@@ -1,8 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { INonces } from "./INonces.sol";
+import { INonces, RESOLVER_KEY_NONCES } from "./INonces.sol";
 import { NonceStorageWrapper } from "../../domain/core/NonceStorageWrapper.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title Nonces
@@ -14,7 +17,18 @@ import { NonceStorageWrapper } from "../../domain/core/NonceStorageWrapper.sol";
  *      signature; this contract exposes only the read path. Intended to be inherited exclusively
  *      by `NoncesFacet`.
  */
-abstract contract Nonces is INonces {
+abstract contract Nonces is INonces, Modifiers {
+    /// @inheritdoc INonces
+    function initializeNonces()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_NONCES)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_NONCES);
+        emit NoncesInitialized();
+    }
+
     /// @inheritdoc INonces
     function nonces(address owner) external view returns (uint256) {
         return NonceStorageWrapper.getNonceFor(owner);

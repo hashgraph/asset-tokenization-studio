@@ -116,7 +116,7 @@ library KpiLinkedRateLib {
      * @return rateDecimals_ The decimals of the previous coupon rate.
      */
     function _previousRate(uint256 couponID) private view returns (uint256 rate_, uint8 rateDecimals_) {
-        uint256 previousCouponId = CouponStorageWrapper.getPreviousCouponInOrderedList(couponID);
+        uint256 previousCouponId = CouponStorageWrapper.getPreviousCouponInOrderedList(couponID, false);
 
         if (previousCouponId == 0) {
             return (0, 0);

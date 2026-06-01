@@ -73,6 +73,13 @@ interface IAmortization {
     event AmortizationCancelled(uint256 amortizationId, address indexed operator);
 
     /**
+     * @notice Emitted when an admin force-cancels an amortization, bypassing date guards.
+     * @param amortizationId Identifier of the force-cancelled amortization.
+     * @param operator Address that performed the force-cancellation.
+     */
+    event AmortizationForceCancelled(uint256 amortizationId, address indexed operator);
+
+    /**
      * @notice Emitted when a hold is created or replaced for a token holder in an amortization.
      * @param corporateActionId Unique identifier grouping related corporate actions.
      * @param amortizationID Identifier of the amortization.
@@ -101,6 +108,12 @@ interface IAmortization {
         address indexed tokenHolder,
         uint256 holdId
     );
+
+    /**
+     * @notice Emitted once when the amortization capability is initialised on a token.
+     * @dev Fires exclusively from `initializeAmortization`.
+     */
+    event AmortizationInitialized();
 
     /**
      * @notice Amortization creation failed due to an internal failure.
@@ -150,6 +163,13 @@ interface IAmortization {
     error InvalidAmortizationHoldAmount(uint256 amortizationID);
 
     /**
+     * @notice Initialises the amortization capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeAmortization() external;
+
+    /**
      * @notice Sets a new amortization for the security.
      * @param _amortization The amortization data to register.
      * @return success_ Whether the operation succeeded.
@@ -166,6 +186,16 @@ interface IAmortization {
      * @param _amortizationID The ID of the amortization to cancel.
      */
     function cancelAmortization(uint256 _amortizationID) external;
+
+    /**
+     * @notice Force-cancels an amortization regardless of its execution date.
+     * @dev Restricted to `ROLE_CORPORATE_ACTION_FORCE_CANCEL` and gated by the unpaused state,
+     *      `onlyWithoutMultiPartition`, and `onlyMatchingActionType`. Marks the corporate action
+     *      disabled unconditionally — bypasses `AmortizationAlreadyExecuted` and
+     *      `AmortizationNotActive` — and emits `AmortizationForceCancelled`.
+     * @param _amortizationID The ID of the amortization to force-cancel.
+     */
+    function forceCancelAmortization(uint256 _amortizationID) external;
 
     /**
      * @notice Releases the active hold for a specific token holder in an amortization.

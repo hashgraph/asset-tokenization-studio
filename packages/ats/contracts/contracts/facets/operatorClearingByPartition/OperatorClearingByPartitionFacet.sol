@@ -24,6 +24,7 @@ contract OperatorClearingByPartitionFacet is OperatorClearingByPartition, IStati
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeOperatorClearingByPartition.selector,
                 this.operatorClearingRedeemByPartition.selector,
                 this.operatorClearingTransferByPartition.selector
             );

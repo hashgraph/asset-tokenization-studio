@@ -2,8 +2,8 @@
 
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ATS_ROLES } from "@scripts";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import { ATS_ROLES, EQUITY_CONFIG_ID, RESOLVER_KEY_ACCESS_CONTROL } from "@scripts";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac } from "@test";
 import { ethers } from "hardhat";
@@ -12,6 +12,7 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 describe("Access Control Tests", () => {
   let diamond: ResolverProxy;
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
   let deployer: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
@@ -21,6 +22,7 @@ describe("Access Control Tests", () => {
     const base = await deployEquityTokenFixture();
     diamond = base.diamond;
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       {
         role: ATS_ROLES.ROLE_PAUSER,
@@ -47,9 +49,9 @@ describe("Access Control Tests", () => {
   });
 
   it("GIVEN an account without administrative role WHEN grantRole THEN transaction fails with AccountHasNoRole", async () => {
-    await expect(
-      asset.connect(signer_C).grantRole(ATS_ROLES.ROLE_PAUSER, unknownSigner.address),
-    ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+    await expect(asset.connect(signer_C).grantRole(ATS_ROLES.ROLE_PAUSER, unknownSigner.address))
+      .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+      .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
   });
 
   it("GIVEN a deactivated asset WHEN revokeRole THEN transaction fails with Deactivated", async () => {
@@ -61,9 +63,9 @@ describe("Access Control Tests", () => {
   });
 
   it("GIVEN an account without administrative role WHEN revokeRole THEN transaction fails with AccountHasNoRole", async () => {
-    await expect(
-      asset.connect(signer_C).revokeRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, unknownSigner.address),
-    ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+    await expect(asset.connect(signer_C).revokeRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, unknownSigner.address))
+      .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+      .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
   });
 
   it("GIVEN a deactivated asset WHEN applyRoles THEN transaction fails with Deactivated", async () => {
@@ -75,18 +77,18 @@ describe("Access Control Tests", () => {
   });
 
   it("GIVEN an account without administrative role WHEN applyRoles THEN transaction fails with AccountHasNoRole", async () => {
-    await expect(
-      asset.connect(signer_C).applyRoles([ATS_ROLES.DEFAULT_ADMIN_ROLE], [true], unknownSigner.address),
-    ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+    await expect(asset.connect(signer_C).applyRoles([ATS_ROLES.DEFAULT_ADMIN_ROLE], [true], unknownSigner.address))
+      .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+      .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
   });
 
   it("GIVEN a list of roles and actives that is not equally long WHEN applyRoles THEN transaction fails with RolesAndActivesLengthMismatch", async () => {
-    await expect(
-      asset.connect(signer_C).applyRoles([ATS_ROLES.DEFAULT_ADMIN_ROLE], [], unknownSigner.address),
-    ).to.be.revertedWithCustomError(asset, "RolesAndActivesLengthMismatch");
+    await expect(asset.connect(signer_C).applyRoles([ATS_ROLES.DEFAULT_ADMIN_ROLE], [], unknownSigner.address))
+      .to.be.revertedWithCustomError(asset, "RolesAndActivesLengthMismatch")
+      .withArgs(1, 0);
   });
 
-  it("GIVEN a list of contradictory roles (enable and disbale) role WHEN applyRoles THEN transaction fails with ApplyRoleContradiction", async () => {
+  it("GIVEN a list of contradictory roles (enable and disable) role WHEN applyRoles THEN transaction fails with ApplyRoleContradiction", async () => {
     const Roles_1 = [
       ATS_ROLES.DEFAULT_ADMIN_ROLE,
       ATS_ROLES.ROLE_PAUSER,
@@ -243,7 +245,13 @@ describe("Access Control Tests", () => {
         .applyRoles([ATS_ROLES.ROLE_PAUSER, ATS_ROLES.DEFAULT_ADMIN_ROLE], [false, true], signer_C.address),
     )
       .to.emit(asset, "RolesApplied")
-      .withArgs([ATS_ROLES.ROLE_PAUSER, ATS_ROLES.DEFAULT_ADMIN_ROLE], [false, true], signer_C.address);
+      .withArgs(
+        [ATS_ROLES.ROLE_PAUSER, ATS_ROLES.DEFAULT_ADMIN_ROLE],
+        [false, true],
+        signer_C.address,
+        [ATS_ROLES.ROLE_PAUSER, ATS_ROLES.DEFAULT_ADMIN_ROLE],
+        [false, true],
+      );
 
     // check that C has the role
     expect(await asset.hasRole(ATS_ROLES.ROLE_PAUSER, signer_C.address)).to.equal(false);
@@ -285,6 +293,8 @@ describe("Access Control Tests", () => {
         [ATS_ROLES.ROLE_PAUSER, ATS_ROLES.DEFAULT_ADMIN_ROLE, ATS_ROLES.DEFAULT_ADMIN_ROLE],
         [true, false, false],
         signer_C.address,
+        [],
+        [],
       );
 
     // check that C has the role
@@ -297,6 +307,40 @@ describe("Access Control Tests", () => {
     expect(roleCountFor_C).to.equal(1);
     expect(rolesFor_C.length).to.equal(roleCountFor_C);
     expect(rolesFor_C[0].toUpperCase()).to.equal(ATS_ROLES.ROLE_PAUSER.toUpperCase());
+  });
+
+  it("GIVEN a mixed batch of effective and no-op entries WHEN applyRoles THEN RolesApplied carries only the effectively changed entries in input order", async () => {
+    // Pre-state: signer_C holds ROLE_PAUSER and ROLE_AGENT, nothing else.
+    await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_PAUSER, signer_C.address);
+    await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_AGENT, signer_C.address);
+
+    // Five entries, alternating no-op / effective. The interleaving is the point:
+    // it exercises the count-cursor vs index-write path that all-effective and
+    // all-no-op batches cannot distinguish (audit FIND-142 cursor correctness).
+    const requestedRoles = [
+      ATS_ROLES.ROLE_CAP, // revoke unheld → no-op
+      ATS_ROLES.DEFAULT_ADMIN_ROLE, // grant new → effective
+      ATS_ROLES.ROLE_PAUSER, // grant held → no-op
+      ATS_ROLES.ROLE_AGENT, // revoke held → effective
+      ATS_ROLES.ROLE_BOND_MANAGER, // revoke unheld → no-op
+    ];
+    const requestedStates = [false, true, true, false, false];
+
+    await expect(asset.connect(deployer).applyRoles(requestedRoles, requestedStates, signer_C.address))
+      .to.emit(asset, "RolesApplied")
+      .withArgs(
+        requestedRoles,
+        requestedStates,
+        signer_C.address,
+        [ATS_ROLES.DEFAULT_ADMIN_ROLE, ATS_ROLES.ROLE_AGENT],
+        [true, false],
+      );
+
+    expect(await asset.hasRole(ATS_ROLES.ROLE_CAP, signer_C.address)).to.equal(false);
+    expect(await asset.hasRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, signer_C.address)).to.equal(true);
+    expect(await asset.hasRole(ATS_ROLES.ROLE_PAUSER, signer_C.address)).to.equal(true);
+    expect(await asset.hasRole(ATS_ROLES.ROLE_AGENT, signer_C.address)).to.equal(false);
+    expect(await asset.hasRole(ATS_ROLES.ROLE_BOND_MANAGER, signer_C.address)).to.equal(false);
   });
 
   it("GIVEN an account that already has a role WHEN grantRole is called again THEN transaction fails with AccountAssignedToRole", async () => {
@@ -358,5 +402,56 @@ describe("Access Control Tests", () => {
     expect(await asset.hasRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, deployer.address)).to.equal(false);
     expect(await asset.hasRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, signer_C.address)).to.equal(true);
     expect(await asset.getRoleMemberCount(ATS_ROLES.DEFAULT_ADMIN_ROLE)).to.equal(1);
+  });
+
+  describe("initializeAccessControl", () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeAccessControl is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(unknownSigner).initializeAccessControl())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(unknownSigner.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN an already-initialised facet WHEN initializeAccessControl is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeAccessControl())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_ACCESS_CONTROL, 1);
+    });
+  });
+
+  describe("initializeAccessControl event", () => {
+    it("GIVEN a fresh deployment WHEN initializeAccessControl is called THEN it emits AccessControlInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_ACCESS_CONTROL);
+      await expect(asset.initializeAccessControl()).to.emit(asset, "AccessControlInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational WHEN grantRole is called THEN AssetNotOperational", async () => {
+      await expect(asset.grantRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, unknownSigner.address))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN revokeRole is called THEN AssetNotOperational", async () => {
+      await expect(asset.revokeRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, unknownSigner.address))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN renounceRole is called THEN AssetNotOperational", async () => {
+      await expect(asset.renounceRole(ATS_ROLES.DEFAULT_ADMIN_ROLE))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN applyRoles is called THEN AssetNotOperational", async () => {
+      await expect(asset.applyRoles([], [], unknownSigner.address))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
   });
 });

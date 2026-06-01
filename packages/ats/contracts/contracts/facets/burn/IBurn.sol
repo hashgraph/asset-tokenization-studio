@@ -13,6 +13,12 @@ bytes32 constant RESOLVER_KEY_BURN = 0xa9ec330b49ea310aaeba8dae3ba4f2a0b94fd35fa
  */
 interface IBurn {
     /**
+     * @notice Emitted once when the burn capability is initialised on a token.
+     * @dev Fires exclusively from `initializeBurn`.
+     */
+    event BurnInitialized();
+
+    /**
      * @notice Emitted when tokens are redeemed from a holder's balance.
      * @param _operator Account that executed the redemption.
      * @param _from Address from which tokens were burnt.
@@ -20,6 +26,13 @@ interface IBurn {
      * @param _data Arbitrary payload forwarded alongside the redemption.
      */
     event Redeemed(address indexed _operator, address indexed _from, uint256 _value, bytes _data);
+
+    /**
+     * @notice Initialises the burn capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeBurn() external;
 
     /**
      * @notice Burns `_amount` tokens from `_userAddress` on behalf of a controller or agent.

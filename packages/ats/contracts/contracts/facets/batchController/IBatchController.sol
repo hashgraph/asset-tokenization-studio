@@ -14,6 +14,19 @@ bytes32 constant RESOLVER_KEY_BATCH_CONTROLLER = 0x535258ade68566dbac2304c09e172
  */
 interface IBatchController {
     /**
+     * @notice Emitted once when the batch controller capability is initialised on a token.
+     * @dev Fires exclusively from `initializeBatchController` after the storage write succeeds.
+     */
+    event BatchControllerInitialized();
+
+    /**
+     * @notice Initialises the batch controller capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeBatchController() external;
+
+    /**
      * @notice Batch forced transfer of tokens from multiple source addresses to multiple destinations.
      * @dev Restricted to accounts holding the controller or agent role. Requires the token to be
      *      controllable and operating in single-partition mode. Emits one

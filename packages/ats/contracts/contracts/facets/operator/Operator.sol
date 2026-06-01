@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IOperator } from "./IOperator.sol";
+import { IOperator, RESOLVER_KEY_OPERATOR } from "./IOperator.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title  Operator
@@ -15,9 +17,27 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract Operator is IOperator, Modifiers {
     /// @inheritdoc IOperator
+    function initializeOperator()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_OPERATOR)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_OPERATOR);
+        emit OperatorInitialized();
+    }
+
+    /// @inheritdoc IOperator
     function authorizeOperator(
         address _operator
-    ) external override onlyActivated onlyUnpaused onlyCompliant(EvmAccessors.getMsgSender(), _operator, false) {
+    )
+        external
+        override
+        onlyOperational
+        onlyActivated
+        onlyUnpaused
+        onlyCompliant(EvmAccessors.getMsgSender(), _operator, false)
+    {
         ERC1410StorageWrapper.authorizeOperator(_operator);
         emit OperatorAuthorized(_operator, EvmAccessors.getMsgSender());
     }
@@ -28,6 +48,7 @@ abstract contract Operator is IOperator, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyIdentifiedAddresses(EvmAccessors.getMsgSender(), _operator)

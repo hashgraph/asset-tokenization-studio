@@ -3,16 +3,18 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { ADDRESS_ZERO, ATS_ROLES, GAS_LIMIT } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, EQUITY_CONFIG_ID, GAS_LIMIT } from "@scripts";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture } from "@test";
 
-import { ResolverProxy, MockedExternalKycList, IAsset } from "@contract-types";
+import { MockDiamondCut, ResolverProxy, MockedExternalKycList, IAsset } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 describe("ExternalKycList Management Tests", () => {
   let diamond: ResolverProxy;
+  let mockDiamondCut: MockDiamondCut;
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
+  let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
   let initMock1: MockedExternalKycList;
@@ -40,8 +42,10 @@ describe("ExternalKycList Management Tests", () => {
       },
     });
     diamond = base.diamond;
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     signer_A = base.deployer;
     signer_B = base.user1;
+    signer_D = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
 
@@ -407,12 +411,34 @@ describe("ExternalKycList Management Tests", () => {
   });
 
   describe("Initialize Tests", () => {
-    it("GIVEN an already initialized contract WHEN initializeExternalKycLists is called again THEN it reverts with ContractAlreadyInitialized", async () => {
+    it("GIVEN an already initialized contract WHEN initializeExternalKycLists is called again THEN it reverts with FacetAlreadyRegistered", async () => {
       const newKycLists = [externalKycListMock3.target as string];
       await expect(asset.connect(signer_A).initializeExternalKycLists(newKycLists)).to.be.revertedWithCustomError(
         asset,
-        "AlreadyInitialized",
+        "FacetAlreadyRegistered",
       );
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeExternalKycLists is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(
+        asset.connect(signer_D).initializeExternalKycLists([initMock1.target as string]),
+      ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+    });
+
+    it("GIVEN a new deployment WHEN initializeExternalKycLists is called THEN it emits ExternalKycListInitialized", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      const kycLists = [initMock1.target as string];
+      const tx = await freshAsset.connect(infra.deployer).initializeExternalKycLists(kycLists);
+      const receipt = await tx.wait();
+      const emitted = await decodeEvent(freshAsset, "ExternalKycListInitialized", receipt!);
+      expect(emitted.kycLists).to.deep.equal(kycLists);
     });
   });
 
@@ -445,6 +471,28 @@ describe("ExternalKycList Management Tests", () => {
       await expect(
         deactivatedAsset.connect(base.deployer).removeExternalKycList(ethers.ZeroAddress),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN addExternalKycList THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.addExternalKycList("0x0000000000000000000000000000000000000001"),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN removeExternalKycList THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.removeExternalKycList("0x0000000000000000000000000000000000000001"),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN updateExternalKycLists THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.updateExternalKycLists([], [])).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
   });
 });

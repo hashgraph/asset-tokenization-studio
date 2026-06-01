@@ -29,8 +29,10 @@ contract ScheduledBalanceAdjustmentFacet is ScheduledBalanceAdjustment, IStaticF
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeScheduledBalanceAdjustment.selector,
                 this.setScheduledBalanceAdjustment.selector,
                 this.cancelScheduledBalanceAdjustment.selector,
+                this.forceCancelScheduledBalanceAdjustment.selector,
                 this.getScheduledBalanceAdjustment.selector,
                 this.getBalanceAdjustmentCount.selector,
                 this.getPendingBalanceAdjustmentCount.selector,

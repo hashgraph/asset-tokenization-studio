@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { ResolverProxy, type IAsset } from "@contract-types";
+import { ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 import {
   DEFAULT_PARTITION,
   ATS_ROLES,
@@ -12,6 +12,8 @@ import {
   ZERO,
   EMPTY_HEX_BYTES,
   EMPTY_STRING,
+  BOND_FIXED_RATE_CONFIG_ID,
+  RESOLVER_KEY_COUPON,
 } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import {
@@ -19,8 +21,6 @@ import {
   grantRoleAndPauseToken,
   deployBondTokenFixture,
   deployBondFixedRateTokenFixture,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-imports
-  deployBondKpiLinkedRateTokenFixture,
   executeRbac,
   MAX_UINT256,
   EVENT_NAMES,
@@ -66,6 +66,7 @@ describe("Coupon Tests", () => {
   let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixture(isMultiPartition = false) {
     const base = await deployBondTokenFixture({
@@ -154,6 +155,7 @@ describe("Coupon Tests", () => {
       rateStatus: 1,
     };
     await loadFixture(deploySecurityFixture);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
   });
 
   it("GIVEN an account without corporateActions role WHEN setCoupon THEN transaction fails with AccountHasNoRole", async () => {
@@ -299,7 +301,7 @@ describe("Coupon Tests", () => {
 
     const [couponsFor, accounts] = await asset.getCouponsFor(1, 0, 10);
 
-    const couponsOrderedListTotal = await asset.getCouponsOrderedListTotal();
+    const couponsOrderedListTotal = await asset.getCouponsOrderedListTotal(false);
 
     expect(listCount).to.equal(1);
     expect(isDisabled).to.be.false;
@@ -644,6 +646,67 @@ describe("Coupon Tests", () => {
     await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C);
 
     await expect(asset.connect(signer_C).cancelCoupon(999)).to.be.revertedWithCustomError(asset, "WrongIndexForAction");
+  });
+
+  describe("Force Cancel Coupon", () => {
+    it("GIVEN account with ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelCoupon before execution date THEN transaction succeeds and isDisabled is true", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C);
+
+      await asset.connect(signer_C).setCoupon(couponData);
+
+      await expect(asset.connect(signer_C).forceCancelCoupon(1))
+        .to.emit(asset, "CouponForceCancelled")
+        .withArgs(1, signer_C.address);
+      const isDisabled = (await asset.getCoupon(1)).isDisabled_;
+      expect(isDisabled).to.equal(true);
+    });
+
+    it("GIVEN account with ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelCoupon after execution date THEN transaction succeeds bypassing date guard", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C);
+
+      await asset.connect(signer_C).setCoupon(couponData);
+
+      await asset.changeSystemTimestamp(couponExecutionDateInSeconds + 1);
+
+      await expect(asset.connect(signer_C).forceCancelCoupon(1))
+        .to.emit(asset, "CouponForceCancelled")
+        .withArgs(1, signer_C.address);
+      const isDisabled = (await asset.getCoupon(1)).isDisabled_;
+      expect(isDisabled).to.equal(true);
+    });
+
+    it("GIVEN account without ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelCoupon THEN transaction fails with AccountHasNoRole", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C);
+
+      await asset.connect(signer_C).setCoupon(couponData);
+
+      await expect(asset.connect(signer_D).forceCancelCoupon(1)).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN paused token WHEN forceCancelCoupon THEN transaction fails with IsPaused", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C);
+
+      await asset.connect(signer_C).setCoupon(couponData);
+
+      await asset.connect(signer_B).pause();
+
+      await expect(asset.connect(signer_C).forceCancelCoupon(1)).to.be.revertedWithCustomError(asset, "IsPaused");
+    });
+
+    it("GIVEN no existing coupon WHEN forceCancelCoupon with invalid ID THEN transaction fails with WrongIndexForAction", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C);
+
+      await expect(asset.connect(signer_C).forceCancelCoupon(999)).to.be.revertedWithCustomError(
+        asset,
+        "WrongIndexForAction",
+      );
+    });
   });
 
   it("GIVEN a coupon without snapshot WHEN getCouponFor is called after record date THEN uses balance at record date", async () => {
@@ -991,6 +1054,26 @@ describe("Coupon Tests", () => {
       expect(couponAmountFor.numerator * canonicalDenominator).to.equal(preFixProduct * couponAmountFor.denominator);
     });
   });
+  describe("initializeCoupon", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeCoupon is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeCoupon())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeCoupon is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeCoupon())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_COUPON, 1);
+    });
+  });
+
+  describe("initializeCoupon event", () => {
+    it("GIVEN a fresh deployment WHEN initializeCoupon is called THEN emits CouponInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_COUPON);
+      await expect(asset.initializeCoupon()).to.emit(asset, "CouponInitialized");
+    });
+  });
 });
 
 describe("Coupon Fixed-Rate Variant Tests", () => {
@@ -999,6 +1082,7 @@ describe("Coupon Fixed-Rate Variant Tests", () => {
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deployFixedRateFixture() {
     const base = await deployBondFixedRateTokenFixture({
@@ -1014,6 +1098,7 @@ describe("Coupon Fixed-Rate Variant Tests", () => {
     signer_C = base.user2;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
       { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
@@ -1091,6 +1176,32 @@ describe("Coupon Fixed-Rate Variant Tests", () => {
         deactivatedAsset,
         "Deactivated",
       );
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setCoupon THEN reverts with AssetNotOperational", async () => {
+      const minimalCoupon = {
+        recordDate: 0,
+        executionDate: 0,
+        rate: 0,
+        rateDecimals: 0,
+        startDate: 0,
+        endDate: 0,
+        fixingDate: 0,
+        rateStatus: 0,
+      };
+      await expect(asset.setCoupon(minimalCoupon)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational WHEN cancelCoupon is called THEN AssetNotOperational", async () => {
+      await expect(asset.cancelCoupon(0n))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(BOND_FIXED_RATE_CONFIG_ID, 1);
     });
   });
 });

@@ -17,6 +17,19 @@ bytes32 constant RESOLVER_KEY_MINT_BY_PARTITION = 0x25ec74149ce0eadddeb82e668365
  */
 interface IMintByPartition {
     /**
+     * @notice Emitted once when the mint-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeMintByPartition`.
+     */
+    event MintByPartitionInitialized();
+
+    /**
+     * @notice Initialises the mint-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeMintByPartition() external;
+
+    /**
      * @notice Issues tokens to a specific partition for a token holder.
      * @dev Restricted to issuer or agent roles. Increases the total supply and the partition
      *      supply and emits `IssuedByPartition`. Only callable when the token is unpaused;

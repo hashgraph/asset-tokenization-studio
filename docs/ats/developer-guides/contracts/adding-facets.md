@@ -135,6 +135,10 @@ If your facet requires custom storage, create a storage wrapper under
 → **R3 Single-slot scalars (uint256, bytes32, string)** → **R4 Aggregates
 (mapping, array, EnumerableSet, checkpoint arrays)** → **APPEND-ONLY ZONE**.
 New fields go below the marker — the boundary is greppable and audit-visible.
+All four region banners are **always present, in canonical order, even when a region has no
+fields** — the empty banners are scaffolding that fixes each field's insertion point and the
+region numbering. Never renumber a region when its only field is removed; leave the empty
+banner in place.
 
 **File**: `contracts/domain/asset/rewards/RewardsStorageWrapper.sol`
 
@@ -151,9 +155,10 @@ bytes32 constant STORAGE_LOCATION_REWARDS = 0x0000000000000000000000000000000000
 struct RewardsDataStorage {
   // ─── R1 Lifecycle (bool flags) ───────────────────────────
   bool initialized;
+  // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
   // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
   uint256 totalDistributed;
-  // ─── R4 Aggregates (mapping, array, EnumerableSet, checkpoint arrays) ──
+  // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
   mapping(address => uint256) totalRewards;
   mapping(address => uint256) lastDistribution;
   // ─── APPEND-ONLY ZONE BELOW ───

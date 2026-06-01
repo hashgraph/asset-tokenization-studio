@@ -36,11 +36,11 @@ bytes32 constant STORAGE_LOCATION_ERC3643 = 0x167d628abbc681171e3e4d784cf450a7f9
  */
 struct ERC3643Storage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
-    bool initialized;
     // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
     address onchainID;
     address identityRegistry;
     address compliance;
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(address => uint256) frozenTokens;
     mapping(address => mapping(bytes32 => uint256)) frozenTokensByPartition;
@@ -62,21 +62,6 @@ library ERC3643StorageWrapper {
     using LowLevelCall for address;
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.Bytes32Set;
-
-    /**
-     * @notice Initialises the ERC3643 capability by wiring the compliance and identity-registry
-     *         addresses and marking the namespace as initialised.
-     * @dev Single-shot setup; subsequent calls should be guarded upstream by the initialiser
-     *      modifier so the storage flag cannot be flipped twice.
-     * @param _compliance Address of the compliance contract that authorises transfers.
-     * @param _identityRegistry Address of the identity registry that vets token holders.
-     */
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC3643(address _compliance, address _identityRegistry) internal {
-        erc3643Storage().initialized = true;
-        setCompliance(_compliance);
-        setIdentityRegistry(_identityRegistry);
-    }
 
     /**
      * @notice Sets the freeze status of a wallet by toggling its presence on the control list.
@@ -342,6 +327,10 @@ library ERC3643StorageWrapper {
         address _investorOnchainID,
         uint256 _timestamp
     ) internal returns (bool) {
+        ERC3643Storage storage $ = erc3643Storage();
+        $.addressRecovered[_lostWallet] = true;
+        $.addressRecovered[_newWallet] = false;
+
         uint256 frozenBalance = getFrozenAmountForAdjustedAt(_lostWallet, _timestamp);
         if (frozenBalance > 0) {
             unfreezeTokens(_lostWallet, frozenBalance, _timestamp);
@@ -356,9 +345,6 @@ library ERC3643StorageWrapper {
         if (ControlListStorageWrapper.isInControlList(_lostWallet)) {
             ControlListStorageWrapper.addToControlList(_newWallet);
         }
-        ERC3643Storage storage $ = erc3643Storage();
-        $.addressRecovered[_lostWallet] = true;
-        $.addressRecovered[_newWallet] = false;
 
         emit IERC3643Types.RecoverySuccess(_lostWallet, _newWallet, _investorOnchainID);
         return true;
@@ -472,14 +458,6 @@ library ERC3643StorageWrapper {
      */
     function getOnchainID() internal view returns (address) {
         return erc3643Storage().onchainID;
-    }
-
-    /**
-     * @notice Reports whether the ERC3643 capability has been initialised.
-     * @return `true` once `initialize_ERC3643` has executed successfully.
-     */
-    function isERC3643Initialized() internal view returns (bool) {
-        return erc3643Storage().initialized;
     }
 
     /**

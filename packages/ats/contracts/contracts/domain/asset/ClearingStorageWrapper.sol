@@ -14,7 +14,6 @@ import { ThirdPartyType } from "./types/ThirdPartyType.sol";
 /// @custom:hash storage Clearing
 bytes32 constant STORAGE_LOCATION_CLEARING = 0xd7a6e2f3304ec7238486e8af625921e3cfd501a713f0b2036d4a701fd3e81800;
 
-// solhint-disable max-line-length
 /**
  * @notice Persistent storage layout for the Clearing facet.
  * @dev Holds the activation flags, aggregate cleared amounts per holder and partition,
@@ -26,23 +25,20 @@ bytes32 constant STORAGE_LOCATION_CLEARING = 0xd7a6e2f3304ec7238486e8af625921e3c
  */
 struct ClearingDataStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
-    bool initialized;
     bool activated;
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(address => uint256) totalClearedAmountByAccount;
     mapping(address => mapping(bytes32 => uint256)) totalClearedAmountByAccountAndPartition;
-    // solhint-disable-next-line max-line-length
+    // solhint-disable max-line-length
     mapping(address => mapping(bytes32 => mapping(IClearingTypes.ClearingOperationType => EnumerableSet.UintSet))) clearingIdsByAccountAndPartitionAndTypes;
-    // solhint-disable-next-line max-line-length
     mapping(address => mapping(bytes32 => mapping(IClearingTypes.ClearingOperationType => uint256))) nextClearingIdByAccountPartitionAndType;
-    // solhint-disable-next-line max-line-length
     mapping(address => mapping(bytes32 => mapping(uint256 => IClearingTypes.ClearingTransferData))) clearingTransferByAccountPartitionAndId;
-    // solhint-disable-next-line max-line-length
     mapping(address => mapping(bytes32 => mapping(uint256 => IClearingTypes.ClearingRedeemData))) clearingRedeemByAccountPartitionAndId;
-    // solhint-disable-next-line max-line-length
     mapping(address => mapping(bytes32 => mapping(uint256 => IClearingTypes.ClearingHoldCreationData))) clearingHoldCreationByAccountPartitionAndId;
-    // solhint-disable-next-line max-line-length
     mapping(address => mapping(bytes32 => mapping(IClearingTypes.ClearingOperationType => mapping(uint256 => address)))) clearingThirdPartyByAccountPartitionTypeAndId;
+    // solhint-enable max-line-length
     // ─── APPEND-ONLY ZONE BELOW ───
 }
 // solhint-enable max-line-length
@@ -62,9 +58,7 @@ library ClearingStorageWrapper {
      * @param clearingActive Whether clearing operations are active immediately after init.
      */
     function initializeClearing(bool clearingActive) internal {
-        ClearingDataStorage storage clearingStorage_ = clearingStorage();
-        clearingStorage_.initialized = true;
-        clearingStorage_.activated = clearingActive;
+        clearingStorage().activated = clearingActive;
     }
 
     /**
@@ -75,14 +69,6 @@ library ClearingStorageWrapper {
     function setClearing(bool activated) internal returns (bool success_) {
         clearingStorage().activated = activated;
         return true;
-    }
-
-    /**
-     * @notice Indicates whether the clearing storage has been initialised.
-     * @return Whether {initializeClearing} has already been executed for this token.
-     */
-    function isClearingInitialized() internal view returns (bool) {
-        return clearingStorage().initialized;
     }
 
     /**

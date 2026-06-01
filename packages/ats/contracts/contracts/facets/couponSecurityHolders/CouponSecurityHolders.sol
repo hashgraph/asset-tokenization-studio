@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ICouponSecurityHolders } from "./ICouponSecurityHolders.sol";
+import { ICouponSecurityHolders, RESOLVER_KEY_COUPON_SECURITY_HOLDERS } from "./ICouponSecurityHolders.sol";
 import { ICouponTypes } from "../coupon/ICouponTypes.sol";
 import { CORPORATE_ACTION_TYPE_COUPON } from "../../constants/dispatchTypes.sol";
 import { CouponStorageWrapper } from "../../domain/asset/coupon/CouponStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title CouponSecurityHolders
@@ -16,6 +18,17 @@ import { Modifiers } from "../../services/Modifiers.sol";
  */
 abstract contract CouponSecurityHolders is ICouponSecurityHolders, Modifiers {
     /// @inheritdoc ICouponSecurityHolders
+    function initializeCouponSecurityHolders()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_COUPON_SECURITY_HOLDERS)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_COUPON_SECURITY_HOLDERS);
+        emit CouponSecurityHoldersInitialized();
+    }
+
+    /// @inheritdoc ICouponSecurityHolders
     function getCouponHolders(
         uint256 _couponID,
         uint256 _pageIndex,
@@ -24,6 +37,7 @@ abstract contract CouponSecurityHolders is ICouponSecurityHolders, Modifiers {
         external
         view
         override
+        onlyOperational
         onlyMatchingActionType(CORPORATE_ACTION_TYPE_COUPON, _couponID - 1)
         returns (address[] memory holders_)
     {
@@ -39,6 +53,7 @@ abstract contract CouponSecurityHolders is ICouponSecurityHolders, Modifiers {
         external
         view
         override
+        onlyOperational
         onlyMatchingActionType(CORPORATE_ACTION_TYPE_COUPON, _couponID - 1)
         returns (ICouponTypes.CouponFor[] memory couponFor_, address[] memory holders_)
     {

@@ -26,6 +26,9 @@ bytes32 constant STORAGE_LOCATION_LOCK = 0xd42ee8bdd326f30f9a4764fdaf28dd7191689
  * @custom:storage-location erc7201:security.token.standard.storage.Lock
  */
 struct LockDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(address => uint256) totalLockedAmountByAccount;
     mapping(address => mapping(bytes32 => uint256)) totalLockedAmountByAccountAndPartition;
@@ -57,7 +60,6 @@ library LockStorageWrapper {
      * @param tokenHolder Holder whose tokens are being locked.
      * @param expirationTimestamp Unix timestamp from which the lock becomes releasable.
      * @param operator Address that authored the lock; surfaced in the emitted ERC1410 event.
-     * @return success_ Always `true` on successful return; the function reverts otherwise.
      * @return lockId_ The freshly-minted identifier assigned to this lock.
      */
     function lockByPartition(
@@ -66,7 +68,7 @@ library LockStorageWrapper {
         address tokenHolder,
         uint256 expirationTimestamp,
         address operator
-    ) internal returns (bool success_, uint256 lockId_) {
+    ) internal returns (uint256 lockId_) {
         checkNonZeroLockAmount(amount);
 
         _prepareLock(partition, tokenHolder);
@@ -78,7 +80,7 @@ library LockStorageWrapper {
 
         _emitLockEvents(partition, operator, tokenHolder, amount);
 
-        return (true, lockId_);
+        return (lockId_);
     }
 
     /**
@@ -229,8 +231,9 @@ library LockStorageWrapper {
      *         write.
      * @dev Updates both the account snapshot and the dedicated locked-balances snapshot so that
      *      any subsequent snapshot read sees the pre-mutation state captured exactly once. The
-     *      `amount` and `expirationTimestamp` arguments are deliberately unused so the helper
-     *      can stay signature-compatible with the locking pipeline's call-site.
+     *      second (`amount`) and fourth (`expirationTimestamp`) arguments are deliberately unused;
+     *      they exist only to keep the helper signature-compatible with the locking pipeline's
+     *      call-site.
      * @param partition Partition being mutated.
      * @param tokenHolder Holder whose snapshots are being refreshed.
      */
@@ -246,14 +249,38 @@ library LockStorageWrapper {
 
     /**
      * @notice Refreshes the snapshot machinery for a holder/partition pair ahead of a release.
-     * @dev Mirror of `updateLockedBalancesBeforeLock`. The `lockId` argument is deliberately
-     *      unused so the helper stays signature-compatible with the release pipeline.
+     * @dev Mirror of `updateLockedBalancesBeforeLock`. The second (`lockId`) argument is
+     *      deliberately unused; it exists only to keep the helper signature-compatible with
+     *      the release pipeline's call-site.
      * @param partition Partition being mutated.
      * @param tokenHolder Holder whose snapshots are being refreshed.
      */
     function updateLockedBalancesBeforeRelease(bytes32 partition, uint256 /*lockId*/, address tokenHolder) internal {
         SnapshotsStorageWrapper.updateAccountSnapshot(tokenHolder, partition);
         SnapshotsStorageWrapper.updateAccountLockedBalancesSnapshot(tokenHolder, partition);
+    }
+
+    /**
+     * @notice Updates the expiration timestamp of an existing lock without touching balances.
+     * @dev Only the `expirationTimestamp` field of the `LockData` record is mutated; amount,
+     *      lock-id set, and ABAF/LABAF aggregates are left untouched because this operation does
+     *      not move any tokens. Callers are responsible for validating the lock id and the new
+     *      timestamp before invoking this function.
+     * @param partition Partition the lock belongs to.
+     * @param tokenHolder Holder that owns the lock.
+     * @param lockId Identifier of the lock being updated.
+     * @param newExpirationTimestamp The replacement expiration timestamp.
+     * @return oldExpirationTimestamp_ The expiration timestamp that was stored before the update.
+     */
+    function updateLockExpiration(
+        bytes32 partition,
+        address tokenHolder,
+        uint256 lockId,
+        uint256 newExpirationTimestamp
+    ) internal returns (uint256 oldExpirationTimestamp_) {
+        ILock.LockData storage lock = lockStorage().locksByAccountPartitionAndId[tokenHolder][partition][lockId];
+        oldExpirationTimestamp_ = lock.expirationTimestamp;
+        lock.expirationTimestamp = newExpirationTimestamp;
     }
 
     /**

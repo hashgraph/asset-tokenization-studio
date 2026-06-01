@@ -16,23 +16,20 @@ bytes32 constant STORAGE_LOCATION_FIXED_RATE = 0x577d3b71f198de7595699f8f2861298
 
 /**
  * @title FixedRateDataStorage
- * @notice Struct holding the fixed interest rate value and its decimal precision,
- *         along with an initialisation flag.
+ * @notice Struct holding the fixed interest rate value and its decimal precision.
  * @dev Backing storage for the fixed-rate coupon model; mutated only by
  *      `InterestRateStorageWrapper` via the deterministic ERC-7201 slot.
- * @param initialized Whether the fixed rate data has been initialised.
  * @param decimals Number of decimal places for the rate.
  * @param rate The fixed interest rate value.
  * @custom:storage-location erc7201:security.token.standard.storage.FixedRate
  */
 struct FixedRateDataStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
-    bool initialized;
     // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
     uint8 decimals;
     // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     uint256 rate;
-
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     // ─── APPEND-ONLY ZONE BELOW ───
 }
 
@@ -43,7 +40,6 @@ struct FixedRateDataStorage {
  * @dev Backing storage for the KPI-linked coupon model; mutated only by
  *      `InterestRateStorageWrapper`. Rate ordering (`minRate ≤ baseRate ≤ maxRate`)
  *      and impact bound strict-ordering invariants are enforced at write time.
- * @param initialized Whether the KPI-linked rate data has been initialised.
  * @param rateDecimals Number of decimals for rate values.
  * @param impactDataDecimals Number of decimals for impact data fields.
  * @param maxRate Upper bound for the KPI-linked rate.
@@ -61,7 +57,6 @@ struct FixedRateDataStorage {
  */
 struct KpiLinkedRateDataStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
-    bool initialized;
     // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
     uint8 rateDecimals;
     uint8 impactDataDecimals;
@@ -77,25 +72,24 @@ struct KpiLinkedRateDataStorage {
     uint256 baseLine;
     uint256 maxDeviationFloor;
     uint256 adjustmentPrecision;
-
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 /**
  * @title InterestRateTypeDataStorage
- * @notice Stores the selected coupon rate type discriminator and its initialisation flag.
+ * @notice Stores the selected coupon rate type discriminator.
  * @dev Decoupled from the rate-specific storages so the active model can be queried
  *      without touching the fixed-rate or KPI-linked storage slots.
- * @param initialized Whether the coupon rate type has been initialised.
  * @param rateType The `IInterestRate.RateType` discriminator selected by the admin.
  * @custom:storage-location erc7201:security.token.standard.storage.InterestRateType
  */
 struct InterestRateTypeDataStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
-    bool initialized;
     // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
     IInterestRate.RateType rateType;
-
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     // ─── APPEND-ONLY ZONE BELOW ───
 }
 
@@ -153,15 +147,13 @@ library InterestRateStorageWrapper {
     }
 
     /**
-     * @notice Writes the coupon rate type and sets the initialisation flag.
+     * @notice Writes the coupon rate type during one-time initialisation.
      * @dev Called only once during asset deployment. Reverts via the caller's modifier
      *      if already initialised.
      * @param _rateType The `IInterestRate.RateType` to persist.
      */
     function initializeCouponRateType(IInterestRate.RateType _rateType) internal {
-        InterestRateTypeDataStorage storage s = interestRateTypeStorage();
-        s.rateType = _rateType;
-        s.initialized = true;
+        interestRateTypeStorage().rateType = _rateType;
     }
 
     /**
@@ -179,30 +171,6 @@ library InterestRateStorageWrapper {
      */
     function getCouponRateType() internal view returns (IInterestRate.RateType rateType_) {
         return interestRateTypeStorage().rateType;
-    }
-
-    /**
-     * @notice Checks whether the fixed rate data has been initialised.
-     * @return True if fixed rate data is initialised, false otherwise.
-     */
-    function isFixedRateInitialized() internal view returns (bool) {
-        return fixedRateStorage().initialized;
-    }
-
-    /**
-     * @notice Checks whether the KPI-linked rate data has been initialised.
-     * @return True if KPI-linked rate data is initialised, false otherwise.
-     */
-    function isKpiLinkedRateInitialized() internal view returns (bool) {
-        return kpiLinkedRateStorage().initialized;
-    }
-
-    /**
-     * @notice Checks whether the coupon rate type has been initialised.
-     * @return True if the coupon rate type has been initialised, false otherwise.
-     */
-    function isInterestRateTypeInitialized() internal view returns (bool) {
-        return interestRateTypeStorage().initialized;
     }
 
     /**

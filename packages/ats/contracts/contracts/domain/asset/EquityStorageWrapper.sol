@@ -40,7 +40,8 @@ struct EquityDataStorage {
     bool putRight;
     // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
     IEquity.DividendType dividendRight;
-
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     // ─── APPEND-ONLY ZONE BELOW ───
 }
 
@@ -107,7 +108,19 @@ library EquityStorageWrapper {
         if (balanceAdjustment.executionDate <= TimeTravelStorageWrapper.getBlockTimestamp()) {
             revert IScheduledBalanceAdjustment.BalanceAdjustmentAlreadyExecuted(corporateActionId, balanceAdjustmentId);
         }
-        CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
+        _executeCancelScheduledBalanceAdjustment(corporateActionId);
+    }
+
+    /**
+     * @notice Cancels a scheduled balance adjustment unconditionally, bypassing the
+     *         already-executed guard.
+     * @dev Use when administrative override is required after the execution date has passed.
+     *      Delegates to `_executeCancelScheduledBalanceAdjustment` directly.
+     * @param balanceAdjustmentId The identifier of the balance adjustment to cancel.
+     */
+    function forceCancelScheduledBalanceAdjustment(uint256 balanceAdjustmentId) internal {
+        (, bytes32 corporateActionId, ) = getScheduledBalanceAdjustment(balanceAdjustmentId);
+        _executeCancelScheduledBalanceAdjustment(corporateActionId);
     }
 
     /**
@@ -233,6 +246,14 @@ library EquityStorageWrapper {
      */
     function isEquityInitialized() internal view returns (bool) {
         return _equityStorage().initialized;
+    }
+
+    /**
+     * @notice Performs the storage write that cancels a scheduled balance adjustment.
+     * @param corporateActionId The corporate-action identifier linked to the balance adjustment.
+     */
+    function _executeCancelScheduledBalanceAdjustment(bytes32 corporateActionId) private {
+        CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
     }
 
     /**

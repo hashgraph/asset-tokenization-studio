@@ -14,6 +14,21 @@ bytes32 constant RESOLVER_KEY_PARTITIONS = 0x9caef059931effa6169ed564cfd0d8dac03
  */
 interface IPartitions {
     /**
+     * @notice Emitted once when the partitions capability is initialised on a token.
+     * @dev Fires exclusively from `initializePartitions`.
+     * @param multiPartition Whether the token operates in multi-partition mode.
+     */
+    event PartitionsInitialized(bool multiPartition);
+
+    /**
+     * @notice Initialises the partitions capability on the token and sets multi-partition mode.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     * @param _multiPartition When `true`, the token accepts partitions other than the default.
+     */
+    function initializePartitions(bool _multiPartition) external;
+
+    /**
      * @notice Use to get the list of partitions `_tokenHolder` is associated with.
      * @param _tokenHolder An address corresponds whom partition list is queried.
      * @return List of partitions.

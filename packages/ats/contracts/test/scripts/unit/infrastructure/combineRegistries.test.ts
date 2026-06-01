@@ -16,7 +16,7 @@ import {
   type RegistryProvider,
   type FacetDefinition,
 } from "@scripts/infrastructure";
-import { TEST_RESOLVER_KEYS, TEST_FACET_NAMES } from "@test";
+import { TESTS, TEST_FACET_NAMES } from "@test";
 
 describe("Registry Combination Utilities", () => {
   // ============================================================================
@@ -66,7 +66,7 @@ describe("Registry Combination Utilities", () => {
       });
 
       it("should return same registry when only one provided", () => {
-        const facet = createMockFacet(TEST_FACET_NAMES.TEST, TEST_RESOLVER_KEYS.SAMPLE);
+        const facet = createMockFacet(TEST_FACET_NAMES.TEST, TESTS.SAMPLE);
         const registry = createMockRegistry([facet]);
 
         const combined = combineRegistries(registry);
@@ -76,12 +76,12 @@ describe("Registry Combination Utilities", () => {
 
       it("should combine two registries with no conflicts", () => {
         const registry1 = createMockRegistry([
-          createMockFacet(TEST_FACET_NAMES.FACET_A, TEST_RESOLVER_KEYS.KEY_1),
-          createMockFacet(TEST_FACET_NAMES.FACET_B, TEST_RESOLVER_KEYS.KEY_2),
+          createMockFacet(TEST_FACET_NAMES.FACET_A, TESTS.KEY_1),
+          createMockFacet(TEST_FACET_NAMES.FACET_B, TESTS.KEY_2),
         ]);
         const registry2 = createMockRegistry([
-          createMockFacet(TEST_FACET_NAMES.FACET_C, TEST_RESOLVER_KEYS.KEY_3),
-          createMockFacet(TEST_FACET_NAMES.FACET_D, TEST_RESOLVER_KEYS.KEY_4),
+          createMockFacet(TEST_FACET_NAMES.FACET_C, TESTS.KEY_3),
+          createMockFacet(TEST_FACET_NAMES.FACET_D, TESTS.KEY_4),
         ]);
 
         const combined = combineRegistries(registry1, registry2);
@@ -106,8 +106,8 @@ describe("Registry Combination Utilities", () => {
 
     describe("conflict resolution strategies", () => {
       it("should throw error with onConflict: error", () => {
-        const registry1 = createMockRegistry([createMockFacet(TEST_FACET_NAMES.DUPLICATE, TEST_RESOLVER_KEYS.KEY_1)]);
-        const registry2 = createMockRegistry([createMockFacet(TEST_FACET_NAMES.DUPLICATE, TEST_RESOLVER_KEYS.KEY_2)]);
+        const registry1 = createMockRegistry([createMockFacet(TEST_FACET_NAMES.DUPLICATE, TESTS.KEY_1)]);
+        const registry2 = createMockRegistry([createMockFacet(TEST_FACET_NAMES.DUPLICATE, TESTS.KEY_2)]);
 
         expect(() => combineRegistries(registry1, registry2, { onConflict: "error" })).to.throw(
           `Registry conflict: Facet '${TEST_FACET_NAMES.DUPLICATE}' appears in multiple registries`,
@@ -115,39 +115,39 @@ describe("Registry Combination Utilities", () => {
       });
 
       it("should use last definition with onConflict: warn (default)", () => {
-        const facet1 = createMockFacet(TEST_FACET_NAMES.DUPLICATE, TEST_RESOLVER_KEYS.KEY_1);
-        const facet2 = createMockFacet(TEST_FACET_NAMES.DUPLICATE, TEST_RESOLVER_KEYS.KEY_2);
+        const facet1 = createMockFacet(TEST_FACET_NAMES.DUPLICATE, TESTS.KEY_1);
+        const facet2 = createMockFacet(TEST_FACET_NAMES.DUPLICATE, TESTS.KEY_2);
         const registry1 = createMockRegistry([facet1]);
         const registry2 = createMockRegistry([facet2]);
 
         const combined = combineRegistries(registry1, registry2);
 
         const result = combined.getFacetDefinition(TEST_FACET_NAMES.DUPLICATE);
-        expect(result?.resolverKey?.value).to.equal(TEST_RESOLVER_KEYS.KEY_2);
+        expect(result?.resolverKey?.value).to.equal(TESTS.KEY_2);
       });
 
       it("should use first definition with onConflict: first", () => {
-        const facet1 = createMockFacet(TEST_FACET_NAMES.DUPLICATE, TEST_RESOLVER_KEYS.KEY_1);
-        const facet2 = createMockFacet(TEST_FACET_NAMES.DUPLICATE, TEST_RESOLVER_KEYS.KEY_2);
+        const facet1 = createMockFacet(TEST_FACET_NAMES.DUPLICATE, TESTS.KEY_1);
+        const facet2 = createMockFacet(TEST_FACET_NAMES.DUPLICATE, TESTS.KEY_2);
         const registry1 = createMockRegistry([facet1]);
         const registry2 = createMockRegistry([facet2]);
 
         const combined = combineRegistries(registry1, registry2, { onConflict: "first" });
 
         const result = combined.getFacetDefinition(TEST_FACET_NAMES.DUPLICATE);
-        expect(result?.resolverKey?.value).to.equal(TEST_RESOLVER_KEYS.KEY_1);
+        expect(result?.resolverKey?.value).to.equal(TESTS.KEY_1);
       });
 
       it("should use last definition with onConflict: last", () => {
-        const facet1 = createMockFacet(TEST_FACET_NAMES.DUPLICATE, TEST_RESOLVER_KEYS.KEY_1);
-        const facet2 = createMockFacet(TEST_FACET_NAMES.DUPLICATE, TEST_RESOLVER_KEYS.KEY_2);
+        const facet1 = createMockFacet(TEST_FACET_NAMES.DUPLICATE, TESTS.KEY_1);
+        const facet2 = createMockFacet(TEST_FACET_NAMES.DUPLICATE, TESTS.KEY_2);
         const registry1 = createMockRegistry([facet1]);
         const registry2 = createMockRegistry([facet2]);
 
         const combined = combineRegistries(registry1, registry2, { onConflict: "last" });
 
         const result = combined.getFacetDefinition(TEST_FACET_NAMES.DUPLICATE);
-        expect(result?.resolverKey?.value).to.equal(TEST_RESOLVER_KEYS.KEY_2);
+        expect(result?.resolverKey?.value).to.equal(TESTS.KEY_2);
       });
     });
 
@@ -170,7 +170,7 @@ describe("Registry Combination Utilities", () => {
         const facet: FacetDefinition = {
           name: TEST_FACET_NAMES.TEST,
           description: TEST_DESCRIPTION,
-          resolverKey: { name: TEST_KEY_NAME, value: TEST_RESOLVER_KEYS.ABC },
+          resolverKey: { name: TEST_KEY_NAME, value: TESTS.ABC },
           roleCount: TEST_ROLE_COUNT,
           inheritance: TEST_INHERITANCE,
         };

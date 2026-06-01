@@ -17,6 +17,19 @@ bytes32 constant RESOLVER_KEY_NONCES = 0xd1166cb96f266d69db4d4e49d81acaf5441b16b
  */
 interface INonces {
     /**
+     * @notice Emitted once when the nonces capability is initialised on a token.
+     * @dev Fires exclusively from `initializeNonces`.
+     */
+    event NoncesInitialized();
+
+    /**
+     * @notice Initialises the nonces capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeNonces() external;
+
+    /**
      * @notice Returns the current nonce for `owner`.
      * @param owner Address whose nonce is queried.
      * @return Current nonce value for `owner`.

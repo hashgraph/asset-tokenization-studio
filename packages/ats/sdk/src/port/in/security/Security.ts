@@ -31,7 +31,7 @@ import { BaseSecurityInPort } from "./BaseSecurityInPort";
 import { ISecurityInPortSnapshot, SecurityInPortSnapshot } from "./snapshot/Snapshot";
 import { ISecurityInPortNominalValue, SecurityInPortNominalValue } from "./nominalValue/NominalValue";
 import { ISecurityInPortDeactivation, SecurityInPortDeactivation } from "./deactivation/Deactivation";
-import { ISecurityInPortMetadata, SecurityInPortMetadata } from "./metadata/Metadata";
+import { ISecurityInPortCustomData, SecurityInPortCustomData } from "./customData/CustomData";
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -59,7 +59,7 @@ interface SecurityInPort
     ISecurityInPortSnapshot,
     ISecurityInPortNominalValue,
     ISecurityInPortDeactivation,
-    ISecurityInPortMetadata {}
+    ISecurityInPortCustomData {}
 
 class SecurityInPort extends BaseSecurityInPort {
   constructor(
@@ -96,7 +96,7 @@ applyMixins(SecurityInPort, [
   SecurityInPortSnapshot,
   SecurityInPortNominalValue,
   SecurityInPortDeactivation,
-  SecurityInPortMetadata,
+  SecurityInPortCustomData,
 ]);
 
 export default new SecurityInPort();

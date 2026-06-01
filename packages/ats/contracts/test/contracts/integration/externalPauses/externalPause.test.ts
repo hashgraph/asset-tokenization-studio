@@ -4,14 +4,16 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ADDRESS_ZERO, ATS_ROLES, GAS_LIMIT } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, EQUITY_CONFIG_ID, GAS_LIMIT } from "@scripts";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture } from "@test";
-import { ResolverProxy, type IAsset, MockedExternalPause } from "@contract-types";
+import { MockDiamondCut, ResolverProxy, type IAsset, MockedExternalPause } from "@contract-types";
 
 describe("ExternalPause Tests", () => {
   let diamond: ResolverProxy;
+  let mockDiamondCut: MockDiamondCut;
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
+  let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
   let externalPauseMock1: MockedExternalPause;
@@ -38,8 +40,10 @@ describe("ExternalPause Tests", () => {
       },
     });
     diamond = base.diamond;
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     signer_A = base.deployer;
     signer_B = base.user1;
+    signer_D = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
 
@@ -280,18 +284,12 @@ describe("ExternalPause Tests", () => {
   });
 
   describe("Pause Modifier Tests (onlyUnpaused)", () => {
-    it("GIVEN an external pause is paused WHEN calling a function with onlyUnpaused THEN it reverts with IsPaused", async () => {
+    it("GIVEN an external pause is paused WHEN calling addExternalPause or updateExternalPauses THEN they revert with IsPaused", async () => {
       await externalPauseMock1.setPaused(true, {
         gasLimit: GAS_LIMIT.default,
       });
-      // Use asset instance for error checking as Common interface loading failed
       await expect(
         asset.addExternalPause(externalPauseMock3.target as string, {
-          gasLimit: GAS_LIMIT.default,
-        }),
-      ).to.be.revertedWithCustomError(asset, "IsPaused"); // Assumes IsPaused is inherited/available
-      await expect(
-        asset.removeExternalPause(externalPauseMock2.target as string, {
           gasLimit: GAS_LIMIT.default,
         }),
       ).to.be.revertedWithCustomError(asset, "IsPaused");
@@ -324,6 +322,29 @@ describe("ExternalPause Tests", () => {
           gasLimit: GAS_LIMIT.high,
         }),
       ).to.not.be.reverted;
+    });
+  });
+
+  describe("External Pause Removal Deadlock", () => {
+    it("GIVEN a stuck external pause (always paused) AND internal flag is NOT set WHEN removeExternalPause THEN it succeeds", async () => {
+      await externalPauseMock1.setPaused(true, { gasLimit: GAS_LIMIT.default });
+      await expect(
+        asset.removeExternalPause(externalPauseMock1.target as string, {
+          gasLimit: GAS_LIMIT.default,
+        }),
+      ).to.not.be.reverted;
+      expect(await asset.isExternalPause(externalPauseMock1.target as string)).to.be.false;
+    });
+
+    it("GIVEN the internal pause flag IS set WHEN removeExternalPause THEN it reverts with IsPaused", async () => {
+      await asset.grantRole(ATS_ROLES.ROLE_PAUSER, signer_A.address, { gasLimit: GAS_LIMIT.default });
+      await asset.pause({ gasLimit: GAS_LIMIT.default });
+      expect(await asset.paused()).to.be.true;
+      await expect(
+        asset.removeExternalPause(externalPauseMock1.target as string, {
+          gasLimit: GAS_LIMIT.default,
+        }),
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
   });
 
@@ -399,8 +420,31 @@ describe("ExternalPause Tests", () => {
   });
 
   describe("Initialize Tests", () => {
-    it("GIVEN already initialized WHEN initializeExternalPauses is called again THEN it reverts with AlreadyInitialized", async () => {
-      await expect(asset.initializeExternalPauses([])).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+    it("GIVEN already initialized WHEN initializeExternalPauses is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeExternalPauses([])).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeExternalPauses is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeExternalPauses([])).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN a new deployment WHEN initializeExternalPauses is called THEN it emits ExternalPauseInitialized", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      const pauses: string[] = [];
+      const tx = await freshAsset.connect(infra.deployer).initializeExternalPauses(pauses);
+      const receipt = await tx.wait();
+      const emitted = await decodeEvent(freshAsset, "ExternalPauseInitialized", receipt!);
+      expect(emitted.pauses).to.deep.equal(pauses);
     });
   });
 
@@ -434,6 +478,29 @@ describe("ExternalPause Tests", () => {
       await expect(
         deactivatedAsset.connect(base.deployer).removeExternalPause(ethers.ZeroAddress),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN addExternalPause THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.addExternalPause("0x0000000000000000000000000000000000000001")).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN removeExternalPause THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.removeExternalPause("0x0000000000000000000000000000000000000001"),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN updateExternalPauses THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.updateExternalPauses([], [])).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
   });
 });

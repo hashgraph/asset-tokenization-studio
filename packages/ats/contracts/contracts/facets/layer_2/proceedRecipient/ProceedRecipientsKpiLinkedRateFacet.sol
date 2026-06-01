@@ -5,10 +5,26 @@ import { IProceedRecipients, RESOLVER_KEY_PROCEED_RECIPIENTS_KPI_LINKED_RATE } f
 import { ProceedRecipients } from "./ProceedRecipients.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../../infrastructure/proxy/Bytes4Builder.sol";
-import { ROLE_PROCEED_RECIPIENT_MANAGER } from "../../../constants/roles.sol";
+import { ROLE_PROCEED_RECIPIENT_MANAGER, DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
 import { ScheduledTasksOps } from "../../../domain/orchestrator/ScheduledTasksOps.sol";
+import { ProceedRecipientsStorageWrapper } from "../../../domain/asset/ProceedRecipientsStorageWrapper.sol";
+import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
 
 contract ProceedRecipientsKpiLinkedRateFacet is ProceedRecipients, IStaticFunctionSelectors {
+    function initializeProceedRecipients(
+        address[] calldata _proceedRecipients,
+        bytes[] calldata _data
+    )
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_PROCEED_RECIPIENTS_KPI_LINKED_RATE)
+    {
+        ProceedRecipientsStorageWrapper.initializeProceedRecipients(_proceedRecipients, _data);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_PROCEED_RECIPIENTS_KPI_LINKED_RATE);
+        emit IProceedRecipients.ProceedRecipientsInitialized(_proceedRecipients, _data);
+    }
+
     function addProceedRecipient(
         address _proceedRecipient,
         bytes calldata _data
@@ -31,7 +47,7 @@ contract ProceedRecipientsKpiLinkedRateFacet is ProceedRecipients, IStaticFuncti
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
-                this.initialize_ProceedRecipients.selector,
+                this.initializeProceedRecipients.selector,
                 this.addProceedRecipient.selector,
                 this.removeProceedRecipient.selector,
                 this.updateProceedRecipientData.selector,

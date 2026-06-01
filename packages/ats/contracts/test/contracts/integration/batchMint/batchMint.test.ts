@@ -3,11 +3,11 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { IAsset, type ResolverProxy } from "@contract-types";
+import { IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
-import { EMPTY_STRING, ATS_ROLES, ZERO } from "@scripts";
+import { EMPTY_STRING, ATS_ROLES, ZERO, EQUITY_CONFIG_ID, RESOLVER_KEY_BATCH_MINT } from "@scripts";
 
 const AMOUNT = 1000;
 const MAX_SUPPLY = 10000000;
@@ -21,6 +21,7 @@ describe("BatchMint Tests", () => {
   let signer_E: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixtureSinglePartition() {
     const base = await deployEquityTokenFixture({
@@ -37,6 +38,7 @@ describe("BatchMint Tests", () => {
     signer_E = base.user4;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
       {
@@ -164,6 +166,7 @@ describe("BatchMint Tests", () => {
       signer_A = base.deployer;
 
       asset = await ethers.getContractAt("IAsset", diamond.target);
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     });
 
     it("GIVEN an single partition token WHEN batchMint THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
@@ -184,6 +187,38 @@ describe("BatchMint Tests", () => {
         deactivatedAsset,
         "Deactivated",
       );
+    });
+  });
+  describe("initializeBatchMint", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeBatchMint is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeBatchMint())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeBatchMint is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeBatchMint())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_BATCH_MINT, 1);
+    });
+  });
+
+  describe("initializeBatchMint event", () => {
+    it("GIVEN a fresh deployment WHEN initializeBatchMint is called THEN emits BatchMintInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_BATCH_MINT);
+      await expect(asset.initializeBatchMint()).to.emit(asset, "BatchMintInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational WHEN batchMint is called THEN AssetNotOperational", async () => {
+      await expect(asset.batchMint([], []))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 });

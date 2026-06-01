@@ -18,6 +18,19 @@ bytes32 constant RESOLVER_KEY_TRANSFER_AND_LOCK_BY_PARTITION = 0xb5ec128e8657ab0
  */
 interface ITransferAndLockByPartition is ITransferAndLockTypes {
     /**
+     * @notice Emitted once when the transfer-and-lock-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeTransferAndLockByPartition`.
+     */
+    event TransferAndLockByPartitionInitialized();
+
+    /**
+     * @notice Initialises the transfer-and-lock-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeTransferAndLockByPartition() external;
+
+    /**
      * @notice Transfers `_amount` tokens from the caller's `_partition` balance to
      *         `_to` and locks them until `_expirationTimestamp`.
      * @dev    Callers must hold `ROLE_LOCKER`. The token must be unpaused and
@@ -33,7 +46,6 @@ interface ITransferAndLockByPartition is ITransferAndLockTypes {
      * @param _data                Additional data forwarded to the recipient.
      * @param _expirationTimestamp Unix timestamp until which the transferred tokens
      *                             are locked.
-     * @return success_  True when the transfer and lock have been recorded.
      * @return lockId_   Identifier assigned to the resulting lock for
      *                   `(_partition, _to)`.
      */
@@ -43,5 +55,5 @@ interface ITransferAndLockByPartition is ITransferAndLockTypes {
         uint256 _amount,
         bytes calldata _data,
         uint256 _expirationTimestamp
-    ) external returns (bool success_, uint256 lockId_);
+    ) external returns (uint256 lockId_);
 }
