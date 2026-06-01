@@ -9,6 +9,7 @@ import { CouponStorageWrapper } from "./coupon/CouponStorageWrapper.sol";
 import { DecimalsLib } from "../../infrastructure/utils/DecimalsLib.sol";
 import { KPI_LINKED_RATE_COUPON } from "../../constants/values.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
+import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 /**
  * @title KpiLinkedRateLib
@@ -34,24 +35,32 @@ library KpiLinkedRateLib {
      * @param coupon The coupon data.
      * @return rate_ The calculated interest rate.
      * @return rateDecimals_ The decimals of the calculated rate.
+     * @return rateStatus_ The status of the calculated rate.
      */
     function calculateKpiLinkedInterestRate(
         uint256 couponID,
         ICouponTypes.Coupon memory coupon
-    ) internal view returns (uint256 rate_, uint8 rateDecimals_) {
+    ) internal view returns (uint256 rate_, uint8 rateDecimals_, ICouponTypes.RateCalculationStatus rateStatus_) {
+        if (coupon.fixingDate > TimeTravelStorageWrapper.getBlockTimestamp()) {
+            return (0, 0, ICouponTypes.RateCalculationStatus.PENDING);
+        }
+
         KpiLinkedRateDataStorage memory kpiData = InterestRateStorageWrapper.kpiLinkedRateStorage();
 
         if (coupon.fixingDate < kpiData.startPeriod) {
-            return _getStartRate(kpiData);
+            (rate_, rateDecimals_) = _getStartRate(kpiData);
+            return (rate_, rateDecimals_, ICouponTypes.RateCalculationStatus.SET);
         }
 
         (uint256 impactData, bool reportFound) = _collectImpactData(coupon.fixingDate, kpiData.reportPeriod);
 
         if (!reportFound) {
-            return _getRateWhenNoReport(couponID, kpiData);
+            (rate_, rateDecimals_) = _getRateWhenNoReport(couponID, kpiData);
+            return (rate_, rateDecimals_, ICouponTypes.RateCalculationStatus.SET);
         }
 
-        return _getRateFromImpact(impactData, kpiData);
+        (rate_, rateDecimals_) = _getRateFromImpact(impactData, kpiData);
+        return (rate_, rateDecimals_, ICouponTypes.RateCalculationStatus.SET);
     }
 
     function _getRateWhenNoReport(

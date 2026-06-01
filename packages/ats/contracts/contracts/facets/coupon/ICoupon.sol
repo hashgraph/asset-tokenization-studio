@@ -77,6 +77,12 @@ interface ICoupon is ICouponTypes {
     error InterestRateIsKpiLinked();
 
     /**
+     * @notice Reverts when a standard rate variant is supplied with pending
+     *         rate parameters.
+     */
+    error InterestRateIsStandard();
+
+    /**
      * @notice Reverts when a coupon identifier does not resolve to an existing corporate
      *         action.
      * @param couponID The coupon identifier that was not found.

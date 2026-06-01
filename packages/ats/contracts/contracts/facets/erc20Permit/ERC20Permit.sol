@@ -2,10 +2,10 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC20Permit, RESOLVER_KEY_ERC20PERMIT } from "./IERC20Permit.sol";
-import { Modifiers } from "../../../../services/Modifiers.sol";
-import { ERC20PermitStorageWrapper } from "../../../../domain/asset/ERC20PermitStorageWrapper.sol";
-import { DEFAULT_ADMIN_ROLE } from "../../../../constants/roles.sol";
-import { InitializerStorageWrapper } from "../../../../domain/core/InitializerStorageWrapper.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { ERC20PermitStorageWrapper } from "../../domain/asset/ERC20PermitStorageWrapper.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title ERC20 Permit
