@@ -569,7 +569,7 @@ abstract contract Factory is IFactory {
         IPartitions(securityAddress_).initializePartitions(_securityData.isMultiPartition);
         IController(securityAddress_).initializeController(_securityData.isControllable);
 
-        // Token verbs: allowance, transfer, mint, burn, freeze, pause, deactivate
+        // allowance, transfer, mint, burn, freeze, pause, deactivate
         IAllowance(securityAddress_).initializeAllowance();
         ITransfer(securityAddress_).initializeTransfer();
         ITransferByPartition(securityAddress_).initializeTransferByPartition();
