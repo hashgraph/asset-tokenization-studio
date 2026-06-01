@@ -67,15 +67,16 @@ library KpiLinkedRateLib {
         uint256 couponID,
         KpiLinkedRateDataStorage memory kpiData
     ) private view returns (uint256 rate_, uint8 rateDecimals_) {
-        (uint256 previousRate, uint8 previousRateDecimals) = _previousRate(couponID);
+        (uint256 previousRate, uint8 previousRateDecimals, bool found) = _previousRate(couponID);
 
-        uint256 adjustedPreviousRate = DecimalsLib.calculateDecimalsAdjustment(
-            previousRate,
-            previousRateDecimals,
-            kpiData.rateDecimals
-        );
+        rate_ =
+            (
+                (found)
+                    ? DecimalsLib.calculateDecimalsAdjustment(previousRate, previousRateDecimals, kpiData.rateDecimals)
+                    : kpiData.baseRate
+            ) +
+            kpiData.missedPenalty;
 
-        rate_ = adjustedPreviousRate + kpiData.missedPenalty;
         if (rate_ > kpiData.maxRate) {
             rate_ = kpiData.maxRate;
         }
@@ -115,11 +116,11 @@ library KpiLinkedRateLib {
      * @return rate_ The rate of the previous coupon, or 0 if this is the first coupon.
      * @return rateDecimals_ The decimals of the previous coupon rate.
      */
-    function _previousRate(uint256 couponID) private view returns (uint256 rate_, uint8 rateDecimals_) {
+    function _previousRate(uint256 couponID) private view returns (uint256 rate_, uint8 rateDecimals_, bool found_) {
         uint256 previousCouponId = CouponStorageWrapper.getPreviousCouponInOrderedList(couponID, false);
 
         if (previousCouponId == 0) {
-            return (0, 0);
+            return (0, 0, false);
         }
 
         (ICouponTypes.RegisteredCoupon memory previousCoupon, , ) = CouponStorageWrapper.getCoupon(previousCouponId);
@@ -130,7 +131,7 @@ library KpiLinkedRateLib {
             KPI_LINKED_RATE_COUPON
         );
 
-        return (previousCoupon.coupon.rate, previousCoupon.coupon.rateDecimals);
+        return (previousCoupon.coupon.rate, previousCoupon.coupon.rateDecimals, true);
     }
 
     function _getStartRate(
