@@ -36,7 +36,7 @@ import {
 } from "../facets/clearingAtSnapshotByPartition/IClearingAtSnapshotByPartition.sol";
 import { IClearingByPartition } from "../facets/clearingByPartition/IClearingByPartition.sol";
 import { IClearingHoldByPartition } from "../facets/clearingHoldByPartition/IClearingHoldByPartition.sol";
-import { IERC20Permit } from "../facets/layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
+import { IERC20Permit } from "../facets/erc20Permit/IERC20Permit.sol";
 import { IIdentity } from "../facets/identity/IIdentity.sol";
 import {
     IScheduledCrossOrderedTasks

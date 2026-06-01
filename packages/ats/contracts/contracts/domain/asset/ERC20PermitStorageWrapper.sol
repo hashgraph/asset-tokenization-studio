@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IERC20Permit } from "../../facets/layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
+import { IERC20Permit } from "../../facets/erc20Permit/IERC20Permit.sol";
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import { TYPEHASH_ERC20_PERMIT } from "../../constants/eip712.sol";
 import { _getDomainHash } from "../../infrastructure/utils/EIP712.sol";
