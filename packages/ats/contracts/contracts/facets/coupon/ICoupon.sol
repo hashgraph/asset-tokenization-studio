@@ -63,6 +63,10 @@ interface ICoupon is ICouponTypes {
      */
     error InterestRateIsKpiLinked();
 
+    /**
+     * @notice Reverts when a standard rate variant is supplied with pending
+     *         rate parameters.
+     */
     error InterestRateIsStandard();
 
     /**
