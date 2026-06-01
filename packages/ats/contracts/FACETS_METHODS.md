@@ -2099,7 +2099,7 @@ function canTransfer(address _from, address _to, uint256 _amount) external view 
 
 ## ERC20 Votes
 
-- Interface: `contracts/facets/layer_1/ERC1400/ERC20Votes/IERC20Votes.sol`
+- Interface: `contracts/facets/erc20Votes/IERC20Votes.sol`
 - Resolver key: `Erc20votes`
 
 ```solidity
@@ -2210,7 +2210,7 @@ struct KycData {
 
 ## Lock
 
-- Interface: `contracts/facets/layer_1/lock/ILock.sol`
+- Interface: `contracts/facets/lock/ILock.sol`
 - Resolver key: `Lock`
 
 ```solidity
@@ -2329,7 +2329,7 @@ struct ScheduledTask {
 
 ## Votes
 
-- Interface: `contracts/facets/layer_1/ERC1400/ERC20Votes/IVotes.sol`
+- Interface: `contracts/facets/erc20Votes/IVotes.sol`
 
 ```solidity
 function delegate(address delegatee) external;
