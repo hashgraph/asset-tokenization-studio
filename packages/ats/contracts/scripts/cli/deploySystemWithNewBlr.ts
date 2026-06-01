@@ -10,7 +10,6 @@
  * Configuration via environment variables:
  *   NETWORK - Target network name (required)
  *   {NETWORK}_PRIVATE_KEY_0 - Private key for deployer account
- *   USE_TIMETRAVEL - Enable TimeTravel mode (default: false)
  *   DEPLOY_ONLY_BOND_CONFIG - Deploy only Bond Configuration
  *   PARALLEL_FACET_DEPLOYMENT - Deploy facets in parallel
  *
@@ -33,7 +32,6 @@ async function main() {
   // Get network from environment (required)
   const { network, signer, address } = await requireNetworkSigner();
 
-  const useTimeTravel = parseBooleanEnv("USE_TIMETRAVEL", false);
   const partialBatchDeploy = parseBooleanEnv("PARTIAL_BATCH_DEPLOY", false);
   const batchSize = parseIntEnv("BATCH_SIZE", DEFAULT_BATCH_SIZE);
   const deployOnlyBondConfig = parseBooleanEnv("DEPLOY_ONLY_BOND_CONFIG", false);
@@ -43,7 +41,6 @@ async function main() {
   info(`🚀 Starting ATS deployment`);
   info("---");
   info(`📡 Network: ${network}`);
-  info(`⏰ TimeTravel: ${useTimeTravel ? "enabled" : "disabled"}`);
   info(`📦 PartialBatchDeploy: ${partialBatchDeploy ? "enabled" : "disabled"}`);
   info(`📊 Batch Size: ${batchSize}`);
   if (deployOnlyBondConfig) info(`⚡ Mode: Bond-only (Equity, Bond variants, Loan, LoansPortfolio skipped)`);
@@ -57,7 +54,6 @@ async function main() {
 
     // Deploy system with new BLR
     const output = await deploySystemWithNewBlr(signer, network, {
-      useTimeTravel,
       partialBatchDeploy,
       batchSize,
       deployOnlyBondConfig,

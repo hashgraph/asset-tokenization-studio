@@ -14,7 +14,6 @@
  *   BLR_ADDRESS - Address of existing BusinessLogicResolver (required)
  *   PROXY_ADDRESSES - Comma-separated list of proxy addresses to update (optional)
  *   CONFIGURATIONS - Which configs to create: 'equity', 'bond', or 'both' (default: 'both')
- *   USE_TIMETRAVEL - Enable TimeTravel mode (default: false)
  *
  * Usage:
  *   NETWORK=hedera-testnet BLR_ADDRESS=0x123... npm run upgrade
@@ -26,13 +25,7 @@
 
 import { upgradeConfigurations } from "../workflows/upgradeConfigurations";
 import { DEFAULT_BATCH_SIZE, info, success, error, warn } from "@scripts/infrastructure";
-import {
-  requireNetworkSigner,
-  requireValidAddress,
-  parseOptionalAddressList,
-  parseBooleanEnv,
-  parseIntEnv,
-} from "./shared";
+import { requireNetworkSigner, requireValidAddress, parseOptionalAddressList, parseIntEnv } from "./shared";
 import { ethers } from "ethers";
 
 /**
@@ -45,7 +38,6 @@ async function main() {
   const blrAddress = requireValidAddress(process.env.BLR_ADDRESS, "BLR_ADDRESS");
   const proxyAddresses = parseOptionalAddressList(process.env.PROXY_ADDRESSES, "PROXY_ADDRESSES");
   const configurationsStr = process.env.CONFIGURATIONS || "both";
-  const useTimeTravel = parseBooleanEnv("USE_TIMETRAVEL", false);
   const batchSize = parseIntEnv("BATCH_SIZE", DEFAULT_BATCH_SIZE);
 
   // Validate configurations parameter
@@ -61,7 +53,6 @@ async function main() {
   info(`📡 Network: ${network}`);
   info(`📍 BLR Address: ${blrAddress}`);
   info(`⚙️ Configurations: ${configurations}`);
-  info(`⏰ TimeTravel: ${useTimeTravel ? "enabled" : "disabled"}`);
   info(`📊 Batch Size: ${batchSize}`);
   if (proxyAddresses && proxyAddresses.length > 0) {
     info(`Proxy Updates: ${proxyAddresses.length} proxies`);
@@ -78,7 +69,6 @@ async function main() {
       blrAddress,
       configurations,
       proxyAddresses,
-      useTimeTravel,
       batchSize,
       saveOutput: true,
     });

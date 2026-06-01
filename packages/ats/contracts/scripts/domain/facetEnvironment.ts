@@ -1,41 +1,42 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * Centralises the test-environment facet substitution logic that all
- * createConfiguration modules share.
+ * Centralises the test-environment facet substitution shared by every
+ * createConfiguration module.
  *
- * In production (`useTimeTravel = false`) the facet list is returned as-is.
- * In test mode (`useTimeTravel = true`):
- *   - every production facet listed in `TEST_REPLACEMENTS` is swapped for its
- *     test counterpart verbatim (no TimeTravel suffix appended);
- *   - all remaining facets receive the `TimeTravel` suffix;
- *   - the facets listed in `TEST_ONLY_EXTRAS` are appended.
+ * In production the facet list is returned unchanged. In test mode — driven by
+ * `isTestMode()` (the `ATS_TEST_MODE` env var, defaulting on for the `test` /
+ * `coverage` Hardhat tasks) — the list is transformed by:
+ *   - swapping every production facet listed in `TEST_REPLACEMENTS` for its
+ *     test counterpart;
+ *   - appending the facets listed in `TEST_ONLY_EXTRAS`.
  *
- * To add a new test-environment substitution, edit this file only —
- * no individual createConfiguration file needs to change.
+ * To add a test-environment substitution, edit this file only — no individual
+ * createConfiguration module needs to change.
  *
  * @module domain/facetEnvironment
  */
 
-// Facets swapped for a test-specific variant when useTimeTravel=true.
-// Key = production facet name, value = test facet name (used verbatim, no suffix).
-// Edit this map in one place to affect all configurations.
+import { isTestMode } from "@scripts/infrastructure";
+import { EVM_ACCESSORS_FACET_NAME } from "./constants";
+
+// Production facets swapped for a test-specific counterpart in test mode.
 const TEST_REPLACEMENTS: Record<string, string> = {
   DiamondFacet: "MockDiamondCut",
 };
 
-// Facets appended to every configuration when useTimeTravel=true.
-// Edit this list in one place to affect all configurations.
-const TEST_ONLY_EXTRAS = ["TimeTravelFacet"] as const;
+// Facets appended to every configuration in test mode; excluded from production source paths.
+const TEST_ONLY_EXTRAS = [EVM_ACCESSORS_FACET_NAME] as const;
 
 /**
- * Build the final facet name list for a given environment.
+ * Build the final facet name list for the active environment.
  *
- * @param productionFacets  The canonical production facet list for a token type.
- * @param useTimeTravel     True in test environments; false in production.
+ * @param productionFacets The canonical production facet list for a token type.
+ * @returns The production list unchanged in production; the substituted list plus
+ *          the test-only extras when `isTestMode()` is true.
  */
-export function buildFacetList(productionFacets: readonly string[], useTimeTravel: boolean): string[] {
-  if (!useTimeTravel) return [...productionFacets];
+export function buildFacetList(productionFacets: readonly string[]): string[] {
+  if (!isTestMode()) return [...productionFacets];
 
-  return [...productionFacets.map((name) => TEST_REPLACEMENTS[name] ?? `${name}TimeTravel`), ...TEST_ONLY_EXTRAS];
+  return [...productionFacets.map((name) => TEST_REPLACEMENTS[name] ?? name), ...TEST_ONLY_EXTRAS];
 }

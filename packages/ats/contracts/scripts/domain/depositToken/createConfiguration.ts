@@ -21,6 +21,8 @@ import {
 } from "@scripts/infrastructure";
 import { BusinessLogicResolver } from "@contract-types";
 import { DEPOSIT_TOKEN_CONFIG_ID } from "../constants";
+import { buildFacetList } from "../facetEnvironment";
+import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
 import { atsRegistry } from "../atsRegistry";
 
 /**
@@ -118,7 +120,6 @@ const DEPOSIT_TOKEN_FACETS = [
  *
  * @param blrContract - BusinessLogicResolver contract instance
  * @param facetAddresses - Map of facet names to their deployed addresses
- * @param useTimeTravel - Whether to use TimeTravel variants (default: false)
  * @param partialBatchDeploy - Whether this is a partial batch deployment (default: false)
  * @param batchSize - Number of facets per batch (default: DEFAULT_BATCH_SIZE)
  * @param confirmations - Number of confirmations to wait for (default: 0 for test environments)
@@ -127,26 +128,18 @@ const DEPOSIT_TOKEN_FACETS = [
 export async function createDepositTokenConfiguration(
   blrContract: BusinessLogicResolver,
   facetAddresses: Record<string, string>,
-  useTimeTravel: boolean = false,
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
   retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  // When useTimeTravel=true, ALL facets get the TimeTravel suffix (universal mapping)
-  // plus the TimeTravelFacet controller. No filtering needed — simplifies deployment logic.
-  const facetNames = useTimeTravel
-    ? [...DEPOSIT_TOKEN_FACETS.map((name) => `${name}TimeTravel`), "TimeTravelFacet"]
-    : [...DEPOSIT_TOKEN_FACETS];
+  const facetNames = buildFacetList(DEPOSIT_TOKEN_FACETS);
 
   // Build facet data with resolver keys from registry
   const facets = facetNames.map((name) => {
-    // Strip "TimeTravel" suffix to get the base name for registry lookup
-    const baseName = name.replace(/TimeTravel$/, "");
-
-    const facetDef = atsRegistry.getFacetDefinition(baseName);
+    const facetDef = atsRegistry.getFacetDefinition(name) ?? getMockFacetDefinition(name);
     if (!facetDef?.resolverKey?.value) {
-      throw new Error(`No resolver key found for facet: ${baseName}`);
+      throw new Error(`No resolver key found for facet: ${name}`);
     }
     return {
       facetName: name,

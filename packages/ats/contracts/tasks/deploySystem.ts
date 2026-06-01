@@ -7,7 +7,6 @@
  *
  * Usage:
  * - npx hardhat deploy-system --network testnet
- * - npx hardhat deploy-system --network testnet --timetravel
  * - npx hardhat deploy-system --network testnet --output custom-deployment.json
  */
 
@@ -15,11 +14,9 @@ import { task } from "hardhat/config";
 import { deploySystemWithNewBlr } from "../scripts/workflows/deploySystemWithNewBlr";
 
 task("deploy-system", "Deploy complete ATS system using new modular scripts")
-  .addFlag("timetravel", "Use TimeTravel variants for facets")
   .addOptionalParam("output", "Custom output file path for deployment data")
   .setAction(async (args, hre) => {
     console.log(`\n🎯 Deploying to network: ${hre.network.name}`);
-    console.log(`🔄 TimeTravel: ${args.timetravel ? "Enabled" : "Disabled"}`);
 
     if (args.output) {
       console.log(`📄 Output: ${args.output}`);
@@ -27,7 +24,6 @@ task("deploy-system", "Deploy complete ATS system using new modular scripts")
 
     try {
       const result = await deploySystemWithNewBlr(hre.network.name, {
-        useTimeTravel: args.timetravel,
         saveOutput: true,
         outputPath: args.output,
       });

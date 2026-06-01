@@ -4,7 +4,7 @@
  * Facet deployment module.
  *
  * High-level operation for deploying multiple facets with support for
- * TimeTravel variants, layer-based ordering, and dependency management.
+ * layer-based ordering, and dependency management.
  *
  * @module core/operations/facetDeployment
  */

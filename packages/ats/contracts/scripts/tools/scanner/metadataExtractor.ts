@@ -44,9 +44,6 @@ export interface ContractMetadata {
   /** Detected category */
   category: string;
 
-  /** Whether TimeTravel variant exists */
-  hasTimeTravel: boolean;
-
   /** Extracted role definitions with values */
   roles: RoleDefinition[];
 
@@ -85,14 +82,12 @@ export interface ContractMetadata {
  * Extract metadata from a contract file.
  *
  * @param contract - Contract file information
- * @param hasTimeTravel - Whether TimeTravel variant exists
  * @param allResolverKeys - Optional map of all resolver keys (name -> value)
  * @param allContracts - Optional map of all contracts (for inheritance method extraction)
  * @returns Extracted metadata
  */
 export function extractMetadata(
   contract: ContractFile,
-  hasTimeTravel: boolean,
   allResolverKeys?: Map<string, string>,
   allContracts?: Map<string, ContractFile>,
 ): ContractMetadata {
@@ -158,7 +153,6 @@ export function extractMetadata(
     sourceFile: contract.relativePath,
     layer,
     category,
-    hasTimeTravel,
     roles,
     resolverKey,
     methods,
