@@ -93,6 +93,8 @@ library BondStorageWrapper {
      *      the rational form intact and defer the division to the caller.
      * @param account The holder whose principal share is being computed.
      * @return principalFor_ The principal fraction expressed as `numerator / denominator`.
+     * @custom:revert ICommonErrors.ExponentOverflow If the token decimals at the current block
+     *         are ≥ 78, making `10 ** decimals` overflow `uint256`.
      */
     function getPrincipalFor(address account) internal view returns (IPrincipal.PrincipalFor memory principalFor_) {
         IBondTypes.BondDetailsData memory bondDetails = getBondDetails();
@@ -106,7 +108,10 @@ library BondStorageWrapper {
             bondDetails.nominalValue,
             DecimalsLib.pow10(bondDetails.nominalValueDecimals)
         );
-        principalFor_.denominator = DecimalsLib.pow10(ERC20StorageWrapper.decimalsAdjustedAt(blockTimestamp));
+        uint8 decimalsAdjustedAtBlockTimestamp = ERC20StorageWrapper.decimalsAdjustedAt(blockTimestamp);
+
+        DecimalsLib.checkExponentOverflow(decimalsAdjustedAtBlockTimestamp);
+        principalFor_.denominator = DecimalsLib.pow10(decimalsAdjustedAtBlockTimestamp);
     }
 
     /**

@@ -122,4 +122,11 @@ interface ICommonErrors {
      * @param decimals The exponent that causes the overflow.
      */
     error GreaterThanMaxUint256(uint256 amount, uint8 decimals);
+
+    /**
+     * @notice Reverts when an exponent would cause `10 ** exponent` to overflow `uint256`.
+     * @dev Thrown by `DecimalsLib.checkExponentOverflow` when `exponent >= 78`.
+     * @param exponent The exponent that would produce an overflow.
+     */
+    error ExponentOverflow(uint256 exponent);
 }

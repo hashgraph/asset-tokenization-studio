@@ -529,6 +529,22 @@ describe("Dividends", () => {
     expect(dividendAmountFor.denominator).to.equal(10n ** BigInt(amountDecimals));
   });
 
+  it("GIVEN a dividend with amountDecimals >= 78 WHEN getDividendAmountFor after record date THEN reverts with ExponentOverflow", async () => {
+    await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
+    // amountDecimals = 78 == MAX_DECIMALS; 10^78 overflows uint256
+    await asset.setDividend({
+      recordDate: dividendsRecordDateInSeconds.toString(),
+      executionDate: dividendsExecutionDateInSeconds.toString(),
+      amount: dividendsAmountPerEquity,
+      amountDecimals: 78,
+    });
+    await asset.changeSystemTimestamp(dividendsRecordDateInSeconds + 1);
+    await expect(asset.getDividendAmountFor(1, signer_A.address)).to.be.revertedWithCustomError(
+      asset,
+      "ExponentOverflow",
+    );
+  });
+
   it("GIVEN a dividend created WHEN calling dividend methods with a wrong dividendId THEN transactions fail with WrongIndexForAction", async () => {
     await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 

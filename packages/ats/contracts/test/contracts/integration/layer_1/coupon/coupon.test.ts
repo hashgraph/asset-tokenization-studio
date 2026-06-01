@@ -1053,6 +1053,17 @@ describe("Coupon Tests", () => {
         10n ** (couponFor.decimals + BigInt(HIGH_NOMINAL_DECIMALS) + BigInt(HIGH_RATE_DECIMALS)) * BigInt(YEAR_SECONDS);
       expect(couponAmountFor.numerator * canonicalDenominator).to.equal(preFixProduct * couponAmountFor.denominator);
     });
+
+    it("GIVEN decimals + rateDecimals >= 78 WHEN getCouponAmountFor after record date THEN reverts with ExponentOverflow", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
+      // default token decimals = 6; rateDecimals = 72 → totalDecimals = 78 == MAX_DECIMALS; 10^78 overflows uint256
+      await asset.connect(signer_A).setCoupon({ ...couponData, rateDecimals: 72 });
+      await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
+      await expect(asset.getCouponAmountFor(1, signer_A.address)).to.be.revertedWithCustomError(
+        asset,
+        "ExponentOverflow",
+      );
+    });
   });
   describe("initializeCoupon", () => {
     it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeCoupon is called THEN AccountHasNoRole", async () => {

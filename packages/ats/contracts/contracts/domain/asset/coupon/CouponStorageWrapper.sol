@@ -564,6 +564,8 @@ library CouponStorageWrapper {
      * @param recordDateReached True if the coupon's record date has passed.
      * @return couponAmountFor_ Numerator and denominator of the payable amount;
      *         both zero if the record date has not yet been reached.
+     * @custom:revert ICommonErrors.ExponentOverflow If `decimals + rateDecimals` is ≥ 78,
+     *         making `10 ** (decimals + rateDecimals)` overflow `uint256`.
      */
     function _calculateCouponAmount(
         ICouponTypes.Coupon memory coupon,
@@ -583,8 +585,11 @@ library CouponStorageWrapper {
         // mathematically equivalent to the original (balance * nominal * rate * period) /
         // (10**(d+nd+rd) * 365 days), redistributed to keep every intermediate within uint256.
         uint256 balanceNominalScaled = Math.mulDiv(tokenBalance, nominalValue, DecimalsLib.pow10(nominalValueDecimals));
-        couponAmountFor_.numerator = balanceNominalScaled * coupon.rate * period;
-        couponAmountFor_.denominator = DecimalsLib.pow10(uint256(decimals) + coupon.rateDecimals) * 365 days;
+        couponAmountFor_.numerator = Math.mulDiv(balanceNominalScaled * coupon.rate, period, 365 days);
+
+        uint256 totalDecimals = uint256(decimals) + uint256(coupon.rateDecimals);
+        DecimalsLib.checkExponentOverflow(totalDecimals);
+        couponAmountFor_.denominator = DecimalsLib.pow10(totalDecimals);
     }
 
     /**
