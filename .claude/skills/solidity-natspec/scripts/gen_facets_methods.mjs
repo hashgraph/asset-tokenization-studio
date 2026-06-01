@@ -299,8 +299,6 @@ function slug(text) {
   return n === 0 ? base : `${base}-${n}`;
 }
 
-const LAYER_TITLES = ["Core / supporting facets", "Layer 1", "Layer 2", "Layer 3"];
-
 // Assign each facet its anchor up front (in document order) so the TOC and body agree.
 for (const f of facets) f.anchor = slug(f.name);
 
@@ -314,18 +312,10 @@ out.push("> Generated and maintained via the `solidity-natspec` skill. Update th
 out.push("> facet interface changes.");
 out.push("");
 
-// Table of contents, grouped by layer.
+// Table of contents: flat list of every facet in document order.
 out.push("## Contents");
 out.push("");
-let tocLayer = -1;
 for (const facet of facets) {
-  const lr = layerRank(facet.rel);
-  if (lr !== tocLayer) {
-    if (tocLayer !== -1) out.push("");
-    tocLayer = lr;
-    out.push(`**${LAYER_TITLES[lr]}**`);
-    out.push("");
-  }
   out.push(`- [${facet.name}](#${facet.anchor})`);
 }
 out.push("");

@@ -5,8 +5,6 @@
 
 ## Contents
 
-**Core / supporting facets**
-
 - [Access Control](#access-control)
 - [Adjust Balances](#adjust-balances)
 - [Allowance](#allowance)
@@ -92,9 +90,6 @@
 - [Transfer And Lock By Partition](#transfer-and-lock-by-partition)
 - [Transfer By Partition](#transfer-by-partition)
 - [Voting Security Holders](#voting-security-holders)
-
-**Layer 1**
-
 - [Compliance](#compliance)
 - [ERC20 Votes](#erc20-votes)
 - [External Control List](#external-control-list)
@@ -108,9 +103,6 @@
 - [Revocation List](#revocation-list)
 - [Snapshots](#snapshots)
 - [Votes](#votes)
-
-**Layer 2**
-
 - [Amortization](#amortization)
 - [Bond Read](#bond-read)
 - [Equity](#equity)
@@ -124,9 +116,6 @@
 - [Scheduled Cross Ordered Tasks](#scheduled-cross-ordered-tasks)
 - [Security](#security)
 - [Voting](#voting)
-
-**Layer 3**
-
 - [Bond USA](#bond-usa)
 - [Equity USA](#equity-usa)
 - [Transfer And Lock](#transfer-and-lock)
