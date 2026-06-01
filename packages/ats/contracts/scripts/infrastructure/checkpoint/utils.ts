@@ -208,6 +208,7 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
       getBondFixedRateFacets: () => [],
       getBondKpiLinkedRateFacets: () => [],
       getLoanFacets: () => [],
+      getDepositTokenFacets: () => [],
       getLoansPortfolioFacets: () => [],
       getFactoryFacets: () => [],
     },

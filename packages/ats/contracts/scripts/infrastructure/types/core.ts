@@ -778,6 +778,7 @@ export interface DeploymentOutputType {
     getBondFixedRateFacets(): FacetMetadata[];
     getBondKpiLinkedRateFacets(): FacetMetadata[];
     getLoanFacets(): FacetMetadata[];
+    getDepositTokenFacets(): FacetMetadata[];
     getLoansPortfolioFacets(): FacetMetadata[];
     getFactoryFacets(): FacetMetadata[];
   };
