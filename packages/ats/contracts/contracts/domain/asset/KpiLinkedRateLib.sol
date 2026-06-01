@@ -60,17 +60,13 @@ library KpiLinkedRateLib {
     ) private view returns (uint256 rate_, uint8 rateDecimals_) {
         (uint256 previousRate, uint8 previousRateDecimals, bool found) = _previousRate(couponID);
 
-        if (!found) {
-            rate_ = kpiData.baseRate + kpiData.missedPenalty;
-        } else {
-            uint256 adjustedPreviousRate = DecimalsLib.calculateDecimalsAdjustment(
-                previousRate,
-                previousRateDecimals,
-                kpiData.rateDecimals
-            );
-
-            rate_ = adjustedPreviousRate + kpiData.missedPenalty;
-        }
+        rate_ =
+            (
+                (found)
+                    ? DecimalsLib.calculateDecimalsAdjustment(previousRate, previousRateDecimals, kpiData.rateDecimals)
+                    : kpiData.baseRate
+            ) +
+            kpiData.missedPenalty;
 
         if (rate_ > kpiData.maxRate) {
             rate_ = kpiData.maxRate;
