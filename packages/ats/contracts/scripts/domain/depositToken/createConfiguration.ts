@@ -3,17 +3,10 @@
 /**
  * Deposit Token configuration module.
  *
- * Creates the deposit token configuration in BusinessLogicResolver by calling
- * the generic infrastructure operation with the deposit-token-specific facet
- * list and configuration id.
- *
- * This is a thin wrapper around the generic createConfiguration() operation,
- * providing the deposit-token facet list. Every facet listed here is initialised
- * by `Factory._deployDepositTokenSecurity`, so the set must stay in sync with that
- * function or `setOperationalStatus` will not mark deployed proxies operational.
- *
- * See `docs/DEPOSIT_TOKEN_PLAN.md` for the rationale of every facet listed
- * here.
+ * Registers the deposit token configuration in the BusinessLogicResolver by calling the generic
+ * createConfiguration() operation with the deposit-token facet list and configuration id. Every
+ * facet listed here is initialised by `Factory._deployDepositToken`, so the set must stay in sync
+ * with that function or `setOperationalStatus` will not mark deployed proxies operational.
  *
  * @module domain/depositToken/createConfiguration
  */
@@ -31,28 +24,21 @@ import { DEPOSIT_TOKEN_CONFIG_ID } from "../constants";
 import { atsRegistry } from "../atsRegistry";
 
 /**
- * Deposit Token Configuration
+ * Deposit Token configuration: 43 facets (42 capability facets + InitializerFacet).
  *
- * 43 facets total (42 capability facets + InitializerFacet), derived from the
- * capabilities matrix in `docs/DEPOSIT_TOKEN_PLAN.md` §3.
- *
- * Grouped per YES capability plus the always-on initializer + diamond
- * infrastructure block. Capabilities marked FALSE in capabilities.txt
- * (Compliance, KYC, External KYC, External Pause, Protected Partitions,
- * Identity & Claims, Snapshots, Lock, …) have no facet in this list.
+ * A deposit token is a minimal cash-style asset, so this list omits the facets for capabilities
+ * it does not expose (compliance, KYC, external KYC, external pause, protected partitions,
+ * identity, snapshots, lock, coupon, maturity, …). Each facet listed here has a matching
+ * initialiser in `Factory._deployDepositToken`.
  */
 const DEPOSIT_TOKEN_FACETS = [
   // Always-on (initializers + diamond infra)
   "AccessControlFacet",
   "DiamondFacet",
-  "InitializerFacet", // required by setOperationalStatus / Factory._deployDepositTokenSecurity
+  "InitializerFacet", // required by setOperationalStatus / Factory._deployDepositToken
   "ControlListFacet", // also = Eligibility
   "CoreFacet", // also = Core
   "CapFacet", // also = Cap
-
-  // NOTE: per capabilities.txt the deposit token excludes Compliance, KYC, External KYC,
-  // External Pause, Protected Partitions and Identity & Claims — their facets are deliberately
-  // absent from this list (and from Factory._deployDepositTokenSecurity).
 
   // Allowance (includes approve)
   "AllowanceFacet",
@@ -86,7 +72,7 @@ const DEPOSIT_TOKEN_FACETS = [
   "OperatorClearingHoldByPartitionFacet",
 
   // Partitions
-  "PartitionsFacet", // initializeERC1410 folded in here; ERC1410ManagementFacet removed
+  "PartitionsFacet",
 
   // Batch
   "BatchControllerFacet",

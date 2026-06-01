@@ -402,13 +402,11 @@ abstract contract Factory is IFactory {
 
     /**
      * @notice Deploys and fully initialises a deposit token proxy.
-     * @dev DepositToken is a minimal cash-style asset. Only the facets in the deposit-token
-     *      capability matrix are deployed and initialised, via `_deployDepositToken`
-     *      (see `docs/DEPOSIT_TOKEN_PLAN.md` §3). The deposit-token configuration intentionally
-     *      excludes `SecurityFacet`, so no regulation metadata is persisted on-chain; the
-     *      supplied `FactoryRegulationData` is validated by `checkRegulation` and emitted for
-     *      indexing only. The proxy is marked operational and this factory's temporary
-     *      `DEFAULT_ADMIN_ROLE` is renounced before emitting `DepositTokenDeployed`.
+     * @dev Creates the proxy and initialises its facets via `_deployDepositToken`, marks the
+     *      proxy operational and renounces this factory's temporary `DEFAULT_ADMIN_ROLE`. The
+     *      deposit token configuration does not include `SecurityFacet`, so
+     *      `_factoryRegulationData` is validated by `checkRegulation` and emitted in
+     *      `DepositTokenDeployed` but not persisted on-chain.
      * @param _depositTokenData Deposit token creation data wrapping the shared `SecurityData`.
      * @param _factoryRegulationData Regulation type and sub-type validated for the deposit token.
      * @return depositTokenAddress_ Address of the newly deployed deposit token proxy.
@@ -528,19 +526,17 @@ abstract contract Factory is IFactory {
     }
 
     /**
-     * @notice Deploys a deposit-token proxy and initialises ONLY the facets that belong to the
-     *         deposit-token configuration.
-     * @dev DepositToken is a minimal cash-style asset. Unlike `_deploySecurity`, this routine
-     *      deliberately omits the snapshot, lock, transfer-and-lock, corporate-action, identity,
-     *      recovery, SSI, balance-adjustment, scheduled-task, ERC20-permit, ERC20-votes and
-     *      protected-by-partition initialisers — none of those facets are part of the
-     *      deposit-token capability matrix (see `docs/DEPOSIT_TOKEN_PLAN.md` §3) and therefore
-     *      are not registered in `DEPOSIT_TOKEN_FACETS`. Every facet that IS registered there
-     *      must be initialised here, otherwise `IInitializer.setOperationalStatus` would never
-     *      mark the proxy operational. The `InitializerFacet` batch size is seeded last so a
-     *      single `setOperationalStatus` pass can validate every facet above.
+     * @notice Deploys a deposit-token proxy and initialises only the facets it exposes.
+     * @dev Initialises exactly the facets registered for the deposit-token resolver
+     *      configuration and no others; in particular it does not call the snapshot, lock,
+     *      transfer-and-lock, corporate-action, identity, recovery, SSI, balance-adjustment,
+     *      scheduled-task, ERC20-permit, ERC20-votes, compliance, KYC, external-pause or
+     *      protected-partition initialisers. Each initialiser invoked here requires its facet to
+     *      be present in the resolver configuration, otherwise `IInitializer.setOperationalStatus`
+     *      cannot mark the proxy operational. The `InitializerFacet` batch size is seeded last so a
+     *      single `setOperationalStatus` pass validates every facet initialised above.
      * @param _securityData Common security deployment configuration.
-     * @param _securityType Security type recorded in core metadata (DepositToken).
+     * @param _securityType Security type recorded in core metadata.
      * @return securityAddress_ Address of the fully initialised deposit-token proxy.
      */
     function _deployDepositToken(
@@ -570,7 +566,7 @@ abstract contract Factory is IFactory {
         ICustomData(securityAddress_).initializeCustomData();
         IDocumentation(securityAddress_).initializeDocumentation();
 
-        // Partitions and controller flag (initializeERC1410 was folded into initializePartitions)
+        // Partitions and controller flag
         IPartitions(securityAddress_).initializePartitions(_securityData.isMultiPartition);
         IController(securityAddress_).initializeController(_securityData.isControllable);
 
@@ -618,11 +614,8 @@ abstract contract Factory is IFactory {
         IHoldFacet(securityAddress_).initializeHold();
         IHoldByPartition(securityAddress_).initializeHoldByPartition();
 
-        // NOTE: per capabilities.txt the deposit token excludes Compliance, KYC, External KYC,
-        // External Pause, Protected Partitions and Identity & Claims — those facets are NOT in
-        // DEPOSIT_TOKEN_FACETS and so their initialisers are intentionally not called here.
-
-        // Seed the initializer batch size LAST so setOperationalStatus covers every facet above.
+        // Seed the initializer batch size last so a single setOperationalStatus pass
+        // can validate every facet initialised above.
         IInitializer(securityAddress_).initializeInitializer(_SECURITY_FACETS_MAX);
     }
 
