@@ -6,9 +6,7 @@ import { IScheduledCrossOrderedTasks } from "./scheduledCrossOrderedTask/ISchedu
 import { IAccessControl } from "./accessControl/IAccessControl.sol";
 import { IAdjustBalances } from "./adjustBalances/IAdjustBalances.sol";
 import { IAmortization } from "./amortization/IAmortization.sol";
-import { IBondUSA } from "./layer_3/bondUSA/IBondUSA.sol";
 import { IMaturity } from "./maturity/IMaturity.sol";
-import { IBondRead } from "./layer_2/bond/IBondRead.sol";
 import { IPrincipal } from "./principal/IPrincipal.sol";
 
 // Layer 1 — ERC1400
@@ -34,8 +32,6 @@ import { ITransfer } from "./transfer/ITransfer.sol";
 // Layer 1 — Remaining facets
 import { IERC20Votes } from "./erc20Votes/IERC20Votes.sol";
 import { IERC3643 } from "./layer_1/ERC3643/IERC3643.sol";
-import { IEquity } from "./layer_2/equity/IEquity.sol";
-import { IEquityUSA } from "./layer_3/equityUSA/IEquityUSA.sol";
 import { IExternalControlList } from "./layer_1/externalControlList/IExternalControlList.sol";
 import { IExternalControlListManagement } from "./externalControlListManagement/IExternalControlListManagement.sol";
 import { IExternalKycList } from "./layer_1/externalKycList/IExternalKycList.sol";
@@ -60,7 +56,6 @@ import { IVoting } from "./voting/IVoting.sol";
 import { IVotingSecurityHolders } from "./votingSecurityHolders/IVotingSecurityHolders.sol";
 
 // Layer 3
-import { ISecurity } from "./layer_2/security/ISecurity.sol";
 import { ISsiManagement } from "./ssiManagement/ISsiManagement.sol";
 import { ITimeTravel } from "../test/testTimeTravel/ITimeTravel.sol";
 import { IBalanceTracker } from "./balanceTracker/IBalanceTracker.sol";
@@ -194,11 +189,8 @@ interface IAsset is
     IRecovery,
     IBurn,
     IScheduledCrossOrderedTasks,
-    IBondRead,
     IPrincipal,
     IMaturity,
-    IEquity,
-    ISecurity,
     ICorporateActions,
     IProtectedPartitions,
     IProceedRecipients,
@@ -211,8 +203,6 @@ interface IAsset is
     ILoansPortfolio,
     IVoting,
     IVotingSecurityHolders,
-    IBondUSA,
-    IEquityUSA,
     ITransferAndLock,
     ITransferAndLockByPartition,
     // Corporate Actions

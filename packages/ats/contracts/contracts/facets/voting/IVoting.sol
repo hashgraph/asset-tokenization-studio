@@ -7,8 +7,8 @@ import { IVotingTypes } from "./IVotingTypes.sol";
 bytes32 constant RESOLVER_KEY_VOTING = 0x88b1621426a5ad16c2399cdc8a04b7da54bf8ddf04c60aeb2fe17ad903891b58;
 
 /// @title IVoting
+/// @author Asset Tokenization Studio Team
 /// @notice Interface for voting rights management functionality
-
 interface IVoting is IVotingTypes {
     /**
      * @notice Emitted once when the voting capability is initialised on a token.
@@ -66,9 +66,9 @@ interface IVoting is IVotingTypes {
     function cancelVoting(uint256 _voteId) external returns (bool success_);
 
     /// @notice Force-cancels a voting regardless of its record date
-    /// @dev Restricted to `ROLE_CORPORATE_ACTION_FORCE_CANCEL` and gated by the unpaused state
-    ///      and `onlyMatchingActionType`. Marks the corporate action disabled unconditionally —
-    ///      bypasses `VotingAlreadyRecorded` — and emits `VotingForceCancelled`.
+    /// @dev Restricted to `ROLE_CORPORATE_ACTION_FORCE_CANCEL` and gated by the operational,
+    ///      unpaused state and `onlyMatchingActionType`. Marks the corporate action disabled
+    ///      unconditionally — bypasses `VotingAlreadyRecorded` — and emits `VotingForceCancelled`.
     /// @param _voteId The ID of the voting to force-cancel
     /// @return success_ Whether the force-cancellation was successful
     function forceCancelVoting(uint256 _voteId) external returns (bool success_);

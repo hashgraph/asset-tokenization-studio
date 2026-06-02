@@ -20,9 +20,13 @@ export { deployTupProxyFixture, deployTupProxyWithV2Fixture, TUP_VERSIONS } from
 export type { TupProxyFixtureResult } from "./tupProxy.fixture";
 
 // Token fixtures
-export { deployEquityTokenFixture, DEFAULT_EQUITY_PARAMS, getEquityDetails } from "./tokens/equity.fixture";
+export { deployEquityTokenFixture, DEFAULT_EQUITY_PARAMS, makeEquityDetailsData } from "./tokens/equity.fixture";
 
-export { deployBondTokenFixture, DEFAULT_BOND_PARAMS, getBondDetails } from "./tokens/bond.fixture";
+export {
+  deployBondTokenFixture,
+  DEFAULT_BOND_PARAMS,
+  makeBondDetailsData as getBondDetails,
+} from "./tokens/bond.fixture";
 
 export { deployBondFixedRateTokenFixture, DEFAULT_BOND_FIXED_RATE_PARAMS } from "./tokens/bondFixedRate.fixture";
 

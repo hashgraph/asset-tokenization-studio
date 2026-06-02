@@ -46,7 +46,7 @@ export const DEFAULT_EQUITY_PARAMS = {
   nominalValueDecimals: 2,
 } as const;
 
-export function getEquityDetails(params?: DeepPartial<EquityDetailsDataParams>) {
+export function makeEquityDetailsData(params?: DeepPartial<EquityDetailsDataParams>) {
   return {
     votingRight: params?.votingRight ?? DEFAULT_EQUITY_PARAMS.votingRight,
     informationRight: params?.informationRight ?? DEFAULT_EQUITY_PARAMS.informationRight,
@@ -88,7 +88,7 @@ export async function deployEquityTokenFixture({
     (useLoadFixture ? await loadFixture(deployAtsInfrastructureFixture) : await deployAtsInfrastructureFixture());
   const { factory, blr, deployer } = infrastructure;
   const securityData = getSecurityData(blr, equityDataParams?.securityData);
-  const equityDetails = getEquityDetails(equityDataParams?.equityDetails);
+  const equityDetails = makeEquityDetailsData(equityDataParams?.equityDetails);
   // Deploy equity token using factory helper
   const diamond = await deployEquityFromFactory(
     {

@@ -53,11 +53,16 @@ export default class CreateBondFixedRateRequest extends ValidatedRequest<CreateB
   nominalValueDecimals: number;
   startingDate: string;
   maturityDate: string;
-  regulationType: number;
-  regulationSubType: number;
-  isCountryControlListWhiteList: boolean;
-  countries: string;
-  info: string;
+  @OptionalField()
+  regulationType?: number;
+  @OptionalField()
+  regulationSubType?: number;
+  @OptionalField()
+  isCountryControlListWhiteList?: boolean;
+  @OptionalField()
+  countries?: string;
+  @OptionalField()
+  info?: string;
   configId: string;
   configVersion: number;
   rate: number;
@@ -126,11 +131,11 @@ export default class CreateBondFixedRateRequest extends ValidatedRequest<CreateB
     nominalValueDecimals: number;
     startingDate: string;
     maturityDate: string;
-    regulationType: number;
-    regulationSubType: number;
-    isCountryControlListWhiteList: boolean;
-    countries: string;
-    info: string;
+    regulationType?: number;
+    regulationSubType?: number;
+    isCountryControlListWhiteList?: boolean;
+    countries?: string;
+    info?: string;
     configId: string;
     configVersion: number;
     rate: number;
@@ -168,10 +173,11 @@ export default class CreateBondFixedRateRequest extends ValidatedRequest<CreateB
         return SecurityDate.checkDateTimestamp(parseInt(val), parseInt(this.startingDate), undefined);
       },
       regulationType: (val) => {
-        return Factory.checkRegulationType(val);
+        return Factory.checkRegulationType(val!);
       },
       regulationSubType: (val) => {
-        return Factory.checkRegulationSubType(val, this.regulationType);
+        if (this.regulationType === undefined) return [];
+        return Factory.checkRegulationSubType(val!, this.regulationType);
       },
       configId: FormatValidation.checkBytes32Format(),
       configVersion: FormatValidation.checkNumber({ min: MIN_CONFIG_VERSION }),

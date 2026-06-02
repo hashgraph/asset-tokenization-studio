@@ -6,7 +6,6 @@ import { IKyc } from "../kyc/IKyc.sol";
 import { ROLE_MATURITY_REDEEMER } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
@@ -16,10 +15,7 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
  * @title MaturityByPartition
  * @author Asset Tokenization Studio Team
  * @notice Abstract implementation of `IMaturityByPartition` providing single-partition
- *         bond maturity redemption with full modifier chain enforcement.
- * @dev Delegates storage writes to `ERC1410StorageWrapper.redeemByPartition`. Preserves
- *      all modifier semantics from the original `Bond.redeemAtMaturityByPartition`
- *      implementation. Intended to be inherited by `MaturityByPartitionFacet`.
+ *         maturity redemption with full modifier chain enforcement.
  */
 abstract contract MaturityByPartition is IMaturityByPartition, Modifiers {
     /// @inheritdoc IMaturityByPartition
@@ -51,7 +47,7 @@ abstract contract MaturityByPartition is IMaturityByPartition, Modifiers {
         onlyUnrecoveredAddress(_tokenHolder)
         onlyListedAllowed(_tokenHolder)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
-        onlyValidMaturityDate(TimeTravelStorageWrapper.getBlockTimestamp())
+        onlyMaturityReached
     {
         TokenCoreOps.redeemByPartition(_partition, _tokenHolder, EvmAccessors.getMsgSender(), _amount, "", "");
     }

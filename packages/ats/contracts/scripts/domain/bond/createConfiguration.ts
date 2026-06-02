@@ -152,9 +152,6 @@ const BOND_FACETS = [
   "MaturityByPartitionFacet",
 
   // Jurisdiction-Specific
-  "SecurityFacet",
-  "BondUSAFacet",
-  "BondUSAReadFacet",
   "PrincipalFacet",
 ] as const;
 

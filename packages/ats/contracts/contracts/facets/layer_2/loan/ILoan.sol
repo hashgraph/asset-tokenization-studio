@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { RegulationData, AdditionalSecurityData } from "../../../constants/regulation.sol";
-
 /// @custom:hash resolverKey Loan
 bytes32 constant RESOLVER_KEY_LOAN = 0x17c2126e932655e91a8e803b275de0a930c4b51a109b751567a95ee5d6bd6eba;
 

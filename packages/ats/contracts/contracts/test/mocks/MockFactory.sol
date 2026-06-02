@@ -152,11 +152,7 @@ abstract contract MockFactory is Factory, IMockFactory {
         )
         returns (address bondAddress_)
     {
-        bondAddress_ = _deployBond(
-            _bondFixedRateData.bondData,
-            _bondFixedRateData.factoryRegulationData,
-            SecurityType.BondFixedRate
-        );
+        bondAddress_ = _deployBond(_bondFixedRateData.bondData, SecurityType.BondFixedRate);
         IFixedRate(bondAddress_).initializeFixedRate(_bondFixedRateData.fixedRateData);
         IInterestRate(bondAddress_).initializeInterestRateType(IInterestRate.RateType.FIXED);
         (bool isOperational_, ) = IInitializer(bondAddress_).setOperationalStatus();
@@ -236,7 +232,7 @@ abstract contract MockFactory is Factory, IMockFactory {
      * @return bondAddress_ Address of the deployed KPI-linked-rate bond proxy.
      */
     function _deployBondKpiLinkedRate(BondKpiLinkedRateData calldata _data) internal returns (address bondAddress_) {
-        bondAddress_ = _deployBond(_data.bondData, _data.factoryRegulationData, SecurityType.BondKpiLinkedRate);
+        bondAddress_ = _deployBond(_data.bondData, SecurityType.BondKpiLinkedRate);
         IKpiLinkedRate(bondAddress_).initializeKpiLinkedRate(_data.interestRate, _data.impactData);
         IInterestRate(bondAddress_).initializeInterestRateType(IInterestRate.RateType.KPI_LINKED);
         IKpis(bondAddress_).initializeKpis();

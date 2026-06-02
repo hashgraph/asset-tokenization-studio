@@ -11,7 +11,7 @@ import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 /**
  * @title ScheduledBalanceAdjustmentFacet
  * @author Asset Tokenization Studio Team
- * @notice Diamond facet that consolidates all 6 scheduled balance-adjustment selectors under
+ * @notice Diamond facet that consolidates all 8 scheduled balance-adjustment selectors under
  *         a single `RESOLVER_KEY_SCHEDULED_BALANCE_ADJUSTMENT`.
  * @dev Inherits implementation from `ScheduledBalanceAdjustment` and satisfies the
  *      `IStaticFunctionSelectors` contract required by the Diamond proxy for selector

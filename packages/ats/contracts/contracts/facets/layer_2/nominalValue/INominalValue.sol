@@ -13,7 +13,7 @@ bytes32 constant RESOLVER_KEY_NOMINAL_VALUE = 0xfa54bc09a6a76763f17be0504e29b9c2
  * @dev Implemented by `NominalValueFacet` via the abstract `NominalValue` writer. Events are
  *      declared here (writer interface) per the project's event-emission rule; the abstract is
  *      the sole emit site for each event. Currency uses `bytes3` to hold an ISO 4217 alphabetic
- *      code (e.g. `0x555344` for "USD"), matching the convention shared with bond/equity details.
+ *      code (e.g. `0x555344` for "USD"), matching the convention shared with security details.
  */
 interface INominalValue {
     /**
@@ -49,8 +49,8 @@ interface INominalValue {
      * @notice Initialises the nominal value capability with amount, decimals, and currency.
      * @dev Callable once per token; subsequent calls revert with `AlreadyInitialized` via the
      *      `onlyNotNominalValueInitialized` modifier on the implementation. The factory calls this
-     *      automatically when deploying bonds and equities, forwarding the currency from the
-     *      bond/equity details so newly-deployed tokens land with the field populated.
+     *      automatically when deploying security tokens, forwarding the currency from the
+     *      security details so newly-deployed tokens land with the field populated.
      * @param _nominalValue Initial nominal value amount.
      * @param _nominalValueDecimals Number of decimals applied to `_nominalValue`.
      * @param _nominalValueCurrency ISO 4217 currency code as `bytes3`; pass `0x000000` to leave unset.

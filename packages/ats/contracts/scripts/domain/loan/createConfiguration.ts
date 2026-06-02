@@ -151,9 +151,6 @@ const LOAN_FACETS = [
   "AdjustBalancesFacet",
   "ScheduledBalanceAdjustmentFacet",
   "ProtectedPartitionsFacet",
-
-  // Jurisdiction-Specific
-  "SecurityFacet",
 ] as const;
 
 /**

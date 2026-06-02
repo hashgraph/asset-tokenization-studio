@@ -103,8 +103,9 @@ class EquityInPort implements IEquityInPort {
       internalKycActivated: req.internalKycActivated,
       isMultiPartition: req.isMultiPartition,
       maxSupply: BigDecimal.fromString(req.numberOfShares),
-      regulationType: CastRegulationType.fromNumber(req.regulationType),
-      regulationsubType: CastRegulationSubType.fromNumber(req.regulationSubType),
+      regulationType: req.regulationType !== undefined ? CastRegulationType.fromNumber(req.regulationType) : undefined,
+      regulationsubType:
+        req.regulationSubType !== undefined ? CastRegulationSubType.fromNumber(req.regulationSubType) : undefined,
       isCountryControlListWhiteList: req.isCountryControlListWhiteList,
       countries: req.countries,
       info: req.info,
@@ -167,7 +168,8 @@ class EquityInPort implements IEquityInPort {
       conversionRight: res.equity.conversionRight,
       redemptionRight: res.equity.redemptionRight,
       putRight: res.equity.putRight,
-      dividendRight: CastDividendType.toNumber(res.equity.dividendRight),
+      dividendRight:
+        res.equity.dividendRight !== undefined ? CastDividendType.toNumber(res.equity.dividendRight) : undefined,
       currency: res.equity.currency,
       nominalValue: res.equity.nominalValue.toString(),
       nominalValueDecimals: res.equity.nominalValueDecimals,

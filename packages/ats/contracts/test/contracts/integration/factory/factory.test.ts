@@ -15,7 +15,7 @@ import {
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture } from "@test";
 import { getRegulationData, getSecurityData } from "@test";
-import { getEquityDetails } from "@test";
+import { makeEquityDetailsData } from "@test";
 import {
   RegulationType,
   RegulationSubType,
@@ -100,7 +100,7 @@ describe("Factory Tests", () => {
           security: getSecurityData(businessLogicResolver, {
             rbacs: init_rbacs,
           }),
-          equityDetails: getEquityDetails(),
+          equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolver = ADDRESS_ZERO;
         equityData.security.resolverProxyConfiguration = {
@@ -140,7 +140,7 @@ describe("Factory Tests", () => {
           security: getSecurityData(businessLogicResolver, {
             rbacs: init_rbacs,
           }),
-          equityDetails: getEquityDetails(),
+          equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfiguration = {
           key: EQUITY_CONFIG_ID,
@@ -158,7 +158,7 @@ describe("Factory Tests", () => {
             erc20MetadataInfo: { isin: "US037833100" }, // 11 characters
             rbacs: init_rbacs,
           }),
-          equityDetails: getEquityDetails(),
+          equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfiguration = {
           key: EQUITY_CONFIG_ID,
@@ -177,7 +177,7 @@ describe("Factory Tests", () => {
             erc20MetadataInfo: { isin: "US03783310051" }, // 13 characters
             rbacs: init_rbacs,
           }),
-          equityDetails: getEquityDetails(),
+          equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfiguration = {
           key: EQUITY_CONFIG_ID,
@@ -217,7 +217,7 @@ describe("Factory Tests", () => {
             erc20MetadataInfo: { isin: "US0378331009" }, // Wrong checksum digit
             rbacs: init_rbacs,
           }),
-          equityDetails: getEquityDetails(),
+          equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfiguration = {
           key: EQUITY_CONFIG_ID,
@@ -236,7 +236,7 @@ describe("Factory Tests", () => {
             erc20MetadataInfo: { isin: "US0378331009" }, // Wrong checksum digit
             rbacs: init_rbacs,
           }),
-          equityDetails: getEquityDetails(),
+          equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfiguration = {
           key: EQUITY_CONFIG_ID,
@@ -280,7 +280,7 @@ describe("Factory Tests", () => {
           security: getSecurityData(businessLogicResolver, {
             rbacs: emptyAdminRbacs,
           }),
-          equityDetails: getEquityDetails(),
+          equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfiguration = {
           key: EQUITY_CONFIG_ID,
@@ -332,7 +332,7 @@ describe("Factory Tests", () => {
           security: getSecurityData(businessLogicResolver, {
             rbacs: noAdminRbacs,
           }),
-          equityDetails: getEquityDetails(),
+          equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfiguration = {
           key: EQUITY_CONFIG_ID,
@@ -357,7 +357,7 @@ describe("Factory Tests", () => {
           security: getSecurityData(businessLogicResolver, {
             rbacs: mixedAdminRbacs,
           }),
-          equityDetails: getEquityDetails(),
+          equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfiguration = {
           key: EQUITY_CONFIG_ID,
@@ -402,7 +402,7 @@ describe("Factory Tests", () => {
           security: getSecurityData(businessLogicResolver, {
             rbacs: init_rbacs,
           }),
-          equityDetails: getEquityDetails(),
+          equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfiguration = {
           key: EQUITY_CONFIG_ID,
@@ -448,7 +448,7 @@ describe("Factory Tests", () => {
           security: getSecurityData(businessLogicResolver, {
             rbacs: init_rbacs,
           }),
-          equityDetails: getEquityDetails(),
+          equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfiguration = {
           key: EQUITY_CONFIG_ID,
@@ -470,7 +470,7 @@ describe("Factory Tests", () => {
           security: getSecurityData(businessLogicResolver, {
             rbacs: init_rbacs,
           }),
-          equityDetails: getEquityDetails(),
+          equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfiguration = {
           key: EQUITY_CONFIG_ID,
@@ -563,7 +563,7 @@ describe("Factory Tests", () => {
     it("GIVEN an empty Resolver WHEN deploying a new resolverProxy THEN transaction fails", async () => {
       const equityData = {
         security: getSecurityData(businessLogicResolver),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -584,7 +584,7 @@ describe("Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           erc20MetadataInfo: { isin: "short" },
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -608,7 +608,7 @@ describe("Factory Tests", () => {
     it("GIVEN no admin WHEN deploying a new resolverProxy THEN transaction fails", async () => {
       const equityData = {
         security: getSecurityData(businessLogicResolver),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -628,7 +628,7 @@ describe("Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -655,7 +655,7 @@ describe("Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -682,7 +682,7 @@ describe("Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -722,20 +722,10 @@ describe("Factory Tests", () => {
       expect(metadata.info.isin).to.be.equal(equityData.security.erc20MetadataInfo.isin);
       expect(metadata.securityType).to.be.equal(SecurityType.EQUITY);
 
-      const equityFacet = await ethers.getContractAt("Equity", equityAddress);
-
-      const equityMetadata = await equityFacet.getEquityDetails();
-      expect(equityMetadata.votingRight).to.equal(equityData.equityDetails.votingRight);
-      expect(equityMetadata.informationRight).to.equal(equityData.equityDetails.informationRight);
-      expect(equityMetadata.liquidationRight).to.equal(equityData.equityDetails.liquidationRight);
-      expect(equityMetadata.subscriptionRight).to.equal(equityData.equityDetails.subscriptionRight);
-      expect(equityMetadata.conversionRight).to.equal(equityData.equityDetails.conversionRight);
-      expect(equityMetadata.redemptionRight).to.equal(equityData.equityDetails.redemptionRight);
-      expect(equityMetadata.putRight).to.equal(equityData.equityDetails.putRight);
-      expect(equityMetadata.dividendRight).to.equal(equityData.equityDetails.dividendRight);
-      expect(equityMetadata.currency).to.equal(equityData.equityDetails.currency);
-      expect(equityMetadata.nominalValue).to.equal(equityData.equityDetails.nominalValue);
-      expect(equityMetadata.nominalValueDecimals).to.equal(equityData.equityDetails.nominalValueDecimals);
+      const nominalValueFacet = await ethers.getContractAt("NominalValue", equityAddress);
+      expect(await nominalValueFacet.getNominalValueCurrency()).to.equal(equityData.equityDetails.currency);
+      expect(await nominalValueFacet.getNominalValue()).to.equal(equityData.equityDetails.nominalValue);
+      expect(await nominalValueFacet.getNominalValueDecimals()).to.equal(equityData.equityDetails.nominalValueDecimals);
 
       const capFacet = await ethers.getContractAt("Cap", equityAddress);
 
@@ -901,13 +891,15 @@ describe("Factory Tests", () => {
       const maxSupply = await capFacet.getMaxSupply();
       expect(maxSupply).to.equal(bondData.security.maxSupply);
 
-      const bondFacet = await ethers.getContractAt("BondRead", bondAddress);
-      const bondDetails = await bondFacet.getBondDetails();
-      expect(bondDetails.currency).to.be.deep.equal(bondData.bondDetails.currency);
-      expect(bondDetails.nominalValue).to.be.deep.equal(bondData.bondDetails.nominalValue);
-      expect(bondDetails.nominalValueDecimals).to.be.deep.equal(bondData.bondDetails.nominalValueDecimals);
-      expect(bondDetails.startingDate).to.be.deep.equal(bondData.bondDetails.startingDate);
-      expect(bondDetails.maturityDate).to.be.deep.equal(bondData.bondDetails.maturityDate);
+      const nominalFacet = await ethers.getContractAt("NominalValue", bondAddress);
+
+      expect(await nominalFacet.getNominalValueCurrency()).to.be.deep.equal(bondData.bondDetails.currency);
+      expect(await nominalFacet.getNominalValue()).to.be.deep.equal(bondData.bondDetails.nominalValue);
+      expect(await nominalFacet.getNominalValueDecimals()).to.be.deep.equal(bondData.bondDetails.nominalValueDecimals);
+
+      const maturityFacet = await ethers.getContractAt("Maturity", bondAddress);
+      expect(await maturityFacet.getMaturityDate()).to.be.deep.equal(bondData.bondDetails.maturityDate);
+
       const couponFacet = await ethers.getContractAt("CouponFacet", bondAddress);
       const couponCount = await couponFacet.getCouponCount();
       expect(couponCount).to.equal(0);
@@ -1117,7 +1109,7 @@ describe("Factory Tests", () => {
           erc20MetadataInfo: { isin: "US037833100" }, // 11 characters - too short
           rbacs: init_rbacs,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -1138,7 +1130,7 @@ describe("Factory Tests", () => {
           erc20MetadataInfo: { isin: "US03783310051" }, // 13 characters - too long
           rbacs: init_rbacs,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -1159,7 +1151,7 @@ describe("Factory Tests", () => {
           erc20MetadataInfo: { isin: "" }, // Empty string
           rbacs: init_rbacs,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -1831,7 +1823,7 @@ describe("Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: emptyAdminRbacs,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -1858,7 +1850,7 @@ describe("Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: zeroAddressAdminRbacs,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -1889,7 +1881,7 @@ describe("Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: noAdminRbacs,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -1916,7 +1908,7 @@ describe("Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: mixedAdminRbacs,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,

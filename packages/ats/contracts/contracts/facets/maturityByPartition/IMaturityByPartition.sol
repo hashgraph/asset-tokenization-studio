@@ -9,7 +9,7 @@ bytes32 constant RESOLVER_KEY_MATURITY_BY_PARTITION = 0x561e299af2bd67a767eee765
  * @title IMaturityByPartition
  * @author Asset Tokenization Studio Team
  * @notice Interface for redeeming a specified amount of tokens from a partition at
- *         bond maturity.
+ *         maturity.
  * @dev The caller must hold ROLE_MATURITY_REDEEMER. The contract must be unpaused and
  *      clearing disabled. The token holder must be on the allowed list with granted KYC
  *      status, must not be recovered, and the maturity date must have passed. In
@@ -31,7 +31,7 @@ interface IMaturityByPartition {
     function initializeMaturityByPartition() external;
 
     /**
-     * @notice Redeems a specified amount of tokens from a single partition at bond
+     * @notice Redeems a specified amount of tokens from a single partition at
      *         maturity.
      * @dev Emits a Transfer event on successful redemption via
      *      ERC1410StorageWrapper.redeemByPartition.

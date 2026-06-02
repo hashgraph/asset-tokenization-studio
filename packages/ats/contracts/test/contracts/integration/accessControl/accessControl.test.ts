@@ -322,7 +322,7 @@ describe("Access Control Tests", () => {
       ATS_ROLES.DEFAULT_ADMIN_ROLE, // grant new → effective
       ATS_ROLES.ROLE_PAUSER, // grant held → no-op
       ATS_ROLES.ROLE_AGENT, // revoke held → effective
-      ATS_ROLES.ROLE_BOND_MANAGER, // revoke unheld → no-op
+      ATS_ROLES.ROLE_MATURITY_MANAGER, // revoke unheld → no-op
     ];
     const requestedStates = [false, true, true, false, false];
 
@@ -340,7 +340,7 @@ describe("Access Control Tests", () => {
     expect(await asset.hasRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, signer_C.address)).to.equal(true);
     expect(await asset.hasRole(ATS_ROLES.ROLE_PAUSER, signer_C.address)).to.equal(true);
     expect(await asset.hasRole(ATS_ROLES.ROLE_AGENT, signer_C.address)).to.equal(false);
-    expect(await asset.hasRole(ATS_ROLES.ROLE_BOND_MANAGER, signer_C.address)).to.equal(false);
+    expect(await asset.hasRole(ATS_ROLES.ROLE_MATURITY_MANAGER, signer_C.address)).to.equal(false);
   });
 
   it("GIVEN an account that already has a role WHEN grantRole is called again THEN transaction fails with AccountAssignedToRole", async () => {

@@ -14,7 +14,7 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
 /**
  * @title KpiLinkedRateLib
  * @dev Library for calculating KPI-linked interest rates.
- * This library implements the rate calculation logic for bonds with KPI-linked rates.
+ * This library implements the rate calculation logic for securities with KPI-linked rates.
  *
  * The rate is calculated based on:
  * - Start rate: Rate applied before the start period

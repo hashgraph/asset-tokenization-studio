@@ -4,8 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IResolverProxy } from "../infrastructure/proxy/IResolverProxy.sol";
 import { IBusinessLogicResolver } from "../infrastructure/diamond/IBusinessLogicResolver.sol";
 import { ICore } from "../facets/core/ICore.sol";
-import { IBondRead } from "../facets/layer_2/bond/IBondRead.sol";
-import { IEquity } from "../facets/layer_2/equity/IEquity.sol";
 import { FactoryRegulationData, RegulationData, RegulationType, RegulationSubType } from "../constants/regulation.sol";
 
 /// @custom:hash resolverKey Factory
@@ -35,6 +33,18 @@ interface IFactory {
         /// @notice A loan instrument.
         Loan,
         DepositToken
+    }
+
+    /**
+     * @notice Categories of dividend entitlement an equity token may carry.
+     */
+    enum DividendType {
+        /// No dividend right.
+        NONE,
+        /// Preferential dividend — paid before common holders.
+        PREFERRED,
+        /// Ordinary dividend distributed pro-rata across common holders.
+        COMMON
     }
 
     /**
@@ -90,13 +100,62 @@ interface IFactory {
     }
 
     /**
+     * @notice Economic and rights parameters specific to equity tokens.
+     * @param votingRight          Whether holders carry voting rights.
+     * @param informationRight     Whether holders are entitled to company information.
+     * @param liquidationRight     Whether holders have a claim on assets upon liquidation.
+     * @param subscriptionRight    Whether holders may subscribe to new issuances.
+     * @param conversionRight      Whether holders may convert their tokens into another class.
+     * @param redemptionRight      Whether holders may redeem tokens for the underlying asset.
+     * @param putRight             Whether holders may force the issuer to repurchase tokens.
+     * @param dividendRight        Category of dividend entitlement this equity class carries.
+     * @param currency             ISO 4217 currency code encoded as `bytes3`.
+     * @param nominalValue         Face value of one equity unit (raw integer).
+     * @param nominalValueDecimals Number of decimal places applied to `nominalValue`.
+     */
+    struct EquityDetailsData {
+        bool votingRight;
+        bool informationRight;
+        bool liquidationRight;
+        bool subscriptionRight;
+        bool conversionRight;
+        bool redemptionRight;
+        bool putRight;
+        DividendType dividendRight;
+        bytes3 currency;
+        uint256 nominalValue;
+        uint8 nominalValueDecimals;
+    }
+
+    /**
      * @notice Full configuration for deploying an equity token.
      * @param security      Core security configuration shared across all security types.
      * @param equityDetails Equity-specific details such as dividend type and voting rights.
      */
     struct EquityData {
         SecurityData security;
-        IEquity.EquityDetailsData equityDetails;
+        EquityDetailsData equityDetails;
+    }
+
+    /**
+     * @notice Input data describing a bond's economic parameters.
+     * @dev    Replaces the removed `IBondRead.BondDetailsData` type. Consumed by the Factory
+     *         during `deployBond`, `deployBondFixedRate`, and `deployBondKpiLinkedRate`.
+     * @param currency               ISO 4217 currency code encoded as `bytes3`.
+     * @param nominalValue           Face value of one unit of the bond (raw integer).
+     * @param nominalValueDecimals   Number of decimals applied to `nominalValue`.
+     * @param startingDate           Bond issuance / start-of-coupon-accrual timestamp (Unix epoch,
+     *                               seconds). Persisted as metadata under
+     *                               `BOND_STARTING_DATE_METADATA_KEY`.
+     * @param maturityDate           Redemption date timestamp (Unix epoch, seconds). Must be
+     *                               strictly greater than `startingDate`.
+     */
+    struct BondDetailsData {
+        bytes3 currency;
+        uint256 nominalValue;
+        uint8 nominalValueDecimals;
+        uint256 startingDate;
+        uint256 maturityDate;
     }
 
     /**
@@ -108,7 +167,7 @@ interface IFactory {
      */
     struct BondData {
         SecurityData security;
-        IBondRead.BondDetailsData bondDetails;
+        BondDetailsData bondDetails;
         address[] proceedRecipients;
         bytes[] proceedRecipientsData;
     }

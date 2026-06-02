@@ -114,7 +114,7 @@ export const BondDetailsFixture = createFixture<BondDetails>((props) => {
   props.currency.faker((faker) => faker.finance.currencyCode());
   props.nominalValue.faker((faker) => faker.finance.amount({ min: 1, max: 10, dec: 2 }));
   props.nominalValueDecimals.faker((faker) => faker.number.int({ min: 1, max: 5 }));
-  props.startingDate.faker((faker) => faker.date.past());
+  props.startingDate?.faker((faker) => faker.date.past());
   props.maturityDate.faker((faker) => faker.date.recent());
 });
 
@@ -221,7 +221,7 @@ export const CreateBondRequestFixture = createFixture<CreateBondRequest>((reques
           ),
         ),
   );
-  request.isCountryControlListWhiteList.faker((faker) => faker.datatype.boolean());
+  request.isCountryControlListWhiteList?.faker((faker) => faker.datatype.boolean());
   request.countries?.faker((faker) =>
     faker.helpers
       .arrayElements(
@@ -230,7 +230,7 @@ export const CreateBondRequestFixture = createFixture<CreateBondRequest>((reques
       )
       .join(","),
   );
-  request.info.faker((faker) => faker.lorem.words());
+  request.info?.faker((faker) => faker.lorem.words());
   request.currency.faker((faker) => `0x${Buffer.from(faker.finance.currencyCode()).toString("hex")}`);
   request.nominalValue.faker((faker) => faker.finance.amount({ min: 1, max: 10, dec: 2 }));
   request.nominalValueDecimals.faker((faker) => faker.number.int({ min: 1, max: 5 }));
