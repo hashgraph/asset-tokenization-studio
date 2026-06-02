@@ -8,7 +8,6 @@ import { IController } from "../controller/IController.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
-import { ProtectedPartitionRoleValidator } from "../../infrastructure/utils/ProtectedPartitionRoleValidator.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
@@ -19,7 +18,7 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
  *         (self-redemption by the caller) and `redeemFrom` (operator-initiated on behalf
  *         of a token holder). All operations are restricted to single-partition mode.
  */
-abstract contract Burn is IBurn, Modifiers, ProtectedPartitionRoleValidator {
+abstract contract Burn is IBurn, Modifiers {
     /// @inheritdoc IBurn
     function initializeBurn() external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_BURN) {
         InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_BURN);

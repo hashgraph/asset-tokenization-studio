@@ -8,12 +8,11 @@ import { ScheduledTasksOps } from "../orchestrator/ScheduledTasksOps.sol";
 bytes32 constant STORAGE_LOCATION_LOAN = 0x2af22e338cd16bdeda633a06c0ad54c1b9d04b19487a6b1ed48b48c18d643800;
 
 /**
- * @title LoanDataStorage
- * @notice Backing storage for a single loan instrument's full lifecycle data.
- * @dev Enum-typed fields are stored as `uint8` for tight packing in region R2; the loan
- *      facet round-trips them through their respective `ILoan` enums on read/write.
- *      Mutated only through `LoanStorageWrapper` against the deterministic ERC-7201 slot.
- * @param initialized Whether the loan data has been initialised.
+ * @notice Backing storage for a single loan instrument's lifecycle, economics and risk data.
+ * @dev Enum-typed fields are stored as `uint8` to preserve tight packing in region R2.
+ *      Values are expected to be round-tripped through their corresponding `ILoan` enums by
+ *      the loan storage wrapper or facet. New fields must be appended below the marker to
+ *      preserve ERC-7201 storage layout compatibility.
  * @param currency ISO 4217 currency code of the loan principal.
  * @param loanStructureType Packed `ILoan.LoanStructureType` discriminator.
  * @param repaymentType Packed `ILoan.RepaymentType` discriminator.
@@ -24,29 +23,28 @@ bytes32 constant STORAGE_LOCATION_LOAN = 0x2af22e338cd16bdeda633a06c0ad54c1b9d04
  * @param utilizationFeeType Packed `ILoan.UtilizationFeeType` discriminator.
  * @param performanceStatus Packed `ILoan.PerformanceStatus` discriminator.
  * @param originatorAccount Account that originated the loan.
- * @param servicerAccount Account servicing the loan.
- * @param startingDate Unix timestamp at which the loan starts accruing.
- * @param maturityDate Unix timestamp at which the loan matures.
- * @param signingDate Unix timestamp at which the loan was signed.
- * @param floorRate Lower bound applied to the variable rate calculation.
- * @param capRate Upper bound applied to the variable rate calculation.
- * @param rateMargin Margin added to the base reference rate.
+ * @param servicerAccount Account responsible for servicing the loan.
+ * @param startingDate Unix timestamp from which the loan starts accruing.
+ * @param maturityDate Unix timestamp at which the loan contractually matures.
+ * @param signingDate Unix timestamp at which the loan agreement was signed.
+ * @param floorRate Lower bound applied to variable-rate calculations.
+ * @param capRate Upper bound applied to variable-rate calculations.
+ * @param rateMargin Margin added to the selected base reference rate.
  * @param firstAccrualDate Unix timestamp of the first interest accrual.
- * @param prepaymentPenalty Penalty applied on prepayment.
+ * @param prepaymentPenalty Penalty applied when the loan is prepaid.
  * @param commitmentFee Fee charged for the unused portion of a commitment.
- * @param utilizationFee Fee charged for the utilised portion.
- * @param servicingFee Fee paid to the servicer.
- * @param internalRiskGrade Free-form internal risk grade label.
- * @param defaultProbability Probability of default (basis points or modelled units).
- * @param lossGivenDefault Loss-given-default ratio (basis points or modelled units).
- * @param totalCollateralValue Aggregate value of the collateral securing the loan.
- * @param loanToValue Loan-to-value ratio (basis points or modelled units).
- * @param daysPastDue Number of days the loan has been past due.
+ * @param utilizationFee Fee charged for the utilised portion of a facility.
+ * @param servicingFee Fee payable to the loan servicer.
+ * @param internalRiskGrade Internal risk grade label assigned to the loan.
+ * @param defaultProbability Probability of default, expressed in protocol-defined units.
+ * @param lossGivenDefault Loss-given-default ratio, expressed in protocol-defined units.
+ * @param totalCollateralValue Aggregate value of collateral securing the loan.
+ * @param loanToValue Loan-to-value ratio, expressed in protocol-defined units.
+ * @param daysPastDue Number of days for which the loan has been past due.
  * @custom:storage-location erc7201:security.token.standard.storage.Loan
  */
 struct LoanDataStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
-    bool initialized;
     // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
     bytes3 currency;
     uint8 loanStructureType;
@@ -96,7 +94,6 @@ library LoanStorageWrapper {
      */
     function initializeLoan(ILoan.LoanDetailsData calldata _loanDetailsData) internal {
         LoanDataStorage storage ls = _loanStorage();
-        ls.initialized = true;
         _writeLoanDetails(_loanDetailsData, ls);
     }
 
@@ -160,14 +157,6 @@ library LoanStorageWrapper {
             performanceStatus: ILoan.PerformanceStatus(ls.performanceStatus),
             daysPastDue: ls.daysPastDue
         });
-    }
-
-    /**
-     * @notice Reports whether the loan storage has been initialised.
-     * @return True once `initializeLoan` has been called, false otherwise.
-     */
-    function isLoanInitialized() internal view returns (bool) {
-        return _loanStorage().initialized;
     }
 
     /**
