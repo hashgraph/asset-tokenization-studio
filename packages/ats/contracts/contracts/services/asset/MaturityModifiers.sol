@@ -19,7 +19,7 @@ abstract contract MaturityModifiers {
      * @param _maturityDate Proposed maturity timestamp (Unix epoch, seconds).
      */
     modifier onlyValidMaturityDate(uint256 _maturityDate) {
-        MaturityDateStorageWrapper.requireValidMaturityDate(_maturityDate);
+        MaturityDateStorageWrapper.checkValidMaturityDate(_maturityDate);
         _;
     }
 
@@ -28,7 +28,7 @@ abstract contract MaturityModifiers {
      * @dev    Used on `fullRedeemAtMaturity` to ensure the token has matured before redemption.
      */
     modifier onlyMaturityReached() {
-        MaturityDateStorageWrapper.requireMaturityReached();
+        MaturityDateStorageWrapper.checkMaturityReached();
         _;
     }
 }

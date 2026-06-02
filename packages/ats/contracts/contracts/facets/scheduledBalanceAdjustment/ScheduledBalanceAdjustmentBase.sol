@@ -70,7 +70,7 @@ abstract contract ScheduledBalanceAdjustmentBase {
      * @param data     ABI-encoded `ScheduledBalanceAdjustment` struct.
      */
     function _registerBalanceAdjustmentTasks(bytes32 actionId, bytes memory data) internal {
-        _requireValidCorporateActionId(actionId);
+        _checkValidCorporateActionId(actionId);
 
         IScheduledBalanceAdjustment.ScheduledBalanceAdjustment memory newBalanceAdjustment = abi.decode(
             data,
@@ -146,7 +146,7 @@ abstract contract ScheduledBalanceAdjustmentBase {
      * @notice Reverts if the corporate-action identifier is zero, indicating a failed creation.
      * @param actionId Corporate-action identifier to validate.
      */
-    function _requireValidCorporateActionId(bytes32 actionId) internal pure {
+    function _checkValidCorporateActionId(bytes32 actionId) internal pure {
         if (actionId == bytes32(0)) {
             revert IScheduledBalanceAdjustment.BalanceAdjustmentCreationFailed();
         }

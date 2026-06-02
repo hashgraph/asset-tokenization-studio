@@ -28,18 +28,6 @@ struct MaturityDateDataStorage {
  */
 library MaturityDateStorageWrapper {
     /**
-     * @notice Initialises the maturity date on first deployment, marking the slot as set.
-     * @dev    Must only be called once (guarded by `onlyNotMaturityInitialized`).  Sets the
-     *         `initialized` flag so that subsequent `initializeMaturity` calls revert.
-     * @param _maturityDate Initial maturity timestamp (Unix epoch, seconds). Must be non-zero
-     *                      and in the future at the time of token deployment.
-     */
-    function initializeMaturity(uint256 _maturityDate) internal {
-        MaturityDateDataStorage storage s = _maturityDateStorage();
-        s.maturityDate = _maturityDate;
-    }
-
-    /**
      * @notice Persists a new maturity date to the dedicated storage slot.
      * @dev    Does not validate the value; call `requireValidMaturityDate`
      *         before invoking this function when update-guard semantics are
@@ -65,7 +53,7 @@ library MaturityDateStorageWrapper {
      *         be greater than the current block timestamp (implicitly non-zero).
      * @param _maturityDate Proposed maturity timestamp (Unix epoch, seconds).
      */
-    function requireValidMaturityDate(uint256 _maturityDate) internal view {
+    function checkValidMaturityDate(uint256 _maturityDate) internal view {
         if (_maturityDate <= TimeTravelStorageWrapper.getBlockTimestamp()) {
             revert IMaturity.MaturityDateInvalid();
         }
@@ -75,7 +63,7 @@ library MaturityDateStorageWrapper {
      * @notice Reverts if the current block timestamp has not yet reached the stored maturity date.
      * @dev    Used to gate redemption — the token must have matured before any holder can redeem.
      */
-    function requireMaturityReached() internal view {
+    function checkMaturityReached() internal view {
         if (TimeTravelStorageWrapper.getBlockTimestamp() < getMaturityDate()) {
             revert IMaturity.MaturityDateInvalid();
         }

@@ -31,7 +31,7 @@ abstract contract Maturity is IMaturity, Modifiers {
         onlyFacetNotRegistered(RESOLVER_KEY_MATURITY)
         onlyValidMaturityDate(_maturityDate)
     {
-        MaturityDateStorageWrapper.initializeMaturity(_maturityDate);
+        MaturityDateStorageWrapper.setMaturityDate(_maturityDate);
         InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_MATURITY);
         emit MaturityInitialized(_maturityDate);
     }
