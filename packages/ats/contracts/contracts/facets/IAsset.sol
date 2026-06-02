@@ -49,7 +49,7 @@ import { IKpiLinkedRate } from "./layer_2/interestRate/kpiLinkedRate/IKpiLinkedR
 // Layer 2
 import { IOperatorHoldByPartition } from "./operatorHoldByPartition/IOperatorHoldByPartition.sol";
 import { IHoldByPartition } from "./holdByPartition/IHoldByPartition.sol";
-import { IKyc } from "./layer_1/kyc/IKyc.sol";
+import { IKyc } from "./kyc/IKyc.sol";
 // IKpiLinkedRate is excluded: it defines getInterestRate() with an incompatible return type
 // (different InterestRate struct), which cannot be reconciled in a single Solidity interface.
 // Use the typed instance directly when testing KPI-linked rate facets.
