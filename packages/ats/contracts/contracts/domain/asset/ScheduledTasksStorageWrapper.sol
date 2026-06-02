@@ -2,10 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ScheduledTasksLib } from "../../facets/layer_2/scheduledTask/ScheduledTasksLib.sol";
-import {
-    ScheduledTask,
-    ScheduledTasksDataStorage
-} from "../../facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
+import { ScheduledTask } from "../../facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { IScheduledBalanceAdjustment } from "../../facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol";
 import {
     SCHEDULED_TASK_TYPE_SNAPSHOT,
@@ -13,11 +10,9 @@ import {
     SCHEDULED_TASK_TYPE_COUPON_LISTING
 } from "../../constants/dispatchTypes.sol";
 import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageWrapper.sol";
+import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { ScheduledTasksDispatchOps } from "../orchestrator/ScheduledTasksDispatchOps.sol";
-import {
-    IScheduledCrossOrderedTasks
-} from "../../facets/layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
 
 /// @custom:hash storage ScheduledSnapshots
 // solhint-disable-next-line max-line-length
@@ -34,6 +29,27 @@ bytes32 constant STORAGE_LOCATION_SCHEDULED_BALANCE_ADJUSTMENTS = 0x2585709bc5ff
 /// @custom:hash storage ScheduledCrossOrderedTasks
 // solhint-disable-next-line max-line-length
 bytes32 constant STORAGE_LOCATION_SCHEDULED_CROSS_ORDERED_TASKS = 0xc0ba5b9a820688d8898770d2f45db1e829785cb69882e5bb2981fdd22d60f900;
+
+/**
+ * @notice Generic ordered-task-queue storage layout.
+ * @dev Instantiated at four independent ERC-7201 namespaces by this wrapper, one per task family:
+ *        - erc7201:security.token.standard.storage.ScheduledSnapshots
+ *        - erc7201:security.token.standard.storage.ScheduledCouponListing
+ *        - erc7201:security.token.standard.storage.ScheduledBalanceAdjustments
+ *        - erc7201:security.token.standard.storage.ScheduledCrossOrderedTasks
+ *      No single `@custom:storage-location` annotation can capture the four-slot binding;
+ *      tooling that needs per-slot layout resolution must consult the four STORAGE_LOCATION_*
+ *      constants in this file directly.
+ */
+struct ScheduledTasksDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    uint256 scheduledTaskCount;
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
+    mapping(uint256 => ScheduledTask) scheduledTasks;
+    // ─── APPEND-ONLY ZONE BELOW ───
+}
 
 /**
  * @title Scheduled Tasks Storage Wrapper
@@ -53,10 +69,10 @@ library ScheduledTasksStorageWrapper {
 
     /**
      * @notice Executes due scheduled tasks from a queue up to the requested limit.
-     * @dev Pops each due task before dispatch. Failed executions cancel the related
-     *      corporate action or pending sub-task action and emit `TaskExecutionFailed`.
-     *      If a cross-ordered task returns a recognised sub-task type, one due task from
-     *      the corresponding sub-queue is triggered in the same call.
+     * @dev Pops each due task before dispatch. A failed execution reverts the entire call,
+     *      leaving the queue unchanged so the blocked task can be force-cancelled by an
+     *      authorised caller. If a cross-ordered task returns a recognised sub-task type,
+     *      one due task from the corresponding sub-queue is triggered in the same call.
      * @param _scheduledTasks Queue storage containing the scheduled tasks to process.
      * @param callbackType Dispatch discriminator used by `ScheduledTasksDispatchOps`.
      * @param _max Maximum number of tasks to process; zero means all currently queued tasks.
@@ -88,16 +104,13 @@ library ScheduledTasksStorageWrapper {
                 pos
             );
 
-            if (currentScheduledTask.scheduledTimestamp >= currentBlockTimestamp) break;
+            if (currentScheduledTask.scheduledTimestamp > currentBlockTimestamp) break;
 
             ScheduledTasksLib.popScheduledTask(_scheduledTasks);
 
-            try ScheduledTasksDispatchOps.execute(callbackType, currentScheduledTask) returns (bytes32 subTaskType) {
-                if (subTaskType != bytes32(0)) {
-                    _triggerOneSubTask(subTaskType, currentBlockTimestamp);
-                }
-            } catch {
-                _onTaskExecutionFailed(callbackType, currentScheduledTask);
+            bytes32 subTaskType = ScheduledTasksDispatchOps.execute(callbackType, currentScheduledTask);
+            if (subTaskType != bytes32(0)) {
+                _triggerOneSubTask(subTaskType, currentBlockTimestamp);
             }
 
             unchecked {
@@ -218,58 +231,105 @@ library ScheduledTasksStorageWrapper {
 
     /**
      * @notice Returns the number of scheduled snapshot tasks.
-     * @dev Reads only the snapshot task queue.
-     * @return Number of queued snapshot tasks.
+     * @dev When `_includeDisabled` is `false`, iterates the queue and excludes tasks
+     *      belonging to a disabled corporate action (O(n)). When `true`, returns the raw
+     *      queue length in O(1).
+     * @param _includeDisabled When `false`, disabled tasks are excluded from the count.
+     * @return count_ Number of queued snapshot tasks, optionally filtered.
      */
-    function getScheduledSnapshotCount() internal view returns (uint256) {
-        return ScheduledTasksLib.getScheduledTaskCount(scheduledSnapshotStorage());
+    function getScheduledSnapshotCount(bool _includeDisabled) internal view returns (uint256 count_) {
+        ScheduledTasksDataStorage storage store = scheduledSnapshotStorage();
+        uint256 total = ScheduledTasksLib.getScheduledTaskCount(store);
+        if (_includeDisabled) return total;
+
+        for (uint256 i; i < total; ) {
+            unchecked {
+                count_ += CorporateActionsStorageWrapper.isCorporateActionDisabled(
+                    abi.decode(ScheduledTasksLib.getScheduledTasksByIndex(store, i).data, (bytes32))
+                )
+                    ? 0
+                    : 1;
+                ++i;
+            }
+        }
     }
 
     /**
      * @notice Returns a paginated list of scheduled snapshot tasks.
-     * @dev Pagination semantics are delegated to `ScheduledTasksLib`.
-     * @param _pageIndex Zero-based page index.
-     * @param _pageLength Maximum number of tasks to return.
+     * @dev When `_includeDisabled` is `true`, delegates to `ScheduledTasksLib` using direct
+     *      index arithmetic (O(1) per item). When `false`, iterates the full queue and skips
+     *      disabled tasks before applying pagination (O(n)).
+     * @param _pageIndex       Zero-based page index.
+     * @param _pageLength      Maximum number of tasks to return.
+     * @param _includeDisabled When `false`, tasks belonging to a disabled corporate action are
+     *                         excluded from the page.
      * @return scheduledSnapshots_ Snapshot tasks contained in the requested page.
      */
     function getScheduledSnapshots(
         uint256 _pageIndex,
-        uint256 _pageLength
+        uint256 _pageLength,
+        bool _includeDisabled
     ) internal view returns (ScheduledTask[] memory scheduledSnapshots_) {
-        return ScheduledTasksLib.getScheduledTasks(scheduledSnapshotStorage(), _pageIndex, _pageLength);
+        scheduledSnapshots_ = _includeDisabled
+            ? ScheduledTasksLib.getScheduledTasks(scheduledSnapshotStorage(), _pageIndex, _pageLength)
+            : _getActivePage(scheduledSnapshotStorage(), _pageIndex, _pageLength);
     }
 
     /**
      * @notice Returns the number of scheduled coupon listing tasks.
-     * @dev Reads only the coupon listing task queue.
-     * @return Number of queued coupon listing tasks.
+     * @dev When `_includeDisabled` is `false`, iterates the queue and excludes tasks
+     *      belonging to a disabled corporate action (O(n)). When `true`, returns the raw
+     *      queue length in O(1) — use this form for internal iteration where the full
+     *      queue size is needed.
+     * @param _includeDisabled When `false`, disabled tasks are excluded from the count.
+     * @return count_ Number of queued coupon listing tasks, optionally filtered.
      */
-    function getScheduledCouponListingCount() internal view returns (uint256) {
-        return ScheduledTasksLib.getScheduledTaskCount(scheduledCouponListingStorage());
+    function getScheduledCouponListingCount(bool _includeDisabled) internal view returns (uint256 count_) {
+        uint256 total = ScheduledTasksLib.getScheduledTaskCount(scheduledCouponListingStorage());
+        if (_includeDisabled) return total;
+
+        for (uint256 i; i < total; ) {
+            unchecked {
+                count_ += isScheduledCouponListingDisabledAtIndex(i) ? 0 : 1;
+                ++i;
+            }
+        }
     }
 
     /**
      * @notice Returns a paginated list of scheduled coupon listing tasks.
-     * @dev Pagination semantics are delegated to `ScheduledTasksLib`.
-     * @param _pageIndex Zero-based page index.
-     * @param _pageLength Maximum number of tasks to return.
+     * @dev When `_includeDisabled` is `true`, delegates to `ScheduledTasksLib` using direct
+     *      index arithmetic (O(1) per item). When `false`, iterates the full queue and skips
+     *      disabled tasks before applying pagination (O(n)).
+     * @param _pageIndex       Zero-based page index.
+     * @param _pageLength      Maximum number of tasks to return.
+     * @param _includeDisabled When `false`, tasks belonging to a disabled corporate action are
+     *                         excluded from the page.
      * @return scheduledCouponListing_ Coupon listing tasks contained in the requested page.
      */
     function getScheduledCouponListing(
         uint256 _pageIndex,
-        uint256 _pageLength
+        uint256 _pageLength,
+        bool _includeDisabled
     ) internal view returns (ScheduledTask[] memory scheduledCouponListing_) {
-        return ScheduledTasksLib.getScheduledTasks(scheduledCouponListingStorage(), _pageIndex, _pageLength);
+        scheduledCouponListing_ = _includeDisabled
+            ? ScheduledTasksLib.getScheduledTasks(scheduledCouponListingStorage(), _pageIndex, _pageLength)
+            : _getActivePage(scheduledCouponListingStorage(), _pageIndex, _pageLength);
     }
 
     /**
      * @notice Counts pending coupon listings scheduled before a timestamp.
      * @dev Iterates from the queue top and stops at the first task not earlier than the
      *      timestamp. Gas cost grows linearly with the number of matching pending tasks.
-     * @param _timestamp Exclusive upper bound for scheduled timestamps.
+     * @param _timestamp      Exclusive upper bound for scheduled timestamps.
+     * @param _includeDisabled When `false`, tasks belonging to a disabled corporate action are
+     *                         excluded from the count.
      * @return total_ Number of pending coupon listings scheduled before `_timestamp`.
      */
-    function getPendingScheduledCouponListingTotalAt(uint256 _timestamp) internal view returns (uint256 total_) {
+    function getPendingScheduledCouponListingTotalAt(
+        uint256 _timestamp,
+        bool _includeDisabled
+    ) internal view returns (uint256 total_) {
         ScheduledTasksDataStorage storage scheduledCouponListing = scheduledCouponListingStorage();
         uint256 length = ScheduledTasksLib.getScheduledTaskCount(scheduledCouponListing);
         uint256 pos;
@@ -285,8 +345,15 @@ library ScheduledTasksStorageWrapper {
             );
 
             if (scheduledTask.scheduledTimestamp < _timestamp) {
+                if (
+                    _includeDisabled ||
+                    !CorporateActionsStorageWrapper.isCorporateActionDisabled(abi.decode(scheduledTask.data, (bytes32)))
+                ) {
+                    unchecked {
+                        ++total_;
+                    }
+                }
                 unchecked {
-                    ++total_;
                     ++i;
                 }
                 continue;
@@ -294,6 +361,20 @@ library ScheduledTasksStorageWrapper {
 
             break;
         }
+    }
+
+    /**
+     * @notice Returns whether the coupon listing task at a given queue index belongs to a
+     *         disabled corporate action.
+     * @param _index Queue index of the scheduled coupon listing task.
+     * @return True if the related corporate action is disabled.
+     */
+    function isScheduledCouponListingDisabledAtIndex(uint256 _index) internal view returns (bool) {
+        ScheduledTask memory couponListing = ScheduledTasksLib.getScheduledTasksByIndex(
+            scheduledCouponListingStorage(),
+            _index
+        );
+        return CorporateActionsStorageWrapper.isCorporateActionDisabled(abi.decode(couponListing.data, (bytes32)));
     }
 
     /**
@@ -315,47 +396,73 @@ library ScheduledTasksStorageWrapper {
 
     /**
      * @notice Returns the number of scheduled balance adjustment tasks.
-     * @dev Reads only the balance adjustment task queue.
-     * @return Number of queued balance adjustment tasks.
+     * @dev When `_includeDisabled` is `false`, iterates the queue and excludes tasks
+     *      belonging to a disabled corporate action (O(n)). When `true`, returns the raw
+     *      queue length in O(1).
+     * @param _includeDisabled When `false`, disabled tasks are excluded from the count.
+     * @return count_ Number of queued balance adjustment tasks, optionally filtered.
      */
-    function getScheduledBalanceAdjustmentCount() internal view returns (uint256) {
-        return ScheduledTasksLib.getScheduledTaskCount(scheduledBalanceAdjustmentStorage());
+    function getScheduledBalanceAdjustmentCount(bool _includeDisabled) internal view returns (uint256 count_) {
+        ScheduledTasksDataStorage storage store = scheduledBalanceAdjustmentStorage();
+        uint256 total = ScheduledTasksLib.getScheduledTaskCount(store);
+        if (_includeDisabled) return total;
+
+        for (uint256 i; i < total; ) {
+            unchecked {
+                count_ += CorporateActionsStorageWrapper.isCorporateActionDisabled(
+                    abi.decode(ScheduledTasksLib.getScheduledTasksByIndex(store, i).data, (bytes32))
+                )
+                    ? 0
+                    : 1;
+                ++i;
+            }
+        }
     }
 
     /**
      * @notice Returns a paginated list of scheduled balance adjustment tasks.
-     * @dev Pagination semantics are delegated to `ScheduledTasksLib`.
-     * @param _pageIndex Zero-based page index.
-     * @param _pageLength Maximum number of tasks to return.
+     * @dev When `_includeDisabled` is `true`, delegates to `ScheduledTasksLib` using direct
+     *      index arithmetic (O(1) per item). When `false`, iterates the full queue and skips
+     *      disabled tasks before applying pagination (O(n)).
+     * @param _pageIndex       Zero-based page index.
+     * @param _pageLength      Maximum number of tasks to return.
+     * @param _includeDisabled When `false`, tasks belonging to a disabled corporate action are
+     *                         excluded from the page.
      * @return scheduledBalanceAdjustment_ Adjustment tasks contained in the requested page.
      */
     function getScheduledBalanceAdjustments(
         uint256 _pageIndex,
-        uint256 _pageLength
+        uint256 _pageLength,
+        bool _includeDisabled
     ) internal view returns (ScheduledTask[] memory scheduledBalanceAdjustment_) {
-        return ScheduledTasksLib.getScheduledTasks(scheduledBalanceAdjustmentStorage(), _pageIndex, _pageLength);
+        scheduledBalanceAdjustment_ = _includeDisabled
+            ? ScheduledTasksLib.getScheduledTasks(scheduledBalanceAdjustmentStorage(), _pageIndex, _pageLength)
+            : _getActivePage(scheduledBalanceAdjustmentStorage(), _pageIndex, _pageLength);
     }
 
     /**
      * @notice Aggregates pending balance adjustment factors scheduled before a timestamp.
      * @dev Iterates from the queue top and stops at the first task not earlier than the
      *      timestamp. Gas cost grows linearly with the number of matching pending tasks.
-     * @param _timestamp Exclusive upper bound for scheduled timestamps.
+     * @param _timestamp       Exclusive upper bound for scheduled timestamps.
+     * @param _includeDisabled When `false`, tasks belonging to a disabled corporate action are
+     *                         excluded from the aggregation.
      * @return pendingABAF_ Product of pending adjustment factors, initialised to one.
      * @return pendingDecimals_ Sum of decimal adjustments for matching pending tasks.
      */
     function getPendingScheduledBalanceAdjustmentsAt(
-        uint256 _timestamp
+        uint256 _timestamp,
+        bool _includeDisabled
     ) internal view returns (uint256 pendingABAF_, uint8 pendingDecimals_) {
-        // * Initialization
         pendingABAF_ = 1;
         ScheduledTasksDataStorage storage scheduledBalanceAdjustments = scheduledBalanceAdjustmentStorage();
         uint256 length = ScheduledTasksLib.getScheduledTaskCount(scheduledBalanceAdjustments);
-        uint256 pos;
+        uint256 pos = length;
 
         for (uint256 i; i < length; ) {
             unchecked {
-                pos = length - 1 - i;
+                --pos;
+                ++i;
             }
 
             ScheduledTask memory scheduledTask = ScheduledTasksLib.getScheduledTasksByIndex(
@@ -363,26 +470,19 @@ library ScheduledTasksStorageWrapper {
                 pos
             );
 
-            if (scheduledTask.scheduledTimestamp < _timestamp) {
-                bytes memory balanceAdjustmentData = CorporateActionsStorageWrapper.getCorporateActionData(
-                    abi.decode(scheduledTask.data, (bytes32))
-                );
+            if (scheduledTask.scheduledTimestamp >= _timestamp) break;
 
+            bytes32 actionId = abi.decode(scheduledTask.data, (bytes32));
+
+            if (_includeDisabled || !CorporateActionsStorageWrapper.isCorporateActionDisabled(actionId)) {
                 IScheduledBalanceAdjustment.ScheduledBalanceAdjustment memory balanceAdjustment = abi.decode(
-                    balanceAdjustmentData,
+                    CorporateActionsStorageWrapper.getCorporateActionData(actionId),
                     (IScheduledBalanceAdjustment.ScheduledBalanceAdjustment)
                 );
 
                 pendingABAF_ *= balanceAdjustment.factor;
                 pendingDecimals_ += balanceAdjustment.decimals;
-
-                unchecked {
-                    ++i;
-                }
-                continue;
             }
-
-            break;
         }
     }
 
@@ -476,7 +576,7 @@ library ScheduledTasksStorageWrapper {
     /**
      * @notice Triggers one due sub-task for a recognised cross-ordered task type.
      * @dev Returns silently for unknown task types, empty queues or sub-tasks that are not due.
-     *      Pops the sub-task before dispatch and handles execution failure by cancellation.
+     *      Pops the sub-task before dispatch; a failed execution reverts the entire call.
      * @param subTaskType Task type identifying the sub-queue to process.
      * @param currentBlockTimestamp Timestamp used as the due-task threshold.
      */
@@ -506,79 +606,55 @@ library ScheduledTasksStorageWrapper {
         }
 
         ScheduledTask memory subTask = ScheduledTasksLib.getScheduledTasksByIndex(subQueue_, pos);
-        if (subTask.scheduledTimestamp >= currentBlockTimestamp) return;
+        if (subTask.scheduledTimestamp > currentBlockTimestamp) return;
 
         ScheduledTasksLib.popScheduledTask(subQueue_);
 
-        try ScheduledTasksDispatchOps.execute(subCallbackType, subTask) returns (bytes32) {} catch {
-            _onTaskExecutionFailed(subCallbackType, subTask);
-        }
+        ScheduledTasksDispatchOps.execute(subCallbackType, subTask);
     }
 
     /**
-     * @notice Handles a failed scheduled task execution.
-     * @dev Cross-ordered failures cancel the pending top action in the referenced sub-queue.
-     *      Other failures cancel the corporate action encoded in the failed task. Always emits
-     *      `TaskExecutionFailed` with the failed action or task identifier.
-     * @param callbackType Dispatch discriminator of the failed task.
-     * @param task Failed scheduled task.
+     * @notice Returns a page of active (non-disabled) tasks from a queue.
+     * @dev O(_pageLength): iterates only the raw queue slots `[start, end)` computed from
+     *      `_pageIndex` and `_pageLength`. Disabled tasks within that window are skipped, so
+     *      a page may return fewer than `_pageLength` items when disabled tasks fall in range.
+     *      The returned array is trimmed to the actual collected count via assembly.
+     * @param _store      Storage pointer to the task queue to paginate.
+     * @param _pageIndex  Zero-based page index.
+     * @param _pageLength Maximum number of tasks per page.
+     * @return result_ Active tasks in the requested page, never longer than `_pageLength`.
      */
-    function _onTaskExecutionFailed(bytes32 callbackType, ScheduledTask memory task) private {
-        bytes32 actionId = _getActionIdFromScheduledTask(task);
+    function _getActivePage(
+        ScheduledTasksDataStorage storage _store,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) private view returns (ScheduledTask[] memory result_) {
+        uint256 total = ScheduledTasksLib.getScheduledTaskCount(_store);
+        (uint256 start, uint256 end) = Pagination.getStartAndEnd(_pageIndex, _pageLength);
+        result_ = new ScheduledTask[](Pagination.getSize(start, end, total));
+        uint256 collected;
 
-        if (callbackType == bytes32("crossOrdered")) {
-            _cancelPendingSubTaskAction(actionId);
-            emit IScheduledCrossOrderedTasks.TaskExecutionFailed(actionId, callbackType, task.scheduledTimestamp);
-            return;
+        if (end > total) end = total;
+
+        for (; start < end; ) {
+            ScheduledTask memory task = ScheduledTasksLib.getScheduledTasksByIndex(_store, start);
+            unchecked {
+                ++start;
+            }
+
+            if (CorporateActionsStorageWrapper.isCorporateActionDisabled(abi.decode(task.data, (bytes32)))) continue;
+
+            result_[collected] = task;
+            unchecked {
+                ++collected;
+            }
         }
 
-        CorporateActionsStorageWrapper.cancelCorporateAction(actionId);
-        emit IScheduledCrossOrderedTasks.TaskExecutionFailed(actionId, callbackType, task.scheduledTimestamp);
-    }
-
-    /**
-     * @notice Cancels the pending action at the top of a recognised sub-task queue.
-     * @dev Returns silently for unknown task types and empty queues.
-     * @param taskType Task type identifying the sub-queue whose top action should be cancelled.
-     */
-    function _cancelPendingSubTaskAction(bytes32 taskType) private {
-        if (taskType == SCHEDULED_TASK_TYPE_SNAPSHOT) {
-            _cancelTopQueueAction(scheduledSnapshotStorage());
-            return;
+        if (collected < _pageLength) {
+            // solhint-disable-next-line no-inline-assembly
+            assembly {
+                mstore(result_, collected)
+            }
         }
-
-        if (taskType == SCHEDULED_TASK_TYPE_BALANCE_ADJUSTMENT) {
-            _cancelTopQueueAction(scheduledBalanceAdjustmentStorage());
-            return;
-        }
-
-        if (taskType == SCHEDULED_TASK_TYPE_COUPON_LISTING) {
-            _cancelTopQueueAction(scheduledCouponListingStorage());
-        }
-    }
-
-    /**
-     * @notice Cancels the corporate action encoded in the top task of a queue.
-     * @dev Does not remove the task from the queue. Returns silently when the queue is empty.
-     * @param subQueue Queue whose top task contains the action identifier to cancel.
-     */
-    function _cancelTopQueueAction(ScheduledTasksDataStorage storage subQueue) private {
-        uint256 count = ScheduledTasksLib.getScheduledTaskCount(subQueue);
-        if (count == 0) return;
-
-        ScheduledTask memory pendingTask = ScheduledTasksLib.getScheduledTasksByIndex(subQueue, count - 1);
-        CorporateActionsStorageWrapper.cancelCorporateAction(abi.decode(pendingTask.data, (bytes32)));
-    }
-
-    /**
-     * @notice Decodes the corporate action identifier from a scheduled task.
-     * @dev Assumes the task data was encoded as a single `bytes32` value.
-     * @param _scheduledTask Scheduled task containing ABI-encoded action data.
-     * @return actionId_ Decoded corporate action identifier.
-     */
-    function _getActionIdFromScheduledTask(
-        ScheduledTask memory _scheduledTask
-    ) private pure returns (bytes32 actionId_) {
-        return abi.decode(_scheduledTask.data, (bytes32));
     }
 }

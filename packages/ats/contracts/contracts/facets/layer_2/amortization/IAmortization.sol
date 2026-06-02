@@ -1,12 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IAmortizationStorageWrapper } from "../../../domain/asset/amortization/IAmortizationStorageWrapper.sol";
-
 /// @custom:hash resolverKey Amortization
 bytes32 constant RESOLVER_KEY_AMORTIZATION = 0xc0d83d8b9295f78954b1c7c9648bec9775edf597a57f9f4110883e9ca2134739;
 
-interface IAmortization is IAmortizationStorageWrapper {
+/**
+ * @title IAmortization
+ * @author Asset Tokenization Studio Team
+ * @notice Writer interface for the amortization facet — corporate-action driven token redemption.
+ * @dev Defines the events, errors, structs, and functions used to register, fund, hold, and
+ *      cancel amortization corporate actions across the token holder set.
+ */
+interface IAmortization {
     /// @notice Core amortization data structure
     /// @dev Stores the record/execution dates and the total amount of tokens to redeem (burn) across all holders.
     ///      Per-holder token amounts are submitted off-chain by the backend via `setAmortizationHold`.
@@ -45,6 +50,126 @@ interface IAmortization is IAmortizationStorageWrapper {
     }
 
     /**
+     * @notice Emitted when an amortization is created or updated for a security.
+     * @param corporateActionId Unique identifier grouping related corporate actions.
+     * @param amortizationId Identifier of the created or updated amortization.
+     * @param operator Address that performed the operation.
+     * @param recordDate Date at which token holder balances are snapshotted.
+     * @param executionDate Date at which the amortization payment is executed.
+     */
+    event AmortizationSet(
+        bytes32 corporateActionId,
+        uint256 amortizationId,
+        address indexed operator,
+        uint256 recordDate,
+        uint256 executionDate
+    );
+
+    /**
+     * @notice Emitted when an amortization is cancelled.
+     * @param amortizationId Identifier of the cancelled amortization.
+     * @param operator Address that performed the cancellation.
+     */
+    event AmortizationCancelled(uint256 amortizationId, address indexed operator);
+
+    /**
+     * @notice Emitted when an admin force-cancels an amortization, bypassing date guards.
+     * @param amortizationId Identifier of the force-cancelled amortization.
+     * @param operator Address that performed the force-cancellation.
+     */
+    event AmortizationForceCancelled(uint256 amortizationId, address indexed operator);
+
+    /**
+     * @notice Emitted when a hold is created or replaced for a token holder in an amortization.
+     * @param corporateActionId Unique identifier grouping related corporate actions.
+     * @param amortizationID Identifier of the amortization.
+     * @param tokenHolder Address of the token holder.
+     * @param holdId ID of the newly created hold.
+     * @param tokenAmount Amount of tokens locked in the hold.
+     */
+    event AmortizationHoldSet(
+        bytes32 indexed corporateActionId,
+        uint256 indexed amortizationID,
+        address indexed tokenHolder,
+        uint256 holdId,
+        uint256 tokenAmount
+    );
+
+    /**
+     * @notice Emitted when a hold is released for a token holder in an amortization.
+     * @param corporateActionId Unique identifier grouping related corporate actions.
+     * @param amortizationID Identifier of the amortization.
+     * @param tokenHolder Address of the token holder whose hold was released.
+     * @param holdId ID of the released hold.
+     */
+    event AmortizationHoldReleased(
+        bytes32 indexed corporateActionId,
+        uint256 indexed amortizationID,
+        address indexed tokenHolder,
+        uint256 holdId
+    );
+
+    /**
+     * @notice Emitted once when the amortization capability is initialised on a token.
+     * @dev Fires exclusively from `initializeAmortization`.
+     */
+    event AmortizationInitialized();
+
+    /**
+     * @notice Amortization creation failed due to an internal failure.
+     */
+    error AmortizationCreationFailed();
+
+    /**
+     * @notice Amortization execution failed because the amortization has already been executed.
+     * @param corporateActionId The corporate action ID of the already-executed amortization.
+     * @param amortizationId The amortization ID that was already executed.
+     */
+    error AmortizationAlreadyExecuted(bytes32 corporateActionId, uint256 amortizationId);
+
+    /**
+     * @notice Thrown when creating a hold for an amortization fails.
+     * @param corporateActionId The corporate action ID of the amortization.
+     * @param amortizationID The amortization ID for which hold creation failed.
+     */
+    error AmortizationHoldFailed(bytes32 corporateActionId, uint256 amortizationID);
+
+    /**
+     * @notice Thrown when attempting to cancel an amortization that still has active holds.
+     * @param corporateActionId The corporate action ID of the amortization.
+     * @param amortizationID The amortization ID that still has pending holds.
+     */
+    error AmortizationHasActiveHolds(bytes32 corporateActionId, uint256 amortizationID);
+
+    /**
+     * @notice Thrown when attempting to release a hold that is not active for the given holder.
+     * @param corporateActionId The corporate action ID of the amortization.
+     * @param amortizationID The amortization ID.
+     * @param tokenHolder The address of the token holder with no active hold.
+     */
+    error AmortizationHoldNotActive(bytes32 corporateActionId, uint256 amortizationID, address tokenHolder);
+
+    /**
+     * @notice Thrown when attempting to operate on a cancelled amortization.
+     * @param corporateActionId The corporate action ID of the amortization.
+     * @param amortizationID The amortization ID.
+     */
+    error AmortizationNotActive(bytes32 corporateActionId, uint256 amortizationID);
+
+    /**
+     * @notice Thrown when attempting to set a hold with a zero token amount.
+     * @param amortizationID The amortization ID.
+     */
+    error InvalidAmortizationHoldAmount(uint256 amortizationID);
+
+    /**
+     * @notice Initialises the amortization capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeAmortization() external;
+
+    /**
      * @notice Sets a new amortization for the security.
      * @param _amortization The amortization data to register.
      * @return success_ Whether the operation succeeded.
@@ -61,6 +186,16 @@ interface IAmortization is IAmortizationStorageWrapper {
      * @param _amortizationID The ID of the amortization to cancel.
      */
     function cancelAmortization(uint256 _amortizationID) external;
+
+    /**
+     * @notice Force-cancels an amortization regardless of its execution date.
+     * @dev Restricted to `ROLE_CORPORATE_ACTION_FORCE_CANCEL` and gated by the unpaused state,
+     *      `onlyWithoutMultiPartition`, and `onlyMatchingActionType`. Marks the corporate action
+     *      disabled unconditionally — bypasses `AmortizationAlreadyExecuted` and
+     *      `AmortizationNotActive` — and emits `AmortizationForceCancelled`.
+     * @param _amortizationID The ID of the amortization to force-cancel.
+     */
+    function forceCancelAmortization(uint256 _amortizationID) external;
 
     /**
      * @notice Releases the active hold for a specific token holder in an amortization.
@@ -112,6 +247,7 @@ interface IAmortization is IAmortizationStorageWrapper {
      * @param _pageIndex The page index for pagination.
      * @param _pageLength The number of records per page.
      * @return amortizationsFor_ List of amortization payment information per holder.
+     * @return holders_ The holder addresses aligned by index with `amortizationsFor_`.
      */
     function getAmortizationsFor(
         uint256 _amortizationID,

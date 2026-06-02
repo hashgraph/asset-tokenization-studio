@@ -3,10 +3,10 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { ComplianceMock, IdentityRegistryMock, IAsset, type ResolverProxy } from "@contract-types";
+import { ComplianceMock, IdentityRegistryMock, IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
-import { ATS_ROLES, EMPTY_STRING, ZERO, ADDRESS_ZERO } from "@scripts";
+import { ATS_ROLES, EMPTY_STRING, ZERO, ADDRESS_ZERO, EQUITY_CONFIG_ID, RESOLVER_KEY_BATCH_TRANSFER } from "@scripts";
 
 const AMOUNT = 1000;
 const MAX_SUPPLY = 10000000;
@@ -20,6 +20,7 @@ describe("BatchTransfer Tests", () => {
   let signer_F: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   let identityRegistryMock: IdentityRegistryMock;
   let complianceMock: ComplianceMock;
@@ -54,6 +55,7 @@ describe("BatchTransfer Tests", () => {
     signer_F = base.user5;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
       {
@@ -315,6 +317,38 @@ describe("BatchTransfer Tests", () => {
         deactivatedAsset,
         "Deactivated",
       );
+    });
+  });
+  describe("initializeBatchTransfer", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeBatchTransfer is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeBatchTransfer())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeBatchTransfer is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeBatchTransfer())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_BATCH_TRANSFER, 1);
+    });
+  });
+
+  describe("initializeBatchTransfer event", () => {
+    it("GIVEN a fresh deployment WHEN initializeBatchTransfer is called THEN emits BatchTransferInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_BATCH_TRANSFER);
+      await expect(asset.initializeBatchTransfer()).to.emit(asset, "BatchTransferInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational WHEN batchTransfer is called THEN AssetNotOperational", async () => {
+      await expect(asset.batchTransfer([], []))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 });

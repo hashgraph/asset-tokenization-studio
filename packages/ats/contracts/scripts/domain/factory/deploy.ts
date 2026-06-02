@@ -16,7 +16,15 @@
 import { Signer } from "ethers";
 import { ResolverProxy__factory } from "@contract-types";
 import { FACTORY_CONFIG_ID } from "@scripts/domain";
-import { info, section, success, error as logError, GAS_LIMIT, hederaGasOverrides } from "@scripts/infrastructure";
+import {
+  info,
+  section,
+  success,
+  error as logError,
+  GAS_LIMIT,
+  hederaGasOverrides,
+  gasLimitOverride,
+} from "@scripts/infrastructure";
 
 /**
  * Options for deploying Factory.
@@ -38,6 +46,9 @@ export interface DeployFactoryResult {
 
   /** Factory proxy address (ResolverProxy instance) */
   factoryAddress: string;
+
+  /** Implementation address, if tracked by the deployment */
+  implementationAddress?: string;
 
   error?: string;
 }
@@ -90,7 +101,7 @@ export async function deployFactory(signer: Signer, options: DeployFactoryOption
       factoryVersion,
       [], // empty rbacs — Factory is permissionless in v1
       {
-        gasLimit: GAS_LIMIT.high,
+        ...gasLimitOverride(GAS_LIMIT.high),
         ...hederaGasOverrides(),
       },
     );

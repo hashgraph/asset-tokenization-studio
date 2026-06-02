@@ -290,48 +290,33 @@ describe("Bond KpiLinked Rate Tests", () => {
     it("GIVEN a kpiLinked rate bond WHEN no report is found THEN transaction success and rate is previous rate plus penalty", async () => {
       await setKpiConfiguration(-10);
 
+      const firstCouponRate = newInterestRate.baseRate + newInterestRate.missedPenalty;
+      const firstCouponRateDecimals = newInterestRate.rateDecimals;
+
       // Test missed penalty when there is a single coupon
       await asset.connect(signer_A).setCoupon(couponData);
 
       await asset.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
 
-      await checkCouponPostValues(
-        0 + newInterestRate.missedPenalty,
-        newInterestRate.rateDecimals,
-        amount,
-        1,
-        signer_A.address,
-      );
+      await checkCouponPostValues(firstCouponRate, firstCouponRateDecimals, amount, 1, signer_A.address);
 
       // Test missed penalty when there are two coupons
       updateCouponDates();
 
+      const secondCouponRate = firstCouponRate + newInterestRate.missedPenalty;
+      const secondCouponRateDecimals = newInterestRate.rateDecimals;
+
       await asset.connect(signer_A).setCoupon(couponData);
 
       await asset.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
 
-      await checkCouponPostValues(
-        0 + newInterestRate.missedPenalty,
-        newInterestRate.rateDecimals,
-        amount,
-        1,
-        signer_A.address,
-      );
+      await checkCouponPostValues(firstCouponRate, firstCouponRateDecimals, amount, 1, signer_A.address);
 
-      await checkCouponPostValues(
-        newInterestRate.missedPenalty + newInterestRate.missedPenalty,
-        newInterestRate.rateDecimals,
-        amount,
-        2,
-        signer_A.address,
-      );
+      await checkCouponPostValues(secondCouponRate, secondCouponRateDecimals, amount, 2, signer_A.address);
 
-      // Test missed penalty when previous coupon had less decimals
-      const previousCouponRate = 2 * newInterestRate.missedPenalty;
-      const previousCouponRateDecimals = newInterestRate.rateDecimals;
-
-      newInterestRate.missedPenalty = previousCouponRate;
-      newInterestRate.rateDecimals = previousCouponRateDecimals + 1;
+      newInterestRate.missedPenalty = 2 * newInterestRate.missedPenalty;
+      newInterestRate.rateDecimals = secondCouponRateDecimals + 1;
+      newInterestRate.maxRate = 10 * newInterestRate.maxRate;
 
       await asset.connect(signer_A).setKpiLinkedRateInterestRate(newInterestRate);
 
@@ -341,20 +326,17 @@ describe("Bond KpiLinked Rate Tests", () => {
 
       await asset.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
 
-      const rate = previousCouponRate * 10 + newInterestRate.missedPenalty;
+      const thirdCouponRate = secondCouponRate * 10 + newInterestRate.missedPenalty;
+      const thirdCouponRateDecimals = newInterestRate.rateDecimals;
 
-      await checkCouponPostValues(previousCouponRate / 2, previousCouponRateDecimals, amount, 1, signer_A.address);
+      await checkCouponPostValues(firstCouponRate, firstCouponRateDecimals, amount, 1, signer_A.address);
 
-      await checkCouponPostValues(previousCouponRate, previousCouponRateDecimals, amount, 2, signer_A.address);
+      await checkCouponPostValues(secondCouponRate, secondCouponRateDecimals, amount, 2, signer_A.address);
 
-      await checkCouponPostValues(rate, newInterestRate.rateDecimals, amount, 3, signer_A.address);
+      await checkCouponPostValues(thirdCouponRate, thirdCouponRateDecimals, amount, 3, signer_A.address);
 
-      // Test missed penalty when previous coupon had more decimals
-      const previousCouponRate_2 = rate;
-      const previousCouponRateDecimals_2 = newInterestRate.rateDecimals;
-
-      newInterestRate.missedPenalty = previousCouponRate_2;
-      newInterestRate.rateDecimals = previousCouponRateDecimals_2 - 1;
+      newInterestRate.missedPenalty = thirdCouponRate;
+      newInterestRate.rateDecimals = thirdCouponRateDecimals - 1;
 
       await asset.connect(signer_A).setKpiLinkedRateInterestRate(newInterestRate);
 
@@ -364,15 +346,16 @@ describe("Bond KpiLinked Rate Tests", () => {
 
       await asset.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
 
-      const rate_2 = previousCouponRate_2 / 10 + newInterestRate.missedPenalty;
+      const fourthCouponRate = thirdCouponRate / 10 + newInterestRate.missedPenalty;
+      const fourthCouponRateDecimals = newInterestRate.rateDecimals;
 
-      await checkCouponPostValues(previousCouponRate / 2, previousCouponRateDecimals, amount, 1, signer_A.address);
+      await checkCouponPostValues(firstCouponRate, firstCouponRateDecimals, amount, 1, signer_A.address);
 
-      await checkCouponPostValues(previousCouponRate, previousCouponRateDecimals, amount, 2, signer_A.address);
+      await checkCouponPostValues(secondCouponRate, secondCouponRateDecimals, amount, 2, signer_A.address);
 
-      await checkCouponPostValues(previousCouponRate_2, previousCouponRateDecimals_2, amount, 3, signer_A.address);
+      await checkCouponPostValues(thirdCouponRate, thirdCouponRateDecimals, amount, 3, signer_A.address);
 
-      await checkCouponPostValues(rate_2, newInterestRate.rateDecimals, amount, 4, signer_A.address);
+      await checkCouponPostValues(fourthCouponRate, fourthCouponRateDecimals, amount, 4, signer_A.address);
     });
 
     it("GIVEN a kpiLinked rate bond WHEN reportPeriod is greater than fixingDate THEN no underflow and rate falls back to missed penalty", async () => {
@@ -389,7 +372,7 @@ describe("Bond KpiLinked Rate Tests", () => {
       // windowStart collapses to fixingDate -> empty lookup window -> no report found
       // -> _getRateWhenNoReport branch -> rate = 0 + missedPenalty (no previous coupon).
       await checkCouponPostValues(
-        newInterestRate.missedPenalty,
+        newInterestRate.baseRate + newInterestRate.missedPenalty,
         newInterestRate.rateDecimals,
         amount,
         1,
@@ -434,7 +417,7 @@ describe("Bond KpiLinked Rate Tests", () => {
       // getPreviousCouponInOrderedList(2) on list [1, 3] must return 0 (not found),
       // so the rate equals 0 + missedPenalty rather than coupon1.rate + missedPenalty.
       const coupon2 = (await asset.getCoupon(2)).registeredCoupon_;
-      expect(coupon2.coupon.rate).to.equal(newInterestRate.missedPenalty);
+      expect(coupon2.coupon.rate).to.equal(newInterestRate.baseRate + newInterestRate.missedPenalty);
     });
 
     it("GIVEN a kpiLinked rate bond WHEN impact data is above baseline THEN transaction success and rate is calculated", async () => {
@@ -563,7 +546,7 @@ describe("Bond KpiLinked Rate Tests", () => {
 
       await asset.connect(signer_A).triggerScheduledCrossOrderedTasks(100);
 
-      const orderedList = await asset.getCouponsOrderedList(0, 10);
+      const orderedList = await asset.getCouponsOrderedList(0, 10, false);
       expect(orderedList).to.be.an("array").with.lengthOf(1);
       expect(orderedList[0]).to.equal(2); // couponId 2 is the only one in the ordered list
     });
@@ -578,7 +561,7 @@ describe("Bond KpiLinked Rate Tests", () => {
 
     describe("getCouponsOrderedListTotal", () => {
       it("should return 0 when no coupons have been created", async () => {
-        const total = await asset.getCouponsOrderedListTotal();
+        const total = await asset.getCouponsOrderedListTotal(false);
         expect(total).to.equal(0);
       });
 
@@ -626,14 +609,14 @@ describe("Bond KpiLinked Rate Tests", () => {
         // Move time forward past all fixing dates
         await asset.changeSystemTimestamp(currentBlockTimestamp + TIME_PERIODS_S.DAY * 6);
 
-        const total = await asset.getCouponsOrderedListTotal();
+        const total = await asset.getCouponsOrderedListTotal(false);
         expect(total).to.equal(3);
       });
     });
 
     describe("getCouponFromOrderedListAt", () => {
       it("should return 0 for invalid position when no coupons exist", async () => {
-        const couponId = await asset.getCouponFromOrderedListAt(0);
+        const couponId = await asset.getCouponFromOrderedListAt(0, false);
         expect(couponId).to.equal(0);
       });
 
@@ -656,7 +639,7 @@ describe("Bond KpiLinked Rate Tests", () => {
         await asset.changeSystemTimestamp(currentBlockTimestamp + TIME_PERIODS_S.DAY * 2);
 
         // Try to get position 1 (second item) when only 1 exists (index 0)
-        const couponId = await asset.getCouponFromOrderedListAt(1);
+        const couponId = await asset.getCouponFromOrderedListAt(1, false);
         expect(couponId).to.equal(0);
       });
 
@@ -708,22 +691,22 @@ describe("Bond KpiLinked Rate Tests", () => {
         await asset.changeSystemTimestamp(currentBlockTimestamp + TIME_PERIODS_S.DAY * 6);
 
         // Get coupon at position 0 (first coupon)
-        const couponId0 = await asset.getCouponFromOrderedListAt(0);
+        const couponId0 = await asset.getCouponFromOrderedListAt(0, false);
         expect(couponId0).to.equal(1);
 
         // Get coupon at position 1 (second coupon)
-        const couponId1 = await asset.getCouponFromOrderedListAt(1);
+        const couponId1 = await asset.getCouponFromOrderedListAt(1, false);
         expect(couponId1).to.equal(2);
 
         // Get coupon at position 2 (third coupon)
-        const couponId2 = await asset.getCouponFromOrderedListAt(2);
+        const couponId2 = await asset.getCouponFromOrderedListAt(2, false);
         expect(couponId2).to.equal(3);
       });
     });
 
     describe("getCouponsOrderedList", () => {
       it("should return empty array when no coupons exist", async () => {
-        const coupons = await asset.getCouponsOrderedList(0, 10);
+        const coupons = await asset.getCouponsOrderedList(0, 10, false);
         expect(coupons).to.be.an("array").that.is.empty;
       });
 
@@ -771,7 +754,7 @@ describe("Bond KpiLinked Rate Tests", () => {
         // Move time forward past all fixing dates
         await asset.changeSystemTimestamp(currentBlockTimestamp + TIME_PERIODS_S.DAY * 6);
 
-        const coupons = await asset.getCouponsOrderedList(0, 10);
+        const coupons = await asset.getCouponsOrderedList(0, 10, false);
         expect(coupons).to.be.an("array").with.lengthOf(3);
         expect(coupons[0]).to.equal(1);
         expect(coupons[1]).to.equal(2);
@@ -799,24 +782,24 @@ describe("Bond KpiLinked Rate Tests", () => {
         await asset.changeSystemTimestamp(currentBlockTimestamp + TIME_PERIODS_S.DAY * 11);
 
         // Get first page (2 items)
-        const page1 = await asset.getCouponsOrderedList(0, 2);
+        const page1 = await asset.getCouponsOrderedList(0, 2, false);
         expect(page1).to.be.an("array").with.lengthOf(2);
         expect(page1[0]).to.equal(1);
         expect(page1[1]).to.equal(2);
 
         // Get second page (2 items)
-        const page2 = await asset.getCouponsOrderedList(1, 2);
+        const page2 = await asset.getCouponsOrderedList(1, 2, false);
         expect(page2).to.be.an("array").with.lengthOf(2);
         expect(page2[0]).to.equal(3);
         expect(page2[1]).to.equal(4);
 
         // Get third page (1 item remaining)
-        const page3 = await asset.getCouponsOrderedList(2, 2);
+        const page3 = await asset.getCouponsOrderedList(2, 2, false);
         expect(page3).to.be.an("array").with.lengthOf(1);
         expect(page3[0]).to.equal(5);
 
         // Get page beyond available data
-        const page4 = await asset.getCouponsOrderedList(3, 2);
+        const page4 = await asset.getCouponsOrderedList(3, 2, false);
         expect(page4).to.be.an("array").that.is.empty;
       });
 
@@ -841,17 +824,17 @@ describe("Bond KpiLinked Rate Tests", () => {
         await asset.changeSystemTimestamp(currentBlockTimestamp + TIME_PERIODS_S.DAY * 7);
 
         // Get page 0 (first item)
-        const page0 = await asset.getCouponsOrderedList(0, 1);
+        const page0 = await asset.getCouponsOrderedList(0, 1, false);
         expect(page0).to.be.an("array").with.lengthOf(1);
         expect(page0[0]).to.equal(1);
 
         // Get page 1 (second item)
-        const page1 = await asset.getCouponsOrderedList(1, 1);
+        const page1 = await asset.getCouponsOrderedList(1, 1, false);
         expect(page1).to.be.an("array").with.lengthOf(1);
         expect(page1[0]).to.equal(2);
 
         // Get page 2 (third item)
-        const page2 = await asset.getCouponsOrderedList(2, 1);
+        const page2 = await asset.getCouponsOrderedList(2, 1, false);
         expect(page2).to.be.an("array").with.lengthOf(1);
         expect(page2[0]).to.equal(3);
       });

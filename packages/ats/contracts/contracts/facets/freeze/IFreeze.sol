@@ -18,6 +18,12 @@ bytes32 constant RESOLVER_KEY_FREEZE = 0xad51c3d79dbb37543854270a7bd1c7237cfa425
  */
 interface IFreeze {
     /**
+     * @notice Emitted once when the freeze capability is initialised on a token.
+     * @dev Fires exclusively from `initializeFreeze`.
+     */
+    event FreezeInitialized();
+
+    /**
      * @notice Emitted when a specific amount of tokens is frozen for a wallet.
      * @param account The wallet address whose tokens were frozen.
      * @param amount The amount of tokens frozen.
@@ -44,11 +50,18 @@ interface IFreeze {
 
     /**
      * @notice Reverts when a partial token freeze is attempted with a zero amount.
-     * @dev Checked at the start of `ERC3643StorageWrapper.freezeTokensByPartition`, the
-     *      single entry point shared by both `freezePartialTokens` and any partition-scoped
-     *      freeze call. Freezing zero tokens is semantically invalid and rejected early.
+     * @dev Checked at the start of `ERC3643StorageWrapper.freezeTokens`, the entry point for
+     *      partial token freezes. Freezing zero tokens is semantically invalid and rejected
+     *      early.
      */
     error InvalidFreezeAmount();
+
+    /**
+     * @notice Initialises the freeze capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeFreeze() external;
 
     /**
      * @notice Freezes a specific amount of tokens for a wallet, reducing its liquid balance.

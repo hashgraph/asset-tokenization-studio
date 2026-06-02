@@ -13,6 +13,12 @@ bytes32 constant RESOLVER_KEY_CONTROLLER = 0xf020acbcf895b1f0961c02558f58e8e3f0a
  *      management. Inherits `AgentAdded` and `AgentRemoved` events from `IERC3643Types`.
  */
 interface IController is IERC3643Types {
+    /**
+     * @notice Emitted when the controller feature is initialised for a token.
+     * @dev Fired inside `initializeController` once the facet is marked ready.
+     */
+    event ControllerInitialized(bool controllable);
+
     /// @notice Emitted when the controller feature is permanently disabled for a token.
     event FinalizedControllerFeature(address operator);
 

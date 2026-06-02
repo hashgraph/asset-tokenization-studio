@@ -30,6 +30,8 @@ import {
   getStorageWrapperRegistryCount,
   atsRegistry,
   isLibraryDependentFacet,
+  hasOrchestratorLibraryAddresses,
+  setOrchestratorLibraryAddresses,
 } from "@scripts/domain";
 
 describe("atsRegistry.generated - Factory Functions", () => {
@@ -40,6 +42,26 @@ describe("atsRegistry.generated - Factory Functions", () => {
 
   before(async () => {
     [signer] = await ethers.getSigners();
+    // Self-sufficient unit-suite bootstrap: when this file runs in isolation
+    // (e.g. `npm test -- test/scripts/unit/...`) no upstream integration fixture
+    // has primed the orchestrator-library module state, so factory branches
+    // that transitively call `getLibLinks()` revert with "addresses not set".
+    // Seed zero-address placeholders — no deployment happens here, the factories
+    // are only constructed, never invoked. Guarded so integration runs that
+    // already set real addresses are left untouched.
+    if (!hasOrchestratorLibraryAddresses()) {
+      const zero = ethers.ZeroAddress;
+      setOrchestratorLibraryAddresses({
+        tokenCoreOps: zero,
+        holdOps: zero,
+        clearingOps: zero,
+        clearingLifecycleOps: zero,
+        clearingReadOps: zero,
+        clearingProtectedOps: zero,
+        scheduledTasksOps: zero,
+        scheduledTasksDispatchOps: zero,
+      });
+    }
   });
 
   // Helper to check if a facet can be safely instantiated without library addresses

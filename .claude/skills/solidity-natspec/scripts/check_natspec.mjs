@@ -14,7 +14,7 @@
 //
 // Heuristic only — for authoring guidance, not a compiler-grade validator. State
 // variables are intentionally not checked (too easy to mis-detect); verify those
-// manually using SKILL.md "What to cover".
+// manually using ADD.md "What to cover".
 //
 // Usage: node scripts/check_natspec.mjs <path/to/file.sol>
 // Exit code: 0 if every checked element passes, 1 if anything is missing or
@@ -149,9 +149,31 @@ const splitTopLevel = (text) => {
   return out;
 };
 
+// Solidity tokens that may appear as the trailing token of a parameter or return
+// fragment when the name is omitted. If the last identifier is one of these (or a
+// generic numeric type like uint256/bytes32/intN), the fragment carries no name
+// and we return "" so the matching @param/@return is not required.
+const SOLIDITY_TYPE_KEYWORDS = new Set([
+  "memory",
+  "calldata",
+  "storage",
+  "bool",
+  "address",
+  "string",
+  "bytes",
+  "fixed",
+  "ufixed",
+  "uint",
+  "int",
+]);
+const NUMERIC_TYPE_RE = /^(uint|int|bytes|fixed|ufixed)\d+$/;
+
 const lastIdentifierOrEmpty = (fragment) => {
   const tokens = fragment.match(/[A-Za-z_]\w*/g) || [];
-  return tokens.length >= 2 ? tokens[tokens.length - 1] : "";
+  if (tokens.length < 2) return "";
+  const last = tokens[tokens.length - 1];
+  if (SOLIDITY_TYPE_KEYWORDS.has(last) || NUMERIC_TYPE_RE.test(last)) return "";
+  return last;
 };
 
 const parseCallableSignature = (signature, kind) => {
@@ -355,7 +377,7 @@ const main = () => {
   const findings = checkFile(path);
   if (findings.length === 0) {
     console.log(`OK -- every checked element in ${path} passes NatSpec rules.`);
-    console.log("Reminder: state variables are not checked; verify those via SKILL.md section 6.");
+    console.log("Reminder: state variables are not checked; verify those via ADD.md section 6.");
     return 0;
   }
   console.log(`NatSpec issues in ${path}:`);

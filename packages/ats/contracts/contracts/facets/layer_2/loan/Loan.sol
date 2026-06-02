@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ILoan } from "./ILoan.sol";
-import { ROLE_LOAN_MANAGER } from "../../../constants/roles.sol";
-import { LoanStorageWrapper } from "../../../domain/asset/loan/LoanStorageWrapper.sol";
+import { ILoan, RESOLVER_KEY_LOAN } from "./ILoan.sol";
+import { ROLE_LOAN_MANAGER, DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
+import { LoanStorageWrapper } from "../../../domain/asset/LoanStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title Loan
@@ -13,23 +15,31 @@ import { Modifiers } from "../../../services/Modifiers.sol";
  * @author Hashgraph
  */
 abstract contract Loan is ILoan, Modifiers {
+    /// @inheritdoc ILoan
     function initializeLoan(
         LoanDetailsData calldata _loanDetailsData
     )
         external
         override
-        onlyUninitialized(LoanStorageWrapper.isLoanInitialized())
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_LOAN)
         onlyValidTimestamp(_loanDetailsData.loanBasicData.startingDate)
         validateDates(_loanDetailsData.loanBasicData.startingDate, _loanDetailsData.loanBasicData.maturityDate)
     {
         LoanStorageWrapper.initializeLoan(_loanDetailsData);
+        // TODO: [LOAN-INTEGRATION] Security data should be initialised through TreasuryToken/deployment layer.
+        // SecurityStorageWrapper.initializeSecurity(_regulationData, _additionalSecurityData);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_LOAN);
+        emit ILoan.LoanInitialized(_loanDetailsData);
     }
 
+    /// @inheritdoc ILoan
     function setLoanDetails(
         LoanDetailsData calldata loanDetailsData_
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_LOAN_MANAGER)
@@ -44,6 +54,7 @@ abstract contract Loan is ILoan, Modifiers {
         LoanStorageWrapper.setLoanDetails(loanDetailsData_);
     }
 
+    /// @inheritdoc ILoan
     function getLoanDetails() external view override returns (LoanDetailsData memory loanDetailsData_) {
         return LoanStorageWrapper.getLoanDetails();
     }

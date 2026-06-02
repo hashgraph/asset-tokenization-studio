@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type IAsset, type ResolverProxy, ComplianceMock, IdentityRegistryMock } from "@contract-types";
+import { type IAsset, type ResolverProxy, ComplianceMock, IdentityRegistryMock, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 import {
@@ -15,6 +15,8 @@ import {
   EMPTY_HEX_BYTES,
   dateToUnixTimestamp,
   EIP1066_CODES,
+  EQUITY_CONFIG_ID,
+  RESOLVER_KEY_RECOVERY,
 } from "@scripts";
 
 const name = "TEST";
@@ -34,6 +36,7 @@ describe("Recovery Tests", () => {
   let signer_F: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   let identityRegistryMock: IdentityRegistryMock;
   let complianceMock: ComplianceMock;
@@ -70,7 +73,7 @@ describe("Recovery Tests", () => {
       signer_F = base.user5;
 
       asset = await ethers.getContractAt("IAsset", diamond.target);
-
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
       await executeRbac(asset, [
         {
           role: ATS_ROLES.ROLE_PAUSER,
@@ -215,11 +218,18 @@ describe("Recovery Tests", () => {
         expect(isRecovered).to.equal(true);
       });
 
-      it("GIVEN lost wallet WHEN calling recovery using a previously recovered address THEN recovered status is set to false", async () => {
+      it("GIVEN _lostWallet is already recovered WHEN recoveryAddress THEN transaction fails with WalletRecovered", async () => {
         await asset.recoveryAddress(signer_C.address, signer_B.address, ADDRESS_ZERO);
-        await asset.recoveryAddress(signer_B.address, signer_C.address, ADDRESS_ZERO);
-        const isRecoveredC = await asset.isAddressRecovered(signer_C.address);
-        expect(isRecoveredC).to.equal(false);
+        await expect(
+          asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO),
+        ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+      });
+
+      it("GIVEN _newWallet is already recovered WHEN recoveryAddress THEN transaction fails with WalletRecovered", async () => {
+        await asset.recoveryAddress(signer_C.address, signer_B.address, ADDRESS_ZERO);
+        await expect(
+          asset.recoveryAddress(signer_B.address, signer_C.address, ADDRESS_ZERO),
+        ).to.be.revertedWithCustomError(asset, "WalletRecovered");
       });
 
       it("GIVEN a recovered address THEN operations should fail", async () => {
@@ -741,6 +751,39 @@ describe("Recovery Tests", () => {
           .connect(base.deployer)
           .recoveryAddress(ethers.ZeroAddress, ethers.ZeroAddress, ethers.ZeroAddress),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("initializeRecovery", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeRecovery is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeRecovery())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeRecovery is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeRecovery())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_RECOVERY, 1);
+    });
+  });
+
+  describe("initializeRecovery event", () => {
+    it("GIVEN a fresh deployment WHEN initializeRecovery is called THEN emits RecoveryInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_RECOVERY);
+      await expect(asset.initializeRecovery()).to.emit(asset, "RecoveryInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational WHEN recoveryAddress is called THEN AssetNotOperational", async () => {
+      await expect(asset.recoveryAddress(ethers.ZeroAddress, ethers.ZeroAddress, ethers.ZeroAddress))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 });

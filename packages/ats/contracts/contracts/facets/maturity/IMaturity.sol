@@ -10,12 +10,25 @@ bytes32 constant RESOLVER_KEY_MATURITY = 0x16825792debc7c17efd86bdf71500575f9ff5
  * @title  IMaturity
  * @notice Interface for bond maturity redemption and maturity date management.
  * @dev    `fullRedeemAtMaturity` and `updateMaturityDate` are extracted from the Bond facet
- *         into a dedicated Maturity facet registered under `_MATURITY_RESOLVER_KEY`.
+ *         into a dedicated Maturity facet registered under `RESOLVER_KEY_MATURITY`.
  *         Events and errors — `MaturityDateUpdated` and `BondMaturityDateWrong` — are
  *         inherited from `IBondTypes`.
  * @author Asset Tokenization Studio Team
  */
 interface IMaturity is IBondTypes {
+    /**
+     * @notice Emitted once when the maturity capability is initialised on a token.
+     * @dev Fires exclusively from `initializeMaturity`.
+     */
+    event MaturityInitialized();
+
+    /**
+     * @notice Initialises the maturity capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeMaturity() external;
+
     /**
      * @notice Redeems all token partitions held by a token holder at bond maturity.
      * @dev    Caller must hold `ROLE_MATURITY_REDEEMER`. Contract must be unpaused and clearing

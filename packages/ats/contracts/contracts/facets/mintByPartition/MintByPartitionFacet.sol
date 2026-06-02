@@ -24,7 +24,7 @@ contract MintByPartitionFacet is MintByPartition, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.issueByPartition.selector);
+        return Bytes4Builder.build(this.initializeMintByPartition.selector, this.issueByPartition.selector);
     }
 
     /// @inheritdoc IStaticFunctionSelectors

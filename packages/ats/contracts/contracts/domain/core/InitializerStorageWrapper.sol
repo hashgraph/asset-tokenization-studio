@@ -4,29 +4,34 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ResolverProxyStorageWrapper } from "./ResolverProxyStorageWrapper.sol";
 import { IDiamondCutManager } from "../../infrastructure/diamond/IDiamondCutManager.sol";
 import { IInitializer } from "../../facets/initializer/IInitializer.sol";
-import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /// @custom:hash storage Initializer
 bytes32 constant STORAGE_LOCATION_INITIALIZER = 0x7f2d07b09acba6319339222a47bfb11d5f72a81023b8b3e9ec77c77ec694f200;
 
 /**
  * @notice Diamond-storage layout backing the initializer facet.
- * @param maxInitializerFacetIndex Maximum number of facets validated by
- *        `setOperationalStatus` per call.
- * @param configVersionStatus Per `(configurationId, version)` operational-status encoding:
- *        `0` = not started, `1` = fully operational, `>1` = resume facet index + 1.
- * @param facetVersionStatus Per `(facetId, version)` initialisation status: `0` = not
- *        started, `1` = ready, `>1` = initialisation in progress (exact intermediate value
- *        is defined by each facet's own initialiser).
- * @param facetLastVersion Latest version recorded per facet (0 if never registered).
+ * @dev Tracks operational status per `(configurationId, version)` and initialisation status per
+ *      `(facetId, version)`. Status encodings:
+ *      - `configVersionStatus`: `0` not started, `1` fully operational, `>1` resume facet index + 1.
+ *      - `facetVersionStatus`: `0` not started, `1` ready, `>1` initialisation in progress
+ *        (intermediate value defined by each facet's own initialiser).
+ *      `facetLastVersion` records the latest version per facet (`0` when never registered) and is
+ *      consulted by predecessor checks during upgrades. New fields must be appended below the
+ *      APPEND-ONLY marker to preserve upgrade safety.
+ * @custom:storage-location erc7201:security.token.standard.storage.Initializer
  */
 struct InitializerDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     uint256 maxInitializerFacetIndex;
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     // configVersionStatus encoding: 0 = not started, 1 = fully operational, >1 = (resume facet index + 1)
     mapping(bytes32 configId => mapping(uint256 versionId => uint256 status)) configVersionStatus;
     // facetVersionStatus: 1 means the facet version is ready
     mapping(bytes32 facetId => mapping(uint256 versionId => uint256 status)) facetVersionStatus;
     mapping(bytes32 facetId => uint256 version) facetLastVersion;
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 /**
@@ -67,6 +72,8 @@ library InitializerStorageWrapper {
      * @return isOperational_ True when every facet of the configuration version is ready.
      * @return lastFacetIndex_ Index reached in this call; on partial progress, the next call
      *         resumes here. Zero when the configuration was already operational.
+     * @return configId_ Resolver-proxy configuration identifier this call evaluated.
+     * @return versionId_ Configuration version this call evaluated.
      */
     // Verifies that every facet of the current config+version is ready, in batches of MAX_INITIALIZER_FACET_INDEX.
     // Persists progress so next calls resume where the previous one stopped, until the whole config is operational.
@@ -84,14 +91,11 @@ library InitializerStorageWrapper {
             return (true, 0, configId_, versionId_);
         }
 
-        // Resume from previously stored progress (status > 1 encodes "resume index + 1"); 0 means start fresh.
         uint256 nextFacetIndex;
-
         unchecked {
             nextFacetIndex = operationStatus > 1 ? operationStatus - 1 : 0;
         }
 
-        // Upper bound of this batch; clamped below to the actual facet count.
         unchecked {
             lastFacetIndex_ = getMaxInitializerFacetIndex() + nextFacetIndex;
         }
@@ -108,26 +112,13 @@ library InitializerStorageWrapper {
             .getBusinessLogicResolver()
             .getFacetConfigurationsByConfigurationIdAndVersion(configId_, versionId_, nextFacetIndex, lastFacetIndex_);
 
-        uint256 facetConfigurationsLength = facetConfigurations.length;
+        (isOperational_, lastFacetIndex_) = _checkFacetsReady(
+            facetConfigurations,
+            nextFacetIndex,
+            facetsLength,
+            lastFacetIndex_
+        );
 
-        // Walk the batch; stop at the first facet that is not ready and record where to resume next call.
-        for (uint256 facetIndex; facetIndex < facetConfigurationsLength; ) {
-            uint256 facetStatus = getFacetVersionStatus(
-                facetConfigurations[facetIndex].id,
-                facetConfigurations[facetIndex].version
-            );
-
-            unchecked {
-                if (facetStatus != 1) {
-                    isOperational_ = false;
-                    lastFacetIndex_ = nextFacetIndex + facetIndex;
-                    break;
-                }
-                ++facetIndex;
-            }
-        }
-
-        isOperational_ = lastFacetIndex_ == facetsLength;
         unchecked {
             initializerStorage().configVersionStatus[configId_][versionId_] = isOperational_ ? 1 : lastFacetIndex_ + 1;
         }
@@ -180,6 +171,16 @@ library InitializerStorageWrapper {
      */
     function setFacetLastVersionTo(bytes32 _facetId, uint256 _versionId) internal {
         initializerStorage().facetLastVersion[_facetId] = _versionId;
+    }
+
+    /// @notice Sets the operational status for a configuration version.
+    /// @dev Used by tests (via MockDiamondCut.forceNonOperational()) to set status to 0
+    ///      and by `setOperationalStatus` flow to set status to 1 after full initialisation.
+    /// @param configId Resolver-proxy configuration.
+    /// @param versionId Configuration version.
+    /// @param status Status value: 0 = not started, 1 = fully operational.
+    function setConfigVersion(bytes32 configId, uint256 versionId, uint256 status) internal {
+        initializerStorage().configVersionStatus[configId][versionId] = status;
     }
 
     /**
@@ -235,6 +236,7 @@ library InitializerStorageWrapper {
         uint256 i;
         uint256 lastVersion = InitializerStorageWrapper.getFacetLastVersion(_facetId);
         uint256 length = _fromLastVersions.length;
+        if (length == 0) return;
         while (i < length) {
             if (lastVersion == _fromLastVersions[i]) {
                 return;
@@ -317,6 +319,33 @@ library InitializerStorageWrapper {
                 ResolverProxyStorageWrapper.getResolverProxyVersion(),
                 _facetId
             );
+    }
+
+    function _checkFacetsReady(
+        IDiamondCutManager.FacetConfiguration[] memory _facetConfigurations,
+        uint256 _nextFacetIndex,
+        uint256 _facetsLength,
+        uint256 _requestedLastFacetIndex
+    ) private view returns (bool allReady_, uint256 lastFacetIndex_) {
+        lastFacetIndex_ = _requestedLastFacetIndex;
+        uint256 facetConfigurationsLength = _facetConfigurations.length;
+
+        for (uint256 facetIndex; facetIndex < facetConfigurationsLength; ) {
+            uint256 facetStatus = getFacetVersionStatus(
+                _facetConfigurations[facetIndex].id,
+                _facetConfigurations[facetIndex].version
+            );
+
+            unchecked {
+                if (facetStatus != 1) {
+                    lastFacetIndex_ = _nextFacetIndex + facetIndex;
+                    return (false, lastFacetIndex_);
+                }
+                ++facetIndex;
+            }
+        }
+
+        allReady_ = lastFacetIndex_ == _facetsLength;
     }
 
     /**

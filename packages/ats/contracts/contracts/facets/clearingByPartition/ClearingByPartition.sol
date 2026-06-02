@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
-
-import { IClearingByPartition } from "./IClearingByPartition.sol";
+import { IClearingByPartition, RESOLVER_KEY_CLEARING_BY_PARTITION } from "./IClearingByPartition.sol";
 import { ROLE_CLEARING_VALIDATOR } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
@@ -11,22 +10,36 @@ import { ClearingReadOps } from "../../domain/orchestrator/ClearingReadOps.sol";
 import { ClearingStorageWrapper } from "../../domain/asset/ClearingStorageWrapper.sol";
 import { ThirdPartyType } from "../../domain/asset/types/ThirdPartyType.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title ClearingByPartition
+ * @notice Provides partition-scoped clearing lifecycle, creation, and query operations.
+ * @dev Implements `IClearingByPartition` through shared clearing orchestrators and facet
+ *      initialisation storage. Mutating entry points depend on operational, activation,
+ *      pause, partition, identity, recovery, role, and clearing-state modifiers.
  * @author Asset Tokenization Studio Team
- * @notice Abstract implementation of partition-aware clearing operations: approve/cancel/reclaim actions,
- *         clearing redeem and transfer creation, and clearing read queries scoped to a partition.
- * @dev Implements the partition-scoped subset of clearing functionality on top of ClearingOps,
- *      ClearingReadOps, and ClearingStorageWrapper. Intended to be inherited by ClearingByPartitionFacet.
  */
 abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
+    /// @inheritdoc IClearingByPartition
+    function initializeClearingByPartition()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_CLEARING_BY_PARTITION)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_CLEARING_BY_PARTITION);
+        emit ClearingByPartitionInitialized();
+    }
+
     /// @inheritdoc IClearingByPartition
     function approveClearingOperationByPartition(
         IClearingByPartition.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_CLEARING_VALIDATOR)
@@ -40,7 +53,6 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
         (success_, operationData, partition_) = ClearingLifecycleOps.approveClearingOperationByPartition(
             _clearingOperationIdentifier
         );
-
         emit ClearingOperationApproved(
             EvmAccessors.getMsgSender(),
             _clearingOperationIdentifier.tokenHolder,
@@ -57,6 +69,7 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_CLEARING_VALIDATOR)
@@ -84,6 +97,7 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
@@ -103,13 +117,14 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
     }
 
     /// @inheritdoc IClearingByPartition
-    /// @dev Emits {ClearedRedeemByPartition} via ClearingOps.clearingRedeemCreation.
+    /// @dev Requires clearing to be active and records the caller as the token holder.
     function clearingRedeemByPartition(
         ClearingOperation calldata _clearingOperation,
         uint256 _amount
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyClearingActivated
@@ -129,13 +144,14 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
     }
 
     /// @inheritdoc IClearingByPartition
-    /// @dev Emits {ClearedRedeemFromByPartition} via ClearingOps.clearingRedeemCreation.
+    /// @dev Requires clearing allowance and decreases it after creating the redeem request.
     function clearingRedeemFromByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
         uint256 _amount
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
@@ -164,7 +180,7 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
     }
 
     /// @inheritdoc IClearingByPartition
-    /// @dev Emits {ClearedTransferByPartition} via ClearingOps.clearingTransferCreation.
+    /// @dev Requires clearing to be active and records the caller as the token holder.
     function clearingTransferByPartition(
         ClearingOperation calldata _clearingOperation,
         uint256 _amount,
@@ -172,6 +188,7 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyClearingActivated
@@ -194,7 +211,7 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
     }
 
     /// @inheritdoc IClearingByPartition
-    /// @dev Emits {ClearedTransferFromByPartition} via ClearingOps.clearingTransferCreation.
+    /// @dev Requires clearing allowance and decreases it in the private helper.
     function clearingTransferFromByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
         uint256 _amount,
@@ -202,6 +219,7 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyClearingActivated
@@ -288,6 +306,16 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
             );
     }
 
+    /**
+     * @notice Creates a clearing transfer entry on behalf of an authorised operator.
+     * @dev Dispatches into {ClearingOps.clearingTransferCreation} with the
+     *      {ThirdPartyType.AUTHORIZED} tag and reduces the operator's clearing allowance.
+     * @param _clearingOperationFrom Operator envelope (clearing operation, holder, operator data).
+     * @param _amount Amount to clear for transfer.
+     * @param _to Destination address that will receive the cleared transfer.
+     * @return success_ True when the clearing entry was created.
+     * @return clearingId_ Identifier assigned to the new clearing record.
+     */
     function _clearingTransferFromByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
         uint256 _amount,

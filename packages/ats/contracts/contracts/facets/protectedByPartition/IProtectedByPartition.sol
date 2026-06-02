@@ -17,6 +17,12 @@ bytes32 constant RESOLVER_KEY_PROTECTED_BY_PARTITION = 0x2f9cd983bc92f917e9c55a3
  */
 interface IProtectedByPartition {
     /**
+     * @notice Emitted once when the protected-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeProtectedByPartition`.
+     */
+    event ProtectedByPartitionInitialized();
+
+    /**
      * @notice Emitted when a protected transfer completes successfully.
      * @param operator The address that initiated the transfer (msg.sender).
      * @param from The token holder whose tokens are transferred.
@@ -49,6 +55,21 @@ interface IProtectedByPartition {
         bytes32 partition,
         IProtectedPartitions.ProtectionData protectionData
     );
+
+    /**
+     * @notice Raised when an account is not authorised for a protected partition.
+     * @dev The reported sender is resolved through `EvmAccessors` for forwarding support.
+     * @param partition Partition whose access requirement is not satisfied.
+     * @param sender Effective caller that lacks the required role.
+     */
+    error ProtectedPartitionRoleRequired(bytes32 partition, address sender);
+
+    /**
+     * @notice Initialises the protected-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeProtectedByPartition() external;
 
     /**
      * @notice Transfers tokens from a token holder to a recipient by presenting an

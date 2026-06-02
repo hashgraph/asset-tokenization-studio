@@ -12,21 +12,34 @@ import { DefaultValueValidation } from "../utils/DefaultValueValidation.sol";
 // solhint-disable-next-line max-line-length
 bytes32 constant STORAGE_LOCATION_BUSINESS_LOGIC_RESOLVER = 0xde52d5af2ee0e84dfa9eb9bcc42ec14eed20a1d286bfef34d73589ea7ee18800;
 
-abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
-    struct BusinessLogicResolverDataStorage {
-        mapping(bytes32 facetId => uint256 lastVersion) latestVersionByFacetId;
-        // list of facetIds
-        bytes32[] activeBusinessLogics;
-        // facetId -> bool
-        mapping(bytes32 => bool) businessLogicActive;
-        // facetId -> pos (one per vesion) -> version + status + address
-        mapping(bytes32 => IBusinessLogicResolver.BusinessLogicVersion[]) businessLogics;
-        // version to status
-        mapping(bytes32 facetIdAndVersion => IBusinessLogicResolver.VersionStatus status) statusByFacetIdAndVersion;
-        bool initialized;
-        mapping(bytes32 => EnumerableSetBytes4.Bytes4Set) selectorBlacklist;
-    }
+/**
+ * @notice Diamond storage backing the business-logic resolver registry.
+ * @dev Records, per facet id, the active version set, status, and selector blacklist that
+ *      determine which logic a resolver-proxy delegates to. Hoisted to file scope per the
+ *      project's ERC-7201 storage convention; new fields must be appended below the
+ *      APPEND-ONLY marker to preserve upgrade safety.
+ * @custom:storage-location erc7201:security.token.standard.storage.BusinessLogicResolver
+ */
+struct BusinessLogicResolverDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    bool initialized;
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
+    mapping(bytes32 facetId => uint256 lastVersion) latestVersionByFacetId;
+    // list of facetIds
+    bytes32[] activeBusinessLogics;
+    // facetId -> bool
+    mapping(bytes32 => bool) businessLogicActive;
+    // facetId -> pos (one per vesion) -> version + status + address
+    mapping(bytes32 => IBusinessLogicResolver.BusinessLogicVersion[]) businessLogics;
+    // version to status
+    mapping(bytes32 facetIdAndVersion => IBusinessLogicResolver.VersionStatus status) statusByFacetIdAndVersion;
+    mapping(bytes32 => EnumerableSetBytes4.Bytes4Set) selectorBlacklist;
+    // ─── APPEND-ONLY ZONE BELOW ───
+}
 
+abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
     modifier validVersion(bytes32 _businessLogicKey, uint256 _version) {
         _checkValidVersion(_businessLogicKey, _version);
         _;

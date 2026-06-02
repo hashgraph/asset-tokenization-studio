@@ -147,7 +147,7 @@ export interface FacetDefinition {
 
   /** Resolver key imported or defined by this facet */
   resolverKey?: {
-    /** Resolver key name (e.g., _ACCESS_CONTROL_RESOLVER_KEY) */
+    /** Resolver key name (e.g., _ACCESS_CONTROL) */
     name: string;
     /** Resolver key bytes32 value (e.g., 0x011768a41...) */
     value: string;
@@ -778,6 +778,7 @@ export interface DeploymentOutputType {
     getBondFixedRateFacets(): FacetMetadata[];
     getBondKpiLinkedRateFacets(): FacetMetadata[];
     getLoanFacets(): FacetMetadata[];
+    getDepositTokenFacets(): FacetMetadata[];
     getLoansPortfolioFacets(): FacetMetadata[];
     getFactoryFacets(): FacetMetadata[];
   };

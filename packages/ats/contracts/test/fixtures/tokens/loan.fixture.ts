@@ -24,36 +24,11 @@ import {
   LOAN_CONFIG_ID,
   SecurityDataParams,
 } from "@scripts/domain";
-import {
-  AccessControlFacet__factory,
-  CapFacet__factory,
-  ControlListFacet__factory,
-  CouponFacet__factory,
-  NominalValueFacet__factory,
-  CoreFacet__factory,
-  ERC3643ManagementFacet__factory,
-  ERC20VotesFacet__factory,
-  ControllerFacet__factory,
-  MintFacet__factory,
-  BurnFacet__factory,
-  ERC1410ManagementFacet__factory,
-  FreezeFacet__factory,
-  KycFacet__factory,
-  PauseFacet__factory,
-  ProtectedPartitionsFacet__factory,
-  ClearingFacet__factory,
-  ExternalKycListManagementFacet__factory,
-  ExternalControlListManagementFacet__factory,
-  ExternalPauseManagementFacet__factory,
-  ProceedRecipientsFacet__factory,
-  TimeTravelFacet__factory,
-  Loan__factory,
-  ISecurity__factory,
-} from "@contract-types";
+import { IAsset__factory, IDiamondFacet__factory } from "@contract-types";
 import { decodeEvent } from "@scripts/infrastructure";
 import { DeepPartial, TIME_PERIODS_S } from "@scripts";
 import { getDltTimestamp } from "../hardhatHelpers";
-import { DEFAULT_BOND_PARAMS, getRegulationData, getSecurityData } from "@test";
+import { DEFAULT_BOND_PARAMS, executeRbac, getRegulationData, getSecurityData } from "@test";
 
 /**
  * Default loan token parameters for test fixtures.
@@ -241,6 +216,8 @@ export async function deployLoanTokenFixture({
   // Create Loan configuration in BLR (registers all 45 facets including AmortizationFacet)
   await createLoanConfiguration(blr, facetAddresses, true);
 
+  const version = 1;
+
   // Deploy TestFactory
 
   // Deploy ResolverProxy via TestFactory
@@ -253,37 +230,31 @@ export async function deployLoanTokenFixture({
   const receipt = await tx.wait();
   const proxyAddress = (await decodeEvent(factory, "ProxyDeployed", receipt)).proxyAddress;
 
-  // Connect commonly used facets to the proxy
-  const accessControlFacet = AccessControlFacet__factory.connect(proxyAddress, deployer);
-  const pauseFacet = PauseFacet__factory.connect(proxyAddress, deployer);
-  const kycFacet = KycFacet__factory.connect(proxyAddress, deployer);
-  const controlListFacet = ControlListFacet__factory.connect(proxyAddress, deployer);
-  const coreFacet = CoreFacet__factory.connect(proxyAddress, deployer);
-  const freezeFacet = FreezeFacet__factory.connect(proxyAddress, deployer);
-  const capFacet = CapFacet__factory.connect(proxyAddress, deployer);
-  const controllerFacet = ControllerFacet__factory.connect(proxyAddress, deployer);
-  const mintFacet = MintFacet__factory.connect(proxyAddress, deployer);
-  const burnFacet = BurnFacet__factory.connect(proxyAddress, deployer);
-  const erc1410ManagementFacet = ERC1410ManagementFacet__factory.connect(proxyAddress, deployer);
-  const erc3643ManagementFacet = ERC3643ManagementFacet__factory.connect(proxyAddress, deployer);
-  const erc20VotesFacet = ERC20VotesFacet__factory.connect(proxyAddress, deployer);
-  const couponFacet = CouponFacet__factory.connect(proxyAddress, deployer);
-  const nominalValueFacet = NominalValueFacet__factory.connect(proxyAddress, deployer);
-  const protectedPartitionsFacet = ProtectedPartitionsFacet__factory.connect(proxyAddress, deployer);
-  const clearingFacet = ClearingFacet__factory.connect(proxyAddress, deployer);
-  const externalKycListManagementFacet = ExternalKycListManagementFacet__factory.connect(proxyAddress, deployer);
-  const externalControlListManagementFacet = ExternalControlListManagementFacet__factory.connect(
-    proxyAddress,
-    deployer,
-  );
-  const externalPauseManagementFacet = ExternalPauseManagementFacet__factory.connect(proxyAddress, deployer);
-  const proceedRecipientsFacet = ProceedRecipientsFacet__factory.connect(proxyAddress, deployer);
-  const timeTravelFacet = TimeTravelFacet__factory.connect(proxyAddress, deployer);
-  const loanFacet = Loan__factory.connect(proxyAddress, deployer);
-  const securityFacet = ISecurity__factory.connect(proxyAddress, deployer);
+  // Connected facets (most commonly used)
+  const accessControlFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const pauseFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const kycFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const controlListFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const coreFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const freezeFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const capFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const controllerFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const mintFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const burnFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const erc1410ManagementFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const erc3643ManagementFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const erc20VotesFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const couponFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const nominalValueFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const protectedPartitionsFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const clearingFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const externalKycListManagementFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const externalControlListManagementFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const externalPauseManagementFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const proceedRecipientsFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const timeTravelFacet = IAsset__factory.connect(proxyAddress, deployer);
 
   await controlListFacet.initializeControlList(securityData.isWhiteList);
-  await erc1410ManagementFacet.initialize_ERC1410(securityData.isMultiPartition);
   await controllerFacet.initializeController(securityData.isControllable);
   await coreFacet.initializeCore({
     info: {
@@ -294,32 +265,112 @@ export async function deployLoanTokenFixture({
     },
     securityType: 1, // SecurityType.Equity (reuse for loan)
   });
-  await mintFacet.initialize_ERC1594();
+  await mintFacet.initializeERC1594();
   await capFacet.initializeCap(securityData.maxSupply, []);
-  await protectedPartitionsFacet.initialize_ProtectedPartitions(securityData.arePartitionsProtected);
+  await protectedPartitionsFacet.initializeProtectedPartitions(securityData.arePartitionsProtected);
   await clearingFacet.initializeClearing(securityData.clearingActive);
   await externalPauseManagementFacet.initializeExternalPauses([]);
   await externalControlListManagementFacet.initializeExternalControlLists([]);
   await kycFacet.initializeInternalKyc(securityData.internalKycActivated);
   await externalKycListManagementFacet.initializeExternalKycLists([]);
-  await erc20VotesFacet.initialize_ERC20Votes(securityData.erc20VotesActivated);
-  await erc3643ManagementFacet.initialize_ERC3643(ZeroAddress, ZeroAddress);
+  await erc20VotesFacet.initializeERC20Votes(securityData.erc20VotesActivated);
   await nominalValueFacet.initializeNominalValue(
     loanParams?.nominalValue ?? DEFAULT_LOAN_PARAMS.nominalValue,
     loanParams?.nominalValueDecimals ?? DEFAULT_LOAN_PARAMS.nominalValueDecimals,
     loanParams?.loanInit?.currency ?? DEFAULT_LOAN_PARAMS.currency,
   );
 
-  await loanFacet.initializeLoan(loanDetails);
+  const asset = IAsset__factory.connect(proxyAddress, deployer);
 
-  await securityFacet.initializeSecurity(
-    buildRegulationData(regulationData.regulationType, regulationData.regulationSubType),
-    {
-      countriesControlListType: regulationData.additionalSecurityData.countriesControlListType,
-      listOfCountries: regulationData.additionalSecurityData.listOfCountries,
-      info: regulationData.additionalSecurityData.info,
-    },
-  );
+  // Initialize remaining essential facets identified
+  await IDiamondFacet__factory.connect(proxyAddress, deployer).initializeDiamondCut();
+  await asset.initializeTransferAndLock();
+
+  await asset.initializeLoan(loanDetails);
+  await asset.initializeSecurity(buildRegulationData(regulationData.regulationType, regulationData.regulationSubType), {
+    countriesControlListType: regulationData.additionalSecurityData.countriesControlListType,
+    listOfCountries: regulationData.additionalSecurityData.listOfCountries,
+    info: regulationData.additionalSecurityData.info,
+  });
+  await asset.initializeAccessControl();
+
+  // Call all other initializations provided by the user list that are present in IAsset
+  await asset.initializeAllowance();
+  await asset.initializeBurn();
+  await asset.initializeSecurityHolders();
+  await asset.initializeHold();
+  await asset.initializeBatchMint();
+  await asset.initializeBatchTransfer();
+  await asset.initializeBatchBurn();
+  await asset.initializeFreeze();
+  await asset.initializeBalanceTrackerAdjusted();
+  await asset.initializeFreezeAtSnapshot();
+  await asset.initializeClearingHoldByPartition();
+  await asset.initializeOperatorClearingByPartition();
+  await asset.initializeControllerHoldByPartition();
+  await asset.initializeProtectedHoldByPartition();
+  await asset.initializeRecovery();
+  await asset.initializeProtectedClearingByPartition();
+  await asset.initializeProtectedClearingHoldByPartition();
+  await asset.initializeBurnByPartition();
+  await asset.initializeNominalValueAtSnapshot();
+  await asset.initializeClearingAtSnapshot();
+  await asset.initializeControllerByPartition();
+  await asset.initializeBatchFreeze();
+  await asset.initializeClearingByPartition();
+  await asset.initializeSnapshotsByPartition();
+  await asset.initializeIdentity(ZeroAddress);
+  await asset.initializeSecurityHoldersAtSnapshot();
+  await asset.initializeFreezeAtSnapshotByPartition();
+  await asset.initializeProtectedByPartition();
+  await asset.initializeEIP712();
+  await asset.initializeDocumentation();
+  await asset.initializeTransferAndLockByPartition();
+  await asset.initializeHoldAtSnapshot();
+  await asset.initializeLock();
+  await asset.initializeOperatorClearingHoldByPartition();
+  await asset.initializeSnapshots();
+  await asset.initializeERC20Permit();
+  await asset.initializeLockAtSnapshotByPartition();
+  await asset.initializeOperator();
+  await asset.initializeTransfer();
+  await asset.initializeLockAtSnapshot();
+  await asset.initializeHoldAtSnapshotByPartition();
+  await asset.initializeBalanceTrackerAtSnapshotByPartition();
+  await asset.initializeCouponSecurityHolders();
+  await asset.initializeTransferByPartition();
+  await asset.initializeBalanceTrackerAtSnapshot();
+  await asset.initializePartitions(securityData.isMultiPartition);
+  await asset.initializeBalanceTrackerByPartition();
+  await asset.initializeSsiManagement();
+  await asset.initializeOperatorByPartition();
+  await asset.initializeAmortization();
+  await asset.initializeProceedRecipients([], []);
+  await asset.initializeScheduledCrossOrderedTasks();
+  await asset.initializeCorporateActions();
+  await asset.initializeMintByPartition();
+  await asset.initializeClearingAtSnapshotByPartition();
+  await asset.initializeBatchController();
+  await asset.initializeCoreAtSnapshot();
+  await asset.initializeComplianceByPartition();
+  await asset.initializeCoupon();
+  await asset.initializeLockByPartition();
+  await asset.initializeHoldByPartition();
+  await asset.initializeDeactivate();
+  await asset.initializeOperatorHoldByPartition();
+  await asset.initializeCoreAdjusted();
+  await asset.initializeCustomData();
+  await asset.initializeCompliance(ZeroAddress);
+  await asset.initializeCouponListing();
+  await asset.initializeCapByPartition();
+  await asset.initializePause();
+  await asset.initializeBalanceTracker();
+  await asset.initializeBalanceAdjustments();
+  await asset.initializeScheduledBalanceAdjustment();
+  await asset.initializeTimeTravel();
+
+  await asset.connect(deployer).initializeInitializer(150);
+  await asset.connect(deployer).setOperationalStatus();
 
   return {
     ...infrastructure,

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { HolderBalance } from "../layer_1/snapshot/ISnapshots.sol";
+import { HolderBalance } from "../snapshot/ISnapshots.sol";
 
 /// @custom:hash resolverKey BalanceTrackerAtSnapshot
 // solhint-disable-next-line max-line-length
@@ -16,6 +16,19 @@ bytes32 constant RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT = 0x2c9af26b5891593b81
  *      `SnapshotIdDoesNotExists` for unknown identifiers.
  */
 interface IBalanceTrackerAtSnapshot {
+    /**
+     * @notice Emitted once when the snapshot balance tracker capability is initialised on a token.
+     * @dev Fires exclusively from `initializeBalanceTrackerAtSnapshot` after the storage write succeeds.
+     */
+    event BalanceTrackerAtSnapshotInitialized();
+
+    /**
+     * @notice Initialises the snapshot balance tracker capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeBalanceTrackerAtSnapshot() external;
+
     /**
      * @notice Returns the balance of a token holder at the time of a given snapshot.
      * @param _snapshotID  The snapshot identifier returned by a prior `takeSnapshot` call.

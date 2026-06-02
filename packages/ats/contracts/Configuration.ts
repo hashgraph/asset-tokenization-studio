@@ -32,6 +32,7 @@ const NETWORK_ENV_PREFIX_SEPARATOR_REGEX = /-/g;
  * - hedera-previewnet: Hedera previewnet (public test network)
  * - hedera-testnet: Hedera testnet (primary test network)
  * - hedera-mainnet: Hedera mainnet (production network)
+ * - hedera-hashsphere: Hedera Hashsphere (private enterprise network)
  */
 export const NETWORKS = [
   "hardhat",
@@ -40,6 +41,7 @@ export const NETWORKS = [
   "hedera-previewnet",
   "hedera-testnet",
   "hedera-mainnet",
+  "hedera-hashsphere",
 ] as const;
 export type Network = (typeof NETWORKS)[number];
 
@@ -85,7 +87,6 @@ export const CONTRACT_NAMES = [
   "EIP712Facet",
   "ERC1410ScheduledTasksFacet",
   "ERC20Votes", //TODO
-  "ERC1410ManagementFacet",
   "PartitionsFacet",
   "MintByPartitionFacet",
   "ERC1410TokenHolderFacet",
@@ -148,7 +149,6 @@ export const CONTRACT_NAMES = [
   "ExternalKycListManagementFacet",
   "ERC3643",
   "FreezeFacet",
-  "ERC3643ManagementFacet",
   "ERC3643ReadFacet",
   "IdentityFacet",
   "BatchControllerFacet",

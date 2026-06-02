@@ -13,7 +13,7 @@ contract ProtectedPartitionsFacet is ProtectedPartitions, IStaticFunctionSelecto
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
-                this.initialize_ProtectedPartitions.selector,
+                this.initializeProtectedPartitions.selector,
                 this.protectPartitions.selector,
                 this.unprotectPartitions.selector,
                 this.arePartitionsProtected.selector,

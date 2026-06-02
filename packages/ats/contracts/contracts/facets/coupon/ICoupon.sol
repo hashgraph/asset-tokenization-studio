@@ -21,6 +21,12 @@ bytes32 constant RESOLVER_KEY_COUPON = 0xe292dde7a8154c59d06fe2333acc2b54d003262
  */
 interface ICoupon is ICouponTypes {
     /**
+     * @notice Emitted once when the coupon capability is initialised on a token.
+     * @dev Fires exclusively from `initializeCoupon`.
+     */
+    event CouponInitialized();
+
+    /**
      * @notice Emitted when an operator schedules a new coupon corporate action.
      * @param corporateActionId Identifier of the underlying corporate action.
      * @param couponId One-indexed coupon identifier within the coupon corporate action type.
@@ -44,6 +50,13 @@ interface ICoupon is ICouponTypes {
     event CouponCancelled(uint256 indexed couponId, address indexed operator);
 
     /**
+     * @notice Emitted when an admin force-cancels a coupon, bypassing date guards.
+     * @param couponId One-indexed identifier of the force-cancelled coupon.
+     * @param operator Address that performed the force-cancellation.
+     */
+    event CouponForceCancelled(uint256 indexed couponId, address indexed operator);
+
+    /**
      * @notice Reverts when an operator attempts to cancel a coupon whose execution date has
      *         already passed.
      * @param corporateActionId Identifier of the underlying corporate action.
@@ -64,11 +77,24 @@ interface ICoupon is ICouponTypes {
     error InterestRateIsKpiLinked();
 
     /**
+     * @notice Reverts when a standard rate variant is supplied with pending
+     *         rate parameters.
+     */
+    error InterestRateIsStandard();
+
+    /**
      * @notice Reverts when a coupon identifier does not resolve to an existing corporate
      *         action.
      * @param couponID The coupon identifier that was not found.
      */
     error CouponNotFound(uint256 couponID);
+
+    /**
+     * @notice Initialises the coupon capability on the token.
+     * @dev Callable once; subsequent calls revert with FacetAlreadyRegistered.
+     *      Requires DEFAULT_ADMIN_ROLE. Called by the factory during deployment.
+     */
+    function initializeCoupon() external;
 
     /**
      * @notice Schedules a new coupon corporate action and registers the snapshot/record-date
@@ -90,6 +116,16 @@ interface ICoupon is ICouponTypes {
      * @return success_ True if the cancellation was recorded.
      */
     function cancelCoupon(uint256 _couponID) external returns (bool success_);
+
+    /**
+     * @notice Force-cancels a coupon regardless of its execution date.
+     * @dev Restricted to `ROLE_CORPORATE_ACTION_FORCE_CANCEL` and gated by the unpaused state
+     *      and `onlyMatchingActionType`. Marks the corporate action disabled unconditionally —
+     *      bypasses `CouponAlreadyExecuted` — and emits `CouponForceCancelled`.
+     * @param _couponID One-indexed identifier of the coupon to force-cancel.
+     * @return success_ True if the force-cancellation was recorded.
+     */
+    function forceCancelCoupon(uint256 _couponID) external returns (bool success_);
 
     /**
      * @notice Returns the persisted coupon record together with its cancelled flag.

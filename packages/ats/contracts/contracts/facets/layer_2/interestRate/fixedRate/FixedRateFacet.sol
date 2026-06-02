@@ -11,7 +11,7 @@ contract FixedRateFacet is FixedRate, IStaticFunctionSelectors {
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.initialize_FixedRate.selector, this.setRate.selector, this.getRate.selector);
+        return Bytes4Builder.build(this.initializeFixedRate.selector, this.setRate.selector, this.getRate.selector);
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {

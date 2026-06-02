@@ -22,7 +22,7 @@ contract BatchBurnFacet is BatchBurn, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.batchBurn.selector);
+        return Bytes4Builder.build(this.initializeBatchBurn.selector, this.batchBurn.selector);
     }
 
     /// @inheritdoc IStaticFunctionSelectors

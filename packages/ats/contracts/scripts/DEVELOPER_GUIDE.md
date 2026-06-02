@@ -399,7 +399,8 @@ const FUND_FACETS = [
   "ERC20PermitFacet",
 
   // Compliance (if needed)
-  "ERC3643ManagementFacet",
+  "ComplianceFacet",
+  "IdentityFacet",
   "ERC3643ReadFacet",
 
   // Fund-Specific (your custom facets)

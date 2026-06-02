@@ -29,6 +29,7 @@ export const KNOWN_NETWORKS = {
   HEDERA_PREVIEWNET: "hedera-previewnet",
   HEDERA_TESTNET: "hedera-testnet",
   HEDERA_MAINNET: "hedera-mainnet",
+  HEDERA_HASHSPHERE: "hedera-hashsphere",
 } as const;
 
 /**
@@ -154,6 +155,25 @@ export const DEPLOYMENT_CONFIGS: Record<string, DeploymentConfig> = {
       maxRetries: 3, // 3 retries after initial attempt (4 total attempts)
       baseDelay: 10_000, // 10 second base delay — gives Hedera time to clear any queued tx
       maxDelay: 20_000, // normal cap; throttle errors bypass this via ×5 multiplier
+      logRetries: true,
+    },
+    verifyDeployment: true,
+  },
+
+  /**
+   * Hedera Hashsphere
+   * - 1 confirmation, 3 retries (4 total attempts)
+   * - Normal delays: 2s → 4s → 8s → 8s between retries
+   * - Worst-case: 4 × 120s + ~22s delays = ~8 minutes
+   * - Typical: 4 × 5-10s + 14s = ~34 seconds
+   */
+  "hedera-hashsphere": {
+    confirmations: 1,
+    timeout: 120_000, // 2 minutes per attempt
+    retryOptions: {
+      maxRetries: 2, // 3 retries after initial attempt (4 total attempts)
+      baseDelay: 2000,
+      maxDelay: 8000,
       logRetries: true,
     },
     verifyDeployment: true,

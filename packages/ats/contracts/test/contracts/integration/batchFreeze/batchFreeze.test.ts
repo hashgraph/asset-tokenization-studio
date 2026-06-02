@@ -3,10 +3,10 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { ComplianceMock, IdentityRegistryMock, IAsset, type ResolverProxy } from "@contract-types";
+import { ComplianceMock, IdentityRegistryMock, IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
-import { ATS_ROLES, EMPTY_STRING, ZERO, ADDRESS_ZERO } from "@scripts";
+import { ATS_ROLES, EMPTY_STRING, ZERO, ADDRESS_ZERO, RESOLVER_KEY_BATCH_FREEZE } from "@scripts";
 
 const AMOUNT = 1000;
 const MAX_SUPPLY = 10000000;
@@ -20,6 +20,7 @@ describe("BatchFreeze Tests", () => {
   let signer_F: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   let identityRegistryMock: IdentityRegistryMock;
   let complianceMock: ComplianceMock;
@@ -54,7 +55,7 @@ describe("BatchFreeze Tests", () => {
     signer_F = base.user5;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
-
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       {
         role: ATS_ROLES.ROLE_PAUSER,
@@ -236,6 +237,12 @@ describe("BatchFreeze Tests", () => {
           "ZeroAddressNotAllowed",
         );
       });
+
+      it("GIVEN an account without ROLE_FREEZE_MANAGER or ROLE_AGENT WHEN batchFreezePartialTokens THEN fails with AccountHasNoRoles", async () => {
+        await expect(
+          asset.connect(signer_F).batchFreezePartialTokens([signer_D.address], [freezeAmount]),
+        ).to.be.revertedWithCustomError(asset, "AccountHasNoRoles");
+      });
     });
 
     describe("batchUnfreezePartialTokens", () => {
@@ -306,6 +313,12 @@ describe("BatchFreeze Tests", () => {
           asset,
           "ZeroAddressNotAllowed",
         );
+      });
+
+      it("GIVEN an account without ROLE_FREEZE_MANAGER or ROLE_AGENT WHEN batchUnfreezePartialTokens THEN fails with AccountHasNoRoles", async () => {
+        await expect(
+          asset.connect(signer_F).batchUnfreezePartialTokens([signer_D.address], [unfreezeAmount]),
+        ).to.be.revertedWithCustomError(asset, "AccountHasNoRoles");
       });
     });
 
@@ -399,6 +412,46 @@ describe("BatchFreeze Tests", () => {
       await expect(
         deactivatedAsset.connect(base.deployer).batchUnfreezePartialTokens([], []),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+  describe("initializeBatchFreeze", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeBatchFreeze is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeBatchFreeze())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeBatchFreeze is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeBatchFreeze())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_BATCH_FREEZE, 1);
+    });
+  });
+
+  describe("initializeBatchFreeze event", () => {
+    it("GIVEN a fresh deployment WHEN initializeBatchFreeze is called THEN emits BatchFreezeInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_BATCH_FREEZE);
+      await expect(asset.initializeBatchFreeze()).to.emit(asset, "BatchFreezeInitialized");
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN batchSetAddressFrozen THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.batchSetAddressFrozen([], [])).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN batchFreezePartialTokens THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.batchFreezePartialTokens([], [])).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN batchUnfreezePartialTokens THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.batchUnfreezePartialTokens([], [])).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
     });
   });
 });

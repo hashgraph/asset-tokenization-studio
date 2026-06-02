@@ -4,8 +4,8 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { type IAsset } from "@contract-types";
-import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES } from "@scripts";
+import { type IAsset, MockDiamondCut } from "@contract-types";
+import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES, LOAN_CONFIG_ID, RESOLVER_KEY_AMORTIZATION } from "@scripts";
 import { deployLoanTokenFixture, getDltTimestamp } from "@test";
 import { DEFAULT_SECURITY_PARAMS } from "@test/fixtures/tokens/common.fixture";
 
@@ -16,6 +16,7 @@ const EXECUTION_DATE_OFFSET = 1200;
 
 describe("AmortizationFacet", () => {
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
   let deployer: HardhatEthersSigner;
   let user1: HardhatEthersSigner;
   let user2: HardhatEthersSigner;
@@ -35,7 +36,7 @@ describe("AmortizationFacet", () => {
     const { tokenAddress, deployer } = base;
 
     const asset = await ethers.getContractAt("IAsset", tokenAddress, deployer);
-
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", tokenAddress, deployer);
     const [, user1, user2, user3] = await ethers.getSigners();
 
     return {
@@ -51,6 +52,7 @@ describe("AmortizationFacet", () => {
   beforeEach(async () => {
     const fixture = await loadFixture(deployAmortizationLoanFixture);
     asset = fixture.asset;
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", await asset.getAddress());
     deployer = fixture.deployer;
     user1 = fixture.user1;
     user2 = fixture.user2;
@@ -246,6 +248,78 @@ describe("AmortizationFacet", () => {
       await expect(asset.connect(user2).cancelAmortization(1))
         .to.be.revertedWithCustomError(asset, "AmortizationNotActive")
         .withArgs("0x0000000000000000000000000000000000000000000000000000000000000001", 1n);
+    });
+  });
+
+  describe("forceCancelAmortization", () => {
+    let amortizationData: Awaited<ReturnType<typeof makeAmortizationData>>;
+
+    beforeEach(async () => {
+      await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, user2.address);
+      await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, user2.address);
+      amortizationData = await makeAmortizationData();
+      await asset.connect(user2).setAmortization(amortizationData);
+    });
+
+    it("GIVEN account with ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelAmortization before execution date THEN emits AmortizationForceCancelled and isDisabled is true", async () => {
+      await expect(asset.connect(user2).forceCancelAmortization(1))
+        .to.emit(asset, "AmortizationForceCancelled")
+        .withArgs(1n, user2.address);
+
+      const [, isDisabled] = await asset.getAmortization(1);
+      expect(isDisabled).to.equal(true);
+    });
+
+    it("GIVEN account with ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelAmortization after execution date THEN transaction succeeds bypassing date guard", async () => {
+      await asset.changeSystemTimestamp(amortizationData.executionDate + 1);
+
+      await expect(asset.connect(user2).forceCancelAmortization(1))
+        .to.emit(asset, "AmortizationForceCancelled")
+        .withArgs(1n, user2.address);
+
+      const [, isDisabled] = await asset.getAmortization(1);
+      expect(isDisabled).to.equal(true);
+    });
+
+    it("GIVEN account without ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelAmortization THEN reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(user3).forceCancelAmortization(1))
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(user3.address, ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL);
+    });
+
+    it("GIVEN paused token WHEN forceCancelAmortization THEN reverts with IsPaused", async () => {
+      await asset.grantRole(ATS_ROLES.ROLE_PAUSER, user1.address);
+
+      await asset.connect(user1).pause();
+
+      await expect(asset.connect(user2).forceCancelAmortization(1)).to.be.revertedWithCustomError(asset, "IsPaused");
+    });
+
+    it("GIVEN non-existent amortization ID WHEN forceCancelAmortization THEN reverts with WrongIndexForAction", async () => {
+      await expect(asset.connect(user2).forceCancelAmortization(999)).to.be.revertedWithCustomError(
+        asset,
+        "WrongIndexForAction",
+      );
+    });
+
+    it("GIVEN amortization with one active hold WHEN forceCancelAmortization THEN succeeds bypassing hold guard", async () => {
+      await asset.grantRole(ATS_ROLES.ROLE_AMORTIZATION, user2.address);
+      await asset.grantRole(ATS_ROLES.ROLE_ISSUER, user2.address);
+
+      await asset.connect(user2).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: deployer.address,
+        value: TOTAL_UNITS,
+        data: EMPTY_HEX_BYTES,
+      });
+
+      await asset.connect(user2).setAmortizationHold(1, deployer.address, BigInt(TOKENS_TO_REDEEM));
+
+      await expect(asset.connect(user2).forceCancelAmortization(1))
+        .to.emit(asset, "AmortizationForceCancelled")
+        .withArgs(1n, user2.address);
+      const [, isDisabled] = await asset.getAmortization(1);
+      expect(isDisabled).to.equal(true);
     });
   });
 
@@ -1512,6 +1586,57 @@ describe("AmortizationFacet", () => {
       await expect(
         deactivatedAsset.connect(base.deployer).setAmortizationHold(0, ethers.ZeroAddress, 0),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("initializeAmortization", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeAmortization is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(user2).initializeAmortization())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(user2.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeAmortization is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeAmortization())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_AMORTIZATION, 1);
+    });
+  });
+
+  describe("initializeAmortization event", () => {
+    it("GIVEN a fresh deployment WHEN initializeAmortization is called THEN emits AmortizationInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_AMORTIZATION);
+      await expect(asset.initializeAmortization()).to.emit(asset, "AmortizationInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational WHEN setAmortization is called THEN AssetNotOperational", async () => {
+      await expect(asset.setAmortization({ recordDate: 0n, executionDate: 0n, tokensToRedeem: 0n }))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(LOAN_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN cancelAmortization is called THEN AssetNotOperational", async () => {
+      await expect(asset.cancelAmortization(0n))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(LOAN_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN releaseAmortizationHold is called THEN AssetNotOperational", async () => {
+      await expect(asset.releaseAmortizationHold(0n, ethers.ZeroAddress))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(LOAN_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN setAmortizationHold is called THEN AssetNotOperational", async () => {
+      await expect(asset.setAmortizationHold(0n, ethers.ZeroAddress, 0n))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(LOAN_CONFIG_ID, 1);
     });
   });
 });

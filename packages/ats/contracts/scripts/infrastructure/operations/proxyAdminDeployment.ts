@@ -21,6 +21,7 @@ import {
   DEFAULT_TRANSACTION_TIMEOUT,
   GAS_LIMIT,
   hederaGasOverrides,
+  gasLimitOverride,
 } from "@scripts/infrastructure";
 
 /**
@@ -50,7 +51,7 @@ export async function deployProxyAdmin(signer: Signer, overrides?: Overrides): P
     info("Deploying ProxyAdmin...");
 
     const proxyAdmin = await new ProxyAdmin__factory(signer).deploy({
-      gasLimit: GAS_LIMIT.default,
+      ...gasLimitOverride(GAS_LIMIT.default),
       ...hederaGasOverrides(),
       ...overrides,
     } as any);

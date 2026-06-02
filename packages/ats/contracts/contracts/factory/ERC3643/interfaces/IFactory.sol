@@ -12,51 +12,105 @@ import { TRexICore as ICore } from "./ICore.sol";
 import { TRexIBondRead as IBondRead } from "./IBondRead.sol";
 import { TRexIEquity as IEquity } from "./IEquity.sol";
 import { FactoryRegulationData, RegulationData, RegulationType, RegulationSubType } from "./regulation.sol";
-import { TRexIFixedRate as IFixedRate } from "./IFixedRate.sol";
-import { TRexIKpiLinkedRate as IKpiLinkedRate } from "./IKpiLinkedRate.sol";
 
 /// @custom:hash resolverKey Factory
 bytes32 constant RESOLVER_KEY_FACTORY = 0x9fc26269cc1cb994e66f269ed6b58a5bb0c344a134b9dabd342ac466d48f95c7;
 
+/**
+ * @title Factory Interface
+ * @author Asset Tokenization Studio Team
+ * @notice Interface for deploying tokenised securities (equity, bonds, loans)
+ *         through a centralised factory that configures resolver proxies,
+ *         business-logic resolvers, and role-based access control.
+ */
 interface TRexIFactory {
+    /**
+     * @notice Distinguishes the security variant being deployed.
+     * @dev Used internally to select the correct initialisation path in the factory.
+     */
     enum SecurityType {
-        BondVariableRate,
+        /// @notice An equity instrument (shares).
         Equity,
+        /// @notice A bond whose coupon rate floats against an external index.
+        BondVariableRate,
+        /// @notice A bond with a fixed coupon rate.
         BondFixedRate,
+        /// @notice A bond whose coupon is tied to KPI performance metrics.
         BondKpiLinkedRate,
-        Loan
+        /// @notice A loan instrument.
+        Loan,
+        DepositToken
     }
 
+    /**
+     * @notice Identifies the business-logic resolver version to wire into a new proxy.
+     * @param key     Resolver key that maps to the registered BusinessLogicResolver address.
+     * @param version Configuration version to load from the resolver.
+     */
     struct ResolverProxyConfiguration {
         bytes32 key;
         uint256 version;
     }
 
+    /**
+     * @notice Core configuration shared across all security types.
+     * @dev Passed verbatim to the proxy initialiser; all addresses must be non-zero where
+     *      the corresponding feature is activated.
+     * @param arePartitionsProtected     Whether token partitions are protected from arbitrary transfer.
+     * @param isMultiPartition           Whether the token supports multiple partitions.
+     * @param resolver                   BusinessLogicResolver that backs the new Diamond proxy.
+     * @param resolverProxyConfiguration Resolver key and version used during deployment.
+     * @param rbacs                      Initial role assignments applied at proxy creation.
+     * @param isControllable             Whether an operator can forcibly transfer tokens.
+     * @param isWhiteList                Whether transfers are gated by a whitelist.
+     * @param maxSupply                  Hard cap on total token supply (0 means unlimited).
+     * @param erc20MetadataInfo          ERC-20 name, symbol, and decimals.
+     * @param clearingActive             Whether clearing and settlement is activated.
+     * @param internalKycActivated       Whether the internal KYC module is activated.
+     * @param externalPauses             External pause contract addresses consulted on transfer.
+     * @param externalControlLists       External control-list contract addresses.
+     * @param externalKycLists           External KYC-list contract addresses.
+     * @param erc20VotesActivated        Whether ERC-20 vote delegation is activated.
+     * @param compliance                 Address of the compliance contract (address(0) to disable).
+     * @param identityRegistry           Address of the identity registry (address(0) to disable).
+     */
     struct SecurityData {
-        bool arePartitionsProtected;
-        bool isMultiPartition;
         IBusinessLogicResolver resolver;
-        ResolverProxyConfiguration resolverProxyConfiguration;
-        IResolverProxy.Rbac[] rbacs;
-        bool isControllable;
-        bool isWhiteList;
         uint256 maxSupply;
+        ResolverProxyConfiguration resolverProxyConfiguration;
         ICore.ERC20MetadataInfo erc20MetadataInfo;
-        bool clearingActive;
-        bool internalKycActivated;
+        IResolverProxy.Rbac[] rbacs;
         address[] externalPauses;
         address[] externalControlLists;
         address[] externalKycLists;
-        bool erc20VotesActivated;
         address compliance;
         address identityRegistry;
+        bool arePartitionsProtected;
+        bool isMultiPartition;
+        bool isControllable;
+        bool isWhiteList;
+        bool clearingActive;
+        bool internalKycActivated;
+        bool erc20VotesActivated;
     }
 
+    /**
+     * @notice Full configuration for deploying an equity token.
+     * @param security      Core security configuration shared across all security types.
+     * @param equityDetails Equity-specific details such as dividend type and voting rights.
+     */
     struct EquityData {
         SecurityData security;
         IEquity.EquityDetailsData equityDetails;
     }
 
+    /**
+     * @notice Full configuration for deploying a bond token.
+     * @param security              Core security configuration shared across all security types.
+     * @param bondDetails           Bond-specific details such as maturity date and nominal value.
+     * @param proceedRecipients     Addresses that receive the bond proceeds at issuance.
+     * @param proceedRecipientsData ABI-encoded data forwarded to each proceed recipient.
+     */
     struct BondData {
         SecurityData security;
         IBondRead.BondDetailsData bondDetails;
@@ -64,19 +118,21 @@ interface TRexIFactory {
         bytes[] proceedRecipientsData;
     }
 
-    struct BondKpiLinkedRateData {
-        BondData bondData;
-        FactoryRegulationData factoryRegulationData;
-        IKpiLinkedRate.InterestRate interestRate;
-        IKpiLinkedRate.ImpactData impactData;
+    /**
+     * @notice Full configuration for deploying a deposit token.
+     * @param security Core security configuration shared across all security types.
+     */
+    struct DepositTokenData {
+        SecurityData security;
     }
 
-    struct BondFixedRateData {
-        BondData bondData;
-        FactoryRegulationData factoryRegulationData;
-        IFixedRate.FixedRateData fixedRateData;
-    }
-
+    /**
+     * @notice Emitted when a new equity token is deployed.
+     * @param deployer Address that initiated the deployment.
+     * @param equityAddress Address of the newly deployed equity proxy.
+     * @param equityData Full equity configuration supplied at deployment.
+     * @param regulationData Regulation settings applied to the equity.
+     */
     event EquityDeployed(
         address indexed deployer,
         address equityAddress,
@@ -84,6 +140,13 @@ interface TRexIFactory {
         FactoryRegulationData regulationData
     );
 
+    /**
+     * @notice Emitted when a new variable-rate bond is deployed.
+     * @param deployer Address that initiated the deployment.
+     * @param bondAddress Address of the newly deployed bond proxy.
+     * @param bondData Full bond configuration supplied at deployment.
+     * @param regulationData Regulation settings applied to the bond.
+     */
     event BondDeployed(
         address indexed deployer,
         address bondAddress,
@@ -91,14 +154,28 @@ interface TRexIFactory {
         FactoryRegulationData regulationData
     );
 
-    event BondFixedRateDeployed(address indexed deployer, address bondAddress, BondFixedRateData bondFixedRateData);
-
-    event BondKpiLinkedRateDeployed(
+    /**
+     * @notice Emitted when a new deposit token is deployed.
+     * @param deployer Address that initiated the deployment.
+     * @param depositTokenAddress Address of the newly deployed deposit token proxy.
+     * @param depositTokenData Full deposit token configuration.
+     * @param regulationData Regulation data validated for the deposit token.
+     */
+    event DepositTokenDeployed(
         address indexed deployer,
-        address bondAddress,
-        BondKpiLinkedRateData bondKpiLinkedRateData
+        address depositTokenAddress,
+        DepositTokenData depositTokenData,
+        FactoryRegulationData regulationData
     );
 
+    /**
+     * @notice Emitted when a new resolver proxy is deployed.
+     * @param proxyAddress Address of the newly deployed proxy.
+     * @param resolver Business-logic resolver attached to the proxy.
+     * @param configKey Configuration identifier used by the proxy.
+     * @param version Initial configuration version.
+     * @param rbac Role-based access control entries seeded at deployment.
+     */
     event ProxyDeployed(
         address indexed proxyAddress,
         IBusinessLogicResolver resolver,
@@ -107,21 +184,56 @@ interface TRexIFactory {
         IResolverProxy.Rbac[] rbac
     );
 
+    /**
+     * @notice Raised when the supplied resolver address is the zero address.
+     * @param resolver The zero-address resolver that caused the revert.
+     */
     error EmptyResolver(IBusinessLogicResolver resolver);
+
+    /**
+     * @notice Raised when no admin role assignments are provided for the new proxy.
+     */
     error NoInitialAdmins();
 
     /**
-     * @notice Deploys a new resolver proxy and initializes its rbac
+     * @notice Raised when the provided ISIN does not meet the expected format or length.
+     * @param isin The invalid ISIN string.
+     */
+    error WrongISIN(string isin);
+
+    /**
+     * @notice Raised when the ISIN checksum is invalid.
+     * @param isin The invalid ISIN string.
+     */
+    error WrongISINChecksum(string isin);
+
+    /**
+     * @notice Raised when the requested regulation type and sub-type combination is not permitted.
+     * @param regulationType Primary regulation category.
+     * @param regulationSubType Sub-category within the regulation.
+     */
+    error RegulationTypeAndSubTypeForbidden(RegulationType regulationType, RegulationSubType regulationSubType);
+
+    /**
+     * @notice Deploys a new resolver proxy and initialises its RBAC.
+     * @param _resolver Business-logic resolver to attach.
+     * @param _configKey Configuration identifier for the proxy.
+     * @param _version Initial configuration version.
+     * @param _rbacs Role-based access control entries to seed.
+     * @return proxyAddress_ Address of the deployed proxy.
      */
     function deployProxy(
         IBusinessLogicResolver _resolver,
         bytes32 _configKey,
         uint256 _version,
         IResolverProxy.Rbac[] memory _rbacs
-    ) external returns (address);
+    ) external returns (address proxyAddress_);
 
     /**
-     * @notice Deploys a new equity given the input equity data
+     * @notice Deploys a new equity token with the supplied data.
+     * @param _equityData Equity configuration and metadata.
+     * @param _factoryRegulationData Regulation settings for the equity.
+     * @return equityAddress_ Address of the deployed equity proxy.
      */
     function deployEquity(
         EquityData calldata _equityData,
@@ -129,19 +241,35 @@ interface TRexIFactory {
     ) external returns (address equityAddress_);
 
     /**
-     * @notice Deploys a new equity given the input equity data
+     * @notice Deploys a new variable-rate bond with the supplied data.
+     * @param _bondData Bond configuration and metadata.
+     * @param _factoryRegulationData Regulation settings for the bond.
+     * @return bondAddress_ Address of the deployed bond proxy.
      */
     function deployBond(
         BondData calldata _bondData,
         FactoryRegulationData calldata _factoryRegulationData
     ) external returns (address bondAddress_);
 
-    function deployBondFixedRate(BondFixedRateData calldata _bondFixedRateData) external returns (address bondAddress_);
+    /**
+     * @notice Deploys a new deposit token from the supplied configuration.
+     * @dev DepositToken is a minimal cash-style asset; the regulation data is validated and
+     *      emitted for indexing but not persisted on-chain.
+     * @param _depositTokenData Deposit token creation data wrapping the shared `SecurityData`.
+     * @param _factoryRegulationData Regulation type and sub-type validated for the deposit token.
+     * @return depositTokenAddress_ Address of the newly deployed deposit token proxy.
+     */
+    function deployDepositToken(
+        DepositTokenData calldata _depositTokenData,
+        FactoryRegulationData calldata _factoryRegulationData
+    ) external returns (address depositTokenAddress_);
 
-    function deployBondKpiLinkedRate(
-        BondKpiLinkedRateData calldata _bondKpiLinkedRateData
-    ) external returns (address bondAddress_);
-
+    /**
+     * @notice Returns the regulation data that applies to a given type/sub-type pair.
+     * @param _regulationType Primary regulation category.
+     * @param _regulationSubType Sub-category within the regulation.
+     * @return regulationData_ Matched regulation configuration.
+     */
     function getAppliedRegulationData(
         RegulationType _regulationType,
         RegulationSubType _regulationSubType

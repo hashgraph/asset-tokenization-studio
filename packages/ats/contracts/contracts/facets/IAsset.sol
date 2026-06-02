@@ -28,14 +28,13 @@ import { ICoreAdjusted } from "./coreAdjusted/ICoreAdjusted.sol";
 import { IAllowance } from "./allowance/IAllowance.sol";
 
 // Layer 1 — External lists
-import { IERC1410Management } from "./layer_1/ERC1400/ERC1410/IERC1410Management.sol";
 import { ITransferByPartition } from "./transferByPartition/ITransferByPartition.sol";
 
 import { IOperator } from "./operator/IOperator.sol";
 import { ITransfer } from "./transfer/ITransfer.sol";
 
 // Layer 1 — Remaining facets
-import { IERC20Votes } from "./layer_1/ERC1400/ERC20Votes/IERC20Votes.sol";
+import { IERC20Votes } from "./erc20Votes/IERC20Votes.sol";
 import { IERC3643 } from "./layer_1/ERC3643/IERC3643.sol";
 import { IEquity } from "./layer_2/equity/IEquity.sol";
 import { IEquityUSA } from "./layer_3/equityUSA/IEquityUSA.sol";
@@ -50,7 +49,7 @@ import { IKpiLinkedRate } from "./layer_2/interestRate/kpiLinkedRate/IKpiLinkedR
 // Layer 2
 import { IOperatorHoldByPartition } from "./operatorHoldByPartition/IOperatorHoldByPartition.sol";
 import { IHoldByPartition } from "./holdByPartition/IHoldByPartition.sol";
-import { IKyc } from "./layer_1/kyc/IKyc.sol";
+import { IKyc } from "./kyc/IKyc.sol";
 // IKpiLinkedRate is excluded: it defines getInterestRate() with an incompatible return type
 // (different InterestRate struct), which cannot be reconciled in a single Solidity interface.
 // Use the typed instance directly when testing KPI-linked rate facets.
@@ -59,7 +58,7 @@ import { INominalValue } from "./layer_2/nominalValue/INominalValue.sol";
 import { INominalValueAtSnapshot } from "./nominalValueAtSnapshot/INominalValueAtSnapshot.sol";
 import { IPause } from "./pause/IPause.sol";
 import { ILoansPortfolio } from "./layer_2/loansPortfolio/ILoansPortfolio.sol";
-import { IVoting } from "./layer_2/voting/IVoting.sol";
+import { IVoting } from "./voting/IVoting.sol";
 import { IVotingSecurityHolders } from "./votingSecurityHolders/IVotingSecurityHolders.sol";
 
 // Layer 3
@@ -68,14 +67,14 @@ import { ISsiManagement } from "./ssiManagement/ISsiManagement.sol";
 import { ITimeTravel } from "../test/testTimeTravel/ITimeTravel.sol";
 import { IBalanceTracker } from "./balanceTracker/IBalanceTracker.sol";
 import { IBalanceTrackerAdjusted } from "./balanceTrackerAdjusted/IBalanceTrackerAdjusted.sol";
-import { ITransferAndLock } from "./layer_3/transferAndLock/ITransferAndLock.sol";
+import { ITransferAndLock } from "./transferAndLock/ITransferAndLock.sol";
 import { ITransferAndLockByPartition } from "./transferAndLockByPartition/ITransferAndLockByPartition.sol";
 import { ICoupon } from "./coupon/ICoupon.sol";
 import { IDividend } from "./dividend/IDividend.sol";
 import { IDividendSecurityHolders } from "./dividendSecurityHolders/IDividendSecurityHolders.sol";
 import { IKpis } from "./layer_2/kpi/kpiLatest/IKpis.sol";
 import { IProtectedPartitions } from "./layer_1/protectedPartition/IProtectedPartitions.sol";
-import { IProceedRecipients } from "./layer_2/proceedRecipient/IProceedRecipients.sol";
+import { IProceedRecipients } from "./proceedRecipient/IProceedRecipients.sol";
 import { ICap } from "./cap/ICap.sol";
 import { ICapByPartition } from "./capByPartition/ICapByPartition.sol";
 import { INonces } from "./nonces/INonces.sol";
@@ -96,11 +95,11 @@ import { IScheduledBalanceAdjustment } from "./scheduledBalanceAdjustment/ISched
 import { ICouponSecurityHolders } from "./couponSecurityHolders/ICouponSecurityHolders.sol";
 import { ISecurityHolders } from "./securityHolders/ISecurityHolders.sol";
 
-import { ILock } from "./layer_1/lock/ILock.sol";
+import { ILock } from "./lock/ILock.sol";
 import { ILockByPartition } from "./lockByPartition/ILockByPartition.sol";
 import { IFreeze } from "./freeze/IFreeze.sol";
 import { IBatchFreeze } from "./batchFreeze/IBatchFreeze.sol";
-import { ISnapshots } from "./layer_1/snapshot/ISnapshots.sol";
+import { ISnapshots } from "./snapshot/ISnapshots.sol";
 import { ISnapshotsByPartition } from "./snapshotsByPartition/ISnapshotsByPartition.sol";
 import { ISecurityHoldersAtSnapshot } from "./securityHoldersAtSnapshot/ISecurityHoldersAtSnapshot.sol";
 import { IFreezeAtSnapshot } from "./freezeAtSnapshot/IFreezeAtSnapshot.sol";
@@ -133,16 +132,17 @@ import { IControllerHoldByPartition } from "./controllerHoldByPartition/IControl
 import { IControllerByPartition } from "./controllerByPartition/IControllerByPartition.sol";
 import { IProtectedByPartition } from "./protectedByPartition/IProtectedByPartition.sol";
 import { IProtectedHoldByPartition } from "./protectedHoldByPartition/IProtectedHoldByPartition.sol";
-import { IERC20Permit } from "./layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
+import { IERC20Permit } from "./erc20Permit/IERC20Permit.sol";
 import { IEIP712 } from "./eip712/IEIP712.sol";
 import { IControlList } from "./controlList/IControlList.sol";
 import { IBatchBurn } from "./batchBurn/IBatchBurn.sol";
 import { IBatchMint } from "./batchMint/IBatchMint.sol";
 import { IBatchTransfer } from "./batchTransfer/IBatchTransfer.sol";
-import { IMetadata } from "./metadata/IMetadata.sol";
+import { ICustomData } from "./customData/ICustomData.sol";
 import { IDeactivate } from "./deactivate/IDeactivate.sol";
 import { IOperatorByPartition } from "./operatorByPartition/IOperatorByPartition.sol";
 import { IInterestRate } from "./interestRate/IInterestRate.sol";
+import { IInitializer } from "./initializer/IInitializer.sol";
 
 /// @custom:hash resolverKey TransferAndLock
 bytes32 constant RESOLVER_KEY_TRANSFER_AND_LOCK = 0xe92a301947f21b973cb1007aeba48f2eecd916d05107b6355fc499b783b8f7d9;
@@ -164,10 +164,10 @@ bytes32 constant RESOLVER_KEY_TRANSFER_AND_LOCK_FIXED_RATE = 0x0405063ec31286ce4
  * @dev Intended for use in tests and external tooling to interact with all Diamond methods
  *      through a single typed object, rather than multiple per-facet instances.
  *
- *      Note: IHold already transitively includes IAccessControl, IERC1410Management,
- *      IHoldRead, and IHoldTokenHolder. IERC3643 already includes its
- *      sub-interfaces. IERC20Votes includes IERC5805 and IVotes. Solidity C3 linearisation
- *      handles the resulting diamond inheritance without conflicts.
+ *      Note: IHold already transitively includes IAccessControl,
+ *      IHoldRead, and IHoldTokenHolder. IERC3643 surfaces the shared ERC-3643 types,
+ *      events and errors (IERC3643Types). IERC20Votes includes IERC5805 and IVotes.
+ *      Solidity C3 linearisation handles the resulting diamond inheritance without conflicts.
  *
  *      Note: IKpiLinkedRate is intentionally excluded due to an irreconcilable function selector
  *      conflict on getInterestRate(). Consumers that need the KPI-linked rate surface must use
@@ -190,7 +190,6 @@ interface IAsset is
     IOperatorHoldByPartition,
     ITransfer,
     IERC20Votes,
-    IERC1410Management,
     ITransferByPartition,
     IOperator,
     IERC3643,
@@ -287,9 +286,10 @@ interface IAsset is
     IBatchBurn,
     IBatchMint,
     IBatchTransfer,
-    IMetadata,
+    ICustomData,
     IDeactivate,
     IOperatorByPartition,
     ISecurityHolders,
-    IInterestRate
+    IInterestRate,
+    IInitializer
 {}

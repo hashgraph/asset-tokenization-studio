@@ -2019,14 +2019,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
-  async setMetadata(security: EvmAddress, key: string, value: string[]): Promise<TransactionResponse> {
-    LogService.logTrace(`Setting metadata for security: ${security.toString()}`);
+  async setCustomData(security: EvmAddress, key: string, value: string[]): Promise<TransactionResponse> {
+    LogService.logTrace(`Setting custom data for security: ${security.toString()}`);
 
     return this.executeTransaction(
       IAsset__factory.connect(security.toString(), this.getSignerOrProvider()),
-      "setMetadata",
+      "setCustomData",
       [encodeBytes32String(key), value.map((v) => toUtf8Bytes(v))],
-      GAS.SET_METADATA,
+      GAS.SET_CUSTOM_DATA,
     );
   }
 

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity 0.8.22;
+// solhint-disable
 
 import { IAssetMock } from "./interfaces/IAssetMock.sol";
 // solhint-disable-next-line max-line-length
@@ -274,7 +275,7 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
-    function getPendingBalanceAdjustmentCount() external pure returns (uint256) {
+    function getPendingBalanceAdjustmentCount(bool) external pure returns (uint256) {
         revert NotImplemented();
     }
 
@@ -286,7 +287,7 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
-    function getScheduledBalanceAdjustments(uint256, uint256) external pure returns (ScheduledTask[] memory) {
+    function getScheduledBalanceAdjustments(uint256, uint256, bool) external pure returns (ScheduledTask[] memory) {
         revert NotImplemented();
     }
 
@@ -339,6 +340,10 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
+    function initializeBalanceAdjustments() external pure {
+        revert NotImplemented();
+    }
+
     function transfer(address, uint256) external pure returns (bool) {
         revert NotImplemented();
     }
@@ -375,8 +380,7 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1410_Basic(bool) external pure {
+    function initializeERC1410Basic(bool) external pure {
         revert NotImplemented();
     }
 
@@ -404,15 +408,41 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
-    function getCouponFromOrderedListAt(uint256) external pure returns (uint256) {
+    function getCouponFromOrderedListAt(uint256, bool) external pure returns (uint256) {
         revert NotImplemented();
     }
 
-    function getCouponsOrderedList(uint256, uint256) external pure returns (uint256[] memory) {
+    function getCouponsOrderedList(uint256, uint256, bool) external pure returns (uint256[] memory) {
         revert NotImplemented();
     }
 
-    function getCouponsOrderedListTotal() external pure returns (uint256) {
+    function getCouponsOrderedListTotal(bool) external pure returns (uint256) {
+        revert NotImplemented();
+    }
+
+    function initializeCoupon() external pure {
+        revert NotImplemented();
+    }
+
+    function initializeScheduledBalanceAdjustment() external pure {
+        revert NotImplemented();
+    }
+
+    function initializeVoting() external pure {
+        revert NotImplemented();
+    }
+
+    /// @notice Mock implementation — always reverts with `NotImplemented`.
+    function forceCancelScheduledBalanceAdjustment(uint256) external pure returns (bool) {
+        revert NotImplemented();
+    }
+
+    function forceCancelCoupon(uint256) external pure returns (bool) {
+        revert NotImplemented();
+    }
+
+    function forceCancelVoting(uint256) external pure returns (bool) {
         revert NotImplemented();
     }
 }
+// solhint-enable

@@ -3,8 +3,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ATS_ROLES, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import { ATS_ROLES, EMPTY_HEX_BYTES, EMPTY_STRING, RESOLVER_KEY_PARTITIONS, ZERO } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
@@ -18,8 +18,10 @@ describe("Partitions Tests", () => {
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
+  let unknownSigner: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixtureSinglePartition() {
     const base = await deployEquityTokenFixture({
@@ -33,8 +35,11 @@ describe("Partitions Tests", () => {
     signer_A = base.deployer;
     signer_B = base.user1;
     signer_C = base.user2;
+    const signers = await ethers.getSigners();
+    unknownSigner = signers[signers.length - 1];
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
       { role: ATS_ROLES.ROLE_ISSUER, members: [signer_B.address] },
@@ -59,8 +64,11 @@ describe("Partitions Tests", () => {
     signer_A = base.deployer;
     signer_B = base.user1;
     signer_C = base.user2;
+    const signers = await ethers.getSigners();
+    unknownSigner = signers[signers.length - 1];
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
       { role: ATS_ROLES.ROLE_ISSUER, members: [signer_B.address] },
@@ -124,6 +132,27 @@ describe("Partitions Tests", () => {
       });
 
       expect(await asset.partitionsOf(signer_C.address)).to.deep.equal([_DEFAULT_PARTITION, _CUSTOM_PARTITION]);
+    });
+  });
+
+  describe("initializePartitions", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializePartitions THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(unknownSigner).initializePartitions(false))
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(await unknownSigner.getAddress(), ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializePartitions THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializePartitions(false))
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_PARTITIONS, 1);
+    });
+  });
+
+  describe("initializePartitions event", () => {
+    it("GIVEN fresh facet WHEN initializePartitions THEN emits PartitionsInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_PARTITIONS);
+      await expect(asset.initializePartitions(false)).to.emit(asset, "PartitionsInitialized");
     });
   });
 });

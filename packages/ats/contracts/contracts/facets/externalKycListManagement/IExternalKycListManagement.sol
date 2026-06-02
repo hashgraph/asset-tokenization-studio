@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IKyc } from "../layer_1/kyc/IKyc.sol";
+import { IKyc } from "../kyc/IKyc.sol";
 
 /// @custom:hash resolverKey ExternalKycList
 bytes32 constant RESOLVER_KEY_EXTERNAL_KYC_LIST = 0x519d262ce075401982a7a64c60caea0491af317c7b69b7869f8181e8d9cda124;
@@ -19,6 +19,12 @@ bytes32 constant RESOLVER_KEY_EXTERNAL_KYC_LIST = 0x519d262ce075401982a7a64c60ca
  *      `ExternalListManagementStorageWrapper`.
  */
 interface IExternalKycListManagement {
+    /**
+     * @notice Emitted once when the external KYC list capability is initialised on a token.
+     * @dev Fires exclusively from `initializeExternalKycLists` after the storage write succeeds.
+     */
+    event ExternalKycListInitialized(address[] kycLists);
+
     /**
      * @notice Emitted when multiple external KYC list addresses are added or removed in a single
      *         batch.
@@ -63,7 +69,7 @@ interface IExternalKycListManagement {
 
     /**
      * @notice One-time initialiser that populates the external KYC list at token deployment.
-     * @dev Can only be called once; subsequent calls revert via `onlyNotKycExternalInitialized`.
+     * @dev Can only be called once; subsequent calls revert via `onlyFacetNotRegistered`.
      *      The leading-underscore naming convention signals this is an initialiser function.
      * @param _kycLists Initial array of external KYC list contract addresses to register.
      */

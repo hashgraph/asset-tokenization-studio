@@ -3,12 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ActionValidationModifiers } from "./ActionValidationModifiers.sol";
 import { AdjustBalancesModifiers } from "./AdjustBalancesModifiers.sol";
-import { BondModifiers } from "./BondModifiers.sol";
 import { ClearingModifiers } from "./ClearingModifiers.sol";
 import { CouponModifiers } from "./CouponModifiers.sol";
 import { ComplianceModifiers } from "./ComplianceModifiers.sol";
-import { EquityModifiers } from "./EquityModifiers.sol";
-import { ERC20Modifiers } from "./ERC20Modifiers.sol";
 import { ERC1410Modifiers } from "./ERC1410Modifiers.sol";
 import { ERC3643Modifiers } from "./ERC3643Modifiers.sol";
 import { ExpirationModifiers } from "./ExpirationModifiers.sol";
@@ -17,12 +14,11 @@ import { InterestRateModifiers } from "./InterestRateModifiers.sol";
 import { KpisModifiers } from "./KpisModifiers.sol";
 import { LockModifiers } from "./LockModifiers.sol";
 import { MaturityModifiers } from "./MaturityModifiers.sol";
-import { NominalValueModifiers } from "./NominalValueModifiers.sol";
 import { ProceedRecipientModifiers } from "./ProceedRecipientModifiers.sol";
+import { ProtectedPartitionRoleValidatorModifiers } from "./ProtectedPartitionRoleValidatorModifiers.sol";
 import { StateModifiers } from "./StateModifiers.sol";
 import { AmortizationModifiers } from "./AmortizationModifiers.sol";
 import { LoansPortfolioModifiers } from "./LoansPortfolioModifiers.sol";
-import { SecurityModifiers } from "./SecurityModifiers.sol";
 
 /**
  * @title AssetModifiers
@@ -34,12 +30,9 @@ import { SecurityModifiers } from "./SecurityModifiers.sol";
  * Asset Modifiers:
  * - ActionValidationModifiers: Action validation
  * - AdjustBalancesModifiers: Adjust balances validation
- * - BondModifiers: Bond-specific validation
  * - ClearingModifiers: Clearing state validation
  * - CouponModifiers: Coupon date validation
  * - ComplianceModifiers: Compliance validation
- * - EquityModifiers: Equity-specific validation
- * - ERC20Modifiers: ERC20 initialization validation
  * - ERC3643Modifiers: ERC3643 initialization validation
  * - ExpirationModifiers: Expiration validation
  * - HoldModifiers: Hold validation
@@ -47,8 +40,8 @@ import { SecurityModifiers } from "./SecurityModifiers.sol";
  * - KpisModifiers: Kpis validation
  * - LockModifiers: Lock validation
  * - MaturityModifiers: Maturity validation
- * - NominalValueModifiers: Nominal value initialization validation
  * - ProceedRecipientModifiers: Proceed recipients validation
+ * - ProtectedPartitionRoleValidatorModifiers: Protected partitions roles validation
  * - StateModifiers: State validation
  *
  * @author Asset Tokenization Studio Team
@@ -57,13 +50,10 @@ abstract contract AssetModifiers is
     ActionValidationModifiers,
     AdjustBalancesModifiers,
     AmortizationModifiers,
-    BondModifiers,
     ClearingModifiers,
     CouponModifiers,
     ComplianceModifiers,
-    EquityModifiers,
     ERC1410Modifiers,
-    ERC20Modifiers,
     ERC3643Modifiers,
     ExpirationModifiers,
     HoldModifiers,
@@ -72,9 +62,8 @@ abstract contract AssetModifiers is
     LockModifiers,
     LoansPortfolioModifiers,
     MaturityModifiers,
-    NominalValueModifiers,
     ProceedRecipientModifiers,
-    SecurityModifiers,
+    ProtectedPartitionRoleValidatorModifiers,
     StateModifiers
 {
     // This contract aggregates all asset modifiers through inheritance

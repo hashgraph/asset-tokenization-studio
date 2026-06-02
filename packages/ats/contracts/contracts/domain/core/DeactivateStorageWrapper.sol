@@ -12,10 +12,15 @@ bytes32 constant STORAGE_LOCATION_DEACTIVATE = 0x572f1b7cd92e0f948542520f56d2d4e
  *      collisions with other facets. Single-field struct kept for forward compatibility — any
  *      future deactivation metadata (operator, timestamp, reason) can be appended without
  *      changing the slot.
- * @param deactivated True once the token has been deactivated; transitions are one-way.
+ * @custom:storage-location erc7201:security.token.standard.storage.Deactivate
  */
 struct DeactivateDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
     bool deactivated;
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 /**

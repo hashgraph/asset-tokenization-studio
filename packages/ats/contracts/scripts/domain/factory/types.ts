@@ -79,6 +79,17 @@ export interface LoansPortfolioDetailsDataParams {
   maturityDate: number;
 }
 
+/**
+ * Deposit Token deployment input.
+ *
+ * The deposit token is a minimal cash-style asset that has no detail data of
+ * its own (no nominal value, no coupon, no maturity, no interest rate). The
+ * only payload required by the factory is the shared `SecurityData`.
+ */
+export interface DepositTokenDataParams {
+  security: SecurityDataParams;
+}
+
 export enum DividendRight {
   NONE = 0,
   PREFERRED = 1,
@@ -121,9 +132,10 @@ export interface FixedRateDataParams {
 }
 
 export enum SecurityType {
-  BOND_VARIABLE_RATE = 0,
-  EQUITY = 1,
+  EQUITY = 0,
+  BOND_VARIABLE_RATE = 1,
   BOND_FIXED_RATE = 2,
   BOND_KPI_LINKED_RATE = 3,
-  BOND_SPT_RATE = 4,
+  LOAN = 4,
+  DEPOSIT_TOKEN = 5,
 }

@@ -6,13 +6,22 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
-import { DEFAULT_PARTITION, EMPTY_STRING, ZERO, EMPTY_HEX_BYTES, ADDRESS_ZERO, ATS_ROLES } from "@scripts";
-import { ResolverProxy, IAsset, IHoldTypes } from "@contract-types";
+import {
+  DEFAULT_PARTITION,
+  EMPTY_STRING,
+  ZERO,
+  EMPTY_HEX_BYTES,
+  ADDRESS_ZERO,
+  ATS_ROLES,
+  EQUITY_CONFIG_ID,
+  RESOLVER_KEY_CONTROLLER_HOLD_BY_PARTITION,
+} from "@scripts";
+import { ResolverProxy, IAsset, IHoldTypes, MockDiamondCut } from "@contract-types";
 
 const _WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
 const _AMOUNT = 1000;
 const _DATA = "0x1234";
-let holdIdentifier: IHoldTypes.HoldIdentifierStruct;
+let holdIdentifier: { partition: string; tokenHolder: string; holdId: number };
 enum ThirdPartyType {
   NULL,
   AUTHORIZED,
@@ -31,6 +40,7 @@ describe("ControllerHoldByPartition Tests", () => {
   let signer_E: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
   let currentTimestamp = 0;
@@ -109,6 +119,7 @@ describe("ControllerHoldByPartition Tests", () => {
     signer_E = base.user4;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, set_initRbacs());
 
     await setFacets(asset);
@@ -124,6 +135,7 @@ describe("ControllerHoldByPartition Tests", () => {
     signer_E = base.user4;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, set_initRbacs());
 
     await setFacets(asset);
@@ -329,18 +341,63 @@ describe("ControllerHoldByPartition Tests", () => {
           0,
           _AMOUNT,
           1,
-          hold.amount,
-          hold.escrow,
-          hold.data,
+          Number(hold.amount),
+          hold.escrow as string,
+          hold.data as string,
           operatorData,
-          hold.to,
-          hold.expirationTimestamp,
+          hold.to as string,
+          String(hold.expirationTimestamp),
           1,
           1,
           ThirdPartyType.CONTROLLER,
           ADDRESS_ZERO,
         );
       });
+    });
+  });
+  describe("initializeControllerHoldByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeControllerHoldByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeControllerHoldByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeControllerHoldByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeControllerHoldByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_CONTROLLER_HOLD_BY_PARTITION, 1);
+    });
+  });
+
+  describe("initializeControllerHoldByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeControllerHoldByPartition is called THEN emits ControllerHoldByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_CONTROLLER_HOLD_BY_PARTITION);
+      await expect(asset.initializeControllerHoldByPartition()).to.emit(asset, "ControllerHoldByPartitionInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational WHEN controllerCreateHoldByPartition is called THEN AssetNotOperational", async () => {
+      await expect(
+        asset.controllerCreateHoldByPartition(
+          ethers.ZeroHash,
+          ethers.ZeroAddress,
+          {
+            amount: 0n,
+            expirationTimestamp: 0n,
+            escrow: ethers.ZeroAddress,
+            to: ethers.ZeroAddress,
+            data: "0x",
+          },
+          "0x",
+        ),
+      )
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 
@@ -367,23 +424,22 @@ describe("ControllerHoldByPartition Tests", () => {
       ).to.be.revertedWithCustomError(asset, "InvalidPartition");
     });
   });
-
-  describe("Deactivated", () => {
-    it("GIVEN a deactivated asset WHEN controllerCreateHoldByPartition THEN transaction fails with Deactivated", async () => {
-      const base = await deployEquityTokenFixture();
-      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
-      await deactivatedAsset.connect(base.deployer).deactivate();
-      await expect(
-        deactivatedAsset
-          .connect(base.deployer)
-          .controllerCreateHoldByPartition(
-            ethers.ZeroHash,
-            ethers.ZeroAddress,
-            { amount: 0, expirationTimestamp: 0, escrow: ethers.ZeroAddress, to: ethers.ZeroAddress, data: "0x" },
-            "0x",
-          ),
-      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
-    });
+});
+describe("Deactivated", () => {
+  it("GIVEN a deactivated asset WHEN controllerCreateHoldByPartition THEN transaction fails with Deactivated", async () => {
+    const base = await deployEquityTokenFixture();
+    const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+    await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+    await deactivatedAsset.connect(base.deployer).deactivate();
+    await expect(
+      deactivatedAsset
+        .connect(base.deployer)
+        .controllerCreateHoldByPartition(
+          ethers.ZeroHash,
+          ethers.ZeroAddress,
+          { amount: 0, expirationTimestamp: 0, escrow: ethers.ZeroAddress, to: ethers.ZeroAddress, data: "0x" },
+          "0x",
+        ),
+    ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
   });
 });

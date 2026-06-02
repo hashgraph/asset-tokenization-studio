@@ -214,7 +214,9 @@ function _isNonceValid(uint256 _nonce, uint256 _currentNonce) pure returns (bool
 
 function _recoverSigner(bytes32 _prefixedHash, bytes memory _signature) pure returns (address) {
     (bytes32 r, bytes32 s, uint8 v) = _splitSignature(_signature);
-    return ecrecover(_prefixedHash, v, r, s);
+    address recovered = ecrecover(_prefixedHash, v, r, s);
+    if (recovered == address(0)) revert ICommonErrors.WrongSignature();
+    return recovered;
 }
 
 function _splitSignature(bytes memory sig) pure returns (bytes32 r, bytes32 s, uint8 v) {

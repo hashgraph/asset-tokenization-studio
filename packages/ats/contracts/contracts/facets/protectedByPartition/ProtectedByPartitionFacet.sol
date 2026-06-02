@@ -26,6 +26,7 @@ contract ProtectedByPartitionFacet is ProtectedByPartition, IStaticFunctionSelec
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeProtectedByPartition.selector,
                 this.protectedTransferFromByPartition.selector,
                 this.protectedRedeemFromByPartition.selector
             );

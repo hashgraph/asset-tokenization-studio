@@ -23,7 +23,11 @@ contract ControllerByPartitionFacet is ControllerByPartition, IStaticFunctionSel
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
-            Bytes4Builder.build(this.controllerRedeemByPartition.selector, this.controllerTransferByPartition.selector);
+            Bytes4Builder.build(
+                this.initializeControllerByPartition.selector,
+                this.controllerRedeemByPartition.selector,
+                this.controllerTransferByPartition.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors

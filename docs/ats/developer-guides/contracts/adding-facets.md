@@ -127,18 +127,42 @@ interface IRewards {
 
 ### Step 2: Create Storage Wrapper (if needed)
 
-If your facet requires custom storage, create a storage wrapper in Layer 0.
+If your facet requires custom storage, create a storage wrapper under
+`contracts/domain/{asset,core}/`. The storage struct lives at **file scope**
+(not inside any contract or interface), carries an ERC-7201
+`@custom:storage-location` annotation, and follows the 5-region layout:
+**R1 Lifecycle (bool flags)** → **R2 Packed scalars (uint8, bytes3, address, enum)**
+→ **R3 Single-slot scalars (uint256, bytes32, string)** → **R4 Aggregates
+(mapping, array, EnumerableSet, checkpoint arrays)** → **APPEND-ONLY ZONE**.
+New fields go below the marker — the boundary is greppable and audit-visible.
+All four region banners are **always present, in canonical order, even when a region has no
+fields** — the empty banners are scaffolding that fixes each field's insertion point and the
+region numbering. Never renumber a region when its only field is removed; leave the empty
+banner in place.
 
-**File**: `contracts/layer_0/rewards/RewardsStorageWrapper.sol`
+**File**: `contracts/domain/asset/rewards/RewardsStorageWrapper.sol`
 
 ```solidity
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.23;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity >=0.8.0 <0.9.0;
 
-import { IRewardsStorageWrapper } from "../layer_2/interfaces/rewards/IRewardsStorageWrapper.sol";
+import { IRewardsStorageWrapper } from "./IRewardsStorageWrapper.sol";
 
 /// @custom:hash storage Rewards
 bytes32 constant STORAGE_LOCATION_REWARDS = 0x0000000000000000000000000000000000000000000000000000000000000000;
+
+/// @custom:storage-location erc7201:security.token.standard.storage.Rewards
+struct RewardsDataStorage {
+  // ─── R1 Lifecycle (bool flags) ───────────────────────────
+  bool initialized;
+  // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+  // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+  uint256 totalDistributed;
+  // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
+  mapping(address => uint256) totalRewards;
+  mapping(address => uint256) lastDistribution;
+  // ─── APPEND-ONLY ZONE BELOW ───
+}
 
 /**
  * @title RewardsStorageWrapper
@@ -146,17 +170,7 @@ bytes32 constant STORAGE_LOCATION_REWARDS = 0x0000000000000000000000000000000000
  */
 abstract contract RewardsStorageWrapper is IRewardsStorageWrapper {
   /**
-   * @notice Storage structure for rewards data
-   */
-  struct RewardsDataStorage {
-    bool initialized;
-    mapping(address => uint256) totalRewards;
-    mapping(address => uint256) lastDistribution;
-    uint256 totalDistributed;
-  }
-
-  /**
-   * @notice Access rewards storage via assembly (EIP-1967 pattern)
+   * @notice Access rewards storage at the ERC-7201 namespace slot.
    * @return rewardsData_ Storage pointer
    */
   function _rewardsStorage() internal pure returns (RewardsDataStorage storage rewardsData_) {
@@ -187,11 +201,11 @@ abstract contract RewardsStorageWrapper is IRewardsStorageWrapper {
 
 ### Step 3: Define Storage Events/Errors Interface
 
-**File**: `contracts/layer_2/interfaces/rewards/IRewardsStorageWrapper.sol`
+**File**: `contracts/domain/asset/rewards/IRewardsStorageWrapper.sol`
 
 ```solidity
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.23;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity >=0.8.0 <0.9.0;
 
 /**
  * @title IRewardsStorageWrapper

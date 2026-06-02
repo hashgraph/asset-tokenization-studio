@@ -1,8 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IClearingAtSnapshotByPartition } from "./IClearingAtSnapshotByPartition.sol";
+import {
+    IClearingAtSnapshotByPartition,
+    RESOLVER_KEY_CLEARING_AT_SNAPSHOT_BY_PARTITION
+} from "./IClearingAtSnapshotByPartition.sol";
 import { SnapshotsStorageWrapper } from "../../domain/asset/SnapshotsStorageWrapper.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title ClearingAtSnapshotByPartition
@@ -12,7 +18,18 @@ import { SnapshotsStorageWrapper } from "../../domain/asset/SnapshotsStorageWrap
  * @dev Delegates storage reads to `SnapshotsStorageWrapper`. Intended to be inherited by
  *      `ClearingAtSnapshotByPartitionFacet`.
  */
-abstract contract ClearingAtSnapshotByPartition is IClearingAtSnapshotByPartition {
+abstract contract ClearingAtSnapshotByPartition is IClearingAtSnapshotByPartition, Modifiers {
+    /// @inheritdoc IClearingAtSnapshotByPartition
+    function initializeClearingAtSnapshotByPartition()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_CLEARING_AT_SNAPSHOT_BY_PARTITION)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_CLEARING_AT_SNAPSHOT_BY_PARTITION);
+        emit ClearingAtSnapshotByPartitionInitialized();
+    }
+
     /// @inheritdoc IClearingAtSnapshotByPartition
     function clearedBalanceOfAtSnapshotByPartition(
         bytes32 _partition,
