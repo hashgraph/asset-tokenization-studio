@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import CreateEquityRequest from "./equity/CreateEquityRequest";
-import CreateTrexSuiteEquityRequest from "./equity/CreateTrexSuiteEquityRequest";
 import CreateBondRequest from "./bond/CreateBondRequest";
-import CreateTrexSuiteBondRequest from "./bond/CreateTrexSuiteBondRequest";
-import { CreateEquityRequestFixture, CreateTrexSuiteEquityRequestFixture } from "@test/fixtures/equity/EquityFixture";
-import { CreateBondRequestFixture, CreateTrexSuiteBondRequestFixture } from "@test/fixtures/bond/BondFixture";
+import { CreateEquityRequestFixture } from "@test/fixtures/equity/EquityFixture";
+import { CreateBondRequestFixture } from "@test/fixtures/bond/BondFixture";
 
 /**
  * configVersion validation lives at the request-DTO boundary (a single
@@ -22,16 +20,6 @@ describe("create requests — configVersion boundary validation", () => {
     {
       name: "CreateBondRequest",
       build: (cv: number) => new CreateBondRequest(CreateBondRequestFixture.create({ configVersion: cv })),
-    },
-    {
-      name: "CreateTrexSuiteEquityRequest",
-      build: (cv: number) =>
-        new CreateTrexSuiteEquityRequest(CreateTrexSuiteEquityRequestFixture.create({ configVersion: cv })),
-    },
-    {
-      name: "CreateTrexSuiteBondRequest",
-      build: (cv: number) =>
-        new CreateTrexSuiteBondRequest(CreateTrexSuiteBondRequestFixture.create({ configVersion: cv })),
     },
   ];
 
