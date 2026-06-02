@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 import { ZERO_ADDRESS, EMPTY_BYTES, _DEFAULT_PARTITION } from "../../constants/values.sol";
-import { IKyc } from "../../facets/layer_1/kyc/IKyc.sol";
+import { IKyc } from "../../facets/kyc/IKyc.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { Eip1066 } from "../../constants/eip1066.sol";
 import { IClearingTypes } from "../../facets/clearing/IClearingTypes.sol";

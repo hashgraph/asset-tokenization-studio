@@ -57,6 +57,14 @@ interface IProtectedByPartition {
     );
 
     /**
+     * @notice Raised when an account is not authorised for a protected partition.
+     * @dev The reported sender is resolved through `EvmAccessors` for forwarding support.
+     * @param partition Partition whose access requirement is not satisfied.
+     * @param sender Effective caller that lacks the required role.
+     */
+    error ProtectedPartitionRoleRequired(bytes32 partition, address sender);
+
+    /**
      * @notice Initialises the protected-by-partition capability on the token.
      * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
      *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.

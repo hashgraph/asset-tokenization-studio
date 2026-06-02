@@ -2,11 +2,13 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { DefaultValueValidation } from "../../infrastructure/utils/DefaultValueValidation.sol";
+import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
+import { MAX_EXTERNAL_LIST_SIZE } from "../../constants/values.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IExternalControlList } from "../../facets/layer_1/externalControlList/IExternalControlList.sol";
 import { IExternalKycList } from "../../facets/layer_1/externalKycList/IExternalKycList.sol";
-import { IKyc } from "../../facets/layer_1/kyc/IKyc.sol";
+import { IKyc } from "../../facets/kyc/IKyc.sol";
 
 /// @custom:hash storage ControlListManagement
 // solhint-disable-next-line max-line-length
@@ -92,12 +94,21 @@ library ExternalListManagementStorageWrapper {
 
     /**
      * @notice Adds `_list` to the external-list set selected by `_position`.
+     * @dev Reverts with `ICommonErrors.MaxExternalListSizeReached` when the insertion would grow
+     *      the set beyond `MAX_EXTERNAL_LIST_SIZE`. The cap is checked only when the entry is newly
+     *      inserted, so re-adding an existing member is unaffected and still returns false. This is
+     *      the single chokepoint for every add path (single add, bulk update and the three
+     *      initialisers).
      * @param _position ERC-7201 slot selecting which external list to mutate.
      * @param _list Address to add.
      * @return success_ True when the entry was newly inserted; false when it was already present.
      */
     function addExternalList(bytes32 _position, address _list) internal returns (bool success_) {
-        success_ = externalListStorage(_position).list.add(_list);
+        EnumerableSet.AddressSet storage list = externalListStorage(_position).list;
+        success_ = list.add(_list);
+        if (success_ && list.length() > MAX_EXTERNAL_LIST_SIZE) {
+            revert ICommonErrors.MaxExternalListSizeReached(MAX_EXTERNAL_LIST_SIZE);
+        }
     }
 
     /**
