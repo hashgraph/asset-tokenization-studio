@@ -2,17 +2,11 @@
 "@hashgraph/asset-tokenization-contracts": major
 ---
 
-Audit FIND-142: `RolesApplied` now distinguishes requested from effectively applied entries.
+Audit FIND-142: `applyRoles` now emits two separate events to distinguish requested from effectively applied role changes (BBND-1783).
 
-The event carries two new fields, `appliedRoles` and `appliedStates`, populated only with the
-entries whose state effectively changed. Existing `actives` parameters on the event were
-renamed to `states` for clarity. Off-chain indexers can now tell which roles actually
-mutated versus which were no-ops.
-
-Additional changes in the same scope:
-
-- The `applyRoles` external function no longer returns `bool success_`; the function reverts
-  on failure (admin check) and otherwise always completes.
+- `RolesApplied(bytes32[] roles, bool[] actives, address account)` retains its original signature and fires for every batch call, reflecting all requested operations.
+- New `EffectivelyRolesApplied(bytes32[] roles, bool[] actives)` is emitted only for entries that resulted in an effective storage mutation. Off-chain indexers can subscribe to this event to track actual state changes without filtering no-ops.
+- `applyRoles` no longer returns `bool success_`; the function reverts on failure and otherwise always completes.
 - The unreachable `RolesNotApplied` error declaration was removed from `IAccessControl`.
 
-Both modifications are ABI-breaking and require consumers to regenerate their bindings.
+All four modifications are ABI-breaking and require consumers to regenerate their bindings.
