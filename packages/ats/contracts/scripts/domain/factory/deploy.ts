@@ -47,6 +47,9 @@ export interface DeployFactoryResult {
   /** Factory proxy address (ResolverProxy instance) */
   factoryAddress: string;
 
+  /** Implementation address, if tracked by the deployment */
+  implementationAddress?: string;
+
   error?: string;
 }
 

@@ -122,4 +122,14 @@ interface ICommonErrors {
      * @param decimals The exponent that causes the overflow.
      */
     error GreaterThanMaxUint256(uint256 amount, uint8 decimals);
+
+    /**
+     * @notice Reverts when adding an entry would grow an external list beyond its maximum size.
+     * @dev Enforced by `ExternalListManagementStorageWrapper.addExternalList` for the external
+     *      pause, control and KYC lists. The bound exists because each list is iterated in full on
+     *      the hot path of token operations, so an unbounded list could exceed the gas limit and
+     *      brick the token.
+     * @param max Maximum number of entries permitted in the external list.
+     */
+    error MaxExternalListSizeReached(uint256 max);
 }

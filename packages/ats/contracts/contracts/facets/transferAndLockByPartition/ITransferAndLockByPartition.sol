@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ITransferAndLockTypes } from "../layer_3/transferAndLock/ITransferAndLockTypes.sol";
+import { ITransferAndLockTypes } from "../transferAndLock/ITransferAndLockTypes.sol";
 
 /// @custom:hash resolverKey TransferAndLockByPartition
 // solhint-disable-next-line max-line-length

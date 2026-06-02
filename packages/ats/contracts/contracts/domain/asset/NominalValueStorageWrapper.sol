@@ -11,10 +11,11 @@ bytes32 constant STORAGE_LOCATION_NOMINAL_VALUE = 0xf4ae98634996e72bf90c5471fce1
  * @title NominalValueDataStorage
  * @notice Backing storage for nominal value, decimals, and ISO 4217 currency code.
  * @dev Sole source of truth for nominal-value fields on this asset; mutated only via
- *      `NominalValueStorageWrapper` against the deterministic ERC-7201 slot.
+ *      `NominalValueStorageWrapper` against the deterministic ERC-7201 slot. New fields
+ *      must be appended below the marker to preserve storage layout compatibility.
  * @param nominalValueDecimals Number of decimals applied to `nominalValue`.
- * @param nominalValueCurrency ISO 4217 currency code (`0x000000` when unset).
- * @param nominalValue Nominal value amount expressed with `nominalValueDecimals` precision.
+ * @param nominalValueCurrency ISO 4217 currency code, or `0x000000` when unset.
+ * @param nominalValue Nominal amount expressed with `nominalValueDecimals` precision.
  * @custom:storage-location erc7201:security.token.standard.storage.NominalValue
  */
 struct NominalValueDataStorage {
