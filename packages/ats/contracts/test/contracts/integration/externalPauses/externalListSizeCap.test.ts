@@ -77,7 +77,7 @@ describe("External List Size Cap", () => {
           infrastructure,
           equityDataParams: { securityData: { isMultiPartition: true, externalPauses: mocks } },
         }),
-      ).to.be.reverted;
+      ).to.be.revertedWithCustomError(asset, "MaxExternalListSizeReached");
     });
   });
 
@@ -91,6 +91,25 @@ describe("External List Size Cap", () => {
       await expect(
         asset.addExternalControlList(mocks[MAX_EXTERNAL_LIST_SIZE], { gasLimit: GAS_LIMIT.default }),
       ).to.be.revertedWithCustomError(asset, "MaxExternalListSizeReached");
+      expect(await asset.getExternalControlListsCount()).to.equal(MAX_EXTERNAL_LIST_SIZE);
+    });
+
+    it("GIVEN a bulk update that would exceed MAX THEN it reverts with MaxExternalListSizeReached", async () => {
+      const mocks = await deployMockAddresses("MockedWhitelist", MAX_EXTERNAL_LIST_SIZE + 1);
+      await expect(
+        asset.updateExternalControlLists(mocks, new Array(mocks.length).fill(true), { gasLimit: GAS_LIMIT.max }),
+      ).to.be.revertedWithCustomError(asset, "MaxExternalListSizeReached");
+    });
+
+    it("GIVEN initialisation with more than MAX entries THEN it reverts with MaxExternalListSizeReached", async () => {
+      const infrastructure = await loadFixture(deployAtsInfrastructureFixture);
+      const mocks = await deployMockAddresses("MockedWhitelist", MAX_EXTERNAL_LIST_SIZE + 1);
+      await expect(
+        deployEquityTokenFixture({
+          infrastructure,
+          equityDataParams: { securityData: { isMultiPartition: true, externalControlLists: mocks } },
+        }),
+      ).to.be.revertedWithCustomError(asset, "MaxExternalListSizeReached");
     });
   });
 
@@ -103,6 +122,25 @@ describe("External List Size Cap", () => {
       expect(await asset.getExternalKycListsCount()).to.equal(MAX_EXTERNAL_LIST_SIZE);
       await expect(
         asset.addExternalKycList(mocks[MAX_EXTERNAL_LIST_SIZE], { gasLimit: GAS_LIMIT.default }),
+      ).to.be.revertedWithCustomError(asset, "MaxExternalListSizeReached");
+      expect(await asset.getExternalKycListsCount()).to.equal(MAX_EXTERNAL_LIST_SIZE);
+    });
+
+    it("GIVEN a bulk update that would exceed MAX THEN it reverts with MaxExternalListSizeReached", async () => {
+      const mocks = await deployMockAddresses("MockedExternalKycList", MAX_EXTERNAL_LIST_SIZE + 1);
+      await expect(
+        asset.updateExternalKycLists(mocks, new Array(mocks.length).fill(true), { gasLimit: GAS_LIMIT.max }),
+      ).to.be.revertedWithCustomError(asset, "MaxExternalListSizeReached");
+    });
+
+    it("GIVEN initialisation with more than MAX entries THEN it reverts with MaxExternalListSizeReached", async () => {
+      const infrastructure = await loadFixture(deployAtsInfrastructureFixture);
+      const mocks = await deployMockAddresses("MockedExternalKycList", MAX_EXTERNAL_LIST_SIZE + 1);
+      await expect(
+        deployEquityTokenFixture({
+          infrastructure,
+          equityDataParams: { securityData: { isMultiPartition: true, externalKycLists: mocks } },
+        }),
       ).to.be.revertedWithCustomError(asset, "MaxExternalListSizeReached");
     });
   });
