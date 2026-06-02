@@ -18,7 +18,6 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const contractsRoot = __dirname;
 const repoRoot = path.resolve(__dirname, "../../..");
-const facetsDir = path.join(contractsRoot, "contracts/facets");
 
 // Resolve @solidity-parser/parser from the package or monorepo root node_modules.
 const parserCandidates = [
@@ -45,10 +44,16 @@ function walk(dir) {
 }
 
 const allSolFiles = walk(path.join(contractsRoot, "contracts"));
+// Interfaces are sourced from the facets, factory, and infrastructure trees. The ERC3643
+// reference suite under factory/ is excluded.
+const interfaceDirs = ["contracts/facets", "contracts/factory", "contracts/infrastructure"];
 // Interface convention in this repo: `I<PascalName>` — the char after the leading `I` is
 // upper-case or a digit. This excludes concrete contracts that merely start with I
 // (Identity.sol, Initializer.sol, InterestRate.sol, and their *Facet.sol variants).
-const interfaceFiles = walk(facetsDir).filter((f) => /^I[A-Z0-9]/.test(path.basename(f)));
+const interfaceFiles = interfaceDirs
+  .flatMap((d) => walk(path.join(contractsRoot, d)))
+  .filter((f) => /^I[A-Z0-9]/.test(path.basename(f)))
+  .filter((f) => !path.relative(contractsRoot, f).split(path.sep).join("/").includes("contracts/factory/ERC3643/"));
 
 // ---------------------------------------------------------------------------------------------
 // Type-name rendering from AST nodes

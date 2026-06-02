@@ -1,11 +1,11 @@
 # ATS Facet Methods
 
 > **Generated file — do not edit by hand.** Regenerate after any facet interface change with:
->
+> 
 > ```bash
 > node gen_facets_methods.mjs
 > ```
->
+> 
 > Maintained via the `solidity-natspec` skill.
 
 ## Contents
@@ -25,6 +25,7 @@
 - [Batch Transfer](#batch-transfer)
 - [Burn](#burn)
 - [Burn By Partition](#burn-by-partition)
+- [Business Logic Resolver](#business-logic-resolver)
 - [Cap](#cap)
 - [Cap By Partition](#cap-by-partition)
 - [Clearing](#clearing)
@@ -47,6 +48,10 @@
 - [Coupon Security Holders](#coupon-security-holders)
 - [Custom Data](#custom-data)
 - [Deactivate](#deactivate)
+- [Diamond Cut](#diamond-cut)
+- [Diamond Cut Manager](#diamond-cut-manager)
+- [Diamond Facet](#diamond-facet)
+- [Diamond Loupe](#diamond-loupe)
 - [Dividend](#dividend)
 - [Dividend Security Holders](#dividend-security-holders)
 - [Documentation](#documentation)
@@ -56,6 +61,7 @@
 - [External Control List Management](#external-control-list-management)
 - [External KYC List Management](#external-kyc-list-management)
 - [External Pause Management](#external-pause-management)
+- [Factory](#factory)
 - [Freeze](#freeze)
 - [Freeze At Snapshot](#freeze-at-snapshot)
 - [Freeze At Snapshot By Partition](#freeze-at-snapshot-by-partition)
@@ -66,6 +72,7 @@
 - [Identity](#identity)
 - [Initializer](#initializer)
 - [Interest Rate](#interest-rate)
+- [KYC](#kyc)
 - [Lock](#lock)
 - [Lock At Snapshot](#lock-at-snapshot)
 - [Lock At Snapshot By Partition](#lock-at-snapshot-by-partition)
@@ -83,31 +90,34 @@
 - [Partitions](#partitions)
 - [Pause](#pause)
 - [Principal](#principal)
+- [Proceed Recipients](#proceed-recipients)
 - [Protected By Partition](#protected-by-partition)
 - [Protected Clearing By Partition](#protected-clearing-by-partition)
 - [Protected Clearing Hold By Partition](#protected-clearing-hold-by-partition)
 - [Protected Hold By Partition](#protected-hold-by-partition)
 - [Recovery](#recovery)
+- [Revocation List](#revocation-list)
 - [Scheduled Balance Adjustment](#scheduled-balance-adjustment)
 - [Security Holders](#security-holders)
 - [Security Holders At Snapshot](#security-holders-at-snapshot)
+- [Snapshots](#snapshots)
 - [Snapshots By Partition](#snapshots-by-partition)
 - [SSI Management](#ssi-management)
+- [Static Function Selectors](#static-function-selectors)
 - [Transfer](#transfer)
+- [Transfer And Lock](#transfer-and-lock)
 - [Transfer And Lock By Partition](#transfer-and-lock-by-partition)
 - [Transfer By Partition](#transfer-by-partition)
 - [Votes](#votes)
+- [Voting](#voting)
 - [Voting Security Holders](#voting-security-holders)
 - [Compliance](#compliance)
 - [External Control List](#external-control-list)
 - [External KYC List](#external-kyc-list)
 - [External Pause](#external-pause)
 - [Identity Registry](#identity-registry)
-- [KYC](#kyc)
 - [Operator Clearing Hold By Partition](#operator-clearing-hold-by-partition)
 - [Protected Partitions](#protected-partitions)
-- [Revocation List](#revocation-list)
-- [Snapshots](#snapshots)
 - [Amortization](#amortization)
 - [Bond Read](#bond-read)
 - [Equity](#equity)
@@ -117,13 +127,10 @@
 - [Loan](#loan)
 - [Loans Portfolio](#loans-portfolio)
 - [Nominal Value](#nominal-value)
-- [Proceed Recipients](#proceed-recipients)
 - [Scheduled Cross Ordered Tasks](#scheduled-cross-ordered-tasks)
 - [Security](#security)
-- [Voting](#voting)
 - [Bond USA](#bond-usa)
 - [Equity USA](#equity-usa)
-- [Transfer And Lock](#transfer-and-lock)
 
 <!-- core / supporting facets -->
 
@@ -140,15 +147,15 @@ function renounceRole(bytes32 _role) external returns (bool success_);
 function applyRoles(bytes32[] calldata _roles, bool[] calldata _actives, address _account) external;
 function getRoleCountFor(address _account) external view returns (uint256 roleCount_);
 function getRolesFor(
-  address _account,
-  uint256 _pageIndex,
-  uint256 _pageLength
+    address _account,
+    uint256 _pageIndex,
+    uint256 _pageLength
 ) external view returns (bytes32[] memory roles_);
 function getRoleMemberCount(bytes32 _role) external view returns (uint256 memberCount_);
 function getRoleMembers(
-  bytes32 _role,
-  uint256 _pageIndex,
-  uint256 _pageLength
+    bytes32 _role,
+    uint256 _pageIndex,
+    uint256 _pageLength
 ) external view returns (address[] memory members_);
 function hasRole(bytes32 _role, address _account) external view returns (bool);
 ```
@@ -206,11 +213,14 @@ function balanceOfAt(address _tokenHolder, uint256 _timestamp) external view ret
 
 ```solidity
 function initializeBalanceTrackerAtSnapshot() external;
-function balanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) external view returns (uint256 balance_);
+function balanceOfAtSnapshot(
+    uint256 _snapshotID,
+    address _tokenHolder
+) external view returns (uint256 balance_);
 function balancesOfAtSnapshot(
-  uint256 _snapshotID,
-  uint256 _pageIndex,
-  uint256 _pageLength
+    uint256 _snapshotID,
+    uint256 _pageIndex,
+    uint256 _pageLength
 ) external view returns (HolderBalance[] memory balances_);
 function totalSupplyAtSnapshot(uint256 _snapshotID) external view returns (uint256 totalSupply_);
 ```
@@ -218,10 +228,10 @@ function totalSupplyAtSnapshot(uint256 _snapshotID) external view returns (uint2
 ### Types
 
 ```solidity
-// declared in contracts/facets/layer_1/snapshot/ISnapshots.sol
+// declared in contracts/facets/snapshot/ISnapshots.sol
 struct HolderBalance {
-  address holder;
-  uint256 balance;
+    address holder;
+    uint256 balance;
 }
 ```
 
@@ -233,13 +243,13 @@ struct HolderBalance {
 ```solidity
 function initializeBalanceTrackerAtSnapshotByPartition() external;
 function balanceOfAtSnapshotByPartition(
-  bytes32 _partition,
-  uint256 _snapshotID,
-  address _tokenHolder
+    bytes32 _partition,
+    uint256 _snapshotID,
+    address _tokenHolder
 ) external view returns (uint256 balance_);
 function totalSupplyAtSnapshotByPartition(
-  bytes32 _partition,
-  uint256 _snapshotID
+    bytes32 _partition,
+    uint256 _snapshotID
 ) external view returns (uint256 totalSupply_);
 ```
 
@@ -250,9 +260,15 @@ function totalSupplyAtSnapshotByPartition(
 
 ```solidity
 function initializeBalanceTrackerByPartition() external;
-function balanceOfByPartition(bytes32 _partition, address _tokenHolder) external view returns (uint256);
+function balanceOfByPartition(
+    bytes32 _partition,
+    address _tokenHolder
+) external view returns (uint256);
 function totalSupplyByPartition(bytes32 _partition) external view returns (uint256);
-function getTotalBalanceForByPartition(bytes32 _partition, address _account) external view returns (uint256);
+function getTotalBalanceForByPartition(
+    bytes32 _partition,
+    address _account
+) external view returns (uint256);
 ```
 
 ## Batch Burn
@@ -273,9 +289,9 @@ function batchBurn(address[] calldata _userAddresses, uint256[] calldata _amount
 ```solidity
 function initializeBatchController() external;
 function batchForcedTransfer(
-  address[] calldata _fromList,
-  address[] calldata _toList,
-  uint256[] calldata _amounts
+    address[] calldata _fromList,
+    address[] calldata _toList,
+    uint256[] calldata _amounts
 ) external;
 ```
 
@@ -287,8 +303,14 @@ function batchForcedTransfer(
 ```solidity
 function initializeBatchFreeze() external;
 function batchSetAddressFrozen(address[] calldata _userAddresses, bool[] calldata _freeze) external;
-function batchFreezePartialTokens(address[] calldata _userAddresses, uint256[] calldata _amounts) external;
-function batchUnfreezePartialTokens(address[] calldata _userAddresses, uint256[] calldata _amounts) external;
+function batchFreezePartialTokens(
+    address[] calldata _userAddresses,
+    uint256[] calldata _amounts
+) external;
+function batchUnfreezePartialTokens(
+    address[] calldata _userAddresses,
+    uint256[] calldata _amounts
+) external;
 ```
 
 ## Batch Mint
@@ -333,6 +355,62 @@ function initializeBurnByPartition() external;
 function redeemByPartition(bytes32 _partition, uint256 _value, bytes calldata _data) external;
 ```
 
+## Business Logic Resolver
+
+- Interface: `contracts/infrastructure/diamond/IBusinessLogicResolver.sol`
+
+```solidity
+function initializeBusinessLogicResolver() external returns (bool success_);
+function registerBusinessLogics(BusinessLogicRegistryData[] calldata _businessLogics) external;
+function addSelectorsToBlacklist(bytes32 _configurationId, bytes4[] calldata _selectors) external;
+function removeSelectorsFromBlacklist(
+    bytes32 _configurationId,
+    bytes4[] calldata _selectors
+) external;
+function getVersionStatus(
+    bytes32 _businessLogicKey,
+    uint256 _version
+) external view returns (VersionStatus status_);
+function getLatestVersion(bytes32 _businessLogicKey) external view returns (uint256 latestVersion_);
+function getLatestVersions(
+    bytes32[] calldata _businessLogicKeys
+) external view returns (uint256[] memory latestVersions_);
+function resolveLatestBusinessLogic(
+    bytes32 _businessLogicKey
+) external view returns (address businessLogicAddress_);
+function resolveBusinessLogicByVersion(
+    bytes32 _businessLogicKey,
+    uint256 _version
+) external view returns (address businessLogicAddress_);
+function getBusinessLogicCount() external view returns (uint256 businessLogicCount_);
+function getBusinessLogicKeys(
+    uint256 _pageIndex,
+    uint256 _pageLength
+) external view returns (bytes32[] memory businessLogicKeys_);
+function getSelectorsBlacklist(
+    bytes32 _configurationId,
+    uint256 _pageIndex,
+    uint256 _pageLength
+) external view returns (bytes4[] memory selectors_);
+```
+
+### Types
+
+```solidity
+// declared in contracts/infrastructure/diamond/IBusinessLogicResolver.sol
+struct BusinessLogicRegistryData {
+    bytes32 businessLogicKey;
+    address businessLogicAddress;
+}
+
+// declared in contracts/infrastructure/diamond/IBusinessLogicResolver.sol
+enum VersionStatus {
+    NONE,
+    ACTIVATED,
+    DEACTIVATED
+}
+```
+
 ## Cap
 
 - Interface: `contracts/facets/cap/ICap.sol`
@@ -349,8 +427,8 @@ function getMaxSupply() external view returns (uint256 maxSupply_);
 ```solidity
 // declared in contracts/facets/cap/ICap.sol
 struct PartitionCap {
-  bytes32 partition;
-  uint256 maxSupply;
+    bytes32 partition;
+    uint256 maxSupply;
 }
 ```
 
@@ -361,7 +439,10 @@ struct PartitionCap {
 
 ```solidity
 function initializeCapByPartition() external;
-function setMaxSupplyByPartition(bytes32 _partition, uint256 _maxSupply) external returns (bool success_);
+function setMaxSupplyByPartition(
+    bytes32 _partition,
+    uint256 _maxSupply
+) external returns (bool success_);
 function getMaxSupplyByPartition(bytes32 _partition) external view returns (uint256 maxSupply_);
 ```
 
@@ -377,10 +458,10 @@ function deactivateClearing() external returns (bool success_);
 function isClearingActivated() external view returns (bool);
 function getClearedAmountFor(address _tokenHolder) external view returns (uint256 amount_);
 function getClearingThirdParty(
-  bytes32 _partition,
-  address _tokenHolder,
-  IClearingTypes.ClearingOperationType _clearingOperationType,
-  uint256 _clearingId
+    bytes32 _partition,
+    address _tokenHolder,
+    IClearingTypes.ClearingOperationType _clearingOperationType,
+    uint256 _clearingId
 ) external view returns (address thirdParty_);
 ```
 
@@ -389,9 +470,9 @@ function getClearingThirdParty(
 ```solidity
 // declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
 enum ClearingOperationType {
-  Transfer,
-  Redeem,
-  HoldCreation
+    Transfer,
+    Redeem,
+    HoldCreation
 }
 ```
 
@@ -402,7 +483,10 @@ enum ClearingOperationType {
 
 ```solidity
 function initializeClearingAtSnapshot() external;
-function clearedBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) external view returns (uint256 balance_);
+function clearedBalanceOfAtSnapshot(
+    uint256 _snapshotID,
+    address _tokenHolder
+) external view returns (uint256 balance_);
 ```
 
 ## Clearing At Snapshot By Partition
@@ -413,9 +497,9 @@ function clearedBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) e
 ```solidity
 function initializeClearingAtSnapshotByPartition() external;
 function clearedBalanceOfAtSnapshotByPartition(
-  bytes32 _partition,
-  uint256 _snapshotID,
-  address _tokenHolder
+    bytes32 _partition,
+    uint256 _snapshotID,
+    address _tokenHolder
 ) external view returns (uint256 balance_);
 ```
 
@@ -427,57 +511,57 @@ function clearedBalanceOfAtSnapshotByPartition(
 ```solidity
 function initializeClearingByPartition() external;
 function approveClearingOperationByPartition(
-  IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier
+    IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier
 ) external returns (bool success_, bytes32 partition_);
 function cancelClearingOperationByPartition(
-  IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier
+    IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier
 ) external returns (bool success_);
 function reclaimClearingOperationByPartition(
-  IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier
+    IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier
 ) external returns (bool success_);
 function clearingRedeemByPartition(
-  IClearingTypes.ClearingOperation calldata _clearingOperation,
-  uint256 _amount
+    IClearingTypes.ClearingOperation calldata _clearingOperation,
+    uint256 _amount
 ) external returns (bool success_, uint256 clearingId_);
 function clearingRedeemFromByPartition(
-  IClearingTypes.ClearingOperationFrom calldata _clearingOperationFrom,
-  uint256 _amount
+    IClearingTypes.ClearingOperationFrom calldata _clearingOperationFrom,
+    uint256 _amount
 ) external returns (bool success_, uint256 clearingId_);
 function clearingTransferByPartition(
-  IClearingTypes.ClearingOperation calldata _clearingOperation,
-  uint256 _amount,
-  address _to
+    IClearingTypes.ClearingOperation calldata _clearingOperation,
+    uint256 _amount,
+    address _to
 ) external returns (bool success_, uint256 clearingId_);
 function clearingTransferFromByPartition(
-  IClearingTypes.ClearingOperationFrom calldata _clearingOperationFrom,
-  uint256 _amount,
-  address _to
+    IClearingTypes.ClearingOperationFrom calldata _clearingOperationFrom,
+    uint256 _amount,
+    address _to
 ) external returns (bool success_, uint256 clearingId_);
 function getClearingRedeemForByPartition(
-  bytes32 _partition,
-  address _tokenHolder,
-  uint256 _clearingId
+    bytes32 _partition,
+    address _tokenHolder,
+    uint256 _clearingId
 ) external view returns (IClearingTypes.ClearingRedeemData memory clearingRedeemData_);
 function getClearingTransferForByPartition(
-  bytes32 _partition,
-  address _tokenHolder,
-  uint256 _clearingId
+    bytes32 _partition,
+    address _tokenHolder,
+    uint256 _clearingId
 ) external view returns (IClearingTypes.ClearingTransferData memory clearingTransferData_);
 function getClearedAmountForByPartition(
-  bytes32 _partition,
-  address _tokenHolder
+    bytes32 _partition,
+    address _tokenHolder
 ) external view returns (uint256 amount_);
 function getClearingCountForByPartition(
-  bytes32 _partition,
-  address _tokenHolder,
-  IClearingTypes.ClearingOperationType _clearingOperationType
+    bytes32 _partition,
+    address _tokenHolder,
+    IClearingTypes.ClearingOperationType _clearingOperationType
 ) external view returns (uint256 clearingCount_);
 function getClearingsIdForByPartition(
-  bytes32 _partition,
-  address _tokenHolder,
-  IClearingTypes.ClearingOperationType _clearingOperationType,
-  uint256 _pageIndex,
-  uint256 _pageLength
+    bytes32 _partition,
+    address _tokenHolder,
+    IClearingTypes.ClearingOperationType _clearingOperationType,
+    uint256 _pageIndex,
+    uint256 _pageLength
 ) external view returns (uint256[] memory clearingsId_);
 ```
 
@@ -486,59 +570,59 @@ function getClearingsIdForByPartition(
 ```solidity
 // declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
 struct ClearingOperationIdentifier {
-  ClearingOperationType clearingOperationType;
-  bytes32 partition;
-  address tokenHolder;
-  uint256 clearingId;
+    ClearingOperationType clearingOperationType;
+    bytes32 partition;
+    address tokenHolder;
+    uint256 clearingId;
 }
 
 // declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
 struct ClearingOperation {
-  bytes32 partition;
-  uint256 expirationTimestamp;
-  bytes data;
+    bytes32 partition;
+    uint256 expirationTimestamp;
+    bytes data;
 }
 
 // declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
 struct ClearingOperationFrom {
-  ClearingOperation clearingOperation;
-  address from;
-  bytes operatorData;
+    ClearingOperation clearingOperation;
+    address from;
+    bytes operatorData;
 }
 
 // declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
 struct ClearingRedeemData {
-  uint256 amount;
-  uint256 expirationTimestamp;
-  bytes data;
-  bytes operatorData;
-  ThirdPartyType operatorType;
+    uint256 amount;
+    uint256 expirationTimestamp;
+    bytes data;
+    bytes operatorData;
+    ThirdPartyType operatorType;
 }
 
 // declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
 struct ClearingTransferData {
-  uint256 amount;
-  uint256 expirationTimestamp;
-  address destination;
-  bytes data;
-  bytes operatorData;
-  ThirdPartyType operatorType;
+    uint256 amount;
+    uint256 expirationTimestamp;
+    address destination;
+    bytes data;
+    bytes operatorData;
+    ThirdPartyType operatorType;
 }
 
 // declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
 enum ClearingOperationType {
-  Transfer,
-  Redeem,
-  HoldCreation
+    Transfer,
+    Redeem,
+    HoldCreation
 }
 
 // declared in contracts/domain/asset/types/ThirdPartyType.sol
 enum ThirdPartyType {
-  NULL,
-  AUTHORIZED,
-  OPERATOR,
-  PROTECTED,
-  CONTROLLER
+    NULL,
+    AUTHORIZED,
+    OPERATOR,
+    PROTECTED,
+    CONTROLLER
 }
 ```
 
@@ -550,17 +634,17 @@ enum ThirdPartyType {
 ```solidity
 function initializeClearingHoldByPartition() external;
 function clearingCreateHoldByPartition(
-  IClearingTypes.ClearingOperation calldata _clearingOperation,
-  IHoldTypes.Hold calldata _hold
+    IClearingTypes.ClearingOperation calldata _clearingOperation,
+    IHoldTypes.Hold calldata _hold
 ) external returns (bool success_, uint256 clearingId_);
 function clearingCreateHoldFromByPartition(
-  IClearingTypes.ClearingOperationFrom calldata _clearingOperationFrom,
-  IHoldTypes.Hold calldata _hold
+    IClearingTypes.ClearingOperationFrom calldata _clearingOperationFrom,
+    IHoldTypes.Hold calldata _hold
 ) external returns (bool success_, uint256 clearingId_);
 function getClearingCreateHoldForByPartition(
-  bytes32 _partition,
-  address _tokenHolder,
-  uint256 _clearingId
+    bytes32 _partition,
+    address _tokenHolder,
+    uint256 _clearingId
 ) external view returns (IClearingTypes.ClearingHoldCreationData memory clearingHoldCreationData_);
 ```
 
@@ -569,47 +653,47 @@ function getClearingCreateHoldForByPartition(
 ```solidity
 // declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
 struct ClearingOperation {
-  bytes32 partition;
-  uint256 expirationTimestamp;
-  bytes data;
+    bytes32 partition;
+    uint256 expirationTimestamp;
+    bytes data;
 }
 
 // declared in contracts/facets/layer_1/hold/IHoldTypes.sol
 struct Hold {
-  uint256 amount;
-  uint256 expirationTimestamp;
-  address escrow;
-  address to;
-  bytes data;
+    uint256 amount;
+    uint256 expirationTimestamp;
+    address escrow;
+    address to;
+    bytes data;
 }
 
 // declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
 struct ClearingOperationFrom {
-  ClearingOperation clearingOperation;
-  address from;
-  bytes operatorData;
+    ClearingOperation clearingOperation;
+    address from;
+    bytes operatorData;
 }
 
 // declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
 struct ClearingHoldCreationData {
-  uint256 amount;
-  uint256 expirationTimestamp;
-  bytes data;
-  address holdEscrow;
-  uint256 holdExpirationTimestamp;
-  address holdTo;
-  bytes holdData;
-  bytes operatorData;
-  ThirdPartyType operatorType;
+    uint256 amount;
+    uint256 expirationTimestamp;
+    bytes data;
+    address holdEscrow;
+    uint256 holdExpirationTimestamp;
+    address holdTo;
+    bytes holdData;
+    bytes operatorData;
+    ThirdPartyType operatorType;
 }
 
 // declared in contracts/domain/asset/types/ThirdPartyType.sol
 enum ThirdPartyType {
-  NULL,
-  AUTHORIZED,
-  OPERATOR,
-  PROTECTED,
-  CONTROLLER
+    NULL,
+    AUTHORIZED,
+    OPERATOR,
+    PROTECTED,
+    CONTROLLER
 }
 ```
 
@@ -621,19 +705,19 @@ enum ThirdPartyType {
 ```solidity
 function initializeComplianceByPartition() external;
 function canTransferByPartition(
-  address _from,
-  address _to,
-  bytes32 _partition,
-  uint256 _value,
-  bytes calldata _data,
-  bytes calldata _operatorData
+    address _from,
+    address _to,
+    bytes32 _partition,
+    uint256 _value,
+    bytes calldata _data,
+    bytes calldata _operatorData
 ) external view returns (bool status, bytes1 code, bytes32 reason);
 function canRedeemByPartition(
-  address _from,
-  bytes32 _partition,
-  uint256 _value,
-  bytes calldata _data,
-  bytes calldata _operatorData
+    address _from,
+    bytes32 _partition,
+    uint256 _value,
+    bytes calldata _data,
+    bytes calldata _operatorData
 ) external view returns (bool status, bytes1 code, bytes32 reason);
 ```
 
@@ -645,12 +729,16 @@ function canRedeemByPartition(
 ```solidity
 function initializeCompliance(address _compliance) external;
 function setCompliance(address _compliance) external;
-function canTransfer(address _to, uint256 _value, bytes calldata _data) external view returns (bool, bytes1, bytes32);
+function canTransfer(
+    address _to,
+    uint256 _value,
+    bytes calldata _data
+) external view returns (bool, bytes1, bytes32);
 function canTransferFrom(
-  address _from,
-  address _to,
-  uint256 _value,
-  bytes calldata _data
+    address _from,
+    address _to,
+    uint256 _value,
+    bytes calldata _data
 ) external view returns (bool, bytes1, bytes32);
 function compliance() external view returns (ICompliance);
 ```
@@ -668,8 +756,8 @@ function isInControlList(address _account) external view returns (bool);
 function getControlListType() external view returns (bool);
 function getControlListCount() external view returns (uint256 controlListCount_);
 function getControlListMembers(
-  uint256 _pageIndex,
-  uint256 _pageLength
+    uint256 _pageIndex,
+    uint256 _pageLength
 ) external view returns (address[] memory members_);
 ```
 
@@ -681,17 +769,17 @@ function getControlListMembers(
 ```solidity
 function initializeController(bool _isControllable) external;
 function controllerTransfer(
-  address _from,
-  address _to,
-  uint256 _value,
-  bytes calldata _data,
-  bytes calldata _operatorData
+    address _from,
+    address _to,
+    uint256 _value,
+    bytes calldata _data,
+    bytes calldata _operatorData
 ) external;
 function controllerRedeem(
-  address _tokenHolder,
-  uint256 _value,
-  bytes calldata _data,
-  bytes calldata _operatorData
+    address _tokenHolder,
+    uint256 _value,
+    bytes calldata _data,
+    bytes calldata _operatorData
 ) external;
 function forcedTransfer(address _from, address _to, uint256 _amount) external returns (bool);
 function addAgent(address _agent) external;
@@ -709,19 +797,19 @@ function isAgent(address _agent) external view returns (bool);
 ```solidity
 function initializeControllerByPartition() external;
 function controllerTransferByPartition(
-  bytes32 _partition,
-  address _from,
-  address _to,
-  uint256 _value,
-  bytes calldata _data,
-  bytes calldata _operatorData
+    bytes32 _partition,
+    address _from,
+    address _to,
+    uint256 _value,
+    bytes calldata _data,
+    bytes calldata _operatorData
 ) external returns (bytes32);
 function controllerRedeemByPartition(
-  bytes32 _partition,
-  address _tokenHolder,
-  uint256 _value,
-  bytes calldata _data,
-  bytes calldata _operatorData
+    bytes32 _partition,
+    address _tokenHolder,
+    uint256 _value,
+    bytes calldata _data,
+    bytes calldata _operatorData
 ) external;
 ```
 
@@ -733,10 +821,10 @@ function controllerRedeemByPartition(
 ```solidity
 function initializeControllerHoldByPartition() external;
 function controllerCreateHoldByPartition(
-  bytes32 _partition,
-  address _from,
-  IHoldTypes.Hold calldata _hold,
-  bytes calldata _operatorData
+    bytes32 _partition,
+    address _from,
+    IHoldTypes.Hold calldata _hold,
+    bytes calldata _operatorData
 ) external returns (bool success_, uint256 holdId_);
 ```
 
@@ -745,11 +833,11 @@ function controllerCreateHoldByPartition(
 ```solidity
 // declared in contracts/facets/layer_1/hold/IHoldTypes.sol
 struct Hold {
-  uint256 amount;
-  uint256 expirationTimestamp;
-  address escrow;
-  address to;
-  bytes data;
+    uint256 amount;
+    uint256 expirationTimestamp;
+    address escrow;
+    address to;
+    bytes data;
 }
 ```
 
@@ -774,30 +862,31 @@ function version() external view returns (string memory);
 ```solidity
 // declared in contracts/factory/ERC3643/interfaces/ICore.sol
 struct ERC20Metadata {
-  ERC20MetadataInfo info;
-  IFactory.SecurityType securityType;
+    ERC20MetadataInfo info;
+    IFactory.SecurityType securityType;
 }
 
 // declared in contracts/factory/ERC3643/interfaces/ICore.sol
 struct ERC20MetadataInfo {
-  string name;
-  string symbol;
-  string isin;
-  uint8 decimals;
+    string name;
+    string symbol;
+    string isin;
+    uint8 decimals;
 }
 
 // declared in contracts/factory/IFactory.sol
 enum SecurityType {
-  /// @notice A bond whose coupon rate floats against an external index.
-  BondVariableRate,
-  /// @notice An equity instrument (shares).
-  Equity,
-  /// @notice A bond with a fixed coupon rate.
-  BondFixedRate,
-  /// @notice A bond whose coupon is tied to KPI performance metrics.
-  BondKpiLinkedRate,
-  /// @notice A loan instrument.
-  Loan
+    /// @notice An equity instrument (shares).
+    Equity,
+    /// @notice A bond whose coupon rate floats against an external index.
+    BondVariableRate,
+    /// @notice A bond with a fixed coupon rate.
+    BondFixedRate,
+    /// @notice A bond whose coupon is tied to KPI performance metrics.
+    BondKpiLinkedRate,
+    /// @notice A loan instrument.
+    Loan,
+    DepositToken
 }
 ```
 
@@ -829,44 +918,30 @@ function decimalsAtSnapshot(uint256 _snapshotID) external view returns (uint8 de
 ```solidity
 function initializeCorporateActions() external;
 function getCorporateAction(
-  bytes32 _corporateActionId
+    bytes32 _corporateActionId
 ) external view returns (bytes32 actionType_, uint256 actionIdByType_, bytes memory data_, bool isDisabled_);
 function getCorporateActionCount() external view returns (uint256 corporateActionCount_);
 function getCorporateActionIds(
-  uint256 _pageIndex,
-  uint256 _pageLength
+    uint256 _pageIndex,
+    uint256 _pageLength
 ) external view returns (bytes32[] memory corporateActionIds_);
 function getCorporateActions(
-  uint256 _pageIndex,
-  uint256 _pageLength
-)
-  external
-  view
-  returns (
-    bytes32[] memory actionTypes_,
-    uint256[] memory actionIdByType_,
-    bytes[] memory datas_,
-    bool[] memory isDisabled_
-  );
-function getCorporateActionCountByType(bytes32 _actionType) external view returns (uint256 corporateActionCount_);
+    uint256 _pageIndex,
+    uint256 _pageLength
+) external view returns (bytes32[] memory actionTypes_, uint256[] memory actionIdByType_, bytes[] memory datas_, bool[] memory isDisabled_);
+function getCorporateActionCountByType(
+    bytes32 _actionType
+) external view returns (uint256 corporateActionCount_);
 function getCorporateActionIdsByType(
-  bytes32 _actionType,
-  uint256 _pageIndex,
-  uint256 _pageLength
+    bytes32 _actionType,
+    uint256 _pageIndex,
+    uint256 _pageLength
 ) external view returns (bytes32[] memory corporateActionIds_);
 function getCorporateActionsByType(
-  bytes32 _actionType,
-  uint256 _pageIndex,
-  uint256 _pageLength
-)
-  external
-  view
-  returns (
-    bytes32[] memory actionTypes_,
-    uint256[] memory actionIdByType_,
-    bytes[] memory datas_,
-    bool[] memory isDisabled_
-  );
+    bytes32 _actionType,
+    uint256 _pageIndex,
+    uint256 _pageLength
+) external view returns (bytes32[] memory actionTypes_, uint256[] memory actionIdByType_, bytes[] memory datas_, bool[] memory isDisabled_);
 function actionContentHashExists(bytes32 _contentHash) external view returns (bool);
 ```
 
@@ -881,12 +956,15 @@ function setCoupon(Coupon calldata _newCoupon) external returns (uint256 couponI
 function cancelCoupon(uint256 _couponID) external returns (bool success_);
 function forceCancelCoupon(uint256 _couponID) external returns (bool success_);
 function getCoupon(
-  uint256 _couponID
+    uint256 _couponID
 ) external view returns (RegisteredCoupon memory registeredCoupon_, bool isDisabled_);
-function getCouponFor(uint256 _couponID, address _account) external view returns (CouponFor memory couponFor_);
+function getCouponFor(
+    uint256 _couponID,
+    address _account
+) external view returns (CouponFor memory couponFor_);
 function getCouponAmountFor(
-  uint256 _couponID,
-  address _account
+    uint256 _couponID,
+    address _account
 ) external view returns (CouponAmountFor memory couponAmountFor_);
 function getCouponCount() external view returns (uint256 couponCount_);
 ```
@@ -896,45 +974,45 @@ function getCouponCount() external view returns (uint256 couponCount_);
 ```solidity
 // declared in contracts/facets/coupon/ICouponTypes.sol
 struct Coupon {
-  uint256 recordDate;
-  uint256 executionDate;
-  uint256 startDate;
-  uint256 endDate;
-  uint256 fixingDate;
-  uint256 rate;
-  uint8 rateDecimals;
-  RateCalculationStatus rateStatus;
+    uint256 recordDate;
+    uint256 executionDate;
+    uint256 startDate;
+    uint256 endDate;
+    uint256 fixingDate;
+    uint256 rate;
+    uint8 rateDecimals;
+    RateCalculationStatus rateStatus;
 }
 
 // declared in contracts/facets/coupon/ICouponTypes.sol
 struct RegisteredCoupon {
-  Coupon coupon;
-  uint256 snapshotId;
+    Coupon coupon;
+    uint256 snapshotId;
 }
 
 // declared in contracts/facets/coupon/ICouponTypes.sol
 struct CouponFor {
-  uint256 tokenBalance;
-  uint8 decimals;
-  uint256 nominalValue;
-  uint256 nominalValueDecimals;
-  bool recordDateReached;
-  Coupon coupon;
-  CouponAmountFor couponAmount;
-  bool isDisabled;
+    uint256 tokenBalance;
+    uint8 decimals;
+    uint256 nominalValue;
+    uint256 nominalValueDecimals;
+    bool recordDateReached;
+    Coupon coupon;
+    CouponAmountFor couponAmount;
+    bool isDisabled;
 }
 
 // declared in contracts/facets/coupon/ICouponTypes.sol
 struct CouponAmountFor {
-  uint256 numerator;
-  uint256 denominator;
-  bool recordDateReached;
+    uint256 numerator;
+    uint256 denominator;
+    bool recordDateReached;
 }
 
 // declared in contracts/facets/coupon/ICouponTypes.sol
 enum RateCalculationStatus {
-  PENDING,
-  SET
+    PENDING,
+    SET
 }
 ```
 
@@ -945,18 +1023,21 @@ enum RateCalculationStatus {
 
 ```solidity
 function initializeCouponListing() external;
-function getCouponFromOrderedListAt(uint256 _pos, bool _includeDisabled) external view returns (uint256 couponID_);
+function getCouponFromOrderedListAt(
+    uint256 _pos,
+    bool _includeDisabled
+) external view returns (uint256 couponID_);
 function getCouponsOrderedList(
-  uint256 _pageIndex,
-  uint256 _pageLength,
-  bool _includeDisabled
+    uint256 _pageIndex,
+    uint256 _pageLength,
+    bool _includeDisabled
 ) external view returns (uint256[] memory couponIDs_);
 function getCouponsOrderedListTotal(bool _includeDisabled) external view returns (uint256 total_);
 function scheduledCouponListingCount(bool _includeDisabled) external view returns (uint256);
 function getScheduledCouponListing(
-  uint256 _pageIndex,
-  uint256 _pageLength,
-  bool _includeDisabled
+    uint256 _pageIndex,
+    uint256 _pageLength,
+    bool _includeDisabled
 ) external view returns (ScheduledTask[] memory scheduledCouponListing_);
 ```
 
@@ -965,8 +1046,8 @@ function getScheduledCouponListing(
 ```solidity
 // declared in contracts/factory/ERC3643/interfaces/IScheduledTasksCommon.sol
 struct ScheduledTask {
-  uint256 scheduledTimestamp;
-  bytes data;
+    uint256 scheduledTimestamp;
+    bytes data;
 }
 ```
 
@@ -978,14 +1059,14 @@ struct ScheduledTask {
 ```solidity
 function initializeCouponSecurityHolders() external;
 function getCouponHolders(
-  uint256 _couponID,
-  uint256 _pageIndex,
-  uint256 _pageLength
+    uint256 _couponID,
+    uint256 _pageIndex,
+    uint256 _pageLength
 ) external view returns (address[] memory holders_);
 function getCouponsFor(
-  uint256 _couponID,
-  uint256 _pageIndex,
-  uint256 _pageLength
+    uint256 _couponID,
+    uint256 _pageIndex,
+    uint256 _pageLength
 ) external view returns (CouponFor[] memory couponFor_, address[] memory holders_);
 function getTotalCouponHolders(uint256 _couponID) external view returns (uint256);
 ```
@@ -995,39 +1076,39 @@ function getTotalCouponHolders(uint256 _couponID) external view returns (uint256
 ```solidity
 // declared in contracts/facets/coupon/ICouponTypes.sol
 struct CouponFor {
-  uint256 tokenBalance;
-  uint8 decimals;
-  uint256 nominalValue;
-  uint256 nominalValueDecimals;
-  bool recordDateReached;
-  Coupon coupon;
-  CouponAmountFor couponAmount;
-  bool isDisabled;
+    uint256 tokenBalance;
+    uint8 decimals;
+    uint256 nominalValue;
+    uint256 nominalValueDecimals;
+    bool recordDateReached;
+    Coupon coupon;
+    CouponAmountFor couponAmount;
+    bool isDisabled;
 }
 
 // declared in contracts/facets/coupon/ICouponTypes.sol
 struct Coupon {
-  uint256 recordDate;
-  uint256 executionDate;
-  uint256 startDate;
-  uint256 endDate;
-  uint256 fixingDate;
-  uint256 rate;
-  uint8 rateDecimals;
-  RateCalculationStatus rateStatus;
+    uint256 recordDate;
+    uint256 executionDate;
+    uint256 startDate;
+    uint256 endDate;
+    uint256 fixingDate;
+    uint256 rate;
+    uint8 rateDecimals;
+    RateCalculationStatus rateStatus;
 }
 
 // declared in contracts/facets/coupon/ICouponTypes.sol
 struct CouponAmountFor {
-  uint256 numerator;
-  uint256 denominator;
-  bool recordDateReached;
+    uint256 numerator;
+    uint256 denominator;
+    bool recordDateReached;
 }
 
 // declared in contracts/facets/coupon/ICouponTypes.sol
 enum RateCalculationStatus {
-  PENDING,
-  SET
+    PENDING,
+    SET
 }
 ```
 
@@ -1053,6 +1134,200 @@ function deactivate() external;
 function isDeactivated() external view returns (bool);
 ```
 
+## Diamond Cut
+
+- Interface: `contracts/infrastructure/proxy/IDiamondCut.sol`
+
+```solidity
+function updateConfigVersion(uint256 _newVersion) external;
+function updateConfig(bytes32 _newConfigurationId, uint256 _newVersion) external;
+function updateResolver(
+    IBusinessLogicResolver _newResolver,
+    bytes32 _newConfigurationId,
+    uint256 _newVersion
+) external;
+function getConfigInfo(
+) external view returns (address resolver_, bytes32 configurationId_, uint256 version_);
+```
+
+## Diamond Cut Manager
+
+- Interface: `contracts/infrastructure/diamond/IDiamondCutManager.sol`
+
+```solidity
+function createConfiguration(
+    bytes32 _configurationId,
+    FacetConfiguration[] calldata _facetConfigurations
+) external;
+function createBatchConfiguration(
+    bytes32 _configurationId,
+    FacetConfiguration[] calldata _facetConfigurations,
+    bool _isLastBatch
+) external;
+function cancelBatchConfiguration(bytes32 _configurationId) external;
+function checkResolverProxyConfigurationRegistered(
+    bytes32 _configurationId,
+    uint256 _version
+) external;
+function resolveResolverProxyCall(
+    bytes32 _configurationId,
+    uint256 _version,
+    bytes4 _selector
+) external view returns (address facetAddress_);
+function resolveSupportsInterface(
+    bytes32 _configurationId,
+    uint256 _version,
+    bytes4 _interfaceId
+) external view returns (bool exists_);
+function isResolverProxyConfigurationRegistered(
+    bytes32 _configurationId,
+    uint256 _version
+) external view returns (bool);
+function getConfigurationsLength() external view returns (uint256 configurationsLength_);
+function getConfigurations(
+    uint256 _pageIndex,
+    uint256 _pageLength
+) external view returns (bytes32[] memory configurationIds_);
+function getLatestVersionByConfiguration(
+    bytes32 _configurationId
+) external view returns (uint256 latestVersion_);
+function getFacetsLengthByConfigurationIdAndVersion(
+    bytes32 _configurationId,
+    uint256 _version
+) external view returns (uint256 facetsLength_);
+function getFacetsByConfigurationIdAndVersion(
+    bytes32 _configurationId,
+    uint256 _version,
+    uint256 _pageIndex,
+    uint256 _pageLength
+) external view returns (IDiamondLoupe.Facet[] memory facets_);
+function getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(
+    bytes32 _configurationId,
+    uint256 _version,
+    bytes32 _facetId
+) external view returns (uint256 facetSelectorsLength_);
+function getFacetSelectorsByConfigurationIdVersionAndFacetId(
+    bytes32 _configurationId,
+    uint256 _version,
+    bytes32 _facetId,
+    uint256 _pageIndex,
+    uint256 _pageLength
+) external view returns (bytes4[] memory facetSelectors_);
+function getFacetIdsByConfigurationIdAndVersion(
+    bytes32 _configurationId,
+    uint256 _version,
+    uint256 _pageIndex,
+    uint256 _pageLength
+) external view returns (bytes32[] memory facetIds_);
+function getFacetConfigurationsByConfigurationIdAndVersion(
+    bytes32 _configurationId,
+    uint256 _version,
+    uint256 _start,
+    uint256 _end
+) external view returns (FacetConfiguration[] memory facetConfigurations_);
+function getFacetAddressesByConfigurationIdAndVersion(
+    bytes32 _configurationId,
+    uint256 _version,
+    uint256 _pageIndex,
+    uint256 _pageLength
+) external view returns (address[] memory facetAddresses_);
+function getFacetIdByConfigurationIdVersionAndSelector(
+    bytes32 _configurationId,
+    uint256 _version,
+    bytes4 _selector
+) external view returns (bytes32 facetId_);
+function getFacetByConfigurationIdVersionAndFacetId(
+    bytes32 _configurationId,
+    uint256 _version,
+    bytes32 _facetId
+) external view returns (IDiamondLoupe.Facet memory facet_);
+function getFacetAddressByConfigurationIdVersionAndFacetId(
+    bytes32 _configurationId,
+    uint256 _version,
+    bytes32 _facetId
+) external view returns (address facetAddress_);
+function getFacetVersionByConfigurationIdVersionAndFacetId(
+    bytes32 _configurationId,
+    uint256 _version,
+    bytes32 _facetId
+) external view returns (uint256 facetVersion_);
+```
+
+### Types
+
+```solidity
+// declared in contracts/infrastructure/diamond/IDiamondCutManager.sol
+struct FacetConfiguration {
+    bytes32 id;
+    uint256 version;
+}
+
+// declared in contracts/infrastructure/proxy/IDiamondLoupe.sol
+struct Facet {
+    bytes32 id;
+    address addr;
+    bytes4[] selectors;
+    bytes4[] interfaceIds;
+}
+```
+
+## Diamond Facet
+
+- Interface: `contracts/infrastructure/diamond/IDiamondFacet.sol`
+
+```solidity
+function initializeDiamondCut() external;
+```
+
+## Diamond Loupe
+
+- Interface: `contracts/infrastructure/proxy/IDiamondLoupe.sol`
+
+```solidity
+function getFacets() external view returns (Facet[] memory facets_);
+function getFacetsLength() external view returns (uint256 facetsLength_);
+function getFacetsByPage(
+    uint256 _pageIndex,
+    uint256 _pageLength
+) external view returns (Facet[] memory facets_);
+function getFacetSelectors(
+    bytes32 _facetId
+) external view returns (bytes4[] memory facetSelectors_);
+function getFacetSelectorsLength(
+    bytes32 _facetId
+) external view returns (uint256 facetSelectorsLength_);
+function getFacetSelectorsByPage(
+    bytes32 _facetId,
+    uint256 _pageIndex,
+    uint256 _pageLength
+) external view returns (bytes4[] memory facetSelectors_);
+function getFacetIds() external view returns (bytes32[] memory facetIds_);
+function getFacetIdsByPage(
+    uint256 _pageIndex,
+    uint256 _pageLength
+) external view returns (bytes32[] memory facetIds_);
+function getFacetAddresses() external view returns (address[] memory facetAddresses_);
+function getFacetAddressesByPage(
+    uint256 _pageIndex,
+    uint256 _pageLength
+) external view returns (address[] memory facetAddresses_);
+function getFacetIdBySelector(bytes4 _selector) external view returns (bytes32 facetId_);
+function getFacet(bytes32 _facetId) external view returns (Facet memory facet_);
+function getFacetAddress(bytes4 _selector) external view returns (address facetAddress_);
+```
+
+### Types
+
+```solidity
+// declared in contracts/infrastructure/proxy/IDiamondLoupe.sol
+struct Facet {
+    bytes32 id;
+    address addr;
+    bytes4[] selectors;
+    bytes4[] interfaceIds;
+}
+```
+
 ## Dividend
 
 - Interface: `contracts/facets/dividend/IDividend.sol`
@@ -1064,12 +1339,15 @@ function setDividend(Dividend calldata newDividend) external returns (uint256 di
 function cancelDividend(uint256 dividendId) external returns (bool success_);
 function forceCancelDividend(uint256 dividendId) external returns (bool success_);
 function getDividend(
-  uint256 dividendId
+    uint256 dividendId
 ) external view returns (RegisteredDividend memory registeredDividend_, bool isDisabled_);
-function getDividendFor(uint256 dividendId, address account) external view returns (DividendFor memory dividendFor_);
+function getDividendFor(
+    uint256 dividendId,
+    address account
+) external view returns (DividendFor memory dividendFor_);
 function getDividendAmountFor(
-  uint256 dividendId,
-  address account
+    uint256 dividendId,
+    address account
 ) external view returns (DividendAmountFor memory dividendAmountFor_);
 function getDividendsCount() external view returns (uint256 dividendCount_);
 ```
@@ -1079,35 +1357,35 @@ function getDividendsCount() external view returns (uint256 dividendCount_);
 ```solidity
 // declared in contracts/facets/dividend/IDividendTypes.sol
 struct Dividend {
-  uint256 recordDate;
-  uint256 executionDate;
-  uint256 amount;
-  uint8 amountDecimals;
+    uint256 recordDate;
+    uint256 executionDate;
+    uint256 amount;
+    uint8 amountDecimals;
 }
 
 // declared in contracts/facets/dividend/IDividendTypes.sol
 struct RegisteredDividend {
-  Dividend dividend;
-  uint256 snapshotId;
+    Dividend dividend;
+    uint256 snapshotId;
 }
 
 // declared in contracts/facets/dividend/IDividendTypes.sol
 struct DividendFor {
-  uint256 tokenBalance;
-  uint256 amount;
-  uint8 amountDecimals;
-  uint256 recordDate;
-  uint256 executionDate;
-  uint8 decimals;
-  bool recordDateReached;
-  bool isDisabled;
+    uint256 tokenBalance;
+    uint256 amount;
+    uint8 amountDecimals;
+    uint256 recordDate;
+    uint256 executionDate;
+    uint8 decimals;
+    bool recordDateReached;
+    bool isDisabled;
 }
 
 // declared in contracts/facets/dividend/IDividendTypes.sol
 struct DividendAmountFor {
-  uint256 numerator;
-  uint256 denominator;
-  bool recordDateReached;
+    uint256 numerator;
+    uint256 denominator;
+    bool recordDateReached;
 }
 ```
 
@@ -1119,9 +1397,9 @@ struct DividendAmountFor {
 ```solidity
 function initializeDividendSecurityHolders() external;
 function getDividendHolders(
-  uint256 dividendId,
-  uint256 pageIndex,
-  uint256 pageLength
+    uint256 dividendId,
+    uint256 pageIndex,
+    uint256 pageLength
 ) external view returns (address[] memory holders_);
 function getTotalDividendHolders(uint256 dividendId) external view returns (uint256);
 ```
@@ -1157,13 +1435,13 @@ function DOMAIN_SEPARATOR() external view returns (bytes32 domainSeparator_);
 ```solidity
 function initializeERC20Permit() external;
 function permit(
-  address owner,
-  address spender,
-  uint256 value,
-  uint256 deadline,
-  uint8 v,
-  bytes32 r,
-  bytes32 s
+    address owner,
+    address spender,
+    uint256 value,
+    uint256 deadline,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
 ) external;
 ```
 
@@ -1175,7 +1453,10 @@ function permit(
 ```solidity
 function initializeERC20Votes(bool _activated) external;
 function isActivated() external view returns (bool);
-function checkpoints(address _account, uint256 _pos) external view returns (Checkpoints.Checkpoint memory);
+function checkpoints(
+    address _account,
+    uint256 _pos
+) external view returns (Checkpoints.Checkpoint memory);
 function numCheckpoints(address _account) external view returns (uint256);
 ```
 
@@ -1184,8 +1465,8 @@ function numCheckpoints(address _account) external view returns (uint256);
 ```solidity
 // declared in contracts/infrastructure/utils/Checkpoints.sol
 struct Checkpoint {
-  uint256 from;
-  uint256 value;
+    uint256 from;
+    uint256 value;
 }
 ```
 
@@ -1197,16 +1478,16 @@ struct Checkpoint {
 ```solidity
 function initializeExternalControlLists(address[] calldata _controlLists) external;
 function updateExternalControlLists(
-  address[] calldata _controlLists,
-  bool[] calldata _actives
+    address[] calldata _controlLists,
+    bool[] calldata _actives
 ) external returns (bool success_);
 function addExternalControlList(address _controlList) external returns (bool success_);
 function removeExternalControlList(address _controlList) external returns (bool success_);
 function isExternalControlList(address _controlList) external view returns (bool);
 function getExternalControlListsCount() external view returns (uint256 externalControlListsCount_);
 function getExternalControlListsMembers(
-  uint256 _pageIndex,
-  uint256 _pageLength
+    uint256 _pageIndex,
+    uint256 _pageLength
 ) external view returns (address[] memory members_);
 ```
 
@@ -1218,27 +1499,30 @@ function getExternalControlListsMembers(
 ```solidity
 function initializeExternalKycLists(address[] calldata _kycLists) external;
 function updateExternalKycLists(
-  address[] calldata _kycLists,
-  bool[] calldata _actives
+    address[] calldata _kycLists,
+    bool[] calldata _actives
 ) external returns (bool success_);
 function addExternalKycList(address _kycList) external returns (bool success_);
 function removeExternalKycList(address _kycList) external returns (bool success_);
 function isExternalKycList(address _kycList) external view returns (bool);
-function isExternallyGranted(address _account, IKyc.KycStatus _kycStatus) external view returns (bool);
+function isExternallyGranted(
+    address _account,
+    IKyc.KycStatus _kycStatus
+) external view returns (bool);
 function getExternalKycListsCount() external view returns (uint256 externalKycListsCount_);
 function getExternalKycListsMembers(
-  uint256 _pageIndex,
-  uint256 _pageLength
+    uint256 _pageIndex,
+    uint256 _pageLength
 ) external view returns (address[] memory members_);
 ```
 
 ### Types
 
 ```solidity
-// declared in contracts/facets/layer_1/kyc/IKyc.sol
+// declared in contracts/facets/kyc/IKyc.sol
 enum KycStatus {
-  NOT_GRANTED,
-  GRANTED
+    NOT_GRANTED,
+    GRANTED
 }
 ```
 
@@ -1249,15 +1533,207 @@ enum KycStatus {
 
 ```solidity
 function initializeExternalPauses(address[] calldata _pauses) external;
-function updateExternalPauses(address[] calldata _pauses, bool[] calldata _actives) external returns (bool success_);
+function updateExternalPauses(
+    address[] calldata _pauses,
+    bool[] calldata _actives
+) external returns (bool success_);
 function addExternalPause(address _pause) external returns (bool success_);
 function removeExternalPause(address _pause) external returns (bool success_);
 function isExternalPause(address _pause) external view returns (bool);
 function getExternalPausesCount() external view returns (uint256 externalPausesCount_);
 function getExternalPausesMembers(
-  uint256 _pageIndex,
-  uint256 _pageLength
+    uint256 _pageIndex,
+    uint256 _pageLength
 ) external view returns (address[] memory members_);
+```
+
+## Factory
+
+- Interface: `contracts/factory/IFactory.sol`
+- Resolver key: `Factory`
+
+```solidity
+function deployProxy(
+    IBusinessLogicResolver _resolver,
+    bytes32 _configKey,
+    uint256 _version,
+    IResolverProxy.Rbac[] memory _rbacs
+) external returns (address proxyAddress_);
+function deployEquity(
+    EquityData calldata _equityData,
+    FactoryRegulationData calldata _factoryRegulationData
+) external returns (address equityAddress_);
+function deployBond(
+    BondData calldata _bondData,
+    FactoryRegulationData calldata _factoryRegulationData
+) external returns (address bondAddress_);
+function deployDepositToken(
+    DepositTokenData calldata _depositTokenData,
+    FactoryRegulationData calldata _factoryRegulationData
+) external returns (address depositTokenAddress_);
+function getAppliedRegulationData(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) external pure returns (RegulationData memory regulationData_);
+```
+
+### Types
+
+```solidity
+// declared in contracts/infrastructure/proxy/IResolverProxy.sol
+struct Rbac {
+    bytes32 role;
+    address[] members;
+}
+
+// declared in contracts/factory/IFactory.sol
+struct EquityData {
+    SecurityData security;
+    IEquity.EquityDetailsData equityDetails;
+}
+
+// declared in contracts/factory/ERC3643/interfaces/regulation.sol
+struct FactoryRegulationData {
+    RegulationType regulationType;
+    RegulationSubType regulationSubType;
+    AdditionalSecurityData additionalSecurityData;
+}
+
+// declared in contracts/factory/IFactory.sol
+struct BondData {
+    SecurityData security;
+    IBondRead.BondDetailsData bondDetails;
+    address[] proceedRecipients;
+    bytes[] proceedRecipientsData;
+}
+
+// declared in contracts/factory/IFactory.sol
+struct DepositTokenData {
+    SecurityData security;
+}
+
+// declared in contracts/factory/ERC3643/interfaces/regulation.sol
+enum RegulationType {
+    NONE,
+    REG_S,
+    REG_D
+}
+
+// declared in contracts/factory/ERC3643/interfaces/regulation.sol
+enum RegulationSubType {
+    NONE,
+    REG_D_506_B,
+    REG_D_506_C
+}
+
+// declared in contracts/factory/ERC3643/interfaces/regulation.sol
+struct RegulationData {
+    RegulationType regulationType;
+    RegulationSubType regulationSubType;
+    uint256 dealSize;
+    AccreditedInvestors accreditedInvestors;
+    uint256 maxNonAccreditedInvestors;
+    ManualInvestorVerification manualInvestorVerification;
+    InternationalInvestors internationalInvestors;
+    ResaleHoldPeriod resaleHoldPeriod;
+}
+
+// declared in contracts/factory/IFactory.sol
+struct SecurityData {
+    IBusinessLogicResolver resolver;
+    uint256 maxSupply;
+    ResolverProxyConfiguration resolverProxyConfiguration;
+    ICore.ERC20MetadataInfo erc20MetadataInfo;
+    IResolverProxy.Rbac[] rbacs;
+    address[] externalPauses;
+    address[] externalControlLists;
+    address[] externalKycLists;
+    address compliance;
+    address identityRegistry;
+    bool arePartitionsProtected;
+    bool isMultiPartition;
+    bool isControllable;
+    bool isWhiteList;
+    bool clearingActive;
+    bool internalKycActivated;
+    bool erc20VotesActivated;
+}
+
+// declared in contracts/factory/ERC3643/interfaces/IEquity.sol
+struct EquityDetailsData {
+    bool votingRight;
+    bool informationRight;
+    bool liquidationRight;
+    bool subscriptionRight;
+    bool conversionRight;
+    bool redemptionRight;
+    bool putRight;
+    DividendType dividendRight;
+    bytes3 currency;
+    uint256 nominalValue;
+    uint8 nominalValueDecimals;
+}
+
+// declared in contracts/factory/ERC3643/interfaces/regulation.sol
+struct AdditionalSecurityData {
+    bool countriesControlListType;
+    string listOfCountries;
+    string info;
+}
+
+// declared in contracts/factory/ERC3643/interfaces/IBondTypes.sol
+struct BondDetailsData {
+    bytes3 currency;
+    uint256 nominalValue;
+    uint8 nominalValueDecimals;
+    uint256 startingDate;
+    uint256 maturityDate;
+}
+
+// declared in contracts/factory/ERC3643/interfaces/regulation.sol
+enum AccreditedInvestors {
+    NONE,
+    ACCREDITATION_REQUIRED
+}
+
+// declared in contracts/factory/ERC3643/interfaces/regulation.sol
+enum ManualInvestorVerification {
+    NOTHING_TO_VERIFY,
+    VERIFICATION_INVESTORS_FINANCIAL_DOCUMENTS_REQUIRED
+}
+
+// declared in contracts/factory/ERC3643/interfaces/regulation.sol
+enum InternationalInvestors {
+    NOT_ALLOWED,
+    ALLOWED
+}
+
+// declared in contracts/factory/ERC3643/interfaces/regulation.sol
+enum ResaleHoldPeriod {
+    NOT_APPLICABLE,
+    APPLICABLE_FROM_6_MOTHS_TO_1_YEAR
+}
+
+// declared in contracts/factory/IFactory.sol
+struct ResolverProxyConfiguration {
+    bytes32 key;
+    uint256 version;
+}
+
+// declared in contracts/factory/ERC3643/interfaces/ICore.sol
+struct ERC20MetadataInfo {
+    string name;
+    string symbol;
+    string isin;
+    uint8 decimals;
+}
+
+// declared in contracts/factory/ERC3643/interfaces/IEquity.sol
+enum DividendType {
+    NONE,
+    PREFERRED,
+    COMMON
+}
 ```
 
 ## Freeze
@@ -1281,7 +1757,10 @@ function isFrozen(address _userAddress) external view returns (bool);
 
 ```solidity
 function initializeFreezeAtSnapshot() external;
-function frozenBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) external view returns (uint256 balance_);
+function frozenBalanceOfAtSnapshot(
+    uint256 _snapshotID,
+    address _tokenHolder
+) external view returns (uint256 balance_);
 ```
 
 ## Freeze At Snapshot By Partition
@@ -1292,9 +1771,9 @@ function frozenBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) ex
 ```solidity
 function initializeFreezeAtSnapshotByPartition() external;
 function frozenBalanceOfAtSnapshotByPartition(
-  bytes32 _partition,
-  uint256 _snapshotID,
-  address _tokenHolder
+    bytes32 _partition,
+    uint256 _snapshotID,
+    address _tokenHolder
 ) external view returns (uint256 balance_);
 ```
 
@@ -1305,7 +1784,10 @@ function frozenBalanceOfAtSnapshotByPartition(
 
 ```solidity
 function initializeHoldAtSnapshot() external;
-function heldBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) external view returns (uint256 balance_);
+function heldBalanceOfAtSnapshot(
+    uint256 _snapshotID,
+    address _tokenHolder
+) external view returns (uint256 balance_);
 ```
 
 ## Hold At Snapshot By Partition
@@ -1316,9 +1798,9 @@ function heldBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) exte
 ```solidity
 function initializeHoldAtSnapshotByPartition() external;
 function heldBalanceOfAtSnapshotByPartition(
-  bytes32 _partition,
-  uint256 _snapshotID,
-  address _tokenHolder
+    bytes32 _partition,
+    uint256 _snapshotID,
+    address _tokenHolder
 ) external view returns (uint256 balance_);
 ```
 
@@ -1330,50 +1812,44 @@ function heldBalanceOfAtSnapshotByPartition(
 ```solidity
 function initializeHoldByPartition() external;
 function createHoldByPartition(
-  bytes32 _partition,
-  IHoldTypes.Hold calldata _hold
+    bytes32 _partition,
+    IHoldTypes.Hold calldata _hold
 ) external returns (bool success_, uint256 holdId_);
 function createHoldFromByPartition(
-  bytes32 _partition,
-  address _from,
-  IHoldTypes.Hold calldata _hold,
-  bytes calldata _operatorData
+    bytes32 _partition,
+    address _from,
+    IHoldTypes.Hold calldata _hold,
+    bytes calldata _operatorData
 ) external returns (bool success_, uint256 holdId_);
 function executeHoldByPartition(
-  IHoldTypes.HoldIdentifier calldata _holdIdentifier,
-  address _to,
-  uint256 _amount
+    IHoldTypes.HoldIdentifier calldata _holdIdentifier,
+    address _to,
+    uint256 _amount
 ) external returns (bool success_, bytes32 partition_);
 function releaseHoldByPartition(
-  IHoldTypes.HoldIdentifier calldata _holdIdentifier,
-  uint256 _amount
+    IHoldTypes.HoldIdentifier calldata _holdIdentifier,
+    uint256 _amount
 ) external returns (bool success_);
-function reclaimHoldByPartition(IHoldTypes.HoldIdentifier calldata _holdIdentifier) external returns (bool success_);
-function getHeldAmountForByPartition(bytes32 _partition, address _tokenHolder) external view returns (uint256 amount_);
+function reclaimHoldByPartition(
+    IHoldTypes.HoldIdentifier calldata _holdIdentifier
+) external returns (bool success_);
+function getHeldAmountForByPartition(
+    bytes32 _partition,
+    address _tokenHolder
+) external view returns (uint256 amount_);
 function getHoldCountForByPartition(
-  bytes32 _partition,
-  address _tokenHolder
+    bytes32 _partition,
+    address _tokenHolder
 ) external view returns (uint256 holdCount_);
 function getHoldsIdForByPartition(
-  bytes32 _partition,
-  address _tokenHolder,
-  uint256 _pageIndex,
-  uint256 _pageLength
+    bytes32 _partition,
+    address _tokenHolder,
+    uint256 _pageIndex,
+    uint256 _pageLength
 ) external view returns (uint256[] memory holdsId_);
 function getHoldForByPartition(
-  IHoldTypes.HoldIdentifier calldata _holdIdentifier
-)
-  external
-  view
-  returns (
-    uint256 amount_,
-    uint256 expirationTimestamp_,
-    address escrow_,
-    address destination_,
-    bytes memory data_,
-    bytes memory operatorData_,
-    ThirdPartyType thirdPartyType_
-  );
+    IHoldTypes.HoldIdentifier calldata _holdIdentifier
+) external view returns (uint256 amount_, uint256 expirationTimestamp_, address escrow_, address destination_, bytes memory data_, bytes memory operatorData_, ThirdPartyType thirdPartyType_);
 ```
 
 ### Types
@@ -1381,27 +1857,27 @@ function getHoldForByPartition(
 ```solidity
 // declared in contracts/facets/layer_1/hold/IHoldTypes.sol
 struct Hold {
-  uint256 amount;
-  uint256 expirationTimestamp;
-  address escrow;
-  address to;
-  bytes data;
+    uint256 amount;
+    uint256 expirationTimestamp;
+    address escrow;
+    address to;
+    bytes data;
 }
 
 // declared in contracts/facets/layer_1/hold/IHoldTypes.sol
 struct HoldIdentifier {
-  bytes32 partition;
-  address tokenHolder;
-  uint256 holdId;
+    bytes32 partition;
+    address tokenHolder;
+    uint256 holdId;
 }
 
 // declared in contracts/domain/asset/types/ThirdPartyType.sol
 enum ThirdPartyType {
-  NULL,
-  AUTHORIZED,
-  OPERATOR,
-  PROTECTED,
-  CONTROLLER
+    NULL,
+    AUTHORIZED,
+    OPERATOR,
+    PROTECTED,
+    CONTROLLER
 }
 ```
 
@@ -1414,7 +1890,7 @@ enum ThirdPartyType {
 function initializeHold() external;
 function getHeldAmountFor(address _tokenHolder) external view returns (uint256 amount_);
 function getHoldThirdParty(
-  IHoldTypes.HoldIdentifier calldata _holdIdentifier
+    IHoldTypes.HoldIdentifier calldata _holdIdentifier
 ) external view returns (address thirdParty_);
 ```
 
@@ -1423,9 +1899,9 @@ function getHoldThirdParty(
 ```solidity
 // declared in contracts/facets/layer_1/hold/IHoldTypes.sol
 struct HoldIdentifier {
-  bytes32 partition;
-  address tokenHolder;
-  uint256 holdId;
+    bytes32 partition;
+    address tokenHolder;
+    uint256 holdId;
 }
 ```
 
@@ -1451,8 +1927,14 @@ function onchainID() external view returns (address);
 function initializeInitializer(uint256 _maxInitializerFacetIndex) external;
 function updateMaxInitializerFacetIndex(uint256 _newMaxInitializerFacetIndex) external;
 function setOperationalStatus() external returns (bool isOperational_, uint256 lastFacetIndex_);
-function getOperationalStatus(bytes32 _configId, uint256 _versionId) external view returns (uint256 status_);
-function getFacetVersionStatus(bytes32 _facetId, uint256 _versionId) external view returns (uint256 status_);
+function getOperationalStatus(
+    bytes32 _configId,
+    uint256 _versionId
+) external view returns (uint256 status_);
+function getFacetVersionStatus(
+    bytes32 _facetId,
+    uint256 _versionId
+) external view returns (uint256 status_);
 function getFacetLastVersion(bytes32 _facetId) external view returns (uint256 lastVersion_);
 function getMaxInitializerFacetIndex() external view returns (uint256 maxInitializerFacetIndex_);
 ```
@@ -1473,10 +1955,59 @@ function getCouponRateType() external view returns (RateType);
 ```solidity
 // declared in contracts/facets/interestRate/IInterestRate.sol
 enum RateType {
-  NONE,
-  STANDARD,
-  FIXED,
-  KPI_LINKED
+    NONE,
+    STANDARD,
+    FIXED,
+    KPI_LINKED
+}
+```
+
+## KYC
+
+- Interface: `contracts/facets/kyc/IKyc.sol`
+- Resolver key: `Kyc`
+
+```solidity
+function initializeInternalKyc(bool _activateInternalKyc) external;
+function activateInternalKyc() external returns (bool success_);
+function deactivateInternalKyc() external returns (bool success_);
+function grantKyc(
+    address _account,
+    string memory _vcId,
+    uint256 _validFrom,
+    uint256 _validTo,
+    address _issuer
+) external returns (bool success_);
+function revokeKyc(address _account) external returns (bool success_);
+function getKycStatusFor(address _account) external view returns (KycStatus kycStatus_);
+function getKycFor(address _account) external view returns (KycData memory kyc_);
+function getKycAccountsCount(
+    KycStatus _kycStatus
+) external view returns (uint256 kycAccountsCount_);
+function isInternalKycActivated() external view returns (bool);
+function getKycAccountsData(
+    KycStatus _kycStatus,
+    uint256 _pageIndex,
+    uint256 _pageLength
+) external view returns (address[] memory accounts_, KycData[] memory kycData_);
+```
+
+### Types
+
+```solidity
+// declared in contracts/facets/kyc/IKyc.sol
+enum KycStatus {
+    NOT_GRANTED,
+    GRANTED
+}
+
+// declared in contracts/facets/kyc/IKyc.sol
+struct KycData {
+    uint256 validFrom;
+    uint256 validTo;
+    string vcId;
+    address issuer;
+    KycStatus status;
 }
 ```
 
@@ -1487,28 +2018,32 @@ enum RateType {
 
 ```solidity
 function initializeLock() external;
-function lock(uint256 _amount, address _tokenHolder, uint256 _expirationTimestamp) external returns (uint256 lockId_);
+function lock(
+    uint256 _amount,
+    address _tokenHolder,
+    uint256 _expirationTimestamp
+) external returns (uint256 lockId_);
 function release(uint256 _lockId, address _tokenHolder) external returns (bool success_);
 function updateLockExpiration(
-  address _tokenHolder,
-  uint256 _lockId,
-  uint256 _newExpirationTimestamp
+    address _tokenHolder,
+    uint256 _lockId,
+    uint256 _newExpirationTimestamp
 ) external returns (bool success_);
 function forceReleaseByPartition(
-  bytes32 _partition,
-  uint256 _lockId,
-  address _tokenHolder
+    bytes32 _partition,
+    uint256 _lockId,
+    address _tokenHolder
 ) external returns (bool success_);
 function getLockedAmountFor(address _tokenHolder) external view returns (uint256 amount_);
 function getLockCountFor(address _tokenHolder) external view returns (uint256 lockCount_);
 function getLocksIdFor(
-  address _tokenHolder,
-  uint256 _pageIndex,
-  uint256 _pageLength
+    address _tokenHolder,
+    uint256 _pageIndex,
+    uint256 _pageLength
 ) external view returns (uint256[] memory locksId_);
 function getLockFor(
-  address _tokenHolder,
-  uint256 _lockId
+    address _tokenHolder,
+    uint256 _lockId
 ) external view returns (uint256 amount_, uint256 expirationTimestamp_);
 ```
 
@@ -1519,7 +2054,10 @@ function getLockFor(
 
 ```solidity
 function initializeLockAtSnapshot() external;
-function lockedBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) external view returns (uint256 balance_);
+function lockedBalanceOfAtSnapshot(
+    uint256 _snapshotID,
+    address _tokenHolder
+) external view returns (uint256 balance_);
 ```
 
 ## Lock At Snapshot By Partition
@@ -1530,9 +2068,9 @@ function lockedBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) ex
 ```solidity
 function initializeLockAtSnapshotByPartition() external;
 function lockedBalanceOfAtSnapshotByPartition(
-  bytes32 _partition,
-  uint256 _snapshotID,
-  address _tokenHolder
+    bytes32 _partition,
+    uint256 _snapshotID,
+    address _tokenHolder
 ) external view returns (uint256 balance_);
 ```
 
@@ -1544,36 +2082,40 @@ function lockedBalanceOfAtSnapshotByPartition(
 ```solidity
 function initializeLockByPartition() external;
 function lockByPartition(
-  bytes32 _partition,
-  uint256 _amount,
-  address _tokenHolder,
-  uint256 _expirationTimestamp
+    bytes32 _partition,
+    uint256 _amount,
+    address _tokenHolder,
+    uint256 _expirationTimestamp
 ) external returns (uint256 lockId_);
-function releaseByPartition(bytes32 _partition, uint256 _lockId, address _tokenHolder) external returns (bool success_);
+function releaseByPartition(
+    bytes32 _partition,
+    uint256 _lockId,
+    address _tokenHolder
+) external returns (bool success_);
 function updateLockExpirationByPartition(
-  bytes32 _partition,
-  address _tokenHolder,
-  uint256 _lockId,
-  uint256 _newExpirationTimestamp
+    bytes32 _partition,
+    address _tokenHolder,
+    uint256 _lockId,
+    uint256 _newExpirationTimestamp
 ) external returns (bool success_);
 function getLockedAmountForByPartition(
-  bytes32 _partition,
-  address _tokenHolder
+    bytes32 _partition,
+    address _tokenHolder
 ) external view returns (uint256 amount_);
 function getLockCountForByPartition(
-  bytes32 _partition,
-  address _tokenHolder
+    bytes32 _partition,
+    address _tokenHolder
 ) external view returns (uint256 lockCount_);
 function getLocksIdForByPartition(
-  bytes32 _partition,
-  address _tokenHolder,
-  uint256 _pageIndex,
-  uint256 _pageLength
+    bytes32 _partition,
+    address _tokenHolder,
+    uint256 _pageIndex,
+    uint256 _pageLength
 ) external view returns (uint256[] memory locksId_);
 function getLockForByPartition(
-  bytes32 _partition,
-  address _tokenHolder,
-  uint256 _lockId
+    bytes32 _partition,
+    address _tokenHolder,
+    uint256 _lockId
 ) external view returns (uint256 amount_, uint256 expirationTimestamp_);
 ```
 
@@ -1595,7 +2137,11 @@ function updateMaturityDate(uint256 _newMaturityDate) external returns (bool suc
 
 ```solidity
 function initializeMaturityByPartition() external;
-function redeemAtMaturityByPartition(address _tokenHolder, bytes32 _partition, uint256 _amount) external;
+function redeemAtMaturityByPartition(
+    address _tokenHolder,
+    bytes32 _partition,
+    uint256 _amount
+) external;
 ```
 
 ## Mint
@@ -1625,10 +2171,10 @@ function issueByPartition(IERC1410Types.IssueData calldata _issueData) external;
 ```solidity
 // declared in contracts/facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol
 struct IssueData {
-  bytes32 partition;
-  address tokenHolder;
-  uint256 value;
-  bytes data;
+    bytes32 partition;
+    address tokenHolder;
+    uint256 value;
+    bytes data;
 }
 ```
 
@@ -1640,7 +2186,9 @@ struct IssueData {
 ```solidity
 function initializeNominalValueAtSnapshot() external;
 function nominalValueAtSnapshot(uint256 _snapshotID) external view returns (uint256 nominalValue_);
-function nominalValueDecimalsAtSnapshot(uint256 _snapshotID) external view returns (uint8 nominalValueDecimals_);
+function nominalValueDecimalsAtSnapshot(
+    uint256 _snapshotID
+) external view returns (uint8 nominalValueDecimals_);
 ```
 
 ## Nonces
@@ -1674,18 +2222,20 @@ function isOperator(address _operator, address _tokenHolder) external view retur
 function initializeOperatorByPartition() external;
 function authorizeOperatorByPartition(bytes32 _partition, address _operator) external;
 function revokeOperatorByPartition(bytes32 _partition, address _operator) external;
-function operatorTransferByPartition(OperatorTransferData calldata _operatorTransferData) external returns (bytes32);
+function operatorTransferByPartition(
+    OperatorTransferData calldata _operatorTransferData
+) external returns (bytes32);
 function operatorRedeemByPartition(
-  bytes32 _partition,
-  address _tokenHolder,
-  uint256 _value,
-  bytes calldata _data,
-  bytes calldata _operatorData
+    bytes32 _partition,
+    address _tokenHolder,
+    uint256 _value,
+    bytes calldata _data,
+    bytes calldata _operatorData
 ) external;
 function isOperatorForPartition(
-  bytes32 _partition,
-  address _operator,
-  address _tokenHolder
+    bytes32 _partition,
+    address _operator,
+    address _tokenHolder
 ) external view returns (bool);
 ```
 
@@ -1694,12 +2244,12 @@ function isOperatorForPartition(
 ```solidity
 // declared in contracts/facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol
 struct OperatorTransferData {
-  bytes32 partition;
-  address from;
-  address to;
-  uint256 value;
-  bytes data;
-  bytes operatorData;
+    bytes32 partition;
+    address from;
+    address to;
+    uint256 value;
+    bytes data;
+    bytes operatorData;
 }
 ```
 
@@ -1711,13 +2261,13 @@ struct OperatorTransferData {
 ```solidity
 function initializeOperatorClearingByPartition() external;
 function operatorClearingRedeemByPartition(
-  IClearingTypes.ClearingOperationFrom calldata _clearingOperationFrom,
-  uint256 _amount
+    IClearingTypes.ClearingOperationFrom calldata _clearingOperationFrom,
+    uint256 _amount
 ) external returns (bool success_, uint256 clearingId_);
 function operatorClearingTransferByPartition(
-  IClearingTypes.ClearingOperationFrom calldata _clearingOperationFrom,
-  uint256 _amount,
-  address _to
+    IClearingTypes.ClearingOperationFrom calldata _clearingOperationFrom,
+    uint256 _amount,
+    address _to
 ) external returns (bool success_, uint256 clearingId_);
 ```
 
@@ -1726,16 +2276,16 @@ function operatorClearingTransferByPartition(
 ```solidity
 // declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
 struct ClearingOperationFrom {
-  ClearingOperation clearingOperation;
-  address from;
-  bytes operatorData;
+    ClearingOperation clearingOperation;
+    address from;
+    bytes operatorData;
 }
 
 // declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
 struct ClearingOperation {
-  bytes32 partition;
-  uint256 expirationTimestamp;
-  bytes data;
+    bytes32 partition;
+    uint256 expirationTimestamp;
+    bytes data;
 }
 ```
 
@@ -1747,10 +2297,10 @@ struct ClearingOperation {
 ```solidity
 function initializeOperatorHoldByPartition() external;
 function operatorCreateHoldByPartition(
-  bytes32 _partition,
-  address _from,
-  IHoldTypes.Hold calldata _hold,
-  bytes calldata _operatorData
+    bytes32 _partition,
+    address _from,
+    IHoldTypes.Hold calldata _hold,
+    bytes calldata _operatorData
 ) external returns (bool success_, uint256 holdId_);
 ```
 
@@ -1759,11 +2309,11 @@ function operatorCreateHoldByPartition(
 ```solidity
 // declared in contracts/facets/layer_1/hold/IHoldTypes.sol
 struct Hold {
-  uint256 amount;
-  uint256 expirationTimestamp;
-  address escrow;
-  address to;
-  bytes data;
+    uint256 amount;
+    uint256 expirationTimestamp;
+    address escrow;
+    address to;
+    bytes data;
 }
 ```
 
@@ -1797,7 +2347,9 @@ function paused() external view returns (bool);
 
 ```solidity
 function initializePrincipal() external;
-function getPrincipalFor(address _account) external view returns (PrincipalFor memory principalFor_);
+function getPrincipalFor(
+    address _account
+) external view returns (PrincipalFor memory principalFor_);
 ```
 
 ### Types
@@ -1805,9 +2357,31 @@ function getPrincipalFor(address _account) external view returns (PrincipalFor m
 ```solidity
 // declared in contracts/factory/ERC3643/interfaces/IBondTypes.sol
 struct PrincipalFor {
-  uint256 numerator;
-  uint256 denominator;
+    uint256 numerator;
+    uint256 denominator;
 }
+```
+
+## Proceed Recipients
+
+- Interface: `contracts/facets/proceedRecipient/IProceedRecipients.sol`
+- Resolver key: `ProceedRecipients`
+
+```solidity
+function initializeProceedRecipients(
+    address[] calldata _proceedRecipients,
+    bytes[] calldata _data
+) external;
+function addProceedRecipient(address _proceedRecipient, bytes calldata _data) external;
+function removeProceedRecipient(address _proceedRecipient) external;
+function updateProceedRecipientData(address _proceedRecipient, bytes calldata _data) external;
+function isProceedRecipient(address _proceedRecipient) external view returns (bool);
+function getProceedRecipientData(address _proceedRecipient) external view returns (bytes memory);
+function getProceedRecipientsCount() external view returns (uint256);
+function getProceedRecipients(
+    uint256 _pageIndex,
+    uint256 _pageLength
+) external view returns (address[] memory proceedRecipients_);
 ```
 
 ## Protected By Partition
@@ -1818,17 +2392,17 @@ struct PrincipalFor {
 ```solidity
 function initializeProtectedByPartition() external;
 function protectedTransferFromByPartition(
-  bytes32 _partition,
-  address _from,
-  address _to,
-  uint256 _amount,
-  IProtectedPartitions.ProtectionData calldata _protectionData
+    bytes32 _partition,
+    address _from,
+    address _to,
+    uint256 _amount,
+    IProtectedPartitions.ProtectionData calldata _protectionData
 ) external returns (bytes32);
 function protectedRedeemFromByPartition(
-  bytes32 _partition,
-  address _from,
-  uint256 _amount,
-  IProtectedPartitions.ProtectionData calldata _protectionData
+    bytes32 _partition,
+    address _from,
+    uint256 _amount,
+    IProtectedPartitions.ProtectionData calldata _protectionData
 ) external;
 ```
 
@@ -1837,9 +2411,9 @@ function protectedRedeemFromByPartition(
 ```solidity
 // declared in contracts/facets/layer_1/protectedPartition/IProtectedPartitions.sol
 struct ProtectionData {
-  uint256 deadline;
-  uint256 nonce;
-  bytes signature;
+    uint256 deadline;
+    uint256 nonce;
+    bytes signature;
 }
 ```
 
@@ -1851,15 +2425,15 @@ struct ProtectionData {
 ```solidity
 function initializeProtectedClearingByPartition() external;
 function protectedClearingRedeemByPartition(
-  IClearingTypes.ProtectedClearingOperation calldata _protectedClearingOperation,
-  uint256 _amount,
-  bytes calldata _signature
+    IClearingTypes.ProtectedClearingOperation calldata _protectedClearingOperation,
+    uint256 _amount,
+    bytes calldata _signature
 ) external returns (bool success_, uint256 clearingId_);
 function protectedClearingTransferByPartition(
-  IClearingTypes.ProtectedClearingOperation calldata _protectedClearingOperation,
-  uint256 _amount,
-  address _to,
-  bytes calldata _signature
+    IClearingTypes.ProtectedClearingOperation calldata _protectedClearingOperation,
+    uint256 _amount,
+    address _to,
+    bytes calldata _signature
 ) external returns (bool success_, uint256 clearingId_);
 ```
 
@@ -1868,17 +2442,17 @@ function protectedClearingTransferByPartition(
 ```solidity
 // declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
 struct ProtectedClearingOperation {
-  ClearingOperation clearingOperation;
-  address from;
-  uint256 deadline;
-  uint256 nonce;
+    ClearingOperation clearingOperation;
+    address from;
+    uint256 deadline;
+    uint256 nonce;
 }
 
 // declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
 struct ClearingOperation {
-  bytes32 partition;
-  uint256 expirationTimestamp;
-  bytes data;
+    bytes32 partition;
+    uint256 expirationTimestamp;
+    bytes data;
 }
 ```
 
@@ -1890,9 +2464,9 @@ struct ClearingOperation {
 ```solidity
 function initializeProtectedClearingHoldByPartition() external;
 function protectedClearingCreateHoldByPartition(
-  IClearingTypes.ProtectedClearingOperation calldata _protectedClearingOperation,
-  IHoldTypes.Hold calldata _hold,
-  bytes calldata _signature
+    IClearingTypes.ProtectedClearingOperation calldata _protectedClearingOperation,
+    IHoldTypes.Hold calldata _hold,
+    bytes calldata _signature
 ) external returns (bool success_, uint256 clearingId_);
 ```
 
@@ -1901,26 +2475,26 @@ function protectedClearingCreateHoldByPartition(
 ```solidity
 // declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
 struct ProtectedClearingOperation {
-  ClearingOperation clearingOperation;
-  address from;
-  uint256 deadline;
-  uint256 nonce;
+    ClearingOperation clearingOperation;
+    address from;
+    uint256 deadline;
+    uint256 nonce;
 }
 
 // declared in contracts/facets/layer_1/hold/IHoldTypes.sol
 struct Hold {
-  uint256 amount;
-  uint256 expirationTimestamp;
-  address escrow;
-  address to;
-  bytes data;
+    uint256 amount;
+    uint256 expirationTimestamp;
+    address escrow;
+    address to;
+    bytes data;
 }
 
 // declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
 struct ClearingOperation {
-  bytes32 partition;
-  uint256 expirationTimestamp;
-  bytes data;
+    bytes32 partition;
+    uint256 expirationTimestamp;
+    bytes data;
 }
 ```
 
@@ -1932,10 +2506,10 @@ struct ClearingOperation {
 ```solidity
 function initializeProtectedHoldByPartition() external;
 function protectedCreateHoldByPartition(
-  bytes32 _partition,
-  address _from,
-  IHoldTypes.ProtectedHold memory _protectedHold,
-  bytes calldata _signature
+    bytes32 _partition,
+    address _from,
+    IHoldTypes.ProtectedHold memory _protectedHold,
+    bytes calldata _signature
 ) external returns (bool success_, uint256 holdId_);
 ```
 
@@ -1944,18 +2518,18 @@ function protectedCreateHoldByPartition(
 ```solidity
 // declared in contracts/facets/layer_1/hold/IHoldTypes.sol
 struct ProtectedHold {
-  Hold hold;
-  uint256 deadline;
-  uint256 nonce;
+    Hold hold;
+    uint256 deadline;
+    uint256 nonce;
 }
 
 // declared in contracts/facets/layer_1/hold/IHoldTypes.sol
 struct Hold {
-  uint256 amount;
-  uint256 expirationTimestamp;
-  address escrow;
-  address to;
-  bytes data;
+    uint256 amount;
+    uint256 expirationTimestamp;
+    address escrow;
+    address to;
+    bytes data;
 }
 ```
 
@@ -1967,11 +2541,19 @@ struct Hold {
 ```solidity
 function initializeRecovery() external;
 function recoveryAddress(
-  address _lostWallet,
-  address _newWallet,
-  address _investorOnchainID
+    address _lostWallet,
+    address _newWallet,
+    address _investorOnchainID
 ) external returns (bool success_);
 function isAddressRecovered(address _wallet) external view returns (bool);
+```
+
+## Revocation List
+
+- Interface: `contracts/facets/kyc/IRevocationList.sol`
+
+```solidity
+function revoked(address, string calldata) external view returns (bool);
 ```
 
 ## Scheduled Balance Adjustment
@@ -1982,19 +2564,23 @@ function isAddressRecovered(address _wallet) external view returns (bool);
 ```solidity
 function initializeScheduledBalanceAdjustment() external;
 function setScheduledBalanceAdjustment(
-  ScheduledBalanceAdjustment calldata _newBalanceAdjustment
+    ScheduledBalanceAdjustment calldata _newBalanceAdjustment
 ) external returns (uint256 balanceAdjustmentID_);
-function cancelScheduledBalanceAdjustment(uint256 _balanceAdjustmentID) external returns (bool success_);
-function forceCancelScheduledBalanceAdjustment(uint256 _balanceAdjustmentID) external returns (bool success_);
+function cancelScheduledBalanceAdjustment(
+    uint256 _balanceAdjustmentID
+) external returns (bool success_);
+function forceCancelScheduledBalanceAdjustment(
+    uint256 _balanceAdjustmentID
+) external returns (bool success_);
 function getScheduledBalanceAdjustment(
-  uint256 _balanceAdjustmentID
+    uint256 _balanceAdjustmentID
 ) external view returns (ScheduledBalanceAdjustment memory balanceAdjustment_, bool isDisabled_);
 function getBalanceAdjustmentCount() external view returns (uint256 balanceAdjustmentCount_);
 function getPendingBalanceAdjustmentCount(bool _includeDisabled) external view returns (uint256);
 function getScheduledBalanceAdjustments(
-  uint256 _pageIndex,
-  uint256 _pageLength,
-  bool _includeDisabled
+    uint256 _pageIndex,
+    uint256 _pageLength,
+    bool _includeDisabled
 ) external view returns (ScheduledTask[] memory scheduledBalanceAdjustment_);
 ```
 
@@ -2003,15 +2589,15 @@ function getScheduledBalanceAdjustments(
 ```solidity
 // declared in contracts/facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol
 struct ScheduledBalanceAdjustment {
-  uint256 executionDate;
-  uint256 factor;
-  uint8 decimals;
+    uint256 executionDate;
+    uint256 factor;
+    uint8 decimals;
 }
 
 // declared in contracts/factory/ERC3643/interfaces/IScheduledTasksCommon.sol
 struct ScheduledTask {
-  uint256 scheduledTimestamp;
-  bytes data;
+    uint256 scheduledTimestamp;
+    bytes data;
 }
 ```
 
@@ -2022,7 +2608,10 @@ struct ScheduledTask {
 
 ```solidity
 function initializeSecurityHolders() external;
-function getSecurityHolders(uint256 _pageIndex, uint256 _pageLength) external view returns (address[] memory holders);
+function getSecurityHolders(
+    uint256 _pageIndex,
+    uint256 _pageLength
+) external view returns (address[] memory holders);
 function getTotalSecurityHolders() external view returns (uint256 count);
 ```
 
@@ -2034,11 +2623,37 @@ function getTotalSecurityHolders() external view returns (uint256 count);
 ```solidity
 function initializeSecurityHoldersAtSnapshot() external;
 function getTokenHoldersAtSnapshot(
-  uint256 _snapshotID,
-  uint256 _pageIndex,
-  uint256 _pageLength
+    uint256 _snapshotID,
+    uint256 _pageIndex,
+    uint256 _pageLength
 ) external view returns (address[] memory holders_);
 function getTotalTokenHoldersAtSnapshot(uint256 _snapshotID) external view returns (uint256);
+```
+
+## Snapshots
+
+- Interface: `contracts/facets/snapshot/ISnapshots.sol`
+- Resolver key: `Snapshots`
+
+```solidity
+function initializeSnapshots() external;
+function takeSnapshot() external returns (uint256 snapshotID_);
+function scheduledSnapshotCount(bool _includeDisabled) external view returns (uint256);
+function getScheduledSnapshots(
+    uint256 _pageIndex,
+    uint256 _pageLength,
+    bool _includeDisabled
+) external view returns (ScheduledTask[] memory scheduledSnapshot_);
+```
+
+### Types
+
+```solidity
+// declared in contracts/factory/ERC3643/interfaces/IScheduledTasksCommon.sol
+struct ScheduledTask {
+    uint256 scheduledTimestamp;
+    bytes data;
+}
 ```
 
 ## Snapshots By Partition
@@ -2048,7 +2663,10 @@ function getTotalTokenHoldersAtSnapshot(uint256 _snapshotID) external view retur
 
 ```solidity
 function initializeSnapshotsByPartition() external;
-function partitionsOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) external view returns (bytes32[] memory);
+function partitionsOfAtSnapshot(
+    uint256 _snapshotID,
+    address _tokenHolder
+) external view returns (bytes32[] memory);
 ```
 
 ## SSI Management
@@ -2058,16 +2676,29 @@ function partitionsOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) exter
 
 ```solidity
 function initializeSsiManagement() external;
-function setRevocationRegistryAddress(address _revocationRegistryAddress) external returns (bool success_);
+function setRevocationRegistryAddress(
+    address _revocationRegistryAddress
+) external returns (bool success_);
 function addIssuer(address _issuer) external returns (bool success_);
 function removeIssuer(address _issuer) external returns (bool success_);
 function getRevocationRegistryAddress() external view returns (address revocationRegistryAddress_);
 function isIssuer(address _issuer) external view returns (bool);
 function getIssuerListCount() external view returns (uint256 issuerListCount_);
 function getIssuerListMembers(
-  uint256 _pageIndex,
-  uint256 _pageLength
+    uint256 _pageIndex,
+    uint256 _pageLength
 ) external view returns (address[] memory members_);
+```
+
+## Static Function Selectors
+
+- Interface: `contracts/infrastructure/proxy/IStaticFunctionSelectors.sol`
+
+```solidity
+function getStaticResolverKey() external pure returns (bytes32 staticResolverKey_);
+function getStaticFunctionSelectors(
+) external pure returns (bytes4[] memory staticFunctionSelectors_);
+function getStaticInterfaceIds() external pure returns (bytes4[] memory staticInterfaceIds_);
 ```
 
 ## Transfer
@@ -2080,7 +2711,26 @@ function initializeTransfer() external;
 function transfer(address to, uint256 amount) external returns (bool);
 function transferFrom(address from, address to, uint256 amount) external returns (bool);
 function transferWithData(address _to, uint256 _value, bytes calldata _data) external;
-function transferFromWithData(address _from, address _to, uint256 _value, bytes calldata _data) external;
+function transferFromWithData(
+    address _from,
+    address _to,
+    uint256 _value,
+    bytes calldata _data
+) external;
+```
+
+## Transfer And Lock
+
+- Interface: `contracts/facets/transferAndLock/ITransferAndLock.sol`
+
+```solidity
+function initializeTransferAndLock() external;
+function transferAndLock(
+    address _to,
+    uint256 _amount,
+    bytes calldata _data,
+    uint256 _expirationTimestamp
+) external returns (uint256 lockId_);
 ```
 
 ## Transfer And Lock By Partition
@@ -2091,11 +2741,11 @@ function transferFromWithData(address _from, address _to, uint256 _value, bytes 
 ```solidity
 function initializeTransferAndLockByPartition() external;
 function transferAndLockByPartition(
-  bytes32 _partition,
-  address _to,
-  uint256 _amount,
-  bytes calldata _data,
-  uint256 _expirationTimestamp
+    bytes32 _partition,
+    address _to,
+    uint256 _amount,
+    bytes calldata _data,
+    uint256 _expirationTimestamp
 ) external returns (uint256 lockId_);
 ```
 
@@ -2107,9 +2757,9 @@ function transferAndLockByPartition(
 ```solidity
 function initializeTransferByPartition() external;
 function transferByPartition(
-  bytes32 _partition,
-  BasicTransferInfo calldata _basicTransferInfo,
-  bytes memory _data
+    bytes32 _partition,
+    BasicTransferInfo calldata _basicTransferInfo,
+    bytes memory _data
 ) external returns (bytes32);
 ```
 
@@ -2118,8 +2768,8 @@ function transferByPartition(
 ```solidity
 // declared in contracts/facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol
 struct BasicTransferInfo {
-  address to;
-  uint256 value;
+    address to;
+    uint256 value;
 }
 ```
 
@@ -2135,6 +2785,52 @@ function getPastTotalSupply(uint256 timepoint) external view returns (uint256);
 function delegates(address account) external view returns (address);
 ```
 
+## Voting
+
+- Interface: `contracts/facets/voting/IVoting.sol`
+- Resolver key: `Voting`
+
+```solidity
+function initializeVoting() external;
+function setVoting(Voting calldata _newVoting) external returns (uint256 voteID_);
+function cancelVoting(uint256 _voteId) external returns (bool success_);
+function forceCancelVoting(uint256 _voteId) external returns (bool success_);
+function getVoting(
+    uint256 _voteID
+) external view returns (RegisteredVoting memory registeredVoting_, bool isDisabled_);
+function getVotingFor(
+    uint256 _voteID,
+    address _account
+) external view returns (VotingFor memory votingFor_);
+function getVotingCount() external view returns (uint256 votingCount_);
+```
+
+### Types
+
+```solidity
+// declared in contracts/facets/voting/IVotingTypes.sol
+struct Voting {
+    uint256 recordDate;
+    bytes data;
+}
+
+// declared in contracts/facets/voting/IVotingTypes.sol
+struct RegisteredVoting {
+    Voting voting;
+    uint256 snapshotId;
+}
+
+// declared in contracts/facets/voting/IVotingTypes.sol
+struct VotingFor {
+    uint256 tokenBalance;
+    uint256 recordDate;
+    bytes data;
+    uint8 decimals;
+    bool recordDateReached;
+    bool isDisabled;
+}
+```
+
 ## Voting Security Holders
 
 - Interface: `contracts/facets/votingSecurityHolders/IVotingSecurityHolders.sol`
@@ -2143,9 +2839,9 @@ function delegates(address account) external view returns (address);
 ```solidity
 function initializeVotingSecurityHolders() external;
 function getVotingHolders(
-  uint256 _voteID,
-  uint256 _pageIndex,
-  uint256 _pageLength
+    uint256 _voteID,
+    uint256 _pageIndex,
+    uint256 _pageLength
 ) external view returns (address[] memory holders_);
 function getTotalVotingHolders(uint256 _voteID) external view returns (uint256 totalHolders_);
 ```
@@ -2182,10 +2878,10 @@ function getKycStatus(address account) external view returns (IKyc.KycStatus);
 ### Types
 
 ```solidity
-// declared in contracts/facets/layer_1/kyc/IKyc.sol
+// declared in contracts/facets/kyc/IKyc.sol
 enum KycStatus {
-  NOT_GRANTED,
-  GRANTED
+    NOT_GRANTED,
+    GRANTED
 }
 ```
 
@@ -2205,53 +2901,6 @@ function isPaused() external view returns (bool);
 function isVerified(address _userAddress) external view returns (bool);
 ```
 
-## KYC
-
-- Interface: `contracts/facets/layer_1/kyc/IKyc.sol`
-- Resolver key: `Kyc`
-
-```solidity
-function initializeInternalKyc(bool _activateInternalKyc) external;
-function activateInternalKyc() external returns (bool success_);
-function deactivateInternalKyc() external returns (bool success_);
-function grantKyc(
-  address _account,
-  string memory _vcId,
-  uint256 _validFrom,
-  uint256 _validTo,
-  address _issuer
-) external returns (bool success_);
-function revokeKyc(address _account) external returns (bool success_);
-function getKycStatusFor(address _account) external view returns (KycStatus kycStatus_);
-function getKycFor(address _account) external view returns (KycData memory kyc_);
-function getKycAccountsCount(KycStatus _kycStatus) external view returns (uint256 kycAccountsCount_);
-function isInternalKycActivated() external view returns (bool);
-function getKycAccountsData(
-  KycStatus _kycStatus,
-  uint256 _pageIndex,
-  uint256 _pageLength
-) external view returns (address[] memory accounts_, KycData[] memory kycData_);
-```
-
-### Types
-
-```solidity
-// declared in contracts/facets/layer_1/kyc/IKyc.sol
-enum KycStatus {
-  NOT_GRANTED,
-  GRANTED
-}
-
-// declared in contracts/facets/layer_1/kyc/IKyc.sol
-struct KycData {
-  uint256 validFrom;
-  uint256 validTo;
-  string vcId;
-  address issuer;
-  KycStatus status;
-}
-```
-
 ## Operator Clearing Hold By Partition
 
 - Interface: `contracts/facets/layer_1/clearing/operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol`
@@ -2260,8 +2909,8 @@ struct KycData {
 ```solidity
 function initializeOperatorClearingHoldByPartition() external;
 function operatorClearingCreateHoldByPartition(
-  IClearingTypes.ClearingOperationFrom calldata _clearingOperationFrom,
-  IHoldTypes.Hold calldata _hold
+    IClearingTypes.ClearingOperationFrom calldata _clearingOperationFrom,
+    IHoldTypes.Hold calldata _hold
 ) external returns (bool success_, uint256 clearingId_);
 ```
 
@@ -2270,25 +2919,25 @@ function operatorClearingCreateHoldByPartition(
 ```solidity
 // declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
 struct ClearingOperationFrom {
-  ClearingOperation clearingOperation;
-  address from;
-  bytes operatorData;
+    ClearingOperation clearingOperation;
+    address from;
+    bytes operatorData;
 }
 
 // declared in contracts/facets/layer_1/hold/IHoldTypes.sol
 struct Hold {
-  uint256 amount;
-  uint256 expirationTimestamp;
-  address escrow;
-  address to;
-  bytes data;
+    uint256 amount;
+    uint256 expirationTimestamp;
+    address escrow;
+    address to;
+    bytes data;
 }
 
 // declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
 struct ClearingOperation {
-  bytes32 partition;
-  uint256 expirationTimestamp;
-  bytes data;
+    bytes32 partition;
+    uint256 expirationTimestamp;
+    bytes data;
 }
 ```
 
@@ -2298,45 +2947,15 @@ struct ClearingOperation {
 - Resolver key: `ProtectedPartitions`
 
 ```solidity
-function initializeProtectedPartitions(bool _arePartitionsProtected) external returns (bool success_);
+function initializeProtectedPartitions(
+    bool _arePartitionsProtected
+) external returns (bool success_);
 function protectPartitions() external returns (bool success_);
 function unprotectPartitions() external returns (bool success_);
 function arePartitionsProtected() external view returns (bool);
-function calculateRoleForPartition(bytes32 _partition) external pure returns (bytes32 roleForPartition_);
-```
-
-## Revocation List
-
-- Interface: `contracts/facets/layer_1/kyc/IRevocationList.sol`
-
-```solidity
-function revoked(address, string calldata) external view returns (bool);
-```
-
-## Snapshots
-
-- Interface: `contracts/facets/layer_1/snapshot/ISnapshots.sol`
-- Resolver key: `Snapshots`
-
-```solidity
-function initializeSnapshots() external;
-function takeSnapshot() external returns (uint256 snapshotID_);
-function scheduledSnapshotCount(bool _includeDisabled) external view returns (uint256);
-function getScheduledSnapshots(
-  uint256 _pageIndex,
-  uint256 _pageLength,
-  bool _includeDisabled
-) external view returns (ScheduledTask[] memory scheduledSnapshot_);
-```
-
-### Types
-
-```solidity
-// declared in contracts/factory/ERC3643/interfaces/IScheduledTasksCommon.sol
-struct ScheduledTask {
-  uint256 scheduledTimestamp;
-  bytes data;
-}
+function calculateRoleForPartition(
+    bytes32 _partition
+) external pure returns (bytes32 roleForPartition_);
 ```
 
 <!-- layer_2 -->
@@ -2348,44 +2967,46 @@ struct ScheduledTask {
 
 ```solidity
 function initializeAmortization() external;
-function setAmortization(Amortization calldata _amortization) external returns (bool success_, uint256 amortizationID_);
+function setAmortization(
+    Amortization calldata _amortization
+) external returns (bool success_, uint256 amortizationID_);
 function cancelAmortization(uint256 _amortizationID) external;
 function forceCancelAmortization(uint256 _amortizationID) external;
 function releaseAmortizationHold(uint256 _amortizationID, address _tokenHolder) external;
 function setAmortizationHold(
-  uint256 _amortizationID,
-  address _tokenHolder,
-  uint256 _tokenAmount
+    uint256 _amortizationID,
+    address _tokenHolder,
+    uint256 _tokenAmount
 ) external returns (uint256 holdId_);
 function getAmortization(
-  uint256 _amortizationID
+    uint256 _amortizationID
 ) external view returns (RegisteredAmortization memory registeredAmortization_, bool isDisabled_);
 function getAmortizationFor(
-  uint256 _amortizationID,
-  address _account
+    uint256 _amortizationID,
+    address _account
 ) external view returns (AmortizationFor memory amortizationFor_);
 function getAmortizationsFor(
-  uint256 _amortizationID,
-  uint256 _pageIndex,
-  uint256 _pageLength
+    uint256 _amortizationID,
+    uint256 _pageIndex,
+    uint256 _pageLength
 ) external view returns (AmortizationFor[] memory amortizationsFor_, address[] memory holders_);
 function getAmortizationsCount() external view returns (uint256 amortizationCount_);
 function getAmortizationHolders(
-  uint256 _amortizationID,
-  uint256 _pageIndex,
-  uint256 _pageLength
+    uint256 _amortizationID,
+    uint256 _pageIndex,
+    uint256 _pageLength
 ) external view returns (address[] memory holders_);
 function getTotalAmortizationHolders(uint256 _amortizationID) external view returns (uint256);
 function getAmortizationActiveHolders(
-  uint256 _amortizationID,
-  uint256 _pageIndex,
-  uint256 _pageLength
+    uint256 _amortizationID,
+    uint256 _pageIndex,
+    uint256 _pageLength
 ) external view returns (address[] memory holders_);
 function getTotalAmortizationActiveHolders(uint256 _amortizationID) external view returns (uint256);
 function getTotalHoldByAmortizationId(uint256 _amortizationID) external view returns (uint256);
 function getActiveAmortizationIds(
-  uint256 _pageIndex,
-  uint256 _pageLength
+    uint256 _pageIndex,
+    uint256 _pageLength
 ) external view returns (uint256[] memory activeIds_);
 function getTotalActiveAmortizationIds() external view returns (uint256);
 ```
@@ -2395,35 +3016,35 @@ function getTotalActiveAmortizationIds() external view returns (uint256);
 ```solidity
 // declared in contracts/facets/layer_2/amortization/IAmortization.sol
 struct Amortization {
-  uint256 recordDate;
-  uint256 executionDate;
-  uint256 tokensToRedeem;
+    uint256 recordDate;
+    uint256 executionDate;
+    uint256 tokensToRedeem;
 }
 
 // declared in contracts/facets/layer_2/amortization/IAmortization.sol
 struct RegisteredAmortization {
-  Amortization amortization;
-  uint256 snapshotId;
+    Amortization amortization;
+    uint256 snapshotId;
 }
 
 // declared in contracts/facets/layer_2/amortization/IAmortization.sol
 struct AmortizationFor {
-  uint256 recordDate;
-  uint256 executionDate;
-  // Hold info (current values, adjusted as of now)
-  uint256 holdId; // 0 = no hold created yet
-  bool holdActive; // true = hold is active and awaiting DVP execution
-  uint256 tokenHeldAmount; // hold amount adjusted at current block time (0 if no hold)
-  uint8 decimalsHeld; // token decimals at current block time (0 if no hold)
-  uint256 abafAtHold; // ABAF at current block time (0 if no hold)
-  // Snapshot (historical values at record date)
-  uint256 tokenBalance; // balance at snapshot (or adjusted at recordDate if no snapshot yet)
-  uint8 decimalsBalance; // decimals at snapshot
-  bool recordDateReached; // whether record date has been reached
-  uint256 abafAtSnapshot; // ABAF at snapshot (0 if record date not reached yet)
-  // Nominal value
-  uint256 nominalValue; // face value of the token
-  uint8 nominalValueDecimals; // decimals of the nominal value
+    uint256 recordDate;
+    uint256 executionDate;
+    // Hold info (current values, adjusted as of now)
+    uint256 holdId; // 0 = no hold created yet
+    bool holdActive; // true = hold is active and awaiting DVP execution
+    uint256 tokenHeldAmount; // hold amount adjusted at current block time (0 if no hold)
+    uint8 decimalsHeld; // token decimals at current block time (0 if no hold)
+    uint256 abafAtHold; // ABAF at current block time (0 if no hold)
+    // Snapshot (historical values at record date)
+    uint256 tokenBalance; // balance at snapshot (or adjusted at recordDate if no snapshot yet)
+    uint8 decimalsBalance; // decimals at snapshot
+    bool recordDateReached; // whether record date has been reached
+    uint256 abafAtSnapshot; // ABAF at snapshot (0 if record date not reached yet)
+    // Nominal value
+    uint256 nominalValue; // face value of the token
+    uint8 nominalValueDecimals; // decimals of the nominal value
 }
 ```
 
@@ -2433,7 +3054,8 @@ struct AmortizationFor {
 
 ```solidity
 function initializeBondUSARead() external;
-function getBondDetails() external view returns (IBondTypes.BondDetailsData memory bondDetailsData_);
+function getBondDetails(
+) external view returns (IBondTypes.BondDetailsData memory bondDetailsData_);
 ```
 
 ### Types
@@ -2441,11 +3063,11 @@ function getBondDetails() external view returns (IBondTypes.BondDetailsData memo
 ```solidity
 // declared in contracts/factory/ERC3643/interfaces/IBondTypes.sol
 struct BondDetailsData {
-  bytes3 currency;
-  uint256 nominalValue;
-  uint8 nominalValueDecimals;
-  uint256 startingDate;
-  uint256 maturityDate;
+    bytes3 currency;
+    uint256 nominalValue;
+    uint8 nominalValueDecimals;
+    uint256 startingDate;
+    uint256 maturityDate;
 }
 ```
 
@@ -2462,24 +3084,24 @@ function getEquityDetails() external view returns (EquityDetailsData memory equi
 ```solidity
 // declared in contracts/factory/ERC3643/interfaces/IEquity.sol
 struct EquityDetailsData {
-  bool votingRight;
-  bool informationRight;
-  bool liquidationRight;
-  bool subscriptionRight;
-  bool conversionRight;
-  bool redemptionRight;
-  bool putRight;
-  DividendType dividendRight;
-  bytes3 currency;
-  uint256 nominalValue;
-  uint8 nominalValueDecimals;
+    bool votingRight;
+    bool informationRight;
+    bool liquidationRight;
+    bool subscriptionRight;
+    bool conversionRight;
+    bool redemptionRight;
+    bool putRight;
+    DividendType dividendRight;
+    bytes3 currency;
+    uint256 nominalValue;
+    uint8 nominalValueDecimals;
 }
 
 // declared in contracts/factory/ERC3643/interfaces/IEquity.sol
 enum DividendType {
-  NONE,
-  PREFERRED,
-  COMMON
+    NONE,
+    PREFERRED,
+    COMMON
 }
 ```
 
@@ -2499,8 +3121,8 @@ function getRate() external view returns (uint256 rate_, uint8 decimals_);
 ```solidity
 // declared in contracts/factory/ERC3643/interfaces/IFixedRate.sol
 struct FixedRateData {
-  uint256 rate;
-  uint8 rateDecimals;
+    uint256 rate;
+    uint8 rateDecimals;
 }
 ```
 
@@ -2510,7 +3132,10 @@ struct FixedRateData {
 - Resolver key: `KpiLinkedRate`
 
 ```solidity
-function initializeKpiLinkedRate(InterestRate calldata _interestRate, ImpactData calldata _impactData) external;
+function initializeKpiLinkedRate(
+    InterestRate calldata _interestRate,
+    ImpactData calldata _impactData
+) external;
 function setKpiLinkedRateInterestRate(InterestRate calldata _newInterestRate) external;
 function setKpiLinkedRateImpactData(ImpactData calldata _newImpactData) external;
 function getKpiLinkedRateInterestRate() external view returns (InterestRate memory interestRate_);
@@ -2522,23 +3147,23 @@ function getKpiLinkedRateImpactData() external view returns (ImpactData memory i
 ```solidity
 // declared in contracts/factory/ERC3643/interfaces/IKpiLinkedRateErrors.sol
 struct InterestRate {
-  uint256 maxRate;
-  uint256 baseRate;
-  uint256 minRate;
-  uint256 startPeriod;
-  uint256 startRate;
-  uint256 missedPenalty;
-  uint256 reportPeriod;
-  uint8 rateDecimals;
+    uint256 maxRate;
+    uint256 baseRate;
+    uint256 minRate;
+    uint256 startPeriod;
+    uint256 startRate;
+    uint256 missedPenalty;
+    uint256 reportPeriod;
+    uint8 rateDecimals;
 }
 
 // declared in contracts/factory/ERC3643/interfaces/IKpiLinkedRateErrors.sol
 struct ImpactData {
-  uint256 maxDeviationCap;
-  uint256 baseLine;
-  uint256 maxDeviationFloor;
-  uint8 impactDataDecimals;
-  uint256 adjustmentPrecision;
+    uint256 maxDeviationCap;
+    uint256 baseLine;
+    uint256 maxDeviationFloor;
+    uint8 impactDataDecimals;
+    uint256 adjustmentPrecision;
 }
 ```
 
@@ -2551,9 +3176,9 @@ struct ImpactData {
 function initializeKpis() external;
 function addKpiData(uint256 _date, uint256 _value, address _project) external;
 function getLatestKpiData(
-  uint256 _from,
-  uint256 _to,
-  address _project
+    uint256 _from,
+    uint256 _to,
+    address _project
 ) external view returns (uint256 value_, bool exists_);
 function getMinDate() external view returns (uint256 minDate_);
 function isCheckPointDate(uint256 _date, address _project) external view returns (bool exists_);
@@ -2575,108 +3200,108 @@ function getLoanDetails() external view returns (LoanDetailsData memory loanDeta
 ```solidity
 // declared in contracts/facets/layer_2/loan/ILoan.sol
 struct LoanDetailsData {
-  LoanBasicData loanBasicData;
-  LoanInterestData loanInterestData;
-  RiskData riskData;
-  Collateral collateral;
-  LoanPerformanceStatus loanPerformanceStatus;
+    LoanBasicData loanBasicData;
+    LoanInterestData loanInterestData;
+    RiskData riskData;
+    Collateral collateral;
+    LoanPerformanceStatus loanPerformanceStatus;
 }
 
 // declared in contracts/facets/layer_2/loan/ILoan.sol
 struct LoanBasicData {
-  bytes3 currency;
-  uint256 startingDate;
-  uint256 maturityDate;
-  LoanStructureType loanStructureType;
-  RepaymentType repaymentType;
-  InterestType interestType;
-  uint256 signingDate;
-  address originatorAccount;
-  address servicerAccount;
+    bytes3 currency;
+    uint256 startingDate;
+    uint256 maturityDate;
+    LoanStructureType loanStructureType;
+    RepaymentType repaymentType;
+    InterestType interestType;
+    uint256 signingDate;
+    address originatorAccount;
+    address servicerAccount;
 }
 
 // declared in contracts/facets/layer_2/loan/ILoan.sol
 struct LoanInterestData {
-  BaseReferenceRate baseReferenceRate;
-  uint256 floorRate;
-  uint256 capRate;
-  uint256 rateMargin;
-  DayCount dayCount;
-  PaymentFrequency paymentFrequency;
-  uint256 firstAccrualDate;
-  uint256 prepaymentPenalty;
-  uint256 commitmentFee;
-  uint256 utilizationFee;
-  UtilizationFeeType utilizationFeeType;
-  uint256 servicingFee;
+    BaseReferenceRate baseReferenceRate;
+    uint256 floorRate;
+    uint256 capRate;
+    uint256 rateMargin;
+    DayCount dayCount;
+    PaymentFrequency paymentFrequency;
+    uint256 firstAccrualDate;
+    uint256 prepaymentPenalty;
+    uint256 commitmentFee;
+    uint256 utilizationFee;
+    UtilizationFeeType utilizationFeeType;
+    uint256 servicingFee;
 }
 
 // declared in contracts/facets/layer_2/loan/ILoan.sol
 struct RiskData {
-  string internalRiskGrade;
-  uint256 defaultProbability;
-  uint256 lossGivenDefault;
+    string internalRiskGrade;
+    uint256 defaultProbability;
+    uint256 lossGivenDefault;
 }
 
 // declared in contracts/facets/layer_2/loan/ILoan.sol
 struct Collateral {
-  uint256 totalCollateralValue;
-  uint256 loanToValue;
+    uint256 totalCollateralValue;
+    uint256 loanToValue;
 }
 
 // declared in contracts/facets/layer_2/loan/ILoan.sol
 struct LoanPerformanceStatus {
-  PerformanceStatus performanceStatus;
-  uint256 daysPastDue;
+    PerformanceStatus performanceStatus;
+    uint256 daysPastDue;
 }
 
 // declared in contracts/facets/layer_2/loan/ILoan.sol
 enum LoanStructureType {
-  RCF,
-  TERM_LOAN
+    RCF,
+    TERM_LOAN
 }
 
 // declared in contracts/facets/layer_2/loan/ILoan.sol
 enum RepaymentType {
-  BULLET,
-  AMORTIZING
+    BULLET,
+    AMORTIZING
 }
 
 // declared in contracts/facets/layer_2/loan/ILoan.sol
 enum InterestType {
-  FIXED
+    FIXED
 }
 
 // declared in contracts/facets/layer_2/loan/ILoan.sol
 enum BaseReferenceRate {
-  NONE,
-  EURIBOR,
-  _3M
+    NONE,
+    EURIBOR,
+    _3M
 }
 
 // declared in contracts/facets/layer_2/loan/ILoan.sol
 enum DayCount {
-  ACTUAL360
+    ACTUAL360
 }
 
 // declared in contracts/facets/layer_2/loan/ILoan.sol
 enum PaymentFrequency {
-  MONTHLY,
-  QUARTERLY,
-  YEARLY
+    MONTHLY,
+    QUARTERLY,
+    YEARLY
 }
 
 // declared in contracts/facets/layer_2/loan/ILoan.sol
 enum UtilizationFeeType {
-  EMBEDDED,
-  SEPARATE
+    EMBEDDED,
+    SEPARATE
 }
 
 // declared in contracts/facets/layer_2/loan/ILoan.sol
 enum PerformanceStatus {
-  PERFORMING,
-  NON_PERFORMING,
-  DEFAULT
+    PERFORMING,
+    NON_PERFORMING,
+    DEFAULT
 }
 ```
 
@@ -2686,32 +3311,47 @@ enum PerformanceStatus {
 - Resolver key: `LoansPortfolio`
 
 ```solidity
-function initializeLoansPortfolio(ILoansPortfolio.LoansPortfolioDetailsData calldata _loansPortfolioData) external;
+function initializeLoansPortfolio(
+    ILoansPortfolio.LoansPortfolioDetailsData calldata _loansPortfolioData
+) external;
 function addHoldingsAsset(HoldingsAsset memory _holdingsAsset) external returns (bool success_);
 function removeHoldingsAsset(HoldingsAsset memory _holdingsAsset) external returns (bool success_);
-function notifyLoanHoldingsAssetUpdate(address _holdingsAssetAddress) external returns (bool success_);
-function loansPortfolioWithdraw(address _assetAddress, address _to, uint256 _amount) external returns (bool success_);
-function getLoansPortfolioData() external view returns (LoansPortfolioDetailsData memory loansPortfolioData_);
-function getHoldingsAssets(uint256 _pageIndex, uint256 _pageLength) external view returns (address[] memory assets_);
+function notifyLoanHoldingsAssetUpdate(
+    address _holdingsAssetAddress
+) external returns (bool success_);
+function loansPortfolioWithdraw(
+    address _assetAddress,
+    address _to,
+    uint256 _amount
+) external returns (bool success_);
+function getLoansPortfolioData(
+) external view returns (LoansPortfolioDetailsData memory loansPortfolioData_);
+function getHoldingsAssets(
+    uint256 _pageIndex,
+    uint256 _pageLength
+) external view returns (address[] memory assets_);
 function getLoanHoldingsAssets(
-  uint256 _pageIndex,
-  uint256 _pageLength
+    uint256 _pageIndex,
+    uint256 _pageLength
 ) external view returns (address[] memory assets_);
 function getHoldingsAssetOwnership(
-  uint256 _pageIndex,
-  uint256 _pageLength
+    uint256 _pageIndex,
+    uint256 _pageLength
 ) external view returns (address[] memory assets_, uint256[] memory balances_);
 function getNumberOfAssets() external view returns (uint256 numberOfAssets_);
 function getNumberOfLoans() external view returns (uint256 numberOfLoans_);
 function getNumberOfCash() external view returns (uint256 numberOfCash_);
 function getNumberOfPerformingLoans() external view returns (uint256 numberOfPerformingLoans_);
-function getNumberOfNonPerformingLoans() external view returns (uint256 numberOfNonPerformingLoans_);
+function getNumberOfNonPerformingLoans(
+) external view returns (uint256 numberOfNonPerformingLoans_);
 function getNumberDefaultedLoans() external view returns (uint256 numberDefaultedLoans_);
 function getSecuredLoansRatio() external view returns (uint256 numerator_, uint256 denominator_);
 function getPerformingLoansRatio() external view returns (uint256 numerator_, uint256 denominator_);
-function getNonPerformingLoansRatio() external view returns (uint256 numerator_, uint256 denominator_);
+function getNonPerformingLoansRatio(
+) external view returns (uint256 numerator_, uint256 denominator_);
 function getDefaultedLoansRatio() external view returns (uint256 numerator_, uint256 denominator_);
-function getGeographicalExposure() external view returns (GeographicalExposureData[] memory geographicalExposure_);
+function getGeographicalExposure(
+) external view returns (GeographicalExposureData[] memory geographicalExposure_);
 ```
 
 ### Types
@@ -2719,45 +3359,45 @@ function getGeographicalExposure() external view returns (GeographicalExposureDa
 ```solidity
 // declared in contracts/facets/layer_2/loansPortfolio/ILoansPortfolio.sol
 struct LoansPortfolioDetailsData {
-  PortfolioType portfolioType;
-  DistributionPolicy distributionPolicy;
+    PortfolioType portfolioType;
+    DistributionPolicy distributionPolicy;
 }
 
 // declared in contracts/facets/layer_2/loansPortfolio/ILoansPortfolio.sol
 struct HoldingsAsset {
-  address assetAddress;
-  HoldingsAssetType holdingsAssetType;
-  string country;
+    address assetAddress;
+    HoldingsAssetType holdingsAssetType;
+    string country;
 }
 
 // declared in contracts/facets/layer_2/loansPortfolio/ILoansPortfolio.sol
 struct GeographicalExposureData {
-  string country;
-  uint256 count;
+    string country;
+    uint256 count;
 }
 
 // declared in contracts/facets/layer_2/loansPortfolio/ILoansPortfolio.sol
 enum PortfolioType {
-  NONE,
-  STATIC,
-  REVOLVING,
-  MANAGED,
-  OPEN,
-  CLOSED
+    NONE,
+    STATIC,
+    REVOLVING,
+    MANAGED,
+    OPEN,
+    CLOSED
 }
 
 // declared in contracts/facets/layer_2/loansPortfolio/ILoansPortfolio.sol
 enum DistributionPolicy {
-  NONE,
-  DIRECT_PASSTHROUGH,
-  ACCRUED
+    NONE,
+    DIRECT_PASSTHROUGH,
+    ACCRUED
 }
 
 // declared in contracts/facets/layer_2/loansPortfolio/ILoansPortfolio.sol
 enum HoldingsAssetType {
-  NONE,
-  LOAN,
-  CASH
+    NONE,
+    LOAN,
+    CASH
 }
 ```
 
@@ -2768,34 +3408,15 @@ enum HoldingsAssetType {
 
 ```solidity
 function initializeNominalValue(
-  uint256 _nominalValue,
-  uint8 _nominalValueDecimals,
-  bytes3 _nominalValueCurrency
+    uint256 _nominalValue,
+    uint8 _nominalValueDecimals,
+    bytes3 _nominalValueCurrency
 ) external;
 function setNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals) external;
 function setNominalValueCurrency(bytes3 _nominalValueCurrency) external;
 function getNominalValue() external view returns (uint256);
 function getNominalValueDecimals() external view returns (uint8);
 function getNominalValueCurrency() external view returns (bytes3);
-```
-
-## Proceed Recipients
-
-- Interface: `contracts/facets/layer_2/proceedRecipient/IProceedRecipients.sol`
-- Resolver key: `ProceedRecipients`
-
-```solidity
-function initializeProceedRecipients(address[] calldata _proceedRecipients, bytes[] calldata _data) external;
-function addProceedRecipient(address _proceedRecipient, bytes calldata _data) external;
-function removeProceedRecipient(address _proceedRecipient) external;
-function updateProceedRecipientData(address _proceedRecipient, bytes calldata _data) external;
-function isProceedRecipient(address _proceedRecipient) external view returns (bool);
-function getProceedRecipientData(address _proceedRecipient) external view returns (bytes memory);
-function getProceedRecipientsCount() external view returns (uint256);
-function getProceedRecipients(
-  uint256 _pageIndex,
-  uint256 _pageLength
-) external view returns (address[] memory proceedRecipients_);
 ```
 
 ## Scheduled Cross Ordered Tasks
@@ -2809,8 +3430,8 @@ function triggerPendingScheduledCrossOrderedTasks() external returns (uint256);
 function triggerScheduledCrossOrderedTasks(uint256 _max) external returns (uint256);
 function scheduledCrossOrderedTaskCount() external view returns (uint256);
 function getScheduledCrossOrderedTasks(
-  uint256 _pageIndex,
-  uint256 _pageLength
+    uint256 _pageIndex,
+    uint256 _pageLength
 ) external view returns (ScheduledTask[] memory scheduledTask_);
 ```
 
@@ -2819,8 +3440,8 @@ function getScheduledCrossOrderedTasks(
 ```solidity
 // declared in contracts/factory/ERC3643/interfaces/IScheduledTasksCommon.sol
 struct ScheduledTask {
-  uint256 scheduledTimestamp;
-  bytes data;
+    uint256 scheduledTimestamp;
+    bytes data;
 }
 ```
 
@@ -2831,10 +3452,11 @@ struct ScheduledTask {
 
 ```solidity
 function initializeSecurity(
-  RegulationData memory _regulationData,
-  AdditionalSecurityData calldata _additionalSecurityData
+    RegulationData memory _regulationData,
+    AdditionalSecurityData calldata _additionalSecurityData
 ) external;
-function getSecurityRegulationData() external view returns (SecurityRegulationData memory securityRegulationData_);
+function getSecurityRegulationData(
+) external view returns (SecurityRegulationData memory securityRegulationData_);
 ```
 
 ### Types
@@ -2842,106 +3464,65 @@ function getSecurityRegulationData() external view returns (SecurityRegulationDa
 ```solidity
 // declared in contracts/factory/ERC3643/interfaces/regulation.sol
 struct RegulationData {
-  RegulationType regulationType;
-  RegulationSubType regulationSubType;
-  uint256 dealSize;
-  AccreditedInvestors accreditedInvestors;
-  uint256 maxNonAccreditedInvestors;
-  ManualInvestorVerification manualInvestorVerification;
-  InternationalInvestors internationalInvestors;
-  ResaleHoldPeriod resaleHoldPeriod;
+    RegulationType regulationType;
+    RegulationSubType regulationSubType;
+    uint256 dealSize;
+    AccreditedInvestors accreditedInvestors;
+    uint256 maxNonAccreditedInvestors;
+    ManualInvestorVerification manualInvestorVerification;
+    InternationalInvestors internationalInvestors;
+    ResaleHoldPeriod resaleHoldPeriod;
 }
 
 // declared in contracts/factory/ERC3643/interfaces/regulation.sol
 struct AdditionalSecurityData {
-  bool countriesControlListType;
-  string listOfCountries;
-  string info;
+    bool countriesControlListType;
+    string listOfCountries;
+    string info;
 }
 
 // declared in contracts/facets/layer_2/security/ISecurity.sol
 struct SecurityRegulationData {
-  RegulationData regulationData;
-  AdditionalSecurityData additionalSecurityData;
+    RegulationData regulationData;
+    AdditionalSecurityData additionalSecurityData;
 }
 
 // declared in contracts/factory/ERC3643/interfaces/regulation.sol
 enum RegulationType {
-  NONE,
-  REG_S,
-  REG_D
+    NONE,
+    REG_S,
+    REG_D
 }
 
 // declared in contracts/factory/ERC3643/interfaces/regulation.sol
 enum RegulationSubType {
-  NONE,
-  REG_D_506_B,
-  REG_D_506_C
+    NONE,
+    REG_D_506_B,
+    REG_D_506_C
 }
 
 // declared in contracts/factory/ERC3643/interfaces/regulation.sol
 enum AccreditedInvestors {
-  NONE,
-  ACCREDITATION_REQUIRED
+    NONE,
+    ACCREDITATION_REQUIRED
 }
 
 // declared in contracts/factory/ERC3643/interfaces/regulation.sol
 enum ManualInvestorVerification {
-  NOTHING_TO_VERIFY,
-  VERIFICATION_INVESTORS_FINANCIAL_DOCUMENTS_REQUIRED
+    NOTHING_TO_VERIFY,
+    VERIFICATION_INVESTORS_FINANCIAL_DOCUMENTS_REQUIRED
 }
 
 // declared in contracts/factory/ERC3643/interfaces/regulation.sol
 enum InternationalInvestors {
-  NOT_ALLOWED,
-  ALLOWED
+    NOT_ALLOWED,
+    ALLOWED
 }
 
 // declared in contracts/factory/ERC3643/interfaces/regulation.sol
 enum ResaleHoldPeriod {
-  NOT_APPLICABLE,
-  APPLICABLE_FROM_6_MOTHS_TO_1_YEAR
-}
-```
-
-## Voting
-
-- Interface: `contracts/facets/layer_2/voting/IVoting.sol`
-- Resolver key: `Voting`
-
-```solidity
-function initializeVoting() external;
-function setVoting(Voting calldata _newVoting) external returns (uint256 voteID_);
-function cancelVoting(uint256 _voteId) external returns (bool success_);
-function forceCancelVoting(uint256 _voteId) external returns (bool success_);
-function getVoting(uint256 _voteID) external view returns (RegisteredVoting memory registeredVoting_, bool isDisabled_);
-function getVotingFor(uint256 _voteID, address _account) external view returns (VotingFor memory votingFor_);
-function getVotingCount() external view returns (uint256 votingCount_);
-```
-
-### Types
-
-```solidity
-// declared in contracts/facets/layer_2/voting/IVotingTypes.sol
-struct Voting {
-  uint256 recordDate;
-  bytes data;
-}
-
-// declared in contracts/facets/layer_2/voting/IVotingTypes.sol
-struct RegisteredVoting {
-  Voting voting;
-  uint256 snapshotId;
-}
-
-// declared in contracts/facets/layer_2/voting/IVotingTypes.sol
-struct VotingFor {
-  uint256 tokenBalance;
-  uint256 recordDate;
-  bytes data;
-  uint8 decimals;
-  bool recordDateReached;
-  bool isDisabled;
+    NOT_APPLICABLE,
+    APPLICABLE_FROM_6_MOTHS_TO_1_YEAR
 }
 ```
 
@@ -2961,11 +3542,11 @@ function initializeBondUSA(IBondTypes.BondDetailsData calldata _bondDetailsData)
 ```solidity
 // declared in contracts/factory/ERC3643/interfaces/IBondTypes.sol
 struct BondDetailsData {
-  bytes3 currency;
-  uint256 nominalValue;
-  uint8 nominalValueDecimals;
-  uint256 startingDate;
-  uint256 maturityDate;
+    bytes3 currency;
+    uint256 nominalValue;
+    uint8 nominalValueDecimals;
+    uint256 startingDate;
+    uint256 maturityDate;
 }
 ```
 
@@ -2983,37 +3564,23 @@ function initializeEquityUSA(EquityDetailsData calldata _equityDetailsData) exte
 ```solidity
 // declared in contracts/factory/ERC3643/interfaces/IEquity.sol
 struct EquityDetailsData {
-  bool votingRight;
-  bool informationRight;
-  bool liquidationRight;
-  bool subscriptionRight;
-  bool conversionRight;
-  bool redemptionRight;
-  bool putRight;
-  DividendType dividendRight;
-  bytes3 currency;
-  uint256 nominalValue;
-  uint8 nominalValueDecimals;
+    bool votingRight;
+    bool informationRight;
+    bool liquidationRight;
+    bool subscriptionRight;
+    bool conversionRight;
+    bool redemptionRight;
+    bool putRight;
+    DividendType dividendRight;
+    bytes3 currency;
+    uint256 nominalValue;
+    uint8 nominalValueDecimals;
 }
 
 // declared in contracts/factory/ERC3643/interfaces/IEquity.sol
 enum DividendType {
-  NONE,
-  PREFERRED,
-  COMMON
+    NONE,
+    PREFERRED,
+    COMMON
 }
-```
-
-## Transfer And Lock
-
-- Interface: `contracts/facets/layer_3/transferAndLock/ITransferAndLock.sol`
-
-```solidity
-function initializeTransferAndLock() external;
-function transferAndLock(
-  address _to,
-  uint256 _amount,
-  bytes calldata _data,
-  uint256 _expirationTimestamp
-) external returns (uint256 lockId_);
 ```
