@@ -7,20 +7,21 @@ import {
     SCHEDULED_TASK_TYPE_BALANCE_ADJUSTMENT
 } from "../../constants/dispatchTypes.sol";
 import { IScheduledBalanceAdjustment } from "../../facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol";
-import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageWrapper.sol";
-import { ScheduledTasksStorageWrapper } from "../asset/ScheduledTasksStorageWrapper.sol";
+import { CorporateActionsStorageWrapper } from "../../domain/core/CorporateActionsStorageWrapper.sol";
+import { ScheduledTasksStorageWrapper } from "../../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 
 /**
- * @title BalanceAdjustmentOps
+ * @title ScheduledBalanceAdjustmentBase
  * @author Asset Tokenization Studio Team
- * @notice Orchestrates the scheduled balance-adjustment lifecycle by coordinating
- *         `CorporateActionsStorageWrapper` and `ScheduledTasksStorageWrapper`.
- * @dev Contains no storage slot of its own and uses no inline assembly.
- *      Follows the `*Ops` naming convention for stateless orchestration libraries.
+ * @notice Pure business logic for the scheduled balance-adjustment lifecycle, shared by
+ *         `ScheduledBalanceAdjustment` and its concrete facet.
+ * @dev Coordinates `CorporateActionsStorageWrapper` and `ScheduledTasksStorageWrapper`
+ *      without owning any storage slot of its own. Intended to be inherited by concrete
+ *      facet contracts — not deployed standalone.
  */
-library BalanceAdjustmentOps {
+abstract contract ScheduledBalanceAdjustmentBase {
     /**
      * @notice Creates a new scheduled balance adjustment and registers it with the
      *         corporate-action and scheduled-task sub-systems.
@@ -28,7 +29,7 @@ library BalanceAdjustmentOps {
      * @return corporateActionId_   Identifier of the newly created corporate action.
      * @return balanceAdjustmentID_ One-based index of the new balance adjustment.
      */
-    function setScheduledBalanceAdjustment(
+    function _setScheduledBalanceAdjustment(
         IScheduledBalanceAdjustment.ScheduledBalanceAdjustment calldata newBalanceAdjustment
     ) internal returns (bytes32 corporateActionId_, uint256 balanceAdjustmentID_) {
         bytes memory data = abi.encode(newBalanceAdjustment);
@@ -38,7 +39,7 @@ library BalanceAdjustmentOps {
             data
         );
 
-        initBalanceAdjustment(corporateActionId_, data);
+        _registerBalanceAdjustmentTasks(corporateActionId_, data);
     }
 
     /**
@@ -47,17 +48,17 @@ library BalanceAdjustmentOps {
      *      elapsed at the current block timestamp.
      * @param balanceAdjustmentId One-based index of the balance adjustment to cancel.
      */
-    function cancelScheduledBalanceAdjustment(uint256 balanceAdjustmentId) internal {
-        CorporateActionsStorageWrapper.requireMatchingActionType(
-            CORPORATE_ACTION_TYPE_BALANCE_ADJUSTMENT,
-            balanceAdjustmentId - 1
-        );
+    function _cancelScheduledBalanceAdjustment(uint256 balanceAdjustmentId) internal {
+        unchecked {
+            CorporateActionsStorageWrapper.requireMatchingActionType(
+                CORPORATE_ACTION_TYPE_BALANCE_ADJUSTMENT,
+                balanceAdjustmentId - 1
+            );
+        }
         IScheduledBalanceAdjustment.ScheduledBalanceAdjustment memory balanceAdjustment;
         bytes32 corporateActionId;
-        (balanceAdjustment, corporateActionId, ) = getScheduledBalanceAdjustment(balanceAdjustmentId);
-        if (balanceAdjustment.executionDate <= TimeTravelStorageWrapper.getBlockTimestamp()) {
-            revert IScheduledBalanceAdjustment.BalanceAdjustmentAlreadyExecuted(corporateActionId, balanceAdjustmentId);
-        }
+        (balanceAdjustment, corporateActionId, ) = _getScheduledBalanceAdjustment(balanceAdjustmentId);
+        _requireNotExecuted(balanceAdjustment.executionDate, corporateActionId, balanceAdjustmentId);
         CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
     }
 
@@ -68,10 +69,8 @@ library BalanceAdjustmentOps {
      * @param actionId Corporate-action identifier assigned by the corporate-actions storage.
      * @param data     ABI-encoded `ScheduledBalanceAdjustment` struct.
      */
-    function initBalanceAdjustment(bytes32 actionId, bytes memory data) internal {
-        if (actionId == bytes32(0)) {
-            revert IScheduledBalanceAdjustment.BalanceAdjustmentCreationFailed();
-        }
+    function _registerBalanceAdjustmentTasks(bytes32 actionId, bytes memory data) internal {
+        _requireValidCorporateActionId(actionId);
 
         IScheduledBalanceAdjustment.ScheduledBalanceAdjustment memory newBalanceAdjustment = abi.decode(
             data,
@@ -91,9 +90,26 @@ library BalanceAdjustmentOps {
      * @dev Use when administrative override is required after the execution date has passed.
      * @param balanceAdjustmentId The identifier of the balance adjustment to cancel.
      */
-    function forceCancelScheduledBalanceAdjustment(uint256 balanceAdjustmentId) internal {
-        (, bytes32 corporateActionId, ) = getScheduledBalanceAdjustment(balanceAdjustmentId);
+    function _forceCancelScheduledBalanceAdjustment(uint256 balanceAdjustmentId) internal {
+        (, bytes32 corporateActionId, ) = _getScheduledBalanceAdjustment(balanceAdjustmentId);
         CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
+    }
+
+    /**
+     * @notice Reverts if the balance adjustment's execution date has already elapsed.
+     * @dev Guards cancellation paths that must not proceed after execution.
+     * @param executionDate      Scheduled execution timestamp of the adjustment.
+     * @param corporateActionId  Corporate-action identifier, forwarded to the revert.
+     * @param balanceAdjustmentId One-based index, forwarded to the revert.
+     */
+    function _requireNotExecuted(
+        uint256 executionDate,
+        bytes32 corporateActionId,
+        uint256 balanceAdjustmentId
+    ) internal view {
+        if (executionDate <= TimeTravelStorageWrapper.getBlockTimestamp()) {
+            revert IScheduledBalanceAdjustment.BalanceAdjustmentAlreadyExecuted(corporateActionId, balanceAdjustmentId);
+        }
     }
 
     /**
@@ -103,7 +119,7 @@ library BalanceAdjustmentOps {
      * @return corporateActionId_ Identifier of the underlying corporate action.
      * @return isDisabled_        Whether the corporate action has been cancelled.
      */
-    function getScheduledBalanceAdjustment(
+    function _getScheduledBalanceAdjustment(
         uint256 balanceAdjustmentID
     )
         internal
@@ -123,14 +139,16 @@ library BalanceAdjustmentOps {
         (, , data, isDisabled_) = CorporateActionsStorageWrapper.getCorporateAction(corporateActionId_);
 
         _checkUnexpectedError(data.length == 0, BALANCE_ADJ_DATA);
-        (balanceAdjustment_) = abi.decode(data, (IScheduledBalanceAdjustment.ScheduledBalanceAdjustment));
+        balanceAdjustment_ = abi.decode(data, (IScheduledBalanceAdjustment.ScheduledBalanceAdjustment));
     }
 
     /**
-     * @notice Returns the total number of balance adjustments that have been created.
-     * @return balanceAdjustmentCount_ Count of corporate actions of the balance-adjustment type.
+     * @notice Reverts if the corporate-action identifier is zero, indicating a failed creation.
+     * @param actionId Corporate-action identifier to validate.
      */
-    function getScheduledBalanceAdjustmentsCount() internal view returns (uint256 balanceAdjustmentCount_) {
-        return CorporateActionsStorageWrapper.getCorporateActionCountByType(CORPORATE_ACTION_TYPE_BALANCE_ADJUSTMENT);
+    function _requireValidCorporateActionId(bytes32 actionId) internal pure {
+        if (actionId == bytes32(0)) {
+            revert IScheduledBalanceAdjustment.BalanceAdjustmentCreationFailed();
+        }
     }
 }

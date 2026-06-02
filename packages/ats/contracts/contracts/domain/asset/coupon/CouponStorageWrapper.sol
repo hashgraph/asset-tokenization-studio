@@ -13,7 +13,7 @@ import { ERC20StorageWrapper } from "../ERC20StorageWrapper.sol";
 import { TokenCoreOps } from "../../orchestrator/TokenCoreOps.sol";
 import { ICoupon } from "../../../facets/coupon/ICoupon.sol";
 import { ICouponTypes } from "../../../facets/coupon/ICouponTypes.sol";
-import { MaturityDateStorageWrapper } from "../maturity/MaturityDateStorageWrapper.sol";
+import { MaturityDateStorageWrapper } from "../MaturityDateStorageWrapper.sol";
 import { CouponRateDispatch } from "./CouponRateDispatch.sol";
 import { DatesValidation } from "../../../infrastructure/utils/DatesValidation.sol";
 import { DecimalsLib } from "../../../infrastructure/utils/DecimalsLib.sol";
@@ -441,6 +441,7 @@ library CouponStorageWrapper {
      *      `getCouponFromOrderedListAt` for each position.
      * @param pageIndex Zero-indexed page to retrieve.
      * @param pageLength Number of coupons per page.
+     * @param _includeDisabled Whether to include disabled coupons in the result.
      * @return couponIDs_ Array of coupon identifiers on the requested page.
      */
     function getCouponsOrderedList(

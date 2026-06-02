@@ -1,15 +1,19 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IMaturity } from "../../../facets/maturity/IMaturity.sol";
+import { IMaturity } from "../../facets/maturity/IMaturity.sol";
+import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 /// @custom:hash storage MaturityDate
 bytes32 constant STORAGE_LOCATION_MATURITY_DATE = 0x1aa172d1ea72cd83510f1cf656de1afda1343aac6b18ede59e254f0b6b4e3000;
 
-/// @notice Packed storage layout for the maturity date slot.
+/**
+ * @title MaturityDateDataStorage
+ * @notice Backing storage for the maturity date of any time-bounded token.
+ * @param maturityDate Timestamp (Unix epoch, seconds) of the asset maturity date.
+ */
 struct MaturityDateDataStorage {
     uint256 maturityDate;
-    bool initialized;
 }
 
 /**
@@ -32,7 +36,6 @@ library MaturityDateStorageWrapper {
      */
     function initializeMaturity(uint256 _maturityDate) internal {
         MaturityDateDataStorage storage s = _maturityDateStorage();
-        s.initialized = true;
         s.maturityDate = _maturityDate;
     }
 
@@ -57,26 +60,25 @@ library MaturityDateStorageWrapper {
     }
 
     /**
-     * @notice Returns `true` if the maturity date has been initialised via `initializeMaturity`.
-     * @return initialized_ `true` once the slot has been written by the initialiser.
+     * @notice Reverts if `_maturityDate` is not strictly in the future.
+     * @dev    Used when setting or updating the maturity date. A valid date must
+     *         be greater than the current block timestamp (implicitly non-zero).
+     * @param _maturityDate Proposed maturity timestamp (Unix epoch, seconds).
      */
-    function isMaturityInitialized() internal view returns (bool initialized_) {
-        return _maturityDateStorage().initialized;
+    function requireValidMaturityDate(uint256 _maturityDate) internal view {
+        if (_maturityDate <= TimeTravelStorageWrapper.getBlockTimestamp()) {
+            revert IMaturity.MaturityDateInvalid();
+        }
     }
 
     /**
-     * @notice Reverts if `_maturityDate` does not strictly exceed the stored
-     *         maturity date.
-     * @dev    Used for two distinct guards:
-     *         (1) Redemption at maturity — caller passes the current block
-     *             timestamp; reverts if maturity has not yet been reached.
-     *         (2) Maturity date updates — caller passes the proposed new date;
-     *             reverts if it is not strictly in the future relative to the
-     *             current stored value.
-     * @param _maturityDate Timestamp to validate against the stored date.
+     * @notice Reverts if the current block timestamp has not yet reached the stored maturity date.
+     * @dev    Used to gate redemption — the token must have matured before any holder can redeem.
      */
-    function requireValidMaturityDate(uint256 _maturityDate) internal view {
-        if (_maturityDate <= getMaturityDate()) revert IMaturity.MaturityDateInvalid();
+    function requireMaturityReached() internal view {
+        if (TimeTravelStorageWrapper.getBlockTimestamp() < getMaturityDate()) {
+            revert IMaturity.MaturityDateInvalid();
+        }
     }
 
     /**

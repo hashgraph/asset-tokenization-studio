@@ -5,9 +5,8 @@ import { IMaturity, RESOLVER_KEY_MATURITY } from "./IMaturity.sol";
 import { IKyc } from "../kyc/IKyc.sol";
 import { ROLE_MATURITY_MANAGER, ROLE_MATURITY_REDEEMER } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
-import { MaturityDateStorageWrapper } from "../../domain/asset/maturity/MaturityDateStorageWrapper.sol";
+import { MaturityDateStorageWrapper } from "../../domain/asset/MaturityDateStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
@@ -30,11 +29,10 @@ abstract contract Maturity is IMaturity, Modifiers {
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
         onlyFacetNotRegistered(RESOLVER_KEY_MATURITY)
-        notZeroValue(_maturityDate)
         onlyValidMaturityDate(_maturityDate)
     {
-        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_MATURITY);
         MaturityDateStorageWrapper.initializeMaturity(_maturityDate);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_MATURITY);
         emit MaturityInitialized(_maturityDate);
     }
 
@@ -53,7 +51,7 @@ abstract contract Maturity is IMaturity, Modifiers {
         onlyUnrecoveredAddress(_tokenHolder)
         onlyListedAllowed(_tokenHolder)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
-        onlyValidMaturityDate(TimeTravelStorageWrapper.getBlockTimestamp())
+        onlyMaturityReached
     {
         bytes32[] memory partitions = ERC1410StorageWrapper.partitionsOf(_tokenHolder);
         uint256 length = partitions.length;

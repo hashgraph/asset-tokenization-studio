@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { MaturityDateStorageWrapper } from "../../domain/asset/maturity/MaturityDateStorageWrapper.sol";
-import { _checkNotInitialized } from "../InitializationErrors.sol";
+import { MaturityDateStorageWrapper } from "../../domain/asset/MaturityDateStorageWrapper.sol";
 
 /**
  * @title  MaturityModifiers
@@ -14,24 +13,22 @@ import { _checkNotInitialized } from "../InitializationErrors.sol";
  */
 abstract contract MaturityModifiers {
     /**
-     * @notice Ensures the maturity date has not yet been initialised.
-     * @dev    Reverts with `AlreadyInitialized` if `MaturityDateStorageWrapper.isMaturityInitialized`
-     *         returns `true`. Used exclusively on `initializeMaturity`.
+     * @notice Reverts if `_maturityDate` is not strictly greater than the current block timestamp.
+     * @dev    Used on `initializeMaturity` and `updateMaturityDate`. A zero or past timestamp is
+     *         rejected with `MaturityDateInvalid`.
+     * @param _maturityDate Proposed maturity timestamp (Unix epoch, seconds).
      */
-    modifier onlyNotMaturityInitialized() {
-        _checkNotInitialized(MaturityDateStorageWrapper.isMaturityInitialized());
+    modifier onlyValidMaturityDate(uint256 _maturityDate) {
+        MaturityDateStorageWrapper.requireValidMaturityDate(_maturityDate);
         _;
     }
 
     /**
-     * @notice Validates a timestamp against the stored maturity date.
-     * @dev    Reverts with `MaturityDateInvalid` when `_maturityDate <= storedMaturityDate`.
-     *         Used for both redemption guards (current timestamp must exceed maturity) and
-     *         update guards (new date must exceed current date).
-     * @param _maturityDate The timestamp to validate against the stored maturity date.
+     * @notice Reverts if the stored maturity date has not yet been reached.
+     * @dev    Used on `fullRedeemAtMaturity` to ensure the token has matured before redemption.
      */
-    modifier onlyValidMaturityDate(uint256 _maturityDate) {
-        MaturityDateStorageWrapper.requireValidMaturityDate(_maturityDate);
+    modifier onlyMaturityReached() {
+        MaturityDateStorageWrapper.requireMaturityReached();
         _;
     }
 }

@@ -8,8 +8,9 @@ import {
 import { ROLE_CORPORATE_ACTION, ROLE_CORPORATE_ACTION_FORCE_CANCEL } from "../../constants/roles.sol";
 import { CORPORATE_ACTION_TYPE_BALANCE_ADJUSTMENT } from "../../constants/dispatchTypes.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
-import { BalanceAdjustmentOps } from "../../domain/orchestrator/BalanceAdjustmentOps.sol";
+import { ScheduledBalanceAdjustmentBase } from "./ScheduledBalanceAdjustmentBase.sol";
 import { ScheduledTasksStorageWrapper } from "../../domain/asset/ScheduledTasksStorageWrapper.sol";
+import { CorporateActionsStorageWrapper } from "../../domain/core/CorporateActionsStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { ScheduledTask } from "../layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
@@ -21,10 +22,10 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
  * @notice Abstract implementation of `IScheduledBalanceAdjustment` providing scheduled
  *         balance adjustment corporate actions for tokenised assets.
  * @dev Inherits access-control guards from `Modifiers`. Scheduled adjustments are managed
- *      through `BalanceAdjustmentOps` and `ScheduledTasksStorageWrapper`. Intended to be
+ *      through `ScheduledBalanceAdjustmentBase` and `ScheduledTasksStorageWrapper`. Intended to be
  *      inherited by `ScheduledBalanceAdjustmentFacet`.
  */
-abstract contract ScheduledBalanceAdjustment is IScheduledBalanceAdjustment, Modifiers {
+abstract contract ScheduledBalanceAdjustment is IScheduledBalanceAdjustment, ScheduledBalanceAdjustmentBase, Modifiers {
     /// @inheritdoc IScheduledBalanceAdjustment
     function initializeScheduledBalanceAdjustment()
         external
@@ -52,7 +53,7 @@ abstract contract ScheduledBalanceAdjustment is IScheduledBalanceAdjustment, Mod
         returns (uint256 balanceAdjustmentID_)
     {
         bytes32 corporateActionID;
-        (corporateActionID, balanceAdjustmentID_) = BalanceAdjustmentOps.setScheduledBalanceAdjustment(
+        (corporateActionID, balanceAdjustmentID_) = ScheduledBalanceAdjustmentBase._setScheduledBalanceAdjustment(
             _newBalanceAdjustment
         );
         emit IScheduledBalanceAdjustment.ScheduledBalanceAdjustmentSet(
@@ -78,7 +79,7 @@ abstract contract ScheduledBalanceAdjustment is IScheduledBalanceAdjustment, Mod
         notZeroValue(_balanceAdjustmentId)
         returns (bool success_)
     {
-        BalanceAdjustmentOps.cancelScheduledBalanceAdjustment(_balanceAdjustmentId);
+        ScheduledBalanceAdjustmentBase._cancelScheduledBalanceAdjustment(_balanceAdjustmentId);
         emit IScheduledBalanceAdjustment.ScheduledBalanceAdjustmentCancelled(
             _balanceAdjustmentId,
             EvmAccessors.getMsgSender()
@@ -100,7 +101,7 @@ abstract contract ScheduledBalanceAdjustment is IScheduledBalanceAdjustment, Mod
         onlyMatchingActionType(CORPORATE_ACTION_TYPE_BALANCE_ADJUSTMENT, _balanceAdjustmentId - 1)
         returns (bool success_)
     {
-        BalanceAdjustmentOps.forceCancelScheduledBalanceAdjustment(_balanceAdjustmentId);
+        ScheduledBalanceAdjustmentBase._forceCancelScheduledBalanceAdjustment(_balanceAdjustmentId);
         emit IScheduledBalanceAdjustment.ScheduledBalanceAdjustmentForceCancelled(
             _balanceAdjustmentId,
             EvmAccessors.getMsgSender()
@@ -119,12 +120,14 @@ abstract contract ScheduledBalanceAdjustment is IScheduledBalanceAdjustment, Mod
         onlyMatchingActionType(CORPORATE_ACTION_TYPE_BALANCE_ADJUSTMENT, _balanceAdjustmentID - 1)
         returns (IScheduledBalanceAdjustment.ScheduledBalanceAdjustment memory balanceAdjustment_, bool isDisabled_)
     {
-        (balanceAdjustment_, , isDisabled_) = BalanceAdjustmentOps.getScheduledBalanceAdjustment(_balanceAdjustmentID);
+        (balanceAdjustment_, , isDisabled_) = ScheduledBalanceAdjustmentBase._getScheduledBalanceAdjustment(
+            _balanceAdjustmentID
+        );
     }
 
     /// @inheritdoc IScheduledBalanceAdjustment
     function getBalanceAdjustmentCount() external view override returns (uint256 balanceAdjustmentCount_) {
-        return BalanceAdjustmentOps.getScheduledBalanceAdjustmentsCount();
+        return CorporateActionsStorageWrapper.getCorporateActionCountByType(CORPORATE_ACTION_TYPE_BALANCE_ADJUSTMENT);
     }
 
     /// @inheritdoc IScheduledBalanceAdjustment

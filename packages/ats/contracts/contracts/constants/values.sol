@@ -79,7 +79,7 @@ bytes4 constant KPI_KPIS_SET_MINDATE = 0x00000004;
 /// @dev ID for ERC20VotesStorageWrapper.calculateFactorBetween()
 bytes4 constant KPI_VOTES_CALC_FACTOR = 0x00000005;
 
-/// @dev ID for BalanceAdjustmentOps.getScheduledBalanceAdjustment()
+/// @dev ID for ScheduledBalanceAdjustmentBase.getScheduledBalanceAdjustment()
 bytes4 constant BALANCE_ADJ_DATA = 0x00000008;
 
 /// @dev ID for KpiLinkedRateLib._getPreviousCouponRate()

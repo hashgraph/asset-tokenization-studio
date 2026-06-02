@@ -625,7 +625,10 @@ describe("Dividends", () => {
     it("GIVEN a non-existent dividend WHEN cancelDividend THEN transaction fails", async () => {
       await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
-      await expect(asset.connect(signer_C).cancelDividend(999)).to.be.rejected;
+      await expect(asset.connect(signer_C).cancelDividend(999)).to.be.revertedWithCustomError(
+        asset,
+        "WrongIndexForAction",
+      );
     });
 
     it("GIVEN multiple dividends WHEN cancelDividend on one THEN only that dividend is cancelled", async () => {

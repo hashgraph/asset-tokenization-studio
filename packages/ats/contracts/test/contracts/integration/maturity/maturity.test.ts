@@ -268,12 +268,12 @@ describe("Maturity Tests", () => {
       expect(maturityDateAfter).to.be.equal(maturityDateBefore);
     });
 
-    it("GIVEN a new date earlier than current maturity WHEN updateMaturityDate THEN reverts with MaturityDateInvalid", async () => {
+    it("GIVEN a date in the past WHEN updateMaturityDate THEN reverts with MaturityDateInvalid", async () => {
       await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_MATURITY_MANAGER, signer_C.address);
       const maturityDateBefore = await asset.getMaturityDate();
-      const dayBeforeCurrentMaturity = maturityDateBefore - 86400n;
+      const pastDate = (await getDltTimestamp()) - 1;
 
-      await expect(asset.connect(signer_C).updateMaturityDate(dayBeforeCurrentMaturity)).to.be.revertedWithCustomError(
+      await expect(asset.connect(signer_C).updateMaturityDate(pastDate)).to.be.revertedWithCustomError(
         asset,
         "MaturityDateInvalid",
       );
