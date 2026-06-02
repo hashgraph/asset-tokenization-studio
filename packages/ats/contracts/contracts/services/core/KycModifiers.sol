@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IKyc } from "../../facets/layer_1/kyc/IKyc.sol";
+import { IKyc } from "../../facets/kyc/IKyc.sol";
 import { KycStorageWrapper } from "../../domain/core/KycStorageWrapper.sol";
 import { SsiManagementStorageWrapper } from "../../domain/core/SsiManagementStorageWrapper.sol";
 

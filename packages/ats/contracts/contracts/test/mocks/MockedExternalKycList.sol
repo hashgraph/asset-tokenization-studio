@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IExternalKycList } from "../../facets/layer_1/externalKycList/IExternalKycList.sol";
-import { IKyc } from "../../facets/layer_1/kyc/IKyc.sol";
+import { IKyc } from "../../facets/kyc/IKyc.sol";
 
 contract MockedExternalKycList is IExternalKycList {
     mapping(address => IKyc.KycStatus) private _kycStatus;

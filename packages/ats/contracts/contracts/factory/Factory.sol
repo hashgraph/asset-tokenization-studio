@@ -41,8 +41,8 @@ import { IIdentity } from "../facets/identity/IIdentity.sol";
 import {
     IScheduledCrossOrderedTasks
 } from "../facets/layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
-import { ISnapshots } from "../facets/layer_1/snapshot/ISnapshots.sol";
-import { IProceedRecipients } from "../facets/layer_2/proceedRecipient/IProceedRecipients.sol";
+import { ISnapshots } from "../facets/snapshot/ISnapshots.sol";
+import { IProceedRecipients } from "../facets/proceedRecipient/IProceedRecipients.sol";
 
 import { INominalValue } from "../facets/layer_2/nominalValue/INominalValue.sol";
 import { ScheduledTasksStorageWrapper } from "../domain/asset/ScheduledTasksStorageWrapper.sol";
@@ -52,7 +52,7 @@ import {
     IExternalControlListManagement
 } from "../facets/externalControlListManagement/IExternalControlListManagement.sol";
 import { IExternalKycListManagement } from "../facets/externalKycListManagement/IExternalKycListManagement.sol";
-import { IKyc } from "../facets/layer_1/kyc/IKyc.sol";
+import { IKyc } from "../facets/kyc/IKyc.sol";
 import { _validateISIN } from "./isinValidator.sol";
 import { IInterestRate } from "../facets/interestRate/IInterestRate.sol";
 import { EvmAccessors } from "../infrastructure/utils/EvmAccessors.sol";
@@ -131,10 +131,10 @@ import { ISecurityHoldersAtSnapshot } from "../facets/securityHoldersAtSnapshot/
 import { ISnapshotsByPartition } from "../facets/snapshotsByPartition/ISnapshotsByPartition.sol";
 import { ISsiManagement } from "../facets/ssiManagement/ISsiManagement.sol";
 import { ITransfer } from "../facets/transfer/ITransfer.sol";
-import { ITransferAndLock } from "../facets/layer_3/transferAndLock/ITransferAndLock.sol";
+import { ITransferAndLock } from "../facets/transferAndLock/ITransferAndLock.sol";
 import { ITransferAndLockByPartition } from "../facets/transferAndLockByPartition/ITransferAndLockByPartition.sol";
 import { ITransferByPartition } from "../facets/transferByPartition/ITransferByPartition.sol";
-import { IVoting } from "../facets/layer_2/voting/IVoting.sol";
+import { IVoting } from "../facets/voting/IVoting.sol";
 import { IVotingSecurityHolders } from "../facets/votingSecurityHolders/IVotingSecurityHolders.sol";
 
 /**
