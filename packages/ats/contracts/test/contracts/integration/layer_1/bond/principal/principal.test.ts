@@ -218,5 +218,12 @@ describe("PrincipalFacet Tests", () => {
       expect(principalFor.numerator).to.equal(HOLDING);
       expect(principalFor.denominator).to.equal(10n ** BigInt(DECIMALS));
     });
+
+    it("GIVEN token decimals adjusted to 78 WHEN getPrincipalFor THEN reverts with ExponentOverflow", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ADJUSTMENT_BALANCE, signer_A.address);
+      // DECIMALS (6) + 72 = 78 == MAX_DECIMALS; 10^78 overflows uint256
+      await asset.connect(signer_A).adjustBalances(1, 72);
+      await expect(asset.getPrincipalFor(signer_A.address)).to.be.revertedWithCustomError(asset, "ExponentOverflow");
+    });
   });
 });

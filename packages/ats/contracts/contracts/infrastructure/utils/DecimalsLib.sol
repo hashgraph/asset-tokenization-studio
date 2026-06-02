@@ -26,7 +26,7 @@ import {
 } from "../../constants/values.sol";
 
 library DecimalsLib {
-    uint8 private constant MAX_DECIMALS = 78;
+    uint8 private constant MAX_DECIMALS = 77;
 
     function calculateDecimalsAdjustment(
         uint256 _amount,
@@ -37,7 +37,7 @@ library DecimalsLib {
         uint8 decimalsDiff;
         if (_newDecimals > _decimals) {
             decimalsDiff = _newDecimals - _decimals;
-            if (decimalsDiff >= MAX_DECIMALS) revert ICommonErrors.DecimalsTooLarge(_decimals, _newDecimals);
+            if (decimalsDiff > MAX_DECIMALS) revert ICommonErrors.DecimalsTooLarge(_decimals, _newDecimals);
             uint256 multiplier = pow10(decimalsDiff);
             if (_amount > (MAX_UINT256 / multiplier)) revert ICommonErrors.GreaterThanMaxUint256(_amount, decimalsDiff);
             unchecked {
@@ -45,9 +45,22 @@ library DecimalsLib {
             }
         }
         decimalsDiff = _decimals - _newDecimals;
-        if (decimalsDiff >= MAX_DECIMALS) revert ICommonErrors.DecimalsTooLarge(_decimals, _newDecimals);
+        if (decimalsDiff > MAX_DECIMALS) revert ICommonErrors.DecimalsTooLarge(_decimals, _newDecimals);
         unchecked {
             return _amount / pow10(decimalsDiff);
+        }
+    }
+
+    /**
+     * @notice Reverts with `ICommonErrors.ExponentOverflow` when `exponent` would cause
+     *         `10 ** exponent` to overflow `uint256`.
+     * @dev `uint256` max is ~1.157 × 10^77, so any exponent ≥ 78 overflows. Call this
+     *      before passing an exponent to `pow10`.
+     * @param exponent The value to validate before use as a power-of-ten exponent.
+     */
+    function checkExponentOverflow(uint256 exponent) internal pure {
+        if (exponent > MAX_DECIMALS) {
+            revert ICommonErrors.ExponentOverflow(exponent);
         }
     }
 
