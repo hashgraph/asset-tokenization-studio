@@ -245,13 +245,7 @@ describe("Access Control Tests", () => {
         .applyRoles([ATS_ROLES.ROLE_PAUSER, ATS_ROLES.DEFAULT_ADMIN_ROLE], [false, true], signer_C.address),
     )
       .to.emit(asset, "RolesApplied")
-      .withArgs(
-        [ATS_ROLES.ROLE_PAUSER, ATS_ROLES.DEFAULT_ADMIN_ROLE],
-        [false, true],
-        signer_C.address,
-        [ATS_ROLES.ROLE_PAUSER, ATS_ROLES.DEFAULT_ADMIN_ROLE],
-        [false, true],
-      );
+      .withArgs([ATS_ROLES.ROLE_PAUSER, ATS_ROLES.DEFAULT_ADMIN_ROLE], [false, true], signer_C.address);
 
     // check that C has the role
     expect(await asset.hasRole(ATS_ROLES.ROLE_PAUSER, signer_C.address)).to.equal(false);
@@ -293,8 +287,6 @@ describe("Access Control Tests", () => {
         [ATS_ROLES.ROLE_PAUSER, ATS_ROLES.DEFAULT_ADMIN_ROLE, ATS_ROLES.DEFAULT_ADMIN_ROLE],
         [true, false, false],
         signer_C.address,
-        [],
-        [],
       );
 
     // check that C has the role
@@ -328,13 +320,7 @@ describe("Access Control Tests", () => {
 
     await expect(asset.connect(deployer).applyRoles(requestedRoles, requestedStates, signer_C.address))
       .to.emit(asset, "RolesApplied")
-      .withArgs(
-        requestedRoles,
-        requestedStates,
-        signer_C.address,
-        [ATS_ROLES.DEFAULT_ADMIN_ROLE, ATS_ROLES.ROLE_AGENT],
-        [true, false],
-      );
+      .withArgs(requestedRoles, requestedStates, signer_C.address);
 
     expect(await asset.hasRole(ATS_ROLES.ROLE_CAP, signer_C.address)).to.equal(false);
     expect(await asset.hasRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, signer_C.address)).to.equal(true);
