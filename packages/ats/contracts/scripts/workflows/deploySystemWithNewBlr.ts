@@ -1451,13 +1451,65 @@ export async function deploySystemWithNewBlr(
               facetCount: 0,
               facets: [],
             },
+        loan: isSuccess(loanConfig)
+          ? {
+              configId: loanConfig.data.configurationId,
+              version: loanConfig.data.version,
+              facetCount: loanConfig.data.facetKeys.length,
+              facets: loanConfig.data.facetKeys,
+            }
+          : {
+              configId: "",
+              version: 0,
+              facetCount: 0,
+              facets: [],
+            },
+        loansPortfolio: isSuccess(loansPortfolioConfig)
+          ? {
+              configId: loansPortfolioConfig.data.configurationId,
+              version: loansPortfolioConfig.data.version,
+              facetCount: loansPortfolioConfig.data.facetKeys.length,
+              facets: loansPortfolioConfig.data.facetKeys,
+            }
+          : {
+              configId: "",
+              version: 0,
+              facetCount: 0,
+              facets: [],
+            },
+        depositToken: isSuccess(depositTokenConfig)
+          ? {
+              configId: depositTokenConfig.data.configurationId,
+              version: depositTokenConfig.data.version,
+              facetCount: depositTokenConfig.data.facetKeys.length,
+              facets: depositTokenConfig.data.facetKeys,
+            }
+          : {
+              configId: "",
+              version: 0,
+              facetCount: 0,
+              facets: [],
+            },
+        factory: isSuccess(factoryConfig)
+          ? {
+              configId: factoryConfig.data.configurationId,
+              version: factoryConfig.data.version,
+              facetCount: factoryConfig.data.facetKeys.length,
+              facets: factoryConfig.data.facetKeys,
+            }
+          : {
+              configId: "",
+              version: 0,
+              facetCount: 0,
+              facets: [],
+            },
       },
 
       summary: {
         totalContracts: 3, // ProxyAdmin, BLR, Factory
         totalFacets: facetsResult.deployed.size,
-        // Bond + Factory (bond-only) or Equity + Bond + BondFixedRate + BondKpiLinkedRate + Loan + LoansPortfolio + Factory
-        totalConfigurations: deployOnlyBondConfig ? 2 : 7,
+        // Bond + Factory (bond-only) or Equity + Bond + BondFixedRate + BondKpiLinkedRate + Loan + LoansPortfolio + DepositToken + Factory
+        totalConfigurations: deployOnlyBondConfig ? 2 : 8,
         deploymentTime: Date.now() - startTime,
         gasUsed: totalGasUsed.toString(),
         success: true,
