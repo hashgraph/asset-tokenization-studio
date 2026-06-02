@@ -108,6 +108,24 @@ function renderFunction(fn) {
   return wrapped.join("\n");
 }
 
+// Param renderer for events — supports the `indexed` keyword (events have no storage location).
+function renderEventParam(p) {
+  const parts = [renderType(p.typeName)];
+  if (p.isIndexed) parts.push("indexed");
+  if (p.name) parts.push(p.name);
+  return parts.join(" ");
+}
+
+// Generic event/error signature renderer (wraps when a single line would exceed 100 chars).
+function renderDecl(keyword, name, params) {
+  const oneLine = `${keyword} ${name}(${params.join(", ")});`;
+  if (oneLine.length <= 100) return oneLine;
+  const wrapped = [`${keyword} ${name}(`];
+  params.forEach((p, i) => wrapped.push(`    ${p}${i < params.length - 1 ? "," : ""}`));
+  wrapped.push(");");
+  return wrapped.join("\n");
+}
+
 // ---------------------------------------------------------------------------------------------
 // Global index of struct/enum definitions (verbatim source by char range)
 // ---------------------------------------------------------------------------------------------
@@ -158,10 +176,62 @@ function parseFile(file) {
   return res;
 }
 
-// Build the global type index across the whole contracts tree.
+// ---------------------------------------------------------------------------------------------
+// Global collection of events, custom errors, and role constants across the WHOLE contracts tree.
+// Unlike the Methods section (which excludes the ERC3643 reference suite), these sections span
+// every file and subfolder under contracts/ — no folder is excluded.
+// ---------------------------------------------------------------------------------------------
+const eventMap = new Map(); // dedup key -> { name, rendered, files:Set }
+const errorMap = new Map(); // dedup key -> { name, rendered, files:Set }
+const roles = []; // { name, value }
+const roleSeen = new Set();
+
+// Identity of an event/error declaration: name plus ordered param types (and `indexed` flags).
+// Param names are ignored so the same signature declared in multiple files collapses to one entry.
+function declKey(name, params) {
+  return `${name}(${params.map((p) => renderType(p.typeName) + (p.isIndexed ? " indexed" : "")).join(",")})`;
+}
+
+function collectDecl(map, keyword, node, rel) {
+  const params = node.parameters || [];
+  const key = declKey(node.name, params);
+  const existing = map.get(key);
+  if (existing) {
+    existing.files.add(rel);
+    return;
+  }
+  const renderParamFn = keyword === "event" ? renderEventParam : renderParam;
+  map.set(key, {
+    name: node.name,
+    rendered: renderDecl(keyword, node.name, params.map(renderParamFn)),
+    files: new Set([rel]),
+  });
+}
+
+function collectRole(node) {
+  if (!node.isDeclaredConst) return;
+  const tn = node.typeName;
+  if (!tn || tn.type !== "ElementaryTypeName" || tn.name !== "bytes32") return;
+  // Role identifiers only — by convention `ROLE_<NAME>`, plus the OpenZeppelin `DEFAULT_ADMIN_ROLE`.
+  // Excludes other bytes32 constants (resolver keys, storage slots, type hashes, etc.).
+  if (!node.name.startsWith("ROLE_") && node.name !== "DEFAULT_ADMIN_ROLE") return;
+  if (roleSeen.has(node.name)) return;
+  roleSeen.add(node.name);
+  const value = node.initialValue && node.initialValue.type === "NumberLiteral" ? node.initialValue.number : "";
+  roles.push({ name: node.name, value });
+}
+
+// Build the global type index across the whole contracts tree, and collect events/errors/roles.
 for (const file of allSolFiles) {
   const { source, ast } = parseFile(file);
-  if (ast) indexTypes(ast, source, file);
+  if (!ast) continue;
+  indexTypes(ast, source, file);
+  const rel = path.relative(contractsRoot, file).split(path.sep).join("/");
+  parser.visit(ast, {
+    EventDefinition: (n) => collectDecl(eventMap, "event", n, rel),
+    CustomErrorDefinition: (n) => collectDecl(errorMap, "error", n, rel),
+    FileLevelConstant: (n) => collectRole(n),
+  });
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -323,12 +393,19 @@ out.push("> ");
 out.push("> Maintained via the `solidity-natspec` skill.");
 out.push("");
 
-// Table of contents: flat list of every facet in document order.
+// Table of contents: four top-level sections, with every facet nested under Methods.
 out.push("## Contents");
 out.push("");
+out.push("- [Methods](#methods)");
 for (const facet of facets) {
-  out.push(`- [${facet.name}](#${facet.anchor})`);
+  out.push(`  - [${facet.name}](#${facet.anchor})`);
 }
+out.push("- [Events](#events)");
+out.push("- [Errors](#errors)");
+out.push("- [Roles](#roles)");
+out.push("");
+
+out.push("## Methods");
 out.push("");
 
 let currentLayer = -1;
@@ -340,7 +417,7 @@ for (const facet of facets) {
     out.push("");
   }
 
-  out.push(`## ${facet.name}`);
+  out.push(`### ${facet.name}`);
   out.push("");
   out.push(`- Interface: \`${facet.rel}\``);
   if (facet.resolverKey) out.push(`- Resolver key: \`${facet.resolverKey}\``);
@@ -351,7 +428,7 @@ for (const facet of facets) {
   out.push("");
 
   if (facet.types.length) {
-    out.push("### Types");
+    out.push("#### Types");
     out.push("");
     out.push("```solidity");
     const blocks = facet.types.map((t) => {
@@ -364,6 +441,37 @@ for (const facet of facets) {
   }
 }
 
+// ---------------------------------------------------------------------------------------------
+// Flat Events / Errors sections spanning the whole tree (no facet differentiation), then Roles.
+// ---------------------------------------------------------------------------------------------
+function renderGlobalDeclBlock(d) {
+  return `// declared in ${[...d.files].sort().join(", ")}\n${d.rendered}`;
+}
+
+function pushDeclSection(title, map) {
+  const list = [...map.values()].sort((a, b) => a.name.localeCompare(b.name) || a.rendered.localeCompare(b.rendered));
+  out.push(`## ${title}`);
+  out.push("");
+  out.push("```solidity");
+  out.push(list.map(renderGlobalDeclBlock).join("\n\n"));
+  out.push("```");
+  out.push("");
+}
+
+pushDeclSection("Events", eventMap);
+pushDeclSection("Errors", errorMap);
+
+out.push("## Roles");
+out.push("");
+out.push("| Role | Value |");
+out.push("| --- | --- |");
+for (const r of [...roles].sort((a, b) => a.name.localeCompare(b.name))) {
+  out.push(`| \`${r.name}\` | \`${r.value}\` |`);
+}
+out.push("");
+
 const target = path.join(contractsRoot, "FACETS_METHODS.md");
 fs.writeFileSync(target, out.join("\n").replace(/\n+$/, "\n"));
-console.error(`Wrote ${facets.length} facets to ${target}`);
+console.error(
+  `Wrote ${facets.length} facets, ${eventMap.size} events, ${errorMap.size} errors, ${roles.length} roles to ${target}`,
+);
