@@ -52,7 +52,7 @@ import {
     IExternalControlListManagement
 } from "../facets/externalControlListManagement/IExternalControlListManagement.sol";
 import { IExternalKycListManagement } from "../facets/externalKycListManagement/IExternalKycListManagement.sol";
-import { IKyc } from "../facets/layer_1/kyc/IKyc.sol";
+import { IKyc } from "../facets/kyc/IKyc.sol";
 import { _validateISIN } from "./isinValidator.sol";
 import { IInterestRate } from "../facets/interestRate/IInterestRate.sol";
 import { EvmAccessors } from "../infrastructure/utils/EvmAccessors.sol";

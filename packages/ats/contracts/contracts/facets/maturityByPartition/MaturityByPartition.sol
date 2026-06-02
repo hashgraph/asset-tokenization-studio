@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IMaturityByPartition, RESOLVER_KEY_MATURITY_BY_PARTITION } from "./IMaturityByPartition.sol";
-import { IKyc } from "../layer_1/kyc/IKyc.sol";
+import { IKyc } from "../kyc/IKyc.sol";
 import { ROLE_MATURITY_REDEEMER } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";

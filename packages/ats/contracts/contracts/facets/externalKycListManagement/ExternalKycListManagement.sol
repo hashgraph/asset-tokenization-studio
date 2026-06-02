@@ -8,7 +8,7 @@ import { ExternalListManagementStorageWrapper } from "../../domain/core/External
 import { Modifiers } from "../../services/Modifiers.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { ArrayValidation } from "../../infrastructure/utils/ArrayValidation.sol";
-import { IKyc } from "../layer_1/kyc/IKyc.sol";
+import { IKyc } from "../kyc/IKyc.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**

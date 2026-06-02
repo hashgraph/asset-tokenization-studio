@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IKyc } from "../../facets/layer_1/kyc/IKyc.sol";
-import { IRevocationList } from "../../facets/layer_1/kyc/IRevocationList.sol";
+import { IKyc } from "../../facets/kyc/IKyc.sol";
+import { IRevocationList } from "../../facets/kyc/IRevocationList.sol";
 import { ExternalListManagementStorageWrapper } from "./ExternalListManagementStorageWrapper.sol";
 import { SsiManagementStorageWrapper } from "./SsiManagementStorageWrapper.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";

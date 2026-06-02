@@ -8,7 +8,7 @@ import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IExternalControlList } from "../../facets/layer_1/externalControlList/IExternalControlList.sol";
 import { IExternalKycList } from "../../facets/layer_1/externalKycList/IExternalKycList.sol";
-import { IKyc } from "../../facets/layer_1/kyc/IKyc.sol";
+import { IKyc } from "../../facets/kyc/IKyc.sol";
 
 /// @custom:hash storage ControlListManagement
 // solhint-disable-next-line max-line-length

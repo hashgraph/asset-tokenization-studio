@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IKyc } from "../layer_1/kyc/IKyc.sol";
+import { IKyc } from "../kyc/IKyc.sol";
 
 /// @custom:hash resolverKey ExternalKycList
 bytes32 constant RESOLVER_KEY_EXTERNAL_KYC_LIST = 0x519d262ce075401982a7a64c60caea0491af317c7b69b7869f8181e8d9cda124;
