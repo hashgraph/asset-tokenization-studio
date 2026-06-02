@@ -968,7 +968,10 @@ describe("Equity Tests", () => {
       it("GIVEN no existing voting WHEN forceCancelVoting with invalid ID THEN transaction fails with WrongIndexForAction", async () => {
         await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C.address);
 
-        await expect(asset.connect(signer_C).forceCancelVoting(999)).to.be.rejected;
+        await expect(asset.connect(signer_C).forceCancelVoting(999)).to.be.revertedWithCustomError(
+          asset,
+          "WrongIndexForAction",
+        );
       });
     });
   });
@@ -990,6 +993,17 @@ describe("Equity Tests", () => {
       await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(deactivatedAsset.connect(base.deployer).cancelVoting(0)).to.be.revertedWithCustomError(
+        deactivatedAsset,
+        "Deactivated",
+      );
+    });
+
+    it("GIVEN a deactivated asset WHEN forceCancelVoting THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(deactivatedAsset.connect(base.deployer).forceCancelVoting(0)).to.be.revertedWithCustomError(
         deactivatedAsset,
         "Deactivated",
       );
