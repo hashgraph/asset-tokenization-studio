@@ -11,8 +11,14 @@ bytes32 constant RESOLVER_KEY_OPERATOR_CLEARING_HOLDBYPARTITION = 0xab5e4afdccea
 /**
  * @title IOperatorClearingHoldByPartition
  * @author Asset Tokenization Studio Team
- * @notice Interface for creating holds during clearing operations by a partition operator.
- * @dev Part of the Layer 1 clearing system, allowing authorised operators to initiate holds.
+ * @notice Interface for operator-initiated hold creation submitted through the clearing flow
+ *         on a specific token partition.
+ * @dev    The caller must be an authorised operator for the target partition of `_from`.
+ *         On approval of the queued clearing operation the hold is created via the clearing
+ *         orchestrator; the clearing expiration and the resulting hold expiration are
+ *         independent timestamps.
+ *         The event `ClearedOperatorHoldByPartition` is emitted at submission time;
+ *         `ClearingOperationApproved` (defined in `IClearingTypes`) is emitted on approval.
  */
 interface IOperatorClearingHoldByPartition is IClearingTypes {
     /**
