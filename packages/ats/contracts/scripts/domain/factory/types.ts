@@ -132,8 +132,8 @@ export interface FixedRateDataParams {
 }
 
 export enum SecurityType {
-  BOND_VARIABLE_RATE = 0,
-  EQUITY = 1,
+  EQUITY = 0,
+  BOND_VARIABLE_RATE = 1,
   BOND_FIXED_RATE = 2,
   BOND_KPI_LINKED_RATE = 3,
   LOAN = 4,

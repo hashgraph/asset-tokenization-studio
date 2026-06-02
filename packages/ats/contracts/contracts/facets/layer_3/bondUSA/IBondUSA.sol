@@ -25,8 +25,9 @@ interface IBondUSA is IBondTypes {
     /**
      * @notice Emitted once when the bond-USA capability is initialised on a token.
      * @dev Fires exclusively from `initializeBondUSA`.
+     * @param bondDetailsData Bond configuration data initialised.
      */
-    event BondUSAInitialized();
+    event BondUSAInitialized(IBondTypes.BondDetailsData bondDetailsData);
 
     /**
      * @notice Initialises the bond-USA capability on the token.

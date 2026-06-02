@@ -5,7 +5,8 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import {
   BusinessLogicResolver,
-  IFactory,
+  IMockFactory,
+  IMockFactory__factory,
   type AccessControl,
   type ControlList,
   type ControllerFacet,
@@ -42,7 +43,7 @@ describe("Factory Tests", () => {
   const listOfCountries = "ES,FR,CH";
   const info = "info";
 
-  let factory: IFactory;
+  let factory: IMockFactory;
   let businessLogicResolver: BusinessLogicResolver;
   let accessControlFacet: AccessControl;
   let controlListFacet: ControlList;
@@ -64,10 +65,10 @@ describe("Factory Tests", () => {
 
   async function deployFactoryFixture() {
     const base = await deployAtsInfrastructureFixture();
-    factory = base.factory;
-    businessLogicResolver = base.blr;
     signer_A = base.deployer;
     signer_B = base.user1;
+    factory = IMockFactory__factory.connect(await base.factory.getAddress(), signer_A);
+    businessLogicResolver = base.blr;
 
     listOfMembers = [signer_A.address, signer_B.address];
     for (let i = 0; i < listOfRoles.length; i++) {
