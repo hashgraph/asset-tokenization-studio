@@ -67,7 +67,7 @@ import { ISsiManagement } from "./ssiManagement/ISsiManagement.sol";
 import { ITimeTravel } from "../test/testTimeTravel/ITimeTravel.sol";
 import { IBalanceTracker } from "./balanceTracker/IBalanceTracker.sol";
 import { IBalanceTrackerAdjusted } from "./balanceTrackerAdjusted/IBalanceTrackerAdjusted.sol";
-import { ITransferAndLock } from "./layer_3/transferAndLock/ITransferAndLock.sol";
+import { ITransferAndLock } from "./transferAndLock/ITransferAndLock.sol";
 import { ITransferAndLockByPartition } from "./transferAndLockByPartition/ITransferAndLockByPartition.sol";
 import { ICoupon } from "./coupon/ICoupon.sol";
 import { IDividend } from "./dividend/IDividend.sol";
