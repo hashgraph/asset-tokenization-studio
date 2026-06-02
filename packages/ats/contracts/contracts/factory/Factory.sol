@@ -46,7 +46,7 @@ import { IProceedRecipients } from "../facets/proceedRecipient/IProceedRecipient
 
 import { INominalValue } from "../facets/layer_2/nominalValue/INominalValue.sol";
 import { ScheduledTasksStorageWrapper } from "../domain/asset/ScheduledTasksStorageWrapper.sol";
-import { IProtectedPartitions } from "../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
+import { IProtectedPartitions } from "../facets/protectedPartition/IProtectedPartitions.sol";
 import { IExternalPauseManagement } from "../facets/externalPauseManagement/IExternalPauseManagement.sol";
 import {
     IExternalControlListManagement

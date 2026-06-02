@@ -12,7 +12,7 @@ import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
 import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
-import { IProtectedPartitions } from "../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
+import { IProtectedPartitions } from "../../facets/protectedPartition/IProtectedPartitions.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
