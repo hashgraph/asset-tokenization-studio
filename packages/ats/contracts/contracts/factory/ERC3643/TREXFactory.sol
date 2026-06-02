@@ -24,17 +24,13 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
     /// CREATE2 deployments
     mapping(string => address) public tokenDeployed;
 
-    /// @dev The address of the ATS suite factory
-    address private atsFactory;
-
     /**
      * @dev Constructor is setting the implementation authority and the Identity Factory of the TREX factory
      * @dev The constructor has been adjusted to allow null addresses later set by the owner
      */
-    constructor(address _implementationAuthority, address _idFactory, address _atsFactory) {
+    constructor(address _implementationAuthority, address _idFactory) {
         implementationAuthority = _implementationAuthority;
         idFactory = _idFactory;
-        atsFactory = _atsFactory;
     }
 
     /**
@@ -70,14 +66,6 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         require(_idFactory != address(0), "invalid argument - zero address");
         idFactory = _idFactory;
         emit IdFactorySet(_idFactory);
-    }
-
-    /**
-     *  @dev Sets the address of the ATS factory
-     */
-    function setAtsFactory(address _atsFactory) external onlyOwner {
-        require(_atsFactory != address(0), "invalid argument - zero address");
-        atsFactory = _atsFactory;
     }
 
     function getImplementationAuthority() external view override returns (address) {

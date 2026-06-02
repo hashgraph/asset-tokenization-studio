@@ -10,7 +10,8 @@ Remove the permissionless T-REX suite deployment surface from the factory and SD
 - Removed `deployTREXSuiteAtsEquity` and `deployTREXSuiteAtsBond` from `TREXFactory`, along with the `TokenDetailsAts` struct and their associated imports.
 - Deleted the now-unreachable deployment libraries: `TREXEquityDeploymentLib`, `TREXBondDeploymentLib`, `core/TREXBaseDeploymentLib`, and `core/SecurityDeploymentLib`.
 - Updated `Configuration.ts` (empty `LIBRARY_NAMES`) and the deployment task so `TREXFactoryAts` is deployed without external libraries.
-- The factory contract itself, its setters, `recoverContractOwnership`, and `getToken` are preserved.
+- Removed the now write-only `atsFactory` storage, its `setAtsFactory` setter, and the constructor's `_atsFactory` argument, which only fed the deleted deployment libraries. The deployment task no longer derives or passes an ATS factory address.
+- The factory contract itself, its remaining setters, `recoverContractOwnership`, and `getToken` are preserved.
 
 **SDK:**
 

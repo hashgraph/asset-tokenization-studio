@@ -40,7 +40,6 @@ describe("TREX Factory Tests", () => {
     ).deploy(
       trexDeployment.authorities.trexImplementationAuthority.target,
       await trexDeployment.factories.identityFactory.getAddress(),
-      factory.target,
       {},
     );
     await factoryAts.waitForDeployment();
@@ -98,7 +97,6 @@ describe("TREX Factory Tests", () => {
         const mockContract = await MockOwnable.connect(deployer).deploy(
           trexDeployment.authorities.trexImplementationAuthority.target,
           await trexDeployment.factories.identityFactory.getAddress(),
-          factory.target,
         );
         await mockContract.waitForDeployment();
 
@@ -168,29 +166,6 @@ describe("TREX Factory Tests", () => {
 
         expect(await factoryAts.getIdFactory()).to.equal(newIdFactory);
         await expect(tx).to.emit(factoryAts, "IdFactorySet").withArgs(newIdFactory);
-      });
-    });
-
-    describe("setAtsFactory", () => {
-      it("GIVEN non-owner caller WHEN calling setAtsFactory THEN transaction reverts", async () => {
-        await expect(factoryAts.connect(otherAccount).setAtsFactory(factory.target)).to.be.revertedWith(
-          "Ownable: caller is not the owner",
-        );
-      });
-
-      it("GIVEN zero address WHEN calling setAtsFactory THEN transaction reverts", async () => {
-        await expect(factoryAts.connect(deployer).setAtsFactory(ADDRESS_ZERO)).to.be.revertedWith(
-          "invalid argument - zero address",
-        );
-      });
-
-      it("GIVEN valid ats factory address WHEN calling setAtsFactory THEN factory is set", async () => {
-        const newAtsFactory = factory.target;
-
-        await factoryAts.connect(deployer).setAtsFactory(newAtsFactory);
-
-        // Note: There's no getter for atsFactory, but we can verify by checking it doesn't revert
-        await expect(factoryAts.connect(deployer).setAtsFactory(newAtsFactory)).to.not.be.reverted;
       });
     });
 

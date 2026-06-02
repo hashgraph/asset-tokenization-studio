@@ -222,7 +222,6 @@ task("deploy", "Deploy new contract")
   });
 
 task("deployTrexFactory", "Deploys ATS adapted TREX factory")
-  .addOptionalParam("atsFactory", "Address of the ATS factory", undefined, types.string)
   .addOptionalParam(
     "implementationAuthority",
     "Address of the implementation authority (defaults to zero address)",
@@ -252,16 +251,6 @@ task("deployTrexFactory", "Deploys ATS adapted TREX factory")
 
     let implementationAuthority = args.implementationAuthority ?? ADDRESS_ZERO;
     let idFactory = args.idFactory ?? ADDRESS_ZERO;
-    const atsFactory =
-      args.atsFactory ??
-      (
-        await deployContract(
-          new DeployContractCommand({
-            name: "Factory",
-            signer,
-          }),
-        )
-      ).address;
 
     if (idFactory == ADDRESS_ZERO) {
       const identityImplementation = (
@@ -368,7 +357,6 @@ task("deployTrexFactory", "Deploys ATS adapted TREX factory")
       {
         implementationAuthority,
         idFactory,
-        atsFactory,
       },
       hre,
       {
@@ -384,7 +372,7 @@ task("deployTrexFactory", "Deploys ATS adapted TREX factory")
       new DeployContractCommand({
         name: `TREXFactoryAts`,
         signer,
-        args: [implementationAuthority, idFactory, atsFactory],
+        args: [implementationAuthority, idFactory],
       }),
     );
 
