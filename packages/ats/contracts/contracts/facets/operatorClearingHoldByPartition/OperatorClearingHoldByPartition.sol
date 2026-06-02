@@ -5,13 +5,13 @@ import {
     IOperatorClearingHoldByPartition,
     RESOLVER_KEY_OPERATOR_CLEARING_HOLDBYPARTITION
 } from "./IOperatorClearingHoldByPartition.sol";
-import { IHoldTypes } from "../../hold/IHoldTypes.sol";
-import { Modifiers } from "../../../../services/Modifiers.sol";
-import { ClearingOps } from "../../../../domain/orchestrator/ClearingOps.sol";
-import { ThirdPartyType } from "../../../../domain/asset/types/ThirdPartyType.sol";
-import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
-import { DEFAULT_ADMIN_ROLE } from "../../../../constants/roles.sol";
-import { InitializerStorageWrapper } from "../../../../domain/core/InitializerStorageWrapper.sol";
+import { IHoldTypes } from "../hold/IHoldTypes.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { ClearingOps } from "../../domain/orchestrator/ClearingOps.sol";
+import { ThirdPartyType } from "../../domain/asset/types/ThirdPartyType.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title OperatorClearingHoldByPartition

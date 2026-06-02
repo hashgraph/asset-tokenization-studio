@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
+import { IHoldTypes } from "../hold/IHoldTypes.sol";
 import { IOperatorHoldByPartition, RESOLVER_KEY_OPERATOR_HOLD_BY_PARTITION } from "./IOperatorHoldByPartition.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { HoldOps } from "../../domain/orchestrator/HoldOps.sol";

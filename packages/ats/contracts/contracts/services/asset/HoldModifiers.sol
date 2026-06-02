@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { HoldStorageWrapper } from "../../domain/asset/HoldStorageWrapper.sol";
-import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
+import { IHoldTypes } from "../../facets/hold/IHoldTypes.sol";
 
 /**
  * @title HoldModifiers

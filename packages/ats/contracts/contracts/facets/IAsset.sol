@@ -113,7 +113,7 @@ import {
 } from "./protectedClearingHoldByPartition/IProtectedClearingHoldByPartition.sol";
 import {
     IOperatorClearingHoldByPartition
-} from "./layer_1/clearing/operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol";
+} from "./operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol";
 import { IClearing } from "./clearing/IClearing.sol";
 import { IComplianceFacet } from "./compliance/IComplianceFacet.sol";
 import { IComplianceByPartition } from "./complianceByPartition/IComplianceByPartition.sol";
