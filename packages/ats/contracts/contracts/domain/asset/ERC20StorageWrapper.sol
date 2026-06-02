@@ -12,6 +12,7 @@ import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
+import { ScheduledTasksOps } from "../orchestrator/ScheduledTasksOps.sol";
 
 /// @custom:hash storage Erc20
 bytes32 constant STORAGE_LOCATION_ERC20 = 0xba2beddc557de36eb4836f4ff1fd9d33a28d780fce70d36cf80b490142788200;
@@ -61,6 +62,7 @@ library ERC20StorageWrapper {
      * @param erc20Metadata The metadata struct containing token info and security type.
      */
     function initializeERC20(ICore.ERC20Metadata calldata erc20Metadata) internal {
+        ScheduledTasksOps.triggerPendingScheduledCrossOrderedTasks();
         ERC20Storage storage erc20Stor = erc20Storage();
         erc20Stor.name = erc20Metadata.info.name;
         erc20Stor.symbol = erc20Metadata.info.symbol;

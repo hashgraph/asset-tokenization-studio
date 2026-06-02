@@ -1,24 +1,28 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { ethers, type EventLog, type Log } from "ethers";
-import type { IMockFactory, ResolverProxy } from "@contract-types";
+import { ethers, type EventLog } from "ethers";
+import type { IFactory, ResolverProxy } from "@contract-types";
 import { ResolverProxy__factory } from "@contract-types";
 import { GAS_LIMIT } from "@scripts/infrastructure";
-import {
-  ATS_ROLES,
-  BOND_FIXED_RATE_CONFIG_ID,
-  DeployBondFromFactoryParams,
-  FactoryRegulationDataParams,
-  Rbac,
-} from "@scripts/domain";
+import { ATS_ROLES, DEPOSIT_TOKEN_CONFIG_ID } from "../constants";
+import { FactoryRegulationDataParams, Rbac, SecurityDataParams } from "./types";
 
 // ============================================================================
 // Types
 // ============================================================================
 
-export interface FixedRateParams {
-  rate: number;
-  rateDecimals: number;
+/**
+ * Parameters for deploying a deposit token from the factory.
+ *
+ * DepositToken is a minimal cash-style asset, so the input only carries the
+ * shared `SecurityData`. No nominal value, coupon, maturity or interest rate
+ * detail data is required.
+ */
+export interface DeployDepositTokenFromFactoryParams {
+  /** Admin account address */
+  adminAccount: string;
+  factory: IFactory;
+  securityData: SecurityDataParams;
 }
 
 // ============================================================================
@@ -26,49 +30,27 @@ export interface FixedRateParams {
 // ============================================================================
 
 /**
- * Deploy a bond token using the Factory contract.
+ * Deploy a deposit token using the Factory contract.
  *
  * This function constructs the required data structures and calls the factory's
- * deployBond method to create a new bond token with a diamond proxy.
+ * `deployDepositToken` method to create a new deposit token with a diamond
+ * proxy bound to `DEPOSIT_TOKEN_CONFIG_ID`.
  *
- * @param bondData - Bond deployment parameters
+ * Recommended defaults for `securityDataParams` on a cash token:
+ * - `clearingActive: false` — the hold verbs require `onlyClearingDisabled`.
+ * - `arePartitionsProtected: false` — the configuration does not include
+ *   `ProtectedByPartitionFacet`, so the protected-partition flow is not
+ *   reachable from the diamond.
+ *
+ * @param params - Deposit token deployment parameters
+ * @param regulationTypeParams - Regulation type / sub-type to apply
  * @returns Deployed ResolverProxy (diamond) contract instance
- *
- * @example
- * ```typescript
- * const bond = await deployBondFromFactory({
- *   adminAccount: deployer.address,
- *   isWhiteList: true,
- *   isControllable: true,
- *   isMultiPartition: false,
- *   name: 'My Bond',
- *   symbol: 'MBND',
- *   decimals: 18,
- *   isin: 'US0378331005',
- *   votingRight: true,
- *   // ... other params
- *   regulationType: RegulationType.REG_S,
- *   regulationSubType: RegulationSubType.NONE,
- *   factory: factoryContract,
- *   businessLogicResolver: blrAddress,
- * });
- * ```
  */
-export async function deployBondFixedRateFromFactory(
-  bondDataParams: DeployBondFromFactoryParams,
+export async function deployDepositTokenFromFactory(
+  params: DeployDepositTokenFromFactoryParams,
   regulationTypeParams: FactoryRegulationDataParams,
-  fixedRate: FixedRateParams,
 ): Promise<ResolverProxy> {
-  const {
-    factory,
-    adminAccount,
-    securityData: securityDataParams,
-    bondDetails: bondDetailsParams,
-    proceedRecipients,
-    proceedRecipientsData,
-  } = bondDataParams;
-
-  const { rate, rateDecimals } = fixedRate;
+  const { factory, adminAccount, securityData: securityDataParams } = params;
 
   // Build RBAC array with admin
   const rbacs: Rbac[] = [
@@ -81,7 +63,7 @@ export async function deployBondFixedRateFromFactory(
 
   // Build resolver proxy configuration
   const resolverProxyConfiguration = {
-    key: BOND_FIXED_RATE_CONFIG_ID,
+    key: DEPOSIT_TOKEN_CONFIG_ID,
     version: 1,
   };
 
@@ -111,21 +93,9 @@ export async function deployBondFixedRateFromFactory(
     identityRegistry: securityDataParams.identityRegistry,
   };
 
-  // Build bond details structure
-  const bondDetails = {
-    currency: bondDetailsParams.currency,
-    nominalValue: bondDetailsParams.nominalValue,
-    nominalValueDecimals: bondDetailsParams.nominalValueDecimals,
-    startingDate: bondDetailsParams.startingDate || Math.floor(Date.now() / 1000),
-    maturityDate: bondDetailsParams.maturityDate || 0,
-  };
-
-  // Build bond data
-  const bondData = {
+  // Build deposit token data
+  const depositTokenData = {
     security: securityData,
-    bondDetails,
-    proceedRecipients: proceedRecipients,
-    proceedRecipientsData: proceedRecipientsData,
   };
 
   // Build regulation data
@@ -139,36 +109,25 @@ export async function deployBondFixedRateFromFactory(
     },
   };
 
-  const fixedRateData = {
-    rate: rate,
-    rateDecimals: rateDecimals,
-  };
-
-  const bondFixedRateData = {
-    bondData: bondData,
-    factoryRegulationData: factoryRegulationData,
-    fixedRateData: fixedRateData,
-  };
-
-  // Deploy bond token via factory
-  const tx = await (factory as IMockFactory).deployBondFixedRate(bondFixedRateData, {
+  // Deploy deposit token via factory
+  const tx = await factory.deployDepositToken(depositTokenData, factoryRegulationData, {
     gasLimit: GAS_LIMIT.high,
   });
   const receipt = await tx.wait();
 
-  // Find BondDeployed event to get diamond address
+  // Find DepositTokenDeployed event to get diamond address
   const event = receipt?.logs.find(
-    (log: Log) => "eventName" in log && (log as EventLog).eventName === "BondFixedRateDeployed",
+    (log) => "eventName" in log && (log as EventLog).eventName === "DepositTokenDeployed",
   ) as EventLog | undefined;
   if (!event || !event.args) {
     throw new Error(
-      `BondFixedRateDeployed event not found in deployment transaction. Events: ${JSON.stringify(
-        receipt?.logs.filter((log: Log) => "eventName" in log).map((e: Log) => (e as EventLog).eventName),
+      `DepositTokenDeployed event not found in deployment transaction. Events: ${JSON.stringify(
+        receipt?.logs.filter((log) => "eventName" in log).map((e) => (e as EventLog).eventName),
       )}`,
     );
   }
 
-  const diamondAddress = event.args.diamondProxyAddress || event.args[1];
+  const diamondAddress = event.args.depositTokenAddress || event.args[1];
 
   if (!diamondAddress || diamondAddress === ethers.ZeroAddress) {
     throw new Error(`Invalid diamond address from event. Args: ${JSON.stringify(event.args)}`);

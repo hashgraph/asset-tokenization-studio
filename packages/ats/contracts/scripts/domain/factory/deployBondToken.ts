@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ethers, type EventLog } from "ethers";
-import type { IFactory, ResolverProxy } from "@contract-types";
+import type { IFactory, IMockFactory, ResolverProxy } from "@contract-types";
 import { ResolverProxy__factory } from "@contract-types";
 import { GAS_LIMIT } from "@scripts/infrastructure";
 import { ATS_ROLES, BOND_CONFIG_ID } from "../constants";
@@ -17,7 +17,7 @@ import { BondDetailsDataParams, FactoryRegulationDataParams, Rbac, SecurityDataP
 export interface DeployBondFromFactoryParams {
   /** Admin account address */
   adminAccount: string;
-  factory: IFactory;
+  factory: IFactory | IMockFactory;
   securityData: SecurityDataParams;
   bondDetails: BondDetailsDataParams;
   proceedRecipients: string[];

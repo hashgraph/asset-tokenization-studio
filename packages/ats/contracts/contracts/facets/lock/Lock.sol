@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ROLE_LOCKER, ROLE_CONTROLLER } from "../../../constants/roles.sol";
+import { ROLE_LOCKER, ROLE_CONTROLLER } from "../../constants/roles.sol";
 import { ILock, RESOLVER_KEY_LOCK } from "./ILock.sol";
-import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
-import { _DEFAULT_PARTITION } from "../../../constants/values.sol";
-import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-import { Modifiers } from "../../../services/Modifiers.sol";
-import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
-import { DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
-import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
+import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
+import { LockStorageWrapper } from "../../domain/asset/LockStorageWrapper.sol";
+import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title Lock

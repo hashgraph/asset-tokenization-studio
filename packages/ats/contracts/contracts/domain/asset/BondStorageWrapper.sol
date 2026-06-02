@@ -15,15 +15,16 @@ bytes32 constant STORAGE_LOCATION_BOND = 0xa99cdff87e8b13602d53b3661888bce1eb21f
 
 /**
  * @notice Persistent storage layout for the Bond facet.
- * @dev Holds the initialisation flag and the lifecycle timestamps that frame a bond
- *      instrument. Currency, nominal value and nominal-value decimals are owned by
- *      {NominalValueStorageWrapper}; this struct only captures the bond-specific dates.
- *      New fields must be appended below the marker to preserve ERC-7201 slot offsets.
+ * @dev Holds lifecycle timestamps that define the active period of a bond instrument.
+ *      Currency, nominal value and nominal-value decimals are stored in
+ *      {NominalValueDataStorage}. New fields must be appended below the marker to
+ *      preserve ERC-7201 slot offsets.
+ * @param startingDate Unix timestamp from which the bond lifecycle starts.
+ * @param maturityDate Unix timestamp at which the bond reaches maturity.
  * @custom:storage-location erc7201:security.token.standard.storage.Bond
  */
 struct BondDataStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
-    bool initialized;
     // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
     // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     uint256 startingDate;
@@ -31,7 +32,6 @@ struct BondDataStorage {
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     // ─── APPEND-ONLY ZONE BELOW ───
 }
-
 /// @title Bond Storage Wrapper
 /// @notice Library for managing Bond token storage operations.
 /// @author Asset Tokenization Studio Team
@@ -46,7 +46,6 @@ library BondStorageWrapper {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_bond(IBondTypes.BondDetailsData calldata bondDetailsData) internal {
         BondDataStorage storage bs = _bondStorage();
-        bs.initialized = true;
         bs.startingDate = bondDetailsData.startingDate;
         bs.maturityDate = bondDetailsData.maturityDate;
     }
@@ -112,14 +111,6 @@ library BondStorageWrapper {
 
         DecimalsLib.checkExponentOverflow(decimalsAdjustedAtBlockTimestamp);
         principalFor_.denominator = DecimalsLib.pow10(decimalsAdjustedAtBlockTimestamp);
-    }
-
-    /**
-     * @notice Indicates whether the bond storage has been initialised.
-     * @return Whether {initialize_bond} has already been executed for this token.
-     */
-    function isBondInitialized() internal view returns (bool) {
-        return _bondStorage().initialized;
     }
 
     /**

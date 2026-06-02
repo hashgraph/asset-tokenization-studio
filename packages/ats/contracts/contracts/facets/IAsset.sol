@@ -34,7 +34,7 @@ import { IOperator } from "./operator/IOperator.sol";
 import { ITransfer } from "./transfer/ITransfer.sol";
 
 // Layer 1 — Remaining facets
-import { IERC20Votes } from "./layer_1/ERC1400/ERC20Votes/IERC20Votes.sol";
+import { IERC20Votes } from "./erc20Votes/IERC20Votes.sol";
 import { IERC3643 } from "./layer_1/ERC3643/IERC3643.sol";
 import { IEquity } from "./layer_2/equity/IEquity.sol";
 import { IEquityUSA } from "./layer_3/equityUSA/IEquityUSA.sol";
@@ -95,7 +95,7 @@ import { IScheduledBalanceAdjustment } from "./scheduledBalanceAdjustment/ISched
 import { ICouponSecurityHolders } from "./couponSecurityHolders/ICouponSecurityHolders.sol";
 import { ISecurityHolders } from "./securityHolders/ISecurityHolders.sol";
 
-import { ILock } from "./layer_1/lock/ILock.sol";
+import { ILock } from "./lock/ILock.sol";
 import { ILockByPartition } from "./lockByPartition/ILockByPartition.sol";
 import { IFreeze } from "./freeze/IFreeze.sol";
 import { IBatchFreeze } from "./batchFreeze/IBatchFreeze.sol";
@@ -132,7 +132,7 @@ import { IControllerHoldByPartition } from "./controllerHoldByPartition/IControl
 import { IControllerByPartition } from "./controllerByPartition/IControllerByPartition.sol";
 import { IProtectedByPartition } from "./protectedByPartition/IProtectedByPartition.sol";
 import { IProtectedHoldByPartition } from "./protectedHoldByPartition/IProtectedHoldByPartition.sol";
-import { IERC20Permit } from "./layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
+import { IERC20Permit } from "./erc20Permit/IERC20Permit.sol";
 import { IEIP712 } from "./eip712/IEIP712.sol";
 import { IControlList } from "./controlList/IControlList.sol";
 import { IBatchBurn } from "./batchBurn/IBatchBurn.sol";

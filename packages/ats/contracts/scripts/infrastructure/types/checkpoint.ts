@@ -220,6 +220,8 @@ export interface DeploymentCheckpoint {
       bondFixedRate?: ConfigurationResult;
       /** Bond KpiLinked Rate configuration */
       bondKpiLinkedRate?: ConfigurationResult;
+      /** Deposit Token configuration */
+      depositToken?: ConfigurationResult;
       /** Loan configuration */
       loan?: ConfigurationResult;
       /** Loans Portfolio configuration */

@@ -13,6 +13,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         _;
     }
 
+    // TODO: Format validations in all transactions.
     function createConfiguration(
         bytes32 _configurationId,
         FacetConfiguration[] calldata _facetConfigurations

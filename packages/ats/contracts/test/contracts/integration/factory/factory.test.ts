@@ -5,7 +5,8 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import {
   BusinessLogicResolver,
-  IFactory,
+  IMockFactory,
+  IMockFactory__factory,
   type AccessControl,
   type ControlList,
   type ControllerFacet,
@@ -25,6 +26,7 @@ import {
   BOND_CONFIG_ID,
   BOND_FIXED_RATE_CONFIG_ID,
   BOND_KPI_LINKED_RATE_CONFIG_ID,
+  DEPOSIT_TOKEN_CONFIG_ID,
 } from "@scripts";
 import { Rbac, SecurityType } from "@scripts/domain";
 import { decodeEvent } from "@scripts/infrastructure";
@@ -41,7 +43,7 @@ describe("Factory Tests", () => {
   const listOfCountries = "ES,FR,CH";
   const info = "info";
 
-  let factory: IFactory;
+  let factory: IMockFactory;
   let businessLogicResolver: BusinessLogicResolver;
   let accessControlFacet: AccessControl;
   let controlListFacet: ControlList;
@@ -63,10 +65,10 @@ describe("Factory Tests", () => {
 
   async function deployFactoryFixture() {
     const base = await deployAtsInfrastructureFixture();
-    factory = base.factory;
-    businessLogicResolver = base.blr;
     signer_A = base.deployer;
     signer_B = base.user1;
+    factory = IMockFactory__factory.connect(await base.factory.getAddress(), signer_A);
+    businessLogicResolver = base.blr;
 
     listOfMembers = [signer_A.address, signer_B.address];
     for (let i = 0; i < listOfRoles.length; i++) {
@@ -92,7 +94,7 @@ describe("Factory Tests", () => {
   });
 
   describe("Modifier Tests - Comprehensive Coverage", () => {
-    describe("checkResolver modifier", () => {
+    describe("onlyValidResolver modifier", () => {
       it("GIVEN empty resolver (address(0)) WHEN deploying equity THEN reverts with EmptyResolver", async () => {
         const equityData = {
           security: getSecurityData(businessLogicResolver, {
@@ -133,7 +135,7 @@ describe("Factory Tests", () => {
         );
       });
 
-      it("GIVEN valid resolver WHEN deploying equity THEN passes checkResolver validation", async () => {
+      it("GIVEN valid resolver WHEN deploying equity THEN passes onlyValidResolver validation", async () => {
         const equityData = {
           security: getSecurityData(businessLogicResolver, {
             rbacs: init_rbacs,
@@ -149,7 +151,7 @@ describe("Factory Tests", () => {
       });
     });
 
-    describe("checkISIN modifier", () => {
+    describe("onlyValidISIN modifier", () => {
       it("GIVEN ISIN with length < 12 WHEN deploying equity THEN reverts with WrongISIN", async () => {
         const equityData = {
           security: getSecurityData(businessLogicResolver, {
@@ -247,7 +249,7 @@ describe("Factory Tests", () => {
         );
       });
 
-      it("GIVEN valid ISIN WHEN deploying bond THEN passes checkISIN validation", async () => {
+      it("GIVEN valid ISIN WHEN deploying bond THEN passes onlyValidISIN validation", async () => {
         const bondData = {
           security: getSecurityData(businessLogicResolver, {
             rbacs: init_rbacs,
@@ -265,7 +267,7 @@ describe("Factory Tests", () => {
       });
     });
 
-    describe("checkAdmins modifier", () => {
+    describe("onlyValidAdmins modifier", () => {
       it("GIVEN rbacs with empty members array for admin role WHEN deploying equity THEN reverts with NoInitialAdmins", async () => {
         const emptyAdminRbacs: Rbac[] = [
           {
@@ -394,7 +396,7 @@ describe("Factory Tests", () => {
       });
     });
 
-    describe("checkRegulation modifier", () => {
+    describe("onlyValidRegulation modifier", () => {
       it("GIVEN NONE regulation type with non-NONE subtype WHEN deploying equity THEN reverts with RegulationTypeAndSubTypeForbidden", async () => {
         const equityData = {
           security: getSecurityData(businessLogicResolver, {
@@ -969,6 +971,110 @@ describe("Factory Tests", () => {
       await expect(factory.deployBond(bondData, factoryRegulationData))
         .to.be.revertedWithCustomError(factory, "RegulationTypeAndSubTypeForbidden")
         .withArgs(RegulationType.REG_S, RegulationSubType.REG_D_506_C);
+    });
+  });
+
+  describe("Deposit Token tests", () => {
+    let depositTokenData: ReturnType<typeof buildDepositTokenData>;
+
+    function buildDepositTokenData() {
+      return {
+        security: getSecurityData(businessLogicResolver, {
+          rbacs: init_rbacs,
+          resolverProxyConfiguration: { key: DEPOSIT_TOKEN_CONFIG_ID, version: 1 },
+        }),
+      };
+    }
+
+    beforeEach(() => {
+      depositTokenData = buildDepositTokenData();
+    });
+
+    it("GIVEN an empty Resolver WHEN deploying a new deposit token THEN transaction fails", async () => {
+      depositTokenData.security.resolver = ADDRESS_ZERO;
+
+      await expect(factory.deployDepositToken(depositTokenData, getRegulationData())).to.be.revertedWithCustomError(
+        factory,
+        "EmptyResolver",
+      );
+    });
+
+    it("GIVEN a wrong ISIN WHEN deploying a new deposit token THEN transaction fails", async () => {
+      depositTokenData.security.erc20MetadataInfo.isin = "short";
+
+      await expect(
+        factory.deployDepositToken(depositTokenData, getRegulationData(), {
+          gasLimit: GAS_LIMIT.default,
+        }),
+      ).to.be.revertedWithCustomError(factory, "WrongISIN");
+
+      depositTokenData.security.erc20MetadataInfo.isin = "SJ5633813321";
+      await expect(factory.deployDepositToken(depositTokenData, getRegulationData())).to.be.revertedWithCustomError(
+        factory,
+        "WrongISINChecksum",
+      );
+    });
+
+    it("GIVEN no admin WHEN deploying a new deposit token THEN transaction fails", async () => {
+      depositTokenData.security.rbacs = [];
+
+      await expect(factory.deployDepositToken(depositTokenData, getRegulationData())).to.be.revertedWithCustomError(
+        factory,
+        "NoInitialAdmins",
+      );
+    });
+
+    it("GIVEN wrong regulation type WHEN deploying a new deposit token THEN transaction fails", async () => {
+      const factoryRegulationData = getRegulationData({
+        regulationType: RegulationType.NONE,
+        regulationSubType,
+        additionalSecurityData: {
+          countriesControlListType,
+          listOfCountries,
+          info,
+        },
+      });
+
+      await expect(factory.deployDepositToken(depositTokenData, factoryRegulationData))
+        .to.be.revertedWithCustomError(factory, "RegulationTypeAndSubTypeForbidden")
+        .withArgs(RegulationType.NONE, regulationSubType);
+    });
+
+    it("GIVEN the proper information WHEN deploying a new deposit token THEN transaction succeeds", async () => {
+      const tx = factory.deployDepositToken(depositTokenData, getRegulationData());
+      await expect(tx).to.emit(factory, "DepositTokenDeployed");
+
+      const result = await tx;
+      const receipt = await result.wait();
+      const decoded = await decodeEvent(factory, "DepositTokenDeployed", receipt);
+      const depositTokenAddress = decoded.depositTokenAddress;
+
+      await readFacets(depositTokenAddress);
+
+      for (let i = 0; i < listOfMembers.length; i++) {
+        const roleMemberCount = await accessControlFacet.getRoleMemberCount(listOfRoles[i]);
+        const roleMember = await accessControlFacet.getRoleMembers(listOfRoles[i], 0, 2);
+        expect(roleMemberCount).to.be.equal(2);
+        expect(roleMember[0]).to.be.equal(listOfMembers[0]);
+        expect(roleMember[1]).to.be.equal(listOfMembers[1]);
+      }
+
+      const whiteList = await controlListFacet.getControlListType();
+      expect(whiteList).to.be.equal(depositTokenData.security.isWhiteList);
+
+      const controllable = await controllerFacet.isControllable();
+      expect(controllable).to.be.equal(depositTokenData.security.isControllable);
+
+      const metadata = await coreFacet.getERC20Metadata();
+      expect(metadata.info.name).to.be.equal(depositTokenData.security.erc20MetadataInfo.name);
+      expect(metadata.info.symbol).to.be.equal(depositTokenData.security.erc20MetadataInfo.symbol);
+      expect(metadata.info.decimals).to.be.equal(depositTokenData.security.erc20MetadataInfo.decimals);
+      expect(metadata.info.isin).to.be.equal(depositTokenData.security.erc20MetadataInfo.isin);
+      expect(metadata.securityType).to.be.equal(SecurityType.DEPOSIT_TOKEN);
+
+      // Cap initialised from SecurityData.maxSupply
+      const capFacet = await ethers.getContractAt("Cap", depositTokenAddress);
+      expect(await capFacet.getMaxSupply()).to.equal(depositTokenData.security.maxSupply);
     });
   });
 
@@ -1712,7 +1818,7 @@ describe("Factory Tests", () => {
     });
   });
 
-  describe("checkAdmins edge cases", () => {
+  describe("onlyValidAdmins edge cases", () => {
     it("GIVEN rbacs with empty members array for admin role WHEN deploying equity THEN transaction fails", async () => {
       const emptyAdminRbacs: Rbac[] = [
         {
