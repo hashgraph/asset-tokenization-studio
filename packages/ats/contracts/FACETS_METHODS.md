@@ -3,7 +3,7 @@
 > **Generated file — do not edit by hand.** Regenerate after any facet interface change with:
 >
 > ```bash
-> node .claude/skills/solidity-natspec/scripts/gen_facets_methods.mjs
+> node gen_facets_methods.mjs
 > ```
 >
 > Maintained via the `solidity-natspec` skill.
@@ -52,6 +52,7 @@
 - [Documentation](#documentation)
 - [EIP712](#eip712)
 - [ERC20 Permit](#erc20-permit)
+- [ERC20 Votes](#erc20-votes)
 - [External Control List Management](#external-control-list-management)
 - [External KYC List Management](#external-kyc-list-management)
 - [External Pause Management](#external-pause-management)
@@ -65,6 +66,7 @@
 - [Identity](#identity)
 - [Initializer](#initializer)
 - [Interest Rate](#interest-rate)
+- [Lock](#lock)
 - [Lock At Snapshot](#lock-at-snapshot)
 - [Lock At Snapshot By Partition](#lock-at-snapshot-by-partition)
 - [Lock By Partition](#lock-by-partition)
@@ -94,20 +96,18 @@
 - [Transfer](#transfer)
 - [Transfer And Lock By Partition](#transfer-and-lock-by-partition)
 - [Transfer By Partition](#transfer-by-partition)
+- [Votes](#votes)
 - [Voting Security Holders](#voting-security-holders)
 - [Compliance](#compliance)
-- [ERC20 Votes](#erc20-votes)
 - [External Control List](#external-control-list)
 - [External KYC List](#external-kyc-list)
 - [External Pause](#external-pause)
 - [Identity Registry](#identity-registry)
 - [KYC](#kyc)
-- [Lock](#lock)
 - [Operator Clearing Hold By Partition](#operator-clearing-hold-by-partition)
 - [Protected Partitions](#protected-partitions)
 - [Revocation List](#revocation-list)
 - [Snapshots](#snapshots)
-- [Votes](#votes)
 - [Amortization](#amortization)
 - [Bond Read](#bond-read)
 - [Equity](#equity)
@@ -1167,6 +1167,28 @@ function permit(
 ) external;
 ```
 
+## ERC20 Votes
+
+- Interface: `contracts/facets/erc20Votes/IERC20Votes.sol`
+- Resolver key: `Erc20votes`
+
+```solidity
+function initializeERC20Votes(bool _activated) external;
+function isActivated() external view returns (bool);
+function checkpoints(address _account, uint256 _pos) external view returns (Checkpoints.Checkpoint memory);
+function numCheckpoints(address _account) external view returns (uint256);
+```
+
+### Types
+
+```solidity
+// declared in contracts/infrastructure/utils/Checkpoints.sol
+struct Checkpoint {
+  uint256 from;
+  uint256 value;
+}
+```
+
 ## External Control List Management
 
 - Interface: `contracts/facets/externalControlListManagement/IExternalControlListManagement.sol`
@@ -1456,6 +1478,38 @@ enum RateType {
   FIXED,
   KPI_LINKED
 }
+```
+
+## Lock
+
+- Interface: `contracts/facets/lock/ILock.sol`
+- Resolver key: `Lock`
+
+```solidity
+function initializeLock() external;
+function lock(uint256 _amount, address _tokenHolder, uint256 _expirationTimestamp) external returns (uint256 lockId_);
+function release(uint256 _lockId, address _tokenHolder) external returns (bool success_);
+function updateLockExpiration(
+  address _tokenHolder,
+  uint256 _lockId,
+  uint256 _newExpirationTimestamp
+) external returns (bool success_);
+function forceReleaseByPartition(
+  bytes32 _partition,
+  uint256 _lockId,
+  address _tokenHolder
+) external returns (bool success_);
+function getLockedAmountFor(address _tokenHolder) external view returns (uint256 amount_);
+function getLockCountFor(address _tokenHolder) external view returns (uint256 lockCount_);
+function getLocksIdFor(
+  address _tokenHolder,
+  uint256 _pageIndex,
+  uint256 _pageLength
+) external view returns (uint256[] memory locksId_);
+function getLockFor(
+  address _tokenHolder,
+  uint256 _lockId
+) external view returns (uint256 amount_, uint256 expirationTimestamp_);
 ```
 
 ## Lock At Snapshot
@@ -2069,6 +2123,18 @@ struct BasicTransferInfo {
 }
 ```
 
+## Votes
+
+- Interface: `contracts/facets/erc20Votes/IVotes.sol`
+
+```solidity
+function delegate(address delegatee) external;
+function getVotes(address account) external view returns (uint256);
+function getPastVotes(address account, uint256 timepoint) external view returns (uint256);
+function getPastTotalSupply(uint256 timepoint) external view returns (uint256);
+function delegates(address account) external view returns (address);
+```
+
 ## Voting Security Holders
 
 - Interface: `contracts/facets/votingSecurityHolders/IVotingSecurityHolders.sol`
@@ -2095,28 +2161,6 @@ function transferred(address _from, address _to, uint256 _amount) external;
 function created(address _to, uint256 _amount) external;
 function destroyed(address _from, uint256 _amount) external;
 function canTransfer(address _from, address _to, uint256 _amount) external view returns (bool);
-```
-
-## ERC20 Votes
-
-- Interface: `contracts/facets/erc20Votes/IERC20Votes.sol`
-- Resolver key: `Erc20votes`
-
-```solidity
-function initializeERC20Votes(bool _activated) external;
-function isActivated() external view returns (bool);
-function checkpoints(address _account, uint256 _pos) external view returns (Checkpoints.Checkpoint memory);
-function numCheckpoints(address _account) external view returns (uint256);
-```
-
-### Types
-
-```solidity
-// declared in contracts/infrastructure/utils/Checkpoints.sol
-struct Checkpoint {
-  uint256 from;
-  uint256 value;
-}
 ```
 
 ## External Control List
@@ -2208,38 +2252,6 @@ struct KycData {
 }
 ```
 
-## Lock
-
-- Interface: `contracts/facets/lock/ILock.sol`
-- Resolver key: `Lock`
-
-```solidity
-function initializeLock() external;
-function lock(uint256 _amount, address _tokenHolder, uint256 _expirationTimestamp) external returns (uint256 lockId_);
-function release(uint256 _lockId, address _tokenHolder) external returns (bool success_);
-function updateLockExpiration(
-  address _tokenHolder,
-  uint256 _lockId,
-  uint256 _newExpirationTimestamp
-) external returns (bool success_);
-function forceReleaseByPartition(
-  bytes32 _partition,
-  uint256 _lockId,
-  address _tokenHolder
-) external returns (bool success_);
-function getLockedAmountFor(address _tokenHolder) external view returns (uint256 amount_);
-function getLockCountFor(address _tokenHolder) external view returns (uint256 lockCount_);
-function getLocksIdFor(
-  address _tokenHolder,
-  uint256 _pageIndex,
-  uint256 _pageLength
-) external view returns (uint256[] memory locksId_);
-function getLockFor(
-  address _tokenHolder,
-  uint256 _lockId
-) external view returns (uint256 amount_, uint256 expirationTimestamp_);
-```
-
 ## Operator Clearing Hold By Partition
 
 - Interface: `contracts/facets/layer_1/clearing/operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol`
@@ -2325,18 +2337,6 @@ struct ScheduledTask {
   uint256 scheduledTimestamp;
   bytes data;
 }
-```
-
-## Votes
-
-- Interface: `contracts/facets/erc20Votes/IVotes.sol`
-
-```solidity
-function delegate(address delegatee) external;
-function getVotes(address account) external view returns (uint256);
-function getPastVotes(address account, uint256 timepoint) external view returns (uint256);
-function getPastTotalSupply(uint256 timepoint) external view returns (uint256);
-function delegates(address account) external view returns (address);
 ```
 
 <!-- layer_2 -->

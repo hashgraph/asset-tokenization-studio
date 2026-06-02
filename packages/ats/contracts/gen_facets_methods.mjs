@@ -4,7 +4,7 @@
 // parameters, return values, and any referenced struct/enum types.
 //
 // Usage (from packages/ats/contracts):
-//   node ../../../.claude/skills/solidity-natspec/scripts/gen_facets_methods.mjs
+//   node gen_facets_methods.mjs
 //
 // The script is the deterministic engine behind the FACETS_METHODS.md upkeep described in the
 // solidity-natspec SKILL.md. It parses ASTs (not regex) so multi-line signatures and wrapped
@@ -14,21 +14,22 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-// Resolve @solidity-parser/parser from the monorepo root node_modules.
+// This script lives in the contracts package root, alongside the FACETS_METHODS.md it produces.
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const repoRoot = path.resolve(__dirname, "../../../..");
+const contractsRoot = __dirname;
+const repoRoot = path.resolve(__dirname, "../../..");
+const facetsDir = path.join(contractsRoot, "contracts/facets");
+
+// Resolve @solidity-parser/parser from the package or monorepo root node_modules.
 const parserCandidates = [
+  "packages/ats/contracts/node_modules/@solidity-parser/parser/dist/index.cjs.js",
   "node_modules/@solidity-parser/parser/dist/index.cjs.js",
   "node_modules/@solidity-parser/parser/dist/index.cjs",
-  "packages/ats/contracts/node_modules/@solidity-parser/parser/dist/index.cjs.js",
 ];
 const parserPath = parserCandidates.map((p) => path.join(repoRoot, p)).find((p) => fs.existsSync(p));
 if (!parserPath) throw new Error("@solidity-parser/parser not found in node_modules");
 const parserMod = await import(parserPath);
 const parser = parserMod.default ?? parserMod;
-
-const contractsRoot = path.join(repoRoot, "packages/ats/contracts");
-const facetsDir = path.join(contractsRoot, "contracts/facets");
 
 // ---------------------------------------------------------------------------------------------
 // File discovery
@@ -311,7 +312,7 @@ out.push("");
 out.push("> **Generated file — do not edit by hand.** Regenerate after any facet interface change with:");
 out.push("> ");
 out.push("> ```bash");
-out.push("> node .claude/skills/solidity-natspec/scripts/gen_facets_methods.mjs");
+out.push("> node gen_facets_methods.mjs");
 out.push("> ```");
 out.push("> ");
 out.push("> Maintained via the `solidity-natspec` skill.");

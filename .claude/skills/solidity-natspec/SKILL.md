@@ -1,6 +1,6 @@
 ---
 name: solidity-natspec
-description: Produce and validate comprehensive NatSpec documentation on Solidity files. Use whenever a `.sol` file is created or modified — contracts, interfaces, libraries, facets under `packages/ats/contracts/**`. Ensures every contract element (contract/interface/library, enums, structs, events, custom errors, state variables, modifiers, functions) carries audit-ready NatSpec in the project's house style (British English, ≤100-char lines, intent-focused). Also use on explicit request (`/solidity-natspec`) to document or re-document an existing `.sol` file. Also use whenever a facet interface under `packages/ats/contracts/contracts/facets/**` changes, or when asked to update, regenerate, or refresh `packages/ats/contracts/FACETS_METHODS.md` (the generated facet method index) — the skill regenerates it by running `scripts/gen_facets_methods.mjs`, never by hand-editing.
+description: Produce and validate comprehensive NatSpec documentation on Solidity files. Use whenever a `.sol` file is created or modified — contracts, interfaces, libraries, facets under `packages/ats/contracts/**`. Ensures every contract element (contract/interface/library, enums, structs, events, custom errors, state variables, modifiers, functions) carries audit-ready NatSpec in the project's house style (British English, ≤100-char lines, intent-focused). Also use on explicit request (`/solidity-natspec`) to document or re-document an existing `.sol` file. Also use whenever a facet interface under `packages/ats/contracts/contracts/facets/**` changes, or when asked to update, regenerate, or refresh `packages/ats/contracts/FACETS_METHODS.md` (the generated facet method index) — the skill regenerates it by running `packages/ats/contracts/gen_facets_methods.mjs`, never by hand-editing.
 ---
 
 # Solidity NatSpec Documentation
@@ -99,10 +99,10 @@ Regenerate it deterministically — do **not** hand-edit FACETS_METHODS.md:
 
 ```bash
 cd packages/ats/contracts
-node ../../../.claude/skills/solidity-natspec/scripts/gen_facets_methods.mjs
+node gen_facets_methods.mjs
 ```
 
-The generator (`scripts/gen_facets_methods.mjs`) parses the interface ASTs via
+The generator (`packages/ats/contracts/gen_facets_methods.mjs`) parses the interface ASTs via
 `@solidity-parser/parser` and produces the document with these rules — useful to know when
 verifying its output or extending the script:
 
