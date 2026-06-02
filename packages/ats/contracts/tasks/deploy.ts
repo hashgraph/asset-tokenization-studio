@@ -239,14 +239,7 @@ task("deployTrexFactory", "Deploys ATS adapted TREX factory")
   )
   .addOptionalParam("signerPosition", "The index of the signer in the Hardhat signers array", undefined, types.int)
   .setAction(async (args: DeployTrexFactoryArgs, hre) => {
-    const {
-      deployContractWithLibraries,
-      DeployContractWithLibraryCommand,
-      deployContract,
-      DeployContractCommand,
-      addressListToHederaIdList,
-      ADDRESS_ZERO,
-    } = await import("@scripts");
+    const { deployContract, DeployContractCommand, addressListToHederaIdList, ADDRESS_ZERO } = await import("@scripts");
 
     const { signer }: GetSignerResult = await hre.run("getSigner", {
       privateKey: args.privateKey,
@@ -387,12 +380,11 @@ task("deployTrexFactory", "Deploys ATS adapted TREX factory")
 
     console.log(`Signer: ${signer.address}`);
 
-    const result = await deployContractWithLibraries(
-      new DeployContractWithLibraryCommand({
+    const result = await deployContract(
+      new DeployContractCommand({
         name: `TREXFactoryAts`,
         signer,
         args: [implementationAuthority, idFactory, atsFactory],
-        libraries: ["TREXBondDeploymentLib", "TREXEquityDeploymentLib"],
       }),
     );
 

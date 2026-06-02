@@ -216,8 +216,6 @@ import GetTotalVotingHoldersRequest from "./equity/GetTotalVotingHoldersRequest"
 import GetVotingHoldersRequest from "./equity/GetVotingHoldersRequest";
 import GetSecurityHoldersRequest from "./security/GetSecurityHoldersRequest";
 import GetTotalSecurityHoldersRequest from "./security/GetTotalSecurityHoldersRequest";
-import CreateTrexSuiteEquityRequest from "./equity/CreateTrexSuiteEquityRequest";
-import CreateTrexSuiteBondRequest from "./bond/CreateTrexSuiteBondRequest";
 import AddProceedRecipientRequest from "./bond/AddProceedRecipientRequest";
 import RemoveProceedRecipientRequest from "./bond/RemoveProceedRecipientRequest";
 import UpdateProceedRecipientDataRequest from "./bond/UpdateProceedRecipientDataRequest";
@@ -447,8 +445,6 @@ export {
   GetTotalVotingHoldersRequest,
   GetSecurityHoldersRequest,
   GetTotalSecurityHoldersRequest,
-  CreateTrexSuiteBondRequest,
-  CreateTrexSuiteEquityRequest,
   AddProceedRecipientRequest,
   RemoveProceedRecipientRequest,
   UpdateProceedRecipientDataRequest,

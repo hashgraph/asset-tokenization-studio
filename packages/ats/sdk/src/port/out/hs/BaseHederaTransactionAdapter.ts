@@ -186,18 +186,6 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     return this.factoryOps.createBondKpiLinkedRate(...args);
   }
 
-  async createTrexSuiteBond(
-    ...args: Parameters<FactoryOperations["createTrexSuiteBond"]>
-  ): Promise<TransactionResponse> {
-    return this.factoryOps.createTrexSuiteBond(...args);
-  }
-
-  async createTrexSuiteEquity(
-    ...args: Parameters<FactoryOperations["createTrexSuiteEquity"]>
-  ): Promise<TransactionResponse> {
-    return this.factoryOps.createTrexSuiteEquity(...args);
-  }
-
   // ===== Transfer Operations =====
 
   async transfer(...args: Parameters<TransferOperations["transfer"]>): Promise<TransactionResponse> {
