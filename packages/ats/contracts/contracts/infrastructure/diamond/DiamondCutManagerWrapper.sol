@@ -16,10 +16,23 @@ bytes32 constant STORAGE_LOCATION_DIAMOND_CUT_MANAGER = 0xc9161810d6144bfe5b2804
 
 /**
  * @notice Diamond storage backing the diamond-cut manager configuration registry.
- * @dev Indexes configurations, their versions, and the per-version facet/selector/interface
- *      resolution maps used when cutting a resolver-proxy. Hoisted to file scope per the
- *      project's ERC-7201 storage convention; new fields must be appended below the
- *      APPEND-ONLY marker to preserve upgrade safety.
+ * @dev Indexes configurations, their versions, and the per-version facet, selector and
+ *      interface resolution maps used when cutting a resolver proxy. Hoisted to file scope
+ *      per the project's ERC-7201 storage convention; new fields must be appended below
+ *      the append-only marker to preserve upgrade safety.
+ * @param configurations Active configuration identifiers in insertion order.
+ * @param activeConfigurations Whether a configuration identifier is active.
+ * @param latestVersion Latest activated version for each configuration.
+ * @param batchVersion Draft version currently being assembled for each configuration.
+ * @param facetIds Facet identifiers registered for each configuration version hash.
+ * @param facetVersions Facet versions aligned by index with `facetIds`.
+ * @param facetIdPosition One-based facet position within a configuration version.
+ * @param facetAddress Facet implementation address resolved by selector hash.
+ * @param addr Facet implementation address resolved by facet identifier hash.
+ * @param selectors Function selectors exposed by each facet in a configuration version.
+ * @param selectorToFacetId Facet identifier resolved by selector hash.
+ * @param interfaceIds Interface identifiers exposed by each facet.
+ * @param supportsInterface Whether an interface identifier is supported by a version.
  * @custom:storage-location erc7201:security.token.standard.storage.DiamondCutManager
  */
 struct DiamondCutManagerStorage {
@@ -52,12 +65,34 @@ struct DiamondCutManagerStorage {
     // ─── APPEND-ONLY ZONE BELOW ───
 }
 
+/**
+ * @title Diamond Cut Manager Wrapper
+ * @notice Provides internal helpers for registering and querying diamond configurations.
+ * @dev Manages versioned facet configurations used by resolver proxies. The wrapper
+ *      resolves facet implementations through the business-logic resolver and records
+ *      selector and interface lookup tables for efficient runtime dispatch.
+ * @author Asset Tokenization Studio Team
+ */
 abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, BusinessLogicResolverWrapper {
+    /**
+     * @notice Requires an explicit non-zero configuration version.
+     * @dev Reverts with `VersionZero` when `_version` is zero.
+     * @param _configurationId Identifier of the configuration being validated.
+     * @param _version Configuration version that must be non-zero.
+     */
     modifier validateConfigurationVersion(bytes32 _configurationId, uint256 _version) {
         _checkExplicitVersion(_configurationId, _version);
         _;
     }
 
+    /**
+     * @notice Creates and activates a complete configuration in a single batch.
+     * @dev Reverts if the configuration already has an ongoing batch. Resolves facet
+     *      implementations, registers selectors and interfaces, and activates the version.
+     * @param _configurationId Identifier of the configuration to create.
+     * @param _facetConfigurations Facet identifiers and versions to register.
+     * @return latestVersion_ Version activated for the created configuration.
+     */
     function _createConfiguration(
         bytes32 _configurationId,
         FacetConfiguration[] calldata _facetConfigurations
@@ -68,6 +103,15 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         _activateConfiguration(_configurationId, true);
     }
 
+    /**
+     * @notice Creates or extends a batched configuration and optionally activates it.
+     * @dev Reuses an existing draft version when present, otherwise starts the next version.
+     *      Activation only occurs when `_isLastBatch` is true.
+     * @param _configurationId Identifier of the configuration being assembled.
+     * @param _facetConfigurations Facet identifiers and versions to append to the batch.
+     * @param _isLastBatch Whether this call finalises and activates the batch.
+     * @return latestVersion_ Draft or activated version being populated.
+     */
     function _createBatchConfiguration(
         bytes32 _configurationId,
         FacetConfiguration[] calldata _facetConfigurations,
@@ -80,6 +124,13 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         _activateConfiguration(_configurationId, _isLastBatch);
     }
 
+    /**
+     * @notice Activates the current batch when the final batch flag is set.
+     * @dev Requires at least one facet in the batch. Adds new configuration identifiers to
+     *      the active registry, promotes the batch version to latest and clears the draft.
+     * @param _configurationId Identifier of the configuration to activate.
+     * @param _isLastBatch Whether activation should be performed.
+     */
     function _activateConfiguration(bytes32 _configurationId, bool _isLastBatch) internal {
         if (!_isLastBatch) return;
         DiamondCutManagerStorage storage _dcms = _diamondCutManagerStorage();
@@ -92,17 +143,30 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         delete _dcms.batchVersion[_configurationId];
     }
 
+    /**
+     * @notice Starts the next draft version for a configuration.
+     * @dev Sets the configuration owner to the current EVM sender. Version increment is
+     *      unchecked because realistic version growth cannot overflow.
+     * @param _configurationId Identifier of the configuration to begin.
+     * @return batchVersion_ Draft version assigned to the configuration.
+     */
     function _startBatchConfiguration(bytes32 _configurationId) internal returns (uint256 batchVersion_) {
         DiamondCutManagerStorage storage _dcms = _diamondCutManagerStorage();
-
         unchecked {
             _dcms.batchVersion[_configurationId] = _dcms.latestVersion[_configurationId] + 1;
         }
         batchVersion_ = _getBatchConfigurationVersion(_configurationId);
-
         _setOwner(_configurationId, EvmAccessors.getMsgSender());
     }
 
+    /**
+     * @notice Adds facet definitions to an in-progress configuration version.
+     * @dev Resolves each facet address by identifier and version, rejects duplicates,
+     *      registers selectors, and records supported interface identifiers.
+     * @param _configurationId Identifier of the configuration being populated.
+     * @param _facetConfigurations Facet identifiers and versions to add.
+     * @param _version Draft configuration version receiving the facets.
+     */
     function _addFacetsToBatchConfiguration(
         bytes32 _configurationId,
         FacetConfiguration[] calldata _facetConfigurations,
@@ -110,9 +174,7 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
     ) internal {
         DiamondCutManagerStorage storage _dcms = _diamondCutManagerStorage();
         bytes32 configVersionHash = _buildHash(_configurationId, _version);
-
         uint256 facetsLength = _facetConfigurations.length;
-
         for (uint256 index; index < facetsLength; ) {
             bytes32 facetId = _facetConfigurations[index].id;
             uint256 facetVersion = _facetConfigurations[index].version;
@@ -122,21 +184,15 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
                 .facetIds[configVersionHash]
                 .length;
             bytes32 configVersionFacetHash = _buildHash(_configurationId, _version, facetId);
-
             address addr = _resolveBusinessLogicByVersion(facetId, facetVersion);
-
             if (addr == address(0)) {
                 revert FacetIdNotRegistered(_configurationId, facetId);
             }
-
             if (_dcms.addr[configVersionFacetHash] != address(0)) {
                 revert DuplicatedFacetInConfiguration(facetId);
             }
-
             _dcms.addr[configVersionFacetHash] = addr;
-
             IStaticFunctionSelectors staticFunctionSelectors = IStaticFunctionSelectors(addr);
-
             _registerSelectors(
                 _dcms,
                 _configurationId,
@@ -146,21 +202,25 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
                 configVersionFacetHash
             );
             _registerInterfaceIds(_dcms, _configurationId, _version, staticFunctionSelectors, configVersionFacetHash);
-
             unchecked {
                 ++index;
             }
         }
     }
 
+    /**
+     * @notice Cancels an in-progress batch configuration.
+     * @dev Deletes draft facet addresses, selector mappings, interface mappings, aligned
+     *      arrays and the batch version. Existing active versions remain unchanged.
+     * @param _configurationId Identifier of the draft configuration to cancel.
+     * @return batchVersion_ Draft version that was cancelled.
+     */
     function _cancelBatchConfiguration(bytes32 _configurationId) internal returns (uint256 batchVersion_) {
         DiamondCutManagerStorage storage dcms = _diamondCutManagerStorage();
         batchVersion_ = _getBatchConfigurationVersion(_configurationId);
         bytes32 configVersionHash = _buildHash(_configurationId, batchVersion_);
-
         bytes32[] storage facetIds = dcms.facetIds[configVersionHash];
         uint256 facetIdsLength = facetIds.length;
-
         for (uint256 index; index < facetIdsLength; ) {
             bytes32 configVersionFacetHash = _buildHash(_configurationId, batchVersion_, facetIds[index]);
             delete dcms.addr[configVersionFacetHash];
@@ -170,20 +230,37 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
                 ++index;
             }
         }
-
         delete dcms.facetVersions[configVersionHash];
         delete dcms.facetIds[configVersionHash];
         delete dcms.batchVersion[_configurationId];
     }
 
+    /**
+     * @notice Returns whether a configuration has an unfinished draft version.
+     * @param _configurationId Identifier of the configuration to inspect.
+     * @return True when a batch version is currently stored.
+     */
     function _isOngoingConfiguration(bytes32 _configurationId) internal view returns (bool) {
         return _getBatchConfigurationVersion(_configurationId) != 0;
     }
 
+    /**
+     * @notice Returns the current draft version for a configuration.
+     * @param _configurationId Identifier of the configuration to inspect.
+     * @return batchVersion_ Draft version, or zero when no batch is ongoing.
+     */
     function _getBatchConfigurationVersion(bytes32 _configurationId) internal view returns (uint256 batchVersion_) {
         batchVersion_ = _diamondCutManagerStorage().batchVersion[_configurationId];
     }
 
+    /**
+     * @notice Resolves the facet address that handles a selector for a configuration version.
+     * @param _dcms Diamond cut manager storage reference.
+     * @param _configurationId Identifier of the configuration to query.
+     * @param _version Configuration version to query.
+     * @param _selector Function selector to resolve.
+     * @return facetAddress_ Facet address registered for the selector, or zero if absent.
+     */
     function _resolveResolverProxyCall(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -193,6 +270,14 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         facetAddress_ = _dcms.facetAddress[_buildHashSelector(_configurationId, _version, _selector)];
     }
 
+    /**
+     * @notice Returns whether a configuration version supports an interface identifier.
+     * @param _dcms Diamond cut manager storage reference.
+     * @param _configurationId Identifier of the configuration to query.
+     * @param _version Configuration version to query.
+     * @param _interfaceId Interface identifier to check.
+     * @return exists_ True when the interface is registered as supported.
+     */
     function _resolveSupportsInterface(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -202,6 +287,13 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         exists_ = _dcms.supportsInterface[_buildHashSelector(_configurationId, _version, _interfaceId)];
     }
 
+    /**
+     * @notice Returns whether a resolver proxy configuration version is registered.
+     * @param _dcms Diamond cut manager storage reference.
+     * @param _configurationId Identifier of the configuration to inspect.
+     * @param _version Version to inspect.
+     * @return isRegistered_ True when the active configuration contains the version.
+     */
     function _isResolverProxyConfigurationRegistered(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -210,6 +302,15 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         return !_isResolverProxyConfigurationNotRegistered(_dcms, _configurationId, _version);
     }
 
+    /**
+     * @notice Returns whether a resolver proxy configuration version is not registered.
+     * @dev Version zero, inactive configurations and versions above latest are considered
+     *      unregistered.
+     * @param _dcms Diamond cut manager storage reference.
+     * @param _configurationId Identifier of the configuration to inspect.
+     * @param _version Version to inspect.
+     * @return isRegistered_ True when the version is not registered.
+     */
     function _isResolverProxyConfigurationNotRegistered(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -221,6 +322,14 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
             _version > _dcms.latestVersion[_configurationId];
     }
 
+    /**
+     * @notice Reverts unless a resolver proxy configuration version is registered.
+     * @dev Version zero is not explicitly rejected here unless the configuration is inactive;
+     *      callers requiring explicit versions should use `validateConfigurationVersion`.
+     * @param _dcms Diamond cut manager storage reference.
+     * @param _configurationId Identifier of the configuration to validate.
+     * @param _version Version to validate against the latest active version.
+     */
     function _checkResolverProxyConfigurationRegistered(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -231,6 +340,13 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         }
     }
 
+    /**
+     * @notice Returns active configuration identifiers using pagination.
+     * @param _dcms Diamond cut manager storage reference.
+     * @param _pageIndex Page index used to derive the start offset.
+     * @param _pageLength Maximum number of entries requested.
+     * @return configurationIds_ Configuration identifiers in the requested page.
+     */
     function _getConfigurations(
         DiamondCutManagerStorage storage _dcms,
         uint256 _pageIndex,
@@ -239,6 +355,13 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         configurationIds_ = _buildPaginated(_dcms.configurations, _pageIndex, _pageLength);
     }
 
+    /**
+     * @notice Returns the number of facets registered for a configuration version.
+     * @param _dcms Diamond cut manager storage reference.
+     * @param _configurationId Identifier of the configuration to query.
+     * @param _version Configuration version to query.
+     * @return facetsLength_ Number of registered facets.
+     */
     function _getFacetsLengthByConfigurationIdAndVersion(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -247,6 +370,17 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         facetsLength_ = _dcms.facetIds[_buildHash(_configurationId, _version)].length;
     }
 
+    /**
+     * @notice Returns paginated facet metadata for a configuration version.
+     * @dev Builds full facet structs, including selectors and interface identifiers, for the
+     *      requested page only.
+     * @param _dcms Diamond cut manager storage reference.
+     * @param _configurationId Identifier of the configuration to query.
+     * @param _version Configuration version to query.
+     * @param _pageIndex Page index used to derive the start offset.
+     * @param _pageLength Maximum number of facets requested.
+     * @return facets_ Facet metadata in the requested page.
+     */
     function _getFacetsByConfigurationIdAndVersion(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -272,6 +406,14 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         }
     }
 
+    /**
+     * @notice Returns the number of selectors registered for a facet.
+     * @param _dcms Diamond cut manager storage reference.
+     * @param _configurationId Identifier of the configuration to query.
+     * @param _version Configuration version to query.
+     * @param _facetId Facet identifier to query.
+     * @return facetSelectorsLength_ Number of selectors registered for the facet.
+     */
     function _getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -281,6 +423,16 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         facetSelectorsLength_ = _dcms.selectors[_buildHash(_configurationId, _version, _facetId)].length;
     }
 
+    /**
+     * @notice Returns paginated selectors registered for a facet.
+     * @param _dcms Diamond cut manager storage reference.
+     * @param _configurationId Identifier of the configuration to query.
+     * @param _version Configuration version to query.
+     * @param _facetId Facet identifier to query.
+     * @param _pageIndex Page index used to derive the start offset.
+     * @param _pageLength Maximum number of selectors requested.
+     * @return facetSelectors_ Function selectors in the requested page.
+     */
     function _getFacetSelectorsByConfigurationIdVersionAndFacetId(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -296,6 +448,15 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         );
     }
 
+    /**
+     * @notice Returns paginated facet identifiers for a configuration version.
+     * @param _dcms Diamond cut manager storage reference.
+     * @param _configurationId Identifier of the configuration to query.
+     * @param _version Configuration version to query.
+     * @param _pageIndex Page index used to derive the start offset.
+     * @param _pageLength Maximum number of facet identifiers requested.
+     * @return facetIds_ Facet identifiers in the requested page.
+     */
     function _getFacetIdsByConfigurationIdAndVersion(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -308,18 +469,15 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
 
     /**
      * @notice Returns paginated facet configurations for a configuration version.
-     * @dev The non-zero `_version` precondition is enforced by the
-     * `validateConfigurationVersion` modifier on the external entry point. Pagination bounds
-     * determine the returned slice and may revert through
-     * `Pagination.getSize` if invalid. Facet IDs and versions are read from aligned storage
-     * arrays which are assumed to remain length-synchronised for each configuration version.
+     * @dev Pagination bounds determine the returned slice and may revert through
+     *      `Pagination.getSize` if invalid. Facet IDs and versions are read from aligned
+     *      storage arrays which must remain length-synchronised.
      * @param _dcms Diamond cut manager storage containing registered facet data.
      * @param _configurationId Identifier of the facet configuration set.
-     * @param _version Requested configuration version; must be > 0.
+     * @param _version Requested configuration version; must be greater than zero.
      * @param _start Inclusive start index of the requested page.
      * @param _end Exclusive end index of the requested page.
-     * @return facetConfigurations_ Facet configuration entries within the requested
-     * page.
+     * @return facetConfigurations_ Facet configuration entries within the requested page.
      */
     function _getFacetConfigurationsByConfigurationIdAndVersion(
         DiamondCutManagerStorage storage _dcms,
@@ -329,13 +487,9 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         uint256 _end
     ) internal view returns (FacetConfiguration[] memory facetConfigurations_) {
         bytes32 configVersionHash = _buildHash(_configurationId, _version);
-
         uint256 size = Pagination.getSize(_start, _end, _dcms.facetIds[configVersionHash].length);
-
         facetConfigurations_ = new FacetConfiguration[](size);
-
         uint256 realIndex = _start;
-
         for (uint256 index; index < size; ) {
             facetConfigurations_[index] = FacetConfiguration({
                 id: _dcms.facetIds[configVersionHash][realIndex],
@@ -348,6 +502,15 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         }
     }
 
+    /**
+     * @notice Returns paginated facet addresses for a configuration version.
+     * @param _dcms Diamond cut manager storage reference.
+     * @param _configurationId Identifier of the configuration to query.
+     * @param _version Configuration version to query.
+     * @param _pageIndex Page index used to derive the start offset.
+     * @param _pageLength Maximum number of addresses requested.
+     * @return facetAddresses_ Facet addresses in the requested page.
+     */
     function _getFacetAddressesByConfigurationIdAndVersion(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -368,6 +531,14 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         }
     }
 
+    /**
+     * @notice Returns the facet identifier registered for a selector.
+     * @param _dcms Diamond cut manager storage reference.
+     * @param _configurationId Identifier of the configuration to query.
+     * @param _version Configuration version to query.
+     * @param _selector Function selector to resolve.
+     * @return facetId_ Facet identifier registered for the selector, or zero if absent.
+     */
     function _getFacetIdByConfigurationIdVersionAndSelector(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -377,6 +548,14 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         facetId_ = _dcms.selectorToFacetId[_buildHashSelector(_configurationId, _version, _selector)];
     }
 
+    /**
+     * @notice Returns facet metadata for a specific configuration version and facet.
+     * @param _dcms Diamond cut manager storage reference.
+     * @param _configurationId Identifier of the configuration to query.
+     * @param _version Configuration version to query.
+     * @param _facetId Facet identifier to query.
+     * @return facet_ Facet metadata including address, selectors and interface identifiers.
+     */
     function _getFacetByConfigurationIdVersionAndFacetId(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -392,6 +571,14 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         });
     }
 
+    /**
+     * @notice Returns the implementation address registered for a facet.
+     * @param _dcms Diamond cut manager storage reference.
+     * @param _configurationId Identifier of the configuration to query.
+     * @param _version Configuration version to query.
+     * @param _facetId Facet identifier to resolve.
+     * @return facetAddress_ Facet implementation address, or zero if absent.
+     */
     function _getFacetAddressByConfigurationIdVersionAndFacetId(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -402,15 +589,14 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
     }
 
     /**
-     * @notice Returns the facet version registered for a configuration version and facet identifier.
-     * @dev Reverts if the facet identifier is not registered for the supplied configuration version.
-     *      Reads positional indexes stored as one-based values and uses unchecked arithmetic after
-     *      validating that the position is non-zero.
-     * @param _dcms Diamond cut manager storage containing facet registration indexes and versions.
+     * @notice Returns the facet version registered for a configuration and facet.
+     * @dev Reverts if the facet identifier is not registered for the supplied version.
+     *      Reads one-based positions and uses unchecked arithmetic after validation.
+     * @param _dcms Diamond cut manager storage containing facet indexes and versions.
      * @param _configurationId Identifier of the diamond configuration to query.
      * @param _version Version of the configuration to query.
      * @param _facetId Identifier of the facet whose registered version is requested.
-     * @return facetVersion_ Registered facet version for the supplied configuration and facet.
+     * @return facetVersion_ Registered facet version for the supplied configuration.
      */
     function _getFacetVersionByConfigurationIdVersionAndFacetId(
         DiamondCutManagerStorage storage _dcms,
@@ -419,20 +605,29 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         bytes32 _facetId
     ) internal view returns (uint256 facetVersion_) {
         uint256 pos = _dcms.facetIdPosition[_buildHash(_configurationId, _version, _facetId)];
-
         if (pos == 0) {
             revert FacetIdNotRegistered(_configurationId, _facetId);
         }
-
         unchecked {
             facetVersion_ = _dcms.facetVersions[_buildHash(_configurationId, _version)][pos - 1];
         }
     }
 
+    /**
+     * @notice Requires the caller to own a configuration when ownership already exists.
+     * @dev Allows first-time configuration ownership assignment by skipping checks when the
+     *      stored owner is the zero address.
+     * @param _configurationId Identifier of the configuration ownership scope.
+     */
     function _checkAlreadyOwned(bytes32 _configurationId) internal view {
         if (_getOwner(_configurationId) != address(0)) _checkOwnership(_configurationId);
     }
 
+    /**
+     * @notice Returns the diamond-cut manager storage reference.
+     * @dev Resolves the ERC-7201 storage namespace through inline assembly.
+     * @return ds Storage pointer for the diamond-cut manager state.
+     */
     function _diamondCutManagerStorage() internal pure returns (DiamondCutManagerStorage storage ds) {
         bytes32 position = STORAGE_LOCATION_DIAMOND_CUT_MANAGER;
         // solhint-disable-next-line no-inline-assembly
@@ -441,6 +636,15 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         }
     }
 
+    /**
+     * @notice Deletes selector lookup state for a cancelled facet batch entry.
+     * @dev Removes selector-to-address and selector-to-facet mappings, then clears the
+     *      selector array for the facet hash.
+     * @param _dcms Diamond cut manager storage reference.
+     * @param _configurationId Identifier of the configuration being cleaned.
+     * @param _batchVersion Draft version being cancelled.
+     * @param _configVersionFacetHash Hash identifying the facet within the draft version.
+     */
     function _cleanSelectors(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -460,6 +664,15 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         delete _dcms.selectors[_configVersionFacetHash];
     }
 
+    /**
+     * @notice Deletes interface support state for a cancelled facet batch entry.
+     * @dev Removes supported-interface flags and clears the interface identifier array for
+     *      the facet hash.
+     * @param _dcms Diamond cut manager storage reference.
+     * @param _configurationId Identifier of the configuration being cleaned.
+     * @param _batchVersion Draft version being cancelled.
+     * @param _configVersionFacetHash Hash identifying the facet within the draft version.
+     */
     function _cleanInterfacesIds(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -477,6 +690,17 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         delete _dcms.interfaceIds[_configVersionFacetHash];
     }
 
+    /**
+     * @notice Registers function selectors exposed by a facet implementation.
+     * @dev Reads selectors from the facet contract, rejects blacklisted and duplicate
+     *      selectors, and records selector dispatch and ownership mappings.
+     * @param _dcms Diamond cut manager storage reference.
+     * @param _configurationId Identifier of the configuration being populated.
+     * @param _version Configuration version being populated.
+     * @param _facetId Identifier of the facet providing the selectors.
+     * @param _static Static selector provider implemented by the facet.
+     * @param _configVersionFacetHash Hash identifying the facet within the version.
+     */
     function _registerSelectors(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -505,6 +729,16 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         }
     }
 
+    /**
+     * @notice Registers interface identifiers exposed by a facet implementation.
+     * @dev Reads interface IDs from the facet contract and marks them as supported for the
+     *      target configuration version.
+     * @param _dcms Diamond cut manager storage reference.
+     * @param _configurationId Identifier of the configuration being populated.
+     * @param _version Configuration version being populated.
+     * @param _static Static interface provider implemented by the facet.
+     * @param _configVersionFacetHash Hash identifying the facet within the version.
+     */
     function _registerInterfaceIds(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -524,6 +758,11 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         }
     }
 
+    /**
+     * @notice Reverts if the current draft configuration contains no facets.
+     * @param _dcms Diamond cut manager storage reference.
+     * @param _configurationId Identifier of the configuration to validate.
+     */
     function _checkEmptyFacetConfiguration(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId
@@ -533,11 +772,16 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         }
     }
 
+    /**
+     * @notice Reverts if any selector is blacklisted for a configuration.
+     * @dev Reads the blacklist from business-logic resolver storage.
+     * @param _configurationId Identifier of the configuration whose blacklist applies.
+     * @param _selectors Selectors to validate.
+     */
     function _checkSelectorsBlacklist(bytes32 _configurationId, bytes4[] memory _selectors) private view {
         EnumerableSetBytes4.Bytes4Set storage selectorBlacklist = _businessLogicResolverStorage().selectorBlacklist[
             _configurationId
         ];
-
         uint256 length = _selectors.length;
         for (uint256 index; index < length; ) {
             bytes4 selector = _selectors[index];
@@ -550,14 +794,32 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         }
     }
 
+    /**
+     * @notice Reverts when a configuration version is zero.
+     * @param _configurationId Identifier of the configuration being validated.
+     * @param _version Version value that must be explicit.
+     */
     function _checkExplicitVersion(bytes32 _configurationId, uint256 _version) private pure {
         if (_version == 0) revert VersionZero(_configurationId);
     }
 
+    /**
+     * @notice Builds the storage key for a configuration version.
+     * @param _configurationId Identifier of the configuration.
+     * @param _version Version of the configuration.
+     * @return hash_ Deterministic hash for the configuration version.
+     */
     function _buildHash(bytes32 _configurationId, uint256 _version) private pure returns (bytes32 hash_) {
         hash_ = keccak256(abi.encodePacked(_configurationId, _version));
     }
 
+    /**
+     * @notice Builds the storage key for a facet within a configuration version.
+     * @param _configurationId Identifier of the configuration.
+     * @param _version Version of the configuration.
+     * @param _facetId Identifier of the facet.
+     * @return hash_ Deterministic hash for the configuration, version and facet.
+     */
     function _buildHash(
         bytes32 _configurationId,
         uint256 _version,
@@ -566,6 +828,13 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         hash_ = keccak256(abi.encodePacked(_configurationId, _version, _facetId));
     }
 
+    /**
+     * @notice Builds the storage key for a selector or interface identifier.
+     * @param _configurationId Identifier of the configuration.
+     * @param _version Version of the configuration.
+     * @param _selector Function selector or interface identifier.
+     * @return hash_ Deterministic hash for the configuration, version and selector.
+     */
     function _buildHashSelector(
         bytes32 _configurationId,
         uint256 _version,
@@ -574,6 +843,15 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         hash_ = keccak256(abi.encodePacked(_configurationId, _version, _selector));
     }
 
+    /**
+     * @notice Builds a paginated `bytes32` memory slice.
+     * @dev Pagination bounds are derived from page index and length, then clipped against
+     *      source length through `Pagination.getSize`.
+     * @param _source Source array to page.
+     * @param _pageIndex Page index used to derive the start offset.
+     * @param _pageLength Maximum number of entries requested.
+     * @return page_ Requested page of `bytes32` values.
+     */
     function _buildPaginated(
         bytes32[] memory _source,
         uint256 _pageIndex,
@@ -591,6 +869,15 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         }
     }
 
+    /**
+     * @notice Builds a paginated `bytes4` memory slice.
+     * @dev Pagination bounds are derived from page index and length, then clipped against
+     *      source length through `Pagination.getSize`.
+     * @param _source Source array to page.
+     * @param _pageIndex Page index used to derive the start offset.
+     * @param _pageLength Maximum number of entries requested.
+     * @return page_ Requested page of `bytes4` values.
+     */
     function _buildPaginated(
         bytes4[] memory _source,
         uint256 _pageIndex,
