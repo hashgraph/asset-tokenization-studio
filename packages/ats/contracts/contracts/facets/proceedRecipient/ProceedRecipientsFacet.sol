@@ -3,11 +3,11 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IProceedRecipients, RESOLVER_KEY_PROCEED_RECIPIENTS } from "./IProceedRecipients.sol";
 import { ProceedRecipients } from "./ProceedRecipients.sol";
-import { ProceedRecipientsStorageWrapper } from "../../../domain/asset/ProceedRecipientsStorageWrapper.sol";
-import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
-import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import { Bytes4Builder } from "../../../infrastructure/proxy/Bytes4Builder.sol";
-import { DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
+import { ProceedRecipientsStorageWrapper } from "../../domain/asset/ProceedRecipientsStorageWrapper.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 
 contract ProceedRecipientsFacet is ProceedRecipients, IStaticFunctionSelectors {
     /// @inheritdoc IProceedRecipients

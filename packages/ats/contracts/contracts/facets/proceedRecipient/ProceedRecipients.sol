@@ -2,12 +2,12 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IProceedRecipients, RESOLVER_KEY_PROCEED_RECIPIENTS } from "./IProceedRecipients.sol";
-import { ROLE_PROCEED_RECIPIENT_MANAGER, DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
-import { Modifiers } from "../../../services/Modifiers.sol";
-import { ProceedRecipientsStorageWrapper } from "../../../domain/asset/ProceedRecipientsStorageWrapper.sol";
-import { DefaultValueValidation } from "../../../infrastructure/utils/DefaultValueValidation.sol";
-import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
-import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
+import { ROLE_PROCEED_RECIPIENT_MANAGER, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { ProceedRecipientsStorageWrapper } from "../../domain/asset/ProceedRecipientsStorageWrapper.sol";
+import { DefaultValueValidation } from "../../infrastructure/utils/DefaultValueValidation.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title Proceed Recipients

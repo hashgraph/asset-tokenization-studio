@@ -74,7 +74,7 @@ import { IDividend } from "./dividend/IDividend.sol";
 import { IDividendSecurityHolders } from "./dividendSecurityHolders/IDividendSecurityHolders.sol";
 import { IKpis } from "./layer_2/kpi/kpiLatest/IKpis.sol";
 import { IProtectedPartitions } from "./layer_1/protectedPartition/IProtectedPartitions.sol";
-import { IProceedRecipients } from "./layer_2/proceedRecipient/IProceedRecipients.sol";
+import { IProceedRecipients } from "./proceedRecipient/IProceedRecipients.sol";
 import { ICap } from "./cap/ICap.sol";
 import { ICapByPartition } from "./capByPartition/ICapByPartition.sol";
 import { INonces } from "./nonces/INonces.sol";
