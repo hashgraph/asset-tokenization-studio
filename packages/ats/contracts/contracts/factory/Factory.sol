@@ -134,7 +134,7 @@ import { ITransfer } from "../facets/transfer/ITransfer.sol";
 import { ITransferAndLock } from "../facets/transferAndLock/ITransferAndLock.sol";
 import { ITransferAndLockByPartition } from "../facets/transferAndLockByPartition/ITransferAndLockByPartition.sol";
 import { ITransferByPartition } from "../facets/transferByPartition/ITransferByPartition.sol";
-import { IVoting } from "../facets/layer_2/voting/IVoting.sol";
+import { IVoting } from "../facets/voting/IVoting.sol";
 import { IVotingSecurityHolders } from "../facets/votingSecurityHolders/IVotingSecurityHolders.sol";
 
 /**

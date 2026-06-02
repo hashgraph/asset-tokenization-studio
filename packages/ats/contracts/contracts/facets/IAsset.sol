@@ -58,7 +58,7 @@ import { INominalValue } from "./layer_2/nominalValue/INominalValue.sol";
 import { INominalValueAtSnapshot } from "./nominalValueAtSnapshot/INominalValueAtSnapshot.sol";
 import { IPause } from "./pause/IPause.sol";
 import { ILoansPortfolio } from "./layer_2/loansPortfolio/ILoansPortfolio.sol";
-import { IVoting } from "./layer_2/voting/IVoting.sol";
+import { IVoting } from "./voting/IVoting.sol";
 import { IVotingSecurityHolders } from "./votingSecurityHolders/IVotingSecurityHolders.sol";
 
 // Layer 3
