@@ -5,12 +5,14 @@ import BigDecimal from "../shared/BigDecimal";
 import { SecurityDate } from "../shared/SecurityDate";
 import BaseError from "@core/error/BaseError";
 import { InvalidNegativeRate } from "./error/InvalidNegativeRate";
+import { OptionalField } from "@core/decorator/OptionalDecorator";
 
 export class BondFixedRateDetails extends ValidatedDomain<BondFixedRateDetails> {
   currency: string;
   nominalValue: BigDecimal;
   nominalValueDecimals: number;
-  startingDate: number;
+  @OptionalField()
+  startingDate?: number;
   maturityDate: number;
   rate: number;
   rateDecimals: number;
@@ -19,7 +21,7 @@ export class BondFixedRateDetails extends ValidatedDomain<BondFixedRateDetails> 
     currency: string,
     nominalValue: BigDecimal,
     nominalValueDecimals: number,
-    startingDate: number,
+    startingDate: number | undefined,
     maturityDate: number,
     rate: number,
     rateDecimals: number,

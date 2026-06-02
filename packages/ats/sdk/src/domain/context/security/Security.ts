@@ -54,7 +54,7 @@ export interface SecurityProps {
   regulationType?: RegulationType;
   regulationsubType?: RegulationSubType;
   regulation?: Regulation;
-  isCountryControlListWhiteList: boolean;
+  isCountryControlListWhiteList?: boolean;
   countries?: string;
   info?: string;
 }
@@ -84,9 +84,13 @@ export class Security extends ValidatedDomain<Security> implements SecurityProps
   regulationType?: RegulationType;
   @OptionalField()
   regulationsubType?: RegulationSubType;
+  @OptionalField()
   regulation?: Regulation;
-  isCountryControlListWhiteList: boolean;
+  @OptionalField()
+  isCountryControlListWhiteList?: boolean;
+  @OptionalField()
   countries?: string;
+  @OptionalField()
   info?: string;
 
   constructor(params: SecurityProps) {
@@ -95,9 +99,10 @@ export class Security extends ValidatedDomain<Security> implements SecurityProps
         return Factory.checkRegulationType(CastRegulationType.toNumber(val!));
       },
       regulationsubType: (val) => {
+        if (this.regulationType === undefined) return [];
         return Factory.checkRegulationSubType(
           CastRegulationSubType.toNumber(val!),
-          CastRegulationType.toNumber(this.regulationType!),
+          CastRegulationType.toNumber(this.regulationType),
         );
       },
       totalSupply: (val) => {

@@ -107,8 +107,9 @@ class BondInPort implements IBondInPort {
       internalKycActivated: req.internalKycActivated,
       isMultiPartition: req.isMultiPartition,
       maxSupply: BigDecimal.fromString(req.numberOfUnits),
-      regulationType: CastRegulationType.fromNumber(req.regulationType),
-      regulationsubType: CastRegulationSubType.fromNumber(req.regulationSubType),
+      regulationType: req.regulationType !== undefined ? CastRegulationType.fromNumber(req.regulationType) : undefined,
+      regulationsubType:
+        req.regulationSubType !== undefined ? CastRegulationSubType.fromNumber(req.regulationSubType) : undefined,
       isCountryControlListWhiteList: req.isCountryControlListWhiteList,
       countries: req.countries,
       info: req.info,
@@ -176,8 +177,9 @@ class BondInPort implements IBondInPort {
       internalKycActivated: req.internalKycActivated,
       isMultiPartition: req.isMultiPartition,
       maxSupply: BigDecimal.fromString(req.numberOfUnits),
-      regulationType: CastRegulationType.fromNumber(req.regulationType),
-      regulationsubType: CastRegulationSubType.fromNumber(req.regulationSubType),
+      regulationType: req.regulationType !== undefined ? CastRegulationType.fromNumber(req.regulationType) : undefined,
+      regulationsubType:
+        req.regulationSubType !== undefined ? CastRegulationSubType.fromNumber(req.regulationSubType) : undefined,
       isCountryControlListWhiteList: req.isCountryControlListWhiteList,
       countries: req.countries,
       info: req.info,
@@ -247,8 +249,9 @@ class BondInPort implements IBondInPort {
       internalKycActivated: req.internalKycActivated,
       isMultiPartition: req.isMultiPartition,
       maxSupply: BigDecimal.fromString(req.numberOfUnits),
-      regulationType: CastRegulationType.fromNumber(req.regulationType),
-      regulationsubType: CastRegulationSubType.fromNumber(req.regulationSubType),
+      regulationType: req.regulationType !== undefined ? CastRegulationType.fromNumber(req.regulationType) : undefined,
+      regulationsubType:
+        req.regulationSubType !== undefined ? CastRegulationSubType.fromNumber(req.regulationSubType) : undefined,
       isCountryControlListWhiteList: req.isCountryControlListWhiteList,
       countries: req.countries,
       info: req.info,
@@ -316,7 +319,7 @@ class BondInPort implements IBondInPort {
       currency: res.bond.currency,
       nominalValue: res.bond.nominalValue.toString(),
       nominalValueDecimals: res.bond.nominalValueDecimals,
-      startingDate: new Date(res.bond.startingDate * ONE_THOUSAND),
+      startingDate: res.bond.startingDate ? new Date(res.bond.startingDate * ONE_THOUSAND) : undefined,
       maturityDate: new Date(res.bond.maturityDate * ONE_THOUSAND),
     };
 
@@ -390,8 +393,9 @@ class BondInPort implements IBondInPort {
       internalKycActivated: req.internalKycActivated,
       isMultiPartition: req.isMultiPartition,
       maxSupply: BigDecimal.fromString(req.numberOfUnits),
-      regulationType: CastRegulationType.fromNumber(req.regulationType),
-      regulationsubType: CastRegulationSubType.fromNumber(req.regulationSubType),
+      regulationType: req.regulationType !== undefined ? CastRegulationType.fromNumber(req.regulationType) : undefined,
+      regulationsubType:
+        req.regulationSubType !== undefined ? CastRegulationSubType.fromNumber(req.regulationSubType) : undefined,
       isCountryControlListWhiteList: req.isCountryControlListWhiteList,
       countries: req.countries,
       info: req.info,

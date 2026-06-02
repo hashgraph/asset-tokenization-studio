@@ -231,22 +231,7 @@ export class RPCQueryAdapter {
     const isMultiPartition = await this.connect(IAsset__factory, address.toString()).isMultiPartition();
     const isIssuable = await this.connect(IAsset__factory, address.toString()).isIssuable();
     const isPaused = await this.connect(IAsset__factory, address.toString()).paused();
-    const regulationInfo = await this.connect(IAsset__factory, address.toString()).getSecurityRegulationData();
     const diamondAddress = await this.mirrorNode.getHederaIdfromContractAddress(address.toString());
-    const regulation: Regulation = {
-      type: CastRegulationType.fromBigint(regulationInfo.regulationData.regulationType),
-      subType: CastRegulationSubType.fromBigint(regulationInfo.regulationData.regulationSubType),
-      dealSize: regulationInfo.regulationData.dealSize.toString(),
-      accreditedInvestors: CastAccreditedInvestors.fromBigint(regulationInfo.regulationData.accreditedInvestors),
-      maxNonAccreditedInvestors: Number(regulationInfo.regulationData.maxNonAccreditedInvestors),
-      manualInvestorVerification: CastManualInvestorVerification.fromBigint(
-        regulationInfo.regulationData.manualInvestorVerification,
-      ),
-      internationalInvestors: CastInternationalInvestorscation.fromBigint(
-        regulationInfo.regulationData.internationalInvestors,
-      ),
-      resaleHoldPeriod: CastResaleHoldPeriodorscation.fromBigint(regulationInfo.regulationData.resaleHoldPeriod),
-    };
 
     return new Security({
       name: erc20Metadata.info.name,
@@ -267,46 +252,45 @@ export class RPCQueryAdapter {
       diamondAddress: HederaId.from(diamondAddress),
       evmDiamondAddress: address,
       paused: isPaused,
-      regulationType: CastRegulationType.fromBigint(regulationInfo.regulationData.regulationType),
-      regulationsubType: CastRegulationSubType.fromBigint(regulationInfo.regulationData.regulationSubType),
-      regulation: regulation,
-      isCountryControlListWhiteList: regulationInfo.additionalSecurityData.countriesControlListType,
-      countries: regulationInfo.additionalSecurityData.listOfCountries,
-      info: regulationInfo.additionalSecurityData.info,
     });
   }
 
   async getEquityDetails(address: EvmAddress): Promise<EquityDetails> {
     LogService.logTrace(`Requesting equity details for equity: ${address.toString()}`);
 
-    const res = await this.connect(IAsset__factory, address.toString()).getEquityDetails();
+    const nominalValue = await this.connect(IAsset__factory, address.toString()).getNominalValue();
+    const nominalValueCurrency = await this.connect(IAsset__factory, address.toString()).getNominalValueCurrency();
+    const nominalValueDecimals = await this.connect(IAsset__factory, address.toString()).getNominalValueDecimals();
 
     return new EquityDetails(
-      res.votingRight,
-      res.informationRight,
-      res.liquidationRight,
-      res.subscriptionRight,
-      res.conversionRight,
-      res.redemptionRight,
-      res.putRight,
-      CastDividendType.fromBigint(res.dividendRight),
-      res.currency,
-      new BigDecimal(res.nominalValue.toString()),
-      Number(res.nominalValueDecimals),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      nominalValueCurrency,
+      new BigDecimal(nominalValue.toString()),
+      Number(nominalValueDecimals),
     );
   }
 
   async getBondDetails(address: EvmAddress): Promise<BondDetails> {
     LogService.logTrace(`Requesting bond details for bond: ${address.toString()}`);
 
-    const res = await this.connect(IAsset__factory, address.toString()).getBondDetails();
+    const nominalValue = await this.connect(IAsset__factory, address.toString()).getNominalValue();
+    const nominalValueCurrency = await this.connect(IAsset__factory, address.toString()).getNominalValueCurrency();
+    const nominalValueDecimals = await this.connect(IAsset__factory, address.toString()).getNominalValueDecimals();
+    const maturityDate = await this.connect(IAsset__factory, address.toString()).getMaturityDate;
 
     return new BondDetails(
-      res.currency,
-      new BigDecimal(res.nominalValue.toString()),
-      Number(res.nominalValueDecimals),
-      Number(res.startingDate),
-      Number(res.maturityDate),
+      nominalValueCurrency,
+      new BigDecimal(nominalValue.toString()),
+      Number(nominalValueDecimals),
+      undefined,
+      Number(maturityDate),
     );
   }
 

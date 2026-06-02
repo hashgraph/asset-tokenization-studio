@@ -98,14 +98,15 @@ export class FactoryOperations {
         conversionRight: equityInfo.conversionRight,
         redemptionRight: equityInfo.redemptionRight,
         putRight: equityInfo.putRight,
-        dividendRight: CastDividendType.toNumber(equityInfo.dividendRight),
+        dividendRight:
+          equityInfo.dividendRight !== undefined ? CastDividendType.toNumber(equityInfo.dividendRight) : undefined,
         currency: equityInfo.currency,
         nominalValue: equityInfo.nominalValue.toString(),
         nominalValueDecimals: equityInfo.nominalValueDecimals,
       };
       const securityTokenToCreate = new FactoryEquityToken(security, equityDetails);
       const additionalSecurityData: AdditionalSecurityData = {
-        countriesControlListType: securityInfo.isCountryControlListWhiteList,
+        countriesControlListType: securityInfo.isCountryControlListWhiteList ?? false,
         listOfCountries: securityInfo.countries ?? "",
         info: securityInfo.info ?? "",
       };
@@ -186,7 +187,7 @@ export class FactoryOperations {
         bondInfo.currency,
         bondInfo.nominalValue.toString(),
         bondInfo.nominalValueDecimals,
-        bondInfo.startingDate.toString(),
+        bondInfo.startingDate?.toString(),
         bondInfo.maturityDate.toString(),
       );
       const securityTokenToCreate = new FactoryBondToken(
@@ -196,7 +197,7 @@ export class FactoryOperations {
         proceedRecipientsData.map((data) => (data == "" ? "0x" : data)),
       );
       const additionalSecurityData: AdditionalSecurityData = {
-        countriesControlListType: securityInfo.isCountryControlListWhiteList,
+        countriesControlListType: securityInfo.isCountryControlListWhiteList ?? false,
         listOfCountries: securityInfo.countries ?? "",
         info: securityInfo.info ?? "",
       };
@@ -277,7 +278,7 @@ export class FactoryOperations {
         bondInfo.currency,
         bondInfo.nominalValue.toString(),
         bondInfo.nominalValueDecimals,
-        bondInfo.startingDate.toString(),
+        bondInfo.startingDate?.toString(),
         bondInfo.maturityDate.toString(),
       );
       const securityTokenToCreate = new FactoryBondToken(
@@ -287,7 +288,7 @@ export class FactoryOperations {
         proceedRecipientsData.map((data) => (data == "" ? "0x" : data)),
       );
       const additionalSecurityData: AdditionalSecurityData = {
-        countriesControlListType: securityInfo.isCountryControlListWhiteList,
+        countriesControlListType: securityInfo.isCountryControlListWhiteList ?? false,
         listOfCountries: securityInfo.countries ?? "",
         info: securityInfo.info ?? "",
       };
@@ -373,7 +374,7 @@ export class FactoryOperations {
         bondInfo.currency,
         bondInfo.nominalValue.toString(),
         bondInfo.nominalValueDecimals,
-        bondInfo.startingDate.toString(),
+        bondInfo.startingDate?.toString(),
         bondInfo.maturityDate.toString(),
       );
       const securityTokenToCreate = new FactoryBondToken(
@@ -383,7 +384,7 @@ export class FactoryOperations {
         proceedRecipientsData.map((data) => (data == "" ? "0x" : data)),
       );
       const additionalSecurityData: AdditionalSecurityData = {
-        countriesControlListType: securityInfo.isCountryControlListWhiteList,
+        countriesControlListType: securityInfo.isCountryControlListWhiteList ?? false,
         listOfCountries: securityInfo.countries ?? "",
         info: securityInfo.info ?? "",
       };
@@ -499,7 +500,7 @@ export class FactoryOperations {
       bondDetails.currency,
       bondDetails.nominalValue.toString(),
       bondDetails.nominalValueDecimals,
-      bondDetails.startingDate.toString(),
+      bondDetails.startingDate?.toString(),
       bondDetails.maturityDate.toString(),
     );
     const securityTokenToCreate = new FactoryBondToken(
@@ -509,7 +510,7 @@ export class FactoryOperations {
       proceedRecipientsData.map((data) => (data == "" ? "0x" : data)),
     );
     const additionalSecurityData: AdditionalSecurityData = {
-      countriesControlListType: security.isCountryControlListWhiteList,
+      countriesControlListType: security.isCountryControlListWhiteList ?? false,
       listOfCountries: security.countries ?? "",
       info: security.info ?? "",
     };
@@ -618,14 +619,15 @@ export class FactoryOperations {
         conversionRight: equityDetails.conversionRight,
         redemptionRight: equityDetails.redemptionRight,
         putRight: equityDetails.putRight,
-        dividendRight: CastDividendType.toNumber(equityDetails.dividendRight),
+        dividendRight:
+          equityDetails.dividendRight !== undefined ? CastDividendType.toNumber(equityDetails.dividendRight) : undefined,
         currency: equityDetails.currency,
         nominalValue: equityDetails.nominalValue.toString(),
         nominalValueDecimals: equityDetails.nominalValueDecimals,
       };
       const securityTokenToCreate = new FactoryEquityToken(securityData, equityDetailsData);
       const additionalSecurityData: AdditionalSecurityData = {
-        countriesControlListType: security.isCountryControlListWhiteList,
+        countriesControlListType: security.isCountryControlListWhiteList ?? false,
         listOfCountries: security.countries ?? "",
         info: security.info ?? "",
       };

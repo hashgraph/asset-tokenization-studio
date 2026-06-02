@@ -2,16 +2,13 @@
 pragma solidity 0.8.22;
 
 // solhint-disable max-line-length
-import { ICore } from "@hashgraph/asset-tokenization-contracts/contracts/facets/core/ICore.sol";
-import { ICoupon } from "@hashgraph/asset-tokenization-contracts/contracts/facets/coupon/ICoupon.sol";
+import { IBond } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/bond/IBond.sol";
+import { IBondRead } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/bond/IBondRead.sol";
+import { ICoupon } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/coupon/ICoupon.sol";
+import { IDividend } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/dividend/IDividend.sol";
+import { IERC20 } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_1/ERC1400/ERC20/IERC20.sol";
 import { IEquity } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/equity/IEquity.sol";
 import { IVoting } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/voting/IVoting.sol";
-import {
-    IAdjustBalances
-} from "@hashgraph/asset-tokenization-contracts/contracts/facets/adjustBalances/IAdjustBalances.sol";
-import {
-    IScheduledBalanceAdjustment
-} from "@hashgraph/asset-tokenization-contracts/contracts/facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol";
 
 /**
  * @title IAssetMock
@@ -23,7 +20,6 @@ import {
  *      single handle. Production code MUST NOT depend on this interface — use the ATS
  *      umbrella `IAsset` instead.
  */
-interface IAssetMock is ICoupon, IEquity, IVoting, ICore, IAdjustBalances, IScheduledBalanceAdjustment {
-    /// @notice Reverts from any mock method that has not been given a canned implementation.
+interface IAssetMock is IBond, ICoupon, IEquity, IVoting, IERC20, IBondRead, IDividend {
     error NotImplemented();
 }

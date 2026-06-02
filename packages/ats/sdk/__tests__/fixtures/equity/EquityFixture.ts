@@ -90,7 +90,7 @@ export const CreateEquityRequestFixture = createFixture<CreateEquityRequest>((re
           ),
         ),
   );
-  request.isCountryControlListWhiteList.faker((faker) => faker.datatype.boolean());
+  request.isCountryControlListWhiteList?.faker((faker) => faker.datatype.boolean());
   request.numberOfShares.faker((faker) => faker.number.int({ min: 1, max: 10 }).toString());
   request.countries?.faker((faker) =>
     faker.helpers
@@ -100,7 +100,7 @@ export const CreateEquityRequestFixture = createFixture<CreateEquityRequest>((re
       )
       .join(","),
   );
-  request.info.faker((faker) => faker.lorem.words());
+  request.info?.faker((faker) => faker.lorem.words());
   request.currency.faker((faker) => `0x${Buffer.from(faker.finance.currencyCode()).toString("hex")}`);
   request.dividendRight.faker((faker) =>
     CastDividendType.toNumber(faker.helpers.arrayElement(Object.values(DividendType))),
@@ -452,14 +452,14 @@ export const DividendForFixture = createFixture<DividendFor>((props) => {
 });
 
 export const EquityDetailsFixture = createFixture<EquityDetails>((props) => {
-  props.votingRight.faker((faker) => faker.datatype.boolean());
-  props.informationRight.faker((faker) => faker.datatype.boolean());
-  props.liquidationRight.faker((faker) => faker.datatype.boolean());
-  props.subscriptionRight.faker((faker) => faker.datatype.boolean());
-  props.conversionRight.faker((faker) => faker.datatype.boolean());
-  props.redemptionRight.faker((faker) => faker.datatype.boolean());
-  props.putRight.faker((faker) => faker.datatype.boolean());
-  props.dividendRight.faker((faker) => faker.helpers.arrayElement(Object.values(DividendType)));
+  props.votingRight?.faker((faker) => faker.datatype.boolean());
+  props.informationRight?.faker((faker) => faker.datatype.boolean());
+  props.liquidationRight?.faker((faker) => faker.datatype.boolean());
+  props.subscriptionRight?.faker((faker) => faker.datatype.boolean());
+  props.conversionRight?.faker((faker) => faker.datatype.boolean());
+  props.redemptionRight?.faker((faker) => faker.datatype.boolean());
+  props.putRight?.faker((faker) => faker.datatype.boolean());
+  props.dividendRight?.faker((faker) => faker.helpers.arrayElement(Object.values(DividendType)));
   props.currency.faker((faker) => faker.finance.currencyCode());
   props.nominalValue.faker((faker) => faker.number.int({ min: 1, max: 999 }));
   props.nominalValueDecimals.faker((faker) => faker.number.int({ min: 1, max: 5 }));
@@ -523,7 +523,7 @@ export const CreateTrexSuiteEquityRequestFixture = createFixture<CreateTrexSuite
           ),
         ),
   );
-  request.isCountryControlListWhiteList.faker((faker) => faker.datatype.boolean());
+  request.isCountryControlListWhiteList?.faker((faker) => faker.datatype.boolean());
   request.numberOfShares.faker((faker) => faker.number.int({ min: 1, max: 10 }).toString());
   request.countries?.faker((faker) =>
     faker.helpers
@@ -533,7 +533,7 @@ export const CreateTrexSuiteEquityRequestFixture = createFixture<CreateTrexSuite
       )
       .join(","),
   );
-  request.info.faker((faker) => faker.lorem.words());
+  request.info?.faker((faker) => faker.lorem.words());
   request.currency.faker((faker) => `0x${Buffer.from(faker.finance.currencyCode()).toString("hex")}`);
   request.dividendRight.faker((faker) =>
     CastDividendType.toNumber(faker.helpers.arrayElement(Object.values(DividendType))),

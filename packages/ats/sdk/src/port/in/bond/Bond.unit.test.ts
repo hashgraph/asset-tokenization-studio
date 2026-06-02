@@ -139,8 +139,14 @@ describe("Bond", () => {
             internalKycActivated: createBondRequest.internalKycActivated,
             isMultiPartition: createBondRequest.isMultiPartition,
             maxSupply: BigDecimal.fromString(createBondRequest.numberOfUnits),
-            regulationType: CastRegulationType.fromNumber(createBondRequest.regulationType),
-            regulationsubType: CastRegulationSubType.fromNumber(createBondRequest.regulationSubType),
+            regulationType:
+              createBondRequest.regulationType !== undefined
+                ? CastRegulationType.fromNumber(createBondRequest.regulationType)
+                : undefined,
+            regulationsubType:
+              createBondRequest.regulationSubType !== undefined
+                ? CastRegulationSubType.fromNumber(createBondRequest.regulationSubType)
+                : undefined,
             isCountryControlListWhiteList: createBondRequest.isCountryControlListWhiteList,
             countries: createBondRequest.countries,
             info: createBondRequest.info,
@@ -195,8 +201,14 @@ describe("Bond", () => {
             internalKycActivated: createBondRequest.internalKycActivated,
             isMultiPartition: createBondRequest.isMultiPartition,
             maxSupply: BigDecimal.fromString(createBondRequest.numberOfUnits),
-            regulationType: CastRegulationType.fromNumber(createBondRequest.regulationType),
-            regulationsubType: CastRegulationSubType.fromNumber(createBondRequest.regulationSubType),
+            regulationType:
+              createBondRequest.regulationType !== undefined
+                ? CastRegulationType.fromNumber(createBondRequest.regulationType)
+                : undefined,
+            regulationsubType:
+              createBondRequest.regulationSubType !== undefined
+                ? CastRegulationSubType.fromNumber(createBondRequest.regulationSubType)
+                : undefined,
             isCountryControlListWhiteList: createBondRequest.isCountryControlListWhiteList,
             countries: createBondRequest.countries,
             info: createBondRequest.info,
@@ -404,7 +416,9 @@ describe("Bond", () => {
           currency: expectedResponse.bond.currency,
           nominalValue: expectedResponse.bond.nominalValue.toString(),
           nominalValueDecimals: expectedResponse.bond.nominalValueDecimals,
-          startingDate: new Date(expectedResponse.bond.startingDate * ONE_THOUSAND),
+          startingDate: expectedResponse.bond.startingDate
+            ? new Date(expectedResponse.bond.startingDate * ONE_THOUSAND)
+            : undefined,
           maturityDate: new Date(expectedResponse.bond.maturityDate * ONE_THOUSAND),
         }),
       );
@@ -747,8 +761,14 @@ describe("Bond", () => {
             internalKycActivated: createTrexSuiteBondRequest.internalKycActivated,
             isMultiPartition: createTrexSuiteBondRequest.isMultiPartition,
             maxSupply: BigDecimal.fromString(createTrexSuiteBondRequest.numberOfUnits),
-            regulationType: CastRegulationType.fromNumber(createTrexSuiteBondRequest.regulationType),
-            regulationsubType: CastRegulationSubType.fromNumber(createTrexSuiteBondRequest.regulationSubType),
+            regulationType:
+              createTrexSuiteBondRequest.regulationType !== undefined
+                ? CastRegulationType.fromNumber(createTrexSuiteBondRequest.regulationType)
+                : undefined,
+            regulationsubType:
+              createTrexSuiteBondRequest.regulationSubType !== undefined
+                ? CastRegulationSubType.fromNumber(createTrexSuiteBondRequest.regulationSubType)
+                : undefined,
             isCountryControlListWhiteList: createTrexSuiteBondRequest.isCountryControlListWhiteList,
             countries: createTrexSuiteBondRequest.countries,
             info: createTrexSuiteBondRequest.info,
@@ -814,8 +834,14 @@ describe("Bond", () => {
             internalKycActivated: createTrexSuiteBondRequest.internalKycActivated,
             isMultiPartition: createTrexSuiteBondRequest.isMultiPartition,
             maxSupply: BigDecimal.fromString(createTrexSuiteBondRequest.numberOfUnits),
-            regulationType: CastRegulationType.fromNumber(createTrexSuiteBondRequest.regulationType),
-            regulationsubType: CastRegulationSubType.fromNumber(createTrexSuiteBondRequest.regulationSubType),
+            regulationType:
+              createTrexSuiteBondRequest.regulationType !== undefined
+                ? CastRegulationType.fromNumber(createTrexSuiteBondRequest.regulationType)
+                : undefined,
+            regulationsubType:
+              createTrexSuiteBondRequest.regulationSubType !== undefined
+                ? CastRegulationSubType.fromNumber(createTrexSuiteBondRequest.regulationSubType)
+                : undefined,
             isCountryControlListWhiteList: createTrexSuiteBondRequest.isCountryControlListWhiteList,
             countries: createTrexSuiteBondRequest.countries,
             info: createTrexSuiteBondRequest.info,

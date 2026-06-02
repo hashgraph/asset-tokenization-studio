@@ -152,8 +152,14 @@ describe("Equity", () => {
             internalKycActivated: createEquityRequest.internalKycActivated,
             isMultiPartition: createEquityRequest.isMultiPartition,
             maxSupply: BigDecimal.fromString(createEquityRequest.numberOfShares),
-            regulationType: CastRegulationType.fromNumber(createEquityRequest.regulationType),
-            regulationsubType: CastRegulationSubType.fromNumber(createEquityRequest.regulationSubType),
+            regulationType:
+              createEquityRequest.regulationType !== undefined
+                ? CastRegulationType.fromNumber(createEquityRequest.regulationType)
+                : undefined,
+            regulationsubType:
+              createEquityRequest.regulationSubType !== undefined
+                ? CastRegulationSubType.fromNumber(createEquityRequest.regulationSubType)
+                : undefined,
             isCountryControlListWhiteList: createEquityRequest.isCountryControlListWhiteList,
             countries: createEquityRequest.countries,
             info: createEquityRequest.info,
@@ -212,8 +218,14 @@ describe("Equity", () => {
             internalKycActivated: createEquityRequest.internalKycActivated,
             isMultiPartition: createEquityRequest.isMultiPartition,
             maxSupply: BigDecimal.fromString(createEquityRequest.numberOfShares),
-            regulationType: CastRegulationType.fromNumber(createEquityRequest.regulationType),
-            regulationsubType: CastRegulationSubType.fromNumber(createEquityRequest.regulationSubType),
+            regulationType:
+              createEquityRequest.regulationType !== undefined
+                ? CastRegulationType.fromNumber(createEquityRequest.regulationType)
+                : undefined,
+            regulationsubType:
+              createEquityRequest.regulationSubType !== undefined
+                ? CastRegulationSubType.fromNumber(createEquityRequest.regulationSubType)
+                : undefined,
             isCountryControlListWhiteList: createEquityRequest.isCountryControlListWhiteList,
             countries: createEquityRequest.countries,
             info: createEquityRequest.info,
@@ -416,7 +428,10 @@ describe("Equity", () => {
           conversionRight: expectedResponse.equity.conversionRight,
           redemptionRight: expectedResponse.equity.redemptionRight,
           putRight: expectedResponse.equity.putRight,
-          dividendRight: CastDividendType.toNumber(expectedResponse.equity.dividendRight),
+          dividendRight:
+            expectedResponse.equity.dividendRight !== undefined
+              ? CastDividendType.toNumber(expectedResponse.equity.dividendRight)
+              : undefined,
           currency: expectedResponse.equity.currency,
           nominalValue: expectedResponse.equity.nominalValue.toString(),
           nominalValueDecimals: expectedResponse.equity.nominalValueDecimals,
@@ -1304,8 +1319,14 @@ describe("Equity", () => {
             internalKycActivated: createTrexSuiteEquityRequest.internalKycActivated,
             isMultiPartition: createTrexSuiteEquityRequest.isMultiPartition,
             maxSupply: BigDecimal.fromString(createTrexSuiteEquityRequest.numberOfShares),
-            regulationType: CastRegulationType.fromNumber(createTrexSuiteEquityRequest.regulationType),
-            regulationsubType: CastRegulationSubType.fromNumber(createTrexSuiteEquityRequest.regulationSubType),
+            regulationType:
+              createTrexSuiteEquityRequest.regulationType !== undefined
+                ? CastRegulationType.fromNumber(createTrexSuiteEquityRequest.regulationType)
+                : undefined,
+            regulationsubType:
+              createTrexSuiteEquityRequest.regulationSubType !== undefined
+                ? CastRegulationSubType.fromNumber(createTrexSuiteEquityRequest.regulationSubType)
+                : undefined,
             isCountryControlListWhiteList: createTrexSuiteEquityRequest.isCountryControlListWhiteList,
             countries: createTrexSuiteEquityRequest.countries,
             info: createTrexSuiteEquityRequest.info,
@@ -1377,8 +1398,14 @@ describe("Equity", () => {
             internalKycActivated: createTrexSuiteEquityRequest.internalKycActivated,
             isMultiPartition: createTrexSuiteEquityRequest.isMultiPartition,
             maxSupply: BigDecimal.fromString(createTrexSuiteEquityRequest.numberOfShares),
-            regulationType: CastRegulationType.fromNumber(createTrexSuiteEquityRequest.regulationType),
-            regulationsubType: CastRegulationSubType.fromNumber(createTrexSuiteEquityRequest.regulationSubType),
+            regulationType:
+              createTrexSuiteEquityRequest.regulationType !== undefined
+                ? CastRegulationType.fromNumber(createTrexSuiteEquityRequest.regulationType)
+                : undefined,
+            regulationsubType:
+              createTrexSuiteEquityRequest.regulationSubType !== undefined
+                ? CastRegulationSubType.fromNumber(createTrexSuiteEquityRequest.regulationSubType)
+                : undefined,
             isCountryControlListWhiteList: createTrexSuiteEquityRequest.isCountryControlListWhiteList,
             countries: createTrexSuiteEquityRequest.countries,
             info: createTrexSuiteEquityRequest.info,

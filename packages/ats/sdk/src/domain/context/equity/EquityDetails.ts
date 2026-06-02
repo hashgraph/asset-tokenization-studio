@@ -4,36 +4,45 @@ import ValidatedDomain from "@core/validation/ValidatedArgs";
 import BigDecimal from "../shared/BigDecimal";
 import { DividendType } from "./DividendType";
 import { Equity } from "./Equity";
+import { OptionalField } from "@core/decorator/OptionalDecorator";
 
 export class EquityDetails extends ValidatedDomain<EquityDetails> {
-  votingRight: boolean;
-  informationRight: boolean;
-  liquidationRight: boolean;
-  subscriptionRight: boolean;
-  conversionRight: boolean;
-  redemptionRight: boolean;
-  putRight: boolean;
-  dividendRight: DividendType;
+  @OptionalField()
+  votingRight?: boolean;
+  @OptionalField()
+  informationRight?: boolean;
+  @OptionalField()
+  liquidationRight?: boolean;
+  @OptionalField()
+  subscriptionRight?: boolean;
+  @OptionalField()
+  conversionRight?: boolean;
+  @OptionalField()
+  redemptionRight?: boolean;
+  @OptionalField()
+  putRight?: boolean;
+  @OptionalField()
+  dividendRight?: DividendType;
   currency: string;
   nominalValue: BigDecimal;
   nominalValueDecimals: number;
 
   constructor(
-    votingRight: boolean,
-    informationRight: boolean,
-    liquidationRight: boolean,
-    subscriptionRight: boolean,
-    conversionRight: boolean,
-    redemptionRight: boolean,
-    putRight: boolean,
-    dividendRight: DividendType,
+    votingRight: boolean | undefined,
+    informationRight: boolean | undefined,
+    liquidationRight: boolean | undefined,
+    subscriptionRight: boolean | undefined,
+    conversionRight: boolean | undefined,
+    redemptionRight: boolean | undefined,
+    putRight: boolean | undefined,
+    dividendRight: DividendType | undefined,
     currency: string,
     nominalValue: BigDecimal,
     nominalValueDecimals: number,
   ) {
     super({
       dividendRight: (val) => {
-        return Equity.checkDividend(val);
+        return Equity.checkDividend(val!);
       },
     });
     this.votingRight = votingRight;

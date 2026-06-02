@@ -49,7 +49,6 @@ import {
 import { decodeEvent } from "@scripts/infrastructure";
 import { DeepPartial } from "@scripts";
 import { getRegulationData, getSecurityData, TEST_NOMINAL_VALUES } from "@test";
-import { ISecurity__factory } from "../../../typechain-types/factories/contracts/facets/layer_2/security";
 
 type LoansPortfolioDefaultParamsType = ILoansPortfolio.LoansPortfolioDetailsDataStruct & {
   nominalValue: bigint;

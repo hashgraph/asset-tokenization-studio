@@ -3,19 +3,21 @@
 import ValidatedDomain from "@core/validation/ValidatedArgs";
 import BigDecimal from "../shared/BigDecimal";
 import { SecurityDate } from "../shared/SecurityDate";
+import { OptionalField } from "@core/decorator/OptionalDecorator";
 
 export class BondDetails extends ValidatedDomain<BondDetails> {
   currency: string;
   nominalValue: BigDecimal;
   nominalValueDecimals: number;
-  startingDate: number;
+  @OptionalField()
+  startingDate?: number;
   maturityDate: number;
 
   constructor(
     currency: string,
     nominalValue: BigDecimal,
     nominalValueDecimals: number,
-    startingDate: number,
+    startingDate: number | undefined,
     maturityDate: number,
   ) {
     super({
