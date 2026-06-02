@@ -15,7 +15,7 @@ abstract contract BondUSA is IBondUSA, Modifiers {
     ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_bondInitializerKey()) {
         InitializerStorageWrapper.setFacetToReady(_bondInitializerKey());
         BondStorageWrapper.initialize_bond(_bondDetailsData);
-        emit BondUSAInitialized();
+        emit BondUSAInitialized(_bondDetailsData);
     }
 
     function _bondInitializerKey() internal view virtual returns (bytes32);

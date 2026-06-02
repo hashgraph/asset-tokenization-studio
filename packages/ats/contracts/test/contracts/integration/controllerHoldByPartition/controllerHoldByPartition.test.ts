@@ -21,7 +21,7 @@ import { ResolverProxy, IAsset, IHoldTypes, MockDiamondCut } from "@contract-typ
 const _WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
 const _AMOUNT = 1000;
 const _DATA = "0x1234";
-let holdIdentifier: IHoldTypes.HoldIdentifierStruct;
+let holdIdentifier: { partition: string; tokenHolder: string; holdId: number };
 enum ThirdPartyType {
   NULL,
   AUTHORIZED,
@@ -341,12 +341,12 @@ describe("ControllerHoldByPartition Tests", () => {
           0,
           _AMOUNT,
           1,
-          hold.amount,
-          hold.escrow,
-          hold.data,
+          Number(hold.amount),
+          hold.escrow as string,
+          hold.data as string,
           operatorData,
-          hold.to,
-          hold.expirationTimestamp,
+          hold.to as string,
+          String(hold.expirationTimestamp),
           1,
           1,
           ThirdPartyType.CONTROLLER,

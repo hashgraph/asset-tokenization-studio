@@ -41,8 +41,8 @@ import { IIdentity } from "../facets/identity/IIdentity.sol";
 import {
     IScheduledCrossOrderedTasks
 } from "../facets/layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
-import { ISnapshots } from "../facets/layer_1/snapshot/ISnapshots.sol";
-import { IProceedRecipients } from "../facets/layer_2/proceedRecipient/IProceedRecipients.sol";
+import { ISnapshots } from "../facets/snapshot/ISnapshots.sol";
+import { IProceedRecipients } from "../facets/proceedRecipient/IProceedRecipients.sol";
 
 import { INominalValue } from "../facets/layer_2/nominalValue/INominalValue.sol";
 import { ScheduledTasksStorageWrapper } from "../domain/asset/ScheduledTasksStorageWrapper.sol";
@@ -52,16 +52,12 @@ import {
     IExternalControlListManagement
 } from "../facets/externalControlListManagement/IExternalControlListManagement.sol";
 import { IExternalKycListManagement } from "../facets/externalKycListManagement/IExternalKycListManagement.sol";
-import { IKyc } from "../facets/layer_1/kyc/IKyc.sol";
+import { IKyc } from "../facets/kyc/IKyc.sol";
 import { _validateISIN } from "./isinValidator.sol";
-import { IFixedRate } from "../facets/layer_2/interestRate/fixedRate/IFixedRate.sol";
-import { IKpiLinkedRate } from "../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
-import { InterestRateStorageWrapper } from "../domain/asset/InterestRateStorageWrapper.sol";
 import { IInterestRate } from "../facets/interestRate/IInterestRate.sol";
 import { EvmAccessors } from "../infrastructure/utils/EvmAccessors.sol";
 import { DatesValidation } from "../infrastructure/utils/DatesValidation.sol";
 import { IAdjustBalances } from "../facets/adjustBalances/IAdjustBalances.sol";
-import { IKpis } from "../facets/layer_2/kpi/kpiLatest/IKpis.sol";
 import { IAllowance } from "../facets/allowance/IAllowance.sol";
 import { IBalanceTracker } from "../facets/balanceTracker/IBalanceTracker.sol";
 import { IBalanceTrackerAdjusted } from "../facets/balanceTrackerAdjusted/IBalanceTrackerAdjusted.sol";
@@ -135,10 +131,10 @@ import { ISecurityHoldersAtSnapshot } from "../facets/securityHoldersAtSnapshot/
 import { ISnapshotsByPartition } from "../facets/snapshotsByPartition/ISnapshotsByPartition.sol";
 import { ISsiManagement } from "../facets/ssiManagement/ISsiManagement.sol";
 import { ITransfer } from "../facets/transfer/ITransfer.sol";
-import { ITransferAndLock } from "../facets/layer_3/transferAndLock/ITransferAndLock.sol";
+import { ITransferAndLock } from "../facets/transferAndLock/ITransferAndLock.sol";
 import { ITransferAndLockByPartition } from "../facets/transferAndLockByPartition/ITransferAndLockByPartition.sol";
 import { ITransferByPartition } from "../facets/transferByPartition/ITransferByPartition.sol";
-import { IVoting } from "../facets/layer_2/voting/IVoting.sol";
+import { IVoting } from "../facets/voting/IVoting.sol";
 import { IVotingSecurityHolders } from "../facets/votingSecurityHolders/IVotingSecurityHolders.sol";
 
 /**
@@ -159,77 +155,56 @@ abstract contract Factory is IFactory {
     uint256 private constant _SECURITY_FACETS_MAX = 150;
 
     /**
-     * @notice Ensures a non-zero business logic resolver is provided.
-     * @dev Reverts with `EmptyResolver` when the resolver address is zero.
+     * @notice Guarantees a non-zero business logic resolver is provided.
+     * @dev Delegates to `_checkResolver`, which reverts with `EmptyResolver` when the resolver
+     *      address is zero.
      * @param resolver Resolver that will supply facet configuration for the proxy.
      */
-    modifier checkResolver(IBusinessLogicResolver resolver) {
-        if (address(resolver) == address(0)) {
-            revert EmptyResolver(resolver);
-        }
+    modifier onlyValidResolver(IBusinessLogicResolver resolver) {
+        _checkResolver(resolver);
         _;
     }
 
     /**
-     * @notice Ensures the provided ISIN satisfies the project validator.
-     * @dev Reverts according to `_validateISIN` when the identifier is malformed.
+     * @notice Guarantees the provided ISIN satisfies the project validator.
+     * @dev Delegates to `_checkISIN`, which reverts when the identifier is malformed.
      * @param isin International Securities Identification Number to validate.
      */
-    modifier checkISIN(string calldata isin) {
-        _validateISIN(isin);
+    modifier onlyValidISIN(string calldata isin) {
+        _checkISIN(isin);
         _;
     }
 
     /**
-     * @notice Ensures the initial RBAC configuration includes at least one admin.
-     * @dev Reverts with `NoInitialAdmins` unless a non-zero `DEFAULT_ADMIN_ROLE` member
-     *      exists in the supplied RBAC entries.
+     * @notice Guarantees the initial RBAC configuration includes at least one admin.
+     * @dev Delegates to `_checkAdmins`, which reverts with `NoInitialAdmins` unless a non-zero
+     *      `DEFAULT_ADMIN_ROLE` member exists in the supplied RBAC entries.
      * @param rbacs Initial role assignments passed to the deployed proxy.
      */
-    modifier checkAdmins(IResolverProxy.Rbac[] calldata rbacs) {
+    modifier onlyValidAdmins(IResolverProxy.Rbac[] calldata rbacs) {
         _checkAdmins(rbacs);
         _;
     }
 
     /**
-     * @notice Ensures the regulation type and sub-type combination is supported.
-     * @dev Reverts according to `_checkRegulationTypeAndSubType` for invalid combinations.
+     * @notice Guarantees the regulation type and sub-type combination is supported.
+     * @dev Delegates to `_checkRegulationTypeAndSubType`, which reverts for invalid combinations.
      * @param _regulationType Primary regulation category.
      * @param _regulationSubType Secondary regulation category.
      */
-    modifier checkRegulation(RegulationType _regulationType, RegulationSubType _regulationSubType) {
+    modifier onlyValidRegulation(RegulationType _regulationType, RegulationSubType _regulationSubType) {
         _checkRegulationTypeAndSubType(_regulationType, _regulationSubType);
         _;
     }
 
     /**
-     * @notice Ensures KPI-linked interest rate data is valid before deployment.
-     * @dev Reverts according to `InterestRateStorageWrapper.requireValidInterestRate`.
-     * @param _newInterestRate KPI-linked interest rate configuration to validate.
-     */
-    modifier checkInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) {
-        InterestRateStorageWrapper.requireValidInterestRate(_newInterestRate);
-        _;
-    }
-
-    /**
-     * @notice Ensures KPI impact data is valid before deployment.
-     * @dev Reverts according to `InterestRateStorageWrapper.requireValidImpactData`.
-     * @param _newImpactData KPI impact configuration to validate.
-     */
-    modifier checkImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) {
-        InterestRateStorageWrapper.requireValidImpactData(_newImpactData);
-        _;
-    }
-
-    /**
-     * @notice Ensures bond dates are chronologically valid and schedulable.
-     * @dev Reverts when the maturity date is not after the start date or is an invalid
-     *      scheduled-task timestamp.
+     * @notice Guarantees bond dates are chronologically valid and schedulable.
+     * @dev Delegates to `_checkBondDates`, which reverts when the maturity date is not after the
+     *      start date or is an invalid scheduled-task timestamp.
      * @param startingDate Bond start timestamp.
      * @param maturityDate Bond maturity timestamp.
      */
-    modifier checkBondDates(uint256 startingDate, uint256 maturityDate) {
+    modifier onlyValidBondDates(uint256 startingDate, uint256 maturityDate) {
         _checkBondDates(startingDate, maturityDate);
         _;
     }
@@ -249,7 +224,7 @@ abstract contract Factory is IFactory {
         bytes32 _configKey,
         uint256 _version,
         IResolverProxy.Rbac[] calldata _rbacs
-    ) external checkResolver(_resolver) checkAdmins(_rbacs) returns (address proxyAddress_) {
+    ) external onlyValidResolver(_resolver) onlyValidAdmins(_rbacs) returns (address proxyAddress_) {
         proxyAddress_ = address(new ResolverProxy(_resolver, _configKey, _version, _rbacs));
         emit ProxyDeployed(proxyAddress_, _resolver, _configKey, _version, _rbacs);
     }
@@ -269,10 +244,10 @@ abstract contract Factory is IFactory {
         FactoryRegulationData calldata _factoryRegulationData
     )
         external
-        checkResolver(_equityData.security.resolver)
-        checkISIN(_equityData.security.erc20MetadataInfo.isin)
-        checkAdmins(_equityData.security.rbacs)
-        checkRegulation(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType)
+        onlyValidResolver(_equityData.security.resolver)
+        onlyValidISIN(_equityData.security.erc20MetadataInfo.isin)
+        onlyValidAdmins(_equityData.security.rbacs)
+        onlyValidRegulation(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType)
         returns (address equityAddress_)
     {
         equityAddress_ = _deploySecurity(_equityData.security, SecurityType.Equity);
@@ -312,11 +287,11 @@ abstract contract Factory is IFactory {
         FactoryRegulationData calldata _factoryRegulationData
     )
         external
-        checkResolver(_bondData.security.resolver)
-        checkISIN(_bondData.security.erc20MetadataInfo.isin)
-        checkAdmins(_bondData.security.rbacs)
-        checkRegulation(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType)
-        checkBondDates(_bondData.bondDetails.startingDate, _bondData.bondDetails.maturityDate)
+        onlyValidResolver(_bondData.security.resolver)
+        onlyValidISIN(_bondData.security.erc20MetadataInfo.isin)
+        onlyValidAdmins(_bondData.security.rbacs)
+        onlyValidRegulation(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType)
+        onlyValidBondDates(_bondData.bondDetails.startingDate, _bondData.bondDetails.maturityDate)
         returns (address bondAddress_)
     {
         bondAddress_ = _deployBond(_bondData, _factoryRegulationData, SecurityType.BondVariableRate);
@@ -328,78 +303,46 @@ abstract contract Factory is IFactory {
     }
 
     /**
-     * @notice Deploys and initialises a fixed-rate bond security proxy.
-     * @dev Validates resolver, ISIN, admin RBAC, regulation data and bond dates. Initialises
-     *      bond-specific and fixed-rate facets, marks the proxy operational, renounces this
-     *      factory's temporary admin role and emits `BondFixedRateDeployed`.
-     * @param _bondFixedRateData Fixed-rate bond deployment, regulation and rate data.
-     * @return bondAddress_ Address of the deployed fixed-rate bond proxy.
+     * @notice Deploys and fully initialises a deposit token proxy.
+     * @dev Creates the proxy and initialises its facets via `_deployDepositToken`, marks the
+     *      proxy operational and renounces this factory's temporary `DEFAULT_ADMIN_ROLE`. The
+     *      deposit token configuration does not include `SecurityFacet`, so
+     *      `_factoryRegulationData` is validated by `onlyValidRegulation` and emitted in
+     *      `DepositTokenDeployed` but not persisted on-chain.
+     * @param _depositTokenData Deposit token creation data wrapping the shared `SecurityData`.
+     * @param _factoryRegulationData Regulation type and sub-type validated for the deposit token.
+     * @return depositTokenAddress_ Address of the newly deployed deposit token proxy.
      */
-    function deployBondFixedRate(
-        BondFixedRateData calldata _bondFixedRateData
+    function deployDepositToken(
+        DepositTokenData calldata _depositTokenData,
+        FactoryRegulationData calldata _factoryRegulationData
     )
         external
-        checkResolver(_bondFixedRateData.bondData.security.resolver)
-        checkISIN(_bondFixedRateData.bondData.security.erc20MetadataInfo.isin)
-        checkAdmins(_bondFixedRateData.bondData.security.rbacs)
-        checkRegulation(
-            _bondFixedRateData.factoryRegulationData.regulationType,
-            _bondFixedRateData.factoryRegulationData.regulationSubType
-        )
-        checkBondDates(
-            _bondFixedRateData.bondData.bondDetails.startingDate,
-            _bondFixedRateData.bondData.bondDetails.maturityDate
-        )
-        returns (address bondAddress_)
+        onlyValidResolver(_depositTokenData.security.resolver)
+        onlyValidISIN(_depositTokenData.security.erc20MetadataInfo.isin)
+        onlyValidAdmins(_depositTokenData.security.rbacs)
+        onlyValidRegulation(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType)
+        returns (address depositTokenAddress_)
     {
-        bondAddress_ = _deployBond(
-            _bondFixedRateData.bondData,
-            _bondFixedRateData.factoryRegulationData,
-            SecurityType.BondFixedRate
-        );
-        IFixedRate(bondAddress_).initializeFixedRate(_bondFixedRateData.fixedRateData);
-        IInterestRate(bondAddress_).initializeInterestRateType(IInterestRate.RateType.FIXED);
-        (bool isOperational_, ) = IInitializer(bondAddress_).setOperationalStatus();
+        depositTokenAddress_ = _deployDepositToken(_depositTokenData.security, SecurityType.DepositToken);
+        (bool isOperational_, ) = IInitializer(depositTokenAddress_).setOperationalStatus();
         _checkUnexpectedError(!isOperational_, FACTORY_OPERATIONAL_STATUS);
-        IAccessControl(bondAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
-        emit BondFixedRateDeployed(EvmAccessors.getMsgSender(), bondAddress_, _bondFixedRateData);
+        IAccessControl(depositTokenAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
+        emit DepositTokenDeployed(
+            EvmAccessors.getMsgSender(),
+            depositTokenAddress_,
+            _depositTokenData,
+            _factoryRegulationData
+        );
     }
 
     /**
-     * @notice Deploys and initialises a KPI-linked-rate bond security proxy.
-     * @dev Validates resolver, ISIN, admin RBAC, regulation data, KPI rate data, impact data
-     *      and bond dates. Initialises bond-specific and KPI-linked facets, marks the proxy
-     *      operational, renounces this factory's temporary admin role and emits
-     *      `BondKpiLinkedRateDeployed`.
-     * @param _bondKpiLinkedRateData KPI-linked bond deployment, regulation and rate data.
-     * @return bondAddress_ Address of the deployed KPI-linked-rate bond proxy.
+     * @notice Builds and returns the full `RegulationData` struct for a given regulation type
+     *         and sub-type combination.
+     * @param _regulationType The primary regulation category.
+     * @param _regulationSubType The secondary regulation category.
+     * @return regulationData_ The constructed `RegulationData` struct.
      */
-    function deployBondKpiLinkedRate(
-        BondKpiLinkedRateData calldata _bondKpiLinkedRateData
-    )
-        external
-        checkResolver(_bondKpiLinkedRateData.bondData.security.resolver)
-        checkISIN(_bondKpiLinkedRateData.bondData.security.erc20MetadataInfo.isin)
-        checkAdmins(_bondKpiLinkedRateData.bondData.security.rbacs)
-        checkRegulation(
-            _bondKpiLinkedRateData.factoryRegulationData.regulationType,
-            _bondKpiLinkedRateData.factoryRegulationData.regulationSubType
-        )
-        checkInterestRate(_bondKpiLinkedRateData.interestRate)
-        checkImpactData(_bondKpiLinkedRateData.impactData)
-        checkBondDates(
-            _bondKpiLinkedRateData.bondData.bondDetails.startingDate,
-            _bondKpiLinkedRateData.bondData.bondDetails.maturityDate
-        )
-        returns (address bondAddress_)
-    {
-        bondAddress_ = _deployBondKpiLinkedRate(_bondKpiLinkedRateData);
-        (bool isOperational_, ) = IInitializer(bondAddress_).setOperationalStatus();
-        _checkUnexpectedError(!isOperational_, FACTORY_OPERATIONAL_STATUS);
-        IAccessControl(bondAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
-        _emitBondKpiLinkedRateDeployed(bondAddress_, _bondKpiLinkedRateData);
-    }
-
     /// @inheritdoc IFactory
     function getAppliedRegulationData(
         RegulationType _regulationType,
@@ -448,20 +391,6 @@ abstract contract Factory is IFactory {
     }
 
     /**
-     * @notice Deploys and initialises the KPI-linked-rate bond facet set.
-     * @dev Builds on `_deployBond`, then initialises KPI-linked rate metadata, rate type and
-     *      KPI tracking. Operational status and admin renouncement remain caller concerns.
-     * @param _data KPI-linked bond deployment data.
-     * @return bondAddress_ Address of the deployed KPI-linked-rate bond proxy.
-     */
-    function _deployBondKpiLinkedRate(BondKpiLinkedRateData calldata _data) internal returns (address bondAddress_) {
-        bondAddress_ = _deployBond(_data.bondData, _data.factoryRegulationData, SecurityType.BondKpiLinkedRate);
-        IKpiLinkedRate(bondAddress_).initializeKpiLinkedRate(_data.interestRate, _data.impactData);
-        IInterestRate(bondAddress_).initializeInterestRateType(IInterestRate.RateType.KPI_LINKED);
-        IKpis(bondAddress_).initializeKpis();
-    }
-
-    /**
      * @notice Deploys a security proxy and initialises all common security facets.
      * @dev Appends this factory as a temporary `DEFAULT_ADMIN_ROLE` holder to allow facet
      *      initialisation. Callers must later mark the proxy operational and renounce that role.
@@ -473,8 +402,60 @@ abstract contract Factory is IFactory {
         SecurityData calldata _securityData,
         SecurityType _securityType
     ) internal virtual returns (address securityAddress_) {
-        // Build extended rbacs array that includes the factory as a temporary
-        // DEFAULT_ADMIN_ROLE holder during initialisation.
+        securityAddress_ = _deploySecurityProxy(_securityData);
+        _initializeSecurityMetadata(securityAddress_, _securityData, _securityType);
+        _initializeSecurityCompliance(securityAddress_);
+        _initializeCoreFacets(securityAddress_);
+        _initializeSnapshotFacets(securityAddress_);
+        _initializeManagementFacets(securityAddress_);
+        _initializeHoldFacets(securityAddress_);
+        _initializeClearingFacets(securityAddress_);
+        _initializeMiscellaneousFacets(securityAddress_);
+    }
+
+    /**
+     * @notice Deploys a deposit-token proxy and initialises only the facets it exposes.
+     * @dev Initialises exactly the facets registered for the deposit-token resolver
+     *      configuration and no others; in particular it does not call the snapshot, lock,
+     *      transfer-and-lock, corporate-action, identity, recovery, SSI, balance-adjustment,
+     *      scheduled-task, ERC20-permit, ERC20-votes, compliance, KYC, external-pause or
+     *      protected-partition initialisers. Each initialiser invoked here requires its facet to
+     *      be present in the resolver configuration, otherwise `IInitializer.setOperationalStatus`
+     *      cannot mark the proxy operational. The `InitializerFacet` batch size is seeded last so a
+     *      single `setOperationalStatus` pass validates every facet initialised above.
+     * @param _securityData Common security deployment configuration.
+     * @param _securityType Security type recorded in core metadata.
+     * @return securityAddress_ Address of the fully initialised deposit-token proxy.
+     */
+    function _deployDepositToken(
+        SecurityData calldata _securityData,
+        SecurityType _securityType
+    ) internal virtual returns (address securityAddress_) {
+        securityAddress_ = _deploySecurityProxy(_securityData);
+        _initializeBaseConfiguration(securityAddress_, _securityData, _securityType);
+        // DepositToken carries no nominal value; seed the facet with its zero default.
+        INominalValue(securityAddress_).initializeNominalValue(0, 0, bytes3(0));
+        _initializeTransferAndSupply(securityAddress_);
+        _initializeStateControls(securityAddress_);
+        _initializeBalances(securityAddress_);
+        _initializeOperatorsAndControllers(securityAddress_);
+        _initializeBatchOperations(securityAddress_);
+        _initializeClearingAndHold(securityAddress_, _securityData.clearingActive);
+        // Seed the initializer batch size last so a single setOperationalStatus pass
+        // can validate every facet initialised above.
+        IInitializer(securityAddress_).initializeInitializer(_SECURITY_FACETS_MAX);
+    }
+
+    /**
+     * @notice Deploys a bare security proxy and seeds this factory as a temporary admin.
+     * @dev Builds an extended RBAC array that appends `address(this)` as a `DEFAULT_ADMIN_ROLE`
+     *      member so the factory can run facet initialisers. Callers MUST renounce that role
+     *      once initialisation completes (see `IAccessControl.renounceRole`). The proxy is
+     *      returned uninitialised; facet initialisers are the caller's responsibility.
+     * @param _securityData Common security deployment configuration.
+     * @return securityAddress_ Address of the freshly deployed, uninitialised security proxy.
+     */
+    function _deploySecurityProxy(SecurityData calldata _securityData) private returns (address securityAddress_) {
         uint256 rbacsLen = _securityData.rbacs.length;
         IResolverProxy.Rbac[] memory extendedRbacs = new IResolverProxy.Rbac[](rbacsLen + 1);
         for (uint256 i; i < rbacsLen; ) {
@@ -485,21 +466,124 @@ abstract contract Factory is IFactory {
         }
         extendedRbacs[rbacsLen] = IResolverProxy.Rbac({ role: DEFAULT_ADMIN_ROLE, members: new address[](1) });
         extendedRbacs[rbacsLen].members[0] = address(this);
-        ResolverProxy equity = new ResolverProxy(
+        ResolverProxy proxy = new ResolverProxy(
             _securityData.resolver,
             _securityData.resolverProxyConfiguration.key,
             _securityData.resolverProxyConfiguration.version,
             extendedRbacs
         );
-        securityAddress_ = address(equity);
-        _initializeSecurityMetadata(securityAddress_, _securityData, _securityType);
-        _initializeSecurityCompliance(securityAddress_);
-        _initializeCoreFacets(securityAddress_);
-        _initializeSnapshotFacets(securityAddress_);
-        _initializeManagementFacets(securityAddress_);
-        _initializeHoldFacets(securityAddress_);
-        _initializeClearingFacets(securityAddress_);
-        _initializeMiscellaneousFacets(securityAddress_);
+        securityAddress_ = address(proxy);
+    }
+
+    /**
+     * @notice Initialises a security's metadata, eligibility, supply caps and partition
+     *         configuration.
+     * @dev Covers the always-on infrastructure (access control, diamond cut) plus core metadata,
+     *      control lists, caps, custom data, documentation and the partition and controller flags.
+     *      Nominal value is asset-specific and initialised separately by each deployer.
+     * @param _securityAddress Address of the security proxy being initialised.
+     * @param _securityData Common security deployment configuration.
+     * @param _securityType Security type recorded in core metadata.
+     */
+    function _initializeBaseConfiguration(
+        address _securityAddress,
+        SecurityData calldata _securityData,
+        SecurityType _securityType
+    ) private {
+        IAccessControl(_securityAddress).initializeAccessControl();
+        IDiamondFacet(_securityAddress).initializeDiamondCut();
+
+        ICore.ERC20Metadata memory erc20Metadata = ICore.ERC20Metadata({
+            info: _securityData.erc20MetadataInfo,
+            securityType: _securityType
+        });
+        ICore(_securityAddress).initializeCore(erc20Metadata);
+        IControlList(_securityAddress).initializeControlList(_securityData.isWhiteList);
+        IExternalControlListManagement(_securityAddress).initializeExternalControlLists(
+            _securityData.externalControlLists
+        );
+        ICap(_securityAddress).initializeCap(_securityData.maxSupply, new ICap.PartitionCap[](0));
+        ICapByPartition(_securityAddress).initializeCapByPartition();
+        ICustomData(_securityAddress).initializeCustomData();
+        IDocumentation(_securityAddress).initializeDocumentation();
+
+        IPartitions(_securityAddress).initializePartitions(_securityData.isMultiPartition);
+        IController(_securityAddress).initializeController(_securityData.isControllable);
+    }
+
+    /**
+     * @notice Initialises the transfer, allowance and supply (mint/burn) facets.
+     * @param _securityAddress Address of the security proxy being initialised.
+     */
+    function _initializeTransferAndSupply(address _securityAddress) private {
+        IAllowance(_securityAddress).initializeAllowance();
+        ITransfer(_securityAddress).initializeTransfer();
+        ITransferByPartition(_securityAddress).initializeTransferByPartition();
+        IMint(_securityAddress).initializeERC1594();
+        IMintByPartition(_securityAddress).initializeMintByPartition();
+        IBurn(_securityAddress).initializeBurn();
+        IBurnByPartition(_securityAddress).initializeBurnByPartition();
+    }
+
+    /**
+     * @notice Initialises the state-control facets: freeze, pause and deactivate.
+     * @param _securityAddress Address of the security proxy being initialised.
+     */
+    function _initializeStateControls(address _securityAddress) private {
+        IFreeze(_securityAddress).initializeFreeze();
+        IPause(_securityAddress).initializePause();
+        IDeactivate(_securityAddress).initializeDeactivate();
+    }
+
+    /**
+     * @notice Initialises the balance-tracking and security-holder facets.
+     * @param _securityAddress Address of the security proxy being initialised.
+     */
+    function _initializeBalances(address _securityAddress) private {
+        IBalanceTracker(_securityAddress).initializeBalanceTracker();
+        IBalanceTrackerByPartition(_securityAddress).initializeBalanceTrackerByPartition();
+        ISecurityHolders(_securityAddress).initializeSecurityHolders();
+    }
+
+    /**
+     * @notice Initialises the operator and controller delegation facets.
+     * @param _securityAddress Address of the security proxy being initialised.
+     */
+    function _initializeOperatorsAndControllers(address _securityAddress) private {
+        IOperator(_securityAddress).initializeOperator();
+        IOperatorByPartition(_securityAddress).initializeOperatorByPartition();
+        IOperatorHoldByPartition(_securityAddress).initializeOperatorHoldByPartition();
+        IOperatorClearingByPartition(_securityAddress).initializeOperatorClearingByPartition();
+        IOperatorClearingHoldByPartition(_securityAddress).initializeOperatorClearingHoldByPartition();
+
+        IControllerByPartition(_securityAddress).initializeControllerByPartition();
+        IControllerHoldByPartition(_securityAddress).initializeControllerHoldByPartition();
+    }
+
+    /**
+     * @notice Initialises the batch-operation facets.
+     * @param _securityAddress Address of the security proxy being initialised.
+     */
+    function _initializeBatchOperations(address _securityAddress) private {
+        IBatchController(_securityAddress).initializeBatchController();
+        IBatchBurn(_securityAddress).initializeBatchBurn();
+        IBatchMint(_securityAddress).initializeBatchMint();
+        IBatchTransfer(_securityAddress).initializeBatchTransfer();
+        IBatchFreeze(_securityAddress).initializeBatchFreeze();
+    }
+
+    /**
+     * @notice Initialises the clearing and hold facets.
+     * @param _securityAddress Address of the security proxy being initialised.
+     * @param _clearingActive Whether clearing is initially active.
+     */
+    function _initializeClearingAndHold(address _securityAddress, bool _clearingActive) private {
+        IClearing(_securityAddress).initializeClearing(_clearingActive);
+        IClearingByPartition(_securityAddress).initializeClearingByPartition();
+        IClearingHoldByPartition(_securityAddress).initializeClearingHoldByPartition();
+
+        IHoldFacet(_securityAddress).initializeHold();
+        IHoldByPartition(_securityAddress).initializeHoldByPartition();
     }
 
     /**
@@ -761,20 +845,6 @@ abstract contract Factory is IFactory {
     }
 
     /**
-     * @notice Emits the KPI-linked-rate bond deployment event.
-     * @dev Uses `EvmAccessors.getMsgSender()` so the emitted deployer follows the project's
-     *      message-sender abstraction.
-     * @param _bondAddress Address of the deployed KPI-linked-rate bond proxy.
-     * @param _bondKpiLinkedRateData KPI-linked bond deployment data emitted for indexing.
-     */
-    function _emitBondKpiLinkedRateDeployed(
-        address _bondAddress,
-        BondKpiLinkedRateData calldata _bondKpiLinkedRateData
-    ) private {
-        emit BondKpiLinkedRateDeployed(EvmAccessors.getMsgSender(), _bondAddress, _bondKpiLinkedRateData);
-    }
-
-    /**
      * @notice Validates bond start and maturity dates.
      * @dev Reverts if dates are not ordered correctly or maturity cannot be used for scheduled
      *      tasks.
@@ -784,6 +854,27 @@ abstract contract Factory is IFactory {
     function _checkBondDates(uint256 startingDate, uint256 maturityDate) private view {
         DatesValidation.checkDates(startingDate, maturityDate);
         ScheduledTasksStorageWrapper.requireValidTimestamp(maturityDate);
+    }
+
+    /**
+     * @notice Asserts that a non-zero business logic resolver is provided.
+     * @dev Reverts with `EmptyResolver` when the resolver address is zero.
+     * @param resolver Resolver that will supply facet configuration for the proxy.
+     */
+    function _checkResolver(IBusinessLogicResolver resolver) private pure {
+        if (address(resolver) == address(0)) {
+            revert EmptyResolver(resolver);
+        }
+    }
+
+    /**
+     * @notice Asserts that the provided ISIN satisfies the project validator.
+     * @dev Forwards to the `_validateISIN` free function, which reverts when the identifier is
+     *      malformed.
+     * @param isin International Securities Identification Number to validate.
+     */
+    function _checkISIN(string calldata isin) private pure {
+        _validateISIN(isin);
     }
 
     /**

@@ -20,6 +20,7 @@ function _versions() pure returns (uint256[] memory arr) {
 interface IMockFacet1 {
     function initializeMockFacet1() external;
     function upgradeMockFacet1() external;
+    function upgradeMockFacet1AnyVersion() external;
     function mockFacet1Method() external view returns (string memory);
     function mockFacet1NotReadyMethod() external;
 }
@@ -45,6 +46,14 @@ contract MockFacet1 is IMockFacet1, Modifiers, IStaticFunctionSelectors {
         InitializerStorageWrapper.setFacetToReady(_MOCK_FACET_1_RESOLVER_KEY);
     }
 
+    function upgradeMockFacet1AnyVersion()
+        external
+        override
+        onlyFacetRegistered(_MOCK_FACET_1_RESOLVER_KEY, new uint256[](0))
+    {
+        InitializerStorageWrapper.setFacetToReady(_MOCK_FACET_1_RESOLVER_KEY);
+    }
+
     function mockFacet1Method() external view override onlyOperational returns (string memory) {
         return "MockFacet1 method called";
     }
@@ -62,6 +71,7 @@ contract MockFacet1 is IMockFacet1, Modifiers, IStaticFunctionSelectors {
             Bytes4Builder.build(
                 this.initializeMockFacet1.selector,
                 this.upgradeMockFacet1.selector,
+                this.upgradeMockFacet1AnyVersion.selector,
                 this.mockFacet1Method.selector,
                 this.mockFacet1NotReadyMethod.selector
             );
