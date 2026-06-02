@@ -41,7 +41,7 @@ import { LoansPortfolioModifiers } from "./LoansPortfolioModifiers.sol";
  * - LockModifiers: Lock validation
  * - MaturityModifiers: Maturity validation
  * - ProceedRecipientModifiers: Proceed recipients validation
- * - ProtectedPartitionRoleValidator: Protected partitions roles validation
+ * - ProtectedPartitionRoleValidatorModifiers: Protected partitions roles validation
  * - StateModifiers: State validation
  *
  * @author Asset Tokenization Studio Team

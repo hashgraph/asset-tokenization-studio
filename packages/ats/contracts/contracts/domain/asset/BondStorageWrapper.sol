@@ -15,20 +15,23 @@ bytes32 constant STORAGE_LOCATION_BOND = 0xa99cdff87e8b13602d53b3661888bce1eb21f
 
 /**
  * @notice Persistent storage layout for the Bond facet.
- * @dev Holds the initialisation flag and the lifecycle timestamps that frame a bond
- *      instrument. Currency, nominal value and nominal-value decimals are owned by
- *      {NominalValueStorageWrapper}; this struct only captures the bond-specific dates.
- *      New fields must be appended below the marker to preserve ERC-7201 slot offsets.
+ * @dev Holds lifecycle timestamps that define the active period of a bond instrument.
+ *      Currency, nominal value and nominal-value decimals are stored in
+ *      {NominalValueDataStorage}. New fields must be appended below the marker to
+ *      preserve ERC-7201 slot offsets.
+ * @param startingDate Unix timestamp from which the bond lifecycle starts.
+ * @param maturityDate Unix timestamp at which the bond reaches maturity.
  * @custom:storage-location erc7201:security.token.standard.storage.Bond
  */
 struct BondDataStorage {
-    // ─── R2 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     uint256 startingDate;
     uint256 maturityDate;
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     // ─── APPEND-ONLY ZONE BELOW ───
 }
-
 /// @title Bond Storage Wrapper
 /// @notice Library for managing Bond token storage operations.
 /// @author Asset Tokenization Studio Team
