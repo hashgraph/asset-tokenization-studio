@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { ethers, type EventLog } from "ethers";
-import type { ResolverProxy } from "@contract-types";
+import { ethers, type EventLog, type Log } from "ethers";
+import type { IMockFactory, ResolverProxy } from "@contract-types";
 import { ResolverProxy__factory } from "@contract-types";
 import { GAS_LIMIT } from "@scripts/infrastructure";
 import {
@@ -160,19 +160,19 @@ export async function deployBondKpiLinkedRateFromFactory(
   };
 
   // Deploy bond token via factory
-  const tx = await factory.deployBondKpiLinkedRate(bondKpiLinkedRateData, {
+  const tx = await (factory as IMockFactory).deployBondKpiLinkedRate(bondKpiLinkedRateData, {
     gasLimit: GAS_LIMIT.high,
   });
   const receipt = await tx.wait();
 
   // Find BondDeployed event to get diamond address
   const event = receipt?.logs.find(
-    (log) => "eventName" in log && (log as EventLog).eventName === "BondKpiLinkedRateDeployed",
+    (log: Log) => "eventName" in log && (log as EventLog).eventName === "BondKpiLinkedRateDeployed",
   ) as EventLog | undefined;
   if (!event || !event.args) {
     throw new Error(
       `BondKpiLinkedRateDeployed event not found in deployment transaction. Events: ${JSON.stringify(
-        receipt?.logs.filter((log) => "eventName" in log).map((e) => (e as EventLog).eventName),
+        receipt?.logs.filter((log: Log) => "eventName" in log).map((e: Log) => (e as EventLog).eventName),
       )}`,
     );
   }

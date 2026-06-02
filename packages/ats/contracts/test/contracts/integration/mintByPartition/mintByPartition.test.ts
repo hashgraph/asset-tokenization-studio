@@ -425,7 +425,6 @@ describe("MintByPartitionFacet Tests", () => {
           tokenHolder: ethers.ZeroAddress,
           value: 0n,
           data: "0x",
-          operatorData: "0x",
         }),
       )
         .to.be.revertedWithCustomError(asset, "AssetNotOperational")

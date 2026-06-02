@@ -121,6 +121,7 @@ describe("Deployment File Utilities", () => {
       getBondFixedRateFacets: () => [],
       getBondKpiLinkedRateFacets: () => [],
       getLoanFacets: () => [],
+      getDepositTokenFacets: () => [],
       getLoansPortfolioFacets: () => [],
       getFactoryFacets: () => [],
     },

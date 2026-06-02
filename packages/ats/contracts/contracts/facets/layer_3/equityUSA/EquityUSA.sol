@@ -21,6 +21,6 @@ abstract contract EquityUSA is IEquityUSA, Equity {
     ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_EQUITY) {
         InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_EQUITY);
         _initializeEquity(_equityDetailsData);
-        emit EquityUSAInitialized();
+        emit EquityUSAInitialized(_equityDetailsData);
     }
 }
