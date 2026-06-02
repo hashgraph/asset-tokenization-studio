@@ -14,10 +14,15 @@ import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
- * @title OperatorClearingHoldByPartition
+ * @title  OperatorClearingHoldByPartition
  * @author Asset Tokenization Studio Team
- * @notice Abstract contract implementing hold creation for clearing operations by partition.
- * @dev Implementation logic for authorised operator-led clearing holds.
+ * @notice Abstract implementation of `IOperatorClearingHoldByPartition`.
+ * @dev    Delegates hold-creation-via-clearing to
+ *         `ClearingOps.clearingHoldCreationCreation` (deployed orchestrator library,
+ *         DELEGATECALL) tagged with `ThirdPartyType.OPERATOR`. Routing through
+ *         `ClearingOps` keeps the storage-wrapper chain inside the deployed library rather
+ *         than the facet, so the facet stays well below the EIP-170 24 KiB cap.
+ *         Access guards are enforced via `Modifiers`.
  */
 abstract contract OperatorClearingHoldByPartition is IOperatorClearingHoldByPartition, Modifiers {
     /// @inheritdoc IOperatorClearingHoldByPartition

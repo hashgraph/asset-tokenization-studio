@@ -8,11 +8,14 @@ import {
 import { OperatorClearingHoldByPartition } from "./OperatorClearingHoldByPartition.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
+
 /**
- * @title OperatorClearingHoldByPartitionFacet
+ * @title  OperatorClearingHoldByPartitionFacet
  * @author Asset Tokenization Studio Team
- * @notice Diamond facet for partition-scoped operator clearing hold operations.
- * @dev Exposes clearing hold functionality to the Diamond proxy.
+ * @notice Diamond facet that exposes operator-clearing-hold-by-partition operations to the proxy.
+ * @dev    Selectors exposed:
+ *         - `initializeOperatorClearingHoldByPartition`
+ *         - `operatorClearingCreateHoldByPartition`
  */
 contract OperatorClearingHoldByPartitionFacet is OperatorClearingHoldByPartition, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors

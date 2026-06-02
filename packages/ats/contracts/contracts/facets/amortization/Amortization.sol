@@ -7,12 +7,12 @@ import {
     ROLE_CORPORATE_ACTION,
     ROLE_CORPORATE_ACTION_FORCE_CANCEL,
     DEFAULT_ADMIN_ROLE
-} from "../../../constants/roles.sol";
-import { CORPORATE_ACTION_TYPE_AMORTIZATION } from "../../../constants/dispatchTypes.sol";
-import { AmortizationStorageWrapper } from "../../../domain/asset/AmortizationStorageWrapper.sol";
-import { Modifiers } from "../../../services/Modifiers.sol";
-import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
-import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
+} from "../../constants/roles.sol";
+import { CORPORATE_ACTION_TYPE_AMORTIZATION } from "../../constants/dispatchTypes.sol";
+import { AmortizationStorageWrapper } from "../../domain/asset/AmortizationStorageWrapper.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title Amortization

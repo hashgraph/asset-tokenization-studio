@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { SNAPSHOT_RESULT_ID, _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { CORPORATE_ACTION_TYPE_AMORTIZATION, SCHEDULED_TASK_TYPE_SNAPSHOT } from "../../constants/dispatchTypes.sol";
-import { IAmortization } from "../../facets/layer_2/amortization/IAmortization.sol";
+import { IAmortization } from "../../facets/amortization/IAmortization.sol";
 import { IHoldTypes } from "../../facets/hold/IHoldTypes.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { ITransfer } from "../../facets/transfer/ITransfer.sol";

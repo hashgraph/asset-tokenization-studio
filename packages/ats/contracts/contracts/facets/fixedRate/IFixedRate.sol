@@ -1,10 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// AUTO-GENERATED — DO NOT EDIT.
-// Source: contracts/facets/fixedRate/IFixedRate.sol
-// Regenerated on every `npx hardhat compile` by the
-// `erc3643-clone-interfaces` task in `tasks/compile.ts`.
-// Edits to this file will be silently overwritten.
-pragma solidity ^0.8.17;
+pragma solidity >=0.8.0 <0.9.0;
 
 /// @custom:hash resolverKey FixedRate
 bytes32 constant RESOLVER_KEY_FIXED_RATE = 0x82f13d957a7f7af45723926c5ca1a184f2d667df5221c37434ce37278a9af521;
@@ -19,7 +14,7 @@ bytes32 constant RESOLVER_KEY_FIXED_RATE = 0x82f13d957a7f7af45723926c5ca1a184f2d
  *         The rate is stored as a scaled integer: the effective rate is
  *         `rate / 10 ** rateDecimals`.
  */
-interface TRexIFixedRate {
+interface IFixedRate {
     /**
      * @notice Packed storage for the fixed interest rate.
      * @param rate         Scaled rate value. Divide by `10 ** rateDecimals` to obtain the

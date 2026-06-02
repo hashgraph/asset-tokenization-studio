@@ -5,7 +5,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IScheduledCrossOrderedTasks } from "./scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
 import { IAccessControl } from "./accessControl/IAccessControl.sol";
 import { IAdjustBalances } from "./adjustBalances/IAdjustBalances.sol";
-import { IAmortization } from "./layer_2/amortization/IAmortization.sol";
+import { IAmortization } from "./amortization/IAmortization.sol";
 import { IBondUSA } from "./layer_3/bondUSA/IBondUSA.sol";
 import { IMaturity } from "./maturity/IMaturity.sol";
 import { IBondRead } from "./layer_2/bond/IBondRead.sol";
@@ -41,8 +41,8 @@ import { IExternalControlListManagement } from "./externalControlListManagement/
 import { IExternalKycList } from "./layer_1/externalKycList/IExternalKycList.sol";
 import { IExternalKycListManagement } from "./externalKycListManagement/IExternalKycListManagement.sol";
 import { IExternalPauseManagement } from "./externalPauseManagement/IExternalPauseManagement.sol";
-import { IFixedRate } from "./layer_2/interestRate/fixedRate/IFixedRate.sol";
-import { IKpiLinkedRate } from "./layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
+import { IFixedRate } from "./fixedRate/IFixedRate.sol";
+import { IKpiLinkedRate } from "./kpiLinkedRate/IKpiLinkedRate.sol";
 
 // Layer 2
 import { IOperatorHoldByPartition } from "./operatorHoldByPartition/IOperatorHoldByPartition.sol";
@@ -70,7 +70,7 @@ import { ITransferAndLockByPartition } from "./transferAndLockByPartition/ITrans
 import { ICoupon } from "./coupon/ICoupon.sol";
 import { IDividend } from "./dividend/IDividend.sol";
 import { IDividendSecurityHolders } from "./dividendSecurityHolders/IDividendSecurityHolders.sol";
-import { IKpis } from "./layer_2/kpi/kpiLatest/IKpis.sol";
+import { IKpis } from "./kpi/IKpis.sol";
 import { IProtectedPartitions } from "./protectedPartition/IProtectedPartitions.sol";
 import { IProceedRecipients } from "./proceedRecipient/IProceedRecipients.sol";
 import { ICap } from "./cap/ICap.sol";

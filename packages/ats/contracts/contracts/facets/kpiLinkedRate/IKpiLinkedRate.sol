@@ -1,15 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
-// AUTO-GENERATED — DO NOT EDIT.
-// Source: contracts/facets/kpiLinkedRate/IKpiLinkedRate.sol
-// Regenerated on every `npx hardhat compile` by the
-// `erc3643-clone-interfaces` task in `tasks/compile.ts`.
-// Edits to this file will be silently overwritten.
-pragma solidity ^0.8.17;
+pragma solidity >=0.8.0 <0.9.0;
 
 /// @custom:hash resolverKey KpiLinkedRate
 bytes32 constant RESOLVER_KEY_KPI_LINKED_RATE = 0x47cd76ae576f0ec85f1abfc652d614750caefe22a465bef2c859f6cb32a89593;
 
-interface TRexIKpiLinkedRate {
+interface IKpiLinkedRate {
     /**
      * @notice Interest rate parameters for the KPI-linked coupon model.
      * @dev Rate values must satisfy `minRate ≤ baseRate ≤ maxRate`. All rate fields share

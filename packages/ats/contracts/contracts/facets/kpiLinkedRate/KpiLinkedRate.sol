@@ -2,12 +2,12 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IKpiLinkedRate, RESOLVER_KEY_KPI_LINKED_RATE } from "./IKpiLinkedRate.sol";
-import { ROLE_INTEREST_RATE_MANAGER, DEFAULT_ADMIN_ROLE } from "../../../../constants/roles.sol";
-import { InterestRateStorageWrapper } from "../../../../domain/asset/InterestRateStorageWrapper.sol";
-import { ScheduledTasksOps } from "../../../../domain/orchestrator/ScheduledTasksOps.sol";
-import { Modifiers } from "../../../../services/Modifiers.sol";
-import { InitializerStorageWrapper } from "../../../../domain/core/InitializerStorageWrapper.sol";
-import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
+import { ROLE_INTEREST_RATE_MANAGER, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InterestRateStorageWrapper } from "../../domain/asset/InterestRateStorageWrapper.sol";
+import { ScheduledTasksOps } from "../../domain/orchestrator/ScheduledTasksOps.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title KpiLinkedRate
@@ -79,20 +79,12 @@ contract KpiLinkedRate is IKpiLinkedRate, Modifiers {
         emit ImpactDataUpdated(EvmAccessors.getMsgSender(), _newImpactData);
     }
 
-    /**
-     * @notice Returns the current KPI-linked interest rate configuration.
-     * @dev Reads the persisted rate data without mutating state.
-     * @return interestRate_ Current interest rate parameters.
-     */
+    /// @inheritdoc IKpiLinkedRate
     function getKpiLinkedRateInterestRate() external view returns (InterestRate memory interestRate_) {
         interestRate_ = InterestRateStorageWrapper.getInterestRate();
     }
 
-    /**
-     * @notice Returns the current KPI-linked impact data configuration.
-     * @dev Reads the persisted impact data without mutating state.
-     * @return impactData_ Current impact data parameters.
-     */
+    /// @inheritdoc IKpiLinkedRate
     function getKpiLinkedRateImpactData() external view returns (ImpactData memory impactData_) {
         impactData_ = InterestRateStorageWrapper.getImpactData();
     }
