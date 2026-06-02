@@ -26,7 +26,7 @@ import { COMMAND_HANDLERS_RBAC, QUERY_HANDLERS_RBAC } from "./rbac/InjectableRba
 import { COMMAND_HANDLERS_RECOVERY, QUERY_HANDLERS_RECOVERY } from "./recovery/InjectableRecovery";
 import { COMMAND_HANDLERS_REDEEM, QUERY_HANDLERS_REDEEM } from "./redeem/InjectableRedeem";
 import { COMMAND_HANDLERS_RESOLVER, QUERY_HANDLERS_RESOLVER } from "./resolver/InjectableResolver";
-import { COMMAND_HANDLERS_METADATA, QUERY_HANDLERS_METADATA } from "./security/InjectableMetadata";
+import { COMMAND_HANDLERS_METADATA, QUERY_HANDLERS_METADATA } from "./security/InjectableCustomData";
 import { COMMAND_HANDLERS_SNAPSHOT, QUERY_HANDLERS_SNAPSHOT } from "./snapshot/InjectableSnapshot";
 import { COMMAND_HANDLERS_SUPPLY, QUERY_HANDLERS_SUPPLY } from "./supply/InjectableSupply";
 import { COMMAND_HANDLERS_TRANSFER, QUERY_HANDLERS_TRANSFER } from "./transfer/InjectableTransfer";

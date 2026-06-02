@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ITransfer } from "./ITransfer.sol";
+import { ITransfer, RESOLVER_KEY_TRANSFER } from "./ITransfer.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title Transfer
@@ -14,12 +16,24 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract Transfer is ITransfer, Modifiers {
     /// @inheritdoc ITransfer
+    function initializeTransfer()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_TRANSFER)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_TRANSFER);
+        emit TransferInitialized();
+    }
+
+    /// @inheritdoc ITransfer
     function transfer(
         address to,
         uint256 amount
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
@@ -38,6 +52,7 @@ abstract contract Transfer is ITransfer, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
@@ -56,6 +71,7 @@ abstract contract Transfer is ITransfer, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
@@ -74,6 +90,7 @@ abstract contract Transfer is ITransfer, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyUnrecoveredAddress(_to)

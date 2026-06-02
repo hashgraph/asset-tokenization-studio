@@ -20,22 +20,24 @@ contract ClearingByPartitionFacet is ClearingByPartition, IStaticFunctionSelecto
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return
-            Bytes4Builder.build(
-                this.approveClearingOperationByPartition.selector,
-                this.cancelClearingOperationByPartition.selector,
-                this.reclaimClearingOperationByPartition.selector,
-                this.clearingRedeemByPartition.selector,
-                this.clearingRedeemFromByPartition.selector,
-                this.getClearingRedeemForByPartition.selector,
-                this.clearingTransferByPartition.selector,
-                this.clearingTransferFromByPartition.selector,
-                this.getClearingTransferForByPartition.selector,
-                this.getClearedAmountForByPartition.selector,
-                this.getClearingCountForByPartition.selector,
-                this.getClearingsIdForByPartition.selector
-            );
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
+        uint256 selectorCount = 13;
+        staticFunctionSelectors_ = new bytes4[](selectorCount);
+        unchecked {
+            staticFunctionSelectors_[--selectorCount] = this.getClearingsIdForByPartition.selector;
+            staticFunctionSelectors_[--selectorCount] = this.getClearingCountForByPartition.selector;
+            staticFunctionSelectors_[--selectorCount] = this.getClearedAmountForByPartition.selector;
+            staticFunctionSelectors_[--selectorCount] = this.getClearingTransferForByPartition.selector;
+            staticFunctionSelectors_[--selectorCount] = this.clearingTransferFromByPartition.selector;
+            staticFunctionSelectors_[--selectorCount] = this.clearingTransferByPartition.selector;
+            staticFunctionSelectors_[--selectorCount] = this.getClearingRedeemForByPartition.selector;
+            staticFunctionSelectors_[--selectorCount] = this.clearingRedeemFromByPartition.selector;
+            staticFunctionSelectors_[--selectorCount] = this.clearingRedeemByPartition.selector;
+            staticFunctionSelectors_[--selectorCount] = this.reclaimClearingOperationByPartition.selector;
+            staticFunctionSelectors_[--selectorCount] = this.cancelClearingOperationByPartition.selector;
+            staticFunctionSelectors_[--selectorCount] = this.approveClearingOperationByPartition.selector;
+            staticFunctionSelectors_[--selectorCount] = this.initializeClearingByPartition.selector;
+        }
     }
 
     /// @inheritdoc IStaticFunctionSelectors

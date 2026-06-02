@@ -62,6 +62,12 @@ interface TRexIAccessControl {
     );
 
     /**
+     * @notice Emitted once when the AccessControl capability is initialised on a token.
+     * @dev Fires exclusively from `initializeAccessControl` after the registration succeeds.
+     */
+    event AccessControlInitialized();
+
+    /**
      * @notice Thrown when an account does not hold a required role.
      * @param account The account that lacks the role.
      * @param role The role that is not held.
@@ -103,6 +109,13 @@ interface TRexIAccessControl {
      *         which would permanently lock all admin-gated functions.
      */
     error CannotRenounceSoleAdmin();
+
+    /**
+     * @notice Initialises the AccessControl capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeAccessControl() external;
 
     /**
      * @notice Grants a role to an account.

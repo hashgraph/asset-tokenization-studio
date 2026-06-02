@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ISsiManagement } from "./ISsiManagement.sol";
+import { ISsiManagement, RESOLVER_KEY_SSI_MANAGEMENT } from "./ISsiManagement.sol";
 import { ROLE_SSI_MANAGER } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { SsiManagementStorageWrapper } from "../../domain/core/SsiManagementStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title SsiManagement
@@ -20,9 +22,20 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract SsiManagement is ISsiManagement, Modifiers {
     /// @inheritdoc ISsiManagement
+    function initializeSsiManagement()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_SSI_MANAGEMENT)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_SSI_MANAGEMENT);
+        emit SsiManagementInitialized();
+    }
+
+    /// @inheritdoc ISsiManagement
     function setRevocationRegistryAddress(
         address _revocationRegistryAddress
-    ) external override onlyActivated onlyUnpaused onlyRole(ROLE_SSI_MANAGER) returns (bool success_) {
+    ) external override onlyOperational onlyActivated onlyUnpaused onlyRole(ROLE_SSI_MANAGER) returns (bool success_) {
         address oldRevocationRegistryAddress = SsiManagementStorageWrapper.getRevocationRegistryAddress();
         success_ = SsiManagementStorageWrapper.setRevocationRegistryAddress(_revocationRegistryAddress);
         emit RevocationRegistryUpdated(
@@ -37,6 +50,7 @@ abstract contract SsiManagement is ISsiManagement, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_SSI_MANAGER)
@@ -53,7 +67,7 @@ abstract contract SsiManagement is ISsiManagement, Modifiers {
     /// @inheritdoc ISsiManagement
     function removeIssuer(
         address _issuer
-    ) external override onlyActivated onlyUnpaused onlyRole(ROLE_SSI_MANAGER) returns (bool success_) {
+    ) external override onlyOperational onlyActivated onlyUnpaused onlyRole(ROLE_SSI_MANAGER) returns (bool success_) {
         success_ = SsiManagementStorageWrapper.removeIssuer(_issuer);
         if (!success_) {
             revert UnlistedIssuer(_issuer);

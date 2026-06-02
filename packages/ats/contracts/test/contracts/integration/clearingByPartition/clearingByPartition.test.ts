@@ -1,12 +1,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { expect } from "chai";
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
-import { IAsset, type ResolverProxy } from "@contract-types";
-import { ADDRESS_ZERO, ATS_ROLES, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
+import { IAsset, MockDiamondCut, type ResolverProxy } from "@contract-types";
+import {
+  ADDRESS_ZERO,
+  ATS_ROLES,
+  EMPTY_HEX_BYTES,
+  EMPTY_STRING,
+  ZERO,
+  EQUITY_CONFIG_ID,
+  RESOLVER_KEY_CLEARING_BY_PARTITION,
+} from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
@@ -40,6 +48,7 @@ describe("ClearingByPartitionFacet Tests", () => {
   let signer_C: HardhatEthersSigner;
   let signer_D: HardhatEthersSigner;
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deployFixture() {
     const base = await deployEquityTokenFixture({
@@ -57,7 +66,7 @@ describe("ClearingByPartitionFacet Tests", () => {
     signer_D = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
-
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       { role: ATS_ROLES.ROLE_ISSUER, members: [signer_B.address] },
       { role: ATS_ROLES.ROLE_PAUSER, members: [signer_D.address] },
@@ -1817,6 +1826,134 @@ describe("ClearingByPartitionFacet Tests", () => {
           ethers.ZeroAddress,
         ),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("initializeClearingByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeClearingByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeClearingByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeClearingByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeClearingByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_CLEARING_BY_PARTITION, 1);
+    });
+  });
+
+  describe("initializeClearingByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeClearingByPartition is called THEN emits ClearingByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_CLEARING_BY_PARTITION);
+      await expect(asset.initializeClearingByPartition()).to.emit(asset, "ClearingByPartitionInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational WHEN clearingRedeemByPartition is called THEN AssetNotOperational", async () => {
+      await expect(
+        asset.clearingRedeemByPartition(
+          { partition: _DEFAULT_PARTITION, expirationTimestamp: EXPIRATION_TIMESTAMP, data: EMPTY_HEX_BYTES },
+          _AMOUNT,
+        ),
+      )
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN clearingRedeemFromByPartition is called THEN AssetNotOperational", async () => {
+      await expect(
+        asset.clearingRedeemFromByPartition(
+          {
+            clearingOperation: {
+              partition: _DEFAULT_PARTITION,
+              expirationTimestamp: EXPIRATION_TIMESTAMP,
+              data: EMPTY_HEX_BYTES,
+            },
+            from: signer_A.address,
+            operatorData: EMPTY_HEX_BYTES,
+          },
+          _AMOUNT,
+        ),
+      )
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN clearingTransferByPartition is called THEN AssetNotOperational", async () => {
+      await expect(
+        asset.clearingTransferByPartition(
+          { partition: _DEFAULT_PARTITION, expirationTimestamp: EXPIRATION_TIMESTAMP, data: EMPTY_HEX_BYTES },
+          _AMOUNT,
+          signer_B.address,
+        ),
+      )
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN clearingTransferFromByPartition is called THEN AssetNotOperational", async () => {
+      await expect(
+        asset.clearingTransferFromByPartition(
+          {
+            clearingOperation: {
+              partition: _DEFAULT_PARTITION,
+              expirationTimestamp: EXPIRATION_TIMESTAMP,
+              data: EMPTY_HEX_BYTES,
+            },
+            from: signer_A.address,
+            operatorData: EMPTY_HEX_BYTES,
+          },
+          _AMOUNT,
+          signer_C.address,
+        ),
+      )
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN approveClearingOperationByPartition is called THEN AssetNotOperational", async () => {
+      await expect(
+        asset.approveClearingOperationByPartition({
+          clearingOperationType: ClearingOperationType.Redeem,
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          clearingId: 1,
+        }),
+      )
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN cancelClearingOperationByPartition is called THEN AssetNotOperational", async () => {
+      await expect(
+        asset.cancelClearingOperationByPartition({
+          clearingOperationType: ClearingOperationType.Redeem,
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          clearingId: 1,
+        }),
+      )
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN reclaimClearingOperationByPartition is called THEN AssetNotOperational", async () => {
+      await expect(
+        asset.reclaimClearingOperationByPartition({
+          clearingOperationType: ClearingOperationType.Redeem,
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          clearingId: 1,
+        }),
+      )
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 });

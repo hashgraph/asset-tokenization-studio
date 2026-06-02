@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ILockByPartition } from "./ILockByPartition.sol";
+import { ILockByPartition, RESOLVER_KEY_LOCK_BY_PARTITION } from "./ILockByPartition.sol";
 import { ROLE_LOCKER } from "../../constants/roles.sol";
 import { LockStorageWrapper } from "../../domain/asset/LockStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
@@ -22,6 +24,17 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  *      `LockByPartitionFacet`.
  */
 abstract contract LockByPartition is ILockByPartition, Modifiers {
+    /// @inheritdoc ILockByPartition
+    function initializeLockByPartition()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_LOCK_BY_PARTITION)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_LOCK_BY_PARTITION);
+        emit LockByPartitionInitialized();
+    }
+
     /**
      * @inheritdoc ILockByPartition
      * @dev Pause-gated, restricted to `ROLE_LOCKER`, validated against the
@@ -37,6 +50,7 @@ abstract contract LockByPartition is ILockByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_LOCKER)
@@ -64,6 +78,7 @@ abstract contract LockByPartition is ILockByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)

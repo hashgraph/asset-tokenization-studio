@@ -743,7 +743,7 @@ interface IExternalKycListsMockAdapter {
 interface ITokenMetadataTransactionAdapter {
   setName(security: EvmAddress, name: string, securityId?: ContractId | string): Promise<TransactionResponse>;
   setSymbol(security: EvmAddress, symbol: string, securityId: ContractId | string): Promise<TransactionResponse>;
-  setMetadata(security: EvmAddress, key: string, value: string[], securityId?: ContractId | string): Promise<TransactionResponse>;
+  setCustomData(security: EvmAddress, key: string, value: string[], securityId?: ContractId | string): Promise<TransactionResponse>;
   setOnchainID(
     security: EvmAddress,
     onchainID: EvmAddress,
@@ -1650,7 +1650,7 @@ export default abstract class TransactionAdapter
     symbol: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
-  abstract setMetadata(
+  abstract setCustomData(
     security: EvmAddress,
     key: string,
     value: string[],

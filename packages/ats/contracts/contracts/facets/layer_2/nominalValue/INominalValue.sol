@@ -21,17 +21,11 @@ interface INominalValue {
      * @dev Fires exclusively from `initializeNominalValue` after the storage write succeeds.
      *      Subsequent value or currency updates emit `NominalValueSet` / `NominalValueCurrencySet`
      *      instead, never this event.
-     * @param operator The account that invoked initialisation (deployer or upgrade caller).
      * @param nominalValue The initial nominal value amount.
      * @param nominalValueDecimals The number of decimals applied to `nominalValue`.
      * @param nominalValueCurrency ISO 4217 currency code as `bytes3`; `0x000000` means "unset".
      */
-    event NominalValueInitialized(
-        address indexed operator,
-        uint256 nominalValue,
-        uint8 nominalValueDecimals,
-        bytes3 nominalValueCurrency
-    );
+    event NominalValueInitialized(uint256 nominalValue, uint8 nominalValueDecimals, bytes3 nominalValueCurrency);
 
     /**
      * @notice Emitted when the nominal value amount or its decimals are updated post-initialisation.

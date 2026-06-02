@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { HardhatUserConfig } from "hardhat/config";
+import { HardhatUserConfig, task } from "hardhat/config";
 import "tsconfig-paths/register";
 import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomicfoundation/hardhat-ethers";
@@ -12,6 +12,20 @@ import Configuration from "@configuration";
 import "@tasks";
 import "hardhat-dependency-compiler";
 import "@primitivefi/hardhat-dodoc";
+import { existsSync, mkdirSync } from "fs";
+import { join } from "path";
+
+// Ensure hardhat-dependency-compiler directory exists before coverage runs.
+// solidity-coverage's compile step may not trigger the plugin's hooks,
+// leaving the directory absent and causing ENOENT during cleanup.
+task("coverage").setAction(async (args, hre, runSuper) => {
+  // solidity-coverage v0.8.x does NOT set COVERAGE — we set it here so
+  // gasLimitOverride() can use a higher limit for instrumented contracts.
+  process.env.COVERAGE = "true";
+  const dir = join(hre.config.paths.sources, "hardhat-dependency-compiler");
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+  return runSuper(args);
+});
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -48,8 +62,9 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       chainId: 1337,
-      blockGasLimit: 60_000_000,
+      blockGasLimit: 300_000_000,
       hardfork: "cancun",
+      allowUnlimitedContractSize: true,
     },
     local: {
       url: Configuration.endpoints.local.jsonRpc,

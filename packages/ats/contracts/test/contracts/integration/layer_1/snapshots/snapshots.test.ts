@@ -3,8 +3,10 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ZERO, EMPTY_STRING, ADDRESS_ZERO, dateToUnixTimestamp, ATS_ROLES } from "@scripts";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import { ZERO, EMPTY_STRING, ADDRESS_ZERO, dateToUnixTimestamp, ATS_ROLES, EQUITY_CONFIG_ID } from "@scripts";
+import { decodeEvent } from "@scripts/infrastructure";
+import { deployAtsInfrastructureFixture } from "../../../../fixtures/infrastructure.fixture";
 import { grantRoleAndPauseToken } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
@@ -31,6 +33,7 @@ describe("Snapshots Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let _mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixtureMultiPartition() {
     const base = await deployEquityTokenFixture({
@@ -46,6 +49,7 @@ describe("Snapshots Tests", () => {
     signer_C = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    _mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, set_initRbacs());
   }
 
@@ -572,8 +576,8 @@ describe("Scheduled Snapshots Tests", () => {
     const dividend_1_Id = "0x0000000000000000000000000000000000000000000000000000000000000003";
 
     // check schedled snapshots
-    let scheduledSnapshotCount = await asset.scheduledSnapshotCount();
-    let scheduledSnapshots = await asset.getScheduledSnapshots(0, 100);
+    let scheduledSnapshotCount = await asset.scheduledSnapshotCount(false);
+    let scheduledSnapshots = await asset.getScheduledSnapshots(0, 100, false);
 
     expect(scheduledSnapshotCount).to.equal(3);
     expect(scheduledSnapshots.length).to.equal(scheduledSnapshotCount);
@@ -590,8 +594,8 @@ describe("Scheduled Snapshots Tests", () => {
       .to.emit(asset, "SnapshotTriggered")
       .withArgs(1, dividend_1_Id);
 
-    scheduledSnapshotCount = await asset.scheduledSnapshotCount();
-    scheduledSnapshots = await asset.getScheduledSnapshots(0, 100);
+    scheduledSnapshotCount = await asset.scheduledSnapshotCount(false);
+    scheduledSnapshots = await asset.getScheduledSnapshots(0, 100, false);
 
     expect(scheduledSnapshotCount).to.equal(2);
     expect(scheduledSnapshots.length).to.equal(scheduledSnapshotCount);
@@ -606,8 +610,8 @@ describe("Scheduled Snapshots Tests", () => {
       .to.emit(asset, "SnapshotTriggered")
       .withArgs(2, dividend_2_Id);
 
-    scheduledSnapshotCount = await asset.scheduledSnapshotCount();
-    scheduledSnapshots = await asset.getScheduledSnapshots(0, 100);
+    scheduledSnapshotCount = await asset.scheduledSnapshotCount(false);
+    scheduledSnapshots = await asset.getScheduledSnapshots(0, 100, false);
 
     expect(scheduledSnapshotCount).to.equal(1);
     expect(scheduledSnapshots.length).to.equal(scheduledSnapshotCount);
@@ -620,8 +624,8 @@ describe("Scheduled Snapshots Tests", () => {
       .to.emit(asset, "SnapshotTriggered")
       .withArgs(3, dividend_3_Id);
 
-    scheduledSnapshotCount = await asset.scheduledSnapshotCount();
-    scheduledSnapshots = await asset.getScheduledSnapshots(0, 100);
+    scheduledSnapshotCount = await asset.scheduledSnapshotCount(false);
+    scheduledSnapshots = await asset.getScheduledSnapshots(0, 100, false);
 
     expect(scheduledSnapshotCount).to.equal(0);
     expect(scheduledSnapshots.length).to.equal(scheduledSnapshotCount);
@@ -642,7 +646,7 @@ describe("Scheduled Snapshots Tests", () => {
     };
     await asset.connect(signer_C).setDividend(dividendData);
 
-    let scheduledSnapshotCount = await asset.scheduledSnapshotCount();
+    let scheduledSnapshotCount = await asset.scheduledSnapshotCount(false);
     expect(scheduledSnapshotCount).to.equal(1);
 
     const [dividendBefore] = await asset.getDividend(1);
@@ -657,11 +661,53 @@ describe("Scheduled Snapshots Tests", () => {
       "SnapshotTriggered",
     );
 
-    scheduledSnapshotCount = await asset.scheduledSnapshotCount();
+    scheduledSnapshotCount = await asset.scheduledSnapshotCount(false);
     expect(scheduledSnapshotCount).to.equal(0);
 
     const [dividendAfter] = await asset.getDividend(1);
     expect(dividendAfter.snapshotId).to.equal(0);
+  });
+
+  describe("scheduledSnapshotCount / getScheduledSnapshots: _includeDisabled flag", () => {
+    it("GIVEN a cancelled snapshot task WHEN scheduledSnapshotCount(false) THEN returns 0 and (true) returns 1", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+
+      const recordDate = dateToUnixTimestamp("2030-01-01T00:00:06Z");
+      const executionDate = dateToUnixTimestamp("2030-01-01T00:01:00Z");
+      await asset.connect(signer_C).setDividend({
+        recordDate: recordDate.toString(),
+        executionDate: executionDate.toString(),
+        amount: 1,
+        amountDecimals: 3,
+      });
+
+      await asset.connect(signer_C).cancelDividend(1);
+
+      expect(await asset.scheduledSnapshotCount(false)).to.equal(0);
+      expect(await asset.scheduledSnapshotCount(true)).to.equal(1);
+    });
+
+    it("GIVEN a cancelled snapshot task WHEN getScheduledSnapshots(false) THEN returns empty and (true) returns the task", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+
+      const recordDate = dateToUnixTimestamp("2030-01-01T00:00:06Z");
+      const executionDate = dateToUnixTimestamp("2030-01-01T00:01:00Z");
+      await asset.connect(signer_C).setDividend({
+        recordDate: recordDate.toString(),
+        executionDate: executionDate.toString(),
+        amount: 1,
+        amountDecimals: 3,
+      });
+
+      await asset.connect(signer_C).cancelDividend(1);
+
+      const excluded = await asset.getScheduledSnapshots(0, 100, false);
+      expect(excluded).to.have.lengthOf(0);
+
+      const included = await asset.getScheduledSnapshots(0, 100, true);
+      expect(included).to.have.lengthOf(1);
+      expect(included[0].scheduledTimestamp).to.equal(BigInt(recordDate));
+    });
   });
 
   describe("Deactivated", () => {
@@ -674,6 +720,61 @@ describe("Scheduled Snapshots Tests", () => {
         deactivatedAsset,
         "Deactivated",
       );
+    });
+  });
+
+  describe("initializeSnapshots", () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeSnapshots is called THEN it reverts with AccountHasNoRole", async () => {
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(infra.unknownSigner).initializeSnapshots()).to.be.revertedWithCustomError(
+        freshAsset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN an already-initialised facet WHEN initializeSnapshots is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await freshAsset.connect(infra.deployer).initializeSnapshots();
+      await expect(freshAsset.connect(infra.deployer).initializeSnapshots()).to.be.revertedWithCustomError(
+        freshAsset,
+        "FacetAlreadyRegistered",
+      );
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeSnapshots is called THEN it emits SnapshotsInitialized", async () => {
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(infra.deployer).initializeSnapshots()).to.emit(
+        freshAsset,
+        "SnapshotsInitialized",
+      );
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      const cut = await ethers.getContractAt("MockDiamondCut", await asset.getAddress());
+      await cut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN takeSnapshot THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.takeSnapshot()).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
   });
 });

@@ -13,6 +13,19 @@ bytes32 constant RESOLVER_KEY_CORE_AT_SNAPSHOT = 0x9f1ab2bcf2a5668b07a2b26155b1c
  */
 interface ICoreAtSnapshot {
     /**
+     * @notice Emitted once when the core at snapshot capability is initialised on a token.
+     * @dev Fires exclusively from `initializeCoreAtSnapshot`.
+     */
+    event CoreAtSnapshotInitialized();
+
+    /**
+     * @notice Initialises the core at snapshot capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeCoreAtSnapshot() external;
+
+    /**
      * @notice Returns the token decimals at the time of a given snapshot.
      * @param _snapshotID The snapshot identifier returned by a prior `takeSnapshot` call.
      * @return decimals_ The decimals value recorded at `_snapshotID`.

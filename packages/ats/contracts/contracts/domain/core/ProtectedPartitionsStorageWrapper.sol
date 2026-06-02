@@ -33,8 +33,10 @@ bytes32 constant STORAGE_LOCATION_PROTECTED_PARTITIONS = 0x5b38507d21e10ec4c8c85
  */
 struct ProtectedPartitionsDataStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
-    bool initialized;
     bool arePartitionsProtected;
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     // ─── APPEND-ONLY ZONE BELOW ───
 }
 
@@ -55,11 +57,8 @@ library ProtectedPartitionsStorageWrapper {
      * @param _protectPartitions Initial value of the partition-protection flag.
      * @return success_ Always `true`; preserves the facet's API contract.
      */
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ProtectedPartitions(bool _protectPartitions) internal returns (bool success_) {
-        ProtectedPartitionsDataStorage storage pps = protectedPartitionsStorage();
-        pps.arePartitionsProtected = _protectPartitions;
-        pps.initialized = true;
+    function initializeProtectedPartitions(bool _protectPartitions) internal returns (bool success_) {
+        protectedPartitionsStorage().arePartitionsProtected = _protectPartitions;
         success_ = true;
     }
 
@@ -92,14 +91,6 @@ library ProtectedPartitionsStorageWrapper {
      */
     function arePartitionsProtected() internal view returns (bool) {
         return protectedPartitionsStorage().arePartitionsProtected;
-    }
-
-    /**
-     * @notice Reports whether the protected-partitions module has been initialised.
-     * @return True when the initialiser has run.
-     */
-    function isProtectedPartitionInitialized() internal view returns (bool) {
-        return protectedPartitionsStorage().initialized;
     }
 
     /**

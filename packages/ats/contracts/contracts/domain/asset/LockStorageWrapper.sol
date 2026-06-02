@@ -3,8 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { ILock } from "../../facets/layer_1/lock/ILock.sol";
-import { ILockTypes } from "../../facets/layer_1/lock/ILockTypes.sol";
+import { ILock } from "../../facets/lock/ILock.sol";
+import { ILockTypes } from "../../facets/lock/ILockTypes.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
@@ -26,6 +26,9 @@ bytes32 constant STORAGE_LOCATION_LOCK = 0xd42ee8bdd326f30f9a4764fdaf28dd7191689
  * @custom:storage-location erc7201:security.token.standard.storage.Lock
  */
 struct LockDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(address => uint256) totalLockedAmountByAccount;
     mapping(address => mapping(bytes32 => uint256)) totalLockedAmountByAccountAndPartition;

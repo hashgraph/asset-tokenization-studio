@@ -3,10 +3,10 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { ComplianceMock, IdentityRegistryMock, IAsset, type ResolverProxy } from "@contract-types";
+import { ComplianceMock, IdentityRegistryMock, IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
-import { ATS_ROLES, EMPTY_STRING, ZERO } from "@scripts";
+import { ATS_ROLES, EMPTY_STRING, ZERO, EQUITY_CONFIG_ID, RESOLVER_KEY_BATCH_BURN } from "@scripts";
 
 const AMOUNT = 1000;
 const MAX_SUPPLY = 10000000;
@@ -19,6 +19,7 @@ describe("BatchBurn Tests", () => {
   let signer_E: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   let identityRegistryMock: IdentityRegistryMock;
   let complianceMock: ComplianceMock;
@@ -52,7 +53,7 @@ describe("BatchBurn Tests", () => {
     signer_E = base.user4;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
-
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       {
         role: ATS_ROLES.ROLE_PAUSER,
@@ -225,6 +226,38 @@ describe("BatchBurn Tests", () => {
         deactivatedAsset,
         "Deactivated",
       );
+    });
+  });
+  describe("initializeBatchBurn", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeBatchBurn is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeBatchBurn())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeBatchBurn is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeBatchBurn())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_BATCH_BURN, 1);
+    });
+  });
+
+  describe("initializeBatchBurn event", () => {
+    it("GIVEN a fresh deployment WHEN initializeBatchBurn is called THEN emits BatchBurnInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_BATCH_BURN);
+      await expect(asset.initializeBatchBurn()).to.emit(asset, "BatchBurnInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational WHEN batchBurn is called THEN AssetNotOperational", async () => {
+      await expect(asset.batchBurn([], []))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 });

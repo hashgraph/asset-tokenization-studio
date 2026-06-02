@@ -299,7 +299,7 @@ export const TEST_BYTES32 = {
  * Mock resolver key values for registry combination tests.
  * All values are valid bytes32 format (0x + 64 hex characters).
  */
-export const TEST_RESOLVER_KEYS = {
+export const TESTS = {
   /** First mock resolver key */
   KEY_1: "0x0000000000000000000000000000000000000000000000000000000000000111",
 
@@ -454,9 +454,10 @@ export const TEST_STEPS_EXISTING_BLR = {
   BOND_CONFIG: 4,
   BOND_FIXED_RATE_CONFIG: 5,
   BOND_KPI_LINKED_CONFIG: 6,
-  LOAN_CONFIG: 7,
-  LOANS_PORTFOLIO_CONFIG: 8,
-  FACTORY: 10,
+  DEPOSIT_TOKEN_CONFIG: 7,
+  LOAN_CONFIG: 8,
+  LOANS_PORTFOLIO_CONFIG: 9,
+  FACTORY: 11,
 } as const;
 
 // ============================================================================

@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { KPI_VOTES_CALC_FACTOR } from "../../constants/values.sol";
-import { IERC20Votes } from "../../facets/layer_1/ERC1400/ERC20Votes/IERC20Votes.sol";
+import { IERC20Votes } from "../../facets/erc20Votes/IERC20Votes.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Checkpoints } from "../../infrastructure/utils/Checkpoints.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
@@ -24,8 +24,9 @@ bytes32 constant STORAGE_LOCATION_ERC20VOTES = 0xb9759d8916f84f61d52de275f833caf
  */
 struct ERC20VotesStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
-    bool initialized;
     bool activated;
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(address => address) delegates;
     mapping(address => Checkpoints.Checkpoint[]) checkpoints;
@@ -49,7 +50,6 @@ library ERC20VotesStorageWrapper {
      */
     function initializeERC20Votes(bool activated) internal {
         setActivate(activated);
-        erc20VotesStorage_().initialized = true;
     }
 
     /**
@@ -352,14 +352,6 @@ library ERC20VotesStorageWrapper {
      */
     function isActivated() internal view returns (bool) {
         return erc20VotesStorage_().activated;
-    }
-
-    /**
-     * @notice Returns whether ERC20Votes storage has been initialised.
-     * @return True if the storage has been initialised; false otherwise.
-     */
-    function isERC20VotesInitialized() internal view returns (bool) {
-        return erc20VotesStorage_().initialized;
     }
 
     /**

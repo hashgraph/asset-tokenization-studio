@@ -3,8 +3,16 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ZERO, EMPTY_STRING, dateToUnixTimestamp, ATS_ROLES, ATS_TASK, TIME_PERIODS_S } from "@scripts";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import {
+  ZERO,
+  EMPTY_STRING,
+  dateToUnixTimestamp,
+  ATS_ROLES,
+  ATS_TASK,
+  TIME_PERIODS_S,
+  RESOLVER_KEY_SCHEDULED_TASKS,
+} from "@scripts";
 import { getOrchestratorLibraryAddresses } from "@scripts/domain";
 import { loadFixture, takeSnapshot } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, deployBondKpiLinkedRateTokenFixture, getDltTimestamp, MAX_UINT256 } from "@test";
@@ -21,6 +29,7 @@ describe("Scheduled Tasks Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixtureSinglePartition() {
     const base = await deployEquityTokenFixture();
@@ -30,6 +39,7 @@ describe("Scheduled Tasks Tests", () => {
     signer_C = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
       {
@@ -217,12 +227,12 @@ describe("Scheduled Tasks Tests", () => {
         decimals: 2,
       });
 
-      expect(await asset.getPendingBalanceAdjustmentCount()).to.equal(1);
+      expect(await asset.getPendingBalanceAdjustmentCount(false)).to.equal(1);
 
       await asset.changeSystemTimestamp(taskTimestamp);
       await asset.connect(signer_A).triggerPendingScheduledCrossOrderedTasks();
 
-      expect(await asset.getPendingBalanceAdjustmentCount()).to.equal(0);
+      expect(await asset.getPendingBalanceAdjustmentCount(false)).to.equal(0);
     });
   });
 
@@ -247,14 +257,45 @@ describe("Scheduled Tasks Tests", () => {
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
+
+  describe("initializeScheduledCrossOrderedTasks", () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeScheduledCrossOrderedTasks is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_B).initializeScheduledCrossOrderedTasks()).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN an already-initialised facet WHEN initializeScheduledCrossOrderedTasks is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      await expect(asset.connect(signer_A).initializeScheduledCrossOrderedTasks()).to.be.revertedWithCustomError(
+        asset,
+        "FacetAlreadyRegistered",
+      );
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeScheduledCrossOrderedTasks is called THEN it emits ScheduledCrossOrderedTasksInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_SCHEDULED_TASKS);
+      await expect(asset.connect(signer_A).initializeScheduledCrossOrderedTasks()).to.emit(
+        asset,
+        "ScheduledCrossOrderedTasksInitialized",
+      );
+    });
+  });
 });
 
 describe("Scheduled Tasks Failure Recovery", () => {
+  let asset: IAsset;
+
   async function deployWithCorporateActionRole() {
     const base = await deployEquityTokenFixture();
     await base.asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, base.deployer.address);
     return base;
   }
+
+  beforeEach(async () => {
+    const base = await loadFixture(deployWithCorporateActionRole);
+    asset = base.asset;
+  });
 
   it("GIVEN a crossOrdered snapshot task WHEN triggered successfully THEN queue drains and no TaskExecutionFailed is emitted", async () => {
     const { asset, deployer } = await loadFixture(deployWithCorporateActionRole);
@@ -344,7 +385,7 @@ describe("Scheduled Tasks Failure Recovery", () => {
     await asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks();
 
     expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(0);
-    expect(await asset.scheduledSnapshotCount()).to.equal(0);
+    expect(await asset.scheduledSnapshotCount(false)).to.equal(0);
   });
 
   // ─── Failure path: hardhat_setCode injection ───────────────────────────────
@@ -404,7 +445,7 @@ describe("Scheduled Tasks Failure Recovery", () => {
     await expect(asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks()).to.be.reverted;
 
     expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(1);
-    expect(await asset.scheduledSnapshotCount()).to.equal(1);
+    expect(await asset.scheduledSnapshotCount(true)).to.equal(1);
   });
 
   it("GIVEN failing crossOrdered BALANCE_ADJUSTMENT task WHEN triggered THEN transaction reverts and queue not drained", async () => {
@@ -424,7 +465,7 @@ describe("Scheduled Tasks Failure Recovery", () => {
     await expect(asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks()).to.be.reverted;
 
     expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(1);
-    expect((await asset.getScheduledBalanceAdjustments(0, 10)).length).to.equal(1);
+    expect((await asset.getScheduledBalanceAdjustments(0, 10, true)).length).to.equal(1);
   });
 
   it("GIVEN failing crossOrdered COUPON_LISTING task WHEN triggered THEN transaction reverts and queue not drained", async () => {
@@ -445,14 +486,14 @@ describe("Scheduled Tasks Failure Recovery", () => {
     });
 
     const crossOrderedBefore = await asset.scheduledCrossOrderedTaskCount();
-    const couponListingBefore = await asset.scheduledCouponListingCount();
+    const couponListingBefore = await asset.scheduledCouponListingCount(true);
 
     await asset.changeSystemTimestamp(fixingDate + 1);
 
     await expect(asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks()).to.be.reverted;
 
     expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(crossOrderedBefore);
-    expect(await asset.scheduledCouponListingCount()).to.equal(couponListingBefore);
+    expect(await asset.scheduledCouponListingCount(true)).to.equal(couponListingBefore);
   });
 
   it("GIVEN two failing crossOrdered tasks WHEN triggered THEN transaction reverts and queue not drained", async () => {
@@ -483,5 +524,25 @@ describe("Scheduled Tasks Failure Recovery", () => {
     await expect(asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks()).to.be.reverted;
 
     expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(2);
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      const cut = await ethers.getContractAt("MockDiamondCut", await asset.getAddress());
+      await cut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN triggerPendingScheduledCrossOrderedTasks THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.triggerPendingScheduledCrossOrderedTasks()).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN triggerScheduledCrossOrderedTasks THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.triggerScheduledCrossOrderedTasks(0)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
   });
 });

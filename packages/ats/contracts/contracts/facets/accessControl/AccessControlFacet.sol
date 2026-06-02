@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IAccessControl, RESOLVER_KEY_ACCESS_CONTROL } from "./IAccessControl.sol";
-import { AccessControl } from "./AccessControl.sol";
+import { AccessControlOperational } from "./AccessControlOperational.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 /**
@@ -15,7 +15,7 @@ import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
  *      `IStaticFunctionSelectors` for the Diamond resolver pattern. The resolver key
  *      `RESOLVER_KEY_ACCESS_CONTROL` identifies this facet within the diamond proxy.
  */
-contract AccessControlFacet is AccessControl, IStaticFunctionSelectors {
+contract AccessControlFacet is AccessControlOperational, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = RESOLVER_KEY_ACCESS_CONTROL;
@@ -25,6 +25,7 @@ contract AccessControlFacet is AccessControl, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeAccessControl.selector,
                 this.grantRole.selector,
                 this.revokeRole.selector,
                 this.renounceRole.selector,

@@ -12,6 +12,10 @@ import { TRexIKpiLinkedRateErrors as IKpiLinkedRateErrors } from "./IKpiLinkedRa
 bytes32 constant RESOLVER_KEY_KPI_LINKED_RATE = 0x47cd76ae576f0ec85f1abfc652d614750caefe22a465bef2c859f6cb32a89593;
 
 interface TRexIKpiLinkedRate is IKpiLinkedRateErrors {
+    /// @notice Emitted once when the KpiLinkedRate capability is initialised on a token.
+    /// @dev Fires exclusively from `initializeKpiLinkedRate` after the storage write succeeds.
+    event KpiLinkedRateInitialized(InterestRate interestRate, ImpactData impactData);
+
     event InterestRateUpdated(address indexed operator, InterestRate newInterestRate);
     event ImpactDataUpdated(address indexed operator, ImpactData newImpactData);
 

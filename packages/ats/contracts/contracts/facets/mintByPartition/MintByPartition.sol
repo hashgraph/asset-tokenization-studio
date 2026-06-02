@@ -2,12 +2,14 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ROLE_AGENT, ROLE_ISSUER, _buildRoles } from "../../constants/roles.sol";
-import { IMintByPartition } from "./IMintByPartition.sol";
+import { IMintByPartition, RESOLVER_KEY_MINT_BY_PARTITION } from "./IMintByPartition.sol";
 import { IERC1410Types } from "../layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title MintByPartition
@@ -20,11 +22,23 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract MintByPartition is IMintByPartition, Modifiers {
     /// @inheritdoc IMintByPartition
+    function initializeMintByPartition()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_MINT_BY_PARTITION)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_MINT_BY_PARTITION);
+        emit MintByPartitionInitialized();
+    }
+
+    /// @inheritdoc IMintByPartition
     function issueByPartition(
         IERC1410Types.IssueData calldata _issueData
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyAnyRole(_buildRoles(ROLE_ISSUER, ROLE_AGENT))

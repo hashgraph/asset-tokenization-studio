@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ILoan } from "../../facets/layer_2/loan/ILoan.sol";
+import { ScheduledTasksOps } from "../orchestrator/ScheduledTasksOps.sol";
 
 /// @custom:hash storage Loan
 bytes32 constant STORAGE_LOCATION_LOAN = 0x2af22e338cd16bdeda633a06c0ad54c1b9d04b19487a6b1ed48b48c18d643800;
@@ -76,7 +77,7 @@ struct LoanDataStorage {
     uint256 totalCollateralValue;
     uint256 loanToValue;
     uint256 daysPastDue;
-
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     // ─── APPEND-ONLY ZONE BELOW ───
 }
 
@@ -177,6 +178,7 @@ library LoanStorageWrapper {
      * @param _ls Storage pointer to the loan storage struct.
      */
     function _writeLoanDetails(ILoan.LoanDetailsData memory _ld, LoanDataStorage storage _ls) private {
+        ScheduledTasksOps.triggerPendingScheduledCrossOrderedTasks();
         _ls.currency = _ld.loanBasicData.currency;
         _ls.startingDate = _ld.loanBasicData.startingDate;
         _ls.maturityDate = _ld.loanBasicData.maturityDate;

@@ -126,7 +126,7 @@ contracts/
 
 ### Domain: Storage Wrappers (formerly Layer 0)
 
-Provide type-safe access to Diamond storage, split into **core** and **asset** subdomains. Every storage struct lives at file scope in `*StorageWrapper.sol` and is anchored at a deterministic slot via the ERC-7201 `@custom:storage-location erc7201:security.token.standard.storage.<PascalName>` annotation; the struct body follows the 5-region layout (R1 lifecycle bools → R2 packed scalars → R3 single-slot scalars → R4 aggregates → APPEND-ONLY ZONE).
+Provide type-safe access to Diamond storage, split into **core** and **asset** subdomains. Every storage struct lives at file scope in `*StorageWrapper.sol` and is anchored at a deterministic slot via the ERC-7201 `@custom:storage-location erc7201:security.token.standard.storage.<PascalName>` annotation; the struct body follows the 5-region layout (R1 lifecycle bools → R2 packed scalars → R3 single-slot scalars → R4 aggregates → APPEND-ONLY ZONE), with all four region banners always present even when a region is empty.
 
 **Core** (cross-cutting concerns):
 

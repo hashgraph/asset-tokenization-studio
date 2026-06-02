@@ -18,7 +18,7 @@ contract TransferByPartitionFacet is TransferByPartition, IStaticFunctionSelecto
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.transferByPartition.selector);
+        return Bytes4Builder.build(this.initializeTransferByPartition.selector, this.transferByPartition.selector);
     }
 
     /// @inheritdoc IStaticFunctionSelectors

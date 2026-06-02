@@ -31,7 +31,7 @@ import { SecurityOperations } from "./operations/SecurityOperations";
 import { SecurityMetadataOperations } from "./operations/SecurityMetadataOperations";
 import { AmortizationOperations } from "./operations/AmortizationOperations";
 import { DeactivateOperations } from "./operations/DeactivateOperations";
-import { MetadataOperations } from "./operations/MetadataOperations";
+import { CustomDataOperations } from "./operations/CustomDataOperations";
 
 export abstract class BaseHederaTransactionAdapter extends TransactionAdapter implements TransactionExecutor {
   mirrorNodes: MirrorNodes;
@@ -58,7 +58,7 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
   protected securityMetadataOps!: SecurityMetadataOperations;
   protected amortizationOps!: AmortizationOperations;
   protected deactivateOps!: DeactivateOperations;
-  protected metadataOps!: MetadataOperations;
+  protected customDataOps!: CustomDataOperations;
 
   constructor(
     protected readonly mirrorNodeAdapter: MirrorNodeAdapter,
@@ -79,7 +79,7 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     this.securityMetadataOps = new SecurityMetadataOperations(this);
     this.amortizationOps = new AmortizationOperations(this);
     this.deactivateOps = new DeactivateOperations(this);
-    this.metadataOps = new MetadataOperations(this);
+    this.customDataOps = new CustomDataOperations(this);
   }
 
   // ===== Abstract methods (implemented by concrete adapters) =====
@@ -888,9 +888,9 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     return this.amortizationOps.releaseAmortizationHold(...args);
   }
 
-  // ===== Metadata Operations =====
+  // ===== Custom Data Operations =====
 
-  async setMetadata(...args: Parameters<MetadataOperations["setMetadata"]>): Promise<TransactionResponse> {
-    return this.metadataOps.setMetadata(...args);
+  async setCustomData(...args: Parameters<CustomDataOperations["setCustomData"]>): Promise<TransactionResponse> {
+    return this.customDataOps.setCustomData(...args);
   }
 }

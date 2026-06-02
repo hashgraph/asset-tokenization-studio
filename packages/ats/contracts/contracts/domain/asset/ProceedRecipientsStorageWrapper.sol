@@ -22,6 +22,9 @@ bytes32 constant STORAGE_LOCATION_PROCEED_RECIPIENTS_DATA = 0xc68f265b7453bab62d
  * @custom:storage-location erc7201:security.token.standard.storage.ProceedRecipientsData
  */
 struct ProceedRecipientsDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(address => bytes) proceedRecipientData;
     // ─── APPEND-ONLY ZONE BELOW ───
@@ -44,22 +47,15 @@ library ProceedRecipientsStorageWrapper {
      * @param _proceedRecipients Addresses to register as proceed recipients.
      * @param _data Payload bytes associated 1:1 with each recipient.
      */
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ProceedRecipients(address[] calldata _proceedRecipients, bytes[] calldata _data) internal {
+    function initializeProceedRecipients(address[] calldata _proceedRecipients, bytes[] calldata _data) internal {
         uint256 length = _proceedRecipients.length;
         for (uint256 index; index < length; ) {
             ExternalListManagementStorageWrapper.checkValidAddress(_proceedRecipients[index]);
-            ExternalListManagementStorageWrapper.addExternalList(
-                STORAGE_LOCATION_PROCEED_RECIPIENTS,
-                _proceedRecipients[index]
-            );
-            setProceedRecipientData(_proceedRecipients[index], _data[index]);
+            addProceedRecipient(_proceedRecipients[index], _data[index]);
             unchecked {
                 ++index;
             }
         }
-
-        ExternalListManagementStorageWrapper.setExternalListInitialized(STORAGE_LOCATION_PROCEED_RECIPIENTS);
     }
 
     /**
@@ -161,15 +157,6 @@ library ProceedRecipientsStorageWrapper {
                 _pageIndex,
                 _pageLength
             );
-    }
-
-    /**
-     * @notice Reports whether the proceed-recipient list has been initialised.
-     * @return True once `initialize_ProceedRecipients` has been called, false otherwise.
-     */
-    function isProceedRecipientsInitialized() internal view returns (bool) {
-        return
-            ExternalListManagementStorageWrapper.externalListStorage(STORAGE_LOCATION_PROCEED_RECIPIENTS).initialized;
     }
 
     /**

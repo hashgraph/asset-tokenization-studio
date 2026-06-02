@@ -6,7 +6,15 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 import { IAsset, type ResolverProxy } from "@contract-types";
-import { ADDRESS_ZERO, ATS_ROLES, dateToUnixTimestamp, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
+import {
+  ADDRESS_ZERO,
+  ATS_ROLES,
+  dateToUnixTimestamp,
+  EMPTY_HEX_BYTES,
+  EMPTY_STRING,
+  RESOLVER_KEY_CLEARING,
+  ZERO,
+} from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
@@ -3046,9 +3054,31 @@ describe("Clearing Tests", () => {
       });
     });
 
-    describe("onlyUninitialized modifier", () => {
-      it("GIVEN clearing already initialized WHEN calling initializeClearing THEN transaction fails with AlreadyInitialized", async () => {
-        await expect(asset.initializeClearing(true)).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+    describe("initializeClearing", () => {
+      it("GIVEN an already-initialised facet WHEN initializeClearing is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.initializeClearing(true)).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+      });
+
+      it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeClearing is called THEN it reverts with AccountHasNoRole", async () => {
+        const { diamond: freshDiamond } = await deployEquityTokenFixture({
+          equityDataParams: {
+            securityData: {
+              isMultiPartition: true,
+              clearingActive: false,
+            },
+          },
+        });
+        const freshAsset = await ethers.getContractAt("IAsset", freshDiamond.target);
+        await expect(freshAsset.connect(signer_D).initializeClearing(true)).to.be.revertedWithCustomError(
+          freshAsset,
+          "AccountHasNoRole",
+        );
+      });
+
+      it("GIVEN a fresh deployment WHEN initializeClearing is called THEN emits ClearingInitialized", async () => {
+        const mockDC = await ethers.getContractAt("MockDiamondCut", diamond.target);
+        await mockDC.forceFacetNotRegistered(RESOLVER_KEY_CLEARING);
+        await expect(asset.initializeClearing(true)).to.emit(asset, "ClearingInitialized");
       });
     });
 
@@ -5284,6 +5314,20 @@ describe("Clearing Tests", () => {
         deactivatedAsset,
         "Deactivated",
       );
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      const cut = await ethers.getContractAt("MockDiamondCut", diamond.target);
+      await cut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN activateClearing THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.activateClearing()).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN deactivateClearing THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.deactivateClearing()).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
   });
 });

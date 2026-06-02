@@ -29,6 +29,12 @@ interface IScheduledBalanceAdjustment {
     }
 
     /**
+     * @notice Emitted once when the scheduled balance adjustment capability is initialised on a token.
+     * @dev Fires exclusively from `initializeScheduledBalanceAdjustment`.
+     */
+    event ScheduledBalanceAdjustmentInitialized();
+
+    /**
      * @notice Emitted when a balance adjustment is successfully scheduled.
      * @param corporateActionId   On-chain identifier of the associated corporate action record.
      * @param balanceAdjustmentId Sequential identifier of the scheduled adjustment.
@@ -69,6 +75,13 @@ interface IScheduledBalanceAdjustment {
      * @param balanceAdjustmentId Identifier of the balance adjustment that was already executed.
      */
     error BalanceAdjustmentAlreadyExecuted(bytes32 corporateActionId, uint256 balanceAdjustmentId);
+
+    /**
+     * @notice Initialises the scheduled balance adjustment capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeScheduledBalanceAdjustment() external;
 
     /**
      * @notice Enqueues a balance adjustment to be executed at a future date.
@@ -123,19 +136,24 @@ interface IScheduledBalanceAdjustment {
     /**
      * @notice Returns the number of pending scheduled balance adjustments in the task queue.
      * @dev Reads directly from `ScheduledTasksStorageWrapper`; excludes already-executed tasks.
+     * @param _includeDisabled When true, tasks belonging to cancelled corporate actions are counted;
+     *                         when false, only active tasks are counted.
      * @return Count of pending balance adjustment tasks.
      */
-    function getPendingBalanceAdjustmentCount() external view returns (uint256);
+    function getPendingBalanceAdjustmentCount(bool _includeDisabled) external view returns (uint256);
 
     /**
      * @notice Returns a paginated slice of pending scheduled balance adjustment tasks.
      * @dev Reads from `ScheduledTasksStorageWrapper`. Tasks are ordered by insertion index.
-     * @param _pageIndex  Zero-based page number.
-     * @param _pageLength Maximum number of tasks to return per page.
+     * @param _pageIndex       Zero-based page number.
+     * @param _pageLength      Maximum number of tasks to return per page.
+     * @param _includeDisabled When true, tasks belonging to cancelled corporate actions are included;
+     *                         when false, only active tasks are returned.
      * @return scheduledBalanceAdjustment_ Array of `ScheduledTask` structs for the requested page.
      */
     function getScheduledBalanceAdjustments(
         uint256 _pageIndex,
-        uint256 _pageLength
+        uint256 _pageLength,
+        bool _includeDisabled
     ) external view returns (ScheduledTask[] memory scheduledBalanceAdjustment_);
 }

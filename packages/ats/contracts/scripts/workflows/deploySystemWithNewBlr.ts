@@ -55,6 +55,7 @@ import {
   createBondConfiguration,
   createBondFixedRateConfiguration,
   createBondKpiLinkedRateConfiguration,
+  createDepositTokenConfiguration,
   createLoanConfiguration,
   createLoansPortfolioConfiguration,
   createFactoryConfiguration,
@@ -999,6 +1000,63 @@ export async function deploySystemWithNewBlr(
       throw new Error(createTestFailureMessage("step", "loansPortfolio"));
     }
 
+    // Step 10: Create Deposit Token configuration
+    let depositTokenConfig: Awaited<ReturnType<typeof createDepositTokenConfiguration>>;
+
+    if (checkpoint.steps.configurations?.depositToken && checkpoint.currentStep >= 10) {
+      info(`\n✓ Step 11/${totalSteps}: Deposit Token configuration already created (resuming)`);
+      const depositTokenConfigData = checkpoint.steps.configurations.depositToken;
+      info(`✅ Deposit Token Config ID: ${depositTokenConfigData.configId}`);
+      info(`✅ Deposit Token Version: ${depositTokenConfigData.version}`);
+      info(`✅ Deposit Token Facets: ${depositTokenConfigData.facetCount}`);
+
+      depositTokenConfig = toConfigurationData(depositTokenConfigData);
+    } else if (deployOnlyBondConfig) {
+      info(`\n⏭️  Step 11/${totalSteps}: Deposit Token configuration skipped (deployOnlyBondConfig)`);
+      depositTokenConfig = err("SKIPPED", "Skipped by deployOnlyBondConfig");
+      checkpoint.currentStep = 10;
+      await checkpointManager.saveCheckpoint(checkpoint);
+    } else {
+      info(`\n💵 Step 11/${totalSteps}: Creating Deposit Token configuration...`);
+
+      depositTokenConfig = await createDepositTokenConfiguration(
+        blrContract,
+        facetAddresses,
+        useTimeTravel,
+        partialBatchDeploy,
+        batchSize,
+        confirmations,
+        enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
+      );
+
+      if (!depositTokenConfig.success) {
+        throw new Error(
+          `Deposit Token config creation failed: ${depositTokenConfig.error} - ${depositTokenConfig.message}`,
+        );
+      }
+
+      info(`✅ Deposit Token Config ID: ${depositTokenConfig.data.configurationId}`);
+      info(`✅ Deposit Token Version: ${depositTokenConfig.data.version}`);
+      info(`✅ Deposit Token Facets: ${depositTokenConfig.data.facetKeys.length}`);
+
+      if (!checkpoint.steps.configurations) {
+        checkpoint.steps.configurations = {};
+      }
+      checkpoint.steps.configurations.depositToken = {
+        configId: depositTokenConfig.data.configurationId,
+        version: depositTokenConfig.data.version,
+        facetCount: depositTokenConfig.data.facetKeys.length,
+        facets: depositTokenConfig.data.facetKeys,
+        txHash: "",
+      };
+      checkpoint.currentStep = 10;
+      await checkpointManager.saveCheckpoint(checkpoint);
+    }
+
+    if (shouldFailAtStep("depositToken")) {
+      throw new Error(createTestFailureMessage("step", "depositToken"));
+    }
+
     // ====================================================================
     // TEST-ONLY: Step 12 — InitializeMock Configurations.
     //
@@ -1410,43 +1468,57 @@ export async function deploySystemWithNewBlr(
           // Use type guard to safely access .data property
           if (!isSuccess(equityConfig)) return [];
           const equityKeys = new Set(equityConfig.data.facetKeys.map((f) => f.key));
-          return output.facets.filter((facet) => equityKeys.has(facet.key));
+          const filtered = output.facets.filter((facet) => equityKeys.has(facet.key));
+          return Array.from(new Map(filtered.map((f) => [f.key, f])).values());
         },
         getBondFacets() {
           // Use type guard to safely access .data property
           if (!isSuccess(bondConfig)) return [];
           const bondKeys = new Set(bondConfig.data.facetKeys.map((f) => f.key));
-          return output.facets.filter((facet) => bondKeys.has(facet.key));
+          const filtered = output.facets.filter((facet) => bondKeys.has(facet.key));
+          return Array.from(new Map(filtered.map((f) => [f.key, f])).values());
         },
         getBondFixedRateFacets() {
           // Use type guard to safely access .data property
           if (!isSuccess(bondFixedRateConfig)) return [];
           const bondFixedRateKeys = new Set(bondFixedRateConfig.data.facetKeys.map((f) => f.key));
-          return output.facets.filter((facet) => bondFixedRateKeys.has(facet.key));
+          const filtered = output.facets.filter((facet) => bondFixedRateKeys.has(facet.key));
+          return Array.from(new Map(filtered.map((f) => [f.key, f])).values());
         },
         getBondKpiLinkedRateFacets() {
           // Use type guard to safely access .data property
           if (!isSuccess(bondKpiLinkedRateConfig)) return [];
           const bondKpiLinkedRateKeys = new Set(bondKpiLinkedRateConfig.data.facetKeys.map((f) => f.key));
-          return output.facets.filter((facet) => bondKpiLinkedRateKeys.has(facet.key));
+          const filtered = output.facets.filter((facet) => bondKpiLinkedRateKeys.has(facet.key));
+          return Array.from(new Map(filtered.map((f) => [f.key, f])).values());
         },
         getLoanFacets() {
           // Use type guard to safely access .data property
           if (!isSuccess(loanConfig)) return [];
           const loanKeys = new Set(loanConfig.data.facetKeys.map((f) => f.key));
-          return output.facets.filter((facet) => loanKeys.has(facet.key));
+          const filtered = output.facets.filter((facet) => loanKeys.has(facet.key));
+          return Array.from(new Map(filtered.map((f) => [f.key, f])).values());
+        },
+        getDepositTokenFacets() {
+          // Use type guard to safely access .data property
+          if (!isSuccess(depositTokenConfig)) return [];
+          const depositTokenKeys = new Set(depositTokenConfig.data.facetKeys.map((f) => f.key));
+          const filtered = output.facets.filter((facet) => depositTokenKeys.has(facet.key));
+          return Array.from(new Map(filtered.map((f) => [f.key, f])).values());
         },
         getLoansPortfolioFacets() {
           // Use type guard to safely access .data property
           if (!isSuccess(loansPortfolioConfig)) return [];
           const loansPortfolioKeys = new Set(loansPortfolioConfig.data.facetKeys.map((f) => f.key));
-          return output.facets.filter((facet) => loansPortfolioKeys.has(facet.key));
+          const filtered = output.facets.filter((facet) => loansPortfolioKeys.has(facet.key));
+          return Array.from(new Map(filtered.map((f) => [f.key, f])).values());
         },
         getFactoryFacets() {
           // Use type guard to safely access .data property
           if (!isSuccess(factoryConfig)) return [];
           const factoryKeys = new Set(factoryConfig.data.facetKeys.map((f) => f.key));
-          return output.facets.filter((facet) => factoryKeys.has(facet.key));
+          const filtered = output.facets.filter((facet) => factoryKeys.has(facet.key));
+          return Array.from(new Map(filtered.map((f) => [f.key, f])).values());
         },
       },
     };

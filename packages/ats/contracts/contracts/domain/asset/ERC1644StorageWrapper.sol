@@ -16,9 +16,10 @@ bytes32 constant STORAGE_LOCATION_ERC1644 = 0x96356235f59c9d131a29a98816b8ce8d9e
  */
 struct ERC1644Storage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
-    bool initialized;
     bool isControllable;
-
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     // ─── APPEND-ONLY ZONE BELOW ───
 }
 
@@ -39,7 +40,6 @@ library ERC1644StorageWrapper {
     // solhint-disable-next-line func-name-mixedcase
     function initializeController(bool _controllable) internal {
         erc1644Storage().isControllable = _controllable;
-        erc1644Storage().initialized = true;
     }
 
     /**
@@ -66,14 +66,6 @@ library ERC1644StorageWrapper {
      */
     function isControllable() internal view returns (bool) {
         return erc1644Storage().isControllable;
-    }
-
-    /**
-     * @notice Returns whether `initializeController` has run successfully.
-     * @return `true` once initialised.
-     */
-    function isERC1644Initialized() internal view returns (bool) {
-        return erc1644Storage().initialized;
     }
 
     /**

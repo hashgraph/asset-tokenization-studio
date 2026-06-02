@@ -40,7 +40,8 @@ struct EquityDataStorage {
     bool putRight;
     // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
     IEquity.DividendType dividendRight;
-
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     // ─── APPEND-ONLY ZONE BELOW ───
 }
 

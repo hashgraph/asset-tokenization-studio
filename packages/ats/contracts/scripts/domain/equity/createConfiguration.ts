@@ -23,6 +23,8 @@ import {
 import { BusinessLogicResolver } from "@contract-types";
 import { EQUITY_CONFIG_ID } from "../constants";
 import { atsRegistry } from "../atsRegistry";
+import { buildFacetList } from "../facetEnvironment";
+import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
 
 /**
  * Equity-specific facets list (44 facets total).
@@ -43,11 +45,12 @@ const EQUITY_FACETS = [
   "CapByPartitionFacet",
   "ControlListFacet",
   "CorporateActionsFacet",
-  "DiamondFacet", // Combined: includes DiamondCutFacet + DiamondLoupeFacet functionality
+  "DiamondFacet",
   "CoreFacet",
   "TransferFacet",
   "CoreAdjustedFacet",
-  "MetadataFacet",
+  "InitializerFacet",
+  "CustomDataFacet",
   "FreezeFacet",
   "BatchFreezeFacet",
   "KycFacet",
@@ -72,7 +75,6 @@ const EQUITY_FACETS = [
 
   // ERC Standards (13)
   "MintByPartitionFacet",
-  "ERC1410ManagementFacet",
   "ProtectedByPartitionFacet",
   "OperatorFacet",
   "TransferByPartitionFacet",
@@ -90,7 +92,6 @@ const EQUITY_FACETS = [
   "BatchBurnFacet",
   "BatchMintFacet",
   "BatchTransferFacet",
-  "ERC3643ManagementFacet",
   "RecoveryFacet",
   "IdentityFacet",
   "ComplianceFacet",
@@ -137,13 +138,11 @@ const EQUITY_FACETS = [
   "VotingSecurityHoldersFacet",
 
   "InterestRateFacet",
+  "ProceedRecipientsFacet",
+
   // Jurisdiction-Specific (2)
   "SecurityFacet",
   "EquityUSAFacet",
-
-  // Loan & Loans Portfolio (2)
-  "LoanFacet",
-  //"LoansPortfolioFacet",
 ] as const;
 
 /**
@@ -203,19 +202,14 @@ export async function createEquityConfiguration(
   confirmations: number = 0,
   retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  // Build facet list based on time travel mode
-  // When useTimeTravel=true, ALL facets get TimeTravel suffix (universal mapping)
-  // plus TimeTravelFacet controller. No filtering needed — simplifies deployment logic.
-  const facetNames = useTimeTravel
-    ? [...EQUITY_FACETS.map((name) => `${name}TimeTravel`), "TimeTravelFacet"]
-    : [...EQUITY_FACETS];
+  const facetNames = buildFacetList(EQUITY_FACETS, useTimeTravel);
 
   // Build facet data with resolver keys from registry
   const facets = facetNames.map((name) => {
     // Strip "TimeTravel" suffix to get base name for registry lookup
     const baseName = name.replace(/TimeTravel$/, "");
 
-    const facetDef = atsRegistry.getFacetDefinition(baseName);
+    const facetDef = atsRegistry.getFacetDefinition(baseName) ?? getMockFacetDefinition(baseName);
     if (!facetDef?.resolverKey?.value) {
       throw new Error(`No resolver key found for facet: ${baseName}`);
     }

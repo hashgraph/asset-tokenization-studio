@@ -123,6 +123,13 @@ export async function deployAtsInfrastructureFixture(
       },
       {} as Record<string, string>,
     ),
+    depositTokenFacetKeys: deployment.helpers.getDepositTokenFacets().reduce(
+      (acc, f) => {
+        acc[f.name] = f.key;
+        return acc;
+      },
+      {} as Record<string, string>,
+    ),
     loansPortfolioFacetKeys: deployment.helpers.getLoansPortfolioFacets().reduce(
       (acc, f) => {
         acc[f.name] = f.key;

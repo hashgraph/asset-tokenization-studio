@@ -3,16 +3,18 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { MockedWhitelist, MockedBlacklist, ResolverProxy, IAsset } from "@contract-types";
+import { MockDiamondCut, MockedWhitelist, MockedBlacklist, ResolverProxy, IAsset } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture } from "@test";
-import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, GAS_LIMIT } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, EQUITY_CONFIG_ID, GAS_LIMIT } from "@scripts";
 
 describe("ExternalControlList Management Tests", () => {
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
+  let signer_D: HardhatEthersSigner;
 
   let diamond: ResolverProxy;
+  let mockDiamondCut: MockDiamondCut;
   let asset: IAsset;
   let initMock1: MockedWhitelist;
   let initMock2: MockedBlacklist;
@@ -41,8 +43,10 @@ describe("ExternalControlList Management Tests", () => {
       },
     });
     diamond = base.diamond;
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     signer_A = base.deployer;
     signer_B = base.user1;
+    signer_D = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
 
@@ -319,11 +323,33 @@ describe("ExternalControlList Management Tests", () => {
   });
 
   describe("Initialize Tests", () => {
-    it("GIVEN an already initialized contract WHEN initializeExternalControlLists is called again THEN it reverts with ContractAlreadyInitialized", async () => {
+    it("GIVEN an already initialized contract WHEN initializeExternalControlLists is called again THEN it reverts with FacetAlreadyRegistered", async () => {
       const newControlLists = [externalWhitelistMock2.target as string];
       await expect(
         asset.connect(signer_A).initializeExternalControlLists(newControlLists),
-      ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+      ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeExternalControlLists is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(
+        asset.connect(signer_D).initializeExternalControlLists([initMock1.target as string]),
+      ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+    });
+
+    it("GIVEN a new deployment WHEN initializeExternalControlLists is called THEN it emits ExternalControlListInitialized", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      const controlLists = [initMock1.target as string];
+      const tx = await freshAsset.connect(infra.deployer).initializeExternalControlLists(controlLists);
+      const receipt = await tx.wait();
+      const emitted = await decodeEvent(freshAsset, "ExternalControlListInitialized", receipt!);
+      expect(emitted.controlLists).to.deep.equal(controlLists);
     });
   });
 
@@ -460,6 +486,31 @@ describe("ExternalControlList Management Tests", () => {
       await expect(
         deactivatedAsset.connect(base.deployer).removeExternalControlList(ethers.ZeroAddress),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN addExternalControlList THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.addExternalControlList("0x0000000000000000000000000000000000000001"),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN removeExternalControlList THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.removeExternalControlList("0x0000000000000000000000000000000000000001"),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN updateExternalControlLists THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.updateExternalControlLists([], [])).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
     });
   });
 });

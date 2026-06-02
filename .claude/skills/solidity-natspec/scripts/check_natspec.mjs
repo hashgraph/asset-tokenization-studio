@@ -14,7 +14,7 @@
 //
 // Heuristic only — for authoring guidance, not a compiler-grade validator. State
 // variables are intentionally not checked (too easy to mis-detect); verify those
-// manually using SKILL.md "What to cover".
+// manually using ADD.md "What to cover".
 //
 // Usage: node scripts/check_natspec.mjs <path/to/file.sol>
 // Exit code: 0 if every checked element passes, 1 if anything is missing or
@@ -377,7 +377,7 @@ const main = () => {
   const findings = checkFile(path);
   if (findings.length === 0) {
     console.log(`OK -- every checked element in ${path} passes NatSpec rules.`);
-    console.log("Reminder: state variables are not checked; verify those via SKILL.md section 6.");
+    console.log("Reminder: state variables are not checked; verify those via ADD.md section 6.");
     return 0;
   }
   console.log(`NatSpec issues in ${path}:`);

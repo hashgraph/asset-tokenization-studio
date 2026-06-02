@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ICouponListing } from "./ICouponListing.sol";
+import { ICouponListing, RESOLVER_KEY_COUPON_LISTING } from "./ICouponListing.sol";
 import { ScheduledTask } from "../layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { CouponStorageWrapper } from "../../domain/asset/coupon/CouponStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "../../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title CouponListing
@@ -15,37 +18,58 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
  * @dev Reads from `CouponStorageWrapper`, `ScheduledTasksStorageWrapper`, and
  *      `TimeTravelStorageWrapper`. Intended to be inherited by `CouponListingFacet`.
  */
-abstract contract CouponListing is ICouponListing {
+abstract contract CouponListing is ICouponListing, Modifiers {
     /// @inheritdoc ICouponListing
-    function getCouponFromOrderedListAt(uint256 _pos) external view override returns (uint256 couponID_) {
-        couponID_ = CouponStorageWrapper.getCouponFromOrderedListAt(_pos);
+    function initializeCouponListing()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_COUPON_LISTING)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_COUPON_LISTING);
+        emit CouponListingInitialized();
+    }
+
+    /// @inheritdoc ICouponListing
+    function getCouponFromOrderedListAt(
+        uint256 _pos,
+        bool _includeDisabled
+    ) external view override returns (uint256 couponID_) {
+        couponID_ = CouponStorageWrapper.getCouponFromOrderedListAt(_pos, _includeDisabled);
     }
 
     /// @inheritdoc ICouponListing
     function getCouponsOrderedList(
         uint256 _pageIndex,
-        uint256 _pageLength
+        uint256 _pageLength,
+        bool _includeDisabled
     ) external view override returns (uint256[] memory couponIDs_) {
-        couponIDs_ = CouponStorageWrapper.getCouponsOrderedList(_pageIndex, _pageLength);
+        couponIDs_ = CouponStorageWrapper.getCouponsOrderedList(_pageIndex, _pageLength, _includeDisabled);
     }
 
     /// @inheritdoc ICouponListing
-    function getCouponsOrderedListTotal() external view override returns (uint256 total_) {
+    function getCouponsOrderedListTotal(bool _includeDisabled) external view override returns (uint256 total_) {
         total_ = CouponStorageWrapper.getCouponsOrderedListTotalAdjustedAt(
-            TimeTravelStorageWrapper.getBlockTimestamp()
+            TimeTravelStorageWrapper.getBlockTimestamp(),
+            _includeDisabled
         );
     }
 
     /// @inheritdoc ICouponListing
-    function scheduledCouponListingCount() external view override returns (uint256) {
-        return ScheduledTasksStorageWrapper.getScheduledCouponListingCount();
+    function scheduledCouponListingCount(bool _includeDisabled) external view override returns (uint256) {
+        return ScheduledTasksStorageWrapper.getScheduledCouponListingCount(_includeDisabled);
     }
 
     /// @inheritdoc ICouponListing
     function getScheduledCouponListing(
         uint256 _pageIndex,
-        uint256 _pageLength
+        uint256 _pageLength,
+        bool _includeDisabled
     ) external view override returns (ScheduledTask[] memory scheduledCouponListing_) {
-        scheduledCouponListing_ = ScheduledTasksStorageWrapper.getScheduledCouponListing(_pageIndex, _pageLength);
+        scheduledCouponListing_ = ScheduledTasksStorageWrapper.getScheduledCouponListing(
+            _pageIndex,
+            _pageLength,
+            _includeDisabled
+        );
     }
 }

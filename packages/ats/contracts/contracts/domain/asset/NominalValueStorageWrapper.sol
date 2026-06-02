@@ -12,7 +12,6 @@ bytes32 constant STORAGE_LOCATION_NOMINAL_VALUE = 0xf4ae98634996e72bf90c5471fce1
  * @notice Backing storage for nominal value, decimals, and ISO 4217 currency code.
  * @dev Sole source of truth for nominal-value fields on this asset; mutated only via
  *      `NominalValueStorageWrapper` against the deterministic ERC-7201 slot.
- * @param initialized Whether the nominal value data has been initialised.
  * @param nominalValueDecimals Number of decimals applied to `nominalValue`.
  * @param nominalValueCurrency ISO 4217 currency code (`0x000000` when unset).
  * @param nominalValue Nominal value amount expressed with `nominalValueDecimals` precision.
@@ -20,13 +19,12 @@ bytes32 constant STORAGE_LOCATION_NOMINAL_VALUE = 0xf4ae98634996e72bf90c5471fce1
  */
 struct NominalValueDataStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
-    bool initialized;
     // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
     uint8 nominalValueDecimals;
     bytes3 nominalValueCurrency;
     // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     uint256 nominalValue;
-
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     // ─── APPEND-ONLY ZONE BELOW ───
 }
 
@@ -52,7 +50,6 @@ library NominalValueStorageWrapper {
         uint8 _nominalValueDecimals,
         bytes3 _nominalValueCurrency
     ) internal {
-        _nominalValueStorage().initialized = true;
         setNominalValue(_nominalValue, _nominalValueDecimals);
         setNominalValueCurrency(_nominalValueCurrency);
     }
@@ -103,14 +100,6 @@ library NominalValueStorageWrapper {
      */
     function getNominalValueCurrency() internal view returns (bytes3) {
         return _nominalValueStorage().nominalValueCurrency;
-    }
-
-    /**
-     * @notice Reports whether the nominal value storage has been initialised.
-     * @return True once `initializeNominalValue` has been called, false otherwise.
-     */
-    function isNominalValueInitialized() internal view returns (bool) {
-        return _nominalValueStorage().initialized;
     }
 
     /**

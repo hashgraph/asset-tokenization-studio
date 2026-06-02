@@ -14,32 +14,45 @@ import { EvmAccessors } from "../utils/EvmAccessors.sol";
 // solhint-disable-next-line max-line-length
 bytes32 constant STORAGE_LOCATION_DIAMOND_CUT_MANAGER = 0xc9161810d6144bfe5b28041c8a23ceedf202e65acda5c323c5b387259e601000;
 
-abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, BusinessLogicResolverWrapper {
-    struct DiamondCutManagerStorage {
-        bytes32[] configurations;
-        mapping(bytes32 => bool) activeConfigurations;
-        mapping(bytes32 => uint256) latestVersion;
-        mapping(bytes32 => uint256) batchVersion;
-        // keccak256(configurationId, version)
-        mapping(bytes32 => bytes32[]) facetIds;
-        // keccak256(configurationId, version)
-        mapping(bytes32 => uint256[]) facetVersions;
-        //keccak256(configurationId, version, facetId)
-        mapping(bytes32 => uint256) facetIdPosition;
-        // keccak256(configurationId, version, selector)
-        mapping(bytes32 => address) facetAddress;
-        // keccak256(configurationId, version, facetId)
-        mapping(bytes32 => address) addr;
-        // keccak256(configurationId, version, facetId)
-        mapping(bytes32 => bytes4[]) selectors;
-        // keccak256(configurationId, version, selector)
-        mapping(bytes32 => bytes32) selectorToFacetId;
-        // keccak256(configurationId, version, facetId)
-        mapping(bytes32 => bytes4[]) interfaceIds;
-        // keccak256(configurationId, version, interfaceId)
-        mapping(bytes32 => bool) supportsInterface;
-    }
+/**
+ * @notice Diamond storage backing the diamond-cut manager configuration registry.
+ * @dev Indexes configurations, their versions, and the per-version facet/selector/interface
+ *      resolution maps used when cutting a resolver-proxy. Hoisted to file scope per the
+ *      project's ERC-7201 storage convention; new fields must be appended below the
+ *      APPEND-ONLY marker to preserve upgrade safety.
+ * @custom:storage-location erc7201:security.token.standard.storage.DiamondCutManager
+ */
+struct DiamondCutManagerStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
+    bytes32[] configurations;
+    mapping(bytes32 => bool) activeConfigurations;
+    mapping(bytes32 => uint256) latestVersion;
+    mapping(bytes32 => uint256) batchVersion;
+    // keccak256(configurationId, version)
+    mapping(bytes32 => bytes32[]) facetIds;
+    // keccak256(configurationId, version)
+    mapping(bytes32 => uint256[]) facetVersions;
+    //keccak256(configurationId, version, facetId)
+    mapping(bytes32 => uint256) facetIdPosition;
+    // keccak256(configurationId, version, selector)
+    mapping(bytes32 => address) facetAddress;
+    // keccak256(configurationId, version, facetId)
+    mapping(bytes32 => address) addr;
+    // keccak256(configurationId, version, facetId)
+    mapping(bytes32 => bytes4[]) selectors;
+    // keccak256(configurationId, version, selector)
+    mapping(bytes32 => bytes32) selectorToFacetId;
+    // keccak256(configurationId, version, facetId)
+    mapping(bytes32 => bytes4[]) interfaceIds;
+    // keccak256(configurationId, version, interfaceId)
+    mapping(bytes32 => bool) supportsInterface;
+    // ─── APPEND-ONLY ZONE BELOW ───
+}
 
+abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, BusinessLogicResolverWrapper {
     modifier validateConfigurationVersion(bytes32 _configurationId, uint256 _version) {
         _checkExplicitVersion(_configurationId, _version);
         _;

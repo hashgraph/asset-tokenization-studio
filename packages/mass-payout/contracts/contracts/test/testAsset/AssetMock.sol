@@ -275,7 +275,7 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
-    function getPendingBalanceAdjustmentCount() external pure returns (uint256) {
+    function getPendingBalanceAdjustmentCount(bool) external pure returns (uint256) {
         revert NotImplemented();
     }
 
@@ -287,7 +287,7 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
-    function getScheduledBalanceAdjustments(uint256, uint256) external pure returns (ScheduledTask[] memory) {
+    function getScheduledBalanceAdjustments(uint256, uint256, bool) external pure returns (ScheduledTask[] memory) {
         revert NotImplemented();
     }
 
@@ -337,6 +337,10 @@ contract AssetMock is IAssetMock {
 
     // solhint-disable-next-line func-name-mixedcase
     function initializeCore(ERC20Metadata calldata) external pure {
+        revert NotImplemented();
+    }
+
+    function initializeBalanceAdjustments() external pure {
         revert NotImplemented();
     }
 
@@ -404,15 +408,27 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
-    function getCouponFromOrderedListAt(uint256) external pure returns (uint256) {
+    function getCouponFromOrderedListAt(uint256, bool) external pure returns (uint256) {
         revert NotImplemented();
     }
 
-    function getCouponsOrderedList(uint256, uint256) external pure returns (uint256[] memory) {
+    function getCouponsOrderedList(uint256, uint256, bool) external pure returns (uint256[] memory) {
         revert NotImplemented();
     }
 
-    function getCouponsOrderedListTotal() external pure returns (uint256) {
+    function getCouponsOrderedListTotal(bool) external pure returns (uint256) {
+        revert NotImplemented();
+    }
+
+    function initializeCoupon() external pure {
+        revert NotImplemented();
+    }
+
+    function initializeScheduledBalanceAdjustment() external pure {
+        revert NotImplemented();
+    }
+
+    function initializeVoting() external pure {
         revert NotImplemented();
     }
 

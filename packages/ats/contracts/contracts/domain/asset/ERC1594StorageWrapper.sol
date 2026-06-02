@@ -23,8 +23,6 @@ import { KycStorageWrapper } from "../core/KycStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 import { AccessControlStorageWrapper } from "../core/AccessControlStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-import { IMint } from "../../facets/mint/IMint.sol";
-import { IBurn } from "../../facets/burn/IBurn.sol";
 
 /// @custom:hash storage Erc1594
 bytes32 constant STORAGE_LOCATION_ERC1594 = 0x6bb5986b529cbe1ac563af7efd06b91a80c235aad83852a102d3c187f67c5400;
@@ -37,9 +35,10 @@ bytes32 constant STORAGE_LOCATION_ERC1594 = 0x6bb5986b529cbe1ac563af7efd06b91a80
  */
 struct ERC1594Storage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
-    bool initialized;
     bool issuance;
-
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     // ─── APPEND-ONLY ZONE BELOW ───
 }
 
@@ -67,7 +66,6 @@ library ERC1594StorageWrapper {
     function initialize() internal {
         ERC1594Storage storage ds = erc1594Storage();
         ds.issuance = true;
-        ds.initialized = true;
     }
 
     /**
@@ -115,10 +113,6 @@ library ERC1594StorageWrapper {
      * @notice Returns whether the ERC1594 storage has been initialised.
      * @return `true` if `initialize` has been called successfully.
      */
-    function isERC1594Initialized() internal view returns (bool) {
-        return erc1594Storage().initialized;
-    }
-
     /**
      * @notice Reverts if a transfer from `from` to `to` of `value` in
      * `partition` is not allowed.

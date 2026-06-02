@@ -12,6 +12,7 @@ import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
+import { ScheduledTasksOps } from "../orchestrator/ScheduledTasksOps.sol";
 
 /// @custom:hash storage Erc20
 bytes32 constant STORAGE_LOCATION_ERC20 = 0xba2beddc557de36eb4836f4ff1fd9d33a28d780fce70d36cf80b490142788200;
@@ -26,7 +27,6 @@ bytes32 constant STORAGE_LOCATION_ERC20 = 0xba2beddc557de36eb4836f4ff1fd9d33a28d
  */
 struct ERC20Storage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
-    bool initialized;
     // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
     uint8 decimals;
     IFactory.SecurityType securityType;
@@ -62,13 +62,13 @@ library ERC20StorageWrapper {
      * @param erc20Metadata The metadata struct containing token info and security type.
      */
     function initializeERC20(ICore.ERC20Metadata calldata erc20Metadata) internal {
+        ScheduledTasksOps.triggerPendingScheduledCrossOrderedTasks();
         ERC20Storage storage erc20Stor = erc20Storage();
         erc20Stor.name = erc20Metadata.info.name;
         erc20Stor.symbol = erc20Metadata.info.symbol;
         erc20Stor.isin = erc20Metadata.info.isin;
         erc20Stor.decimals = erc20Metadata.info.decimals;
         erc20Stor.securityType = erc20Metadata.securityType;
-        erc20Stor.initialized = true;
     }
 
     /**
@@ -458,14 +458,6 @@ library ERC20StorageWrapper {
     }
 
     /**
-     * @notice Returns whether the ERC-20 capability has been initialised.
-     * @return `true` if `initializeERC20` has been called at least once; `false` otherwise.
-     */
-    function isERC20Initialized() internal view returns (bool) {
-        return erc20Storage().initialized;
-    }
-
-    /**
      * @notice Returns the full ERC-20 metadata struct including token info and security
      *         type.
      * @return erc20Metadata_ The packed `ICore.ERC20Metadata` value read from storage.
@@ -492,7 +484,10 @@ library ERC20StorageWrapper {
     function getERC20MetadataAdjustedAt(
         uint256 timestamp
     ) internal view returns (ICore.ERC20Metadata memory erc20Metadata_) {
-        (, uint8 pendingDecimals) = ScheduledTasksStorageWrapper.getPendingScheduledBalanceAdjustmentsAt(timestamp);
+        (, uint8 pendingDecimals) = ScheduledTasksStorageWrapper.getPendingScheduledBalanceAdjustmentsAt(
+            timestamp,
+            false
+        );
         erc20Metadata_ = getERC20Metadata();
         erc20Metadata_.info.decimals += pendingDecimals;
     }
