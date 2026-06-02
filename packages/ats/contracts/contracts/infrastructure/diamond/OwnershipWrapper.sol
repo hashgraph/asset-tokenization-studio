@@ -65,8 +65,7 @@ abstract contract OwnershipWrapper {
      * @param _owner Address to record as the new owner.
      */
     function _setOwner(bytes32 _configId, address _owner) internal {
-        OwnershipStorage storage os = _ownershipStorage();
-        os.configOwners[_configId] = _owner;
+        _ownershipStorage().configOwners[_configId] = _owner;
     }
 
     /**
@@ -77,8 +76,7 @@ abstract contract OwnershipWrapper {
      * @param _pendingOwner Address to nominate as the next owner.
      */
     function _setPendingOwner(bytes32 _configId, address _pendingOwner) internal {
-        OwnershipStorage storage os = _ownershipStorage();
-        os.configPendingOwners[_configId] = _pendingOwner;
+        _ownershipStorage().configPendingOwners[_configId] = _pendingOwner;
     }
 
     /**
@@ -88,8 +86,7 @@ abstract contract OwnershipWrapper {
      * @param _configId Configuration whose pending owner slot is being cleared.
      */
     function _removePendingOwner(bytes32 _configId) internal {
-        OwnershipStorage storage os = _ownershipStorage();
-        delete os.configPendingOwners[_configId];
+        delete _ownershipStorage().configPendingOwners[_configId];
     }
 
     /**
@@ -98,8 +95,7 @@ abstract contract OwnershipWrapper {
      * @return owner_ Address recorded as owner, or the zero address when unset.
      */
     function _getOwner(bytes32 _configId) internal view returns (address owner_) {
-        OwnershipStorage storage os = _ownershipStorage();
-        owner_ = os.configOwners[_configId];
+        owner_ = _ownershipStorage().configOwners[_configId];
     }
 
     /**
@@ -109,8 +105,7 @@ abstract contract OwnershipWrapper {
      *         transfer is in flight.
      */
     function _getPendingOwner(bytes32 _configId) internal view returns (address pendingOwner_) {
-        OwnershipStorage storage os = _ownershipStorage();
-        pendingOwner_ = os.configPendingOwners[_configId];
+        pendingOwner_ = _ownershipStorage().configPendingOwners[_configId];
     }
 
     function _checkOwnership(bytes32 _configId) internal view {

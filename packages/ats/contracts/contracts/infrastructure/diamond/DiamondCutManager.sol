@@ -13,15 +13,15 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         _;
     }
 
-    modifier checkOwnership(bytes32 _configurationId) {
-        if (_getOwner(_configurationId) != address(0)) _checkOwnership(_configurationId);
+    modifier checkAlreadyOwned(bytes32 _configurationId) {
+        _checkAlreadyOwned(_configurationId);
         _;
     }
 
     function createConfiguration(
         bytes32 _configurationId,
         FacetConfiguration[] calldata _facetConfigurations
-    ) external override validateConfigurationId(_configurationId) onlyUnpaused checkOwnership(_configurationId) {
+    ) external override validateConfigurationId(_configurationId) onlyUnpaused checkAlreadyOwned(_configurationId) {
         emit DiamondConfigurationCreated(
             _configurationId,
             _facetConfigurations,
@@ -33,7 +33,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         bytes32 _configurationId,
         FacetConfiguration[] calldata _facetConfigurations,
         bool _isLastBatch
-    ) external override validateConfigurationId(_configurationId) onlyUnpaused checkOwnership(_configurationId) {
+    ) external override validateConfigurationId(_configurationId) onlyUnpaused checkAlreadyOwned(_configurationId) {
         emit DiamondBatchConfigurationCreated(
             _configurationId,
             _facetConfigurations,
@@ -44,7 +44,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
 
     function cancelBatchConfiguration(
         bytes32 _configurationId
-    ) external override validateConfigurationId(_configurationId) onlyUnpaused checkOwnership(_configurationId) {
+    ) external override validateConfigurationId(_configurationId) onlyUnpaused checkAlreadyOwned(_configurationId) {
         uint256 version = _cancelBatchConfiguration(_configurationId);
         emit DiamondBatchConfigurationCanceled(_configurationId, version);
     }

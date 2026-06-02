@@ -416,6 +416,10 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         }
     }
 
+    function _checkAlreadyOwned(bytes32 _configurationId) internal view {
+        if (_getOwner(_configurationId) != address(0)) _checkOwnership(_configurationId);
+    }
+
     function _diamondCutManagerStorage() internal pure returns (DiamondCutManagerStorage storage ds) {
         bytes32 position = STORAGE_LOCATION_DIAMOND_CUT_MANAGER;
         // solhint-disable-next-line no-inline-assembly
