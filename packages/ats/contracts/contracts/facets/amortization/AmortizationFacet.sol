@@ -5,11 +5,36 @@ import { IAmortization, RESOLVER_KEY_AMORTIZATION } from "./IAmortization.sol";
 import { Amortization } from "./Amortization.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 
+/**
+ * @title  AmortizationFacet
+ * @author Asset Tokenization Studio Team
+ * @notice Diamond facet that exposes amortization schedule management to the proxy.
+ * @dev    Selectors exposed:
+ *         - `initializeAmortization`
+ *         - `setAmortization`
+ *         - `cancelAmortization`
+ *         - `forceCancelAmortization`
+ *         - `getAmortization`
+ *         - `getAmortizationFor`
+ *         - `getAmortizationsFor`
+ *         - `getAmortizationsCount`
+ *         - `getAmortizationHolders`
+ *         - `getTotalAmortizationHolders`
+ *         - `setAmortizationHold`
+ *         - `releaseAmortizationHold`
+ *         - `getAmortizationActiveHolders`
+ *         - `getTotalAmortizationActiveHolders`
+ *         - `getActiveAmortizationIds`
+ *         - `getTotalActiveAmortizationIds`
+ *         - `getTotalHoldByAmortizationId`
+ */
 contract AmortizationFacet is Amortization, IStaticFunctionSelectors {
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = RESOLVER_KEY_AMORTIZATION;
     }
 
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex = 17;
         staticFunctionSelectors_ = new bytes4[](selectorIndex);
@@ -34,6 +59,7 @@ contract AmortizationFacet is Amortization, IStaticFunctionSelectors {
         }
     }
 
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         staticInterfaceIds_[0] = type(IAmortization).interfaceId;

@@ -70,6 +70,14 @@ interface IMockFactory is IFactory {
         BondKpiLinkedRateData bondKpiLinkedRateData
     );
 
+    /// @notice Thrown when the supplied interest-rate parameters violate ordering invariants
+    ///         (e.g. `minRate > baseRate` or `baseRate > maxRate`).
+    error WrongInterestRateValues(IKpiLinkedRate.InterestRate interestRate);
+
+    /// @notice Thrown when the supplied KPI impact-data parameters violate ordering invariants
+    ///         (e.g. `maxDeviationFloor >= baseLine` or `baseLine >= maxDeviationCap`).
+    error WrongImpactDataValues(IKpiLinkedRate.ImpactData impactData);
+
     /**
      * @notice Deploys and initialises a fixed-rate bond security proxy.
      * @dev Validates resolver, ISIN, admin RBAC, regulation data and bond dates. Initialises
