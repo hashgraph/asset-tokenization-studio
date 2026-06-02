@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 import { ZERO, EMPTY_STRING, ADDRESS_ZERO, dateToUnixTimestamp, ATS_ROLES, EQUITY_CONFIG_ID } from "@scripts";
 import { decodeEvent } from "@scripts/infrastructure";
-import { deployAtsInfrastructureFixture } from "../../../../fixtures/infrastructure.fixture";
+import { deployAtsInfrastructureFixture } from "../../../fixtures/infrastructure.fixture";
 import { grantRoleAndPauseToken } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";

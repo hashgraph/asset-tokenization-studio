@@ -99,7 +99,7 @@ import { ILock } from "./lock/ILock.sol";
 import { ILockByPartition } from "./lockByPartition/ILockByPartition.sol";
 import { IFreeze } from "./freeze/IFreeze.sol";
 import { IBatchFreeze } from "./batchFreeze/IBatchFreeze.sol";
-import { ISnapshots } from "./layer_1/snapshot/ISnapshots.sol";
+import { ISnapshots } from "./snapshot/ISnapshots.sol";
 import { ISnapshotsByPartition } from "./snapshotsByPartition/ISnapshotsByPartition.sol";
 import { ISecurityHoldersAtSnapshot } from "./securityHoldersAtSnapshot/ISecurityHoldersAtSnapshot.sol";
 import { IFreezeAtSnapshot } from "./freezeAtSnapshot/IFreezeAtSnapshot.sol";

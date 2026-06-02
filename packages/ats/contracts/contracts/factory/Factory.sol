@@ -41,7 +41,7 @@ import { IIdentity } from "../facets/identity/IIdentity.sol";
 import {
     IScheduledCrossOrderedTasks
 } from "../facets/layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
-import { ISnapshots } from "../facets/layer_1/snapshot/ISnapshots.sol";
+import { ISnapshots } from "../facets/snapshot/ISnapshots.sol";
 import { IProceedRecipients } from "../facets/layer_2/proceedRecipient/IProceedRecipients.sol";
 
 import { INominalValue } from "../facets/layer_2/nominalValue/INominalValue.sol";

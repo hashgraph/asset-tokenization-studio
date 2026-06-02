@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ScheduledTask } from "../../facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { IScheduledBalanceAdjustment } from "../../facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol";
-import { ISnapshots } from "../../facets/layer_1/snapshot/ISnapshots.sol";
+import { ISnapshots } from "../../facets/snapshot/ISnapshots.sol";
 import { SNAPSHOT_RESULT_ID, COUPON_LISTING_RESULT_ID } from "../../constants/values.sol";
 import { SnapshotsStorageWrapper } from "../asset/SnapshotsStorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "../asset/AdjustBalancesStorageWrapper.sol";

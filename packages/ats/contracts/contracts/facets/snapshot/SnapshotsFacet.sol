@@ -3,8 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ISnapshots, RESOLVER_KEY_SNAPSHOTS } from "./ISnapshots.sol";
 import { Snapshots } from "./Snapshots.sol";
-import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import { Bytes4Builder } from "../../../infrastructure/proxy/Bytes4Builder.sol";
+import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 /**
  * @title SnapshotsFacet
  * @author Asset Tokenization Studio Team
