@@ -94,7 +94,6 @@ task("erc3643-clone-interfaces", async (_, hre) => {
     { original: "ICore", removeImports: false },
     // Coupon Interest Rates interfaces
     { original: "IFixedRate" },
-    { original: "IKpiLinkedRateErrors" },
     { original: "IKpiLinkedRate", removeImports: false, removeHierarchy: false },
     {
       original: "ICouponListing",
@@ -113,7 +112,7 @@ task("erc3643-clone-interfaces", async (_, hre) => {
     { src: "constants/regulation", dst: "regulation" },
     { src: "constants/roles", dst: "roles" },
     {
-      src: "facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon",
+      src: "facets/scheduledTasksCommon/IScheduledTasksCommon",
       dst: "IScheduledTasksCommon",
     },
   ];

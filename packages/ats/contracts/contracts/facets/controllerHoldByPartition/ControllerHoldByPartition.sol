@@ -6,7 +6,7 @@ import {
     RESOLVER_KEY_CONTROLLER_HOLD_BY_PARTITION
 } from "./IControllerHoldByPartition.sol";
 import { ROLE_CONTROLLER, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
-import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
+import { IHoldTypes } from "../hold/IHoldTypes.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { HoldOps } from "../../domain/orchestrator/HoldOps.sol";
 import { ThirdPartyType } from "../../domain/asset/types/ThirdPartyType.sol";

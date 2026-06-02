@@ -28,7 +28,6 @@ import {
   MockedExternalKycList__factory,
   MockedExternalPause__factory,
   MockedWhitelist__factory,
-  TREXFactoryAts__factory,
   DiamondCutManager__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { ScheduledSnapshot } from "@domain/context/security/ScheduledSnapshot";
@@ -1434,12 +1433,6 @@ export class RPCQueryAdapter {
     const total = await this.connect(IAsset__factory, address.toString()).getTotalSecurityHolders();
 
     return Number(total);
-  }
-
-  async getTrexTokenBySalt(factory: EvmAddress, salt: string): Promise<string> {
-    LogService.logTrace(`Getting TREX token by salt ${salt}`);
-    const token = await this.connect(TREXFactoryAts__factory, factory.toString()).getToken(salt);
-    return token;
   }
 
   async isProceedRecipient(address: EvmAddress, proceedRecipient: EvmAddress): Promise<boolean> {

@@ -34,15 +34,13 @@ import { IClearingByPartition } from "../facets/clearingByPartition/IClearingByP
 import { IClearingHoldByPartition } from "../facets/clearingHoldByPartition/IClearingHoldByPartition.sol";
 import { IERC20Permit } from "../facets/erc20Permit/IERC20Permit.sol";
 import { IIdentity } from "../facets/identity/IIdentity.sol";
-import {
-    IScheduledCrossOrderedTasks
-} from "../facets/layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
+import { IScheduledCrossOrderedTasks } from "../facets/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
 import { ISnapshots } from "../facets/snapshot/ISnapshots.sol";
 import { IProceedRecipients } from "../facets/proceedRecipient/IProceedRecipients.sol";
 
 import { INominalValue } from "../facets/layer_2/nominalValue/INominalValue.sol";
 import { ScheduledTasksStorageWrapper } from "../domain/asset/ScheduledTasksStorageWrapper.sol";
-import { IProtectedPartitions } from "../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
+import { IProtectedPartitions } from "../facets/protectedPartition/IProtectedPartitions.sol";
 import { IExternalPauseManagement } from "../facets/externalPauseManagement/IExternalPauseManagement.sol";
 import {
     IExternalControlListManagement
@@ -109,7 +107,7 @@ import { IOperatorByPartition } from "../facets/operatorByPartition/IOperatorByP
 import { IOperatorClearingByPartition } from "../facets/operatorClearingByPartition/IOperatorClearingByPartition.sol";
 import {
     IOperatorClearingHoldByPartition
-} from "../facets/layer_1/clearing/operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol";
+} from "../facets/operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol";
 import { IOperatorHoldByPartition } from "../facets/operatorHoldByPartition/IOperatorHoldByPartition.sol";
 import { IPartitions } from "../facets/partitions/IPartitions.sol";
 import { IPause } from "../facets/pause/IPause.sol";

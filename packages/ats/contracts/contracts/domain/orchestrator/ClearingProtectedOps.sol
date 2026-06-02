@@ -2,8 +2,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ClearingOps } from "./ClearingOps.sol";
-import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
-import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
+import { IClearingTypes } from "../../facets/clearing/IClearingTypes.sol";
+import { IHoldTypes } from "../../facets/hold/IHoldTypes.sol";
 import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../asset/ERC1594StorageWrapper.sol";

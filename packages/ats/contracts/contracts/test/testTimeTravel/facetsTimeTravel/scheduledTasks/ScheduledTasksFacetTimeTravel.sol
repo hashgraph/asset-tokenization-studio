@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     ScheduledCrossOrderedTasksFacet
-} from "../../../../facets/layer_2/scheduledTask/scheduledCrossOrderedTask/ScheduledCrossOrderedTasksFacet.sol";
+} from "../../../../facets/scheduledCrossOrderedTask/ScheduledCrossOrderedTasksFacet.sol";
 import { TimeTravelProvider } from "../../timeTravel/TimeTravelProvider.sol";
 
 contract ScheduledTasksFacetTimeTravel is ScheduledCrossOrderedTasksFacet, TimeTravelProvider {

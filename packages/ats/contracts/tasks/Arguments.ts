@@ -38,7 +38,6 @@ export interface DeployAllArgs extends WithSigner {
 }
 
 export interface DeployTrexFactoryArgs extends WithSigner {
-  atsFactory?: string;
   implementationAuthority?: string;
   idFactory?: string;
   resolver?: string;

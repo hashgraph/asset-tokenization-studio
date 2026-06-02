@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IClearing, RESOLVER_KEY_CLEARING } from "./IClearing.sol";
-import { IClearingTypes } from "../layer_1/clearing/IClearingTypes.sol";
+import { IClearingTypes } from "./IClearingTypes.sol";
 import { ROLE_CLEARING, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ClearingStorageWrapper } from "../../domain/asset/ClearingStorageWrapper.sol";

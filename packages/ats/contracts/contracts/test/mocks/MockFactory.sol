@@ -9,10 +9,9 @@ import { IInitializer } from "../../facets/initializer/IInitializer.sol";
 import { IAccessControl } from "../../facets/accessControl/IAccessControl.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { FACTORY_OPERATIONAL_STATUS } from "../../constants/values.sol";
-import { IKpis } from "../../facets/layer_2/kpi/kpiLatest/IKpis.sol";
-import { IFixedRate } from "../../facets/layer_2/interestRate/fixedRate/IFixedRate.sol";
-import { IKpiLinkedRate } from "../../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
-import { IKpiLinkedRateErrors } from "../../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRateErrors.sol";
+import { IKpis } from "../../facets/kpi/IKpis.sol";
+import { IFixedRate } from "../../facets/fixedRate/IFixedRate.sol";
+import { IKpiLinkedRate } from "../../facets/kpiLinkedRate/IKpiLinkedRate.sol";
 import { InterestRateStorageWrapper } from "../../domain/asset/InterestRateStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
@@ -24,7 +23,7 @@ import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedErro
  *      The deployed security must implement `initializeTimeTravel`, otherwise deployment reverts.
  * @author Asset Tokenization Studio Team
  */
-interface IMockFactory is IFactory, IKpiLinkedRateErrors {
+interface IMockFactory is IFactory {
     /**
      * @notice Full configuration for deploying a KPI-linked-rate bond.
      * @param bondData              Base bond configuration.
@@ -70,6 +69,14 @@ interface IMockFactory is IFactory, IKpiLinkedRateErrors {
         address bondAddress,
         BondKpiLinkedRateData bondKpiLinkedRateData
     );
+
+    /// @notice Thrown when the supplied interest-rate parameters violate ordering invariants
+    ///         (e.g. `minRate > baseRate` or `baseRate > maxRate`).
+    error WrongInterestRateValues(IKpiLinkedRate.InterestRate interestRate);
+
+    /// @notice Thrown when the supplied KPI impact-data parameters violate ordering invariants
+    ///         (e.g. `maxDeviationFloor >= baseLine` or `baseLine >= maxDeviationCap`).
+    error WrongImpactDataValues(IKpiLinkedRate.ImpactData impactData);
 
     /**
      * @notice Deploys and initialises a fixed-rate bond security proxy.

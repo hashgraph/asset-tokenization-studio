@@ -63,8 +63,6 @@ import { GetBondDetailsQuery } from "@query/bond/get/getBondDetails/GetBondDetai
 import { OperationNotAllowed } from "@domain/context/security/error/operations/OperationNotAllowed";
 import { IsInternalKycActivatedQuery } from "@query/security/kyc/isInternalKycActivated/IsInternalKycActivatedQuery";
 import { IsExternallyGrantedQuery } from "@query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery";
-import { GetTokenBySaltQuery } from "@query/factory/trex/getTokenBySalt/GetTokenBySaltQuery";
-import { InvalidTrexTokenSalt } from "@domain/context/factory/error/InvalidTrexTokenSalt";
 import { IsProceedRecipientQuery } from "@query/security/proceedRecipient/isProceedRecipient/IsProceedRecipientQuery";
 import { AccountIsNotProceedRecipient } from "@domain/context/security/error/operations/AccountIsNotProceedRecipient";
 import { AccountIsProceedRecipient } from "@domain/context/security/error/operations/AccountIsProceedRecipient";
@@ -362,15 +360,6 @@ export default class ValidationService extends Service {
 
     if (parseInt(maturityDate) <= bondDetails.maturityDate) {
       throw new OperationNotAllowed("The maturity date cannot be earlier or equal than the current one");
-    }
-  }
-
-  async checkTrexTokenSaltExists(factory: string, salt: string): Promise<void> {
-    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
-    const exists = (await this.queryBus.execute(new GetTokenBySaltQuery(factory, salt))).token;
-
-    if (!exists) {
-      throw new InvalidTrexTokenSalt(salt);
     }
   }
 

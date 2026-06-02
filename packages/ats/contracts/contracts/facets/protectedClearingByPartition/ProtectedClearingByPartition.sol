@@ -5,7 +5,7 @@ import {
     IProtectedClearingByPartition,
     RESOLVER_KEY_PROTECTED_CLEARING_BY_PARTITION
 } from "./IProtectedClearingByPartition.sol";
-import { IClearingTypes } from "../layer_1/clearing/IClearingTypes.sol";
+import { IClearingTypes } from "../clearing/IClearingTypes.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ClearingProtectedOps } from "../../domain/orchestrator/ClearingProtectedOps.sol";
