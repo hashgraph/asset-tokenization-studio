@@ -763,6 +763,10 @@ export interface DeploymentOutputType {
     bond: ConfigurationMetadata;
     bondFixedRate: ConfigurationMetadata;
     bondKpiLinkedRate: ConfigurationMetadata;
+    loan: ConfigurationMetadata;
+    loansPortfolio: ConfigurationMetadata;
+    depositToken: ConfigurationMetadata;
+    factory: ConfigurationMetadata;
   };
   summary: {
     totalContracts: number;
