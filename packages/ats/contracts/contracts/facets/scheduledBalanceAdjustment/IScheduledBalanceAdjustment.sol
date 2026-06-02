@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ScheduledTask } from "../layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
+import { ScheduledTask } from "../scheduledTasksCommon/IScheduledTasksCommon.sol";
 
 /// @custom:hash resolverKey ScheduledBalanceAdjustment
 // solhint-disable-next-line max-line-length

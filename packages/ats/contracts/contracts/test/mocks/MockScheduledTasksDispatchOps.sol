@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ScheduledTask } from "../../facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
+import { ScheduledTask } from "../../facets/scheduledTasksCommon/IScheduledTasksCommon.sol";
 /* disable-solhint */
 
 /// @dev Test-only bytecode replacement for ScheduledTasksDispatchOps.

@@ -3,8 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IScheduledCrossOrderedTasks, RESOLVER_KEY_SCHEDULED_TASKS } from "./IScheduledCrossOrderedTasks.sol";
 import { ScheduledCrossOrderedTasks } from "./ScheduledCrossOrderedTasks.sol";
-import { IStaticFunctionSelectors } from "../../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import { Bytes4Builder } from "../../../../infrastructure/proxy/Bytes4Builder.sol";
+import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 
 contract ScheduledCrossOrderedTasksFacet is ScheduledCrossOrderedTasks, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

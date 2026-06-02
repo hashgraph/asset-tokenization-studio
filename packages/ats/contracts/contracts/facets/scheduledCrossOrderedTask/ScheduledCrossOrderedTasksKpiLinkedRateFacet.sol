@@ -6,8 +6,8 @@ import {
     RESOLVER_KEY_SCHEDULED_CROSS_ORDERED_TASKS_KPI_LINKED_RATE
 } from "./IScheduledCrossOrderedTasks.sol";
 import { ScheduledCrossOrderedTasks } from "./ScheduledCrossOrderedTasks.sol";
-import { IStaticFunctionSelectors } from "../../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import { Bytes4Builder } from "../../../../infrastructure/proxy/Bytes4Builder.sol";
+import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 
 contract ScheduledCrossOrderedTasksKpiLinkedRateFacet is ScheduledCrossOrderedTasks, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

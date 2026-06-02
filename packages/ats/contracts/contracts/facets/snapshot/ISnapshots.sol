@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ISnapshotsTypes } from "./ISnapshotsTypes.sol";
-import { ScheduledTask } from "../layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
+import { ScheduledTask } from "../scheduledTasksCommon/IScheduledTasksCommon.sol";
 
 /// @custom:hash resolverKey Snapshots
 bytes32 constant RESOLVER_KEY_SNAPSHOTS = 0xbc4e3ace00cf7d347ee7bf90737d3091c02f7d6607c195bf0d4b81e33644f0e1;

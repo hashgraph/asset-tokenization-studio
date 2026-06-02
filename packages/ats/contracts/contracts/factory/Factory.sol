@@ -38,9 +38,7 @@ import { IClearingByPartition } from "../facets/clearingByPartition/IClearingByP
 import { IClearingHoldByPartition } from "../facets/clearingHoldByPartition/IClearingHoldByPartition.sol";
 import { IERC20Permit } from "../facets/erc20Permit/IERC20Permit.sol";
 import { IIdentity } from "../facets/identity/IIdentity.sol";
-import {
-    IScheduledCrossOrderedTasks
-} from "../facets/layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
+import { IScheduledCrossOrderedTasks } from "../facets/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
 import { ISnapshots } from "../facets/snapshot/ISnapshots.sol";
 import { IProceedRecipients } from "../facets/proceedRecipient/IProceedRecipients.sol";
 

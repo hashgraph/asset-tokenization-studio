@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
-import { ScheduledTask } from "./scheduledTasksCommon/IScheduledTasksCommon.sol";
-import { ScheduledTasksDataStorage } from "../../../domain/asset/ScheduledTasksStorageWrapper.sol";
+import { Pagination } from "../../infrastructure/utils/Pagination.sol";
+import { ScheduledTask } from "../scheduledTasksCommon/IScheduledTasksCommon.sol";
+import { ScheduledTasksDataStorage } from "../../domain/asset/ScheduledTasksStorageWrapper.sol";
 
 /// @title ScheduledTasksLib
 /// @author Asset Tokenization Studio Team
