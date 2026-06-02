@@ -214,6 +214,8 @@ library DividendStorageWrapper {
      * @param account The holder address
      * @return dividendAmountFor_ Struct containing the fraction (numerator,
      *                            denominator) and the record‑date‑reached flag
+     * @custom:revert ICommonErrors.ExponentOverflow If `amountDecimals` is ≥ 78,
+     *         making `10 ** amountDecimals` overflow `uint256`.
      */
     function getDividendAmountFor(
         uint256 dividendId,
@@ -231,6 +233,7 @@ library DividendStorageWrapper {
             DecimalsLib.pow10(dividendFor.decimals)
         );
 
+        DecimalsLib.checkExponentOverflow(dividendFor.amountDecimals);
         dividendAmountFor_.denominator = DecimalsLib.pow10(dividendFor.amountDecimals);
     }
 
