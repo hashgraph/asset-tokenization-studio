@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IProtectedPartitions } from "../layer_1/protectedPartition/IProtectedPartitions.sol";
+import { IProtectedPartitions } from "../protectedPartition/IProtectedPartitions.sol";
 
 /// @custom:hash resolverKey ProtectedByPartition
 // solhint-disable-next-line max-line-length
@@ -55,6 +55,14 @@ interface IProtectedByPartition {
         bytes32 partition,
         IProtectedPartitions.ProtectionData protectionData
     );
+
+    /**
+     * @notice Raised when an account is not authorised for a protected partition.
+     * @dev The reported sender is resolved through `EvmAccessors` for forwarding support.
+     * @param partition Partition whose access requirement is not satisfied.
+     * @param sender Effective caller that lacks the required role.
+     */
+    error ProtectedPartitionRoleRequired(bytes32 partition, address sender);
 
     /**
      * @notice Initialises the protected-by-partition capability on the token.

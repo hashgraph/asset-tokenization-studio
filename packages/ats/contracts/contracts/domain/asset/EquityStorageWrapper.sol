@@ -30,7 +30,6 @@ bytes32 constant STORAGE_LOCATION_EQUITY = 0x94fe8bd2c421847f50afb78366b145478e2
  */
 struct EquityDataStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
-    bool initialized;
     bool votingRight;
     bool informationRight;
     bool liquidationRight;
@@ -66,7 +65,6 @@ library EquityStorageWrapper {
         $.redemptionRight = equityDetailsData.redemptionRight;
         $.putRight = equityDetailsData.putRight;
         $.dividendRight = equityDetailsData.dividendRight;
-        $.initialized = true;
     }
 
     /**
@@ -238,14 +236,6 @@ library EquityStorageWrapper {
         decimals_ = (snapshotId != 0)
             ? SnapshotsStorageWrapper.decimalsAtSnapshot(snapshotId)
             : ERC20StorageWrapper.decimalsAdjustedAt(date);
-    }
-
-    /**
-     * @notice Indicates whether the equity storage has been initialised.
-     * @return Whether {initializeEquityDetails} has already been executed for this token.
-     */
-    function isEquityInitialized() internal view returns (bool) {
-        return _equityStorage().initialized;
     }
 
     /**

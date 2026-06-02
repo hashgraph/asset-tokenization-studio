@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { SNAPSHOT_RESULT_ID } from "../../../constants/values.sol";
+import { SNAPSHOT_RESULT_ID, MAX_UINT256 } from "../../../constants/values.sol";
+import { ICommonErrors } from "../../../infrastructure/errors/ICommonErrors.sol";
 import {
     CORPORATE_ACTION_TYPE_COUPON,
     SCHEDULED_TASK_TYPE_COUPON_LISTING,
@@ -23,6 +24,8 @@ import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
 import { ScheduledTasksStorageWrapper } from "../ScheduledTasksStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "../SnapshotsStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { InterestRateStorageWrapper } from "../InterestRateStorageWrapper.sol";
+import { IInterestRate } from "../../../facets/interestRate/IInterestRate.sol";
 
 /// @custom:hash storage Coupon
 bytes32 constant STORAGE_LOCATION_COUPON = 0x83419e6b8093975a3157050eb9f883164e1459426616bc1834d782d457195c00;
@@ -89,10 +92,7 @@ library CouponStorageWrapper {
         ICouponTypes.RegisteredCoupon memory registeredCoupon;
         bytes32 corporateActionId;
         (registeredCoupon, corporateActionId, ) = getCoupon(couponId);
-        if (
-            registeredCoupon.coupon.executionDate != 0 &&
-            registeredCoupon.coupon.executionDate <= TimeTravelStorageWrapper.getBlockTimestamp()
-        ) {
+        if (registeredCoupon.coupon.executionDate <= TimeTravelStorageWrapper.getBlockTimestamp()) {
             revert ICoupon.CouponAlreadyExecuted(corporateActionId, couponId);
         }
         CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
@@ -130,7 +130,9 @@ library CouponStorageWrapper {
         }
         ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(newCoupon.recordDate, SCHEDULED_TASK_TYPE_SNAPSHOT);
         ScheduledTasksStorageWrapper.addScheduledSnapshot(newCoupon.recordDate, actionId);
-        if (newCoupon.fixingDate == 0) return;
+
+        if (InterestRateStorageWrapper.getCouponRateType() != IInterestRate.RateType.KPI_LINKED) return;
+
         ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(
             newCoupon.fixingDate,
             SCHEDULED_TASK_TYPE_COUPON_LISTING
@@ -146,33 +148,6 @@ library CouponStorageWrapper {
      */
     function addToCouponsOrderedList(uint256 couponID) internal {
         _couponStorage().couponsOrderedListByIds.push(couponID);
-    }
-
-    /**
-     * @notice Stamps a resolved fixed-rate value and decimals onto a previously
-     *         scheduled coupon.
-     * @dev Mutates the supplied `coupon` struct in memory and persists it via
-     *      `CorporateActionsStorageWrapper.updateCorporateActionData`. Rate status
-     *      is transitioned to SET.
-     * @param couponID One-indexed coupon identifier.
-     * @param coupon In-memory coupon struct modified by reference.
-     * @param rate Fixed-rate numerator resolved by `CouponRateDispatch`.
-     * @param rateDecimals Scale of the rate value.
-     */
-    function updateCouponRate(
-        uint256 couponID,
-        ICouponTypes.Coupon memory coupon,
-        uint256 rate,
-        uint8 rateDecimals
-    ) internal {
-        coupon.rate = rate;
-        coupon.rateDecimals = rateDecimals;
-        coupon.rateStatus = ICouponTypes.RateCalculationStatus.SET;
-
-        CorporateActionsStorageWrapper.updateCorporateActionData(
-            CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(CORPORATE_ACTION_TYPE_COUPON, couponID - 1),
-            abi.encode(coupon)
-        );
     }
 
     /**
@@ -246,21 +221,8 @@ library CouponStorageWrapper {
             SNAPSHOT_RESULT_ID
         );
 
-        if (
-            registeredCoupon_.coupon.fixingDate == 0 ||
-            registeredCoupon_.coupon.rateStatus == ICouponTypes.RateCalculationStatus.SET ||
-            registeredCoupon_.coupon.fixingDate > TimeTravelStorageWrapper.getBlockTimestamp()
-        ) return (registeredCoupon_, corporateActionId_, isDisabled_);
-
-        (uint256 resolvedRate, uint8 resolvedDecimals, bool shouldOverride) = CouponRateDispatch.resolveRate(
-            couponID,
-            registeredCoupon_.coupon
-        );
-        if (shouldOverride) {
-            registeredCoupon_.coupon.rate = resolvedRate;
-            registeredCoupon_.coupon.rateDecimals = resolvedDecimals;
-            registeredCoupon_.coupon.rateStatus = ICouponTypes.RateCalculationStatus.SET;
-        }
+        if (registeredCoupon_.coupon.rateStatus != ICouponTypes.RateCalculationStatus.SET)
+            registeredCoupon_.coupon = CouponRateDispatch.resolveRate(couponID, registeredCoupon_.coupon);
     }
 
     /**
@@ -564,6 +526,8 @@ library CouponStorageWrapper {
      * @param recordDateReached True if the coupon's record date has passed.
      * @return couponAmountFor_ Numerator and denominator of the payable amount;
      *         both zero if the record date has not yet been reached.
+     * @custom:revert ICommonErrors.ExponentOverflow If `decimals + rateDecimals` is ≥ 78,
+     *         making `10 ** (decimals + rateDecimals)` overflow `uint256`.
      */
     function _calculateCouponAmount(
         ICouponTypes.Coupon memory coupon,
@@ -584,7 +548,12 @@ library CouponStorageWrapper {
         // (10**(d+nd+rd) * 365 days), redistributed to keep every intermediate within uint256.
         uint256 balanceNominalScaled = Math.mulDiv(tokenBalance, nominalValue, DecimalsLib.pow10(nominalValueDecimals));
         couponAmountFor_.numerator = balanceNominalScaled * coupon.rate * period;
-        couponAmountFor_.denominator = DecimalsLib.pow10(uint256(decimals) + coupon.rateDecimals) * 365 days;
+
+        uint256 totalDecimals = uint256(decimals) + uint256(coupon.rateDecimals);
+        DecimalsLib.checkExponentOverflow(totalDecimals);
+        if (365 days > (MAX_UINT256 / DecimalsLib.pow10(totalDecimals)))
+            revert ICommonErrors.GreaterThanMaxUint256(365 days, uint8(totalDecimals));
+        couponAmountFor_.denominator = DecimalsLib.pow10(totalDecimals) * 365 days;
     }
 
     /**

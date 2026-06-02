@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IClearingTypes } from "../layer_1/clearing/IClearingTypes.sol";
+import { IClearingTypes } from "../clearing/IClearingTypes.sol";
 
 /// @custom:hash resolverKey ClearingByPartition
 // solhint-disable-next-line max-line-length

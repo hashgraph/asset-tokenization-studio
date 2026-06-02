@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ILockTypes } from "../layer_1/lock/ILockTypes.sol";
+import { ILockTypes } from "../lock/ILockTypes.sol";
 
 /// @custom:hash resolverKey LockByPartition
 bytes32 constant RESOLVER_KEY_LOCK_BY_PARTITION = 0x75c5c6d6dd253e4be43d8d1c25a4252f5f54ebdba6f6c99ed34cd03c0e4d5360;

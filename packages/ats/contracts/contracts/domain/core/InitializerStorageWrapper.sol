@@ -236,6 +236,7 @@ library InitializerStorageWrapper {
         uint256 i;
         uint256 lastVersion = InitializerStorageWrapper.getFacetLastVersion(_facetId);
         uint256 length = _fromLastVersions.length;
+        if (length == 0) return;
         while (i < length) {
             if (lastVersion == _fromLastVersions[i]) {
                 return;

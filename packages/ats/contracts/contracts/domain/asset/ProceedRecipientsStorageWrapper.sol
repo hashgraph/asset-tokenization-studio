@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IProceedRecipients } from "../../facets/layer_2/proceedRecipient/IProceedRecipients.sol";
+import { IProceedRecipients } from "../../facets/proceedRecipient/IProceedRecipients.sol";
 import { ExternalListManagementStorageWrapper } from "../core/ExternalListManagementStorageWrapper.sol";
 
 /// @custom:hash storage ProceedRecipients
@@ -51,11 +51,7 @@ library ProceedRecipientsStorageWrapper {
         uint256 length = _proceedRecipients.length;
         for (uint256 index; index < length; ) {
             ExternalListManagementStorageWrapper.checkValidAddress(_proceedRecipients[index]);
-            ExternalListManagementStorageWrapper.addExternalList(
-                STORAGE_LOCATION_PROCEED_RECIPIENTS,
-                _proceedRecipients[index]
-            );
-            setProceedRecipientData(_proceedRecipients[index], _data[index]);
+            addProceedRecipient(_proceedRecipients[index], _data[index]);
             unchecked {
                 ++index;
             }

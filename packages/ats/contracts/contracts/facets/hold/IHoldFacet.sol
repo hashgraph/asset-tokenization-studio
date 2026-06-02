@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
+import { IHoldTypes } from "./IHoldTypes.sol";
 
 /// @custom:hash resolverKey Hold
 bytes32 constant RESOLVER_KEY_HOLD = 0x7c2ef14067e573a8580a580634bd7547099c4b82cd9f36610da317d77eacf1f1;

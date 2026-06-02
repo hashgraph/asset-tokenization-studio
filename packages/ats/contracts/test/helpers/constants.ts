@@ -454,9 +454,10 @@ export const TEST_STEPS_EXISTING_BLR = {
   BOND_CONFIG: 4,
   BOND_FIXED_RATE_CONFIG: 5,
   BOND_KPI_LINKED_CONFIG: 6,
-  LOAN_CONFIG: 7,
-  LOANS_PORTFOLIO_CONFIG: 8,
-  FACTORY: 10,
+  DEPOSIT_TOKEN_CONFIG: 7,
+  LOAN_CONFIG: 8,
+  LOANS_PORTFOLIO_CONFIG: 9,
+  FACTORY: 11,
 } as const;
 
 // ============================================================================

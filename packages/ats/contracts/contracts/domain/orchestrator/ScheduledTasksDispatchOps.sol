@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ScheduledTask } from "../../facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { IScheduledBalanceAdjustment } from "../../facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol";
-import { ISnapshots } from "../../facets/layer_1/snapshot/ISnapshots.sol";
+import { ISnapshots } from "../../facets/snapshot/ISnapshots.sol";
 import { SNAPSHOT_RESULT_ID, COUPON_LISTING_RESULT_ID } from "../../constants/values.sol";
 import { SnapshotsStorageWrapper } from "../asset/SnapshotsStorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "../asset/AdjustBalancesStorageWrapper.sol";
@@ -13,6 +13,12 @@ import { InterestRateStorageWrapper } from "../asset/InterestRateStorageWrapper.
 import { KpiLinkedRateLib } from "../asset/KpiLinkedRateLib.sol";
 import { ICouponTypes } from "../../facets/coupon/ICouponTypes.sol";
 import { CouponRateDispatch } from "../../domain/asset/coupon/CouponRateDispatch.sol";
+import { IInterestRate } from "../../facets/interestRate/IInterestRate.sol";
+import {
+    CORPORATE_ACTION_TYPE_COUPON,
+    SCHEDULED_TASK_TYPE_COUPON_LISTING,
+    SCHEDULED_TASK_TYPE_SNAPSHOT
+} from "../../constants/dispatchTypes.sol";
 
 /// @title ScheduledTasksDispatchOps - External library for isolated scheduled task dispatch
 /// @notice Deployed once as a separate contract. Called via DELEGATECALL. Handles only
@@ -70,13 +76,14 @@ library ScheduledTasksDispatchOps {
         CouponStorageWrapper.addToCouponsOrderedList(couponID);
         uint256 orderedListPos = CouponStorageWrapper.getCouponsOrderedListTotal();
 
-        _updateCouponRatesIfNeeded(couponID);
-
         CorporateActionsStorageWrapper.updateCorporateActionResult(
             actionId,
             COUPON_LISTING_RESULT_ID,
             abi.encodePacked(orderedListPos)
         );
+
+        if (InterestRateStorageWrapper.getCouponRateType() == IInterestRate.RateType.KPI_LINKED)
+            updateCouponRate(couponID);
     }
 
     function _onScheduledBalanceAdjustmentTriggered(ScheduledTask memory _scheduledTask) private {
@@ -94,17 +101,13 @@ library ScheduledTasksDispatchOps {
         AdjustBalancesStorageWrapper.adjustBalances(balanceAdjustment.factor, balanceAdjustment.decimals);
     }
 
-    function _updateCouponRatesIfNeeded(uint256 couponID) private {
+    function updateCouponRate(uint256 couponID) private {
         (ICouponTypes.RegisteredCoupon memory registeredCoupon, , ) = CouponStorageWrapper.getCoupon(couponID);
 
-        (uint256 rate, uint8 rateDecimals, bool shouldUpdate) = CouponRateDispatch.resolveRate(
-            couponID,
-            registeredCoupon.coupon
+        CorporateActionsStorageWrapper.updateCorporateActionData(
+            CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(CORPORATE_ACTION_TYPE_COUPON, couponID - 1),
+            abi.encode(registeredCoupon.coupon)
         );
-
-        if (shouldUpdate) {
-            CouponStorageWrapper.updateCouponRate(couponID, registeredCoupon.coupon, rate, rateDecimals);
-        }
     }
 
     function _getCouponIdFromAction(bytes32 actionId) private view returns (uint256 couponID_) {
