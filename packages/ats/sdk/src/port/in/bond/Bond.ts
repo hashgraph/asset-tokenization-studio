@@ -10,7 +10,6 @@ import { CreateBondCommand } from "@command/bond/create/CreateBondCommand";
 import { CreateBondFixedRateCommand } from "@command/bond/createfixedrate/CreateBondFixedRateCommand";
 import { CreateBondKpiLinkedRateCommand } from "@command/bond/createkpilinkedrate/CreateBondKpiLinkedRateCommand";
 import { AddKpiDataCommand } from "@command/kpis/addKpiData/AddKpiDataCommand";
-import { CreateTrexSuiteBondCommand } from "@command/bond/createTrexSuite/CreateTrexSuiteBondCommand";
 import { FullRedeemAtMaturityCommand } from "@command/bond/fullRedeemAtMaturity/FullRedeemAtMaturityCommand";
 import { RedeemAtMaturityByPartitionCommand } from "@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand";
 import { UpdateMaturityDateCommand } from "@command/bond/updateMaturityDate/UpdateMaturityDateCommand";
@@ -39,7 +38,6 @@ import AddProceedRecipientRequest from "../request/bond/AddProceedRecipientReque
 import CreateBondFixedRateRequest from "../request/bond/CreateBondFixedRateRequest";
 import CreateBondKpiLinkedRateRequest from "../request/bond/CreateBondKpiLinkedRateRequest";
 import CreateBondRequest from "../request/bond/CreateBondRequest";
-import CreateTrexSuiteBondRequest from "../request/bond/CreateTrexSuiteBondRequest";
 import FullRedeemAtMaturityRequest from "../request/bond/FullRedeemAtMaturityRequest";
 import GetBondDetailsRequest from "../request/bond/GetBondDetailsRequest";
 import GetPrincipalForRequest from "../request/bond/GetPrincipalForRequest";
@@ -63,7 +61,6 @@ interface IBondInPort {
     request: RedeemAtMaturityByPartitionRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
   fullRedeemAtMaturity(request: FullRedeemAtMaturityRequest): Promise<{ payload: boolean; transactionId: string }>;
-  createTrexSuite(request: CreateTrexSuiteBondRequest): Promise<{ security: SecurityViewModel; transactionId: string }>;
   addKpiData(request: AddKpiDataRequest): Promise<{ transactionId: string }>;
   addProceedRecipient(request: AddProceedRecipientRequest): Promise<{ payload: boolean; transactionId: string }>;
   removeProceedRecipient(request: RemoveProceedRecipientRequest): Promise<{ payload: boolean; transactionId: string }>;
@@ -365,86 +362,6 @@ class BondInPort implements IBondInPort {
     ValidatedRequest.handleValidation(FullRedeemAtMaturityRequest.name, request);
 
     return await this.commandBus.execute(new FullRedeemAtMaturityCommand(securityId, sourceId));
-  }
-
-  @LogError
-  async createTrexSuite(
-    req: CreateTrexSuiteBondRequest,
-  ): Promise<{ security: SecurityViewModel; transactionId: string }> {
-    ValidatedRequest.handleValidation("CreateTrexSuiteBondRequest", req);
-
-    const { diamondOwnerAccount, externalPauses, externalControlLists, externalKycLists } = req;
-
-    const securityFactory = this.networkService.configuration.factoryAddress;
-    const resolver = this.networkService.configuration.resolverAddress;
-
-    const newSecurity: SecurityProps = {
-      name: req.name,
-      symbol: req.symbol,
-      isin: req.isin,
-      decimals: req.decimals,
-      isWhiteList: req.isWhiteList,
-      isControllable: req.isControllable,
-      arePartitionsProtected: req.arePartitionsProtected,
-      clearingActive: req.clearingActive,
-      internalKycActivated: req.internalKycActivated,
-      isMultiPartition: req.isMultiPartition,
-      maxSupply: BigDecimal.fromString(req.numberOfUnits),
-      regulationType: CastRegulationType.fromNumber(req.regulationType),
-      regulationsubType: CastRegulationSubType.fromNumber(req.regulationSubType),
-      isCountryControlListWhiteList: req.isCountryControlListWhiteList,
-      countries: req.countries,
-      info: req.info,
-      erc20VotesActivated: req.erc20VotesActivated,
-    };
-
-    const createResponse = await this.commandBus.execute(
-      new CreateTrexSuiteBondCommand(
-        req.salt,
-        req.owner,
-        req.irs,
-        req.onchainId,
-        req.irAgents,
-        req.tokenAgents,
-        req.compliancesModules,
-        req.complianceSettings,
-        req.claimTopics,
-        req.issuers,
-        req.issuerClaims,
-        newSecurity,
-        req.currency,
-        req.nominalValue,
-        req.nominalValueDecimals,
-        req.startingDate,
-        req.maturityDate,
-        new ContractId(securityFactory),
-        new ContractId(resolver),
-        req.configId,
-        req.configVersion,
-        diamondOwnerAccount,
-        req.proceedRecipientsIds,
-        req.proceedRecipientsData,
-        externalPauses,
-        externalControlLists,
-        externalKycLists,
-        req.complianceId,
-        req.identityRegistryId,
-      ),
-    );
-    const securityCreated = createResponse.securityId.toString() !== ContractId.NULL.toString();
-
-    const res = securityCreated
-      ? (await this.queryBus.execute(new GetSecurityQuery(createResponse.securityId.toString()))).security
-      : {};
-
-    return {
-      security: securityCreated
-        ? {
-            ...res,
-          }
-        : {},
-      transactionId: createResponse.transactionId,
-    };
   }
 
   @LogError
