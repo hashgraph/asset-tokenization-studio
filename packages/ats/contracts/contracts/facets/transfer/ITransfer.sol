@@ -58,7 +58,13 @@ interface ITransfer {
      * @param partition The partition that was checked.
      * @param singlePartitionMode Whether the token is in single-partition mode.
      */
-    error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition, bool singlePartitionMode);
+    error InsufficientBalance(
+        address account,
+        uint256 balance,
+        uint256 value,
+        bytes32 partition,
+        bool singlePartitionMode
+    );
 
     /**
      * @notice Initialises the transfer capability on the token.

@@ -391,7 +391,8 @@ library LoansPortfolioStorageWrapper {
         for (uint256 i; i < arraySize; ) {
             tokenBalances_[i] = IBalanceTrackerByPartition(assets_[i]).balanceOfByPartition(
                 _DEFAULT_PARTITION,
-                address(this)
+                address(this),
+                0
             );
             unchecked {
                 ++i;

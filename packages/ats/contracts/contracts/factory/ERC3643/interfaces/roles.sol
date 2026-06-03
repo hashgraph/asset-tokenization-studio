@@ -64,9 +64,6 @@ bytes32 constant ROLE_CORPORATE_ACTION = 0xa1acfc499025c99f55059195e6276f639d34a
 // solhint-disable-next-line max-line-length
 bytes32 constant ROLE_CORPORATE_ACTION_FORCE_CANCEL = 0x34c18461eba17dd4b2a410f90e80f2a3d6e466af7753bf1b9519c24697c199f5;
 
-/// @custom:hash role Deactivate
-bytes32 constant ROLE_TEST = 0x31e3e0f7cd6b1bdc19162dd52d4ce1ed67de0aff8f89b768dcbfad8776b2ae4d;
-
 /// @custom:hash role Documenter
 bytes32 constant ROLE_DOCUMENTER = 0xb7b1452b94e2932605f7ad2a3ceba0bafd68db64704c9bd667f27163c57ca319;
 
@@ -136,6 +133,9 @@ bytes32 constant ROLE_TREX_OWNER = 0xd9e1264632ee9a37e8673a0c55a0a1d8b38c758e843
 
 /// @custom:hash role WildCard
 bytes32 constant ROLE_WILD_CARD = 0x309337df95ff8f6d0075117d46b40fd103d8ae87db1914f1c60acb63487fb157;
+
+/// @custom:hash role Test
+bytes32 constant ROLE_TEST = 0xfeaed73e170ec58f466ed6f2a248ee2a1061283a356297049930608aa72d3e9d;
 
 function _buildRoles(bytes32 role1, bytes32 role2) pure returns (bytes32[] memory roles_) {
     roles_ = new bytes32[](2);

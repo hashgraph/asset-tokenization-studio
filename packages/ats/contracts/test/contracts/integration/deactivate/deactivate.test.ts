@@ -38,13 +38,7 @@ describe("Deactivate Tests", () => {
   it("GIVEN a paused Token WHEN deactivate THEN transaction fails with IsPaused", async () => {
     // Grant ROLE_TEST to unknownSigner and pause the token using deployer's ROLE_PAUSER
     await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_PAUSER, deployer.address);
-    await grantRoleAndPauseToken(
-      asset,
-      ATS_ROLES.ROLE_TEST,
-      deployer,
-      deployer,
-      await unknownSigner.getAddress(),
-    );
+    await grantRoleAndPauseToken(asset, ATS_ROLES.ROLE_TEST, deployer, deployer, await unknownSigner.getAddress());
 
     // deactivate fails because token is paused
     await expect(asset.connect(unknownSigner).deactivate()).to.be.revertedWithCustomError(asset, "IsPaused");

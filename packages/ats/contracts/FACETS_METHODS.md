@@ -276,6 +276,7 @@ function initializeBalanceTracker() external;
 function balanceOf(address _tokenHolder) external view returns (uint256);
 function totalSupply() external view returns (uint256);
 function getTotalBalanceFor(address _account) external view returns (uint256);
+function testMethod(address _account, uint256 _value) external view returns (bool);
 ```
 
 #### Events
@@ -399,7 +400,7 @@ error SnapshotIdNull();
 
 ```solidity
 function initializeBalanceTrackerByPartition() external;
-function balanceOfByPartition(bytes32 _partition, address _tokenHolder) external view returns (uint256);
+function balanceOfByPartition(bytes32 _partition, address _tokenHolder, uint256 _test) external view returns (uint256);
 function totalSupplyByPartition(bytes32 _partition) external view returns (uint256);
 function getTotalBalanceForByPartition(bytes32 _partition, address _account) external view returns (uint256);
 ```
@@ -543,7 +544,7 @@ error Deactivated();
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error InputAmountsArrayLengthMismatch();
 error InputBoolArrayLengthMismatch();
-error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
+error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition, bool singlePartitionMode);
 error InsufficientFrozenBalance(address user, uint256 requestedUnfreeze, uint256 availableFrozen, bytes32 partition);
 error InvalidFreezeAmount();
 error InvalidPartition(address account, bytes32 partition);
@@ -3274,7 +3275,7 @@ error AccountHasNoRoles(address account, bytes32[] roles);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
-error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
+error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition, bool singlePartitionMode);
 error InsufficientFrozenBalance(address user, uint256 requestedUnfreeze, uint256 availableFrozen, bytes32 partition);
 error InvalidFreezeAmount();
 error InvalidPartition(address account, bytes32 partition);
@@ -3575,9 +3576,6 @@ enum ThirdPartyType {
 ```solidity
 function initializeHold() external;
 function getHeldAmountFor(address _tokenHolder) external view returns (uint256 amount_);
-function getHoldThirdParty(
-  IHoldTypes.HoldIdentifier calldata _holdIdentifier
-) external view returns (address thirdParty_);
 ```
 
 #### Events
@@ -3651,17 +3649,6 @@ error InvalidDestinationAddress(address holdDestination, address to);
 error InvalidHoldAmount();
 error IsNotEscrow();
 error WrongHoldId();
-```
-
-#### Types
-
-```solidity
-// declared in contracts/facets/layer_1/hold/IHoldTypes.sol
-struct HoldIdentifier {
-  bytes32 partition;
-  address tokenHolder;
-  uint256 holdId;
-}
 ```
 
 ### Identity
@@ -3933,7 +3920,7 @@ error AccountHasNoRoles(address account, bytes32[] roles);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
-error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
+error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition, bool singlePartitionMode);
 error InvalidLockAmount();
 error InvalidPartition(address account, bytes32 partition);
 error IsPaused();
@@ -4093,7 +4080,7 @@ error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
-error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
+error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition, bool singlePartitionMode);
 error InvalidLockAmount();
 error InvalidPartition(address account, bytes32 partition);
 error IsPaused();
@@ -4191,7 +4178,7 @@ function isIssuable() external view returns (bool issuable_);
 #### Events
 
 ```solidity
-event ERC1594Initialized();
+event ERC1594Initialized(bool indexed _initialized);
 event Issued(address indexed _operator, address indexed _to, uint256 _value, bytes _data);
 ```
 
@@ -4385,6 +4372,7 @@ event RedeemedByPartition(
 );
 event RevokedOperator(address indexed operator, address indexed tokenHolder);
 event RevokedOperatorByPartition(bytes32 indexed partition, address indexed operator, address indexed tokenHolder);
+event TestoperatorByPartitionInitialized();
 event TransferByPartition(
   bytes32 indexed _fromPartition,
   address _operator,
@@ -4857,7 +4845,6 @@ error Deactivated();
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error IsPaused();
 error MaxExternalListSizeReached(uint256 max);
-error ProceedRecipientAlreadyExists(address proceedRecipient);
 error ProceedRecipientNotFound(address proceedRecipient);
 error ZeroAddressNotAllowed();
 ```
@@ -5488,7 +5475,7 @@ error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error IdentityRegistryCallFailed();
 error InputAmountsArrayLengthMismatch();
 error InputBoolArrayLengthMismatch();
-error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
+error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition, bool singlePartitionMode);
 error InsufficientFrozenBalance(address user, uint256 requestedUnfreeze, uint256 availableFrozen, bytes32 partition);
 error InvalidFreezeAmount();
 error InvalidPartition(address account, bytes32 partition);
@@ -5755,6 +5742,7 @@ error Deactivated();
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error IsPaused();
 error ListedIssuer(address issuer);
+error TestError(bool test);
 error UnlistedIssuer(address issuer);
 error ZeroAddressNotAllowed();
 ```
@@ -5805,7 +5793,7 @@ error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
-error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
+error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition, bool singlePartitionMode);
 error IsPaused();
 error NotAllowedInMultiPartitionMode();
 error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
@@ -5875,7 +5863,7 @@ error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
-error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
+error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition, bool singlePartitionMode);
 error InvalidLockAmount();
 error InvalidPartition(address account, bytes32 partition);
 error IsPaused();
@@ -6436,13 +6424,6 @@ event AmortizationHoldReleased(
   address indexed tokenHolder,
   uint256 holdId
 );
-event AmortizationHoldSet(
-  bytes32 indexed corporateActionId,
-  uint256 indexed amortizationID,
-  address indexed tokenHolder,
-  uint256 holdId,
-  uint256 tokenAmount
-);
 event AmortizationInitialized();
 event AmortizationSet(
   bytes32 corporateActionId,
@@ -6478,7 +6459,7 @@ error AmortizationNotActive(bytes32 corporateActionId, uint256 amortizationID);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
-error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
+error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition, bool singlePartitionMode);
 error InsufficientHoldBalance(uint256 holdAmount, uint256 amount);
 error InvalidAmortizationHoldAmount(uint256 amortizationID);
 error InvalidHoldAmount();
@@ -7255,7 +7236,6 @@ enum DividendType {
 | `ROLE_CORPORATE_ACTION`                 | `0xa1acfc499025c99f55059195e6276f639d34a18aad7b8121b9192b7f438c55cd` |
 | `ROLE_CORPORATE_ACTION_FORCE_CANCEL`    | `0x34c18461eba17dd4b2a410f90e80f2a3d6e466af7753bf1b9519c24697c199f5` |
 | `ROLE_CUSTOM_DATA_MANAGER`              | `0x0b348f171b6004b74a59b08b77c142a65c416e0e20c855602b8b2510951101b0` |
-| `ROLE_DEACTIVATE`                       | `0x31e3e0f7cd6b1bdc19162dd52d4ce1ed67de0aff8f89b768dcbfad8776b2ae4d` |
 | `ROLE_DOCUMENTER`                       | `0xb7b1452b94e2932605f7ad2a3ceba0bafd68db64704c9bd667f27163c57ca319` |
 | `ROLE_FREEZE_MANAGER`                   | `0x71ae38482e1ab1c28e767d64766d686215b490c8c1bd7dfe6b101525187c2155` |
 | `ROLE_INTEREST_RATE_MANAGER`            | `0xfa80c71f8de1628faf2c0e9bd02c2f4a3da1f16823b75e61e84b90164a07b4a4` |
@@ -7276,5 +7256,6 @@ enum DividendType {
 | `ROLE_PROTECTED_PARTITIONS_PARTICIPANT` | `0xda17771b6b3d06197fabbe8db1d7586004df4869992b9c7c7fccec5f36dcf604` |
 | `ROLE_SNAPSHOT`                         | `0xf7d999723d2160432933a2aeffaae83e262a5a46fe94f34614a7676d1d1f67c6` |
 | `ROLE_SSI_MANAGER`                      | `0x3120494a82251fe85b0403877539486dbfcf0f94c20741a3229cfad31f625ee1` |
+| `ROLE_TEST`                             | `0xfeaed73e170ec58f466ed6f2a248ee2a1061283a356297049930608aa72d3e9d` |
 | `ROLE_TREX_OWNER`                       | `0xd9e1264632ee9a37e8673a0c55a0a1d8b38c758e843084168ee08cd2d1f7e6f0` |
 | `ROLE_WILD_CARD`                        | `0x309337df95ff8f6d0075117d46b40fd103d8ae87db1914f1c60acb63487fb157` |

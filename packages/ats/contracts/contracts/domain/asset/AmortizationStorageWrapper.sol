@@ -215,8 +215,6 @@ library AmortizationStorageWrapper {
         s.activeHoldHolders[corporateActionId].add(_tokenHolder);
         s.totalHoldByAmortizationId[corporateActionId] += _tokenAmount;
         holdId_ = newHoldId;
-
-
     }
 
     /**

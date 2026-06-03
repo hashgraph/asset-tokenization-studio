@@ -50,5 +50,4 @@ interface IBalanceTracker {
     function getTotalBalanceFor(address _account) external view returns (uint256);
 
     function testMethod(address _account, uint256 _value) external view returns (bool);
-
 }

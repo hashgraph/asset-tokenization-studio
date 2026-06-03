@@ -1,6 +1,5 @@
 # Keep FACETS_METHODS.md in sync whenever a facet interface source is staged.
 # Runs before lint-staged so the regenerated Markdown is formatted in the same pass.
-npm run ats:contracts:compile
 npm run ats:contracts:generate:registry
 node packages/ats/contracts/gen_facets_methods.mjs
 npm run format

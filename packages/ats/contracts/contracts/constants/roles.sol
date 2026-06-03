@@ -26,7 +26,7 @@ bytes32 constant DEFAULT_ADMIN_ROLE = 0x00;
 bytes32 constant ROLE_ADJUSTMENT_BALANCE = 0xb246506a8ded65dd6360e8ce033fd9462936d1be64fb9f85c5f60d28cd3ca6da;
 
 /// @custom:hash role Agent
-bytes32 constant ROLE_AGENT = 0x9830aa071a741c08855dd42130bdb0ff50f7bdf5a4b72f12181eefded0c6542c;
+bytes32 constant ROLE_AGENT = 0x9830aa071a741c08855dd42130bdb0ff50f7bdf5a4b72f12181eefded0c6542b;
 
 /// @custom:hash role Amortization
 bytes32 constant ROLE_AMORTIZATION = 0x0c8c9cf3db23765397bf525e10c9158fd2a7b58b280d5da82a642247779ae3c1;
@@ -130,7 +130,7 @@ bytes32 constant ROLE_TREX_OWNER = 0xd9e1264632ee9a37e8673a0c55a0a1d8b38c758e843
 bytes32 constant ROLE_WILD_CARD = 0x309337df95ff8f6d0075117d46b40fd103d8ae87db1914f1c60acb63487fb157;
 
 /// @custom:hash role Test
-bytes32 constant ROLE_TEST = 0x309337df95ff8f6d0075117d46b40fd103d8ae87db1914f1c60acb63487fb157;
+bytes32 constant ROLE_TEST = 0xfeaed73e170ec58f466ed6f2a248ee2a1061283a356297049930608aa72d3e9d;
 
 function _buildRoles(bytes32 role1, bytes32 role2) pure returns (bytes32[] memory roles_) {
     roles_ = new bytes32[](2);

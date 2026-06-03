@@ -79,7 +79,6 @@ interface IAmortization {
      */
     event AmortizationForceCancelled(uint256 amortizationId, address indexed operator);
 
-
     /**
      * @notice Emitted when a hold is released for a token holder in an amortization.
      * @param corporateActionId Unique identifier grouping related corporate actions.

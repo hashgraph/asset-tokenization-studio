@@ -33,7 +33,11 @@ interface IBalanceTrackerByPartition {
      * @param _tokenHolder The address of the token holder
      * @return The adjusted balance of the token holder in the partition
      */
-    function balanceOfByPartition(bytes32 _partition, address _tokenHolder, uint256 _test) external view returns (uint256, bool);
+    function balanceOfByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _test
+    ) external view returns (uint256);
 
     /**
      * @notice Returns the total token supply within a specific partition,

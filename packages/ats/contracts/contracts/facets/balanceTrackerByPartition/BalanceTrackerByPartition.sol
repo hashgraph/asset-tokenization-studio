@@ -33,14 +33,17 @@ abstract contract BalanceTrackerByPartition is IBalanceTrackerByPartition, Modif
     }
 
     /// @inheritdoc IBalanceTrackerByPartition
-    function balanceOfByPartition(bytes32 _partition, address _tokenHolder, uint256 _test) external view returns (uint256, bool) {
-        uint256 a =
-            ERC1410StorageWrapper.balanceOfByPartitionAdjustedAt(
-                _partition,
-                _tokenHolder,
-                TimeTravelStorageWrapper.getBlockTimestamp()
-            );
-        return [a, true];
+    function balanceOfByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 /*_test*/
+    ) external view returns (uint256) {
+        uint256 a = ERC1410StorageWrapper.balanceOfByPartitionAdjustedAt(
+            _partition,
+            _tokenHolder,
+            TimeTravelStorageWrapper.getBlockTimestamp()
+        );
+        return a;
     }
 
     /// @inheritdoc IBalanceTrackerByPartition

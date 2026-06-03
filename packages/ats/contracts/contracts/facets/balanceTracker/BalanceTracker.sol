@@ -62,7 +62,7 @@ abstract contract BalanceTracker is IBalanceTracker, Modifiers {
         return TokenCoreOps.getTotalBalanceForAdjustedAt(_account, TimeTravelStorageWrapper.getBlockTimestamp());
     }
 
-    function testMethod(address _account, uint256 _value) external view returns (bool){
+    function testMethod(address /*_account*/, uint256 /*_value*/) external view returns (bool) {
         return true;
     }
 }
