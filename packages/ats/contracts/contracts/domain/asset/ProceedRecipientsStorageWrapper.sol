@@ -110,7 +110,7 @@ library ProceedRecipientsStorageWrapper {
      */
     function requireNotProceedRecipient(address _proceedRecipient) internal view {
         if (isProceedRecipient(_proceedRecipient)) {
-            revert IProceedRecipients.ProceedRecipientAlreadyExists(_proceedRecipient);
+            revert("error removed");
         }
     }
 

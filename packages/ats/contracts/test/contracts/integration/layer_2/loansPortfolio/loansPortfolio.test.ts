@@ -39,7 +39,7 @@ describe("LoansPortfolio Token Tests", () => {
     await executeRbac(asset, [
       { role: ATS_ROLES.ROLE_LOANS_PORTFOLIO_MANAGER, members: [signer_A.address] },
       { role: ATS_ROLES.ROLE_PAUSER, members: [signer_B.address] },
-      { role: ATS_ROLES.ROLE_DEACTIVATE, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_TEST, members: [signer_A.address] },
     ]);
 
     loanAsset = await deployLoanToken();
@@ -977,7 +977,7 @@ describe("LoansPortfolio Token Tests", () => {
     it("GIVEN a deactivated asset WHEN addHoldingsAsset THEN transaction fails with Deactivated", async () => {
       const base = await deployLoansPortfolioTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset
@@ -989,7 +989,7 @@ describe("LoansPortfolio Token Tests", () => {
     it("GIVEN a deactivated asset WHEN removeHoldingsAsset THEN transaction fails with Deactivated", async () => {
       const base = await deployLoansPortfolioTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset
@@ -1001,7 +1001,7 @@ describe("LoansPortfolio Token Tests", () => {
     it("GIVEN a deactivated asset WHEN notifyLoanHoldingsAssetUpdate THEN transaction fails with Deactivated", async () => {
       const base = await deployLoansPortfolioTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).notifyLoanHoldingsAssetUpdate(ethers.ZeroAddress),
@@ -1011,7 +1011,7 @@ describe("LoansPortfolio Token Tests", () => {
     it("GIVEN a deactivated asset WHEN loansPortfolioWithdraw THEN transaction fails with Deactivated", async () => {
       const base = await deployLoansPortfolioTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).loansPortfolioWithdraw(ethers.ZeroAddress, ethers.ZeroAddress, 0),

@@ -239,7 +239,7 @@ describe("SSI Tests", () => {
     it("GIVEN a deactivated asset WHEN addIssuer THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(deactivatedAsset.connect(base.deployer).addIssuer(ethers.ZeroAddress)).to.be.revertedWithCustomError(
         deactivatedAsset,
@@ -250,7 +250,7 @@ describe("SSI Tests", () => {
     it("GIVEN a deactivated asset WHEN removeIssuer THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).removeIssuer(ethers.ZeroAddress),
@@ -260,7 +260,7 @@ describe("SSI Tests", () => {
     it("GIVEN a deactivated asset WHEN setRevocationRegistryAddress THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).setRevocationRegistryAddress(ethers.ZeroAddress),

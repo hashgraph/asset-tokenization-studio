@@ -977,7 +977,7 @@ describe("Equity Tests", () => {
     it("GIVEN a deactivated asset WHEN setVoting THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).setVoting({ recordDate: 0, data: "0x" }),
@@ -987,7 +987,7 @@ describe("Equity Tests", () => {
     it("GIVEN a deactivated asset WHEN cancelVoting THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(deactivatedAsset.connect(base.deployer).cancelVoting(0)).to.be.revertedWithCustomError(
         deactivatedAsset,

@@ -108,7 +108,7 @@ describe("Fixed Rate Tests", () => {
     it("GIVEN a deactivated asset WHEN setRate THEN transaction fails with Deactivated", async () => {
       const base = await deployBondFixedRateTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(deactivatedAsset.connect(base.deployer).setRate(0, 0)).to.be.revertedWithCustomError(
         deactivatedAsset,

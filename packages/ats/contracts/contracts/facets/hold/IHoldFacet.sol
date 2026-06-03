@@ -35,15 +35,4 @@ interface IHoldFacet is IHoldTypes {
      * @return amount_ Sum of held balances across all partitions, adjusted to the current timestamp.
      */
     function getHeldAmountFor(address _tokenHolder) external view returns (uint256 amount_);
-
-    /**
-     * @notice Returns the third-party address registered on a given hold.
-     * @dev Returns the zero address when no third party was registered for the hold (for example,
-     *      holds created directly by the token holder, controller-issued holds, or unknown hold ids).
-     * @param _holdIdentifier Tuple identifying the hold: partition, token holder and hold id.
-     * @return thirdParty_ Address of the third party authorised for the hold, or zero if none.
-     */
-    function getHoldThirdParty(
-        IHoldTypes.HoldIdentifier calldata _holdIdentifier
-    ) external view returns (address thirdParty_);
 }

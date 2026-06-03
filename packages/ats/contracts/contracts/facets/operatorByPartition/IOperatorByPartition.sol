@@ -26,6 +26,12 @@ interface IOperatorByPartition is IERC1410Types {
     event OperatorByPartitionInitialized();
 
     /**
+     * @notice Emitted once when the operator-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeOperatorByPartition`.
+     */
+    event TestoperatorByPartitionInitialized();
+
+    /**
      * @notice Initialises the operator-by-partition capability on the token.
      * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
      *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.

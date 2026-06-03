@@ -460,7 +460,7 @@ describe("Controller Tests", () => {
     it("GIVEN a deactivated asset WHEN forcedTransfer THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).forcedTransfer(ethers.ZeroAddress, ethers.ZeroAddress, 0),
@@ -470,7 +470,7 @@ describe("Controller Tests", () => {
     it("GIVEN a deactivated asset WHEN controllerTransfer THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset
@@ -482,7 +482,7 @@ describe("Controller Tests", () => {
     it("GIVEN a deactivated asset WHEN controllerRedeem THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).controllerRedeem(ethers.ZeroAddress, 0, "0x", "0x"),
@@ -492,7 +492,7 @@ describe("Controller Tests", () => {
     it("GIVEN a deactivated asset WHEN finalizeControllable THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(deactivatedAsset.connect(base.deployer).finalizeControllable()).to.be.revertedWithCustomError(
         deactivatedAsset,
@@ -503,7 +503,7 @@ describe("Controller Tests", () => {
     it("GIVEN a deactivated asset WHEN addAgent THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(deactivatedAsset.connect(base.deployer).addAgent(ethers.ZeroAddress)).to.be.revertedWithCustomError(
         deactivatedAsset,
@@ -514,7 +514,7 @@ describe("Controller Tests", () => {
     it("GIVEN a deactivated asset WHEN removeAgent THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).removeAgent(ethers.ZeroAddress),

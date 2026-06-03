@@ -22,8 +22,7 @@ contract HoldFacet is Hold, IStaticFunctionSelectors {
         return
             Bytes4Builder.build(
                 this.initializeHold.selector,
-                this.getHeldAmountFor.selector,
-                this.getHoldThirdParty.selector
+                this.getHeldAmountFor.selector
             );
     }
 

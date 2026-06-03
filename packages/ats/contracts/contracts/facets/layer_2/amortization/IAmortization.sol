@@ -79,21 +79,6 @@ interface IAmortization {
      */
     event AmortizationForceCancelled(uint256 amortizationId, address indexed operator);
 
-    /**
-     * @notice Emitted when a hold is created or replaced for a token holder in an amortization.
-     * @param corporateActionId Unique identifier grouping related corporate actions.
-     * @param amortizationID Identifier of the amortization.
-     * @param tokenHolder Address of the token holder.
-     * @param holdId ID of the newly created hold.
-     * @param tokenAmount Amount of tokens locked in the hold.
-     */
-    event AmortizationHoldSet(
-        bytes32 indexed corporateActionId,
-        uint256 indexed amortizationID,
-        address indexed tokenHolder,
-        uint256 holdId,
-        uint256 tokenAmount
-    );
 
     /**
      * @notice Emitted when a hold is released for a token holder in an amortization.

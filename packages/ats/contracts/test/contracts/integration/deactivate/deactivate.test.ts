@@ -36,11 +36,11 @@ describe("Deactivate Tests", () => {
   });
 
   it("GIVEN a paused Token WHEN deactivate THEN transaction fails with IsPaused", async () => {
-    // Grant ROLE_DEACTIVATE to unknownSigner and pause the token using deployer's ROLE_PAUSER
+    // Grant ROLE_TEST to unknownSigner and pause the token using deployer's ROLE_PAUSER
     await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_PAUSER, deployer.address);
     await grantRoleAndPauseToken(
       asset,
-      ATS_ROLES.ROLE_DEACTIVATE,
+      ATS_ROLES.ROLE_TEST,
       deployer,
       deployer,
       await unknownSigner.getAddress(),
@@ -52,7 +52,7 @@ describe("Deactivate Tests", () => {
 
   it("GIVEN an account with deactivate role WHEN deactivate THEN transaction succeeds and isDeactivated returns true", async () => {
     // Granting Role
-    await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, await unknownSigner.getAddress());
+    await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_TEST, await unknownSigner.getAddress());
 
     // Initial state must be active
     expect(await asset.isDeactivated()).to.be.equal(false);
@@ -66,7 +66,7 @@ describe("Deactivate Tests", () => {
 
   it("GIVEN an already deactivated Token WHEN deactivate THEN transaction fails with Deactivated", async () => {
     // Granting Role
-    await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, await unknownSigner.getAddress());
+    await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_TEST, await unknownSigner.getAddress());
 
     // First deactivation
     await asset.connect(unknownSigner).deactivate();
@@ -81,7 +81,7 @@ describe("Deactivate Tests", () => {
     it("GIVEN a deactivated asset WHEN deactivate THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(deactivatedAsset.connect(base.deployer).deactivate()).to.be.revertedWithCustomError(
         deactivatedAsset,

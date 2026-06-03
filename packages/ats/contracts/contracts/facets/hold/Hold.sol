@@ -28,11 +28,4 @@ abstract contract Hold is IHoldFacet, Modifiers {
         return
             HoldStorageWrapper.getHeldAmountForAdjustedAt(_tokenHolder, TimeTravelStorageWrapper.getBlockTimestamp());
     }
-
-    /// @inheritdoc IHoldFacet
-    function getHoldThirdParty(
-        IHoldTypes.HoldIdentifier calldata _holdIdentifier
-    ) external view override returns (address) {
-        return HoldStorageWrapper.getHoldThirdParty(_holdIdentifier);
-    }
 }

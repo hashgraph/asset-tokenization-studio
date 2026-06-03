@@ -119,7 +119,7 @@ library ERC1410StorageWrapper {
         uint256 fromBalance = balanceOfByPartition(partition, from);
 
         if (fromBalance < value) {
-            revert ITransfer.InsufficientBalance(from, fromBalance, value, partition);
+            revert ITransfer.InsufficientBalance(from, fromBalance, value, partition, true);
         }
 
         ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();

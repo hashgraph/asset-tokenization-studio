@@ -216,13 +216,7 @@ library AmortizationStorageWrapper {
         s.totalHoldByAmortizationId[corporateActionId] += _tokenAmount;
         holdId_ = newHoldId;
 
-        emit IAmortization.AmortizationHoldSet(
-            corporateActionId,
-            _amortizationID,
-            _tokenHolder,
-            newHoldId,
-            _tokenAmount
-        );
+
     }
 
     /**

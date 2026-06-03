@@ -1550,7 +1550,7 @@ describe("AmortizationFacet", () => {
     it("GIVEN a deactivated asset WHEN cancelAmortization THEN transaction fails with Deactivated", async () => {
       const base = await deployLoanTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(deactivatedAsset.connect(base.deployer).cancelAmortization(0)).to.be.revertedWithCustomError(
         deactivatedAsset,
@@ -1561,7 +1561,7 @@ describe("AmortizationFacet", () => {
     it("GIVEN a deactivated asset WHEN setAmortization THEN transaction fails with Deactivated", async () => {
       const base = await deployLoanTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).setAmortization({ recordDate: 0, executionDate: 0, tokensToRedeem: 0 }),
@@ -1571,7 +1571,7 @@ describe("AmortizationFacet", () => {
     it("GIVEN a deactivated asset WHEN releaseAmortizationHold THEN transaction fails with Deactivated", async () => {
       const base = await deployLoanTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).releaseAmortizationHold(0, ethers.ZeroAddress),
@@ -1581,7 +1581,7 @@ describe("AmortizationFacet", () => {
     it("GIVEN a deactivated asset WHEN setAmortizationHold THEN transaction fails with Deactivated", async () => {
       const base = await deployLoanTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).setAmortizationHold(0, ethers.ZeroAddress, 0),

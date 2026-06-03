@@ -452,7 +452,7 @@ describe("ExternalPause Tests", () => {
     it("GIVEN a deactivated asset WHEN addExternalPause THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).addExternalPause(ethers.ZeroAddress),
@@ -462,7 +462,7 @@ describe("ExternalPause Tests", () => {
     it("GIVEN a deactivated asset WHEN updateExternalPauses THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(deactivatedAsset.connect(base.deployer).updateExternalPauses([], [])).to.be.revertedWithCustomError(
         deactivatedAsset,
@@ -473,7 +473,7 @@ describe("ExternalPause Tests", () => {
     it("GIVEN a deactivated asset WHEN removeExternalPause THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).removeExternalPause(ethers.ZeroAddress),

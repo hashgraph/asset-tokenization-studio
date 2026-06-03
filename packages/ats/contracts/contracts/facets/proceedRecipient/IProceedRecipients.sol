@@ -19,7 +19,6 @@ interface IProceedRecipients {
 
     event ProceedRecipientDataUpdated(address indexed operator, address indexed proceedRecipient, bytes newData);
 
-    error ProceedRecipientAlreadyExists(address proceedRecipient);
     error ProceedRecipientNotFound(address proceedRecipient);
 
     /**

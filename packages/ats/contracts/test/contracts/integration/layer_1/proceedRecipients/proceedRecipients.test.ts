@@ -221,7 +221,7 @@ describe("Proceed Recipients Tests", () => {
     it("GIVEN a deactivated asset WHEN addProceedRecipient THEN transaction fails with Deactivated", async () => {
       const base = await deployBondTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).addProceedRecipient(ethers.ZeroAddress, "0x"),
@@ -231,7 +231,7 @@ describe("Proceed Recipients Tests", () => {
     it("GIVEN a deactivated asset WHEN removeProceedRecipient THEN transaction fails with Deactivated", async () => {
       const base = await deployBondTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).removeProceedRecipient(ethers.ZeroAddress),
@@ -241,7 +241,7 @@ describe("Proceed Recipients Tests", () => {
     it("GIVEN a deactivated asset WHEN updateProceedRecipientData THEN transaction fails with Deactivated", async () => {
       const base = await deployBondTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).updateProceedRecipientData(ethers.ZeroAddress, "0x"),

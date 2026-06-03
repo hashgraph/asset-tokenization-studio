@@ -41,7 +41,7 @@ describe("Access Control Tests", () => {
   });
 
   it("GIVEN a deactivated asset WHEN grantRole THEN transaction fails with Deactivated", async () => {
-    await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, deployer.address);
+    await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_TEST, deployer.address);
     await asset.connect(deployer).deactivate();
     await expect(
       asset.connect(deployer).grantRole(ATS_ROLES.ROLE_PAUSER, unknownSigner.address),
@@ -55,7 +55,7 @@ describe("Access Control Tests", () => {
   });
 
   it("GIVEN a deactivated asset WHEN revokeRole THEN transaction fails with Deactivated", async () => {
-    await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, deployer.address);
+    await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_TEST, deployer.address);
     await asset.connect(deployer).deactivate();
     await expect(
       asset.connect(deployer).revokeRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, unknownSigner.address),
@@ -69,7 +69,7 @@ describe("Access Control Tests", () => {
   });
 
   it("GIVEN a deactivated asset WHEN applyRoles THEN transaction fails with Deactivated", async () => {
-    await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, deployer.address);
+    await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_TEST, deployer.address);
     await asset.connect(deployer).deactivate();
     await expect(
       asset.connect(signer_C).applyRoles([ATS_ROLES.DEFAULT_ADMIN_ROLE], [true], unknownSigner.address),
@@ -130,7 +130,7 @@ describe("Access Control Tests", () => {
   });
 
   it("GIVEN a deactivated asset WHEN renounceRole THEN transaction fails with Deactivated", async () => {
-    await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, deployer.address);
+    await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_TEST, deployer.address);
     await asset.connect(deployer).deactivate();
     await expect(asset.connect(signer_C).renounceRole(ATS_ROLES.ROLE_PAUSER)).to.be.revertedWithCustomError(
       asset,

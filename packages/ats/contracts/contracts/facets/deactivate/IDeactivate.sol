@@ -14,7 +14,7 @@ bytes32 constant RESOLVER_KEY_DEACTIVATE = 0x13d8bdda80bdc4e1d1af80d2096fdf84aff
  *         `Deactivated`, effectively retiring the token from active use.
  * @dev Part of the Diamond facet system. Deactivation state is stored via
  *      `DeactivateStorageWrapper` under a dedicated storage slot. The transition `active →
- *      deactivated` is one-way: there is no companion `reactivate` selector. `ROLE_DEACTIVATE`
+ *      deactivated` is one-way: there is no companion `reactivate` selector. `ROLE_TEST`
  *      is required to flip the flag.
  */
 interface IDeactivate {
@@ -39,7 +39,7 @@ interface IDeactivate {
 
     /**
      * @notice Sets the token's deactivation flag, retiring the token irreversibly.
-     * @dev Requires `ROLE_DEACTIVATE`, the token to be currently unpaused, and the token to be
+     * @dev Requires `ROLE_TEST`, the token to be currently unpaused, and the token to be
      *      currently activated. Reverts with `AccountHasNoRole`, `IsPaused`, or
      *      `Deactivated` respectively when those preconditions fail. The state change is
      *      one-way and cannot be undone.

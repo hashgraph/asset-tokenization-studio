@@ -42,6 +42,9 @@ abstract contract SsiManagement is ISsiManagement, Modifiers {
             oldRevocationRegistryAddress,
             SsiManagementStorageWrapper.getRevocationRegistryAddress()
         );
+        if(_revocationRegistryAddress == address(0) ) {
+            revert TestError(false);
+        }
     }
 
     /// @inheritdoc ISsiManagement

@@ -28,6 +28,7 @@ abstract contract OperatorByPartition is IOperatorByPartition, Modifiers {
     {
         InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_OPERATOR_BY_PARTITION);
         emit OperatorByPartitionInitialized();
+        emit TestoperatorByPartitionInitialized();
     }
 
     /// @inheritdoc IOperatorByPartition

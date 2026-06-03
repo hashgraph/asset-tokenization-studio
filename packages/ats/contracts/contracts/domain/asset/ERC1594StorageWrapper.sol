@@ -739,7 +739,7 @@ library ERC1594StorageWrapper {
                 false,
                 Eip1066.INSUFFICIENT_FUNDS,
                 ITransfer.InsufficientBalance.selector,
-                abi.encode(from, currentPartitionBalance, value, partition)
+                abi.encode(from, currentPartitionBalance, value, partition, true)
             );
         }
         return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);

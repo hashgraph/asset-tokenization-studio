@@ -60,6 +60,8 @@ interface ISsiManagement {
      */
     error AccountIsNotIssuer(address issuer);
 
+    error TestError(bool test);
+
     /**
      * @notice Initialises the SSI management capability on the token.
      * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.

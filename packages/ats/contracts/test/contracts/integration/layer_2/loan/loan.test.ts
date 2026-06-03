@@ -268,7 +268,7 @@ describe("Loan Tests", () => {
     it("GIVEN a deactivated asset WHEN cancelAmortization THEN transaction fails with Deactivated", async () => {
       const base = await deployLoanTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(deactivatedAsset.connect(base.deployer).cancelAmortization(0)).to.be.revertedWithCustomError(
         deactivatedAsset,
@@ -279,7 +279,7 @@ describe("Loan Tests", () => {
     it("GIVEN a deactivated asset WHEN setLoanDetails THEN transaction fails with Deactivated", async () => {
       const base = await deployLoanTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).setLoanDetails({

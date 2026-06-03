@@ -270,7 +270,7 @@ describe("Kpi Latest Tests", () => {
     it("GIVEN a deactivated asset WHEN addKpiData THEN transaction fails with Deactivated", async () => {
       const base = await deployBondKpiLinkedRateTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_TEST, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).addKpiData(0, 0, ethers.ZeroAddress),

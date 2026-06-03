@@ -65,7 +65,7 @@ bytes32 constant ROLE_CORPORATE_ACTION = 0xa1acfc499025c99f55059195e6276f639d34a
 bytes32 constant ROLE_CORPORATE_ACTION_FORCE_CANCEL = 0x34c18461eba17dd4b2a410f90e80f2a3d6e466af7753bf1b9519c24697c199f5;
 
 /// @custom:hash role Deactivate
-bytes32 constant ROLE_DEACTIVATE = 0x31e3e0f7cd6b1bdc19162dd52d4ce1ed67de0aff8f89b768dcbfad8776b2ae4d;
+bytes32 constant ROLE_TEST = 0x31e3e0f7cd6b1bdc19162dd52d4ce1ed67de0aff8f89b768dcbfad8776b2ae4d;
 
 /// @custom:hash role Documenter
 bytes32 constant ROLE_DOCUMENTER = 0xb7b1452b94e2932605f7ad2a3ceba0bafd68db64704c9bd667f27163c57ca319;

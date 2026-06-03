@@ -87,7 +87,7 @@ describe("InterestRateFacet Tests", () => {
     });
 
     it("GIVEN a deactivated asset WHEN setCouponRateType THEN reverts with Deactivated", async () => {
-      await asset.connect(admin).grantRole(ATS_ROLES.ROLE_DEACTIVATE, admin.address);
+      await asset.connect(admin).grantRole(ATS_ROLES.ROLE_TEST, admin.address);
       await asset.connect(admin).deactivate();
       await expect(asset.connect(admin).setCouponRateType(RateType.STANDARD)).to.be.revertedWithCustomError(
         asset,

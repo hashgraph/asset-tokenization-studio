@@ -19,7 +19,7 @@ interface IMint {
      * @notice Emitted once when the ERC-1594 capability is initialised on a token.
      * @dev Fires exclusively from `initializeERC1594` after the storage write succeeds.
      */
-    event ERC1594Initialized();
+    event ERC1594Initialized(bool indexed _initialized);
 
     /**
      * @notice Emitted when new tokens are issued to a holder.

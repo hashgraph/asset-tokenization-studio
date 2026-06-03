@@ -28,7 +28,7 @@ abstract contract Mint is IMint, Modifiers {
     {
         ERC1594StorageWrapper.initialize();
         InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_MINT);
-        emit IMint.ERC1594Initialized();
+        emit IMint.ERC1594Initialized(true);
     }
 
     /// @inheritdoc IMint
