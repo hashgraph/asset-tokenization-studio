@@ -112,8 +112,8 @@ This improves CI efficiency by avoiding unnecessary test runs.
 **Step 1: Create Release Branch and Version Bump**
 
 ```bash
-# Create release branch from development
-git checkout -b chore/release-ats-vX.Y.Z development
+# Create release branch from develop
+git checkout -b chore/release-ats-vX.Y.Z develop
 
 # Run changeset version
 npm run changeset:version
@@ -145,16 +145,16 @@ The workflow will:
 
 **Step 3: Post-Release Sync (MANDATORY)**
 
-After the release PR is merged into `main`, immediately sync `main` back into `development`:
+After the release PR is merged into `main`, immediately sync `main` back into `develop`:
 
 ```bash
-git checkout development
-git pull origin development
+git checkout develop
+git pull origin develop
 git merge origin/main --no-edit
-git push origin development
+git push origin develop
 ```
 
-> **Why this is mandatory**: Release PRs are squash-merged into `main`, which creates a new commit that shares no ancestry with the original commits on `development`. Without this sync, the next release will have massive merge conflicts because git cannot recognize that both branches contain the same changes. Syncing after each release establishes a shared merge-base and prevents this divergence.
+> **Why this is mandatory**: Release PRs are squash-merged into `main`, which creates a new commit that shares no ancestry with the original commits on `develop`. Without this sync, the next release will have massive merge conflicts because git cannot recognize that both branches contain the same changes. Syncing after each release establishes a shared merge-base and prevents this divergence.
 
 ### Mass Payout Release
 
@@ -186,13 +186,13 @@ The workflow validates the version, creates and pushes the `vX.Y.Z-mp` tag, and 
 
 **Step 3: Post-Release Sync (MANDATORY)**
 
-After the release PR is merged into `main`, immediately sync `main` back into `development`:
+After the release PR is merged into `main`, immediately sync `main` back into `develop`:
 
 ```bash
-git checkout development
-git pull origin development
+git checkout develop
+git pull origin develop
 git merge origin/main --no-edit
-git push origin development
+git push origin develop
 ```
 
 > **Why this is mandatory**: See [ATS Release Step 3](#ats-release) for details. Skipping this step causes massive merge conflicts on the next release.
