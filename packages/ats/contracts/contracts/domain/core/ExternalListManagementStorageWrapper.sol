@@ -6,8 +6,8 @@ import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 import { MAX_EXTERNAL_LIST_SIZE } from "../../constants/values.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { IExternalControlList } from "../../facets/layer_1/externalControlList/IExternalControlList.sol";
-import { IExternalKycList } from "../../facets/layer_1/externalKycList/IExternalKycList.sol";
+import { IExternalControlList } from "../../facets/externalControlListManagement/IExternalControlList.sol";
+import { IExternalKycList } from "../../facets/externalKycListManagement/IExternalKycList.sol";
 import { IKyc } from "../../facets/kyc/IKyc.sol";
 
 /// @custom:hash storage ControlListManagement
