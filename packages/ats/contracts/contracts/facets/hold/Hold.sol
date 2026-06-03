@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IHoldFacet, RESOLVER_KEY_HOLD } from "./IHoldFacet.sol";
-import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
+import { IHoldTypes } from "./IHoldTypes.sol";
 import { HoldStorageWrapper } from "../../domain/asset/HoldStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";

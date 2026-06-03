@@ -550,7 +550,6 @@ describe("Coupon Tests", () => {
 
     const couponFor = await asset.getCouponFor(1, signer_A.address);
     const couponAmountForAfter = await asset.getCouponAmountFor(1, signer_A.address);
-    const bondDetails = await asset.getBondDetails();
     const period = couponFor.coupon.endDate - couponFor.coupon.startDate;
 
     const [couponsForList, accountsList] = await asset.getCouponsFor(1, 0, 10);
@@ -579,8 +578,9 @@ describe("Coupon Tests", () => {
     expect(couponFor.recordDateReached).to.equal(true);
     expect(couponFor.tokenBalance).to.equal(totalAmount); // normal+cleared+held+locked+frozen
     expect(couponAmountForAfter.recordDateReached).to.equal(couponFor.recordDateReached);
-    const balanceNominalScaled =
-      (couponFor.tokenBalance * bondDetails.nominalValue) / 10n ** bondDetails.nominalValueDecimals;
+    const nominalValue = await asset.getNominalValue();
+    const nominalValueDecimals = await asset.getNominalValueDecimals();
+    const balanceNominalScaled = (couponFor.tokenBalance * nominalValue) / 10n ** nominalValueDecimals;
     expect(couponAmountForAfter.numerator).to.equal(balanceNominalScaled * couponFor.coupon.rate * period);
     expect(couponAmountForAfter.denominator).to.equal(
       10n ** (couponFor.decimals + couponFor.coupon.rateDecimals) * BigInt(YEAR_SECONDS),

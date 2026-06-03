@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { HoldOps } from "../../domain/orchestrator/HoldOps.sol";
 import { HoldStorageWrapper } from "../../domain/asset/HoldStorageWrapper.sol";
 import { ThirdPartyType } from "../../domain/asset/types/ThirdPartyType.sol";
-import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
+import { IHoldTypes } from "../hold/IHoldTypes.sol";
 import { IHoldByPartition, RESOLVER_KEY_HOLD_BY_PARTITION } from "./IHoldByPartition.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";

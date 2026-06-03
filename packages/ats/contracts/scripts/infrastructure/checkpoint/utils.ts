@@ -191,6 +191,30 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
         facetCount: steps.configurations.bondKpiLinkedRate.facetCount,
         facets: [], // Will be populated in actual workflow
       },
+      loan: {
+        configId: steps.configurations.loan?.configId ?? "",
+        version: steps.configurations.loan?.version ?? 0,
+        facetCount: steps.configurations.loan?.facetCount ?? 0,
+        facets: [], // Will be populated in actual workflow
+      },
+      loansPortfolio: {
+        configId: steps.configurations.loansPortfolio?.configId ?? "",
+        version: steps.configurations.loansPortfolio?.version ?? 0,
+        facetCount: steps.configurations.loansPortfolio?.facetCount ?? 0,
+        facets: [], // Will be populated in actual workflow
+      },
+      depositToken: {
+        configId: steps.configurations.depositToken?.configId ?? "",
+        version: steps.configurations.depositToken?.version ?? 0,
+        facetCount: steps.configurations.depositToken?.facetCount ?? 0,
+        facets: [], // Will be populated in actual workflow
+      },
+      factory: {
+        configId: steps.configurations.factory?.configId ?? "",
+        version: steps.configurations.factory?.version ?? 0,
+        facetCount: steps.configurations.factory?.facetCount ?? 0,
+        facets: [], // Will be populated in actual workflow
+      },
     },
 
     summary: {

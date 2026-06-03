@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IKpiLinkedRateErrors } from "../../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRateErrors.sol";
+import { IKpiLinkedRate } from "../../facets/kpiLinkedRate/IKpiLinkedRate.sol";
 import { IInterestRate } from "../../facets/interestRate/IInterestRate.sol";
 import { ScheduledTasksOps } from "../orchestrator/ScheduledTasksOps.sol";
 
@@ -121,7 +121,7 @@ library InterestRateStorageWrapper {
      * @dev Copies all fields from the calldata InterestRate struct into storage.
      * @param _newInterestRate The InterestRate structure containing all rate parameters.
      */
-    function setInterestRate(IKpiLinkedRateErrors.InterestRate calldata _newInterestRate) internal {
+    function setInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) internal {
         KpiLinkedRateDataStorage storage kpiRateStorage = kpiLinkedRateStorage();
         kpiRateStorage.maxRate = _newInterestRate.maxRate;
         kpiRateStorage.baseRate = _newInterestRate.baseRate;
@@ -138,7 +138,7 @@ library InterestRateStorageWrapper {
      * @dev Copies deviation bounds and precision from the calldata ImpactData struct.
      * @param _newImpactData The ImpactData structure containing deviation and precision parameters.
      */
-    function setImpactData(IKpiLinkedRateErrors.ImpactData calldata _newImpactData) internal {
+    function setImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) internal {
         KpiLinkedRateDataStorage storage kpiRateStorage = kpiLinkedRateStorage();
         kpiRateStorage.maxDeviationCap = _newImpactData.maxDeviationCap;
         kpiRateStorage.baseLine = _newImpactData.baseLine;
@@ -189,9 +189,9 @@ library InterestRateStorageWrapper {
      * @notice Returns the full KPI-linked interest rate configuration from storage.
      * @return interestRate_ An InterestRate memory struct with all KPI rate parameters.
      */
-    function getInterestRate() internal view returns (IKpiLinkedRateErrors.InterestRate memory interestRate_) {
+    function getInterestRate() internal view returns (IKpiLinkedRate.InterestRate memory interestRate_) {
         KpiLinkedRateDataStorage storage kpiRateStorage = kpiLinkedRateStorage();
-        interestRate_ = IKpiLinkedRateErrors.InterestRate({
+        interestRate_ = IKpiLinkedRate.InterestRate({
             maxRate: kpiRateStorage.maxRate,
             baseRate: kpiRateStorage.baseRate,
             minRate: kpiRateStorage.minRate,
@@ -207,9 +207,9 @@ library InterestRateStorageWrapper {
      * @notice Returns the KPI-linked impact data configuration from storage.
      * @return impactData_ An ImpactData memory struct with deviation bounds and precision.
      */
-    function getImpactData() internal view returns (IKpiLinkedRateErrors.ImpactData memory impactData_) {
+    function getImpactData() internal view returns (IKpiLinkedRate.ImpactData memory impactData_) {
         KpiLinkedRateDataStorage storage kpiRateStorage = kpiLinkedRateStorage();
-        impactData_ = IKpiLinkedRateErrors.ImpactData({
+        impactData_ = IKpiLinkedRate.ImpactData({
             maxDeviationCap: kpiRateStorage.maxDeviationCap,
             baseLine: kpiRateStorage.baseLine,
             maxDeviationFloor: kpiRateStorage.maxDeviationFloor,
@@ -234,13 +234,13 @@ library InterestRateStorageWrapper {
      *         correctly (minRate ≤ baseRate ≤ maxRate).
      * @dev Reverts with WrongInterestRateValues if the invariant is violated.
      * @param _newInterestRate The InterestRate struct to validate.
-     * @custom:revert IKpiLinkedRateErrors.WrongInterestRateValues If ordering is invalid.
+     * @custom:revert IKpiLinkedRate.WrongInterestRateValues If ordering is invalid.
      */
-    function requireValidInterestRate(IKpiLinkedRateErrors.InterestRate calldata _newInterestRate) internal pure {
+    function requireValidInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) internal pure {
         if (
             _newInterestRate.minRate > _newInterestRate.baseRate || _newInterestRate.baseRate > _newInterestRate.maxRate
         ) {
-            revert IKpiLinkedRateErrors.WrongInterestRateValues(_newInterestRate);
+            revert IKpiLinkedRate.WrongInterestRateValues(_newInterestRate);
         }
     }
 
@@ -251,14 +251,14 @@ library InterestRateStorageWrapper {
      *      when baseLine == maxDeviationFloor or baseLine == maxDeviationCap, causing a permanent
      *      revert that propagates through the scheduled-task queue and freezes all token operations.
      * @param _newImpactData The ImpactData struct to validate.
-     * @custom:revert IKpiLinkedRateErrors.WrongImpactDataValues If ordering is invalid.
+     * @custom:revert IKpiLinkedRate.WrongImpactDataValues If ordering is invalid.
      */
-    function requireValidImpactData(IKpiLinkedRateErrors.ImpactData calldata _newImpactData) internal pure {
+    function requireValidImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) internal pure {
         if (
             !(_newImpactData.maxDeviationFloor < _newImpactData.baseLine &&
                 _newImpactData.baseLine < _newImpactData.maxDeviationCap)
         ) {
-            revert IKpiLinkedRateErrors.WrongImpactDataValues(_newImpactData);
+            revert IKpiLinkedRate.WrongImpactDataValues(_newImpactData);
         }
     }
 

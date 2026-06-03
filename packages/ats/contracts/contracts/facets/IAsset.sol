@@ -2,15 +2,11 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 // Layer 1 — Core
-import {
-    IScheduledCrossOrderedTasks
-} from "./layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
+import { IScheduledCrossOrderedTasks } from "./scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
 import { IAccessControl } from "./accessControl/IAccessControl.sol";
 import { IAdjustBalances } from "./adjustBalances/IAdjustBalances.sol";
-import { IAmortization } from "./layer_2/amortization/IAmortization.sol";
-import { IBondUSA } from "./layer_3/bondUSA/IBondUSA.sol";
+import { IAmortization } from "./amortization/IAmortization.sol";
 import { IMaturity } from "./maturity/IMaturity.sol";
-import { IBondRead } from "./layer_2/bond/IBondRead.sol";
 import { IPrincipal } from "./principal/IPrincipal.sol";
 
 // Layer 1 — ERC1400
@@ -36,15 +32,13 @@ import { ITransfer } from "./transfer/ITransfer.sol";
 // Layer 1 — Remaining facets
 import { IERC20Votes } from "./erc20Votes/IERC20Votes.sol";
 import { IERC3643 } from "./layer_1/ERC3643/IERC3643.sol";
-import { IEquity } from "./layer_2/equity/IEquity.sol";
-import { IEquityUSA } from "./layer_3/equityUSA/IEquityUSA.sol";
 import { IExternalControlList } from "./layer_1/externalControlList/IExternalControlList.sol";
 import { IExternalControlListManagement } from "./externalControlListManagement/IExternalControlListManagement.sol";
 import { IExternalKycList } from "./layer_1/externalKycList/IExternalKycList.sol";
 import { IExternalKycListManagement } from "./externalKycListManagement/IExternalKycListManagement.sol";
 import { IExternalPauseManagement } from "./externalPauseManagement/IExternalPauseManagement.sol";
-import { IFixedRate } from "./layer_2/interestRate/fixedRate/IFixedRate.sol";
-import { IKpiLinkedRate } from "./layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
+import { IFixedRate } from "./fixedRate/IFixedRate.sol";
+import { IKpiLinkedRate } from "./kpiLinkedRate/IKpiLinkedRate.sol";
 
 // Layer 2
 import { IOperatorHoldByPartition } from "./operatorHoldByPartition/IOperatorHoldByPartition.sol";
@@ -62,7 +56,6 @@ import { IVoting } from "./voting/IVoting.sol";
 import { IVotingSecurityHolders } from "./votingSecurityHolders/IVotingSecurityHolders.sol";
 
 // Layer 3
-import { ISecurity } from "./layer_2/security/ISecurity.sol";
 import { ISsiManagement } from "./ssiManagement/ISsiManagement.sol";
 import { ITimeTravel } from "../test/testTimeTravel/ITimeTravel.sol";
 import { IBalanceTracker } from "./balanceTracker/IBalanceTracker.sol";
@@ -72,8 +65,8 @@ import { ITransferAndLockByPartition } from "./transferAndLockByPartition/ITrans
 import { ICoupon } from "./coupon/ICoupon.sol";
 import { IDividend } from "./dividend/IDividend.sol";
 import { IDividendSecurityHolders } from "./dividendSecurityHolders/IDividendSecurityHolders.sol";
-import { IKpis } from "./layer_2/kpi/kpiLatest/IKpis.sol";
-import { IProtectedPartitions } from "./layer_1/protectedPartition/IProtectedPartitions.sol";
+import { IKpis } from "./kpi/IKpis.sol";
+import { IProtectedPartitions } from "./protectedPartition/IProtectedPartitions.sol";
 import { IProceedRecipients } from "./proceedRecipient/IProceedRecipients.sol";
 import { ICap } from "./cap/ICap.sol";
 import { ICapByPartition } from "./capByPartition/ICapByPartition.sol";
@@ -113,7 +106,7 @@ import {
 } from "./protectedClearingHoldByPartition/IProtectedClearingHoldByPartition.sol";
 import {
     IOperatorClearingHoldByPartition
-} from "./layer_1/clearing/operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol";
+} from "./operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol";
 import { IClearing } from "./clearing/IClearing.sol";
 import { IComplianceFacet } from "./compliance/IComplianceFacet.sol";
 import { IComplianceByPartition } from "./complianceByPartition/IComplianceByPartition.sol";
@@ -196,11 +189,8 @@ interface IAsset is
     IRecovery,
     IBurn,
     IScheduledCrossOrderedTasks,
-    IBondRead,
     IPrincipal,
     IMaturity,
-    IEquity,
-    ISecurity,
     ICorporateActions,
     IProtectedPartitions,
     IProceedRecipients,
@@ -213,8 +203,6 @@ interface IAsset is
     ILoansPortfolio,
     IVoting,
     IVotingSecurityHolders,
-    IBondUSA,
-    IEquityUSA,
     ITransferAndLock,
     ITransferAndLockByPartition,
     // Corporate Actions

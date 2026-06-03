@@ -68,7 +68,7 @@ export class SecurityDataBuilder {
       CastRegulationType.toNumber(securityInfo.regulationType!),
       CastRegulationSubType.toNumber(securityInfo.regulationsubType!),
       {
-        countriesControlListType: securityInfo.isCountryControlListWhiteList,
+        countriesControlListType: securityInfo.isCountryControlListWhiteList ?? false,
         listOfCountries: securityInfo.countries ?? "",
         info: securityInfo.info ?? "",
       },
@@ -84,7 +84,8 @@ export class SecurityDataBuilder {
       conversionRight: equityInfo.conversionRight,
       redemptionRight: equityInfo.redemptionRight,
       putRight: equityInfo.putRight,
-      dividendRight: CastDividendType.toNumber(equityInfo.dividendRight),
+      dividendRight:
+        equityInfo.dividendRight !== undefined ? CastDividendType.toNumber(equityInfo.dividendRight) : undefined,
       currency: equityInfo.currency,
       nominalValue: equityInfo.nominalValue.toString(),
       nominalValueDecimals: equityInfo.nominalValueDecimals,
@@ -96,7 +97,7 @@ export class SecurityDataBuilder {
       bondInfo.currency,
       bondInfo.nominalValue.toString(),
       bondInfo.nominalValueDecimals,
-      bondInfo.startingDate.toString(),
+      bondInfo.startingDate?.toString(),
       bondInfo.maturityDate.toString(),
     );
   }
@@ -106,7 +107,7 @@ export class SecurityDataBuilder {
       bondInfo.currency,
       bondInfo.nominalValue.toString(),
       bondInfo.nominalValueDecimals,
-      bondInfo.startingDate.toString(),
+      bondInfo.startingDate?.toString(),
       bondInfo.maturityDate.toString(),
       bondInfo.rate,
       bondInfo.rateDecimals,
@@ -118,7 +119,7 @@ export class SecurityDataBuilder {
       bondInfo.currency,
       bondInfo.nominalValue.toString(),
       bondInfo.nominalValueDecimals,
-      bondInfo.startingDate.toString(),
+      bondInfo.startingDate?.toString(),
       bondInfo.maturityDate.toString(),
       this.buildInterestRateData(bondInfo.interestRate),
       this.buildImpactData(bondInfo.impactData),

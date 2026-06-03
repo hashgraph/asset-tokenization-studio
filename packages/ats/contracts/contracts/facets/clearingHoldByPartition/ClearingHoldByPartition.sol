@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IClearingHoldByPartition, RESOLVER_KEY_CLEARING_HOLDBYPARTITION } from "./IClearingHoldByPartition.sol";
-import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
+import { IHoldTypes } from "../hold/IHoldTypes.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ClearingOps } from "../../domain/orchestrator/ClearingOps.sol";
 import { ClearingReadOps } from "../../domain/orchestrator/ClearingReadOps.sol";

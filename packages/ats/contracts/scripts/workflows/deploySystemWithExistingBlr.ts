@@ -152,6 +152,16 @@ export interface DeploymentWithExistingBlrOutput {
         address: string;
       }>;
     };
+    factory: {
+      configId: string;
+      version: number;
+      facetCount: number;
+      facets: Array<{
+        facetName: string;
+        key: string;
+        address: string;
+      }>;
+    };
   };
 
   /** Deployment summary */
@@ -1168,6 +1178,20 @@ export async function deploySystemWithExistingBlr(
                 facetCount: 0,
                 facets: [],
               },
+        factory:
+          factoryConfig && factoryConfig.success
+            ? {
+                configId: factoryConfig.data.configurationId,
+                version: factoryConfig.data.version,
+                facetCount: factoryConfig.data.facetKeys.length,
+                facets: factoryConfig.data.facetKeys,
+              }
+            : {
+                configId: "N/A (Not created)",
+                version: 0,
+                facetCount: 0,
+                facets: [],
+              },
       },
 
       summary: {
@@ -1178,7 +1202,8 @@ export async function deploySystemWithExistingBlr(
           (bondConfig ? 1 : 0) +
           (bondFixedRateConfig ? 1 : 0) +
           (bondKpiLinkedRateConfig ? 1 : 0) +
-          (depositTokenConfig ? 1 : 0),
+          (depositTokenConfig ? 1 : 0) +
+          (factoryConfig ? 1 : 0),
         deploymentTime: endTime - startTime,
         gasUsed: totalGasUsed.toString(),
         success: true,

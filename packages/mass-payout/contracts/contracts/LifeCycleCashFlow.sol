@@ -5,7 +5,7 @@ pragma solidity 0.8.22;
 
 import { ILifeCycleCashFlow } from "./interfaces/ILifeCycleCashFlow.sol";
 import { LifeCycleCashFlowStorageWrapper } from "./LifeCycleCashFlowStorageWrapper.sol";
-import { ICore } from "@hashgraph/asset-tokenization-contracts/contracts/facets/core/ICore.sol";
+import { IAsset } from "@hashgraph/asset-tokenization-contracts/contracts/facets/IAsset.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { _PAYOUT_ROLE, _CASHOUT_ROLE, _TRANSFERER_ROLE, _PAYMENT_TOKEN_MANAGER_ROLE } from "./constants/roles.sol";
@@ -17,7 +17,7 @@ contract LifeCycleCashFlow is Initializable, LifeCycleCashFlowStorageWrapper {
         Rbac[] memory _rbac
     ) external initializer onlyValidPaymentToken(_paymentToken) {
         _setAsset(_asset);
-        _setAssetType(ILifeCycleCashFlow.AssetType(uint8(ICore(_asset).getERC20Metadata().securityType)));
+        _setAssetType(ILifeCycleCashFlow.AssetType(uint8(IAsset(_asset).getERC20Metadata().securityType)));
         _updatePaymentToken(_paymentToken);
         _assignRbacRoles(_rbac);
     }

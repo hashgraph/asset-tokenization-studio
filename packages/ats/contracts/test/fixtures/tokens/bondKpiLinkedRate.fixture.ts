@@ -18,7 +18,7 @@ import {
 } from "@scripts/domain";
 import { FactoryRegulationDataParams } from "@scripts/domain";
 import { getRegulationData, getSecurityData } from "./common.fixture";
-import { getBondDetails } from "./bond.fixture";
+import { makeBondDetailsData } from "./bond.fixture";
 import { getDltTimestamp } from "@test";
 
 /**
@@ -83,7 +83,7 @@ export async function deployBondKpiLinkedRateTokenFixture({
       version: 1,
     },
   });
-  const bondDetails = await getBondDetails(bondDataParams?.bondDetails);
+  const bondDetails = await makeBondDetailsData(bondDataParams?.bondDetails);
   const interestRate = {
     maxRate: interestRateParams?.maxRate ?? 0,
     baseRate: interestRateParams?.baseRate ?? 0,

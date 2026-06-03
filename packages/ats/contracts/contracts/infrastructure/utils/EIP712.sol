@@ -14,8 +14,8 @@ import {
     TYPEHASH_PROTECTED_CLEARING_OPERATION,
     TYPEHASH_PROTECTED_CLEARING_CREATE_HOLD_FROM_PARTITION
 } from "../../constants/eip712.sol";
-import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
-import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
+import { IHoldTypes } from "../../facets/hold/IHoldTypes.sol";
+import { IClearingTypes } from "../../facets/clearing/IClearingTypes.sol";
 import { ICommonErrors } from "../errors/ICommonErrors.sol";
 
 function _getDomainHash(

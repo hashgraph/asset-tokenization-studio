@@ -27,10 +27,10 @@ import { buildFacetList } from "../facetEnvironment";
 import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
 
 /**
- * Equity-specific facets list (44 facets total).
+ * Equity-specific facets list.
  *
  * This is an explicit positive list of all facets required for equity tokens.
- * Includes all common facets plus EquityUSAFacet, VotingFacet, DividendFacet, and DividendSecurityHoldersFacet.
+ * Includes all common facets plus VotingFacet, DividendFacet, and DividendSecurityHoldersFacet.
  *
  * Note: DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet functionality,
  * so we only include DiamondFacet to avoid selector collisions.
@@ -139,10 +139,6 @@ const EQUITY_FACETS = [
 
   "InterestRateFacet",
   "ProceedRecipientsFacet",
-
-  // Jurisdiction-Specific (2)
-  "SecurityFacet",
-  "EquityUSAFacet",
 ] as const;
 
 /**

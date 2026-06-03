@@ -11,7 +11,7 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
  * @title SecurityHolders
  * @notice Abstract contract implementing token-holder enumeration queries for the
  *         Diamond-based token system.
- * @dev Delegates reader methods to `EquityStorageWrapper` and is intended to be
+ * @dev Delegates reader methods to `ERC1410StorageWrapper` and is intended to be
  *      inherited by `SecurityHoldersFacet`.
  */
 abstract contract SecurityHolders is ISecurityHolders, Modifiers {

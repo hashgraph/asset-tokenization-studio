@@ -26,10 +26,6 @@ import {
     RegulationSubType,
     _checkRegulationTypeAndSubType
 } from "../constants/regulation.sol";
-import { IEquityUSA } from "../facets/layer_3/equityUSA/IEquityUSA.sol";
-import { IBondUSA } from "../facets/layer_3/bondUSA/IBondUSA.sol";
-import { ISecurity } from "../facets/layer_2/security/ISecurity.sol";
-import { IBondRead } from "../facets/layer_2/bond/IBondRead.sol";
 import { IClearingAtSnapshot } from "../facets/clearingAtSnapshot/IClearingAtSnapshot.sol";
 import {
     IClearingAtSnapshotByPartition
@@ -38,15 +34,13 @@ import { IClearingByPartition } from "../facets/clearingByPartition/IClearingByP
 import { IClearingHoldByPartition } from "../facets/clearingHoldByPartition/IClearingHoldByPartition.sol";
 import { IERC20Permit } from "../facets/erc20Permit/IERC20Permit.sol";
 import { IIdentity } from "../facets/identity/IIdentity.sol";
-import {
-    IScheduledCrossOrderedTasks
-} from "../facets/layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
+import { IScheduledCrossOrderedTasks } from "../facets/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
 import { ISnapshots } from "../facets/snapshot/ISnapshots.sol";
 import { IProceedRecipients } from "../facets/proceedRecipient/IProceedRecipients.sol";
 
 import { INominalValue } from "../facets/layer_2/nominalValue/INominalValue.sol";
 import { ScheduledTasksStorageWrapper } from "../domain/asset/ScheduledTasksStorageWrapper.sol";
-import { IProtectedPartitions } from "../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
+import { IProtectedPartitions } from "../facets/protectedPartition/IProtectedPartitions.sol";
 import { IExternalPauseManagement } from "../facets/externalPauseManagement/IExternalPauseManagement.sol";
 import {
     IExternalControlListManagement
@@ -55,6 +49,8 @@ import { IExternalKycListManagement } from "../facets/externalKycListManagement/
 import { IKyc } from "../facets/kyc/IKyc.sol";
 import { _validateISIN } from "./isinValidator.sol";
 import { IInterestRate } from "../facets/interestRate/IInterestRate.sol";
+import { IMaturity } from "../facets/maturity/IMaturity.sol";
+import { ICustomData } from "../facets/customData/ICustomData.sol";
 import { EvmAccessors } from "../infrastructure/utils/EvmAccessors.sol";
 import { DatesValidation } from "../infrastructure/utils/DatesValidation.sol";
 import { IAdjustBalances } from "../facets/adjustBalances/IAdjustBalances.sol";
@@ -111,7 +107,7 @@ import { IOperatorByPartition } from "../facets/operatorByPartition/IOperatorByP
 import { IOperatorClearingByPartition } from "../facets/operatorClearingByPartition/IOperatorClearingByPartition.sol";
 import {
     IOperatorClearingHoldByPartition
-} from "../facets/layer_1/clearing/operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol";
+} from "../facets/operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol";
 import { IOperatorHoldByPartition } from "../facets/operatorHoldByPartition/IOperatorHoldByPartition.sol";
 import { IPartitions } from "../facets/partitions/IPartitions.sol";
 import { IPause } from "../facets/pause/IPause.sol";
@@ -251,11 +247,6 @@ abstract contract Factory is IFactory {
         returns (address equityAddress_)
     {
         equityAddress_ = _deploySecurity(_equityData.security, SecurityType.Equity);
-        IEquityUSA(equityAddress_).initializeEquityUSA(_equityData.equityDetails);
-        ISecurity(equityAddress_).initializeSecurity(
-            _buildRegulationData(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType),
-            _factoryRegulationData.additionalSecurityData
-        );
         INominalValue(equityAddress_).initializeNominalValue(
             _equityData.equityDetails.nominalValue,
             _equityData.equityDetails.nominalValueDecimals,
@@ -294,7 +285,7 @@ abstract contract Factory is IFactory {
         onlyValidBondDates(_bondData.bondDetails.startingDate, _bondData.bondDetails.maturityDate)
         returns (address bondAddress_)
     {
-        bondAddress_ = _deployBond(_bondData, _factoryRegulationData, SecurityType.BondVariableRate);
+        bondAddress_ = _deployBond(_bondData, SecurityType.BondVariableRate);
         IInterestRate(bondAddress_).initializeInterestRateType(IInterestRate.RateType.STANDARD);
         (bool isOperational_, ) = IInitializer(bondAddress_).setOperationalStatus();
         _checkUnexpectedError(!isOperational_, FACTORY_OPERATIONAL_STATUS);
@@ -357,21 +348,14 @@ abstract contract Factory is IFactory {
      *      nominal-value, coupon, maturity and principal facets. Operational status and
      *      factory admin renouncement are handled by the public deployment functions.
      * @param _bondData Bond deployment data.
-     * @param _factoryRegulationData Regulation selection and additional security data.
      * @param _securityType Concrete bond security type used in core metadata.
      * @return bondAddress_ Address of the deployed bond proxy.
      */
     function _deployBond(
         BondData calldata _bondData,
-        FactoryRegulationData calldata _factoryRegulationData,
         SecurityType _securityType
     ) internal returns (address bondAddress_) {
         bondAddress_ = _deploySecurity(_bondData.security, _securityType);
-        IBondUSA(bondAddress_).initializeBondUSA(_bondData.bondDetails);
-        ISecurity(bondAddress_).initializeSecurity(
-            _buildRegulationData(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType),
-            _factoryRegulationData.additionalSecurityData
-        );
         IProceedRecipients(bondAddress_).initializeProceedRecipients(
             _bondData.proceedRecipients,
             _bondData.proceedRecipientsData
@@ -384,10 +368,9 @@ abstract contract Factory is IFactory {
         ICoupon(bondAddress_).initializeCoupon();
         ICouponListing(bondAddress_).initializeCouponListing();
         ICouponSecurityHolders(bondAddress_).initializeCouponSecurityHolders();
-        IMaturity(bondAddress_).initializeMaturity();
+        IMaturity(bondAddress_).initializeMaturity(_bondData.bondDetails.maturityDate);
         IMaturityByPartition(bondAddress_).initializeMaturityByPartition();
         IPrincipal(bondAddress_).initializePrincipal();
-        IBondRead(bondAddress_).initializeBondUSARead();
     }
 
     /**

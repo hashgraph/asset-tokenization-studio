@@ -52,8 +52,6 @@ task(
       snapshotsFacet,
       diamondFacet,
       equityUsaFacet,
-      bondUsaFacet,
-      bondUsaRead,
       scheduledBalanceAdjustmentsFacet,
       scheduledCrossOrderedTasksFacet,
       scheduledCouponListingFacet,
@@ -113,8 +111,6 @@ task(
       "Snapshots Facet": snapshotsFacet.address,
       "Diamond Facet": diamondFacet.address,
       "Equity Facet": equityUsaFacet.address,
-      "Bond Facet": bondUsaFacet.address,
-      BondRead: bondUsaRead.address,
       "Scheduled Balance Adjustments Facet": scheduledBalanceAdjustmentsFacet.address,
       "Scheduled Cross Ordered Tasks Facet": scheduledCrossOrderedTasksFacet.address,
       "Scheduled Coupon Listing Facet": scheduledCouponListingFacet.address,
@@ -222,7 +218,6 @@ task("deploy", "Deploy new contract")
   });
 
 task("deployTrexFactory", "Deploys ATS adapted TREX factory")
-  .addOptionalParam("atsFactory", "Address of the ATS factory", undefined, types.string)
   .addOptionalParam(
     "implementationAuthority",
     "Address of the implementation authority (defaults to zero address)",
@@ -239,14 +234,7 @@ task("deployTrexFactory", "Deploys ATS adapted TREX factory")
   )
   .addOptionalParam("signerPosition", "The index of the signer in the Hardhat signers array", undefined, types.int)
   .setAction(async (args: DeployTrexFactoryArgs, hre) => {
-    const {
-      deployContractWithLibraries,
-      DeployContractWithLibraryCommand,
-      deployContract,
-      DeployContractCommand,
-      addressListToHederaIdList,
-      ADDRESS_ZERO,
-    } = await import("@scripts");
+    const { deployContract, DeployContractCommand, addressListToHederaIdList, ADDRESS_ZERO } = await import("@scripts");
 
     const { signer }: GetSignerResult = await hre.run("getSigner", {
       privateKey: args.privateKey,
@@ -259,16 +247,6 @@ task("deployTrexFactory", "Deploys ATS adapted TREX factory")
 
     let implementationAuthority = args.implementationAuthority ?? ADDRESS_ZERO;
     let idFactory = args.idFactory ?? ADDRESS_ZERO;
-    const atsFactory =
-      args.atsFactory ??
-      (
-        await deployContract(
-          new DeployContractCommand({
-            name: "Factory",
-            signer,
-          }),
-        )
-      ).address;
 
     if (idFactory == ADDRESS_ZERO) {
       const identityImplementation = (
@@ -375,7 +353,6 @@ task("deployTrexFactory", "Deploys ATS adapted TREX factory")
       {
         implementationAuthority,
         idFactory,
-        atsFactory,
       },
       hre,
       {
@@ -387,12 +364,11 @@ task("deployTrexFactory", "Deploys ATS adapted TREX factory")
 
     console.log(`Signer: ${signer.address}`);
 
-    const result = await deployContractWithLibraries(
-      new DeployContractWithLibraryCommand({
+    const result = await deployContract(
+      new DeployContractCommand({
         name: `TREXFactoryAts`,
         signer,
-        args: [implementationAuthority, idFactory, atsFactory],
-        libraries: ["TREXBondDeploymentLib", "TREXEquityDeploymentLib"],
+        args: [implementationAuthority, idFactory],
       }),
     );
 

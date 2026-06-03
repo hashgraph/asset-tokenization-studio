@@ -5,7 +5,6 @@ import { ILoansPortfolio, RESOLVER_KEY_LOANS_PORTFOLIO } from "./ILoansPortfolio
 import { ROLE_LOANS_PORTFOLIO_MANAGER, DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { LoansPortfolioStorageWrapper } from "../../../domain/asset/LoansPortfolioStorageWrapper.sol";
-import { SecurityStorageWrapper } from "../../../domain/asset/SecurityStorageWrapper.sol";
 import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 

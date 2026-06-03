@@ -102,8 +102,6 @@ export default class TransactionService extends Service {
         "CreateBondCommandHandler",
         "CreateBondFixedRateCommandHandler",
         "CreateBondKpiLinkedRateCommandHandler",
-        "CreateTrexSuiteBondCommandHandler",
-        "CreateTrexSuiteEquityCommandHandler",
         "SetRateCommandHandler",
       ].some((handler) => className.includes(handler))
     ) {

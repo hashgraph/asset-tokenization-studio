@@ -3,11 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IMaturity, RESOLVER_KEY_MATURITY } from "./IMaturity.sol";
 import { IKyc } from "../kyc/IKyc.sol";
-import { ROLE_BOND_MANAGER, ROLE_MATURITY_REDEEMER } from "../../constants/roles.sol";
+import { ROLE_MATURITY_MANAGER, ROLE_MATURITY_REDEEMER } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
-import { BondStorageWrapper } from "../../domain/asset/BondStorageWrapper.sol";
+import { MaturityDateStorageWrapper } from "../../domain/asset/MaturityDateStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
@@ -16,23 +15,25 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
 /**
  * @title  Maturity
  * @author Asset Tokenization Studio Team
- * @notice Interface for bond maturity redemption and maturity date management.
- * @dev    `fullRedeemAtMaturity` and `updateMaturityDate` are extracted from the Bond facet
- *         into a dedicated Maturity facet registered under `RESOLVER_KEY_MATURITY`.
- *         Events and errors — `MaturityDateUpdated` and `BondMaturityDateWrong` — are
- *         inherited from `IBondTypes`.
- * @author Asset Tokenization Studio Team
+ * @notice Maturity facet for token redemption and maturity date management.
+ * @dev    `fullRedeemAtMaturity` and `updateMaturityDate` manage the token maturity lifecycle,
+ *         registered under `RESOLVER_KEY_MATURITY`.
+ *         Events: `MaturityDateUpdated`. Errors: `MaturityDateInvalid`.
  */
 abstract contract Maturity is IMaturity, Modifiers {
     /// @inheritdoc IMaturity
-    function initializeMaturity()
+    function initializeMaturity(
+        uint256 _maturityDate
+    )
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
         onlyFacetNotRegistered(RESOLVER_KEY_MATURITY)
+        onlyValidMaturityDate(_maturityDate)
     {
+        MaturityDateStorageWrapper.setMaturityDate(_maturityDate);
         InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_MATURITY);
-        emit MaturityInitialized();
+        emit MaturityInitialized(_maturityDate);
     }
 
     /// @inheritdoc IMaturity
@@ -50,7 +51,7 @@ abstract contract Maturity is IMaturity, Modifiers {
         onlyUnrecoveredAddress(_tokenHolder)
         onlyListedAllowed(_tokenHolder)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
-        onlyValidMaturityDate(TimeTravelStorageWrapper.getBlockTimestamp())
+        onlyMaturityReached
     {
         bytes32[] memory partitions = ERC1410StorageWrapper.partitionsOf(_tokenHolder);
         uint256 length = partitions.length;
@@ -76,13 +77,18 @@ abstract contract Maturity is IMaturity, Modifiers {
         onlyOperational
         onlyActivated
         onlyUnpaused
-        onlyRole(ROLE_BOND_MANAGER)
+        onlyRole(ROLE_MATURITY_MANAGER)
         onlyValidMaturityDate(_newMaturityDate)
         returns (bool success_)
     {
-        emit MaturityDateUpdated(address(this), _newMaturityDate, BondStorageWrapper.getMaturityDate());
-        BondStorageWrapper.setMaturityDate(_newMaturityDate);
+        emit MaturityDateUpdated(address(this), _newMaturityDate, MaturityDateStorageWrapper.getMaturityDate());
+        MaturityDateStorageWrapper.setMaturityDate(_newMaturityDate);
         return true;
+    }
+
+    /// @inheritdoc IMaturity
+    function getMaturityDate() external view override returns (uint256 maturityDate_) {
+        return MaturityDateStorageWrapper.getMaturityDate();
     }
 
     /**
