@@ -88,6 +88,7 @@
   - [Operator By Partition](#operator-by-partition)
   - [Operator Clearing By Partition](#operator-clearing-by-partition)
   - [Operator Hold By Partition](#operator-hold-by-partition)
+  - [Ownership](#ownership)
   - [Partitions](#partitions)
   - [Pause](#pause)
   - [Principal](#principal)
@@ -132,8 +133,6 @@
   - [Security](#security)
   - [Bond USA](#bond-usa)
   - [Equity USA](#equity-usa)
-- [Events](#events)
-- [Errors](#errors)
 - [Roles](#roles)
 
 ## Methods
@@ -143,7 +142,7 @@
 ### Access Control
 
 - Interface: `contracts/facets/accessControl/IAccessControl.sol`
-- Resolver key: `AccessControl`
+- Resolver key: `RESOLVER_KEY_ACCESS_CONTROL` = `0xccc2e755f9225e65f6c822a258c866fc0d57a124ad12c8928adf3ff875ffcd70`
 
 ```solidity
 function initializeAccessControl() external;
@@ -166,10 +165,43 @@ function getRoleMembers(
 function hasRole(bytes32 _role, address _account) external view returns (bool);
 ```
 
+#### Events
+
+```solidity
+event AccessControlInitialized();
+event RoleGranted(address indexed operator, address indexed account, bytes32 indexed role);
+event RoleRenounced(address indexed account, bytes32 indexed role);
+event RoleRevoked(address indexed operator, address indexed account, bytes32 indexed role);
+event RolesApplied(
+    bytes32[] requestedRoles,
+    bool[] requestedStates,
+    address account,
+    bytes32[] appliedRoles,
+    bool[] appliedStates
+);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountAssignedToRole(bytes32 role, address account);
+error AccountHasNoRole(address account, bytes32 role);
+error AccountHasNoRoles(address account, bytes32[] roles);
+error AccountNotAssignedToRole(bytes32 role, address account);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error CannotRenounceSoleAdmin();
+error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IsPaused();
+error RolesAndActivesLengthMismatch(uint256 rolesLength, uint256 activesLength);
+```
+
 ### Adjust Balances
 
 - Interface: `contracts/facets/adjustBalances/IAdjustBalances.sol`
-- Resolver key: `BalanceAdjustments`
+- Resolver key: `RESOLVER_KEY_BALANCE_ADJUSTMENTS` = `0x0d52158578e1e30e77e2dd3caffc1aa31af5397866b92131f66858f01b2e8f01`
 
 ```solidity
 function initializeBalanceAdjustments() external;
@@ -177,10 +209,32 @@ function adjustBalances(uint256 factor, uint8 decimals) external returns (bool s
 function triggerAndSyncAll(bytes32 _partition, address _from, address _to) external;
 ```
 
+#### Events
+
+```solidity
+event AdjustmentBalanceSet(address indexed operator, uint256 factor, uint8 decimals);
+event BalanceAdjustmentsInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error DecimalsOverflow();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error FactorIsZero();
+error FactorOverflow();
+error IsPaused();
+error TotalSupplyOverflow();
+```
+
 ### Allowance
 
 - Interface: `contracts/facets/allowance/IAllowance.sol`
-- Resolver key: `Allowance`
+- Resolver key: `RESOLVER_KEY_ALLOWANCE` = `0x329473cfbe06c7719b3c986b04b90a16a859b86307aad33eea0c3dfe87160ab7`
 
 ```solidity
 function initializeAllowance() external;
@@ -190,10 +244,32 @@ function decreaseAllowance(address spender, uint256 subtractedValue) external re
 function allowance(address owner, address spender) external view returns (uint256);
 ```
 
+#### Events
+
+```solidity
+event AllowanceInitialized();
+event Approval(address indexed owner, address indexed spender, uint256 value);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InsufficientAllowance(address spender, address from);
+error IsPaused();
+error NotAllowedInMultiPartitionMode();
+error SpenderWithZeroAddress();
+error ZeroOwnerAddress();
+```
+
 ### Balance Tracker
 
 - Interface: `contracts/facets/balanceTracker/IBalanceTracker.sol`
-- Resolver key: `BalanceTracker`
+- Resolver key: `RESOLVER_KEY_BALANCE_TRACKER` = `0xefbff5dcb4e5bf43bf472fd0646991b8b4731876498b2a4248f9aa9aee1a127b`
 
 ```solidity
 function initializeBalanceTracker() external;
@@ -202,20 +278,48 @@ function totalSupply() external view returns (uint256);
 function getTotalBalanceFor(address _account) external view returns (uint256);
 ```
 
+#### Events
+
+```solidity
+event BalanceTrackerInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+```
+
 ### Balance Tracker Adjusted
 
 - Interface: `contracts/facets/balanceTrackerAdjusted/IBalanceTrackerAdjusted.sol`
-- Resolver key: `BalanceTrackerAdjusted`
+- Resolver key: `RESOLVER_KEY_BALANCE_TRACKER_ADJUSTED` = `0xde8fb5b2c9dd63c753422ecea8bad989281451fa65dff90dd686eff691b03805`
 
 ```solidity
 function initializeBalanceTrackerAdjusted() external;
 function balanceOfAt(address _tokenHolder, uint256 _timestamp) external view returns (uint256);
 ```
 
+#### Events
+
+```solidity
+event BalanceTrackerAdjustedInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+```
+
 ### Balance Tracker At Snapshot
 
 - Interface: `contracts/facets/balanceTrackerAtSnapshot/IBalanceTrackerAtSnapshot.sol`
-- Resolver key: `BalanceTrackerAtSnapshot`
+- Resolver key: `RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT` = `0x2c9af26b5891593b8184a58e38f6c52e42af55578543d14ab176abd1213e3013`
 
 ```solidity
 function initializeBalanceTrackerAtSnapshot() external;
@@ -231,6 +335,22 @@ function balancesOfAtSnapshot(
 function totalSupplyAtSnapshot(uint256 _snapshotID) external view returns (uint256 totalSupply_);
 ```
 
+#### Events
+
+```solidity
+event BalanceTrackerAtSnapshotInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error SnapshotIdDoesNotExists(uint256 snapshotId);
+error SnapshotIdNull();
+```
+
 #### Types
 
 ```solidity
@@ -244,7 +364,7 @@ struct HolderBalance {
 ### Balance Tracker At Snapshot By Partition
 
 - Interface: `contracts/facets/balanceTrackerAtSnapshotByPartition/IBalanceTrackerAtSnapshotByPartition.sol`
-- Resolver key: `BalanceTrackerAtSnapshotByPartition`
+- Resolver key: `RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT_BY_PARTITION` = `0x58443162e33b704d1fc5afb40e87bf81357231beefee616de557cc06fef3aba8`
 
 ```solidity
 function initializeBalanceTrackerAtSnapshotByPartition() external;
@@ -259,10 +379,26 @@ function totalSupplyAtSnapshotByPartition(
 ) external view returns (uint256 totalSupply_);
 ```
 
+#### Events
+
+```solidity
+event BalanceTrackerAtSnapshotByPartitionInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error SnapshotIdDoesNotExists(uint256 snapshotId);
+error SnapshotIdNull();
+```
+
 ### Balance Tracker By Partition
 
 - Interface: `contracts/facets/balanceTrackerByPartition/IBalanceTrackerByPartition.sol`
-- Resolver key: `BalanceTrackerByPartition`
+- Resolver key: `RESOLVER_KEY_BALANCE_TRACKER_BY_PARTITION` = `0x05d2477d09e6a1df45e3e51bd398af7a071f6f282255486cec19b8b5a403bbaf`
 
 ```solidity
 function initializeBalanceTrackerByPartition() external;
@@ -277,20 +413,62 @@ function getTotalBalanceForByPartition(
 ) external view returns (uint256);
 ```
 
+#### Events
+
+```solidity
+event BalanceTrackerByPartitionInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+```
+
 ### Batch Burn
 
 - Interface: `contracts/facets/batchBurn/IBatchBurn.sol`
-- Resolver key: `BatchBurn`
+- Resolver key: `RESOLVER_KEY_BATCH_BURN` = `0x60fbdebafe46599d2a6d6cbec0e554cfdf693e5eb001a783852bbbc82e5c9984`
 
 ```solidity
 function initializeBatchBurn() external;
 function batchBurn(address[] calldata _userAddresses, uint256[] calldata _amounts) external;
 ```
 
+#### Events
+
+```solidity
+event BatchBurnInitialized();
+event ControllerRedemption(
+    address _controller,
+    address indexed _tokenHolder,
+    uint256 _value,
+    bytes _data,
+    bytes _operatorData
+);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AccountHasNoRoles(address account, bytes32[] roles);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InputAmountsArrayLengthMismatch();
+error IsPaused();
+error NotAllowedInMultiPartitionMode();
+error TokenIsNotControllable();
+```
+
 ### Batch Controller
 
 - Interface: `contracts/facets/batchController/IBatchController.sol`
-- Resolver key: `BatchController`
+- Resolver key: `RESOLVER_KEY_BATCH_CONTROLLER` = `0x535258ade68566dbac2304c09e172709e8b0ab3f78d2be54014d021ddb03ab58`
 
 ```solidity
 function initializeBatchController() external;
@@ -301,10 +479,39 @@ function batchForcedTransfer(
 ) external;
 ```
 
+#### Events
+
+```solidity
+event BatchControllerInitialized();
+event ControllerTransfer(
+    address _controller,
+    address indexed _from,
+    address indexed _to,
+    uint256 _value,
+    bytes _data,
+    bytes _operatorData
+);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AccountHasNoRoles(address account, bytes32[] roles);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InputAmountsArrayLengthMismatch();
+error IsPaused();
+error NotAllowedInMultiPartitionMode();
+error TokenIsNotControllable();
+```
+
 ### Batch Freeze
 
 - Interface: `contracts/facets/batchFreeze/IBatchFreeze.sol`
-- Resolver key: `BatchFreeze`
+- Resolver key: `RESOLVER_KEY_BATCH_FREEZE` = `0x6ddbb1869dce32d8e2c9bb2d23fad216723298560b6cceba67890d5a3efe0e5e`
 
 ```solidity
 function initializeBatchFreeze() external;
@@ -319,30 +526,123 @@ function batchUnfreezePartialTokens(
 ) external;
 ```
 
+#### Events
+
+```solidity
+event AddressFrozen(address indexed userAddress, bool indexed isFrozen, address indexed owner);
+event BatchFreezeInitialized();
+event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance);
+event TokensFrozen(address indexed account, uint256 amount, bytes32 partition);
+event TokensUnfrozen(address indexed account, uint256 amount, bytes32 partition);
+event Transfer(address indexed from, address indexed to, uint256 value);
+event TransferByPartition(
+    bytes32 indexed _fromPartition,
+    address _operator,
+    address indexed _from,
+    address indexed _to,
+    uint256 _value,
+    bytes _data,
+    bytes _operatorData
+);
+```
+
+#### Errors
+
+```solidity
+error AbafChangeForBlockForbidden(uint256 blockNumber);
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AccountHasNoRoles(address account, bytes32[] roles);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InputAmountsArrayLengthMismatch();
+error InputBoolArrayLengthMismatch();
+error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
+error InsufficientFrozenBalance(
+    address user,
+    uint256 requestedUnfreeze,
+    uint256 availableFrozen,
+    bytes32 partition
+);
+error InvalidFreezeAmount();
+error InvalidPartition(address account, bytes32 partition);
+error IsPaused();
+error NotAllowedInMultiPartitionMode();
+error SnapshotIdDoesNotExists(uint256 snapshotId);
+error SnapshotIdNull();
+error UnexpectedError(bytes4 _errorId);
+error WalletRecovered();
+error ZeroAddressNotAllowed();
+```
+
 ### Batch Mint
 
 - Interface: `contracts/facets/batchMint/IBatchMint.sol`
-- Resolver key: `BatchMint`
+- Resolver key: `RESOLVER_KEY_BATCH_MINT` = `0x7575e07f738065de9a6ba5370d7d18b79f7a0b885824780bf5c75784978e9530`
 
 ```solidity
 function initializeBatchMint() external;
 function batchMint(address[] calldata _toList, uint256[] calldata _amounts) external;
 ```
 
+#### Events
+
+```solidity
+event BatchMintInitialized();
+event Issued(address indexed _operator, address indexed _to, uint256 _value, bytes _data);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AccountHasNoRoles(address account, bytes32[] roles);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InputAmountsArrayLengthMismatch();
+error IsPaused();
+error MaxSupplyReached(uint256 maxSupply);
+error NotAllowedInMultiPartitionMode();
+error WalletRecovered();
+```
+
 ### Batch Transfer
 
 - Interface: `contracts/facets/batchTransfer/IBatchTransfer.sol`
-- Resolver key: `BatchTransfer`
+- Resolver key: `RESOLVER_KEY_BATCH_TRANSFER` = `0x01e13672eac45bef2d8d3f1c56eaca6857103f3b72ec9ded3d1f30aa15747d05`
 
 ```solidity
 function initializeBatchTransfer() external;
 function batchTransfer(address[] calldata _toList, uint256[] calldata _amounts) external;
 ```
 
+#### Events
+
+```solidity
+event BatchTransferInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InputAmountsArrayLengthMismatch();
+error IsPaused();
+error NotAllowedInMultiPartitionMode();
+error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
+```
+
 ### Burn
 
 - Interface: `contracts/facets/burn/IBurn.sol`
-- Resolver key: `Burn`
+- Resolver key: `RESOLVER_KEY_BURN` = `0xa9ec330b49ea310aaeba8dae3ba4f2a0b94fd35fafb9d8d8afbb804b73d50ce2`
 
 ```solidity
 function initializeBurn() external;
@@ -351,14 +651,62 @@ function redeem(uint256 _value, bytes calldata _data) external;
 function redeemFrom(address _tokenHolder, uint256 _value, bytes calldata _data) external;
 ```
 
+#### Events
+
+```solidity
+event BurnInitialized();
+event ControllerRedemption(
+    address _controller,
+    address indexed _tokenHolder,
+    uint256 _value,
+    bytes _data,
+    bytes _operatorData
+);
+event Redeemed(address indexed _operator, address indexed _from, uint256 _value, bytes _data);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AccountHasNoRoles(address account, bytes32[] roles);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IsPaused();
+error NotAllowedInMultiPartitionMode();
+error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
+error TokenIsNotControllable();
+error WalletRecovered();
+```
+
 ### Burn By Partition
 
 - Interface: `contracts/facets/burnByPartition/IBurnByPartition.sol`
-- Resolver key: `BurnByPartition`
+- Resolver key: `RESOLVER_KEY_BURN_BY_PARTITION` = `0x8d135078123ea705bd40f02ac0cd59ac08da08600b3510ba6150fe0e4a588684`
 
 ```solidity
 function initializeBurnByPartition() external;
 function redeemByPartition(bytes32 _partition, uint256 _value, bytes calldata _data) external;
+```
+
+#### Events
+
+```solidity
+event BurnByPartitionInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error PartitionNotAllowedInSinglePartitionMode(bytes32 partition);
+error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
 ```
 
 ### Business Logic Resolver
@@ -420,12 +768,41 @@ enum VersionStatus {
 ### Cap
 
 - Interface: `contracts/facets/cap/ICap.sol`
-- Resolver key: `Cap`
+- Resolver key: `RESOLVER_KEY_CAP` = `0x88a28e7c45a3ce8d4ca60cd480c98e1b46feb84caec725cb0a6cf96b2c5143b5`
 
 ```solidity
 function initializeCap(uint256 maxSupply, PartitionCap[] calldata partitionCap) external;
 function setMaxSupply(uint256 _maxSupply) external returns (bool success_);
 function getMaxSupply() external view returns (uint256 maxSupply_);
+```
+
+#### Events
+
+```solidity
+event CapInitialized(uint256 maxSupply, ICap.PartitionCap[] partitionCap);
+event MaxSupplyByPartitionSet(
+    address indexed operator,
+    bytes32 indexed partition,
+    uint256 newMaxSupply,
+    uint256 previousMaxSupply
+);
+event MaxSupplySet(address indexed operator, uint256 newMaxSupply, uint256 previousMaxSupply);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IsPaused();
+error MaxSupplyReached(uint256 maxSupply);
+error MaxSupplyReachedForPartition(bytes32 partition, uint256 maxSupply);
+error NewMaxSupplyCannotBeZero();
+error NewMaxSupplyForPartitionTooLow(bytes32 partition, uint256 maxSupply, uint256 totalSupply);
+error NewMaxSupplyTooLow(uint256 maxSupply, uint256 totalSupply);
 ```
 
 #### Types
@@ -441,7 +818,7 @@ struct PartitionCap {
 ### Cap By Partition
 
 - Interface: `contracts/facets/capByPartition/ICapByPartition.sol`
-- Resolver key: `CapByPartition`
+- Resolver key: `RESOLVER_KEY_CAP_BY_PARTITION` = `0x0a9c473b0456240ebc327730dba40a495c5a639839b0c0b30a01db12373f7529`
 
 ```solidity
 function initializeCapByPartition() external;
@@ -452,10 +829,35 @@ function setMaxSupplyByPartition(
 function getMaxSupplyByPartition(bytes32 _partition) external view returns (uint256 maxSupply_);
 ```
 
+#### Events
+
+```solidity
+event CapByPartitionInitialized();
+event MaxSupplyByPartitionSet(
+    address indexed operator,
+    bytes32 indexed partition,
+    uint256 newMaxSupply,
+    uint256 previousMaxSupply
+);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IsPaused();
+error NewMaxSupplyCannotBeZero();
+error NewMaxSupplyForPartitionTooLow(bytes32 partition, uint256 maxSupply, uint256 totalSupply);
+```
+
 ### Clearing
 
 - Interface: `contracts/facets/clearing/IClearing.sol`
-- Resolver key: `Clearing`
+- Resolver key: `RESOLVER_KEY_CLEARING` = `0xb101eca2006801ca94d6bc86288da88fc7f2ddf39849d3dd96fae75967a3d344`
 
 ```solidity
 function initializeClearing(bool _activateClearing) external;
@@ -469,6 +871,136 @@ function getClearingThirdParty(
     IClearingTypes.ClearingOperationType _clearingOperationType,
     uint256 _clearingId
 ) external view returns (address thirdParty_);
+```
+
+#### Events
+
+```solidity
+event ClearedHoldByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    IHoldTypes.Hold hold,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedHoldFromByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    IHoldTypes.Hold hold,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedOperatorRedeemByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedOperatorTransferByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    address indexed to,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedRedeemByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedRedeemFromByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedTransferByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    address indexed to,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedTransferFromByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    address indexed to,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearingActivated(address indexed operator);
+event ClearingDeactivated(address indexed operator);
+event ClearingInitialized(bool clearingActive);
+event ClearingOperationApproved(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 clearingId,
+    ClearingOperationType clearingOperationType,
+    bytes operationData
+);
+event ClearingOperationCanceled(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 clearingId,
+    ClearingOperationType clearingOperationType
+);
+event ClearingOperationReclaimed(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 clearingId,
+    ClearingOperationType clearingOperationType
+);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error ClearingIsActivated();
+error ClearingIsDisabled();
+error Deactivated();
+error ExpirationDateNotReached();
+error ExpirationDateReached();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InvalidClearingAmount();
+error IsPaused();
+error WrongClearingId();
 ```
 
 #### Types
@@ -485,7 +1017,7 @@ enum ClearingOperationType {
 ### Clearing At Snapshot
 
 - Interface: `contracts/facets/clearingAtSnapshot/IClearingAtSnapshot.sol`
-- Resolver key: `ClearingAtSnapshot`
+- Resolver key: `RESOLVER_KEY_CLEARING_AT_SNAPSHOT` = `0xb65566db9291ca49b508408fe1ba503b28ea434b3f9bca05c3a0c4da031f9e86`
 
 ```solidity
 function initializeClearingAtSnapshot() external;
@@ -495,10 +1027,26 @@ function clearedBalanceOfAtSnapshot(
 ) external view returns (uint256 balance_);
 ```
 
+#### Events
+
+```solidity
+event ClearingAtSnapshotInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error SnapshotIdDoesNotExists(uint256 snapshotId);
+error SnapshotIdNull();
+```
+
 ### Clearing At Snapshot By Partition
 
 - Interface: `contracts/facets/clearingAtSnapshotByPartition/IClearingAtSnapshotByPartition.sol`
-- Resolver key: `ClearingAtSnapshotByPartition`
+- Resolver key: `RESOLVER_KEY_CLEARING_AT_SNAPSHOT_BY_PARTITION` = `0xf55083b17a9ba346028d6a5c0772a7d913e0e90b4954f7a8b8e1912dcd383cbd`
 
 ```solidity
 function initializeClearingAtSnapshotByPartition() external;
@@ -509,10 +1057,26 @@ function clearedBalanceOfAtSnapshotByPartition(
 ) external view returns (uint256 balance_);
 ```
 
+#### Events
+
+```solidity
+event ClearingAtSnapshotByPartitionInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error SnapshotIdDoesNotExists(uint256 snapshotId);
+error SnapshotIdNull();
+```
+
 ### Clearing By Partition
 
 - Interface: `contracts/facets/clearingByPartition/IClearingByPartition.sol`
-- Resolver key: `ClearingByPartition`
+- Resolver key: `RESOLVER_KEY_CLEARING_BY_PARTITION` = `0xb63156d6db31ae3207bca0dd4a8a45f227171367d85a3833a0d7a1622212c5ec`
 
 ```solidity
 function initializeClearingByPartition() external;
@@ -569,6 +1133,141 @@ function getClearingsIdForByPartition(
     uint256 _pageIndex,
     uint256 _pageLength
 ) external view returns (uint256[] memory clearingsId_);
+```
+
+#### Events
+
+```solidity
+event ClearedHoldByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    IHoldTypes.Hold hold,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedHoldFromByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    IHoldTypes.Hold hold,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedOperatorRedeemByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedOperatorTransferByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    address indexed to,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedRedeemByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedRedeemFromByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedTransferByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    address indexed to,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedTransferFromByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    address indexed to,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearingActivated(address indexed operator);
+event ClearingByPartitionInitialized();
+event ClearingDeactivated(address indexed operator);
+event ClearingOperationApproved(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 clearingId,
+    ClearingOperationType clearingOperationType,
+    bytes operationData
+);
+event ClearingOperationCanceled(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 clearingId,
+    ClearingOperationType clearingOperationType
+);
+event ClearingOperationReclaimed(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 clearingId,
+    ClearingOperationType clearingOperationType
+);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error ClearingIsActivated();
+error ClearingIsDisabled();
+error Deactivated();
+error ExpirationDateNotReached();
+error ExpirationDateReached();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InvalidClearingAmount();
+error IsPaused();
+error PartitionNotAllowedInSinglePartitionMode(bytes32 partition);
+error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
+error WalletRecovered();
+error WrongClearingId();
+error WrongExpirationTimestamp();
+error ZeroAddressNotAllowed();
 ```
 
 #### Types
@@ -635,7 +1334,7 @@ enum ThirdPartyType {
 ### Clearing Hold By Partition
 
 - Interface: `contracts/facets/clearingHoldByPartition/IClearingHoldByPartition.sol`
-- Resolver key: `ClearingHoldbypartition`
+- Resolver key: `RESOLVER_KEY_CLEARING_HOLDBYPARTITION` = `0x027ca02a0a3de6d790cd3b5ff9c792b4bfc1649964d7737f5c4554992ca9b111`
 
 ```solidity
 function initializeClearingHoldByPartition() external;
@@ -652,6 +1351,141 @@ function getClearingCreateHoldForByPartition(
     address _tokenHolder,
     uint256 _clearingId
 ) external view returns (IClearingTypes.ClearingHoldCreationData memory clearingHoldCreationData_);
+```
+
+#### Events
+
+```solidity
+event ClearedHoldByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    IHoldTypes.Hold hold,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedHoldFromByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    IHoldTypes.Hold hold,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedOperatorRedeemByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedOperatorTransferByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    address indexed to,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedRedeemByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedRedeemFromByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedTransferByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    address indexed to,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedTransferFromByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    address indexed to,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearingActivated(address indexed operator);
+event ClearingDeactivated(address indexed operator);
+event ClearingHoldByPartitionInitialized();
+event ClearingOperationApproved(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 clearingId,
+    ClearingOperationType clearingOperationType,
+    bytes operationData
+);
+event ClearingOperationCanceled(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 clearingId,
+    ClearingOperationType clearingOperationType
+);
+event ClearingOperationReclaimed(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 clearingId,
+    ClearingOperationType clearingOperationType
+);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error ClearingIsActivated();
+error ClearingIsDisabled();
+error Deactivated();
+error ExpirationDateNotReached();
+error ExpirationDateReached();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InvalidClearingAmount();
+error IsPaused();
+error PartitionNotAllowedInSinglePartitionMode(bytes32 partition);
+error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
+error WalletRecovered();
+error WrongClearingId();
+error WrongExpirationTimestamp();
+error ZeroAddressNotAllowed();
 ```
 
 #### Types
@@ -706,7 +1540,7 @@ enum ThirdPartyType {
 ### Compliance By Partition
 
 - Interface: `contracts/facets/complianceByPartition/IComplianceByPartition.sol`
-- Resolver key: `ComplianceByPartition`
+- Resolver key: `RESOLVER_KEY_COMPLIANCE_BY_PARTITION` = `0xafad2096960379c99c5eae984f0f4ceddafa69c3e08352bcaf84e804ec4135b6`
 
 ```solidity
 function initializeComplianceByPartition() external;
@@ -727,10 +1561,24 @@ function canRedeemByPartition(
 ) external view returns (bool status, bytes1 code, bytes32 reason);
 ```
 
+#### Events
+
+```solidity
+event ComplianceByPartitionInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+```
+
 ### Compliance Facet
 
 - Interface: `contracts/facets/compliance/IComplianceFacet.sol`
-- Resolver key: `Compliance`
+- Resolver key: `RESOLVER_KEY_COMPLIANCE` = `0x0e30d654f46079d52767224a07d1fe1adc91d7edba6504f2f0adca0fca972180`
 
 ```solidity
 function initializeCompliance(address _compliance) external;
@@ -749,10 +1597,16 @@ function canTransferFrom(
 function compliance() external view returns (ICompliance);
 ```
 
+#### Events
+
+```solidity
+event ComplianceInitialized(address compliance);
+```
+
 ### Control List
 
 - Interface: `contracts/facets/controlList/IControlList.sol`
-- Resolver key: `ControlList`
+- Resolver key: `RESOLVER_KEY_CONTROL_LIST` = `0x7bbee58c68b6e19a08128d25f150956d20a69d1cc049afda563753771781ecc5`
 
 ```solidity
 function initializeControlList(bool _isWhiteList) external;
@@ -767,10 +1621,31 @@ function getControlListMembers(
 ) external view returns (address[] memory members_);
 ```
 
+#### Events
+
+```solidity
+event AddedToControlList(address indexed operator, address indexed account);
+event ControlListInitialized(bool isWhiteList);
+event RemovedFromControlList(address indexed operator, address indexed account);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IsPaused();
+error ListedAccount(address account);
+error UnlistedAccount(address account);
+```
+
 ### Controller
 
 - Interface: `contracts/facets/controller/IController.sol`
-- Resolver key: `Controller`
+- Resolver key: `RESOLVER_KEY_CONTROLLER` = `0xf020acbcf895b1f0961c02558f58e8e3f0a254c27f0e6287127ac2f43893df46`
 
 ```solidity
 function initializeController(bool _isControllable) external;
@@ -795,10 +1670,74 @@ function isControllable() external view returns (bool);
 function isAgent(address _agent) external view returns (bool);
 ```
 
+#### Events
+
+```solidity
+event AgentAdded(address indexed _agent);
+event AgentRemoved(address indexed _agent);
+event ComplianceAdded(address indexed compliance);
+event ControllerInitialized(bool controllable);
+event ControllerRedemption(
+    address _controller,
+    address indexed _tokenHolder,
+    uint256 _value,
+    bytes _data,
+    bytes _operatorData
+);
+event ControllerTransfer(
+    address _controller,
+    address indexed _from,
+    address indexed _to,
+    uint256 _value,
+    bytes _data,
+    bytes _operatorData
+);
+event FinalizedControllerFeature(address operator);
+event IdentityRegistryAdded(address indexed identityRegistry);
+event RecoverySuccess(address _lostWallet, address _newWallet, address _investorOnchainID);
+event UpdatedTokenInformation(
+    string indexed newName,
+    string indexed newSymbol,
+    uint8 newDecimals,
+    string newVersion,
+    address indexed newOnchainID
+);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountAssignedToRole(bytes32 role, address account);
+error AccountHasNoRole(address account, bytes32 role);
+error AccountHasNoRoles(address account, bytes32[] roles);
+error AccountNotAssignedToRole(bytes32 role, address account);
+error AddressNotVerified();
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error CannotRecoverWallet();
+error ComplianceCallFailed();
+error ComplianceNotAllowed();
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IdentityRegistryCallFailed();
+error InputAmountsArrayLengthMismatch();
+error InputBoolArrayLengthMismatch();
+error InsufficientFrozenBalance(
+    address user,
+    uint256 requestedUnfreeze,
+    uint256 availableFrozen,
+    bytes32 partition
+);
+error IsPaused();
+error NotAllowedInMultiPartitionMode();
+error TokenIsNotControllable();
+error WalletRecovered();
+```
+
 ### Controller By Partition
 
 - Interface: `contracts/facets/controllerByPartition/IControllerByPartition.sol`
-- Resolver key: `ControllerByPartition`
+- Resolver key: `RESOLVER_KEY_CONTROLLER_BY_PARTITION` = `0xa75865ef65a8410651c7bfebbfa9b89bd06e0bdf0dba55817ba1a6b49fdb1517`
 
 ```solidity
 function initializeControllerByPartition() external;
@@ -819,10 +1758,72 @@ function controllerRedeemByPartition(
 ) external;
 ```
 
+#### Events
+
+```solidity
+event AuthorizedOperator(address indexed operator, address indexed tokenHolder);
+event AuthorizedOperatorByPartition(
+    bytes32 indexed partition,
+    address indexed operator,
+    address indexed tokenHolder
+);
+event ControllerByPartitionInitialized();
+event IssuedByPartition(
+    bytes32 indexed partition,
+    address indexed operator,
+    address indexed to,
+    uint256 value,
+    bytes data
+);
+event RedeemedByPartition(
+    bytes32 indexed partition,
+    address indexed operator,
+    address indexed from,
+    uint256 value,
+    bytes data,
+    bytes operatorData
+);
+event RevokedOperator(address indexed operator, address indexed tokenHolder);
+event RevokedOperatorByPartition(
+    bytes32 indexed partition,
+    address indexed operator,
+    address indexed tokenHolder
+);
+event TransferByPartition(
+    bytes32 indexed _fromPartition,
+    address _operator,
+    address indexed _from,
+    address indexed _to,
+    uint256 _value,
+    bytes _data,
+    bytes _operatorData
+);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AccountHasNoRoles(address account, bytes32[] roles);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InvalidPartition(address account, bytes32 partition);
+error IsPaused();
+error NotAllowedInMultiPartitionMode();
+error PartitionNotAllowedInSinglePartitionMode(bytes32 partition);
+error TokenHolderNotFound(address tokenHolder);
+error TokenIsNotControllable();
+error Unauthorized(address operator, address tokenHolder, bytes32 partition);
+error ZeroPartition();
+error ZeroValue();
+```
+
 ### Controller Hold By Partition
 
 - Interface: `contracts/facets/controllerHoldByPartition/IControllerHoldByPartition.sol`
-- Resolver key: `ControllerHoldByPartition`
+- Resolver key: `RESOLVER_KEY_CONTROLLER_HOLD_BY_PARTITION` = `0xc415f5239b26cab850bcaca08096196a95d9ea5bab0eed1a6e29ce81490efd33`
 
 ```solidity
 function initializeControllerHoldByPartition() external;
@@ -832,6 +1833,96 @@ function controllerCreateHoldByPartition(
     IHoldTypes.Hold calldata _hold,
     bytes calldata _operatorData
 ) external returns (bool success_, uint256 holdId_);
+```
+
+#### Events
+
+```solidity
+event ControllerHeldByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 holdId,
+    Hold hold,
+    bytes operatorData
+);
+event ControllerHoldByPartitionInitialized();
+event HeldByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 holdId,
+    Hold hold,
+    bytes operatorData
+);
+event HeldFromByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 holdId,
+    Hold hold,
+    bytes operatorData
+);
+event HoldByPartitionExecuted(
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 holdId,
+    uint256 amount,
+    address to
+);
+event HoldByPartitionReclaimed(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 holdId,
+    uint256 amount
+);
+event HoldByPartitionReleased(
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 holdId,
+    uint256 amount
+);
+event OperatorHeldByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 holdId,
+    Hold hold,
+    bytes operatorData
+);
+event ProtectedHeldByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 holdId,
+    Hold hold,
+    bytes operatorData
+);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error ClearingIsActivated();
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error HoldExpirationNotReached();
+error HoldExpirationReached();
+error InsufficientHoldBalance(uint256 holdAmount, uint256 amount);
+error InvalidDestinationAddress(address holdDestination, address to);
+error InvalidHoldAmount();
+error IsNotEscrow();
+error IsPaused();
+error PartitionNotAllowedInSinglePartitionMode(bytes32 partition);
+error TokenIsNotControllable();
+error WalletRecovered();
+error WrongExpirationTimestamp();
+error WrongHoldId();
+error ZeroAddressNotAllowed();
 ```
 
 #### Types
@@ -850,7 +1941,7 @@ struct Hold {
 ### Core
 
 - Interface: `contracts/facets/core/ICore.sol`
-- Resolver key: `Core`
+- Resolver key: `RESOLVER_KEY_CORE` = `0xb54e0c9a42346a2760a44e59035a2b84a61d07bed66a2f24cffe3ca4bae1996f`
 
 ```solidity
 function initializeCore(ERC20Metadata calldata metadata) external;
@@ -861,6 +1952,30 @@ function name() external view returns (string memory);
 function symbol() external view returns (string memory);
 function getERC20Metadata() external view returns (ERC20Metadata memory);
 function version() external view returns (string memory);
+```
+
+#### Events
+
+```solidity
+event CoreInitialized(ERC20Metadata metadata);
+event UpdatedTokenInformation(
+    string indexed newName,
+    string indexed newSymbol,
+    uint8 newDecimals,
+    string newVersion,
+    address indexed newOnchainID
+);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IsPaused();
 ```
 
 #### Types
@@ -899,27 +2014,57 @@ enum SecurityType {
 ### Core Adjusted
 
 - Interface: `contracts/facets/coreAdjusted/ICoreAdjusted.sol`
-- Resolver key: `CoreAdjusted`
+- Resolver key: `RESOLVER_KEY_CORE_ADJUSTED` = `0xe190b52312c215f8e240bb53f0aa3e51e31b3005b7fcfb49c730ae523e675cfd`
 
 ```solidity
 function initializeCoreAdjusted() external;
 function decimalsAt(uint256 _timestamp) external view returns (uint8);
 ```
 
+#### Events
+
+```solidity
+event CoreAdjustedInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+```
+
 ### Core At Snapshot
 
 - Interface: `contracts/facets/coreAtSnapshot/ICoreAtSnapshot.sol`
-- Resolver key: `CoreAtSnapshot`
+- Resolver key: `RESOLVER_KEY_CORE_AT_SNAPSHOT` = `0x9f1ab2bcf2a5668b07a2b26155b1c04f30721db434dff2f1e69a3a9b1dc0a039`
 
 ```solidity
 function initializeCoreAtSnapshot() external;
 function decimalsAtSnapshot(uint256 _snapshotID) external view returns (uint8 decimals_);
 ```
 
+#### Events
+
+```solidity
+event CoreAtSnapshotInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error SnapshotIdDoesNotExists(uint256 snapshotId);
+error SnapshotIdNull();
+```
+
 ### Corporate Actions
 
 - Interface: `contracts/facets/corporateActions/ICorporateActions.sol`
-- Resolver key: `CorporateActions`
+- Resolver key: `RESOLVER_KEY_CORPORATE_ACTIONS` = `0x4f091e1f288c10131ffc090469e611b913f1f54343e59e44405312d597897db2`
 
 ```solidity
 function initializeCorporateActions() external;
@@ -951,10 +2096,54 @@ function getCorporateActionsByType(
 function actionContentHashExists(bytes32 _contentHash) external view returns (bool);
 ```
 
+#### Events
+
+```solidity
+event CorporateActionAdded(
+    address indexed operator,
+    bytes32 indexed actionType,
+    bytes32 indexed corporateActionId,
+    uint256 corporateActionIdByType,
+    bytes data
+);
+event CorporateActionCancelled(bytes32 indexed corporateActionId);
+event CorporateActionsInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AccountIsBlocked(address account);
+error AlreadyInitialized();
+error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex);
+error CorporateActionAlreadyDisabled(bytes32 corporateActionId);
+error CorporateActionNotFound(bytes32 corporateActionId);
+error DecimalsTooLarge(uint8 currentDecimals, uint8 newDecimals);
+error DuplicatedCorporateAction(bytes32 actionType, bytes data);
+error ExpiredDeadline(uint256 deadline);
+error ExponentOverflow(uint256 exponent);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error GreaterThanMaxUint256(uint256 amount, uint8 decimals);
+error InvalidDates();
+error InvalidTimestamp();
+error MaxExternalListSizeReached(uint256 max);
+error UnexpectedError(bytes4 _errorId);
+error WrongDates(uint256 firstDate, uint256 secondDate);
+error WrongExpirationTimestamp();
+error WrongIndexForAction(uint256 index, bytes32 actionType);
+error WrongNonce(uint256 nonce, address account);
+error WrongSignature();
+error WrongSignatureLength();
+error ZeroAddressNotAllowed();
+error ZeroValueNotAllowed();
+```
+
 ### Coupon
 
 - Interface: `contracts/facets/coupon/ICoupon.sol`
-- Resolver key: `Coupon`
+- Resolver key: `RESOLVER_KEY_COUPON` = `0xe292dde7a8154c59d06fe2333acc2b54d003262aadc39ee2c7b474e6e64add6b`
 
 ```solidity
 function initializeCoupon() external;
@@ -973,6 +2162,48 @@ function getCouponAmountFor(
     address _account
 ) external view returns (CouponAmountFor memory couponAmountFor_);
 function getCouponCount() external view returns (uint256 couponCount_);
+```
+
+#### Events
+
+```solidity
+event CouponCancelled(uint256 indexed couponId, address indexed operator);
+event CouponForceCancelled(uint256 indexed couponId, address indexed operator);
+event CouponInitialized();
+event CouponSet(
+    bytes32 indexed corporateActionId,
+    uint256 indexed couponId,
+    address indexed operator,
+    Coupon coupon
+);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error CouponAlreadyExecuted(bytes32 corporateActionId, uint256 couponId);
+error CouponCreationFailed();
+error CouponNotFound(uint256 couponID);
+error Deactivated();
+error DecimalsTooLarge(uint8 currentDecimals, uint8 newDecimals);
+error ExponentOverflow(uint256 exponent);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error GreaterThanMaxUint256(uint256 amount, uint8 decimals);
+error InterestRateIsFixed();
+error InterestRateIsKpiLinked();
+error InterestRateIsStandard();
+error InvalidTimestamp();
+error IsPaused();
+error SnapshotIdDoesNotExists(uint256 snapshotId);
+error SnapshotIdNull();
+error UnexpectedError(bytes4 _errorId);
+error WrongDates(uint256 firstDate, uint256 secondDate);
+error WrongImpactDataValues(ImpactData impactData);
+error WrongIndexForAction(uint256 index, bytes32 actionType);
+error WrongInterestRateValues(InterestRate interestRate);
 ```
 
 #### Types
@@ -1025,7 +2256,7 @@ enum RateCalculationStatus {
 ### Coupon Listing
 
 - Interface: `contracts/facets/couponListing/ICouponListing.sol`
-- Resolver key: `CouponListing`
+- Resolver key: `RESOLVER_KEY_COUPON_LISTING` = `0x91e4a085c95cddedc7143dae7647c320f59b0f0214ed0f49ab95d7cedb4db176`
 
 ```solidity
 function initializeCouponListing() external;
@@ -1047,6 +2278,20 @@ function getScheduledCouponListing(
 ) external view returns (ScheduledTask[] memory scheduledCouponListing_);
 ```
 
+#### Events
+
+```solidity
+event CouponListingInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+```
+
 #### Types
 
 ```solidity
@@ -1060,7 +2305,7 @@ struct ScheduledTask {
 ### Coupon Security Holders
 
 - Interface: `contracts/facets/couponSecurityHolders/ICouponSecurityHolders.sol`
-- Resolver key: `CouponSecurityHolders`
+- Resolver key: `RESOLVER_KEY_COUPON_SECURITY_HOLDERS` = `0x8e5fc42839ddbceddb6022f61f5907a3849178cce5cfb82850a28e80140ac9a9`
 
 ```solidity
 function initializeCouponSecurityHolders() external;
@@ -1075,6 +2320,31 @@ function getCouponsFor(
     uint256 _pageLength
 ) external view returns (CouponFor[] memory couponFor_, address[] memory holders_);
 function getTotalCouponHolders(uint256 _couponID) external view returns (uint256);
+```
+
+#### Events
+
+```solidity
+event CouponSecurityHoldersInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error CouponNotFound(uint256 couponID);
+error DecimalsTooLarge(uint8 currentDecimals, uint8 newDecimals);
+error ExponentOverflow(uint256 exponent);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error GreaterThanMaxUint256(uint256 amount, uint8 decimals);
+error SnapshotIdDoesNotExists(uint256 snapshotId);
+error SnapshotIdNull();
+error UnexpectedError(bytes4 _errorId);
+error WrongImpactDataValues(ImpactData impactData);
+error WrongIndexForAction(uint256 index, bytes32 actionType);
+error WrongInterestRateValues(InterestRate interestRate);
 ```
 
 #### Types
@@ -1121,7 +2391,7 @@ enum RateCalculationStatus {
 ### Custom Data
 
 - Interface: `contracts/facets/customData/ICustomData.sol`
-- Resolver key: `CustomData`
+- Resolver key: `RESOLVER_KEY_CUSTOM_DATA` = `0xfe752225f0f7bb1ac35587b02565558e9fbf467f7354ab27123c0afd1aca9a56`
 
 ```solidity
 function initializeCustomData() external;
@@ -1129,15 +2399,49 @@ function setCustomData(bytes32 _key, bytes[] calldata _value) external;
 function getCustomData(bytes32 _key) external view returns (bytes[] memory value_);
 ```
 
+#### Events
+
+```solidity
+event CustomDataInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IsPaused();
+```
+
 ### Deactivate
 
 - Interface: `contracts/facets/deactivate/IDeactivate.sol`
-- Resolver key: `Deactivate`
+- Resolver key: `RESOLVER_KEY_DEACTIVATE` = `0x13d8bdda80bdc4e1d1af80d2096fdf84affb60341d7b8f44392412162d3c3434`
 
 ```solidity
 function initializeDeactivate() external;
 function deactivate() external;
 function isDeactivated() external view returns (bool);
+```
+
+#### Events
+
+```solidity
+event DeactivateInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IsPaused();
 ```
 
 ### Diamond Cut
@@ -1337,7 +2641,7 @@ struct Facet {
 ### Dividend
 
 - Interface: `contracts/facets/dividend/IDividend.sol`
-- Resolver key: `Dividend`
+- Resolver key: `RESOLVER_KEY_DIVIDEND` = `0xfcc58d1d55d14a1359461bb9cef220b267b9846b01d61bd27d97f7c10c28b445`
 
 ```solidity
 function initializeDividend() external;
@@ -1356,6 +2660,43 @@ function getDividendAmountFor(
     address account
 ) external view returns (DividendAmountFor memory dividendAmountFor_);
 function getDividendsCount() external view returns (uint256 dividendCount_);
+```
+
+#### Events
+
+```solidity
+event DividendCancelled(uint256 dividendId, address indexed operator);
+event DividendForceCancelled(uint256 dividendId, address indexed operator);
+event DividendInitialized();
+event DividendSet(
+    bytes32 corporateActionId,
+    uint256 dividendId,
+    address indexed operator,
+    uint256 indexed recordDate,
+    uint256 indexed executionDate,
+    uint256 amount,
+    uint8 amountDecimals
+);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error DividendAlreadyExecuted(bytes32 corporateActionId, uint256 dividendId);
+error DividendCreationFailed();
+error ExponentOverflow(uint256 exponent);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InvalidTimestamp();
+error IsPaused();
+error SnapshotIdDoesNotExists(uint256 snapshotId);
+error SnapshotIdNull();
+error UnexpectedError(bytes4 _errorId);
+error WrongDates(uint256 firstDate, uint256 secondDate);
+error WrongIndexForAction(uint256 index, bytes32 actionType);
 ```
 
 #### Types
@@ -1398,7 +2739,7 @@ struct DividendAmountFor {
 ### Dividend Security Holders
 
 - Interface: `contracts/facets/dividendSecurityHolders/IDividendSecurityHolders.sol`
-- Resolver key: `DividendSecurityHolders`
+- Resolver key: `RESOLVER_KEY_DIVIDEND_SECURITY_HOLDERS` = `0x1478127ed7121d4c1f51d4844183242705cd85c8948b44acb7756ecf98830402`
 
 ```solidity
 function initializeDividendSecurityHolders() external;
@@ -1410,10 +2751,27 @@ function getDividendHolders(
 function getTotalDividendHolders(uint256 dividendId) external view returns (uint256);
 ```
 
+#### Events
+
+```solidity
+event DividendSecurityHoldersInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error SnapshotIdDoesNotExists(uint256 snapshotId);
+error SnapshotIdNull();
+error WrongIndexForAction(uint256 index, bytes32 actionType);
+```
+
 ### Documentation
 
 - Interface: `contracts/facets/documentation/IDocumentation.sol`
-- Resolver key: `Documentation`
+- Resolver key: `RESOLVER_KEY_DOCUMENTATION` = `0x3ab155fb7c96aefcaa7d730782cb640e5acf33c329d90a706843ae88a03cf1fb`
 
 ```solidity
 function initializeDocumentation() external;
@@ -1423,20 +2781,57 @@ function getDocument(bytes32 _name) external view returns (string memory, bytes3
 function getAllDocuments() external view returns (bytes32[] memory);
 ```
 
+#### Events
+
+```solidity
+event DocumentationInitialized();
+event DocumentRemoved(bytes32 indexed name, string uri, bytes32 documentHash);
+event DocumentUpdated(bytes32 indexed name, string uri, bytes32 documentHash);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error DocumentDoesNotExist(bytes32 name);
+error EmptyHASH();
+error EmptyName();
+error EmptyURI();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IsPaused();
+```
+
 ### EIP712
 
 - Interface: `contracts/facets/eip712/IEIP712.sol`
-- Resolver key: `Eip712`
+- Resolver key: `RESOLVER_KEY_EIP712` = `0xaa031e71d3d43f715d16d62c62d7573406d29acdf4c080143dab629e08a8402f`
 
 ```solidity
 function initializeEIP712() external;
 function DOMAIN_SEPARATOR() external view returns (bytes32 domainSeparator_);
 ```
 
+#### Events
+
+```solidity
+event EIP712Initialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+```
+
 ### ERC20 Permit
 
 - Interface: `contracts/facets/erc20Permit/IERC20Permit.sol`
-- Resolver key: `Erc20permit`
+- Resolver key: `RESOLVER_KEY_ERC20PERMIT` = `0xb9b450cd33d22a14f4cc67bea5d1afefac1f0e7c5230fce1b942f751c37a9e6d`
 
 ```solidity
 function initializeERC20Permit() external;
@@ -1451,10 +2846,44 @@ function permit(
 ) external;
 ```
 
+#### Events
+
+```solidity
+event Approval(address indexed owner, address indexed spender, uint256 value);
+event ERC20PermitInitialized();
+event Transfer(address indexed from, address indexed to, uint256 value);
+event TransferByPartition(
+    bytes32 indexed _fromPartition,
+    address _operator,
+    address indexed _from,
+    address indexed _to,
+    uint256 _value,
+    bytes _data,
+    bytes _operatorData
+);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error ERC2612ExpiredSignature(uint256 deadline);
+error ERC2612InvalidSigner(address signer, address owner);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IsPaused();
+error NotAllowedInMultiPartitionMode();
+error SpenderWithZeroAddress();
+error UnexpectedError(bytes4 _errorId);
+error ZeroAddressNotAllowed();
+```
+
 ### ERC20 Votes
 
 - Interface: `contracts/facets/erc20Votes/IERC20Votes.sol`
-- Resolver key: `Erc20votes`
+- Resolver key: `RESOLVER_KEY_ERC20VOTES` = `0x9619bb38c76aac49afb1df75430aefc1314778fe926136a688bf3ae3b5f8c3b7`
 
 ```solidity
 function initializeERC20Votes(bool _activated) external;
@@ -1464,6 +2893,33 @@ function checkpoints(
     uint256 _pos
 ) external view returns (Checkpoints.Checkpoint memory);
 function numCheckpoints(address _account) external view returns (uint256);
+```
+
+#### Events
+
+```solidity
+event DelegateChanged(
+    address indexed delegator,
+    address indexed fromDelegate,
+    address indexed toDelegate
+);
+event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance);
+event ERC20VotesInitialized(bool activated);
+```
+
+#### Errors
+
+```solidity
+error AbafChangeForBlockForbidden(uint256 blockNumber);
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error BrokenClockMode();
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error FutureLookup(uint256 timepoint, uint256 currentClock);
+error IsPaused();
+error UnexpectedError(bytes4 _errorId);
 ```
 
 #### Types
@@ -1479,7 +2935,7 @@ struct Checkpoint {
 ### External Control List Management
 
 - Interface: `contracts/facets/externalControlListManagement/IExternalControlListManagement.sol`
-- Resolver key: `ExternalControlList`
+- Resolver key: `RESOLVER_KEY_EXTERNAL_CONTROL_LIST` = `0x1a8f526d3e49a86640ec4a268407478132e285f13c4efbe08c46324306fd6a04`
 
 ```solidity
 function initializeExternalControlLists(address[] calldata _controlLists) external;
@@ -1497,10 +2953,36 @@ function getExternalControlListsMembers(
 ) external view returns (address[] memory members_);
 ```
 
+#### Events
+
+```solidity
+event AddedToExternalControlLists(address indexed operator, address controlList);
+event ExternalControlListInitialized(address[] controlLists);
+event ExternalControlListsUpdated(address indexed operator, address[] controlLists, bool[] actives);
+event RemovedFromExternalControlLists(address indexed operator, address controlList);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex);
+error Deactivated();
+error ExternalControlListsNotUpdated(address[] controlLista, bool[] actives);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IsPaused();
+error ListedControlList(address controlList);
+error MaxExternalListSizeReached(uint256 max);
+error UnlistedControlList(address controlList);
+error ZeroAddressNotAllowed();
+```
+
 ### External KYC List Management
 
 - Interface: `contracts/facets/externalKycListManagement/IExternalKycListManagement.sol`
-- Resolver key: `ExternalKycList`
+- Resolver key: `RESOLVER_KEY_EXTERNAL_KYC_LIST` = `0x519d262ce075401982a7a64c60caea0491af317c7b69b7869f8181e8d9cda124`
 
 ```solidity
 function initializeExternalKycLists(address[] calldata _kycLists) external;
@@ -1522,6 +3004,32 @@ function getExternalKycListsMembers(
 ) external view returns (address[] memory members_);
 ```
 
+#### Events
+
+```solidity
+event AddedToExternalKycLists(address indexed operator, address kycList);
+event ExternalKycListInitialized(address[] kycLists);
+event ExternalKycListsUpdated(address indexed operator, address[] kycLists, bool[] actives);
+event RemovedFromExternalKycLists(address indexed operator, address kycList);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex);
+error Deactivated();
+error ExternalKycListsNotUpdated(address[] kycList, bool[] actives);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IsPaused();
+error ListedKycList(address kycList);
+error MaxExternalListSizeReached(uint256 max);
+error UnlistedKycList(address kycList);
+error ZeroAddressNotAllowed();
+```
+
 #### Types
 
 ```solidity
@@ -1535,7 +3043,7 @@ enum KycStatus {
 ### External Pause Management
 
 - Interface: `contracts/facets/externalPauseManagement/IExternalPauseManagement.sol`
-- Resolver key: `ExternalPause`
+- Resolver key: `RESOLVER_KEY_EXTERNAL_PAUSE` = `0x7a8980089ef3860d6c0e831805ee28105e662952033ce76812e56e346d37bd7e`
 
 ```solidity
 function initializeExternalPauses(address[] calldata _pauses) external;
@@ -1553,10 +3061,36 @@ function getExternalPausesMembers(
 ) external view returns (address[] memory members_);
 ```
 
+#### Events
+
+```solidity
+event AddedToExternalPauses(address indexed operator, address pause);
+event ExternalPauseInitialized(address[] pauses);
+event ExternalPausesUpdated(address indexed operator, address[] pauses, bool[] actives);
+event RemovedFromExternalPauses(address indexed operator, address pause);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex);
+error Deactivated();
+error ExternalPausesNotUpdated(address[] pauses, bool[] actives);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IsPaused();
+error ListedPause(address pause);
+error MaxExternalListSizeReached(uint256 max);
+error UnlistedPause(address pause);
+error ZeroAddressNotAllowed();
+```
+
 ### Factory
 
 - Interface: `contracts/factory/IFactory.sol`
-- Resolver key: `Factory`
+- Resolver key: `RESOLVER_KEY_FACTORY` = `0x9fc26269cc1cb994e66f269ed6b58a5bb0c344a134b9dabd342ac466d48f95c7`
 
 ```solidity
 function deployProxy(
@@ -1581,6 +3115,58 @@ function getAppliedRegulationData(
     RegulationType _regulationType,
     RegulationSubType _regulationSubType
 ) external pure returns (RegulationData memory regulationData_);
+```
+
+#### Events
+
+```solidity
+event BondDeployed(
+    address indexed deployer,
+    address bondAddress,
+    BondData bondData,
+    FactoryRegulationData regulationData
+);
+event DepositTokenDeployed(
+    address indexed deployer,
+    address depositTokenAddress,
+    DepositTokenData depositTokenData,
+    FactoryRegulationData regulationData
+);
+event EquityDeployed(
+    address indexed deployer,
+    address equityAddress,
+    EquityData equityData,
+    FactoryRegulationData regulationData
+);
+event ProxyDeployed(
+    address indexed proxyAddress,
+    IBusinessLogicResolver resolver,
+    bytes32 configKey,
+    uint256 version,
+    IResolverProxy.Rbac[] rbac
+);
+```
+
+#### Errors
+
+```solidity
+error EmptyResolver(IBusinessLogicResolver resolver);
+error NoInitialAdmins();
+error RegulationTypeAndSubTypeForbidden(
+    RegulationType regulationType,
+    RegulationSubType regulationSubType
+);
+error RegulationTypeAndSubTypeForbidden(
+    RegulationType regulationType,
+    RegulationSubType regulationSubType
+);
+error UnexpectedError(bytes4 _errorId);
+error WrongDates(uint256 firstDate, uint256 secondDate);
+error WrongISIN(string isin);
+error WrongISIN(string isin);
+error WrongISINChecksum(string isin);
+error WrongISINChecksum(string isin);
+error WrongTimestamp(uint256 timeStamp);
 ```
 
 #### Types
@@ -1745,7 +3331,7 @@ enum DividendType {
 ### Freeze
 
 - Interface: `contracts/facets/freeze/IFreeze.sol`
-- Resolver key: `Freeze`
+- Resolver key: `RESOLVER_KEY_FREEZE` = `0xad51c3d79dbb37543854270a7bd1c7237cfa425b16cdf4dee9015c20917ced5a`
 
 ```solidity
 function initializeFreeze() external;
@@ -1756,10 +3342,58 @@ function getFrozenTokens(address _userAddress) external view returns (uint256);
 function isFrozen(address _userAddress) external view returns (bool);
 ```
 
+#### Events
+
+```solidity
+event AddressFrozen(address indexed userAddress, bool indexed isFrozen, address indexed owner);
+event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance);
+event FreezeInitialized();
+event TokensFrozen(address indexed account, uint256 amount, bytes32 partition);
+event TokensUnfrozen(address indexed account, uint256 amount, bytes32 partition);
+event Transfer(address indexed from, address indexed to, uint256 value);
+event TransferByPartition(
+    bytes32 indexed _fromPartition,
+    address _operator,
+    address indexed _from,
+    address indexed _to,
+    uint256 _value,
+    bytes _data,
+    bytes _operatorData
+);
+```
+
+#### Errors
+
+```solidity
+error AbafChangeForBlockForbidden(uint256 blockNumber);
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AccountHasNoRoles(address account, bytes32[] roles);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
+error InsufficientFrozenBalance(
+    address user,
+    uint256 requestedUnfreeze,
+    uint256 availableFrozen,
+    bytes32 partition
+);
+error InvalidFreezeAmount();
+error InvalidPartition(address account, bytes32 partition);
+error IsPaused();
+error NotAllowedInMultiPartitionMode();
+error SnapshotIdDoesNotExists(uint256 snapshotId);
+error SnapshotIdNull();
+error UnexpectedError(bytes4 _errorId);
+error WalletRecovered();
+error ZeroAddressNotAllowed();
+```
+
 ### Freeze At Snapshot
 
 - Interface: `contracts/facets/freezeAtSnapshot/IFreezeAtSnapshot.sol`
-- Resolver key: `FreezeAtSnapshot`
+- Resolver key: `RESOLVER_KEY_FREEZE_AT_SNAPSHOT` = `0x8ca462bf28ae4e7c5b77b86245cfff3caf7f6bdb6308a608cd9315feb2c28631`
 
 ```solidity
 function initializeFreezeAtSnapshot() external;
@@ -1769,10 +3403,26 @@ function frozenBalanceOfAtSnapshot(
 ) external view returns (uint256 balance_);
 ```
 
+#### Events
+
+```solidity
+event FreezeAtSnapshotInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error SnapshotIdDoesNotExists(uint256 snapshotId);
+error SnapshotIdNull();
+```
+
 ### Freeze At Snapshot By Partition
 
 - Interface: `contracts/facets/freezeAtSnapshotByPartition/IFreezeAtSnapshotByPartition.sol`
-- Resolver key: `FreezeAtSnapshotByPartition`
+- Resolver key: `RESOLVER_KEY_FREEZE_AT_SNAPSHOT_BY_PARTITION` = `0xac8fcbc19e12e099f6c6cff54357e28a589b49673267c81a18a965da1c7f4744`
 
 ```solidity
 function initializeFreezeAtSnapshotByPartition() external;
@@ -1783,10 +3433,26 @@ function frozenBalanceOfAtSnapshotByPartition(
 ) external view returns (uint256 balance_);
 ```
 
+#### Events
+
+```solidity
+event FreezeAtSnapshotByPartitionInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error SnapshotIdDoesNotExists(uint256 snapshotId);
+error SnapshotIdNull();
+```
+
 ### Hold At Snapshot
 
 - Interface: `contracts/facets/holdAtSnapshot/IHoldAtSnapshot.sol`
-- Resolver key: `HoldAtSnapshot`
+- Resolver key: `RESOLVER_KEY_HOLD_AT_SNAPSHOT` = `0xe4ec7231213c656d430571c2b40cf204f87a626b5ccf0db85527f72470e54a9e`
 
 ```solidity
 function initializeHoldAtSnapshot() external;
@@ -1796,10 +3462,26 @@ function heldBalanceOfAtSnapshot(
 ) external view returns (uint256 balance_);
 ```
 
+#### Events
+
+```solidity
+event HoldAtSnapshotInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error SnapshotIdDoesNotExists(uint256 snapshotId);
+error SnapshotIdNull();
+```
+
 ### Hold At Snapshot By Partition
 
 - Interface: `contracts/facets/holdAtSnapshotByPartition/IHoldAtSnapshotByPartition.sol`
-- Resolver key: `HoldAtSnapshotByPartition`
+- Resolver key: `RESOLVER_KEY_HOLD_AT_SNAPSHOT_BY_PARTITION` = `0xe6aa6abeda5257bb9fda94cbd6583ff73bfc92f42edd2ace846ee45b3cf49f0f`
 
 ```solidity
 function initializeHoldAtSnapshotByPartition() external;
@@ -1810,10 +3492,26 @@ function heldBalanceOfAtSnapshotByPartition(
 ) external view returns (uint256 balance_);
 ```
 
+#### Events
+
+```solidity
+event HoldAtSnapshotByPartitionInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error SnapshotIdDoesNotExists(uint256 snapshotId);
+error SnapshotIdNull();
+```
+
 ### Hold By Partition
 
 - Interface: `contracts/facets/holdByPartition/IHoldByPartition.sol`
-- Resolver key: `HoldByPartition`
+- Resolver key: `RESOLVER_KEY_HOLD_BY_PARTITION` = `0x3bd50b70b7e42003cb9761c133e88d776c27b53729b463a2d5bf6b36a2fce367`
 
 ```solidity
 function initializeHoldByPartition() external;
@@ -1858,6 +3556,96 @@ function getHoldForByPartition(
 ) external view returns (uint256 amount_, uint256 expirationTimestamp_, address escrow_, address destination_, bytes memory data_, bytes memory operatorData_, ThirdPartyType thirdPartyType_);
 ```
 
+#### Events
+
+```solidity
+event ControllerHeldByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 holdId,
+    Hold hold,
+    bytes operatorData
+);
+event HeldByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 holdId,
+    Hold hold,
+    bytes operatorData
+);
+event HeldFromByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 holdId,
+    Hold hold,
+    bytes operatorData
+);
+event HoldByPartitionExecuted(
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 holdId,
+    uint256 amount,
+    address to
+);
+event HoldByPartitionInitialized();
+event HoldByPartitionReclaimed(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 holdId,
+    uint256 amount
+);
+event HoldByPartitionReleased(
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 holdId,
+    uint256 amount
+);
+event OperatorHeldByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 holdId,
+    Hold hold,
+    bytes operatorData
+);
+event ProtectedHeldByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 holdId,
+    Hold hold,
+    bytes operatorData
+);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error ClearingIsActivated();
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error HoldExpirationNotReached();
+error HoldExpirationReached();
+error InsufficientHoldBalance(uint256 holdAmount, uint256 amount);
+error InvalidDestinationAddress(address holdDestination, address to);
+error InvalidHoldAmount();
+error IsNotEscrow();
+error IsPaused();
+error PartitionNotAllowedInSinglePartitionMode(bytes32 partition);
+error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
+error WalletRecovered();
+error WrongExpirationTimestamp();
+error WrongHoldId();
+error ZeroAddressNotAllowed();
+```
+
 #### Types
 
 ```solidity
@@ -1890,7 +3678,7 @@ enum ThirdPartyType {
 ### Hold Facet
 
 - Interface: `contracts/facets/hold/IHoldFacet.sol`
-- Resolver key: `Hold`
+- Resolver key: `RESOLVER_KEY_HOLD` = `0x7c2ef14067e573a8580a580634bd7547099c4b82cd9f36610da317d77eacf1f1`
 
 ```solidity
 function initializeHold() external;
@@ -1898,6 +3686,84 @@ function getHeldAmountFor(address _tokenHolder) external view returns (uint256 a
 function getHoldThirdParty(
     IHoldTypes.HoldIdentifier calldata _holdIdentifier
 ) external view returns (address thirdParty_);
+```
+
+#### Events
+
+```solidity
+event ControllerHeldByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 holdId,
+    Hold hold,
+    bytes operatorData
+);
+event HeldByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 holdId,
+    Hold hold,
+    bytes operatorData
+);
+event HeldFromByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 holdId,
+    Hold hold,
+    bytes operatorData
+);
+event HoldByPartitionExecuted(
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 holdId,
+    uint256 amount,
+    address to
+);
+event HoldByPartitionReclaimed(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 holdId,
+    uint256 amount
+);
+event HoldByPartitionReleased(
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 holdId,
+    uint256 amount
+);
+event HoldInitialized();
+event OperatorHeldByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 holdId,
+    Hold hold,
+    bytes operatorData
+);
+event ProtectedHeldByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 holdId,
+    Hold hold,
+    bytes operatorData
+);
+```
+
+#### Errors
+
+```solidity
+error HoldExpirationNotReached();
+error HoldExpirationReached();
+error InsufficientHoldBalance(uint256 holdAmount, uint256 amount);
+error InvalidDestinationAddress(address holdDestination, address to);
+error InvalidHoldAmount();
+error IsNotEscrow();
+error WrongHoldId();
 ```
 
 #### Types
@@ -1914,7 +3780,7 @@ struct HoldIdentifier {
 ### Identity
 
 - Interface: `contracts/facets/identity/IIdentity.sol`
-- Resolver key: `Identity`
+- Resolver key: `RESOLVER_KEY_IDENTITY` = `0xbb0d93867bfe08218b429804914b1d345b2c899740c5dd110cb9c6141a01d36e`
 
 ```solidity
 function initializeIdentity(address _identityRegistry) external;
@@ -1924,10 +3790,35 @@ function identityRegistry() external view returns (IIdentityRegistry);
 function onchainID() external view returns (address);
 ```
 
+#### Events
+
+```solidity
+event IdentityInitialized(address identityRegistry);
+event IdentityRegistryAdded(address indexed identityRegistry);
+event UpdatedTokenInformation(
+    string indexed newName,
+    string indexed newSymbol,
+    uint8 newDecimals,
+    string newVersion,
+    address indexed newOnchainID
+);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IsPaused();
+```
+
 ### Initializer
 
 - Interface: `contracts/facets/initializer/IInitializer.sol`
-- Resolver key: `Initializer`
+- Resolver key: `RESOLVER_KEY_INITIALIZER` = `0xe7caa2e00c841ed2a64c4c95e3981f3bfc29108599fad6e89b04f9483df0bf09`
 
 ```solidity
 function initializeInitializer(uint256 _maxInitializerFacetIndex) external;
@@ -1945,15 +3836,63 @@ function getFacetLastVersion(bytes32 _facetId) external view returns (uint256 la
 function getMaxInitializerFacetIndex() external view returns (uint256 maxInitializerFacetIndex_);
 ```
 
+#### Events
+
+```solidity
+event InitializerInitialized(uint256 maxInitializerFacetIndex);
+event MaxInitializerFacetIndexUpdated(address sender, uint256 newMaxInitializerFacetIndex);
+event OperationalStatusPartialSet(
+    address sender,
+    bytes32 configurationId,
+    uint256 version,
+    uint256 lastIndex
+);
+event OperationalStatusSet(address sender, bytes32 configurationId, uint256 version);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error FacetPreviousVersionNotAccepted(
+    bytes32 facetId,
+    uint256 lastVersion,
+    uint256[] expectedVersions
+);
+error FacetReady(bytes32 facetId, uint256 versionId);
+error ZeroValueNotAllowed();
+```
+
 ### Interest Rate
 
 - Interface: `contracts/facets/interestRate/IInterestRate.sol`
-- Resolver key: `InterestRate`
+- Resolver key: `RESOLVER_KEY_INTEREST_RATE` = `0xc09a5111a37fc8806e149b4a20c17a33a9487c6da8ee95f8a2b8ac31ea8dd2f3`
 
 ```solidity
 function initializeInterestRateType(RateType rateType) external;
 function setCouponRateType(RateType rateType) external;
 function getCouponRateType() external view returns (RateType);
+```
+
+#### Events
+
+```solidity
+event CouponRateTypeSet(address indexed operator, RateType rateType);
+event InterestRateTypeInitialized(RateType rateType);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InvalidRateType(RateType rateType);
 ```
 
 #### Types
@@ -1971,7 +3910,7 @@ enum RateType {
 ### KYC
 
 - Interface: `contracts/facets/kyc/IKyc.sol`
-- Resolver key: `Kyc`
+- Resolver key: `RESOLVER_KEY_KYC` = `0xf7fc316b28304fa0b62b8849c3c91a901e72894380ecf746c2bc13e5656549cd`
 
 ```solidity
 function initializeInternalKyc(bool _activateInternalKyc) external;
@@ -1998,6 +3937,32 @@ function getKycAccountsData(
 ) external view returns (address[] memory accounts_, KycData[] memory kycData_);
 ```
 
+#### Events
+
+```solidity
+event InternalKycStatusUpdated(address indexed operator, bool activated);
+event KycGranted(address indexed account, address indexed issuer);
+event KycInitialized(bool internalKycActivated);
+event KycRevoked(address indexed account, address indexed issuer);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AccountIsNotIssuer(address issuer);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InvalidDates();
+error InvalidKycStatus();
+error InvalidZeroAddress();
+error IsPaused();
+error KycIsNotGranted();
+error ZeroAddressNotAllowed();
+```
+
 #### Types
 
 ```solidity
@@ -2020,7 +3985,7 @@ struct KycData {
 ### Lock
 
 - Interface: `contracts/facets/lock/ILock.sol`
-- Resolver key: `Lock`
+- Resolver key: `RESOLVER_KEY_LOCK` = `0xc2e37f639e1d61db1015540583b9d71f8a33da6410aed2826c6caef1304ebd3a`
 
 ```solidity
 function initializeLock() external;
@@ -2053,10 +4018,74 @@ function getLockFor(
 ) external view returns (uint256 amount_, uint256 expirationTimestamp_);
 ```
 
+#### Events
+
+```solidity
+event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance);
+event LockByPartitionReleased(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 lockId
+);
+event LockedByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 lockId,
+    uint256 amount,
+    uint256 expirationTimestamp
+);
+event LockExpirationUpdated(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 lockId,
+    uint256 oldExpirationTimestamp,
+    uint256 newExpirationTimestamp
+);
+event LockInitialized();
+event Transfer(address indexed from, address indexed to, uint256 value);
+event TransferByPartition(
+    bytes32 indexed _fromPartition,
+    address _operator,
+    address indexed _from,
+    address indexed _to,
+    uint256 _value,
+    bytes _data,
+    bytes _operatorData
+);
+```
+
+#### Errors
+
+```solidity
+error AbafChangeForBlockForbidden(uint256 blockNumber);
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AccountHasNoRoles(address account, bytes32[] roles);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
+error InvalidLockAmount();
+error InvalidPartition(address account, bytes32 partition);
+error IsPaused();
+error LockExpirationNotReached();
+error NotAllowedInMultiPartitionMode();
+error PartitionNotAllowedInSinglePartitionMode(bytes32 partition);
+error SnapshotIdDoesNotExists(uint256 snapshotId);
+error SnapshotIdNull();
+error UnexpectedError(bytes4 _errorId);
+error WalletRecovered();
+error WrongExpirationTimestamp();
+error WrongLockId();
+```
+
 ### Lock At Snapshot
 
 - Interface: `contracts/facets/lockAtSnapshot/ILockAtSnapshot.sol`
-- Resolver key: `LockAtSnapshot`
+- Resolver key: `RESOLVER_KEY_LOCK_AT_SNAPSHOT` = `0x91e5d78963175418e7eb62ff74343d1349d9522d316525e922e145c770cc4d18`
 
 ```solidity
 function initializeLockAtSnapshot() external;
@@ -2066,10 +4095,26 @@ function lockedBalanceOfAtSnapshot(
 ) external view returns (uint256 balance_);
 ```
 
+#### Events
+
+```solidity
+event LockAtSnapshotInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error SnapshotIdDoesNotExists(uint256 snapshotId);
+error SnapshotIdNull();
+```
+
 ### Lock At Snapshot By Partition
 
 - Interface: `contracts/facets/lockAtSnapshotByPartition/ILockAtSnapshotByPartition.sol`
-- Resolver key: `LockAtSnapshotByPartition`
+- Resolver key: `RESOLVER_KEY_LOCK_AT_SNAPSHOT_BY_PARTITION` = `0x7740456ff352a04830411a3fdc359bd086a5d78fd7119bbb62a53c62c1911691`
 
 ```solidity
 function initializeLockAtSnapshotByPartition() external;
@@ -2080,10 +4125,26 @@ function lockedBalanceOfAtSnapshotByPartition(
 ) external view returns (uint256 balance_);
 ```
 
+#### Events
+
+```solidity
+event LockAtSnapshotByPartitionInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error SnapshotIdDoesNotExists(uint256 snapshotId);
+error SnapshotIdNull();
+```
+
 ### Lock By Partition
 
 - Interface: `contracts/facets/lockByPartition/ILockByPartition.sol`
-- Resolver key: `LockByPartition`
+- Resolver key: `RESOLVER_KEY_LOCK_BY_PARTITION` = `0x75c5c6d6dd253e4be43d8d1c25a4252f5f54ebdba6f6c99ed34cd03c0e4d5360`
 
 ```solidity
 function initializeLockByPartition() external;
@@ -2125,10 +4186,72 @@ function getLockForByPartition(
 ) external view returns (uint256 amount_, uint256 expirationTimestamp_);
 ```
 
+#### Events
+
+```solidity
+event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance);
+event LockByPartitionInitialized();
+event LockByPartitionReleased(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 lockId
+);
+event LockedByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 lockId,
+    uint256 amount,
+    uint256 expirationTimestamp
+);
+event LockExpirationUpdated(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 lockId,
+    uint256 oldExpirationTimestamp,
+    uint256 newExpirationTimestamp
+);
+event Transfer(address indexed from, address indexed to, uint256 value);
+event TransferByPartition(
+    bytes32 indexed _fromPartition,
+    address _operator,
+    address indexed _from,
+    address indexed _to,
+    uint256 _value,
+    bytes _data,
+    bytes _operatorData
+);
+```
+
+#### Errors
+
+```solidity
+error AbafChangeForBlockForbidden(uint256 blockNumber);
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
+error InvalidLockAmount();
+error InvalidPartition(address account, bytes32 partition);
+error IsPaused();
+error LockExpirationNotReached();
+error PartitionNotAllowedInSinglePartitionMode(bytes32 partition);
+error SnapshotIdDoesNotExists(uint256 snapshotId);
+error SnapshotIdNull();
+error UnexpectedError(bytes4 _errorId);
+error WalletRecovered();
+error WrongExpirationTimestamp();
+error WrongLockId();
+```
+
 ### Maturity
 
 - Interface: `contracts/facets/maturity/IMaturity.sol`
-- Resolver key: `Maturity`
+- Resolver key: `RESOLVER_KEY_MATURITY` = `0x16825792debc7c17efd86bdf71500575f9ff5d4aa20e3a35031c583437a3ca82`
 
 ```solidity
 function initializeMaturity() external;
@@ -2136,10 +4259,38 @@ function fullRedeemAtMaturity(address _tokenHolder) external;
 function updateMaturityDate(uint256 _newMaturityDate) external returns (bool success_);
 ```
 
+#### Events
+
+```solidity
+event MaturityDateUpdated(
+    address indexed bondId,
+    uint256 indexed maturityDate,
+    uint256 indexed previousMaturityDate
+);
+event MaturityInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AccountIsBlocked(address account);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error BondMaturityDateWrong();
+error ClearingIsActivated();
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InvalidKycStatus();
+error IsPaused();
+error WalletRecovered();
+error ZeroAddressNotAllowed();
+```
+
 ### Maturity By Partition
 
 - Interface: `contracts/facets/maturityByPartition/IMaturityByPartition.sol`
-- Resolver key: `MaturityByPartition`
+- Resolver key: `RESOLVER_KEY_MATURITY_BY_PARTITION` = `0x561e299af2bd67a767eee76558f27470801a9cb97627131141cc55ceb734ccbb`
 
 ```solidity
 function initializeMaturityByPartition() external;
@@ -2150,10 +4301,34 @@ function redeemAtMaturityByPartition(
 ) external;
 ```
 
+#### Events
+
+```solidity
+event MaturityByPartitionInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AccountIsBlocked(address account);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error BondMaturityDateWrong();
+error ClearingIsActivated();
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InvalidKycStatus();
+error IsPaused();
+error PartitionNotAllowedInSinglePartitionMode(bytes32 partition);
+error WalletRecovered();
+error ZeroAddressNotAllowed();
+```
+
 ### Mint
 
 - Interface: `contracts/facets/mint/IMint.sol`
-- Resolver key: `Mint`
+- Resolver key: `RESOLVER_KEY_MINT` = `0x394ec838636f78e91b7dbb3e4ea567e07bbb3886ab70a66652c40be856ab9b7a`
 
 ```solidity
 function initializeERC1594() external;
@@ -2162,14 +4337,58 @@ function mint(address _to, uint256 _amount) external;
 function isIssuable() external view returns (bool issuable_);
 ```
 
+#### Events
+
+```solidity
+event ERC1594Initialized();
+event Issued(address indexed _operator, address indexed _to, uint256 _value, bytes _data);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AccountHasNoRoles(address account, bytes32[] roles);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IsPaused();
+error MaxSupplyReached(uint256 maxSupply);
+error NotAllowedInMultiPartitionMode();
+error WalletRecovered();
+```
+
 ### Mint By Partition
 
 - Interface: `contracts/facets/mintByPartition/IMintByPartition.sol`
-- Resolver key: `MintByPartition`
+- Resolver key: `RESOLVER_KEY_MINT_BY_PARTITION` = `0x25ec74149ce0eadddeb82e668365e2e174db7431a04a80bada246f8f7887dadf`
 
 ```solidity
 function initializeMintByPartition() external;
 function issueByPartition(IERC1410Types.IssueData calldata _issueData) external;
+```
+
+#### Events
+
+```solidity
+event MintByPartitionInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AccountHasNoRoles(address account, bytes32[] roles);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IsPaused();
+error MaxSupplyReached(uint256 maxSupply);
+error MaxSupplyReachedForPartition(bytes32 partition, uint256 maxSupply);
+error PartitionNotAllowedInSinglePartitionMode(bytes32 partition);
+error WalletRecovered();
 ```
 
 #### Types
@@ -2187,7 +4406,7 @@ struct IssueData {
 ### Nominal Value At Snapshot
 
 - Interface: `contracts/facets/nominalValueAtSnapshot/INominalValueAtSnapshot.sol`
-- Resolver key: `NominalValueAtSnapshot`
+- Resolver key: `RESOLVER_KEY_NOMINAL_VALUE_AT_SNAPSHOT` = `0xca313777aee568dc14b1700e7be675b73932bbbc4e4f974a9f1321e6d653af74`
 
 ```solidity
 function initializeNominalValueAtSnapshot() external;
@@ -2197,20 +4416,50 @@ function nominalValueDecimalsAtSnapshot(
 ) external view returns (uint8 nominalValueDecimals_);
 ```
 
+#### Events
+
+```solidity
+event NominalValueAtSnapshotInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error SnapshotIdDoesNotExists(uint256 snapshotId);
+error SnapshotIdNull();
+```
+
 ### Nonces
 
 - Interface: `contracts/facets/nonces/INonces.sol`
-- Resolver key: `Nonces`
+- Resolver key: `RESOLVER_KEY_NONCES` = `0xd1166cb96f266d69db4d4e49d81acaf5441b16bb11681f2b1b53dcf7e1bd3bf4`
 
 ```solidity
 function initializeNonces() external;
 function nonces(address owner) external view returns (uint256);
 ```
 
+#### Events
+
+```solidity
+event NoncesInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+```
+
 ### Operator
 
 - Interface: `contracts/facets/operator/IOperator.sol`
-- Resolver key: `Operator`
+- Resolver key: `RESOLVER_KEY_OPERATOR` = `0x5c2062c6ba02b76ae0c3884d5c0fdd3416b2012195a964efaa34e09b1fa31c95`
 
 ```solidity
 function initializeOperator() external;
@@ -2219,10 +4468,31 @@ function revokeOperator(address _operator) external;
 function isOperator(address _operator, address _tokenHolder) external view returns (bool);
 ```
 
+#### Events
+
+```solidity
+event AuthorizedOperator(address indexed operator, address indexed tokenHolder);
+event OperatorAuthorized(address indexed operator, address indexed tokenHolder);
+event OperatorInitialized();
+event OperatorRevoked(address indexed operator, address indexed tokenHolder);
+event RevokedOperator(address indexed operator, address indexed tokenHolder);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IsPaused();
+```
+
 ### Operator By Partition
 
 - Interface: `contracts/facets/operatorByPartition/IOperatorByPartition.sol`
-- Resolver key: `OperatorByPartition`
+- Resolver key: `RESOLVER_KEY_OPERATOR_BY_PARTITION` = `0xfd060cda1c9927203f3914aa0d5916e4c5971977dec4026418bc4fff6d25b277`
 
 ```solidity
 function initializeOperatorByPartition() external;
@@ -2245,6 +4515,68 @@ function isOperatorForPartition(
 ) external view returns (bool);
 ```
 
+#### Events
+
+```solidity
+event AuthorizedOperator(address indexed operator, address indexed tokenHolder);
+event AuthorizedOperatorByPartition(
+    bytes32 indexed partition,
+    address indexed operator,
+    address indexed tokenHolder
+);
+event IssuedByPartition(
+    bytes32 indexed partition,
+    address indexed operator,
+    address indexed to,
+    uint256 value,
+    bytes data
+);
+event OperatorByPartitionInitialized();
+event RedeemedByPartition(
+    bytes32 indexed partition,
+    address indexed operator,
+    address indexed from,
+    uint256 value,
+    bytes data,
+    bytes operatorData
+);
+event RevokedOperator(address indexed operator, address indexed tokenHolder);
+event RevokedOperatorByPartition(
+    bytes32 indexed partition,
+    address indexed operator,
+    address indexed tokenHolder
+);
+event TransferByPartition(
+    bytes32 indexed _fromPartition,
+    address _operator,
+    address indexed _from,
+    address indexed _to,
+    uint256 _value,
+    bytes _data,
+    bytes _operatorData
+);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InvalidPartition(address account, bytes32 partition);
+error IsPaused();
+error NotAllowedInMultiPartitionMode();
+error PartitionNotAllowedInSinglePartitionMode(bytes32 partition);
+error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
+error TokenHolderNotFound(address tokenHolder);
+error Unauthorized(address operator, address tokenHolder, bytes32 partition);
+error ZeroAddressNotAllowed();
+error ZeroPartition();
+error ZeroValue();
+```
+
 #### Types
 
 ```solidity
@@ -2262,7 +4594,7 @@ struct OperatorTransferData {
 ### Operator Clearing By Partition
 
 - Interface: `contracts/facets/operatorClearingByPartition/IOperatorClearingByPartition.sol`
-- Resolver key: `OperatorClearingByPartition`
+- Resolver key: `RESOLVER_KEY_OPERATOR_CLEARING_BY_PARTITION` = `0xaad3c9e6cb80e4d01b9e5f316a82f495c3d11d36f8d738b0c2e4bce2d3f6c01c`
 
 ```solidity
 function initializeOperatorClearingByPartition() external;
@@ -2275,6 +4607,142 @@ function operatorClearingTransferByPartition(
     uint256 _amount,
     address _to
 ) external returns (bool success_, uint256 clearingId_);
+```
+
+#### Events
+
+```solidity
+event ClearedHoldByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    IHoldTypes.Hold hold,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedHoldFromByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    IHoldTypes.Hold hold,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedOperatorRedeemByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedOperatorTransferByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    address indexed to,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedRedeemByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedRedeemFromByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedTransferByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    address indexed to,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedTransferFromByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    address indexed to,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearingActivated(address indexed operator);
+event ClearingDeactivated(address indexed operator);
+event ClearingOperationApproved(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 clearingId,
+    ClearingOperationType clearingOperationType,
+    bytes operationData
+);
+event ClearingOperationCanceled(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 clearingId,
+    ClearingOperationType clearingOperationType
+);
+event ClearingOperationReclaimed(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 clearingId,
+    ClearingOperationType clearingOperationType
+);
+event OperatorClearingByPartitionInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error ClearingIsActivated();
+error ClearingIsDisabled();
+error Deactivated();
+error ExpirationDateNotReached();
+error ExpirationDateReached();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InvalidClearingAmount();
+error IsPaused();
+error PartitionNotAllowedInSinglePartitionMode(bytes32 partition);
+error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
+error Unauthorized(address operator, address tokenHolder, bytes32 partition);
+error WalletRecovered();
+error WrongClearingId();
+error WrongExpirationTimestamp();
+error ZeroAddressNotAllowed();
 ```
 
 #### Types
@@ -2298,7 +4766,7 @@ struct ClearingOperation {
 ### Operator Hold By Partition
 
 - Interface: `contracts/facets/operatorHoldByPartition/IOperatorHoldByPartition.sol`
-- Resolver key: `OperatorHoldByPartition`
+- Resolver key: `RESOLVER_KEY_OPERATOR_HOLD_BY_PARTITION` = `0x2ac9004b9c057e04ee677ec0dda4bf57f4de5a2d382d97b9557aafb2600f257f`
 
 ```solidity
 function initializeOperatorHoldByPartition() external;
@@ -2308,6 +4776,97 @@ function operatorCreateHoldByPartition(
     IHoldTypes.Hold calldata _hold,
     bytes calldata _operatorData
 ) external returns (bool success_, uint256 holdId_);
+```
+
+#### Events
+
+```solidity
+event ControllerHeldByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 holdId,
+    Hold hold,
+    bytes operatorData
+);
+event HeldByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 holdId,
+    Hold hold,
+    bytes operatorData
+);
+event HeldFromByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 holdId,
+    Hold hold,
+    bytes operatorData
+);
+event HoldByPartitionExecuted(
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 holdId,
+    uint256 amount,
+    address to
+);
+event HoldByPartitionReclaimed(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 holdId,
+    uint256 amount
+);
+event HoldByPartitionReleased(
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 holdId,
+    uint256 amount
+);
+event OperatorHeldByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 holdId,
+    Hold hold,
+    bytes operatorData
+);
+event OperatorHoldByPartitionInitialized();
+event ProtectedHeldByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 holdId,
+    Hold hold,
+    bytes operatorData
+);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error ClearingIsActivated();
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error HoldExpirationNotReached();
+error HoldExpirationReached();
+error InsufficientHoldBalance(uint256 holdAmount, uint256 amount);
+error InvalidDestinationAddress(address holdDestination, address to);
+error InvalidHoldAmount();
+error IsNotEscrow();
+error IsPaused();
+error PartitionNotAllowedInSinglePartitionMode(bytes32 partition);
+error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
+error Unauthorized(address operator, address tokenHolder, bytes32 partition);
+error WalletRecovered();
+error WrongExpirationTimestamp();
+error WrongHoldId();
+error ZeroAddressNotAllowed();
 ```
 
 #### Types
@@ -2323,10 +4882,21 @@ struct Hold {
 }
 ```
 
+### Ownership
+
+- Interface: `contracts/infrastructure/diamond/IOwnership.sol`
+
+```solidity
+function transferOwnership(bytes32 _configId, address _newOwner) external;
+function acceptOwnership(bytes32 _configId) external;
+function getOwner(bytes32 configId) external view returns (address owner_);
+function getPendingOwner(bytes32 configId) external view returns (address pendingOwner_);
+```
+
 ### Partitions
 
 - Interface: `contracts/facets/partitions/IPartitions.sol`
-- Resolver key: `Partitions`
+- Resolver key: `RESOLVER_KEY_PARTITIONS` = `0x9caef059931effa6169ed564cfd0d8dac03be612be61f4fc934e8554cfe1c53f`
 
 ```solidity
 function initializePartitions(bool _multiPartition) external;
@@ -2334,10 +4904,24 @@ function partitionsOf(address _tokenHolder) external view returns (bytes32[] mem
 function isMultiPartition() external view returns (bool);
 ```
 
+#### Events
+
+```solidity
+event PartitionsInitialized(bool multiPartition);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+```
+
 ### Pause
 
 - Interface: `contracts/facets/pause/IPause.sol`
-- Resolver key: `Pause`
+- Resolver key: `RESOLVER_KEY_PAUSE` = `0x472ad8280a7d90bcd8b7876cad2cd5a4a2d31c116563ace7a685aff94eae8928`
 
 ```solidity
 function initializePause() external;
@@ -2346,16 +4930,51 @@ function unpause() external returns (bool success_);
 function paused() external view returns (bool);
 ```
 
+#### Events
+
+```solidity
+event Paused(address indexed operator);
+event PauseInitialized();
+event Unpaused(address indexed operator);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IsPaused();
+error IsUnpaused();
+```
+
 ### Principal
 
 - Interface: `contracts/facets/principal/IPrincipal.sol`
-- Resolver key: `Principal`
+- Resolver key: `RESOLVER_KEY_PRINCIPAL` = `0xa3dc20804ebd6f2a06a7e8b8de31712f3d18a73b1963acfa1d25ed86907bd0e6`
 
 ```solidity
 function initializePrincipal() external;
 function getPrincipalFor(
     address _account
 ) external view returns (PrincipalFor memory principalFor_);
+```
+
+#### Events
+
+```solidity
+event PrincipalInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error ExponentOverflow(uint256 exponent);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 ```
 
 #### Types
@@ -2371,7 +4990,7 @@ struct PrincipalFor {
 ### Proceed Recipients
 
 - Interface: `contracts/facets/proceedRecipient/IProceedRecipients.sol`
-- Resolver key: `ProceedRecipients`
+- Resolver key: `RESOLVER_KEY_PROCEED_RECIPIENTS` = `0x63388aa198df5944c611b8fcbfd32945c57864f7125a5f95069040087d2b0bb7`
 
 ```solidity
 function initializeProceedRecipients(
@@ -2390,10 +5009,38 @@ function getProceedRecipients(
 ) external view returns (address[] memory proceedRecipients_);
 ```
 
+#### Events
+
+```solidity
+event ProceedRecipientAdded(address indexed operator, address indexed proceedRecipient, bytes data);
+event ProceedRecipientDataUpdated(
+    address indexed operator,
+    address indexed proceedRecipient,
+    bytes newData
+);
+event ProceedRecipientRemoved(address indexed operator, address indexed proceedRecipient);
+event ProceedRecipientsInitialized(address[] proceedRecipients, bytes[] data);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IsPaused();
+error MaxExternalListSizeReached(uint256 max);
+error ProceedRecipientAlreadyExists(address proceedRecipient);
+error ProceedRecipientNotFound(address proceedRecipient);
+error ZeroAddressNotAllowed();
+```
+
 ### Protected By Partition
 
 - Interface: `contracts/facets/protectedByPartition/IProtectedByPartition.sol`
-- Resolver key: `ProtectedByPartition`
+- Resolver key: `RESOLVER_KEY_PROTECTED_BY_PARTITION` = `0x2f9cd983bc92f917e9c55a3f61b8984646d96980224f4712084967ea1d24d62f`
 
 ```solidity
 function initializeProtectedByPartition() external;
@@ -2412,6 +5059,40 @@ function protectedRedeemFromByPartition(
 ) external;
 ```
 
+#### Events
+
+```solidity
+event ProtectedByPartitionInitialized();
+event ProtectedRedeemedByPartition(
+    address indexed operator,
+    address indexed from,
+    uint256 amount,
+    bytes32 partition,
+    IProtectedPartitions.ProtectionData protectionData
+);
+event ProtectedTransferredByPartition(
+    address indexed operator,
+    address indexed from,
+    address indexed to,
+    uint256 amount,
+    bytes32 partition,
+    IProtectedPartitions.ProtectionData protectionData
+);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IsPaused();
+error PartitionsAreUnProtected();
+error ProtectedPartitionRoleRequired(bytes32 partition, address sender);
+```
+
 #### Types
 
 ```solidity
@@ -2426,7 +5107,7 @@ struct ProtectionData {
 ### Protected Clearing By Partition
 
 - Interface: `contracts/facets/protectedClearingByPartition/IProtectedClearingByPartition.sol`
-- Resolver key: `ProtectedClearingByPartition`
+- Resolver key: `RESOLVER_KEY_PROTECTED_CLEARING_BY_PARTITION` = `0x3cbb73b8ee5db791f9534af7a5c9fc09a4cf9adff327a05839f2673a3dc63aae`
 
 ```solidity
 function initializeProtectedClearingByPartition() external;
@@ -2441,6 +5122,161 @@ function protectedClearingTransferByPartition(
     address _to,
     bytes calldata _signature
 ) external returns (bool success_, uint256 clearingId_);
+```
+
+#### Events
+
+```solidity
+event ClearedHoldByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    IHoldTypes.Hold hold,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedHoldFromByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    IHoldTypes.Hold hold,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedOperatorRedeemByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedOperatorTransferByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    address indexed to,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedRedeemByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedRedeemFromByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedTransferByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    address indexed to,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedTransferFromByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    address indexed to,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearingActivated(address indexed operator);
+event ClearingDeactivated(address indexed operator);
+event ClearingOperationApproved(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 clearingId,
+    ClearingOperationType clearingOperationType,
+    bytes operationData
+);
+event ClearingOperationCanceled(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 clearingId,
+    ClearingOperationType clearingOperationType
+);
+event ClearingOperationReclaimed(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 clearingId,
+    ClearingOperationType clearingOperationType
+);
+event ProtectedClearedRedeemByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ProtectedClearedTransferByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    address indexed to,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ProtectedClearingByPartitionInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error ClearingIsActivated();
+error ClearingIsDisabled();
+error Deactivated();
+error ExpirationDateNotReached();
+error ExpirationDateReached();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InvalidClearingAmount();
+error IsPaused();
+error PartitionsAreUnProtected();
+error WalletRecovered();
+error WrongClearingId();
+error WrongExpirationTimestamp();
+error ZeroAddressNotAllowed();
 ```
 
 #### Types
@@ -2465,7 +5301,7 @@ struct ClearingOperation {
 ### Protected Clearing Hold By Partition
 
 - Interface: `contracts/facets/protectedClearingHoldByPartition/IProtectedClearingHoldByPartition.sol`
-- Resolver key: `ProtectedClearingHoldByPartition`
+- Resolver key: `RESOLVER_KEY_PROTECTED_CLEARING_HOLD_BY_PARTITION` = `0xc28474cfcf6b32464e9000d064b91827c6c37fd3e06dae932c9447c204c35cc1`
 
 ```solidity
 function initializeProtectedClearingHoldByPartition() external;
@@ -2474,6 +5310,150 @@ function protectedClearingCreateHoldByPartition(
     IHoldTypes.Hold calldata _hold,
     bytes calldata _signature
 ) external returns (bool success_, uint256 clearingId_);
+```
+
+#### Events
+
+```solidity
+event ClearedHoldByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    IHoldTypes.Hold hold,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedHoldFromByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    IHoldTypes.Hold hold,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedOperatorRedeemByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedOperatorTransferByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    address indexed to,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedRedeemByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedRedeemFromByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedTransferByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    address indexed to,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedTransferFromByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    address indexed to,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearingActivated(address indexed operator);
+event ClearingDeactivated(address indexed operator);
+event ClearingOperationApproved(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 clearingId,
+    ClearingOperationType clearingOperationType,
+    bytes operationData
+);
+event ClearingOperationCanceled(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 clearingId,
+    ClearingOperationType clearingOperationType
+);
+event ClearingOperationReclaimed(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 clearingId,
+    ClearingOperationType clearingOperationType
+);
+event ProtectedClearedHoldByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    IHoldTypes.Hold hold,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ProtectedClearingHoldByPartitionInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error ClearingIsActivated();
+error ClearingIsDisabled();
+error Deactivated();
+error ExpirationDateNotReached();
+error ExpirationDateReached();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InvalidClearingAmount();
+error IsPaused();
+error PartitionsAreUnProtected();
+error WalletRecovered();
+error WrongClearingId();
+error WrongExpirationTimestamp();
+error ZeroAddressNotAllowed();
 ```
 
 #### Types
@@ -2507,7 +5487,7 @@ struct ClearingOperation {
 ### Protected Hold By Partition
 
 - Interface: `contracts/facets/protectedHoldByPartition/IProtectedHoldByPartition.sol`
-- Resolver key: `ProtectedHoldByPartition`
+- Resolver key: `RESOLVER_KEY_PROTECTED_HOLD_BY_PARTITION` = `0x5b77b995d3e53c3e46f114bbf37642ce3169369548c8135b8b11f5cebd3fb07b`
 
 ```solidity
 function initializeProtectedHoldByPartition() external;
@@ -2517,6 +5497,95 @@ function protectedCreateHoldByPartition(
     IHoldTypes.ProtectedHold memory _protectedHold,
     bytes calldata _signature
 ) external returns (bool success_, uint256 holdId_);
+```
+
+#### Events
+
+```solidity
+event ControllerHeldByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 holdId,
+    Hold hold,
+    bytes operatorData
+);
+event HeldByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 holdId,
+    Hold hold,
+    bytes operatorData
+);
+event HeldFromByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 holdId,
+    Hold hold,
+    bytes operatorData
+);
+event HoldByPartitionExecuted(
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 holdId,
+    uint256 amount,
+    address to
+);
+event HoldByPartitionReclaimed(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 holdId,
+    uint256 amount
+);
+event HoldByPartitionReleased(
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 holdId,
+    uint256 amount
+);
+event OperatorHeldByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 holdId,
+    Hold hold,
+    bytes operatorData
+);
+event ProtectedHeldByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 holdId,
+    Hold hold,
+    bytes operatorData
+);
+event ProtectedHoldByPartitionInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error ClearingIsActivated();
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error HoldExpirationNotReached();
+error HoldExpirationReached();
+error InsufficientHoldBalance(uint256 holdAmount, uint256 amount);
+error InvalidDestinationAddress(address holdDestination, address to);
+error InvalidHoldAmount();
+error IsNotEscrow();
+error IsPaused();
+error PartitionsAreUnProtected();
+error WalletRecovered();
+error WrongExpirationTimestamp();
+error WrongHoldId();
+error ZeroAddressNotAllowed();
 ```
 
 #### Types
@@ -2542,7 +5611,7 @@ struct Hold {
 ### Recovery
 
 - Interface: `contracts/facets/recovery/IRecovery.sol`
-- Resolver key: `Recovery`
+- Resolver key: `RESOLVER_KEY_RECOVERY` = `0x087cb866f812745e77608e4eb4b359ae96b8a0ba2ef9fe8336488e479b72d92a`
 
 ```solidity
 function initializeRecovery() external;
@@ -2552,6 +5621,69 @@ function recoveryAddress(
     address _investorOnchainID
 ) external returns (bool success_);
 function isAddressRecovered(address _wallet) external view returns (bool);
+```
+
+#### Events
+
+```solidity
+event AgentAdded(address indexed _agent);
+event AgentRemoved(address indexed _agent);
+event ComplianceAdded(address indexed compliance);
+event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance);
+event IdentityRegistryAdded(address indexed identityRegistry);
+event RecoveryInitialized();
+event RecoverySuccess(address _lostWallet, address _newWallet, address _investorOnchainID);
+event Transfer(address indexed from, address indexed to, uint256 value);
+event TransferByPartition(
+    bytes32 indexed _fromPartition,
+    address _operator,
+    address indexed _from,
+    address indexed _to,
+    uint256 _value,
+    bytes _data,
+    bytes _operatorData
+);
+event UpdatedTokenInformation(
+    string indexed newName,
+    string indexed newSymbol,
+    uint8 newDecimals,
+    string newVersion,
+    address indexed newOnchainID
+);
+```
+
+#### Errors
+
+```solidity
+error AbafChangeForBlockForbidden(uint256 blockNumber);
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AddressNotVerified();
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error CannotRecoverWallet();
+error ComplianceCallFailed();
+error ComplianceNotAllowed();
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IdentityRegistryCallFailed();
+error InputAmountsArrayLengthMismatch();
+error InputBoolArrayLengthMismatch();
+error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
+error InsufficientFrozenBalance(
+    address user,
+    uint256 requestedUnfreeze,
+    uint256 availableFrozen,
+    bytes32 partition
+);
+error InvalidFreezeAmount();
+error InvalidPartition(address account, bytes32 partition);
+error IsPaused();
+error NotAllowedInMultiPartitionMode();
+error SnapshotIdDoesNotExists(uint256 snapshotId);
+error SnapshotIdNull();
+error TokenHolderNotFound(address tokenHolder);
+error UnexpectedError(bytes4 _errorId);
+error WalletRecovered();
 ```
 
 ### Revocation List
@@ -2565,7 +5697,7 @@ function revoked(address, string calldata) external view returns (bool);
 ### Scheduled Balance Adjustment
 
 - Interface: `contracts/facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol`
-- Resolver key: `ScheduledBalanceAdjustment`
+- Resolver key: `RESOLVER_KEY_SCHEDULED_BALANCE_ADJUSTMENT` = `0x90c7d769d18188f75b1092289e2465103d06f9c1195bf0ee4b2cf0844a5d6c96`
 
 ```solidity
 function initializeScheduledBalanceAdjustment() external;
@@ -2590,6 +5722,46 @@ function getScheduledBalanceAdjustments(
 ) external view returns (ScheduledTask[] memory scheduledBalanceAdjustment_);
 ```
 
+#### Events
+
+```solidity
+event ScheduledBalanceAdjustmentCancelled(uint256 balanceAdjustmentId, address indexed operator);
+event ScheduledBalanceAdjustmentForceCancelled(
+    uint256 balanceAdjustmentId,
+    address indexed operator
+);
+event ScheduledBalanceAdjustmentInitialized();
+event ScheduledBalanceAdjustmentSet(
+    bytes32 corporateActionId,
+    uint256 balanceAdjustmentId,
+    address indexed operator,
+    uint256 indexed executionDate,
+    uint256 factor,
+    uint256 decimals
+);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error BalanceAdjustmentAlreadyExecuted(bytes32 corporateActionId, uint256 balanceAdjustmentId);
+error BalanceAdjustmentCreationFailed();
+error Deactivated();
+error DecimalsOverflow();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error FactorIsZero();
+error FactorOverflow();
+error InvalidTimestamp();
+error IsPaused();
+error TotalSupplyOverflow();
+error UnexpectedError(bytes4 _errorId);
+error WrongIndexForAction(uint256 index, bytes32 actionType);
+error ZeroValueNotAllowed();
+```
+
 #### Types
 
 ```solidity
@@ -2610,7 +5782,7 @@ struct ScheduledTask {
 ### Security Holders
 
 - Interface: `contracts/facets/securityHolders/ISecurityHolders.sol`
-- Resolver key: `Securityholders`
+- Resolver key: `RESOLVER_KEY_SECURITYHOLDERS` = `0x744edd4f33c7d5e322286e40155d549553e22329ac9503643bf36fc149504bc9`
 
 ```solidity
 function initializeSecurityHolders() external;
@@ -2621,10 +5793,24 @@ function getSecurityHolders(
 function getTotalSecurityHolders() external view returns (uint256 count);
 ```
 
+#### Events
+
+```solidity
+event SecurityHoldersInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+```
+
 ### Security Holders At Snapshot
 
 - Interface: `contracts/facets/securityHoldersAtSnapshot/ISecurityHoldersAtSnapshot.sol`
-- Resolver key: `SecurityHoldersAtSnapshot`
+- Resolver key: `RESOLVER_KEY_SECURITY_HOLDERS_AT_SNAPSHOT` = `0xf7707140407ccf0d6deaf72844217e3c1383270609a7a75e36def71a3c453b9e`
 
 ```solidity
 function initializeSecurityHoldersAtSnapshot() external;
@@ -2636,10 +5822,26 @@ function getTokenHoldersAtSnapshot(
 function getTotalTokenHoldersAtSnapshot(uint256 _snapshotID) external view returns (uint256);
 ```
 
+#### Events
+
+```solidity
+event SecurityHoldersAtSnapshotInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error SnapshotIdDoesNotExists(uint256 snapshotId);
+error SnapshotIdNull();
+```
+
 ### Snapshots
 
 - Interface: `contracts/facets/snapshot/ISnapshots.sol`
-- Resolver key: `Snapshots`
+- Resolver key: `RESOLVER_KEY_SNAPSHOTS` = `0xbc4e3ace00cf7d347ee7bf90737d3091c02f7d6607c195bf0d4b81e33644f0e1`
 
 ```solidity
 function initializeSnapshots() external;
@@ -2650,6 +5852,27 @@ function getScheduledSnapshots(
     uint256 _pageLength,
     bool _includeDisabled
 ) external view returns (ScheduledTask[] memory scheduledSnapshot_);
+```
+
+#### Events
+
+```solidity
+event SnapshotsInitialized();
+event SnapshotTaken(address indexed operator, uint256 indexed snapshotID);
+event SnapshotTriggered(uint256 snapshotId, bytes metadata);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IsPaused();
+error SnapshotIdDoesNotExists(uint256 snapshotId);
+error SnapshotIdNull();
 ```
 
 #### Types
@@ -2665,7 +5888,7 @@ struct ScheduledTask {
 ### Snapshots By Partition
 
 - Interface: `contracts/facets/snapshotsByPartition/ISnapshotsByPartition.sol`
-- Resolver key: `SnapshotsByPartition`
+- Resolver key: `RESOLVER_KEY_SNAPSHOTS_BY_PARTITION` = `0x37c825560f21710d66419d4eefeb45ae2dadf078b1db5593749d24a7d38465ee`
 
 ```solidity
 function initializeSnapshotsByPartition() external;
@@ -2675,10 +5898,26 @@ function partitionsOfAtSnapshot(
 ) external view returns (bytes32[] memory);
 ```
 
+#### Events
+
+```solidity
+event SnapshotsByPartitionInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error SnapshotIdDoesNotExists(uint256 snapshotId);
+error SnapshotIdNull();
+```
+
 ### SSI Management
 
 - Interface: `contracts/facets/ssiManagement/ISsiManagement.sol`
-- Resolver key: `SsiManagement`
+- Resolver key: `RESOLVER_KEY_SSI_MANAGEMENT` = `0xba7dfd151d5ed77cbbf8b00c124c67331edf1e6959e7c0129dc73ee72a9c0016`
 
 ```solidity
 function initializeSsiManagement() external;
@@ -2696,6 +5935,33 @@ function getIssuerListMembers(
 ) external view returns (address[] memory members_);
 ```
 
+#### Events
+
+```solidity
+event AddedToIssuerList(address indexed operator, address indexed issuer);
+event RemovedFromIssuerList(address indexed operator, address indexed issuer);
+event RevocationRegistryUpdated(
+    address indexed oldRegistryAddress,
+    address indexed newRegistryAddress
+);
+event SsiManagementInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AccountIsNotIssuer(address issuer);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IsPaused();
+error ListedIssuer(address issuer);
+error UnlistedIssuer(address issuer);
+error ZeroAddressNotAllowed();
+```
+
 ### Static Function Selectors
 
 - Interface: `contracts/infrastructure/proxy/IStaticFunctionSelectors.sol`
@@ -2710,7 +5976,7 @@ function getStaticInterfaceIds() external pure returns (bytes4[] memory staticIn
 ### Transfer
 
 - Interface: `contracts/facets/transfer/ITransfer.sol`
-- Resolver key: `Transfer`
+- Resolver key: `RESOLVER_KEY_TRANSFER` = `0xdb0637d5ac2d3a8a460b63275e82a566d4b5ac4b9d2d2938f70c6612970a4b64`
 
 ```solidity
 function initializeTransfer() external;
@@ -2723,6 +5989,36 @@ function transferFromWithData(
     uint256 _value,
     bytes calldata _data
 ) external;
+```
+
+#### Events
+
+```solidity
+event Transfer(address indexed from, address indexed to, uint256 value);
+event TransferFromWithData(
+    address indexed sender,
+    address indexed from,
+    address indexed to,
+    uint256 amount,
+    bytes data
+);
+event TransferInitialized();
+event TransferWithData(address indexed sender, address indexed to, uint256 amount, bytes data);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
+error IsPaused();
+error NotAllowedInMultiPartitionMode();
+error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
+error WalletRecovered();
 ```
 
 ### Transfer And Lock
@@ -2742,7 +6038,7 @@ function transferAndLock(
 ### Transfer And Lock By Partition
 
 - Interface: `contracts/facets/transferAndLockByPartition/ITransferAndLockByPartition.sol`
-- Resolver key: `TransferAndLockByPartition`
+- Resolver key: `RESOLVER_KEY_TRANSFER_AND_LOCK_BY_PARTITION` = `0xb5ec128e8657ab00db44aa63e5aeded6689b18978072102b9ccb7788faf87a6e`
 
 ```solidity
 function initializeTransferAndLockByPartition() external;
@@ -2755,10 +6051,54 @@ function transferAndLockByPartition(
 ) external returns (uint256 lockId_);
 ```
 
+#### Events
+
+```solidity
+event PartitionTransferredAndLocked(
+    bytes32 indexed partition,
+    address indexed from,
+    address to,
+    uint256 value,
+    bytes data,
+    uint256 expirationTimestamp,
+    uint256 lockId
+);
+event Transfer(address indexed from, address indexed to, uint256 value);
+event TransferAndLockByPartitionInitialized();
+event TransferByPartition(
+    bytes32 indexed _fromPartition,
+    address _operator,
+    address indexed _from,
+    address indexed _to,
+    uint256 _value,
+    bytes _data,
+    bytes _operatorData
+);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
+error InvalidLockAmount();
+error InvalidPartition(address account, bytes32 partition);
+error IsPaused();
+error PartitionNotAllowedInSinglePartitionMode(bytes32 partition);
+error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
+error SnapshotIdDoesNotExists(uint256 snapshotId);
+error SnapshotIdNull();
+error WrongExpirationTimestamp();
+```
+
 ### Transfer By Partition
 
 - Interface: `contracts/facets/transferByPartition/ITransferByPartition.sol`
-- Resolver key: `TransferByPartition`
+- Resolver key: `RESOLVER_KEY_TRANSFER_BY_PARTITION` = `0xfb16c0ead8e476dfd6f2201a386b6a761b76e01aa6e21786c2d90f10036197d9`
 
 ```solidity
 function initializeTransferByPartition() external;
@@ -2767,6 +6107,66 @@ function transferByPartition(
     BasicTransferInfo calldata _basicTransferInfo,
     bytes memory _data
 ) external returns (bytes32);
+```
+
+#### Events
+
+```solidity
+event AuthorizedOperator(address indexed operator, address indexed tokenHolder);
+event AuthorizedOperatorByPartition(
+    bytes32 indexed partition,
+    address indexed operator,
+    address indexed tokenHolder
+);
+event IssuedByPartition(
+    bytes32 indexed partition,
+    address indexed operator,
+    address indexed to,
+    uint256 value,
+    bytes data
+);
+event RedeemedByPartition(
+    bytes32 indexed partition,
+    address indexed operator,
+    address indexed from,
+    uint256 value,
+    bytes data,
+    bytes operatorData
+);
+event RevokedOperator(address indexed operator, address indexed tokenHolder);
+event RevokedOperatorByPartition(
+    bytes32 indexed partition,
+    address indexed operator,
+    address indexed tokenHolder
+);
+event TransferByPartition(
+    bytes32 indexed _fromPartition,
+    address _operator,
+    address indexed _from,
+    address indexed _to,
+    uint256 _value,
+    bytes _data,
+    bytes _operatorData
+);
+event TransferByPartitionInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InvalidPartition(address account, bytes32 partition);
+error NotAllowedInMultiPartitionMode();
+error PartitionNotAllowedInSinglePartitionMode(bytes32 partition);
+error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
+error TokenHolderNotFound(address tokenHolder);
+error Unauthorized(address operator, address tokenHolder, bytes32 partition);
+error ZeroPartition();
+error ZeroValue();
 ```
 
 #### Types
@@ -2794,7 +6194,7 @@ function delegates(address account) external view returns (address);
 ### Voting
 
 - Interface: `contracts/facets/voting/IVoting.sol`
-- Resolver key: `Voting`
+- Resolver key: `RESOLVER_KEY_VOTING` = `0x88b1621426a5ad16c2399cdc8a04b7da54bf8ddf04c60aeb2fe17ad903891b58`
 
 ```solidity
 function initializeVoting() external;
@@ -2809,6 +6209,39 @@ function getVotingFor(
     address _account
 ) external view returns (VotingFor memory votingFor_);
 function getVotingCount() external view returns (uint256 votingCount_);
+```
+
+#### Events
+
+```solidity
+event VotingCancelled(uint256 voteId, address indexed operator);
+event VotingForceCancelled(uint256 voteId, address indexed operator);
+event VotingInitialized();
+event VotingSet(
+    bytes32 corporateActionId,
+    uint256 voteId,
+    address indexed operator,
+    uint256 indexed recordDate,
+    bytes data
+);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InvalidTimestamp();
+error IsPaused();
+error SnapshotIdDoesNotExists(uint256 snapshotId);
+error SnapshotIdNull();
+error UnexpectedError(bytes4 _errorId);
+error VotingAlreadyRecorded(bytes32 corporateActionId, uint256 voteId);
+error VotingRightsCreationFailed();
+error WrongIndexForAction(uint256 index, bytes32 actionType);
 ```
 
 #### Types
@@ -2840,7 +6273,7 @@ struct VotingFor {
 ### Voting Security Holders
 
 - Interface: `contracts/facets/votingSecurityHolders/IVotingSecurityHolders.sol`
-- Resolver key: `VotingSecurityHolders`
+- Resolver key: `RESOLVER_KEY_VOTING_SECURITY_HOLDERS` = `0xff4e971334f234a2d839b58b2fef84241254942cef8940a4457d1eecb63882b9`
 
 ```solidity
 function initializeVotingSecurityHolders() external;
@@ -2850,6 +6283,22 @@ function getVotingHolders(
     uint256 _pageLength
 ) external view returns (address[] memory holders_);
 function getTotalVotingHolders(uint256 _voteID) external view returns (uint256 totalHolders_);
+```
+
+#### Events
+
+```solidity
+event VotingSecurityHoldersInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error SnapshotIdDoesNotExists(uint256 snapshotId);
+error SnapshotIdNull();
 ```
 
 <!-- layer_1 -->
@@ -2910,7 +6359,7 @@ function isVerified(address _userAddress) external view returns (bool);
 ### Operator Clearing Hold By Partition
 
 - Interface: `contracts/facets/layer_1/clearing/operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol`
-- Resolver key: `OperatorClearingHoldbypartition`
+- Resolver key: `RESOLVER_KEY_OPERATOR_CLEARING_HOLDBYPARTITION` = `0xab5e4afdccea84152256072fb9f39bf08d591a7666557783209dff003658d945`
 
 ```solidity
 function initializeOperatorClearingHoldByPartition() external;
@@ -2918,6 +6367,152 @@ function operatorClearingCreateHoldByPartition(
     IClearingTypes.ClearingOperationFrom calldata _clearingOperationFrom,
     IHoldTypes.Hold calldata _hold
 ) external returns (bool success_, uint256 clearingId_);
+```
+
+#### Events
+
+```solidity
+event ClearedHoldByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    IHoldTypes.Hold hold,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedHoldFromByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    IHoldTypes.Hold hold,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedOperatorHoldByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    IHoldTypes.Hold hold,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedOperatorRedeemByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedOperatorTransferByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    address indexed to,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedRedeemByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedRedeemFromByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedTransferByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    address indexed to,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearedTransferFromByPartition(
+    address indexed operator,
+    address indexed tokenHolder,
+    address indexed to,
+    bytes32 partition,
+    uint256 clearingId,
+    uint256 amount,
+    uint256 expirationDate,
+    bytes data,
+    bytes operatorData
+);
+event ClearingActivated(address indexed operator);
+event ClearingDeactivated(address indexed operator);
+event ClearingOperationApproved(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 clearingId,
+    ClearingOperationType clearingOperationType,
+    bytes operationData
+);
+event ClearingOperationCanceled(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 clearingId,
+    ClearingOperationType clearingOperationType
+);
+event ClearingOperationReclaimed(
+    address indexed operator,
+    address indexed tokenHolder,
+    bytes32 indexed partition,
+    uint256 clearingId,
+    ClearingOperationType clearingOperationType
+);
+event OperatorClearingHoldByPartitionInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error ClearingIsActivated();
+error ClearingIsDisabled();
+error Deactivated();
+error ExpirationDateNotReached();
+error ExpirationDateReached();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InvalidClearingAmount();
+error IsPaused();
+error PartitionNotAllowedInSinglePartitionMode(bytes32 partition);
+error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
+error Unauthorized(address operator, address tokenHolder, bytes32 partition);
+error WalletRecovered();
+error WrongClearingId();
+error WrongExpirationTimestamp();
+error ZeroAddressNotAllowed();
 ```
 
 #### Types
@@ -2950,7 +6545,7 @@ struct ClearingOperation {
 ### Protected Partitions
 
 - Interface: `contracts/facets/layer_1/protectedPartition/IProtectedPartitions.sol`
-- Resolver key: `ProtectedPartitions`
+- Resolver key: `RESOLVER_KEY_PROTECTED_PARTITIONS` = `0x895834530eae98f8a742fe98f3d528d3cce6c6a51af63b495414bdf391180dd7`
 
 ```solidity
 function initializeProtectedPartitions(
@@ -2964,12 +6559,53 @@ function calculateRoleForPartition(
 ) external pure returns (bytes32 roleForPartition_);
 ```
 
+#### Events
+
+```solidity
+event PartitionsProtected(address indexed operator);
+event PartitionsUnProtected(address indexed operator);
+event ProtectedPartitionsInitialized(bool arePartitionsProtected);
+event ProtectedRedeemFrom(
+    bytes32 indexed partition,
+    address indexed operator,
+    address indexed from,
+    uint256 value,
+    uint256 deadline,
+    uint256 nonce,
+    bytes signature
+);
+event ProtectedTransferFrom(
+    bytes32 indexed partition,
+    address indexed operator,
+    address indexed from,
+    address to,
+    uint256 value,
+    uint256 deadline,
+    uint256 nonce,
+    bytes signature
+);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IsPaused();
+error PartitionsAreProtected();
+error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
+error PartitionsAreUnProtected();
+```
+
 <!-- layer_2 -->
 
 ### Amortization
 
 - Interface: `contracts/facets/layer_2/amortization/IAmortization.sol`
-- Resolver key: `Amortization`
+- Resolver key: `RESOLVER_KEY_AMORTIZATION` = `0xc0d83d8b9295f78954b1c7c9648bec9775edf597a57f9f4110883e9ca2134739`
 
 ```solidity
 function initializeAmortization() external;
@@ -3015,6 +6651,78 @@ function getActiveAmortizationIds(
     uint256 _pageLength
 ) external view returns (uint256[] memory activeIds_);
 function getTotalActiveAmortizationIds() external view returns (uint256);
+```
+
+#### Events
+
+```solidity
+event AmortizationCancelled(uint256 amortizationId, address indexed operator);
+event AmortizationForceCancelled(uint256 amortizationId, address indexed operator);
+event AmortizationHoldReleased(
+    bytes32 indexed corporateActionId,
+    uint256 indexed amortizationID,
+    address indexed tokenHolder,
+    uint256 holdId
+);
+event AmortizationHoldSet(
+    bytes32 indexed corporateActionId,
+    uint256 indexed amortizationID,
+    address indexed tokenHolder,
+    uint256 holdId,
+    uint256 tokenAmount
+);
+event AmortizationInitialized();
+event AmortizationSet(
+    bytes32 corporateActionId,
+    uint256 amortizationId,
+    address indexed operator,
+    uint256 recordDate,
+    uint256 executionDate
+);
+event Approval(address indexed owner, address indexed spender, uint256 value);
+event Transfer(address indexed from, address indexed to, uint256 value);
+event TransferByPartition(
+    bytes32 indexed _fromPartition,
+    address _operator,
+    address indexed _from,
+    address indexed _to,
+    uint256 _value,
+    bytes _data,
+    bytes _operatorData
+);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AmortizationAlreadyExecuted(bytes32 corporateActionId, uint256 amortizationId);
+error AmortizationCreationFailed();
+error AmortizationHasActiveHolds(bytes32 corporateActionId, uint256 amortizationID);
+error AmortizationHoldFailed(bytes32 corporateActionId, uint256 amortizationID);
+error AmortizationHoldNotActive(
+    bytes32 corporateActionId,
+    uint256 amortizationID,
+    address tokenHolder
+);
+error AmortizationNotActive(bytes32 corporateActionId, uint256 amortizationID);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
+error InsufficientHoldBalance(uint256 holdAmount, uint256 amount);
+error InvalidAmortizationHoldAmount(uint256 amortizationID);
+error InvalidHoldAmount();
+error InvalidPartition(address account, bytes32 partition);
+error InvalidTimestamp();
+error IsPaused();
+error NotAllowedInMultiPartitionMode();
+error SnapshotIdDoesNotExists(uint256 snapshotId);
+error SnapshotIdNull();
+error UnexpectedError(bytes4 _errorId);
+error WrongDates(uint256 firstDate, uint256 secondDate);
+error WrongIndexForAction(uint256 index, bytes32 actionType);
 ```
 
 #### Types
@@ -3114,12 +6822,31 @@ enum DividendType {
 ### Fixed Rate
 
 - Interface: `contracts/facets/layer_2/interestRate/fixedRate/IFixedRate.sol`
-- Resolver key: `FixedRate`
+- Resolver key: `RESOLVER_KEY_FIXED_RATE` = `0x82f13d957a7f7af45723926c5ca1a184f2d667df5221c37434ce37278a9af521`
 
 ```solidity
 function initializeFixedRate(FixedRateData calldata _initData) external;
 function setRate(uint256 _newRate, uint8 _newRateDecimals) external;
 function getRate() external view returns (uint256 rate_, uint8 decimals_);
+```
+
+#### Events
+
+```solidity
+event FixedRateInitialized(FixedRateData initData);
+event RateUpdated(address indexed operator, uint256 newRate, uint8 newRateDecimals);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InterestRateIsFixed();
+error IsPaused();
 ```
 
 #### Types
@@ -3135,7 +6862,7 @@ struct FixedRateData {
 ### KPI Linked Rate
 
 - Interface: `contracts/facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol`
-- Resolver key: `KpiLinkedRate`
+- Resolver key: `RESOLVER_KEY_KPI_LINKED_RATE` = `0x47cd76ae576f0ec85f1abfc652d614750caefe22a465bef2c859f6cb32a89593`
 
 ```solidity
 function initializeKpiLinkedRate(
@@ -3146,6 +6873,27 @@ function setKpiLinkedRateInterestRate(InterestRate calldata _newInterestRate) ex
 function setKpiLinkedRateImpactData(ImpactData calldata _newImpactData) external;
 function getKpiLinkedRateInterestRate() external view returns (InterestRate memory interestRate_);
 function getKpiLinkedRateImpactData() external view returns (ImpactData memory impactData_);
+```
+
+#### Events
+
+```solidity
+event ImpactDataUpdated(address indexed operator, ImpactData newImpactData);
+event InterestRateUpdated(address indexed operator, InterestRate newInterestRate);
+event KpiLinkedRateInitialized(InterestRate interestRate, ImpactData impactData);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IsPaused();
+error WrongImpactDataValues(ImpactData impactData);
+error WrongInterestRateValues(InterestRate interestRate);
 ```
 
 #### Types
@@ -3176,7 +6924,7 @@ struct ImpactData {
 ### KPIs
 
 - Interface: `contracts/facets/layer_2/kpi/kpiLatest/IKpis.sol`
-- Resolver key: `Kpis`
+- Resolver key: `RESOLVER_KEY_KPIS` = `0xc0b75e6f4facfa630926f9653b857eeb3547c604941b210701f53f3b17521743`
 
 ```solidity
 function initializeKpis() external;
@@ -3190,15 +6938,59 @@ function getMinDate() external view returns (uint256 minDate_);
 function isCheckPointDate(uint256 _date, address _project) external view returns (bool exists_);
 ```
 
+#### Events
+
+```solidity
+event KpiDataAdded(address indexed project, uint256 date, uint256 value);
+event KpisInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error CouponNotFound(uint256 couponID);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InvalidDate(uint256 providedDate, uint256 minDate, uint256 maxDate);
+error InvalidDateRange(uint256 fromDate, uint256 toDate);
+error IsPaused();
+error KpiDataAlreadyExists(uint256 date);
+error UnexpectedError(bytes4 _errorId);
+```
+
 ### Loan
 
 - Interface: `contracts/facets/layer_2/loan/ILoan.sol`
-- Resolver key: `Loan`
+- Resolver key: `RESOLVER_KEY_LOAN` = `0x17c2126e932655e91a8e803b275de0a930c4b51a109b751567a95ee5d6bd6eba`
 
 ```solidity
 function initializeLoan(LoanDetailsData calldata _loanDetailsData) external;
 function setLoanDetails(LoanDetailsData calldata loanDetailsData_) external;
 function getLoanDetails() external view returns (LoanDetailsData memory loanDetailsData_);
+```
+
+#### Events
+
+```solidity
+event LoanDetailsSet(LoanDetailsData loanDetails);
+event LoanInitialized(LoanDetailsData loanDetailsData);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InvalidTimestamp();
+error IsPaused();
+error WrongDates(uint256 firstDate, uint256 secondDate);
+error ZeroAddressNotAllowed();
 ```
 
 #### Types
@@ -3314,7 +7106,7 @@ enum PerformanceStatus {
 ### Loans Portfolio
 
 - Interface: `contracts/facets/layer_2/loansPortfolio/ILoansPortfolio.sol`
-- Resolver key: `LoansPortfolio`
+- Resolver key: `RESOLVER_KEY_LOANS_PORTFOLIO` = `0x3f6ea14bbeaea82befb49409b874caf151715c6619ac1d26ba858039b7ece33e`
 
 ```solidity
 function initializeLoansPortfolio(
@@ -3358,6 +7150,32 @@ function getNonPerformingLoansRatio(
 function getDefaultedLoansRatio() external view returns (uint256 numerator_, uint256 denominator_);
 function getGeographicalExposure(
 ) external view returns (GeographicalExposureData[] memory geographicalExposure_);
+```
+
+#### Events
+
+```solidity
+event HoldingsAssetAdded(HoldingsAsset holdingsAsset);
+event HoldingsAssetRemoved(HoldingsAsset holdingsAsset);
+event LoanHoldingsAssetUpdated(address loanHoldingsAsset);
+event LoansPortfolioInitialized(LoansPortfolioDetailsData loansPortfolioData);
+event LoansPortfolioWithdrawn(address assetAddress, address to, uint256 amount);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error HoldingAssetNotFound(address assetAddress);
+error HoldingsAssetAlreadyExists(address assetAddress);
+error HoldingsAssetTypeNotSupported(uint8 holdingsAssetType);
+error IsPaused();
+error ZeroAddressNotAllowed();
+error ZeroValue();
 ```
 
 #### Types
@@ -3410,7 +7228,7 @@ enum HoldingsAssetType {
 ### Nominal Value
 
 - Interface: `contracts/facets/layer_2/nominalValue/INominalValue.sol`
-- Resolver key: `NominalValue`
+- Resolver key: `RESOLVER_KEY_NOMINAL_VALUE` = `0xfa54bc09a6a76763f17be0504e29b9c28edd15cdc3432c07f92c2b6962f2fbbe`
 
 ```solidity
 function initializeNominalValue(
@@ -3425,10 +7243,32 @@ function getNominalValueDecimals() external view returns (uint8);
 function getNominalValueCurrency() external view returns (bytes3);
 ```
 
+#### Events
+
+```solidity
+event NominalValueCurrencySet(address indexed operator, bytes3 nominalValueCurrency);
+event NominalValueInitialized(
+    uint256 nominalValue,
+    uint8 nominalValueDecimals,
+    bytes3 nominalValueCurrency
+);
+event NominalValueSet(address indexed operator, uint256 nominalValue, uint8 nominalValueDecimals);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+```
+
 ### Scheduled Cross Ordered Tasks
 
 - Interface: `contracts/facets/layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol`
-- Resolver key: `ScheduledTasks`
+- Resolver key: `RESOLVER_KEY_SCHEDULED_TASKS` = `0x53ea769a267213f8e35c975a0dba3d7d8d73163d53f804c2ac6ea37d6c47c082`
 
 ```solidity
 function initializeScheduledCrossOrderedTasks() external;
@@ -3439,6 +7279,28 @@ function getScheduledCrossOrderedTasks(
     uint256 _pageIndex,
     uint256 _pageLength
 ) external view returns (ScheduledTask[] memory scheduledTask_);
+```
+
+#### Events
+
+```solidity
+event ScheduledCrossOrderedTasksInitialized();
+event TaskExecutionFailed(
+    bytes32 indexed actionId,
+    bytes32 indexed taskType,
+    uint256 scheduledTimestamp
+);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IsPaused();
 ```
 
 #### Types
@@ -3454,7 +7316,7 @@ struct ScheduledTask {
 ### Security
 
 - Interface: `contracts/facets/layer_2/security/ISecurity.sol`
-- Resolver key: `Security`
+- Resolver key: `RESOLVER_KEY_SECURITY` = `0x4a0ea8dcc902efa355c705fe7211cb0da08f05ad9fc8888237dd67a8c4dc6f1a`
 
 ```solidity
 function initializeSecurity(
@@ -3463,6 +7325,23 @@ function initializeSecurity(
 ) external;
 function getSecurityRegulationData(
 ) external view returns (SecurityRegulationData memory securityRegulationData_);
+```
+
+#### Events
+
+```solidity
+event SecurityInitialized(
+    RegulationData regulationData,
+    AdditionalSecurityData additionalSecurityData
+);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 ```
 
 #### Types
@@ -3537,10 +7416,30 @@ enum ResaleHoldPeriod {
 ### Bond USA
 
 - Interface: `contracts/facets/layer_3/bondUSA/IBondUSA.sol`
-- Resolver key: `BondVariableRate`
+- Resolver key: `RESOLVER_KEY_BOND_VARIABLE_RATE` = `0xbc8b53a2f8803b138aac441fbeb6b767a51b66a5f4d735c3d15af67cc72b9daa`
 
 ```solidity
 function initializeBondUSA(IBondTypes.BondDetailsData calldata _bondDetailsData) external;
+```
+
+#### Events
+
+```solidity
+event BondUSAInitialized(IBondTypes.BondDetailsData bondDetailsData);
+event MaturityDateUpdated(
+    address indexed bondId,
+    uint256 indexed maturityDate,
+    uint256 indexed previousMaturityDate
+);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error BondMaturityDateWrong();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 ```
 
 #### Types
@@ -3559,10 +7458,24 @@ struct BondDetailsData {
 ### Equity USA
 
 - Interface: `contracts/facets/layer_3/equityUSA/IEquityUSA.sol`
-- Resolver key: `Equity`
+- Resolver key: `RESOLVER_KEY_EQUITY` = `0x32d1b4f5d593b1e786f1c491656e2db7e35a80754244b3c5e787a03db7fcef31`
 
 ```solidity
 function initializeEquityUSA(EquityDetailsData calldata _equityDetailsData) external;
+```
+
+#### Events
+
+```solidity
+event EquityUSAInitialized(EquityDetailsData equityDetailsData);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 ```
 
 #### Types
@@ -3589,1817 +7502,6 @@ enum DividendType {
     PREFERRED,
     COMMON
 }
-```
-
-## Events
-
-```solidity
-// declared in contracts/facets/accessControl/IAccessControl.sol, contracts/factory/ERC3643/interfaces/IAccessControl.sol
-event AccessControlInitialized();
-
-// declared in contracts/test/mocks/MockedExternalBlacklist.sol
-event AddedToBlacklist(address indexed account);
-
-// declared in contracts/facets/controlList/IControlList.sol
-event AddedToControlList(address indexed operator, address indexed account);
-
-// declared in contracts/facets/externalControlListManagement/IExternalControlListManagement.sol
-event AddedToExternalControlLists(address indexed operator, address controlList);
-
-// declared in contracts/facets/externalKycListManagement/IExternalKycListManagement.sol
-event AddedToExternalKycLists(address indexed operator, address kycList);
-
-// declared in contracts/facets/externalPauseManagement/IExternalPauseManagement.sol
-event AddedToExternalPauses(address indexed operator, address pause);
-
-// declared in contracts/facets/ssiManagement/ISsiManagement.sol
-event AddedToIssuerList(address indexed operator, address indexed issuer);
-
-// declared in contracts/test/mocks/MockedExternalWhitelist.sol
-event AddedToWhitelist(address indexed account);
-
-// declared in contracts/facets/freeze/IFreeze.sol
-event AddressFrozen(address indexed userAddress, bool indexed isFrozen, address indexed owner);
-
-// declared in contracts/facets/adjustBalances/IAdjustBalances.sol
-event AdjustmentBalanceSet(address indexed operator, uint256 factor, uint8 decimals);
-
-// declared in contracts/facets/layer_1/ERC3643/IERC3643Types.sol
-event AgentAdded(address indexed _agent);
-
-// declared in contracts/facets/layer_1/ERC3643/IERC3643Types.sol
-event AgentRemoved(address indexed _agent);
-
-// declared in contracts/facets/allowance/IAllowance.sol
-event AllowanceInitialized();
-
-// declared in contracts/facets/layer_2/amortization/IAmortization.sol
-event AmortizationCancelled(uint256 amortizationId, address indexed operator);
-
-// declared in contracts/facets/layer_2/amortization/IAmortization.sol
-event AmortizationForceCancelled(uint256 amortizationId, address indexed operator);
-
-// declared in contracts/facets/layer_2/amortization/IAmortization.sol
-event AmortizationHoldReleased(
-    bytes32 indexed corporateActionId,
-    uint256 indexed amortizationID,
-    address indexed tokenHolder,
-    uint256 holdId
-);
-
-// declared in contracts/facets/layer_2/amortization/IAmortization.sol
-event AmortizationHoldSet(
-    bytes32 indexed corporateActionId,
-    uint256 indexed amortizationID,
-    address indexed tokenHolder,
-    uint256 holdId,
-    uint256 tokenAmount
-);
-
-// declared in contracts/facets/layer_2/amortization/IAmortization.sol
-event AmortizationInitialized();
-
-// declared in contracts/facets/layer_2/amortization/IAmortization.sol
-event AmortizationSet(
-    bytes32 corporateActionId,
-    uint256 amortizationId,
-    address indexed operator,
-    uint256 recordDate,
-    uint256 executionDate
-);
-
-// declared in contracts/facets/allowance/IAllowanceTypes.sol
-event Approval(address indexed owner, address indexed spender, uint256 value);
-
-// declared in contracts/facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol
-event AuthorizedOperator(address indexed operator, address indexed tokenHolder);
-
-// declared in contracts/facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol
-event AuthorizedOperatorByPartition(
-    bytes32 indexed partition,
-    address indexed operator,
-    address indexed tokenHolder
-);
-
-// declared in contracts/facets/adjustBalances/IAdjustBalances.sol
-event BalanceAdjustmentsInitialized();
-
-// declared in contracts/facets/balanceTrackerAdjusted/IBalanceTrackerAdjusted.sol
-event BalanceTrackerAdjustedInitialized();
-
-// declared in contracts/facets/balanceTrackerAtSnapshotByPartition/IBalanceTrackerAtSnapshotByPartition.sol
-event BalanceTrackerAtSnapshotByPartitionInitialized();
-
-// declared in contracts/facets/balanceTrackerAtSnapshot/IBalanceTrackerAtSnapshot.sol
-event BalanceTrackerAtSnapshotInitialized();
-
-// declared in contracts/facets/balanceTrackerByPartition/IBalanceTrackerByPartition.sol
-event BalanceTrackerByPartitionInitialized();
-
-// declared in contracts/facets/balanceTracker/IBalanceTracker.sol
-event BalanceTrackerInitialized();
-
-// declared in contracts/facets/batchBurn/IBatchBurn.sol
-event BatchBurnInitialized();
-
-// declared in contracts/facets/batchController/IBatchController.sol
-event BatchControllerInitialized();
-
-// declared in contracts/facets/batchFreeze/IBatchFreeze.sol
-event BatchFreezeInitialized();
-
-// declared in contracts/facets/batchMint/IBatchMint.sol
-event BatchMintInitialized();
-
-// declared in contracts/facets/batchTransfer/IBatchTransfer.sol
-event BatchTransferInitialized();
-
-// declared in contracts/factory/ERC3643/interfaces/IFactory.sol, contracts/factory/IFactory.sol
-event BondDeployed(
-    address indexed deployer,
-    address bondAddress,
-    BondData bondData,
-    FactoryRegulationData regulationData
-);
-
-// declared in contracts/test/mocks/MockFactory.sol
-event BondFixedRateDeployed(
-    address indexed deployer,
-    address bondAddress,
-    BondFixedRateData bondFixedRateData
-);
-
-// declared in contracts/test/mocks/MockFactory.sol
-event BondKpiLinkedRateDeployed(
-    address indexed deployer,
-    address bondAddress,
-    BondKpiLinkedRateData bondKpiLinkedRateData
-);
-
-// declared in contracts/facets/layer_3/bondUSA/IBondUSA.sol
-event BondUSAInitialized(IBondTypes.BondDetailsData bondDetailsData);
-
-// declared in contracts/facets/layer_2/bond/IBondRead.sol, contracts/factory/ERC3643/interfaces/IBondRead.sol
-event BondUSAReadInitialized();
-
-// declared in contracts/facets/burnByPartition/IBurnByPartition.sol
-event BurnByPartitionInitialized();
-
-// declared in contracts/facets/burn/IBurn.sol
-event BurnInitialized();
-
-// declared in contracts/factory/ERC3643/interfaces/IBusinessLogicResolver.sol, contracts/infrastructure/diamond/IBusinessLogicResolver.sol
-event BusinessLogicResolverInitialized();
-
-// declared in contracts/factory/ERC3643/interfaces/IBusinessLogicResolver.sol, contracts/infrastructure/diamond/IBusinessLogicResolver.sol
-event BusinessLogicsRegistered(
-    BusinessLogicRegistryData[] businessLogics,
-    uint256[] newLatestVersions
-);
-
-// declared in contracts/facets/capByPartition/ICapByPartition.sol
-event CapByPartitionInitialized();
-
-// declared in contracts/facets/cap/ICap.sol
-event CapInitialized(uint256 maxSupply, ICap.PartitionCap[] partitionCap);
-
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
-event ClearedHoldByPartition(
-    address indexed operator,
-    address indexed tokenHolder,
-    bytes32 partition,
-    uint256 clearingId,
-    IHoldTypes.Hold hold,
-    uint256 expirationDate,
-    bytes data,
-    bytes operatorData
-);
-
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
-event ClearedHoldFromByPartition(
-    address indexed operator,
-    address indexed tokenHolder,
-    bytes32 partition,
-    uint256 clearingId,
-    IHoldTypes.Hold hold,
-    uint256 expirationDate,
-    bytes data,
-    bytes operatorData
-);
-
-// declared in contracts/facets/layer_1/clearing/operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol
-event ClearedOperatorHoldByPartition(
-    address indexed operator,
-    address indexed tokenHolder,
-    bytes32 partition,
-    uint256 clearingId,
-    IHoldTypes.Hold hold,
-    uint256 expirationDate,
-    bytes data,
-    bytes operatorData
-);
-
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
-event ClearedOperatorRedeemByPartition(
-    address indexed operator,
-    address indexed tokenHolder,
-    bytes32 partition,
-    uint256 clearingId,
-    uint256 amount,
-    uint256 expirationDate,
-    bytes data,
-    bytes operatorData
-);
-
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
-event ClearedOperatorTransferByPartition(
-    address indexed operator,
-    address indexed tokenHolder,
-    address indexed to,
-    bytes32 partition,
-    uint256 clearingId,
-    uint256 amount,
-    uint256 expirationDate,
-    bytes data,
-    bytes operatorData
-);
-
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
-event ClearedRedeemByPartition(
-    address indexed operator,
-    address indexed tokenHolder,
-    bytes32 partition,
-    uint256 clearingId,
-    uint256 amount,
-    uint256 expirationDate,
-    bytes data,
-    bytes operatorData
-);
-
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
-event ClearedRedeemFromByPartition(
-    address indexed operator,
-    address indexed tokenHolder,
-    bytes32 partition,
-    uint256 clearingId,
-    uint256 amount,
-    uint256 expirationDate,
-    bytes data,
-    bytes operatorData
-);
-
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
-event ClearedTransferByPartition(
-    address indexed operator,
-    address indexed tokenHolder,
-    address indexed to,
-    bytes32 partition,
-    uint256 clearingId,
-    uint256 amount,
-    uint256 expirationDate,
-    bytes data,
-    bytes operatorData
-);
-
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
-event ClearedTransferFromByPartition(
-    address indexed operator,
-    address indexed tokenHolder,
-    address indexed to,
-    bytes32 partition,
-    uint256 clearingId,
-    uint256 amount,
-    uint256 expirationDate,
-    bytes data,
-    bytes operatorData
-);
-
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
-event ClearingActivated(address indexed operator);
-
-// declared in contracts/facets/clearingAtSnapshotByPartition/IClearingAtSnapshotByPartition.sol
-event ClearingAtSnapshotByPartitionInitialized();
-
-// declared in contracts/facets/clearingAtSnapshot/IClearingAtSnapshot.sol
-event ClearingAtSnapshotInitialized();
-
-// declared in contracts/facets/clearingByPartition/IClearingByPartition.sol
-event ClearingByPartitionInitialized();
-
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
-event ClearingDeactivated(address indexed operator);
-
-// declared in contracts/facets/clearingHoldByPartition/IClearingHoldByPartition.sol
-event ClearingHoldByPartitionInitialized();
-
-// declared in contracts/facets/clearing/IClearing.sol
-event ClearingInitialized(bool clearingActive);
-
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
-event ClearingOperationApproved(
-    address indexed operator,
-    address indexed tokenHolder,
-    bytes32 indexed partition,
-    uint256 clearingId,
-    ClearingOperationType clearingOperationType,
-    bytes operationData
-);
-
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
-event ClearingOperationCanceled(
-    address indexed operator,
-    address indexed tokenHolder,
-    bytes32 indexed partition,
-    uint256 clearingId,
-    ClearingOperationType clearingOperationType
-);
-
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
-event ClearingOperationReclaimed(
-    address indexed operator,
-    address indexed tokenHolder,
-    bytes32 indexed partition,
-    uint256 clearingId,
-    ClearingOperationType clearingOperationType
-);
-
-// declared in contracts/facets/layer_1/ERC3643/IERC3643Types.sol
-event ComplianceAdded(address indexed compliance);
-
-// declared in contracts/test/mocks/MockComplianceModule.sol
-event ComplianceBound(address indexed _compliance);
-
-// declared in contracts/facets/complianceByPartition/IComplianceByPartition.sol
-event ComplianceByPartitionInitialized();
-
-// declared in contracts/facets/compliance/IComplianceFacet.sol
-event ComplianceInitialized(address compliance);
-
-// declared in contracts/test/mocks/MockComplianceModule.sol
-event ComplianceUnbound(address indexed _compliance);
-
-// declared in contracts/test/mocks/MockComplianceModule.sol
-event ConfigSet(address indexed _compliance, uint256 value);
-
-// declared in contracts/facets/controllerByPartition/IControllerByPartition.sol
-event ControllerByPartitionInitialized();
-
-// declared in contracts/facets/layer_1/hold/IHoldTypes.sol
-event ControllerHeldByPartition(
-    address indexed operator,
-    address indexed tokenHolder,
-    bytes32 partition,
-    uint256 holdId,
-    Hold hold,
-    bytes operatorData
-);
-
-// declared in contracts/facets/controllerHoldByPartition/IControllerHoldByPartition.sol
-event ControllerHoldByPartitionInitialized();
-
-// declared in contracts/facets/controller/IController.sol
-event ControllerInitialized(bool controllable);
-
-// declared in contracts/facets/controller/IController.sol
-event ControllerRedemption(
-    address _controller,
-    address indexed _tokenHolder,
-    uint256 _value,
-    bytes _data,
-    bytes _operatorData
-);
-
-// declared in contracts/facets/controller/IController.sol
-event ControllerTransfer(
-    address _controller,
-    address indexed _from,
-    address indexed _to,
-    uint256 _value,
-    bytes _data,
-    bytes _operatorData
-);
-
-// declared in contracts/facets/controlList/IControlList.sol
-event ControlListInitialized(bool isWhiteList);
-
-// declared in contracts/facets/coreAdjusted/ICoreAdjusted.sol
-event CoreAdjustedInitialized();
-
-// declared in contracts/facets/coreAtSnapshot/ICoreAtSnapshot.sol
-event CoreAtSnapshotInitialized();
-
-// declared in contracts/facets/core/ICore.sol, contracts/factory/ERC3643/interfaces/ICore.sol
-event CoreInitialized(ERC20Metadata metadata);
-
-// declared in contracts/facets/corporateActions/ICorporateActions.sol
-event CorporateActionAdded(
-    address indexed operator,
-    bytes32 indexed actionType,
-    bytes32 indexed corporateActionId,
-    uint256 corporateActionIdByType,
-    bytes data
-);
-
-// declared in contracts/facets/corporateActions/ICorporateActions.sol
-event CorporateActionCancelled(bytes32 indexed corporateActionId);
-
-// declared in contracts/facets/corporateActions/ICorporateActions.sol
-event CorporateActionsInitialized();
-
-// declared in contracts/facets/coupon/ICoupon.sol
-event CouponCancelled(uint256 indexed couponId, address indexed operator);
-
-// declared in contracts/facets/coupon/ICoupon.sol
-event CouponForceCancelled(uint256 indexed couponId, address indexed operator);
-
-// declared in contracts/facets/coupon/ICoupon.sol
-event CouponInitialized();
-
-// declared in contracts/facets/couponListing/ICouponListing.sol, contracts/factory/ERC3643/interfaces/ICouponListing.sol
-event CouponListingInitialized();
-
-// declared in contracts/facets/interestRate/IInterestRate.sol
-event CouponRateTypeSet(address indexed operator, RateType rateType);
-
-// declared in contracts/facets/couponSecurityHolders/ICouponSecurityHolders.sol
-event CouponSecurityHoldersInitialized();
-
-// declared in contracts/facets/coupon/ICoupon.sol
-event CouponSet(
-    bytes32 indexed corporateActionId,
-    uint256 indexed couponId,
-    address indexed operator,
-    Coupon coupon
-);
-
-// declared in contracts/facets/customData/ICustomData.sol
-event CustomDataInitialized();
-
-// declared in contracts/facets/deactivate/IDeactivate.sol
-event DeactivateInitialized();
-
-// declared in contracts/facets/erc20Votes/IERC20Votes.sol
-event DelegateChanged(
-    address indexed delegator,
-    address indexed fromDelegate,
-    address indexed toDelegate
-);
-
-// declared in contracts/facets/erc20Votes/IERC20Votes.sol
-event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance);
-
-// declared in contracts/factory/ERC3643/libraries/core/TREXBaseDeploymentLib.sol
-event Deployed(address indexed _addr);
-
-// declared in contracts/factory/ERC3643/interfaces/IFactory.sol, contracts/factory/IFactory.sol
-event DepositTokenDeployed(
-    address indexed deployer,
-    address depositTokenAddress,
-    DepositTokenData depositTokenData,
-    FactoryRegulationData regulationData
-);
-
-// declared in contracts/factory/ERC3643/interfaces/IDiamondCutManager.sol, contracts/infrastructure/diamond/IDiamondCutManager.sol
-event DiamondBatchConfigurationCanceled(bytes32 indexed configurationId, uint256 version);
-
-// declared in contracts/factory/ERC3643/interfaces/IDiamondCutManager.sol, contracts/infrastructure/diamond/IDiamondCutManager.sol
-event DiamondBatchConfigurationCreated(
-    bytes32 configurationId,
-    FacetConfiguration[] facetConfigurations,
-    bool _isLastBatch,
-    uint256 version
-);
-
-// declared in contracts/factory/ERC3643/interfaces/IDiamondCutManager.sol, contracts/infrastructure/diamond/IDiamondCutManager.sol
-event DiamondConfigurationCreated(
-    bytes32 configurationId,
-    FacetConfiguration[] facetConfigurations,
-    uint256 version
-);
-
-// declared in contracts/infrastructure/diamond/IDiamondFacet.sol
-event DiamondCutInitialized();
-
-// declared in contracts/facets/dividend/IDividend.sol
-event DividendCancelled(uint256 dividendId, address indexed operator);
-
-// declared in contracts/facets/dividend/IDividend.sol
-event DividendForceCancelled(uint256 dividendId, address indexed operator);
-
-// declared in contracts/facets/dividend/IDividend.sol
-event DividendInitialized();
-
-// declared in contracts/facets/dividendSecurityHolders/IDividendSecurityHolders.sol
-event DividendSecurityHoldersInitialized();
-
-// declared in contracts/facets/dividend/IDividend.sol
-event DividendSet(
-    bytes32 corporateActionId,
-    uint256 dividendId,
-    address indexed operator,
-    uint256 indexed recordDate,
-    uint256 indexed executionDate,
-    uint256 amount,
-    uint8 amountDecimals
-);
-
-// declared in contracts/facets/documentation/IDocumentation.sol
-event DocumentationInitialized();
-
-// declared in contracts/facets/documentation/IDocumentation.sol
-event DocumentRemoved(bytes32 indexed name, string uri, bytes32 documentHash);
-
-// declared in contracts/facets/documentation/IDocumentation.sol
-event DocumentUpdated(bytes32 indexed name, string uri, bytes32 documentHash);
-
-// declared in contracts/facets/eip712/IEIP712.sol
-event EIP712Initialized();
-
-// declared in contracts/factory/ERC3643/interfaces/IFactory.sol, contracts/factory/IFactory.sol
-event EquityDeployed(
-    address indexed deployer,
-    address equityAddress,
-    EquityData equityData,
-    FactoryRegulationData regulationData
-);
-
-// declared in contracts/facets/layer_3/equityUSA/IEquityUSA.sol
-event EquityUSAInitialized(EquityDetailsData equityDetailsData);
-
-// declared in contracts/facets/mint/IMint.sol
-event ERC1594Initialized();
-
-// declared in contracts/facets/erc20Permit/IERC20Permit.sol
-event ERC20PermitInitialized();
-
-// declared in contracts/facets/erc20Votes/IERC20Votes.sol
-event ERC20VotesInitialized(bool activated);
-
-// declared in contracts/facets/externalControlListManagement/IExternalControlListManagement.sol
-event ExternalControlListInitialized(address[] controlLists);
-
-// declared in contracts/facets/externalControlListManagement/IExternalControlListManagement.sol
-event ExternalControlListsUpdated(address indexed operator, address[] controlLists, bool[] actives);
-
-// declared in contracts/facets/externalKycListManagement/IExternalKycListManagement.sol
-event ExternalKycListInitialized(address[] kycLists);
-
-// declared in contracts/facets/externalKycListManagement/IExternalKycListManagement.sol
-event ExternalKycListsUpdated(address indexed operator, address[] kycLists, bool[] actives);
-
-// declared in contracts/facets/externalPauseManagement/IExternalPauseManagement.sol
-event ExternalPauseInitialized(address[] pauses);
-
-// declared in contracts/facets/externalPauseManagement/IExternalPauseManagement.sol
-event ExternalPausesUpdated(address indexed operator, address[] pauses, bool[] actives);
-
-// declared in contracts/facets/controller/IController.sol
-event FinalizedControllerFeature(address operator);
-
-// declared in contracts/facets/layer_2/interestRate/fixedRate/IFixedRate.sol, contracts/factory/ERC3643/interfaces/IFixedRate.sol
-event FixedRateInitialized(FixedRateData initData);
-
-// declared in contracts/facets/freezeAtSnapshotByPartition/IFreezeAtSnapshotByPartition.sol
-event FreezeAtSnapshotByPartitionInitialized();
-
-// declared in contracts/facets/freezeAtSnapshot/IFreezeAtSnapshot.sol
-event FreezeAtSnapshotInitialized();
-
-// declared in contracts/facets/freeze/IFreeze.sol
-event FreezeInitialized();
-
-// declared in contracts/facets/layer_1/hold/IHoldTypes.sol
-event HeldByPartition(
-    address indexed operator,
-    address indexed tokenHolder,
-    bytes32 partition,
-    uint256 holdId,
-    Hold hold,
-    bytes operatorData
-);
-
-// declared in contracts/facets/layer_1/hold/IHoldTypes.sol
-event HeldFromByPartition(
-    address indexed operator,
-    address indexed tokenHolder,
-    bytes32 partition,
-    uint256 holdId,
-    Hold hold,
-    bytes operatorData
-);
-
-// declared in contracts/facets/holdAtSnapshotByPartition/IHoldAtSnapshotByPartition.sol
-event HoldAtSnapshotByPartitionInitialized();
-
-// declared in contracts/facets/holdAtSnapshot/IHoldAtSnapshot.sol
-event HoldAtSnapshotInitialized();
-
-// declared in contracts/facets/layer_1/hold/IHoldTypes.sol
-event HoldByPartitionExecuted(
-    address indexed tokenHolder,
-    bytes32 indexed partition,
-    uint256 holdId,
-    uint256 amount,
-    address to
-);
-
-// declared in contracts/facets/holdByPartition/IHoldByPartition.sol
-event HoldByPartitionInitialized();
-
-// declared in contracts/facets/layer_1/hold/IHoldTypes.sol
-event HoldByPartitionReclaimed(
-    address indexed operator,
-    address indexed tokenHolder,
-    bytes32 indexed partition,
-    uint256 holdId,
-    uint256 amount
-);
-
-// declared in contracts/facets/layer_1/hold/IHoldTypes.sol
-event HoldByPartitionReleased(
-    address indexed tokenHolder,
-    bytes32 indexed partition,
-    uint256 holdId,
-    uint256 amount
-);
-
-// declared in contracts/facets/layer_2/loansPortfolio/ILoansPortfolio.sol
-event HoldingsAssetAdded(HoldingsAsset holdingsAsset);
-
-// declared in contracts/facets/layer_2/loansPortfolio/ILoansPortfolio.sol
-event HoldingsAssetRemoved(HoldingsAsset holdingsAsset);
-
-// declared in contracts/facets/hold/IHoldFacet.sol
-event HoldInitialized();
-
-// declared in contracts/facets/identity/IIdentity.sol
-event IdentityInitialized(address identityRegistry);
-
-// declared in contracts/facets/layer_1/ERC3643/IERC3643Types.sol
-event IdentityRegistryAdded(address indexed identityRegistry);
-
-// declared in contracts/facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol, contracts/factory/ERC3643/interfaces/IKpiLinkedRate.sol
-event ImpactDataUpdated(address indexed operator, ImpactData newImpactData);
-
-// declared in contracts/facets/initializer/IInitializer.sol
-event InitializerInitialized(uint256 maxInitializerFacetIndex);
-
-// declared in contracts/facets/interestRate/IInterestRate.sol
-event InterestRateTypeInitialized(RateType rateType);
-
-// declared in contracts/facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol, contracts/factory/ERC3643/interfaces/IKpiLinkedRate.sol
-event InterestRateUpdated(address indexed operator, InterestRate newInterestRate);
-
-// declared in contracts/facets/kyc/IKyc.sol
-event InternalKycStatusUpdated(address indexed operator, bool activated);
-
-// declared in contracts/facets/mint/IMint.sol
-event Issued(address indexed _operator, address indexed _to, uint256 _value, bytes _data);
-
-// declared in contracts/facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol
-event IssuedByPartition(
-    bytes32 indexed partition,
-    address indexed operator,
-    address indexed to,
-    uint256 value,
-    bytes data
-);
-
-// declared in contracts/facets/layer_2/kpi/kpiLatest/IKpis.sol
-event KpiDataAdded(address indexed project, uint256 date, uint256 value);
-
-// declared in contracts/facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol, contracts/factory/ERC3643/interfaces/IKpiLinkedRate.sol
-event KpiLinkedRateInitialized(InterestRate interestRate, ImpactData impactData);
-
-// declared in contracts/facets/layer_2/kpi/kpiLatest/IKpis.sol
-event KpisInitialized();
-
-// declared in contracts/facets/kyc/IKyc.sol
-event KycGranted(address indexed account, address indexed issuer);
-
-// declared in contracts/test/mocks/MockedExternalKycList.sol
-event KycGranted(address indexed account);
-
-// declared in contracts/facets/kyc/IKyc.sol
-event KycInitialized(bool internalKycActivated);
-
-// declared in contracts/facets/kyc/IKyc.sol
-event KycRevoked(address indexed account, address indexed issuer);
-
-// declared in contracts/test/mocks/MockedExternalKycList.sol
-event KycRevoked(address indexed account);
-
-// declared in contracts/facets/layer_2/loan/ILoan.sol
-event LoanDetailsSet(LoanDetailsData loanDetails);
-
-// declared in contracts/facets/layer_2/loansPortfolio/ILoansPortfolio.sol
-event LoanHoldingsAssetUpdated(address loanHoldingsAsset);
-
-// declared in contracts/facets/layer_2/loan/ILoan.sol
-event LoanInitialized(LoanDetailsData loanDetailsData);
-
-// declared in contracts/facets/layer_2/loansPortfolio/ILoansPortfolio.sol
-event LoansPortfolioInitialized(LoansPortfolioDetailsData loansPortfolioData);
-
-// declared in contracts/facets/layer_2/loansPortfolio/ILoansPortfolio.sol
-event LoansPortfolioWithdrawn(address assetAddress, address to, uint256 amount);
-
-// declared in contracts/facets/lockAtSnapshotByPartition/ILockAtSnapshotByPartition.sol
-event LockAtSnapshotByPartitionInitialized();
-
-// declared in contracts/facets/lockAtSnapshot/ILockAtSnapshot.sol
-event LockAtSnapshotInitialized();
-
-// declared in contracts/facets/lockByPartition/ILockByPartition.sol
-event LockByPartitionInitialized();
-
-// declared in contracts/facets/lock/ILockTypes.sol
-event LockByPartitionReleased(
-    address indexed operator,
-    address indexed tokenHolder,
-    bytes32 indexed partition,
-    uint256 lockId
-);
-
-// declared in contracts/facets/lock/ILockTypes.sol
-event LockedByPartition(
-    address indexed operator,
-    address indexed tokenHolder,
-    bytes32 indexed partition,
-    uint256 lockId,
-    uint256 amount,
-    uint256 expirationTimestamp
-);
-
-// declared in contracts/facets/lock/ILockTypes.sol
-event LockExpirationUpdated(
-    address indexed operator,
-    address indexed tokenHolder,
-    bytes32 indexed partition,
-    uint256 lockId,
-    uint256 oldExpirationTimestamp,
-    uint256 newExpirationTimestamp
-);
-
-// declared in contracts/facets/lock/ILock.sol
-event LockInitialized();
-
-// declared in contracts/facets/maturityByPartition/IMaturityByPartition.sol
-event MaturityByPartitionInitialized();
-
-// declared in contracts/facets/layer_2/bond/IBondTypes.sol, contracts/factory/ERC3643/interfaces/IBondTypes.sol
-event MaturityDateUpdated(
-    address indexed bondId,
-    uint256 indexed maturityDate,
-    uint256 indexed previousMaturityDate
-);
-
-// declared in contracts/facets/maturity/IMaturity.sol
-event MaturityInitialized();
-
-// declared in contracts/facets/initializer/IInitializer.sol
-event MaxInitializerFacetIndexUpdated(address sender, uint256 newMaxInitializerFacetIndex);
-
-// declared in contracts/facets/cap/ICap.sol
-event MaxSupplyByPartitionSet(
-    address indexed operator,
-    bytes32 indexed partition,
-    uint256 newMaxSupply,
-    uint256 previousMaxSupply
-);
-
-// declared in contracts/facets/cap/ICap.sol
-event MaxSupplySet(address indexed operator, uint256 newMaxSupply, uint256 previousMaxSupply);
-
-// declared in contracts/facets/mintByPartition/IMintByPartition.sol
-event MintByPartitionInitialized();
-
-// declared in contracts/facets/nominalValueAtSnapshot/INominalValueAtSnapshot.sol
-event NominalValueAtSnapshotInitialized();
-
-// declared in contracts/facets/layer_2/nominalValue/INominalValue.sol
-event NominalValueCurrencySet(address indexed operator, bytes3 nominalValueCurrency);
-
-// declared in contracts/facets/layer_2/nominalValue/INominalValue.sol
-event NominalValueInitialized(
-    uint256 nominalValue,
-    uint8 nominalValueDecimals,
-    bytes3 nominalValueCurrency
-);
-
-// declared in contracts/facets/layer_2/nominalValue/INominalValue.sol
-event NominalValueSet(address indexed operator, uint256 nominalValue, uint8 nominalValueDecimals);
-
-// declared in contracts/facets/nonces/INonces.sol
-event NoncesInitialized();
-
-// declared in contracts/facets/initializer/IInitializer.sol
-event OperationalStatusPartialSet(
-    address sender,
-    bytes32 configurationId,
-    uint256 version,
-    uint256 lastIndex
-);
-
-// declared in contracts/facets/initializer/IInitializer.sol
-event OperationalStatusSet(address sender, bytes32 configurationId, uint256 version);
-
-// declared in contracts/facets/operator/IOperator.sol
-event OperatorAuthorized(address indexed operator, address indexed tokenHolder);
-
-// declared in contracts/facets/operatorByPartition/IOperatorByPartition.sol
-event OperatorByPartitionInitialized();
-
-// declared in contracts/facets/operatorClearingByPartition/IOperatorClearingByPartition.sol
-event OperatorClearingByPartitionInitialized();
-
-// declared in contracts/facets/layer_1/clearing/operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol
-event OperatorClearingHoldByPartitionInitialized();
-
-// declared in contracts/facets/layer_1/hold/IHoldTypes.sol
-event OperatorHeldByPartition(
-    address indexed operator,
-    address indexed tokenHolder,
-    bytes32 partition,
-    uint256 holdId,
-    Hold hold,
-    bytes operatorData
-);
-
-// declared in contracts/facets/operatorHoldByPartition/IOperatorHoldByPartition.sol
-event OperatorHoldByPartitionInitialized();
-
-// declared in contracts/facets/operator/IOperator.sol
-event OperatorInitialized();
-
-// declared in contracts/facets/operator/IOperator.sol
-event OperatorRevoked(address indexed operator, address indexed tokenHolder);
-
-// declared in contracts/facets/partitions/IPartitions.sol
-event PartitionsInitialized(bool multiPartition);
-
-// declared in contracts/facets/layer_1/protectedPartition/IProtectedPartitions.sol
-event PartitionsProtected(address indexed operator);
-
-// declared in contracts/facets/layer_1/protectedPartition/IProtectedPartitions.sol
-event PartitionsUnProtected(address indexed operator);
-
-// declared in contracts/facets/transferAndLock/ITransferAndLockTypes.sol
-event PartitionTransferredAndLocked(
-    bytes32 indexed partition,
-    address indexed from,
-    address to,
-    uint256 value,
-    bytes data,
-    uint256 expirationTimestamp,
-    uint256 lockId
-);
-
-// declared in contracts/facets/pause/IPause.sol
-event Paused(address indexed operator);
-
-// declared in contracts/test/mocks/MockedExternalPause.sol
-event PausedStateChanged(bool isPaused);
-
-// declared in contracts/facets/pause/IPause.sol
-event PauseInitialized();
-
-// declared in contracts/facets/principal/IPrincipal.sol
-event PrincipalInitialized();
-
-// declared in contracts/facets/proceedRecipient/IProceedRecipients.sol
-event ProceedRecipientAdded(address indexed operator, address indexed proceedRecipient, bytes data);
-
-// declared in contracts/facets/proceedRecipient/IProceedRecipients.sol
-event ProceedRecipientDataUpdated(
-    address indexed operator,
-    address indexed proceedRecipient,
-    bytes newData
-);
-
-// declared in contracts/facets/proceedRecipient/IProceedRecipients.sol
-event ProceedRecipientRemoved(address indexed operator, address indexed proceedRecipient);
-
-// declared in contracts/facets/proceedRecipient/IProceedRecipients.sol
-event ProceedRecipientsInitialized(address[] proceedRecipients, bytes[] data);
-
-// declared in contracts/facets/protectedByPartition/IProtectedByPartition.sol
-event ProtectedByPartitionInitialized();
-
-// declared in contracts/facets/protectedClearingHoldByPartition/IProtectedClearingHoldByPartition.sol
-event ProtectedClearedHoldByPartition(
-    address indexed operator,
-    address indexed tokenHolder,
-    bytes32 partition,
-    uint256 clearingId,
-    IHoldTypes.Hold hold,
-    uint256 expirationDate,
-    bytes data,
-    bytes operatorData
-);
-
-// declared in contracts/facets/protectedClearingByPartition/IProtectedClearingByPartition.sol
-event ProtectedClearedRedeemByPartition(
-    address indexed operator,
-    address indexed tokenHolder,
-    bytes32 partition,
-    uint256 clearingId,
-    uint256 amount,
-    uint256 expirationDate,
-    bytes data,
-    bytes operatorData
-);
-
-// declared in contracts/facets/protectedClearingByPartition/IProtectedClearingByPartition.sol
-event ProtectedClearedTransferByPartition(
-    address indexed operator,
-    address indexed tokenHolder,
-    address indexed to,
-    bytes32 partition,
-    uint256 clearingId,
-    uint256 amount,
-    uint256 expirationDate,
-    bytes data,
-    bytes operatorData
-);
-
-// declared in contracts/facets/protectedClearingByPartition/IProtectedClearingByPartition.sol
-event ProtectedClearingByPartitionInitialized();
-
-// declared in contracts/facets/protectedClearingHoldByPartition/IProtectedClearingHoldByPartition.sol
-event ProtectedClearingHoldByPartitionInitialized();
-
-// declared in contracts/facets/layer_1/hold/IHoldTypes.sol
-event ProtectedHeldByPartition(
-    address indexed operator,
-    address indexed tokenHolder,
-    bytes32 partition,
-    uint256 holdId,
-    Hold hold,
-    bytes operatorData
-);
-
-// declared in contracts/facets/protectedHoldByPartition/IProtectedHoldByPartition.sol
-event ProtectedHoldByPartitionInitialized();
-
-// declared in contracts/facets/layer_1/protectedPartition/IProtectedPartitions.sol
-event ProtectedPartitionsInitialized(bool arePartitionsProtected);
-
-// declared in contracts/facets/protectedByPartition/IProtectedByPartition.sol
-event ProtectedRedeemedByPartition(
-    address indexed operator,
-    address indexed from,
-    uint256 amount,
-    bytes32 partition,
-    IProtectedPartitions.ProtectionData protectionData
-);
-
-// declared in contracts/facets/layer_1/protectedPartition/IProtectedPartitions.sol
-event ProtectedRedeemFrom(
-    bytes32 indexed partition,
-    address indexed operator,
-    address indexed from,
-    uint256 value,
-    uint256 deadline,
-    uint256 nonce,
-    bytes signature
-);
-
-// declared in contracts/facets/layer_1/protectedPartition/IProtectedPartitions.sol
-event ProtectedTransferFrom(
-    bytes32 indexed partition,
-    address indexed operator,
-    address indexed from,
-    address to,
-    uint256 value,
-    uint256 deadline,
-    uint256 nonce,
-    bytes signature
-);
-
-// declared in contracts/facets/protectedByPartition/IProtectedByPartition.sol
-event ProtectedTransferredByPartition(
-    address indexed operator,
-    address indexed from,
-    address indexed to,
-    uint256 amount,
-    bytes32 partition,
-    IProtectedPartitions.ProtectionData protectionData
-);
-
-// declared in contracts/factory/ERC3643/interfaces/IFactory.sol, contracts/factory/IFactory.sol
-event ProxyDeployed(
-    address indexed proxyAddress,
-    IBusinessLogicResolver resolver,
-    bytes32 configKey,
-    uint256 version,
-    IResolverProxy.Rbac[] rbac
-);
-
-// declared in contracts/facets/layer_2/interestRate/fixedRate/IFixedRate.sol, contracts/factory/ERC3643/interfaces/IFixedRate.sol
-event RateUpdated(address indexed operator, uint256 newRate, uint8 newRateDecimals);
-
-// declared in contracts/facets/recovery/IRecovery.sol
-event RecoveryInitialized();
-
-// declared in contracts/facets/layer_1/ERC3643/IERC3643Types.sol
-event RecoverySuccess(address _lostWallet, address _newWallet, address _investorOnchainID);
-
-// declared in contracts/facets/burn/IBurn.sol
-event Redeemed(address indexed _operator, address indexed _from, uint256 _value, bytes _data);
-
-// declared in contracts/facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol
-event RedeemedByPartition(
-    bytes32 indexed partition,
-    address indexed operator,
-    address indexed from,
-    uint256 value,
-    bytes data,
-    bytes operatorData
-);
-
-// declared in contracts/test/mocks/MockedExternalBlacklist.sol
-event RemovedFromBlacklist(address indexed account);
-
-// declared in contracts/facets/controlList/IControlList.sol
-event RemovedFromControlList(address indexed operator, address indexed account);
-
-// declared in contracts/facets/externalControlListManagement/IExternalControlListManagement.sol
-event RemovedFromExternalControlLists(address indexed operator, address controlList);
-
-// declared in contracts/facets/externalKycListManagement/IExternalKycListManagement.sol
-event RemovedFromExternalKycLists(address indexed operator, address kycList);
-
-// declared in contracts/facets/externalPauseManagement/IExternalPauseManagement.sol
-event RemovedFromExternalPauses(address indexed operator, address pause);
-
-// declared in contracts/facets/ssiManagement/ISsiManagement.sol
-event RemovedFromIssuerList(address indexed operator, address indexed issuer);
-
-// declared in contracts/test/mocks/MockedExternalWhitelist.sol
-event RemovedFromWhitelist(address indexed account);
-
-// declared in contracts/facets/ssiManagement/ISsiManagement.sol
-event RevocationRegistryUpdated(
-    address indexed oldRegistryAddress,
-    address indexed newRegistryAddress
-);
-
-// declared in contracts/facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol
-event RevokedOperator(address indexed operator, address indexed tokenHolder);
-
-// declared in contracts/facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol
-event RevokedOperatorByPartition(
-    bytes32 indexed partition,
-    address indexed operator,
-    address indexed tokenHolder
-);
-
-// declared in contracts/factory/ERC3643/interfaces/IRexIAccessControl.sol
-event RoleAdminChanged(
-    bytes32 indexed role,
-    bytes32 indexed previousAdminRole,
-    bytes32 indexed newAdminRole
-);
-
-// declared in contracts/facets/accessControl/IAccessControl.sol, contracts/factory/ERC3643/interfaces/IAccessControl.sol, contracts/factory/ERC3643/interfaces/IRexIAccessControl.sol
-event RoleGranted(address indexed operator, address indexed account, bytes32 indexed role);
-
-// declared in contracts/facets/accessControl/IAccessControl.sol, contracts/factory/ERC3643/interfaces/IAccessControl.sol, contracts/factory/ERC3643/interfaces/IRexIAccessControl.sol
-event RoleRenounced(address indexed account, bytes32 indexed role);
-
-// declared in contracts/facets/accessControl/IAccessControl.sol, contracts/factory/ERC3643/interfaces/IAccessControl.sol, contracts/factory/ERC3643/interfaces/IRexIAccessControl.sol
-event RoleRevoked(address indexed operator, address indexed account, bytes32 indexed role);
-
-// declared in contracts/facets/accessControl/IAccessControl.sol, contracts/factory/ERC3643/interfaces/IAccessControl.sol
-event RolesApplied(
-    bytes32[] requestedRoles,
-    bool[] requestedStates,
-    address account,
-    bytes32[] appliedRoles,
-    bool[] appliedStates
-);
-
-// declared in contracts/factory/ERC3643/interfaces/IRexIAccessControl.sol
-event RolesApplied(bytes32[] roles, bool[] actives, address account);
-
-// declared in contracts/facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol
-event ScheduledBalanceAdjustmentCancelled(uint256 balanceAdjustmentId, address indexed operator);
-
-// declared in contracts/facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol
-event ScheduledBalanceAdjustmentForceCancelled(
-    uint256 balanceAdjustmentId,
-    address indexed operator
-);
-
-// declared in contracts/facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol
-event ScheduledBalanceAdjustmentInitialized();
-
-// declared in contracts/facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol
-event ScheduledBalanceAdjustmentSet(
-    bytes32 corporateActionId,
-    uint256 balanceAdjustmentId,
-    address indexed operator,
-    uint256 indexed executionDate,
-    uint256 factor,
-    uint256 decimals
-);
-
-// declared in contracts/facets/layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol
-event ScheduledCrossOrderedTasksInitialized();
-
-// declared in contracts/facets/securityHoldersAtSnapshot/ISecurityHoldersAtSnapshot.sol
-event SecurityHoldersAtSnapshotInitialized();
-
-// declared in contracts/facets/securityHolders/ISecurityHolders.sol
-event SecurityHoldersInitialized();
-
-// declared in contracts/facets/layer_2/security/ISecurity.sol
-event SecurityInitialized(
-    RegulationData regulationData,
-    AdditionalSecurityData additionalSecurityData
-);
-
-// declared in contracts/facets/snapshotsByPartition/ISnapshotsByPartition.sol
-event SnapshotsByPartitionInitialized();
-
-// declared in contracts/facets/snapshot/ISnapshots.sol
-event SnapshotsInitialized();
-
-// declared in contracts/facets/snapshot/ISnapshots.sol
-event SnapshotTaken(address indexed operator, uint256 indexed snapshotID);
-
-// declared in contracts/facets/snapshot/ISnapshots.sol
-event SnapshotTriggered(uint256 snapshotId, bytes metadata);
-
-// declared in contracts/facets/ssiManagement/ISsiManagement.sol
-event SsiManagementInitialized();
-
-// declared in contracts/test/testTimeTravel/ITimeTravel.sol
-event SystemBlocknumberChanged(uint256 legacySystemNumber, uint256 newSystemNumber);
-
-// declared in contracts/test/testTimeTravel/ITimeTravel.sol
-event SystemBlocknumberReset();
-
-// declared in contracts/test/testTimeTravel/ITimeTravel.sol
-event SystemTimestampChanged(uint256 legacySystemTime, uint256 newSystemTime);
-
-// declared in contracts/test/testTimeTravel/ITimeTravel.sol
-event SystemTimestampReset();
-
-// declared in contracts/facets/layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol
-event TaskExecutionFailed(
-    bytes32 indexed actionId,
-    bytes32 indexed taskType,
-    uint256 scheduledTimestamp
-);
-
-// declared in contracts/facets/freeze/IFreeze.sol
-event TokensFrozen(address indexed account, uint256 amount, bytes32 partition);
-
-// declared in contracts/facets/freeze/IFreeze.sol
-event TokensUnfrozen(address indexed account, uint256 amount, bytes32 partition);
-
-// declared in contracts/facets/transfer/ITransfer.sol
-event Transfer(address indexed from, address indexed to, uint256 value);
-
-// declared in contracts/facets/transferAndLockByPartition/ITransferAndLockByPartition.sol
-event TransferAndLockByPartitionInitialized();
-
-// declared in contracts/facets/transferAndLock/ITransferAndLock.sol
-event TransferAndLockInitialized();
-
-// declared in contracts/facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol
-event TransferByPartition(
-    bytes32 indexed _fromPartition,
-    address _operator,
-    address indexed _from,
-    address indexed _to,
-    uint256 _value,
-    bytes _data,
-    bytes _operatorData
-);
-
-// declared in contracts/facets/transferByPartition/ITransferByPartition.sol
-event TransferByPartitionInitialized();
-
-// declared in contracts/facets/transfer/ITransfer.sol
-event TransferFromWithData(
-    address indexed sender,
-    address indexed from,
-    address indexed to,
-    uint256 amount,
-    bytes data
-);
-
-// declared in contracts/facets/transfer/ITransfer.sol
-event TransferInitialized();
-
-// declared in contracts/facets/transfer/ITransfer.sol
-event TransferWithData(address indexed sender, address indexed to, uint256 amount, bytes data);
-
-// declared in contracts/factory/ERC3643/libraries/core/TREXBaseDeploymentLib.sol
-event TREXSuiteDeployed(
-    address indexed _token,
-    address _ir,
-    address _irs,
-    address _tir,
-    address _ctr,
-    address _mc,
-    string indexed _salt
-);
-
-// declared in contracts/facets/pause/IPause.sol
-event Unpaused(address indexed operator);
-
-// declared in contracts/facets/layer_1/ERC3643/IERC3643Types.sol
-event UpdatedTokenInformation(
-    string indexed newName,
-    string indexed newSymbol,
-    uint8 newDecimals,
-    string newVersion,
-    address indexed newOnchainID
-);
-
-// declared in contracts/facets/voting/IVoting.sol
-event VotingCancelled(uint256 voteId, address indexed operator);
-
-// declared in contracts/facets/voting/IVoting.sol
-event VotingForceCancelled(uint256 voteId, address indexed operator);
-
-// declared in contracts/facets/voting/IVoting.sol
-event VotingInitialized();
-
-// declared in contracts/facets/votingSecurityHolders/IVotingSecurityHolders.sol
-event VotingSecurityHoldersInitialized();
-
-// declared in contracts/facets/voting/IVoting.sol
-event VotingSet(
-    bytes32 corporateActionId,
-    uint256 voteId,
-    address indexed operator,
-    uint256 indexed recordDate,
-    bytes data
-);
-```
-
-## Errors
-
-```solidity
-// declared in contracts/facets/erc20Votes/IERC20Votes.sol
-error AbafChangeForBlockForbidden(uint256 blockNumber);
-
-// declared in contracts/services/core/AccessControlModifiers.sol
-error AccessControlRequired(bytes32 role, address sender);
-
-// declared in contracts/facets/accessControl/IAccessControl.sol, contracts/factory/ERC3643/interfaces/IAccessControl.sol, contracts/factory/ERC3643/interfaces/IRexIAccessControl.sol
-error AccountAssignedToRole(bytes32 role, address account);
-
-// declared in contracts/facets/accessControl/IAccessControl.sol, contracts/factory/ERC3643/interfaces/IAccessControl.sol, contracts/factory/ERC3643/interfaces/IRexIAccessControl.sol
-error AccountHasNoRole(address account, bytes32 role);
-
-// declared in contracts/facets/accessControl/IAccessControl.sol, contracts/factory/ERC3643/interfaces/IAccessControl.sol, contracts/factory/ERC3643/interfaces/IRexIAccessControl.sol
-error AccountHasNoRoles(address account, bytes32[] roles);
-
-// declared in contracts/infrastructure/errors/ICommonErrors.sol
-error AccountIsBlocked(address account);
-
-// declared in contracts/facets/ssiManagement/ISsiManagement.sol
-error AccountIsNotIssuer(address issuer);
-
-// declared in contracts/facets/accessControl/IAccessControl.sol, contracts/factory/ERC3643/interfaces/IAccessControl.sol, contracts/factory/ERC3643/interfaces/IRexIAccessControl.sol
-error AccountNotAssignedToRole(bytes32 role, address account);
-
-// declared in contracts/facets/layer_1/ERC3643/IERC3643Types.sol
-error AddressNotVerified();
-
-// declared in contracts/test/mocks/MockComplianceModule.sol
-error AlreadyBound();
-
-// declared in contracts/infrastructure/errors/ICommonErrors.sol, contracts/test/mocks/MockImplementation.sol
-error AlreadyInitialized();
-
-// declared in contracts/test/mocks/MockImplementationV2.sol
-error AlreadyInitializedV2();
-
-// declared in contracts/facets/layer_2/amortization/IAmortization.sol
-error AmortizationAlreadyExecuted(bytes32 corporateActionId, uint256 amortizationId);
-
-// declared in contracts/facets/layer_2/amortization/IAmortization.sol
-error AmortizationCreationFailed();
-
-// declared in contracts/facets/layer_2/amortization/IAmortization.sol
-error AmortizationHasActiveHolds(bytes32 corporateActionId, uint256 amortizationID);
-
-// declared in contracts/facets/layer_2/amortization/IAmortization.sol
-error AmortizationHoldFailed(bytes32 corporateActionId, uint256 amortizationID);
-
-// declared in contracts/facets/layer_2/amortization/IAmortization.sol
-error AmortizationHoldNotActive(
-    bytes32 corporateActionId,
-    uint256 amortizationID,
-    address tokenHolder
-);
-
-// declared in contracts/facets/layer_2/amortization/IAmortization.sol
-error AmortizationNotActive(bytes32 corporateActionId, uint256 amortizationID);
-
-// declared in contracts/facets/initializer/IInitializer.sol
-error AssetNotOperational(bytes32 configId, uint256 versionId);
-
-// declared in contracts/facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol
-error BalanceAdjustmentAlreadyExecuted(bytes32 corporateActionId, uint256 balanceAdjustmentId);
-
-// declared in contracts/facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol
-error BalanceAdjustmentCreationFailed();
-
-// declared in contracts/facets/layer_2/bond/IBondTypes.sol, contracts/factory/ERC3643/interfaces/IBondTypes.sol
-error BondMaturityDateWrong();
-
-// declared in contracts/facets/erc20Votes/IERC20Votes.sol
-error BrokenClockMode();
-
-// declared in contracts/factory/ERC3643/interfaces/IBusinessLogicResolver.sol, contracts/infrastructure/diamond/IBusinessLogicResolver.sol
-error BusinessLogicKeyDuplicated(bytes32 businessLogicKey);
-
-// declared in contracts/factory/ERC3643/interfaces/IBusinessLogicResolver.sol, contracts/infrastructure/diamond/IBusinessLogicResolver.sol
-error BusinessLogicKeyMismatch(address implementation, bytes32 actualKey, bytes32 expectedKey);
-
-// declared in contracts/factory/ERC3643/interfaces/IBusinessLogicResolver.sol, contracts/infrastructure/diamond/IBusinessLogicResolver.sol
-error BusinessLogicVersionDoesNotExist(uint256 version);
-
-// declared in contracts/facets/layer_1/ERC3643/IERC3643Types.sol
-error CannotRecoverWallet();
-
-// declared in contracts/facets/accessControl/IAccessControl.sol, contracts/factory/ERC3643/interfaces/IAccessControl.sol
-error CannotRenounceSoleAdmin();
-
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
-error ClearingIsActivated();
-
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
-error ClearingIsDisabled();
-
-// declared in contracts/facets/layer_1/ERC3643/IERC3643Types.sol
-error ComplianceCallFailed();
-
-// declared in contracts/facets/layer_1/ERC3643/IERC3643Types.sol
-error ComplianceNotAllowed();
-
-// declared in contracts/factory/ERC3643/interfaces/IRexIAccessControl.sol, contracts/infrastructure/errors/ICommonErrors.sol
-error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex);
-
-// declared in contracts/facets/corporateActions/ICorporateActions.sol
-error CorporateActionAlreadyDisabled(bytes32 corporateActionId);
-
-// declared in contracts/facets/corporateActions/ICorporateActions.sol
-error CorporateActionNotFound(bytes32 corporateActionId);
-
-// declared in contracts/facets/coupon/ICoupon.sol
-error CouponAlreadyExecuted(bytes32 corporateActionId, uint256 couponId);
-
-// declared in contracts/facets/coupon/ICoupon.sol
-error CouponCreationFailed();
-
-// declared in contracts/facets/coupon/ICoupon.sol
-error CouponNotFound(uint256 couponID);
-
-// declared in contracts/facets/deactivate/IDeactivate.sol
-error Deactivated();
-
-// declared in contracts/facets/adjustBalances/IAdjustBalances.sol
-error DecimalsOverflow();
-
-// declared in contracts/infrastructure/errors/ICommonErrors.sol
-error DecimalsTooLarge(uint8 currentDecimals, uint8 newDecimals);
-
-// declared in contracts/factory/ERC3643/interfaces/IDiamondCutManager.sol, contracts/infrastructure/diamond/IDiamondCutManager.sol
-error DefaultValueForConfigurationIdNotPermitted();
-
-// declared in contracts/facets/dividend/IDividend.sol
-error DividendAlreadyExecuted(bytes32 corporateActionId, uint256 dividendId);
-
-// declared in contracts/facets/dividend/IDividend.sol
-error DividendCreationFailed();
-
-// declared in contracts/facets/documentation/IDocumentation.sol
-error DocumentDoesNotExist(bytes32 name);
-
-// declared in contracts/facets/corporateActions/ICorporateActions.sol
-error DuplicatedCorporateAction(bytes32 actionType, bytes data);
-
-// declared in contracts/factory/ERC3643/interfaces/IDiamondCutManager.sol, contracts/infrastructure/diamond/IDiamondCutManager.sol
-error DuplicatedFacetInConfiguration(bytes32 facetId);
-
-// declared in contracts/factory/ERC3643/interfaces/IDiamondCutManager.sol, contracts/infrastructure/diamond/IDiamondCutManager.sol
-error EmptyFacetConfigurationNotPermitted(bytes32 configurationId);
-
-// declared in contracts/facets/documentation/IDocumentation.sol
-error EmptyHASH();
-
-// declared in contracts/facets/documentation/IDocumentation.sol
-error EmptyName();
-
-// declared in contracts/factory/ERC3643/interfaces/IFactory.sol, contracts/factory/IFactory.sol
-error EmptyResolver(IBusinessLogicResolver resolver);
-
-// declared in contracts/facets/documentation/IDocumentation.sol
-error EmptyURI();
-
-// declared in contracts/facets/erc20Permit/IERC20Permit.sol
-error ERC2612ExpiredSignature(uint256 deadline);
-
-// declared in contracts/facets/erc20Permit/IERC20Permit.sol
-error ERC2612InvalidSigner(address signer, address owner);
-
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
-error ExpirationDateNotReached();
-
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
-error ExpirationDateReached();
-
-// declared in contracts/infrastructure/errors/ICommonErrors.sol
-error ExpiredDeadline(uint256 deadline);
-
-// declared in contracts/facets/externalControlListManagement/IExternalControlListManagement.sol
-error ExternalControlListsNotUpdated(address[] controlLista, bool[] actives);
-
-// declared in contracts/facets/externalKycListManagement/IExternalKycListManagement.sol
-error ExternalKycListsNotUpdated(address[] kycList, bool[] actives);
-
-// declared in contracts/facets/externalPauseManagement/IExternalPauseManagement.sol
-error ExternalPausesNotUpdated(address[] pauses, bool[] actives);
-
-// declared in contracts/facets/initializer/IInitializer.sol
-error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
-
-// declared in contracts/factory/ERC3643/interfaces/IDiamondCutManager.sol, contracts/infrastructure/diamond/IDiamondCutManager.sol
-error FacetIdNotRegistered(bytes32 configurationId, bytes32 facetId);
-
-// declared in contracts/facets/initializer/IInitializer.sol
-error FacetPreviousVersionNotAccepted(
-    bytes32 facetId,
-    uint256 lastVersion,
-    uint256[] expectedVersions
-);
-
-// declared in contracts/facets/initializer/IInitializer.sol
-error FacetReady(bytes32 facetId, uint256 versionId);
-
-// declared in contracts/facets/adjustBalances/IAdjustBalances.sol
-error FactorIsZero();
-
-// declared in contracts/facets/adjustBalances/IAdjustBalances.sol
-error FactorOverflow();
-
-// declared in contracts/factory/ERC3643/interfaces/IResolverProxy.sol, contracts/infrastructure/proxy/IResolverProxy.sol
-error FunctionNotFound(bytes4 _functionSelector);
-
-// declared in contracts/facets/erc20Votes/IERC20Votes.sol
-error FutureLookup(uint256 timepoint, uint256 currentClock);
-
-// declared in contracts/infrastructure/errors/ICommonErrors.sol
-error GreaterThanMaxUint256(uint256 amount, uint8 decimals);
-
-// declared in contracts/facets/layer_1/hold/IHoldTypes.sol
-error HoldExpirationNotReached();
-
-// declared in contracts/facets/layer_1/hold/IHoldTypes.sol
-error HoldExpirationReached();
-
-// declared in contracts/facets/layer_2/loansPortfolio/ILoansPortfolio.sol
-error HoldingAssetNotFound(address assetAddress);
-
-// declared in contracts/facets/layer_2/loansPortfolio/ILoansPortfolio.sol
-error HoldingsAssetAlreadyExists(address assetAddress);
-
-// declared in contracts/facets/layer_2/loansPortfolio/ILoansPortfolio.sol
-error HoldingsAssetTypeNotSupported(uint8 holdingsAssetType);
-
-// declared in contracts/facets/layer_1/ERC3643/IERC3643Types.sol
-error IdentityRegistryCallFailed();
-
-// declared in contracts/facets/layer_1/ERC3643/IERC3643Types.sol
-error InputAmountsArrayLengthMismatch();
-
-// declared in contracts/facets/layer_1/ERC3643/IERC3643Types.sol
-error InputBoolArrayLengthMismatch();
-
-// declared in contracts/facets/allowance/IAllowanceTypes.sol
-error InsufficientAllowance(address spender, address from);
-
-// declared in contracts/facets/transfer/ITransfer.sol
-error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
-
-// declared in contracts/facets/layer_1/ERC3643/IERC3643Types.sol
-error InsufficientFrozenBalance(
-    address user,
-    uint256 requestedUnfreeze,
-    uint256 availableFrozen,
-    bytes32 partition
-);
-
-// declared in contracts/facets/layer_1/hold/IHoldTypes.sol
-error InsufficientHoldBalance(uint256 holdAmount, uint256 amount);
-
-// declared in contracts/facets/layer_2/interestRate/fixedRate/IFixedRate.sol, contracts/factory/ERC3643/interfaces/IFixedRate.sol
-error InterestRateIsFixed();
-
-// declared in contracts/facets/coupon/ICoupon.sol
-error InterestRateIsKpiLinked();
-
-// declared in contracts/facets/coupon/ICoupon.sol
-error InterestRateIsStandard();
-
-// declared in contracts/facets/layer_2/amortization/IAmortization.sol
-error InvalidAmortizationHoldAmount(uint256 amortizationID);
-
-// declared in contracts/test/testTimeTravel/ITimeTravel.sol
-error InvalidBlocknumber(uint256 newSystemNumber);
-
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
-error InvalidClearingAmount();
-
-// declared in contracts/facets/layer_2/kpi/kpiLatest/IKpis.sol
-error InvalidDate(uint256 providedDate, uint256 minDate, uint256 maxDate);
-
-// declared in contracts/facets/layer_2/kpi/kpiLatest/IKpis.sol
-error InvalidDateRange(uint256 fromDate, uint256 toDate);
-
-// declared in contracts/infrastructure/errors/ICommonErrors.sol
-error InvalidDates();
-
-// declared in contracts/facets/layer_1/hold/IHoldTypes.sol
-error InvalidDestinationAddress(address holdDestination, address to);
-
-// declared in contracts/facets/freeze/IFreeze.sol
-error InvalidFreezeAmount();
-
-// declared in contracts/facets/layer_1/hold/IHoldTypes.sol
-error InvalidHoldAmount();
-
-// declared in contracts/facets/kyc/IKyc.sol
-error InvalidKycStatus();
-
-// declared in contracts/facets/lock/ILockTypes.sol
-error InvalidLockAmount();
-
-// declared in contracts/facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol
-error InvalidPartition(address account, bytes32 partition);
-
-// declared in contracts/facets/interestRate/IInterestRate.sol
-error InvalidRateType(RateType rateType);
-
-// declared in contracts/infrastructure/errors/ICommonErrors.sol
-error InvalidTimestamp();
-
-// declared in contracts/facets/kyc/IKyc.sol
-error InvalidZeroAddress();
-
-// declared in contracts/facets/layer_1/hold/IHoldTypes.sol
-error IsNotEscrow();
-
-// declared in contracts/facets/pause/IPause.sol
-error IsPaused();
-
-// declared in contracts/facets/pause/IPause.sol
-error IsUnpaused();
-
-// declared in contracts/facets/layer_2/kpi/kpiLatest/IKpis.sol
-error KpiDataAlreadyExists(uint256 date);
-
-// declared in contracts/facets/kyc/IKyc.sol
-error KycIsNotGranted();
-
-// declared in contracts/facets/controlList/IControlList.sol
-error ListedAccount(address account);
-
-// declared in contracts/facets/externalControlListManagement/IExternalControlListManagement.sol
-error ListedControlList(address controlList);
-
-// declared in contracts/facets/ssiManagement/ISsiManagement.sol
-error ListedIssuer(address issuer);
-
-// declared in contracts/facets/externalKycListManagement/IExternalKycListManagement.sol
-error ListedKycList(address kycList);
-
-// declared in contracts/facets/externalPauseManagement/IExternalPauseManagement.sol
-error ListedPause(address pause);
-
-// declared in contracts/facets/lock/ILockTypes.sol
-error LockExpirationNotReached();
-
-// declared in contracts/infrastructure/errors/ICommonErrors.sol
-error MaxExternalListSizeReached(uint256 max);
-
-// declared in contracts/facets/cap/ICap.sol
-error MaxSupplyReached(uint256 maxSupply);
-
-// declared in contracts/facets/cap/ICap.sol
-error MaxSupplyReachedForPartition(bytes32 partition, uint256 maxSupply);
-
-// declared in contracts/test/mocks/ComplianceMock.sol
-error MockErrorBurn(address _from, uint256 _amount);
-
-// declared in contracts/test/mocks/ComplianceMock.sol
-error MockErrorCanTransfer(address _from, address _to, uint256 _amount);
-
-// declared in contracts/test/mocks/ComplianceMock.sol
-error MockErrorMint(address _to, uint256 _amount);
-
-// declared in contracts/test/mocks/ComplianceMock.sol
-error MockErrorTransfer(address _from, address _to, uint256 _amount);
-
-// declared in contracts/test/mocks/IdentityRegistryMock.sol
-error MockErrorVerified(address _userAddress);
-
-// declared in contracts/test/mocks/MockScheduledTasksDispatchOps.sol
-error MockTaskExecutionFailed();
-
-// declared in contracts/facets/cap/ICap.sol
-error NewMaxSupplyCannotBeZero();
-
-// declared in contracts/facets/cap/ICap.sol
-error NewMaxSupplyForPartitionTooLow(bytes32 partition, uint256 maxSupply, uint256 totalSupply);
-
-// declared in contracts/facets/cap/ICap.sol
-error NewMaxSupplyTooLow(uint256 maxSupply, uint256 totalSupply);
-
-// declared in contracts/factory/ERC3643/interfaces/IFactory.sol, contracts/factory/IFactory.sol
-error NoInitialAdmins();
-
-// declared in contracts/facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol
-error NotAllowedInMultiPartitionMode();
-
-// declared in contracts/test/mocks/MockComplianceModule.sol
-error NotBound();
-
-// declared in contracts/factory/ERC3643/interfaces/IDiamondCutManager.sol, contracts/infrastructure/diamond/IDiamondCutManager.sol
-error OngoingBatchConfigurationNotPermitted(bytes32 configurationId);
-
-// declared in contracts/facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol
-error PartitionNotAllowedInSinglePartitionMode(bytes32 partition);
-
-// declared in contracts/facets/layer_1/protectedPartition/IProtectedPartitions.sol
-error PartitionsAreProtected();
-
-// declared in contracts/facets/layer_1/protectedPartition/IProtectedPartitions.sol
-error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
-
-// declared in contracts/facets/layer_1/protectedPartition/IProtectedPartitions.sol
-error PartitionsAreUnProtected();
-
-// declared in contracts/facets/proceedRecipient/IProceedRecipients.sol
-error ProceedRecipientAlreadyExists(address proceedRecipient);
-
-// declared in contracts/facets/proceedRecipient/IProceedRecipients.sol
-error ProceedRecipientNotFound(address proceedRecipient);
-
-// declared in contracts/facets/protectedByPartition/IProtectedByPartition.sol
-error ProtectedPartitionRoleRequired(bytes32 partition, address sender);
-
-// declared in contracts/constants/regulation.sol, contracts/factory/ERC3643/interfaces/IFactory.sol, contracts/factory/ERC3643/interfaces/regulation.sol, contracts/factory/IFactory.sol
-error RegulationTypeAndSubTypeForbidden(
-    RegulationType regulationType,
-    RegulationSubType regulationSubType
-);
-
-// declared in contracts/factory/ERC3643/interfaces/IDiamondCutManager.sol, contracts/infrastructure/diamond/IDiamondCutManager.sol
-error ResolverProxyConfigurationNoRegistered(bytes32 resolverProxyConfigurationId, uint256 version);
-
-// declared in contracts/facets/accessControl/IAccessControl.sol, contracts/factory/ERC3643/interfaces/IAccessControl.sol, contracts/factory/ERC3643/interfaces/IRexIAccessControl.sol
-error RolesAndActivesLengthMismatch(uint256 rolesLength, uint256 activesLength);
-
-// declared in contracts/factory/ERC3643/interfaces/IRexIAccessControl.sol
-error RolesNotApplied(bytes32[] roles, bool[] actives, address account);
-
-// declared in contracts/factory/ERC3643/interfaces/IDiamondCutManager.sol, contracts/infrastructure/diamond/IDiamondCutManager.sol
-error SelectorAlreadyRegistered(
-    bytes32 configurationId,
-    uint256 version,
-    bytes32 facetId,
-    bytes4 selector
-);
-
-// declared in contracts/factory/ERC3643/interfaces/IDiamondCutManager.sol, contracts/infrastructure/diamond/IDiamondCutManager.sol
-error SelectorBlacklisted(bytes4 selector);
-
-// declared in contracts/facets/snapshot/ISnapshotsTypes.sol
-error SnapshotIdDoesNotExists(uint256 snapshotId);
-
-// declared in contracts/facets/snapshot/ISnapshotsTypes.sol
-error SnapshotIdNull();
-
-// declared in contracts/facets/allowance/IAllowanceTypes.sol
-error SpenderWithZeroAddress();
-
-// declared in contracts/facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol
-error TokenHolderNotFound(address tokenHolder);
-
-// declared in contracts/facets/controller/IController.sol
-error TokenIsNotControllable();
-
-// declared in contracts/facets/adjustBalances/IAdjustBalances.sol
-error TotalSupplyOverflow();
-
-// declared in contracts/facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol
-error Unauthorized(address operator, address tokenHolder, bytes32 partition);
-
-// declared in contracts/infrastructure/errors/ICommonErrors.sol
-error UnexpectedError(bytes4 _errorId);
-
-// declared in contracts/infrastructure/diamond/BusinessLogicResolver.sol
-error Unimplemented();
-
-// declared in contracts/facets/controlList/IControlList.sol
-error UnlistedAccount(address account);
-
-// declared in contracts/facets/externalControlListManagement/IExternalControlListManagement.sol
-error UnlistedControlList(address controlList);
-
-// declared in contracts/facets/ssiManagement/ISsiManagement.sol
-error UnlistedIssuer(address issuer);
-
-// declared in contracts/facets/externalKycListManagement/IExternalKycListManagement.sol
-error UnlistedKycList(address kycList);
-
-// declared in contracts/facets/externalPauseManagement/IExternalPauseManagement.sol
-error UnlistedPause(address pause);
-
-// declared in contracts/factory/ERC3643/interfaces/IDiamondCutManager.sol, contracts/infrastructure/diamond/IDiamondCutManager.sol
-error VersionZero(bytes32 configurationId);
-
-// declared in contracts/facets/voting/IVoting.sol
-error VotingAlreadyRecorded(bytes32 corporateActionId, uint256 voteId);
-
-// declared in contracts/facets/voting/IVoting.sol
-error VotingRightsCreationFailed();
-
-// declared in contracts/facets/layer_1/ERC3643/IERC3643Types.sol
-error WalletRecovered();
-
-// declared in contracts/test/testTimeTravel/ITimeTravel.sol
-error WrongChainId();
-
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
-error WrongClearingId();
-
-// declared in contracts/infrastructure/errors/ICommonErrors.sol
-error WrongDates(uint256 firstDate, uint256 secondDate);
-
-// declared in contracts/infrastructure/errors/ICommonErrors.sol
-error WrongExpirationTimestamp();
-
-// declared in contracts/facets/layer_1/hold/IHoldTypes.sol
-error WrongHoldId();
-
-// declared in contracts/facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRateErrors.sol, contracts/factory/ERC3643/interfaces/IKpiLinkedRateErrors.sol
-error WrongImpactDataValues(ImpactData impactData);
-
-// declared in contracts/facets/corporateActions/ICorporateActions.sol
-error WrongIndexForAction(uint256 index, bytes32 actionType);
-
-// declared in contracts/facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRateErrors.sol, contracts/factory/ERC3643/interfaces/IKpiLinkedRateErrors.sol
-error WrongInterestRateValues(InterestRate interestRate);
-
-// declared in contracts/factory/ERC3643/interfaces/IFactory.sol, contracts/factory/IFactory.sol, contracts/factory/isinValidator.sol
-error WrongISIN(string isin);
-
-// declared in contracts/factory/ERC3643/interfaces/IFactory.sol, contracts/factory/IFactory.sol, contracts/factory/isinValidator.sol
-error WrongISINChecksum(string isin);
-
-// declared in contracts/facets/lock/ILockTypes.sol
-error WrongLockId();
-
-// declared in contracts/infrastructure/errors/ICommonErrors.sol
-error WrongNonce(uint256 nonce, address account);
-
-// declared in contracts/infrastructure/errors/ICommonErrors.sol
-error WrongSignature();
-
-// declared in contracts/infrastructure/errors/ICommonErrors.sol
-error WrongSignatureLength();
-
-// declared in contracts/domain/asset/ScheduledTasksStorageWrapper.sol
-error WrongTimestamp(uint256 timeStamp);
-
-// declared in contracts/infrastructure/errors/ICommonErrors.sol
-error ZeroAddressNotAllowed();
-
-// declared in contracts/factory/ERC3643/interfaces/IBusinessLogicResolver.sol, contracts/infrastructure/diamond/IBusinessLogicResolver.sol
-error ZeroKeyNotValidForBusinessLogic();
-
-// declared in contracts/facets/allowance/IAllowanceTypes.sol
-error ZeroOwnerAddress();
-
-// declared in contracts/facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol
-error ZeroPartition();
-
-// declared in contracts/facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol
-error ZeroValue();
-
-// declared in contracts/infrastructure/errors/ICommonErrors.sol
-error ZeroValueNotAllowed();
 ```
 
 ## Roles

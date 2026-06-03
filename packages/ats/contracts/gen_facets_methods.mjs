@@ -1,7 +1,14 @@
 #!/usr/bin/env node
-// Generates packages/ats/contracts/FACETS_METHODS.md: a reference of every external/public
+// Generates packages/ats/contracts/FACETS_METHODS.md: a per-facet reference of every external/public
 // entry point declared by the facet interfaces under contracts/facets/**, with full input
-// parameters, return values, and any referenced struct/enum types.
+// parameters, return values, and any referenced struct/enum types. Each facet section also lists
+// the events and errors that facet can emit/revert with, plus a flat Roles table at the end.
+//
+// Methods and types are parsed from the interface ASTs. Events and errors are grouped per facet by
+// joining to the generated registry (scripts/domain/atsRegistry.generated.ts) on the facet's
+// resolver-key value: each facet interface declares a `bytes32 constant RESOLVER_KEY_* = 0x...;`
+// whose value keys that facet's events/errors in the registry. Facets whose interface declares no
+// such constant (parent / protocol interfaces) list methods only.
 //
 // Usage (from packages/ats/contracts):
 //   node gen_facets_methods.mjs
@@ -235,6 +242,60 @@ for (const file of allSolFiles) {
 }
 
 // ---------------------------------------------------------------------------------------------
+// Per-facet events/errors, sourced from the generated registry and joined by resolver-key value.
+// The registry (scripts/domain/atsRegistry.generated.ts) groups, under each facet entry, every
+// event/error that facet can emit/revert with — including inherited and library-level ones, so it
+// is richer than the interface declarations alone. It is a stable generated TS module, so we parse
+// it textually and key each entry by its resolver-key hash (which matches the RESOLVER_KEY_*
+// constant declared in the facet interface). Returns Map<resolverKeyValue, {events, errors}> where
+// each entry is { name, full }.
+// ---------------------------------------------------------------------------------------------
+function parseRegistry() {
+  const file = path.join(contractsRoot, "scripts/domain/atsRegistry.generated.ts");
+  const src = fs.readFileSync(file, "utf8");
+  // Restrict to the FACET_REGISTRY object; infrastructure/storage registries are not facets.
+  const seg = src.slice(src.indexOf("FACET_REGISTRY"), src.indexOf("TOTAL_FACETS"));
+  const starts = [];
+  for (const m of seg.matchAll(/^  [A-Za-z0-9_]+: \{$/gm)) starts.push(m.index);
+  // Pairs each entry's name with its `full` signature, scoped to whatever slice it is run over.
+  const entryRe = /name:\s*"([A-Za-z0-9_]+)",\s*signature:\s*\{\s*full:\s*"((?:event|error) [^"]*)"/g;
+  const entries = (slice) => {
+    const out = [];
+    entryRe.lastIndex = 0;
+    let e;
+    while ((e = entryRe.exec(slice))) out.push({ name: e[1], full: e[2] });
+    return out;
+  };
+  const byValue = new Map();
+  for (let i = 0; i < starts.length; i++) {
+    const block = seg.slice(starts[i], i + 1 < starts.length ? starts[i + 1] : seg.length);
+    const rk = block.match(/resolverKey:\s*\{\s*name:\s*"[^"]+",\s*value:\s*"([^"]+)"/);
+    if (!rk) continue;
+    // Blocks are ordered methods -> events -> errors -> factory; slice each array by its 4-space
+    // header so method names never leak into the event/error lists.
+    const ev = block.search(/\n {4}events: \[/);
+    const er = block.search(/\n {4}errors: \[/);
+    const fc = block.search(/\n {4}factory:/);
+    const end = (a, b) => (a >= 0 ? a : b >= 0 ? b : undefined);
+    byValue.set(rk[1].toLowerCase(), {
+      events: ev >= 0 ? entries(block.slice(ev, end(er, fc))) : [],
+      errors: er >= 0 ? entries(block.slice(er, fc >= 0 ? fc : undefined)) : [],
+    });
+  }
+  return byValue;
+}
+const registryByKey = parseRegistry();
+
+// Name -> rendered signature, from the whole-tree AST collection above. Event/error names are
+// globally unique (the registry has zero overloaded names), so the name alone recovers the AST
+// rendering — which keeps clean struct/enum type names and 100-char wrapping. The registry's own
+// `full` is used only as a fallback for the rare name not present in the AST index.
+const eventByName = new Map();
+for (const d of eventMap.values()) if (!eventByName.has(d.name)) eventByName.set(d.name, d.rendered);
+const errorByName = new Map();
+for (const d of errorMap.values()) if (!errorByName.has(d.name)) errorByName.set(d.name, d.rendered);
+
+// ---------------------------------------------------------------------------------------------
 // Facet name derivation
 // ---------------------------------------------------------------------------------------------
 const ACRONYMS = new Set(["ssi", "kyc", "kpi", "usa", "eip", "erc", "abaf"]);
@@ -306,7 +367,11 @@ function extractFacet(file) {
   if (functions.length === 0) return null;
 
   const rel = path.relative(contractsRoot, file).split(path.sep).join("/");
-  const keyMatch = source.match(/resolverKey\s+([A-Za-z0-9_]+)/);
+  // The facet's resolver key is a file-level `bytes32 constant RESOLVER_KEY_* = 0x...;` declared in
+  // the interface file (the concrete facet imports and returns it via getStaticResolverKey). We
+  // capture both name and value: the value joins this facet to its events/errors in the generated
+  // registry. Interfaces without such a constant (parent / protocol interfaces) get no events/errors.
+  const keyMatch = source.match(/bytes32\s+constant\s+(RESOLVER_KEY_[A-Z0-9_]+)\s*=\s*(0x[0-9a-fA-F]+)/);
 
   // Resolve referenced types, transitively following struct members so nested custom types
   // (e.g. an enum used by a struct field) are also documented. Skip names we never indexed.
@@ -333,7 +398,8 @@ function extractFacet(file) {
     file,
     rel,
     name: facetName(mainInterface.name),
-    resolverKey: keyMatch ? keyMatch[1] : null,
+    resolverKeyName: keyMatch ? keyMatch[1] : null,
+    resolverKeyValue: keyMatch ? keyMatch[2].toLowerCase() : null,
     functions,
     types,
   };
@@ -393,15 +459,14 @@ out.push("> ");
 out.push("> Maintained via the `solidity-natspec` skill.");
 out.push("");
 
-// Table of contents: four top-level sections, with every facet nested under Methods.
+// Table of contents: Methods (with every facet nested, each carrying its own events/errors) and
+// the flat Roles table.
 out.push("## Contents");
 out.push("");
 out.push("- [Methods](#methods)");
 for (const facet of facets) {
   out.push(`  - [${facet.name}](#${facet.anchor})`);
 }
-out.push("- [Events](#events)");
-out.push("- [Errors](#errors)");
 out.push("- [Roles](#roles)");
 out.push("");
 
@@ -420,12 +485,39 @@ for (const facet of facets) {
   out.push(`### ${facet.name}`);
   out.push("");
   out.push(`- Interface: \`${facet.rel}\``);
-  if (facet.resolverKey) out.push(`- Resolver key: \`${facet.resolverKey}\``);
+  if (facet.resolverKeyName) {
+    out.push(`- Resolver key: \`${facet.resolverKeyName}\` = \`${facet.resolverKeyValue}\``);
+  }
   out.push("");
   out.push("```solidity");
   out.push(facet.functions.map(renderFunction).join("\n"));
   out.push("```");
   out.push("");
+
+  // Events and errors are grouped per facet via the registry join (by resolver-key value). Facets
+  // with no resolver key (parent / protocol interfaces) have no registry entry and so list no
+  // events or errors. A registry-listed name is rendered from the AST index, falling back to the
+  // registry's own `full` signature only if it is not found there.
+  const reg = facet.resolverKeyValue ? registryByKey.get(facet.resolverKeyValue) : null;
+  if (reg) {
+    const pushDecls = (title, list, byName) => {
+      if (!list.length) return;
+      out.push(`#### ${title}`);
+      out.push("");
+      out.push("```solidity");
+      out.push(
+        list
+          .slice()
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((d) => byName.get(d.name) || `${d.full};`)
+          .join("\n"),
+      );
+      out.push("```");
+      out.push("");
+    };
+    pushDecls("Events", reg.events, eventByName);
+    pushDecls("Errors", reg.errors, errorByName);
+  }
 
   if (facet.types.length) {
     out.push("#### Types");
@@ -442,25 +534,9 @@ for (const facet of facets) {
 }
 
 // ---------------------------------------------------------------------------------------------
-// Flat Events / Errors sections spanning the whole tree (no facet differentiation), then Roles.
+// Roles span the whole tree (events and errors are now listed per facet, above). Roles are not
+// tracked per facet by the registry, so they remain a single flat table.
 // ---------------------------------------------------------------------------------------------
-function renderGlobalDeclBlock(d) {
-  return `// declared in ${[...d.files].sort().join(", ")}\n${d.rendered}`;
-}
-
-function pushDeclSection(title, map) {
-  const list = [...map.values()].sort((a, b) => a.name.localeCompare(b.name) || a.rendered.localeCompare(b.rendered));
-  out.push(`## ${title}`);
-  out.push("");
-  out.push("```solidity");
-  out.push(list.map(renderGlobalDeclBlock).join("\n\n"));
-  out.push("```");
-  out.push("");
-}
-
-pushDeclSection("Events", eventMap);
-pushDeclSection("Errors", errorMap);
-
 out.push("## Roles");
 out.push("");
 out.push("| Role | Value |");
@@ -472,6 +548,7 @@ out.push("");
 
 const target = path.join(contractsRoot, "FACETS_METHODS.md");
 fs.writeFileSync(target, out.join("\n").replace(/\n+$/, "\n"));
+const joined = facets.filter((f) => f.resolverKeyValue && registryByKey.has(f.resolverKeyValue)).length;
 console.error(
-  `Wrote ${facets.length} facets, ${eventMap.size} events, ${errorMap.size} errors, ${roles.length} roles to ${target}`,
+  `Wrote ${facets.length} facets (${joined} joined to the registry for events/errors), ${roles.length} roles to ${target}`,
 );

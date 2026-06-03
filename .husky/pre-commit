@@ -1,8 +1,8 @@
 # Keep FACETS_METHODS.md in sync whenever a facet interface source is staged.
 # Runs before lint-staged so the regenerated Markdown is formatted in the same pass.
-if git diff --cached --name-only | grep -q '^packages/ats/contracts/contracts/facets/.*\.sol$'; then
-  node packages/ats/contracts/gen_facets_methods.mjs
-  git add packages/ats/contracts/FACETS_METHODS.md
-fi
+npm run ats:contracts:compile
+npm run ats:contracts:generate:registry
+node packages/ats/contracts/gen_facets_methods.mjs
+git add packages/ats/contracts/FACETS_METHODS.md
 
 npm run pre-commit
