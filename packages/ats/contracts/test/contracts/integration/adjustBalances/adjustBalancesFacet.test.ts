@@ -747,6 +747,16 @@ describe("AdjustBalancesFacet Tests", () => {
           .triggerAndSyncAll(ethers.ZeroHash, ethers.ZeroAddress, ethers.ZeroAddress),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
+
+    it("GIVEN a deactivated asset WHEN forceCancelScheduledBalanceAdjustment THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).forceCancelScheduledBalanceAdjustment(0),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
   });
   describe("initializeBalanceAdjustments", () => {
     it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeBalanceAdjustments is called THEN AccountHasNoRole", async () => {
