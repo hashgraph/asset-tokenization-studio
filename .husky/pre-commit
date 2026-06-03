@@ -3,6 +3,6 @@
 npm run ats:contracts:compile
 npm run ats:contracts:generate:registry
 node packages/ats/contracts/gen_facets_methods.mjs
-git add packages/ats/contracts/FACETS_METHODS.md
-
+npm run format
 npm run pre-commit
+git add packages/ats/contracts/FACETS_METHODS.md
