@@ -1544,6 +1544,13 @@ describe("AmortizationFacet", () => {
         "NotAllowedInMultiPartitionMode",
       );
     });
+
+    it("GIVEN multiPartition token WHEN forceCancelAmortization THEN reverts with NotAllowedInMultiPartitionMode", async () => {
+      await expect(mpAsset.forceCancelAmortization(1)).to.be.revertedWithCustomError(
+        mpAsset,
+        "NotAllowedInMultiPartitionMode",
+      );
+    });
   });
 
   describe("Deactivated", () => {
@@ -1586,6 +1593,17 @@ describe("AmortizationFacet", () => {
       await expect(
         deactivatedAsset.connect(base.deployer).setAmortizationHold(0, ethers.ZeroAddress, 0),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN forceCancelAmortization THEN transaction fails with Deactivated", async () => {
+      const base = await deployLoanTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(deactivatedAsset.connect(base.deployer).forceCancelAmortization(0)).to.be.revertedWithCustomError(
+        deactivatedAsset,
+        "Deactivated",
+      );
     });
   });
 
