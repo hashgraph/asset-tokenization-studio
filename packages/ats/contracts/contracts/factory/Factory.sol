@@ -38,7 +38,7 @@ import { IScheduledCrossOrderedTasks } from "../facets/scheduledCrossOrderedTask
 import { ISnapshots } from "../facets/snapshot/ISnapshots.sol";
 import { IProceedRecipients } from "../facets/proceedRecipient/IProceedRecipients.sol";
 
-import { INominalValue } from "../facets/layer_2/nominalValue/INominalValue.sol";
+import { INominalValue } from "../facets/nominalValue/INominalValue.sol";
 import { ScheduledTasksStorageWrapper } from "../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { IProtectedPartitions } from "../facets/protectedPartition/IProtectedPartitions.sol";
 import { IExternalPauseManagement } from "../facets/externalPauseManagement/IExternalPauseManagement.sol";
