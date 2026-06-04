@@ -3,13 +3,41 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ILoansPortfolio, RESOLVER_KEY_LOANS_PORTFOLIO } from "./ILoansPortfolio.sol";
 import { LoansPortfolio } from "./LoansPortfolio.sol";
-import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 
+/**
+ * @title  LoansPortfolioFacet
+ * @author Asset Tokenization Studio Team
+ * @notice Diamond facet that exposes loans-portfolio management to the proxy.
+ * @dev    Selectors exposed:
+ *         - `initializeLoansPortfolio`
+ *         - `addHoldingsAsset`
+ *         - `removeHoldingsAsset`
+ *         - `notifyLoanHoldingsAssetUpdate`
+ *         - `loansPortfolioWithdraw`
+ *         - `getLoansPortfolioData`
+ *         - `getHoldingsAssets`
+ *         - `getLoanHoldingsAssets`
+ *         - `getHoldingsAssetOwnership`
+ *         - `getNumberOfAssets`
+ *         - `getNumberOfLoans`
+ *         - `getNumberOfCash`
+ *         - `getNumberOfPerformingLoans`
+ *         - `getNumberOfNonPerformingLoans`
+ *         - `getNumberDefaultedLoans`
+ *         - `getSecuredLoansRatio`
+ *         - `getPerformingLoansRatio`
+ *         - `getNonPerformingLoansRatio`
+ *         - `getDefaultedLoansRatio`
+ *         - `getGeographicalExposure`
+ */
 contract LoansPortfolioFacet is LoansPortfolio, IStaticFunctionSelectors {
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = RESOLVER_KEY_LOANS_PORTFOLIO;
     }
 
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](19);
@@ -34,6 +62,7 @@ contract LoansPortfolioFacet is LoansPortfolio, IStaticFunctionSelectors {
         staticFunctionSelectors_[selectorIndex++] = this.getDefaultedLoansRatio.selector;
     }
 
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         staticInterfaceIds_[0] = type(ILoansPortfolio).interfaceId;

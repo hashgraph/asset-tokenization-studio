@@ -51,7 +51,7 @@ import { ILoan } from "./loan/ILoan.sol";
 import { INominalValue } from "./nominalValue/INominalValue.sol";
 import { INominalValueAtSnapshot } from "./nominalValueAtSnapshot/INominalValueAtSnapshot.sol";
 import { IPause } from "./pause/IPause.sol";
-import { ILoansPortfolio } from "./layer_2/loansPortfolio/ILoansPortfolio.sol";
+import { ILoansPortfolio } from "./loansPortfolio/ILoansPortfolio.sol";
 import { IVoting } from "./voting/IVoting.sol";
 import { IVotingSecurityHolders } from "./votingSecurityHolders/IVotingSecurityHolders.sol";
 
