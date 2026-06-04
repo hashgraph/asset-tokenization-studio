@@ -335,29 +335,30 @@ library ERC1594StorageWrapper {
     }
 
     /**
-     * @notice Determines whether an operator must satisfy compliance and allowance checks.
-     * @dev Returns false when the sender is the token holder or holds the protected partition
-     *      role while partition protection is enabled. Returns true for all other delegated
-     *      operations. Reads protected partition and access-control storage without mutating state.
-     * @param _from Token holder whose balance or partitioned balance is acted upon.
+     * @notice Determines whether an operator is subject to compliance and allowance checks.
+     * @dev Returns false when the sender is the token holder. If partition protection is
+     *      enabled, also returns false for senders holding the role associated with the
+     *      protected partition. Returns true for all other delegated operations. Does not
+     *      mutate state and only reads protected partition and access-control storage.
+     * @param _from Token holder whose balance or partitioned balance is being acted upon.
      * @param _sender Address initiating the operation.
      * @param _partition Partition identifier used to resolve privileged sender permissions.
-     * @return True if the sender must pass additional compliance and allowance checks.
+     * @return True when the sender must satisfy additional compliance and allowance checks.
      */
     function _isSenderComplianceRequired(
         address _from,
         address _sender,
         bytes32 _partition
     ) private view returns (bool) {
-        if (_from == _sender) return false;
-        if (!ProtectedPartitionsStorageWrapper.arePartitionsProtected()) return true;
-        if (
-            AccessControlStorageWrapper.hasRole(
-                ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition),
-                _sender
-            )
-        ) return false;
-        return true;
+        return
+            _from == _sender
+                ? false
+                : ProtectedPartitionsStorageWrapper.arePartitionsProtected()
+                    ? !AccessControlStorageWrapper.hasRole(
+                        ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition),
+                        _sender
+                    )
+                    : true;
     }
 
     /**
