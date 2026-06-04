@@ -32,9 +32,9 @@ import { ITransfer } from "./transfer/ITransfer.sol";
 // Layer 1 — Remaining facets
 import { IERC20Votes } from "./erc20Votes/IERC20Votes.sol";
 import { IERC3643 } from "./layer_1/ERC3643/IERC3643.sol";
-import { IExternalControlList } from "./layer_1/externalControlList/IExternalControlList.sol";
+import { IExternalControlList } from "./externalControlListManagement/IExternalControlList.sol";
 import { IExternalControlListManagement } from "./externalControlListManagement/IExternalControlListManagement.sol";
-import { IExternalKycList } from "./layer_1/externalKycList/IExternalKycList.sol";
+import { IExternalKycList } from "./externalKycListManagement/IExternalKycList.sol";
 import { IExternalKycListManagement } from "./externalKycListManagement/IExternalKycListManagement.sol";
 import { IExternalPauseManagement } from "./externalPauseManagement/IExternalPauseManagement.sol";
 import { IFixedRate } from "./fixedRate/IFixedRate.sol";
