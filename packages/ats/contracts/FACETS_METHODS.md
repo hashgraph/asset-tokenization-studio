@@ -1,4 +1,4 @@
-# ATS Facet Methods
+# ATS Facet Interfaces
 
 > **Generated file — do not edit by hand.** Regenerate after any facet interface change with:
 >
@@ -10,7 +10,7 @@
 
 ## Contents
 
-- [Methods](#methods)
+- [Facets](#facets)
   - [Access Control](#access-control)
   - [Adjust Balances](#adjust-balances)
   - [Allowance](#allowance)
@@ -135,7 +135,7 @@
   - [Equity USA](#equity-usa)
 - [Roles](#roles)
 
-## Methods
+## Facets
 
 <!-- core / supporting facets -->
 
@@ -658,6 +658,7 @@ error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error IsPaused();
 error NotAllowedInMultiPartitionMode();
 error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
+error ProtectedPartitionRoleRequired(bytes32 partition, address sender);
 error TokenIsNotControllable();
 error WalletRecovered();
 ```
@@ -2082,12 +2083,10 @@ error CorporateActionNotFound(bytes32 corporateActionId);
 error DecimalsTooLarge(uint8 currentDecimals, uint8 newDecimals);
 error DuplicatedCorporateAction(bytes32 actionType, bytes data);
 error ExpiredDeadline(uint256 deadline);
-error ExponentOverflow(uint256 exponent);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error GreaterThanMaxUint256(uint256 amount, uint8 decimals);
 error InvalidDates();
 error InvalidTimestamp();
-error MaxExternalListSizeReached(uint256 max);
 error UnexpectedError(bytes4 _errorId);
 error WrongDates(uint256 firstDate, uint256 secondDate);
 error WrongExpirationTimestamp();
@@ -2140,7 +2139,6 @@ error CouponCreationFailed();
 error CouponNotFound(uint256 couponID);
 error Deactivated();
 error DecimalsTooLarge(uint8 currentDecimals, uint8 newDecimals);
-error ExponentOverflow(uint256 exponent);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error GreaterThanMaxUint256(uint256 amount, uint8 decimals);
 error InterestRateIsFixed();
@@ -2284,7 +2282,6 @@ error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error CouponNotFound(uint256 couponID);
 error DecimalsTooLarge(uint8 currentDecimals, uint8 newDecimals);
-error ExponentOverflow(uint256 exponent);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error GreaterThanMaxUint256(uint256 amount, uint8 decimals);
 error SnapshotIdDoesNotExists(uint256 snapshotId);
@@ -2610,7 +2607,6 @@ error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
 error DividendAlreadyExecuted(bytes32 corporateActionId, uint256 dividendId);
 error DividendCreationFailed();
-error ExponentOverflow(uint256 exponent);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error InvalidTimestamp();
 error IsPaused();
@@ -2889,7 +2885,6 @@ error ExternalControlListsNotUpdated(address[] controlLista, bool[] actives);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error IsPaused();
 error ListedControlList(address controlList);
-error MaxExternalListSizeReached(uint256 max);
 error UnlistedControlList(address controlList);
 error ZeroAddressNotAllowed();
 ```
@@ -2937,7 +2932,6 @@ error ExternalKycListsNotUpdated(address[] kycList, bool[] actives);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error IsPaused();
 error ListedKycList(address kycList);
-error MaxExternalListSizeReached(uint256 max);
 error UnlistedKycList(address kycList);
 error ZeroAddressNotAllowed();
 ```
@@ -2991,7 +2985,6 @@ error ExternalPausesNotUpdated(address[] pauses, bool[] actives);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error IsPaused();
 error ListedPause(address pause);
-error MaxExternalListSizeReached(uint256 max);
 error UnlistedPause(address pause);
 error ZeroAddressNotAllowed();
 ```
@@ -3035,11 +3028,11 @@ event BondDeployed(
   BondData bondData,
   FactoryRegulationData regulationData
 );
-event DepositTokenDeployed(
+event BondFixedRateDeployed(address indexed deployer, address bondAddress, BondFixedRateData bondFixedRateData);
+event BondKpiLinkedRateDeployed(
   address indexed deployer,
-  address depositTokenAddress,
-  DepositTokenData depositTokenData,
-  FactoryRegulationData regulationData
+  address bondAddress,
+  BondKpiLinkedRateData bondKpiLinkedRateData
 );
 event EquityDeployed(
   address indexed deployer,
@@ -3062,12 +3055,11 @@ event ProxyDeployed(
 error EmptyResolver(IBusinessLogicResolver resolver);
 error NoInitialAdmins();
 error RegulationTypeAndSubTypeForbidden(RegulationType regulationType, RegulationSubType regulationSubType);
-error RegulationTypeAndSubTypeForbidden(RegulationType regulationType, RegulationSubType regulationSubType);
 error UnexpectedError(bytes4 _errorId);
 error WrongDates(uint256 firstDate, uint256 secondDate);
+error WrongImpactDataValues(ImpactData impactData);
+error WrongInterestRateValues(InterestRate interestRate);
 error WrongISIN(string isin);
-error WrongISIN(string isin);
-error WrongISINChecksum(string isin);
 error WrongISINChecksum(string isin);
 error WrongTimestamp(uint256 timeStamp);
 ```
@@ -3722,7 +3714,6 @@ error AssetNotOperational(bytes32 configId, uint256 versionId);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error FacetPreviousVersionNotAccepted(bytes32 facetId, uint256 lastVersion, uint256[] expectedVersions);
 error FacetReady(bytes32 facetId, uint256 versionId);
-error ZeroValueNotAllowed();
 ```
 
 ### Interest Rate
@@ -3794,32 +3785,6 @@ function getKycAccountsData(
 ) external view returns (address[] memory accounts_, KycData[] memory kycData_);
 ```
 
-#### Events
-
-```solidity
-event InternalKycStatusUpdated(address indexed operator, bool activated);
-event KycGranted(address indexed account, address indexed issuer);
-event KycInitialized(bool internalKycActivated);
-event KycRevoked(address indexed account, address indexed issuer);
-```
-
-#### Errors
-
-```solidity
-error AccessControlRequired(bytes32 role, address sender);
-error AccountHasNoRole(address account, bytes32 role);
-error AccountIsNotIssuer(address issuer);
-error AssetNotOperational(bytes32 configId, uint256 versionId);
-error Deactivated();
-error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
-error InvalidDates();
-error InvalidKycStatus();
-error InvalidZeroAddress();
-error IsPaused();
-error KycIsNotGranted();
-error ZeroAddressNotAllowed();
-```
-
 #### Types
 
 ```solidity
@@ -3869,70 +3834,6 @@ function getLockFor(
   address _tokenHolder,
   uint256 _lockId
 ) external view returns (uint256 amount_, uint256 expirationTimestamp_);
-```
-
-#### Events
-
-```solidity
-event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance);
-event LockByPartitionReleased(
-  address indexed operator,
-  address indexed tokenHolder,
-  bytes32 indexed partition,
-  uint256 lockId
-);
-event LockedByPartition(
-  address indexed operator,
-  address indexed tokenHolder,
-  bytes32 indexed partition,
-  uint256 lockId,
-  uint256 amount,
-  uint256 expirationTimestamp
-);
-event LockExpirationUpdated(
-  address indexed operator,
-  address indexed tokenHolder,
-  bytes32 indexed partition,
-  uint256 lockId,
-  uint256 oldExpirationTimestamp,
-  uint256 newExpirationTimestamp
-);
-event LockInitialized();
-event Transfer(address indexed from, address indexed to, uint256 value);
-event TransferByPartition(
-  bytes32 indexed _fromPartition,
-  address _operator,
-  address indexed _from,
-  address indexed _to,
-  uint256 _value,
-  bytes _data,
-  bytes _operatorData
-);
-```
-
-#### Errors
-
-```solidity
-error AbafChangeForBlockForbidden(uint256 blockNumber);
-error AccessControlRequired(bytes32 role, address sender);
-error AccountHasNoRole(address account, bytes32 role);
-error AccountHasNoRoles(address account, bytes32[] roles);
-error AssetNotOperational(bytes32 configId, uint256 versionId);
-error Deactivated();
-error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
-error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition, bool singlePartitionMode);
-error InvalidLockAmount();
-error InvalidPartition(address account, bytes32 partition);
-error IsPaused();
-error LockExpirationNotReached();
-error NotAllowedInMultiPartitionMode();
-error PartitionNotAllowedInSinglePartitionMode(bytes32 partition);
-error SnapshotIdDoesNotExists(uint256 snapshotId);
-error SnapshotIdNull();
-error UnexpectedError(bytes4 _errorId);
-error WalletRecovered();
-error WrongExpirationTimestamp();
-error WrongLockId();
 ```
 
 ### Lock At Snapshot
@@ -4372,7 +4273,6 @@ event RedeemedByPartition(
 );
 event RevokedOperator(address indexed operator, address indexed tokenHolder);
 event RevokedOperatorByPartition(bytes32 indexed partition, address indexed operator, address indexed tokenHolder);
-event TestoperatorByPartitionInitialized();
 event TransferByPartition(
   bytes32 indexed _fromPartition,
   address _operator,
@@ -4793,7 +4693,6 @@ event PrincipalInitialized();
 ```solidity
 error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
-error ExponentOverflow(uint256 exponent);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 ```
 
@@ -4824,29 +4723,6 @@ function getProceedRecipients(
   uint256 _pageIndex,
   uint256 _pageLength
 ) external view returns (address[] memory proceedRecipients_);
-```
-
-#### Events
-
-```solidity
-event ProceedRecipientAdded(address indexed operator, address indexed proceedRecipient, bytes data);
-event ProceedRecipientDataUpdated(address indexed operator, address indexed proceedRecipient, bytes newData);
-event ProceedRecipientRemoved(address indexed operator, address indexed proceedRecipient);
-event ProceedRecipientsInitialized(address[] proceedRecipients, bytes[] data);
-```
-
-#### Errors
-
-```solidity
-error AccessControlRequired(bytes32 role, address sender);
-error AccountHasNoRole(address account, bytes32 role);
-error AssetNotOperational(bytes32 configId, uint256 versionId);
-error Deactivated();
-error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
-error IsPaused();
-error MaxExternalListSizeReached(uint256 max);
-error ProceedRecipientNotFound(address proceedRecipient);
-error ZeroAddressNotAllowed();
 ```
 
 ### Protected By Partition
@@ -4902,7 +4778,6 @@ error Deactivated();
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error IsPaused();
 error PartitionsAreUnProtected();
-error ProtectedPartitionRoleRequired(bytes32 partition, address sender);
 ```
 
 #### Types
@@ -5646,27 +5521,6 @@ function getScheduledSnapshots(
 ) external view returns (ScheduledTask[] memory scheduledSnapshot_);
 ```
 
-#### Events
-
-```solidity
-event SnapshotsInitialized();
-event SnapshotTaken(address indexed operator, uint256 indexed snapshotID);
-event SnapshotTriggered(uint256 snapshotId, bytes metadata);
-```
-
-#### Errors
-
-```solidity
-error AccessControlRequired(bytes32 role, address sender);
-error AccountHasNoRole(address account, bytes32 role);
-error AssetNotOperational(bytes32 configId, uint256 versionId);
-error Deactivated();
-error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
-error IsPaused();
-error SnapshotIdDoesNotExists(uint256 snapshotId);
-error SnapshotIdNull();
-```
-
 #### Types
 
 ```solidity
@@ -5742,7 +5596,6 @@ error Deactivated();
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error IsPaused();
 error ListedIssuer(address issuer);
-error TestError(bool test);
 error UnlistedIssuer(address issuer);
 error ZeroAddressNotAllowed();
 ```
@@ -5975,39 +5828,6 @@ function forceCancelVoting(uint256 _voteId) external returns (bool success_);
 function getVoting(uint256 _voteID) external view returns (RegisteredVoting memory registeredVoting_, bool isDisabled_);
 function getVotingFor(uint256 _voteID, address _account) external view returns (VotingFor memory votingFor_);
 function getVotingCount() external view returns (uint256 votingCount_);
-```
-
-#### Events
-
-```solidity
-event VotingCancelled(uint256 voteId, address indexed operator);
-event VotingForceCancelled(uint256 voteId, address indexed operator);
-event VotingInitialized();
-event VotingSet(
-  bytes32 corporateActionId,
-  uint256 voteId,
-  address indexed operator,
-  uint256 indexed recordDate,
-  bytes data
-);
-```
-
-#### Errors
-
-```solidity
-error AccessControlRequired(bytes32 role, address sender);
-error AccountHasNoRole(address account, bytes32 role);
-error AssetNotOperational(bytes32 configId, uint256 versionId);
-error Deactivated();
-error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
-error InvalidTimestamp();
-error IsPaused();
-error SnapshotIdDoesNotExists(uint256 snapshotId);
-error SnapshotIdNull();
-error UnexpectedError(bytes4 _errorId);
-error VotingAlreadyRecorded(bytes32 corporateActionId, uint256 voteId);
-error VotingRightsCreationFailed();
-error WrongIndexForAction(uint256 index, bytes32 actionType);
 ```
 
 #### Types
@@ -6423,6 +6243,13 @@ event AmortizationHoldReleased(
   uint256 indexed amortizationID,
   address indexed tokenHolder,
   uint256 holdId
+);
+event AmortizationHoldSet(
+  bytes32 indexed corporateActionId,
+  uint256 indexed amortizationID,
+  address indexed tokenHolder,
+  uint256 holdId,
+  uint256 tokenAmount
 );
 event AmortizationInitialized();
 event AmortizationSet(

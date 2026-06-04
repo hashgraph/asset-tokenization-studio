@@ -448,7 +448,7 @@ for (const f of facets) f.anchor = slug(f.name);
 // Markdown rendering
 // ---------------------------------------------------------------------------------------------
 const out = [];
-out.push("# ATS Facet Methods");
+out.push("# ATS Facet Interfaces");
 out.push("");
 out.push("> **Generated file — do not edit by hand.** Regenerate after any facet interface change with:");
 out.push("> ");
@@ -459,18 +459,18 @@ out.push("> ");
 out.push("> Maintained via the `solidity-natspec` skill.");
 out.push("");
 
-// Table of contents: Methods (with every facet nested, each carrying its own events/errors) and
+// Table of contents: Facets (with every facet nested, each carrying its own events/errors) and
 // the flat Roles table.
 out.push("## Contents");
 out.push("");
-out.push("- [Methods](#methods)");
+out.push("- [Facets](#facets)");
 for (const facet of facets) {
   out.push(`  - [${facet.name}](#${facet.anchor})`);
 }
 out.push("- [Roles](#roles)");
 out.push("");
 
-out.push("## Methods");
+out.push("## Facets");
 out.push("");
 
 let currentLayer = -1;
