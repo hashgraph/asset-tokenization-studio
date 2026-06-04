@@ -351,23 +351,13 @@ library ERC1594StorageWrapper {
     ) private view returns (bool) {
         if (_from == _sender) return false;
         if (!ProtectedPartitionsStorageWrapper.arePartitionsProtected()) return true;
-        return !_isSenderPrivileged(_sender, _partition);
-    }
-
-    /**
-     * @notice Checks whether a sender is privileged for a protected partition.
-     * @dev Resolves the partition-specific role and checks membership in access-control storage.
-     *      Does not validate whether partition protection is currently enabled.
-     * @param _sender Address whose partition privilege is checked.
-     * @param _partition Partition identifier used to derive the required role.
-     * @return True if the sender holds the role associated with the partition.
-     */
-    function _isSenderPrivileged(address _sender, bytes32 _partition) private view returns (bool) {
-        return
+        if (
             AccessControlStorageWrapper.hasRole(
                 ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition),
                 _sender
-            );
+            )
+        ) return false;
+        return true;
     }
 
     /**
