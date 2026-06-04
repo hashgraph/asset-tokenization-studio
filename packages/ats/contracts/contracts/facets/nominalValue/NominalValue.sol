@@ -2,19 +2,19 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { INominalValue, RESOLVER_KEY_NOMINAL_VALUE } from "./INominalValue.sol";
-import { ROLE_NOMINAL_VALUE, DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
-import { Modifiers } from "../../../services/Modifiers.sol";
-import { NominalValueStorageWrapper } from "../../../domain/asset/NominalValueStorageWrapper.sol";
-import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
-import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
+import { ROLE_NOMINAL_VALUE, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { NominalValueStorageWrapper } from "../../domain/asset/NominalValueStorageWrapper.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title NominalValue
  * @author Asset Tokenization Studio Team
  * @notice Writer abstract for the nominal value capability; sole emit site for the events
  *         declared on `INominalValue`.
- * @dev Concrete facet `NominalValueFacet` registers the external onlyOperational selectors. Storage operations
- *      delegate to `NominalValueStorageWrapper`, which holds the dedicated slot.
+ * @dev    Delegates all storage reads and writes to `NominalValueStorageWrapper`, which owns
+ *         the dedicated storage slot. Access guards are enforced via `Modifiers`.
  */
 abstract contract NominalValue is INominalValue, Modifiers {
     /// @inheritdoc INominalValue
