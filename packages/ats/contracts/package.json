@@ -158,7 +158,8 @@
     "validate:package": "npm run build && npx publint && npx @arethetypeswrong/cli --pack",
     "prepack": "npm run build",
     "prepare": "npx hardhat compile",
-    "doc": "npx hardhat dodoc"
+    "doc": "npx hardhat dodoc",
+    "doc:checks": "node gen_facets_interfaces.mjs --check"
   },
   "dependencies": {
     "@onchain-id/solidity": "^2.2.1",

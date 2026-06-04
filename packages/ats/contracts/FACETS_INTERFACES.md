@@ -179,7 +179,6 @@ event RolesApplied(
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountAssignedToRole(bytes32 role, address account);
 error AccountHasNoRole(address account, bytes32 role);
 error AccountHasNoRoles(address account, bytes32[] roles);
@@ -214,7 +213,6 @@ event BalanceAdjustmentsInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -249,7 +247,6 @@ event Approval(address indexed owner, address indexed spender, uint256 value);
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -352,7 +349,6 @@ event TransferByPartition(
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AmortizationAlreadyExecuted(bytes32 corporateActionId, uint256 amortizationId);
 error AmortizationCreationFailed();
@@ -436,7 +432,6 @@ event BalanceTrackerInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 ```
@@ -460,7 +455,6 @@ event BalanceTrackerAdjustedInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 ```
@@ -490,7 +484,6 @@ event BalanceTrackerAtSnapshotInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error SnapshotIdDoesNotExists(uint256 snapshotId);
@@ -534,7 +527,6 @@ event BalanceTrackerAtSnapshotByPartitionInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error SnapshotIdDoesNotExists(uint256 snapshotId);
@@ -562,7 +554,6 @@ event BalanceTrackerByPartitionInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 ```
@@ -593,7 +584,6 @@ event ControllerRedemption(
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AccountHasNoRoles(address account, bytes32[] roles);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
@@ -636,7 +626,6 @@ event ControllerTransfer(
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AccountHasNoRoles(address account, bytes32[] roles);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
@@ -684,7 +673,6 @@ event TransferByPartition(
 
 ```solidity
 error AbafChangeForBlockForbidden(uint256 blockNumber);
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AccountHasNoRoles(address account, bytes32[] roles);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
@@ -725,7 +713,6 @@ event Issued(address indexed _operator, address indexed _to, uint256 _value, byt
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AccountHasNoRoles(address account, bytes32[] roles);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
@@ -757,7 +744,6 @@ event BatchTransferInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -797,7 +783,6 @@ event Redeemed(address indexed _operator, address indexed _from, uint256 _value,
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AccountHasNoRoles(address account, bytes32[] roles);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
@@ -829,7 +814,6 @@ event BurnByPartitionInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -913,7 +897,6 @@ event MaxSupplySet(address indexed operator, uint256 newMaxSupply, uint256 previ
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -962,7 +945,6 @@ event MaxSupplyByPartitionSet(
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -1107,7 +1089,6 @@ event ClearingOperationReclaimed(
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error ClearingIsActivated();
@@ -1151,7 +1132,6 @@ event ClearingAtSnapshotInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error SnapshotIdDoesNotExists(uint256 snapshotId);
@@ -1181,7 +1161,6 @@ event ClearingAtSnapshotByPartitionInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error SnapshotIdDoesNotExists(uint256 snapshotId);
@@ -1366,7 +1345,6 @@ event ClearingOperationReclaimed(
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error ClearingIsActivated();
@@ -1584,7 +1562,6 @@ event ClearingOperationReclaimed(
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error ClearingIsActivated();
@@ -1685,7 +1662,6 @@ event ComplianceByPartitionInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 ```
@@ -1743,7 +1719,6 @@ event RemovedFromControlList(address indexed operator, address indexed account);
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -1818,7 +1793,6 @@ event UpdatedTokenInformation(
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountAssignedToRole(bytes32 role, address account);
 error AccountHasNoRole(address account, bytes32 role);
 error AccountHasNoRoles(address account, bytes32[] roles);
@@ -1901,7 +1875,6 @@ event TransferByPartition(
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AccountHasNoRoles(address account, bytes32[] roles);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
@@ -1997,7 +1970,6 @@ event ProtectedHeldByPartition(
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error ClearingIsActivated();
@@ -2063,7 +2035,6 @@ event UpdatedTokenInformation(
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -2074,13 +2045,13 @@ error IsPaused();
 #### Types
 
 ```solidity
-// declared in contracts/factory/ERC3643/interfaces/ICore.sol
+// declared in contracts/facets/core/ICore.sol
 struct ERC20Metadata {
   ERC20MetadataInfo info;
   IFactory.SecurityType securityType;
 }
 
-// declared in contracts/factory/ERC3643/interfaces/ICore.sol
+// declared in contracts/facets/core/ICore.sol
 struct ERC20MetadataInfo {
   string name;
   string symbol;
@@ -2123,7 +2094,6 @@ event CoreAdjustedInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 ```
@@ -2147,7 +2117,6 @@ event CoreAtSnapshotInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error SnapshotIdDoesNotExists(uint256 snapshotId);
@@ -2220,7 +2189,6 @@ event CorporateActionsInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AccountIsBlocked(address account);
 error AlreadyInitialized();
@@ -2280,7 +2248,6 @@ event CouponSet(bytes32 indexed corporateActionId, uint256 indexed couponId, add
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error CouponAlreadyExecuted(bytes32 corporateActionId, uint256 couponId);
@@ -2381,7 +2348,6 @@ event CouponListingInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 ```
@@ -2389,7 +2355,7 @@ error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 #### Types
 
 ```solidity
-// declared in contracts/factory/ERC3643/interfaces/IScheduledTasksCommon.sol
+// declared in contracts/facets/scheduledTasksCommon/IScheduledTasksCommon.sol
 struct ScheduledTask {
   uint256 scheduledTimestamp;
   bytes data;
@@ -2425,7 +2391,6 @@ event CouponSecurityHoldersInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error CouponNotFound(uint256 couponID);
@@ -2500,7 +2465,6 @@ event CustomDataInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -2528,7 +2492,6 @@ event DeactivateInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -2748,7 +2711,6 @@ event DividendSet(
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -2826,7 +2788,6 @@ event DividendSecurityHoldersInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error SnapshotIdDoesNotExists(uint256 snapshotId);
@@ -2858,7 +2819,6 @@ event DocumentUpdated(bytes32 indexed name, string uri, bytes32 documentHash);
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -2889,7 +2849,6 @@ event EIP712Initialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 ```
@@ -2932,7 +2891,6 @@ event TransferByPartition(
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -2970,7 +2928,6 @@ event ERC20VotesInitialized(bool activated);
 
 ```solidity
 error AbafChangeForBlockForbidden(uint256 blockNumber);
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error BrokenClockMode();
@@ -3032,7 +2989,6 @@ event RemovedFromExternalControlLists(address indexed operator, address controlL
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex);
@@ -3098,7 +3054,6 @@ event RemovedFromExternalKycLists(address indexed operator, address kycList);
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex);
@@ -3160,7 +3115,6 @@ event RemovedFromExternalPauses(address indexed operator, address pause);
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex);
@@ -3265,7 +3219,7 @@ struct EquityData {
   EquityDetailsData equityDetails;
 }
 
-// declared in contracts/factory/ERC3643/interfaces/regulation.sol
+// declared in contracts/constants/regulation.sol
 struct FactoryRegulationData {
   RegulationType regulationType;
   RegulationSubType regulationSubType;
@@ -3285,21 +3239,21 @@ struct DepositTokenData {
   SecurityData security;
 }
 
-// declared in contracts/factory/ERC3643/interfaces/regulation.sol
+// declared in contracts/constants/regulation.sol
 enum RegulationType {
   NONE,
   REG_S,
   REG_D
 }
 
-// declared in contracts/factory/ERC3643/interfaces/regulation.sol
+// declared in contracts/constants/regulation.sol
 enum RegulationSubType {
   NONE,
   REG_D_506_B,
   REG_D_506_C
 }
 
-// declared in contracts/factory/ERC3643/interfaces/regulation.sol
+// declared in contracts/constants/regulation.sol
 struct RegulationData {
   RegulationType regulationType;
   RegulationSubType regulationSubType;
@@ -3347,7 +3301,7 @@ struct EquityDetailsData {
   uint8 nominalValueDecimals;
 }
 
-// declared in contracts/factory/ERC3643/interfaces/regulation.sol
+// declared in contracts/constants/regulation.sol
 struct AdditionalSecurityData {
   bool countriesControlListType;
   string listOfCountries;
@@ -3363,25 +3317,25 @@ struct BondDetailsData {
   uint256 maturityDate;
 }
 
-// declared in contracts/factory/ERC3643/interfaces/regulation.sol
+// declared in contracts/constants/regulation.sol
 enum AccreditedInvestors {
   NONE,
   ACCREDITATION_REQUIRED
 }
 
-// declared in contracts/factory/ERC3643/interfaces/regulation.sol
+// declared in contracts/constants/regulation.sol
 enum ManualInvestorVerification {
   NOTHING_TO_VERIFY,
   VERIFICATION_INVESTORS_FINANCIAL_DOCUMENTS_REQUIRED
 }
 
-// declared in contracts/factory/ERC3643/interfaces/regulation.sol
+// declared in contracts/constants/regulation.sol
 enum InternationalInvestors {
   NOT_ALLOWED,
   ALLOWED
 }
 
-// declared in contracts/factory/ERC3643/interfaces/regulation.sol
+// declared in contracts/constants/regulation.sol
 enum ResaleHoldPeriod {
   NOT_APPLICABLE,
   APPLICABLE_FROM_6_MOTHS_TO_1_YEAR
@@ -3393,7 +3347,7 @@ struct ResolverProxyConfiguration {
   uint256 version;
 }
 
-// declared in contracts/factory/ERC3643/interfaces/ICore.sol
+// declared in contracts/facets/core/ICore.sol
 struct ERC20MetadataInfo {
   string name;
   string symbol;
@@ -3433,7 +3387,6 @@ event RateUpdated(address indexed operator, uint256 newRate, uint8 newRateDecima
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -3445,7 +3398,7 @@ error IsPaused();
 #### Types
 
 ```solidity
-// declared in contracts/factory/ERC3643/interfaces/IFixedRate.sol
+// declared in contracts/facets/fixedRate/IFixedRate.sol
 struct FixedRateData {
   uint256 rate;
   uint8 rateDecimals;
@@ -3490,7 +3443,6 @@ event TransferByPartition(
 
 ```solidity
 error AbafChangeForBlockForbidden(uint256 blockNumber);
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AccountHasNoRoles(address account, bytes32[] roles);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
@@ -3528,7 +3480,6 @@ event FreezeAtSnapshotInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error SnapshotIdDoesNotExists(uint256 snapshotId);
@@ -3558,7 +3509,6 @@ event FreezeAtSnapshotByPartitionInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error SnapshotIdDoesNotExists(uint256 snapshotId);
@@ -3584,7 +3534,6 @@ event HoldAtSnapshotInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error SnapshotIdDoesNotExists(uint256 snapshotId);
@@ -3614,7 +3563,6 @@ event HoldAtSnapshotByPartitionInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error SnapshotIdDoesNotExists(uint256 snapshotId);
@@ -3739,7 +3687,6 @@ event ProtectedHeldByPartition(
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error ClearingIsActivated();
@@ -3916,7 +3863,6 @@ event UpdatedTokenInformation(
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -3951,7 +3897,6 @@ event OperationalStatusSet(address sender, bytes32 configurationId, uint256 vers
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
@@ -3981,7 +3926,6 @@ event InterestRateTypeInitialized(RateType rateType);
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -4025,7 +3969,6 @@ event KpiLinkedRateInitialized(InterestRate interestRate, ImpactData impactData)
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -4038,7 +3981,7 @@ error WrongInterestRateValues(InterestRate interestRate);
 #### Types
 
 ```solidity
-// declared in contracts/factory/ERC3643/interfaces/IKpiLinkedRate.sol
+// declared in contracts/facets/kpiLinkedRate/IKpiLinkedRate.sol
 struct InterestRate {
   uint256 maxRate;
   uint256 baseRate;
@@ -4050,7 +3993,7 @@ struct InterestRate {
   uint8 rateDecimals;
 }
 
-// declared in contracts/factory/ERC3643/interfaces/IKpiLinkedRate.sol
+// declared in contracts/facets/kpiLinkedRate/IKpiLinkedRate.sol
 struct ImpactData {
   uint256 maxDeviationCap;
   uint256 baseLine;
@@ -4087,7 +4030,6 @@ event KpisInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error CouponNotFound(uint256 couponID);
@@ -4140,7 +4082,6 @@ event KycRevoked(address indexed account, address indexed issuer);
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AccountIsNotIssuer(address issuer);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
@@ -4194,7 +4135,6 @@ event LoanInitialized(LoanDetailsData loanDetailsData);
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -4362,7 +4302,6 @@ event LoansPortfolioWithdrawn(address assetAddress, address to, uint256 amount);
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -4497,7 +4436,6 @@ event TransferByPartition(
 
 ```solidity
 error AbafChangeForBlockForbidden(uint256 blockNumber);
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AccountHasNoRoles(address account, bytes32[] roles);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
@@ -4537,7 +4475,6 @@ event LockAtSnapshotInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error SnapshotIdDoesNotExists(uint256 snapshotId);
@@ -4567,7 +4504,6 @@ event LockAtSnapshotByPartitionInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error SnapshotIdDoesNotExists(uint256 snapshotId);
@@ -4658,7 +4594,6 @@ event TransferByPartition(
 
 ```solidity
 error AbafChangeForBlockForbidden(uint256 blockNumber);
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -4699,7 +4634,6 @@ event MaturityInitialized(uint256 indexed maturityDate);
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AccountIsBlocked(address account);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
@@ -4732,7 +4666,6 @@ event MaturityByPartitionInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AccountIsBlocked(address account);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
@@ -4769,7 +4702,6 @@ event Issued(address indexed _operator, address indexed _to, uint256 _value, byt
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AccountHasNoRoles(address account, bytes32[] roles);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
@@ -4800,7 +4732,6 @@ event MintByPartitionInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AccountHasNoRoles(address account, bytes32[] roles);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
@@ -4854,7 +4785,6 @@ event NominalValueSet(address indexed operator, uint256 nominalValue, uint8 nomi
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -4881,7 +4811,6 @@ event NominalValueAtSnapshotInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error SnapshotIdDoesNotExists(uint256 snapshotId);
@@ -4907,7 +4836,6 @@ event NoncesInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 ```
@@ -4937,7 +4865,6 @@ event RevokedOperator(address indexed operator, address indexed tokenHolder);
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -5006,7 +4933,6 @@ event TransferByPartition(
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -5171,7 +5097,6 @@ event OperatorClearingByPartitionInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error ClearingIsActivated();
@@ -5348,7 +5273,6 @@ event OperatorClearingHoldByPartitionInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error ClearingIsActivated();
@@ -5474,7 +5398,6 @@ event ProtectedHeldByPartition(
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error ClearingIsActivated();
@@ -5540,7 +5463,6 @@ event PartitionsInitialized(bool multiPartition);
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 ```
@@ -5568,7 +5490,6 @@ event Unpaused(address indexed operator);
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -5596,7 +5517,6 @@ event PrincipalInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 ```
@@ -5644,7 +5564,6 @@ event ProceedRecipientsInitialized(address[] proceedRecipients, bytes[] data);
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -5702,7 +5621,6 @@ event ProtectedTransferredByPartition(
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -5880,7 +5798,6 @@ event ProtectedClearingByPartitionInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error ClearingIsActivated();
@@ -6057,7 +5974,6 @@ event ProtectedClearingHoldByPartitionInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error ClearingIsActivated();
@@ -6182,7 +6098,6 @@ event ProtectedHoldByPartitionInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error ClearingIsActivated();
@@ -6265,7 +6180,6 @@ event ProtectedTransferFrom(
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -6324,7 +6238,6 @@ event UpdatedTokenInformation(
 
 ```solidity
 error AbafChangeForBlockForbidden(uint256 blockNumber);
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AddressNotVerified();
 error AssetNotOperational(bytes32 configId, uint256 versionId);
@@ -6400,7 +6313,6 @@ event ScheduledBalanceAdjustmentSet(
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error BalanceAdjustmentAlreadyExecuted(bytes32 corporateActionId, uint256 balanceAdjustmentId);
@@ -6428,7 +6340,7 @@ struct ScheduledBalanceAdjustment {
   uint8 decimals;
 }
 
-// declared in contracts/factory/ERC3643/interfaces/IScheduledTasksCommon.sol
+// declared in contracts/facets/scheduledTasksCommon/IScheduledTasksCommon.sol
 struct ScheduledTask {
   uint256 scheduledTimestamp;
   bytes data;
@@ -6461,7 +6373,6 @@ event TaskExecutionFailed(bytes32 indexed actionId, bytes32 indexed taskType, ui
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -6472,7 +6383,7 @@ error IsPaused();
 #### Types
 
 ```solidity
-// declared in contracts/factory/ERC3643/interfaces/IScheduledTasksCommon.sol
+// declared in contracts/facets/scheduledTasksCommon/IScheduledTasksCommon.sol
 struct ScheduledTask {
   uint256 scheduledTimestamp;
   bytes data;
@@ -6499,7 +6410,6 @@ event SecurityHoldersInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 ```
@@ -6528,7 +6438,6 @@ event SecurityHoldersAtSnapshotInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error SnapshotIdDoesNotExists(uint256 snapshotId);
@@ -6562,7 +6471,6 @@ event SnapshotTriggered(uint256 snapshotId, bytes metadata);
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -6575,7 +6483,7 @@ error SnapshotIdNull();
 #### Types
 
 ```solidity
-// declared in contracts/factory/ERC3643/interfaces/IScheduledTasksCommon.sol
+// declared in contracts/facets/scheduledTasksCommon/IScheduledTasksCommon.sol
 struct ScheduledTask {
   uint256 scheduledTimestamp;
   bytes data;
@@ -6601,7 +6509,6 @@ event SnapshotsByPartitionInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error SnapshotIdDoesNotExists(uint256 snapshotId);
@@ -6639,7 +6546,6 @@ event SsiManagementInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AccountIsNotIssuer(address issuer);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
@@ -6692,7 +6598,6 @@ event TransferWithData(address indexed sender, address indexed to, uint256 amoun
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -6762,7 +6667,6 @@ event TransferByPartition(
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -6829,7 +6733,6 @@ event TransferByPartitionInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -6899,7 +6802,6 @@ event VotingSet(
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
 error Deactivated();
@@ -6964,7 +6866,6 @@ event VotingSecurityHoldersInitialized();
 #### Errors
 
 ```solidity
-error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error SnapshotIdDoesNotExists(uint256 snapshotId);

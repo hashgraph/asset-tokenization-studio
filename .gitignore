@@ -139,6 +139,7 @@ asset-tokenization-studio.iml
 !.claude/skills/
 .claude/skills/*
 !.claude/skills/solidity-natspec/
+!.claude/skills/facets-interfaces-doctor/
 .opencode/
 CLAUDE.md
 AGENTS.md
