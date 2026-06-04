@@ -21,13 +21,4 @@ abstract contract ControlListModifiers {
         ControlListStorageWrapper.checkControlList(_account);
         _;
     }
-
-    /**
-     * @notice Modifier to ensure control list has not been initialized
-     * @dev Reverts with AlreadyInitialized if control list is already initialized
-     */
-    modifier onlyNotControlListInitialized() {
-        _checkNotInitialized(ControlListStorageWrapper.isControlListInitialized());
-        _;
-    }
 }

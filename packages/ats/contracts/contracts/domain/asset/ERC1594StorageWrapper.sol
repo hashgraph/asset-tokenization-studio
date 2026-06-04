@@ -109,14 +109,6 @@ library ERC1594StorageWrapper {
     }
 
     /**
-     * @notice Returns whether the ERC1594 storage has been initialised.
-     * @return `true` if `initialize` has been called successfully.
-     */
-    function isERC1594Initialized() internal view returns (bool) {
-        return erc1594Storage().initialized;
-    }
-
-    /**
      * @notice Reverts if either `from` or `to` is listed as a recovered
      * wallet.
      * @dev Reverts with `WalletRecovered` for any non-zero address whose
@@ -326,7 +318,7 @@ library ERC1594StorageWrapper {
      * @param _from Token holder address.
      * @param _sender Address initiating the operation.
      * @param _partition Partition identifier.
-     * @return checkSender_ True if the sender must pass additional checks.
+     * @return isRequired_ True if the sender must pass additional checks.
      */
     function _isSenderComplianceRequired(
         address _from,

@@ -54,7 +54,7 @@ abstract contract SsiManagement is ISsiManagement, Modifiers {
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_SSI_MANAGER)
-        notZeroAddress(_issuer)
+        onlyAddressNotZero(_issuer)
         returns (bool success_)
     {
         success_ = SsiManagementStorageWrapper.addIssuer(_issuer);

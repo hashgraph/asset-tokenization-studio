@@ -234,10 +234,6 @@ library ExternalListManagementStorageWrapper {
         return true;
     }
 
-    function isKycExternalInitialized() internal view returns (bool) {
-        return externalListStorage(_KYC_MANAGEMENT_STORAGE_POSITION).initialized;
-    }
-
     /**
      * @notice Returns the storage pointer for the external-list namespace at `_position`.
      * @dev Resolves the supplied ERC-7201 slot via inline assembly, allowing the same struct
