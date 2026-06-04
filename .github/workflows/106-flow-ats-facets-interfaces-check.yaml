@@ -1,4 +1,4 @@
-name: "106: [FLOW] ATS FACETS_METHODS Check"
+name: "106: [FLOW] ATS FACETS_INTERFACES Check"
 
 # Enforces that packages/ats/contracts/FACETS_INTERFACES.md (and the facet registry
 # it depends on) is in sync with the committed contract sources. The husky
