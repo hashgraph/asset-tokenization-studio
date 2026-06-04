@@ -88,3 +88,10 @@ deployments/**/.checkpoints/
 
 # Auto-generated MCP server context (added automatically)
 .mcp-server-context.md
+
+# run-ai-checks.sh output — never commit these
+ai-run.log
+ai-run.json
+*.ai-run.log
+*.ai-run.json
+.ai-logs/
