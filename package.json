@@ -47,7 +47,7 @@
     "format:staged:check": "prettier --check",
     "pre-commit": "lint-staged",
     "commitlint": "commitlint --edit",
-    "prepare": "husky",
+    "prepare": "husky; git config merge.ours.driver true 2>/dev/null || true",
     "changeset": "changeset",
     "changeset:version": "changeset version && npm install --package-lock-only && npm run format",
     "changeset:publish": "changeset publish",
