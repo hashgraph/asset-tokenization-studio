@@ -180,7 +180,7 @@ library ERC1594StorageWrapper {
             );
         }
         address sender = EvmAccessors.getMsgSender();
-        bool checkSender = _checkSenderHasProtectedPartitionRole(from, sender, partition);
+        bool checkSender = _isSenderComplianceRequired(from, sender, partition);
         (canRedeemFrom, statusCode, reasonCode, details) = _isCompliant(from, address(0), value, sender, checkSender);
         if (!canRedeemFrom) return (canRedeemFrom, statusCode, reasonCode, details);
         (canRedeemFrom, statusCode, reasonCode, details) = _isIdentified(from, address(0));
@@ -239,7 +239,7 @@ library ERC1594StorageWrapper {
             );
         }
         address sender = EvmAccessors.getMsgSender();
-        bool checkSender = _checkSenderHasProtectedPartitionRole(from, sender, partition);
+        bool checkSender = _isSenderComplianceRequired(from, sender, partition);
         (canTransfer, statusCode, reasonCode, details) = _isCompliant(from, to, value, sender, checkSender);
         if (!canTransfer) return (canTransfer, statusCode, reasonCode, details);
         (canTransfer, statusCode, reasonCode, details) = _isIdentified(from, to);
@@ -328,17 +328,21 @@ library ERC1594StorageWrapper {
      * @param _partition Partition identifier.
      * @return checkSender_ True if the sender must pass additional checks.
      */
-    function _checkSenderHasProtectedPartitionRole(
+    function _isSenderComplianceRequired(
         address _from,
         address _sender,
         bytes32 _partition
-    ) private view returns (bool checkSender_) {
-        checkSender_ =
-            _from != _sender &&
-            (!AccessControlStorageWrapper.hasRole(
+    ) private view returns (bool isRequired_) {
+        if (_from == _sender) return false;
+        if (!ProtectedPartitionsStorageWrapper.arePartitionsProtected()) return true;
+        if (
+            AccessControlStorageWrapper.hasRole(
                 ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition),
                 _sender
-            ) || !ProtectedPartitionsStorageWrapper.arePartitionsProtected());
+            )
+        ) return false;
+
+        return true;
     }
 
     /**
