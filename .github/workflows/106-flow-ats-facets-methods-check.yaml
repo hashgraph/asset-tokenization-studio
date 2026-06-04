@@ -1,0 +1,82 @@
+name: "106: [FLOW] ATS FACETS_METHODS Check"
+
+# Enforces that packages/ats/contracts/FACETS_INTERFACES.md (and the facet registry
+# it depends on) is in sync with the committed contract sources. The husky
+# pre-commit hook does this locally, but hooks can be skipped (e.g. when a dev
+# never installs husky). CI is unavoidable, so this is the authoritative gate.
+#
+# Verify mode only: nothing is committed or pushed back. The job regenerates the
+# file from the committed sources and fails the PR if it differs in content.
+# The comparison is format-insensitive: both the committed file and the freshly
+# generated file are normalised through the same version-pinned Prettier, so a
+# pure formatting discrepancy can never cause a false failure — only genuine
+# content drift does.
+
+on:
+  pull_request: # every PR, regardless of target branch (including main)
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  facets-interfaces-check:
+    name: facets-interfaces-check
+    runs-on: token-studio-linux-medium
+    timeout-minutes: 15
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Setup NodeJS Environment
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compile contracts
+        # Compile first so the generators read fully up-to-date artifacts
+        # (ABIs/typechain) rather than stale or missing build output.
+        run: npm run ats:contracts:compile
+
+      - name: Verify FACETS_INTERFACES.md is in sync (format-insensitive)
+        run: |
+          set -euo pipefail
+          FILE="packages/ats/contracts/FACETS_INTERFACES.md"
+
+          # 1) Snapshot the committed file and normalise it through CI's pinned
+          #    Prettier. The temp file lives inside the package dir so Prettier
+          #    resolves the same prettier.config.mjs that applies to the real file.
+          BASELINE="$(mktemp -p packages/ats/contracts --suffix=.md)"
+          trap 'rm -f "$BASELINE"' EXIT
+          git show "HEAD:${FILE}" > "$BASELINE"
+          npx prettier --write --log-level warn "$BASELINE"
+
+          # 2) Regenerate from the committed sources, then normalise the same way.
+          npm run ats:contracts:generate:registry
+          node packages/ats/contracts/gen_facets_interfaces.mjs
+          npx prettier --write --log-level warn "$FILE"
+
+          # 3) Both sides went through the identical formatter, so any remaining
+          #    difference is genuine content drift.
+          if ! diff -u "$BASELINE" "$FILE"; then
+            echo "::error file=${FILE}::FACETS_INTERFACES.md is out of date. Regenerate it locally (npm run ats:contracts:generate:registry && node packages/ats/contracts/gen_facets_interfaces.mjs && npm run format) and commit the result. Tip: ensure husky is installed (npm install) so the pre-commit hook does this automatically."
+            exit 1
+          fi
+          echo "✅ FACETS_INTERFACES.md is in sync with the committed sources."

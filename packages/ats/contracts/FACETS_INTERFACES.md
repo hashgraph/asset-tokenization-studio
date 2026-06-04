@@ -3,7 +3,7 @@
 > **Generated file — do not edit by hand.** Regenerate after any facet interface change with:
 >
 > ```bash
-> node gen_facets_methods.mjs
+> node gen_facets_interfaces.mjs
 > ```
 >
 > Maintained via the `solidity-natspec` skill.

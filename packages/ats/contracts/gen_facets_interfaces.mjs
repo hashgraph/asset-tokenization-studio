@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Generates packages/ats/contracts/FACETS_METHODS.md: a per-facet reference of every external/public
+// Generates packages/ats/contracts/FACETS_INTERFACES.md: a per-facet reference of every external/public
 // entry point declared by the facet interfaces under contracts/facets/**, with full input
 // parameters, return values, and any referenced struct/enum types. Each facet section also lists
 // the events and errors that facet can emit/revert with, plus a flat Roles table at the end.
@@ -11,9 +11,9 @@
 // such constant (parent / protocol interfaces) list methods only.
 //
 // Usage (from packages/ats/contracts):
-//   node gen_facets_methods.mjs
+//   node gen_facets_interfaces.mjs
 //
-// The script is the deterministic engine behind the FACETS_METHODS.md upkeep described in the
+// The script is the deterministic engine behind the FACETS_INTERFACES.md upkeep described in the
 // solidity-natspec SKILL.md. It parses ASTs (not regex) so multi-line signatures and wrapped
 // parameter lists are handled correctly.
 
@@ -21,7 +21,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-// This script lives in the contracts package root, alongside the FACETS_METHODS.md it produces.
+// This script lives in the contracts package root, alongside the FACETS_INTERFACES.md it produces.
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const contractsRoot = __dirname;
 const repoRoot = path.resolve(__dirname, "../../..");
@@ -453,7 +453,7 @@ out.push("");
 out.push("> **Generated file — do not edit by hand.** Regenerate after any facet interface change with:");
 out.push("> ");
 out.push("> ```bash");
-out.push("> node gen_facets_methods.mjs");
+out.push("> node gen_facets_interfaces.mjs");
 out.push("> ```");
 out.push("> ");
 out.push("> Maintained via the `solidity-natspec` skill.");
@@ -546,7 +546,7 @@ for (const r of [...roles].sort((a, b) => a.name.localeCompare(b.name))) {
 }
 out.push("");
 
-const target = path.join(contractsRoot, "FACETS_METHODS.md");
+const target = path.join(contractsRoot, "FACETS_INTERFACES.md");
 fs.writeFileSync(target, out.join("\n").replace(/\n+$/, "\n"));
 const joined = facets.filter((f) => f.resolverKeyValue && registryByKey.has(f.resolverKeyValue)).length;
 console.error(
