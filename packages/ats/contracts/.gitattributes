@@ -1,0 +1,6 @@
+# FACETS_METHODS.md is fully regenerated on every commit by the pre-commit hook
+# (gen_facets_methods.mjs), so merging another branch's copy is never meaningful.
+# Always keep our local version to avoid spurious merge conflicts. This requires
+# each clone to register the "ours" driver locally (done via the root "prepare"
+# npm script): git config merge.ours.driver true
+FACETS_METHODS.md merge=ours
