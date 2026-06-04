@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ICorporateActions } from "./ICorporateActions.sol";
+import { ICorporateActions, RESOLVER_KEY_CORPORATE_ACTIONS } from "./ICorporateActions.sol";
 import { CorporateActions } from "./CorporateActions.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { _CORPORATE_ACTIONS_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-
 /**
  * @title CorporateActionsFacet
  * @author Asset Tokenization Studio Team
@@ -15,18 +13,19 @@ import { _CORPORATE_ACTIONS_RESOLVER_KEY } from "../../constants/resolverKeys.so
  *         functions.
  * @dev Inherits `CorporateActions` for the business logic and implements
  *      `IStaticFunctionSelectors` for the Diamond resolver pattern. The resolver key
- *      `_CORPORATE_ACTIONS_RESOLVER_KEY` identifies this facet within the diamond proxy.
+ *      `RESOLVER_KEY_CORPORATE_ACTIONS` identifies this facet within the diamond proxy.
  */
 contract CorporateActionsFacet is CorporateActions, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _CORPORATE_ACTIONS_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_CORPORATE_ACTIONS;
     }
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeCorporateActions.selector,
                 this.getCorporateAction.selector,
                 this.getCorporateActionCount.selector,
                 this.getCorporateActionIds.selector,

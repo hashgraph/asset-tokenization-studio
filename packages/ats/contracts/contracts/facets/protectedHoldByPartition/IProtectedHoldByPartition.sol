@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
+import { IHoldTypes } from "../hold/IHoldTypes.sol";
+
+/// @custom:hash resolverKey ProtectedHoldByPartition
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_PROTECTED_HOLD_BY_PARTITION = 0x5b77b995d3e53c3e46f114bbf37642ce3169369548c8135b8b11f5cebd3fb07b;
 
 /**
  * @title IProtectedHoldByPartition
@@ -14,6 +18,19 @@ import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
  *      never inherits the umbrella.
  */
 interface IProtectedHoldByPartition is IHoldTypes {
+    /**
+     * @notice Emitted once when the protected-hold-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeProtectedHoldByPartition`.
+     */
+    event ProtectedHoldByPartitionInitialized();
+
+    /**
+     * @notice Initialises the protected-hold-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeProtectedHoldByPartition() external;
+
     /**
      * @notice Creates a hold on a protected partition on behalf of a token holder, authorised by
      *         an off-chain signature.

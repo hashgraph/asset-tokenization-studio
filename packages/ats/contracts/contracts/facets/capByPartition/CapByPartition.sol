@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ICapByPartition } from "./ICapByPartition.sol";
-import { CAP_ROLE } from "../../constants/roles.sol";
+import { ICapByPartition, RESOLVER_KEY_CAP_BY_PARTITION } from "./ICapByPartition.sol";
+import { ROLE_CAP, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { CapStorageWrapper } from "../../domain/core/CapStorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title CapByPartition
@@ -13,12 +14,23 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
  * @notice Abstract implementation of `ICapByPartition` providing per-partition maximum supply
  *         cap management.
  * @dev Delegates persistence to {CapStorageWrapper} and resolves the active timestamp via
- *      {TimeTravelStorageWrapper}. The setter is gated by `onlyUnpaused`, `onlyRole(CAP_ROLE)`
+ *      {EvmAccessors}. The setter is gated by `onlyUnpaused`, `onlyRole(ROLE_CAP)`
  *      and `onlyValidNewMaxSupplyByPartition`; the latter enforces the partition-vs-global
  *      relationship and rejects values below the partition's adjusted total supply. Intended
  *      to be inherited by `CapByPartitionFacet`.
  */
 abstract contract CapByPartition is ICapByPartition, Modifiers {
+    /// @inheritdoc ICapByPartition
+    function initializeCapByPartition()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_CAP_BY_PARTITION)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_CAP_BY_PARTITION);
+        emit ICapByPartition.CapByPartitionInitialized();
+    }
+
     /// @inheritdoc ICapByPartition
     function setMaxSupplyByPartition(
         bytes32 _partition,
@@ -26,22 +38,19 @@ abstract contract CapByPartition is ICapByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
-        onlyRole(CAP_ROLE)
-        onlyValidNewMaxSupplyByPartition(_partition, _maxSupply, TimeTravelStorageWrapper.getBlockTimestamp())
+        onlyRole(ROLE_CAP)
+        onlyValidNewMaxSupplyByPartition(_partition, _maxSupply, EvmAccessors.getBlockTimestamp())
         returns (bool success_)
     {
-        CapStorageWrapper.setMaxSupplyByPartition(_partition, _maxSupply, TimeTravelStorageWrapper.getBlockTimestamp());
+        CapStorageWrapper.setMaxSupplyByPartition(_partition, _maxSupply, EvmAccessors.getBlockTimestamp());
         success_ = true;
     }
 
     /// @inheritdoc ICapByPartition
     function getMaxSupplyByPartition(bytes32 _partition) external view override returns (uint256 maxSupply_) {
-        return
-            CapStorageWrapper.getMaxSupplyByPartitionAdjustedAt(
-                _partition,
-                TimeTravelStorageWrapper.getBlockTimestamp()
-            );
+        return CapStorageWrapper.getMaxSupplyByPartitionAdjustedAt(_partition, EvmAccessors.getBlockTimestamp());
     }
 }

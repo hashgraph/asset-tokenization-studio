@@ -10,8 +10,7 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
     error Unimplemented();
 
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_BusinessLogicResolver()
+    function initializeBusinessLogicResolver()
         external
         override
         onlyUninitialized(_businessLogicResolverStorage().initialized)
@@ -20,12 +19,13 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
         AccessControlStorageWrapper.grantRole(DEFAULT_ADMIN_ROLE, EvmAccessors.getMsgSender());
 
         _businessLogicResolverStorage().initialized = true;
+        emit BusinessLogicResolverInitialized();
         success_ = true;
     }
 
     function registerBusinessLogics(
         BusinessLogicRegistryData[] calldata _businessLogics
-    ) external override onlyValidKeys(_businessLogics) onlyRole(DEFAULT_ADMIN_ROLE) onlyUnpaused {
+    ) external override onlyValidKeysAndAddresses(_businessLogics) onlyRole(DEFAULT_ADMIN_ROLE) onlyUnpaused {
         uint256[] memory latestVersion = _registerBusinessLogics(_businessLogics);
 
         emit BusinessLogicsRegistered(_businessLogics, latestVersion);
@@ -34,14 +34,14 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
     function addSelectorsToBlacklist(
         bytes32 _configurationId,
         bytes4[] calldata _selectors
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyUnpaused {
         _addSelectorsToBlacklist(_configurationId, _selectors);
     }
 
     function removeSelectorsFromBlacklist(
         bytes32 _configurationId,
         bytes4[] calldata _selectors
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyUnpaused {
         _removeSelectorsFromBlacklist(_configurationId, _selectors);
     }
 

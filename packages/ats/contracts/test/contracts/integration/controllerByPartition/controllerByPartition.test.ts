@@ -5,8 +5,16 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
-import { DEFAULT_PARTITION, EMPTY_STRING, ZERO, EMPTY_HEX_BYTES, ATS_ROLES } from "@scripts";
-import { ResolverProxy, IAsset } from "@contract-types";
+import {
+  DEFAULT_PARTITION,
+  EMPTY_STRING,
+  ZERO,
+  EMPTY_HEX_BYTES,
+  ATS_ROLES,
+  EQUITY_CONFIG_ID,
+  RESOLVER_KEY_CONTROLLER_BY_PARTITION,
+} from "@scripts";
+import { ResolverProxy, IAsset, MockDiamondCut } from "@contract-types";
 
 const _WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
 const _AMOUNT = 1000;
@@ -22,27 +30,28 @@ describe("ControllerByPartition Tests", () => {
   let signer_E: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   function set_initRbacs() {
     return [
       {
-        role: ATS_ROLES.ISSUER_ROLE,
+        role: ATS_ROLES.ROLE_ISSUER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_D.address],
       },
       {
-        role: ATS_ROLES.KYC_ROLE,
+        role: ATS_ROLES.ROLE_KYC,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.SSI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_SSI_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.CONTROLLER_ROLE,
+        role: ATS_ROLES.ROLE_CONTROLLER,
         members: [signer_C.address],
       },
     ];
@@ -70,6 +79,7 @@ describe("ControllerByPartition Tests", () => {
     signer_E = base.user4;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, set_initRbacs());
     await setupBalances(asset);
   }
@@ -179,7 +189,7 @@ describe("ControllerByPartition Tests", () => {
     });
 
     describe("AccessControl — onlyAnyRole", () => {
-      it("GIVEN an account without CONTROLLER_ROLE or AGENT_ROLE WHEN controllerTransferByPartition THEN revert AccountHasNoRoles", async () => {
+      it("GIVEN an account without ROLE_CONTROLLER or ROLE_AGENT WHEN controllerTransferByPartition THEN revert AccountHasNoRoles", async () => {
         await expect(
           asset
             .connect(signer_B)
@@ -194,7 +204,7 @@ describe("ControllerByPartition Tests", () => {
         ).to.be.revertedWithCustomError(asset, "AccountHasNoRoles");
       });
 
-      it("GIVEN an account without CONTROLLER_ROLE or AGENT_ROLE WHEN controllerRedeemByPartition THEN revert AccountHasNoRoles", async () => {
+      it("GIVEN an account without ROLE_CONTROLLER or ROLE_AGENT WHEN controllerRedeemByPartition THEN revert AccountHasNoRoles", async () => {
         await expect(
           asset
             .connect(signer_B)
@@ -204,7 +214,7 @@ describe("ControllerByPartition Tests", () => {
     });
 
     describe("Success", () => {
-      it("GIVEN an account with CONTROLLER_ROLE WHEN controllerTransferByPartition THEN emit TransferByPartition and update balances", async () => {
+      it("GIVEN an account with ROLE_CONTROLLER WHEN controllerTransferByPartition THEN emit TransferByPartition and update balances", async () => {
         await expect(
           asset
             .connect(signer_C)
@@ -223,8 +233,8 @@ describe("ControllerByPartition Tests", () => {
         expect(await asset.totalSupply()).to.equal(_AMOUNT);
       });
 
-      it("GIVEN an account with AGENT_ROLE WHEN controllerTransferByPartition THEN emit TransferByPartition and update balances", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES.AGENT_ROLE, signer_B.address);
+      it("GIVEN an account with ROLE_AGENT WHEN controllerTransferByPartition THEN emit TransferByPartition and update balances", async () => {
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_AGENT, signer_B.address);
 
         await expect(
           asset
@@ -243,7 +253,7 @@ describe("ControllerByPartition Tests", () => {
         expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.equal(_AMOUNT);
       });
 
-      it("GIVEN an account with CONTROLLER_ROLE WHEN controllerRedeemByPartition THEN emit RedeemedByPartition and decrease supply", async () => {
+      it("GIVEN an account with ROLE_CONTROLLER WHEN controllerRedeemByPartition THEN emit RedeemedByPartition and decrease supply", async () => {
         const supplyBefore = await asset.totalSupply();
 
         await expect(
@@ -256,8 +266,8 @@ describe("ControllerByPartition Tests", () => {
         expect(await asset.totalSupply()).to.equal(supplyBefore - BigInt(_AMOUNT));
       });
 
-      it("GIVEN an account with AGENT_ROLE WHEN controllerRedeemByPartition THEN emit RedeemedByPartition and decrease supply", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES.AGENT_ROLE, signer_B.address);
+      it("GIVEN an account with ROLE_AGENT WHEN controllerRedeemByPartition THEN emit RedeemedByPartition and decrease supply", async () => {
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_AGENT, signer_B.address);
         const supplyBefore = await asset.totalSupply();
 
         await expect(
@@ -307,13 +317,66 @@ describe("ControllerByPartition Tests", () => {
     it("GIVEN a deactivated asset WHEN controllerTransferByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset
           .connect(base.deployer)
           .controllerTransferByPartition(ethers.ZeroHash, ethers.ZeroAddress, ethers.ZeroAddress, 0, "0x", "0x"),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN controllerRedeemByPartition THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset
+          .connect(base.deployer)
+          .controllerRedeemByPartition(ethers.ZeroHash, ethers.ZeroAddress, 0, "0x", "0x"),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+  describe("initializeControllerByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeControllerByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeControllerByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeControllerByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeControllerByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_CONTROLLER_BY_PARTITION, 1);
+    });
+  });
+
+  describe("initializeControllerByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeControllerByPartition is called THEN emits ControllerByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_CONTROLLER_BY_PARTITION);
+      await expect(asset.initializeControllerByPartition()).to.emit(asset, "ControllerByPartitionInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await loadFixture(deployFixtureSinglePartition);
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational WHEN controllerRedeemByPartition is called THEN AssetNotOperational", async () => {
+      await expect(asset.controllerRedeemByPartition(ethers.ZeroHash, ethers.ZeroAddress, 0n, "0x", "0x"))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN controllerTransferByPartition is called THEN AssetNotOperational", async () => {
+      await expect(
+        asset.controllerTransferByPartition(ethers.ZeroHash, ethers.ZeroAddress, ethers.ZeroAddress, 0n, "0x", "0x"),
+      )
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 });

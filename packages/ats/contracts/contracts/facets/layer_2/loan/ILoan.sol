@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { RegulationData, AdditionalSecurityData } from "../../../constants/regulation.sol";
+/// @custom:hash resolverKey Loan
+bytes32 constant RESOLVER_KEY_LOAN = 0x17c2126e932655e91a8e803b275de0a930c4b51a109b751567a95ee5d6bd6eba;
 
 interface ILoan {
     enum LoanStructureType {
@@ -96,14 +97,13 @@ interface ILoan {
         uint256 daysPastDue;
     }
 
+    /// @notice Emitted once when the Loan capability is initialised on a token.
+    /// @dev Fires exclusively from `initialize_Loan` after the storage write succeeds.
+    event LoanInitialized(LoanDetailsData loanDetailsData);
+
     event LoanDetailsSet(LoanDetailsData loanDetails);
 
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_Loan(
-        LoanDetailsData calldata _loanDetailsData,
-        RegulationData memory _regulationData,
-        AdditionalSecurityData calldata _additionalSecurityData
-    ) external;
+    function initializeLoan(LoanDetailsData calldata _loanDetailsData) external;
 
     /**
      * @dev Set the loan details

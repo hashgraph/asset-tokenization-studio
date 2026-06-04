@@ -25,7 +25,14 @@ import {
   getNetworkDeploymentDir,
   type DeploymentOutputType,
 } from "@scripts/infrastructure";
-import { TEST_ADDRESSES, TEST_CONFIG_IDS, TEST_WORKFLOWS, TEST_TIMESTAMPS, removeTestDeployments } from "@test";
+import {
+  TEST_ADDRESSES,
+  TEST_CONFIG_IDS,
+  TEST_WORKFLOWS,
+  TEST_TIMESTAMPS,
+  TEST_BYTES32,
+  removeTestDeployments,
+} from "@test";
 
 describe("Deployment File Utilities", () => {
   const TEST_DEPLOYMENTS_DIR = getDeploymentsDir();
@@ -106,11 +113,59 @@ describe("Deployment File Utilities", () => {
           },
         ],
       },
+      loan: {
+        configId: TEST_BYTES32.ALL_FS,
+        version: 1,
+        facetCount: 43,
+        facets: [
+          {
+            facetName: "AccessControlFacet",
+            key: TEST_BYTES32.ALL_FS,
+            address: TEST_ADDRESSES.VALID_2,
+          },
+        ],
+      },
+      loansPortfolio: {
+        configId: TEST_BYTES32.ALL_FS,
+        version: 1,
+        facetCount: 43,
+        facets: [
+          {
+            facetName: "AccessControlFacet",
+            key: TEST_BYTES32.ALL_FS,
+            address: TEST_ADDRESSES.VALID_2,
+          },
+        ],
+      },
+      depositToken: {
+        configId: TEST_BYTES32.ALL_FS,
+        version: 1,
+        facetCount: 43,
+        facets: [
+          {
+            facetName: "AccessControlFacet",
+            key: TEST_BYTES32.ALL_FS,
+            address: TEST_ADDRESSES.VALID_2,
+          },
+        ],
+      },
+      factory: {
+        configId: TEST_BYTES32.ALL_FS,
+        version: 1,
+        facetCount: 43,
+        facets: [
+          {
+            facetName: "AccessControlFacet",
+            key: TEST_BYTES32.ALL_FS,
+            address: TEST_ADDRESSES.VALID_2,
+          },
+        ],
+      },
     },
     summary: {
       totalContracts: 48,
       totalFacets: 1,
-      totalConfigurations: 4,
+      totalConfigurations: 8,
       deploymentTime: 5000,
       gasUsed: "0",
       success: true,
@@ -121,6 +176,7 @@ describe("Deployment File Utilities", () => {
       getBondFixedRateFacets: () => [],
       getBondKpiLinkedRateFacets: () => [],
       getLoanFacets: () => [],
+      getDepositTokenFacets: () => [],
       getLoansPortfolioFacets: () => [],
       getFactoryFacets: () => [],
     },

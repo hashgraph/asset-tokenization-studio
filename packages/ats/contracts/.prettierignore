@@ -9,3 +9,11 @@ typechain-types/
 .gitlab-ci.yml
 build
 slither.db.json
+
+# Generator drift-guard snapshots: byte-exact copies of generated source, must
+# stay identical to the generator output and must not be reformatted (BBND-1672).
+test/scripts/unit/tools/__snapshots__/
+
+# Auto-generated EVM accessor library: gitignored, regenerated on every compile in
+# the generator's own format — prettier must not reformat it (BBND-1672).
+contracts/infrastructure/utils/EvmAccessors.sol

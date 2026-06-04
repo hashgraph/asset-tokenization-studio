@@ -3,9 +3,10 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
+import { RESOLVER_KEY_ERC20VOTES } from "@scripts";
 
 import { executeRbac } from "@test";
 import { ATS_ROLES, DEFAULT_PARTITION } from "@scripts";
@@ -20,13 +21,14 @@ describe("ERC20Votes Tests", () => {
   let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   const ABAF = 200;
   const DECIMALS = 2;
   const block = 100;
 
   async function checkVotingPowerAfterAdjustment() {
-    await asset.changeSystemBlocknumber(block + 1);
+    await asset.changeSystemBlockNumber(block + 1);
 
     const votesA1 = await asset.getPastVotes(signer_A.address, block - 1);
     const votesA2 = await asset.getVotes(signer_A.address);
@@ -59,21 +61,22 @@ describe("ERC20Votes Tests", () => {
     signer_C = base.user2;
     signer_D = base.user3;
     asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.ADJUSTMENT_BALANCE_ROLE,
+        role: ATS_ROLES.ROLE_ADJUSTMENT_BALANCE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.CORPORATE_ACTION_ROLE,
+        role: ATS_ROLES.ROLE_CORPORATE_ACTION,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.ISSUER_ROLE,
+        role: ATS_ROLES.ROLE_ISSUER,
         members: [signer_A.address],
       },
     ]);
@@ -83,11 +86,26 @@ describe("ERC20Votes Tests", () => {
     await loadFixture(deploySecurityFixture);
   });
 
-  describe("Initialization", () => {
-    it("GIVEN a initialized ERC20Votes WHEN initialize again THEN transaction fails with AlreadyInitialized", async () => {
-      await expect(asset.initialize_ERC20Votes(true)).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+  describe("initializeERC20Votes", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeERC20Votes is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeERC20Votes(true))
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
+    it("GIVEN already-initialised WHEN initializeERC20Votes is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeERC20Votes(true)).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+    });
+  });
+
+  describe("initializeERC20Votes event", () => {
+    it("GIVEN a fresh deployment WHEN initializeERC20Votes is called THEN emits ERC20VotesInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_ERC20VOTES);
+      await expect(asset.initializeERC20Votes(true)).to.emit(asset, "ERC20VotesInitialized");
+    });
+  });
+
+  describe("Initialization", () => {
     it("GIVEN ERC20Votes activated WHEN calling isActivated THEN returns true", async () => {
       const isActivated = await asset.isActivated();
       expect(isActivated).to.equal(true);
@@ -114,7 +132,7 @@ describe("ERC20Votes Tests", () => {
   describe("Clock and Clock Mode", () => {
     it("GIVEN any state WHEN clock THEN returns current block number", async () => {
       const blockNumber = 1000;
-      await asset.changeSystemBlocknumber(blockNumber);
+      await asset.changeSystemBlockNumber(blockNumber);
       const clockValue = await asset.clock();
       expect(clockValue).to.equal(blockNumber);
     });
@@ -175,7 +193,7 @@ describe("ERC20Votes Tests", () => {
   describe("Voting Power", () => {
     async function checkTotalSupply(amount: number) {
       const now = await asset.clock();
-      await asset.changeSystemBlocknumber(now + 100n);
+      await asset.changeSystemBlockNumber(now + 100n);
       const totalSupply = await asset.getPastTotalSupply(now);
       expect(totalSupply).to.equal(amount);
     }
@@ -259,7 +277,7 @@ describe("ERC20Votes Tests", () => {
 
   describe("Past Votes", () => {
     beforeEach(async () => {
-      await asset.changeSystemBlocknumber(1);
+      await asset.changeSystemBlockNumber(1);
 
       await asset.issueByPartition({
         partition: DEFAULT_PARTITION,
@@ -282,12 +300,12 @@ describe("ERC20Votes Tests", () => {
       const block_2 = 200;
       const block_3 = 300;
 
-      await asset.changeSystemBlocknumber(block_1);
+      await asset.changeSystemBlockNumber(block_1);
 
       await asset.delegate(signer_A.address);
       await asset.connect(signer_B).delegate(signer_B.address);
 
-      await asset.changeSystemBlocknumber(block_2);
+      await asset.changeSystemBlockNumber(block_2);
 
       await asset.issueByPartition({
         partition: DEFAULT_PARTITION,
@@ -296,7 +314,7 @@ describe("ERC20Votes Tests", () => {
         data: "0x",
       });
 
-      await asset.changeSystemBlocknumber(block_3);
+      await asset.changeSystemBlockNumber(block_3);
 
       await asset.issueByPartition({
         partition: DEFAULT_PARTITION,
@@ -312,7 +330,7 @@ describe("ERC20Votes Tests", () => {
         data: "0x",
       });
 
-      await asset.changeSystemBlocknumber(block_3 + 1);
+      await asset.changeSystemBlockNumber(block_3 + 1);
 
       const pastVotesA1 = await asset.getPastVotes(signer_A.address, block_1);
       const pastVotesA2 = await asset.getPastVotes(signer_A.address, block_2);
@@ -372,7 +390,7 @@ describe("ERC20Votes Tests", () => {
 
   describe("Balance adjustments", () => {
     beforeEach(async () => {
-      await asset.changeSystemBlocknumber(1);
+      await asset.changeSystemBlockNumber(1);
       await asset.delegate(signer_A.address);
       await asset.issueByPartition({
         partition: DEFAULT_PARTITION,
@@ -394,7 +412,7 @@ describe("ERC20Votes Tests", () => {
     });
 
     it("GIVEN an ERC20Votes when adjusting balances and delegating THEN values updated", async () => {
-      await asset.changeSystemBlocknumber(block);
+      await asset.changeSystemBlockNumber(block);
 
       await asset.adjustBalances(ABAF, DECIMALS);
 
@@ -410,7 +428,7 @@ describe("ERC20Votes Tests", () => {
     it("GIVEN an ERC20Votes when adjusting balances and transferring THEN values updated", async () => {
       await asset.connect(signer_B).delegate(signer_B.address);
 
-      await asset.changeSystemBlocknumber(block);
+      await asset.changeSystemBlockNumber(block);
 
       await asset.adjustBalances(ABAF, DECIMALS);
 
@@ -426,7 +444,7 @@ describe("ERC20Votes Tests", () => {
 
   describe("Scheduled Balance adjustments", () => {
     beforeEach(async () => {
-      await asset.changeSystemBlocknumber(1);
+      await asset.changeSystemBlockNumber(1);
       await asset.changeSystemTimestamp(1);
       await asset.delegate(signer_A.address);
       await asset.issueByPartition({
@@ -447,7 +465,7 @@ describe("ERC20Votes Tests", () => {
         decimals: DECIMALS,
       });
 
-      await asset.changeSystemBlocknumber(block);
+      await asset.changeSystemBlockNumber(block);
       await asset.changeSystemTimestamp(timestamp + 1);
 
       await expect(asset.delegate(signer_B.address))
@@ -470,7 +488,7 @@ describe("ERC20Votes Tests", () => {
         decimals: DECIMALS,
       });
 
-      await asset.changeSystemBlocknumber(block);
+      await asset.changeSystemBlockNumber(block);
       await asset.changeSystemTimestamp(timestamp + 1);
 
       await expect(asset.transferByPartition(DEFAULT_PARTITION, { to: signer_B.address, value: amount * ABAF }, "0x"))
@@ -497,10 +515,10 @@ describe("ERC20Votes Tests", () => {
     const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
 
     beforeEach(async () => {
-      await asset.grantRole(ATS_ROLES.LOCKER_ROLE, signer_A.address);
-      await asset.grantRole(ATS_ROLES.FREEZE_MANAGER_ROLE, signer_A.address);
-      await asset.grantRole(ATS_ROLES.CLEARING_ROLE, signer_A.address);
-      await asset.grantRole(ATS_ROLES.CLEARING_VALIDATOR_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_LOCKER, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_FREEZE_MANAGER, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_CLEARING, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_CLEARING_VALIDATOR, signer_A.address);
 
       await asset.issueByPartition({
         partition: DEFAULT_PARTITION,
@@ -580,8 +598,8 @@ describe("ERC20Votes Tests", () => {
       });
       const singlePartitionAsset = await ethers.getContractAt("IAsset", base.diamond.target, base.deployer);
       await executeRbac(singlePartitionAsset, [
-        { role: ATS_ROLES.ISSUER_ROLE, members: [base.deployer.address] },
-        { role: ATS_ROLES.FREEZE_MANAGER_ROLE, members: [base.deployer.address] },
+        { role: ATS_ROLES.ROLE_ISSUER, members: [base.deployer.address] },
+        { role: ATS_ROLES.ROLE_FREEZE_MANAGER, members: [base.deployer.address] },
       ]);
 
       await singlePartitionAsset.issueByPartition({
@@ -644,7 +662,7 @@ describe("ERC20Votes Tests", () => {
 
   describe("Checkpoints lookup optimization", () => {
     beforeEach(async () => {
-      await asset.changeSystemBlocknumber(1);
+      await asset.changeSystemBlockNumber(1);
       await asset.issueByPartition({
         partition: DEFAULT_PARTITION,
         tokenHolder: signer_A.address,
@@ -655,14 +673,14 @@ describe("ERC20Votes Tests", () => {
 
     it("GIVEN many checkpoints (>5) WHEN getPastVotes THEN uses optimized binary search with sqrt", async () => {
       // First delegate to establish voting power
-      await asset.changeSystemBlocknumber(50);
+      await asset.changeSystemBlockNumber(50);
       await asset.connect(signer_A).delegate(signer_B.address);
 
       // Create more than 5 checkpoints to trigger sqrt optimization
       let currentBlock = 100;
 
       for (let i = 0; i < 10; i++) {
-        await asset.changeSystemBlocknumber(currentBlock);
+        await asset.changeSystemBlockNumber(currentBlock);
 
         // Issue more tokens to create total supply checkpoints
         await asset.issueByPartition({
@@ -683,7 +701,7 @@ describe("ERC20Votes Tests", () => {
       }
 
       // Move forward to query past votes
-      await asset.changeSystemBlocknumber(currentBlock + 100);
+      await asset.changeSystemBlockNumber(currentBlock + 100);
 
       // Query votes at various past blocks - this will trigger the sqrt optimization
       const pastVotes1 = await asset.getPastVotes(signer_B.address, 200);
@@ -719,7 +737,7 @@ describe("ERC20Votes Tests", () => {
       let currentBlock = 100;
 
       for (let i = 0; i < 12; i++) {
-        await asset.changeSystemBlocknumber(currentBlock);
+        await asset.changeSystemBlockNumber(currentBlock);
         currentBlock += 50;
 
         await asset.issueByPartition({
@@ -730,7 +748,7 @@ describe("ERC20Votes Tests", () => {
         });
       }
 
-      await asset.changeSystemBlocknumber(currentBlock + 100);
+      await asset.changeSystemBlockNumber(currentBlock + 100);
 
       // Query at a timepoint that should hit the lower branch of sqrt optimization
       const pastTotalSupply = await asset.getPastTotalSupply(currentBlock - 100);
@@ -738,7 +756,7 @@ describe("ERC20Votes Tests", () => {
     });
 
     it("GIVEN empty checkpoints WHEN getPastVotes with timepoint THEN returns zero", async () => {
-      await asset.changeSystemBlocknumber(1000);
+      await asset.changeSystemBlockNumber(1000);
 
       // Query past votes for an address with no delegation history
       const pastVotes = await asset.getPastVotes(signer_D.address, 500);
@@ -746,10 +764,10 @@ describe("ERC20Votes Tests", () => {
     });
 
     it("GIVEN checkpoints WHEN getPastTotalSupply at block 0 THEN returns zero", async () => {
-      await asset.changeSystemBlocknumber(1);
+      await asset.changeSystemBlockNumber(1);
       await asset.connect(signer_A).delegate(signer_A.address);
 
-      await asset.changeSystemBlocknumber(100);
+      await asset.changeSystemBlockNumber(100);
 
       // Query total supply before any issuance
       const pastTotalSupply = await asset.getPastTotalSupply(0);
@@ -757,7 +775,7 @@ describe("ERC20Votes Tests", () => {
     });
 
     it("GIVEN delegation at early block WHEN getPastVotes at block before ABAF checkpoint THEN returns correct value", async () => {
-      await asset.changeSystemBlocknumber(10);
+      await asset.changeSystemBlockNumber(10);
 
       await asset.issueByPartition({
         partition: DEFAULT_PARTITION,
@@ -770,7 +788,7 @@ describe("ERC20Votes Tests", () => {
       await asset.connect(signer_A).delegate(signer_A.address);
 
       // Move to a later block
-      await asset.changeSystemBlocknumber(100);
+      await asset.changeSystemBlockNumber(100);
 
       const pastVotes = await asset.getPastVotes(signer_A.address, 5);
       expect(pastVotes).to.equal(0);
@@ -781,12 +799,21 @@ describe("ERC20Votes Tests", () => {
     it("GIVEN a deactivated asset WHEN delegate THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(deactivatedAsset.connect(base.deployer).delegate(ethers.ZeroAddress)).to.be.revertedWithCustomError(
         deactivatedAsset,
         "Deactivated",
       );
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN delegate THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.delegate(ethers.ZeroAddress)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
   });
 });

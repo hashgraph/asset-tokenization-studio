@@ -30,6 +30,7 @@ export const NETWORKS = [
   "hedera-previewnet",
   "hedera-testnet",
   "hedera-mainnet",
+  "hedera-hashsphere",
 ] as const;
 
 export type Network = (typeof NETWORKS)[number];
@@ -47,6 +48,7 @@ export const NETWORK_ALIASES: Record<string, Network> = {
   previewnet: "hedera-previewnet",
   testnet: "hedera-testnet",
   mainnet: "hedera-mainnet",
+  hashsphere: "hedera-hashsphere",
 };
 
 /**
@@ -59,6 +61,7 @@ export const CHAIN_IDS: Record<string, number> = {
   "hedera-testnet": 296,
   "hedera-previewnet": 297,
   "hedera-local": 298, // Local Hedera node reports 298, not 1337
+  "hedera-hashsphere": 299, // Override via HEDERA_HASHSPHERE_CHAIN_ID if different
   local: 1337,
   hardhat: 31337,
 };
@@ -91,6 +94,10 @@ export const DEFAULT_ENDPOINTS = {
     jsonRpc: "https://mainnet.hashio.io/api",
     mirror: "https://mainnet.mirrornode.hedera.com",
   },
+  "hedera-hashsphere": {
+    jsonRpc: "",
+    mirror: "",
+  },
 } as const;
 
 // ============================================================================
@@ -122,6 +129,7 @@ export const DEFAULT_CONFIRMATIONS = {
   "hedera-previewnet": 2,
   "hedera-testnet": 2,
   "hedera-mainnet": 5,
+  "hedera-hashsphere": 1,
 } as const;
 
 /**
@@ -189,21 +197,13 @@ export const GAS_LIMIT = {
 } as const;
 
 /**
- * Sentinel value for auto-updating ResolverProxy deployments.
- *
- * When used as the `version` parameter, the proxy automatically resolves
- * to the latest registered configuration version at runtime.
- *
- * Value: `0` (interpreted as "use latest" by `_resolveVersion()`)
- */
-export const LATEST_VERSION = 0;
-
-/**
  * Default partition for ERC1410 operations.
  *
  * bytes32(uint256(1)) = 0x00...01
  */
 export const DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
+
+export const MAX_UINT8 = 255;
 
 // ============================================================================
 // Contract Names

@@ -3,8 +3,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ZERO, EMPTY_STRING, ATS_ROLES, DEFAULT_PARTITION } from "@scripts";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import { ZERO, EMPTY_STRING, ATS_ROLES, DEFAULT_PARTITION, RESOLVER_KEY_FREEZE_AT_SNAPSHOT } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
@@ -19,27 +19,28 @@ describe("FreezeAtSnapshot Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   function set_initRbacs(): any[] {
     return [
       {
-        role: ATS_ROLES.ISSUER_ROLE,
+        role: ATS_ROLES.ROLE_ISSUER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.KYC_ROLE,
+        role: ATS_ROLES.ROLE_KYC,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.SSI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_SSI_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.FREEZE_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_FREEZE_MANAGER,
         members: [signer_B.address],
       },
     ];
@@ -59,6 +60,7 @@ describe("FreezeAtSnapshot Tests", () => {
     signer_C = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, set_initRbacs());
   }
 
@@ -69,9 +71,9 @@ describe("FreezeAtSnapshot Tests", () => {
   it("GIVEN an account with snapshot role WHEN takeSnapshot and Freeze THEN frozen balance is captured per snapshot", async () => {
     const TINY_AMOUNT = 10;
 
-    await asset.connect(signer_A).grantRole(ATS_ROLES.SNAPSHOT_ROLE, signer_A.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES.FREEZE_MANAGER_ROLE, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_SNAPSHOT, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_FREEZE_MANAGER, signer_A.address);
     await asset.connect(signer_A).addIssuer(signer_A.address);
     await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
 
@@ -105,9 +107,9 @@ describe("FreezeAtSnapshot Tests", () => {
   });
 
   it("GIVEN frozen tokens WHEN querying historical snapshot THEN balance and frozen amounts are tracked separately", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.SNAPSHOT_ROLE, signer_A.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES.FREEZE_MANAGER_ROLE, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_SNAPSHOT, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_FREEZE_MANAGER, signer_A.address);
     await asset.connect(signer_A).addIssuer(signer_A.address);
     await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
 
@@ -138,5 +140,26 @@ describe("FreezeAtSnapshot Tests", () => {
     expect(balance2).to.equal(AMOUNT - 100); // Balance reduced
     expect(frozen2).to.equal(100); // Frozen tokens tracked
     expect(balance2 + frozen2).to.equal(AMOUNT); // Total remains same
+  });
+
+  describe("initializeFreezeAtSnapshot", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeFreezeAtSnapshot is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeFreezeAtSnapshot())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeFreezeAtSnapshot is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeFreezeAtSnapshot())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_FREEZE_AT_SNAPSHOT, 1);
+    });
+  });
+
+  describe("initializeFreezeAtSnapshot event", () => {
+    it("GIVEN a fresh deployment WHEN initializeFreezeAtSnapshot is called THEN emits FreezeAtSnapshotInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_FREEZE_AT_SNAPSHOT);
+      await expect(asset.initializeFreezeAtSnapshot()).to.emit(asset, "FreezeAtSnapshotInitialized");
+    });
   });
 });

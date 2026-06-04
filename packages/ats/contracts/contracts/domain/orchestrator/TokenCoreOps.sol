@@ -10,7 +10,13 @@ import { ERC20StorageWrapper } from "../asset/ERC20StorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../asset/ERC1594StorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "../asset/SnapshotsStorageWrapper.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
-import { IProtectedPartitions } from "../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
+import { IProtectedPartitions } from "../../facets/protectedPartition/IProtectedPartitions.sol";
+import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
+import { IPrincipal } from "../../facets/principal/IPrincipal.sol";
+import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
+import { DecimalsLib } from "../../infrastructure/utils/DecimalsLib.sol";
+import { NominalValueStorageWrapper } from "../asset/NominalValueStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /// @title TokenCoreOps - Orchestrator for core token operations
 /// @notice Deployed once as a separate contract. Facets call via DELEGATECALL.
@@ -158,6 +164,12 @@ library TokenCoreOps {
 
     // Internal functions (inlined into calling StorageWrappers)
 
+    /// @notice Computes the total adjusted balance for a token holder at a given timestamp.
+    /// @dev Sums the spendable balance, locked, held, cleared, and frozen amounts, each
+    ///      scaled by their respective ABAF factors.
+    /// @param _tokenHolder Address of the token holder.
+    /// @param _timestamp   Block timestamp used for the ABAF adjustment calculation.
+    /// @return totalBalance_ Aggregate adjusted balance including frozen tokens.
     function getTotalBalanceForAdjustedAt(
         address _tokenHolder,
         uint256 _timestamp
@@ -166,7 +178,8 @@ library TokenCoreOps {
             AdjustBalancesStorageWrapper.balanceOfAdjustedAt(_tokenHolder, _timestamp) +
             LockStorageWrapper.getLockedAmountForAdjustedAt(_tokenHolder, _timestamp) +
             HoldStorageWrapper.getHeldAmountForAdjustedAt(_tokenHolder, _timestamp) +
-            ClearingReadOps.getClearedAmountForAdjustedAt(_tokenHolder, _timestamp);
+            ClearingReadOps.getClearedAmountForAdjustedAt(_tokenHolder, _timestamp) +
+            ERC3643StorageWrapper.getFrozenAmountForAdjustedAt(_tokenHolder, _timestamp);
     }
 
     function getTotalBalanceForByPartitionAdjustedAt(
@@ -179,5 +192,24 @@ library TokenCoreOps {
             LockStorageWrapper.getLockedAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _timestamp) +
             HoldStorageWrapper.getHeldAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _timestamp) +
             ClearingReadOps.getClearedAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _timestamp);
+    }
+
+    /**
+     * @notice Computes the principal position for `account` at the current block timestamp.
+     * @param  account      Token holder address.
+     * @return principalFor_ Numerator/denominator pair representing the holder's principal.
+     */
+    function getPrincipalFor(address account) internal view returns (IPrincipal.PrincipalFor memory principalFor_) {
+        uint256 blockTimestamp = EvmAccessors.getBlockTimestamp();
+
+        // Pre-apply the nominal-value scale via 512-bit mulDiv: balance * nominal stays bounded
+        // even at high precision, and the equivalent fraction keeps the token-decimal scale on
+        // the denominator so sub-unit balances survive (numerator/denominator == old fraction).
+        principalFor_.numerator = Math.mulDiv(
+            TokenCoreOps.getTotalBalanceForAdjustedAt(account, blockTimestamp),
+            NominalValueStorageWrapper.getNominalValue(),
+            DecimalsLib.pow10(NominalValueStorageWrapper.getNominalValueDecimals())
+        );
+        principalFor_.denominator = DecimalsLib.pow10(ERC20StorageWrapper.decimalsAdjustedAt(blockTimestamp));
     }
 }

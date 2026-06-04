@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey BurnByPartition
+bytes32 constant RESOLVER_KEY_BURN_BY_PARTITION = 0x8d135078123ea705bd40f02ac0cd59ac08da08600b3510ba6150fe0e4a588684;
+
 /**
  * @title IBurnByPartition
  * @author Asset Tokenization Studio Team
@@ -10,6 +13,19 @@ pragma solidity >=0.8.0 <0.9.0;
  *      partition supply and emits the `RedeemedByPartition` event.
  */
 interface IBurnByPartition {
+    /**
+     * @notice Emitted once when the burn by partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeBurnByPartition`.
+     */
+    event BurnByPartitionInitialized();
+
+    /**
+     * @notice Initialises the burn by partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeBurnByPartition() external;
+
     /**
      * @notice Decreases totalSupply and the corresponding amount of the specified partition of msg.sender
      * @dev Only callable when not paused. In single-partition mode only the default partition is accepted.

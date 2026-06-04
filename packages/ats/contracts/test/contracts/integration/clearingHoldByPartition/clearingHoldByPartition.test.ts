@@ -1,12 +1,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { expect } from "chai";
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
-import { IAsset, type ResolverProxy } from "@contract-types";
-import { ADDRESS_ZERO, ATS_ROLES, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
+import { IAsset, MockDiamondCut, type ResolverProxy } from "@contract-types";
+import {
+  ADDRESS_ZERO,
+  ATS_ROLES,
+  EMPTY_HEX_BYTES,
+  EMPTY_STRING,
+  ZERO,
+  EQUITY_CONFIG_ID,
+  RESOLVER_KEY_CLEARING_HOLDBYPARTITION,
+} from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
@@ -54,6 +62,7 @@ describe("ClearingHoldByPartitionFacet Tests", () => {
   let signer_E: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
   let currentTimestamp = 0;
@@ -97,18 +106,18 @@ describe("ClearingHoldByPartitionFacet Tests", () => {
     signer_E = base.user4;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
-
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
-      { role: ATS_ROLES.ISSUER_ROLE, members: [signer_B.address] },
-      { role: ATS_ROLES.CONTROLLER_ROLE, members: [signer_C.address] },
-      { role: ATS_ROLES.PAUSER_ROLE, members: [signer_D.address] },
-      { role: ATS_ROLES.CONTROL_LIST_ROLE, members: [signer_E.address] },
-      { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
-      { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
-      { role: ATS_ROLES.CLEARING_ROLE, members: [signer_A.address] },
-      { role: ATS_ROLES.CLEARING_VALIDATOR_ROLE, members: [signer_A.address] },
-      { role: ATS_ROLES.PROTECTED_PARTITIONS_ROLE, members: [signer_B.address] },
-      { role: ATS_ROLES.AGENT_ROLE, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_ISSUER, members: [signer_B.address] },
+      { role: ATS_ROLES.ROLE_CONTROLLER, members: [signer_C.address] },
+      { role: ATS_ROLES.ROLE_PAUSER, members: [signer_D.address] },
+      { role: ATS_ROLES.ROLE_CONTROL_LIST, members: [signer_E.address] },
+      { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+      { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_CLEARING, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_CLEARING_VALIDATOR, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_PROTECTED_PARTITIONS, members: [signer_B.address] },
+      { role: ATS_ROLES.ROLE_AGENT, members: [signer_A.address] },
     ]);
 
     await setFacets(asset);
@@ -253,7 +262,7 @@ describe("ClearingHoldByPartitionFacet Tests", () => {
 
         it("GIVEN protected partitions with wildcard role WHEN clearingCreateHoldByPartition THEN transaction succeeds", async () => {
           await asset.connect(signer_B).protectPartitions();
-          await asset.grantRole(ATS_ROLES.WILD_CARD_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_WILD_CARD, signer_A.address);
           await expect(asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold)).to.not.be
             .reverted;
         });
@@ -325,7 +334,7 @@ describe("ClearingHoldByPartitionFacet Tests", () => {
           clearingId: 1,
         };
 
-        await asset.grantRole(ATS_ROLES.CLEARING_VALIDATOR_ROLE, signer_E.address);
+        await asset.grantRole(ATS_ROLES.ROLE_CLEARING_VALIDATOR, signer_E.address);
         await asset.connect(signer_E).approveClearingOperationByPartition(identifier);
         const allowanceAfterClearingApproval = await asset.allowance(signer_A.address, signer_D.address);
 
@@ -428,7 +437,7 @@ describe("ClearingHoldByPartitionFacet Tests", () => {
         it("GIVEN protected partitions with wildcard role WHEN clearingCreateHoldFromByPartition THEN transaction succeeds", async () => {
           await asset.connect(signer_A).increaseAllowance(signer_B.address, _AMOUNT);
           await asset.connect(signer_B).protectPartitions();
-          await asset.grantRole(ATS_ROLES.WILD_CARD_ROLE, signer_B.address);
+          await asset.grantRole(ATS_ROLES.ROLE_WILD_CARD, signer_B.address);
           await expect(asset.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom, hold)).to.not.be
             .reverted;
         });
@@ -564,13 +573,13 @@ describe("ClearingHoldByPartitionFacet Tests", () => {
 
       it("A12: GIVEN protectedClearingCreateHoldByPartition WHEN transfer to address(0) THEN emits Transfer to ZeroAddress", async () => {
         // Setup protected partitions
-        await asset.grantRole(ATS_ROLES.PROTECTED_PARTITIONS_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_PROTECTED_PARTITIONS, signer_A.address);
         await asset.protectPartitions();
 
         // Grant role for protected partition
         const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
           ["bytes32", "bytes32"],
-          [ATS_ROLES.PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
+          [ATS_ROLES.ROLE_PROTECTED_PARTITIONS_PARTICIPANT, _DEFAULT_PARTITION],
         );
         const packedDataWithoutPrefix = packedData.slice(2);
         const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
@@ -657,7 +666,7 @@ describe("ClearingHoldByPartitionFacet Tests", () => {
     it("GIVEN a deactivated asset WHEN clearingCreateHoldByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset
@@ -667,6 +676,88 @@ describe("ClearingHoldByPartitionFacet Tests", () => {
             { amount: 0, expirationTimestamp: 0, escrow: ethers.ZeroAddress, to: ethers.ZeroAddress, data: "0x" },
           ),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN clearingCreateHoldFromByPartition THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).clearingCreateHoldFromByPartition(
+          {
+            clearingOperation: { partition: ethers.ZeroHash, expirationTimestamp: 0, data: "0x" },
+            from: ethers.ZeroAddress,
+            operatorData: "0x",
+          },
+          { amount: 0, expirationTimestamp: 0, escrow: ethers.ZeroAddress, to: ethers.ZeroAddress, data: "0x" },
+        ),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("initializeClearingHoldByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeClearingHoldByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeClearingHoldByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeClearingHoldByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeClearingHoldByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_CLEARING_HOLDBYPARTITION, 1);
+    });
+  });
+
+  describe("initializeClearingHoldByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeClearingHoldByPartition is called THEN emits ClearingHoldByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_CLEARING_HOLDBYPARTITION);
+      await expect(asset.initializeClearingHoldByPartition()).to.emit(asset, "ClearingHoldByPartitionInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational WHEN clearingCreateHoldByPartition is called THEN AssetNotOperational", async () => {
+      await expect(
+        asset.clearingCreateHoldByPartition(
+          { partition: _DEFAULT_PARTITION, expirationTimestamp, data: _DATA },
+          {
+            amount: BigInt(_AMOUNT),
+            expirationTimestamp: BigInt(expirationTimestamp),
+            escrow: signer_B.address,
+            to: signer_C.address,
+            data: _DATA,
+          },
+        ),
+      )
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN clearingCreateHoldFromByPartition is called THEN AssetNotOperational", async () => {
+      await expect(
+        asset.clearingCreateHoldFromByPartition(
+          {
+            clearingOperation: { partition: _DEFAULT_PARTITION, expirationTimestamp, data: _DATA },
+            from: signer_A.address,
+            operatorData: _DATA,
+          },
+          {
+            amount: BigInt(_AMOUNT),
+            expirationTimestamp: BigInt(expirationTimestamp),
+            escrow: signer_B.address,
+            to: signer_C.address,
+            data: _DATA,
+          },
+        ),
+      )
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 });

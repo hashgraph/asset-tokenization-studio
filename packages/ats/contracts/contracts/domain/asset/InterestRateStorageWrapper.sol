@@ -1,30 +1,48 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _FIXED_RATE_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { _KPI_LINKED_RATE_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { _INTEREST_RATE_TYPE_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { IKpiLinkedRateErrors } from "../../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRateErrors.sol";
+import { IKpiLinkedRate } from "../../facets/kpiLinkedRate/IKpiLinkedRate.sol";
 import { IInterestRate } from "../../facets/interestRate/IInterestRate.sol";
+import { ScheduledTasksOps } from "../orchestrator/ScheduledTasksOps.sol";
+
+/// @custom:hash storage InterestRateType
+// solhint-disable-next-line max-line-length
+bytes32 constant STORAGE_LOCATION_INTEREST_RATE_TYPE = 0xb307072990b6f669214acc1dea3ecf3325e96dd0c0bfc7f3707eee45be6a8a00;
+
+/// @custom:hash storage KpiLinkedRate
+bytes32 constant STORAGE_LOCATION_KPI_LINKED_RATE = 0xfd654781c90de8f4a5cbc1548092929b04718c1777cd90dc2720e57e9f459000;
+
+/// @custom:hash storage FixedRate
+bytes32 constant STORAGE_LOCATION_FIXED_RATE = 0x577d3b71f198de7595699f8f28612988ade0252ef23d62ee04fdaa63df28d200;
 
 /**
  * @title FixedRateDataStorage
- * @notice Struct holding the fixed interest rate value and its decimal precision,
- *         along with an initialisation flag.
- * @param rate The fixed interest rate value.
+ * @notice Struct holding the fixed interest rate value and its decimal precision.
+ * @dev Backing storage for the fixed-rate coupon model; mutated only by
+ *      `InterestRateStorageWrapper` via the deterministic ERC-7201 slot.
  * @param decimals Number of decimal places for the rate.
- * @param initialized Whether the fixed rate data has been initialised.
+ * @param rate The fixed interest rate value.
+ * @custom:storage-location erc7201:security.token.standard.storage.FixedRate
  */
 struct FixedRateDataStorage {
-    uint256 rate;
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
     uint8 decimals;
-    bool initialized;
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    uint256 rate;
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 /**
  * @title KpiLinkedRateDataStorage
  * @notice Stores parameters for a KPI-linked interest rate model, including rate
  *         boundaries, reporting constraints, and impact data bounds.
+ * @dev Backing storage for the KPI-linked coupon model; mutated only by
+ *      `InterestRateStorageWrapper`. Rate ordering (`minRate ≤ baseRate ≤ maxRate`)
+ *      and impact bound strict-ordering invariants are enforced at write time.
+ * @param rateDecimals Number of decimals for rate values.
+ * @param impactDataDecimals Number of decimals for impact data fields.
  * @param maxRate Upper bound for the KPI-linked rate.
  * @param baseRate Base rate from which adjustments are applied.
  * @param minRate Lower bound for the KPI-linked rate.
@@ -32,15 +50,18 @@ struct FixedRateDataStorage {
  * @param startRate Initial rate applicable at startPeriod.
  * @param missedPenalty Penalty rate applied when a report is missed.
  * @param reportPeriod Duration in seconds between successive reports.
- * @param rateDecimals Number of decimals for rate values.
  * @param maxDeviationCap Upper deviation cap for impact data.
  * @param baseLine Baseline value for impact deviation calculations.
  * @param maxDeviationFloor Lower deviation floor for impact data.
  * @param adjustmentPrecision Precision factor for the adjustment computation.
- * @param impactDataDecimals Number of decimals for impact data fields.
- * @param initialized Whether the KPI-linked rate data has been initialised.
+ * @custom:storage-location erc7201:security.token.standard.storage.KpiLinkedRate
  */
 struct KpiLinkedRateDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    uint8 rateDecimals;
+    uint8 impactDataDecimals;
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     uint256 maxRate;
     uint256 baseRate;
     uint256 minRate;
@@ -48,22 +69,29 @@ struct KpiLinkedRateDataStorage {
     uint256 startRate;
     uint256 missedPenalty;
     uint256 reportPeriod;
-    uint8 rateDecimals;
     uint256 maxDeviationCap;
     uint256 baseLine;
     uint256 maxDeviationFloor;
     uint256 adjustmentPrecision;
-    uint8 impactDataDecimals;
-    bool initialized;
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 /**
  * @title InterestRateTypeDataStorage
- * @notice Stores the selected coupon rate type.
+ * @notice Stores the selected coupon rate type discriminator.
+ * @dev Decoupled from the rate-specific storages so the active model can be queried
+ *      without touching the fixed-rate or KPI-linked storage slots.
  * @param rateType The `IInterestRate.RateType` discriminator selected by the admin.
+ * @custom:storage-location erc7201:security.token.standard.storage.InterestRateType
  */
 struct InterestRateTypeDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
     IInterestRate.RateType rateType;
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 /**
@@ -93,7 +121,7 @@ library InterestRateStorageWrapper {
      * @dev Copies all fields from the calldata InterestRate struct into storage.
      * @param _newInterestRate The InterestRate structure containing all rate parameters.
      */
-    function setInterestRate(IKpiLinkedRateErrors.InterestRate calldata _newInterestRate) internal {
+    function setInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) internal {
         KpiLinkedRateDataStorage storage kpiRateStorage = kpiLinkedRateStorage();
         kpiRateStorage.maxRate = _newInterestRate.maxRate;
         kpiRateStorage.baseRate = _newInterestRate.baseRate;
@@ -110,7 +138,7 @@ library InterestRateStorageWrapper {
      * @dev Copies deviation bounds and precision from the calldata ImpactData struct.
      * @param _newImpactData The ImpactData structure containing deviation and precision parameters.
      */
-    function setImpactData(IKpiLinkedRateErrors.ImpactData calldata _newImpactData) internal {
+    function setImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) internal {
         KpiLinkedRateDataStorage storage kpiRateStorage = kpiLinkedRateStorage();
         kpiRateStorage.maxDeviationCap = _newImpactData.maxDeviationCap;
         kpiRateStorage.baseLine = _newImpactData.baseLine;
@@ -120,7 +148,19 @@ library InterestRateStorageWrapper {
     }
 
     /**
-     * @notice Stores the selected coupon rate type and marks the slot as set.
+     * @notice Writes the coupon rate type during one-time initialisation.
+     * @dev Called only once during asset deployment. Reverts via the caller's modifier
+     *      if already initialised.
+     * @param _rateType The `IInterestRate.RateType` to persist.
+     */
+    function initializeCouponRateType(IInterestRate.RateType _rateType) internal {
+        ScheduledTasksOps.triggerPendingScheduledCrossOrderedTasks();
+        setCouponRateType(_rateType);
+    }
+
+    /**
+     * @notice Updates the coupon rate type after initialisation.
+     * @dev Used by the post-init admin setter; does not touch the `initialized` flag.
      * @param _rateType The `IInterestRate.RateType` to persist.
      */
     function setCouponRateType(IInterestRate.RateType _rateType) internal {
@@ -133,22 +173,6 @@ library InterestRateStorageWrapper {
      */
     function getCouponRateType() internal view returns (IInterestRate.RateType rateType_) {
         return interestRateTypeStorage().rateType;
-    }
-
-    /**
-     * @notice Checks whether the fixed rate data has been initialised.
-     * @return True if fixed rate data is initialised, false otherwise.
-     */
-    function isFixedRateInitialized() internal view returns (bool) {
-        return fixedRateStorage().initialized;
-    }
-
-    /**
-     * @notice Checks whether the KPI-linked rate data has been initialised.
-     * @return True if KPI-linked rate data is initialised, false otherwise.
-     */
-    function isKpiLinkedRateInitialized() internal view returns (bool) {
-        return kpiLinkedRateStorage().initialized;
     }
 
     /**
@@ -165,9 +189,9 @@ library InterestRateStorageWrapper {
      * @notice Returns the full KPI-linked interest rate configuration from storage.
      * @return interestRate_ An InterestRate memory struct with all KPI rate parameters.
      */
-    function getInterestRate() internal view returns (IKpiLinkedRateErrors.InterestRate memory interestRate_) {
+    function getInterestRate() internal view returns (IKpiLinkedRate.InterestRate memory interestRate_) {
         KpiLinkedRateDataStorage storage kpiRateStorage = kpiLinkedRateStorage();
-        interestRate_ = IKpiLinkedRateErrors.InterestRate({
+        interestRate_ = IKpiLinkedRate.InterestRate({
             maxRate: kpiRateStorage.maxRate,
             baseRate: kpiRateStorage.baseRate,
             minRate: kpiRateStorage.minRate,
@@ -183,9 +207,9 @@ library InterestRateStorageWrapper {
      * @notice Returns the KPI-linked impact data configuration from storage.
      * @return impactData_ An ImpactData memory struct with deviation bounds and precision.
      */
-    function getImpactData() internal view returns (IKpiLinkedRateErrors.ImpactData memory impactData_) {
+    function getImpactData() internal view returns (IKpiLinkedRate.ImpactData memory impactData_) {
         KpiLinkedRateDataStorage storage kpiRateStorage = kpiLinkedRateStorage();
-        impactData_ = IKpiLinkedRateErrors.ImpactData({
+        impactData_ = IKpiLinkedRate.ImpactData({
             maxDeviationCap: kpiRateStorage.maxDeviationCap,
             baseLine: kpiRateStorage.baseLine,
             maxDeviationFloor: kpiRateStorage.maxDeviationFloor,
@@ -210,13 +234,13 @@ library InterestRateStorageWrapper {
      *         correctly (minRate ≤ baseRate ≤ maxRate).
      * @dev Reverts with WrongInterestRateValues if the invariant is violated.
      * @param _newInterestRate The InterestRate struct to validate.
-     * @custom:revert IKpiLinkedRateErrors.WrongInterestRateValues If ordering is invalid.
+     * @custom:revert IKpiLinkedRate.WrongInterestRateValues If ordering is invalid.
      */
-    function requireValidInterestRate(IKpiLinkedRateErrors.InterestRate calldata _newInterestRate) internal pure {
+    function requireValidInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) internal pure {
         if (
             _newInterestRate.minRate > _newInterestRate.baseRate || _newInterestRate.baseRate > _newInterestRate.maxRate
         ) {
-            revert IKpiLinkedRateErrors.WrongInterestRateValues(_newInterestRate);
+            revert IKpiLinkedRate.WrongInterestRateValues(_newInterestRate);
         }
     }
 
@@ -227,14 +251,14 @@ library InterestRateStorageWrapper {
      *      when baseLine == maxDeviationFloor or baseLine == maxDeviationCap, causing a permanent
      *      revert that propagates through the scheduled-task queue and freezes all token operations.
      * @param _newImpactData The ImpactData struct to validate.
-     * @custom:revert IKpiLinkedRateErrors.WrongImpactDataValues If ordering is invalid.
+     * @custom:revert IKpiLinkedRate.WrongImpactDataValues If ordering is invalid.
      */
-    function requireValidImpactData(IKpiLinkedRateErrors.ImpactData calldata _newImpactData) internal pure {
+    function requireValidImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) internal pure {
         if (
             !(_newImpactData.maxDeviationFloor < _newImpactData.baseLine &&
                 _newImpactData.baseLine < _newImpactData.maxDeviationCap)
         ) {
-            revert IKpiLinkedRateErrors.WrongImpactDataValues(_newImpactData);
+            revert IKpiLinkedRate.WrongImpactDataValues(_newImpactData);
         }
     }
 
@@ -244,7 +268,7 @@ library InterestRateStorageWrapper {
      * @return fixedRateDataStorage_ Storage pointer to FixedRateDataStorage.
      */
     function fixedRateStorage() internal pure returns (FixedRateDataStorage storage fixedRateDataStorage_) {
-        bytes32 position = _FIXED_RATE_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_FIXED_RATE;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             fixedRateDataStorage_.slot := position
@@ -257,7 +281,7 @@ library InterestRateStorageWrapper {
      * @return kpiLinkedRateDataStorage_ Storage pointer to KpiLinkedRateDataStorage.
      */
     function kpiLinkedRateStorage() internal pure returns (KpiLinkedRateDataStorage storage kpiLinkedRateDataStorage_) {
-        bytes32 position = _KPI_LINKED_RATE_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_KPI_LINKED_RATE;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             kpiLinkedRateDataStorage_.slot := position
@@ -270,7 +294,7 @@ library InterestRateStorageWrapper {
      * @return data_ Storage pointer to InterestRateTypeDataStorage.
      */
     function interestRateTypeStorage() private pure returns (InterestRateTypeDataStorage storage data_) {
-        bytes32 position = _INTEREST_RATE_TYPE_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_INTEREST_RATE_TYPE;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             data_.slot := position

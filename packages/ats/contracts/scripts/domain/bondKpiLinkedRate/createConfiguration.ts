@@ -18,8 +18,9 @@ import {
   createBatchConfiguration,
   OperationResult,
   DEFAULT_BATCH_SIZE,
+  RetryOptions,
 } from "@scripts/infrastructure";
-import { BOND_KPI_LINKED_RATE_CONFIG_ID, atsRegistry } from "@scripts/domain";
+import { BOND_KPI_LINKED_RATE_CONFIG_ID, atsRegistry, buildFacetList, getMockFacetDefinition } from "@scripts/domain";
 import { BusinessLogicResolver } from "@contract-types";
 
 /**
@@ -45,7 +46,8 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "CoreFacet",
   "TransferFacet",
   "CoreAdjustedFacet",
-  "MetadataFacet",
+  "InitializerFacet", // Core initializer facet
+  "CustomDataFacet",
   "FreezeFacet",
   "BatchFreezeFacet",
   "KycFacet",
@@ -70,7 +72,6 @@ const BOND_KPI_LINKED_RATE_FACETS = [
 
   // ERC Standards
   "MintByPartitionFacet",
-  "ERC1410ManagementFacet",
   "ProtectedByPartitionFacet",
   "OperatorFacet",
   "TransferByPartitionFacet",
@@ -88,7 +89,6 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "BatchBurnFacet",
   "BatchMintFacet",
   "BatchTransferFacet",
-  "ERC3643ManagementFacet",
   "RecoveryFacet",
   "IdentityFacet",
   "ComplianceFacet",
@@ -138,15 +138,13 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   // Interest Rate (rate-specific - keep variant names)
   "CouponFacet",
   "KpiLinkedRateFacet",
-  "KpisKpiLinkedRateFacet",
+  "KpisFacet",
   "InterestRateFacet",
 
   // Maturity By Partition
   "MaturityByPartitionFacet",
 
   // Jurisdiction-Specific (write facet and read facet are both rate-specific)
-  "BondUSAKpiLinkedRateFacet",
-  "BondUSAReadKpiLinkedRateFacet",
   "PrincipalFacet",
 ] as const;
 
@@ -162,7 +160,6 @@ const BOND_KPI_LINKED_RATE_FACETS = [
  *
  * @param blrContract - BusinessLogicResolver contract instance
  * @param facetAddresses - Map of facet names to their deployed addresses
- * @param useTimeTravel - Whether to use TimeTravel variants (default: false)
  * @param partialBatchDeploy - Whether this is a partial batch deployment (default: false)
  * @param batchSize - Number of facets per batch (default: DEFAULT_BATCH_SIZE)
  * @param confirmations - Number of confirmations to wait for (default: 0 for test environments)
@@ -200,26 +197,18 @@ const BOND_KPI_LINKED_RATE_FACETS = [
 export async function createBondKpiLinkedRateConfiguration(
   blrContract: BusinessLogicResolver,
   facetAddresses: Record<string, string>,
-  useTimeTravel: boolean = false,
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
+  retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  // Build facet list based on time travel mode
-  // When useTimeTravel=true, ALL facets get TimeTravel suffix (universal mapping)
-  // plus TimeTravelFacet controller. No filtering needed — simplifies deployment logic.
-  const facetNames = useTimeTravel
-    ? [...BOND_KPI_LINKED_RATE_FACETS.map((name) => `${name}TimeTravel`), "TimeTravelFacet"]
-    : [...BOND_KPI_LINKED_RATE_FACETS];
+  const facetNames = buildFacetList(BOND_KPI_LINKED_RATE_FACETS);
 
   // Build facet data with resolver keys from registry
   const facets = facetNames.map((name) => {
-    // Strip "TimeTravel" suffix to get base name for registry lookup
-    const baseName = name.replace(/TimeTravel$/, "");
-
-    const facetDef = atsRegistry.getFacetDefinition(baseName);
+    const facetDef = atsRegistry.getFacetDefinition(name) ?? getMockFacetDefinition(name);
     if (!facetDef?.resolverKey?.value) {
-      throw new Error(`No resolver key found for facet: ${baseName}`);
+      throw new Error(`No resolver key found for facet: ${name}`);
     }
     return {
       facetName: name,
@@ -234,5 +223,6 @@ export async function createBondKpiLinkedRateConfiguration(
     partialBatchDeploy,
     batchSize,
     confirmations,
+    retryOptions,
   });
 }

@@ -5,7 +5,7 @@
  *
  * Verifies that the thin wrapper calls createBatchConfiguration with the correct
  * configId (FACTORY_CONFIG_ID), version=1, and single-element resolverKeys array
- * (_FACTORY_RESOLVER_KEY).
+ * (_FACTORY).
  *
  * @module test/scripts/unit/domain/factory/createConfiguration.test
  */
@@ -14,8 +14,8 @@ import { expect } from "chai";
 import sinon from "sinon";
 import { createFactoryConfiguration, FACTORY_CONFIG_ID } from "@scripts/domain";
 
-// Known _FACTORY_RESOLVER_KEY value (keccak256("security.token.standard.factory.resolverKey"))
-const EXPECTED_FACTORY_RESOLVER_KEY = "0xa5472d34be801f744a73bce4e1851e67767286307e3203726a3261b280a667b3";
+// Known _FACTORY value (keccak256("security.token.standard.factory.resolverKey"))
+const EXPECTED_FACTORY = "0xa5472d34be801f744a73bce4e1851e67767286307e3203726a3261b280a667b3";
 
 const MOCK_FACTORY_FACET_ADDRESS = "0x1234567890123456789012345678901234567890";
 const MOCK_FACTORY_VERSION = 1;
@@ -105,12 +105,10 @@ describe("createFactoryConfiguration", () => {
 
   it("should use the correct factory resolver key", () => {
     // Verify the resolver key matches keccak256("security.token.standard.factory.resolverKey")
-    expect(EXPECTED_FACTORY_RESOLVER_KEY).to.equal(
-      "0xa5472d34be801f744a73bce4e1851e67767286307e3203726a3261b280a667b3",
-    );
+    expect(EXPECTED_FACTORY).to.equal("0xa5472d34be801f744a73bce4e1851e67767286307e3203726a3261b280a667b3");
   });
 
-  it("should accept useTimeTravel=false by default", async () => {
+  it("should resolve facet versions without legacy useTimeTravel flag", async () => {
     const facetAddresses: Record<string, string> = {
       FactoryFacet: MOCK_FACTORY_FACET_ADDRESS,
     };

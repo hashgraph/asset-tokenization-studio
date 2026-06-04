@@ -30,6 +30,8 @@ import { LockOperations } from "./operations/LockOperations";
 import { SecurityOperations } from "./operations/SecurityOperations";
 import { SecurityMetadataOperations } from "./operations/SecurityMetadataOperations";
 import { AmortizationOperations } from "./operations/AmortizationOperations";
+import { DeactivateOperations } from "./operations/DeactivateOperations";
+import { CustomDataOperations } from "./operations/CustomDataOperations";
 
 export abstract class BaseHederaTransactionAdapter extends TransactionAdapter implements TransactionExecutor {
   mirrorNodes: MirrorNodes;
@@ -55,6 +57,8 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
   protected securityOps!: SecurityOperations;
   protected securityMetadataOps!: SecurityMetadataOperations;
   protected amortizationOps!: AmortizationOperations;
+  protected deactivateOps!: DeactivateOperations;
+  protected customDataOps!: CustomDataOperations;
 
   constructor(
     protected readonly mirrorNodeAdapter: MirrorNodeAdapter,
@@ -74,6 +78,8 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     this.securityOps = new SecurityOperations(this);
     this.securityMetadataOps = new SecurityMetadataOperations(this);
     this.amortizationOps = new AmortizationOperations(this);
+    this.deactivateOps = new DeactivateOperations(this);
+    this.customDataOps = new CustomDataOperations(this);
   }
 
   // ===== Abstract methods (implemented by concrete adapters) =====
@@ -178,18 +184,6 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     ...args: Parameters<FactoryOperations["createBondKpiLinkedRate"]>
   ): Promise<TransactionResponse> {
     return this.factoryOps.createBondKpiLinkedRate(...args);
-  }
-
-  async createTrexSuiteBond(
-    ...args: Parameters<FactoryOperations["createTrexSuiteBond"]>
-  ): Promise<TransactionResponse> {
-    return this.factoryOps.createTrexSuiteBond(...args);
-  }
-
-  async createTrexSuiteEquity(
-    ...args: Parameters<FactoryOperations["createTrexSuiteEquity"]>
-  ): Promise<TransactionResponse> {
-    return this.factoryOps.createTrexSuiteEquity(...args);
   }
 
   // ===== Transfer Operations =====
@@ -606,6 +600,10 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     return this.pauseOps.unpause(...args);
   }
 
+  async deactivate(...args: Parameters<DeactivateOperations["deactivate"]>): Promise<TransactionResponse> {
+    return this.deactivateOps.deactivate(...args);
+  }
+
   async updateExternalPauses(
     ...args: Parameters<PauseOperations["updateExternalPauses"]>
   ): Promise<TransactionResponse> {
@@ -876,5 +874,11 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     ...args: Parameters<AmortizationOperations["releaseAmortizationHold"]>
   ): Promise<TransactionResponse> {
     return this.amortizationOps.releaseAmortizationHold(...args);
+  }
+
+  // ===== Custom Data Operations =====
+
+  async setCustomData(...args: Parameters<CustomDataOperations["setCustomData"]>): Promise<TransactionResponse> {
+    return this.customDataOps.setCustomData(...args);
   }
 }

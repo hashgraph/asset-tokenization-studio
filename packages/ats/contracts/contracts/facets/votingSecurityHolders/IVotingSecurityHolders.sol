@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey VotingSecurityHolders
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_VOTING_SECURITY_HOLDERS = 0xff4e971334f234a2d839b58b2fef84241254942cef8940a4457d1eecb63882b9;
+
 /**
  * @title IVotingSecurityHolders
  * @author Asset Tokenization Studio Team
@@ -10,6 +14,19 @@ pragma solidity >=0.8.0 <0.9.0;
  *      Returns empty/zero when the record date has not yet been reached.
  */
 interface IVotingSecurityHolders {
+    /**
+     * @notice Emitted once when the voting-security-holders capability is initialised on a token.
+     * @dev Fires exclusively from `initializeVotingSecurityHolders`.
+     */
+    event VotingSecurityHoldersInitialized();
+
+    /**
+     * @notice Initialises the voting-security-holders capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeVotingSecurityHolders() external;
+
     /**
      * @notice Returns a paginated list of token holders eligible for a voting.
      * @dev Resolved from the snapshot at the voting record date when one exists; falls back to

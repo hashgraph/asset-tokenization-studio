@@ -53,7 +53,7 @@ const regulationSubType = RegulationSubType.NONE;
 const countries = "AF,HG,BN";
 const info = "Anything";
 const configId = "0x0000000000000000000000000000000000000000000000000000000000000000";
-const configVersion = 0;
+const configVersion = 1;
 
 const mirrorNode: MirrorNode = {
   name: "testmirrorNode",
@@ -156,7 +156,7 @@ describe("🧪 Bond test", () => {
     expect(bondDetails.currency).toEqual(currency);
     expect(bondDetails.nominalValue).toEqual(nominalValue);
     expect(bondDetails.nominalValueDecimals).toEqual(nominalValueDecimals);
-    expect(bondDetails.startingDate.getTime() / 1000).toEqual(startingDate);
+    expect(bondDetails.startingDate!.getTime() / 1000).toEqual(startingDate);
     expect(bondDetails.maturityDate.getTime() / 1000).toEqual(maturityDate);
   }, 60_000);
 

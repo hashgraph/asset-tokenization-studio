@@ -18,9 +18,12 @@ import {
   createBatchConfiguration,
   OperationResult,
   DEFAULT_BATCH_SIZE,
+  RetryOptions,
 } from "@scripts/infrastructure";
 import { LOANS_PORTFOLIO_CONFIG_ID } from "../constants";
 import { atsRegistry } from "../atsRegistry";
+import { buildFacetList } from "../facetEnvironment";
+import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
 import { BusinessLogicResolver } from "@contract-types";
 
 /**
@@ -35,9 +38,6 @@ import { BusinessLogicResolver } from "@contract-types";
  *
  * Note: DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet functionality,
  * so we only include DiamondFacet to avoid selector collisions.
- *
- * Note: Loan Portfolio does NOT include TimeTravel variants (per spec). TimeTravelFacet
- * is injected automatically by the deploy script in test environments.
  */
 const LOANS_PORTFOLIO_FACETS = [
   "LoansPortfolioFacet",
@@ -52,7 +52,8 @@ const LOANS_PORTFOLIO_FACETS = [
   "CoreFacet",
   "TransferFacet",
   "CoreAdjustedFacet",
-  "MetadataFacet",
+  "InitializerFacet", // Core initializer facet
+  "CustomDataFacet",
   "FreezeFacet",
   "BatchFreezeFacet",
   "KycFacet",
@@ -78,7 +79,6 @@ const LOANS_PORTFOLIO_FACETS = [
 
   // ERC Standards
   "MintByPartitionFacet",
-  "ERC1410ManagementFacet",
   "ProtectedByPartitionFacet",
   "OperatorFacet",
   "TransferByPartitionFacet",
@@ -96,7 +96,6 @@ const LOANS_PORTFOLIO_FACETS = [
   "BatchBurnFacet",
   "BatchMintFacet",
   "BatchTransferFacet",
-  "ERC3643ManagementFacet",
   "RecoveryFacet",
   "IdentityFacet",
   "ComplianceFacet",
@@ -147,21 +146,18 @@ const LOANS_PORTFOLIO_FACETS = [
 export async function createLoansPortfolioConfiguration(
   blrContract: BusinessLogicResolver,
   facetAddresses: Record<string, string>,
-  useTimeTravel: boolean = false,
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
+  retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  const facetNames = useTimeTravel
-    ? [...LOANS_PORTFOLIO_FACETS.map((name) => `${name}TimeTravel`), "TimeTravelFacet"]
-    : [...LOANS_PORTFOLIO_FACETS];
+  const facetNames = buildFacetList(LOANS_PORTFOLIO_FACETS);
 
   // Build facet data with resolver keys from registry
   const facets = facetNames.map((name) => {
-    const baseName = name.replace(/TimeTravel$/, "");
-    const facetDef = atsRegistry.getFacetDefinition(baseName);
+    const facetDef = atsRegistry.getFacetDefinition(name) ?? getMockFacetDefinition(name);
     if (!facetDef?.resolverKey?.value) {
-      throw new Error(`No resolver key found for facet: ${baseName}`);
+      throw new Error(`No resolver key found for facet: ${name}`);
     }
     return {
       facetName: name,
@@ -176,5 +172,6 @@ export async function createLoansPortfolioConfiguration(
     partialBatchDeploy,
     batchSize,
     confirmations,
+    retryOptions,
   });
 }

@@ -3,6 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 
+/// @custom:hash resolverKey CorporateActions
+bytes32 constant RESOLVER_KEY_CORPORATE_ACTIONS = 0x4f091e1f288c10131ffc090469e611b913f1f54343e59e44405312d597897db2;
+
 /**
  * @title ICorporateActions
  * @author Asset Tokenization Studio Team
@@ -10,12 +13,18 @@ import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
  *         actions represent issuer-initiated events (e.g. dividends, votes, KPI settlements)
  *         that are registered on-chain and classified by an arbitrary `bytes32` action type.
  * @dev Part of the Diamond facet system. Corporate actions are stored at
- *      `_CORPORATE_ACTION_STORAGE_POSITION` via `CorporateActionsStorageWrapper`. Each action
+ *      `STORAGE_LOCATION_CORPORATE_ACTION` via `CorporateActionsStorageWrapper`. Each action
  *      is assigned a 1-based sequential `bytes32` ID and de-duplicated by a content hash of
  *      `keccak256(abi.encode(actionType, data))`. Write operations (add, cancel, update) are
  *      defined in domain-specific interfaces that extend this one.
  */
 interface ICorporateActions is ICommonErrors {
+    /**
+     * @notice Emitted once when the corporate actions capability is initialised on a token.
+     * @dev Fires exclusively from `initializeCorporateActions`.
+     */
+    event CorporateActionsInitialized();
+
     /**
      * @notice Emitted when a new corporate action is registered on the token.
      * @param operator Address of the caller who added the corporate action.
@@ -65,6 +74,13 @@ interface ICorporateActions is ICommonErrors {
      * @param corporateActionId The identifier of the already-disabled corporate action.
      */
     error CorporateActionAlreadyDisabled(bytes32 corporateActionId);
+
+    /**
+     * @notice Initialises the corporate actions capability on the token.
+     * @dev Callable once; subsequent calls revert with FacetAlreadyRegistered.
+     *      Requires DEFAULT_ADMIN_ROLE. Called by the factory during deployment.
+     */
+    function initializeCorporateActions() external;
 
     /**
      * @notice Returns the stored details for a single corporate action.

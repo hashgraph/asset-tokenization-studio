@@ -43,6 +43,9 @@ import {
   waitForTransaction,
   isInstantMiningNetwork,
   hederaGasOverrides,
+  gasLimitOverride,
+  warn,
+  RetryOptions,
 } from "@scripts/infrastructure";
 
 // Types imported from centralized types module
@@ -166,6 +169,7 @@ export async function processFacetLists(
   batchSize: number = DEFAULT_BATCH_SIZE,
   gasLimit?: number,
   confirmations: number = 0,
+  retryOptions?: RetryOptions,
 ): Promise<void> {
   // Get network name for instant mining check
   let networkName = "unknown";
@@ -204,7 +208,7 @@ export async function processFacetLists(
     // partialBatchDeploy only indicates if more configurations follow after this one
     const isLastBatch = i + chunkSize >= facetIdList.length;
 
-    await sendBatchConfiguration(configId, batch, isLastBatch, blrContract, gasLimit, confirmations);
+    await sendBatchConfiguration(configId, batch, isLastBatch, blrContract, gasLimit, confirmations, retryOptions);
   }
 }
 
@@ -246,6 +250,7 @@ export async function sendBatchConfiguration(
   blrContract: BusinessLogicResolver,
   gasLimit?: number,
   confirmations: number = 0,
+  retryOptions?: RetryOptions,
 ): Promise<void> {
   const finalBatch = isFinalBatch;
 
@@ -254,27 +259,42 @@ export async function sendBatchConfiguration(
   info(`  Is final batch: ${finalBatch}`);
   info(`  Confirmations to wait: ${confirmations}`);
 
+  // Dynamic import for parallel test performance (see module JSDoc for explanation).
+  // Declared outside try-catch so GAS_LIMIT is also available in the catch block.
+  const { GAS_LIMIT, retryTransaction, withNonceReset } = await import("@scripts/infrastructure");
+
   try {
-    // Dynamic import for parallel test performance (see module JSDoc for explanation)
-    const { GAS_LIMIT } = await import("@scripts/infrastructure");
+    const signer = blrContract.runner;
+    const retryOpts = withNonceReset(signer, retryOptions);
 
-    const txResponse = await blrContract.createBatchConfiguration(configId, configurations, finalBatch, {
-      gasLimit: gasLimit || GAS_LIMIT.businessLogicResolver.createConfiguration,
-      ...hederaGasOverrides(),
-    });
+    await retryTransaction(async () => {
+      const txResponse = await blrContract.createBatchConfiguration(configId, configurations, finalBatch, {
+        ...gasLimitOverride(gasLimit || GAS_LIMIT.businessLogicResolver.createConfiguration),
+        ...hederaGasOverrides(),
+      });
 
-    info(`Batch configuration transaction sent: ${txResponse.hash}`);
+      info(`Batch configuration transaction sent: ${txResponse.hash}`);
 
-    // Wait for transaction confirmation with configurable confirmations
-    const receipt = await waitForTransaction(txResponse, confirmations, DEFAULT_TRANSACTION_TIMEOUT);
+      // Wait for transaction confirmation with configurable confirmations
+      const receipt = await waitForTransaction(txResponse, confirmations, DEFAULT_TRANSACTION_TIMEOUT);
 
-    const gasUsed = formatGasUsage(receipt, txResponse.gasLimit);
-    debug(gasUsed);
+      const gasUsed = formatGasUsage(receipt, txResponse.gasLimit);
+      debug(gasUsed);
+    }, retryOpts);
 
     success(`Batch configuration ${finalBatch ? "(final)" : "(partial)"} completed successfully`);
-    info(`  Transaction: ${receipt.hash}`);
-    info(`  Block: ${receipt.blockNumber}`);
   } catch (err) {
+    // Re-simulate with staticCall to surface the decoded revert reason (custom
+    // errors, panic codes, etc.) that status=0 receipts don't carry.
+    try {
+      await blrContract.createBatchConfiguration.staticCall(configId, configurations, finalBatch, {
+        gasLimit: gasLimit || GAS_LIMIT.businessLogicResolver.createConfiguration,
+      });
+    } catch (simErr) {
+      const simMessage = simErr instanceof Error ? simErr.message : String(simErr);
+      logError(`Failed to send batch configuration: ${simMessage}`);
+      throw new Error(simMessage);
+    }
     const errorMessage = extractRevertReason(err);
     logError(`Failed to send batch configuration: ${errorMessage}`);
     throw err;
@@ -343,6 +363,9 @@ export async function createBatchConfiguration(
     /** Number of confirmations to wait for (default: 0 for test environments) */
     confirmations?: number;
 
+    /** Optional retry configuration */
+    retryOptions?: RetryOptions;
+
     /**
      * Optional map of facet name -> explicit BLR version to pin in the
      * configuration. When provided, every facet in `facets` must have an entry,
@@ -360,11 +383,12 @@ export async function createBatchConfiguration(
     batchSize = DEFAULT_BATCH_SIZE,
     gasLimit,
     confirmations = 0,
+    retryOptions,
     facetVersions,
   } = options;
 
   // Dynamic imports for parallel test performance (see module JSDoc for explanation)
-  const { info } = await import("@scripts/infrastructure");
+  const { info, GAS_LIMIT } = await import("@scripts/infrastructure");
   const { ok, err } = await import("@scripts/infrastructure");
 
   if (facets.length === 0) {
@@ -418,6 +442,41 @@ export async function createBatchConfiguration(
       versions = latestVersions.map((v) => Number(v));
     }
 
+    // Guard: version=0 means the facet was never registered in the BLR.
+    // Passing version=0 to createBatchConfiguration causes an arithmetic
+    // underflow panic in _resolveBusinessLogicByVersion (_version - 1 on
+    // uint256(0)), which surfaces only as a silent status=0 revert.
+    const unregistered = facetKeys.filter((_, i) => versions[i] === 0);
+    if (unregistered.length > 0) {
+      throw new Error(
+        `Cannot create configuration: ${unregistered.length} facet(s) have version 0 ` +
+          `(not registered in BLR): ${unregistered.map((f) => f.facetName).join(", ")}`,
+      );
+    }
+
+    // Recover from a partial batch left by a previous crashed run.
+    // A non-zero batchVersion is detectable by querying version currentVersion+1:
+    // _resolveVersion returns explicit versions as-is, so if any facets were
+    // written to that slot the array will be non-empty.
+    const currentVersion = await getConfigurationVersion(blrContract, configurationId);
+    const ongoingBatchFacets = await blrContract.getFacetIdsByConfigurationIdAndVersion(
+      configurationId,
+      currentVersion + 1,
+      0,
+      1,
+    );
+    if (ongoingBatchFacets.length > 0) {
+      warn(
+        `Detected uncommitted batch for config ${configurationId} (version ${currentVersion + 1}). ` +
+          `Cancelling to allow clean retry...`,
+      );
+      const cancelTx = await blrContract.cancelBatchConfiguration(configurationId, {
+        ...gasLimitOverride(GAS_LIMIT.businessLogicResolver.createConfiguration),
+        ...hederaGasOverrides(),
+      });
+      await cancelTx.wait(confirmations);
+    }
+
     info("Processing facets in batches", {
       facetCount: facetIdList.length,
       partialBatchDeploy,
@@ -433,6 +492,7 @@ export async function createBatchConfiguration(
       batchSize,
       gasLimit,
       confirmations,
+      retryOptions,
     );
 
     // Query the actual configuration-specific version after batch processing

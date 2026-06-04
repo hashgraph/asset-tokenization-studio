@@ -2,8 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { InterestRateStorageWrapper } from "../../domain/asset/InterestRateStorageWrapper.sol";
-import { _checkNotInitialized } from "../InitializationErrors.sol";
-import { IKpiLinkedRate } from "../../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
+import { IKpiLinkedRate } from "../../facets/kpiLinkedRate/IKpiLinkedRate.sol";
 import { IInterestRate } from "../../facets/interestRate/IInterestRate.sol";
 
 /**
@@ -16,25 +15,6 @@ import { IInterestRate } from "../../facets/interestRate/IInterestRate.sol";
  */
 abstract contract InterestRateModifiers {
     /**
-     * @notice Modifier that ensures fixed rate has not been initialized.
-     * @dev Reverts with AlreadyInitialized if fixed rate is already initialized.
-     */
-    modifier onlyNotFixedRateInitialized() {
-        _checkNotInitialized(InterestRateStorageWrapper.isFixedRateInitialized());
-        _;
-    }
-
-    /**
-     * @notice Modifier that ensures KPI linked rate has not been initialized.
-     * @dev Reverts with AlreadyInitialized if KPI linked rate is already initialized.
-     */
-    modifier onlyNotKpiLinkedRateInitialized() {
-        _checkNotInitialized(InterestRateStorageWrapper.isKpiLinkedRateInitialized());
-        _;
-    }
-
-    /**
-     * @notice Modifier that validates the KPI-linked interest rate ordering invariant.
      * @dev Reverts with WrongInterestRateValues if minRate > baseRate or baseRate > maxRate.
      * @param _newInterestRate The interest rate struct to validate.
      */

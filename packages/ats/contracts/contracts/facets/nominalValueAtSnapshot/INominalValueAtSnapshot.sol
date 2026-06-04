@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey NominalValueAtSnapshot
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_NOMINAL_VALUE_AT_SNAPSHOT = 0xca313777aee568dc14b1700e7be675b73932bbbc4e4f974a9f1321e6d653af74;
+
 /**
  * @title  INominalValueAtSnapshot
  * @author Asset Tokenization Studio Team
@@ -13,6 +17,19 @@ pragma solidity >=0.8.0 <0.9.0;
  *         `SnapshotIdDoesNotExists` for unknown identifiers.
  */
 interface INominalValueAtSnapshot {
+    /**
+     * @notice Emitted once when the nominal-value-at-snapshot capability is initialised on a token.
+     * @dev Fires exclusively from `initializeNominalValueAtSnapshot`.
+     */
+    event NominalValueAtSnapshotInitialized();
+
+    /**
+     * @notice Initialises the nominal-value-at-snapshot capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeNominalValueAtSnapshot() external;
+
     /**
      * @notice Returns the nominal value of the token at the time of a given snapshot.
      * @dev    Resolved against the `nominalValueSnapshots` series; falls back to the live

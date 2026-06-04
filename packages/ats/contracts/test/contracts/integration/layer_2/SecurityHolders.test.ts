@@ -3,8 +3,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { DEFAULT_PARTITION, ATS_ROLES, ZERO, EMPTY_HEX_BYTES } from "@scripts";
+import { type ResolverProxy, type IAsset, MockERC1410StorageWrapper, MockDiamondCut } from "@contract-types";
+import { DEFAULT_PARTITION, ATS_ROLES, ZERO, EMPTY_HEX_BYTES, RESOLVER_KEY_SECURITYHOLDERS } from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
@@ -16,8 +16,10 @@ describe("SecurityHoldersFacet Tests", () => {
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
   let signer_D: HardhatEthersSigner;
+  let unknownSigner: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityHoldersFixture() {
     const base = await deployEquityTokenFixture();
@@ -27,19 +29,22 @@ describe("SecurityHoldersFacet Tests", () => {
     signer_C = base.user2;
     const signers = await ethers.getSigners();
     signer_D = signers[3];
+    const lastSigner = signers[signers.length - 1];
+    unknownSigner = lastSigner;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       {
-        role: ATS_ROLES.KYC_ROLE,
+        role: ATS_ROLES.ROLE_KYC,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.ISSUER_ROLE,
+        role: ATS_ROLES.ROLE_ISSUER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.SSI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_SSI_MANAGER,
         members: [signer_A.address],
       },
     ]);
@@ -359,7 +364,7 @@ describe("SecurityHoldersFacet Tests", () => {
 
   describe("holder registry integrity with encumbered tokens (FIND-120)", () => {
     beforeEach(async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.LOCKER_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_LOCKER, signer_A.address);
     });
 
     it("GIVEN a holder with locked tokens WHEN burning all free tokens via redeemByPartition THEN holder remains in registry", async () => {
@@ -410,6 +415,67 @@ describe("SecurityHoldersFacet Tests", () => {
     });
   });
 
+  describe("replaceTokenHolder existence guard (audit fix)", () => {
+    let mock: MockERC1410StorageWrapper;
+
+    beforeEach(async () => {
+      const factory = await ethers.getContractFactory("MockERC1410StorageWrapper");
+      mock = (await factory.deploy()) as unknown as MockERC1410StorageWrapper;
+      await mock.waitForDeployment();
+    });
+
+    it("GIVEN oldTokenHolder is not registered (index == 0) WHEN replaceTokenHolder THEN reverts with TokenHolderNotFound", async () => {
+      await expect(mock.exposed_replaceTokenHolder(signer_B.address, signer_C.address))
+        .to.be.revertedWithCustomError(mock, "TokenHolderNotFound")
+        .withArgs(signer_C.address);
+    });
+
+    it("GIVEN oldTokenHolder was registered and then removed (index reset to 0) WHEN replaceTokenHolder THEN reverts with TokenHolderNotFound", async () => {
+      await mock.exposed_addNewTokenHolder(signer_B.address);
+      await mock.exposed_addNewTokenHolder(signer_C.address);
+      await mock.exposed_removeTokenHolder(signer_B.address);
+
+      expect(await mock.exposed_getTokenHolderIndex(signer_B.address)).to.equal(0);
+
+      await expect(mock.exposed_replaceTokenHolder(signer_D.address, signer_B.address))
+        .to.be.revertedWithCustomError(mock, "TokenHolderNotFound")
+        .withArgs(signer_B.address);
+    });
+
+    it("GIVEN a registered oldTokenHolder WHEN replaceTokenHolder THEN registry is updated and slot 0 is never corrupted", async () => {
+      await mock.exposed_addNewTokenHolder(signer_B.address);
+      const indexBefore = await mock.exposed_getTokenHolderIndex(signer_B.address);
+
+      await mock.exposed_replaceTokenHolder(signer_C.address, signer_B.address);
+
+      expect(await mock.exposed_getTokenHolderIndex(signer_B.address)).to.equal(0);
+      expect(await mock.exposed_getTokenHolderIndex(signer_C.address)).to.equal(indexBefore);
+      expect(await mock.exposed_getTokenHolder(Number(indexBefore))).to.equal(signer_C.address);
+      expect(await mock.exposed_getTokenHolder(0)).to.equal(ethers.ZeroAddress);
+    });
+  });
+
+  describe("initializeSecurityHolders", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeSecurityHolders THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(unknownSigner).initializeSecurityHolders())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(await unknownSigner.getAddress(), ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeSecurityHolders THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeSecurityHolders())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_SECURITYHOLDERS, 1);
+    });
+  });
+
+  describe("initializeSecurityHolders event", () => {
+    it("GIVEN fresh facet WHEN initializeSecurityHolders THEN emits SecurityHoldersInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_SECURITYHOLDERS);
+      await expect(asset.initializeSecurityHolders()).to.emit(asset, "SecurityHoldersInitialized");
+    });
+  });
+
   describe("removeTokenHolder storage cleanup (audit fix FIND-123)", () => {
     it("GIVEN two holders WHEN first holder transfers all tokens out THEN tokenHolders[lastIndex] storage slot is zeroed", async () => {
       const tokenAmount = 1000n;
@@ -451,6 +517,33 @@ describe("SecurityHoldersFacet Tests", () => {
 
       const slotValue = await ethers.provider.getStorage(diamond.target, ghostSlot);
       expect(slotValue).to.equal(ethers.ZeroHash);
+    });
+  });
+
+  describe("removeTokenHolder unregistered holder guard", () => {
+    let mock: MockERC1410StorageWrapper;
+
+    beforeEach(async () => {
+      const factory = await ethers.getContractFactory("MockERC1410StorageWrapper");
+      mock = (await factory.deploy()) as unknown as MockERC1410StorageWrapper;
+      await mock.waitForDeployment();
+    });
+
+    it("GIVEN an unregistered address WHEN removeTokenHolder is called THEN reverts with UnexpectedError", async () => {
+      await expect(mock.exposed_removeTokenHolder(signer_B.address))
+        .to.be.revertedWithCustomError(mock, "UnexpectedError")
+        .withArgs("0x0000000c");
+    });
+
+    it("GIVEN a registered holder WHEN removeTokenHolder is called THEN succeeds and holder count decrements", async () => {
+      await mock.exposed_addNewTokenHolder(signer_B.address);
+
+      expect(await mock.exposed_getTotalTokenHolders()).to.equal(1);
+
+      await mock.exposed_removeTokenHolder(signer_B.address);
+
+      expect(await mock.exposed_getTotalTokenHolders()).to.equal(0);
+      expect(await mock.exposed_getTokenHolderIndex(signer_B.address)).to.equal(0);
     });
   });
 });

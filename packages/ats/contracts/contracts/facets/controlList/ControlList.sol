@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IControlList } from "./IControlList.sol";
-import { CONTROL_LIST_ROLE } from "../../constants/roles.sol";
+import { IControlList, RESOLVER_KEY_CONTROL_LIST } from "./IControlList.sol";
+import { ROLE_CONTROL_LIST, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { ControlListStorageWrapper } from "../../domain/core/ControlListStorageWrapper.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
@@ -13,22 +14,25 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  * @notice Abstract contract implementing control list management logic for a security token.
  *         Supports both whitelist and blacklist modes, set once at initialisation, to gate
  *         transfer access by address membership.
- * @dev Implements `IControlList`. State is stored at `_CONTROL_LIST_STORAGE_POSITION` via
+ * @dev Implements `IControlList`. State is stored at `STORAGE_LOCATION_CONTROL_LIST` via
  *      `ControlListStorageWrapper`. All mutating functions after initialisation require
- *      `CONTROL_LIST_ROLE` and the token to be unpaused. Intended to be inherited exclusively
+ *      `ROLE_CONTROL_LIST` and the token to be unpaused. Intended to be inherited exclusively
  *      by `ControlListFacet`.
  */
 abstract contract ControlList is IControlList, Modifiers {
     /// @inheritdoc IControlList
-    // solhint-disable-next-line func-name-mixedcase
-    function initializeControlList(bool _isWhiteList) external override onlyNotControlListInitialized {
+    function initializeControlList(
+        bool _isWhiteList
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_CONTROL_LIST) {
         ControlListStorageWrapper.initializeControlList(_isWhiteList);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_CONTROL_LIST);
+        emit ControlListInitialized(_isWhiteList);
     }
 
     /// @inheritdoc IControlList
     function addToControlList(
         address _account
-    ) external override onlyActivated onlyUnpaused onlyRole(CONTROL_LIST_ROLE) returns (bool success_) {
+    ) external override onlyOperational onlyActivated onlyUnpaused onlyRole(ROLE_CONTROL_LIST) returns (bool success_) {
         success_ = ControlListStorageWrapper.addToControlList(_account);
         if (!success_) {
             revert ListedAccount(_account);
@@ -39,7 +43,7 @@ abstract contract ControlList is IControlList, Modifiers {
     /// @inheritdoc IControlList
     function removeFromControlList(
         address _account
-    ) external override onlyActivated onlyUnpaused onlyRole(CONTROL_LIST_ROLE) returns (bool success_) {
+    ) external override onlyOperational onlyActivated onlyUnpaused onlyRole(ROLE_CONTROL_LIST) returns (bool success_) {
         success_ = ControlListStorageWrapper.removeFromControlList(_account);
         if (!success_) {
             revert UnlistedAccount(_account);

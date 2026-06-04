@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { AccessControlStorageWrapper, RoleDataStorage } from "../../domain/core/AccessControlStorageWrapper.sol";
-import { FREEZE_MANAGER_ROLE, AGENT_ROLE } from "../../constants/roles.sol";
+import { ROLE_FREEZE_MANAGER, ROLE_AGENT } from "../../constants/roles.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
@@ -39,7 +39,7 @@ abstract contract AccessControlModifiers {
 
     modifier onlyAdminRole() virtual {
         AccessControlStorageWrapper.checkRole(
-            AccessControlStorageWrapper.getRoleAdmin(AGENT_ROLE),
+            AccessControlStorageWrapper.getRoleAdmin(ROLE_AGENT),
             EvmAccessors.getMsgSender()
         );
         _;
@@ -88,18 +88,18 @@ abstract contract AccessControlModifiers {
 
     /**
      * @dev Modifier that verifies the given account holds at least one of the
-     * roles authorized to perform freeze operations: FREEZE_MANAGER_ROLE or
-     * AGENT_ROLE.
+     * roles authorized to perform freeze operations: ROLE_FREEZE_MANAGER or
+     * ROLE_AGENT.
      *
      * Requirements:
-     * - `_account` must have either FREEZE_MANAGER_ROLE or AGENT_ROLE.
+     * - `_account` must have either ROLE_FREEZE_MANAGER or ROLE_AGENT.
      *
      * @param _account The address to check roles for.
      */
     modifier onlyFreezeRoles(address _account) virtual {
         bytes32[] memory roles = new bytes32[](2);
-        roles[0] = FREEZE_MANAGER_ROLE;
-        roles[1] = AGENT_ROLE;
+        roles[0] = ROLE_FREEZE_MANAGER;
+        roles[1] = ROLE_AGENT;
         AccessControlStorageWrapper.checkAnyRole(roles, _account);
         _;
     }

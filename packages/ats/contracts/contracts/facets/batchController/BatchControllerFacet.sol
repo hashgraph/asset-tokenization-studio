@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBatchController } from "./IBatchController.sol";
+import { IBatchController, RESOLVER_KEY_BATCH_CONTROLLER } from "./IBatchController.sol";
 import { BatchController } from "./BatchController.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { _BATCH_CONTROLLER_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-
 /**
  * @title BatchControllerFacet
  * @notice Diamond facet exposing controller-only batch transfer operations.
@@ -16,12 +14,12 @@ import { _BATCH_CONTROLLER_RESOLVER_KEY } from "../../constants/resolverKeys.sol
 contract BatchControllerFacet is BatchController, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _BATCH_CONTROLLER_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_BATCH_CONTROLLER;
     }
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.batchForcedTransfer.selector);
+        return Bytes4Builder.build(this.initializeBatchController.selector, this.batchForcedTransfer.selector);
     }
 
     /// @inheritdoc IStaticFunctionSelectors

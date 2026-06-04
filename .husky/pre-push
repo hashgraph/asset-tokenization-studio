@@ -75,9 +75,9 @@ while read local_ref local_sha remote_ref remote_sha; do
         # New branch - check all commits
         range="$local_sha"
 
-        # Get all commits up to common ancestor with development/main
-        if git rev-parse --verify origin/development > /dev/null 2>&1; then
-            BASE="origin/development"
+        # Get all commits up to common ancestor with develop/main
+        if git rev-parse --verify origin/develop > /dev/null 2>&1; then
+            BASE="origin/develop"
         elif git rev-parse --verify origin/main > /dev/null 2>&1; then
             BASE="origin/main"
         else

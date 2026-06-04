@@ -1,11 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IOperatorClearingByPartition } from "./IOperatorClearingByPartition.sol";
+import {
+    IOperatorClearingByPartition,
+    RESOLVER_KEY_OPERATOR_CLEARING_BY_PARTITION
+} from "./IOperatorClearingByPartition.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ClearingOps } from "../../domain/orchestrator/ClearingOps.sol";
 import { ThirdPartyType } from "../../domain/asset/types/ThirdPartyType.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title OperatorClearingByPartition
@@ -15,12 +20,24 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract OperatorClearingByPartition is IOperatorClearingByPartition, Modifiers {
     /// @inheritdoc IOperatorClearingByPartition
+    function initializeOperatorClearingByPartition()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_OPERATOR_CLEARING_BY_PARTITION)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_OPERATOR_CLEARING_BY_PARTITION);
+        emit OperatorClearingByPartitionInitialized();
+    }
+
+    /// @inheritdoc IOperatorClearingByPartition
     function operatorClearingRedeemByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
         uint256 _amount
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyClearingActivated
@@ -53,6 +70,7 @@ abstract contract OperatorClearingByPartition is IOperatorClearingByPartition, M
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyClearingActivated

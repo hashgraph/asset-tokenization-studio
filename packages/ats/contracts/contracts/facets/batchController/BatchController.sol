@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { CONTROLLER_ROLE, AGENT_ROLE, _buildRoles } from "../../constants/roles.sol";
-import { IBatchController } from "./IBatchController.sol";
+import { ROLE_CONTROLLER, ROLE_AGENT, DEFAULT_ADMIN_ROLE, _buildRoles } from "../../constants/roles.sol";
+import { IBatchController, RESOLVER_KEY_BATCH_CONTROLLER } from "./IBatchController.sol";
 import { IController } from "../controller/IController.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title BatchController
@@ -18,6 +19,17 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract BatchController is IBatchController, Modifiers {
     /// @inheritdoc IBatchController
+    function initializeBatchController()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_BATCH_CONTROLLER)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_BATCH_CONTROLLER);
+        emit IBatchController.BatchControllerInitialized();
+    }
+
+    /// @inheritdoc IBatchController
     function batchForcedTransfer(
         address[] calldata _fromList,
         address[] calldata _toList,
@@ -25,13 +37,14 @@ abstract contract BatchController is IBatchController, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyValidInputAmountsArrayLength(_fromList, _amounts)
         onlyValidInputAmountsArrayLength(_toList, _amounts)
         onlyWithoutMultiPartition
         onlyControllable
-        onlyAnyRole(_buildRoles(CONTROLLER_ROLE, AGENT_ROLE))
+        onlyAnyRole(_buildRoles(ROLE_CONTROLLER, ROLE_AGENT))
     {
         address operator = EvmAccessors.getMsgSender();
         uint256 length = _fromList.length;

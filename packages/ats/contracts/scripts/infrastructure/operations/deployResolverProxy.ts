@@ -16,13 +16,13 @@ import {
   error as logError,
   formatGasUsage,
   info,
-  LATEST_VERSION,
   section,
   success,
   validateAddress,
   GAS_LIMIT,
   DEFAULT_TRANSACTION_TIMEOUT,
   hederaGasOverrides,
+  gasLimitOverride,
 } from "@scripts/infrastructure";
 
 /**
@@ -46,23 +46,13 @@ export interface DeployResolverProxyOptions {
   configurationId: string;
 
   /**
-   * Configuration version to use.
-   * - Use `0` or omit for auto-updating proxy (always resolves to latest version)
-   * - Use specific version number (1, 2, 3...) for pinned proxy
-   *
-   * **Auto-updating (version: 0 or undefined)** (default):
-   * - Proxy automatically uses the latest registered configuration version
-   * - Ideal for development environments and testing
-   * - Version resolution happens at runtime on every call
-   *
-   * **Pinned (version: 1, 2, 3...)**:
-   * - Proxy uses a specific configuration version
-   * - Recommended for production deployments
-   * - Provides predictable behavior and upgrade control
-   *
-   * @default LATEST_VERSION (0)
+   * Configuration version to pin the proxy to. Must be `>= 1`; the diamond cut
+   * manager reverts with `VersionZero` on `0`. Callers that want the most recent
+   * registered version read it via
+   * `DiamondCutManager.getLatestVersionByConfiguration(configurationId)`
+   * and pass the resolved number here.
    */
-  version?: number;
+  version: number;
 
   /** RBAC configuration (optional, defaults to empty array) */
   rbac?: ResolverProxyRbac[];
@@ -117,11 +107,12 @@ export interface DeployResolverProxyResult {
  * pattern contracts in the ATS ecosystem.
  *
  * **Version Resolution**:
- * - `version: 0` - Auto-updating proxy (always uses latest configuration version)
- * - `version: N` - Pinned proxy (uses specific configuration version N)
+ * - `version: N` (N >= 1) - Pinned proxy targeting configuration version N.
  *
- * The version resolution is handled by the smart contract's `_resolveVersion()`
- * function, which queries the BusinessLogicResolver at runtime.
+ * The diamond cut manager rejects `version == 0` with `VersionZero`. Callers
+ * that want the most recent registered version must read it first via
+ * `DiamondCutManager.getLatestVersionByConfiguration(configurationId)` and
+ * pass the resolved number into `options.version`.
  *
  * @param signer - Ethers signer for deploying the contract
  * @param options - Deployment options
@@ -129,27 +120,22 @@ export interface DeployResolverProxyResult {
  *
  * @example
  * ```typescript
- * import { deployResolverProxy, LATEST_VERSION } from '@scripts/infrastructure'
- *
- * // Auto-updating proxy (development/testing)
- * const devProxy = await deployResolverProxy(signer, {
- *     blrAddress: '0x123...',
- *     configurationId: EQUITY_CONFIG_ID,
- *     version: LATEST_VERSION, // or version: 0
- *     rbac: [],
- * })
- * // This proxy automatically uses the latest configuration version
- * // Ideal for development where you want automatic updates
+ * import { deployResolverProxy } from '@scripts/infrastructure'
  *
  * // Pinned proxy (production)
  * const prodProxy = await deployResolverProxy(signer, {
  *     blrAddress: '0x123...',
  *     configurationId: EQUITY_CONFIG_ID,
- *     version: 1, // Pin to specific version
+ *     version: 1, // Pin to specific version (>= 1)
  *     rbac: [],
  * })
- * // This proxy uses version 1 and won't auto-update
- * // Recommended for production deployments
+ *
+ * // Resolve "latest" explicitly when needed
+ * const blr = DiamondCutManager__factory.connect(blrAddress, signer)
+ * const latest = await blr.getLatestVersionByConfiguration(EQUITY_CONFIG_ID)
+ * const proxy = await deployResolverProxy(signer, {
+ *     blrAddress, configurationId: EQUITY_CONFIG_ID, version: Number(latest), rbac: [],
+ * })
  * ```
  */
 export async function deployResolverProxy(
@@ -159,12 +145,20 @@ export async function deployResolverProxy(
   const {
     blrAddress,
     configurationId,
-    version = LATEST_VERSION,
+    version,
     rbac = [],
     network: _network,
-    overrides = { gasLimit: GAS_LIMIT.default, ...hederaGasOverrides() },
+    overrides = { ...gasLimitOverride(GAS_LIMIT.default), ...hederaGasOverrides() },
     confirmations = 1,
   } = options;
+
+  if (!Number.isInteger(version) || version < 1) {
+    throw new Error(
+      `deployResolverProxy: 'version' must be an integer >= 1, got ${version}. ` +
+        "Call DiamondCutManager.getLatestVersionByConfiguration(configurationId) " +
+        "first when targeting the latest registered version.",
+    );
+  }
 
   section("Deploying ResolverProxy");
 

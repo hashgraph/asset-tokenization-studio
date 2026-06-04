@@ -1,18 +1,34 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey CapByPartition
+bytes32 constant RESOLVER_KEY_CAP_BY_PARTITION = 0x0a9c473b0456240ebc327730dba40a495c5a639839b0c0b30a01db12373f7529;
+
 /**
  * @title ICapByPartition
  * @author Asset Tokenization Studio Team
  * @notice Interface for managing the per-partition maximum supply cap of a token.
  * @dev The partition-scoped cap sits underneath the global cap declared in `ICap`. Setting a
- *      partition cap requires the `CAP_ROLE` and the token to be unpaused; the cap value is
+ *      partition cap requires the `ROLE_CAP` and the token to be unpaused; the cap value is
  *      validated against the partition's current total supply and the global max supply both
  *      adjusted for any pending balance adjustments. Reads expose the same balance-adjusted
  *      view, so values returned reflect scheduled adjustments effective at the current block
  *      timestamp.
  */
 interface ICapByPartition {
+    /**
+     * @notice Emitted once when the CapByPartition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeCapByPartition` after the storage write succeeds.
+     */
+    event CapByPartitionInitialized();
+
+    /**
+     * @notice Initialises the CapByPartition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeCapByPartition() external;
+
     /**
      * @notice Sets the maximum supply cap for a specific partition of the token.
      * @dev Reverts with `NewMaxSupplyCannotBeZero` when `_maxSupply` is zero, and with

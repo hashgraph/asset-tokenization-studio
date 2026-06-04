@@ -353,7 +353,7 @@ npx hardhat console --network hedera-testnet
 2n  // New configuration version
 
 > // Verify BondFacet address
-> await blr.resolveLatestBusinessLogic(BOND_RESOLVER_KEY)
+> await blr.resolveLatestBusinessLogic(RESOLVER_KEY_BOND)
 '0xNEW_BOND_FACET_ADDRESS'
 ```
 
@@ -378,7 +378,7 @@ const facetsToRegister = [
   {
     name: "RewardsFacet",
     address: await rewardsFacet.getAddress(),
-    resolverKey: _REWARDS_RESOLVER_KEY,
+    resolverKey: RESOLVER_KEY_REWARDS,
   },
 ];
 
@@ -668,7 +668,7 @@ const facetsToRegister = [
   {
     name: "BondFacet",
     address: previousBondFacetAddress, // Old working version
-    resolverKey: BOND_RESOLVER_KEY,
+    resolverKey: RESOLVER_KEY_BOND,
   },
   // ... all other facets
 ];
@@ -733,6 +733,29 @@ console.log("Token paused while investigating issue");
 2. **Time locks**: Enforce delay between proposal and execution
 3. **Emergency procedures**: Document emergency contacts
 4. **Insurance**: Consider smart contract insurance
+
+#### Admin Account Assumptions for Resolver Swaps
+
+The Diamond proxy exposes `updateResolver`, `updateConfig` and
+`updateConfigVersion`, gated by `DEFAULT_ADMIN_ROLE`. These calls redirect all
+proxy function calls to a new implementation in a single transaction, with no
+on-chain timelock and no user exit window.
+
+This is an intentional design choice: the contracts assume the
+`DEFAULT_ADMIN_ROLE` is held by a hardened account — a multisig, governance
+contract, or equivalent — whose own approval workflow already provides the
+delay, review, and accountability surface required for such a sensitive
+operation. Adding an in-contract timelock would only duplicate controls that
+must exist at the admin-account level.
+
+When deploying to production, issuers MUST:
+
+- Assign `DEFAULT_ADMIN_ROLE` to a multisig or governance contract, never to
+  an EOA.
+- Document the off-chain approval process (signers, thresholds, review SLA)
+  used before any resolver or configuration change is executed.
+- Treat any direct EOA holding `DEFAULT_ADMIN_ROLE` as a configuration
+  defect, not a supported deployment mode.
 
 ### Documentation
 

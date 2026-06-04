@@ -3,10 +3,10 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type IAsset, type ResolverProxy } from "@contract-types";
+import { type IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
-import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO, RESOLVER_KEY_MINT } from "@scripts";
 
 const AMOUNT = 1000;
 const DATA = "0x1234";
@@ -15,10 +15,54 @@ const EMPTY_VC_ID = EMPTY_STRING;
 
 describe("MintFacet Tests", () => {
   let diamond: ResolverProxy;
+  let mockDiamondCut: MockDiamondCut;
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
+  let signer_D: HardhatEthersSigner;
   let signer_E: HardhatEthersSigner;
   let asset: IAsset;
+
+  async function deploySharedFixture() {
+    const base = await deployEquityTokenFixture({
+      equityDataParams: {
+        securityData: {
+          isMultiPartition: true,
+          internalKycActivated: true,
+        },
+      },
+    });
+    diamond = base.diamond;
+    signer_A = base.deployer;
+    signer_B = base.user1;
+    signer_D = base.user3;
+    signer_E = base.user4;
+    asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
+    await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
+  }
+
+  beforeEach(async () => {
+    await loadFixture(deploySharedFixture);
+  });
+
+  describe("initializeERC1594", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeERC1594 is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeERC1594())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeERC1594 is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeERC1594()).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+    });
+  });
+
+  describe("initializeERC1594 event", () => {
+    it("GIVEN a fresh deployment WHEN initializeERC1594 is called THEN emits ERC1594Initialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_MINT);
+      await expect(asset.initializeERC1594()).to.emit(asset, "ERC1594Initialized");
+    });
+  });
 
   describe("Multi partition mode", () => {
     async function deployMultiPartitionFixture() {
@@ -33,15 +77,11 @@ describe("MintFacet Tests", () => {
       diamond = base.diamond;
       signer_A = base.deployer;
       asset = await ethers.getContractAt("IAsset", diamond.target);
-      await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
     }
 
     beforeEach(async () => {
       await loadFixture(deployMultiPartitionFixture);
-    });
-
-    it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-      await expect(asset.initialize_ERC1594()).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
     });
 
     it("GIVEN multi-partition mode WHEN issue THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
@@ -77,13 +117,13 @@ describe("MintFacet Tests", () => {
       asset = await ethers.getContractAt("IAsset", diamond.target);
 
       await executeRbac(asset, [
-        { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES.CAP_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES.CORPORATE_ACTION_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+        { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_CAP, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_CORPORATE_ACTION, members: [signer_A.address] },
       ]);
 
-      await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
       await asset.addIssuer(signer_A.address);
       await asset.connect(signer_B).grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
     }
@@ -153,12 +193,25 @@ describe("MintFacet Tests", () => {
     it("GIVEN a deactivated asset WHEN mint THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(deactivatedAsset.connect(base.deployer).mint(ethers.ZeroAddress, 0)).to.be.revertedWithCustomError(
         deactivatedAsset,
         "Deactivated",
       );
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN issue THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.issue(ADDRESS_ZERO, 0, "0x")).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN mint THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.mint(ADDRESS_ZERO, 0)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
   });
 });

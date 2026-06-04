@@ -17,7 +17,6 @@
  *   NETWORK - Target network name (required)
  *   {NETWORK}_PRIVATE_KEY_0 - Private key for deployer account
  *   BLR_ADDRESS - Address of existing BLR proxy (required)
- *   USE_TIMETRAVEL - Enable TimeTravel mode (default: false)
  *   DEPLOY_FACTORY - Deploy Factory contract (default: true)
  *   BATCH_SIZE - Number of facets per batch (optional, uses default if not set)
  *   CONFIRMATIONS - Number of confirmations to wait (optional, uses network default)
@@ -25,7 +24,6 @@
  * Usage:
  *   NETWORK=hedera-testnet BLR_ADDRESS=0x123... npm run deploy:existingBlr
  *   NETWORK=local BLR_ADDRESS=0x123... DEPLOY_FACTORY=false npm run deploy:existingBlr
- *   NETWORK=hedera-testnet BLR_ADDRESS=0x123... USE_TIMETRAVEL=true npm run deploy:existingBlr
  *
  * @module cli/deploySystemWithExistingBlr
  */
@@ -43,8 +41,6 @@ async function main() {
 
   // Get required BLR address
   const blrAddress = requireValidAddress(process.env.BLR_ADDRESS, "BLR_ADDRESS");
-
-  const useTimeTravel = parseBooleanEnv("USE_TIMETRAVEL", false);
   const deployFactory = parseBooleanEnv("DEPLOY_FACTORY", true);
   const batchSize = parseIntEnv("BATCH_SIZE", 0); // 0 = use workflow default
   const confirmations = parseIntEnv("CONFIRMATIONS", 0); // 0 = use network default
@@ -54,7 +50,6 @@ async function main() {
   info(`📡 Network: ${network}`);
   info(`👤 Deployer: ${address}`);
   info(`🔗 Existing BLR: ${blrAddress}`);
-  info(`⏰ TimeTravel: ${useTimeTravel ? "enabled" : "disabled"}`);
   info(`🏭 Deploy Factory: ${deployFactory ? "yes" : "no"}`);
   if (batchSize > 0) {
     info(`📊 Batch Size: ${batchSize}`);
@@ -67,7 +62,6 @@ async function main() {
   try {
     // Deploy system with existing BLR
     const output = await deploySystemWithExistingBlr(signer, network, blrAddress, {
-      useTimeTravel,
       deployFactory,
       ...(batchSize > 0 && { batchSize }),
       ...(confirmations > 0 && { confirmations }),

@@ -42,9 +42,9 @@ describe("BusinessLogicResolver", () => {
     [signer_A, signer_B, signer_C] = await ethers.getSigners();
     businessLogicResolver = await (await ethers.getContractFactory("BusinessLogicResolver", signer_A)).deploy();
 
-    await businessLogicResolver.initialize_BusinessLogicResolver();
+    await businessLogicResolver.initializeBusinessLogicResolver();
     accessControl = await ethers.getContractAt("AccessControl", businessLogicResolver.target, signer_A);
-    await accessControl.grantRole(ATS_ROLES.PAUSER_ROLE, signer_B.address);
+    await accessControl.grantRole(ATS_ROLES.ROLE_PAUSER, signer_B.address);
 
     pause = await ethers.getContractAt("Pause", businessLogicResolver.target);
 
@@ -93,7 +93,7 @@ describe("BusinessLogicResolver", () => {
   });
 
   it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-    await expect(businessLogicResolver.initialize_BusinessLogicResolver()).to.be.revertedWithCustomError(
+    await expect(businessLogicResolver.initializeBusinessLogicResolver()).to.be.revertedWithCustomError(
       businessLogicResolver,
       "AlreadyInitialized",
     );
@@ -109,6 +109,18 @@ describe("BusinessLogicResolver", () => {
       // transfer with data fails
       await expect(
         businessLogicResolver.registerBusinessLogics(BUSINESS_LOGIC_KEYS.slice(0, 2)),
+      ).to.be.revertedWithCustomError(businessLogicResolver, "IsPaused");
+    });
+
+    it("GIVEN a paused contract WHEN addSelectorsToBlacklist is called THEN transaction fails with IsPaused", async () => {
+      await expect(
+        businessLogicResolver.addSelectorsToBlacklist(EQUITY_CONFIG_ID, ["0x8456cb59"]),
+      ).to.be.revertedWithCustomError(businessLogicResolver, "IsPaused");
+    });
+
+    it("GIVEN a paused contract WHEN removeSelectorsFromBlacklist is called THEN transaction fails with IsPaused", async () => {
+      await expect(
+        businessLogicResolver.removeSelectorsFromBlacklist(EQUITY_CONFIG_ID, ["0x8456cb59"]),
       ).to.be.revertedWithCustomError(businessLogicResolver, "IsPaused");
     });
   });
@@ -174,6 +186,19 @@ describe("BusinessLogicResolver", () => {
       await expect(
         businessLogicResolver.registerBusinessLogics(BUSINESS_LOGICS_TO_REGISTER),
       ).to.be.revertedWithCustomError(businessLogicResolver, "ZeroKeyNotValidForBusinessLogic");
+    });
+
+    it("GIVEN a zero address WHEN registerBusinessLogics THEN Fails with ZeroAddressNotAllowed", async () => {
+      const BUSINESS_LOGICS_TO_REGISTER = [
+        {
+          businessLogicKey: BUSINESS_LOGIC_KEYS[0].businessLogicKey,
+          businessLogicAddress: ethers.ZeroAddress,
+        },
+      ];
+
+      await expect(
+        businessLogicResolver.registerBusinessLogics(BUSINESS_LOGICS_TO_REGISTER),
+      ).to.be.revertedWithCustomError(businessLogicResolver, "ZeroAddressNotAllowed");
     });
 
     it("GIVEN an duplicated key WHEN registerBusinessLogics THEN Fails with BusinessLogicKeyDuplicated", async () => {

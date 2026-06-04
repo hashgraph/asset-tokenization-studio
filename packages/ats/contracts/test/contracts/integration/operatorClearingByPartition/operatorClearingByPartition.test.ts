@@ -5,8 +5,15 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
-import { IAsset, type ResolverProxy } from "@contract-types";
-import { ADDRESS_ZERO, ATS_ROLES, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
+import { IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
+import {
+  ADDRESS_ZERO,
+  ATS_ROLES,
+  EMPTY_HEX_BYTES,
+  EMPTY_STRING,
+  RESOLVER_KEY_OPERATOR_CLEARING_BY_PARTITION,
+  ZERO,
+} from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
@@ -38,6 +45,7 @@ describe("OperatorClearingByPartition Tests", () => {
   let signer_E: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
   let currentTimestamp = 0;
@@ -74,14 +82,15 @@ describe("OperatorClearingByPartition Tests", () => {
     signer_E = base.user4;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
-      { role: ATS_ROLES.ISSUER_ROLE, members: [signer_B.address] },
-      { role: ATS_ROLES.PAUSER_ROLE, members: [signer_D.address] },
-      { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
-      { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
-      { role: ATS_ROLES.CLEARING_ROLE, members: [signer_A.address] },
-      { role: ATS_ROLES.CLEARING_VALIDATOR_ROLE, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_ISSUER, members: [signer_B.address] },
+      { role: ATS_ROLES.ROLE_PAUSER, members: [signer_D.address] },
+      { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+      { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_CLEARING, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_CLEARING_VALIDATOR, members: [signer_A.address] },
     ]);
 
     await setFacets(asset);
@@ -175,7 +184,7 @@ describe("OperatorClearingByPartition Tests", () => {
       describe("onlyUnrecoveredAddress modifier", () => {
         it("GIVEN a recovered msgSender WHEN operatorClearingTransferByPartition THEN transaction fails with WalletRecovered", async () => {
           await asset.connect(signer_A).authorizeOperator(signer_B.address);
-          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
           await asset.recoveryAddress(signer_B.address, signer_E.address, ADDRESS_ZERO);
 
           await expect(
@@ -187,7 +196,7 @@ describe("OperatorClearingByPartition Tests", () => {
 
         it("GIVEN a recovered from address WHEN operatorClearingTransferByPartition THEN transaction fails with WalletRecovered", async () => {
           await asset.connect(signer_A).authorizeOperator(signer_B.address);
-          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
           await asset.recoveryAddress(signer_A.address, signer_E.address, ADDRESS_ZERO);
 
           await expect(
@@ -196,6 +205,13 @@ describe("OperatorClearingByPartition Tests", () => {
               .operatorClearingTransferByPartition(clearingOperationFrom, _AMOUNT, signer_C.address),
           ).to.be.revertedWithCustomError(asset, "WalletRecovered");
         });
+      });
+
+      it("GIVEN amount is zero WHEN operatorClearingTransferByPartition THEN transaction fails with InvalidClearingAmount", async () => {
+        await asset.connect(signer_A).authorizeOperator(signer_B.address);
+        await expect(
+          asset.connect(signer_B).operatorClearingTransferByPartition(clearingOperationFrom, 0, signer_C.address),
+        ).to.be.revertedWithCustomError(asset, "InvalidClearingAmount");
       });
     });
 
@@ -249,7 +265,7 @@ describe("OperatorClearingByPartition Tests", () => {
       describe("onlyUnrecoveredAddress modifier", () => {
         it("GIVEN a recovered msgSender WHEN operatorClearingRedeemByPartition THEN transaction fails with WalletRecovered", async () => {
           await asset.connect(signer_A).authorizeOperator(signer_B.address);
-          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
           await asset.recoveryAddress(signer_B.address, signer_E.address, ADDRESS_ZERO);
 
           await expect(
@@ -259,13 +275,20 @@ describe("OperatorClearingByPartition Tests", () => {
 
         it("GIVEN a recovered from address WHEN operatorClearingRedeemByPartition THEN transaction fails with WalletRecovered", async () => {
           await asset.connect(signer_A).authorizeOperator(signer_B.address);
-          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
           await asset.recoveryAddress(signer_A.address, signer_E.address, ADDRESS_ZERO);
 
           await expect(
             asset.connect(signer_B).operatorClearingRedeemByPartition(clearingOperationFrom, _AMOUNT),
           ).to.be.revertedWithCustomError(asset, "WalletRecovered");
         });
+      });
+
+      it("GIVEN amount is zero WHEN operatorClearingRedeemByPartition THEN transaction fails with InvalidClearingAmount", async () => {
+        await asset.connect(signer_A).authorizeOperator(signer_B.address);
+        await expect(
+          asset.connect(signer_B).operatorClearingRedeemByPartition(clearingOperationFrom, 0),
+        ).to.be.revertedWithCustomError(asset, "InvalidClearingAmount");
       });
     });
   });
@@ -274,7 +297,7 @@ describe("OperatorClearingByPartition Tests", () => {
     it("GIVEN a deactivated asset WHEN operatorClearingRedeemByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).operatorClearingRedeemByPartition(
@@ -286,6 +309,77 @@ describe("OperatorClearingByPartition Tests", () => {
           0,
         ),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN operatorClearingTransferByPartition THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).operatorClearingTransferByPartition(
+          {
+            clearingOperation: { partition: ethers.ZeroHash, expirationTimestamp: 0, data: "0x" },
+            from: ethers.ZeroAddress,
+            operatorData: "0x",
+          },
+          0,
+          ethers.ZeroAddress,
+        ),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("initializeOperatorClearingByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeOperatorClearingByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeOperatorClearingByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeOperatorClearingByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeOperatorClearingByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_OPERATOR_CLEARING_BY_PARTITION, 1);
+    });
+  });
+
+  describe("initializeOperatorClearingByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeOperatorClearingByPartition is called THEN emits OperatorClearingByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_OPERATOR_CLEARING_BY_PARTITION);
+      await expect(asset.initializeOperatorClearingByPartition()).to.emit(
+        asset,
+        "OperatorClearingByPartitionInitialized",
+      );
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN operatorClearingRedeemByPartition THEN reverts with AssetNotOperational", async () => {
+      const minimalOp: ClearingOperationFrom = {
+        clearingOperation: { partition: ethers.ZeroHash, expirationTimestamp: 0, data: "0x" },
+        from: ADDRESS_ZERO,
+        operatorData: "0x",
+      };
+      await expect(asset.operatorClearingRedeemByPartition(minimalOp, 0)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN operatorClearingTransferByPartition THEN reverts with AssetNotOperational", async () => {
+      const minimalOp: ClearingOperationFrom = {
+        clearingOperation: { partition: ethers.ZeroHash, expirationTimestamp: 0, data: "0x" },
+        from: ADDRESS_ZERO,
+        operatorData: "0x",
+      };
+      await expect(asset.operatorClearingTransferByPartition(minimalOp, 0, ADDRESS_ZERO)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
     });
   });
 });

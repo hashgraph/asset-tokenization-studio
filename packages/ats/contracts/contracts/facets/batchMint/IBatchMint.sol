@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey BatchMint
+bytes32 constant RESOLVER_KEY_BATCH_MINT = 0x7575e07f738065de9a6ba5370d7d18b79f7a0b885824780bf5c75784978e9530;
+
 /**
  * @title IBatchMint
  * @notice Interface for batch minting tokens to multiple addresses in a single transaction.
@@ -11,6 +14,19 @@ pragma solidity >=0.8.0 <0.9.0;
  * @author Hashgraph Asset Tokenization
  */
 interface IBatchMint {
+    /**
+     * @notice Emitted once when the batch mint capability is initialised on a token.
+     * @dev Fires exclusively from `initializeBatchMint` after the storage write succeeds.
+     */
+    event BatchMintInitialized();
+
+    /**
+     * @notice Initialises the batch mint capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeBatchMint() external;
+
     /**
      * @notice Batch mint tokens to multiple addresses.
      * @dev Iterates over `_toList` and `_amounts` in two passes: first validates identity,

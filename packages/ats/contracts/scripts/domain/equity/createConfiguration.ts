@@ -18,16 +18,19 @@ import {
   OperationResult,
   createBatchConfiguration,
   DEFAULT_BATCH_SIZE,
+  RetryOptions,
 } from "@scripts/infrastructure";
 import { BusinessLogicResolver } from "@contract-types";
 import { EQUITY_CONFIG_ID } from "../constants";
 import { atsRegistry } from "../atsRegistry";
+import { buildFacetList } from "../facetEnvironment";
+import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
 
 /**
- * Equity-specific facets list (44 facets total).
+ * Equity-specific facets list.
  *
  * This is an explicit positive list of all facets required for equity tokens.
- * Includes all common facets plus EquityUSAFacet, VotingFacet, DividendFacet, and DividendSecurityHoldersFacet.
+ * Includes all common facets plus VotingFacet, DividendFacet, and DividendSecurityHoldersFacet.
  *
  * Note: DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet functionality,
  * so we only include DiamondFacet to avoid selector collisions.
@@ -42,11 +45,12 @@ const EQUITY_FACETS = [
   "CapByPartitionFacet",
   "ControlListFacet",
   "CorporateActionsFacet",
-  "DiamondFacet", // Combined: includes DiamondCutFacet + DiamondLoupeFacet functionality
+  "DiamondFacet",
   "CoreFacet",
   "TransferFacet",
   "CoreAdjustedFacet",
-  "MetadataFacet",
+  "InitializerFacet",
+  "CustomDataFacet",
   "FreezeFacet",
   "BatchFreezeFacet",
   "KycFacet",
@@ -71,7 +75,6 @@ const EQUITY_FACETS = [
 
   // ERC Standards (13)
   "MintByPartitionFacet",
-  "ERC1410ManagementFacet",
   "ProtectedByPartitionFacet",
   "OperatorFacet",
   "TransferByPartitionFacet",
@@ -89,7 +92,6 @@ const EQUITY_FACETS = [
   "BatchBurnFacet",
   "BatchMintFacet",
   "BatchTransferFacet",
-  "ERC3643ManagementFacet",
   "RecoveryFacet",
   "IdentityFacet",
   "ComplianceFacet",
@@ -136,12 +138,7 @@ const EQUITY_FACETS = [
   "VotingSecurityHoldersFacet",
 
   "InterestRateFacet",
-  // Jurisdiction-Specific (1)
-  "EquityUSAFacet",
-
-  // Loan & Loans Portfolio (2)
-  "LoanFacet",
-  //"LoansPortfolioFacet",
+  "ProceedRecipientsFacet",
 ] as const;
 
 /**
@@ -156,7 +153,6 @@ const EQUITY_FACETS = [
  *
  * @param blrContract - BusinessLogicResolver contract instance
  * @param facetAddresses - Map of facet names to their deployed addresses
- * @param useTimeTravel - Whether to use TimeTravel variants (default: false)
  * @param partialBatchDeploy - Whether this is a partial batch deployment (default: false)
  * @param batchSize - Number of facets per batch (default: DEFAULT_BATCH_SIZE)
  * @param confirmations - Number of confirmations to wait for (default: 0 for test environments)
@@ -195,26 +191,18 @@ const EQUITY_FACETS = [
 export async function createEquityConfiguration(
   blrContract: BusinessLogicResolver,
   facetAddresses: Record<string, string>,
-  useTimeTravel: boolean = false,
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
+  retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  // Build facet list based on time travel mode
-  // When useTimeTravel=true, ALL facets get TimeTravel suffix (universal mapping)
-  // plus TimeTravelFacet controller. No filtering needed — simplifies deployment logic.
-  const facetNames = useTimeTravel
-    ? [...EQUITY_FACETS.map((name) => `${name}TimeTravel`), "TimeTravelFacet"]
-    : [...EQUITY_FACETS];
+  const facetNames = buildFacetList(EQUITY_FACETS);
 
   // Build facet data with resolver keys from registry
   const facets = facetNames.map((name) => {
-    // Strip "TimeTravel" suffix to get base name for registry lookup
-    const baseName = name.replace(/TimeTravel$/, "");
-
-    const facetDef = atsRegistry.getFacetDefinition(baseName);
+    const facetDef = atsRegistry.getFacetDefinition(name) ?? getMockFacetDefinition(name);
     if (!facetDef?.resolverKey?.value) {
-      throw new Error(`No resolver key found for facet: ${baseName}`);
+      throw new Error(`No resolver key found for facet: ${name}`);
     }
     return {
       facetName: name,
@@ -229,5 +217,6 @@ export async function createEquityConfiguration(
     partialBatchDeploy,
     batchSize,
     confirmations,
+    retryOptions,
   });
 }

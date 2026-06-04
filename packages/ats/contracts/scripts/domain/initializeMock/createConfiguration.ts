@@ -13,6 +13,7 @@ import {
   createBatchConfiguration,
   OperationResult,
   DEFAULT_BATCH_SIZE,
+  RetryOptions,
 } from "@scripts/infrastructure";
 import { BusinessLogicResolver } from "@contract-types";
 import { atsRegistry } from "../atsRegistry";
@@ -38,7 +39,6 @@ const INITIALIZE_MOCK_FACETS = [
  * TEST-ONLY: create the InitializeMock configuration in BusinessLogicResolver.
  *
  * Behaves like `createBondConfiguration` and friends but:
- * - skips the TimeTravel branching (mocks have no TimeTravel variants);
  * - resolves the three mock facets through `getMockFacetDefinition` instead of
  *   the auto-generated atsRegistry;
  * - accepts an explicit per-facet BLR version map so a single configId can
@@ -70,6 +70,7 @@ export async function createInitializeMockConfiguration(
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
+  retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
   // TEST-ONLY: build the facet list, pulling InitializerFacet from atsRegistry
   // and the three mocks from the local mock registry.
@@ -92,5 +93,6 @@ export async function createInitializeMockConfiguration(
     batchSize,
     confirmations,
     facetVersions,
+    retryOptions,
   });
 }

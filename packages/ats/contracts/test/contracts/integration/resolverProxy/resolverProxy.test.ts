@@ -53,7 +53,7 @@ describe("ResolverProxy Tests", () => {
 
     const newResolver = deployedResolver.connect(signer_A) as BusinessLogicResolver;
 
-    await newResolver.initialize_BusinessLogicResolver();
+    await newResolver.initializeBusinessLogicResolver();
 
     return newResolver;
   }
@@ -149,7 +149,7 @@ describe("ResolverProxy Tests", () => {
     await expect(await diamondLoupe.supportsInterface(GRANT_ROLE_SIGNATURE)).to.be.false;
   });
 
-  it("GIVEN deployed facets WHEN deploy a diamond to latestVersion and one to a specific version THEN only the latest version one will get updated", async () => {
+  it("GIVEN deployed facets WHEN pinning each diamond to its own explicit version THEN each keeps its pinned facet set even after later configuration updates", async () => {
     const businessLogicsRegistryDatas_1 = [
       {
         businessLogicKey: await diamondFacet.getStaticResolverKey(),
@@ -181,22 +181,42 @@ describe("ResolverProxy Tests", () => {
     const resolverProxy_v1 = await (
       await ethers.getContractFactory("ResolverProxy")
     ).deploy(resolver.target, CONFIG_ID, 1, []);
-
-    const resolverProxy_latest = await (
-      await ethers.getContractFactory("ResolverProxy")
-    ).deploy(resolver.target, CONFIG_ID, 0, []);
-
     const diamondFacet_v1 = await ethers.getContractAt("DiamondFacet", resolverProxy_v1.target);
-
-    const diamondFacet_latest = await ethers.getContractAt("DiamondFacet", resolverProxy_latest.target);
-
     await checkFacets(businessLogicsRegistryDatas_1, diamondFacet_v1);
-    await checkFacets(businessLogicsRegistryDatas_1, diamondFacet_latest);
 
     await setUpResolver(businessLogicsRegistryDatas_2);
 
+    const latestVersion = Number(await resolver.getLatestVersionByConfiguration(CONFIG_ID));
+    expect(latestVersion).to.equal(2);
+
+    const resolverProxy_v2 = await (
+      await ethers.getContractFactory("ResolverProxy")
+    ).deploy(resolver.target, CONFIG_ID, latestVersion, []);
+    const diamondFacet_v2 = await ethers.getContractAt("DiamondFacet", resolverProxy_v2.target);
+
     await checkFacets(businessLogicsRegistryDatas_1, diamondFacet_v1);
-    await checkFacets(businessLogicsRegistryDatas_2, diamondFacet_latest);
+    await checkFacets(businessLogicsRegistryDatas_2, diamondFacet_v2);
+  });
+
+  it("GIVEN a registered configuration WHEN deploying a ResolverProxy with version 0 THEN reverts with VersionZero", async () => {
+    const businessLogicsRegistryDatas = [
+      {
+        businessLogicKey: await diamondFacet.getStaticResolverKey(),
+        businessLogicAddress: diamondFacet.target,
+      },
+      {
+        businessLogicKey: await accessControlImpl.getStaticResolverKey(),
+        businessLogicAddress: accessControlImpl.target,
+      },
+    ];
+
+    await setUpResolver(businessLogicsRegistryDatas);
+
+    const resolverProxyFactory = await ethers.getContractFactory("ResolverProxy");
+
+    await expect(resolverProxyFactory.deploy(resolver.target, CONFIG_ID, 0, []))
+      .to.be.revertedWithCustomError(resolver, "VersionZero")
+      .withArgs(CONFIG_ID);
   });
 
   it("GIVEN resolverProxy and non-admin user WHEN updating version THEN fails with AccountHasNoRole", async () => {
@@ -290,7 +310,7 @@ describe("ResolverProxy Tests", () => {
     expect(result.configurationId_).to.equal(CONFIG_ID);
     expect(result.version_).to.equal(oldVersion);
 
-    const newVersion = 0;
+    const newVersion = 1;
 
     await diamondCut.updateConfigVersion(newVersion);
 
@@ -393,7 +413,7 @@ describe("ResolverProxy Tests", () => {
     expect(result.configurationId_).to.equal(CONFIG_ID);
     expect(result.version_).to.equal(oldVersion);
 
-    const newVersion = 0;
+    const newVersion = 1;
 
     await diamondCut.updateConfig(CONFIG_ID_2, newVersion);
 
@@ -505,7 +525,7 @@ describe("ResolverProxy Tests", () => {
     expect(result.configurationId_).to.equal(CONFIG_ID);
     expect(result.version_).to.equal(oldVersion);
 
-    const newVersion = 0;
+    const newVersion = 1;
 
     await diamondCut.updateResolver(resolver_2.target, CONFIG_ID_2, newVersion);
 

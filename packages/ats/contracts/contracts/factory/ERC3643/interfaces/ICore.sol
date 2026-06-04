@@ -8,6 +8,9 @@ pragma solidity ^0.8.17;
 
 import { TRexIFactory as IFactory } from "./IFactory.sol";
 
+/// @custom:hash resolverKey Core
+bytes32 constant RESOLVER_KEY_CORE = 0xb54e0c9a42346a2760a44e59035a2b84a61d07bed66a2f24cffe3ca4bae1996f;
+
 /**
  * @title ICore
  * @notice Consolidated interface for the token "Core" domain: identity-defining methods
@@ -33,6 +36,12 @@ interface TRexICore {
         ERC20MetadataInfo info;
         IFactory.SecurityType securityType;
     }
+
+    /**
+     * @notice Emitted once when the core ERC-20 metadata is initialised on a token.
+     * @dev Fires exclusively from `initializeCore` after the storage write succeeds.
+     */
+    event CoreInitialized(ERC20Metadata metadata);
 
     /**
      * @notice Initializes the Core domain (name, symbol, decimals and the rest of the ERC20 metadata).

@@ -4,9 +4,17 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { type IAsset, type ResolverProxy } from "@contract-types";
+import { type IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
-import { ADDRESS_ZERO, ATS_ROLES, EIP1066_CODES, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
+import {
+  ADDRESS_ZERO,
+  ATS_ROLES,
+  EIP1066_CODES,
+  EMPTY_HEX_BYTES,
+  EMPTY_STRING,
+  ZERO,
+  RESOLVER_KEY_COMPLIANCE_BY_PARTITION,
+} from "@scripts";
 import { getSelector } from "@scripts/infrastructure";
 
 const _PARTITION_ID_1 = "0x0000000000000000000000000000000000000000000000000000000000000001";
@@ -25,6 +33,7 @@ describe("ComplianceByPartition Tests", () => {
   let signer_E: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixtureMultiPartition() {
     const base = await deployEquityTokenFixture({
@@ -43,14 +52,15 @@ describe("ComplianceByPartition Tests", () => {
     signer_E = base.user4;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
-      { role: ATS_ROLES.PAUSER_ROLE, members: [signer_B.address] },
-      { role: ATS_ROLES.ISSUER_ROLE, members: [signer_A.address] },
-      { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
-      { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
-      { role: ATS_ROLES.CONTROL_LIST_ROLE, members: [signer_A.address] },
-      { role: ATS_ROLES.CLEARING_ROLE, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_PAUSER, members: [signer_B.address] },
+      { role: ATS_ROLES.ROLE_ISSUER, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+      { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_CONTROL_LIST, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_CLEARING, members: [signer_A.address] },
     ]);
 
     await asset.connect(signer_A).addIssuer(signer_E.address);
@@ -312,6 +322,26 @@ describe("ComplianceByPartition Tests", () => {
           .connect(signer_D)
           .canRedeemByPartition(signer_C.address, _PARTITION_ID_1, AMOUNT, DATA, OPERATOR_DATA),
       ).to.be.deep.equal([true, EIP1066_CODES.SUCCESS, ethers.ZeroHash]);
+    });
+  });
+  describe("initializeComplianceByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeComplianceByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeComplianceByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeComplianceByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeComplianceByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_COMPLIANCE_BY_PARTITION, 1);
+    });
+  });
+
+  describe("initializeComplianceByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeComplianceByPartition is called THEN emits ComplianceByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_COMPLIANCE_BY_PARTITION);
+      await expect(asset.initializeComplianceByPartition()).to.emit(asset, "ComplianceByPartitionInitialized");
     });
   });
 });

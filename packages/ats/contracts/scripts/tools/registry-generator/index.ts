@@ -35,7 +35,7 @@ function parseArgs(): CliOptions {
 
   return {
     dryRun: args.includes("--dry-run"),
-    output: hasOutput ? args[outputIndex + 1] : "scripts/domain/atsRegistry.data.ts",
+    output: hasOutput ? args[outputIndex + 1] : "scripts/domain/atsRegistry.generated.ts",
     verbose: args.includes("--verbose") || args.includes("-v"),
     facetsOnly: args.includes("--facets-only"),
     useCache: args.includes("--use-cache") || args.includes("--cache"),
@@ -70,15 +70,7 @@ async function main(): Promise<void> {
       logLevel: logLevel as any,
       useCache: options.useCache,
       cacheDir: process.cwd(),
-      excludePaths: [
-        "**/test/**",
-        "!**/test/timeTravel/**",
-        "**/tests/**",
-        "**/mocks/**",
-        "**/mock/**",
-        "**/*.t.sol",
-        "**/*.s.sol",
-      ],
+      excludePaths: ["**/test/**", "**/tests/**", "**/mocks/**", "**/mock/**", "**/*.t.sol", "**/*.s.sol"],
     },
     !options.dryRun,
   );

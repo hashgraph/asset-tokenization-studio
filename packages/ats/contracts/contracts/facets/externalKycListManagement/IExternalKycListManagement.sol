@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IKyc } from "../layer_1/kyc/IKyc.sol";
+import { IKyc } from "../kyc/IKyc.sol";
+
+/// @custom:hash resolverKey ExternalKycList
+bytes32 constant RESOLVER_KEY_EXTERNAL_KYC_LIST = 0x519d262ce075401982a7a64c60caea0491af317c7b69b7869f8181e8d9cda124;
 
 /**
  * @title IExternalKycListManagement
@@ -10,12 +13,18 @@ import { IKyc } from "../layer_1/kyc/IKyc.sol";
  *         lists are trusted third-party contracts consulted during KYC verification: an account's
  *         KYC status is considered externally valid only when every listed provider confirms the
  *         requested status.
- * @dev Part of the Diamond facet system. `KYC_MANAGER_ROLE` is required for all state-mutating
+ * @dev Part of the Diamond facet system. `ROLE_KYC_MANAGER` is required for all state-mutating
  *      functions after initialisation. The external KYC list and its initialisation flag are
- *      stored in diamond storage at `_KYC_MANAGEMENT_STORAGE_POSITION` via
+ *      stored in diamond storage at `STORAGE_LOCATION_KYC_MANAGEMENT` via
  *      `ExternalListManagementStorageWrapper`.
  */
 interface IExternalKycListManagement {
+    /**
+     * @notice Emitted once when the external KYC list capability is initialised on a token.
+     * @dev Fires exclusively from `initializeExternalKycLists` after the storage write succeeds.
+     */
+    event ExternalKycListInitialized(address[] kycLists);
+
     /**
      * @notice Emitted when multiple external KYC list addresses are added or removed in a single
      *         batch.
@@ -60,7 +69,7 @@ interface IExternalKycListManagement {
 
     /**
      * @notice One-time initialiser that populates the external KYC list at token deployment.
-     * @dev Can only be called once; subsequent calls revert via `onlyNotKycExternalInitialized`.
+     * @dev Can only be called once; subsequent calls revert via `onlyFacetNotRegistered`.
      *      The leading-underscore naming convention signals this is an initialiser function.
      * @param _kycLists Initial array of external KYC list contract addresses to register.
      */
@@ -68,7 +77,7 @@ interface IExternalKycListManagement {
 
     /**
      * @notice Adds or removes multiple external KYC list contracts in a single transaction.
-     * @dev Requires `KYC_MANAGER_ROLE` and the token to be unpaused. Both arrays must have the
+     * @dev Requires `ROLE_KYC_MANAGER` and the token to be unpaused. Both arrays must have the
      *      same length and contain no duplicate addresses, validated by
      *      `ArrayValidation.checkUniqueValues`. Reverts with `ExternalKycListsNotUpdated` on
      *      failure. Emits `ExternalKycListsUpdated`.
@@ -83,7 +92,7 @@ interface IExternalKycListManagement {
 
     /**
      * @notice Adds an external KYC list contract to the list.
-     * @dev Requires `KYC_MANAGER_ROLE`, the token to be unpaused, and a non-zero address.
+     * @dev Requires `ROLE_KYC_MANAGER`, the token to be unpaused, and a non-zero address.
      *      Reverts with `ListedKycList` if the address is already listed. Emits
      *      `AddedToExternalKycLists`.
      * @param _kycList Address of the external KYC list contract to add.
@@ -93,7 +102,7 @@ interface IExternalKycListManagement {
 
     /**
      * @notice Removes an external KYC list contract from the list.
-     * @dev Requires `KYC_MANAGER_ROLE` and the token to be unpaused. Reverts with
+     * @dev Requires `ROLE_KYC_MANAGER` and the token to be unpaused. Reverts with
      *      `UnlistedKycList` if the address is not listed. Emits `RemovedFromExternalKycLists`.
      * @param _kycList Address of the external KYC list contract to remove.
      * @return success_ True if the contract was removed successfully.

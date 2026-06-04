@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IClearingTypes } from "../layer_1/clearing/IClearingTypes.sol";
+import { IClearingTypes } from "../clearing/IClearingTypes.sol";
+
+/// @custom:hash resolverKey ProtectedClearingByPartition
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_PROTECTED_CLEARING_BY_PARTITION = 0x3cbb73b8ee5db791f9534af7a5c9fc09a4cf9adff327a05839f2673a3dc63aae;
 
 /**
  * @title IProtectedClearingByPartition
@@ -16,6 +20,12 @@ import { IClearingTypes } from "../layer_1/clearing/IClearingTypes.sol";
  *      is retained for the `ProtectedClearingOperation` struct used in method signatures.
  */
 interface IProtectedClearingByPartition is IClearingTypes {
+    /**
+     * @notice Emitted once when the protected-clearing-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeProtectedClearingByPartition`.
+     */
+    event ProtectedClearingByPartitionInitialized();
+
     /**
      * @notice Emitted when a protected clearing redeem operation is successfully created
      *         for a partition.
@@ -63,6 +73,13 @@ interface IProtectedClearingByPartition is IClearingTypes {
         bytes data,
         bytes operatorData
     );
+
+    /**
+     * @notice Initialises the protected-clearing-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeProtectedClearingByPartition() external;
 
     /**
      * @notice Creates a protected clearing redeem operation for a partition.

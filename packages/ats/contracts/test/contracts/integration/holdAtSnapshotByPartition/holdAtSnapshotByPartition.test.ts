@@ -3,8 +3,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type IAsset } from "@contract-types";
-import { ZERO, EMPTY_STRING, ADDRESS_ZERO, ATS_ROLES } from "@scripts";
+import { type IAsset, MockDiamondCut } from "@contract-types";
+import { ZERO, EMPTY_STRING, ADDRESS_ZERO, ATS_ROLES, RESOLVER_KEY_HOLD_AT_SNAPSHOT_BY_PARTITION } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
@@ -24,6 +24,7 @@ describe("HoldAtSnapshotByPartition Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixtureMultiPartition() {
     const base = await deployEquityTokenFixture({
@@ -38,37 +39,38 @@ describe("HoldAtSnapshotByPartition Tests", () => {
     signer_C = base.user3;
 
     asset = await ethers.getContractAt("IAsset", base.diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", base.diamond.target);
     await executeRbac(asset, set_initRbacs());
   }
 
   function set_initRbacs(): any[] {
     return [
       {
-        role: ATS_ROLES.ISSUER_ROLE,
+        role: ATS_ROLES.ROLE_ISSUER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.KYC_ROLE,
+        role: ATS_ROLES.ROLE_KYC,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.SSI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_SSI_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.FREEZE_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_FREEZE_MANAGER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.CLEARING_ROLE,
+        role: ATS_ROLES.ROLE_CLEARING,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.CLEARING_VALIDATOR_ROLE,
+        role: ATS_ROLES.ROLE_CLEARING_VALIDATOR,
         members: [signer_B.address],
       },
     ];
@@ -91,8 +93,8 @@ describe("HoldAtSnapshotByPartition Tests", () => {
   });
 
   it("GIVEN snapshot exists WHEN querying held balances by partition THEN returns correct values", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.SNAPSHOT_ROLE, signer_C.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_SNAPSHOT, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
 
     await asset.connect(signer_A).addIssuer(signer_A.address);
     await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
@@ -191,5 +193,26 @@ describe("HoldAtSnapshotByPartition Tests", () => {
     expect(heldBalance_C_2_Partition_1).to.equal(heldAmountOf_C_Partition_1);
     expect(heldBalance_A_2_Partition_2).to.equal(heldAmountOf_A_Partition_2);
     expect(heldBalance_C_2_Partition_2).to.equal(0);
+  });
+
+  describe("initializeHoldAtSnapshotByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeHoldAtSnapshotByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeHoldAtSnapshotByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeHoldAtSnapshotByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeHoldAtSnapshotByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_HOLD_AT_SNAPSHOT_BY_PARTITION, 1);
+    });
+  });
+
+  describe("initializeHoldAtSnapshotByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeHoldAtSnapshotByPartition is called THEN emits HoldAtSnapshotByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_HOLD_AT_SNAPSHOT_BY_PARTITION);
+      await expect(asset.initializeHoldAtSnapshotByPartition()).to.emit(asset, "HoldAtSnapshotByPartitionInitialized");
+    });
   });
 });

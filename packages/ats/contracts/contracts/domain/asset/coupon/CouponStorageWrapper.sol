@@ -1,41 +1,63 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import { SNAPSHOT_RESULT_ID, MAX_UINT256 } from "../../../constants/values.sol";
+import { ICommonErrors } from "../../../infrastructure/errors/ICommonErrors.sol";
 import {
-    COUPON_CORPORATE_ACTION_TYPE,
-    COUPON_LISTING_TASK_TYPE,
-    SNAPSHOT_RESULT_ID,
-    SNAPSHOT_TASK_TYPE
-} from "../../../constants/values.sol";
+    CORPORATE_ACTION_TYPE_COUPON,
+    SCHEDULED_TASK_TYPE_COUPON_LISTING,
+    SCHEDULED_TASK_TYPE_SNAPSHOT
+} from "../../../constants/dispatchTypes.sol";
 import { CorporateActionsStorageWrapper } from "../../core/CorporateActionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "../ERC20StorageWrapper.sol";
-import { ERC3643StorageWrapper } from "../../core/ERC3643StorageWrapper.sol";
+import { TokenCoreOps } from "../../orchestrator/TokenCoreOps.sol";
 import { ICoupon } from "../../../facets/coupon/ICoupon.sol";
 import { ICouponTypes } from "../../../facets/coupon/ICouponTypes.sol";
+import { MaturityDateStorageWrapper } from "../MaturityDateStorageWrapper.sol";
 import { CouponRateDispatch } from "./CouponRateDispatch.sol";
-import { NominalValueStorageWrapper } from "../nominalValue/NominalValueStorageWrapper.sol";
+import { DatesValidation } from "../../../infrastructure/utils/DatesValidation.sol";
+import { DecimalsLib } from "../../../infrastructure/utils/DecimalsLib.sol";
+import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
+import { NominalValueStorageWrapper } from "../NominalValueStorageWrapper.sol";
 import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
 import { ScheduledTasksStorageWrapper } from "../ScheduledTasksStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "../SnapshotsStorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-import { _COUPON_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
+import { InterestRateStorageWrapper } from "../InterestRateStorageWrapper.sol";
+import { IInterestRate } from "../../../facets/interestRate/IInterestRate.sol";
+
+/// @custom:hash storage Coupon
+bytes32 constant STORAGE_LOCATION_COUPON = 0x83419e6b8093975a3157050eb9f883164e1459426616bc1834d782d457195c00;
+
+/**
+ * @notice Coupon data stored at an ERC-7201 namespace slot.
+ * @dev Tracks all issued coupon identifiers in chronological order for paginated
+ *      enumeration and scheduled-task dispatch.
+ * @custom:storage-location erc7201:security.token.standard.storage.Coupon
+ */
+struct CouponDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
+    uint256[] couponsOrderedListByIds;
+    // ─── APPEND-ONLY ZONE BELOW ───
+}
 
 /// @title Coupon Storage Wrapper
 /// @notice Library for managing Coupon storage operations.
 /// @dev Provides structured access to CouponDataStorage at a dedicated storage slot.
 /// @author Asset Tokenization Studio Team
 library CouponStorageWrapper {
-    struct CouponDataStorage {
-        uint256[] couponsOrderedListByIds;
-    }
-
     /**
      * @notice Persists a new coupon corporate action and schedules its snapshot/listing
      *         tasks. Variant invariants and rate stamping are delegated to
      *         `CouponRateDispatch.validateAndStamp`, which mirrors the deferred dispatch
      *         performed by `getCoupon` on the read path.
-     * @dev Does NOT emit `ICoupon.CouponSet` — the writer abstract emits it inline after
+     * @dev The end-date-against-maturity constraint is enforced by the caller before this
+     *      function is invoked (see `CouponModifiers.onlyValidCouponEndDate`).
+     *      Does NOT emit `ICoupon.CouponSet` — the writer abstract emits it inline after
      *      this call returns, per the project event-emission rule.
      * @param newCoupon Coupon parameters captured at scheduling time.
      * @return corporateActionId_ Identifier of the underlying corporate action.
@@ -50,7 +72,7 @@ library CouponStorageWrapper {
         newCoupon = CouponRateDispatch.validateAndStamp(newCoupon);
 
         (corporateActionId_, couponID_) = CorporateActionsStorageWrapper.addCorporateAction(
-            COUPON_CORPORATE_ACTION_TYPE,
+            CORPORATE_ACTION_TYPE_COUPON,
             abi.encode(newCoupon)
         );
 
@@ -70,31 +92,75 @@ library CouponStorageWrapper {
         ICouponTypes.RegisteredCoupon memory registeredCoupon;
         bytes32 corporateActionId;
         (registeredCoupon, corporateActionId, ) = getCoupon(couponId);
-        if (
-            registeredCoupon.coupon.executionDate != 0 &&
-            registeredCoupon.coupon.executionDate <= TimeTravelStorageWrapper.getBlockTimestamp()
-        ) {
+        if (registeredCoupon.coupon.executionDate <= EvmAccessors.getBlockTimestamp()) {
             revert ICoupon.CouponAlreadyExecuted(corporateActionId, couponId);
         }
         CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
         success_ = true;
     }
 
+    /**
+     * @notice Cancels a coupon unconditionally, bypassing the execution-date guard.
+     * @dev Use when administrative override is required after the execution date has passed.
+     *      Delegates to `CorporateActionsStorageWrapper.cancelCorporateAction` directly.
+     * @param couponId One-indexed identifier of the coupon to cancel.
+     * @return success_ Always true if no revert occurred.
+     */
+    function forceCancelCoupon(uint256 couponId) internal returns (bool success_) {
+        bytes32 corporateActionId;
+        (, corporateActionId, ) = getCoupon(couponId);
+        CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
+        success_ = true;
+    }
+
+    /**
+     * @notice Schedules snapshot and optional coupon-listing tasks for a newly
+     *         persisted coupon.
+     * @dev Reverts if `actionId` is zero (indicates prior corporate-action creation
+     *      failure). When `fixingDate` is zero (indicating a non-rate-fixing coupon),
+     *      the listing task is skipped.
+     * @param actionId The corporate-action identifier returned by
+     *         `CorporateActionsStorageWrapper.addCorporateAction`.
+     * @param newCoupon The coupon parameters containing `recordDate` and optionally
+     *         `fixingDate`.
+     */
     function initCoupon(bytes32 actionId, ICouponTypes.Coupon memory newCoupon) internal {
         if (actionId == bytes32(0)) {
             revert ICoupon.CouponCreationFailed();
         }
-        ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(newCoupon.recordDate, SNAPSHOT_TASK_TYPE);
+        ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(newCoupon.recordDate, SCHEDULED_TASK_TYPE_SNAPSHOT);
         ScheduledTasksStorageWrapper.addScheduledSnapshot(newCoupon.recordDate, actionId);
-        if (newCoupon.fixingDate == 0) return;
-        ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(newCoupon.fixingDate, COUPON_LISTING_TASK_TYPE);
+
+        if (InterestRateStorageWrapper.getCouponRateType() != IInterestRate.RateType.KPI_LINKED) return;
+
+        ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(
+            newCoupon.fixingDate,
+            SCHEDULED_TASK_TYPE_COUPON_LISTING
+        );
         ScheduledTasksStorageWrapper.addScheduledCouponListing(newCoupon.fixingDate, actionId);
     }
 
+    /**
+     * @notice Records a coupon identifier in chronological order after creation.
+     * @dev Appends to the ordered list, supporting pagination and traversal of all
+     *      issued coupons.
+     * @param couponID One-indexed coupon identifier to append.
+     */
     function addToCouponsOrderedList(uint256 couponID) internal {
         _couponStorage().couponsOrderedListByIds.push(couponID);
     }
 
+    /**
+     * @notice Stamps a resolved fixed-rate value and decimals onto a previously
+     *         scheduled coupon.
+     * @dev Mutates the supplied `coupon` struct in memory and persists it via
+     *      `CorporateActionsStorageWrapper.updateCorporateActionData`. Rate status
+     *      is transitioned to SET.
+     * @param couponID One-indexed coupon identifier.
+     * @param coupon In-memory coupon struct modified by reference.
+     * @param rate Fixed-rate numerator resolved by `CouponRateDispatch`.
+     * @param rateDecimals Scale of the rate value.
+     */
     function updateCouponRate(
         uint256 couponID,
         ICouponTypes.Coupon memory coupon,
@@ -106,11 +172,68 @@ library CouponStorageWrapper {
         coupon.rateStatus = ICouponTypes.RateCalculationStatus.SET;
 
         CorporateActionsStorageWrapper.updateCorporateActionData(
-            CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(COUPON_CORPORATE_ACTION_TYPE, couponID - 1),
+            CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(CORPORATE_ACTION_TYPE_COUPON, couponID - 1),
             abi.encode(coupon)
         );
     }
 
+    /**
+     * @notice Reverts with `ICommonErrors.WrongDates` when the security has a non-zero maturity
+     *         date and `endDate` exceeds it.
+     * @dev When `maturityDate` is zero the security is treated as open-ended and no constraint is
+     *      applied. Delegates the ordered-date check to `DatesValidation.checkDates`.
+     * @param endDate Coupon end date to validate against the security's maturity date.
+     */
+    function checkEndDateAgainstMaturity(uint256 endDate) internal view {
+        uint256 maturityDate = MaturityDateStorageWrapper.getMaturityDate();
+        if (maturityDate != 0) {
+            DatesValidation.checkDates(endDate, maturityDate);
+        }
+    }
+
+    /**
+     * @notice Returns the raw coupon data and its corporate-action metadata without resolving
+     *         the rate.
+     * @dev Reads the coupon struct directly from the encoded corporate-action data without
+     *      triggering `CouponRateDispatch.resolveRate`. Used by callers that need raw
+     *      coupon fields (e.g. fixing dates, record dates) but must not trigger recursive rate
+     *      resolution — in particular `KpisStorageWrapper.setMinDate`, which is called from
+     *      within the KPI rate-resolution path and would loop if it called the full
+     *      `getCoupon`.
+     * @param couponID One-indexed coupon identifier.
+     * @return rawCoupon_ The coupon struct as stored, without rate resolution.
+     * @return corporateActionId_ The underlying corporate-action identifier.
+     * @return isDisabled_ True if the coupon has been cancelled.
+     */
+    function getRawCouponData(
+        uint256 couponID
+    ) internal view returns (ICouponTypes.Coupon memory rawCoupon_, bytes32 corporateActionId_, bool isDisabled_) {
+        corporateActionId_ = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
+            CORPORATE_ACTION_TYPE_COUPON,
+            couponID - 1
+        );
+        bytes memory data;
+        (, , data, isDisabled_) = CorporateActionsStorageWrapper.getCorporateAction(corporateActionId_);
+
+        if (data.length == 0) revert ICoupon.CouponNotFound(couponID);
+        rawCoupon_ = abi.decode(data, (ICouponTypes.Coupon));
+    }
+
+    /**
+     * @notice Fetches a coupon by one-indexed identifier, resolving its rate if
+     *         deferred and the fixing date has passed.
+     * @dev Returns the coupon's associated corporate-action identifier and
+     *      cancellation flag. For STANDARD and KPI_LINKED coupons, or when the
+     *      fixing date has not yet occurred, returns the coupon unchanged.
+     *      For FIXED and NONE coupons, or when rate resolution applies,
+     *      delegates to `CouponRateDispatch.resolveRate` to compute the
+     *      effective rate and optionally update it in-memory.
+     * @param couponID One-indexed coupon identifier.
+     * @return registeredCoupon_ The coupon and its snapshot binding, with rate
+     *         resolved if applicable.
+     * @return corporateActionId_ The underlying corporate-action identifier.
+     * @return isDisabled_ True if the coupon has been cancelled.
+     */
     function getCoupon(
         uint256 couponID
     )
@@ -118,36 +241,15 @@ library CouponStorageWrapper {
         view
         returns (ICouponTypes.RegisteredCoupon memory registeredCoupon_, bytes32 corporateActionId_, bool isDisabled_)
     {
-        corporateActionId_ = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
-            COUPON_CORPORATE_ACTION_TYPE,
-            couponID - 1
-        );
-        bytes memory data;
-        (, , data, isDisabled_) = CorporateActionsStorageWrapper.getCorporateAction(corporateActionId_);
-
-        if (data.length == 0) revert ICoupon.CouponNotFound(couponID);
-        (registeredCoupon_.coupon) = abi.decode(data, (ICouponTypes.Coupon));
+        (registeredCoupon_.coupon, corporateActionId_, isDisabled_) = getRawCouponData(couponID);
 
         registeredCoupon_.snapshotId = CorporateActionsStorageWrapper.getUintResultAt(
             corporateActionId_,
             SNAPSHOT_RESULT_ID
         );
 
-        if (
-            registeredCoupon_.coupon.fixingDate == 0 ||
-            registeredCoupon_.coupon.rateStatus == ICouponTypes.RateCalculationStatus.SET ||
-            registeredCoupon_.coupon.fixingDate > TimeTravelStorageWrapper.getBlockTimestamp()
-        ) return (registeredCoupon_, corporateActionId_, isDisabled_);
-
-        (uint256 resolvedRate, uint8 resolvedDecimals, bool shouldOverride) = CouponRateDispatch.resolveRate(
-            couponID,
-            registeredCoupon_.coupon
-        );
-        if (shouldOverride) {
-            registeredCoupon_.coupon.rate = resolvedRate;
-            registeredCoupon_.coupon.rateDecimals = resolvedDecimals;
-            registeredCoupon_.coupon.rateStatus = ICouponTypes.RateCalculationStatus.SET;
-        }
+        if (registeredCoupon_.coupon.rateStatus != ICouponTypes.RateCalculationStatus.SET)
+            registeredCoupon_.coupon = CouponRateDispatch.resolveRate(couponID, registeredCoupon_.coupon);
     }
 
     /**
@@ -158,7 +260,7 @@ library CouponStorageWrapper {
      *        and `nominalValueDecimals` are all read at the snapshot scale via
      *        `SnapshotsStorageWrapper`.
      *      - Otherwise they fall back to the ABAF-adjusted state at the coupon's record date
-     *        (`ERC3643StorageWrapper.getTotalBalanceForAdjustedAt`,
+     *        (`TokenCoreOps.getTotalBalanceForAdjustedAt`,
      *        `ERC20StorageWrapper.decimalsAdjustedAt`) and the live nominal-value pair from
      *        `NominalValueStorageWrapper`.
      *      The resolved quadruple is then handed to `_calculateCouponAmount`, which must keep
@@ -181,7 +283,7 @@ library CouponStorageWrapper {
         couponFor_.coupon = registeredCoupon.coupon;
         couponFor_.isDisabled = isDisabled;
 
-        if (registeredCoupon.coupon.recordDate < TimeTravelStorageWrapper.getBlockTimestamp() && !isDisabled) {
+        if (registeredCoupon.coupon.recordDate < EvmAccessors.getBlockTimestamp() && !isDisabled) {
             couponFor_.recordDateReached = true;
             if (registeredCoupon.snapshotId != 0) {
                 couponFor_.tokenBalance = SnapshotsStorageWrapper.getTotalBalanceOfAtSnapshot(
@@ -194,7 +296,7 @@ library CouponStorageWrapper {
                     registeredCoupon.snapshotId
                 );
             } else {
-                couponFor_.tokenBalance = ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(
+                couponFor_.tokenBalance = TokenCoreOps.getTotalBalanceForAdjustedAt(
                     account,
                     registeredCoupon.coupon.recordDate
                 );
@@ -214,6 +316,15 @@ library CouponStorageWrapper {
         );
     }
 
+    /**
+     * @notice Returns only the fractional amount payable to an account under a
+     *         coupon, extracting from the full coupon view.
+     * @dev Delegates to `getCouponFor` and unwraps its `couponAmount` member.
+     * @param couponID One-indexed coupon identifier.
+     * @param account Holder whose payable amount is being queried.
+     * @return couponAmountFor_ Numerator and denominator representing the holder's
+     *         fractional coupon payable.
+     */
     function getCouponAmountFor(
         uint256 couponID,
         address account
@@ -221,10 +332,27 @@ library CouponStorageWrapper {
         return getCouponFor(couponID, account).couponAmount;
     }
 
+    /**
+     * @notice Returns the total number of coupons ever issued.
+     * @dev Queries the underlying corporate-action store for coupons only.
+     * @return couponCount_ The count of all coupons (both active and cancelled).
+     */
     function getCouponCount() internal view returns (uint256 couponCount_) {
-        return CorporateActionsStorageWrapper.getCorporateActionCountByType(COUPON_CORPORATE_ACTION_TYPE);
+        return CorporateActionsStorageWrapper.getCorporateActionCountByType(CORPORATE_ACTION_TYPE_COUPON);
     }
 
+    /**
+     * @notice Returns the paginated list of holders eligible for a coupon,
+     *         resolved from snapshot or live state.
+     * @dev Before the record date, returns an empty array. If the coupon has a
+     *      snapshot binding, reads the paginated holders at that snapshot;
+     *      otherwise reads from the current ERC-1410 state. Pagination is applied
+     *      at the snapshot or live level respectively.
+     * @param couponID One-indexed coupon identifier.
+     * @param pageIndex Zero-indexed page to retrieve.
+     * @param pageLength Number of holders per page.
+     * @return holders_ Array of holder addresses on the requested page.
+     */
     function getCouponHolders(
         uint256 couponID,
         uint256 pageIndex,
@@ -232,7 +360,7 @@ library CouponStorageWrapper {
     ) internal view returns (address[] memory holders_) {
         (ICouponTypes.RegisteredCoupon memory registeredCoupon, , ) = getCoupon(couponID);
 
-        if (registeredCoupon.coupon.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return holders_;
+        if (registeredCoupon.coupon.recordDate >= EvmAccessors.getBlockTimestamp()) return holders_;
 
         if (registeredCoupon.snapshotId != 0)
             return SnapshotsStorageWrapper.tokenHoldersAt(registeredCoupon.snapshotId, pageIndex, pageLength);
@@ -240,10 +368,19 @@ library CouponStorageWrapper {
         return ERC1410StorageWrapper.getTokenHolders(pageIndex, pageLength);
     }
 
+    /**
+     * @notice Returns the total count of holders eligible for a coupon at its
+     *         record date.
+     * @dev Returns zero if the record date has not yet been reached. If a snapshot
+     *      is bound, returns the snapshot's holder count; otherwise returns the
+     *      current ERC-1410 holder count.
+     * @param couponID One-indexed coupon identifier.
+     * @return total_ The number of token holders eligible for coupon payment.
+     */
     function getTotalCouponHolders(uint256 couponID) internal view returns (uint256 total_) {
         (ICouponTypes.RegisteredCoupon memory registeredCoupon, , ) = getCoupon(couponID);
 
-        if (registeredCoupon.coupon.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return 0;
+        if (registeredCoupon.coupon.recordDate >= EvmAccessors.getBlockTimestamp()) return 0;
 
         if (registeredCoupon.snapshotId != 0)
             return SnapshotsStorageWrapper.totalTokenHoldersAt(registeredCoupon.snapshotId);
@@ -251,8 +388,19 @@ library CouponStorageWrapper {
         return ERC1410StorageWrapper.getTotalTokenHolders();
     }
 
-    function getCouponFromOrderedListAt(uint256 pos) internal view returns (uint256 couponID_) {
-        if (pos >= getCouponsOrderedListTotalAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp())) return 0;
+    /**
+     * @notice Retrieves a coupon identifier at a specific position in the
+     *         chronologically-ordered, time-adjusted list.
+     * @dev Operates in two regions: if position is within the executed coupons,
+     *      reads from storage; otherwise reads from pending scheduled tasks,
+     *      traversing in reverse order. Returns zero if position is out of bounds.
+     * @param pos Zero-indexed position in the adjusted ordered list.
+     * @param _includeDisabled Whether to include disabled coupons in the traversal.
+     * @return couponID_ The coupon identifier at that position, or zero if out
+     *         of bounds.
+     */
+    function getCouponFromOrderedListAt(uint256 pos, bool _includeDisabled) internal view returns (uint256 couponID_) {
+        if (pos >= getCouponsOrderedListTotalAdjustedAt(EvmAccessors.getBlockTimestamp(), _includeDisabled)) return 0;
 
         uint256 actualOrderedListLengthTotal = getCouponsOrderedListTotal();
         if (pos < actualOrderedListLengthTotal) {
@@ -260,13 +408,46 @@ library CouponStorageWrapper {
         }
 
         uint256 pendingIndexOffset = pos - actualOrderedListLengthTotal;
-        uint256 index = ScheduledTasksStorageWrapper.getScheduledCouponListingCount() - 1 - pendingIndexOffset;
-        return ScheduledTasksStorageWrapper.getScheduledCouponListingIdAtIndex(index);
+
+        if (_includeDisabled) {
+            return
+                ScheduledTasksStorageWrapper.getScheduledCouponListingIdAtIndex(
+                    ScheduledTasksStorageWrapper.getScheduledCouponListingCount(true) - 1 - pendingIndexOffset
+                );
+        }
+
+        // When excluding disabled, iterate the queue skipping disabled tasks to find the
+        // correct coupon at the filtered pending index.
+        uint256 seen;
+        for (uint256 j = ScheduledTasksStorageWrapper.getScheduledCouponListingCount(true); j > 0; ) {
+            unchecked {
+                --j;
+            }
+            if (ScheduledTasksStorageWrapper.isScheduledCouponListingDisabledAtIndex(j)) continue;
+            if (seen != pendingIndexOffset) {
+                unchecked {
+                    ++seen;
+                }
+                continue;
+            }
+            return ScheduledTasksStorageWrapper.getScheduledCouponListingIdAtIndex(j);
+        }
     }
 
+    /**
+     * @notice Returns a paginated slice of the chronologically-ordered coupon list,
+     *         including both executed and pending (scheduled) coupons.
+     * @dev Computes page boundaries and populates the result array by calling
+     *      `getCouponFromOrderedListAt` for each position.
+     * @param pageIndex Zero-indexed page to retrieve.
+     * @param pageLength Number of coupons per page.
+     * @param _includeDisabled Whether to include disabled coupons in the result.
+     * @return couponIDs_ Array of coupon identifiers on the requested page.
+     */
     function getCouponsOrderedList(
         uint256 pageIndex,
-        uint256 pageLength
+        uint256 pageLength,
+        bool _includeDisabled
     ) internal view returns (uint256[] memory couponIDs_) {
         (uint256 start, uint256 end) = Pagination.getStartAndEnd(pageIndex, pageLength);
 
@@ -274,35 +455,71 @@ library CouponStorageWrapper {
             Pagination.getSize(
                 start,
                 end,
-                getCouponsOrderedListTotalAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp())
+                getCouponsOrderedListTotalAdjustedAt(EvmAccessors.getBlockTimestamp(), _includeDisabled)
             )
         );
 
         uint256 length = couponIDs_.length;
         for (uint256 i; i < length; ) {
             unchecked {
-                couponIDs_[i] = getCouponFromOrderedListAt(start + i);
+                couponIDs_[i] = getCouponFromOrderedListAt(start + i, _includeDisabled);
                 ++i;
             }
         }
     }
 
-    function getCouponsOrderedListTotalAdjustedAt(uint256 timestamp) internal view returns (uint256 total_) {
+    /**
+     * @notice Returns the combined count of executed and pending coupons at a given
+     *         timestamp.
+     * @dev Sums the stored coupon count with the pending scheduled-coupon-listing
+     *      count at the specified time.
+     * @param timestamp The point in time at which to measure pending coupons.
+     * @param _includeDisabled Whether to include disabled coupons in the count.
+     * @return total_ The adjusted total coupon count (executed + pending at
+     *         timestamp).
+     */
+    function getCouponsOrderedListTotalAdjustedAt(
+        uint256 timestamp,
+        bool _includeDisabled
+    ) internal view returns (uint256 total_) {
         return
             getCouponsOrderedListTotal() +
-            ScheduledTasksStorageWrapper.getPendingScheduledCouponListingTotalAt(timestamp);
+            ScheduledTasksStorageWrapper.getPendingScheduledCouponListingTotalAt(timestamp, _includeDisabled);
     }
 
+    /**
+     * @notice Returns the count of executed coupons only.
+     * @dev Queries the length of the stored ordered list, excluding pending
+     *      scheduled tasks.
+     * @return total_ The number of executed coupons.
+     */
     function getCouponsOrderedListTotal() internal view returns (uint256 total_) {
         total_ = _couponStorage().couponsOrderedListByIds.length;
     }
 
-    function getPreviousCouponInOrderedList(uint256 couponID) internal view returns (uint256 previousCouponID_) {
-        uint256 orderedListLength = getCouponsOrderedListTotalAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp());
+    /**
+     * @notice Returns the coupon identifier immediately preceding a given coupon in
+     *         the ordered list.
+     * @dev Linearly searches the ordered list for the target coupon and returns its
+     *      predecessor. Returns zero if the coupon is not found, is the first in
+     *      the list, or the list contains fewer than two coupons.
+     * @param couponID One-indexed coupon identifier to search for.
+     * @param _includeDisabled Whether to include disabled coupons in the traversal.
+     * @return previousCouponID_ The identifier of the preceding coupon, or zero if
+     *         not applicable.
+     */
+    function getPreviousCouponInOrderedList(
+        uint256 couponID,
+        bool _includeDisabled
+    ) internal view returns (uint256 previousCouponID_) {
+        uint256 orderedListLength = getCouponsOrderedListTotalAdjustedAt(
+            EvmAccessors.getBlockTimestamp(),
+            _includeDisabled
+        );
 
         if (orderedListLength < 2) return (0);
 
-        if (getCouponFromOrderedListAt(0) == couponID) return (0);
+        if (getCouponFromOrderedListAt(0, _includeDisabled) == couponID) return (0);
 
         unchecked {
             --orderedListLength;
@@ -310,8 +527,8 @@ library CouponStorageWrapper {
         uint256 previousCouponId;
 
         for (uint256 i; i < orderedListLength; ) {
-            previousCouponId = getCouponFromOrderedListAt(i);
-            uint256 couponId = getCouponFromOrderedListAt(i + 1);
+            previousCouponId = getCouponFromOrderedListAt(i, _includeDisabled);
+            uint256 couponId = getCouponFromOrderedListAt(i + 1, _includeDisabled);
             if (couponId == couponID) return previousCouponId;
 
             unchecked {
@@ -327,7 +544,17 @@ library CouponStorageWrapper {
      * @dev Scale invariant: `tokenBalance`, `decimals`, `nominalValue` and `nominalValueDecimals`
      *      must all be sampled at the same point in time as the holder balance — either the
      *      snapshot bound to the coupon or the ABAF-adjusted state at the record date. The
-     *      function is intentionally `pure`:
+     *      function is intentionally `pure`; no recomputation occurs after record date.
+     * @param coupon The coupon parameters defining rate, scale, and period.
+     * @param tokenBalance Holder's token balance at the record date.
+     * @param decimals Token decimal scale.
+     * @param nominalValue Nominal value per token at the record date.
+     * @param nominalValueDecimals Nominal value decimal scale.
+     * @param recordDateReached True if the coupon's record date has passed.
+     * @return couponAmountFor_ Numerator and denominator of the payable amount;
+     *         both zero if the record date has not yet been reached.
+     * @custom:revert ICommonErrors.ExponentOverflow If `decimals + rateDecimals` is ≥ 78,
+     *         making `10 ** (decimals + rateDecimals)` overflow `uint256`.
      */
     function _calculateCouponAmount(
         ICouponTypes.Coupon memory coupon,
@@ -342,13 +569,29 @@ library CouponStorageWrapper {
         uint256 period = coupon.endDate - coupon.startDate;
 
         couponAmountFor_.recordDateReached = true;
-        couponAmountFor_.numerator = tokenBalance * nominalValue * coupon.rate * period;
-        couponAmountFor_.denominator = 10 ** (decimals + nominalValueDecimals + coupon.rateDecimals) * 365 days;
+        // Staged multiplication: pre-apply the nominal-value scale via 512-bit mulDiv so the
+        // numerator never materialises the full four-way product. The resulting fraction is
+        // mathematically equivalent to the original (balance * nominal * rate * period) /
+        // (10**(d+nd+rd) * 365 days), redistributed to keep every intermediate within uint256.
+        uint256 balanceNominalScaled = Math.mulDiv(tokenBalance, nominalValue, DecimalsLib.pow10(nominalValueDecimals));
+        couponAmountFor_.numerator = balanceNominalScaled * coupon.rate * period;
+
+        uint256 totalDecimals = uint256(decimals) + uint256(coupon.rateDecimals);
+        DecimalsLib.checkExponentOverflow(totalDecimals);
+        if (365 days > (MAX_UINT256 / DecimalsLib.pow10(totalDecimals)))
+            revert ICommonErrors.GreaterThanMaxUint256(365 days, uint8(totalDecimals));
+        couponAmountFor_.denominator = DecimalsLib.pow10(totalDecimals) * 365 days;
     }
 
+    /**
+     * @notice Loads the coupon storage struct from its ERC-7201 namespace slot.
+     * @dev Uses inline assembly to set the storage slot for the returned reference,
+     *      allowing access to the coupon data at its designated storage location.
+     * @return cs_ A storage reference to `CouponDataStorage` at the ERC-7201 slot.
+     */
     // solhint-disable-next-line func-name-mixedcase
     function _couponStorage() private pure returns (CouponDataStorage storage cs_) {
-        bytes32 position = _COUPON_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_COUPON;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             cs_.slot := position

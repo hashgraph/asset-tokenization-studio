@@ -16,7 +16,7 @@
  */
 
 import { Signer, ContractFactory } from "ethers";
-import { ProxyAdmin__factory } from "@contract-types";
+import { ProxyAdmin__factory, IStaticFunctionSelectors__factory } from "@contract-types";
 import {
   deployFacets,
   registerFacets,
@@ -27,6 +27,8 @@ import {
   warn,
   error as logError,
   getDeploymentConfig,
+  DEFAULT_TRANSACTION_TIMEOUT,
+  retryTransaction,
   CheckpointManager,
   NullCheckpointManager,
   saveDeploymentOutput,
@@ -47,9 +49,11 @@ import {
   createBondConfiguration,
   createBondFixedRateConfiguration,
   createBondKpiLinkedRateConfiguration,
+  createDepositTokenConfiguration,
   createFactoryConfiguration,
   deployOrchestratorLibraries,
   hasOrchestratorLibraryAddresses,
+  setOrchestratorLibraryAddresses,
 } from "@scripts/domain";
 
 import { BusinessLogicResolver__factory } from "@contract-types";
@@ -138,6 +142,26 @@ export interface DeploymentWithExistingBlrOutput {
         address: string;
       }>;
     };
+    depositToken: {
+      configId: string;
+      version: number;
+      facetCount: number;
+      facets: Array<{
+        facetName: string;
+        key: string;
+        address: string;
+      }>;
+    };
+    factory: {
+      configId: string;
+      version: number;
+      facetCount: number;
+      facets: Array<{
+        facetName: string;
+        key: string;
+        address: string;
+      }>;
+    };
   };
 
   /** Deployment summary */
@@ -156,9 +180,6 @@ export interface DeploymentWithExistingBlrOutput {
  * Options for deploying with existing BLR.
  */
 export interface DeploySystemWithExistingBlrOptions extends ResumeOptions {
-  /** Whether to use TimeTravel variants for facets */
-  useTimeTravel?: boolean;
-
   /** Whether to save deployment output to file */
   saveOutput?: boolean;
 
@@ -180,7 +201,7 @@ export interface DeploySystemWithExistingBlrOptions extends ResumeOptions {
   /** Existing ProxyAdmin address (optional, will deploy new one if not provided) */
   existingProxyAdminAddress?: string;
 
-  /** Number of confirmations to wait for each deployment (default: from network config) */
+  /** Number of confirmations for contract transactions */
   confirmations?: number;
 
   /** Enable retry mechanism for failed deployments (default: from network config) */
@@ -223,7 +244,6 @@ export interface DeploySystemWithExistingBlrOptions extends ResumeOptions {
  *     'hedera-testnet',
  *     '0x123...BLR...',
  *     {
- *         useTimeTravel: false,
  *         deployFacets: true,
  *         deployFactory: true,
  *         saveOutput: true
@@ -244,7 +264,6 @@ export async function deploySystemWithExistingBlr(
   const networkConfig = getDeploymentConfig(network);
 
   const {
-    useTimeTravel = false,
     saveOutput = true,
     outputPath,
     deployFacets: shouldDeployFacets = true,
@@ -274,8 +293,7 @@ export async function deploySystemWithExistingBlr(
   info(`📡 Network: ${network}`);
   info(`👤 Deployer: ${deployer}`);
   info(`🔷 BLR Address: ${blrAddress}`);
-  info(`🔄 TimeTravel: ${useTimeTravel ? "Enabled" : "Disabled"}`);
-  info(`⏱️  Confirmations: ${confirmations}`);
+  info(`⏱️  Confirmations (deploy): ${confirmations}`);
   info(`🔁 Retry: ${enableRetry ? "Enabled" : "Disabled"}`);
   info(`✅ Verification: ${verifyDeployment ? "Enabled" : "Disabled"}`);
   info("═".repeat(60));
@@ -318,7 +336,6 @@ export async function deploySystemWithExistingBlr(
       deployer,
       workflowType: "existingBlr",
       options: {
-        useTimeTravel,
         saveOutput,
         outputPath,
         deployFacets: shouldDeployFacets,
@@ -397,6 +414,44 @@ export async function deploySystemWithExistingBlr(
     const facetAddresses: Record<string, string> = {};
 
     if (shouldDeployFacets) {
+      // Resolve any pending facets left by a previous run that crashed between
+      // onTransactionSent and onFacetDeployed (i.e. during waitForDeployment).
+      if (checkpoint.steps.facets) {
+        const pendingEntries = [...checkpoint.steps.facets.entries()].filter(([, entry]) => entry.pending);
+        if (pendingEntries.length > 0) {
+          info(`\n⏳ Resolving ${pendingEntries.length} pending facet transaction(s) from previous run...`);
+          const provider = signer.provider;
+          if (!provider) throw new Error("Signer has no provider — cannot resolve pending facet transactions");
+          for (const [facetName, entry] of pendingEntries) {
+            info(`   Waiting for ${facetName} (tx: ${entry.txHash})...`);
+            try {
+              const receipt = await retryTransaction(
+                () => provider.waitForTransaction(entry.txHash, confirmations, DEFAULT_TRANSACTION_TIMEOUT * 3),
+                enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
+              );
+              if (receipt?.contractAddress) {
+                checkpoint.steps.facets.set(facetName, {
+                  address: receipt.contractAddress,
+                  txHash: entry.txHash,
+                  gasUsed: receipt.gasUsed.toString(),
+                  deployedAt: entry.deployedAt,
+                });
+                info(`   ✅ ${facetName} confirmed at ${receipt.contractAddress}`);
+              } else {
+                warn(`   ⚠ ${facetName} tx has no contract address (throttled?), will redeploy`);
+                checkpoint.steps.facets.delete(facetName);
+              }
+            } catch (pendingErr) {
+              warn(
+                `   ⚠ Could not confirm ${facetName}: ${pendingErr instanceof Error ? pendingErr.message : String(pendingErr)}, will redeploy`,
+              );
+              checkpoint.steps.facets.delete(facetName);
+            }
+            await checkpointManager.saveCheckpoint(checkpoint);
+          }
+        }
+      }
+
       if (checkpoint.steps.facets && checkpoint.currentStep >= 1) {
         info(`\n✓ Step 3/${totalSteps}: All facets already deployed (resuming)`);
         // Use converter to reconstruct facetsResult with proper DeploymentResult types
@@ -419,43 +474,43 @@ export async function deploySystemWithExistingBlr(
         info(`\n📦 Step 3/${totalSteps}: Deploying all facets...`);
 
         // Deploy orchestrator libraries first (required for facet factory linking)
-        if (!hasOrchestratorLibraryAddresses()) {
+        if (checkpoint.steps.libraries) {
+          const { deployedAt: _deployedAt, ...libAddrs } = checkpoint.steps.libraries;
+          setOrchestratorLibraryAddresses(libAddrs);
+          info("   Orchestrator libraries restored from checkpoint");
+        } else if (!hasOrchestratorLibraryAddresses()) {
           info("   Deploying orchestrator libraries (required for facet linking)...");
-          await deployOrchestratorLibraries(signer);
+          const libAddrs = await deployOrchestratorLibraries(signer, {
+            retryOptions: enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
+          });
+          checkpoint.steps.libraries = { ...libAddrs, deployedAt: new Date().toISOString() };
+          await checkpointManager.saveCheckpoint(checkpoint);
         }
 
-        let allFacets = atsRegistry.getAllFacets();
+        const allFacets = atsRegistry.getAllFacets();
         info(`   Found ${allFacets.length} facets in registry`);
-
-        if (!useTimeTravel) {
-          allFacets = allFacets.filter((f) => f.name !== "TimeTravelFacet");
-        }
 
         // Initialize facets Map if not exists
         if (!checkpoint.steps.facets) {
           checkpoint.steps.facets = new Map();
         }
 
-        // Create factories from registry
-        // When useTimeTravel=true, deploy TimeTravel variant facets instead of production ones
-        // Skip facets without factories (abstract contracts like LockFacet)
+        // Create factories from registry. Skip facets without factories
+        // (abstract contracts like LockFacet).
         const facetFactories: Record<string, ContractFactory> = {};
         for (const facet of allFacets) {
-          // Select factory: TimeTravel variant when available and enabled, else production
-          const selectedFactory = useTimeTravel && facet.timeTravelFactory ? facet.timeTravelFactory : facet.factory;
-
-          if (!selectedFactory) {
+          if (!facet.factory) {
             info(`   Skipping ${facet.name} (abstract contract, no factory)`);
             continue;
           }
 
           // Get factory
-          const factory = selectedFactory(signer) as ContractFactory;
+          const factory = facet.factory(signer) as ContractFactory;
           // Use the actual contract name from the factory
           const contractName = factory.constructor.name.replace("__factory", "");
 
-          // Skip if already deployed
-          if (checkpoint.steps.facets.has(contractName)) {
+          // Skip if already confirmed. Pending entries were resolved above.
+          if (checkpoint.steps.facets.has(contractName) && !checkpoint.steps.facets.get(contractName)!.pending) {
             info(`   ✓ ${contractName} already deployed (skipping)`);
             continue;
           }
@@ -471,6 +526,24 @@ export async function deploySystemWithExistingBlr(
             confirmations,
             enableRetry,
             verifyDeployment,
+            onTransactionSent: async (facetName, txHash) => {
+              checkpoint.steps.facets!.set(facetName, {
+                address: "",
+                txHash,
+                deployedAt: new Date().toISOString(),
+                pending: true,
+              });
+              await checkpointManager.saveCheckpoint(checkpoint);
+            },
+            onFacetDeployed: async (facetName, result) => {
+              checkpoint.steps.facets!.set(facetName, {
+                address: result.address!,
+                txHash: result.transactionHash || "",
+                gasUsed: result.gasUsed?.toString(),
+                deployedAt: new Date().toISOString(),
+              });
+              await checkpointManager.saveCheckpoint(checkpoint);
+            },
           });
 
           if (!facetsResult.success) {
@@ -536,13 +609,9 @@ export async function deploySystemWithExistingBlr(
 
         // Prepare facets with resolver keys from registry
         const facetsToRegister = Object.entries(facetAddresses).map(([facetName, facetAddress]) => {
-          // Strip "TimeTravel" suffix to get canonical name
-          const baseName = facetName.replace(/TimeTravel$/, "");
-
-          // Look up resolver key from registry
-          const definition = atsRegistry.getFacetDefinition(baseName);
+          const definition = atsRegistry.getFacetDefinition(facetName);
           if (!definition || !definition.resolverKey?.value) {
-            throw new Error(`Facet ${baseName} not found in registry or missing resolver key`);
+            throw new Error(`Facet ${facetName} not found in registry or missing resolver key`);
           }
 
           return {
@@ -554,6 +623,7 @@ export async function deploySystemWithExistingBlr(
 
         const registerResult = await registerFacets(blrContract, {
           facets: facetsToRegister,
+          retryOptions: enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
         });
 
         if (!registerResult.success) {
@@ -582,6 +652,7 @@ export async function deploySystemWithExistingBlr(
     let bondConfig: Awaited<ReturnType<typeof createBondConfiguration>> | undefined;
     let bondFixedRateConfig: Awaited<ReturnType<typeof createBondFixedRateConfiguration>> | undefined;
     let bondKpiLinkedRateConfig: Awaited<ReturnType<typeof createBondKpiLinkedRateConfiguration>> | undefined;
+    let depositTokenConfig: Awaited<ReturnType<typeof createDepositTokenConfiguration>> | undefined;
     if (shouldCreateConfigurations) {
       if (Object.keys(facetAddresses).length === 0) {
         info(`\n⚠️  Step 5/${totalSteps}: Skipping configurations (no facets deployed)...`);
@@ -611,10 +682,10 @@ export async function deploySystemWithExistingBlr(
           equityConfig = await createEquityConfiguration(
             blrContract,
             facetAddresses,
-            useTimeTravel,
             false,
             batchSize,
             confirmations,
+            enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
           );
 
           if (!equityConfig.success) {
@@ -655,10 +726,10 @@ export async function deploySystemWithExistingBlr(
           bondConfig = await createBondConfiguration(
             blrContract,
             facetAddresses,
-            useTimeTravel,
             false,
             batchSize,
             confirmations,
+            enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
           );
 
           if (!bondConfig.success) {
@@ -696,10 +767,10 @@ export async function deploySystemWithExistingBlr(
           bondFixedRateConfig = await createBondFixedRateConfiguration(
             blrContract,
             facetAddresses,
-            useTimeTravel,
             false,
             batchSize,
             confirmations,
+            enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
           );
 
           if (!bondFixedRateConfig.success) {
@@ -739,10 +810,10 @@ export async function deploySystemWithExistingBlr(
           bondKpiLinkedRateConfig = await createBondKpiLinkedRateConfiguration(
             blrContract,
             facetAddresses,
-            useTimeTravel,
             false,
             batchSize,
             confirmations,
+            enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
           );
 
           if (!bondKpiLinkedRateConfig.success) {
@@ -765,14 +836,60 @@ export async function deploySystemWithExistingBlr(
           checkpoint.currentStep = 6;
           await checkpointManager.saveCheckpoint(checkpoint);
         }
+
+        // Step 7: Create Deposit Token Configuration
+        if (checkpoint.steps.configurations?.depositToken && checkpoint.currentStep >= 7) {
+          info(`\n✓ Step 8/${totalSteps}: Deposit Token configuration already created (resuming)`);
+          const depositTokenConfigData = checkpoint.steps.configurations.depositToken;
+          info(`✅ Deposit Token Config ID: ${depositTokenConfigData.configId}`);
+          info(`✅ Deposit Token Version: ${depositTokenConfigData.version}`);
+          info(`✅ Deposit Token Facets: ${depositTokenConfigData.facetCount}`);
+
+          depositTokenConfig = toConfigurationData(depositTokenConfigData);
+        } else {
+          info(`\n💵 Step 8/${totalSteps}: Creating Deposit Token configuration...`);
+
+          depositTokenConfig = await createDepositTokenConfiguration(
+            blrContract,
+            facetAddresses,
+            false,
+            batchSize,
+            confirmations,
+            enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
+          );
+
+          if (!depositTokenConfig.success) {
+            throw new Error(
+              `Deposit Token config creation failed: ${depositTokenConfig.error} - ${depositTokenConfig.message}`,
+            );
+          }
+
+          info(`✅ Deposit Token Config ID: ${depositTokenConfig.data.configurationId}`);
+          info(`✅ Deposit Token Version: ${depositTokenConfig.data.version}`);
+          info(`✅ Deposit Token Facets: ${depositTokenConfig.data.facetKeys.length}`);
+
+          if (!checkpoint.steps.configurations) {
+            checkpoint.steps.configurations = {};
+          }
+          checkpoint.steps.configurations.depositToken = {
+            configId: depositTokenConfig.data.configurationId,
+            version: depositTokenConfig.data.version,
+            facetCount: depositTokenConfig.data.facetKeys.length,
+            facets: depositTokenConfig.data.facetKeys,
+            txHash: "",
+          };
+          checkpoint.currentStep = 7;
+          await checkpointManager.saveCheckpoint(checkpoint);
+        }
       }
     } else {
-      info(`\n💼 Step 4-7/${totalSteps}: Skipping configurations...`);
+      info(`\n💼 Step 4-8/${totalSteps}: Skipping configurations...`);
       skippedSteps.push(
         "Equity configuration",
         "Bond configuration",
         "Bond Fixed Rate configuration",
         "Bond KpiLinked Rate configuration",
+        "Deposit Token configuration",
       );
     }
 
@@ -793,10 +910,10 @@ export async function deploySystemWithExistingBlr(
         factoryConfig = await createFactoryConfiguration(
           blrContractForFactory,
           facetAddresses,
-          useTimeTravel,
           false,
           batchSize,
           confirmations,
+          enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
         );
 
         if (!factoryConfig.success) {
@@ -909,34 +1026,62 @@ export async function deploySystemWithExistingBlr(
       },
 
       facets: facetsResult
-        ? await Promise.all(
-            Array.from(facetsResult.deployed.entries()).map(async ([facetName, deploymentResult]) => {
-              const facetAddress = deploymentResult.address!;
+        ? await (async () => {
+            // Pass 1: resolve keys in parallel
+            const facetEntries = await Promise.all(
+              Array.from(facetsResult.deployed.entries()).map(async ([facetName, deploymentResult]) => {
+                const facetAddress = deploymentResult.address!;
 
-              // Find matching key from config
-              const equityFacet = equityConfig?.success
-                ? equityConfig.data.facetKeys.find((ef) => ef.address === facetAddress)
-                : undefined;
-              const bondFacet = bondConfig?.success
-                ? bondConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
-                : undefined;
-              const bondFixedRateFacet = bondFixedRateConfig?.success
-                ? bondFixedRateConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
-                : undefined;
-              const bondKpiLinkedRateFacet = bondKpiLinkedRateConfig?.success
-                ? bondKpiLinkedRateConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
-                : undefined;
+                // Find matching key from config
+                const equityFacet = equityConfig?.success
+                  ? equityConfig.data.facetKeys.find((ef) => ef.address === facetAddress)
+                  : undefined;
+                const bondFacet = bondConfig?.success
+                  ? bondConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
+                  : undefined;
+                const bondFixedRateFacet = bondFixedRateConfig?.success
+                  ? bondFixedRateConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
+                  : undefined;
+                const bondKpiLinkedRateFacet = bondKpiLinkedRateConfig?.success
+                  ? bondKpiLinkedRateConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
+                  : undefined;
 
-              return {
+                const staticFunctionSelectors = IStaticFunctionSelectors__factory.connect(facetAddress, signer);
+                const key =
+                  equityFacet?.key ||
+                  bondFacet?.key ||
+                  bondFixedRateFacet?.key ||
+                  bondKpiLinkedRateFacet?.key ||
+                  (await staticFunctionSelectors.getStaticResolverKey());
+
+                return { facetName, facetAddress, key };
+              }),
+            );
+
+            // Pass 2: single batch call for all known keys (skip empty keys — not in any config)
+            const blrForVersions = BusinessLogicResolver__factory.connect(blrAddress, signer);
+            const knownKeys = facetEntries.map((e) => e.key).filter((k) => k !== "");
+            const uniqueKeys = [...new Set(knownKeys)];
+            const rawVersions = uniqueKeys.length > 0 ? await blrForVersions.getLatestVersions(uniqueKeys) : [];
+            const versionByKey = new Map(uniqueKeys.map((k, i) => [k, Number(rawVersions[i])]));
+
+            // Pass 3: assemble final output with contractId (parallel) and version
+            return Promise.all(
+              facetEntries.map(async ({ facetName, facetAddress, key }) => ({
                 name: facetName,
                 address: facetAddress,
                 contractId: await getContractId(facetAddress),
-                key: equityFacet?.key || bondFacet?.key || bondFixedRateFacet?.key || bondKpiLinkedRateFacet?.key || "",
-              };
-            }),
-          )
+                key,
+                version: versionByKey.get(key) ?? undefined,
+              })),
+            );
+          })()
         : [],
 
+      // Configuration summary. `version: 0` entries below are placeholders
+      // emitted when the corresponding configuration was skipped or failed to
+      // create — they are display-only and never sent on-chain. Successful
+      // entries carry the real registered version (>= 1) from the BLR.
       configurations: {
         equity:
           equityConfig && equityConfig.success
@@ -994,6 +1139,34 @@ export async function deploySystemWithExistingBlr(
                 facetCount: 0,
                 facets: [],
               },
+        depositToken:
+          depositTokenConfig && depositTokenConfig.success
+            ? {
+                configId: depositTokenConfig.data.configurationId,
+                version: depositTokenConfig.data.version,
+                facetCount: depositTokenConfig.data.facetKeys.length,
+                facets: depositTokenConfig.data.facetKeys,
+              }
+            : {
+                configId: "N/A (Not created)",
+                version: 0,
+                facetCount: 0,
+                facets: [],
+              },
+        factory:
+          factoryConfig && factoryConfig.success
+            ? {
+                configId: factoryConfig.data.configurationId,
+                version: factoryConfig.data.version,
+                facetCount: factoryConfig.data.facetKeys.length,
+                facets: factoryConfig.data.facetKeys,
+              }
+            : {
+                configId: "N/A (Not created)",
+                version: 0,
+                facetCount: 0,
+                facets: [],
+              },
       },
 
       summary: {
@@ -1003,7 +1176,9 @@ export async function deploySystemWithExistingBlr(
           (equityConfig ? 1 : 0) +
           (bondConfig ? 1 : 0) +
           (bondFixedRateConfig ? 1 : 0) +
-          (bondKpiLinkedRateConfig ? 1 : 0),
+          (bondKpiLinkedRateConfig ? 1 : 0) +
+          (depositTokenConfig ? 1 : 0) +
+          (factoryConfig ? 1 : 0),
         deploymentTime: endTime - startTime,
         gasUsed: totalGasUsed.toString(),
         success: true,

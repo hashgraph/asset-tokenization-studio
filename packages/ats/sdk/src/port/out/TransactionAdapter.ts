@@ -199,6 +199,7 @@ interface ITransactionAdapter {
   ): Promise<TransactionResponse>;
   pause(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
   unpause(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
+  deactivate(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
   takeSnapshot(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
   setDividend(
     security: EvmAddress,
@@ -742,6 +743,7 @@ interface IExternalKycListsMockAdapter {
 interface ITokenMetadataTransactionAdapter {
   setName(security: EvmAddress, name: string, securityId?: ContractId | string): Promise<TransactionResponse>;
   setSymbol(security: EvmAddress, symbol: string, securityId: ContractId | string): Promise<TransactionResponse>;
+  setCustomData(security: EvmAddress, key: string, value: string[], securityId?: ContractId | string): Promise<TransactionResponse>;
   setOnchainID(
     security: EvmAddress,
     onchainID: EvmAddress,
@@ -1172,6 +1174,7 @@ export default abstract class TransactionAdapter
   ): Promise<TransactionResponse<any, Error>>;
   abstract pause(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse<any, Error>>;
   abstract unpause(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse<any, Error>>;
+  abstract deactivate(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse<any, Error>>;
   abstract takeSnapshot(
     security: EvmAddress,
     securityId?: ContractId | string,
@@ -1647,6 +1650,12 @@ export default abstract class TransactionAdapter
     symbol: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
+  abstract setCustomData(
+    security: EvmAddress,
+    key: string,
+    value: string[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
   abstract setAddressFrozen(
     security: EvmAddress,
     status: boolean,
@@ -1750,62 +1759,6 @@ export default abstract class TransactionAdapter
     security: EvmAddress,
     sourceId: EvmAddress,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse>;
-
-  abstract createTrexSuiteBond(
-    salt: string,
-    owner: string,
-    irs: string,
-    onchainId: string,
-    irAgents: string[],
-    tokenAgents: string[],
-    compliancesModules: string[],
-    complianceSettings: string[],
-    claimTopics: number[],
-    issuers: string[],
-    issuerClaims: number[][],
-    security: Security,
-    bondDetails: BondDetails,
-    factory: EvmAddress,
-    resolver: EvmAddress,
-    configId: string,
-    configVersion: number,
-    compliance: EvmAddress,
-    identityRegistryAddress: EvmAddress,
-    diamondOwnerAccount: EvmAddress,
-    proceedRecipients?: EvmAddress[],
-    proceedRecipientsData?: string[],
-    externalPauses?: EvmAddress[],
-    externalControlLists?: EvmAddress[],
-    externalKycLists?: EvmAddress[],
-    factoryId?: ContractId | string,
-  ): Promise<TransactionResponse>;
-
-  abstract createTrexSuiteEquity(
-    salt: string,
-    owner: string,
-    irs: string,
-    onchainId: string,
-    irAgents: string[],
-    tokenAgents: string[],
-    compliancesModules: string[],
-    complianceSettings: string[],
-    claimTopics: number[],
-    issuers: string[],
-    issuerClaims: number[][],
-    security: Security,
-    equityDetails: EquityDetails,
-    factory: EvmAddress,
-    resolver: EvmAddress,
-    configId: string,
-    configVersion: number,
-    compliance: EvmAddress,
-    identityRegistryAddress: EvmAddress,
-    diamondOwnerAccount: EvmAddress,
-    externalPauses?: EvmAddress[],
-    externalControlLists?: EvmAddress[],
-    externalKycLists?: EvmAddress[],
-    factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
 
   abstract addProceedRecipient(

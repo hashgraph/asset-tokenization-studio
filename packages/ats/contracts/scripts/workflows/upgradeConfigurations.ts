@@ -4,7 +4,7 @@
  * Upgrade ATS configurations workflow.
  *
  * Upgrades existing BusinessLogicResolver configurations to a new version by:
- * 1. Deploying all facets (48-49 total, with optional TimeTravel variants)
+ * 1. Deploying all facets (48 total)
  * 2. Registering facets in existing BLR (creates new global version)
  * 3. Creating new configuration versions for Equity and/or Bond
  * 4. Optionally updating existing ResolverProxy tokens to use the new version
@@ -47,6 +47,7 @@ import {
   createBondConfiguration,
   deployOrchestratorLibraries,
   hasOrchestratorLibraryAddresses,
+  setOrchestratorLibraryAddresses,
 } from "@scripts/domain";
 import { BusinessLogicResolver__factory } from "@contract-types";
 
@@ -95,7 +96,6 @@ const UpgradeConfigurationsOptionsSchema = z.object({
   blrAddress: z.string().min(1, "BLR address is required"),
 
   // Optional fields with defaults
-  useTimeTravel: z.boolean().optional().default(false),
   configurations: z.enum(["equity", "bond", "both"]).optional().default("both"),
   proxyAddresses: z
     .array(z.string().regex(/^0x[a-fA-F0-9]{40}$/))
@@ -126,9 +126,6 @@ const UpgradeConfigurationsOptionsSchema = z.object({
 export interface UpgradeConfigurationsOptions extends ResumeOptions {
   /** Address of existing BLR proxy (required) */
   blrAddress: string;
-
-  /** Whether to use TimeTravel variants for facets (default: false) */
-  useTimeTravel?: boolean;
 
   /** Which configurations to create: 'equity', 'bond', or 'both' (default: 'both') */
   configurations?: "equity" | "bond" | "both";
@@ -326,7 +323,6 @@ async function validateAndInitialize(
       deployer: signerAddress,
       workflowType: "upgradeConfigurations",
       options: {
-        useTimeTravel: options.useTimeTravel,
         confirmations: finalConfirmations,
         enableRetry: options.enableRetry,
         verifyDeployment: options.verifyDeployment,
@@ -361,15 +357,14 @@ async function validateAndInitialize(
 /**
  * Phase 2: Deploy all facets.
  *
- * Deploys all facet contracts (48 without TimeTravel, 49 with TimeTravel variants).
- * Skips facets that were already deployed in previous checkpoint runs.
+ * Deploys all facet contracts (48 total). Skips facets that were already deployed
+ * in previous checkpoint runs.
  *
  * @param ctx - Upgrade phase context
  * @throws If facet deployment fails
  */
 async function deployFacetsPhase(ctx: UpgradePhaseContext): Promise<void> {
   const { signer, checkpoint, options, checkpointManager, atsRegistry: registry, network } = ctx;
-  const { useTimeTravel = false } = options;
 
   // CRITICAL FIX: Get confirmations from options or fall back to network config
   // Passing undefined confirmations to deployFacets causes it to hang on Hardhat
@@ -384,39 +379,40 @@ async function deployFacetsPhase(ctx: UpgradePhaseContext): Promise<void> {
   }
 
   // Deploy orchestrator libraries first (required for facet factory linking)
-  if (!hasOrchestratorLibraryAddresses()) {
+  if (checkpoint.steps.libraries) {
+    const { deployedAt: _deployedAt, ...libAddrs } = checkpoint.steps.libraries;
+    setOrchestratorLibraryAddresses(libAddrs);
+    info("   Orchestrator libraries restored from checkpoint");
+  } else if (!hasOrchestratorLibraryAddresses()) {
     info("   Deploying orchestrator libraries (required for facet linking)...");
-    await deployOrchestratorLibraries(signer);
+    const libEnableRetry = options.enableRetry ?? networkConfig.retryOptions.maxRetries > 0;
+    const libAddrs = await deployOrchestratorLibraries(signer, {
+      retryOptions: libEnableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
+    });
+    checkpoint.steps.libraries = { ...libAddrs, deployedAt: new Date().toISOString() };
+    await checkpointManager.saveCheckpoint(checkpoint);
   }
 
   info("\n📦 Step 1/5: Deploying all facets...");
 
-  let allFacets = registry.getAllFacets();
+  const allFacets = registry.getAllFacets();
   info(`   Found ${allFacets.length} facets in registry`);
-
-  if (!useTimeTravel) {
-    allFacets = allFacets.filter((f) => f.name !== "TimeTravelFacet");
-    info("   TimeTravelFacet removed from deployment list");
-  }
 
   // Initialize facets Map if not exists
   if (!checkpoint.steps.facets) {
     checkpoint.steps.facets = new Map();
   }
 
-  // Create factories from registry
-  // When useTimeTravel=true, deploy TimeTravel variant facets instead of production ones
-  // Skip facets without factories (abstract contracts like LockFacet)
+  // Create factories from registry. Skip facets without factories
+  // (abstract contracts like LockFacet).
   const facetFactories: Record<string, ContractFactory> = {};
   for (const facet of allFacets) {
-    const selectedFactory = useTimeTravel && facet.timeTravelFactory ? facet.timeTravelFactory : facet.factory;
-
-    if (!selectedFactory) {
+    if (!facet.factory) {
       info(`   Skipping ${facet.name} (abstract contract, no factory)`);
       continue;
     }
 
-    const factory = selectedFactory(signer) as ContractFactory;
+    const factory = facet.factory(signer) as ContractFactory;
     const contractName = factory.constructor.name.replace("__factory", "");
 
     // Skip if already deployed
@@ -563,13 +559,10 @@ async function registerFacetsPhase(ctx: UpgradePhaseContext): Promise<void> {
       throw new Error(`No address for facet: ${facetName}`);
     }
 
-    // Strip "TimeTravel" suffix to get canonical name
-    const baseName = facetName.replace(/TimeTravel$/, "");
-
     // Look up resolver key from registry
-    const definition = atsRegistry.getFacetDefinition(baseName);
+    const definition = atsRegistry.getFacetDefinition(facetName);
     if (!definition || !definition.resolverKey?.value) {
-      throw new Error(`Facet ${baseName} not found in registry or missing resolver key`);
+      throw new Error(`Facet ${facetName} not found in registry or missing resolver key`);
     }
 
     return {
@@ -597,8 +590,11 @@ async function registerFacetsPhase(ctx: UpgradePhaseContext): Promise<void> {
     `   Total facets to register: ${facetsToRegister.length} (${existingFacets.length} existing + ${newFacets.length} new)`,
   );
 
+  const upgradeNetworkConfig = getDeploymentConfig(ctx.network);
+  const upgradeEnableRetry = ctx.options.enableRetry ?? upgradeNetworkConfig.retryOptions.maxRetries > 0;
   const registerResult = await registerFacets(blrContract, {
     facets: facetsToRegister,
+    retryOptions: upgradeEnableRetry ? upgradeNetworkConfig.retryOptions : { maxRetries: 0 },
   });
 
   if (!registerResult.success) {
@@ -676,6 +672,7 @@ async function createOrResumeConfiguration(params: {
     configId: result.data.configurationId,
     version: result.data.version,
     facetCount: result.data.facetKeys.length,
+    facets: result.data.facetKeys,
     txHash: "",
   };
   checkpoint.currentStep = stepNumber;
@@ -698,12 +695,14 @@ async function createConfigurationsPhase(ctx: UpgradePhaseContext): Promise<{
   bond?: string;
 }> {
   const { blrContract, checkpoint, checkpointManager, options, network } = ctx;
-  const { useTimeTravel = false, batchSize = DEFAULT_BATCH_SIZE } = options;
+  const { batchSize = DEFAULT_BATCH_SIZE } = options;
   const { configurations = "both" } = options;
 
   // CRITICAL FIX: Get confirmations from options or fall back to network config
   const networkConfig = getDeploymentConfig(network);
   const confirmations = options.confirmations ?? networkConfig.confirmations;
+  const cfgEnableRetry = options.enableRetry ?? networkConfig.retryOptions.maxRetries > 0;
+  const cfgRetryOptions = cfgEnableRetry ? networkConfig.retryOptions : { maxRetries: 0 };
 
   // Build facet addresses from checkpoint
   const facetAddresses: Record<string, string> = {};
@@ -729,10 +728,10 @@ async function createConfigurationsPhase(ctx: UpgradePhaseContext): Promise<{
         createEquityConfiguration(
           blrContract,
           facetAddresses,
-          useTimeTravel,
           false, // partialBatchDeploy
           batchSize,
           confirmations,
+          cfgRetryOptions,
         ),
       logPrefix: "Creating Equity configuration",
     });
@@ -752,10 +751,10 @@ async function createConfigurationsPhase(ctx: UpgradePhaseContext): Promise<{
         createBondConfiguration(
           blrContract,
           facetAddresses,
-          useTimeTravel,
           false, // partialBatchDeploy
           batchSize,
           confirmations,
+          cfgRetryOptions,
         ),
       logPrefix: "Creating Bond configuration",
     });
@@ -928,18 +927,30 @@ async function buildOutput(
     return network.toLowerCase().includes("hedera") ? await fetchHederaContractId(network, address) : undefined;
   };
 
-  // Build facets array with contract IDs
-  const facets = await Promise.all(
-    Array.from(checkpoint.steps.facets?.entries() || []).map(async ([facetName, facetData]) => {
-      const facetAddress = facetData.address;
+  // Build facets array with contract IDs and registered versions
+  const facetEntries = Array.from(checkpoint.steps.facets?.entries() || []).map(([facetName, facetData]) => {
+    let key = "";
+    try {
+      key = atsRegistry.getFacetDefinition(facetName)?.resolverKey?.value ?? "";
+    } catch {
+      // Facet not in registry — leave key empty
+    }
+    return { facetName, facetAddress: facetData.address, key };
+  });
 
-      return {
-        name: facetName,
-        address: facetAddress,
-        contractId: await getContractId(facetAddress),
-        key: "", // Key information not needed in output
-      };
-    }),
+  const blrForVersions = BusinessLogicResolver__factory.connect(blrAddress, ctx.signer);
+  const uniqueKeys = [...new Set(facetEntries.map((e) => e.key).filter((k) => k !== ""))];
+  const rawVersions = uniqueKeys.length > 0 ? await blrForVersions.getLatestVersions(uniqueKeys) : [];
+  const versionByKey = new Map(uniqueKeys.map((k, i) => [k, Number(rawVersions[i])]));
+
+  const facets = await Promise.all(
+    facetEntries.map(async ({ facetName, facetAddress, key }) => ({
+      name: facetName,
+      address: facetAddress,
+      contractId: await getContractId(facetAddress),
+      key,
+      version: versionByKey.get(key) ?? 0,
+    })),
   );
 
   const output: UpgradeConfigurationsOutput = {
@@ -996,7 +1007,7 @@ async function buildOutput(
  *
  * Executes the upgrade workflow:
  * 1. Validate BLR address exists
- * 2. Deploy all facets (48-49 total depending on TimeTravel mode)
+ * 2. Deploy all facets (48 total)
  * 3. Register facets in BLR (creates new version)
  * 4. Create new Equity and/or Bond configuration versions
  * 5. Optionally update ResolverProxy tokens to new version
@@ -1067,7 +1078,6 @@ export async function upgradeConfigurations(
   info(`📡 Network: ${network}`);
   info(`👤 Deployer: ${deployer}`);
   info(`🔷 BLR Address: ${validatedOptions.blrAddress}`);
-  info(`🔄 TimeTravel: ${validatedOptions.useTimeTravel ? "Enabled" : "Disabled"}`);
   info(`📋 Configurations: ${validatedOptions.configurations || "both"}`);
   info(`🔗 Proxies to Update: ${(validatedOptions.proxyAddresses || []).length}`);
   info(`⏱️  Confirmations: ${validatedOptions.confirmations || networkConfig.confirmations}`);

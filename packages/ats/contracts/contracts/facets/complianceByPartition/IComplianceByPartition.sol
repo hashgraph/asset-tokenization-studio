@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey ComplianceByPartition
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_COMPLIANCE_BY_PARTITION = 0xafad2096960379c99c5eae984f0f4ceddafa69c3e08352bcaf84e804ec4135b6;
+
 /**
  * @title IComplianceByPartition
  * @author Asset Tokenization Studio Team
@@ -9,6 +13,19 @@ pragma solidity >=0.8.0 <0.9.0;
  *      short-circuit with the EIP-1066 PAUSED status code when the token is paused.
  */
 interface IComplianceByPartition {
+    /**
+     * @notice Emitted once when the compliance by partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeComplianceByPartition`.
+     */
+    event ComplianceByPartitionInitialized();
+
+    /**
+     * @notice Initialises the compliance by partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeComplianceByPartition() external;
+
     /**
      * @notice Checks whether a transfer can be executed on a specific partition.
      * @dev Assumes that if the caller has an admin role the transfer will be performed using the

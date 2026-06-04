@@ -5,11 +5,10 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { isinGenerator } from "@thomaschaplin/isin-generator";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ATS_ROLES } from "@scripts";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import { ATS_ROLES, RESOLVER_KEY_CORE } from "@scripts";
 import { SecurityType } from "@scripts/domain";
-import { assertObject } from "@test";
-import { deployEquityTokenFixture, executeRbac } from "@test";
+import { assertObject, deployEquityTokenFixture, executeRbac } from "@test";
 
 const name = "TEST_Core";
 const symbol = "TCR";
@@ -23,8 +22,10 @@ describe("Core Facet Tests", () => {
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
+  let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deployFixture() {
     const base = await deployEquityTokenFixture({
@@ -38,12 +39,14 @@ describe("Core Facet Tests", () => {
     signer_A = base.deployer;
     signer_B = base.user1;
     signer_C = base.user2;
+    signer_D = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
-      { role: ATS_ROLES.PAUSER_ROLE, members: [signer_B.address] },
-      { role: ATS_ROLES.TREX_OWNER_ROLE, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_PAUSER, members: [signer_B.address] },
+      { role: ATS_ROLES.ROLE_TREX_OWNER, members: [signer_A.address] },
     ]);
   }
 
@@ -52,13 +55,34 @@ describe("Core Facet Tests", () => {
   });
 
   describe("initializeCore", () => {
-    it("GIVEN an initialized token WHEN initializeCore is called again THEN reverts with AlreadyInitialized", async () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeCore is called THEN AccountHasNoRole", async () => {
+      await expect(
+        asset.connect(signer_D).initializeCore({
+          info: { name: "X", symbol: "Y", isin: "ES1234567890", decimals: 6 },
+          securityType: SecurityType.BOND_VARIABLE_RATE,
+        }),
+      ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+    });
+
+    it("GIVEN already-initialised WHEN initializeCore is called again THEN FacetAlreadyRegistered", async () => {
       await expect(
         asset.initializeCore({
           info: { name: "X", symbol: "Y", isin: "ES1234567890", decimals: 6 },
           securityType: SecurityType.BOND_VARIABLE_RATE,
         }),
-      ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+      ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+    });
+  });
+
+  describe("initializeCore event", () => {
+    it("GIVEN a fresh deployment WHEN initializeCore is called THEN emits CoreInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_CORE);
+      await expect(
+        asset.initializeCore({
+          info: { name, symbol, decimals, isin },
+          securityType: SecurityType.EQUITY,
+        }),
+      ).to.emit(asset, "CoreInitialized");
     });
   });
 
@@ -146,12 +170,36 @@ describe("Core Facet Tests", () => {
     it("GIVEN a deactivated asset WHEN setName THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(deactivatedAsset.connect(base.deployer).setName("")).to.be.revertedWithCustomError(
         deactivatedAsset,
         "Deactivated",
       );
+    });
+
+    it("GIVEN a deactivated asset WHEN setSymbol THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(deactivatedAsset.connect(base.deployer).setSymbol("")).to.be.revertedWithCustomError(
+        deactivatedAsset,
+        "Deactivated",
+      );
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setName THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.setName("")).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN setSymbol THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.setSymbol("")).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
   });
 });

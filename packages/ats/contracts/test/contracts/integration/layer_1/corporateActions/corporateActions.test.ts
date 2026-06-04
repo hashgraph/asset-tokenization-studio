@@ -3,8 +3,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ATS_ROLES } from "@scripts";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import { ATS_ROLES, ATS_CORPORATE_ACTION, RESOLVER_KEY_CORPORATE_ACTIONS } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac } from "@test";
@@ -17,21 +17,24 @@ describe("Corporate Actions Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixtureSinglePartition() {
     const base = await deployEquityTokenFixture();
     diamond = base.diamond;
+    const _signer_A = base.deployer;
     signer_B = base.user1;
     signer_C = base.user2;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.CORPORATE_ACTION_ROLE,
+        role: ATS_ROLES.ROLE_CORPORATE_ACTION,
         members: [signer_C.address],
       },
     ]);
@@ -51,7 +54,7 @@ describe("Corporate Actions Tests", () => {
       amountDecimals: 1,
     };
 
-    const actionType = "0x1c29d09f87f2b0c8192a7719a2acdfdfa320dc2835b5a0398e5bd8dc34c14b0e"; //DIVIDEND_CORPORATE_ACTION_TYPE
+    const actionType = ATS_CORPORATE_ACTION.DIVIDEND;
     const encodedDividendData = ethers.AbiCoder.defaultAbiCoder().encode(
       ["(uint256 recordDate, uint256 executionDate, uint256 amount, uint8 amountDecimals)"],
       [dividendData],
@@ -117,5 +120,25 @@ describe("Corporate Actions Tests", () => {
     expect(corporateActions.actionIdByType_[0]).to.equal(corporateActionsByType.actionIdByType_[0]);
     expect(corporateActions.datas_[0]).to.equal(corporateActionsByType.datas_[0]);
     expect(corporateActions.isDisabled_[0]).to.equal(corporateActionsByType.isDisabled_[0]);
+  });
+  describe("initializeCorporateActions", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeCorporateActions is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_B).initializeCorporateActions())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_B.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeCorporateActions is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeCorporateActions())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_CORPORATE_ACTIONS, 1);
+    });
+  });
+
+  describe("initializeCorporateActions event", () => {
+    it("GIVEN a fresh deployment WHEN initializeCorporateActions is called THEN emits CorporateActionsInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_CORPORATE_ACTIONS);
+      await expect(asset.initializeCorporateActions()).to.emit(asset, "CorporateActionsInitialized");
+    });
   });
 });

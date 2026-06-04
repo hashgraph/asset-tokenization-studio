@@ -93,7 +93,6 @@ export {
   RETRY_DELAY,
   DEFAULT_BATCH_SIZE,
   GAS_LIMIT,
-  LATEST_VERSION,
   DEFAULT_PARTITION,
   INFRASTRUCTURE_CONTRACT_NAMES,
   PROXY_CONTRACTS,
@@ -122,7 +121,7 @@ export {
 // Configuration
 // ============================================================================
 
-export { getNetworkConfig, getAllNetworks, getPrivateKey, getPrivateKeys } from "./config";
+export { getNetworkConfig, getAllNetworks, getPrivateKey, getPrivateKeys, isTestMode } from "./config";
 
 // ============================================================================
 // Signer
@@ -233,11 +232,13 @@ export {
 export {
   waitForTransaction,
   hederaGasOverrides,
+  gasLimitOverride,
   extractRevertReason,
   getGasPrice,
   estimateGasLimit,
   formatGasUsage,
   retryTransaction,
+  withNonceReset,
   isNonceTooLowError,
   isGasError,
   isNetworkError,
@@ -270,18 +271,11 @@ export {
 } from "./utils/logging";
 export type { LoggerConfig } from "./utils/logging";
 
-export {
-  resolveContractName,
-  getTimeTravelVariant,
-  hasTimeTravelVariant,
-  getBaseContractName,
-  isTimeTravelVariant,
-} from "./utils/naming";
-
 export { fetchHederaContractId, getMirrorNodeUrl, isHederaNetwork } from "./utils/hedera";
 
 export { getSelector } from "./utils/selector";
 export { decodeEvent } from "./utils/decodeEvent";
+export { decodeCustomError } from "./utils/decodeCustomError";
 export { dateToUnixTimestamp, generateTimestamp } from "./utils/time";
 
 export { withRetry, withRetryFn, DEFAULT_RETRYABLE_ERRORS } from "./utils/retry";

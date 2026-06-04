@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey HoldAtSnapshotByPartition
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_HOLD_AT_SNAPSHOT_BY_PARTITION = 0xe6aa6abeda5257bb9fda94cbd6583ff73bfc92f42edd2ace846ee45b3cf49f0f;
+
 /**
  * @title IHoldAtSnapshotByPartition
  * @author Asset Tokenization Studio Team
@@ -10,6 +14,19 @@ pragma solidity >=0.8.0 <0.9.0;
  *      `SnapshotIdDoesNotExists` for unknown identifiers.
  */
 interface IHoldAtSnapshotByPartition {
+    /**
+     * @notice Emitted once when the hold-at-snapshot-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeHoldAtSnapshotByPartition`.
+     */
+    event HoldAtSnapshotByPartitionInitialized();
+
+    /**
+     * @notice Initialises the hold-at-snapshot-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeHoldAtSnapshotByPartition() external;
+
     /**
      * @notice Returns the held balance of a token holder for a given partition at the time of a
      *         given snapshot.

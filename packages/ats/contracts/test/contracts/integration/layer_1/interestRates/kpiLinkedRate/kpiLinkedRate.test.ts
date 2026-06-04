@@ -3,11 +3,10 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ATS_ROLES } from "@scripts";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import { ATS_ROLES, RESOLVER_KEY_KPI_LINKED_RATE } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { DEFAULT_BOND_KPI_LINKED_RATE_PARAMS, deployBondKpiLinkedRateTokenFixture } from "@test";
-import { executeRbac } from "@test";
+import { DEFAULT_BOND_KPI_LINKED_RATE_PARAMS, deployBondKpiLinkedRateTokenFixture, executeRbac } from "@test";
 
 describe("Kpi Linked Rate Tests", () => {
   let diamond: ResolverProxy;
@@ -16,6 +15,7 @@ describe("Kpi Linked Rate Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixtureMultiPartition() {
     const base = await deployBondKpiLinkedRateTokenFixture();
@@ -25,13 +25,14 @@ describe("Kpi Linked Rate Tests", () => {
     signer_C = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.INTEREST_RATE_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_INTEREST_RATE_MANAGER,
         members: [signer_A.address],
       },
     ]);
@@ -41,28 +42,133 @@ describe("Kpi Linked Rate Tests", () => {
     await loadFixture(deploySecurityFixtureMultiPartition);
   });
 
-  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-    await expect(
-      asset.initializeKpiLinkedRate(
-        {
-          maxRate: 3,
-          baseRate: 2,
-          minRate: 1,
-          startPeriod: 1000,
-          startRate: 2,
-          missedPenalty: 2,
-          reportPeriod: 5000,
-          rateDecimals: 1,
-        },
-        {
-          maxDeviationCap: 1000,
-          baseLine: 700,
-          maxDeviationFloor: 300,
-          impactDataDecimals: 1,
-          adjustmentPrecision: 3,
-        },
-      ),
-    ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+  describe("initializeKpiLinkedRate", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeKpiLinkedRate is called THEN AccountHasNoRole", async () => {
+      await expect(
+        asset.connect(signer_C).initializeKpiLinkedRate(
+          {
+            maxRate: 3,
+            baseRate: 2,
+            minRate: 1,
+            startPeriod: 1000,
+            startRate: 2,
+            missedPenalty: 2,
+            reportPeriod: 5000,
+            rateDecimals: 1,
+          },
+          {
+            maxDeviationCap: 1000,
+            baseLine: 700,
+            maxDeviationFloor: 300,
+            impactDataDecimals: 1,
+            adjustmentPrecision: 3,
+          },
+        ),
+      )
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeKpiLinkedRate is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(
+        asset.initializeKpiLinkedRate(
+          {
+            maxRate: 3,
+            baseRate: 2,
+            minRate: 1,
+            startPeriod: 1000,
+            startRate: 2,
+            missedPenalty: 2,
+            reportPeriod: 5000,
+            rateDecimals: 1,
+          },
+          {
+            maxDeviationCap: 1000,
+            baseLine: 700,
+            maxDeviationFloor: 300,
+            impactDataDecimals: 1,
+            adjustmentPrecision: 3,
+          },
+        ),
+      ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+    });
+  });
+
+  describe("initializeKpiLinkedRate event", () => {
+    it("GIVEN a fresh deployment WHEN initializeKpiLinkedRate is called THEN emits KpiLinkedRateInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_KPI_LINKED_RATE);
+      await expect(
+        asset.initializeKpiLinkedRate(
+          {
+            maxRate: 3n,
+            baseRate: 2n,
+            minRate: 1n,
+            startPeriod: 5000,
+            startRate: 2n,
+            missedPenalty: 2n,
+            reportPeriod: 5000,
+            rateDecimals: 1,
+          },
+          {
+            maxDeviationCap: 1000,
+            baseLine: 700,
+            maxDeviationFloor: 300,
+            impactDataDecimals: 1,
+            adjustmentPrecision: 3,
+          },
+        ),
+      ).to.emit(asset, "KpiLinkedRateInitialized");
+    });
+  });
+
+  describe("initializeKpiLinkedRate", () => {
+    it("GIVEN Min Rate larger than Base Rate WHEN initializeKpiLinkedRate THEN transaction fails with WrongInterestRateValues", async () => {
+      await expect(
+        deployBondKpiLinkedRateTokenFixture({
+          interestRateParams: { maxRate: 4, baseRate: 2, minRate: 3 },
+        }),
+      ).to.be.revertedWithCustomError(asset, "WrongInterestRateValues");
+    });
+
+    it("GIVEN Base Rate larger than Max Rate WHEN initializeKpiLinkedRate THEN transaction fails with WrongInterestRateValues", async () => {
+      await expect(
+        deployBondKpiLinkedRateTokenFixture({
+          interestRateParams: { maxRate: 4, baseRate: 5, minRate: 3 },
+        }),
+      ).to.be.revertedWithCustomError(asset, "WrongInterestRateValues");
+    });
+
+    it("GIVEN Max deviation floor larger than Base Line WHEN initializeKpiLinkedRate THEN transaction fails with WrongImpactDataValues", async () => {
+      await expect(
+        deployBondKpiLinkedRateTokenFixture({
+          impactDataParams: { maxDeviationCap: 1000, baseLine: 700, maxDeviationFloor: 800 },
+        }),
+      ).to.be.revertedWithCustomError(asset, "WrongImpactDataValues");
+    });
+
+    it("GIVEN Max deviation floor equal to Base Line WHEN initializeKpiLinkedRate THEN transaction fails with WrongImpactDataValues", async () => {
+      await expect(
+        deployBondKpiLinkedRateTokenFixture({
+          impactDataParams: { maxDeviationCap: 1000, baseLine: 700, maxDeviationFloor: 700 },
+        }),
+      ).to.be.revertedWithCustomError(asset, "WrongImpactDataValues");
+    });
+
+    it("GIVEN Base Line larger than Max Deviation Cap WHEN initializeKpiLinkedRate THEN transaction fails with WrongImpactDataValues", async () => {
+      await expect(
+        deployBondKpiLinkedRateTokenFixture({
+          impactDataParams: { maxDeviationCap: 1000, baseLine: 7000, maxDeviationFloor: 800 },
+        }),
+      ).to.be.revertedWithCustomError(asset, "WrongImpactDataValues");
+    });
+
+    it("GIVEN Base Line equal to Max Deviation Cap WHEN initializeKpiLinkedRate THEN transaction fails with WrongImpactDataValues", async () => {
+      await expect(
+        deployBondKpiLinkedRateTokenFixture({
+          impactDataParams: { maxDeviationCap: 1000, baseLine: 1000, maxDeviationFloor: 800 },
+        }),
+      ).to.be.revertedWithCustomError(asset, "WrongImpactDataValues");
+    });
   });
 
   describe("Paused", () => {
@@ -287,7 +393,7 @@ describe("Kpi Linked Rate Tests", () => {
     it("GIVEN a deactivated asset WHEN setKpiLinkedRateInterestRate THEN transaction fails with Deactivated", async () => {
       const base = await deployBondKpiLinkedRateTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).setKpiLinkedRateInterestRate({
@@ -301,6 +407,59 @@ describe("Kpi Linked Rate Tests", () => {
           rateDecimals: 0,
         }),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN setKpiLinkedRateImpactData THEN transaction fails with Deactivated", async () => {
+      const base = await deployBondKpiLinkedRateTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).setKpiLinkedRateImpactData({
+          maxDeviationCap: 0,
+          baseLine: 0,
+          maxDeviationFloor: 0,
+          impactDataDecimals: 0,
+          adjustmentPrecision: 0,
+        }),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setCouponRateType THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.setCouponRateType(3)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN setKpiLinkedRateImpactData THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.setKpiLinkedRateImpactData({
+          maxDeviationCap: 0,
+          baseLine: 0,
+          maxDeviationFloor: 0,
+          impactDataDecimals: 0,
+          adjustmentPrecision: 0,
+        }),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN setKpiLinkedRateInterestRate THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.setKpiLinkedRateInterestRate({
+          maxRate: 0,
+          baseRate: 0,
+          minRate: 0,
+          startPeriod: 0,
+          startRate: 0,
+          missedPenalty: 0,
+          reportPeriod: 0,
+          rateDecimals: 0,
+        }),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
   });
 });

@@ -6,9 +6,17 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { type ResolverProxy, type IAsset } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { grantRoleAndPauseToken } from "@test";
-import { deployEquityTokenFixture } from "@test";
+import { deployAtsInfrastructureFixture, deployEquityTokenFixture } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
-import { EMPTY_STRING, ZERO, DEFAULT_PARTITION, ATS_ROLES, ADDRESS_ZERO, EMPTY_HEX_BYTES } from "@scripts";
+import {
+  EMPTY_STRING,
+  ZERO,
+  DEFAULT_PARTITION,
+  ATS_ROLES,
+  ADDRESS_ZERO,
+  EMPTY_HEX_BYTES,
+  EQUITY_CONFIG_ID,
+} from "@scripts";
 
 const amount = 1;
 const data = "0x1234";
@@ -38,23 +46,23 @@ describe("Controller Tests", () => {
       asset = await ethers.getContractAt("IAsset", diamond.target);
       await executeRbac(asset, [
         {
-          role: ATS_ROLES.PAUSER_ROLE,
+          role: ATS_ROLES.ROLE_PAUSER,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES.ISSUER_ROLE,
+          role: ATS_ROLES.ROLE_ISSUER,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES.CONTROLLER_ROLE,
+          role: ATS_ROLES.ROLE_CONTROLLER,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES.KYC_ROLE,
+          role: ATS_ROLES.ROLE_KYC,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES.SSI_MANAGER_ROLE,
+          role: ATS_ROLES.ROLE_SSI_MANAGER,
           members: [signer_A.address],
         },
       ]);
@@ -64,13 +72,41 @@ describe("Controller Tests", () => {
       await loadFixture(deploySecurityFixtureSinglePartition);
     });
 
-    it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-      await expect(asset.initializeController(false)).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+    it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeController(false)).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeController is called THEN it reverts with AccountHasNoRole", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(signer_C).initializeController(false)).to.be.revertedWithCustomError(
+        freshAsset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeController is called THEN ControllerInitialized event is emitted", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      const deploymentReceipt = await (await freshAsset.connect(infra.deployer).initializeController(false)).wait();
+      await expect(deploymentReceipt).to.emit(freshAsset, "ControllerInitialized").withArgs(false);
     });
 
     describe("Paused", () => {
       beforeEach(async () => {
-        await grantRoleAndPauseToken(asset, ATS_ROLES.CONTROLLER_ROLE, signer_A, signer_B, signer_C.address);
+        await grantRoleAndPauseToken(asset, ATS_ROLES.ROLE_CONTROLLER, signer_A, signer_B, signer_C.address);
       });
 
       it("GIVEN a paused Token WHEN controllerTransfer THEN transaction fails with IsPaused", async () => {
@@ -122,7 +158,7 @@ describe("Controller Tests", () => {
         );
       });
 
-      it("GIVEN an account without ATS_ROLES.CONTROLLER_ROLE WHEN forcedTransfer is called THEN transaction fails with AccountHasNoRole", async () => {
+      it("GIVEN an account without ATS_ROLES.ROLE_CONTROLLER WHEN forcedTransfer is called THEN transaction fails with AccountHasNoRole", async () => {
         await expect(
           asset.connect(signer_C).forcedTransfer(signer_D.address, signer_E.address, amount),
         ).to.be.revertedWithCustomError(asset, "AccountHasNoRoles");
@@ -186,8 +222,8 @@ describe("Controller Tests", () => {
 
     describe("finalizeControllable", () => {
       beforeEach(async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROLLER_ROLE, signer_A.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CONTROLLER, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
         await expect(asset.connect(signer_A).finalizeControllable())
           .to.emit(asset, "FinalizedControllerFeature")
           .withArgs(signer_A.address);
@@ -218,7 +254,7 @@ describe("Controller Tests", () => {
 
     describe("ForcedTransfer", () => {
       beforeEach(async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROLLER_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CONTROLLER, signer_A.address);
         await asset.connect(signer_A).addIssuer(signer_A.address);
         await asset.connect(signer_B).grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
         await asset.connect(signer_B).grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
@@ -226,7 +262,7 @@ describe("Controller Tests", () => {
 
       it("GIVEN an account with balance WHEN forcedTransfer THEN transaction success", async () => {
         await asset.connect(signer_B).mint(signer_E.address, amount * 2);
-        await asset.grantRole(ATS_ROLES.CONTROLLER_ROLE, signer_E.address);
+        await asset.grantRole(ATS_ROLES.ROLE_CONTROLLER, signer_E.address);
 
         expect(await asset.forcedTransfer(signer_E.address, signer_D.address, amount))
           .to.emit(asset, "Transferred")
@@ -263,7 +299,7 @@ describe("Controller Tests", () => {
           .to.emit(asset, "AgentAdded")
           .withArgs(signer_B.address);
 
-        const hasRole = await asset.hasRole(ATS_ROLES.AGENT_ROLE, signer_B.address);
+        const hasRole = await asset.hasRole(ATS_ROLES.ROLE_AGENT, signer_B.address);
         const isAgent = await asset.isAgent(signer_B.address);
         expect(isAgent).to.equal(true);
         expect(hasRole).to.equal(true);
@@ -276,7 +312,7 @@ describe("Controller Tests", () => {
           .to.emit(asset, "AgentRemoved")
           .withArgs(signer_B.address);
 
-        const hasRole = await asset.hasRole(ATS_ROLES.AGENT_ROLE, signer_B.address);
+        const hasRole = await asset.hasRole(ATS_ROLES.ROLE_AGENT, signer_B.address);
         const isAgent = await asset.isAgent(signer_B.address);
         expect(isAgent).to.equal(false);
         expect(hasRole).to.equal(false);
@@ -285,7 +321,7 @@ describe("Controller Tests", () => {
       it("GIVEN a non-agent address WHEN removing agent THEN reverts with AccountNotAssignedToRole", async () => {
         await expect(asset.removeAgent(signer_C.address))
           .to.be.revertedWithCustomError(asset, "AccountNotAssignedToRole")
-          .withArgs(ATS_ROLES.AGENT_ROLE, signer_C.address);
+          .withArgs(ATS_ROLES.ROLE_AGENT, signer_C.address);
       });
 
       it("GIVEN an already-agent address WHEN adding agent again THEN reverts with AccountAssignedToRole", async () => {
@@ -293,11 +329,11 @@ describe("Controller Tests", () => {
 
         await expect(asset.addAgent(signer_B.address))
           .to.be.revertedWithCustomError(asset, "AccountAssignedToRole")
-          .withArgs(ATS_ROLES.AGENT_ROLE, signer_B.address);
+          .withArgs(ATS_ROLES.ROLE_AGENT, signer_B.address);
       });
 
       it("GIVEN a user with the agent role WHEN performing actions using ERC-1400 methods succeeds", async () => {
-        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_B.address);
+        await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_B.address);
         const issueAmount = 1000;
         await expect(
           asset.connect(signer_B).issueByPartition({
@@ -335,7 +371,7 @@ describe("Controller Tests", () => {
       });
 
       it("GIVEN a user with the agent role WHEN performing actions using ERC-3643 methods succeeds", async () => {
-        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_B.address);
+        await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_B.address);
         const issueAmount = 1000;
         await asset.connect(signer_B).issueByPartition({
           partition: DEFAULT_PARTITION,
@@ -382,7 +418,7 @@ describe("Controller Tests", () => {
       asset = await ethers.getContractAt("IAsset", diamond.target);
       await executeRbac(asset, [
         {
-          role: ATS_ROLES.PAUSER_ROLE,
+          role: ATS_ROLES.ROLE_PAUSER,
           members: [signer_B.address],
         },
       ]);
@@ -394,9 +430,9 @@ describe("Controller Tests", () => {
 
     describe("NotAllowedInMultiPartitionMode", () => {
       beforeEach(async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROLLER_ROLE, signer_C.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CONTROLLER, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
       });
 
       it("GIVEN an account with controller role WHEN controllerTransfer THEN NotAllowedInMultiPartitionMode", async () => {
@@ -424,11 +460,104 @@ describe("Controller Tests", () => {
     it("GIVEN a deactivated asset WHEN forcedTransfer THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).forcedTransfer(ethers.ZeroAddress, ethers.ZeroAddress, 0),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN controllerTransfer THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset
+          .connect(base.deployer)
+          .controllerTransfer(ethers.ZeroAddress, ethers.ZeroAddress, 0, "0x", "0x"),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN controllerRedeem THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).controllerRedeem(ethers.ZeroAddress, 0, "0x", "0x"),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN finalizeControllable THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(deactivatedAsset.connect(base.deployer).finalizeControllable()).to.be.revertedWithCustomError(
+        deactivatedAsset,
+        "Deactivated",
+      );
+    });
+
+    it("GIVEN a deactivated asset WHEN addAgent THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(deactivatedAsset.connect(base.deployer).addAgent(ethers.ZeroAddress)).to.be.revertedWithCustomError(
+        deactivatedAsset,
+        "Deactivated",
+      );
+    });
+
+    it("GIVEN a deactivated asset WHEN removeAgent THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).removeAgent(ethers.ZeroAddress),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      const cut = await ethers.getContractAt("MockDiamondCut", diamond.target);
+      await cut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN controllerTransfer THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.controllerTransfer(ADDRESS_ZERO, ADDRESS_ZERO, 0, "0x", "0x")).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN controllerRedeem THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.controllerRedeem(ADDRESS_ZERO, 0, "0x", "0x")).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN finalizeControllable THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.finalizeControllable()).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN forcedTransfer THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.forcedTransfer(ADDRESS_ZERO, ADDRESS_ZERO, 0)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN addAgent THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.addAgent(ADDRESS_ZERO)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN removeAgent THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.removeAgent(ADDRESS_ZERO)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
   });
 });

@@ -66,7 +66,6 @@ import {
   MockedExternalKycList__factory,
   MockedExternalPause__factory,
   MockedWhitelist__factory,
-  TREXFactoryAts__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import type { IScheduledBalanceAdjustment } from "@hashgraph/asset-tokenization-contracts";
 import { ContractId } from "@hiero-ledger/sdk";
@@ -74,7 +73,7 @@ import EventService from "@service/event/EventService";
 import LogService from "@service/log/LogService";
 import NetworkService from "@service/network/NetworkService";
 import MetamaskService from "@service/wallet/metamask/MetamaskService";
-import { BaseContract, ContractTransactionResponse, Provider, Signer } from "ethers";
+import { BaseContract, ContractTransactionResponse, encodeBytes32String, Provider, Signer, toUtf8Bytes } from "ethers";
 import { singleton } from "tsyringe";
 import { SigningError } from "../error/SigningError";
 import { MirrorNodeAdapter } from "../mirror/MirrorNodeAdapter";
@@ -385,6 +384,17 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       "unpause",
       [],
       GAS.UNPAUSE,
+    );
+  }
+
+  async deactivate(security: EvmAddress): Promise<TransactionResponse> {
+    LogService.logTrace(`Deactivating security: ${security.toString()}`);
+
+    return this.executeTransaction(
+      IAsset__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "deactivate",
+      [],
+      GAS.DEACTIVATE,
     );
   }
 
@@ -2009,6 +2019,17 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
+  async setCustomData(security: EvmAddress, key: string, value: string[]): Promise<TransactionResponse> {
+    LogService.logTrace(`Setting custom data for security: ${security.toString()}`);
+
+    return this.executeTransaction(
+      IAsset__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "setCustomData",
+      [encodeBytes32String(key), value.map((v) => toUtf8Bytes(v))],
+      GAS.SET_CUSTOM_DATA,
+    );
+  }
+
   async setOnchainID(security: EvmAddress, onchainID: EvmAddress): Promise<TransactionResponse> {
     LogService.logTrace(`Setting onchainID to ${security.toString()}`);
 
@@ -2330,223 +2351,6 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     } catch (error) {
       LogService.logError(error);
       throw new SigningError(`Unexpected error in ${deployMethod} operation: ${error}`);
-    }
-  }
-
-  async createTrexSuiteBond(
-    salt: string,
-    owner: string,
-    irs: string,
-    onchainId: string,
-    irAgents: string[],
-    tokenAgents: string[],
-    compliancesModules: string[],
-    complianceSettings: string[],
-    claimTopics: number[],
-    issuers: string[],
-    issuerClaims: number[][],
-    security: Security,
-    bondDetails: BondDetails,
-    factory: EvmAddress,
-    resolver: EvmAddress,
-    configId: string,
-    configVersion: number,
-    compliance: EvmAddress,
-    identityRegistryAddress: EvmAddress,
-    diamondOwnerAccount: EvmAddress,
-    proceedRecipients: EvmAddress[] = [],
-    proceedRecipientsData: string[] = [],
-    externalPauses?: EvmAddress[],
-    externalControlLists?: EvmAddress[],
-    externalKycLists?: EvmAddress[],
-  ): Promise<TransactionResponse> {
-    return this.createTrexSuite(
-      "bond",
-      salt,
-      owner,
-      irs,
-      onchainId,
-      irAgents,
-      tokenAgents,
-      compliancesModules,
-      complianceSettings,
-      claimTopics,
-      issuers,
-      issuerClaims,
-      security,
-      { bondDetails },
-      factory,
-      resolver,
-      configId,
-      configVersion,
-      compliance,
-      identityRegistryAddress,
-      diamondOwnerAccount,
-      proceedRecipients,
-      proceedRecipientsData,
-      externalPauses,
-      externalControlLists,
-      externalKycLists,
-    );
-  }
-
-  async createTrexSuiteEquity(
-    salt: string,
-    owner: string,
-    irs: string,
-    onchainId: string,
-    irAgents: string[],
-    tokenAgents: string[],
-    compliancesModules: string[],
-    complianceSettings: string[],
-    claimTopics: number[],
-    issuers: string[],
-    issuerClaims: number[][],
-    security: Security,
-    equityDetails: EquityDetails,
-    factory: EvmAddress,
-    resolver: EvmAddress,
-    configId: string,
-    configVersion: number,
-    compliance: EvmAddress,
-    identityRegistryAddress: EvmAddress,
-    diamondOwnerAccount: EvmAddress,
-    externalPauses?: EvmAddress[],
-    externalControlLists?: EvmAddress[],
-    externalKycLists?: EvmAddress[],
-  ): Promise<TransactionResponse> {
-    return this.createTrexSuite(
-      "equity",
-      salt,
-      owner,
-      irs,
-      onchainId,
-      irAgents,
-      tokenAgents,
-      compliancesModules,
-      complianceSettings,
-      claimTopics,
-      issuers,
-      issuerClaims,
-      security,
-      equityDetails,
-      factory,
-      resolver,
-      configId,
-      configVersion,
-      compliance,
-      identityRegistryAddress,
-      diamondOwnerAccount,
-      [],
-      [],
-      externalPauses,
-      externalControlLists,
-      externalKycLists,
-    );
-  }
-
-  private async createTrexSuite(
-    tokenType: "bond" | "equity",
-    salt: string,
-    owner: string,
-    irs: string,
-    onchainId: string,
-    irAgents: string[],
-    tokenAgents: string[],
-    compliancesModules: string[],
-    complianceSettings: string[],
-    claimTopics: number[],
-    issuers: string[],
-    issuerClaims: number[][],
-    security: Security,
-    tokenDetails: { bondDetails: BondDetails } | EquityDetails,
-    factory: EvmAddress,
-    resolver: EvmAddress,
-    configId: string,
-    configVersion: number,
-    compliance: EvmAddress,
-    identityRegistryAddress: EvmAddress,
-    diamondOwnerAccount: EvmAddress,
-    proceedRecipientsId: EvmAddress[],
-    proceedRecipientsData: string[],
-    externalPauses?: EvmAddress[],
-    externalControlLists?: EvmAddress[],
-    externalKycLists?: EvmAddress[],
-  ): Promise<TransactionResponse> {
-    const securityData = SecurityDataBuilder.buildSecurityData(
-      security,
-      resolver,
-      configId,
-      configVersion,
-      externalPauses,
-      externalControlLists,
-      externalKycLists,
-      diamondOwnerAccount,
-      compliance,
-      identityRegistryAddress,
-    );
-
-    const regulationData = SecurityDataBuilder.buildRegulationData(security);
-
-    let tokenData: any;
-
-    if (tokenType === "bond") {
-      const details = tokenDetails as {
-        bondDetails: BondDetails;
-      };
-      tokenData = {
-        security: securityData,
-        bondDetails: SecurityDataBuilder.buildBondDetails(details.bondDetails),
-        proceedRecipients: proceedRecipientsId.map((addr) => addr.toString()),
-        proceedRecipientsData: proceedRecipientsData.map((data) => (data == "" ? "0x" : data)),
-      } as FactoryBondToken;
-    } else {
-      tokenData = {
-        security: securityData,
-        equityDetails: SecurityDataBuilder.buildEquityDetails(tokenDetails as EquityDetails),
-      } as FactoryEquityToken;
-    }
-
-    const factoryContract = TREXFactoryAts__factory.connect(factory.toString(), this.getSignerOrProvider());
-
-    LogService.logTrace(`Deploying TrexSuiteAts${tokenType.charAt(0).toUpperCase() + tokenType.slice(1)}:`, {
-      security: tokenData,
-    });
-
-    const methodMap = {
-      bond: "deployTREXSuiteAtsBond",
-      equity: "deployTREXSuiteAtsEquity",
-    } as const;
-
-    try {
-      return this.executeTransaction(
-        factoryContract,
-        methodMap[tokenType],
-        [
-          salt,
-          {
-            owner,
-            irs,
-            ONCHAINID: onchainId,
-            irAgents,
-            tokenAgents,
-            complianceModules: compliancesModules,
-            complianceSettings,
-          },
-          {
-            claimTopics,
-            issuers,
-            issuerClaims,
-          },
-          tokenData,
-          regulationData,
-        ],
-        GAS.TREX_CREATE_SUITE,
-        "TREXSuiteDeployed",
-      );
-    } catch (error) {
-      LogService.logError(error);
-      throw new SigningError(`Unexpected error in ${methodMap[tokenType]} operation: ${error}`);
     }
   }
 

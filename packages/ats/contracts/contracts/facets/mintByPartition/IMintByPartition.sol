@@ -3,6 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC1410Types } from "../layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 
+/// @custom:hash resolverKey MintByPartition
+bytes32 constant RESOLVER_KEY_MINT_BY_PARTITION = 0x25ec74149ce0eadddeb82e668365e2e174db7431a04a80bada246f8f7887dadf;
+
 /**
  * @title IMintByPartition
  * @author Asset Tokenization Studio Team
@@ -13,6 +16,19 @@ import { IERC1410Types } from "../layer_1/ERC1400/ERC1410/IERC1410Types.sol";
  *      `IssuedByPartition` event from `IERC1410Types`.
  */
 interface IMintByPartition {
+    /**
+     * @notice Emitted once when the mint-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeMintByPartition`.
+     */
+    event MintByPartitionInitialized();
+
+    /**
+     * @notice Initialises the mint-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeMintByPartition() external;
+
     /**
      * @notice Issues tokens to a specific partition for a token holder.
      * @dev Restricted to issuer or agent roles. Increases the total supply and the partition

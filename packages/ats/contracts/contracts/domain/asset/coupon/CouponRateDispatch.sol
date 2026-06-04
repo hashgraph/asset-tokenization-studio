@@ -4,9 +4,11 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ICoupon } from "../../../facets/coupon/ICoupon.sol";
 import { ICouponTypes } from "../../../facets/coupon/ICouponTypes.sol";
 import { IInterestRate } from "../../../facets/interestRate/IInterestRate.sol";
-import { IFixedRate } from "../../../facets/layer_2/interestRate/fixedRate/IFixedRate.sol";
+import { IFixedRate } from "../../../facets/fixedRate/IFixedRate.sol";
 import { InterestRateStorageWrapper } from "../InterestRateStorageWrapper.sol";
 import { KpiLinkedRateLib } from "../KpiLinkedRateLib.sol";
+import { _checkUnexpectedError } from "../../../infrastructure/utils/UnexpectedError.sol";
+import { UNRECOGNIZED_RATE_TYPE } from "../../../constants/values.sol";
 
 /**
  * @title CouponRateDispatch
@@ -36,19 +38,18 @@ library CouponRateDispatch {
      *              been initialized.
      * @param couponID The coupon identifier.
      * @param coupon   The coupon data struct.
-     * @return rate_           Resolved rate value (meaningful only when shouldOverride_ is true).
-     * @return rateDecimals_   Decimal precision (meaningful only when shouldOverride_ is true).
-     * @return shouldOverride_ True when the caller must overwrite the coupon's rate fields.
+     * @return resolvedCoupon_  Coupon with the resolved rate value.
      */
     function resolveRate(
         uint256 couponID,
         ICouponTypes.Coupon memory coupon
-    ) internal view returns (uint256 rate_, uint8 rateDecimals_, bool shouldOverride_) {
+    ) internal view returns (ICouponTypes.Coupon memory resolvedCoupon_) {
+        resolvedCoupon_ = coupon;
         if (InterestRateStorageWrapper.getCouponRateType() == IInterestRate.RateType.KPI_LINKED) {
-            (rate_, rateDecimals_) = KpiLinkedRateLib.calculateKpiLinkedInterestRate(couponID, coupon);
-            return (rate_, rateDecimals_, true);
+            (resolvedCoupon_.rate, resolvedCoupon_.rateDecimals, resolvedCoupon_.rateStatus) = KpiLinkedRateLib
+                .calculateKpiLinkedInterestRate(couponID, coupon);
         }
-        return (rate_, rateDecimals_, shouldOverride_);
+        return resolvedCoupon_;
         // NONE, STANDARD, FIXED: rate is owned at write time; no action needed at read/trigger time.
     }
 
@@ -71,28 +72,33 @@ library CouponRateDispatch {
         ICouponTypes.Coupon memory newCoupon
     ) internal view returns (ICouponTypes.Coupon memory resolved_) {
         IInterestRate.RateType rateType = InterestRateStorageWrapper.getCouponRateType();
+        resolved_ = newCoupon;
 
         if (rateType == IInterestRate.RateType.NONE) {
-            newCoupon.rate = 0;
-            newCoupon.rateDecimals = 0;
-            newCoupon.rateStatus = ICouponTypes.RateCalculationStatus.SET;
-            return newCoupon;
+            resolved_.rate = 0;
+            resolved_.rateDecimals = 0;
+            resolved_.rateStatus = ICouponTypes.RateCalculationStatus.SET;
+            return resolved_;
         }
 
         if (rateType == IInterestRate.RateType.FIXED) {
-            if (!_isPendingRate(newCoupon)) revert IFixedRate.InterestRateIsFixed();
-            (newCoupon.rate, newCoupon.rateDecimals) = InterestRateStorageWrapper.getRate();
-            newCoupon.rateStatus = ICouponTypes.RateCalculationStatus.SET;
-            return newCoupon;
+            if (!_isPendingRate(resolved_)) revert IFixedRate.InterestRateIsFixed();
+            (resolved_.rate, resolved_.rateDecimals) = InterestRateStorageWrapper.getRate();
+            resolved_.rateStatus = ICouponTypes.RateCalculationStatus.SET;
+            return resolved_;
         }
 
         if (rateType == IInterestRate.RateType.KPI_LINKED) {
-            if (!_isPendingRate(newCoupon)) revert ICoupon.InterestRateIsKpiLinked();
-            return newCoupon;
+            if (!_isPendingRate(resolved_)) revert ICoupon.InterestRateIsKpiLinked();
+            return resolved_;
         }
 
-        // STANDARD: pass the user-supplied rate through unchanged.
-        resolved_ = newCoupon;
+        if (rateType == IInterestRate.RateType.STANDARD) {
+            if (resolved_.rateStatus != ICouponTypes.RateCalculationStatus.SET) revert ICoupon.InterestRateIsStandard();
+            return resolved_;
+        }
+
+        _checkUnexpectedError(true, UNRECOGNIZED_RATE_TYPE);
     }
 
     /**

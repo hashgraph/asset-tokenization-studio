@@ -31,7 +31,7 @@ const WORKFLOW_STEPS: Record<string, readonly string[]> = {
     "Loan Configuration",
     "Loans Portfolio Configuration",
     "Factory",
-    // TEST-ONLY: only executed when `useTimeTravel` is enabled; the workflow
+    // TEST-ONLY: only executed when `ATS_TEST_MODE=true`; the workflow
     // skips this step otherwise but its slot stays in the list so step indices
     "InitializeMock Configurations",
   ] as const,
@@ -43,6 +43,7 @@ const WORKFLOW_STEPS: Record<string, readonly string[]> = {
     "Bond Configuration",
     "Bond Fixed Rate Configuration",
     "Bond KpiLinked Rate Configuration",
+    "Deposit Token Configuration",
     "Loan Configuration",
     "Loans Portfolio Configuration",
     "Factory Configuration",
@@ -190,6 +191,30 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
         facetCount: steps.configurations.bondKpiLinkedRate.facetCount,
         facets: [], // Will be populated in actual workflow
       },
+      loan: {
+        configId: steps.configurations.loan?.configId ?? "",
+        version: steps.configurations.loan?.version ?? 0,
+        facetCount: steps.configurations.loan?.facetCount ?? 0,
+        facets: [], // Will be populated in actual workflow
+      },
+      loansPortfolio: {
+        configId: steps.configurations.loansPortfolio?.configId ?? "",
+        version: steps.configurations.loansPortfolio?.version ?? 0,
+        facetCount: steps.configurations.loansPortfolio?.facetCount ?? 0,
+        facets: [], // Will be populated in actual workflow
+      },
+      depositToken: {
+        configId: steps.configurations.depositToken?.configId ?? "",
+        version: steps.configurations.depositToken?.version ?? 0,
+        facetCount: steps.configurations.depositToken?.facetCount ?? 0,
+        facets: [], // Will be populated in actual workflow
+      },
+      factory: {
+        configId: steps.configurations.factory?.configId ?? "",
+        version: steps.configurations.factory?.version ?? 0,
+        facetCount: steps.configurations.factory?.facetCount ?? 0,
+        facets: [], // Will be populated in actual workflow
+      },
     },
 
     summary: {
@@ -207,6 +232,7 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
       getBondFixedRateFacets: () => [],
       getBondKpiLinkedRateFacets: () => [],
       getLoanFacets: () => [],
+      getDepositTokenFacets: () => [],
       getLoansPortfolioFacets: () => [],
       getFactoryFacets: () => [],
     },

@@ -1,43 +1,57 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IMaturity } from "./IMaturity.sol";
-import { IKyc } from "../layer_1/kyc/IKyc.sol";
-import { BOND_MANAGER_ROLE, MATURITY_REDEEMER_ROLE } from "../../constants/roles.sol";
+import { IMaturity, RESOLVER_KEY_MATURITY } from "./IMaturity.sol";
+import { IKyc } from "../kyc/IKyc.sol";
+import { ROLE_MATURITY_MANAGER, ROLE_MATURITY_REDEEMER } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
-import { BondStorageWrapper } from "../../domain/asset/BondStorageWrapper.sol";
+import { MaturityDateStorageWrapper } from "../../domain/asset/MaturityDateStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title  Maturity
- * @notice Abstract implementation of `IMaturity` providing bond maturity redemption and maturity
- *         date management capabilities.
- * @dev    Delegates partition operations to `ERC1410StorageWrapper` and maturity date persistence
- *         to `BondStorageWrapper`. Access and state guards are applied via `Modifiers`. Intended
- *         to be inherited by `MaturityFacet`.
  * @author Asset Tokenization Studio Team
+ * @notice Maturity facet for token redemption and maturity date management.
+ * @dev    `fullRedeemAtMaturity` and `updateMaturityDate` manage the token maturity lifecycle,
+ *         registered under `RESOLVER_KEY_MATURITY`.
+ *         Events: `MaturityDateUpdated`. Errors: `MaturityDateInvalid`.
  */
 abstract contract Maturity is IMaturity, Modifiers {
     /// @inheritdoc IMaturity
-    /// @dev Emits {RedeemedByPartition} for each partition via
-    ///      `ERC1410StorageWrapper.redeemByPartition`.
+    function initializeMaturity(
+        uint256 _maturityDate
+    )
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_MATURITY)
+        onlyValidMaturityDate(_maturityDate)
+    {
+        MaturityDateStorageWrapper.setMaturityDate(_maturityDate);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_MATURITY);
+        emit MaturityInitialized(_maturityDate);
+    }
+
+    /// @inheritdoc IMaturity
     function fullRedeemAtMaturity(
         address _tokenHolder
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyClearingDisabled
-        onlyRole(MATURITY_REDEEMER_ROLE)
+        onlyRole(ROLE_MATURITY_REDEEMER)
         onlyAddressNotZero(_tokenHolder)
         onlyUnrecoveredAddress(_tokenHolder)
         onlyListedAllowed(_tokenHolder)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
-        onlyValidMaturityDate(TimeTravelStorageWrapper.getBlockTimestamp())
+        onlyMaturityReached
     {
         bytes32[] memory partitions = ERC1410StorageWrapper.partitionsOf(_tokenHolder);
         uint256 length = partitions.length;
@@ -60,15 +74,21 @@ abstract contract Maturity is IMaturity, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
-        onlyRole(BOND_MANAGER_ROLE)
+        onlyRole(ROLE_MATURITY_MANAGER)
         onlyValidMaturityDate(_newMaturityDate)
         returns (bool success_)
     {
-        emit MaturityDateUpdated(address(this), _newMaturityDate, BondStorageWrapper.getMaturityDate());
-        BondStorageWrapper.setMaturityDate(_newMaturityDate);
+        emit MaturityDateUpdated(address(this), _newMaturityDate, MaturityDateStorageWrapper.getMaturityDate());
+        MaturityDateStorageWrapper.setMaturityDate(_newMaturityDate);
         return true;
+    }
+
+    /// @inheritdoc IMaturity
+    function getMaturityDate() external view override returns (uint256 maturityDate_) {
+        return MaturityDateStorageWrapper.getMaturityDate();
     }
 
     /**

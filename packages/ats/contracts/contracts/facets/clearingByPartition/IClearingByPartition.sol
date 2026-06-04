@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IClearingTypes } from "../layer_1/clearing/IClearingTypes.sol";
+import { IClearingTypes } from "../clearing/IClearingTypes.sol";
+
+/// @custom:hash resolverKey ClearingByPartition
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_CLEARING_BY_PARTITION = 0xb63156d6db31ae3207bca0dd4a8a45f227171367d85a3833a0d7a1622212c5ec;
 
 /**
  * @title IClearingByPartition
@@ -12,6 +16,19 @@ import { IClearingTypes } from "../layer_1/clearing/IClearingTypes.sol";
  *      protected-partition access control, and standard clearing lifecycle guards.
  */
 interface IClearingByPartition is IClearingTypes {
+    /**
+     * @notice Emitted once when the clearing-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeClearingByPartition`.
+     */
+    event ClearingByPartitionInitialized();
+
+    /**
+     * @notice Initialises the clearing-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeClearingByPartition() external;
+
     /**
      * @notice Approves a clearing operation previously requested by a token holder
      * @dev Can only be called before expiration date

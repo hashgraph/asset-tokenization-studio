@@ -131,7 +131,6 @@ export interface ErrorDefinition {
  * - contractName: 100% duplicate of name (always identical)
  * - category: Never used in actual deployments (fantasy feature)
  * - layer: Meaningless for independent facets (diamond pattern has no deploy order)
- * - hasTimeTravel: Convention-based (all facets have TimeTravel variants for tests)
  * - dependencies: Always empty (facets are independent by design)
  * - roles: Always empty (never populated or used)
  * - upgradeable: Nonsense for facets (upgraded via BLR config swap, not proxy)
@@ -147,7 +146,7 @@ export interface FacetDefinition {
 
   /** Resolver key imported or defined by this facet */
   resolverKey?: {
-    /** Resolver key name (e.g., _ACCESS_CONTROL_RESOLVER_KEY) */
+    /** Resolver key name (e.g., _ACCESS_CONTROL) */
     name: string;
     /** Resolver key bytes32 value (e.g., 0x011768a41...) */
     value: string;
@@ -178,13 +177,7 @@ export interface FacetDefinition {
    *
    * The registry stores the factory reference; deployment code handles library linking.
    */
-  factory?: (signer: Signer, useTimeTravel?: boolean) => ContractFactory;
-
-  /**
-   * TypeChain factory for the TimeTravel variant of this facet (test-only).
-   * Same library linking assumptions as factory.
-   */
-  timeTravelFactory?: (signer: Signer) => unknown;
+  factory?: (signer: Signer) => ContractFactory;
 }
 
 /**
@@ -686,6 +679,7 @@ export interface FacetMetadata {
   address: string;
   contractId?: string;
   key: string;
+  version?: number;
 }
 
 /**
@@ -762,6 +756,10 @@ export interface DeploymentOutputType {
     bond: ConfigurationMetadata;
     bondFixedRate: ConfigurationMetadata;
     bondKpiLinkedRate: ConfigurationMetadata;
+    loan: ConfigurationMetadata;
+    loansPortfolio: ConfigurationMetadata;
+    depositToken: ConfigurationMetadata;
+    factory: ConfigurationMetadata;
   };
   summary: {
     totalContracts: number;
@@ -777,6 +775,7 @@ export interface DeploymentOutputType {
     getBondFixedRateFacets(): FacetMetadata[];
     getBondKpiLinkedRateFacets(): FacetMetadata[];
     getLoanFacets(): FacetMetadata[];
+    getDepositTokenFacets(): FacetMetadata[];
     getLoansPortfolioFacets(): FacetMetadata[];
     getFactoryFacets(): FacetMetadata[];
   };

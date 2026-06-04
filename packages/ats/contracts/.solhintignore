@@ -2,6 +2,10 @@ node_modules/
 contracts/hts-precompile/HederaResponseCodes.sol
 contracts/hts-precompile/HederaTokenService.sol
 contracts/hts-precompile/IHederaTokenService.sol
+contracts/constants/
+contracts/test/
+contracts/hardhat-dependency-compiler/
+contracts/infrastructure/utils/EvmAccessors.sol
 export/
 deployments/
 artifacts/

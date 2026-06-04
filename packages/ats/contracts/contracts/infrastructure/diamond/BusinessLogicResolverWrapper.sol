@@ -4,31 +4,51 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IBusinessLogicResolver } from "./IBusinessLogicResolver.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSetBytes4 } from "../../infrastructure/utils/EnumerableSetBytes4.sol";
-import { _BUSINESS_LOGIC_RESOLVER_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { DefaultValueValidation } from "../utils/DefaultValueValidation.sol";
+
+/// @custom:hash storage BusinessLogicResolver
+// solhint-disable-next-line max-line-length
+bytes32 constant STORAGE_LOCATION_BUSINESS_LOGIC_RESOLVER = 0xde52d5af2ee0e84dfa9eb9bcc42ec14eed20a1d286bfef34d73589ea7ee18800;
+
+/**
+ * @notice Diamond storage backing the business-logic resolver registry.
+ * @dev Records, per facet id, the active version set, status, and selector blacklist that
+ *      determine which logic a resolver-proxy delegates to. Hoisted to file scope per the
+ *      project's ERC-7201 storage convention; new fields must be appended below the
+ *      APPEND-ONLY marker to preserve upgrade safety.
+ * @custom:storage-location erc7201:security.token.standard.storage.BusinessLogicResolver
+ */
+struct BusinessLogicResolverDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    bool initialized;
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
+    mapping(bytes32 facetId => uint256 lastVersion) latestVersionByFacetId;
+    // list of facetIds
+    bytes32[] activeBusinessLogics;
+    // facetId -> bool
+    mapping(bytes32 => bool) businessLogicActive;
+    // facetId -> pos (one per vesion) -> version + status + address
+    mapping(bytes32 => IBusinessLogicResolver.BusinessLogicVersion[]) businessLogics;
+    // version to status
+    mapping(bytes32 facetIdAndVersion => IBusinessLogicResolver.VersionStatus status) statusByFacetIdAndVersion;
+    mapping(bytes32 => EnumerableSetBytes4.Bytes4Set) selectorBlacklist;
+    // ─── APPEND-ONLY ZONE BELOW ───
+}
 
 abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
-    struct BusinessLogicResolverDataStorage {
-        mapping(bytes32 facetId => uint256 lastVersion) latestVersionByFacetId;
-        // list of facetIds
-        bytes32[] activeBusinessLogics;
-        // facetId -> bool
-        mapping(bytes32 => bool) businessLogicActive;
-        // facetId -> pos (one per vesion) -> version + status + address
-        mapping(bytes32 => IBusinessLogicResolver.BusinessLogicVersion[]) businessLogics;
-        // version to status
-        mapping(bytes32 facetIdAndVersion => IBusinessLogicResolver.VersionStatus status) statusByFacetIdAndVersion;
-        bool initialized;
-        mapping(bytes32 => EnumerableSetBytes4.Bytes4Set) selectorBlacklist;
-    }
-
     modifier validVersion(bytes32 _businessLogicKey, uint256 _version) {
         _checkValidVersion(_businessLogicKey, _version);
         _;
     }
 
-    modifier onlyValidKeys(IBusinessLogicResolver.BusinessLogicRegistryData[] calldata _businessLogicsRegistryDatas) {
-        _checkValidKeys(_businessLogicsRegistryDatas);
+    modifier onlyValidKeysAndAddresses(
+        IBusinessLogicResolver.BusinessLogicRegistryData[] calldata _businessLogicsRegistryDatas
+    ) {
+        _checkValidKeysAndAddresses(_businessLogicsRegistryDatas);
         _;
     }
 
@@ -209,7 +229,7 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
         pure
         returns (BusinessLogicResolverDataStorage storage businessLogicResolverData_)
     {
-        bytes32 position = _BUSINESS_LOGIC_RESOLVER_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_BUSINESS_LOGIC_RESOLVER;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             businessLogicResolverData_.slot := position
@@ -221,7 +241,7 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
             revert BusinessLogicVersionDoesNotExist(_version);
     }
 
-    function _checkValidKeys(
+    function _checkValidKeysAndAddresses(
         IBusinessLogicResolver.BusinessLogicRegistryData[] calldata _businessLogicsRegistryDatas
     ) private pure {
         // Check all previously activated keys are in the array.this
@@ -232,6 +252,8 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
         for (uint256 index; index < length; ) {
             currentKey = _businessLogicsRegistryDatas[index].businessLogicKey;
             if (uint256(currentKey) == 0) revert ZeroKeyNotValidForBusinessLogic();
+
+            DefaultValueValidation.checkZeroAddress(_businessLogicsRegistryDatas[index].businessLogicAddress);
 
             unchecked {
                 innerIndex = index + 1;

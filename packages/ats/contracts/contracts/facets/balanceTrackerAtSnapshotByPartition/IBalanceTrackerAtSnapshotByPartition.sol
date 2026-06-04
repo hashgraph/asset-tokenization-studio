@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey BalanceTrackerAtSnapshotByPartition
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT_BY_PARTITION = 0x58443162e33b704d1fc5afb40e87bf81357231beefee616de557cc06fef3aba8;
+
 /**
  * @title IBalanceTrackerAtSnapshotByPartition
  * @author Asset Tokenization Studio Team
@@ -11,6 +15,19 @@ pragma solidity >=0.8.0 <0.9.0;
  *      `SnapshotIdDoesNotExists` for unknown identifiers.
  */
 interface IBalanceTrackerAtSnapshotByPartition {
+    /**
+     * @notice Emitted once when the partition snapshot balance tracker capability is initialised on a token.
+     * @dev Fires exclusively from `initializeBalanceTrackerAtSnapshotByPartition` after the storage write succeeds.
+     */
+    event BalanceTrackerAtSnapshotByPartitionInitialized();
+
+    /**
+     * @notice Initialises the partition snapshot balance tracker capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeBalanceTrackerAtSnapshotByPartition() external;
+
     /**
      * @notice Returns the balance of an account for a given partition at the time of a given snapshot.
      * @param _partition   The partition identifier.

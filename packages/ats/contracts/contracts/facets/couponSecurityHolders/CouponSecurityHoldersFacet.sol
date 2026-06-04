@@ -1,18 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ICouponSecurityHolders } from "./ICouponSecurityHolders.sol";
+import { ICouponSecurityHolders, RESOLVER_KEY_COUPON_SECURITY_HOLDERS } from "./ICouponSecurityHolders.sol";
 import { CouponSecurityHolders } from "./CouponSecurityHolders.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { _COUPON_SECURITY_HOLDERS_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-
 /**
  * @title CouponSecurityHoldersFacet
  * @author Asset Tokenization Studio Team
  * @notice Diamond facet that exposes coupon security-holder queries via
  *         `ICouponSecurityHolders`, registered under
- *         `_COUPON_SECURITY_HOLDERS_RESOLVER_KEY`.
+ *         `RESOLVER_KEY_COUPON_SECURITY_HOLDERS`.
  * @dev Consolidates holder-enumeration methods previously part of `CouponFacet`:
  *      `getCouponHolders`, `getCouponsFor`, `getTotalCouponHolders`.
  *      Must be registered alongside any `Coupon*Facet` variant in all token
@@ -22,13 +20,14 @@ import { _COUPON_SECURITY_HOLDERS_RESOLVER_KEY } from "../../constants/resolverK
 contract CouponSecurityHoldersFacet is CouponSecurityHolders, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _COUPON_SECURITY_HOLDERS_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_COUPON_SECURITY_HOLDERS;
     }
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeCouponSecurityHolders.selector,
                 this.getCouponHolders.selector,
                 this.getCouponsFor.selector,
                 this.getTotalCouponHolders.selector

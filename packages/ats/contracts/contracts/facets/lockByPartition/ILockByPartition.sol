@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ILockTypes } from "../layer_1/lock/ILockTypes.sol";
+import { ILockTypes } from "../lock/ILockTypes.sol";
+
+/// @custom:hash resolverKey LockByPartition
+bytes32 constant RESOLVER_KEY_LOCK_BY_PARTITION = 0x75c5c6d6dd253e4be43d8d1c25a4252f5f54ebdba6f6c99ed34cd03c0e4d5360;
 
 /**
  * @title ILockByPartition
@@ -16,16 +19,28 @@ import { ILockTypes } from "../layer_1/lock/ILockTypes.sol";
  */
 interface ILockByPartition is ILockTypes {
     /**
+     * @notice Emitted once when the lock-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeLockByPartition`.
+     */
+    event LockByPartitionInitialized();
+
+    /**
+     * @notice Initialises the lock-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeLockByPartition() external;
+
+    /**
      * @notice Locks `_amount` tokens of `_tokenHolder` on `_partition` until
      *         `_expirationTimestamp`.
-     * @dev Callers must hold `LOCKER_ROLE`. The implementation enforces the unpaused state,
+     * @dev Callers must hold `ROLE_LOCKER`. The implementation enforces the unpaused state,
      *      a future expiration timestamp, an unrecovered token holder and the
      *      single-partition / default-partition rule. Emits `LockedByPartition`.
      * @param _partition The partition the tokens are locked on.
      * @param _amount The amount of tokens to lock.
      * @param _tokenHolder The address whose tokens are locked.
      * @param _expirationTimestamp Unix timestamp at which the lock becomes releasable.
-     * @return success_ True when the lock has been recorded.
      * @return lockId_ Identifier assigned to the new lock for `(partition, tokenHolder)`.
      */
     function lockByPartition(
@@ -33,7 +48,7 @@ interface ILockByPartition is ILockTypes {
         uint256 _amount,
         address _tokenHolder,
         uint256 _expirationTimestamp
-    ) external returns (bool success_, uint256 lockId_);
+    ) external returns (uint256 lockId_);
 
     /**
      * @notice Releases a lock on `_partition` previously created with `lockByPartition`.
@@ -50,6 +65,26 @@ interface ILockByPartition is ILockTypes {
         bytes32 _partition,
         uint256 _lockId,
         address _tokenHolder
+    ) external returns (bool success_);
+
+    /**
+     * @notice Updates the expiration timestamp of an existing lock on `_partition`.
+     * @dev Callers must hold `ROLE_LOCKER`. The new timestamp must be in the future. Both
+     *      shortening and extending are allowed — this is an intentional trusted-role design: a
+     *      second locker can correct an excessively far expiration set by a compromised account,
+     *      while an admin can revoke the malicious locker's role if needed. Emits
+     *      `LockExpirationUpdated`.
+     * @param _partition The partition the lock lives on.
+     * @param _tokenHolder The address whose lock expiration is being updated.
+     * @param _lockId Identifier of the lock to update.
+     * @param _newExpirationTimestamp New Unix timestamp at which the lock becomes releasable.
+     * @return success_ True when the expiration timestamp has been updated.
+     */
+    function updateLockExpirationByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId,
+        uint256 _newExpirationTimestamp
     ) external returns (bool success_);
 
     /**

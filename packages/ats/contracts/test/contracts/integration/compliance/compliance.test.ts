@@ -3,10 +3,18 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type IAsset, type ResolverProxy, ComplianceMock, IdentityRegistryMock } from "@contract-types";
+import { type IAsset, type ResolverProxy, ComplianceMock, IdentityRegistryMock, MockDiamondCut } from "@contract-types";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ATS_ROLES, EIP1066_CODES, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO, dateToUnixTimestamp } from "@scripts";
+import {
+  ATS_ROLES,
+  EIP1066_CODES,
+  EMPTY_HEX_BYTES,
+  EMPTY_STRING,
+  ZERO,
+  dateToUnixTimestamp,
+  RESOLVER_KEY_COMPLIANCE,
+} from "@scripts";
 import { getSelector } from "@scripts/infrastructure";
 
 const AMOUNT = 1000;
@@ -24,6 +32,7 @@ describe("Compliance Tests", () => {
   let signer_F: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   enum ClearingOperationType {
     Transfer,
@@ -49,22 +58,23 @@ describe("Compliance Tests", () => {
       signer_E = base.user4;
 
       asset = await ethers.getContractAt("IAsset", diamond.target);
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
       await executeRbac(asset, [
         {
-          role: ATS_ROLES.PAUSER_ROLE,
+          role: ATS_ROLES.ROLE_PAUSER,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES.CLEARING_ROLE,
+          role: ATS_ROLES.ROLE_CLEARING,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES.KYC_ROLE,
+          role: ATS_ROLES.ROLE_KYC,
           members: [signer_B.address],
         },
       ]);
 
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
     }
 
     beforeEach(async () => {
@@ -104,30 +114,31 @@ describe("Compliance Tests", () => {
       signer_E = base.user4;
 
       asset = await ethers.getContractAt("IAsset", diamond.target);
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
       await executeRbac(asset, [
         {
-          role: ATS_ROLES.PAUSER_ROLE,
+          role: ATS_ROLES.ROLE_PAUSER,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES.ISSUER_ROLE,
+          role: ATS_ROLES.ROLE_ISSUER,
           members: [signer_C.address],
         },
         {
-          role: ATS_ROLES.KYC_ROLE,
+          role: ATS_ROLES.ROLE_KYC,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES.SSI_MANAGER_ROLE,
+          role: ATS_ROLES.ROLE_SSI_MANAGER,
           members: [signer_A.address],
         },
         {
-          role: ATS_ROLES.CLEARING_ROLE,
+          role: ATS_ROLES.ROLE_CLEARING,
           members: [signer_B.address],
         },
       ]);
 
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
       await asset.connect(signer_A).addIssuer(signer_E.address);
       await asset.connect(signer_B).grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
       await asset.connect(signer_B).grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
@@ -170,7 +181,7 @@ describe("Compliance Tests", () => {
         await asset.connect(signer_C).increaseAllowance(signer_A.address, AMOUNT);
         await asset.connect(signer_E).increaseAllowance(signer_C.address, AMOUNT);
         // Blacklisting accounts
-        await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROL_LIST_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CONTROL_LIST, signer_A.address);
         await asset.connect(signer_A).addToControlList(signer_C.address);
 
         expect(await asset.connect(signer_C).canTransfer(signer_D.address, AMOUNT, DATA)).to.be.deep.equal([
@@ -327,19 +338,20 @@ describe("Compliance Tests", () => {
       signer_E = base.user4;
 
       asset = await ethers.getContractAt("IAsset", diamond.target);
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
       await executeRbac(asset, [
         {
-          role: ATS_ROLES.PAUSER_ROLE,
+          role: ATS_ROLES.ROLE_PAUSER,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES.TREX_OWNER_ROLE,
+          role: ATS_ROLES.ROLE_TREX_OWNER,
           members: [signer_A.address],
         },
       ]);
 
-      await asset.connect(signer_A).grantRole(ATS_ROLES.PAUSER_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_PAUSER, signer_A.address);
     }
 
     beforeEach(async () => {
@@ -412,19 +424,20 @@ describe("Compliance Tests", () => {
       signer_F = base.user5;
 
       asset = await ethers.getContractAt("IAsset", diamond.target);
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
       await executeRbac(asset, [
-        { role: ATS_ROLES.PAUSER_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES.ISSUER_ROLE, members: [signer_C.address] },
-        { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES.CLEARING_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES.CLEARING_VALIDATOR_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES.AGENT_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES.TREX_OWNER_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_PAUSER, members: [signer_B.address] },
+        { role: ATS_ROLES.ROLE_ISSUER, members: [signer_C.address] },
+        { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+        { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_CLEARING, members: [signer_B.address] },
+        { role: ATS_ROLES.ROLE_CLEARING_VALIDATOR, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_AGENT, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_TREX_OWNER, members: [signer_A.address] },
       ]);
 
-      await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
       await asset.addIssuer(signer_E.address);
       await asset.connect(signer_B).grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
       await asset.connect(signer_B).grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
@@ -561,7 +574,7 @@ describe("Compliance Tests", () => {
     it("GIVEN a deactivated asset WHEN setCompliance THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).setCompliance(ethers.ZeroAddress),
@@ -590,17 +603,18 @@ describe("Compliance Tests", () => {
       signer_E = base.user4;
 
       asset = await ethers.getContractAt("IAsset", diamond.target);
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
       await executeRbac(asset, [
-        { role: ATS_ROLES.PAUSER_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES.CLEARING_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES.CLEARING_VALIDATOR_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES.AGENT_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_PAUSER, members: [signer_B.address] },
+        { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+        { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_CLEARING, members: [signer_B.address] },
+        { role: ATS_ROLES.ROLE_CLEARING_VALIDATOR, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_AGENT, members: [signer_A.address] },
       ]);
 
-      await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
       await asset.addIssuer(signer_E.address);
       await asset.connect(signer_B).grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
       await asset.connect(signer_B).grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
@@ -732,6 +746,39 @@ describe("Compliance Tests", () => {
           clearingOperationType: ClearingOperationType.Redeem,
         }),
       ).to.not.be.reverted;
+    });
+  });
+  describe("initializeCompliance", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeCompliance is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeCompliance(ethers.ZeroAddress))
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeCompliance is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeCompliance(ethers.ZeroAddress))
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_COMPLIANCE, 1);
+    });
+  });
+
+  describe("initializeCompliance event", () => {
+    it("GIVEN a fresh deployment WHEN initializeCompliance is called THEN emits ComplianceInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_COMPLIANCE);
+      await expect(asset.initializeCompliance(ethers.ZeroAddress)).to.emit(asset, "ComplianceInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setCompliance THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.setCompliance("0x0000000000000000000000000000000000000001")).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
     });
   });
 });

@@ -4,7 +4,6 @@ on:
   pull_request:
     branches:
       - develop
-      - development
     types:
       - opened
       - synchronize
@@ -43,7 +42,18 @@ jobs:
         run: |
           echo "Base branch: ${{ github.base_ref }}"
           git fetch origin ${{ github.base_ref }}:${{ github.base_ref }}
+          git fetch origin main:main
           git branch -a
+
+      - name: Fetch changeset base branch (main)
+        if: ${{ github.base_ref != 'main' }}
+        run: |
+          # `npx changeset status` reads `baseBranch` from .changeset/config.json
+          # (currently "main") and resolves it locally via `getDivergedCommit`. The
+          # previous "Fetch base branch" step only fetches the PR base, so `main`
+          # is absent for PRs targeting `develop` and the status command
+          # fails with "Failed to find where HEAD diverged from 'main'".
+          git fetch origin main:main
 
       - name: Setup NodeJS Environment
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
@@ -114,6 +124,26 @@ jobs:
             echo "More info: https://github.com/changesets/changesets/blob/main/docs/intro-to-using-changesets.md"
             exit 1
           fi
+
+      - name: Validate changeset contents
+        if: ${{ steps.bypass.outputs.bypass == 'false' }}
+        run: |
+          echo "🔍 Validating that all pending changesets reference known workspace packages..."
+          if ! npx changeset status; then
+            echo ""
+            echo "❌ CHANGESET CONTENT VALIDATION FAILED"
+            echo ""
+            echo "One or more .changeset/*.md files reference a package name that does not"
+            echo "exist in this workspace (see .changeset/config.json 'fixed' groups for the"
+            echo "authoritative names). Open the failing changeset and replace the package"
+            echo "name with the correct workspace name, e.g.:"
+            echo ""
+            echo "  @asset-tokenization-studio/ats-contracts  ->  @hashgraph/asset-tokenization-contracts"
+            echo ""
+            echo "Then re-run \`npx changeset status\` locally to confirm before pushing."
+            exit 1
+          fi
+          echo "✅ All pending changesets reference valid workspace packages"
 
       - name: Success summary
         if: ${{ always() }}

@@ -1,8 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
+import { IHoldTypes } from "../hold/IHoldTypes.sol";
 import { ThirdPartyType } from "../../domain/asset/types/ThirdPartyType.sol";
+
+/// @custom:hash resolverKey HoldByPartition
+bytes32 constant RESOLVER_KEY_HOLD_BY_PARTITION = 0x3bd50b70b7e42003cb9761c133e88d776c27b53729b463a2d5bf6b36a2fce367;
 
 /**
  * @title IHoldByPartition
@@ -15,6 +18,19 @@ import { ThirdPartyType } from "../../domain/asset/types/ThirdPartyType.sol";
  * @author Asset Tokenization Studio Team
  */
 interface IHoldByPartition is IHoldTypes {
+    /**
+     * @notice Emitted once when the hold-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeHoldByPartition`.
+     */
+    event HoldByPartitionInitialized();
+
+    /**
+     * @notice Initialises the hold-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeHoldByPartition() external;
+
     /**
      * @notice Creates a hold on the tokens of a token holder on a specific partition.
      * @param _partition The partition on which the hold is created.

@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IController } from "./IController.sol";
+import { IController, RESOLVER_KEY_CONTROLLER } from "./IController.sol";
 import { IERC3643Types } from "../layer_1/ERC3643/IERC3643Types.sol";
-import { DEFAULT_ADMIN_ROLE, CONTROLLER_ROLE, AGENT_ROLE, _buildRoles } from "../../constants/roles.sol";
+import { DEFAULT_ADMIN_ROLE, ROLE_CONTROLLER, ROLE_AGENT, _buildRoles } from "../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
 import { ERC1644StorageWrapper } from "../../domain/asset/ERC1644StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 
@@ -18,8 +19,12 @@ import { Modifiers } from "../../services/Modifiers.sol";
  */
 abstract contract Controller is IController, Modifiers {
     /// @inheritdoc IController
-    function initializeController(bool _controllable) external override onlyNotControllerInitialized {
+    function initializeController(
+        bool _controllable
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_CONTROLLER) {
         ERC1644StorageWrapper.initializeController(_controllable);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_CONTROLLER);
+        emit IController.ControllerInitialized(_controllable);
     }
 
     /// @inheritdoc IController
@@ -32,11 +37,12 @@ abstract contract Controller is IController, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyControllable
         onlyWithoutMultiPartition
-        onlyAnyRole(_buildRoles(CONTROLLER_ROLE, AGENT_ROLE))
+        onlyAnyRole(_buildRoles(ROLE_CONTROLLER, ROLE_AGENT))
     {
         TokenCoreOps.transfer(_from, _to, _value);
         emit IController.ControllerTransfer(EvmAccessors.getMsgSender(), _from, _to, _value, _data, _operatorData);
@@ -51,18 +57,26 @@ abstract contract Controller is IController, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyControllable
         onlyWithoutMultiPartition
-        onlyAnyRole(_buildRoles(CONTROLLER_ROLE, AGENT_ROLE))
+        onlyAnyRole(_buildRoles(ROLE_CONTROLLER, ROLE_AGENT))
     {
         TokenCoreOps.burn(_tokenHolder, _value);
         emit IController.ControllerRedemption(EvmAccessors.getMsgSender(), _tokenHolder, _value, _data, _operatorData);
     }
 
     /// @inheritdoc IController
-    function finalizeControllable() external override onlyActivated onlyRole(DEFAULT_ADMIN_ROLE) onlyControllable {
+    function finalizeControllable()
+        external
+        override
+        onlyOperational
+        onlyActivated
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyControllable
+    {
         ERC1644StorageWrapper.finalizeControllable();
     }
 
@@ -74,11 +88,12 @@ abstract contract Controller is IController, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyControllable
-        onlyAnyRole(_buildRoles(CONTROLLER_ROLE, AGENT_ROLE))
+        onlyAnyRole(_buildRoles(ROLE_CONTROLLER, ROLE_AGENT))
         returns (bool)
     {
         TokenCoreOps.transfer(_from, _to, _amount);
@@ -87,13 +102,13 @@ abstract contract Controller is IController, Modifiers {
     }
 
     /// @inheritdoc IController
-    function addAgent(address _agent) external override onlyActivated onlyUnpaused onlyAdminRole {
+    function addAgent(address _agent) external override onlyOperational onlyActivated onlyUnpaused onlyAdminRole {
         ERC3643StorageWrapper.addAgent(_agent);
         emit IERC3643Types.AgentAdded(_agent);
     }
 
     /// @inheritdoc IController
-    function removeAgent(address _agent) external override onlyActivated onlyUnpaused onlyAdminRole {
+    function removeAgent(address _agent) external override onlyOperational onlyActivated onlyUnpaused onlyAdminRole {
         ERC3643StorageWrapper.removeAgent(_agent);
         emit IERC3643Types.AgentRemoved(_agent);
     }
@@ -105,6 +120,6 @@ abstract contract Controller is IController, Modifiers {
 
     /// @inheritdoc IController
     function isAgent(address _agent) external view override returns (bool) {
-        return AccessControlStorageWrapper.hasRole(AGENT_ROLE, _agent);
+        return AccessControlStorageWrapper.hasRole(ROLE_AGENT, _agent);
     }
 }

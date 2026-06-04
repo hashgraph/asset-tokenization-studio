@@ -3,8 +3,16 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { ResolverProxy, type IAsset } from "@contract-types";
-import { DEFAULT_PARTITION, ATS_ROLES, TIME_PERIODS_S, ADDRESS_ZERO, ZERO, EMPTY_STRING } from "@scripts";
+import { ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import {
+  DEFAULT_PARTITION,
+  ATS_ROLES,
+  TIME_PERIODS_S,
+  ADDRESS_ZERO,
+  ZERO,
+  EMPTY_STRING,
+  RESOLVER_KEY_MATURITY_BY_PARTITION,
+} from "@scripts";
 import { getDltTimestamp, grantRoleAndPauseToken } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployBondTokenFixture, executeRbac, MAX_UINT256 } from "@test";
@@ -27,6 +35,7 @@ describe("MaturityByPartition Tests", () => {
   let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixture(isMultiPartition = false) {
     const base = await deployBondTokenFixture({
@@ -47,42 +56,43 @@ describe("MaturityByPartition Tests", () => {
     signer_D = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
       {
-        role: ATS_ROLES.FREEZE_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_FREEZE_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.KYC_ROLE,
+        role: ATS_ROLES.ROLE_KYC,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.MATURITY_REDEEMER_ROLE,
+        role: ATS_ROLES.ROLE_MATURITY_REDEEMER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.SSI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_SSI_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.CONTROL_LIST_ROLE,
+        role: ATS_ROLES.ROLE_CONTROL_LIST,
         members: [signer_D.address],
       },
       {
-        role: ATS_ROLES.CLEARING_ROLE,
+        role: ATS_ROLES.ROLE_CLEARING,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.PROTECTED_PARTITIONS_ROLE,
+        role: ATS_ROLES.ROLE_PROTECTED_PARTITIONS,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.AGENT_ROLE,
+        role: ATS_ROLES.ROLE_AGENT,
         members: [signer_A.address],
       },
     ]);
@@ -139,7 +149,7 @@ describe("MaturityByPartition Tests", () => {
       });
 
       it("GIVEN the token is paused WHEN redeeming at maturity THEN transaction fails with IsPaused", async () => {
-        await grantRoleAndPauseToken(asset, ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A, signer_B, signer_C.address);
+        await grantRoleAndPauseToken(asset, ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A, signer_B, signer_C.address);
 
         await expect(
           asset.connect(signer_C).redeemAtMaturityByPartition(signer_C.address, DEFAULT_PARTITION, amount),
@@ -152,10 +162,10 @@ describe("MaturityByPartition Tests", () => {
         ).to.be.revertedWithCustomError(asset, "InvalidKycStatus");
       });
 
-      it("GIVEN the current date is before maturity WHEN redeeming at maturity THEN transaction fails with BondMaturityDateWrong", async () => {
+      it("GIVEN the current date is before maturity WHEN redeeming at maturity THEN transaction fails with MaturityDateWrong", async () => {
         await expect(
           asset.connect(signer_A).redeemAtMaturityByPartition(signer_A.address, DEFAULT_PARTITION, amount),
-        ).to.be.revertedWithCustomError(asset, "BondMaturityDateWrong");
+        ).to.be.revertedWithCustomError(asset, "MaturityDateInvalid");
       });
 
       it("GIVEN a recovered wallet WHEN redeeming at maturity THEN transaction fails with WalletRecovered", async () => {
@@ -167,7 +177,7 @@ describe("MaturityByPartition Tests", () => {
       });
 
       it("GIVEN all conditions are met WHEN redeeming at maturity THEN transaction succeeds and emits RedeemedByPartition", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
 
         await asset.connect(signer_C).issueByPartition({
           partition: DEFAULT_PARTITION,
@@ -184,7 +194,7 @@ describe("MaturityByPartition Tests", () => {
       });
 
       it("GIVEN all conditions are met WHEN redeeming zero amount at maturity THEN transaction succeeds but updates no balances", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
 
         await asset.connect(signer_C).issueByPartition({
           partition: DEFAULT_PARTITION,
@@ -208,7 +218,7 @@ describe("MaturityByPartition Tests", () => {
   describe("Multi Partition", () => {
     it("GIVEN a new diamond contract with multi-partition WHEN redeemAtMaturityByPartition is called THEN transaction success", async () => {
       await deploySecurityFixture(true);
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
       await asset.connect(signer_C).issueByPartition({
         partition: _PARTITION_ID,
         tokenHolder: signer_A.address,
@@ -225,7 +235,7 @@ describe("MaturityByPartition Tests", () => {
 
     it("GIVEN a new diamond contract with multi-partition and multiple partitions issued WHEN redeemAtMaturityByPartition is called THEN transaction success", async () => {
       await deploySecurityFixture(true);
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
       await asset.connect(signer_C).issueByPartition({
         partition: _PARTITION_ID,
         tokenHolder: signer_A.address,
@@ -251,11 +261,44 @@ describe("MaturityByPartition Tests", () => {
     it("GIVEN a deactivated asset WHEN redeemAtMaturityByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployBondTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).redeemAtMaturityByPartition(ethers.ZeroAddress, ethers.ZeroHash, 0),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("initializeMaturityByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeMaturityByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeMaturityByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeMaturityByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeMaturityByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_MATURITY_BY_PARTITION, 1);
+    });
+  });
+
+  describe("initializeMaturityByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeMaturityByPartition is called THEN emits MaturityByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_MATURITY_BY_PARTITION);
+      await expect(asset.initializeMaturityByPartition()).to.emit(asset, "MaturityByPartitionInitialized");
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN redeemAtMaturityByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.redeemAtMaturityByPartition(ADDRESS_ZERO, DEFAULT_PARTITION, 0)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
     });
   });
 });

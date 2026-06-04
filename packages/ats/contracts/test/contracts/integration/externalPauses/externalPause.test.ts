@@ -4,14 +4,16 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ADDRESS_ZERO, ATS_ROLES, GAS_LIMIT } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, EQUITY_CONFIG_ID, GAS_LIMIT } from "@scripts";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture } from "@test";
-import { ResolverProxy, type IAsset, MockedExternalPause } from "@contract-types";
+import { MockDiamondCut, ResolverProxy, type IAsset, MockedExternalPause } from "@contract-types";
 
 describe("ExternalPause Tests", () => {
   let diamond: ResolverProxy;
+  let mockDiamondCut: MockDiamondCut;
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
+  let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
   let externalPauseMock1: MockedExternalPause;
@@ -38,12 +40,14 @@ describe("ExternalPause Tests", () => {
       },
     });
     diamond = base.diamond;
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     signer_A = base.deployer;
     signer_B = base.user1;
+    signer_D = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
 
-    await base.accessControlFacet.grantRole(ATS_ROLES.PAUSE_MANAGER_ROLE, signer_A.address);
+    await base.accessControlFacet.grantRole(ATS_ROLES.ROLE_PAUSE_MANAGER, signer_A.address);
 
     externalPauseMock1 = await (await ethers.getContractFactory("MockedExternalPause", signer_A)).deploy();
     await externalPauseMock1.waitForDeployment();
@@ -280,18 +284,12 @@ describe("ExternalPause Tests", () => {
   });
 
   describe("Pause Modifier Tests (onlyUnpaused)", () => {
-    it("GIVEN an external pause is paused WHEN calling a function with onlyUnpaused THEN it reverts with IsPaused", async () => {
+    it("GIVEN an external pause is paused WHEN calling addExternalPause or updateExternalPauses THEN they revert with IsPaused", async () => {
       await externalPauseMock1.setPaused(true, {
         gasLimit: GAS_LIMIT.default,
       });
-      // Use asset instance for error checking as Common interface loading failed
       await expect(
         asset.addExternalPause(externalPauseMock3.target as string, {
-          gasLimit: GAS_LIMIT.default,
-        }),
-      ).to.be.revertedWithCustomError(asset, "IsPaused"); // Assumes IsPaused is inherited/available
-      await expect(
-        asset.removeExternalPause(externalPauseMock2.target as string, {
           gasLimit: GAS_LIMIT.default,
         }),
       ).to.be.revertedWithCustomError(asset, "IsPaused");
@@ -327,15 +325,38 @@ describe("ExternalPause Tests", () => {
     });
   });
 
+  describe("External Pause Removal Deadlock", () => {
+    it("GIVEN a stuck external pause (always paused) AND internal flag is NOT set WHEN removeExternalPause THEN it succeeds", async () => {
+      await externalPauseMock1.setPaused(true, { gasLimit: GAS_LIMIT.default });
+      await expect(
+        asset.removeExternalPause(externalPauseMock1.target as string, {
+          gasLimit: GAS_LIMIT.default,
+        }),
+      ).to.not.be.reverted;
+      expect(await asset.isExternalPause(externalPauseMock1.target as string)).to.be.false;
+    });
+
+    it("GIVEN the internal pause flag IS set WHEN removeExternalPause THEN it reverts with IsPaused", async () => {
+      await asset.grantRole(ATS_ROLES.ROLE_PAUSER, signer_A.address, { gasLimit: GAS_LIMIT.default });
+      await asset.pause({ gasLimit: GAS_LIMIT.default });
+      expect(await asset.paused()).to.be.true;
+      await expect(
+        asset.removeExternalPause(externalPauseMock1.target as string, {
+          gasLimit: GAS_LIMIT.default,
+        }),
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
+    });
+  });
+
   describe("Access Control Tests", () => {
-    it("GIVEN an account without ATS_ROLES.PAUSE_MANAGER_ROLE WHEN adding an external pause THEN it reverts with AccessControl", async () => {
+    it("GIVEN an account without ATS_ROLES.ROLE_PAUSE_MANAGER WHEN adding an external pause THEN it reverts with AccessControl", async () => {
       const newPause = externalPauseMock3.target as string;
       await expect(
         asset.connect(signer_B).addExternalPause(newPause, { gasLimit: GAS_LIMIT.default }),
       ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
 
-    it("GIVEN an account with ATS_ROLES.PAUSE_MANAGER_ROLE WHEN adding an external pause THEN it succeeds", async () => {
+    it("GIVEN an account with ATS_ROLES.ROLE_PAUSE_MANAGER WHEN adding an external pause THEN it succeeds", async () => {
       const newPause = externalPauseMock3.target as string;
       expect(await asset.isExternalPause(newPause)).to.be.false;
       await expect(
@@ -348,7 +369,7 @@ describe("ExternalPause Tests", () => {
       expect(await asset.isExternalPause(newPause)).to.be.true;
     });
 
-    it("GIVEN an account without ATS_ROLES.PAUSE_MANAGER_ROLE WHEN removing an external pause THEN it reverts with AccessControl", async () => {
+    it("GIVEN an account without ATS_ROLES.ROLE_PAUSE_MANAGER WHEN removing an external pause THEN it reverts with AccessControl", async () => {
       expect(await asset.isExternalPause(externalPauseMock1.target as string)).to.be.true;
       // --- FIX: Check for custom error ---
       await expect(
@@ -358,7 +379,7 @@ describe("ExternalPause Tests", () => {
       ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
 
-    it("GIVEN an account with ATS_ROLES.PAUSE_MANAGER_ROLE WHEN removing an external pause THEN it succeeds", async () => {
+    it("GIVEN an account with ATS_ROLES.ROLE_PAUSE_MANAGER WHEN removing an external pause THEN it succeeds", async () => {
       expect(await asset.isExternalPause(externalPauseMock1.target as string)).to.be.true;
       await expect(
         asset.removeExternalPause(externalPauseMock1.target as string, {
@@ -370,7 +391,7 @@ describe("ExternalPause Tests", () => {
       expect(await asset.isExternalPause(externalPauseMock1.target as string)).to.be.false;
     });
 
-    it("GIVEN an account without ATS_ROLES.PAUSE_MANAGER_ROLE WHEN updating external pauses THEN it reverts with AccessControl", async () => {
+    it("GIVEN an account without ATS_ROLES.ROLE_PAUSE_MANAGER WHEN updating external pauses THEN it reverts with AccessControl", async () => {
       const pauses = [externalPauseMock1.target as string];
       const actives = [false];
       expect(await asset.isExternalPause(externalPauseMock1.target as string)).to.be.true;
@@ -381,7 +402,7 @@ describe("ExternalPause Tests", () => {
       ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
 
-    it("GIVEN an account with ATS_ROLES.PAUSE_MANAGER_ROLE WHEN updating external pauses THEN it succeeds", async () => {
+    it("GIVEN an account with ATS_ROLES.ROLE_PAUSE_MANAGER WHEN updating external pauses THEN it succeeds", async () => {
       expect(await asset.isExternalPause(externalPauseMock1.target as string)).to.be.true;
       expect(await asset.isExternalPause(externalPauseMock2.target as string)).to.be.true;
       const pauses = [externalPauseMock1.target as string, externalPauseMock2.target as string];
@@ -399,8 +420,31 @@ describe("ExternalPause Tests", () => {
   });
 
   describe("Initialize Tests", () => {
-    it("GIVEN already initialized WHEN initializeExternalPauses is called again THEN it reverts with AlreadyInitialized", async () => {
-      await expect(asset.initializeExternalPauses([])).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+    it("GIVEN already initialized WHEN initializeExternalPauses is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeExternalPauses([])).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeExternalPauses is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeExternalPauses([])).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN a new deployment WHEN initializeExternalPauses is called THEN it emits ExternalPauseInitialized", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      const pauses: string[] = [];
+      const tx = await freshAsset.connect(infra.deployer).initializeExternalPauses(pauses);
+      const receipt = await tx.wait();
+      const emitted = await decodeEvent(freshAsset, "ExternalPauseInitialized", receipt!);
+      expect(emitted.pauses).to.deep.equal(pauses);
     });
   });
 
@@ -408,11 +452,55 @@ describe("ExternalPause Tests", () => {
     it("GIVEN a deactivated asset WHEN addExternalPause THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).addExternalPause(ethers.ZeroAddress),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN updateExternalPauses THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(deactivatedAsset.connect(base.deployer).updateExternalPauses([], [])).to.be.revertedWithCustomError(
+        deactivatedAsset,
+        "Deactivated",
+      );
+    });
+
+    it("GIVEN a deactivated asset WHEN removeExternalPause THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).removeExternalPause(ethers.ZeroAddress),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN addExternalPause THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.addExternalPause("0x0000000000000000000000000000000000000001")).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN removeExternalPause THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.removeExternalPause("0x0000000000000000000000000000000000000001"),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN updateExternalPauses THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.updateExternalPauses([], [])).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
   });
 });

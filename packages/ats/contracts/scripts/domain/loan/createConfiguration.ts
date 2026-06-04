@@ -18,9 +18,12 @@ import {
   OperationResult,
   createBatchConfiguration,
   DEFAULT_BATCH_SIZE,
+  RetryOptions,
 } from "@scripts/infrastructure";
 import { BusinessLogicResolver } from "@contract-types";
 import { LOAN_CONFIG_ID } from "../constants";
+import { buildFacetList } from "../facetEnvironment";
+import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
 import { atsRegistry } from "../atsRegistry";
 
 /**
@@ -30,9 +33,6 @@ import { atsRegistry } from "../atsRegistry";
  *
  * Note: DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet functionality,
  * so we only include DiamondFacet to avoid selector collisions.
- *
- * Note: Loan does NOT include TimeTravel variants (per spec). TimeTravelFacet
- * is injected automatically by the deploy script in test environments.
  */
 const LOAN_FACETS = [
   // Loan Functionality
@@ -73,21 +73,20 @@ const LOAN_FACETS = [
   // ERC Standards
   "TransferFacet",
   "CoreAdjustedFacet",
-  "MetadataFacet",
+  "InitializerFacet", // Core initializer facet
+  "CustomDataFacet",
   "ERC20PermitFacet",
   "EIP712Facet",
   "ERC20VotesFacet",
   "DocumentationFacet",
   "ControllerFacet",
   "OperatorFacet",
-  "ERC1410ManagementFacet",
   "ProtectedByPartitionFacet",
   "MintByPartitionFacet",
   "TransferByPartitionFacet",
   "PartitionsFacet",
   "OperatorByPartitionFacet",
   "BurnByPartitionFacet",
-  "ERC3643ManagementFacet",
   "RecoveryFacet",
   "IdentityFacet",
   "BatchControllerFacet",
@@ -161,8 +160,6 @@ const LOAN_FACETS = [
  * All implementation logic is handled by the generic createConfiguration()
  * operation in core/operations/blrConfigurations.ts.
  *
- * Note: Loan configuration does NOT include TimeTravel variants.
- *
  * @param blrContract - BusinessLogicResolver contract instance
  * @param facetAddresses - Map of facet names to their deployed addresses
  * @param partialBatchDeploy - Whether this is a partial batch deployment (default: false)
@@ -201,22 +198,17 @@ const LOAN_FACETS = [
 export async function createLoanConfiguration(
   blrContract: BusinessLogicResolver,
   facetAddresses: Record<string, string>,
-  useTimeTravel: boolean = false,
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
+  retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  // Build facet data with resolver keys from registry
-  const baseFacets = useTimeTravel ? [...LOAN_FACETS, "TimeTravelFacet"] : LOAN_FACETS;
-  const facetNames = useTimeTravel
-    ? baseFacets.map((name) => (name === "TimeTravelFacet" || name.endsWith("TimeTravel") ? name : `${name}TimeTravel`))
-    : baseFacets;
+  const facetNames = buildFacetList(LOAN_FACETS);
 
   const facets = facetNames.map((name) => {
-    const baseName = name.replace(/TimeTravel$/, "");
-    const facetDef = atsRegistry.getFacetDefinition(baseName);
+    const facetDef = atsRegistry.getFacetDefinition(name) ?? getMockFacetDefinition(name);
     if (!facetDef?.resolverKey?.value) {
-      throw new Error(`No resolver key found for facet: ${baseName}`);
+      throw new Error(`No resolver key found for facet: ${name}`);
     }
     return {
       facetName: name,
@@ -231,5 +223,6 @@ export async function createLoanConfiguration(
     partialBatchDeploy,
     batchSize,
     confirmations,
+    retryOptions,
   });
 }

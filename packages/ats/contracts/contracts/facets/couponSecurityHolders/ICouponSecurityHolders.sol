@@ -3,6 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ICouponTypes } from "../coupon/ICouponTypes.sol";
 
+/// @custom:hash resolverKey CouponSecurityHolders
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_COUPON_SECURITY_HOLDERS = 0x8e5fc42839ddbceddb6022f61f5907a3849178cce5cfb82850a28e80140ac9a9;
+
 /**
  * @title ICouponSecurityHolders
  * @notice Interface for querying the set of security holders associated with a coupon.
@@ -13,6 +17,19 @@ import { ICouponTypes } from "../coupon/ICouponTypes.sol";
  * @author Asset Tokenization Studio Team
  */
 interface ICouponSecurityHolders is ICouponTypes {
+    /**
+     * @notice Emitted once when the coupon security holders capability is initialised on a token.
+     * @dev Fires exclusively from `initializeCouponSecurityHolders`.
+     */
+    event CouponSecurityHoldersInitialized();
+
+    /**
+     * @notice Initialises the coupon security holders capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeCouponSecurityHolders() external;
+
     /**
      * @notice Returns a paginated list of token holders eligible for a coupon.
      * @dev Holders are resolved from the snapshot at the coupon record date when one

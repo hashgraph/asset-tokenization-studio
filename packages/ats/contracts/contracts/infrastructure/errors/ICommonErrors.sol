@@ -108,10 +108,35 @@ interface ICommonErrors {
     error ZeroValueNotAllowed();
 
     /**
-     * @notice Reverts when the decimal precision gap exceeds the supported range.
-     * @dev Protects decimal scaling logic from unsafe or unsupported conversions.
-     * @param smallerDecimals Lower decimal precision value.
-     * @param biggerDecimals Higher decimal precision value.
+     * @notice Reverts when the difference between current decimals and new decimals exceeds the maximum value.
+     * @dev Protects decimals amount difference between current and new not te be greater than maximum.
+     * @param currentDecimals the current decimals amount.
+     * @param newDecimals the new decimals amount.
      */
-    error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals);
+    error DecimalsTooLarge(uint8 currentDecimals, uint8 newDecimals);
+
+    /**
+     * @notice Reverts when multiplying `amount` by `10 ** decimals` would exceed `uint256` max.
+     * @dev Thrown by `DecimalsLib.calculateDecimalsAdjustment` when `amount > MAX_UINT256 / 10 ** decimals`.
+     * @param amount The token amount that cannot be scaled up.
+     * @param decimals The exponent that causes the overflow.
+     */
+    error GreaterThanMaxUint256(uint256 amount, uint8 decimals);
+
+    /**
+     * @notice Reverts when an exponent would cause `10 ** exponent` to overflow `uint256`.
+     * @dev Thrown by `DecimalsLib.checkExponentOverflow` when `exponent >= 78`.
+     * @param exponent The exponent that would produce an overflow.
+     */
+    error ExponentOverflow(uint256 exponent);
+
+    /**
+     * @notice Reverts when adding an entry would grow an external list beyond its maximum size.
+     * @dev Enforced by `ExternalListManagementStorageWrapper.addExternalList` for the external
+     *      pause, control and KYC lists. The bound exists because each list is iterated in full on
+     *      the hot path of token operations, so an unbounded list could exceed the gas limit and
+     *      brick the token.
+     * @param max Maximum number of entries permitted in the external list.
+     */
+    error MaxExternalListSizeReached(uint256 max);
 }

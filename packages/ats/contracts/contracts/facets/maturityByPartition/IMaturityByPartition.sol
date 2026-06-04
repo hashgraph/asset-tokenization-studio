@@ -1,12 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey MaturityByPartition
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_MATURITY_BY_PARTITION = 0x561e299af2bd67a767eee76558f27470801a9cb97627131141cc55ceb734ccbb;
+
 /**
  * @title IMaturityByPartition
  * @author Asset Tokenization Studio Team
  * @notice Interface for redeeming a specified amount of tokens from a partition at
- *         bond maturity.
- * @dev The caller must hold MATURITY_REDEEMER_ROLE. The contract must be unpaused and
+ *         maturity.
+ * @dev The caller must hold ROLE_MATURITY_REDEEMER. The contract must be unpaused and
  *      clearing disabled. The token holder must be on the allowed list with granted KYC
  *      status, must not be recovered, and the maturity date must have passed. In
  *      single-partition mode, the partition must be the default partition. In
@@ -14,7 +18,20 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 interface IMaturityByPartition {
     /**
-     * @notice Redeems a specified amount of tokens from a single partition at bond
+     * @notice Emitted once when the maturity-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeMaturityByPartition`.
+     */
+    event MaturityByPartitionInitialized();
+
+    /**
+     * @notice Initialises the maturity-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeMaturityByPartition() external;
+
+    /**
+     * @notice Redeems a specified amount of tokens from a single partition at
      *         maturity.
      * @dev Emits a Transfer event on successful redemption via
      *      ERC1410StorageWrapper.redeemByPartition.

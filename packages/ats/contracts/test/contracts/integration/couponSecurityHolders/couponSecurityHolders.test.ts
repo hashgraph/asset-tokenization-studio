@@ -3,12 +3,17 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { ResolverProxy, type IAsset } from "@contract-types";
-import { DEFAULT_PARTITION, ATS_ROLES, TIME_PERIODS_S, ZERO, EMPTY_STRING } from "@scripts";
-import { getDltTimestamp, executeRbac } from "@test";
+import { ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import {
+  DEFAULT_PARTITION,
+  ATS_ROLES,
+  TIME_PERIODS_S,
+  ZERO,
+  EMPTY_STRING,
+  RESOLVER_KEY_COUPON_SECURITY_HOLDERS,
+} from "@scripts";
+import { getDltTimestamp, executeRbac, deployBondTokenFixture, MAX_UINT256 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployBondTokenFixture } from "@test";
-import { MAX_UINT256 } from "@test";
 
 const numberOfCoupons = 50;
 const frequency = TIME_PERIODS_S.DAY;
@@ -32,6 +37,7 @@ describe("CouponSecurityHolders Tests", () => {
   let signer_B: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixture() {
     const base = await deployBondTokenFixture({
@@ -47,21 +53,22 @@ describe("CouponSecurityHolders Tests", () => {
     signer_B = base.user1;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.KYC_ROLE,
+        role: ATS_ROLES.ROLE_KYC,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.SSI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_SSI_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.AGENT_ROLE,
+        role: ATS_ROLES.ROLE_AGENT,
         members: [signer_A.address],
       },
     ]);
@@ -88,8 +95,8 @@ describe("CouponSecurityHolders Tests", () => {
 
   it("GIVEN a coupon with snapshot WHEN getCouponHolders is called THEN returns token holders from snapshot", async () => {
     const TotalAmount = 1000;
-    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
     await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
 
     await asset.connect(signer_A).issueByPartition({
@@ -141,8 +148,8 @@ describe("CouponSecurityHolders Tests", () => {
   });
 
   it("GIVEN a coupon before record date WHEN getTotalCouponHolders THEN returns zero", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
 
     await asset.connect(signer_A).issueByPartition({
       partition: DEFAULT_PARTITION,
@@ -175,8 +182,8 @@ describe("CouponSecurityHolders Tests", () => {
   });
 
   it("GIVEN a coupon after record date with holders WHEN getCouponsFor THEN returns correct data for each holder", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
     await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
 
     await asset.connect(signer_A).issueByPartition({
@@ -219,5 +226,39 @@ describe("CouponSecurityHolders Tests", () => {
     expect(accounts.length).to.equal(Number(totalHolders));
     expect(couponsFor[0].recordDateReached).to.be.true;
     expect(accounts).to.include(signer_A.address);
+  });
+
+  describe("initializeCouponSecurityHolders", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeCouponSecurityHolders is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_B).initializeCouponSecurityHolders())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_B.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeCouponSecurityHolders is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeCouponSecurityHolders())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_COUPON_SECURITY_HOLDERS, 1);
+    });
+  });
+
+  describe("initializeCouponSecurityHolders event", () => {
+    it("GIVEN a fresh deployment WHEN initializeCouponSecurityHolders is called THEN emits CouponSecurityHoldersInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_COUPON_SECURITY_HOLDERS);
+      await expect(asset.initializeCouponSecurityHolders()).to.emit(asset, "CouponSecurityHoldersInitialized");
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN getCouponHolders THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.getCouponHolders(1, 0, 0)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN getCouponsFor THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.getCouponsFor(1, 0, 0)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
   });
 });

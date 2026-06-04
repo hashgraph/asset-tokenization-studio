@@ -3,12 +3,14 @@
 import ValidatedDomain from "@core/validation/ValidatedArgs";
 import { SecurityDate } from "../shared/SecurityDate";
 import { BondFixedRateDetails } from "../bond/BondFixedRateDetails";
+import { OptionalField } from "@core/decorator/OptionalDecorator";
 
 export class BondFixedRateDetailsData extends ValidatedDomain<BondFixedRateDetailsData> {
   public currency: string;
   public nominalValue: string;
   public nominalValueDecimals: number;
-  public startingDate: string;
+  @OptionalField()
+  public startingDate?: string;
   public maturityDate: string;
   public rate: number;
   public rateDecimals: number;
@@ -17,14 +19,17 @@ export class BondFixedRateDetailsData extends ValidatedDomain<BondFixedRateDetai
     currency: string,
     nominalValue: string,
     nominalValueDecimals: number,
-    startingDate: string,
+    startingDate: string | undefined,
     maturityDate: string,
     rate: number,
     rateDecimals: number,
   ) {
     super({
       maturityDate: (val) => {
-        return SecurityDate.checkDateTimestamp(parseInt(val), parseInt(this.startingDate));
+        return SecurityDate.checkDateTimestamp(
+          parseInt(val),
+          this.startingDate !== undefined ? parseInt(this.startingDate) : undefined,
+        );
       },
       rateDecimals: (_) => {
         return BondFixedRateDetails.checkRate(this.rateDecimals);

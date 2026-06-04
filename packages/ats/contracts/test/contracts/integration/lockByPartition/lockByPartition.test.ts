@@ -4,12 +4,20 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { type ResolverProxy, type IAsset } from "@contract-types";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 
 import { deployEquityTokenFixture } from "@test";
 
 import { executeRbac, MAX_UINT256 } from "@test";
-import { EMPTY_STRING, ATS_ROLES, ZERO, dateToUnixTimestamp } from "@scripts";
+import {
+  ADDRESS_ZERO,
+  DEFAULT_PARTITION,
+  EMPTY_STRING,
+  ATS_ROLES,
+  ZERO,
+  dateToUnixTimestamp,
+  RESOLVER_KEY_LOCK_BY_PARTITION,
+} from "@scripts";
 import { Rbac } from "@scripts/domain";
 
 const _NON_DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000011";
@@ -35,6 +43,7 @@ describe("LockByPartition Tests", () => {
   let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
   let currentTimestamp = 0;
@@ -42,27 +51,27 @@ describe("LockByPartition Tests", () => {
 
   function set_initRbacs(): Rbac[] {
     const rbacIssuer: Rbac = {
-      role: ATS_ROLES.ISSUER_ROLE,
+      role: ATS_ROLES.ROLE_ISSUER,
       members: [signer_B.address],
     };
     const rbacLocker: Rbac = {
-      role: ATS_ROLES.LOCKER_ROLE,
+      role: ATS_ROLES.ROLE_LOCKER,
       members: [signer_C.address],
     };
     const rbacPausable: Rbac = {
-      role: ATS_ROLES.PAUSER_ROLE,
+      role: ATS_ROLES.ROLE_PAUSER,
       members: [signer_D.address],
     };
     const rbacKYC: Rbac = {
-      role: ATS_ROLES.KYC_ROLE,
+      role: ATS_ROLES.ROLE_KYC,
       members: [signer_B.address],
     };
     const rbacSSI: Rbac = {
-      role: ATS_ROLES.SSI_MANAGER_ROLE,
+      role: ATS_ROLES.ROLE_SSI_MANAGER,
       members: [signer_A.address],
     };
     const rbacCorporateAction: Rbac = {
-      role: ATS_ROLES.CORPORATE_ACTION_ROLE,
+      role: ATS_ROLES.ROLE_CORPORATE_ACTION,
       members: [signer_B.address],
     };
     return [rbacIssuer, rbacLocker, rbacPausable, rbacKYC, rbacSSI, rbacCorporateAction];
@@ -90,6 +99,7 @@ describe("LockByPartition Tests", () => {
     signer_D = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, set_initRbacs());
 
@@ -105,6 +115,7 @@ describe("LockByPartition Tests", () => {
     signer_D = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, set_initRbacs());
 
@@ -274,16 +285,33 @@ describe("LockByPartition Tests", () => {
         expect(await asset.balanceOfByPartition(_NON_DEFAULT_PARTITION, signer_A.address)).to.equal(_AMOUNT);
         expect(await asset.totalSupplyByPartition(_NON_DEFAULT_PARTITION)).to.equal(_AMOUNT);
       });
+
+      it("GIVEN a valid lockId WHEN releaseByPartition at exact expiration timestamp THEN transaction success", async () => {
+        await asset.connect(signer_B).issueByPartition({
+          partition: _NON_DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: _AMOUNT,
+          data: "0x",
+        });
+        await asset
+          .connect(signer_C)
+          .lockByPartition(_NON_DEFAULT_PARTITION, _AMOUNT, signer_A.address, expirationTimestamp);
+
+        await asset.changeSystemTimestamp(expirationTimestamp);
+        await expect(asset.connect(signer_C).releaseByPartition(_NON_DEFAULT_PARTITION, 1, signer_A.address))
+          .to.emit(asset, "LockByPartitionReleased")
+          .withArgs(signer_C.address, signer_A.address, _NON_DEFAULT_PARTITION, 1);
+      });
     });
 
     describe("Adjust Balances", () => {
       async function setPreBalanceAdjustment() {
         // Granting Role to account C
-        await asset.connect(signer_A).grantRole(ATS_ROLES.ADJUSTMENT_BALANCE_ROLE, signer_C.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_A.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROLLER_ROLE, signer_A.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.LOCKER_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ADJUSTMENT_BALANCE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CAP, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CONTROLLER, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_LOCKER, signer_A.address);
 
         await asset.connect(signer_A).setMaxSupply(maxSupply_Original);
         await asset.connect(signer_A).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply_Partition_1_Original);
@@ -476,6 +504,118 @@ describe("LockByPartition Tests", () => {
     });
   });
 
+  describe("updateLockExpirationByPartition (multi-partition)", () => {
+    beforeEach(async () => {
+      await loadFixture(deploySecurityFixtureMultiPartition);
+    });
+
+    async function issuedAndLocked(expiration: number | bigint): Promise<void> {
+      await asset.connect(signer_B).issueByPartition({
+        partition: _NON_DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: _AMOUNT,
+        data: "0x",
+      });
+      await asset.connect(signer_C).lockByPartition(_NON_DEFAULT_PARTITION, _AMOUNT, signer_A.address, expiration);
+    }
+
+    it("GIVEN a paused token WHEN updateLockExpirationByPartition THEN fails with IsPaused", async () => {
+      await asset.connect(signer_D).pause();
+      await expect(
+        asset
+          .connect(signer_C)
+          .updateLockExpirationByPartition(_NON_DEFAULT_PARTITION, signer_A.address, 1, expirationTimestamp),
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
+    });
+
+    it("GIVEN an account without LOCKER role WHEN updateLockExpirationByPartition THEN fails with AccountHasNoRole", async () => {
+      await expect(
+        asset
+          .connect(signer_D)
+          .updateLockExpirationByPartition(_NON_DEFAULT_PARTITION, signer_A.address, 1, expirationTimestamp),
+      ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+    });
+
+    it("GIVEN an invalid lockId WHEN updateLockExpirationByPartition THEN fails with WrongLockId", async () => {
+      await expect(
+        asset
+          .connect(signer_C)
+          .updateLockExpirationByPartition(_NON_DEFAULT_PARTITION, signer_A.address, 99, expirationTimestamp),
+      ).to.be.revertedWithCustomError(asset, "WrongLockId");
+    });
+
+    it("GIVEN a new timestamp in the past WHEN updateLockExpirationByPartition THEN fails with WrongExpirationTimestamp", async () => {
+      await issuedAndLocked(expirationTimestamp);
+      await expect(
+        asset
+          .connect(signer_C)
+          .updateLockExpirationByPartition(_NON_DEFAULT_PARTITION, signer_A.address, 1, currentTimestamp - ONE_SECOND),
+      ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
+    });
+
+    it("GIVEN a lock with type(uint256).max expiration (FIND-059) WHEN updateLockExpirationByPartition THEN shortens expiration and lock becomes releasable", async () => {
+      await issuedAndLocked(MAX_UINT256);
+
+      const shortenedExpiration = expirationTimestamp;
+
+      await expect(
+        asset
+          .connect(signer_C)
+          .updateLockExpirationByPartition(_NON_DEFAULT_PARTITION, signer_A.address, 1, shortenedExpiration),
+      )
+        .to.emit(asset, "LockExpirationUpdated")
+        .withArgs(signer_C.address, signer_A.address, _NON_DEFAULT_PARTITION, 1, MAX_UINT256, shortenedExpiration);
+
+      const [, updatedExpiration] = await asset.getLockForByPartition(_NON_DEFAULT_PARTITION, signer_A.address, 1);
+      expect(updatedExpiration).to.equal(shortenedExpiration);
+
+      // Verify lock is now releasable after advancing time
+      await asset.changeSystemTimestamp(shortenedExpiration + ONE_SECOND);
+      await expect(asset.connect(signer_C).releaseByPartition(_NON_DEFAULT_PARTITION, 1, signer_A.address))
+        .to.emit(asset, "LockByPartitionReleased")
+        .withArgs(signer_C.address, signer_A.address, _NON_DEFAULT_PARTITION, 1);
+    });
+
+    it("GIVEN a lock WHEN updateLockExpirationByPartition extends expiration THEN getLockForByPartition reflects new timestamp", async () => {
+      await issuedAndLocked(expirationTimestamp);
+
+      const extendedExpiration = expirationTimestamp + ONE_YEAR_IN_SECONDS;
+
+      await expect(
+        asset
+          .connect(signer_C)
+          .updateLockExpirationByPartition(_NON_DEFAULT_PARTITION, signer_A.address, 1, extendedExpiration),
+      )
+        .to.emit(asset, "LockExpirationUpdated")
+        .withArgs(
+          signer_C.address,
+          signer_A.address,
+          _NON_DEFAULT_PARTITION,
+          1,
+          expirationTimestamp,
+          extendedExpiration,
+        );
+
+      const [lockedAmount, updatedExpiration] = await asset.getLockForByPartition(
+        _NON_DEFAULT_PARTITION,
+        signer_A.address,
+        1,
+      );
+      expect(lockedAmount).to.equal(_AMOUNT);
+      expect(updatedExpiration).to.equal(extendedExpiration);
+    });
+
+    it("GIVEN a lock WHEN updateLockExpirationByPartition THEN locked amount is unchanged", async () => {
+      await issuedAndLocked(expirationTimestamp);
+      await asset
+        .connect(signer_C)
+        .updateLockExpirationByPartition(_NON_DEFAULT_PARTITION, signer_A.address, 1, expirationTimestamp + ONE_SECOND);
+
+      expect(await asset.getLockedAmountForByPartition(_NON_DEFAULT_PARTITION, signer_A.address)).to.equal(_AMOUNT);
+      expect(await asset.getLockCountForByPartition(_NON_DEFAULT_PARTITION, signer_A.address)).to.equal(1);
+    });
+  });
+
   describe("Multi-partition disabled", () => {
     beforeEach(async () => {
       await loadFixture(deploySecurityFixtureSinglePartition);
@@ -484,7 +624,9 @@ describe("LockByPartition Tests", () => {
     describe("multi-partition transactions arent enabled", () => {
       it("GIVEN a token with multi-partition enabled GIVEN lockByPartition THEN fails with PartitionNotAllowedInSinglePartitionMode", async () => {
         await expect(
-          asset.connect(signer_C).lockByPartition(_NON_DEFAULT_PARTITION, _AMOUNT, signer_A.address, currentTimestamp),
+          asset
+            .connect(signer_C)
+            .lockByPartition(_NON_DEFAULT_PARTITION, _AMOUNT, signer_A.address, expirationTimestamp),
         )
           .to.be.revertedWithCustomError(asset, "PartitionNotAllowedInSinglePartitionMode")
           .withArgs(_NON_DEFAULT_PARTITION);
@@ -502,9 +644,9 @@ describe("LockByPartition Tests", () => {
         const AMOUNT = 10;
         const EXPIRATION_TIMESTAMP = dateToUnixTimestamp(`2030-01-01T00:00:35Z`);
 
-        await asset.connect(signer_A).grantRole(ATS_ROLES.SNAPSHOT_ROLE, signer_A.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.LOCKER_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_SNAPSHOT, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_LOCKER, signer_A.address);
 
         await asset.connect(signer_A).issueByPartition({
           partition: _DEFAULT_PARTITION,
@@ -627,15 +769,121 @@ describe("LockByPartition Tests", () => {
     });
   });
 
+  describe("updateLockExpirationByPartition (single-partition)", () => {
+    beforeEach(async () => {
+      await loadFixture(deploySecurityFixtureSinglePartition);
+    });
+
+    async function issuedAndLocked(expiration: number | bigint): Promise<void> {
+      await asset.connect(signer_B).issueByPartition({
+        partition: _DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: _AMOUNT,
+        data: "0x",
+      });
+      await asset.connect(signer_C).lockByPartition(_DEFAULT_PARTITION, _AMOUNT, signer_A.address, expiration);
+    }
+
+    it("GIVEN a lock with type(uint256).max expiration (FIND-059) WHEN updateLockExpirationByPartition THEN shortens expiration and lock becomes releasable", async () => {
+      await issuedAndLocked(MAX_UINT256);
+
+      const shortenedExpiration = expirationTimestamp;
+
+      await expect(
+        asset
+          .connect(signer_C)
+          .updateLockExpirationByPartition(_DEFAULT_PARTITION, signer_A.address, 1, shortenedExpiration),
+      )
+        .to.emit(asset, "LockExpirationUpdated")
+        .withArgs(signer_C.address, signer_A.address, _DEFAULT_PARTITION, 1, MAX_UINT256, shortenedExpiration);
+
+      await asset.changeSystemTimestamp(shortenedExpiration + ONE_SECOND);
+      await expect(asset.connect(signer_C).releaseByPartition(_DEFAULT_PARTITION, 1, signer_A.address))
+        .to.emit(asset, "LockByPartitionReleased")
+        .withArgs(signer_C.address, signer_A.address, _DEFAULT_PARTITION, 1);
+    });
+
+    it("GIVEN a lock with type(uint256).max WHEN updateLockExpiration (default-partition helper) THEN shortens expiration", async () => {
+      await issuedAndLocked(MAX_UINT256);
+
+      const shortenedExpiration = expirationTimestamp;
+
+      await expect(asset.connect(signer_C).updateLockExpiration(signer_A.address, 1, shortenedExpiration))
+        .to.emit(asset, "LockExpirationUpdated")
+        .withArgs(signer_C.address, signer_A.address, _DEFAULT_PARTITION, 1, MAX_UINT256, shortenedExpiration);
+
+      const [, updatedExpiration] = await asset.getLockFor(signer_A.address, 1);
+      expect(updatedExpiration).to.equal(shortenedExpiration);
+    });
+  });
+
   describe("Deactivated", () => {
     it("GIVEN a deactivated asset WHEN lockByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).lockByPartition(ethers.ZeroHash, 0, ethers.ZeroAddress, 0),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN releaseByPartition THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).releaseByPartition(ethers.ZeroHash, 0, ethers.ZeroAddress),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("initializeLockByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeLockByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeLockByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeLockByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeLockByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_LOCK_BY_PARTITION, 1);
+    });
+  });
+
+  describe("initializeLockByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeLockByPartition is called THEN emits LockByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_LOCK_BY_PARTITION);
+      await expect(asset.initializeLockByPartition()).to.emit(asset, "LockByPartitionInitialized");
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await loadFixture(deploySecurityFixtureSinglePartition);
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN lockByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.lockByPartition(DEFAULT_PARTITION, 0, ADDRESS_ZERO, 0)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN releaseByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.releaseByPartition(DEFAULT_PARTITION, 0, ADDRESS_ZERO)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN forceReleaseByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.forceReleaseByPartition(DEFAULT_PARTITION, 0, ADDRESS_ZERO)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
     });
   });
 });

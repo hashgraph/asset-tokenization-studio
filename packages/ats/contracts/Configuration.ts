@@ -32,6 +32,7 @@ const NETWORK_ENV_PREFIX_SEPARATOR_REGEX = /-/g;
  * - hedera-previewnet: Hedera previewnet (public test network)
  * - hedera-testnet: Hedera testnet (primary test network)
  * - hedera-mainnet: Hedera mainnet (production network)
+ * - hedera-hashsphere: Hedera Hashsphere (private enterprise network)
  */
 export const NETWORKS = [
   "hardhat",
@@ -40,6 +41,7 @@ export const NETWORKS = [
   "hedera-previewnet",
   "hedera-testnet",
   "hedera-mainnet",
+  "hedera-hashsphere",
 ] as const;
 export type Network = (typeof NETWORKS)[number];
 
@@ -85,7 +87,6 @@ export const CONTRACT_NAMES = [
   "EIP712Facet",
   "ERC1410ScheduledTasksFacet",
   "ERC20Votes", //TODO
-  "ERC1410ManagementFacet",
   "PartitionsFacet",
   "MintByPartitionFacet",
   "ERC1410TokenHolderFacet",
@@ -100,8 +101,6 @@ export const CONTRACT_NAMES = [
   "ComplianceByPartitionFacet",
   "DiamondFacet",
   "EquityUSAFacet",
-  "BondUSAFacet",
-  "BondUSARead", //TODO
   "PrincipalFacet",
   "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",
@@ -134,7 +133,7 @@ export const CONTRACT_NAMES = [
   "HoldFacet",
   "HoldByPartitionFacet",
   "OperatorHoldByPartitionFacet",
-  "TimeTravel",
+  "EvmAccessorsFacet",
   "KycFacet",
   "SsiManagementFacet",
   "ClearingFacet",
@@ -148,7 +147,6 @@ export const CONTRACT_NAMES = [
   "ExternalKycListManagementFacet",
   "ERC3643",
   "FreezeFacet",
-  "ERC3643ManagementFacet",
   "ERC3643ReadFacet",
   "IdentityFacet",
   "BatchControllerFacet",
@@ -172,12 +170,7 @@ export const CONTRACT_NAMES = [
 ] as const;
 export type ContractName = (typeof CONTRACT_NAMES)[number];
 
-export const LIBRARY_NAMES = [
-  "SecurityDeploymentLib",
-  "TREXBaseDeploymentLib",
-  "TREXBondDeploymentLib",
-  "TREXEquityDeploymentLib",
-] as const;
+export const LIBRARY_NAMES = [] as const;
 export type LibraryName = (typeof LIBRARY_NAMES)[number];
 
 export const CONTRACT_NAMES_WITH_PROXY = ["Factory", "BusinessLogicResolver"];
@@ -233,6 +226,34 @@ export default class Configuration {
         defaultValue: "true",
       }).toLowerCase() === "true"
     );
+  }
+
+  /**
+   * Determines whether ATS is running in test mode for EVM accessor generation.
+   *
+   * An explicit `ATS_TEST_MODE` environment variable always wins (case-insensitive
+   * `"true"`/`"false"`). When it is unset, test mode is inferred from the active
+   * Hardhat task: the `test` and `coverage` tasks need the compile they trigger to
+   * emit the override-capable accessor library and register the writer facet, so
+   * test mode defaults on for them and off for every other task (compile, deploy,
+   * run). Matching the task name anywhere in `process.argv` tolerates global flags
+   * preceding it; no enumerated `NETWORKS` value collides with `"test"`/`"coverage"`.
+   *
+   * In test mode the accessor generator emits slot-fallback getters plus override
+   * readers/writers; in prod mode it emits getters that compile down to a single
+   * native opcode each, with no override machinery in the artifact.
+   *
+   * @returns {boolean} True if test mode is enabled, false otherwise.
+   */
+  public static get isTestMode(): boolean {
+    const explicit = Configuration._getEnvironmentVariable({
+      name: "ATS_TEST_MODE",
+      defaultValue: "",
+    }).toLowerCase();
+    if (explicit !== "") {
+      return explicit === "true";
+    }
+    return process.argv.includes("test") || process.argv.includes("coverage");
   }
 
   public static get privateKeys(): Record<Network, string[]> {

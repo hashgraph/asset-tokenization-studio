@@ -1,24 +1,29 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ICoupon } from "./ICoupon.sol";
+import { ICoupon, RESOLVER_KEY_COUPON } from "./ICoupon.sol";
 import { ICouponTypes } from "./ICouponTypes.sol";
-import { CORPORATE_ACTION_ROLE } from "../../constants/roles.sol";
-import { COUPON_CORPORATE_ACTION_TYPE } from "../../constants/values.sol";
+import {
+    ROLE_CORPORATE_ACTION,
+    ROLE_CORPORATE_ACTION_FORCE_CANCEL,
+    DEFAULT_ADMIN_ROLE
+} from "../../constants/roles.sol";
+import { CORPORATE_ACTION_TYPE_COUPON } from "../../constants/dispatchTypes.sol";
 import { CouponStorageWrapper } from "../../domain/asset/coupon/CouponStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title Coupon
  * @author Asset Tokenization Studio Team
  * @notice Abstract base of the unified coupon writer surface exposed by `CouponFacet` for
- *         every bond rate variant (standard, fixed-rate, KPI-linked, SPT). Provides the
+ *         every security rate variant (standard, fixed-rate, KPI-linked, SPT). Provides the
  *         shared coupon lifecycle (`setCoupon`, `cancelCoupon`) plus the per-record reads
  *         consumers need before executing a coupon.
  * @dev Thin forwarder over `CouponStorageWrapper`; holds no storage of its own. Write
- *      paths are restricted to `CORPORATE_ACTION_ROLE` and gated by the unpaused state.
- *      Read paths are guarded by `onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE,
+ *      paths are restricted to `ROLE_CORPORATE_ACTION` and gated by the unpaused state.
+ *      Read paths are guarded by `onlyMatchingActionType(CORPORATE_ACTION_TYPE_COUPON,
  *      _couponID - 1)`. The rate-variant invariants and rate resolution live in
  *      `CouponStorageWrapper.setCoupon` (write-path mirror of `getCoupon`'s read-path
  *      dispatch via `InterestRateStorageWrapper.is<Variant>Initialized()`). Emits
@@ -27,7 +32,18 @@ import { Modifiers } from "../../services/Modifiers.sol";
  */
 abstract contract Coupon is ICoupon, Modifiers {
     /// @inheritdoc ICoupon
-    /// @dev Restricted to `CORPORATE_ACTION_ROLE`; gated by `onlyUnpaused`,
+    function initializeCoupon()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_COUPON)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_COUPON);
+        emit CouponInitialized();
+    }
+
+    /// @inheritdoc ICoupon
+    /// @dev Restricted to `ROLE_CORPORATE_ACTION`; gated by `onlyUnpaused`,
     ///      `onlyValidDates(...)` (three pairs of date validations), and
     ///      `onlyValidTimestamp` on `recordDate` and `fixingDate`. Variant-specific
     ///      rate invariants and rate stamping are applied inside
@@ -38,14 +54,16 @@ abstract contract Coupon is ICoupon, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
-        onlyRole(CORPORATE_ACTION_ROLE)
+        onlyRole(ROLE_CORPORATE_ACTION)
         onlyValidDates(_newCoupon.startDate, _newCoupon.endDate)
         onlyValidDates(_newCoupon.recordDate, _newCoupon.executionDate)
         onlyValidDates(_newCoupon.fixingDate, _newCoupon.executionDate)
         onlyValidTimestamp(_newCoupon.recordDate)
         onlyValidTimestamp(_newCoupon.fixingDate)
+        onlyValidCouponEndDate(_newCoupon.endDate)
         returns (uint256 couponID_)
     {
         bytes32 corporateActionId;
@@ -55,21 +73,40 @@ abstract contract Coupon is ICoupon, Modifiers {
     }
 
     /// @inheritdoc ICoupon
-    /// @dev Restricted to `CORPORATE_ACTION_ROLE`; gated by `onlyUnpaused` and
-    ///      `onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)`.
+    /// @dev Restricted to `ROLE_CORPORATE_ACTION`; gated by `onlyUnpaused` and
+    ///      `onlyMatchingActionType(CORPORATE_ACTION_TYPE_COUPON, _couponID - 1)`.
     function cancelCoupon(
+        uint256 _couponID
+    )
+        external
+        override
+        onlyOperational
+        onlyActivated
+        onlyUnpaused
+        onlyRole(ROLE_CORPORATE_ACTION)
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_COUPON, _couponID - 1)
+        returns (bool success_)
+    {
+        success_ = CouponStorageWrapper.cancelCoupon(_couponID);
+        emit ICoupon.CouponCancelled(_couponID, EvmAccessors.getMsgSender());
+    }
+
+    /// @inheritdoc ICoupon
+    /// @dev Restricted to `ROLE_CORPORATE_ACTION_FORCE_CANCEL`; gated by `onlyUnpaused` and
+    ///      `onlyMatchingActionType(CORPORATE_ACTION_TYPE_COUPON, _couponID - 1)`.
+    function forceCancelCoupon(
         uint256 _couponID
     )
         external
         override
         onlyActivated
         onlyUnpaused
-        onlyRole(CORPORATE_ACTION_ROLE)
-        onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
+        onlyRole(ROLE_CORPORATE_ACTION_FORCE_CANCEL)
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_COUPON, _couponID - 1)
         returns (bool success_)
     {
-        success_ = CouponStorageWrapper.cancelCoupon(_couponID);
-        emit ICoupon.CouponCancelled(_couponID, EvmAccessors.getMsgSender());
+        success_ = CouponStorageWrapper.forceCancelCoupon(_couponID);
+        emit ICoupon.CouponForceCancelled(_couponID, EvmAccessors.getMsgSender());
     }
 
     /// @inheritdoc ICoupon
@@ -81,7 +118,7 @@ abstract contract Coupon is ICoupon, Modifiers {
         external
         view
         override
-        onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_COUPON, _couponID - 1)
         returns (ICouponTypes.RegisteredCoupon memory registeredCoupon_, bool isDisabled_)
     {
         (registeredCoupon_, , isDisabled_) = CouponStorageWrapper.getCoupon(_couponID);
@@ -97,7 +134,7 @@ abstract contract Coupon is ICoupon, Modifiers {
         external
         view
         override
-        onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_COUPON, _couponID - 1)
         returns (ICouponTypes.CouponFor memory couponFor_)
     {
         couponFor_ = CouponStorageWrapper.getCouponFor(_couponID, _account);
@@ -113,7 +150,7 @@ abstract contract Coupon is ICoupon, Modifiers {
         external
         view
         override
-        onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_COUPON, _couponID - 1)
         returns (ICouponTypes.CouponAmountFor memory couponAmountFor_)
     {
         couponAmountFor_ = CouponStorageWrapper.getCouponAmountFor(_couponID, _account);

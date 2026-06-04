@@ -3,8 +3,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ZERO, EMPTY_STRING, ATS_ROLES } from "@scripts";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import { DEFAULT_PARTITION, ZERO, EMPTY_STRING, ATS_ROLES, RESOLVER_KEY_CAP_BY_PARTITION } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
@@ -21,6 +21,7 @@ describe("CapByPartition Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixtureMultiPartition() {
     const base = await deployEquityTokenFixture({
@@ -37,22 +38,23 @@ describe("CapByPartition Tests", () => {
     signer_C = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.KYC_ROLE,
+        role: ATS_ROLES.ROLE_KYC,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.SSI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_SSI_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.CAP_ROLE,
+        role: ATS_ROLES.ROLE_CAP,
         members: [signer_A.address],
       },
     ]);
@@ -90,7 +92,7 @@ describe("CapByPartition Tests", () => {
 
   describe("New Max Supply Too low or 0", () => {
     it("GIVEN a token WHEN setMaxSupplyByPartition with 0 THEN transaction fails with NewMaxSupplyCannotBeZero", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CAP, signer_C.address);
 
       await expect(asset.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, 0)).to.be.revertedWithCustomError(
         asset,
@@ -99,8 +101,8 @@ describe("CapByPartition Tests", () => {
     });
 
     it("GIVEN a token WHEN setMaxSupplyByPartition a value that is less than the current total supply THEN transaction fails with NewMaxSupplyForPartitionTooLow", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CAP, signer_C.address);
 
       await asset.connect(signer_C).issueByPartition({
         partition: _PARTITION_ID_1,
@@ -118,7 +120,7 @@ describe("CapByPartition Tests", () => {
 
   describe("New Max Supply OK", () => {
     it("GIVEN a token WHEN setMaxSupplyByPartition THEN transaction succeeds", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CAP, signer_C.address);
 
       await expect(asset.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply * 2))
         .to.emit(asset, "MaxSupplyByPartitionSet")
@@ -130,7 +132,7 @@ describe("CapByPartition Tests", () => {
     });
 
     it("GIVEN a token WHEN setMaxSupplyByPartition exceeds global max supply THEN transaction succeeds", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CAP, signer_C.address);
 
       await expect(asset.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply * 100))
         .to.emit(asset, "MaxSupplyByPartitionSet")
@@ -142,15 +144,48 @@ describe("CapByPartition Tests", () => {
     });
   });
 
+  describe("initializeCapByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeCapByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeCapByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeCapByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeCapByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_CAP_BY_PARTITION, 1);
+    });
+  });
+
+  describe("initializeCapByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeCapByPartition is called THEN emits CapByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_CAP_BY_PARTITION);
+      await expect(asset.initializeCapByPartition()).to.emit(asset, "CapByPartitionInitialized");
+    });
+  });
+
   describe("Deactivated", () => {
     it("GIVEN a deactivated asset WHEN setMaxSupplyByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).setMaxSupplyByPartition(ethers.ZeroHash, 0),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setMaxSupplyByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.setMaxSupplyByPartition(DEFAULT_PARTITION, 0)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
     });
   });
 });

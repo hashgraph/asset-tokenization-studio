@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // TEST-ONLY: integration tests for the InitializeMock domain. Loads the full
-// ATS infrastructure fixture (which, with useTimeTravel=true, deploys three
+// ATS infrastructure fixture (which deploys three
 // distinct BLR versions of each of MockFacet1/2/3 — all backed by identical
 // bytecode — and creates two versions of the InitializeMock configuration:
 //   v1 = { InitializerFacet:1, MockDiamondCut:1, MockFacet1:1, MockFacet2:2, MockFacet3:1 }
@@ -15,8 +15,10 @@
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
+import { ethers } from "hardhat";
 import {
   IFactory,
+  IDiamondFacet__factory,
   InitializerFacet,
   InitializerFacet__factory,
   MockDiamondCut,
@@ -29,22 +31,29 @@ import {
   MockFacet3__factory,
 } from "@contract-types";
 import { deployAtsInfrastructureFixture } from "@test";
-import { INITIALIZE_MOCK_CONFIG_ID, ATS_ROLES } from "@scripts";
+import {
+  INITIALIZE_MOCK_CONFIG_ID,
+  EQUITY_CONFIG_ID,
+  ATS_ROLES,
+  RESOLVER_KEY_DIAMOND,
+  RESOLVER_KEY_INITIALIZER,
+} from "@scripts";
 import { decodeEvent } from "@scripts/infrastructure";
 
 describe("Initializer — InitializeMock domain", () => {
-  // TEST-ONLY: mirrors `_INITIALIZER_RESOLVER_KEY` declared in
-  // `contracts/constants/resolverKeys.sol`.
-  const initializerFacetId = "0x65c891d003e7dc436f2c3d0863d599d91867c8695fee29923a476a2be3ec540f";
-  // TEST-ONLY: mirrors the `_MOCK_FACET_N_RESOLVER_KEY = bytes32("MockFacetN")`
+  // TEST-ONLY: mirrors `RESOLVER_KEY_INITIALIZER` declared file-scope in
+  // `contracts/facets/initializer/IInitializer.sol`. Sourced from the
+  // auto-generated atsRegistry so the test stays in sync with the codegen.
+  const initializerFacetId = RESOLVER_KEY_INITIALIZER;
+  // TEST-ONLY: mirrors the `_MOCK_FACET_N = bytes32("MockFacetN")`
   // constants declared in `contracts/test/mocks/MockFacets.sol`.
   const mockFacet1Id = "0x4d6f636b46616365743100000000000000000000000000000000000000000000";
   const mockFacet2Id = "0x4d6f636b46616365743200000000000000000000000000000000000000000000";
   const mockFacet3Id = "0x4d6f636b46616365743300000000000000000000000000000000000000000000";
-  // TEST-ONLY: mirrors `_MOCK_DIAMOND_CUT_RESOLVER_KEY = bytes32("MockDiamondCut")`
-  // declared in `contracts/test/mocks/MockDiamondCut.sol` (14 ASCII bytes
-  // right-padded with 18 zero bytes).
-  const mockDiamondCutId = "0x4d6f636b4469616d6f6e64437574000000000000000000000000000000000000";
+  // TEST-ONLY: mirrors the production `_DIAMOND` from
+  // `contracts/constants/resolverKeys.sol`. MockDiamondCut shares the same
+  // key so that BLR registration and facet-version-status assertions align.
+  const mockDiamondCutId = RESOLVER_KEY_DIAMOND;
 
   let factory: IFactory;
   let blrAddress: string;
@@ -578,6 +587,49 @@ describe("Initializer — InitializeMock domain", () => {
 
       const response = await mockFacet2.mockFacet2Method();
       expect(response).to.equal("MockFacet2 method called");
+    });
+  });
+
+  describe("initializeDiamondCut", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeDiamondCut is called THEN AccountHasNoRole", async () => {
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", (await proxyTx.wait())!);
+      const diamond = IDiamondFacet__factory.connect(proxyAddress as string, infra.deployer);
+      const asset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(diamond.connect(infra.unknownSigner).initializeDiamondCut()).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN already-initialised WHEN initializeDiamondCut is called again THEN FacetAlreadyRegistered", async () => {
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", (await proxyTx.wait())!);
+      const diamond = IDiamondFacet__factory.connect(proxyAddress as string, infra.deployer);
+      const asset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await diamond.connect(infra.deployer).initializeDiamondCut();
+      await expect(diamond.connect(infra.deployer).initializeDiamondCut()).to.be.revertedWithCustomError(
+        asset,
+        "FacetAlreadyRegistered",
+      );
+    });
+  });
+
+  describe("initializeDiamondCut event", () => {
+    it("GIVEN a fresh deployment WHEN initializeDiamondCut is called THEN emits DiamondCutInitialized", async () => {
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", (await proxyTx.wait())!);
+      const diamond = IDiamondFacet__factory.connect(proxyAddress as string, infra.deployer);
+      await expect(diamond.connect(infra.deployer).initializeDiamondCut()).to.emit(diamond, "DiamondCutInitialized");
     });
   });
 });

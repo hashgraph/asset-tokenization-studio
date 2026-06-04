@@ -9,10 +9,27 @@
  * @module core/utils/transaction
  */
 
-import { ContractTransactionResponse, ContractTransactionReceipt, Provider } from "ethers";
+import {
+  ContractRunner,
+  ContractTransactionResponse,
+  ContractTransactionReceipt,
+  NonceManager,
+  Provider,
+} from "ethers";
 import { DEFAULT_TRANSACTION_TIMEOUT, GAS_LIMIT } from "../constants";
 import { isInstantMiningNetwork } from "../networkConfig";
 import { info, warn, debug } from "./logging";
+
+/**
+ * Returns `{ gasLimit: limit }` under normal operation.
+ * Under solidity-coverage (`COVERAGE=true`), contracts are instrumented and grow
+ * substantially, so we use a higher fixed limit instead of auto-estimation — the
+ * auto-estimate is based on the unmodified bytecode and will be too low.
+ * 30M sits well within the 300M blockGasLimit configured for coverage runs.
+ */
+export function gasLimitOverride(limit: number): { gasLimit: number } {
+  return { gasLimit: process.env.COVERAGE ? 30_000_000 : limit };
+}
 
 /**
  * Returns `{ gasPrice: GAS_LIMIT.gasPrice }` on real networks (Hedera) and `{}`
@@ -61,20 +78,21 @@ export async function waitForTransaction(
   confirmations: number = DEFAULT_TRANSACTION_CONFIRMATIONS,
   timeout: number = DEFAULT_TRANSACTION_TIMEOUT,
 ): Promise<ContractTransactionReceipt> {
+  let receipt: ContractTransactionReceipt | null;
   try {
-    const receipt = await Promise.race([
+    receipt = await Promise.race([
       tx.wait(confirmations),
       new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Transaction timeout")), timeout)),
     ]);
-
-    if (!receipt || receipt.status === 0) {
-      throw new Error("Transaction failed");
-    }
-
-    return receipt;
   } catch (error) {
     throw new Error(`Transaction failed: ${error instanceof Error ? error.message : String(error)}`);
   }
+
+  if (!receipt || receipt.status === 0) {
+    throw new Error(`Transaction reverted (status=0): ${tx.hash}`);
+  }
+
+  return receipt;
 }
 
 /**
@@ -177,6 +195,16 @@ export interface RetryOptions {
   maxDelay?: number;
   /** Whether to log retry attempts (default: true) */
   logRetries?: boolean;
+  /**
+   * Optional hook called after each failure and before the retry delay.
+   * The hook is awaited, so async work here extends the total wait time.
+   *
+   * Primary use: call NonceManager.reset() to discard the stale internal nonce
+   * delta that ethers accumulates when a 502 aborts sendTransaction before Hedera
+   * confirms receipt. Without a reset the next attempt uses nonce N+1 while the
+   * network still expects N, causing a "Wrong Nonce" rejection.
+   */
+  onRetry?: (error: unknown, attempt: number) => void | Promise<void>;
 }
 
 /**
@@ -184,7 +212,7 @@ export interface RetryOptions {
  * Reduced from previous values for faster failure feedback (<2min worst-case).
  * Old values: maxRetries: 3, baseDelay: 2000, maxDelay: 16000
  */
-export const DEFAULT_RETRY_OPTIONS: Required<RetryOptions> = {
+export const DEFAULT_RETRY_OPTIONS: Omit<Required<RetryOptions>, "onRetry"> = {
   maxRetries: 2, // 3 total attempts
   baseDelay: 1000, // 1 second base delay
   maxDelay: 4000, // Cap at 4 seconds (delays: 1s → 2s → 4s)
@@ -209,7 +237,7 @@ export const DEFAULT_RETRY_OPTIONS: Required<RetryOptions> = {
  * ```
  */
 export async function retryTransaction<T>(fn: () => Promise<T>, options: RetryOptions = {}): Promise<T> {
-  const { maxRetries, baseDelay, maxDelay, logRetries } = { ...DEFAULT_RETRY_OPTIONS, ...options };
+  const { maxRetries, baseDelay, maxDelay, logRetries, onRetry } = { ...DEFAULT_RETRY_OPTIONS, ...options };
   let lastError: Error | undefined;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -234,6 +262,9 @@ export async function retryTransaction<T>(fn: () => Promise<T>, options: RetryOp
           debug(`Waiting ${adjustedDelay}ms before retry...`);
         }
 
+        // Resync state
+        await onRetry?.(error, attempt);
+
         await new Promise((resolve) => setTimeout(resolve, adjustedDelay));
         continue;
       }
@@ -241,6 +272,38 @@ export async function retryTransaction<T>(fn: () => Promise<T>, options: RetryOp
   }
 
   throw new Error(`Transaction failed after ${maxRetries + 1} attempts: ${lastError?.message || "Unknown error"}`);
+}
+
+/**
+ * Build retry options that reset the {@link NonceManager} (if any) before each retry.
+ *
+ * On Hedera, a 502 from the JSON-RPC relay can abort `sendTransaction` after ethers
+ * has bumped the NonceManager's internal delta but before the network observed the tx.
+ * The next attempt would then use nonce N+1 while Hedera still expects N, causing a
+ * "Wrong Nonce" rejection. Calling `NonceManager.reset()` forces the next
+ * `sendTransaction` to re-fetch the confirmed nonce from the network.
+ *
+ * If `runner` is not a NonceManager (plain Wallet, null, undefined, etc.) the caller's
+ * options are returned unchanged.
+ *
+ * NOTE: If `options.onRetry` is set, it is replaced by the reset callback — callers
+ * that need to compose their own `onRetry` should wire it manually.
+ *
+ * @param runner - ContractRunner driving the transaction (e.g. `signer`, `contract.runner`)
+ * @param options - Caller-supplied retry options
+ * @returns Retry options with `onRetry` wired up when applicable
+ */
+export function withNonceReset(runner: ContractRunner | null | undefined, options?: RetryOptions): RetryOptions {
+  const base = options ?? {};
+  if (!(runner instanceof NonceManager)) {
+    return base;
+  }
+  return {
+    ...base,
+    onRetry: () => {
+      runner.reset();
+    },
+  };
 }
 
 /**
@@ -252,9 +315,13 @@ export async function retryTransaction<T>(fn: () => Promise<T>, options: RetryOp
  * @returns Adjusted delay in milliseconds
  */
 function adjustDelayForErrorType(error: unknown, baseDelay: number): number {
-  const message = extractRevertReason(error).toLowerCase();
+  // Hedera network - high delay
+  if (isHederaThrottleError(error)) {
+    return baseDelay * 5;
+  }
 
-  // Hedera rate limit errors - add extra delay
+  const message = extractRevertReason(error).toLowerCase();
+  // Rate limit errors - add extra delay
   if (message.includes("rate limit") || message.includes("too many requests")) {
     return baseDelay * 1.5;
   }
@@ -333,12 +400,51 @@ export function isGasError(error: unknown): boolean {
  * @param error - Error to check
  * @returns true if error is network-related
  */
+/**
+ * Check if error is a Hedera consensus-layer pre-execution rejection.
+ *
+ * On Hedera, when the per-account contract-creation throttle fires the node mines
+ * the transaction but rejects it before the EVM runs: status=0, gasUsed=0,
+ * contractAddress=null. This is NOT an EVM revert (which shows gasUsed > 0).
+ *
+ * NOTE: This heuristic is scoped to contract-deployment transactions. A non-deployment
+ * transaction that genuinely consumes 0 gas (e.g. a precompile call) could produce
+ * the same receipt shape and trigger a false-positive. Do not use this check in
+ * non-deployment retry contexts without adding an additional deployment-specific guard.
+ *
+ * @param error - Error to check
+ * @returns true if the mined receipt shows status=0 and gasUsed=0
+ */
+export function isHederaThrottleError(error: unknown): boolean {
+  if (typeof error === "object" && error !== null && "receipt" in error) {
+    const receipt = (error as Record<string, unknown>).receipt;
+    if (
+      receipt !== null &&
+      typeof receipt === "object" &&
+      "gasUsed" in receipt &&
+      "status" in receipt &&
+      "contractAddress" in receipt &&
+      String((receipt as Record<string, unknown>).gasUsed) === "0" &&
+      (receipt as Record<string, unknown>).status === 0 &&
+      (receipt as Record<string, unknown>).contractAddress === null
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export function isNetworkError(error: unknown): boolean {
   const message = extractRevertReason(error).toLowerCase();
   return (
     message.includes("network") ||
     message.includes("timeout") ||
     message.includes("connection") ||
-    message.includes("econnrefused")
+    message.includes("econnrefused") ||
+    // ethers v6 HTTP-layer errors — "server response 502 Bad Gateway", code=SERVER_ERROR, etc.
+    message.includes("bad gateway") ||
+    message.includes("server_error") ||
+    message.includes("server error") ||
+    /\b5\d\d\b/.test(message) // any 5xx status code
   );
 }

@@ -2,23 +2,23 @@
 
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { type IAsset } from "@contract-types";
+import { type IAsset, MockDiamondCut } from "@contract-types";
 import {
   executeRbac,
   deployLoanTokenFixture,
-  getRegulationData,
   MAX_UINT256,
   deployLoansPortfolioTokenFixture,
   DEFAULT_LOANS_PORTFOLIO_PARAMS,
   getLoanDetails,
 } from "@test";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { ADDRESS_ZERO, ATS_ROLES, buildRegulationData, DEFAULT_PARTITION, EMPTY_STRING, ZERO } from "@scripts";
-import { ethers } from "hardhat";
+import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO, LOANS_PORTFOLIO } from "@scripts";
 import { HoldingsAssetType } from "@scripts/domain";
+import { ethers } from "hardhat";
 
 describe("LoansPortfolio Token Tests", () => {
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
@@ -34,10 +34,12 @@ describe("LoansPortfolio Token Tests", () => {
     signer_C = base.user3;
 
     asset = await ethers.getContractAt("IAsset", base.tokenAddress, signer_A);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", base.tokenAddress);
 
     await executeRbac(asset, [
-      { role: ATS_ROLES.LOANS_PORTFOLIO_MANAGER_ROLE, members: [signer_A.address] },
-      { role: ATS_ROLES.PAUSER_ROLE, members: [signer_B.address] },
+      { role: ATS_ROLES.ROLE_LOANS_PORTFOLIO_MANAGER, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_PAUSER, members: [signer_B.address] },
+      { role: ATS_ROLES.ROLE_DEACTIVATE, members: [signer_A.address] },
     ]);
 
     loanAsset = await deployLoanToken();
@@ -60,10 +62,10 @@ describe("LoansPortfolio Token Tests", () => {
     const loanIAsset = await ethers.getContractAt("IAsset", loanBase.tokenAddress, signer_A);
 
     await executeRbac(loanIAsset, [
-      { role: ATS_ROLES.ISSUER_ROLE, members: [signer_A?.address] },
-      { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A?.address] },
-      { role: ATS_ROLES.KYC_ROLE, members: [signer_B?.address] },
-      { role: ATS_ROLES.LOAN_MANAGER_ROLE, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_ISSUER, members: [signer_A?.address] },
+      { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A?.address] },
+      { role: ATS_ROLES.ROLE_KYC, members: [signer_B?.address] },
+      { role: ATS_ROLES.ROLE_LOAN_MANAGER, members: [signer_A.address] },
     ]);
 
     await loanIAsset.addIssuer(signer_A.address);
@@ -76,7 +78,7 @@ describe("LoansPortfolio Token Tests", () => {
     await loadFixture(deployLoansPortfolioFixture);
   });
 
-  describe("_initialize_LoansPortfolio", () => {
+  describe("initializeLoansPortfolio", () => {
     it("GIVEN a deployed portfolio WHEN initializing THEN state is set correctly", async () => {
       const data = await asset.getLoansPortfolioData();
 
@@ -84,23 +86,31 @@ describe("LoansPortfolio Token Tests", () => {
       expect(data.distributionPolicy).to.equal(DEFAULT_LOANS_PORTFOLIO_PARAMS.distributionPolicy);
     });
 
-    it("GIVEN an already initialized portfolio WHEN initializing again THEN reverts with AlreadyInitialized", async () => {
-      const regulationData = getRegulationData();
-
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeLoansPortfolio is called THEN it reverts with AccountHasNoRole", async () => {
       await expect(
-        asset.initializeLoansPortfolio(
-          {
-            portfolioType: DEFAULT_LOANS_PORTFOLIO_PARAMS.portfolioType,
-            distributionPolicy: DEFAULT_LOANS_PORTFOLIO_PARAMS.distributionPolicy,
-          },
-          buildRegulationData(regulationData.regulationType, regulationData.regulationSubType),
-          {
-            countriesControlListType: regulationData.additionalSecurityData.countriesControlListType,
-            listOfCountries: regulationData.additionalSecurityData.listOfCountries,
-            info: regulationData.additionalSecurityData.info,
-          },
-        ),
-      ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+        asset.connect(signer_C).initializeLoansPortfolio({
+          portfolioType: DEFAULT_LOANS_PORTFOLIO_PARAMS.portfolioType,
+          distributionPolicy: DEFAULT_LOANS_PORTFOLIO_PARAMS.distributionPolicy,
+        }),
+      ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+    });
+
+    it("GIVEN an already initialized portfolio WHEN initializing again THEN reverts with FacetAlreadyRegistered", async () => {
+      await expect(
+        asset.initializeLoansPortfolio({
+          portfolioType: DEFAULT_LOANS_PORTFOLIO_PARAMS.portfolioType,
+          distributionPolicy: DEFAULT_LOANS_PORTFOLIO_PARAMS.distributionPolicy,
+        }),
+      ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeLoansPortfolio is called THEN it emits LoansPortfolioInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(LOANS_PORTFOLIO);
+      const loansPortfolioData = {
+        portfolioType: DEFAULT_LOANS_PORTFOLIO_PARAMS.portfolioType,
+        distributionPolicy: DEFAULT_LOANS_PORTFOLIO_PARAMS.distributionPolicy,
+      };
+      await expect(asset.initializeLoansPortfolio(loansPortfolioData)).to.emit(asset, "LoansPortfolioInitialized");
     });
   });
 
@@ -180,7 +190,7 @@ describe("LoansPortfolio Token Tests", () => {
         }),
       )
         .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
-        .withArgs(signer_C.address, ATS_ROLES.LOANS_PORTFOLIO_MANAGER_ROLE);
+        .withArgs(signer_C.address, ATS_ROLES.ROLE_LOANS_PORTFOLIO_MANAGER);
     });
 
     it("GIVEN an existing asset WHEN adding the same asset THEN reverts with HoldingsAssetAlreadyExists", async () => {
@@ -299,7 +309,7 @@ describe("LoansPortfolio Token Tests", () => {
 
       await expect(asset.connect(signer_C).removeHoldingsAsset(holdingsAsset))
         .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
-        .withArgs(signer_C.address, ATS_ROLES.LOANS_PORTFOLIO_MANAGER_ROLE);
+        .withArgs(signer_C.address, ATS_ROLES.ROLE_LOANS_PORTFOLIO_MANAGER);
     });
   });
 
@@ -383,7 +393,7 @@ describe("LoansPortfolio Token Tests", () => {
     it("GIVEN an unauthorized account WHEN notifying update THEN reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_C).notifyLoanHoldingsAssetUpdate(await loanAsset.getAddress()))
         .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
-        .withArgs(signer_C.address, ATS_ROLES.LOANS_PORTFOLIO_MANAGER_ROLE);
+        .withArgs(signer_C.address, ATS_ROLES.ROLE_LOANS_PORTFOLIO_MANAGER);
     });
   });
 
@@ -490,7 +500,7 @@ describe("LoansPortfolio Token Tests", () => {
 
       await expect(asset.connect(signer_C).loansPortfolioWithdraw(await loanAsset.getAddress(), signer_A.address, 100n))
         .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
-        .withArgs(signer_C.address, ATS_ROLES.LOANS_PORTFOLIO_MANAGER_ROLE);
+        .withArgs(signer_C.address, ATS_ROLES.ROLE_LOANS_PORTFOLIO_MANAGER);
     });
   });
 
@@ -967,13 +977,81 @@ describe("LoansPortfolio Token Tests", () => {
     it("GIVEN a deactivated asset WHEN addHoldingsAsset THEN transaction fails with Deactivated", async () => {
       const base = await deployLoansPortfolioTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset
           .connect(base.deployer)
           .addHoldingsAsset({ assetAddress: ethers.ZeroAddress, holdingsAssetType: 0, country: "" }),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN removeHoldingsAsset THEN transaction fails with Deactivated", async () => {
+      const base = await deployLoansPortfolioTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset
+          .connect(base.deployer)
+          .removeHoldingsAsset({ assetAddress: ethers.ZeroAddress, holdingsAssetType: 0, country: "" }),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN notifyLoanHoldingsAssetUpdate THEN transaction fails with Deactivated", async () => {
+      const base = await deployLoansPortfolioTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).notifyLoanHoldingsAssetUpdate(ethers.ZeroAddress),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN loansPortfolioWithdraw THEN transaction fails with Deactivated", async () => {
+      const base = await deployLoansPortfolioTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).loansPortfolioWithdraw(ethers.ZeroAddress, ethers.ZeroAddress, 0),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN addHoldingsAsset THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.addHoldingsAsset({ assetAddress: ADDRESS_ZERO, holdingsAssetType: HoldingsAssetType.LOAN, country: "" }),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN removeHoldingsAsset THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.removeHoldingsAsset({
+          assetAddress: ADDRESS_ZERO,
+          holdingsAssetType: HoldingsAssetType.LOAN,
+          country: "",
+        }),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN notifyLoanHoldingsAssetUpdate THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.notifyLoanHoldingsAssetUpdate(ADDRESS_ZERO)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN loansPortfolioWithdraw THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.loansPortfolioWithdraw(ADDRESS_ZERO, ADDRESS_ZERO, 0)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
     });
   });
 });

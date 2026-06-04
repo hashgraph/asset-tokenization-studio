@@ -195,7 +195,7 @@ If you added a **new facet contract** (not just adding existing facet to configu
 npm run generate:registry
 ```
 
-This updates [domain/atsRegistry.data.ts](domain/atsRegistry.data.ts) with:
+This updates [domain/atsRegistry.generated.ts](domain/atsRegistry.generated.ts) with:
 
 - Facet metadata (methods, events, errors)
 - Resolver keys (from contract constants)
@@ -216,7 +216,6 @@ const [signer] = await ethers.getSigners();
 // Deploy single facet
 const result = await deployFacets(signer, {
   facetNames: ["NewFacet"],
-  useTimeTravel: false,
   network: "hedera-testnet",
 });
 
@@ -276,11 +275,7 @@ const facetAddresses = {
 };
 
 // Create configuration
-const result = await createEquityConfiguration(
-  blr,
-  facetAddresses,
-  false, // useTimeTravel
-);
+const result = await createEquityConfiguration(blr, facetAddresses);
 
 if (result.success) {
   console.log(`Configuration version: ${result.data.version}`);
@@ -399,7 +394,8 @@ const FUND_FACETS = [
   "ERC20PermitFacet",
 
   // Compliance (if needed)
-  "ERC3643ManagementFacet",
+  "ComplianceFacet",
+  "IdentityFacet",
   "ERC3643ReadFacet",
 
   // Fund-Specific (your custom facets)
@@ -414,7 +410,6 @@ const FUND_FACETS = [
  *
  * @param blrContract - BusinessLogicResolver contract instance
  * @param facetAddresses - Map of facet names to their deployed addresses
- * @param useTimeTravel - Whether to use TimeTravel variants (default: false)
  * @param partialBatchDeploy - Whether this is a partial batch deployment (default: false)
  * @param batchSize - Number of facets per batch (default: DEFAULT_BATCH_SIZE)
  * @param confirmations - Number of confirmations to wait for (default: 0)
@@ -423,26 +418,15 @@ const FUND_FACETS = [
 export async function createFundConfiguration(
   blrContract: Contract,
   facetAddresses: Record<string, string>,
-  useTimeTravel: boolean = false,
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  // Get facet names based on time travel mode
-  const baseFacets = useTimeTravel ? [...FUND_FACETS, "TimeTravelFacet"] : FUND_FACETS;
-
-  const facetNames = useTimeTravel
-    ? baseFacets.map((name) => (name === "TimeTravelFacet" || name.endsWith("TimeTravel") ? name : `${name}TimeTravel`))
-    : baseFacets;
-
   // Build facet data with resolver keys from registry (internal lookup)
-  const facets = facetNames.map((name) => {
-    // Strip "TimeTravel" suffix to get base name for registry lookup
-    const baseName = name.replace(/TimeTravel$/, "");
-
-    const facetDef = atsRegistry.getFacetDefinition(baseName);
+  const facets = FUND_FACETS.map((name) => {
+    const facetDef = atsRegistry.getFacetDefinition(name);
     if (!facetDef?.resolverKey?.value) {
-      throw new Error(`No resolver key found for facet: ${baseName}`);
+      throw new Error(`No resolver key found for facet: ${name}`);
     }
     return {
       facetName: name,
@@ -512,7 +496,6 @@ const [signer] = await ethers.getSigners();
 
 const result = await deployFacets(signer, {
   facetNames: ["FundManagementFacet", "FundUSAFacet"],
-  useTimeTravel: false,
   network: "hedera-testnet",
 });
 
@@ -574,11 +557,7 @@ const facetAddresses = {
   FundUSAFacet: "0x...",
 };
 
-const result = await createFundConfiguration(
-  blr,
-  facetAddresses,
-  false, // useTimeTravel
-);
+const result = await createFundConfiguration(blr, facetAddresses);
 
 if (result.success) {
   console.log(`Fund configuration created!`);
@@ -595,7 +574,7 @@ If you want to include your new asset in complete deployment workflows, update [
 ```typescript
 // Add after bond configuration
 section("Creating Fund Configuration");
-const fundConfigResult = await createFundConfiguration(blrContract, facetAddresses, useTimeTravel);
+const fundConfigResult = await createFundConfiguration(blrContract, facetAddresses);
 
 if (!fundConfigResult.success) {
   throw new Error(`Fund configuration failed: ${fundConfigResult.error}`);
@@ -1247,7 +1226,6 @@ async function main() {
   const [signer] = await ethers.getSigners();
 
   const output = await deploySystemWithNewBlr(signer, "hedera-testnet", {
-    useTimeTravel: false, // Use standard facets (not TimeTravel variants)
     saveOutput: true, // Save deployment.json file
     batchSize: 15, // Deploy 15 facets per transaction
     confirmations: 2, // Wait for 2 confirmations per tx
@@ -1294,7 +1272,6 @@ async function main() {
     deployFacets: true, // Deploy all facets
     deployFactory: true, // Deploy Factory
     createConfigurations: true, // Create equity/bond configs
-    useTimeTravel: false,
     saveOutput: true,
     batchSize: 15,
   });
@@ -1353,14 +1330,14 @@ const output = await deploySystemWithNewBlr(signer, "hedera-testnet", {
 
 The registry system **automatically extracts metadata** from Solidity contracts and generates TypeScript definitions. This ensures resolver keys, function selectors, and contract metadata stay in sync with actual contracts.
 
-**Generated File**: [domain/atsRegistry.data.ts](domain/atsRegistry.data.ts) (auto-generated, don't edit)
+**Generated File**: [domain/atsRegistry.generated.ts](domain/atsRegistry.generated.ts) (auto-generated, don't edit)
 
 **What's Extracted**:
 
 - Function signatures and selectors
 - Event signatures and topics
 - Custom error definitions
-- Resolver keys (from `constants/resolverKeys.sol`)
+- Resolver keys (file-scope `RESOLVER_KEY_<NAME>` constant inside each `I<Feature>.sol`)
 - Role constants (from `constants/roles.sol`)
 - Inheritance chains
 - NatSpec documentation
@@ -1372,7 +1349,7 @@ Regenerate the registry when:
 - ✅ You **add a new facet contract** to the codebase
 - ✅ You **modify function signatures** in existing facets
 - ✅ You **add/remove events or errors** in facets
-- ✅ You **change resolver keys** in `constants/resolverKeys.sol`
+- ✅ You **change a resolver key** declared at file scope in an `I<Feature>.sol`
 - ❌ NOT needed when just changing configuration facet lists
 
 ### How to Regenerate
@@ -1386,7 +1363,7 @@ npm run generate:registry
 
 1. Scans all Solidity files in [contracts/](../contracts/)
 2. Extracts metadata using [MetadataExtractor](tools/scanner/metadataExtractor.ts)
-3. Generates TypeScript registry at [domain/atsRegistry.data.ts](domain/atsRegistry.data.ts)
+3. Generates TypeScript registry at [domain/atsRegistry.generated.ts](domain/atsRegistry.generated.ts)
 4. Creates helper functions via [registryFactory](infrastructure/registryFactory.ts)
 
 **Output Example**:
@@ -1398,8 +1375,8 @@ export const FACET_REGISTRY = {
     layer: 1,
     category: "core",
     resolverKey: {
-      name: "_ACCESS_CONTROL_RESOLVER_KEY",
-      value: "0x011768a41cb4fe76...",
+      name: "RESOLVER_KEY_ACCESS_CONTROL",
+      value: "0xccc2e755f9225e65...",
     },
     methods: [
       {
@@ -1443,7 +1420,7 @@ const allFacets = getAllFacets();
 console.log(`Total facets: ${allFacets.length}`);
 
 // Access roles
-console.log(ROLES._PAUSER_ROLE); // bytes32 value from contracts
+console.log(ROLES.ROLE_PAUSER); // bytes32 value from contracts
 ```
 
 ### Registry in Operations
@@ -1653,7 +1630,7 @@ See [`types/core.ts:9-30`](infrastructure/types/core.ts#L9-L30) for detailed gui
 npm run generate:registry
 ```
 
-**Verify**: Check that `NewFacet` appears in [domain/atsRegistry.data.ts](domain/atsRegistry.data.ts)
+**Verify**: Check that `NewFacet` appears in [domain/atsRegistry.generated.ts](domain/atsRegistry.generated.ts)
 
 ---
 
@@ -1675,16 +1652,18 @@ This generates TypeChain types in `build/typechain/`.
 
 **Error**: `Facet AccessControlFacet found in registry but missing resolverKey.value.`
 
-**Cause**: The facet exists but doesn't have a resolver key defined in `constants/resolverKeys.sol`.
+**Cause**: The facet exists but doesn't have a file-scope `RESOLVER_KEY_<FEATURE>` constant declared inside its `I<Feature>.sol` interface file.
 
 **Solution**:
 
-1. Check if resolver key exists in [contracts/constants/resolverKeys.sol](../contracts/constants/resolverKeys.sol)
-2. If missing, add it:
+1. Check the facet's `I<Feature>.sol` for a file-scope constant:
    ```solidity
-   bytes32 constant _NEW_FACET_RESOLVER_KEY = keccak256("NewFacet resolver key");
+   /// @custom:hash resolverKey <PascalName>
+   bytes32 constant RESOLVER_KEY_<FEATURE> = 0x0000000000000000000000000000000000000000000000000000000000000000;
    ```
-3. Regenerate registry: `npm run generate:registry`
+2. If missing, add it with a placeholder hex (any 32-byte value). The hex is rewritten by codegen.
+3. Run `npm run -w packages/ats/contracts generate:hashes` (or rely on the post-compile hook in `npx hardhat compile`) to populate the canonical hex from `asset.tokenization.standard.resolverKey.<PascalName>`.
+4. Regenerate the contract registry: `npm run generate:registry`.
 
 ---
 
@@ -1752,7 +1731,7 @@ await createFundConfiguration(
    ```bash
    npm run generate:registry
    ```
-4. Verify timestamp at top of [domain/atsRegistry.data.ts](domain/atsRegistry.data.ts)
+4. Verify timestamp at top of [domain/atsRegistry.generated.ts](domain/atsRegistry.generated.ts)
 
 ---
 

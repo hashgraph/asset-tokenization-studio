@@ -1,30 +1,28 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IMint } from "./IMint.sol";
+import { IMint, RESOLVER_KEY_MINT } from "./IMint.sol";
 import { Mint } from "./Mint.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { _MINT_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-
 /**
  * @title MintFacet
  * @author Asset Tokenization Studio Team
  * @notice Diamond facet exposing the consolidated token issuance entry points.
- * @dev Registers four selectors: `initialize_ERC1594`, `isIssuable`, `issue` and `mint`. Inherits the business logic
+ * @dev Registers four selectors: `initializeERC1594`, `isIssuable`, `issue` and `mint`. Inherits the business logic
  *      from the `Mint` abstract contract.
  */
 contract MintFacet is Mint, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _MINT_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_MINT;
     }
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
-                this.initialize_ERC1594.selector,
+                this.initializeERC1594.selector,
                 this.isIssuable.selector,
                 this.issue.selector,
                 this.mint.selector

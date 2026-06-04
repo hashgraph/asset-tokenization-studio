@@ -4,11 +4,12 @@ pragma solidity >=0.8.0 <0.9.0;
 import { HoldOps } from "../../domain/orchestrator/HoldOps.sol";
 import { HoldStorageWrapper } from "../../domain/asset/HoldStorageWrapper.sol";
 import { ThirdPartyType } from "../../domain/asset/types/ThirdPartyType.sol";
-import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
-import { IHoldByPartition } from "./IHoldByPartition.sol";
+import { IHoldTypes } from "../hold/IHoldTypes.sol";
+import { IHoldByPartition, RESOLVER_KEY_HOLD_BY_PARTITION } from "./IHoldByPartition.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title HoldByPartition
@@ -24,12 +25,24 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
  */
 abstract contract HoldByPartition is IHoldByPartition, Modifiers {
     /// @inheritdoc IHoldByPartition
+    function initializeHoldByPartition()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_HOLD_BY_PARTITION)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_HOLD_BY_PARTITION);
+        emit HoldByPartitionInitialized();
+    }
+
+    /// @inheritdoc IHoldByPartition
     function createHoldByPartition(
         bytes32 _partition,
         IHoldTypes.Hold calldata _hold
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyClearingDisabled
@@ -61,6 +74,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyClearingDisabled
@@ -96,6 +110,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
@@ -122,6 +137,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
@@ -143,6 +159,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
@@ -169,7 +186,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
             HoldStorageWrapper.getHeldAmountForByPartitionAdjustedAt(
                 _partition,
                 _tokenHolder,
-                TimeTravelStorageWrapper.getBlockTimestamp()
+                EvmAccessors.getBlockTimestamp()
             );
     }
 
@@ -208,10 +225,6 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
             ThirdPartyType thirdPartyType_
         )
     {
-        return
-            HoldStorageWrapper.getHoldForByPartitionAdjustedAt(
-                _holdIdentifier,
-                TimeTravelStorageWrapper.getBlockTimestamp()
-            );
+        return HoldStorageWrapper.getHoldForByPartitionAdjustedAt(_holdIdentifier, EvmAccessors.getBlockTimestamp());
     }
 }

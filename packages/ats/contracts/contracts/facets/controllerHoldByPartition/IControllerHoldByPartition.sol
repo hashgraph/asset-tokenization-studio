@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
+import { IHoldTypes } from "../hold/IHoldTypes.sol";
+
+/// @custom:hash resolverKey ControllerHoldByPartition
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_CONTROLLER_HOLD_BY_PARTITION = 0xc415f5239b26cab850bcaca08096196a95d9ea5bab0eed1a6e29ce81490efd33;
 
 /**
  * @title IControllerHoldByPartition
@@ -11,6 +15,19 @@ import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
  *      `IHoldTypes`.
  */
 interface IControllerHoldByPartition is IHoldTypes {
+    /**
+     * @notice Emitted once when the controller hold by partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeControllerHoldByPartition`.
+     */
+    event ControllerHoldByPartitionInitialized();
+
+    /**
+     * @notice Initialises the controller hold by partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeControllerHoldByPartition() external;
+
     /**
      * @notice Creates a hold on the tokens of a token holder, by a controller, on a specific partition.
      * @dev Can only be called by a user with the controller role. The contract must be controllable

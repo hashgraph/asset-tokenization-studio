@@ -1,13 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IProtectedClearingHoldByPartition } from "./IProtectedClearingHoldByPartition.sol";
-import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
-import { IClearingTypes } from "../layer_1/clearing/IClearingTypes.sol";
+import {
+    IProtectedClearingHoldByPartition,
+    RESOLVER_KEY_PROTECTED_CLEARING_HOLD_BY_PARTITION
+} from "./IProtectedClearingHoldByPartition.sol";
+import { IHoldTypes } from "../hold/IHoldTypes.sol";
+import { IClearingTypes } from "../clearing/IClearingTypes.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ClearingProtectedOps } from "../../domain/orchestrator/ClearingProtectedOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title ProtectedClearingHoldByPartition
@@ -22,6 +27,17 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract ProtectedClearingHoldByPartition is IProtectedClearingHoldByPartition, Modifiers {
     /// @inheritdoc IProtectedClearingHoldByPartition
+    function initializeProtectedClearingHoldByPartition()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_PROTECTED_CLEARING_HOLD_BY_PARTITION)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_PROTECTED_CLEARING_HOLD_BY_PARTITION);
+        emit ProtectedClearingHoldByPartitionInitialized();
+    }
+
+    /// @inheritdoc IProtectedClearingHoldByPartition
     function protectedClearingCreateHoldByPartition(
         IClearingTypes.ProtectedClearingOperation calldata _protectedClearingOperation,
         IHoldTypes.Hold calldata _hold,
@@ -29,6 +45,7 @@ abstract contract ProtectedClearingHoldByPartition is IProtectedClearingHoldByPa
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyUnrecoveredAddress(_protectedClearingOperation.from)
@@ -54,7 +71,7 @@ abstract contract ProtectedClearingHoldByPartition is IProtectedClearingHoldByPa
 
     /**
      * @notice Emits `ProtectedClearedHoldByPartition` for a successful protected clearing hold.
-     * @dev Extracted to a `private` helper so the external entry point's stack stays within the
+     * @dev Extracted to a `private` helper so the external onlyOperational entry point's stack stays within the
      *      Solidity 16-slot limit; the helper is called exactly once, after the
      *      `ClearingProtectedOps.protectedClearingCreateHoldByPartition` call returns.
      * @param _operation  The protected clearing operation (partition, from, expiration, data, ...).

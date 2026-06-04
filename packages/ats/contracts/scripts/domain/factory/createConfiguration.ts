@@ -18,10 +18,13 @@ import {
   OperationResult,
   createBatchConfiguration,
   DEFAULT_BATCH_SIZE,
+  RetryOptions,
+  isTestMode,
 } from "@scripts/infrastructure";
 import { BusinessLogicResolver } from "@contract-types";
 import { FACTORY_CONFIG_ID } from "../constants";
 import { atsRegistry } from "../atsRegistry";
+import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
 
 /**
  * Factory-specific facets list (1 facet).
@@ -42,7 +45,6 @@ const FACTORY_FACETS = ["FactoryFacet"] as const;
  *
  * @param blrContract - BusinessLogicResolver contract instance
  * @param facetAddresses - Map of facet names to their deployed addresses
- * @param useTimeTravel - Whether to use TimeTravel variants (default: false)
  * @param partialBatchDeploy - Whether this is a partial batch deployment (default: false)
  * @param batchSize - Number of facets per batch (default: DEFAULT_BATCH_SIZE)
  * @param confirmations - Number of confirmations to wait for (default: 0 for test environments)
@@ -78,22 +80,21 @@ const FACTORY_FACETS = ["FactoryFacet"] as const;
 export async function createFactoryConfiguration(
   blrContract: BusinessLogicResolver,
   facetAddresses: Record<string, string>,
-  useTimeTravel: boolean = false,
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
+  retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  // Build facet list based on time travel mode
-  const facetNames = useTimeTravel ? FACTORY_FACETS.map((name) => `${name}TimeTravel`) : [...FACTORY_FACETS];
+  const testMode = isTestMode();
+  const facetNames = testMode ? FACTORY_FACETS.map(() => "MockFactoryFacet") : [...FACTORY_FACETS];
 
   // Build facet data with resolver keys from registry
   const facets = facetNames.map((name) => {
-    // Strip "TimeTravel" suffix to get base name for registry lookup
-    const baseName = name.replace(/TimeTravel$/, "");
-
-    const facetDef = atsRegistry.getFacetDefinition(baseName);
+    const facetDef = testMode
+      ? (getMockFacetDefinition(name) ?? atsRegistry.getFacetDefinition(name))
+      : atsRegistry.getFacetDefinition(name);
     if (!facetDef?.resolverKey?.value) {
-      throw new Error(`No resolver key found for facet: ${baseName}`);
+      throw new Error(`No resolver key found for facet: ${name}`);
     }
     return {
       facetName: name,
@@ -108,5 +109,6 @@ export async function createFactoryConfiguration(
     partialBatchDeploy,
     batchSize,
     confirmations,
+    retryOptions,
   });
 }

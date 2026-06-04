@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey SecurityHoldersAtSnapshot
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_SECURITY_HOLDERS_AT_SNAPSHOT = 0xf7707140407ccf0d6deaf72844217e3c1383270609a7a75e36def71a3c453b9e;
+
 /**
  * @title  ISecurityHoldersAtSnapshot
  * @notice Interface for querying the set of token holders captured at a specific snapshot.
@@ -12,6 +16,19 @@ pragma solidity >=0.8.0 <0.9.0;
  * @author Asset Tokenization Studio Team
  */
 interface ISecurityHoldersAtSnapshot {
+    /**
+     * @notice Emitted once when the security-holders-at-snapshot capability is initialised on a token.
+     * @dev Fires exclusively from `initializeSecurityHoldersAtSnapshot`.
+     */
+    event SecurityHoldersAtSnapshotInitialized();
+
+    /**
+     * @notice Initialises the security-holders-at-snapshot capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeSecurityHoldersAtSnapshot() external;
+
     /**
      * @notice Returns a paginated list of token holders recorded at the time of a given
      *         snapshot.

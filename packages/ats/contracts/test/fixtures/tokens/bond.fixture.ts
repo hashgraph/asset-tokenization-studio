@@ -30,7 +30,7 @@ export const DEFAULT_BOND_PARAMS = {
   },
 } as const;
 
-export async function getBondDetails(params?: DeepPartial<BondDetailsDataParams>) {
+export async function makeBondDetailsData(params?: DeepPartial<BondDetailsDataParams>) {
   const maturityDate =
     params?.maturityDate ??
     (params?.startingDate
@@ -79,7 +79,7 @@ export async function deployBondTokenFixture({
       version: 1,
     },
   });
-  const bondDetails = await getBondDetails(bondDataParams?.bondDetails);
+  const bondDetails = await makeBondDetailsData(bondDataParams?.bondDetails);
 
   const diamond = await deployBondFromFactory(
     {
@@ -104,7 +104,7 @@ export async function deployBondTokenFixture({
   const controlListFacet = ControlListFacet__factory.connect(diamond.target as string, deployer);
   const asset = IAsset__factory.connect(diamond.target as string, deployer);
 
-  await accessControlFacet.grantRole(ATS_ROLES.NOMINAL_VALUE_ROLE, deployer.address);
+  await accessControlFacet.grantRole(ATS_ROLES.ROLE_NOMINAL_VALUE, deployer.address);
 
   return {
     ...infrastructure,

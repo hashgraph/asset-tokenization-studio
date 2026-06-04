@@ -3,6 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC1410Types } from "../layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 
+/// @custom:hash resolverKey OperatorByPartition
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_OPERATOR_BY_PARTITION = 0xfd060cda1c9927203f3914aa0d5916e4c5971977dec4026418bc4fff6d25b277;
+
 /**
  * @title  IOperatorByPartition
  * @notice Interface for per-partition operator management: authorise, revoke, and query
@@ -15,6 +19,19 @@ import { IERC1410Types } from "../layer_1/ERC1400/ERC1410/IERC1410Types.sol";
  * @author Asset Tokenization Studio Team
  */
 interface IOperatorByPartition is IERC1410Types {
+    /**
+     * @notice Emitted once when the operator-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeOperatorByPartition`.
+     */
+    event OperatorByPartitionInitialized();
+
+    /**
+     * @notice Initialises the operator-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeOperatorByPartition() external;
+
     /**
      * @notice Authorises an operator to manage a specific partition of `msg.sender`'s tokens.
      * @dev    The token must not be paused. Both `msg.sender` and `_operator` must pass

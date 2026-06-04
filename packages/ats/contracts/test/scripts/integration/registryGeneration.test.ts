@@ -24,8 +24,6 @@ import { silenceScriptLogging } from "@test";
 // Exported building blocks
 import { detectLayer, detectCategory, generateDescription } from "@scripts";
 
-import { pairTimeTravelVariants } from "@scripts";
-
 // Mock artifact data for test contracts
 const mockArtifactData = {
   contractName: "MockContract",
@@ -71,7 +69,7 @@ describe("Registry Generation Pipeline - Integration Tests", () => {
       expect(result.code).to.include("FACET_REGISTRY");
       expect(result.code).to.include("INFRASTRUCTURE_CONTRACTS");
       expect(result.code).to.include("STORAGE_WRAPPER_REGISTRY");
-      expect(result.code).to.include("export const ROLES");
+      expect(result.rolesCode).to.include("export const ROLES");
       expect(result.code).to.include("@scripts/infrastructure");
     }).timeout(30000);
 
@@ -80,7 +78,6 @@ describe("Registry Generation Pipeline - Integration Tests", () => {
         contractsPath,
         artifactPath,
         includeStorageWrappers: false,
-        includeTimeTravel: false,
         facetsOnly: true,
         logLevel: "SILENT",
       };
@@ -92,9 +89,6 @@ describe("Registry Generation Pipeline - Integration Tests", () => {
 
       // When includeStorageWrappers=false, storage wrappers should be 0
       expect(result.stats.totalStorageWrappers).to.equal(0);
-
-      // When includeTimeTravel=false, withTimeTravel should be 0
-      expect(result.stats.withTimeTravel).to.equal(0);
     }).timeout(30000);
 
     it("should allow custom resolver key paths", async () => {
@@ -102,7 +96,7 @@ describe("Registry Generation Pipeline - Integration Tests", () => {
         {
           contractsPath,
           artifactPath,
-          resolverKeyPaths: ["**/constants/resolverKeys.sol"],
+          resolverKeyPaths: ["**/facets/cap/ICap.sol"],
           logLevel: "SILENT",
         },
         false,
@@ -168,10 +162,14 @@ describe("Registry Generation Pipeline - Integration Tests", () => {
 
     it("should write file when requested", async () => {
       const tempOutputPath = path.join(__dirname, "../temp-registry.data.ts");
+      const tempRolesPath = path.join(path.dirname(tempOutputPath), "atsRoles.generated.ts");
 
       // Clean up if exists
       if (fs.existsSync(tempOutputPath)) {
         fs.unlinkSync(tempOutputPath);
+      }
+      if (fs.existsSync(tempRolesPath)) {
+        fs.unlinkSync(tempRolesPath);
       }
 
       try {
@@ -195,6 +193,9 @@ describe("Registry Generation Pipeline - Integration Tests", () => {
         // Clean up
         if (fs.existsSync(tempOutputPath)) {
           fs.unlinkSync(tempOutputPath);
+        }
+        if (fs.existsSync(tempRolesPath)) {
+          fs.unlinkSync(tempRolesPath);
         }
       }
     }).timeout(30000);
@@ -245,45 +246,12 @@ contract MyContract {}
       const description = generateDescription(source, "MyContract");
       expect(description).to.equal("This is a test contract");
     });
-
-    it("should export pairTimeTravelVariants function", () => {
-      const baseFacets = [
-        {
-          filePath: "/path/AccessControl.sol",
-          relativePath: "AccessControl.sol",
-          directory: "/path",
-          fileName: "AccessControl",
-          contractNames: ["AccessControlFacet"],
-          primaryContract: "AccessControlFacet",
-          source: "",
-          artifactData: mockArtifactData,
-        },
-      ];
-
-      const timeTravelFacets = [
-        {
-          filePath: "/path/AccessControlTimeTravel.sol",
-          relativePath: "AccessControlTimeTravel.sol",
-          directory: "/path",
-          fileName: "AccessControlTimeTravel",
-          contractNames: ["AccessControlFacetTimeTravel"],
-          primaryContract: "AccessControlFacetTimeTravel",
-          source: "",
-          artifactData: mockArtifactData,
-        },
-      ];
-
-      const pairs = pairTimeTravelVariants(baseFacets, timeTravelFacets);
-      expect(pairs.size).to.equal(1);
-      expect(pairs.get("AccessControlFacet")).to.not.be.null;
-    });
   });
 
   describe("DEFAULT_CONFIG", () => {
     it("should have sensible defaults", () => {
       expect(DEFAULT_CONFIG.contractsPath).to.equal("./contracts");
       expect(DEFAULT_CONFIG.includeStorageWrappers).to.be.true;
-      expect(DEFAULT_CONFIG.includeTimeTravel).to.be.true;
       expect(DEFAULT_CONFIG.extractNatspec).to.be.true;
       expect(DEFAULT_CONFIG.logLevel).to.equal("INFO");
       expect(DEFAULT_CONFIG.facetsOnly).to.be.false;
@@ -484,7 +452,7 @@ contract MyContract {}
         for (const name of mockNames) {
           if (name.startsWith("I") && name[1] === name[1]?.toUpperCase()) {
             // Extract the specific entry
-            const entryRegex = new RegExp(`${name}:\\s*\\{[\\s\\S]*?\\n\\s{4}\\}`);
+            const entryRegex = new RegExp(`${name}:\\s*\\{[\\s\\S]*?\\n\\s{2}\\}`);
             const entryMatch = mockSection?.[0].match(entryRegex);
             if (entryMatch) {
               expect(entryMatch[0]).to.not.include(
@@ -587,7 +555,7 @@ contract MyContract {}
       // Should succeed even if standalone files don't match
       // (Roles may or may not be found depending on inline contract definitions)
       expect(result.stats.totalRoles).to.be.greaterThanOrEqual(0);
-      expect(result.code).to.include("export const ROLES");
+      expect(result.rolesCode).to.include("export const ROLES");
     }).timeout(30000);
   });
 });

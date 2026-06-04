@@ -18,7 +18,16 @@ ATS uses role-based access control (RBAC) to manage permissions for security tok
 - **Who needs it**: Token issuer, primary administrator
 - ⚠️ **Warning**: Unrestricted access - use multi-signature wallets in production
 
-### TREX_OWNER_ROLE
+> **Instant-effect operations.** `DEFAULT_ADMIN_ROLE` can also swap the
+> Diamond proxy's resolver and configuration (`updateResolver`,
+> `updateConfig`, `updateConfigVersion`), which rewires every facet call in a
+> single transaction with no on-chain timelock or user exit window. The
+> contracts intentionally rely on the admin account itself — expected to be a
+> multisig or governance contract — to provide the delay, review, and
+> accountability surface for such changes. Assigning this role to an EOA in
+> production is unsupported.
+
+### ROLE_TREX_OWNER
 
 - **Purpose**: Owner of ERC-3643 (T-REX) compliant tokens
 - **Can do**: Configure compliance modules, manage identity registry, update token info
@@ -26,25 +35,25 @@ ATS uses role-based access control (RBAC) to manage permissions for security tok
 
 ## Token Operations
 
-### ISSUER_ROLE
+### ROLE_ISSUER
 
 - **Purpose**: Manage token supply and distribution
 - **Can do**: Mint/burn tokens, issue to investors, manage supply within cap
 - **Use cases**: Initial distribution, funding rounds, token buybacks
 
-### CORPORATE_ACTION_ROLE
+### ROLE_CORPORATE_ACTION
 
 - **Purpose**: Execute corporate actions
 - **Can do**: Distribute dividends (equity), process coupon payments (bonds), create snapshots
 - **Use cases**: Quarterly dividends, bond coupons, special distributions
 
-### BOND_MANAGER_ROLE
+### ROLE_BOND_MANAGER
 
 - **Purpose**: Manage bond-specific operations
 - **Can do**: Execute coupon payments, process maturity redemption, manage bond lifecycle
 - **Use cases**: Bond interest payments, principal repayment at maturity
 
-### MATURITY_REDEEMER_ROLE
+### ROLE_MATURITY_REDEEMER
 
 - **Purpose**: Handle bond maturity redemptions
 - **Can do**: Execute maturity redemption, process principal repayment, burn redeemed bonds
@@ -52,37 +61,37 @@ ATS uses role-based access control (RBAC) to manage permissions for security tok
 
 ## Compliance & KYC
 
-### KYC_ROLE
+### ROLE_KYC
 
 - **Purpose**: Manage investor verification
 - **Can do**: Grant/revoke KYC, update investor attributes, mark as accredited
 - **Use cases**: Investor onboarding, annual renewal, revocation
 
-### KYC_MANAGER_ROLE
+### ROLE_KYC_MANAGER
 
 - **Purpose**: Manage external KYC lists
 - **Can do**: Add/remove external KYC lists, link to token, query status
 - **Use cases**: Third-party KYC providers, shared investor lists
 
-### INTERNAL_KYC_MANAGER_ROLE
+### INTERNAL_ROLE_KYC_MANAGER
 
 - **Purpose**: Control internal KYC system
 - **Can do**: Enable/disable internal KYC validation flag
 - **Use cases**: Switch between internal and external KYC
 
-### SSI_MANAGER_ROLE
+### ROLE_SSI_MANAGER
 
 - **Purpose**: Manage Self-Sovereign Identity integration
 - **Can do**: Set revocation registry, add/remove credential issuers
 - **Use cases**: Terminal 3 integration, SSI configuration
 
-### CONTROL_LIST_ROLE
+### ROLE_CONTROL_LIST
 
 - **Purpose**: Manage internal transfer restrictions
 - **Can do**: Add/remove addresses to whitelist/blacklist
 - **Use cases**: Geographic restrictions, investor eligibility
 
-### CONTROL_LIST_MANAGER_ROLE
+### ROLE_CONTROL_LIST_MANAGER
 
 - **Purpose**: Manage external control lists
 - **Can do**: Add/remove external control lists, configure settings
@@ -90,25 +99,25 @@ ATS uses role-based access control (RBAC) to manage permissions for security tok
 
 ## Security & Freeze
 
-### PAUSER_ROLE
+### ROLE_PAUSER
 
 - **Purpose**: Emergency pause functionality
 - **Can do**: Pause/unpause all token transfers
 - **Use cases**: Security incidents, regulatory holds, contract upgrades
 
-### PAUSE_MANAGER_ROLE
+### ROLE_PAUSE_MANAGER
 
 - **Purpose**: Manage external pause mechanisms
 - **Can do**: Add/remove external pause sources, coordinate cross-token pauses
 - **Use cases**: Platform-wide pauses, coordinated security responses
 
-### FREEZE_MANAGER_ROLE
+### ROLE_FREEZE_MANAGER
 
 - **Purpose**: Freeze specific accounts or amounts
 - **Can do**: Freeze/unfreeze accounts, freeze token amounts, query freeze status
 - **Use cases**: Court orders, suspicious activity, lock-up enforcement
 
-### LOCKER_ROLE
+### ROLE_LOCKER
 
 - **Purpose**: Create time-locked holdings
 - **Can do**: Lock tokens for periods, create vesting schedules, release locked tokens
@@ -116,32 +125,32 @@ ATS uses role-based access control (RBAC) to manage permissions for security tok
 
 ## Administrative Operations
 
-### CONTROLLER_ROLE
+### ROLE_CONTROLLER
 
 - **Purpose**: Forced transfers and balance adjustments
 - **Can do**: Force transfer tokens, adjust balances, execute regulatory transfers
 - **Use cases**: Court orders, inheritance, lost key recovery
 - ⚠️ **Warning**: Powerful role - requires authorization
 
-### ADJUSTMENT_BALANCE_ROLE
+### ROLE_ADJUSTMENT_BALANCE
 
 - **Purpose**: Adjust token balances
 - **Can do**: Modify account balances directly
 - **Use cases**: Corrections, regulatory adjustments, special situations
 
-### DOCUMENTER_ROLE
+### ROLE_DOCUMENTER
 
 - **Purpose**: Manage token documentation
 - **Can do**: Update documents (prospectus), add document hashes, manage disclosures
 - **Use cases**: Legal documentation updates, investor relations
 
-### CAP_ROLE
+### ROLE_CAP
 
 - **Purpose**: Manage token supply cap
 - **Can do**: Set maximum supply, update cap limits
 - **Use cases**: Initial supply cap, authorized capital increases
 
-### SNAPSHOT_ROLE
+### ROLE_SNAPSHOT
 
 - **Purpose**: Create balance snapshots
 - **Can do**: Create snapshots, record holder positions at specific times
@@ -149,13 +158,13 @@ ATS uses role-based access control (RBAC) to manage permissions for security tok
 
 ## Clearing & Settlement
 
-### CLEARING_ROLE
+### ROLE_CLEARING
 
 - **Purpose**: Manage clearing operations
 - **Can do**: Create holds, execute clearing, coordinate with clearing houses
 - **Use cases**: T+2 settlement, clearing house integration
 
-### CLEARING_VALIDATOR_ROLE
+### ROLE_CLEARING_VALIDATOR
 
 - **Purpose**: Validate clearing operations
 - **Can do**: Approve clearing, validate settlement instructions
@@ -163,7 +172,7 @@ ATS uses role-based access control (RBAC) to manage permissions for security tok
 
 ## Payment Distribution
 
-### PROCEED_RECIPIENT_MANAGER_ROLE
+### ROLE_PROCEED_RECIPIENT_MANAGER
 
 - **Purpose**: Manage payment recipients
 - **Can do**: Configure who receives proceeds from corporate actions
@@ -171,25 +180,25 @@ ATS uses role-based access control (RBAC) to manage permissions for security tok
 
 ## Specialized Roles
 
-### AGENT_ROLE
+### ROLE_AGENT
 
 - **Purpose**: General operational agent
 - **Can do**: Execute transfers on behalf of others, routine administrative tasks
 - **Use cases**: Transfer agents, operational team members
 
-### PROTECTED_PARTITIONS_ROLE
+### ROLE_PROTECTED_PARTITIONS
 
 - **Purpose**: Manage protected token partitions
 - **Can do**: Create protected partitions, manage partition rules
 - **Use cases**: Advanced partition management
 
-### PROTECTED_PARTITIONS_PARTICIPANT_ROLE
+### ROLE_PROTECTED_PARTITIONS_PARTICIPANT
 
 - **Purpose**: Participate in protected partitions
 - **Can do**: Access protected partitions, transfer within partitions
 - **Use cases**: Partition access control
 
-### WILD_CARD_ROLE
+### ROLE_WILD_CARD
 
 - **Purpose**: Custom permissions
 - **Can do**: Variable based on token configuration
@@ -225,31 +234,31 @@ ATS uses role-based access control (RBAC) to manage permissions for security tok
 **Token Issuer Admin**:
 
 ```
-DEFAULT_ADMIN_ROLE + ISSUER_ROLE + CAP_ROLE
+DEFAULT_ADMIN_ROLE + ROLE_ISSUER + ROLE_CAP
 ```
 
 **Compliance Officer**:
 
 ```
-KYC_ROLE + CONTROL_LIST_ROLE + FREEZE_MANAGER_ROLE + PAUSER_ROLE
+ROLE_KYC + ROLE_CONTROL_LIST + ROLE_FREEZE_MANAGER + ROLE_PAUSER
 ```
 
 **Corporate Actions Team**:
 
 ```
-CORPORATE_ACTION_ROLE + SNAPSHOT_ROLE
+ROLE_CORPORATE_ACTION + ROLE_SNAPSHOT
 ```
 
 **Bond Administrator**:
 
 ```
-BOND_MANAGER_ROLE + MATURITY_REDEEMER_ROLE + CORPORATE_ACTION_ROLE
+ROLE_BOND_MANAGER + ROLE_MATURITY_REDEEMER + ROLE_CORPORATE_ACTION
 ```
 
 **External List Manager**:
 
 ```
-KYC_MANAGER_ROLE + CONTROL_LIST_MANAGER_ROLE + PAUSE_MANAGER_ROLE
+ROLE_KYC_MANAGER + ROLE_CONTROL_LIST_MANAGER + ROLE_PAUSE_MANAGER
 ```
 
 ## Best Practices
@@ -294,6 +303,6 @@ KYC_MANAGER_ROLE + CONTROL_LIST_MANAGER_ROLE + PAUSE_MANAGER_ROLE
 ## Next Steps
 
 - [Creating Equity](./creating-equity.md) - Create your first token
-- [Managing External KYC Lists](./managing-external-kyc-lists.md) - Use KYC_MANAGER_ROLE
-- [Managing External Control Lists](./managing-external-control-lists.md) - Use CONTROL_LIST_MANAGER_ROLE
-- [SSI Integration](./ssi-integration.md) - Use SSI_MANAGER_ROLE
+- [Managing External KYC Lists](./managing-external-kyc-lists.md) - Use ROLE_KYC_MANAGER
+- [Managing External Control Lists](./managing-external-control-lists.md) - Use ROLE_CONTROL_LIST_MANAGER
+- [SSI Integration](./ssi-integration.md) - Use ROLE_SSI_MANAGER

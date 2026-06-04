@@ -1,73 +1,103 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _CLEARING_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
+import { IClearingTypes } from "../../facets/clearing/IClearingTypes.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { LockStorageWrapper } from "./LockStorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { ThirdPartyType } from "./types/ThirdPartyType.sol";
 import { DefaultValueValidation } from "../../infrastructure/utils/DefaultValueValidation.sol";
 
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+/// @custom:hash storage Clearing
+bytes32 constant STORAGE_LOCATION_CLEARING = 0xd7a6e2f3304ec7238486e8af625921e3cfd501a713f0b2036d4a701fd3e81800;
+
+/**
+ * @notice Persistent storage layout for the Clearing facet.
+ * @dev Holds the activation flags, aggregate cleared amounts per holder and partition,
+ *      per-operation-type id sets, monotonically increasing next-id counters, and the
+ *      per-operation payload mappings for transfer / redeem / hold-creation flows plus
+ *      the third-party authorisation map. New fields must be appended below the marker
+ *      to preserve ERC-7201 slot offsets.
+ * @custom:storage-location erc7201:security.token.standard.storage.Clearing
+ */
+struct ClearingDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    bool activated;
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
+    mapping(address => uint256) totalClearedAmountByAccount;
+    mapping(address => mapping(bytes32 => uint256)) totalClearedAmountByAccountAndPartition;
+    // solhint-disable max-line-length
+    mapping(address => mapping(bytes32 => mapping(IClearingTypes.ClearingOperationType => EnumerableSet.UintSet))) clearingIdsByAccountAndPartitionAndTypes;
+    mapping(address => mapping(bytes32 => mapping(IClearingTypes.ClearingOperationType => uint256))) nextClearingIdByAccountPartitionAndType;
+    mapping(address => mapping(bytes32 => mapping(uint256 => IClearingTypes.ClearingTransferData))) clearingTransferByAccountPartitionAndId;
+    mapping(address => mapping(bytes32 => mapping(uint256 => IClearingTypes.ClearingRedeemData))) clearingRedeemByAccountPartitionAndId;
+    mapping(address => mapping(bytes32 => mapping(uint256 => IClearingTypes.ClearingHoldCreationData))) clearingHoldCreationByAccountPartitionAndId;
+    mapping(address => mapping(bytes32 => mapping(IClearingTypes.ClearingOperationType => mapping(uint256 => address)))) clearingThirdPartyByAccountPartitionTypeAndId;
+    // solhint-enable max-line-length
+    // ─── APPEND-ONLY ZONE BELOW ───
+}
+// solhint-enable max-line-length
+
 /// @title ClearingStorageWrapper - Pure Storage Operations
+/// @author Asset Tokenization Studio Team
 /// @notice Contains ONLY storage operations for clearing data.
 /// @dev Orchestration logic moved to ClearingOps. This library manages storage slot access.
 library ClearingStorageWrapper {
     using Pagination for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.UintSet;
 
-    // solhint-disable max-line-length
-    struct ClearingDataStorage {
-        bool initialized;
-        bool activated;
-        mapping(address => uint256) totalClearedAmountByAccount;
-        mapping(address => mapping(bytes32 => uint256)) totalClearedAmountByAccountAndPartition;
-        // solhint-disable-next-line max-line-length
-        mapping(address => mapping(bytes32 => mapping(IClearingTypes.ClearingOperationType => EnumerableSet.UintSet))) clearingIdsByAccountAndPartitionAndTypes;
-        // solhint-disable-next-line max-line-length
-        mapping(address => mapping(bytes32 => mapping(IClearingTypes.ClearingOperationType => uint256))) nextClearingIdByAccountPartitionAndType;
-        // solhint-disable-next-line max-line-length
-        mapping(address => mapping(bytes32 => mapping(uint256 => IClearingTypes.ClearingTransferData))) clearingTransferByAccountPartitionAndId;
-        // solhint-disable-next-line max-line-length
-        mapping(address => mapping(bytes32 => mapping(uint256 => IClearingTypes.ClearingRedeemData))) clearingRedeemByAccountPartitionAndId;
-        // solhint-disable-next-line max-line-length
-        mapping(address => mapping(bytes32 => mapping(uint256 => IClearingTypes.ClearingHoldCreationData))) clearingHoldCreationByAccountPartitionAndId;
-        // solhint-disable-next-line max-line-length
-        mapping(address => mapping(bytes32 => mapping(IClearingTypes.ClearingOperationType => mapping(uint256 => address)))) clearingThirdPartyByAccountPartitionTypeAndId;
-    }
-    // solhint-enable max-line-length
-
+    /**
+     * @notice Initialises the clearing storage with the supplied activation flag.
+     * @dev Sets both the initialised and the activated booleans in one operation. Should
+     *      be invoked exactly once during facet bootstrap.
+     * @param clearingActive Whether clearing operations are active immediately after init.
+     */
     function initializeClearing(bool clearingActive) internal {
-        ClearingDataStorage storage clearingStorage_ = clearingStorage();
-        clearingStorage_.initialized = true;
-        clearingStorage_.activated = clearingActive;
+        clearingStorage().activated = clearingActive;
     }
 
+    /**
+     * @notice Sets the clearing activation flag.
+     * @param activated The new activation flag.
+     * @return success_ Always true; reserved for future failure modes.
+     */
     function setClearing(bool activated) internal returns (bool success_) {
         clearingStorage().activated = activated;
         return true;
     }
 
-    function isClearingInitialized() internal view returns (bool) {
-        return clearingStorage().initialized;
-    }
-
+    /**
+     * @notice Indicates whether clearing operations are currently active.
+     * @return Whether new clearing operations may be created on this token.
+     */
     function isClearingActivated() internal view returns (bool) {
         return clearingStorage().activated;
     }
 
+    /**
+     * @notice Returns the storage reference at the ERC-7201 slot for the clearing namespace.
+     * @dev Resolved via inline assembly against {STORAGE_LOCATION_CLEARING}.
+     * @return clearing_ The storage reference for the clearing data struct.
+     */
     function clearingStorage() internal pure returns (ClearingDataStorage storage clearing_) {
-        bytes32 position = _CLEARING_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_CLEARING;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             clearing_.slot := position
         }
     }
 
+    /**
+     * @notice Indicates whether a clearing identifier is registered for the given context.
+     * @param clearingOperationIdentifier The (holder, partition, operation type, id) tuple.
+     * @return Whether the id is present in the corresponding {EnumerableSet.UintSet}.
+     */
     // solhint-disable-next-line ordering
     function isClearingIdValid(
         IClearingTypes.ClearingOperationIdentifier calldata clearingOperationIdentifier
@@ -79,7 +109,16 @@ library ClearingStorageWrapper {
             ][clearingOperationIdentifier.clearingOperationType].contains(clearingOperationIdentifier.clearingId);
     }
 
-    /// @notice Get next clearing ID and increment - pure storage operation
+    /**
+     * @notice Increments and returns the next clearing ID for the given holder, partition,
+     *         and operation type.
+     * @dev Monotonically increments a counter stored at the intersection of holder, partition,
+     *      and operation type, registering the new ID in the enumerable set for pagination.
+     * @param _from The token holder address.
+     * @param _partition The partition to which the clearing belongs.
+     * @param _operationType The clearing operation type (Transfer, Redeem, HoldCreation).
+     * @return clearingId_ The newly incremented clearing ID.
+     */
     function increaseClearingId(
         address _from,
         bytes32 _partition,
@@ -94,7 +133,20 @@ library ClearingStorageWrapper {
         setClearingIdByPartitionAndType(clearingDataStorage, _from, _partition, clearingId_, _operationType);
     }
 
-    /// @notice Set clearing transfer data - pure storage operation
+    /**
+     * @notice Stores clearing transfer data in the clearing registry.
+     * @dev Persists the transfer payload for the given holder, partition, and clearing ID
+     *      to support subsequent retrieval, validation, and execution.
+     * @param _from The token holder.
+     * @param _partition The partition.
+     * @param _clearingId The clearing operation ID.
+     * @param _amount The transfer amount.
+     * @param _expirationTimestamp Unix timestamp at which the clearing expires.
+     * @param _to The transfer destination.
+     * @param _data Transfer metadata.
+     * @param _operatorData Operator metadata.
+     * @param _operatorType The operator classification (AUTHORIZED, OPERATOR, PROTECTED).
+     */
     function setClearingTransferData(
         address _from,
         bytes32 _partition,
@@ -117,7 +169,19 @@ library ClearingStorageWrapper {
             });
     }
 
-    /// @notice Set clearing redeem data - pure storage operation
+    /**
+     * @notice Stores clearing redeem data in the clearing registry.
+     * @dev Persists the redeem payload for the given holder, partition, and clearing ID
+     *      to support subsequent retrieval, validation, and execution.
+     * @param _from The token holder.
+     * @param _partition The partition.
+     * @param _clearingId The clearing operation ID.
+     * @param _amount The redeem amount.
+     * @param _expirationTimestamp Unix timestamp at which the clearing expires.
+     * @param _data Redeem metadata.
+     * @param _operatorData Operator metadata.
+     * @param _operatorType The operator classification (AUTHORIZED, OPERATOR, PROTECTED).
+     */
     function setClearingRedeemData(
         address _from,
         bytes32 _partition,
@@ -138,7 +202,23 @@ library ClearingStorageWrapper {
             });
     }
 
-    /// @notice Set clearing hold creation data - pure storage operation
+    /**
+     * @notice Stores clearing hold creation data in the clearing registry.
+     * @dev Persists the hold creation payload for the given holder, partition, and clearing
+     *      ID to support subsequent retrieval, validation, and execution.
+     * @param _from The token holder.
+     * @param _partition The partition.
+     * @param _clearingId The clearing operation ID.
+     * @param _amount The hold amount.
+     * @param _expirationTimestamp Unix timestamp at which the clearing expires.
+     * @param _holdExpirationTimestamp Unix timestamp at which the hold expires.
+     * @param _data Clearing metadata.
+     * @param _holdData Hold-specific metadata.
+     * @param _escrow The escrow account for the held tokens.
+     * @param _to The hold beneficiary.
+     * @param _operatorData Operator metadata.
+     * @param _operatorType The operator classification (AUTHORIZED, OPERATOR, PROTECTED).
+     */
     function setClearingHoldCreationData(
         address _from,
         bytes32 _partition,
@@ -167,17 +247,40 @@ library ClearingStorageWrapper {
             });
     }
 
-    /// @notice Multiply total cleared amount by factor - pure storage operation
+    /**
+     * @notice Multiplies the total cleared amount for a holder by the supplied factor.
+     * @dev Used during rebalancing and snapshot operations to adjust historical clearing
+     *      totals.
+     * @param _tokenHolder The token holder.
+     * @param _factor The multiplication factor.
+     */
     function multiplyTotalClearedAmount(address _tokenHolder, uint256 _factor) internal {
         clearingStorage().totalClearedAmountByAccount[_tokenHolder] *= _factor;
     }
 
-    /// @notice Multiply total cleared amount by partition by factor - pure storage operation
+    /**
+     * @notice Multiplies the cleared amount for a holder and partition by the supplied
+     *         factor.
+     * @dev Used during rebalancing and snapshot operations to adjust historical clearing
+     *      totals per partition.
+     * @param _tokenHolder The token holder.
+     * @param _partition The partition.
+     * @param _factor The multiplication factor.
+     */
     function multiplyTotalClearedAmountByPartition(address _tokenHolder, bytes32 _partition, uint256 _factor) internal {
         clearingStorage().totalClearedAmountByAccountAndPartition[_tokenHolder][_partition] *= _factor;
     }
 
-    /// @notice Set clearing third party - pure storage operation
+    /**
+     * @notice Registers the third-party authoriser for a clearing operation.
+     * @dev Stores the spender (operator) for subsequent authorisation and delegation
+     *      checks.
+     * @param _partition The partition.
+     * @param _tokenHolder The token holder.
+     * @param _operationType The clearing operation type (Transfer, Redeem, HoldCreation).
+     * @param _clearingId The clearing operation ID.
+     * @param _spender The authorised third party.
+     */
     function setClearingThirdParty(
         bytes32 _partition,
         address _tokenHolder,
@@ -190,7 +293,17 @@ library ClearingStorageWrapper {
         ] = _spender;
     }
 
-    /// @notice Set clearing ID by partition and type - pure storage operation
+    /**
+     * @notice Adds the supplied clearing ID to the enumerable set indexed by holder,
+     *         partition, and operation type.
+     * @dev Called during clearing creation to register the ID for pagination and
+     *      existence checks.
+     * @param clearingDataStorage The clearing storage reference.
+     * @param _tokenHolder The token holder.
+     * @param _partition The partition.
+     * @param _clearingId The clearing operation ID to register.
+     * @param _operationType The clearing operation type (Transfer, Redeem, HoldCreation).
+     */
     function setClearingIdByPartitionAndType(
         ClearingDataStorage storage clearingDataStorage,
         address _tokenHolder,
@@ -203,13 +316,28 @@ library ClearingStorageWrapper {
         );
     }
 
-    /// @notice Increase cleared amounts - pure storage operation
+    /**
+     * @notice Increases both the total cleared amount and the partition-scoped cleared
+     *         amount for the given holder.
+     * @dev Maintains two aggregates: account-wide and partition-specific.
+     * @param _tokenHolder The token holder.
+     * @param _partition The partition.
+     * @param _amount The amount to add to both aggregates.
+     */
     function increaseClearedAmounts(address _tokenHolder, bytes32 _partition, uint256 _amount) internal {
         clearingStorage().totalClearedAmountByAccountAndPartition[_tokenHolder][_partition] += _amount;
         clearingStorage().totalClearedAmountByAccount[_tokenHolder] += _amount;
     }
 
-    /// @notice Update clearing amount by ID - pure storage operation
+    /**
+     * @notice Multiplies the amount of the identified clearing operation by the supplied
+     *         factor.
+     * @dev Dispatches to the appropriate clearing data struct (Transfer, Redeem, or
+     *      HoldCreation) based on operation type; used during rebalancing.
+     * @param _clearingOperationIdentifier The clearing operation identifier (holder,
+     *        partition, operation type, ID).
+     * @param _factor The multiplication factor.
+     */
     function updateClearingAmountById(
         IClearingTypes.ClearingOperationIdentifier memory _clearingOperationIdentifier,
         uint256 _factor
@@ -234,7 +362,13 @@ library ClearingStorageWrapper {
         ][_clearingOperationIdentifier.clearingId].amount *= _factor;
     }
 
-    /// @notice Remove clearing - pure storage operation
+    /**
+     * @notice Deletes all state associated with the identified clearing operation.
+     * @dev Removes the clearing ID from its enumerable set, decrements both aggregates,
+     *      and deletes all payloads and authorisations.
+     * @param _clearingOperationIdentifier The clearing operation identifier (holder,
+     *        partition, operation type, ID).
+     */
     function removeClearing(IClearingTypes.ClearingOperationIdentifier memory _clearingOperationIdentifier) internal {
         ClearingDataStorage storage clearingStorage_ = clearingStorage();
         uint256 amount = _isClearingBasicInfo(_clearingOperationIdentifier).amount;
@@ -269,45 +403,93 @@ library ClearingStorageWrapper {
         AdjustBalancesStorageWrapper.removeLabafClearing(_clearingOperationIdentifier);
     }
 
-    /// @notice Get clearing basic info (calldata version for external calls)
+    /**
+     * @notice Returns the basic clearing info (amount, expiration, destination) for the
+     *         given clearing operation.
+     * @dev Adaptor for calldata parameters; delegates to {_isClearingBasicInfo} with
+     *      memory conversion.
+     * @param _clearingOperationIdentifier The clearing operation identifier (calldata).
+     * @return info_ Basic clearing information (amount, expiration timestamp,
+     *         destination).
+     */
     function isClearingBasicInfo(
         IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier
-    ) internal view returns (IClearingTypes.ClearingOperationBasicInfo memory) {
+    ) internal view returns (IClearingTypes.ClearingOperationBasicInfo memory info_) {
         return _isClearingBasicInfo(_clearingOperationIdentifier);
     }
 
+    /**
+     * @notice Returns the clearing transfer data for the given holder and partition.
+     * @param _partition The partition.
+     * @param _tokenHolder The token holder.
+     * @param _clearingId The clearing operation ID.
+     * @return data_ The clearing transfer data struct.
+     */
     function getClearingTransferForByPartition(
         bytes32 _partition,
         address _tokenHolder,
         uint256 _clearingId
-    ) internal view returns (IClearingTypes.ClearingTransferData memory) {
+    ) internal view returns (IClearingTypes.ClearingTransferData memory data_) {
         return clearingStorage().clearingTransferByAccountPartitionAndId[_tokenHolder][_partition][_clearingId];
     }
 
+    /**
+     * @notice Returns the clearing redeem data for the given holder and partition.
+     * @param _partition The partition.
+     * @param _tokenHolder The token holder.
+     * @param _clearingId The clearing operation ID.
+     * @return data_ The clearing redeem data struct.
+     */
     function getClearingRedeemForByPartition(
         bytes32 _partition,
         address _tokenHolder,
         uint256 _clearingId
-    ) internal view returns (IClearingTypes.ClearingRedeemData memory) {
+    ) internal view returns (IClearingTypes.ClearingRedeemData memory data_) {
         return clearingStorage().clearingRedeemByAccountPartitionAndId[_tokenHolder][_partition][_clearingId];
     }
 
+    /**
+     * @notice Returns the clearing hold creation data for the given holder and partition.
+     * @param _partition The partition.
+     * @param _tokenHolder The token holder.
+     * @param _clearingId The clearing operation ID.
+     * @return data_ The clearing hold creation data struct.
+     */
     function getClearingHoldCreationForByPartition(
         bytes32 _partition,
         address _tokenHolder,
         uint256 _clearingId
-    ) internal view returns (IClearingTypes.ClearingHoldCreationData memory) {
+    ) internal view returns (IClearingTypes.ClearingHoldCreationData memory data_) {
         return clearingStorage().clearingHoldCreationByAccountPartitionAndId[_tokenHolder][_partition][_clearingId];
     }
 
+    /**
+     * @notice Returns the total amount cleared across all partitions for a holder.
+     * @param _tokenHolder The token holder.
+     * @return The total cleared amount.
+     */
     function getClearedAmountFor(address _tokenHolder) internal view returns (uint256) {
         return clearingStorage().totalClearedAmountByAccount[_tokenHolder];
     }
 
+    /**
+     * @notice Returns the amount cleared for a holder in a specific partition.
+     * @param _partition The partition.
+     * @param _tokenHolder The token holder.
+     * @return The partition-specific cleared amount.
+     */
     function getClearedAmountForByPartition(bytes32 _partition, address _tokenHolder) internal view returns (uint256) {
         return clearingStorage().totalClearedAmountByAccountAndPartition[_tokenHolder][_partition];
     }
 
+    /**
+     * @notice Returns the authorised third party for the identified clearing operation.
+     * @param _partition The partition.
+     * @param _tokenHolder The token holder.
+     * @param _clearingOperationType The clearing operation type.
+     * @param _clearingId The clearing operation ID.
+     * @return The third-party address.
+     */
     function getClearingThirdParty(
         bytes32 _partition,
         address _tokenHolder,
@@ -320,6 +502,13 @@ library ClearingStorageWrapper {
             ][_clearingId];
     }
 
+    /**
+     * @notice Returns the operator type (AUTHORIZED, OPERATOR, PROTECTED) for the
+     *         identified clearing operation.
+     * @dev Dispatches to the appropriate clearing data struct based on operation type.
+     * @param _clearingOperationIdentifier The clearing operation identifier.
+     * @return The third-party operator type.
+     */
     function getClearingThirdPartyType(
         IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     ) internal view returns (ThirdPartyType) {
@@ -344,6 +533,14 @@ library ClearingStorageWrapper {
             ][_clearingOperationIdentifier.clearingId].operatorType;
     }
 
+    /**
+     * @notice Returns the number of clearing operations for a holder, partition, and
+     *         operation type.
+     * @param _partition The partition.
+     * @param _tokenHolder The token holder.
+     * @param _clearingOperationType The clearing operation type.
+     * @return The count of clearing operations.
+     */
     function getClearingCountForByPartition(
         bytes32 _partition,
         address _tokenHolder,
@@ -354,13 +551,23 @@ library ClearingStorageWrapper {
             .clearingIdsByAccountAndPartitionAndTypes[_tokenHolder][_partition][_clearingOperationType].length();
     }
 
+    /**
+     * @notice Returns a paginated list of clearing IDs for a holder, partition, and
+     *         operation type.
+     * @param _partition The partition.
+     * @param _tokenHolder The token holder.
+     * @param _clearingOperationType The clearing operation type.
+     * @param _pageIndex The zero-based page index.
+     * @param _pageLength The number of items per page.
+     * @return ids_ A paginated array of clearing IDs.
+     */
     function getClearingsIdForByPartition(
         bytes32 _partition,
         address _tokenHolder,
         IClearingTypes.ClearingOperationType _clearingOperationType,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (uint256[] memory) {
+    ) internal view returns (uint256[] memory ids_) {
         return
             clearingStorage()
             .clearingIdsByAccountAndPartitionAndTypes[_tokenHolder][_partition][_clearingOperationType].getFromSet(
@@ -369,12 +576,20 @@ library ClearingStorageWrapper {
                 );
     }
 
+    /**
+     * @notice Constructs a clearing operation identifier struct from its components.
+     * @param _tokenHolder The token holder.
+     * @param _partition The partition.
+     * @param _clearingId The clearing operation ID.
+     * @param _clearingOperationType The clearing operation type.
+     * @return id_ A clearing operation identifier struct.
+     */
     function buildClearingOperationIdentifier(
         address _tokenHolder,
         bytes32 _partition,
         uint256 _clearingId,
         IClearingTypes.ClearingOperationType _clearingOperationType
-    ) internal pure returns (IClearingTypes.ClearingOperationIdentifier memory) {
+    ) internal pure returns (IClearingTypes.ClearingOperationIdentifier memory id_) {
         return
             IClearingTypes.ClearingOperationIdentifier({
                 tokenHolder: _tokenHolder,
@@ -384,6 +599,16 @@ library ClearingStorageWrapper {
             });
     }
 
+    /**
+     * @notice Constructs a clearing transfer data struct from its components.
+     * @param _amount The transfer amount.
+     * @param _expirationTimestamp The expiration timestamp.
+     * @param _destination The transfer destination.
+     * @param _data Transfer metadata.
+     * @param _operatorData Operator metadata.
+     * @param _operatorType The operator type.
+     * @return data_ A clearing transfer data struct.
+     */
     function buildClearingTransferData(
         uint256 _amount,
         uint256 _expirationTimestamp,
@@ -391,7 +616,7 @@ library ClearingStorageWrapper {
         bytes memory _data,
         bytes memory _operatorData,
         ThirdPartyType _operatorType
-    ) internal pure returns (IClearingTypes.ClearingTransferData memory) {
+    ) internal pure returns (IClearingTypes.ClearingTransferData memory data_) {
         return
             IClearingTypes.ClearingTransferData({
                 amount: _amount,
@@ -403,13 +628,22 @@ library ClearingStorageWrapper {
             });
     }
 
+    /**
+     * @notice Constructs a clearing redeem data struct from its components.
+     * @param _amount The redeem amount.
+     * @param _expirationTimestamp The expiration timestamp.
+     * @param _data Redeem metadata.
+     * @param _operatorData Operator metadata.
+     * @param _operatorType The operator type.
+     * @return data_ A clearing redeem data struct.
+     */
     function buildClearingRedeemData(
         uint256 _amount,
         uint256 _expirationTimestamp,
         bytes memory _data,
         bytes memory _operatorData,
         ThirdPartyType _operatorType
-    ) internal pure returns (IClearingTypes.ClearingRedeemData memory) {
+    ) internal pure returns (IClearingTypes.ClearingRedeemData memory data_) {
         return
             IClearingTypes.ClearingRedeemData({
                 amount: _amount,
@@ -420,6 +654,18 @@ library ClearingStorageWrapper {
             });
     }
 
+    /**
+     * @notice Constructs a clearing hold creation data struct from its components.
+     * @param _amount The hold amount.
+     * @param _expirationTimestamp The clearing expiration timestamp.
+     * @param _data Clearing metadata.
+     * @param _holdData Hold-specific metadata.
+     * @param _holdEscrow The hold escrow account.
+     * @param _holdTo The hold beneficiary.
+     * @param _operatorData Operator metadata.
+     * @param _operatorType The operator type.
+     * @return data_ A clearing hold creation data struct.
+     */
     function buildClearingHoldCreationData(
         uint256 _amount,
         uint256 _expirationTimestamp,
@@ -429,7 +675,7 @@ library ClearingStorageWrapper {
         address _holdTo,
         bytes memory _operatorData,
         ThirdPartyType _operatorType
-    ) internal pure returns (IClearingTypes.ClearingHoldCreationData memory) {
+    ) internal pure returns (IClearingTypes.ClearingHoldCreationData memory data_) {
         return
             IClearingTypes.ClearingHoldCreationData({
                 amount: _amount,
@@ -444,23 +690,35 @@ library ClearingStorageWrapper {
             });
     }
 
+    /**
+     * @notice Reverts if the clearing ID is not registered.
+     * @param _clearingOperationIdentifier The clearing operation identifier.
+     */
     function requireValidClearingId(
         IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     ) internal view {
         if (!isClearingIdValid(_clearingOperationIdentifier)) revert IClearingTypes.WrongClearingId();
     }
 
+    /**
+     * @notice Reverts if clearing operations are not currently activated.
+     */
     function requireClearingActivated() internal view {
         if (!isClearingActivated()) revert IClearingTypes.ClearingIsDisabled();
     }
 
+    /**
+     * @notice Reverts if the clearing operation's expiration state does not match the
+     *         supplied condition.
+     * @param _clearingOperationIdentifier The clearing operation identifier.
+     * @param _mustBeExpired True to require expiration, false to require non-expiration.
+     */
     function requireExpirationTimestamp(
         IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
         bool _mustBeExpired
     ) internal view {
         if (
-            TimeTravelStorageWrapper.getBlockTimestamp() >
-            isClearingBasicInfo(_clearingOperationIdentifier).expirationTimestamp !=
+            EvmAccessors.getBlockTimestamp() >= isClearingBasicInfo(_clearingOperationIdentifier).expirationTimestamp !=
             _mustBeExpired
         ) {
             if (_mustBeExpired) revert IClearingTypes.ExpirationDateNotReached();
@@ -468,10 +726,23 @@ library ClearingStorageWrapper {
         }
     }
 
+    /**
+     * @notice Reverts if clearing operations are currently activated.
+     */
     function checkClearingDisabled() internal view {
         if (isClearingActivated()) revert IClearingTypes.ClearingIsActivated();
     }
 
+    /**
+     * @notice Validates operator clearing transfer parameters; reverts on any violation.
+     * @dev Checks expiration, account recovery, partitioning rules, and operator
+     *      authorisation.
+     * @param _expirationTimestamp The clearing operation expiration timestamp.
+     * @param _account The account triggering the operation.
+     * @param _to The transfer destination.
+     * @param _from The token holder (transfer source).
+     * @param _partition The partition.
+     */
     function checkOperatorClearingTransferByPartition(
         uint256 _expirationTimestamp,
         address _account,
@@ -489,6 +760,17 @@ library ClearingStorageWrapper {
         ERC1410StorageWrapper.requireOperator(_partition, _from);
     }
 
+    /**
+     * @notice Validates clearing hold creation parameters; reverts on any violation.
+     * @dev Checks expiration, account recovery, partitioning rules, and address validity.
+     * @param _holdExpirationTimestamp The hold expiration timestamp.
+     * @param _operationExpirationTimestamp The clearing operation expiration timestamp.
+     * @param _account The account triggering the operation.
+     * @param _to The hold beneficiary.
+     * @param _from The token holder.
+     * @param _escrow The escrow account.
+     * @param _partition The partition.
+     */
     function checkClearingCreateHoldByPartition(
         uint256 _holdExpirationTimestamp,
         uint256 _operationExpirationTimestamp,
@@ -508,6 +790,19 @@ library ClearingStorageWrapper {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
     }
 
+    /**
+     * @notice Validates operator clearing hold creation parameters; reverts on any
+     *         violation.
+     * @dev Delegates to {checkClearingCreateHoldByPartition} then verifies operator
+     *      authorisation.
+     * @param _holdExpirationTimestamp The hold expiration timestamp.
+     * @param _operationExpirationTimestamp The clearing operation expiration timestamp.
+     * @param _account The account triggering the operation.
+     * @param _to The hold beneficiary.
+     * @param _from The token holder.
+     * @param _escrow The escrow account.
+     * @param _partition The partition.
+     */
     function checkOperatorClearingCreateHoldByPartition(
         uint256 _holdExpirationTimestamp,
         uint256 _operationExpirationTimestamp,
@@ -529,10 +824,17 @@ library ClearingStorageWrapper {
         ERC1410StorageWrapper.requireOperator(_partition, _from);
     }
 
-    /// @notice Internal helper for memory parameter
+    /**
+     * @notice Internal helper returning basic clearing info for memory-typed identifiers.
+     * @dev Dispatches to the appropriate clearing data struct (Transfer, Redeem, or
+     *      HoldCreation) and extracts amount, expiration, and destination.
+     * @param _clearingOperationIdentifier The clearing operation identifier (memory).
+     * @return info_ Basic clearing information (amount, expiration timestamp,
+     *         destination).
+     */
     function _isClearingBasicInfo(
         IClearingTypes.ClearingOperationIdentifier memory _clearingOperationIdentifier
-    ) private view returns (IClearingTypes.ClearingOperationBasicInfo memory) {
+    ) private view returns (IClearingTypes.ClearingOperationBasicInfo memory info_) {
         if (_clearingOperationIdentifier.clearingOperationType == IClearingTypes.ClearingOperationType.Transfer) {
             IClearingTypes.ClearingTransferData memory transferData = clearingStorage()
                 .clearingTransferByAccountPartitionAndId[_clearingOperationIdentifier.tokenHolder][
@@ -567,5 +869,13 @@ library ClearingStorageWrapper {
                 expirationTimestamp: data.expirationTimestamp,
                 destination: data.holdTo
             });
+    }
+
+    /**
+     * @notice Reverts with `InvalidClearingAmount` if the supplied token amount is zero.
+     * @param _amount Token quantity to validate before registering a clearing operation.
+     */
+    function checkNonZeroClearingAmount(uint256 _amount) internal pure {
+        if (_amount == 0) revert IClearingTypes.InvalidClearingAmount();
     }
 }

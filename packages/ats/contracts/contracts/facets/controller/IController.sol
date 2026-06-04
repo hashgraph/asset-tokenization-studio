@@ -3,6 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC3643Types } from "../layer_1/ERC3643/IERC3643Types.sol";
 
+/// @custom:hash resolverKey Controller
+bytes32 constant RESOLVER_KEY_CONTROLLER = 0xf020acbcf895b1f0961c02558f58e8e3f0a254c27f0e6287127ac2f43893df46;
+
 /**
  * @title IController
  * @notice Interface for the ControllerFacet, grouping all controller and agent management operations.
@@ -10,6 +13,12 @@ import { IERC3643Types } from "../layer_1/ERC3643/IERC3643Types.sol";
  *      management. Inherits `AgentAdded` and `AgentRemoved` events from `IERC3643Types`.
  */
 interface IController is IERC3643Types {
+    /**
+     * @notice Emitted when the controller feature is initialised for a token.
+     * @dev Fired inside `initializeController` once the facet is marked ready.
+     */
+    event ControllerInitialized(bool controllable);
+
     /// @notice Emitted when the controller feature is permanently disabled for a token.
     event FinalizedControllerFeature(address operator);
 

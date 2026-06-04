@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ScheduledTask } from "../layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
+import { ScheduledTask } from "../scheduledTasksCommon/IScheduledTasksCommon.sol";
+
+/// @custom:hash resolverKey ScheduledBalanceAdjustment
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_SCHEDULED_BALANCE_ADJUSTMENT = 0x90c7d769d18188f75b1092289e2465103d06f9c1195bf0ee4b2cf0844a5d6c96;
 
 /**
  * @title IScheduledBalanceAdjustment
@@ -9,7 +13,7 @@ import { ScheduledTask } from "../layer_2/scheduledTask/scheduledTasksCommon/ISc
  * @notice Interface for scheduled balance adjustment corporate actions on tokenised assets.
  * @dev Scheduled balance adjustments enqueue operations to multiply every token holder's balance
  *      by `factor / 10^decimals` at a future date. Tasks are managed through `ScheduledTasksStorageWrapper`
- *      and corporate-action records through `EquityStorageWrapper`.
+ *      and corporate-action records through `BalanceAdjustmentOps`.
  */
 interface IScheduledBalanceAdjustment {
     /**
@@ -23,6 +27,12 @@ interface IScheduledBalanceAdjustment {
         uint256 factor;
         uint8 decimals;
     }
+
+    /**
+     * @notice Emitted once when the scheduled balance adjustment capability is initialised on a token.
+     * @dev Fires exclusively from `initializeScheduledBalanceAdjustment`.
+     */
+    event ScheduledBalanceAdjustmentInitialized();
 
     /**
      * @notice Emitted when a balance adjustment is successfully scheduled.
@@ -49,6 +59,13 @@ interface IScheduledBalanceAdjustment {
      */
     event ScheduledBalanceAdjustmentCancelled(uint256 balanceAdjustmentId, address indexed operator);
 
+    /**
+     * @notice Emitted when an admin force-cancels a balance adjustment, bypassing date guards.
+     * @param balanceAdjustmentId Sequential identifier of the force-cancelled adjustment.
+     * @param operator            Address that performed the force-cancellation.
+     */
+    event ScheduledBalanceAdjustmentForceCancelled(uint256 balanceAdjustmentId, address indexed operator);
+
     /// @notice Reverts when the underlying storage layer fails to create a corporate action record.
     error BalanceAdjustmentCreationFailed();
 
@@ -60,10 +77,17 @@ interface IScheduledBalanceAdjustment {
     error BalanceAdjustmentAlreadyExecuted(bytes32 corporateActionId, uint256 balanceAdjustmentId);
 
     /**
+     * @notice Initialises the scheduled balance adjustment capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeScheduledBalanceAdjustment() external;
+
+    /**
      * @notice Enqueues a balance adjustment to be executed at a future date.
-     * @dev Caller must hold `CORPORATE_ACTION_ROLE`. The token must not be paused,
+     * @dev Caller must hold `ROLE_CORPORATE_ACTION`. The token must not be paused,
      *      `_newBalanceAdjustment.executionDate` must be a future timestamp, and `factor` must be
-     *      non-zero. Creates a corporate action record via `EquityStorageWrapper` and emits
+     *      non-zero. Creates a corporate action record via `BalanceAdjustmentOps` and emits
      *      `ScheduledBalanceAdjustmentSet`.
      * @param _newBalanceAdjustment Parameters of the adjustment to schedule.
      * @return balanceAdjustmentID_ Sequential identifier assigned to the newly created adjustment.
@@ -74,7 +98,7 @@ interface IScheduledBalanceAdjustment {
 
     /**
      * @notice Cancels a previously scheduled balance adjustment.
-     * @dev Caller must hold `CORPORATE_ACTION_ROLE`. The token must not be paused.
+     * @dev Caller must hold `ROLE_CORPORATE_ACTION`. The token must not be paused.
      *      Emits `ScheduledBalanceAdjustmentCancelled` on success.
      * @param _balanceAdjustmentID Identifier of the scheduled adjustment to cancel.
      * @return success_ True if the cancellation succeeded.
@@ -82,9 +106,19 @@ interface IScheduledBalanceAdjustment {
     function cancelScheduledBalanceAdjustment(uint256 _balanceAdjustmentID) external returns (bool success_);
 
     /**
+     * @notice Force-cancels a balance adjustment regardless of its execution date.
+     * @dev Restricted to `ROLE_CORPORATE_ACTION_FORCE_CANCEL` and gated by the unpaused state
+     *      and `notZeroValue`. Marks the corporate action disabled unconditionally — bypasses
+     *      `BalanceAdjustmentAlreadyExecuted` — and emits `ScheduledBalanceAdjustmentForceCancelled`.
+     * @param _balanceAdjustmentID Identifier of the scheduled adjustment to force-cancel.
+     * @return success_ True if the force-cancellation succeeded.
+     */
+    function forceCancelScheduledBalanceAdjustment(uint256 _balanceAdjustmentID) external returns (bool success_);
+
+    /**
      * @notice Returns the parameters and disabled state of a previously scheduled balance adjustment.
      * @dev Reverts if the corporate action type stored at index `_balanceAdjustmentID - 1` does not
-     *      match `BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE`.
+     *      match `CORPORATE_ACTION_TYPE_BALANCE_ADJUSTMENT`.
      * @param _balanceAdjustmentID Identifier of the scheduled adjustment to query.
      * @return balanceAdjustment_ Struct containing executionDate, factor, and decimals.
      * @return isDisabled_        True if the adjustment has been cancelled or already executed.
@@ -102,19 +136,24 @@ interface IScheduledBalanceAdjustment {
     /**
      * @notice Returns the number of pending scheduled balance adjustments in the task queue.
      * @dev Reads directly from `ScheduledTasksStorageWrapper`; excludes already-executed tasks.
+     * @param _includeDisabled When true, tasks belonging to cancelled corporate actions are counted;
+     *                         when false, only active tasks are counted.
      * @return Count of pending balance adjustment tasks.
      */
-    function getPendingBalanceAdjustmentCount() external view returns (uint256);
+    function getPendingBalanceAdjustmentCount(bool _includeDisabled) external view returns (uint256);
 
     /**
      * @notice Returns a paginated slice of pending scheduled balance adjustment tasks.
      * @dev Reads from `ScheduledTasksStorageWrapper`. Tasks are ordered by insertion index.
-     * @param _pageIndex  Zero-based page number.
-     * @param _pageLength Maximum number of tasks to return per page.
+     * @param _pageIndex       Zero-based page number.
+     * @param _pageLength      Maximum number of tasks to return per page.
+     * @param _includeDisabled When true, tasks belonging to cancelled corporate actions are included;
+     *                         when false, only active tasks are returned.
      * @return scheduledBalanceAdjustment_ Array of `ScheduledTask` structs for the requested page.
      */
     function getScheduledBalanceAdjustments(
         uint256 _pageIndex,
-        uint256 _pageLength
+        uint256 _pageLength,
+        bool _includeDisabled
     ) external view returns (ScheduledTask[] memory scheduledBalanceAdjustment_);
 }

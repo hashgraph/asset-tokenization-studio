@@ -1,18 +1,27 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey Documentation
+bytes32 constant RESOLVER_KEY_DOCUMENTATION = 0x3ab155fb7c96aefcaa7d730782cb640e5acf33c329d90a706843ae88a03cf1fb;
+
 /**
  * @title IDocumentation
  * @notice Interface for on-chain document management, enabling attachment, removal,
  *         and retrieval of off-chain documents referenced by a unique `bytes32` name.
  * @dev Implementing contracts are expected to gate write operations behind role-based
  *      access control and pause checks. Storage is managed via a dedicated diamond
- *      storage slot (`_DOCUMENTATION_STORAGE_POSITION`) to avoid layout collisions.
+ *      storage slot (`STORAGE_LOCATION_DOCUMENTATION`) to avoid layout collisions.
  *      All function selectors are identical to those of the former `IERC1643` interface,
  *      preserving full ABI compatibility.
  * @author Hashgraph Asset Tokenization
  */
 interface IDocumentation {
+    /**
+     * @notice Emitted once when the documentation capability is initialised on a token.
+     * @dev Fires exclusively from `initializeDocumentation`.
+     */
+    event DocumentationInitialized();
+
     /**
      * @notice Emitted when a document is permanently removed from the contract.
      * @param name         Unique identifier of the document that was removed.
@@ -54,9 +63,16 @@ interface IDocumentation {
     error DocumentDoesNotExist(bytes32 name);
 
     /**
+     * @notice Initialises the documentation capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeDocumentation() external;
+
+    /**
      * @notice Attaches a new document to the contract or updates the URI and hash of an
      *         existing one.
-     * @dev Requires the caller to hold `DOCUMENTER_ROLE` and the token to be unpaused.
+     * @dev Requires the caller to hold `ROLE_DOCUMENTER` and the token to be unpaused.
      *      If `_name` is not yet registered, it is appended to the `docNames` array and
      *      its index is recorded in `docIndexes`. Emits {DocumentUpdated}.
      * @param _name         Unique `bytes32` identifier for the document. Must not be zero.
@@ -67,7 +83,7 @@ interface IDocumentation {
 
     /**
      * @notice Removes an existing document from the contract.
-     * @dev Requires the caller to hold `DOCUMENTER_ROLE` and the token to be unpaused.
+     * @dev Requires the caller to hold `ROLE_DOCUMENTER` and the token to be unpaused.
      *      Uses a swap-and-pop strategy to remove the entry from `docNames` in O(1),
      *      updating `docIndexes` accordingly. Emits {DocumentRemoved}.
      *      Reverts with {DocumentDoesNotExist} if `_name` is not registered.

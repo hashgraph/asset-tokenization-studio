@@ -1,41 +1,53 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IExternalPauseManagement } from "./IExternalPauseManagement.sol";
-import { PAUSE_MANAGER_ROLE } from "../../constants/roles.sol";
-import { _PAUSE_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { PauseStorageWrapper } from "../../domain/core/PauseStorageWrapper.sol";
+import { IExternalPauseManagement, RESOLVER_KEY_EXTERNAL_PAUSE } from "./IExternalPauseManagement.sol";
+import { ROLE_PAUSE_MANAGER, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { PauseStorageWrapper, STORAGE_LOCATION_PAUSE_MANAGEMENT } from "../../domain/core/PauseStorageWrapper.sol";
 import { ExternalListManagementStorageWrapper } from "../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { ArrayValidation } from "../../infrastructure/utils/ArrayValidation.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title ExternalPauseManagement
  * @author Asset Tokenization Studio Team
- * @notice Abstract contract implementing external pause management logic for a security token.
+ * @notice Abstract contract implementing external onlyOperational pause management logic for a security token.
  *         Maintains a list of trusted third-party pause contracts whose combined pause state
  *         contributes to the token's global pause evaluation.
- * @dev Implements `IExternalPauseManagement`. The external pause list is stored in diamond storage
- *      at `_PAUSE_MANAGEMENT_STORAGE_POSITION` via `ExternalListManagementStorageWrapper`.
- *      All mutating functions after initialisation are gated by `PAUSE_MANAGER_ROLE` and the
+ * @dev Implements `IExternalPauseManagement`. The external onlyOperational pause list is stored in diamond storage
+ *      at `STORAGE_LOCATION_PAUSE_MANAGEMENT` via `ExternalListManagementStorageWrapper`.
+ *      All mutating functions after initialisation are gated by `ROLE_PAUSE_MANAGER` and the
  *      `onlyUnpaused` modifier inherited from `Modifiers`. Intended to be inherited exclusively
  *      by `ExternalPauseManagementFacet`.
  */
 abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers {
     /// @inheritdoc IExternalPauseManagement
-    function initializeExternalPauses(address[] calldata _pauses) external override onlyNotExternalPauseInitialized {
+    function initializeExternalPauses(
+        address[] calldata _pauses
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_EXTERNAL_PAUSE) {
         PauseStorageWrapper.initializeExternalPauses(_pauses);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_EXTERNAL_PAUSE);
+        emit IExternalPauseManagement.ExternalPauseInitialized(_pauses);
     }
 
     /// @inheritdoc IExternalPauseManagement
     function updateExternalPauses(
         address[] calldata _pauses,
         bool[] calldata _actives
-    ) external override onlyActivated onlyUnpaused onlyRole(PAUSE_MANAGER_ROLE) returns (bool success_) {
+    )
+        external
+        override
+        onlyOperational
+        onlyActivated
+        onlyUnpaused
+        onlyRole(ROLE_PAUSE_MANAGER)
+        returns (bool success_)
+    {
         ArrayValidation.checkUniqueValues(_pauses, _actives);
         success_ = ExternalListManagementStorageWrapper.updateExternalLists(
-            _PAUSE_MANAGEMENT_STORAGE_POSITION,
+            STORAGE_LOCATION_PAUSE_MANAGEMENT,
             _pauses,
             _actives
         );
@@ -51,13 +63,14 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
-        onlyRole(PAUSE_MANAGER_ROLE)
+        onlyRole(ROLE_PAUSE_MANAGER)
         onlyAddressNotZero(_pause)
         returns (bool success_)
     {
-        success_ = ExternalListManagementStorageWrapper.addExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pause);
+        success_ = ExternalListManagementStorageWrapper.addExternalList(STORAGE_LOCATION_PAUSE_MANAGEMENT, _pause);
         if (!success_) {
             revert ListedPause(_pause);
         }
@@ -67,8 +80,16 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers
     /// @inheritdoc IExternalPauseManagement
     function removeExternalPause(
         address _pause
-    ) external override onlyActivated onlyUnpaused onlyRole(PAUSE_MANAGER_ROLE) returns (bool success_) {
-        success_ = ExternalListManagementStorageWrapper.removeExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pause);
+    )
+        external
+        override
+        onlyOperational
+        onlyActivated
+        onlyNotInternallyPaused
+        onlyRole(ROLE_PAUSE_MANAGER)
+        returns (bool success_)
+    {
+        success_ = ExternalListManagementStorageWrapper.removeExternalList(STORAGE_LOCATION_PAUSE_MANAGEMENT, _pause);
         if (!success_) {
             revert UnlistedPause(_pause);
         }
@@ -77,12 +98,12 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers
 
     /// @inheritdoc IExternalPauseManagement
     function isExternalPause(address _pause) external view override returns (bool) {
-        return ExternalListManagementStorageWrapper.isExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pause);
+        return ExternalListManagementStorageWrapper.isExternalList(STORAGE_LOCATION_PAUSE_MANAGEMENT, _pause);
     }
 
     /// @inheritdoc IExternalPauseManagement
     function getExternalPausesCount() external view override returns (uint256 externalPausesCount_) {
-        return ExternalListManagementStorageWrapper.getExternalListsCount(_PAUSE_MANAGEMENT_STORAGE_POSITION);
+        return ExternalListManagementStorageWrapper.getExternalListsCount(STORAGE_LOCATION_PAUSE_MANAGEMENT);
     }
 
     /// @inheritdoc IExternalPauseManagement
@@ -92,7 +113,7 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers
     ) external view override returns (address[] memory members_) {
         return
             ExternalListManagementStorageWrapper.getExternalListsMembers(
-                _PAUSE_MANAGEMENT_STORAGE_POSITION,
+                STORAGE_LOCATION_PAUSE_MANAGEMENT,
                 _pageIndex,
                 _pageLength
             );

@@ -107,6 +107,9 @@ export const TEST_NETWORKS = {
   /** Hedera previewnet network identifier */
   PREVIEWNET: "hedera-previewnet",
 
+  /** Hedera HashSphere network identifier */
+  HASHSPHERE: "hedera-hashsphere",
+
   /** Hedera local network identifier */
   HEDERA_LOCAL: "hedera-local",
 
@@ -296,7 +299,7 @@ export const TEST_BYTES32 = {
  * Mock resolver key values for registry combination tests.
  * All values are valid bytes32 format (0x + 64 hex characters).
  */
-export const TEST_RESOLVER_KEYS = {
+export const TESTS = {
   /** First mock resolver key */
   KEY_1: "0x0000000000000000000000000000000000000000000000000000000000000111",
 
@@ -451,9 +454,10 @@ export const TEST_STEPS_EXISTING_BLR = {
   BOND_CONFIG: 4,
   BOND_FIXED_RATE_CONFIG: 5,
   BOND_KPI_LINKED_CONFIG: 6,
-  LOAN_CONFIG: 7,
-  LOANS_PORTFOLIO_CONFIG: 8,
-  FACTORY: 10,
+  DEPOSIT_TOKEN_CONFIG: 7,
+  LOAN_CONFIG: 8,
+  LOANS_PORTFOLIO_CONFIG: 9,
+  FACTORY: 11,
 } as const;
 
 // ============================================================================
@@ -507,8 +511,8 @@ export const TEST_STANDARD_CONTRACTS = {
   /** CapTable facet */
   CAP_TABLE_FACET: "CapTableFacet",
 
-  /** TimeTravel facet (invariant - no TimeTravel variant) */
-  TIME_TRAVEL_FACET: "TimeTravelFacet",
+  /** EvmAccessors test-only writer facet */
+  EVM_ACCESSORS_FACET: "EvmAccessorsFacet",
 
   /** Pausable facet (for CheckpointManager tests) */
   PAUSABLE_FACET: "PausableFacet",
@@ -529,24 +533,6 @@ export const TEST_STANDARD_CONTRACTS = {
 
   /** MyFacetContract (has Facet in middle, not at end) */
   MY_FACET_CONTRACT: "MyFacetContract",
-} as const;
-
-// ============================================================================
-// Time Travel Variants
-// ============================================================================
-
-/**
- * TimeTravel variant names for testing.
- */
-export const TEST_TIME_TRAVEL_VARIANTS = {
-  /** AccessControlFacet TimeTravel variant */
-  ACCESS_CONTROL: "AccessControlFacetTimeTravel",
-
-  /** PauseFacet TimeTravel variant */
-  PAUSE: "PauseFacetTimeTravel",
-
-  /** Generic TimeTravel suffix */
-  SUFFIX: "TimeTravel",
 } as const;
 
 // ============================================================================
@@ -1305,4 +1291,20 @@ export const EVENT_NAMES = {
   NOMINAL_VALUE_SET: "NominalValueSet",
   /** Emitted by `NominalValue.setNominalValueCurrency`. */
   NOMINAL_VALUE_CURRENCY_SET: "NominalValueCurrencySet",
+  /** Emitted by `EvmAccessorsFacet.changeSystemTimestamp` (test-only). */
+  SYSTEM_TIMESTAMP_CHANGED: "SystemTimestampChanged",
+  /** Emitted by `EvmAccessorsFacet.resetSystemTimestamp` (test-only). */
+  SYSTEM_TIMESTAMP_RESET: "SystemTimestampReset",
+  /** Emitted by `EvmAccessorsFacet.changeSystemBlockNumber` (test-only). */
+  SYSTEM_BLOCK_NUMBER_CHANGED: "SystemBlockNumberChanged",
+  /** Emitted by `EvmAccessorsFacet.resetSystemBlockNumber` (test-only). */
+  SYSTEM_BLOCK_NUMBER_RESET: "SystemBlockNumberReset",
+  /** Emitted by `EvmAccessorsFacet.changeSystemChainId` (test-only). */
+  SYSTEM_CHAIN_ID_CHANGED: "SystemChainIdChanged",
+  /** Emitted by `EvmAccessorsFacet.resetSystemChainId` (test-only). */
+  SYSTEM_CHAIN_ID_RESET: "SystemChainIdReset",
+  /** Emitted by `EvmAccessorsFacet.changeSystemSender` (test-only). */
+  SYSTEM_SENDER_CHANGED: "SystemSenderChanged",
+  /** Emitted by `EvmAccessorsFacet.resetSystemSender` (test-only). */
+  SYSTEM_SENDER_RESET: "SystemSenderReset",
 } as const;

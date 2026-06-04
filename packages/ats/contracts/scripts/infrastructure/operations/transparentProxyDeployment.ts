@@ -19,6 +19,7 @@ import {
   GAS_LIMIT,
   DEFAULT_TRANSACTION_TIMEOUT,
   hederaGasOverrides,
+  gasLimitOverride,
 } from "@scripts/infrastructure";
 
 /**
@@ -71,7 +72,7 @@ export async function deployTransparentProxy(
       proxyAdminAddress,
       initData,
       {
-        gasLimit: GAS_LIMIT.default,
+        ...gasLimitOverride(GAS_LIMIT.default),
         ...hederaGasOverrides(),
       },
     );

@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey ExternalPause
+bytes32 constant RESOLVER_KEY_EXTERNAL_PAUSE = 0x7a8980089ef3860d6c0e831805ee28105e662952033ce76812e56e346d37bd7e;
+
 /**
  * @title IExternalPauseManagement
  * @author Asset Tokenization Studio Team
@@ -8,12 +11,18 @@ pragma solidity >=0.8.0 <0.9.0;
  *         trusted third-party contracts whose pause state propagates to the token: the token is
  *         considered paused when its own pause flag is set, or when any listed external pause
  *         contract returns `true` from its `isPaused()` call.
- * @dev Part of the Diamond facet system. `PAUSE_MANAGER_ROLE` is required for all state-mutating
+ * @dev Part of the Diamond facet system. `ROLE_PAUSE_MANAGER` is required for all state-mutating
  *      functions after initialisation. The external pause list and its initialisation flag are
- *      stored in diamond storage at `_PAUSE_MANAGEMENT_STORAGE_POSITION` via
+ *      stored in diamond storage at `STORAGE_LOCATION_PAUSE_MANAGEMENT` via
  *      `ExternalListManagementStorageWrapper`.
  */
 interface IExternalPauseManagement {
+    /**
+     * @notice Emitted once when the external pause capability is initialised on a token.
+     * @dev Fires exclusively from `initializeExternalPauses` after the storage write succeeds.
+     */
+    event ExternalPauseInitialized(address[] pauses);
+
     /**
      * @notice Emitted when multiple external pause addresses are added or removed in a single
      *         batch.
@@ -58,7 +67,7 @@ interface IExternalPauseManagement {
 
     /**
      * @notice One-time initialiser that populates the external pause list at token deployment.
-     * @dev Can only be called once; subsequent calls revert via `onlyNotExternalPauseInitialized`.
+     * @dev Can only be called once; subsequent calls revert via `onlyFacetNotRegistered`.
      *      The leading-underscore naming convention signals this is an initialiser function.
      * @param _pauses Initial array of external pause contract addresses to register.
      */
@@ -66,7 +75,7 @@ interface IExternalPauseManagement {
 
     /**
      * @notice Adds or removes multiple external pause contracts in a single transaction.
-     * @dev Requires `PAUSE_MANAGER_ROLE` and the token to be unpaused. Both arrays must have the
+     * @dev Requires `ROLE_PAUSE_MANAGER` and the token to be unpaused. Both arrays must have the
      *      same length and contain no duplicate addresses, validated by
      *      `ArrayValidation.checkUniqueValues`. Emits `ExternalPausesUpdated`.
      * @param _pauses Array of external pause contract addresses to process.
@@ -80,7 +89,7 @@ interface IExternalPauseManagement {
 
     /**
      * @notice Adds an external pause contract to the list.
-     * @dev Requires `PAUSE_MANAGER_ROLE`, the token to be unpaused, and a non-zero address.
+     * @dev Requires `ROLE_PAUSE_MANAGER`, the token to be unpaused, and a non-zero address.
      *      Reverts with `ListedPause` if the address is already listed. Emits
      *      `AddedToExternalPauses`.
      * @param _pause Address of the external pause contract to add.
@@ -90,7 +99,7 @@ interface IExternalPauseManagement {
 
     /**
      * @notice Removes an external pause contract from the list.
-     * @dev Requires `PAUSE_MANAGER_ROLE` and the token to be unpaused. Reverts with `UnlistedPause`
+     * @dev Requires `ROLE_PAUSE_MANAGER` and the token to be unpaused. Reverts with `UnlistedPause`
      *      if the address is not listed. Emits `RemovedFromExternalPauses`.
      * @param _pause Address of the external pause contract to remove.
      * @return success_ True if the contract was removed successfully.

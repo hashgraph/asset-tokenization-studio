@@ -4,12 +4,11 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { type ResolverProxy, type IAsset } from "@contract-types";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 
 import { deployEquityTokenFixture } from "@test";
-
 import { executeRbac, MAX_UINT256 } from "@test";
-import { EMPTY_STRING, ATS_ROLES, ZERO } from "@scripts";
+import { EMPTY_STRING, ATS_ROLES, ZERO, EQUITY_CONFIG_ID, RESOLVER_KEY_LOCK } from "@scripts";
 import { Rbac } from "@scripts/domain";
 
 const _NON_DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000011";
@@ -25,6 +24,7 @@ describe("Lock Tests", () => {
   let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
   let currentTimestamp = 0;
@@ -32,27 +32,27 @@ describe("Lock Tests", () => {
 
   function set_initRbacs(): Rbac[] {
     const rbacIssuer: Rbac = {
-      role: ATS_ROLES.ISSUER_ROLE,
+      role: ATS_ROLES.ROLE_ISSUER,
       members: [signer_B.address],
     };
     const rbacLocker: Rbac = {
-      role: ATS_ROLES.LOCKER_ROLE,
+      role: ATS_ROLES.ROLE_LOCKER,
       members: [signer_C.address],
     };
     const rbacPausable: Rbac = {
-      role: ATS_ROLES.PAUSER_ROLE,
+      role: ATS_ROLES.ROLE_PAUSER,
       members: [signer_D.address],
     };
     const rbacKYC: Rbac = {
-      role: ATS_ROLES.KYC_ROLE,
+      role: ATS_ROLES.ROLE_KYC,
       members: [signer_B.address],
     };
     const rbacSSI: Rbac = {
-      role: ATS_ROLES.SSI_MANAGER_ROLE,
+      role: ATS_ROLES.ROLE_SSI_MANAGER,
       members: [signer_A.address],
     };
     const rbacCorporateAction: Rbac = {
-      role: ATS_ROLES.CORPORATE_ACTION_ROLE,
+      role: ATS_ROLES.ROLE_CORPORATE_ACTION,
       members: [signer_B.address],
     };
     return [rbacIssuer, rbacLocker, rbacPausable, rbacKYC, rbacSSI, rbacCorporateAction];
@@ -80,6 +80,7 @@ describe("Lock Tests", () => {
     signer_D = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, set_initRbacs());
 
@@ -95,6 +96,7 @@ describe("Lock Tests", () => {
     signer_D = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, set_initRbacs());
 
@@ -268,11 +270,71 @@ describe("Lock Tests", () => {
     it("GIVEN a deactivated asset WHEN lock THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).lock(0, ethers.ZeroAddress, 0),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN release THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).release(0, ethers.ZeroAddress),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN forceReleaseByPartition THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      const lockFacet = await ethers.getContractAt("LockFacet", base.diamond.target);
+      await expect(
+        lockFacet.connect(base.deployer).forceReleaseByPartition(ethers.ZeroHash, 0, ethers.ZeroAddress),
+      ).to.be.revertedWithCustomError(lockFacet, "Deactivated");
+    });
+  });
+
+  describe("initializeLock", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeLock is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeLock())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeLock is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeLock())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_LOCK, 1);
+    });
+  });
+
+  describe("initializeLock event", () => {
+    it("GIVEN a fresh deployment WHEN initializeLock is called THEN emits LockInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_LOCK);
+      await expect(asset.initializeLock()).to.emit(asset, "LockInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational WHEN lock is called THEN AssetNotOperational", async () => {
+      await expect(asset.lock(0n, ethers.ZeroAddress, 0n))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN release is called THEN AssetNotOperational", async () => {
+      await expect(asset.release(0n, ethers.ZeroAddress))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 });

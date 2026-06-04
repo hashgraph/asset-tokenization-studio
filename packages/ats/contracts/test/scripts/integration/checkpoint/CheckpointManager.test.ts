@@ -64,7 +64,6 @@ describe("CheckpointManager", () => {
         deployer,
         workflowType: TEST_WORKFLOWS.NEW_BLR,
         options: {
-          useTimeTravel: false,
           confirmations: 2,
         },
       });
@@ -80,7 +79,6 @@ describe("CheckpointManager", () => {
       expect(checkpoint).to.have.property("lastUpdate");
       expect(checkpoint.steps).to.deep.equal({});
       expect(checkpoint.options).to.deep.equal({
-        useTimeTravel: false,
         confirmations: 2,
       });
       expect(checkpoint).to.not.have.property("failure");
@@ -238,7 +236,7 @@ describe("CheckpointManager", () => {
         network: TEST_NETWORKS.TESTNET,
         deployer: TEST_ADDRESSES.VALID_0,
         workflowType: TEST_WORKFLOWS.NEW_BLR,
-        options: { useTimeTravel: true },
+        options: {},
       });
 
       original.steps.proxyAdmin = {

@@ -2,33 +2,8 @@
 pragma solidity 0.8.22;
 
 import { IAssetMock } from "./interfaces/IAssetMock.sol";
-// solhint-disable-next-line max-line-length
-// solhint-disable max-line-length
-import {
-    ScheduledTask
-} from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
-import {
-    IScheduledBalanceAdjustment
-} from "@hashgraph/asset-tokenization-contracts/contracts/facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol";
 import { IFactory } from "@hashgraph/asset-tokenization-contracts/contracts/factory/IFactory.sol";
-import { ICouponTypes } from "@hashgraph/asset-tokenization-contracts/contracts/facets/coupon/ICouponTypes.sol";
-import { IVotingTypes } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/voting/IVotingTypes.sol";
-// solhint-disable max-line-length
-import { IDividendTypes } from "@hashgraph/asset-tokenization-contracts/contracts/facets/dividend/IDividendTypes.sol";
-import { IBondTypes } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/bond/IBondTypes.sol";
-import { IPrincipal } from "@hashgraph/asset-tokenization-contracts/contracts/facets/principal/IPrincipal.sol";
 
-/**
- * @title AssetMock
- * @author Asset Tokenization Studio Team
- * @notice Test-only mock asset used by the mass-payout `LifeCycleCashFlow` integration
- *         tests. Implements `IAssetMock`, which aggregates every facet interface the
- *         flows interact with.
- * @dev Most methods revert with `NotImplemented` — they exist solely to satisfy the
- *      `IAssetMock` aggregated surface. A small subset returns canned values seeded by
- *      the constructor parameters (`SecurityType`, `withHolders`, `amountNumerator`).
- *      Production code MUST NOT instantiate or reference this mock.
- */
 // solhint-disable no-unused-vars
 contract AssetMock is IAssetMock {
     IFactory.SecurityType private _securityType;
@@ -74,15 +49,12 @@ contract AssetMock is IAssetMock {
         holders_[1] = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
     }
 
-    function getPrincipalFor(address) external view returns (IPrincipal.PrincipalFor memory principalFor_) {
+    function getPrincipalFor(address) external view returns (PrincipalFor memory principalFor_) {
         principalFor_.numerator = _numerator;
         principalFor_.denominator = 1;
     }
 
-    function getCouponAmountFor(
-        uint256,
-        address
-    ) external view returns (ICouponTypes.CouponAmountFor memory couponAmountFor_) {
+    function getCouponAmountFor(uint256, address) external view returns (CouponAmountFor memory couponAmountFor_) {
         couponAmountFor_.numerator = _numerator;
         couponAmountFor_.denominator = 1;
         couponAmountFor_.recordDateReached = true;
@@ -91,7 +63,7 @@ contract AssetMock is IAssetMock {
     function getDividendAmountFor(
         uint256,
         address
-    ) external view returns (IDividendTypes.DividendAmountFor memory dividendAmountFor_) {
+    ) external view returns (DividendAmountFor memory dividendAmountFor_) {
         dividendAmountFor_.numerator = _numerator;
         dividendAmountFor_.denominator = 1;
         dividendAmountFor_.recordDateReached = true;
@@ -112,15 +84,7 @@ contract AssetMock is IAssetMock {
         return;
     }
 
-    function setCoupon(ICouponTypes.Coupon calldata) external pure returns (uint256) {
-        revert NotImplemented();
-    }
-
-    function setName(string calldata) external pure {
-        revert NotImplemented();
-    }
-
-    function setSymbol(string calldata) external pure {
+    function setCoupon(Coupon calldata) external pure returns (uint256) {
         revert NotImplemented();
     }
 
@@ -128,7 +92,7 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
-    function getBondDetails() external pure returns (IBondTypes.BondDetailsData memory bondDetailsData_) {
+    function getBondDetails() external pure returns (BondDetailsData memory bondDetailsData_) {
         bondDetailsData_.currency = 0x555344;
         bondDetailsData_.nominalValue = 2345678901;
         bondDetailsData_.nominalValueDecimals = 2;
@@ -136,9 +100,7 @@ contract AssetMock is IAssetMock {
         bondDetailsData_.maturityDate = 1761823607;
     }
 
-    function getCoupon(
-        uint256
-    ) external pure returns (ICouponTypes.RegisteredCoupon memory registeredCoupon_, bool isDisabled_) {
+    function getCoupon(uint256) external pure returns (RegisteredCoupon memory registeredCoupon_, bool isDisabled_) {
         registeredCoupon_.coupon.recordDate = 1753874807;
         registeredCoupon_.coupon.executionDate = 1753874807;
         registeredCoupon_.coupon.startDate = 1;
@@ -150,7 +112,7 @@ contract AssetMock is IAssetMock {
         isDisabled_ = false;
     }
 
-    function getCouponFor(uint256, address) external pure returns (ICouponTypes.CouponFor memory couponFor_) {
+    function getCouponFor(uint256, address) external pure returns (CouponFor memory couponFor_) {
         couponFor_.tokenBalance = 3;
         couponFor_.decimals = 2;
         couponFor_.recordDateReached = true;
@@ -175,7 +137,7 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
-    function setDividend(IDividendTypes.Dividend calldata) external pure returns (uint256) {
+    function setDividend(Dividend calldata) external pure returns (uint256) {
         revert NotImplemented();
     }
 
@@ -195,13 +157,11 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
-    function setVoting(IVotingTypes.Voting calldata) external pure returns (uint256) {
+    function setVoting(Voting calldata) external pure returns (uint256) {
         revert NotImplemented();
     }
 
-    function setScheduledBalanceAdjustment(
-        IScheduledBalanceAdjustment.ScheduledBalanceAdjustment calldata
-    ) external pure returns (uint256) {
+    function setScheduledBalanceAdjustment(ScheduledBalanceAdjustment calldata) external pure returns (uint256) {
         revert NotImplemented();
     }
 
@@ -221,7 +181,7 @@ contract AssetMock is IAssetMock {
 
     function getDividend(
         uint256
-    ) external pure returns (IDividendTypes.RegisteredDividend memory registeredDividend_, bool isDisabled_) {
+    ) external pure returns (RegisteredDividend memory registeredDividend_, bool isDisabled_) {
         registeredDividend_.dividend.recordDate = 1753874807;
         registeredDividend_.dividend.executionDate = 1753874807;
         registeredDividend_.dividend.amount = 400;
@@ -230,7 +190,7 @@ contract AssetMock is IAssetMock {
         isDisabled_ = false;
     }
 
-    function getDividendFor(uint256, address) external pure returns (IDividendTypes.DividendFor memory dividendFor_) {
+    function getDividendFor(uint256, address) external pure returns (DividendFor memory dividendFor_) {
         dividendFor_.tokenBalance = 3;
         dividendFor_.amount = 200;
         dividendFor_.amountDecimals = 2;
@@ -248,11 +208,11 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
-    function getVoting(uint256) external pure returns (IVotingTypes.RegisteredVoting memory, bool) {
+    function getVoting(uint256) external pure returns (RegisteredVoting memory, bool) {
         revert NotImplemented();
     }
 
-    function getVotingFor(uint256, address) external pure returns (IVotingTypes.VotingFor memory) {
+    function getVotingFor(uint256, address) external pure returns (VotingFor memory) {
         revert NotImplemented();
     }
 
@@ -268,29 +228,11 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
-    function getScheduledBalanceAdjustment(
-        uint256
-    ) external pure returns (IScheduledBalanceAdjustment.ScheduledBalanceAdjustment memory, bool) {
+    function getScheduledBalanceAdjustment(uint256) external pure returns (ScheduledBalanceAdjustment memory, bool) {
         revert NotImplemented();
     }
 
-    function getPendingBalanceAdjustmentCount() external pure returns (uint256) {
-        revert NotImplemented();
-    }
-
-    function adjustBalances(uint256, uint8) external pure returns (bool) {
-        revert NotImplemented();
-    }
-
-    function getBalanceAdjustmentCount() external pure returns (uint256) {
-        revert NotImplemented();
-    }
-
-    function getScheduledBalanceAdjustments(uint256, uint256) external pure returns (ScheduledTask[] memory) {
-        revert NotImplemented();
-    }
-
-    function triggerAndSyncAll(bytes32, address, address) external pure {
+    function getScheduledBalanceAdjustmentCount() external pure returns (uint256) {
         revert NotImplemented();
     }
 
@@ -335,7 +277,7 @@ contract AssetMock is IAssetMock {
     }
 
     // solhint-disable-next-line func-name-mixedcase
-    function initializeCore(ERC20Metadata calldata) external pure {
+    function initialize_ERC20(ERC20Metadata calldata) external pure {
         revert NotImplemented();
     }
 
@@ -368,10 +310,6 @@ contract AssetMock is IAssetMock {
     }
 
     function decimalsAt(uint256) external pure returns (uint8) {
-        revert NotImplemented();
-    }
-
-    function version() external pure returns (string memory) {
         revert NotImplemented();
     }
 

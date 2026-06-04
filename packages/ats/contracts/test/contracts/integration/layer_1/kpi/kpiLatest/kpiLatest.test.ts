@@ -3,8 +3,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type IAsset, type ResolverProxy } from "@contract-types";
-import { ATS_ROLES, dateToUnixTimestamp } from "@scripts";
+import { type IAsset, MockDiamondCut, type ResolverProxy } from "@contract-types";
+import { ATS_ROLES, dateToUnixTimestamp, RESOLVER_KEY_KPIS, BOND_KPI_LINKED_RATE_CONFIG_ID } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployBondKpiLinkedRateTokenFixture } from "@test";
 import { executeRbac } from "@test";
@@ -18,6 +18,7 @@ describe("Kpi Latest Tests", () => {
   let project2: string;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixtureMultiPartition() {
     const base = await deployBondKpiLinkedRateTokenFixture();
@@ -31,17 +32,18 @@ describe("Kpi Latest Tests", () => {
     project2 = signer_B.address;
 
     asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target, signer_A);
     await executeRbac(asset, [
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.PROCEED_RECIPIENT_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_PROCEED_RECIPIENT_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.KPI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_KPI_MANAGER,
         members: [signer_A.address],
       },
     ]);
@@ -55,7 +57,7 @@ describe("Kpi Latest Tests", () => {
   });
 
   describe("addKpiData", () => {
-    it("GIVEN a user without KPI_MANAGER_ROLE WHEN addKpiData is called THEN transaction fails", async () => {
+    it("GIVEN a user without ROLE_KPI_MANAGER WHEN addKpiData is called THEN transaction fails", async () => {
       const date = 1000;
       const value = 750;
 
@@ -268,11 +270,42 @@ describe("Kpi Latest Tests", () => {
     it("GIVEN a deactivated asset WHEN addKpiData THEN transaction fails with Deactivated", async () => {
       const base = await deployBondKpiLinkedRateTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).addKpiData(0, 0, ethers.ZeroAddress),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("initializeKpis", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeKpis is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeKpis())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeKpis is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeKpis()).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+    });
+  });
+
+  describe("initializeKpis event", () => {
+    it("GIVEN a fresh deployment WHEN initializeKpis is called THEN emits KpisInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_KPIS);
+      await expect(asset.initializeKpis()).to.emit(asset, "KpisInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational WHEN addKpiData is called THEN AssetNotOperational", async () => {
+      await expect(asset.connect(signer_A).addKpiData(0n, 0n, ethers.ZeroAddress))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(BOND_KPI_LINKED_RATE_CONFIG_ID, 1);
     });
   });
 });

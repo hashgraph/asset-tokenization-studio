@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IControllerHoldByPartition } from "./IControllerHoldByPartition.sol";
+import {
+    IControllerHoldByPartition,
+    RESOLVER_KEY_CONTROLLER_HOLD_BY_PARTITION
+} from "./IControllerHoldByPartition.sol";
 import { ControllerHoldByPartition } from "./ControllerHoldByPartition.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { _CONTROLLER_HOLD_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-
 /**
  * @title Controller Hold by Partition Facet
  * @notice Provides the diamond facet interface for partition-based hold control operations
@@ -20,12 +21,16 @@ import { _CONTROLLER_HOLD_BY_PARTITION_RESOLVER_KEY } from "../../constants/reso
 contract ControllerHoldByPartitionFacet is ControllerHoldByPartition, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _CONTROLLER_HOLD_BY_PARTITION_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_CONTROLLER_HOLD_BY_PARTITION;
     }
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.controllerCreateHoldByPartition.selector);
+        return
+            Bytes4Builder.build(
+                this.initializeControllerHoldByPartition.selector,
+                this.controllerCreateHoldByPartition.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors

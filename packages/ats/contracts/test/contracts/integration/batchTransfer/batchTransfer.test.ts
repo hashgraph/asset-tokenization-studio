@@ -3,10 +3,10 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { ComplianceMock, IdentityRegistryMock, IAsset, type ResolverProxy } from "@contract-types";
+import { ComplianceMock, IdentityRegistryMock, IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
-import { ATS_ROLES, EMPTY_STRING, ZERO, ADDRESS_ZERO } from "@scripts";
+import { ATS_ROLES, EMPTY_STRING, ZERO, ADDRESS_ZERO, EQUITY_CONFIG_ID, RESOLVER_KEY_BATCH_TRANSFER } from "@scripts";
 
 const AMOUNT = 1000;
 const MAX_SUPPLY = 10000000;
@@ -20,6 +20,7 @@ describe("BatchTransfer Tests", () => {
   let signer_F: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   let identityRegistryMock: IdentityRegistryMock;
   let complianceMock: ComplianceMock;
@@ -54,44 +55,45 @@ describe("BatchTransfer Tests", () => {
     signer_F = base.user5;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.KYC_ROLE,
+        role: ATS_ROLES.ROLE_KYC,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.SSI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_SSI_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.AGENT_ROLE,
+        role: ATS_ROLES.ROLE_AGENT,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.CLEARING_ROLE,
+        role: ATS_ROLES.ROLE_CLEARING,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.PROTECTED_PARTITIONS_ROLE,
+        role: ATS_ROLES.ROLE_PROTECTED_PARTITIONS,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.CONTROL_LIST_ROLE,
+        role: ATS_ROLES.ROLE_CONTROL_LIST,
         members: [signer_A.address],
       },
     ]);
 
-    await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+    await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
     await asset.addIssuer(signer_E.address);
     await asset.connect(signer_B).grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
     await asset.connect(signer_B).grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
     await asset.connect(signer_B).grantKyc(signer_F.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
-    await asset.grantRole(ATS_ROLES.PAUSER_ROLE, signer_A.address);
+    await asset.grantRole(ATS_ROLES.ROLE_PAUSER, signer_A.address);
   }
 
   describe("single partition", () => {
@@ -309,12 +311,44 @@ describe("BatchTransfer Tests", () => {
     it("GIVEN a deactivated asset WHEN batchTransfer THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(deactivatedAsset.connect(base.deployer).batchTransfer([], [])).to.be.revertedWithCustomError(
         deactivatedAsset,
         "Deactivated",
       );
+    });
+  });
+  describe("initializeBatchTransfer", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeBatchTransfer is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeBatchTransfer())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeBatchTransfer is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeBatchTransfer())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_BATCH_TRANSFER, 1);
+    });
+  });
+
+  describe("initializeBatchTransfer event", () => {
+    it("GIVEN a fresh deployment WHEN initializeBatchTransfer is called THEN emits BatchTransferInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_BATCH_TRANSFER);
+      await expect(asset.initializeBatchTransfer()).to.emit(asset, "BatchTransferInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational WHEN batchTransfer is called THEN AssetNotOperational", async () => {
+      await expect(asset.batchTransfer([], []))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 });

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ScheduledTask } from "../../facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
+import { ScheduledTask } from "../../facets/scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { IScheduledBalanceAdjustment } from "../../facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol";
-import { ISnapshots } from "../../facets/layer_1/snapshot/ISnapshots.sol";
+import { ISnapshots } from "../../facets/snapshot/ISnapshots.sol";
 import { SNAPSHOT_RESULT_ID, COUPON_LISTING_RESULT_ID } from "../../constants/values.sol";
 import { SnapshotsStorageWrapper } from "../asset/SnapshotsStorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "../asset/AdjustBalancesStorageWrapper.sol";
@@ -13,33 +13,35 @@ import { InterestRateStorageWrapper } from "../asset/InterestRateStorageWrapper.
 import { KpiLinkedRateLib } from "../asset/KpiLinkedRateLib.sol";
 import { ICouponTypes } from "../../facets/coupon/ICouponTypes.sol";
 import { CouponRateDispatch } from "../../domain/asset/coupon/CouponRateDispatch.sol";
+import { IInterestRate } from "../../facets/interestRate/IInterestRate.sol";
+import {
+    CORPORATE_ACTION_TYPE_COUPON,
+    SCHEDULED_TASK_TYPE_COUPON_LISTING,
+    SCHEDULED_TASK_TYPE_SNAPSHOT
+} from "../../constants/dispatchTypes.sol";
 
 /// @title ScheduledTasksDispatchOps - External library for isolated scheduled task dispatch
-/// @notice Deployed once as a separate contract. Called via DELEGATECALL through try/catch for
-///         failure isolation. Handles only leaf-task business logic (snapshot, coupon, balance).
+/// @notice Deployed once as a separate contract. Called via DELEGATECALL. Handles only
+///         leaf-task business logic (snapshot, coupon, balance). A revert propagates to the
+///         caller, blocking the queue until an authorised caller force-cancels the task.
 ///         Cross-ordered sub-task routing and all queue storage access live in
 ///         ScheduledTasksStorageWrapper to avoid circular imports.
 library ScheduledTasksDispatchOps {
     /// @return subTaskType_ Non-zero only for crossOrdered tasks: the sub-task type to trigger.
     ///         ScheduledTasksStorageWrapper reads this value and dispatches the sub-queue internally.
-    function execute(
-        bytes32 callbackType,
-        uint256 pos,
-        uint256 scheduledTasksLength,
-        ScheduledTask calldata task
-    ) external returns (bytes32 subTaskType_) {
+    function execute(bytes32 callbackType, ScheduledTask calldata task) external returns (bytes32 subTaskType_) {
         if (callbackType == bytes32("snapshot")) {
-            _onScheduledSnapshotTriggered(pos, scheduledTasksLength, task);
+            _onScheduledSnapshotTriggered(task);
             return bytes32(0);
         }
 
         if (callbackType == bytes32("coupon")) {
-            _onScheduledCouponListingTriggered(pos, scheduledTasksLength, task);
+            _onScheduledCouponListingTriggered(task);
             return bytes32(0);
         }
 
         if (callbackType == bytes32("balance")) {
-            _onScheduledBalanceAdjustmentTriggered(pos, scheduledTasksLength, task);
+            _onScheduledBalanceAdjustmentTriggered(task);
             return bytes32(0);
         }
 
@@ -48,11 +50,7 @@ library ScheduledTasksDispatchOps {
         }
     }
 
-    function _onScheduledSnapshotTriggered(
-        uint256 /*_pos*/,
-        uint256 /*_scheduledTasksLength*/,
-        ScheduledTask memory _scheduledTask
-    ) private {
+    function _onScheduledSnapshotTriggered(ScheduledTask memory _scheduledTask) private {
         bytes32 actionId = abi.decode(_scheduledTask.data, (bytes32));
         if (CorporateActionsStorageWrapper.isCorporateActionDisabled(actionId)) {
             return;
@@ -67,11 +65,7 @@ library ScheduledTasksDispatchOps {
         );
     }
 
-    function _onScheduledCouponListingTriggered(
-        uint256 /*_pos*/,
-        uint256 /*_scheduledTasksLength*/,
-        ScheduledTask memory _scheduledTask
-    ) private {
+    function _onScheduledCouponListingTriggered(ScheduledTask memory _scheduledTask) private {
         bytes32 actionId = _getActionIdFromScheduledTask(_scheduledTask);
         if (CorporateActionsStorageWrapper.isCorporateActionDisabled(actionId)) {
             return;
@@ -82,20 +76,17 @@ library ScheduledTasksDispatchOps {
         CouponStorageWrapper.addToCouponsOrderedList(couponID);
         uint256 orderedListPos = CouponStorageWrapper.getCouponsOrderedListTotal();
 
-        _updateCouponRatesIfNeeded(couponID);
-
         CorporateActionsStorageWrapper.updateCorporateActionResult(
             actionId,
             COUPON_LISTING_RESULT_ID,
             abi.encodePacked(orderedListPos)
         );
+
+        if (InterestRateStorageWrapper.getCouponRateType() == IInterestRate.RateType.KPI_LINKED)
+            updateCouponRate(couponID);
     }
 
-    function _onScheduledBalanceAdjustmentTriggered(
-        uint256 /*_pos*/,
-        uint256 /*_scheduledTasksLength*/,
-        ScheduledTask memory _scheduledTask
-    ) private {
+    function _onScheduledBalanceAdjustmentTriggered(ScheduledTask memory _scheduledTask) private {
         (, , bytes memory balanceAdjustmentData, bool isDisabled_) = CorporateActionsStorageWrapper.getCorporateAction(
             _getActionIdFromScheduledTask(_scheduledTask)
         );
@@ -110,17 +101,13 @@ library ScheduledTasksDispatchOps {
         AdjustBalancesStorageWrapper.adjustBalances(balanceAdjustment.factor, balanceAdjustment.decimals);
     }
 
-    function _updateCouponRatesIfNeeded(uint256 couponID) private {
+    function updateCouponRate(uint256 couponID) private {
         (ICouponTypes.RegisteredCoupon memory registeredCoupon, , ) = CouponStorageWrapper.getCoupon(couponID);
 
-        (uint256 rate, uint8 rateDecimals, bool shouldUpdate) = CouponRateDispatch.resolveRate(
-            couponID,
-            registeredCoupon.coupon
+        CorporateActionsStorageWrapper.updateCorporateActionData(
+            CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(CORPORATE_ACTION_TYPE_COUPON, couponID - 1),
+            abi.encode(registeredCoupon.coupon)
         );
-
-        if (shouldUpdate) {
-            CouponStorageWrapper.updateCouponRate(couponID, registeredCoupon.coupon, rate, rateDecimals);
-        }
     }
 
     function _getCouponIdFromAction(bytes32 actionId) private view returns (uint256 couponID_) {

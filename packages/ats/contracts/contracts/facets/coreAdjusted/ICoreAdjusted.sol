@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey CoreAdjusted
+bytes32 constant RESOLVER_KEY_CORE_ADJUSTED = 0xe190b52312c215f8e240bb53f0aa3e51e31b3005b7fcfb49c730ae523e675cfd;
+
 /**
  * @title ICoreAdjusted
  * @notice Interface exposing time-adjusted ERC-20 decimal reads for the CoreAdjusted facet.
@@ -10,6 +13,19 @@ pragma solidity >=0.8.0 <0.9.0;
  *      (ABAFs) that have not yet been triggered on-chain.
  */
 interface ICoreAdjusted {
+    /**
+     * @notice Emitted once when the core adjusted capability is initialised on a token.
+     * @dev Fires exclusively from `initializeCoreAdjusted`.
+     */
+    event CoreAdjustedInitialized();
+
+    /**
+     * @notice Initialises the core adjusted capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeCoreAdjusted() external;
+
     /**
      * @notice Returns the effective token decimals at a given timestamp, simulating all pending
      *         scheduled balance adjustments (ABAFs) up to and including that timestamp.

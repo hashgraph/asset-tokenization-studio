@@ -20,8 +20,9 @@ import { TRexIDiamondLoupe as IDiamondLoupe } from "./IDiamondLoupe.sol";
  *      Configurations may be registered atomically via {createConfiguration} or incrementally
  *      via {createBatchConfiguration}, with {cancelBatchConfiguration} discarding an
  *      in-progress batch. Resolution helpers ({resolveResolverProxyCall},
- *      {resolveSupportsInterface}) drive the dispatch logic of resolver proxies, where a
- *      `_version` of 0 means "use latest". Read helpers expose paginated views over
+ *      {resolveSupportsInterface}) drive the dispatch logic of resolver proxies and require an
+ *      explicit non-zero `_version`; callers that want the most recent version must read it
+ *      first via {getLatestVersionByConfiguration}. Read helpers expose paginated views over
  *      configurations, facets, and selectors to keep gas bounded.
  */
 interface TRexIDiamondCutManager {
@@ -31,7 +32,8 @@ interface TRexIDiamondCutManager {
      *      previously registered in the business-logic resolver; `version` pins the version
      *      to snapshot inside the configuration.
      * @param id Facet identifier (business-logic key).
-     * @param version Facet version to pin. Implementations may treat 0 as "latest".
+     * @param version Facet version to pin; must be > 0. The business-logic resolver rejects
+     *        0 with {IBusinessLogicResolver.BusinessLogicVersionDoesNotExist}.
      */
     struct FacetConfiguration {
         bytes32 id;
@@ -75,6 +77,13 @@ interface TRexIDiamondCutManager {
     error DefaultValueForConfigurationIdNotPermitted();
 
     /**
+     * @notice Thrown when attempting to activate a configuration that contains no facets,
+     *         which would brick any ResolverProxy following the latest version.
+     * @param configurationId Configuration key that was supplied with an empty facet list.
+     */
+    error EmptyFacetConfigurationNotPermitted(bytes32 configurationId);
+
+    /**
      * @notice Thrown when a configuration references a facet id that is not registered in
      *         the business-logic resolver.
      * @param configurationId Configuration being created or modified.
@@ -89,12 +98,29 @@ interface TRexIDiamondCutManager {
     error DuplicatedFacetInConfiguration(bytes32 facetId);
 
     /**
+     * @notice Thrown when {createConfiguration} is called for a configuration id that already
+     *         has an in-progress batch, which would prematurely finalise the incomplete batch
+     *         and absorb any facets that were intended for subsequent batch additions.
+     * @param configurationId Configuration key whose batch is currently open.
+     */
+    error OngoingBatchConfigurationNotPermitted(bytes32 configurationId);
+
+    /**
      * @notice Thrown when a (configurationId, version) pair is referenced but has not been
      *         registered (or is still mid-batch and therefore not yet finalised).
      * @param resolverProxyConfigurationId Configuration key that was looked up.
      * @param version Version that was looked up.
      */
     error ResolverProxyConfigurationNoRegistered(bytes32 resolverProxyConfigurationId, uint256 version);
+
+    /**
+     * @notice Thrown when a configuration version of 0 is supplied to an entry point that
+     *         requires an explicit version pin.
+     * @dev Callers that want the most recent registered version must read it first via
+     *      {getLatestVersionByConfiguration} and pass that value.
+     * @param configurationId Configuration key that was looked up.
+     */
+    error VersionZero(bytes32 configurationId);
 
     /**
      * @notice Thrown when attempting to register a selector that is globally blacklisted.
@@ -114,11 +140,12 @@ interface TRexIDiamondCutManager {
 
     /**
      * @notice Registers a new configuration atomically, pinning each facet at the supplied
-     *         version (or at its latest version when 0 is provided).
+     *         version.
      * @dev Reverts with {DefaultValueForConfigurationIdNotPermitted},
      *      {FacetIdNotRegistered}, {DuplicatedFacetInConfiguration}, {SelectorBlacklisted}
-     *      or {SelectorAlreadyRegistered} on invalid input. Emits
-     *      {DiamondConfigurationCreated} on success.
+     *      or {SelectorAlreadyRegistered} on invalid input. Facet versions must be > 0;
+     *      the business-logic resolver rejects 0. Emits {DiamondConfigurationCreated} on
+     *      success.
      * @param _configurationId Unique configuration key to register; must not be `bytes32(0)`.
      * @param _facetConfigurations List of facets (id + pinned version) composing the
      *        configuration; facet ids must be unique within the list.
@@ -158,7 +185,8 @@ interface TRexIDiamondCutManager {
      * @dev Intended to gate resolver-proxy operations; reverts with
      *      {ResolverProxyConfigurationNoRegistered} when the lookup fails.
      * @param _configurationId Configuration key to verify.
-     * @param _version Version to verify; 0 resolves to the latest registered version.
+     * @param _version Version to verify; must be > 0. Read
+     *        {getLatestVersionByConfiguration} first when the latest is required.
      */
     function checkResolverProxyConfigurationRegistered(bytes32 _configurationId, uint256 _version) external;
 
@@ -168,8 +196,8 @@ interface TRexIDiamondCutManager {
      * @dev Used by resolver proxies during dispatch. Returns `address(0)` when no facet
      *      claims the selector.
      * @param _configurationId Configuration key bound to the resolver proxy.
-     * @param _version Version bound to the resolver proxy; 0 resolves to the latest
-     *        registered version.
+     * @param _version Version bound to the resolver proxy; must be > 0. Read
+     *        {getLatestVersionByConfiguration} first when the latest is required.
      * @param _selector Function selector being dispatched.
      * @return facetAddress_ Address of the facet that owns `_selector`, or `address(0)` if
      *         the selector is not registered for the given configuration/version.
@@ -185,8 +213,8 @@ interface TRexIDiamondCutManager {
      *         configuration and version.
      * @dev Powers ERC-165 lookups on resolver proxies.
      * @param _configurationId Configuration key bound to the resolver proxy.
-     * @param _version Version bound to the resolver proxy; 0 resolves to the latest
-     *        registered version.
+     * @param _version Version bound to the resolver proxy; must be > 0. Read
+     *        {getLatestVersionByConfiguration} first when the latest is required.
      * @param _interfaceId Interface identifier to test.
      * @return exists_ True if `_interfaceId` is supported by the configuration version.
      */
@@ -199,7 +227,8 @@ interface TRexIDiamondCutManager {
     /**
      * @notice Non-reverting variant of {checkResolverProxyConfigurationRegistered}.
      * @param _configurationId Configuration key to check.
-     * @param _version Version to check; 0 resolves to the latest registered version.
+     * @param _version Version to check; must be > 0. Read
+     *        {getLatestVersionByConfiguration} first when the latest is required.
      * @return True when the configuration version is registered and finalised.
      */
     function isResolverProxyConfigurationRegistered(
@@ -236,7 +265,8 @@ interface TRexIDiamondCutManager {
     /**
      * @notice Returns the number of facets registered under a configuration version.
      * @param _configurationId Configuration key to query.
-     * @param _version Version to query; 0 resolves to the latest registered version.
+     * @param _version Version to query; must be > 0. Read
+     *        {getLatestVersionByConfiguration} first when the latest is required.
      * @return facetsLength_ Count of facets in the configuration version.
      */
     function getFacetsLengthByConfigurationIdAndVersion(
@@ -248,7 +278,8 @@ interface TRexIDiamondCutManager {
      * @notice Returns a paginated slice of facets for a configuration version, including
      *         each facet's address, selectors, and advertised interface ids.
      * @param _configurationId Configuration key to query.
-     * @param _version Version to query; 0 resolves to the latest registered version.
+     * @param _version Version to query; must be > 0. Read
+     *        {getLatestVersionByConfiguration} first when the latest is required.
      * @param _pageIndex Page index; entries skipped equal `_pageIndex * _pageLength`.
      * @param _pageLength Maximum number of entries to return.
      * @return facets_ Slice of {IDiamondLoupe.Facet} entries for the requested page.
@@ -264,7 +295,8 @@ interface TRexIDiamondCutManager {
      * @notice Returns the number of selectors registered for a facet inside a configuration
      *         version.
      * @param _configurationId Configuration key to query.
-     * @param _version Version to query; 0 resolves to the latest registered version.
+     * @param _version Version to query; must be > 0. Read
+     *        {getLatestVersionByConfiguration} first when the latest is required.
      * @param _facetId Facet key whose selectors are counted.
      * @return facetSelectorsLength_ Count of selectors owned by the facet in the version.
      */
@@ -278,7 +310,8 @@ interface TRexIDiamondCutManager {
      * @notice Returns a paginated slice of selectors registered for a facet inside a
      *         configuration version.
      * @param _configurationId Configuration key to query.
-     * @param _version Version to query; 0 resolves to the latest registered version.
+     * @param _version Version to query; must be > 0. Read
+     *        {getLatestVersionByConfiguration} first when the latest is required.
      * @param _facetId Facet key whose selectors are returned.
      * @param _pageIndex Page index; entries skipped equal `_pageIndex * _pageLength`.
      * @param _pageLength Maximum number of entries to return.
@@ -295,7 +328,8 @@ interface TRexIDiamondCutManager {
     /**
      * @notice Returns a paginated slice of facet ids registered for a configuration version.
      * @param _configurationId Configuration key to query.
-     * @param _version Version to query; 0 resolves to the latest registered version.
+     * @param _version Version to query; must be > 0. Read
+     *        {getLatestVersionByConfiguration} first when the latest is required.
      * @param _pageIndex Page index; entries skipped equal `_pageIndex * _pageLength`.
      * @param _pageLength Maximum number of entries to return.
      * @return facetIds_ Slice of facet ids for the requested page.
@@ -313,7 +347,8 @@ interface TRexIDiamondCutManager {
      * @dev Slice semantics differ from the page-based helpers: `_start` is inclusive and
      *      `_end` is exclusive, allowing callers to express arbitrary windows.
      * @param _configurationId Configuration key to query.
-     * @param _version Version to query; 0 resolves to the latest registered version.
+     * @param _version Version to query; must be > 0. Read
+     *        {getLatestVersionByConfiguration} first when the latest is required.
      * @param _start Inclusive start index of the slice.
      * @param _end Exclusive end index of the slice.
      * @return facetConfigurations_ Slice of {FacetConfiguration} entries for the window.
@@ -329,7 +364,8 @@ interface TRexIDiamondCutManager {
      * @notice Returns a paginated slice of facet addresses registered for a configuration
      *         version.
      * @param _configurationId Configuration key to query.
-     * @param _version Version to query; 0 resolves to the latest registered version.
+     * @param _version Version to query; must be > 0. Read
+     *        {getLatestVersionByConfiguration} first when the latest is required.
      * @param _pageIndex Page index; entries skipped equal `_pageIndex * _pageLength`.
      * @param _pageLength Maximum number of entries to return.
      * @return facetAddresses_ Slice of facet addresses for the requested page.
@@ -345,7 +381,8 @@ interface TRexIDiamondCutManager {
      * @notice Returns the facet id that owns a selector inside a configuration version.
      * @dev Returns `bytes32(0)` when the selector is not registered.
      * @param _configurationId Configuration key to query.
-     * @param _version Version to query; 0 resolves to the latest registered version.
+     * @param _version Version to query; must be > 0. Read
+     *        {getLatestVersionByConfiguration} first when the latest is required.
      * @param _selector Selector to look up.
      * @return facetId_ Facet id owning `_selector`, or `bytes32(0)` if none.
      */
@@ -361,7 +398,8 @@ interface TRexIDiamondCutManager {
      * @dev Returns a zero-valued {IDiamondLoupe.Facet} when the facet is not part of the
      *      configuration version.
      * @param _configurationId Configuration key to query.
-     * @param _version Version to query; 0 resolves to the latest registered version.
+     * @param _version Version to query; must be > 0. Read
+     *        {getLatestVersionByConfiguration} first when the latest is required.
      * @param _facetId Facet key to look up.
      * @return facet_ Facet record for `_facetId`.
      */
@@ -375,7 +413,8 @@ interface TRexIDiamondCutManager {
      * @notice Returns the address of a facet inside a configuration version.
      * @dev Returns `address(0)` when the facet is not part of the configuration version.
      * @param _configurationId Configuration key to query.
-     * @param _version Version to query; 0 resolves to the latest registered version.
+     * @param _version Version to query; must be > 0. Read
+     *        {getLatestVersionByConfiguration} first when the latest is required.
      * @param _facetId Facet key to look up.
      * @return facetAddress_ Address of the facet, or `address(0)` if unregistered.
      */
@@ -387,9 +426,11 @@ interface TRexIDiamondCutManager {
 
     /**
      * @notice Returns the pinned facet version stored inside a configuration version.
-     * @dev Returns 0 when the facet is not part of the configuration version.
+     * @dev Reverts with {FacetIdNotRegistered} when the facet is not part of the configuration
+     *      version, and with {VersionZero} when `_version` is 0.
      * @param _configurationId Configuration key to query.
-     * @param _version Version to query; 0 resolves to the latest registered version.
+     * @param _version Version to query; must be > 0. Read
+     *        {getLatestVersionByConfiguration} first when the latest is required.
      * @param _facetId Facet key to look up.
      * @return facetVersion_ Pinned facet version inside the configuration version.
      */

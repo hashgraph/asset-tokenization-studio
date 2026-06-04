@@ -9,31 +9,9 @@ import {
 } from "@hashgraph/smart-contracts/contracts/system-contracts/hedera-token-service/HederaTokenService.sol";
 import { Pause } from "./core/Pause.sol";
 import { AccessControl } from "./core/AccessControl.sol";
-import { ICore } from "@hashgraph/asset-tokenization-contracts/contracts/facets/core/ICore.sol";
+import { IAsset } from "@hashgraph/asset-tokenization-contracts/contracts/facets/IAsset.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import { ISnapshots } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_1/snapshot/ISnapshots.sol";
-import {
-    ISecurityHoldersAtSnapshot
-} from "@hashgraph/asset-tokenization-contracts/contracts/facets/securityHoldersAtSnapshot/ISecurityHoldersAtSnapshot.sol";
-import {
-    IBalanceTrackerAtSnapshot
-} from "@hashgraph/asset-tokenization-contracts/contracts/facets/balanceTrackerAtSnapshot/IBalanceTrackerAtSnapshot.sol";
-import { IMaturity } from "@hashgraph/asset-tokenization-contracts/contracts/facets/maturity/IMaturity.sol";
-import { ICoupon } from "@hashgraph/asset-tokenization-contracts/contracts/facets/coupon/ICoupon.sol";
-import {
-    ICouponSecurityHolders
-} from "@hashgraph/asset-tokenization-contracts/contracts/facets/couponSecurityHolders/ICouponSecurityHolders.sol";
-import { IBondRead } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/bond/IBondRead.sol";
-import { IPrincipal } from "@hashgraph/asset-tokenization-contracts/contracts/facets/principal/IPrincipal.sol";
-import { IEquity } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/equity/IEquity.sol";
-import { IDividend } from "@hashgraph/asset-tokenization-contracts/contracts/facets/dividend/IDividend.sol";
-import {
-    IDividendSecurityHolders
-} from "@hashgraph/asset-tokenization-contracts/contracts/facets/dividendSecurityHolders/IDividendSecurityHolders.sol";
-import {
-    ISecurityHolders
-} from "@hashgraph/asset-tokenization-contracts/contracts/facets/securityHolders/ISecurityHolders.sol";
 import { _PERCENTAGE_DECIMALS_SIZE } from "./constants/values.sol";
 import { _LIFECYCLE_CASH_FLOW_STORAGE_POSITION } from "./constants/storagePositions.sol";
 
@@ -135,7 +113,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal returns (address[] memory failed_, address[] memory succeeded_, uint256[] memory paidAmount_, bool) {
-        address[] memory holders = ISecurityHolders(_bond).getSecurityHolders(_pageIndex, _pageLength);
+        address[] memory holders = IAsset(_bond).getSecurityHolders(_pageIndex, _pageLength);
 
         if (holders.length == 0) return (failed_, succeeded_, paidAmount_, false);
         (failed_, succeeded_, paidAmount_) = _executeBondCashOutByAddresses(_bond, holders);
@@ -349,10 +327,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
     function _getSnapshotAmountByAmount(
         ILifeCycleCashFlow.SnapshotAmountInfo memory amountInfo
     ) internal view returns (uint256) {
-        uint256 holderTokens = IBalanceTrackerAtSnapshot(amountInfo.asset).balanceOfAtSnapshot(
-            amountInfo.snapshotID,
-            amountInfo.holder
-        );
+        uint256 holderTokens = IAsset(amountInfo.asset).balanceOfAtSnapshot(amountInfo.snapshotID, amountInfo.holder);
         return ((amountInfo.amountOrPercentage * holderTokens) / amountInfo.totalSupplyAtSnapshot);
     }
 
@@ -369,10 +344,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
     function _getSnapshotAmountByPercentage(
         ILifeCycleCashFlow.SnapshotAmountInfo memory amountInfo
     ) internal view returns (uint256) {
-        uint256 holderTokens = IBalanceTrackerAtSnapshot(amountInfo.asset).balanceOfAtSnapshot(
-            amountInfo.snapshotID,
-            amountInfo.holder
-        );
+        uint256 holderTokens = IAsset(amountInfo.asset).balanceOfAtSnapshot(amountInfo.snapshotID, amountInfo.holder);
         return ((amountInfo.paymentTokenBalance * amountInfo.amountOrPercentage * holderTokens) /
             ((100 * 10 ** _PERCENTAGE_DECIMALS_SIZE) * amountInfo.totalSupplyAtSnapshot));
     }
@@ -392,7 +364,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      * @return The payment token decimals
      */
     function _getPaymentTokenDecimals() internal view returns (uint8) {
-        return ICore(address(_getPaymentToken())).decimals();
+        return IAsset(address(_getPaymentToken())).decimals();
     }
 
     /*
@@ -622,7 +594,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
                     ++failedIndex;
                 }
             } else {
-                IMaturity(_bond).fullRedeemAtMaturity(holder);
+                IAsset(_bond).fullRedeemAtMaturity(holder);
                 succeededAddresses_[succeededIndex] = holder;
                 paidAmount_[succeededIndex] = cashAmount;
                 unchecked {
@@ -742,9 +714,9 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         uint256 _pageLength
     ) private view returns (address[] memory holders_) {
         if (_assetType == ILifeCycleCashFlow.AssetType.Equity) {
-            return IDividendSecurityHolders(_asset).getDividendHolders(_distributionID, _pageIndex, _pageLength);
+            return IAsset(_asset).getDividendHolders(_distributionID, _pageIndex, _pageLength);
         } else {
-            return ICouponSecurityHolders(_asset).getCouponHolders(_distributionID, _pageIndex, _pageLength);
+            return IAsset(_asset).getCouponHolders(_distributionID, _pageIndex, _pageLength);
         }
     }
 
@@ -764,7 +736,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         uint256 _pageIndex,
         uint256 _pageLength
     ) private view returns (address[] memory) {
-        return ISecurityHoldersAtSnapshot(_asset).getTokenHoldersAtSnapshot(_snapshotID, _pageIndex, _pageLength);
+        return IAsset(_asset).getTokenHoldersAtSnapshot(_snapshotID, _pageIndex, _pageLength);
     }
 
     /*
@@ -795,7 +767,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      * @param bond The bond address
      */
     function _checkMaturityDate(address _bond) private view {
-        uint256 maturityDateInit = IBondRead(_bond).getBondDetails().maturityDate;
+        uint256 maturityDateInit = IAsset(_bond).getBondDetails().maturityDate;
         _checkPaymentDate(maturityDateInit, _blockTimestamp());
     }
 
@@ -807,7 +779,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      * @return The asset total supply
      */
     function _getTotalSupplyAtSnapshot(address _asset, uint256 _snapshotID) private view returns (uint256) {
-        return IBalanceTrackerAtSnapshot(_asset).totalSupplyAtSnapshot(_snapshotID);
+        return IAsset(_asset).totalSupplyAtSnapshot(_snapshotID);
     }
 
     /*
@@ -827,7 +799,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         address _holder,
         uint8 _paymentTokenDecimals
     ) private view returns (uint256 amount) {
-        ICoupon.CouponAmountFor memory couponAmountFor = ICoupon(_asset).getCouponAmountFor(_couponID, _holder);
+        IAsset.CouponAmountFor memory couponAmountFor = IAsset(_asset).getCouponAmountFor(_couponID, _holder);
         return (couponAmountFor.numerator * 10 ** _paymentTokenDecimals) / couponAmountFor.denominator;
     }
 
@@ -847,10 +819,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         address _holder,
         uint8 _paymentTokenDecimals
     ) private view returns (uint256) {
-        IDividend.DividendAmountFor memory dividendAmountFor = IDividend(_asset).getDividendAmountFor(
-            _dividendID,
-            _holder
-        );
+        IAsset.DividendAmountFor memory dividendAmountFor = IAsset(_asset).getDividendAmountFor(_dividendID, _holder);
         return (dividendAmountFor.numerator * 10 ** _paymentTokenDecimals) / dividendAmountFor.denominator;
     }
 
@@ -867,7 +836,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         address _holder,
         uint8 _paymentTokenDecimals
     ) private view returns (uint256) {
-        IPrincipal.PrincipalFor memory principalFor = IPrincipal(_asset).getPrincipalFor(_holder);
+        IAsset.PrincipalFor memory principalFor = IAsset(_asset).getPrincipalFor(_holder);
         return (principalFor.numerator * 10 ** _paymentTokenDecimals) / principalFor.denominator;
     }
 
@@ -881,12 +850,10 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      */
     function _getDistributionExecutionDate(address _asset, uint256 _distributionID) private view returns (uint256) {
         if (_lifeCycleCashFlowStorage().assetType == ILifeCycleCashFlow.AssetType.Equity) {
-            (IDividend.RegisteredDividend memory registeredDividend_, ) = IDividend(_asset).getDividend(
-                _distributionID
-            );
+            (IAsset.RegisteredDividend memory registeredDividend_, ) = IAsset(_asset).getDividend(_distributionID);
             return registeredDividend_.dividend.executionDate;
         } else {
-            (ICoupon.RegisteredCoupon memory registeredCoupon_, ) = ICoupon(_asset).getCoupon(_distributionID);
+            (IAsset.RegisteredCoupon memory registeredCoupon_, ) = IAsset(_asset).getCoupon(_distributionID);
             return registeredCoupon_.coupon.executionDate;
         }
     }

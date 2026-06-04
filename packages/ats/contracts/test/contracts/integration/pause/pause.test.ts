@@ -3,16 +3,17 @@
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { GAS_LIMIT, ATS_ROLES } from "@scripts";
+import { GAS_LIMIT, ATS_ROLES, RESOLVER_KEY_PAUSE } from "@scripts";
 import { grantRoleAndPauseToken } from "@test";
 import { deployEquityTokenFixture } from "@test";
-import { type ResolverProxy, type IAsset, MockedExternalPause } from "@contract-types";
+import { type ResolverProxy, type IAsset, MockedExternalPause, MockDiamondCut } from "@contract-types";
 import { Signer } from "ethers";
 import { ethers } from "hardhat";
 
 describe("Pause Tests", () => {
   let diamond: ResolverProxy;
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
   let deployer: HardhatEthersSigner;
   let unknownSigner: Signer;
   let externalPauseMock: MockedExternalPause;
@@ -22,6 +23,7 @@ describe("Pause Tests", () => {
     const base = await deployEquityTokenFixture();
     diamond = base.diamond;
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     // Deploy mock external pause contract
     externalPauseMock = await (
@@ -30,8 +32,8 @@ describe("Pause Tests", () => {
     await externalPauseMock.waitForDeployment();
 
     // Add external pause to the token
-    await asset.connect(base.deployer).grantRole(ATS_ROLES.PAUSER_ROLE, base.deployer.address);
-    await asset.connect(base.deployer).grantRole(ATS_ROLES.PAUSE_MANAGER_ROLE, base.deployer.address);
+    await asset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_PAUSER, base.deployer.address);
+    await asset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_PAUSE_MANAGER, base.deployer.address);
     await asset.connect(base.deployer).addExternalPause(externalPauseMock.target, {
       gasLimit: GAS_LIMIT.high,
     });
@@ -57,7 +59,7 @@ describe("Pause Tests", () => {
     // Granting Role and Pause
     await grantRoleAndPauseToken(
       asset,
-      ATS_ROLES.PAUSER_ROLE,
+      ATS_ROLES.ROLE_PAUSER,
       deployer,
       unknownSigner,
       await unknownSigner.getAddress(),
@@ -68,7 +70,7 @@ describe("Pause Tests", () => {
   });
 
   it("GIVEN an unpause Token WHEN unpause THEN transaction fails with IsUnpaused", async () => {
-    await asset.connect(deployer).grantRole(ATS_ROLES.PAUSER_ROLE, await unknownSigner.getAddress());
+    await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_PAUSER, await unknownSigner.getAddress());
 
     // unpause fails
     await expect(asset.connect(unknownSigner).unpause()).to.be.revertedWithCustomError(asset, "IsUnpaused");
@@ -76,7 +78,7 @@ describe("Pause Tests", () => {
 
   it("GIVEN an account with pause role WHEN pause and unpause THEN transaction succeeds", async () => {
     // Granting Role
-    await asset.connect(deployer).grantRole(ATS_ROLES.PAUSER_ROLE, await unknownSigner.getAddress());
+    await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_PAUSER, await unknownSigner.getAddress());
 
     // PAUSE
     await expect(asset.connect(unknownSigner).pause())
@@ -144,12 +146,58 @@ describe("Pause Tests", () => {
     it("GIVEN a deactivated asset WHEN pause THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(deactivatedAsset.connect(base.deployer).pause()).to.be.revertedWithCustomError(
         deactivatedAsset,
         "Deactivated",
       );
+    });
+
+    it("GIVEN a deactivated asset WHEN unpause THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(deactivatedAsset.connect(base.deployer).unpause()).to.be.revertedWithCustomError(
+        deactivatedAsset,
+        "Deactivated",
+      );
+    });
+  });
+
+  describe("initializePause", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializePause is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(unknownSigner).initializePause())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(await unknownSigner.getAddress(), ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializePause is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializePause())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_PAUSE, 1);
+    });
+  });
+
+  describe("initializePause event", () => {
+    it("GIVEN a fresh deployment WHEN initializePause is called THEN emits PauseInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_PAUSE);
+      await expect(asset.initializePause()).to.emit(asset, "PauseInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN pause THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.pause()).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN unpause THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.unpause()).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
   });
 });

@@ -9,11 +9,11 @@ import { ERC20StorageWrapper } from "../asset/ERC20StorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "../asset/SnapshotsStorageWrapper.sol";
 import { HoldStorageWrapper } from "../asset/HoldStorageWrapper.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
-import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
+import { IClearingTypes } from "../../facets/clearing/IClearingTypes.sol";
 import {
     IOperatorClearingHoldByPartition
-} from "../../facets/layer_1/clearing/operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol";
-import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
+} from "../../facets/operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol";
+import { IHoldTypes } from "../../facets/hold/IHoldTypes.sol";
 import { ThirdPartyType } from "../asset/types/ThirdPartyType.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
@@ -65,6 +65,8 @@ library ClearingOps {
         bytes memory _operatorData,
         ThirdPartyType _thirdPartyType
     ) external returns (bool success_, uint256 clearingId_) {
+        ClearingStorageWrapper.checkNonZeroClearingAmount(_amount);
+
         bytes32 partition = _clearingOperation.partition;
 
         clearingId_ = ClearingStorageWrapper.increaseClearingId(
@@ -142,6 +144,8 @@ library ClearingOps {
         bytes memory _operatorData,
         ThirdPartyType _thirdPartyType
     ) external returns (bool success_, uint256 clearingId_) {
+        ClearingStorageWrapper.checkNonZeroClearingAmount(_amount);
+
         bytes32 partition = _clearingOperation.partition;
 
         clearingId_ = ClearingStorageWrapper.increaseClearingId(

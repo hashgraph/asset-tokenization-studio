@@ -3,8 +3,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ZERO, EMPTY_STRING, dateToUnixTimestamp, ATS_ROLES } from "@scripts";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import { ZERO, EMPTY_STRING, dateToUnixTimestamp, ATS_ROLES, RESOLVER_KEY_CAP } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
@@ -30,6 +30,7 @@ describe("Cap Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixtureMultiPartition() {
     const base = await deployEquityTokenFixture({
@@ -46,22 +47,23 @@ describe("Cap Tests", () => {
     signer_C = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.KYC_ROLE,
+        role: ATS_ROLES.ROLE_KYC,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.SSI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_SSI_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.CAP_ROLE,
+        role: ATS_ROLES.ROLE_CAP,
         members: [signer_A.address],
       },
     ]);
@@ -87,8 +89,23 @@ describe("Cap Tests", () => {
     ).to.be.revertedWithCustomError(asset, "NewMaxSupplyCannotBeZero");
   });
 
-  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-    await expect(asset.initializeCap(5, [])).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+  describe("initializeCap", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeCap is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeCap(5, []))
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeCap is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeCap(5, [])).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+    });
+  });
+
+  describe("initializeCap event", () => {
+    it("GIVEN a fresh deployment WHEN initializeCap is called THEN emits CapInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_CAP);
+      await expect(asset.initializeCap(5, [])).to.emit(asset, "CapInitialized");
+    });
   });
 
   describe("Paused", () => {
@@ -115,7 +132,7 @@ describe("Cap Tests", () => {
 
   describe("New Max Supply Too low or 0", () => {
     it("GIVEN a token WHEN setMaxSupply to 0 THEN transaction fails with NewMaxSupplyCannotBeZero", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CAP, signer_C.address);
 
       // add to list fails
       await expect(asset.connect(signer_C).setMaxSupply(0)).to.be.revertedWithCustomError(
@@ -124,8 +141,8 @@ describe("Cap Tests", () => {
       );
     });
     it("GIVEN a token WHEN setMaxSupply a value that is less than the current total supply THEN transaction fails with NewMaxSupplyTooLow", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CAP, signer_C.address);
 
       await asset.connect(signer_C).issueByPartition({
         partition: _PARTITION_ID_1,
@@ -144,7 +161,7 @@ describe("Cap Tests", () => {
 
   describe("New Max Supply OK", () => {
     it("GIVEN a token WHEN setMaxSupply THEN transaction succeeds", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CAP, signer_C.address);
 
       await expect(asset.connect(signer_C).setMaxSupply(maxSupply * 4))
         .to.emit(asset, "MaxSupplySet")
@@ -198,10 +215,10 @@ describe("Cap Tests", () => {
     };
 
     async function setPreBalanceAdjustment() {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_C.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES.SNAPSHOT_ROLE, signer_A.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CAP, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_SNAPSHOT, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
 
       await asset.connect(signer_C).setMaxSupply(maxSupply);
       await asset.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupplyByPartition);
@@ -294,12 +311,22 @@ describe("Cap Tests", () => {
     it("GIVEN a deactivated asset WHEN setMaxSupply THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(deactivatedAsset.connect(base.deployer).setMaxSupply(0)).to.be.revertedWithCustomError(
         deactivatedAsset,
         "Deactivated",
       );
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setMaxSupply THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.setMaxSupply(0)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
   });
 });

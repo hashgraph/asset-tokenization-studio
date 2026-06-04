@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { AGENT_ROLE, ISSUER_ROLE, _buildRoles } from "../../constants/roles.sol";
-import { IMint } from "./IMint.sol";
+import { ROLE_AGENT, ROLE_ISSUER, DEFAULT_ADMIN_ROLE, _buildRoles } from "../../constants/roles.sol";
+import { IMint, RESOLVER_KEY_MINT } from "./IMint.sol";
 import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 
 /**
  * @title Mint
@@ -19,10 +19,15 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract Mint is IMint, Modifiers {
     /// @inheritdoc IMint
-    /// @dev Reverts via `onlyNotERC1594Initialized` if the facet is already initialised.
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1594() external override onlyNotERC1594Initialized {
+    function initializeERC1594()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_MINT)
+    {
         ERC1594StorageWrapper.initialize();
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_MINT);
+        emit IMint.ERC1594Initialized();
     }
 
     /// @inheritdoc IMint
@@ -33,11 +38,13 @@ abstract contract Mint is IMint, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
-        onlyAnyRole(_buildRoles(ISSUER_ROLE, AGENT_ROLE))
-        onlyWithinMaxSupply(_value, TimeTravelStorageWrapper.getBlockTimestamp())
+        onlyAnyRole(_buildRoles(ROLE_ISSUER, ROLE_AGENT))
+        onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
+        onlyWithinMaxSupply(_value, EvmAccessors.getBlockTimestamp())
         onlyIdentifiedAddresses(address(0), _tokenHolder)
         onlyCompliant(address(0), _tokenHolder, false)
     {
@@ -52,11 +59,13 @@ abstract contract Mint is IMint, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
-        onlyAnyRole(_buildRoles(ISSUER_ROLE, AGENT_ROLE))
-        onlyWithinMaxSupply(_amount, TimeTravelStorageWrapper.getBlockTimestamp())
+        onlyAnyRole(_buildRoles(ROLE_ISSUER, ROLE_AGENT))
+        onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
+        onlyWithinMaxSupply(_amount, EvmAccessors.getBlockTimestamp())
         onlyIdentifiedAddresses(address(0), _to)
         onlyCompliant(address(0), _to, false)
     {

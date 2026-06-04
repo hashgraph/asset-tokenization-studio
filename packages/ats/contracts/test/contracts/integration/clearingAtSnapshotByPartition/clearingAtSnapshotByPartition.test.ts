@@ -3,8 +3,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type IAsset } from "@contract-types";
-import { ZERO, EMPTY_STRING, ATS_ROLES } from "@scripts";
+import { type IAsset, MockDiamondCut } from "@contract-types";
+import { ZERO, EMPTY_STRING, ATS_ROLES, RESOLVER_KEY_CLEARING_AT_SNAPSHOT_BY_PARTITION } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
@@ -19,8 +19,10 @@ describe("ClearingAtSnapshotByPartition Tests", () => {
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
+  let unknownSigner: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixtureMultiPartition() {
     const base = await deployEquityTokenFixture({
@@ -33,35 +35,38 @@ describe("ClearingAtSnapshotByPartition Tests", () => {
     signer_A = base.deployer;
     signer_B = base.user2;
     signer_C = base.user3;
+    const signers = await ethers.getSigners();
+    unknownSigner = signers[signers.length - 1];
 
     asset = await ethers.getContractAt("IAsset", base.diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", base.diamond.target);
     await executeRbac(asset, set_initRbacs());
   }
 
   function set_initRbacs(): any[] {
     return [
       {
-        role: ATS_ROLES.ISSUER_ROLE,
+        role: ATS_ROLES.ROLE_ISSUER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.KYC_ROLE,
+        role: ATS_ROLES.ROLE_KYC,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.SSI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_SSI_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.CLEARING_ROLE,
+        role: ATS_ROLES.ROLE_CLEARING,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.CLEARING_VALIDATOR_ROLE,
+        role: ATS_ROLES.ROLE_CLEARING_VALIDATOR,
         members: [signer_B.address],
       },
     ];
@@ -85,8 +90,8 @@ describe("ClearingAtSnapshotByPartition Tests", () => {
     asset = await ethers.getContractAt("IAsset", diamond.target);
 
     await executeRbac(asset, set_initRbacs());
-    await asset.connect(signer_A).grantRole(ATS_ROLES.SNAPSHOT_ROLE, signer_C.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_SNAPSHOT, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
 
     await asset.connect(signer_A).addIssuer(signer_A.address);
     await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
@@ -180,5 +185,45 @@ describe("ClearingAtSnapshotByPartition Tests", () => {
 
     const currentBalance_C_Partition_2 = await asset.balanceOfByPartition(_PARTITION_ID_2, signer_C.address);
     expect(currentBalance_C_Partition_2).to.equal(amount - clearedAmount_Partition_2);
+  });
+
+  describe("initializeClearingAtSnapshotByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeClearingAtSnapshotByPartition THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(unknownSigner).initializeClearingAtSnapshotByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(await unknownSigner.getAddress(), ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeClearingAtSnapshotByPartition THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeClearingAtSnapshotByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_CLEARING_AT_SNAPSHOT_BY_PARTITION, 1);
+    });
+  });
+
+  describe("initializeClearingAtSnapshotByPartition event", () => {
+    it("GIVEN fresh facet WHEN initializeClearingAtSnapshotByPartition THEN emits ClearingAtSnapshotByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_CLEARING_AT_SNAPSHOT_BY_PARTITION);
+      await expect(asset.initializeClearingAtSnapshotByPartition()).to.emit(
+        asset,
+        "ClearingAtSnapshotByPartitionInitialized",
+      );
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN clearingTransferByPartition THEN AssetNotOperational", async () => {
+      await expect(
+        asset.clearingTransferByPartition(
+          { partition: _PARTITION_ID_1, expirationTimestamp: MAX_UINT256, data: "0x" },
+          amount,
+          signer_A.address,
+        ),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
   });
 });

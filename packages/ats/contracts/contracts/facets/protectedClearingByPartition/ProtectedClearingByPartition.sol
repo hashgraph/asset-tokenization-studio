@@ -1,12 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IProtectedClearingByPartition } from "./IProtectedClearingByPartition.sol";
-import { IClearingTypes } from "../layer_1/clearing/IClearingTypes.sol";
+import {
+    IProtectedClearingByPartition,
+    RESOLVER_KEY_PROTECTED_CLEARING_BY_PARTITION
+} from "./IProtectedClearingByPartition.sol";
+import { IClearingTypes } from "../clearing/IClearingTypes.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ClearingProtectedOps } from "../../domain/orchestrator/ClearingProtectedOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title ProtectedClearingByPartition
@@ -20,6 +25,17 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract ProtectedClearingByPartition is IProtectedClearingByPartition, Modifiers {
     /// @inheritdoc IProtectedClearingByPartition
+    function initializeProtectedClearingByPartition()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_PROTECTED_CLEARING_BY_PARTITION)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_PROTECTED_CLEARING_BY_PARTITION);
+        emit ProtectedClearingByPartitionInitialized();
+    }
+
+    /// @inheritdoc IProtectedClearingByPartition
     function protectedClearingRedeemByPartition(
         IClearingTypes.ProtectedClearingOperation calldata _protectedClearingOperation,
         uint256 _amount,
@@ -27,6 +43,7 @@ abstract contract ProtectedClearingByPartition is IProtectedClearingByPartition,
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyProtectedPartitions
@@ -58,6 +75,7 @@ abstract contract ProtectedClearingByPartition is IProtectedClearingByPartition,
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyProtectedPartitions
@@ -85,7 +103,7 @@ abstract contract ProtectedClearingByPartition is IProtectedClearingByPartition,
 
     /**
      * @notice Emits `ProtectedClearedRedeemByPartition` for a successful protected clearing redeem.
-     * @dev Extracted to a `private` helper so the external entry point's stack stays within the
+     * @dev Extracted to a `private` helper so the external onlyOperational entry point's stack stays within the
      *      Solidity 16-slot limit; the helper is called exactly once, after the
      *      `ClearingProtectedOps.protectedClearingRedeemByPartition` call returns.
      * @param _operation  The protected clearing operation (partition, from, expiration, data, ...).
@@ -111,7 +129,7 @@ abstract contract ProtectedClearingByPartition is IProtectedClearingByPartition,
 
     /**
      * @notice Emits `ProtectedClearedTransferByPartition` for a successful protected clearing transfer.
-     * @dev Extracted to a `private` helper so the external entry point's stack stays within the
+     * @dev Extracted to a `private` helper so the external onlyOperational entry point's stack stays within the
      *      Solidity 16-slot limit; the helper is called exactly once, after the
      *      `ClearingProtectedOps.protectedClearingTransferByPartition` call returns.
      * @param _operation  The protected clearing operation (partition, from, expiration, data, ...).

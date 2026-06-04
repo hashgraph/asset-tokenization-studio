@@ -2,9 +2,15 @@
 
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ATS_ROLES } from "@scripts";
-import { deployEquityTokenFixture } from "@test";
+import {
+  type ResolverProxy,
+  type IAsset,
+  type IFactory,
+  type BusinessLogicResolver,
+  IAsset__factory,
+} from "@contract-types";
+import { ADDRESS_ZERO, ATS_ROLES, GAS_LIMIT } from "@scripts";
+import { deployEquityTokenFixture, getSecurityData, getRegulationData, makeEquityDetailsData } from "@test";
 import { grantRoleAndPauseToken } from "@test";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { ethers } from "hardhat";
@@ -18,6 +24,8 @@ describe("Control List Tests", () => {
   let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
+  let factory: IFactory;
+  let blr: BusinessLogicResolver;
 
   async function deployEquityWithControlListFixture() {
     const base = await deployEquityTokenFixture();
@@ -26,18 +34,20 @@ describe("Control List Tests", () => {
     signer_B = base.user1;
     signer_C = base.user2;
     signer_D = base.user3;
+    factory = base.factory as IFactory;
+    blr = base.blr as BusinessLogicResolver;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
 
-    await executeRbac(asset, [{ role: ATS_ROLES.PAUSER_ROLE, members: [signer_B.address] }]);
+    await executeRbac(asset, [{ role: ATS_ROLES.ROLE_PAUSER, members: [signer_B.address] }]);
   }
 
   beforeEach(async () => {
     await loadFixture(deployEquityWithControlListFixture);
   });
 
-  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-    await expect(asset.initializeControlList(true)).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with FacetAlreadyRegistered", async () => {
+    await expect(asset.initializeControlList(true)).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
   });
 
   it("GIVEN an account without controlList role WHEN addToControlList THEN transaction fails with AccountHasNoRole", async () => {
@@ -54,8 +64,56 @@ describe("Control List Tests", () => {
     );
   });
 
+  it("GIVEN an account without controlList role WHEN addToControlList THEN transaction fails with AccountHasNoRole", async () => {
+    await expect(asset.connect(signer_B).addToControlList(signer_C.address)).to.be.revertedWithCustomError(
+      asset,
+      "AccountHasNoRole",
+    );
+  });
+
+  it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeControlList is called THEN it reverts with AccountHasNoRole", async () => {
+    await expect(asset.connect(signer_D).initializeControlList(true)).to.be.revertedWithCustomError(
+      asset,
+      "AccountHasNoRole",
+    );
+  });
+
+  it("GIVEN an already-initialised facet WHEN initializeControlList is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+    await expect(asset.initializeControlList(true)).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+  });
+
+  it("GIVEN a new deployment WHEN initializeControlList is called THEN it emits ControlListInitialized", async () => {
+    const equityData = {
+      security: getSecurityData(blr, {
+        rbacs: [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [signer_A.address] }],
+      }),
+      equityDetails: makeEquityDetailsData(),
+    };
+    const tx = await factory.deployEquity(equityData, getRegulationData(), { gasLimit: GAS_LIMIT.high });
+    const receipt = await tx.wait();
+    const iface = IAsset__factory.createInterface();
+    const event = receipt!.logs
+      .map((log) => {
+        try {
+          return iface.parseLog(log as unknown as { topics: string[]; data: string });
+        } catch {
+          return null;
+        }
+      })
+      .find((parsed) => parsed?.name === "ControlListInitialized");
+    expect(event).to.not.be.undefined;
+    expect(event!.args.isWhiteList).to.equal(equityData.security.isWhiteList);
+  });
+
+  it("GIVEN an account without controlList role WHEN removeFromControlList THEN transaction fails with AccountHasNoRole", async () => {
+    await expect(asset.connect(signer_B).removeFromControlList(signer_C.address)).to.be.revertedWithCustomError(
+      asset,
+      "AccountHasNoRole",
+    );
+  });
+
   it("GIVEN a paused Token WHEN addToControlList THEN transaction fails with IsPaused", async () => {
-    await grantRoleAndPauseToken(asset, ATS_ROLES.CONTROL_LIST_ROLE, signer_A, signer_B, signer_C.address);
+    await grantRoleAndPauseToken(asset, ATS_ROLES.ROLE_CONTROL_LIST, signer_A, signer_B, signer_C.address);
 
     await expect(asset.connect(signer_C).addToControlList(signer_D.address)).to.be.revertedWithCustomError(
       asset,
@@ -64,7 +122,7 @@ describe("Control List Tests", () => {
   });
 
   it("GIVEN a paused Token WHEN removeFromControlList THEN transaction fails with IsPaused", async () => {
-    await grantRoleAndPauseToken(asset, ATS_ROLES.CONTROL_LIST_ROLE, signer_A, signer_B, signer_C.address);
+    await grantRoleAndPauseToken(asset, ATS_ROLES.ROLE_CONTROL_LIST, signer_A, signer_B, signer_C.address);
 
     await expect(asset.connect(signer_C).removeFromControlList(signer_D.address)).to.be.revertedWithCustomError(
       asset,
@@ -73,7 +131,7 @@ describe("Control List Tests", () => {
   });
 
   it("GIVEN an account with controlList role WHEN addToControlList and removeFromControlList THEN transaction succeeds", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROL_LIST_ROLE, signer_B.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CONTROL_LIST, signer_B.address);
 
     let check_signer_B = await asset.isInControlList(signer_B.address);
     expect(check_signer_B).to.equal(false);
@@ -119,7 +177,7 @@ describe("Control List Tests", () => {
   });
 
   it("GIVEN an account already in control list WHEN addToControlList is called again THEN transaction fails with ListedAccount", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROL_LIST_ROLE, signer_B.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CONTROL_LIST, signer_B.address);
 
     // Add account to control list
     await asset.connect(signer_B).addToControlList(signer_C.address);
@@ -134,7 +192,7 @@ describe("Control List Tests", () => {
   });
 
   it("GIVEN an account not in control list WHEN removeFromControlList is called THEN transaction fails with UnlistedAccount", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROL_LIST_ROLE, signer_B.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CONTROL_LIST, signer_B.address);
 
     // Verify account is not in the list
     expect(await asset.isInControlList(signer_C.address)).to.equal(false);
@@ -149,7 +207,7 @@ describe("Control List Tests", () => {
     it("GIVEN a deactivated asset WHEN addToControlList THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).addToControlList(ethers.ZeroAddress),
@@ -159,11 +217,28 @@ describe("Control List Tests", () => {
     it("GIVEN a deactivated asset WHEN removeFromControlList THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).removeFromControlList(ethers.ZeroAddress),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      const cut = await ethers.getContractAt("MockDiamondCut", diamond.target);
+      await cut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN addToControlList THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.addToControlList(ADDRESS_ZERO)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN removeFromControlList THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.removeFromControlList(ADDRESS_ZERO)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
     });
   });
 });

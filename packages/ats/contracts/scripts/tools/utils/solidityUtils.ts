@@ -21,8 +21,7 @@ const BASE_CLASSES_TO_EXCLUDE = new Set([
   "TransferAndLockStorageWrapper",
   "ERC20StorageWrapper",
   "CorporateActionStorageWrapper",
-  "BondStorageWrapper",
-  "EquityStorageWrapper",
+  "BalanceAdjustmentOps",
   "ComplianceStorageWrapper",
   "ScheduledTaskStorageWrapper",
 ]);
@@ -241,7 +240,7 @@ export interface RoleDefinition {
  * @example
  * ```typescript
  * const roles = extractRoles(source)
- * // [{name: 'ISSUER_ROLE', value: '0x4be32e8...'}]
+ * // [{name: 'ROLE_ISSUER', value: '0x4be32e8...'}]
  * // [{name: '_ISSUER_ROLE', value: '0x4be32e8...'}] (legacy ATS)
  * ```
  */
@@ -250,13 +249,13 @@ export function extractRoles(source: string): RoleDefinition[] {
   const lines = source.split("\n");
 
   for (const line of lines) {
-    // Quick check to avoid processing irrelevant lines
-    if (!line.includes("_ROLE") || !line.includes("bytes32") || !line.includes("constant")) {
+    if (!line.includes("bytes32") || !line.includes("constant")) {
       continue;
     }
-
-    // Parse using string operations to avoid ReDoS
-    const role = parseConstantDefinition(line, "_ROLE");
+    if (!line.includes("ROLE_") && !line.includes("DEFAULT_ADMIN_ROLE")) {
+      continue;
+    }
+    const role = parseConstantByPredicate(line, (name) => name.startsWith("ROLE_") || name === "DEFAULT_ADMIN_ROLE");
     if (role) {
       roles.push(role);
     }
@@ -267,9 +266,13 @@ export function extractRoles(source: string): RoleDefinition[] {
 
 /**
  * Parse a constant definition (role or resolver key) using string operations.
- * Matches: bytes32 [public] constant NAME = value;
+ * Matches: bytes32 [public] constant NAME = value; and returns the (name, value)
+ * pair only when `accept(name)` returns true.
  */
-function parseConstantDefinition(line: string, suffix: string): { name: string; value: string } | null {
+function parseConstantByPredicate(
+  line: string,
+  accept: (name: string) => boolean,
+): { name: string; value: string } | null {
   const normalized = normalizeWhitespace(line.trim());
 
   // Must contain "bytes32 "
@@ -299,8 +302,7 @@ function parseConstantDefinition(line: string, suffix: string): { name: string; 
 
   const name = rest.slice(0, eqIdx).trim();
 
-  // Must end with the expected suffix
-  if (!name.endsWith(suffix)) {
+  if (!accept(name)) {
     return null;
   }
 
@@ -320,7 +322,7 @@ function parseConstantDefinition(line: string, suffix: string): { name: string; 
  * Resolver key definition with name and value.
  */
 export interface ResolverKeyDefinition {
-  /** Resolver key name (e.g., _ACCESS_CONTROL_RESOLVER_KEY) */
+  /** Resolver key name (e.g., _ACCESS_CONTROL) */
   name: string;
 
   /** bytes32 value (e.g., 0x011768a41...) */
@@ -331,8 +333,8 @@ export interface ResolverKeyDefinition {
  * Extract resolver key definitions from Solidity code.
  *
  * Matches patterns like:
- * - bytes32 constant FACET_NAME_RESOLVER_KEY = 0x...;
- * - bytes32 constant _FACET_NAME_RESOLVER_KEY = 0x...; (legacy)
+ * - bytes32 constant FACET_NAME = 0x...;
+ * - bytes32 constant _FACET_NAME = 0x...; (legacy)
  *
  * Supports both with and without underscore prefix (underscore is incorrectly
  * used in ATS for public constants - will be removed in future).
@@ -343,8 +345,8 @@ export interface ResolverKeyDefinition {
  * @example
  * ```typescript
  * const keys = extractResolverKeys(source)
- * // [{name: 'ACCESS_CONTROL_RESOLVER_KEY', value: '0x011768a41...'}]
- * // [{name: '_ACCESS_CONTROL_RESOLVER_KEY', value: '0x011768a41...'}] (legacy ATS)
+ * // [{name: 'ACCESS_CONTROL', value: '0x011768a41...'}]
+ * // [{name: '_ACCESS_CONTROL', value: '0x011768a41...'}] (legacy ATS)
  * ```
  */
 export function extractResolverKeys(source: string): ResolverKeyDefinition[] {
@@ -352,13 +354,16 @@ export function extractResolverKeys(source: string): ResolverKeyDefinition[] {
   const lines = source.split("\n");
 
   for (const line of lines) {
-    // Quick check to avoid processing irrelevant lines
-    if (!line.includes("_RESOLVER_KEY") || !line.includes("bytes32") || !line.includes("constant")) {
+    if (!line.includes("RESOLVER_KEY") || !line.includes("bytes32") || !line.includes("constant")) {
       continue;
     }
-
-    // Parse using string operations to avoid ReDoS
-    const key = parseConstantDefinition(line, "_RESOLVER_KEY");
+    // Accept both the legacy `_<FACET>_RESOLVER_KEY` suffix style and the
+    // canonical `RESOLVER_KEY_<FACET>` prefix style during the BBND-1674
+    // transition.
+    const key = parseConstantByPredicate(
+      line,
+      (name) => name.startsWith("RESOLVER_KEY_") || name.endsWith("_RESOLVER_KEY"),
+    );
     if (key) {
       keys.push(key);
     }
@@ -547,7 +552,7 @@ function cleanNatspecValue(value: string): string {
  * @example
  * ```typescript
  * const keyName = extractFacetResolverKeyImport(facetSource)
- * // Returns: '_ACCESS_CONTROL_RESOLVER_KEY'
+ * // Returns: '_ACCESS_CONTROL'
  * ```
  */
 export function extractFacetResolverKeyImport(source: string): string | undefined {
@@ -558,7 +563,7 @@ export function extractFacetResolverKeyImport(source: string): string | undefine
     return keyName;
   }
 
-  // Second try: Check for inline constant definition (e.g., TimeTravelFacet)
+  // Second try: Check for inline constant definition
   const inlineKeys = extractResolverKeys(source);
   if (inlineKeys.length > 0) {
     return inlineKeys[0].name;
@@ -604,13 +609,14 @@ function parseResolverKeyFromImports(source: string): string | null {
     // Extract content between braces
     const content = source.slice(braceStart + 1, braceEnd);
 
-    // Check if this import contains a resolver key
-    if (content.includes("_RESOLVER_KEY")) {
-      // Split by comma and find the resolver key
+    // Check if this import contains a resolver key — accept both the
+    // canonical `RESOLVER_KEY_<NAME>` prefix and the legacy
+    // `_<NAME>_RESOLVER_KEY` suffix during the BBND-1674 transition.
+    if (content.includes("RESOLVER_KEY")) {
       const parts = content.split(",");
       for (const part of parts) {
         const trimmed = part.trim();
-        if (trimmed.endsWith("_RESOLVER_KEY")) {
+        if (trimmed.startsWith("RESOLVER_KEY_") || trimmed.endsWith("_RESOLVER_KEY")) {
           return trimmed;
         }
       }
@@ -694,29 +700,6 @@ function parseSimpleImport(line: string): string | null {
  */
 export function isFacetName(contractName: string): boolean {
   return contractName.endsWith("Facet");
-}
-
-/**
- * Check if contract is a TimeTravel variant.
- *
- * @param contractName - Contract name to check
- * @returns true if name ends with 'TimeTravel'
- */
-export function isTimeTravelVariant(contractName: string): boolean {
-  return contractName.endsWith("TimeTravel");
-}
-
-/**
- * Get base contract name from TimeTravel variant.
- *
- * @param contractName - Contract name (potentially TimeTravel)
- * @returns Base contract name without 'TimeTravel' suffix
- */
-export function getBaseName(contractName: string): string {
-  if (isTimeTravelVariant(contractName)) {
-    return contractName.slice(0, -10); // Remove "TimeTravel"
-  }
-  return contractName;
 }
 
 /**

@@ -17,7 +17,7 @@
  */
 
 import { Signer } from "ethers";
-import { info } from "@scripts/infrastructure";
+import { info, retryTransaction, RetryOptions, withNonceReset } from "@scripts/infrastructure";
 
 /**
  * Deployed addresses of all orchestrator libraries.
@@ -112,7 +112,6 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   TransferFacet: ["tokenCoreOps"],
   ERC20ReadFacet: ["tokenCoreOps"],
   ERC20VotesFacet: ["clearingReadOps", "scheduledTasksOps", "scheduledTasksDispatchOps"],
-  ERC1410ManagementFacet: ["tokenCoreOps"],
   ProtectedByPartitionFacet: ["tokenCoreOps"],
   ControllerByPartitionFacet: ["tokenCoreOps"],
   TransferByPartitionFacet: ["tokenCoreOps"],
@@ -155,12 +154,6 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   BalanceTrackerAtSnapshotByPartitionFacet: ["clearingReadOps"],
   ClearingAtSnapshotFacet: ["clearingReadOps"],
   ClearingAtSnapshotByPartitionFacet: ["clearingReadOps"],
-  // Layer 2/3 Bond read facets transitively reach ClearingReadOps via SnapshotsStorageWrapper
-  BondUSAReadFacet: ["clearingReadOps"],
-  BondUSAReadFixedRateFacet: ["clearingReadOps"],
-  BondUSAReadKpiLinkedRateFacet: ["clearingReadOps"],
-  // Layer 3 EquityUSA — same transitive dependency
-  EquityUSAFacet: ["clearingReadOps"],
   // Layer 2 facet families — coupon/dividend/voting/amortization reach ClearingReadOps
   AmortizationFacet: ["clearingReadOps", "scheduledTasksOps"],
   CouponFacet: ["clearingReadOps"],
@@ -180,8 +173,6 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   NominalValueFacet: ["scheduledTasksOps"],
   ProceedRecipientsKpiLinkedRateFacet: ["scheduledTasksOps"],
   RecoveryFacet: ["scheduledTasksOps"],
-  TransferAndLockFixedRateFacet: ["scheduledTasksOps"],
-  TransferAndLockKpiLinkedRateFacet: ["scheduledTasksOps"],
 };
 
 /**
@@ -252,6 +243,23 @@ export function toTypeChainLibraryAddresses(addresses?: OrchestratorLibraryAddre
 }
 
 /**
+ * Options for `deployOrchestratorLibraries`.
+ */
+export interface DeployOrchestratorLibrariesOptions {
+  /**
+   * Retry configuration for individual library deployments.
+   *
+   * On Hedera testnet, transient 502 / SERVER_ERROR responses from the JSON-RPC relay
+   * can abort a library deployment mid-sequence and force a full re-run from scratch.
+   * Passing the network's `retryOptions` here wraps every library deploy individually so
+   * a single 502 does not kill the entire deployment.
+   *
+   * Default: no retries (`maxRetries: 0`).
+   */
+  retryOptions?: RetryOptions;
+}
+
+/**
  * Deploy all orchestrator libraries in correct dependency order.
  *
  * Deployment order:
@@ -265,9 +273,18 @@ export function toTypeChainLibraryAddresses(addresses?: OrchestratorLibraryAddre
  * After deployment, automatically calls `setOrchestratorLibraryAddresses()`.
  *
  * @param signer - Ethers.js signer for deploying contracts
+ * @param options - Deployment options (retry configuration)
  * @returns Deployed library addresses
  */
-export async function deployOrchestratorLibraries(signer: Signer): Promise<OrchestratorLibraryAddresses> {
+export async function deployOrchestratorLibraries(
+  signer: Signer,
+  options?: DeployOrchestratorLibrariesOptions,
+): Promise<OrchestratorLibraryAddresses> {
+  // After a 502, the NonceManager's internal counter is already incremented even though
+  // Hedera never received the tx.  Reset before each retry so the confirmed nonce is
+  // re-fetched from the network rather than using a stale internal value.
+  const retryOpts: RetryOptions = withNonceReset(signer, options?.retryOptions ?? { maxRetries: 0 });
+
   // Dynamic import to avoid eager loading of typechain
   const {
     TokenCoreOps__factory,
@@ -287,95 +304,91 @@ export async function deployOrchestratorLibraries(signer: Signer): Promise<Orche
   // eth_getTransactionCount before any transaction lands, so they all receive the
   // same nonce and stall indefinitely waiting for a receipt that never arrives.
 
-  // Phase 1: ScheduledTasksDispatchOps and ClearingReadOps have no library dependencies.
-  const scheduledTasksDispatchOps = await (
-    await new ScheduledTasksDispatchOps__factory(signer).deploy()
-  ).waitForDeployment();
-  const scheduledTasksDispatchOpsAddr = await scheduledTasksDispatchOps.getAddress();
-  info(`   ✓ ScheduledTasksDispatchOps deployed at ${scheduledTasksDispatchOpsAddr}`);
+  const deployLib = (name: string, fn: () => Promise<string>): Promise<string> =>
+    retryTransaction(fn, retryOpts).then((addr) => {
+      info(`   ✓ ${name} deployed at ${addr}`);
+      return addr;
+    });
 
-  const clearingReadOps = await (await new ClearingReadOps__factory(signer).deploy()).waitForDeployment();
-  const clearingReadOpsAddr = await clearingReadOps.getAddress();
-  info(`   ✓ ClearingReadOps deployed at ${clearingReadOpsAddr}`);
+  // Phase 1: ScheduledTasksDispatchOps and ClearingReadOps have no library dependencies.
+  const scheduledTasksDispatchOpsAddr = await deployLib("ScheduledTasksDispatchOps", () =>
+    new ScheduledTasksDispatchOps__factory(signer)
+      .deploy()
+      .then((c) => c.waitForDeployment())
+      .then((c) => c.getAddress()),
+  );
+
+  const clearingReadOpsAddr = await deployLib("ClearingReadOps", () =>
+    new ClearingReadOps__factory(signer)
+      .deploy()
+      .then((c) => c.waitForDeployment())
+      .then((c) => c.getAddress()),
+  );
 
   // Phase 2: ScheduledTasksOps inlines ScheduledTasksStorageWrapper which calls ScheduledTasksDispatchOps.
-  const scheduledTasksOps = await new ScheduledTasksOps__factory(
-    {
-      [LIBRARY_KEYS.scheduledTasksDispatchOps]: scheduledTasksDispatchOpsAddr,
-    } as any,
-    signer,
-  ).deploy();
-  await scheduledTasksOps.waitForDeployment();
-  const scheduledTasksOpsAddr = await scheduledTasksOps.getAddress();
-  info(`   ✓ ScheduledTasksOps deployed at ${scheduledTasksOpsAddr}`);
+  const scheduledTasksOpsAddr = await deployLib("ScheduledTasksOps", () =>
+    new ScheduledTasksOps__factory(
+      { [LIBRARY_KEYS.scheduledTasksDispatchOps]: scheduledTasksDispatchOpsAddr } as any,
+      signer,
+    )
+      .deploy()
+      .then((c) => c.waitForDeployment())
+      .then((c) => c.getAddress()),
+  );
 
   // Phase 3: TokenCoreOps and HoldOps depend on ClearingReadOps + ScheduledTasksOps.
-  const tokenCoreOps = await new TokenCoreOps__factory(
-    {
-      [LIBRARY_KEYS.clearingReadOps]: clearingReadOpsAddr,
-      [LIBRARY_KEYS.scheduledTasksOps]: scheduledTasksOpsAddr,
-    } as any,
-    signer,
-  ).deploy();
-  await tokenCoreOps.waitForDeployment();
-  const tokenCoreOpsAddr = await tokenCoreOps.getAddress();
-  info(`   ✓ TokenCoreOps deployed at ${tokenCoreOpsAddr}`);
+  const phase3Links = {
+    [LIBRARY_KEYS.clearingReadOps]: clearingReadOpsAddr,
+    [LIBRARY_KEYS.scheduledTasksOps]: scheduledTasksOpsAddr,
+  } as any;
 
-  const holdOps = await new HoldOps__factory(
-    {
-      [LIBRARY_KEYS.clearingReadOps]: clearingReadOpsAddr,
-      [LIBRARY_KEYS.scheduledTasksOps]: scheduledTasksOpsAddr,
-    } as any,
-    signer,
-  ).deploy();
-  await holdOps.waitForDeployment();
-  const holdOpsAddr = await holdOps.getAddress();
-  info(`   ✓ HoldOps deployed at ${holdOpsAddr}`);
+  const tokenCoreOpsAddr = await deployLib("TokenCoreOps", () =>
+    new TokenCoreOps__factory(phase3Links, signer)
+      .deploy()
+      .then((c) => c.waitForDeployment())
+      .then((c) => c.getAddress()),
+  );
+
+  const holdOpsAddr = await deployLib("HoldOps", () =>
+    new HoldOps__factory(phase3Links, signer)
+      .deploy()
+      .then((c) => c.waitForDeployment())
+      .then((c) => c.getAddress()),
+  );
 
   // Phase 4: ClearingOps depends on TokenCoreOps, HoldOps, ClearingReadOps + ScheduledTasksOps.
-  const clearingOps = await new ClearingOps__factory(
-    {
-      [LIBRARY_KEYS.tokenCoreOps]: tokenCoreOpsAddr,
-      [LIBRARY_KEYS.holdOps]: holdOpsAddr,
-      [LIBRARY_KEYS.clearingReadOps]: clearingReadOpsAddr,
-      [LIBRARY_KEYS.scheduledTasksOps]: scheduledTasksOpsAddr,
-    } as any,
-    signer,
-  ).deploy();
-  await clearingOps.waitForDeployment();
+  const phase4Links = {
+    [LIBRARY_KEYS.tokenCoreOps]: tokenCoreOpsAddr,
+    [LIBRARY_KEYS.holdOps]: holdOpsAddr,
+    [LIBRARY_KEYS.clearingReadOps]: clearingReadOpsAddr,
+    [LIBRARY_KEYS.scheduledTasksOps]: scheduledTasksOpsAddr,
+  } as any;
 
-  const clearingOpsAddr = await clearingOps.getAddress();
-  info(`   ✓ ClearingOps deployed at ${clearingOpsAddr}`);
+  const clearingOpsAddr = await deployLib("ClearingOps", () =>
+    new ClearingOps__factory(phase4Links, signer)
+      .deploy()
+      .then((c) => c.waitForDeployment())
+      .then((c) => c.getAddress()),
+  );
 
   // Phase 5: ClearingLifecycleOps owns the post-creation lifecycle (approve/cancel/reclaim).
   // It calls ClearingOps.beforeClearingOperation as an `internal` cross-library call which
   // the compiler inlines, so no ClearingOps link is required. It does however use
   // TokenCoreOps, HoldOps, ClearingReadOps, and ScheduledTasksOps.
-  const clearingLifecycleOps = await new ClearingLifecycleOps__factory(
-    {
-      [LIBRARY_KEYS.tokenCoreOps]: tokenCoreOpsAddr,
-      [LIBRARY_KEYS.holdOps]: holdOpsAddr,
-      [LIBRARY_KEYS.clearingReadOps]: clearingReadOpsAddr,
-      [LIBRARY_KEYS.scheduledTasksOps]: scheduledTasksOpsAddr,
-    } as any,
-    signer,
-  ).deploy();
-  await clearingLifecycleOps.waitForDeployment();
+  const clearingLifecycleOpsAddr = await deployLib("ClearingLifecycleOps", () =>
+    new ClearingLifecycleOps__factory(phase4Links, signer)
+      .deploy()
+      .then((c) => c.waitForDeployment())
+      .then((c) => c.getAddress()),
+  );
 
-  const clearingLifecycleOpsAddr = await clearingLifecycleOps.getAddress();
-  info(`   ✓ ClearingLifecycleOps deployed at ${clearingLifecycleOpsAddr}`);
-
-  // Phase 6: Deploy ClearingProtectedOps (depends on ClearingOps via internal calls)
-  const clearingProtectedOps = await new ClearingProtectedOps__factory(
-    {
-      [LIBRARY_KEYS.clearingOps]: clearingOpsAddr,
-    } as any,
-    signer,
-  ).deploy();
-  await clearingProtectedOps.waitForDeployment();
-
-  const clearingProtectedOpsAddr = await clearingProtectedOps.getAddress();
-  info(`   ✓ ClearingProtectedOps deployed at ${clearingProtectedOpsAddr}`);
+  // Phase 6: ClearingProtectedOps depends on ClearingOps via internal calls.
+  const clearingProtectedOpsAddr = await deployLib("ClearingProtectedOps", () =>
+    new ClearingProtectedOps__factory({ [LIBRARY_KEYS.clearingOps]: clearingOpsAddr } as any, signer)
+      .deploy()
+      .then((c) => c.waitForDeployment())
+      .then((c) => c.getAddress()),
+  );
 
   const addresses: OrchestratorLibraryAddresses = {
     tokenCoreOps: tokenCoreOpsAddr,

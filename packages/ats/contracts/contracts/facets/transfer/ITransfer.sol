@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey Transfer
+bytes32 constant RESOLVER_KEY_TRANSFER = 0xdb0637d5ac2d3a8a460b63275e82a566d4b5ac4b9d2d2938f70c6612970a4b64;
+
 /**
  * @title ITransferFacet
  * @notice Interface grouping all standard token transfer operations: ERC-20 style and
@@ -8,6 +11,12 @@ pragma solidity >=0.8.0 <0.9.0;
  *         `InsufficientBalance` error that were previously declared in `IERC20`.
  */
 interface ITransfer {
+    /**
+     * @notice Emitted once when the transfer capability is initialised on a token.
+     * @dev Fires exclusively from `initializeTransfer`.
+     */
+    event TransferInitialized();
+
     /**
      * @notice Emitted when tokens are transferred with an attached data payload.
      * @param sender Account that executed the transfer (typically `msg.sender`).
@@ -49,6 +58,13 @@ interface ITransfer {
      * @param partition The partition that was checked.
      */
     error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
+
+    /**
+     * @notice Initialises the transfer capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeTransfer() external;
 
     /**
      * @notice Moves `amount` tokens from the caller to `to`.

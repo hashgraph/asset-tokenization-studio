@@ -1,17 +1,26 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey SsiManagement
+bytes32 constant RESOLVER_KEY_SSI_MANAGEMENT = 0xba7dfd151d5ed77cbbf8b00c124c67331edf1e6959e7c0129dc73ee72a9c0016;
+
 /**
  * @title ISsiManagement
  * @author Asset Tokenization Studio Team
  * @notice Interface for managing Self-Sovereign Identity (SSI) configuration on a security token,
  *         including a list of trusted credential issuers and the address of the revocation registry
  *         contract.
- * @dev Part of the Diamond facet system. `SSI_MANAGER_ROLE` is required for all state-mutating
+ * @dev Part of the Diamond facet system. `ROLE_SSI_MANAGER` is required for all state-mutating
  *      functions. Issuer and revocation data are persisted in diamond storage via
  *      `SsiManagementStorageWrapper`.
  */
 interface ISsiManagement {
+    /**
+     * @notice Emitted once when the SSI management capability is initialised on a token.
+     * @dev Fires exclusively from `initializeSsiManagement`.
+     */
+    event SsiManagementInitialized();
+
     /**
      * @notice Emitted when the revocation registry address is updated.
      * @param oldRegistryAddress Previous revocation registry contract address.
@@ -52,9 +61,16 @@ interface ISsiManagement {
     error AccountIsNotIssuer(address issuer);
 
     /**
+     * @notice Initialises the SSI management capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeSsiManagement() external;
+
+    /**
      * @notice Sets the address of the revocation registry contract used for SSI credential
      *         validation.
-     * @dev Requires `SSI_MANAGER_ROLE` and the token to be unpaused. Emits
+     * @dev Requires `ROLE_SSI_MANAGER` and the token to be unpaused. Emits
      *      `RevocationRegistryUpdated`.
      * @param _revocationRegistryAddress New revocation registry contract address.
      * @return success_ True if the address was updated successfully.
@@ -63,8 +79,9 @@ interface ISsiManagement {
 
     /**
      * @notice Adds an address to the trusted issuer list.
-     * @dev Requires `SSI_MANAGER_ROLE` and the token to be unpaused. Reverts with `ListedIssuer`
-     *      if the address is already listed. Emits `AddedToIssuerList`.
+     * @dev Requires `ROLE_SSI_MANAGER` and the token to be unpaused. Reverts with `ListedIssuer`
+     *      if the address is already listed, or with `ZeroAddressNotAllowed` if the address is
+     *      zero. Emits `AddedToIssuerList`.
      * @param _issuer Address of the issuer to add.
      * @return success_ True if the issuer was added successfully.
      */
@@ -72,7 +89,7 @@ interface ISsiManagement {
 
     /**
      * @notice Removes an address from the trusted issuer list.
-     * @dev Requires `SSI_MANAGER_ROLE` and the token to be unpaused. Reverts with `UnlistedIssuer`
+     * @dev Requires `ROLE_SSI_MANAGER` and the token to be unpaused. Reverts with `UnlistedIssuer`
      *      if the address is not listed. Emits `RemovedFromIssuerList`.
      * @param _issuer Address of the issuer to remove.
      * @return success_ True if the issuer was removed successfully.

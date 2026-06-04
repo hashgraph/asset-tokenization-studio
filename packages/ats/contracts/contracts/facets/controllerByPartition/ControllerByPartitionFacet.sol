@@ -1,16 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IControllerByPartition } from "./IControllerByPartition.sol";
+import { IControllerByPartition, RESOLVER_KEY_CONTROLLER_BY_PARTITION } from "./IControllerByPartition.sol";
 import { ControllerByPartition } from "./ControllerByPartition.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { _CONTROLLER_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-
 /**
  * @title ControllerByPartitionFacet
  * @notice Diamond facet that exposes controller-initiated forced transfer and redemption operations
- *         on a specific partition, registered under `_CONTROLLER_BY_PARTITION_RESOLVER_KEY`.
+ *         on a specific partition, registered under `RESOLVER_KEY_CONTROLLER_BY_PARTITION`.
  * @dev Inherits behaviour from `ControllerByPartition` and satisfies `IStaticFunctionSelectors` for
  *      Diamond proxy selector registration. Exposes two selectors:
  *      `controllerTransferByPartition`, `controllerRedeemByPartition`.
@@ -19,13 +17,17 @@ import { _CONTROLLER_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverK
 contract ControllerByPartitionFacet is ControllerByPartition, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _CONTROLLER_BY_PARTITION_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_CONTROLLER_BY_PARTITION;
     }
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
-            Bytes4Builder.build(this.controllerRedeemByPartition.selector, this.controllerTransferByPartition.selector);
+            Bytes4Builder.build(
+                this.initializeControllerByPartition.selector,
+                this.controllerRedeemByPartition.selector,
+                this.controllerTransferByPartition.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors

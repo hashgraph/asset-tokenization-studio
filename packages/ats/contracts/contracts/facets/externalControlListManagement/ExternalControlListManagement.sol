@@ -1,24 +1,28 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IExternalControlListManagement } from "./IExternalControlListManagement.sol";
-import { CONTROL_LIST_MANAGER_ROLE } from "../../constants/roles.sol";
-import { _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import {
+    IExternalControlListManagement,
+    RESOLVER_KEY_EXTERNAL_CONTROL_LIST
+} from "./IExternalControlListManagement.sol";
+import { ROLE_CONTROL_LIST_MANAGER, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT } from "../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { ExternalListManagementStorageWrapper } from "../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { ArrayValidation } from "../../infrastructure/utils/ArrayValidation.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title ExternalControlListManagement
  * @author Asset Tokenization Studio Team
- * @notice Abstract contract implementing external control list management logic for a security
+ * @notice Abstract contract implementing external onlyOperational control list management logic for a security
  *         token. Maintains a list of trusted third-party control list contracts whose
  *         authorisation results are consulted during transfer compliance checks.
- * @dev Implements `IExternalControlListManagement`. The external control list is stored in diamond
- *      storage at `_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION` via
+ * @dev Implements `IExternalControlListManagement`. The external onlyOperational control list is stored in diamond
+ *      storage at `STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT` via
  *      `ExternalListManagementStorageWrapper`. All mutating functions after initialisation are
- *      gated by `CONTROL_LIST_MANAGER_ROLE` and the `onlyUnpaused` modifier inherited from
+ *      gated by `ROLE_CONTROL_LIST_MANAGER` and the `onlyUnpaused` modifier inherited from
  *      `Modifiers`. Intended to be inherited exclusively by
  *      `ExternalControlListManagementFacet`.
  */
@@ -26,18 +30,28 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
     /// @inheritdoc IExternalControlListManagement
     function initializeExternalControlLists(
         address[] calldata _controlLists
-    ) external override onlyNotExternalControlListInitialized {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_EXTERNAL_CONTROL_LIST) {
         ExternalListManagementStorageWrapper.initializeExternalControlLists(_controlLists);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_EXTERNAL_CONTROL_LIST);
+        emit IExternalControlListManagement.ExternalControlListInitialized(_controlLists);
     }
 
     /// @inheritdoc IExternalControlListManagement
     function updateExternalControlLists(
         address[] calldata _controlLists,
         bool[] calldata _actives
-    ) external override onlyActivated onlyUnpaused onlyRole(CONTROL_LIST_MANAGER_ROLE) returns (bool success_) {
+    )
+        external
+        override
+        onlyOperational
+        onlyActivated
+        onlyUnpaused
+        onlyRole(ROLE_CONTROL_LIST_MANAGER)
+        returns (bool success_)
+    {
         ArrayValidation.checkUniqueValues(_controlLists, _actives);
         success_ = ExternalListManagementStorageWrapper.updateExternalLists(
-            _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
+            STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT,
             _controlLists,
             _actives
         );
@@ -53,14 +67,15 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
-        onlyRole(CONTROL_LIST_MANAGER_ROLE)
+        onlyRole(ROLE_CONTROL_LIST_MANAGER)
         onlyAddressNotZero(_controlList)
         returns (bool success_)
     {
         success_ = ExternalListManagementStorageWrapper.addExternalList(
-            _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
+            STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT,
             _controlList
         );
         if (!success_) {
@@ -72,9 +87,17 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
     /// @inheritdoc IExternalControlListManagement
     function removeExternalControlList(
         address _controlList
-    ) external override onlyActivated onlyUnpaused onlyRole(CONTROL_LIST_MANAGER_ROLE) returns (bool success_) {
+    )
+        external
+        override
+        onlyOperational
+        onlyActivated
+        onlyUnpaused
+        onlyRole(ROLE_CONTROL_LIST_MANAGER)
+        returns (bool success_)
+    {
         success_ = ExternalListManagementStorageWrapper.removeExternalList(
-            _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
+            STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT,
             _controlList
         );
         if (!success_) {
@@ -86,15 +109,12 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
     /// @inheritdoc IExternalControlListManagement
     function isExternalControlList(address _controlList) external view override returns (bool) {
         return
-            ExternalListManagementStorageWrapper.isExternalList(
-                _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
-                _controlList
-            );
+            ExternalListManagementStorageWrapper.isExternalList(STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT, _controlList);
     }
 
     /// @inheritdoc IExternalControlListManagement
     function getExternalControlListsCount() external view override returns (uint256 externalControlListsCount_) {
-        return ExternalListManagementStorageWrapper.getExternalListsCount(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION);
+        return ExternalListManagementStorageWrapper.getExternalListsCount(STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT);
     }
 
     /// @inheritdoc IExternalControlListManagement
@@ -104,7 +124,7 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
     ) external view override returns (address[] memory members_) {
         return
             ExternalListManagementStorageWrapper.getExternalListsMembers(
-                _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
+                STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT,
                 _pageIndex,
                 _pageLength
             );

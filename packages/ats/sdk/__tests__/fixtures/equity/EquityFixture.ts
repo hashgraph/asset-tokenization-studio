@@ -63,8 +63,6 @@ import GetDividendHoldersRequest from "@port/in/request/dividend/GetDividendHold
 import GetTotalDividendHoldersRequest from "@port/in/request/dividend/GetTotalDividendHoldersRequest";
 import GetVotingHoldersRequest from "@port/in/request/equity/GetVotingHoldersRequest";
 import GetTotalVotingHoldersRequest from "@port/in/request/equity/GetTotalVotingHoldersRequest";
-import { CreateTrexSuiteEquityCommand } from "@command/equity/createTrexSuite/CreateTrexSuiteEquityCommand";
-import CreateTrexSuiteEquityRequest from "@port/in/request/equity/CreateTrexSuiteEquityRequest";
 
 export const CreateEquityRequestFixture = createFixture<CreateEquityRequest>((request) => {
   request.name.faker((faker) => faker.company.name());
@@ -90,7 +88,7 @@ export const CreateEquityRequestFixture = createFixture<CreateEquityRequest>((re
           ),
         ),
   );
-  request.isCountryControlListWhiteList.faker((faker) => faker.datatype.boolean());
+  request.isCountryControlListWhiteList?.faker((faker) => faker.datatype.boolean());
   request.numberOfShares.faker((faker) => faker.number.int({ min: 1, max: 10 }).toString());
   request.countries?.faker((faker) =>
     faker.helpers
@@ -100,7 +98,7 @@ export const CreateEquityRequestFixture = createFixture<CreateEquityRequest>((re
       )
       .join(","),
   );
-  request.info.faker((faker) => faker.lorem.words());
+  request.info?.faker((faker) => faker.lorem.words());
   request.currency.faker((faker) => `0x${Buffer.from(faker.finance.currencyCode()).toString("hex")}`);
   request.dividendRight.faker((faker) =>
     CastDividendType.toNumber(faker.helpers.arrayElement(Object.values(DividendType))),
@@ -335,43 +333,6 @@ export const CreateEquityCommandFixture = createFixture<CreateEquityCommand>((co
   command.identityRegistryId?.as(() => HederaIdPropsFixture.create().value);
 });
 
-export const CreateTrexSuiteEquityCommandFixture = createFixture<CreateTrexSuiteEquityCommand>((command) => {
-  command.salt.faker((faker) => faker.string.alphanumeric({ length: 32 }));
-  command.owner.faker((faker) => faker.finance.accountName());
-  command.irs.faker((faker) => faker.finance.iban());
-  command.onchainId.faker((faker) => faker.finance.ethereumAddress());
-  command.irAgents.faker((faker) => [faker.finance.ethereumAddress()]);
-  command.tokenAgents.faker((faker) => [faker.finance.ethereumAddress()]);
-  command.compliancesModules.faker((faker) => [faker.string.alphanumeric({ length: 32 })]);
-  command.complianceSettings.faker((faker) => [faker.string.alphanumeric({ length: 32 })]);
-  command.claimTopics.faker((faker) => [faker.number.int({ min: 1, max: 10 })]);
-  command.issuers.faker((faker) => [faker.finance.ethereumAddress()]);
-  command.issuerClaims.faker((faker) => [faker.number.int({ min: 1, max: 10 })]);
-
-  command.security.fromFixture(SecurityPropsFixture);
-  command.currency.faker((faker) => faker.finance.currencyCode());
-  command.nominalValue.faker((faker) => faker.finance.amount({ min: 1, max: 10, dec: 2 }));
-  command.nominalValueDecimals.faker((faker) => faker.number.int({ min: 1, max: 5 }));
-  command.votingRight.faker((faker) => faker.datatype.boolean());
-  command.informationRight.faker((faker) => faker.datatype.boolean());
-  command.liquidationRight.faker((faker) => faker.datatype.boolean());
-  command.subscriptionRight.faker((faker) => faker.datatype.boolean());
-  command.conversionRight.faker((faker) => faker.datatype.boolean());
-  command.redemptionRight.faker((faker) => faker.datatype.boolean());
-  command.putRight.faker((faker) => faker.datatype.boolean());
-  command.dividendRight.faker((faker) => faker.datatype.boolean());
-  command.currency.faker((faker) => faker.string.hexadecimal({ length: 6, casing: "lower", prefix: "0x" }));
-  command.factory?.as(() => new ContractId(ContractIdPropFixture.create().value));
-  command.resolver?.as(() => new ContractId(ContractIdPropFixture.create().value));
-  command.configId?.faker((faker) => faker.string.hexadecimal({ length: 64, casing: "lower", prefix: "0x" }));
-  command.configVersion?.faker((faker) => faker.number.int({ min: 1, max: 5 }));
-  command.diamondOwnerAccount?.as(() => HederaIdPropsFixture.create().value);
-  command.externalControlLists?.as(() => [HederaIdPropsFixture.create().value]);
-  command.externalKycLists?.as(() => [HederaIdPropsFixture.create().value]);
-  command.compliance?.as(() => HederaIdPropsFixture.create().value);
-  command.identityRegistry?.as(() => HederaIdPropsFixture.create().value);
-});
-
 export const SetScheduledBalanceAdjustmentCommandFixture = createFixture<SetScheduledBalanceAdjustmentCommand>(
   (command) => {
     command.securityId.as(() => HederaIdPropsFixture.create().value);
@@ -452,14 +413,14 @@ export const DividendForFixture = createFixture<DividendFor>((props) => {
 });
 
 export const EquityDetailsFixture = createFixture<EquityDetails>((props) => {
-  props.votingRight.faker((faker) => faker.datatype.boolean());
-  props.informationRight.faker((faker) => faker.datatype.boolean());
-  props.liquidationRight.faker((faker) => faker.datatype.boolean());
-  props.subscriptionRight.faker((faker) => faker.datatype.boolean());
-  props.conversionRight.faker((faker) => faker.datatype.boolean());
-  props.redemptionRight.faker((faker) => faker.datatype.boolean());
-  props.putRight.faker((faker) => faker.datatype.boolean());
-  props.dividendRight.faker((faker) => faker.helpers.arrayElement(Object.values(DividendType)));
+  props.votingRight?.faker((faker) => faker.datatype.boolean());
+  props.informationRight?.faker((faker) => faker.datatype.boolean());
+  props.liquidationRight?.faker((faker) => faker.datatype.boolean());
+  props.subscriptionRight?.faker((faker) => faker.datatype.boolean());
+  props.conversionRight?.faker((faker) => faker.datatype.boolean());
+  props.redemptionRight?.faker((faker) => faker.datatype.boolean());
+  props.putRight?.faker((faker) => faker.datatype.boolean());
+  props.dividendRight?.faker((faker) => faker.helpers.arrayElement(Object.values(DividendType)));
   props.currency.faker((faker) => faker.finance.currencyCode());
   props.nominalValue.faker((faker) => faker.number.int({ min: 1, max: 999 }));
   props.nominalValueDecimals.faker((faker) => faker.number.int({ min: 1, max: 5 }));
@@ -486,75 +447,4 @@ export const CancelVotingRequestFixture = createFixture<CancelVotingRequest>((re
 export const CancelVotingCommandFixture = createFixture<CancelVotingCommand>((command) => {
   command.securityId.as(() => HederaIdPropsFixture.create().value);
   command.votingId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
-});
-
-export const CreateTrexSuiteEquityRequestFixture = createFixture<CreateTrexSuiteEquityRequest>((request) => {
-  request.salt.faker((faker) => faker.string.alphanumeric({ length: 32 }));
-  request.owner.faker((faker) => faker.finance.accountName());
-  request.irs.faker((faker) => faker.finance.iban());
-  request.onchainId.faker((faker) => faker.finance.ethereumAddress());
-  request.irAgents.faker((faker) => [faker.finance.ethereumAddress()]);
-  request.tokenAgents.faker((faker) => [faker.finance.ethereumAddress()]);
-  request.compliancesModules.faker((faker) => [faker.string.alphanumeric({ length: 32 })]);
-  request.complianceSettings.faker((faker) => [faker.string.alphanumeric({ length: 32 })]);
-  request.claimTopics.faker((faker) => [faker.number.int({ min: 1, max: 10 })]);
-  request.issuers.faker((faker) => [faker.finance.ethereumAddress()]);
-  request.issuerClaims.faker((faker) => [faker.number.int({ min: 1, max: 10 })]);
-  request.name.faker((faker) => faker.company.name());
-  request.symbol.faker((faker) => faker.string.alpha({ length: 3, casing: "upper" }));
-  request.isin.faker((faker) => `US${faker.string.numeric(9)}`);
-  request.decimals.faker((faker) => faker.number.int({ min: 0, max: 18 }));
-  request.isWhiteList.faker((faker) => faker.datatype.boolean());
-  request.isControllable.faker((faker) => faker.datatype.boolean());
-  request.arePartitionsProtected.faker((faker) => faker.datatype.boolean());
-  request.clearingActive.faker((faker) => faker.datatype.boolean());
-  request.internalKycActivated.faker((faker) => faker.datatype.boolean());
-  request.isMultiPartition.faker((faker) => faker.datatype.boolean());
-  const regulationType = CastRegulationType.toNumber(
-    faker.helpers.arrayElement(Object.values(RegulationType).filter((type) => type !== RegulationType.NONE)),
-  );
-  request.regulationType?.as(() => regulationType);
-  request.regulationSubType?.faker((faker) =>
-    regulationType === CastRegulationType.toNumber(RegulationType.REG_S)
-      ? CastRegulationSubType.toNumber(RegulationSubType.NONE)
-      : CastRegulationSubType.toNumber(
-          faker.helpers.arrayElement(
-            Object.values(RegulationSubType).filter((subType) => subType !== RegulationSubType.NONE),
-          ),
-        ),
-  );
-  request.isCountryControlListWhiteList.faker((faker) => faker.datatype.boolean());
-  request.numberOfShares.faker((faker) => faker.number.int({ min: 1, max: 10 }).toString());
-  request.countries?.faker((faker) =>
-    faker.helpers
-      .arrayElements(
-        Array.from({ length: 5 }, () => faker.location.countryCode({ variant: "alpha-2" })),
-        { min: 1, max: 5 },
-      )
-      .join(","),
-  );
-  request.info.faker((faker) => faker.lorem.words());
-  request.currency.faker((faker) => `0x${Buffer.from(faker.finance.currencyCode()).toString("hex")}`);
-  request.dividendRight.faker((faker) =>
-    CastDividendType.toNumber(faker.helpers.arrayElement(Object.values(DividendType))),
-  );
-  request.nominalValue.faker((faker) => faker.finance.amount({ min: 1, max: 10, dec: 2 }));
-  request.nominalValueDecimals.faker((faker) => faker.number.int({ min: 1, max: 5 }));
-  request.votingRight.faker((faker) => faker.datatype.boolean());
-  request.liquidationRight.faker((faker) => faker.datatype.boolean());
-  request.subscriptionRight.faker((faker) => faker.datatype.boolean());
-  request.conversionRight.faker((faker) => faker.datatype.boolean());
-  request.redemptionRight.faker((faker) => faker.datatype.boolean());
-  request.putRight.faker((faker) => faker.datatype.boolean());
-  request.configId.faker(
-    (faker) =>
-      `0x000000000000000000000000000000000000000000000000000000000000000${faker.number.int({ min: 1, max: 9 })}`,
-  );
-  request.configVersion.as(() => 1);
-  request.diamondOwnerAccount.as(() => HederaIdPropsFixture.create().value);
-  request.externalPauses?.as(() => [HederaIdPropsFixture.create().value]);
-  request.externalControlLists?.as(() => [HederaIdPropsFixture.create().value]);
-  request.externalKycLists?.as(() => [HederaIdPropsFixture.create().value]);
-  request.complianceId?.as(() => HederaIdPropsFixture.create().value);
-  request.identityRegistryId?.as(() => HederaIdPropsFixture.create().value);
 });

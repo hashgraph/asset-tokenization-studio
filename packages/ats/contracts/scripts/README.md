@@ -126,7 +126,7 @@ The registry system provides **type-safe access to contract metadata** extracted
 # Regenerate registry from contracts/ directory
 npm run generate:registry
 
-# Output: scripts/domain/atsRegistry.data.ts (auto-generated, do not edit)
+# Output: scripts/domain/atsRegistry.generated.ts (auto-generated, do not edit)
 ```
 
 **What gets generated:**
@@ -140,7 +140,6 @@ export const FACET_REGISTRY = {
         methods: ['grantRole', 'revokeRole', ...],
         events: ['RoleGranted', 'RoleRevoked', ...],
         errors: ['AccessControlUnauthorizedAccount', ...],
-        hasTimeTravel: false,
         resolverKey: undefined,
     },
     // ... 50+ facets
@@ -156,7 +155,7 @@ export const STORAGE_WRAPPER_REGISTRY = {
 
 export const ROLES = {
     DEFAULT_ADMIN_ROLE: '0x0000000000000000000000000000000000000000000000000000000000000000',
-    _PAUSER_ROLE: '0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a',
+    ROLE_PAUSER: '0x3cb8b459fdb6e7dc3d2a2aa529e530f885d45e03584adb438423209c86a2731f',
     // ... all role constants
 }
 ```
@@ -204,8 +203,8 @@ console.log(`Total wrappers: ${allWrappers.length}`);
 ```typescript
 import { ROLES } from "@scripts/domain";
 
-console.log(ROLES._PAUSER_ROLE); // bytes32 value
-console.log(ROLES.CORPORATE_ACTION_ROLE); // bytes32 value
+console.log(ROLES.ROLE_PAUSER); // bytes32 value
+console.log(ROLES.ROLE_CORPORATE_ACTION); // bytes32 value
 ```
 
 ### Downstream Projects
@@ -220,7 +219,6 @@ const result = await generateRegistryPipeline({
   contractsPath: "./contracts",
   outputPath: "./generated/myRegistry.data.ts",
   includeStorageWrappers: true,
-  includeTimeTravel: true,
   logLevel: "INFO",
 });
 
@@ -317,11 +315,55 @@ if (conflicts.length > 0) {
 
 ### Registry Files
 
-- **`atsRegistry.data.ts`** - Auto-generated registry data (do not edit manually)
-- **`atsRegistry.ts`** - ATS-specific registry wrapper with helpers
+- **`atsRegistry.generated.ts`** - Auto-generated registry data, **gitignored** (do not edit manually)
+- **`atsRoles.generated.ts`** - Auto-generated role-hash map, **checked into git** (audit-visible)
+- **`atsRegistry.ts`** - ATS-specific registry wrapper with **lazy-load** helpers
 - **`registryFactory.ts`** - Generic factory for creating registry helpers
 - **`generateRegistryPipeline.ts`** - Reusable pipeline for generating registries
 - **`combineRegistries.ts`** - Multi-registry merging utilities (v1.17.0+)
+
+### Two-file split + lazy-load contract (BBND-1766)
+
+The registry generator emits **two** files with different lifecycles:
+
+| File                       | In git?             | Why                                                                                                                                                                                                                         |
+| -------------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `atsRegistry.generated.ts` | **No** (gitignored) | Heavy (~14 k lines) facet / contract / storage-wrapper registry. Causes recurring merge conflicts and reviewer noise. Regenerated on every install / compile so a fresh checkout has the file before any consumer reads it. |
+| `atsRoles.generated.ts`    | **Yes**             | Small (~70 lines), audit-relevant. Role-hash changes are security-visible in PR diffs; burying them inside the 14 k-line registry would hide them.                                                                          |
+
+To keep this gitignore safe at bootstrap time (so `hardhat compile` can run on a
+fresh clone before the file exists), `atsRegistry.ts` exposes the registry data
+through **lazy access only**:
+
+- `import type` from `./atsRegistry.generated` — fully erased at runtime; Node
+  never resolves the file at module load.
+- `require("./atsRegistry.generated")` is invoked only inside function bodies
+  (`getFacetDefinition`, `getAllFacets`, etc.) and inside `Proxy` handlers for
+  the legacy raw exports (`FACET_REGISTRY`, `INFRASTRUCTURE_CONTRACTS`,
+  `STORAGE_WRAPPER_REGISTRY`).
+- Counts that used to be exported as `const ... : number` are now functions
+  (`getFacetRegistryCount()`, `getStorageWrapperRegistryCount()`) because a
+  primitive cannot be lazy.
+
+This means module-load of `atsRegistry.ts` (and anything that transitively
+imports it via the `@scripts` barrel) never touches the gitignored file.
+
+#### Prepare-hook contract
+
+`packages/ats/contracts/package.json` declares:
+
+```jsonc
+"scripts": {
+  "prepare": "npx hardhat compile"
+}
+```
+
+`prepare` runs after every `npm install` / `npm ci` (per-workspace). It invokes
+`hardhat compile`, which runs the registry generator as a post-compile step.
+The CI gate in `.github/workflows/100-flow-ats-test.yaml` asserts that
+`atsRegistry.generated.ts` exists after `npm ci` — catching any regression in
+the prepare hook before downstream build steps fail with a confusing
+module-not-found.
 
 ---
 
@@ -471,9 +513,6 @@ HEDERA_TESTNET_MIRROR_NODE_ENDPOINT='https://testnet.mirrornode.hedera.com'
 
 # Deployer private key (hex format with 0x prefix)
 HEDERA_TESTNET_PRIVATE_KEY_0='0x...'
-
-# Optional: TimeTravel mode (testing only)
-USE_TIMETRAVEL=false
 ```
 
 ### Step 2: Deploy
@@ -596,9 +635,7 @@ const [signer] = await ethers.getSigners();
 // or Standalone
 const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
 
-const output = await deploySystemWithNewBlr(signer, "hedera-testnet", {
-  useTimeTravel: false,
-});
+const output = await deploySystemWithNewBlr(signer, "hedera-testnet");
 ```
 
 ---
@@ -843,12 +880,11 @@ npm run upgrade:configs:hedera:testnet
 - `BLR_ADDRESS` - Existing BLR address (required)
 - `PROXY_ADDRESSES` - Comma-separated proxy addresses to update (optional)
 - `CONFIGURATIONS` - Which configs to create: `equity`, `bond`, or `both` (default: `both`)
-- `USE_TIMETRAVEL` - Include TimeTravel facet variants (default: `false`)
 
 ### What Happens During Upgrade
 
 1. **Validate BLR** - Checks BLR exists on-chain
-2. **Deploy Facets** - Deploys all 48-49 facets (with optional TimeTravel variants)
+2. **Deploy Facets** - Deploys all facets
 3. **Register in BLR** - Registers facets, creating new global version
 4. **Create Configurations** - Creates new Equity/Bond configuration versions (v2, v3, etc.)
 5. **Update Proxies** (optional) - Updates ResolverProxy tokens to new version
@@ -1141,7 +1177,7 @@ scripts/
 │ ├── index.ts # Public API exports
 │ ├── constants.ts # ATS constants (roles, regulations, etc.)
 │ ├── atsRegistry.ts # ATS registry with helpers
-│ ├── atsRegistry.data.ts # Auto-generated registry data
+│ ├── atsRegistry.generated.ts # Auto-generated registry data
 │ │
 │ ├── equity/ # Equity token logic
 │ │ └── createConfiguration.ts
@@ -1222,7 +1258,6 @@ const blrContract = BusinessLogicResolver__factory.connect(blrAddress, signer)
 await createEquityConfiguration(provider, {
   blrContract,  // Contract instance, not address
   facetAddresses: { ... },
-  useTimeTravel: false
 })
 ```
 
@@ -1236,7 +1271,6 @@ Complete deployment workflows that compose operations and modules:
 import { deploySystemWithNewBlr } from "./workflows/deploySystemWithNewBlr";
 
 const output = await deploySystemWithNewBlr(signer, network, {
-  useTimeTravel: false,
   saveOutput: true,
 });
 ```
@@ -1266,7 +1300,6 @@ async function main() {
   // const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider)
 
   const output = await deploySystemWithNewBlr(signer, "hedera-testnet", {
-    useTimeTravel: false,
     saveOutput: true,
   });
 
@@ -1293,7 +1326,6 @@ async function main() {
   // Deploy specific facets
   const facetsResult = await deployFacets(signer, {
     facetNames: ["AccessControlFacet", "KycFacet"],
-    useTimeTravel: false,
   });
 
   // Deploy BusinessLogicResolver
@@ -1368,7 +1400,6 @@ async function deploySystemWithNewBlr(
 ): Promise<DeploymentOutput>;
 
 interface DeploySystemWithNewBlrOptions {
-  useTimeTravel?: boolean;
   saveOutput?: boolean;
   outputPath?: string;
   confirmations?: number; // Default: 2 (increased for Hedera reliability)
@@ -1394,7 +1425,6 @@ async function deploySystemWithExistingBlr(
 ): Promise<DeploymentWithExistingBlrOutput>;
 
 interface DeploySystemWithExistingBlrOptions {
-  useTimeTravel?: boolean;
   saveOutput?: boolean;
   outputPath?: string;
   deployFacets?: boolean;
@@ -1424,9 +1454,10 @@ async function deployBlr(signer: Signer, options?: { proxyAdminAddress?: string 
 async function createEquityConfiguration(
   blrContract: Contract, // BLR contract instance
   facetAddresses: Record<string, string>,
-  useTimeTravel?: boolean,
   partialBatchDeploy?: boolean,
   batchSize?: number,
+  confirmations?: number,
+  retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>>;
 ```
 
@@ -1436,9 +1467,10 @@ async function createEquityConfiguration(
 async function createBondConfiguration(
   blrContract: Contract, // BLR contract instance
   facetAddresses: Record<string, string>,
-  useTimeTravel?: boolean,
   partialBatchDeploy?: boolean,
   batchSize?: number,
+  confirmations?: number,
+  retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>>;
 ```
 
@@ -1497,7 +1529,6 @@ const facetName = TEST_STANDARD_CONTRACTS.ACCESS_CONTROL_FACET;
 - `TEST_TX_HASHES`: Sample transaction hashes
 - `TEST_TIMESTAMPS`: ISO format timestamps
 - `TEST_STANDARD_CONTRACTS`: Real contract/facet names
-- `TEST_TIME_TRAVEL_VARIANTS`: TimeTravel facet variant names
 
 ### Running Tests
 

@@ -69,7 +69,6 @@ export * from "./infrastructure/utils/deploymentFiles";
 export * from "./infrastructure/utils/verification";
 export * from "./infrastructure/utils/transaction";
 export * from "./infrastructure/utils/logging";
-export * from "./infrastructure/utils/naming";
 export * from "./infrastructure/utils/hedera";
 export * from "./infrastructure/utils/selector";
 export * from "./infrastructure/utils/time";
@@ -164,7 +163,7 @@ export * from "./tools/scanner/metadataExtractor";
 // Utilities
 export * from "./tools/utils/fileUtils";
 
-// Solidity utilities (selective export to avoid conflicts with infrastructure/utils/naming)
+// Solidity utilities
 export {
   extractContractNames,
   extractRoles,
@@ -172,9 +171,7 @@ export {
   extractNatspecDescription,
   extractImports,
   isFacetName,
-  getBaseName,
   extractSolidityVersion,
   implementsInterface,
   extractInheritance,
-  // Note: isTimeTravelVariant already exported from infrastructure/utils/naming
 } from "./tools/utils/solidityUtils";

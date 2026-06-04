@@ -3,10 +3,18 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type IAsset, type ResolverProxy } from "@contract-types";
+import { type IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
-import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
+import {
+  ATS_ROLES,
+  DEFAULT_PARTITION,
+  EMPTY_HEX_BYTES,
+  EMPTY_STRING,
+  ZERO,
+  EQUITY_CONFIG_ID,
+  RESOLVER_KEY_MINT_BY_PARTITION,
+} from "@scripts";
 
 const AMOUNT = 1000;
 const DATA = "0x1234";
@@ -24,6 +32,7 @@ describe("MintByPartitionFacet Tests", () => {
   let signer_D: HardhatEthersSigner;
   let signer_E: HardhatEthersSigner;
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   describe("Single partition mode", () => {
     async function deploySinglePartitionFixture() {
@@ -42,12 +51,12 @@ describe("MintByPartitionFacet Tests", () => {
       signer_D = base.user3;
       signer_E = base.user4;
       asset = await ethers.getContractAt("IAsset", diamond.target);
-
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
       await executeRbac(asset, [
-        { role: ATS_ROLES.ISSUER_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES.PAUSER_ROLE, members: [signer_C.address] },
+        { role: ATS_ROLES.ROLE_ISSUER, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+        { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_PAUSER, members: [signer_C.address] },
       ]);
 
       await asset.addIssuer(signer_A.address);
@@ -84,7 +93,7 @@ describe("MintByPartitionFacet Tests", () => {
         }),
       )
         .to.be.revertedWithCustomError(asset, "AccountHasNoRoles")
-        .withArgs(signer_B.address, [ATS_ROLES.ISSUER_ROLE, ATS_ROLES.AGENT_ROLE]);
+        .withArgs(signer_B.address, [ATS_ROLES.ROLE_ISSUER, ATS_ROLES.ROLE_AGENT]);
     });
 
     it("GIVEN a paused token WHEN issueByPartition THEN reverts with IsPaused", async () => {
@@ -114,7 +123,7 @@ describe("MintByPartitionFacet Tests", () => {
     });
 
     it("GIVEN a caller with agent role WHEN issueByPartition THEN emits IssuedByPartition and updates balances", async () => {
-      await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_B.address);
+      await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_B.address);
 
       await expect(
         asset.connect(signer_B).issueByPartition({
@@ -131,7 +140,7 @@ describe("MintByPartitionFacet Tests", () => {
     });
 
     it("GIVEN a recovered caller WHEN issueByPartition THEN reverts with WalletRecovered", async () => {
-      await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_C.address);
+      await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_C.address);
       await asset.connect(signer_C).recoveryAddress(signer_A.address, signer_E.address, ethers.ZeroAddress);
 
       await expect(
@@ -170,7 +179,7 @@ describe("MintByPartitionFacet Tests", () => {
 
     it("GIVEN a recovered token holder WHEN issueByPartition THEN reverts with WalletRecovered", async () => {
       await asset.connect(signer_B).grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-      await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_C.address);
+      await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_C.address);
       await asset.connect(signer_C).recoveryAddress(signer_E.address, signer_D.address, ethers.ZeroAddress);
 
       await expect(
@@ -240,9 +249,9 @@ describe("MintByPartitionFacet Tests", () => {
       asset = await ethers.getContractAt("IAsset", diamond.target);
 
       await executeRbac(asset, [
-        { role: ATS_ROLES.ISSUER_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_ISSUER, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+        { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
       ]);
 
       await asset.addIssuer(signer_A.address);
@@ -286,7 +295,7 @@ describe("MintByPartitionFacet Tests", () => {
     });
 
     it("GIVEN per-partition max supply is set WHEN issueByPartition exceeds partition cap THEN reverts with MaxSupplyReachedForPartition", async () => {
-      await asset.grantRole(ATS_ROLES.CAP_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_CAP, signer_A.address);
       await asset.setMaxSupplyByPartition(CUSTOM_PARTITION, PARTITION_CAP);
 
       await expect(
@@ -307,8 +316,8 @@ describe("MintByPartitionFacet Tests", () => {
       };
 
       await asset.changeSystemTimestamp(100n);
-      await asset.grantRole(ATS_ROLES.CAP_ROLE, signer_A.address);
-      await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_CAP, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
 
       await asset.setMaxSupplyByPartition(CUSTOM_PARTITION, AMOUNT);
       await asset.issueByPartition({
@@ -338,13 +347,88 @@ describe("MintByPartitionFacet Tests", () => {
     it("GIVEN a deactivated asset WHEN issueByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset
           .connect(base.deployer)
           .issueByPartition({ partition: ethers.ZeroHash, tokenHolder: ethers.ZeroAddress, value: 0, data: "0x" }),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN issue THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).issue(ethers.ZeroAddress, 0, "0x"),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("initializeMintByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeMintByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeMintByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeMintByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeMintByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_MINT_BY_PARTITION, 1);
+    });
+  });
+
+  describe("initializeMintByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeMintByPartition is called THEN emits MintByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_MINT_BY_PARTITION);
+      await expect(asset.initializeMintByPartition()).to.emit(asset, "MintByPartitionInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeMintByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeMintByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeMintByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeMintByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_MINT_BY_PARTITION, 1);
+    });
+  });
+
+  describe("initializeMintByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeMintByPartition is called THEN emits MintByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_MINT_BY_PARTITION);
+      await expect(asset.initializeMintByPartition()).to.emit(asset, "MintByPartitionInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational WHEN issueByPartition is called THEN AssetNotOperational", async () => {
+      await expect(
+        asset.issueByPartition({
+          partition: ethers.ZeroHash,
+          tokenHolder: ethers.ZeroAddress,
+          value: 0n,
+          data: "0x",
+        }),
+      )
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 });

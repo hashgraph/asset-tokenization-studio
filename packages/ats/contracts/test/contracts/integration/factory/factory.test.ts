@@ -5,7 +5,8 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import {
   BusinessLogicResolver,
-  IFactory,
+  IMockFactory,
+  IMockFactory__factory,
   type AccessControl,
   type ControlList,
   type ControllerFacet,
@@ -14,7 +15,7 @@ import {
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture } from "@test";
 import { getRegulationData, getSecurityData } from "@test";
-import { getEquityDetails } from "@test";
+import { makeEquityDetailsData } from "@test";
 import {
   RegulationType,
   RegulationSubType,
@@ -25,6 +26,7 @@ import {
   BOND_CONFIG_ID,
   BOND_FIXED_RATE_CONFIG_ID,
   BOND_KPI_LINKED_RATE_CONFIG_ID,
+  DEPOSIT_TOKEN_CONFIG_ID,
 } from "@scripts";
 import { Rbac, SecurityType } from "@scripts/domain";
 import { decodeEvent } from "@scripts/infrastructure";
@@ -41,7 +43,7 @@ describe("Factory Tests", () => {
   const listOfCountries = "ES,FR,CH";
   const info = "info";
 
-  let factory: IFactory;
+  let factory: IMockFactory;
   let businessLogicResolver: BusinessLogicResolver;
   let accessControlFacet: AccessControl;
   let controlListFacet: ControlList;
@@ -50,23 +52,23 @@ describe("Factory Tests", () => {
 
   const listOfRoles = [
     ATS_ROLES.DEFAULT_ADMIN_ROLE,
-    ATS_ROLES.CONTROL_LIST_ROLE,
-    ATS_ROLES.CORPORATE_ACTION_ROLE,
-    ATS_ROLES.ISSUER_ROLE,
-    ATS_ROLES.DOCUMENTER_ROLE,
-    ATS_ROLES.CONTROLLER_ROLE,
-    ATS_ROLES.PAUSER_ROLE,
-    ATS_ROLES.SNAPSHOT_ROLE,
-    ATS_ROLES.LOCKER_ROLE,
+    ATS_ROLES.ROLE_CONTROL_LIST,
+    ATS_ROLES.ROLE_CORPORATE_ACTION,
+    ATS_ROLES.ROLE_ISSUER,
+    ATS_ROLES.ROLE_DOCUMENTER,
+    ATS_ROLES.ROLE_CONTROLLER,
+    ATS_ROLES.ROLE_PAUSER,
+    ATS_ROLES.ROLE_SNAPSHOT,
+    ATS_ROLES.ROLE_LOCKER,
   ];
   let listOfMembers: string[];
 
   async function deployFactoryFixture() {
     const base = await deployAtsInfrastructureFixture();
-    factory = base.factory;
-    businessLogicResolver = base.blr;
     signer_A = base.deployer;
     signer_B = base.user1;
+    factory = IMockFactory__factory.connect(await base.factory.getAddress(), signer_A);
+    businessLogicResolver = base.blr;
 
     listOfMembers = [signer_A.address, signer_B.address];
     for (let i = 0; i < listOfRoles.length; i++) {
@@ -92,13 +94,13 @@ describe("Factory Tests", () => {
   });
 
   describe("Modifier Tests - Comprehensive Coverage", () => {
-    describe("checkResolver modifier", () => {
+    describe("onlyValidResolver modifier", () => {
       it("GIVEN empty resolver (address(0)) WHEN deploying equity THEN reverts with EmptyResolver", async () => {
         const equityData = {
           security: getSecurityData(businessLogicResolver, {
             rbacs: init_rbacs,
           }),
-          equityDetails: getEquityDetails(),
+          equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolver = ADDRESS_ZERO;
         equityData.security.resolverProxyConfiguration = {
@@ -133,12 +135,12 @@ describe("Factory Tests", () => {
         );
       });
 
-      it("GIVEN valid resolver WHEN deploying equity THEN passes checkResolver validation", async () => {
+      it("GIVEN valid resolver WHEN deploying equity THEN passes onlyValidResolver validation", async () => {
         const equityData = {
           security: getSecurityData(businessLogicResolver, {
             rbacs: init_rbacs,
           }),
-          equityDetails: getEquityDetails(),
+          equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfiguration = {
           key: EQUITY_CONFIG_ID,
@@ -149,14 +151,14 @@ describe("Factory Tests", () => {
       });
     });
 
-    describe("checkISIN modifier", () => {
+    describe("onlyValidISIN modifier", () => {
       it("GIVEN ISIN with length < 12 WHEN deploying equity THEN reverts with WrongISIN", async () => {
         const equityData = {
           security: getSecurityData(businessLogicResolver, {
             erc20MetadataInfo: { isin: "US037833100" }, // 11 characters
             rbacs: init_rbacs,
           }),
-          equityDetails: getEquityDetails(),
+          equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfiguration = {
           key: EQUITY_CONFIG_ID,
@@ -175,7 +177,7 @@ describe("Factory Tests", () => {
             erc20MetadataInfo: { isin: "US03783310051" }, // 13 characters
             rbacs: init_rbacs,
           }),
-          equityDetails: getEquityDetails(),
+          equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfiguration = {
           key: EQUITY_CONFIG_ID,
@@ -215,7 +217,7 @@ describe("Factory Tests", () => {
             erc20MetadataInfo: { isin: "US0378331009" }, // Wrong checksum digit
             rbacs: init_rbacs,
           }),
-          equityDetails: getEquityDetails(),
+          equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfiguration = {
           key: EQUITY_CONFIG_ID,
@@ -234,7 +236,7 @@ describe("Factory Tests", () => {
             erc20MetadataInfo: { isin: "US0378331009" }, // Wrong checksum digit
             rbacs: init_rbacs,
           }),
-          equityDetails: getEquityDetails(),
+          equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfiguration = {
           key: EQUITY_CONFIG_ID,
@@ -247,7 +249,7 @@ describe("Factory Tests", () => {
         );
       });
 
-      it("GIVEN valid ISIN WHEN deploying bond THEN passes checkISIN validation", async () => {
+      it("GIVEN valid ISIN WHEN deploying bond THEN passes onlyValidISIN validation", async () => {
         const bondData = {
           security: getSecurityData(businessLogicResolver, {
             rbacs: init_rbacs,
@@ -265,7 +267,7 @@ describe("Factory Tests", () => {
       });
     });
 
-    describe("checkAdmins modifier", () => {
+    describe("onlyValidAdmins modifier", () => {
       it("GIVEN rbacs with empty members array for admin role WHEN deploying equity THEN reverts with NoInitialAdmins", async () => {
         const emptyAdminRbacs: Rbac[] = [
           {
@@ -278,7 +280,7 @@ describe("Factory Tests", () => {
           security: getSecurityData(businessLogicResolver, {
             rbacs: emptyAdminRbacs,
           }),
-          equityDetails: getEquityDetails(),
+          equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfiguration = {
           key: EQUITY_CONFIG_ID,
@@ -321,7 +323,7 @@ describe("Factory Tests", () => {
       it("GIVEN rbacs with no admin role WHEN deploying equity THEN reverts with NoInitialAdmins", async () => {
         const noAdminRbacs: Rbac[] = [
           {
-            role: ATS_ROLES.CONTROL_LIST_ROLE,
+            role: ATS_ROLES.ROLE_CONTROL_LIST,
             members: [signer_A.address],
           },
         ];
@@ -330,7 +332,7 @@ describe("Factory Tests", () => {
           security: getSecurityData(businessLogicResolver, {
             rbacs: noAdminRbacs,
           }),
-          equityDetails: getEquityDetails(),
+          equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfiguration = {
           key: EQUITY_CONFIG_ID,
@@ -355,7 +357,7 @@ describe("Factory Tests", () => {
           security: getSecurityData(businessLogicResolver, {
             rbacs: mixedAdminRbacs,
           }),
-          equityDetails: getEquityDetails(),
+          equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfiguration = {
           key: EQUITY_CONFIG_ID,
@@ -368,7 +370,7 @@ describe("Factory Tests", () => {
       it("GIVEN rbacs with multiple roles where admin role is last WHEN deploying bond THEN passes validation", async () => {
         const orderedRbacs: Rbac[] = [
           {
-            role: ATS_ROLES.CONTROL_LIST_ROLE,
+            role: ATS_ROLES.ROLE_CONTROL_LIST,
             members: [signer_A.address],
           },
           {
@@ -394,13 +396,13 @@ describe("Factory Tests", () => {
       });
     });
 
-    describe("checkRegulation modifier", () => {
+    describe("onlyValidRegulation modifier", () => {
       it("GIVEN NONE regulation type with non-NONE subtype WHEN deploying equity THEN reverts with RegulationTypeAndSubTypeForbidden", async () => {
         const equityData = {
           security: getSecurityData(businessLogicResolver, {
             rbacs: init_rbacs,
           }),
-          equityDetails: getEquityDetails(),
+          equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfiguration = {
           key: EQUITY_CONFIG_ID,
@@ -446,7 +448,7 @@ describe("Factory Tests", () => {
           security: getSecurityData(businessLogicResolver, {
             rbacs: init_rbacs,
           }),
-          equityDetails: getEquityDetails(),
+          equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfiguration = {
           key: EQUITY_CONFIG_ID,
@@ -468,7 +470,7 @@ describe("Factory Tests", () => {
           security: getSecurityData(businessLogicResolver, {
             rbacs: init_rbacs,
           }),
-          equityDetails: getEquityDetails(),
+          equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfiguration = {
           key: EQUITY_CONFIG_ID,
@@ -561,7 +563,7 @@ describe("Factory Tests", () => {
     it("GIVEN an empty Resolver WHEN deploying a new resolverProxy THEN transaction fails", async () => {
       const equityData = {
         security: getSecurityData(businessLogicResolver),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -582,7 +584,7 @@ describe("Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           erc20MetadataInfo: { isin: "short" },
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -606,7 +608,7 @@ describe("Factory Tests", () => {
     it("GIVEN no admin WHEN deploying a new resolverProxy THEN transaction fails", async () => {
       const equityData = {
         security: getSecurityData(businessLogicResolver),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -626,7 +628,7 @@ describe("Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -653,7 +655,7 @@ describe("Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -680,7 +682,7 @@ describe("Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -720,20 +722,10 @@ describe("Factory Tests", () => {
       expect(metadata.info.isin).to.be.equal(equityData.security.erc20MetadataInfo.isin);
       expect(metadata.securityType).to.be.equal(SecurityType.EQUITY);
 
-      const equityFacet = await ethers.getContractAt("Equity", equityAddress);
-
-      const equityMetadata = await equityFacet.getEquityDetails();
-      expect(equityMetadata.votingRight).to.equal(equityData.equityDetails.votingRight);
-      expect(equityMetadata.informationRight).to.equal(equityData.equityDetails.informationRight);
-      expect(equityMetadata.liquidationRight).to.equal(equityData.equityDetails.liquidationRight);
-      expect(equityMetadata.subscriptionRight).to.equal(equityData.equityDetails.subscriptionRight);
-      expect(equityMetadata.conversionRight).to.equal(equityData.equityDetails.conversionRight);
-      expect(equityMetadata.redemptionRight).to.equal(equityData.equityDetails.redemptionRight);
-      expect(equityMetadata.putRight).to.equal(equityData.equityDetails.putRight);
-      expect(equityMetadata.dividendRight).to.equal(equityData.equityDetails.dividendRight);
-      expect(equityMetadata.currency).to.equal(equityData.equityDetails.currency);
-      expect(equityMetadata.nominalValue).to.equal(equityData.equityDetails.nominalValue);
-      expect(equityMetadata.nominalValueDecimals).to.equal(equityData.equityDetails.nominalValueDecimals);
+      const nominalValueFacet = await ethers.getContractAt("NominalValue", equityAddress);
+      expect(await nominalValueFacet.getNominalValueCurrency()).to.equal(equityData.equityDetails.currency);
+      expect(await nominalValueFacet.getNominalValue()).to.equal(equityData.equityDetails.nominalValue);
+      expect(await nominalValueFacet.getNominalValueDecimals()).to.equal(equityData.equityDetails.nominalValueDecimals);
 
       const capFacet = await ethers.getContractAt("Cap", equityAddress);
 
@@ -899,13 +891,15 @@ describe("Factory Tests", () => {
       const maxSupply = await capFacet.getMaxSupply();
       expect(maxSupply).to.equal(bondData.security.maxSupply);
 
-      const bondFacet = await ethers.getContractAt("BondRead", bondAddress);
-      const bondDetails = await bondFacet.getBondDetails();
-      expect(bondDetails.currency).to.be.deep.equal(bondData.bondDetails.currency);
-      expect(bondDetails.nominalValue).to.be.deep.equal(bondData.bondDetails.nominalValue);
-      expect(bondDetails.nominalValueDecimals).to.be.deep.equal(bondData.bondDetails.nominalValueDecimals);
-      expect(bondDetails.startingDate).to.be.deep.equal(bondData.bondDetails.startingDate);
-      expect(bondDetails.maturityDate).to.be.deep.equal(bondData.bondDetails.maturityDate);
+      const nominalFacet = await ethers.getContractAt("NominalValue", bondAddress);
+
+      expect(await nominalFacet.getNominalValueCurrency()).to.be.deep.equal(bondData.bondDetails.currency);
+      expect(await nominalFacet.getNominalValue()).to.be.deep.equal(bondData.bondDetails.nominalValue);
+      expect(await nominalFacet.getNominalValueDecimals()).to.be.deep.equal(bondData.bondDetails.nominalValueDecimals);
+
+      const maturityFacet = await ethers.getContractAt("Maturity", bondAddress);
+      expect(await maturityFacet.getMaturityDate()).to.be.deep.equal(bondData.bondDetails.maturityDate);
+
       const couponFacet = await ethers.getContractAt("CouponFacet", bondAddress);
       const couponCount = await couponFacet.getCouponCount();
       expect(couponCount).to.equal(0);
@@ -972,6 +966,110 @@ describe("Factory Tests", () => {
     });
   });
 
+  describe("Deposit Token tests", () => {
+    let depositTokenData: ReturnType<typeof buildDepositTokenData>;
+
+    function buildDepositTokenData() {
+      return {
+        security: getSecurityData(businessLogicResolver, {
+          rbacs: init_rbacs,
+          resolverProxyConfiguration: { key: DEPOSIT_TOKEN_CONFIG_ID, version: 1 },
+        }),
+      };
+    }
+
+    beforeEach(() => {
+      depositTokenData = buildDepositTokenData();
+    });
+
+    it("GIVEN an empty Resolver WHEN deploying a new deposit token THEN transaction fails", async () => {
+      depositTokenData.security.resolver = ADDRESS_ZERO;
+
+      await expect(factory.deployDepositToken(depositTokenData, getRegulationData())).to.be.revertedWithCustomError(
+        factory,
+        "EmptyResolver",
+      );
+    });
+
+    it("GIVEN a wrong ISIN WHEN deploying a new deposit token THEN transaction fails", async () => {
+      depositTokenData.security.erc20MetadataInfo.isin = "short";
+
+      await expect(
+        factory.deployDepositToken(depositTokenData, getRegulationData(), {
+          gasLimit: GAS_LIMIT.default,
+        }),
+      ).to.be.revertedWithCustomError(factory, "WrongISIN");
+
+      depositTokenData.security.erc20MetadataInfo.isin = "SJ5633813321";
+      await expect(factory.deployDepositToken(depositTokenData, getRegulationData())).to.be.revertedWithCustomError(
+        factory,
+        "WrongISINChecksum",
+      );
+    });
+
+    it("GIVEN no admin WHEN deploying a new deposit token THEN transaction fails", async () => {
+      depositTokenData.security.rbacs = [];
+
+      await expect(factory.deployDepositToken(depositTokenData, getRegulationData())).to.be.revertedWithCustomError(
+        factory,
+        "NoInitialAdmins",
+      );
+    });
+
+    it("GIVEN wrong regulation type WHEN deploying a new deposit token THEN transaction fails", async () => {
+      const factoryRegulationData = getRegulationData({
+        regulationType: RegulationType.NONE,
+        regulationSubType,
+        additionalSecurityData: {
+          countriesControlListType,
+          listOfCountries,
+          info,
+        },
+      });
+
+      await expect(factory.deployDepositToken(depositTokenData, factoryRegulationData))
+        .to.be.revertedWithCustomError(factory, "RegulationTypeAndSubTypeForbidden")
+        .withArgs(RegulationType.NONE, regulationSubType);
+    });
+
+    it("GIVEN the proper information WHEN deploying a new deposit token THEN transaction succeeds", async () => {
+      const tx = factory.deployDepositToken(depositTokenData, getRegulationData());
+      await expect(tx).to.emit(factory, "DepositTokenDeployed");
+
+      const result = await tx;
+      const receipt = await result.wait();
+      const decoded = await decodeEvent(factory, "DepositTokenDeployed", receipt);
+      const depositTokenAddress = decoded.depositTokenAddress;
+
+      await readFacets(depositTokenAddress);
+
+      for (let i = 0; i < listOfMembers.length; i++) {
+        const roleMemberCount = await accessControlFacet.getRoleMemberCount(listOfRoles[i]);
+        const roleMember = await accessControlFacet.getRoleMembers(listOfRoles[i], 0, 2);
+        expect(roleMemberCount).to.be.equal(2);
+        expect(roleMember[0]).to.be.equal(listOfMembers[0]);
+        expect(roleMember[1]).to.be.equal(listOfMembers[1]);
+      }
+
+      const whiteList = await controlListFacet.getControlListType();
+      expect(whiteList).to.be.equal(depositTokenData.security.isWhiteList);
+
+      const controllable = await controllerFacet.isControllable();
+      expect(controllable).to.be.equal(depositTokenData.security.isControllable);
+
+      const metadata = await coreFacet.getERC20Metadata();
+      expect(metadata.info.name).to.be.equal(depositTokenData.security.erc20MetadataInfo.name);
+      expect(metadata.info.symbol).to.be.equal(depositTokenData.security.erc20MetadataInfo.symbol);
+      expect(metadata.info.decimals).to.be.equal(depositTokenData.security.erc20MetadataInfo.decimals);
+      expect(metadata.info.isin).to.be.equal(depositTokenData.security.erc20MetadataInfo.isin);
+      expect(metadata.securityType).to.be.equal(SecurityType.DEPOSIT_TOKEN);
+
+      // Cap initialised from SecurityData.maxSupply
+      const capFacet = await ethers.getContractAt("Cap", depositTokenAddress);
+      expect(await capFacet.getMaxSupply()).to.equal(depositTokenData.security.maxSupply);
+    });
+  });
+
   describe("getAppliedRegulationData tests", () => {
     it("GIVEN a valid regulation type and subtype WHEN calling getAppliedRegulationData THEN returns regulation data", async () => {
       const regulationType = RegulationType.REG_D;
@@ -1011,7 +1109,7 @@ describe("Factory Tests", () => {
           erc20MetadataInfo: { isin: "US037833100" }, // 11 characters - too short
           rbacs: init_rbacs,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -1032,7 +1130,7 @@ describe("Factory Tests", () => {
           erc20MetadataInfo: { isin: "US03783310051" }, // 13 characters - too long
           rbacs: init_rbacs,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -1053,7 +1151,7 @@ describe("Factory Tests", () => {
           erc20MetadataInfo: { isin: "" }, // Empty string
           rbacs: init_rbacs,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -1712,7 +1810,7 @@ describe("Factory Tests", () => {
     });
   });
 
-  describe("checkAdmins edge cases", () => {
+  describe("onlyValidAdmins edge cases", () => {
     it("GIVEN rbacs with empty members array for admin role WHEN deploying equity THEN transaction fails", async () => {
       const emptyAdminRbacs: Rbac[] = [
         {
@@ -1725,7 +1823,7 @@ describe("Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: emptyAdminRbacs,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -1752,7 +1850,7 @@ describe("Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: zeroAddressAdminRbacs,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -1770,11 +1868,11 @@ describe("Factory Tests", () => {
     it("GIVEN rbacs with multiple roles but no admin role WHEN deploying equity THEN transaction fails", async () => {
       const noAdminRbacs: Rbac[] = [
         {
-          role: ATS_ROLES.CONTROL_LIST_ROLE,
+          role: ATS_ROLES.ROLE_CONTROL_LIST,
           members: [signer_A.address],
         },
         {
-          role: ATS_ROLES.ISSUER_ROLE,
+          role: ATS_ROLES.ROLE_ISSUER,
           members: [signer_B.address],
         },
       ];
@@ -1783,7 +1881,7 @@ describe("Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: noAdminRbacs,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -1810,7 +1908,7 @@ describe("Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: mixedAdminRbacs,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -1825,11 +1923,11 @@ describe("Factory Tests", () => {
     it("GIVEN rbacs with non-admin roles followed by admin role WHEN deploying bond THEN transaction succeeds", async () => {
       const orderedRbacs: Rbac[] = [
         {
-          role: ATS_ROLES.CONTROL_LIST_ROLE,
+          role: ATS_ROLES.ROLE_CONTROL_LIST,
           members: [signer_A.address],
         },
         {
-          role: ATS_ROLES.ISSUER_ROLE,
+          role: ATS_ROLES.ROLE_ISSUER,
           members: [signer_B.address],
         },
         {

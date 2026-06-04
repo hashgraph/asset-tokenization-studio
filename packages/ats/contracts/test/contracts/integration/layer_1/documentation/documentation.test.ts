@@ -3,12 +3,12 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { grantRoleAndPauseToken } from "../../../../common";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac } from "@test";
-import { ATS_ROLES } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEY_DOCUMENTATION } from "@scripts";
 
 const documentName_1 = "0x000000000000000000000000000000000000000000000000000000000000aa23";
 const documentName_2 = "0x000000000000000000000000000000000000000000000000000000000000bb23";
@@ -24,6 +24,7 @@ describe("Documentation Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityTokenFixture() {
     const base = await deployEquityTokenFixture();
@@ -33,10 +34,11 @@ describe("Documentation Tests", () => {
     signer_C = base.user2;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_B.address],
       },
     ]);
@@ -63,7 +65,7 @@ describe("Documentation Tests", () => {
 
   it("GIVEN a paused Token WHEN setDocument THEN transaction fails with IsPaused", async () => {
     // Granting Role to account C and Pause
-    await grantRoleAndPauseToken(asset, ATS_ROLES.DOCUMENTER_ROLE, signer_A, signer_B, signer_C.address);
+    await grantRoleAndPauseToken(asset, ATS_ROLES.ROLE_DOCUMENTER, signer_A, signer_B, signer_C.address);
 
     // add document fails
     await expect(
@@ -73,7 +75,7 @@ describe("Documentation Tests", () => {
 
   it("GIVEN a paused Token WHEN removeDocument THEN transaction fails with IsPaused", async () => {
     // Granting Role to account C and Pause
-    await grantRoleAndPauseToken(asset, ATS_ROLES.DOCUMENTER_ROLE, signer_A, signer_B, signer_C.address);
+    await grantRoleAndPauseToken(asset, ATS_ROLES.ROLE_DOCUMENTER, signer_A, signer_B, signer_C.address);
 
     // remove document
     await expect(asset.connect(signer_C).removeDocument(documentName_1)).to.be.revertedWithCustomError(
@@ -83,7 +85,7 @@ describe("Documentation Tests", () => {
   });
 
   it("GIVEN a document with no name WHEN setDocument THEN transaction fails with EmptyName", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.DOCUMENTER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_DOCUMENTER, signer_C.address);
 
     // add document fails
     await expect(
@@ -98,7 +100,7 @@ describe("Documentation Tests", () => {
   });
 
   it("GIVEN a document with no URI WHEN setDocument THEN transaction fails with EmptyURI", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.DOCUMENTER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_DOCUMENTER, signer_C.address);
     // add document fails
     await expect(asset.connect(signer_C).setDocument(documentName_1, "", documentHASH_1)).to.be.revertedWithCustomError(
       asset,
@@ -107,7 +109,7 @@ describe("Documentation Tests", () => {
   });
 
   it("GIVEN a document with no HASH WHEN setDocument THEN transaction fails with EmptyHASH", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.DOCUMENTER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_DOCUMENTER, signer_C.address);
 
     // add document fails
     await expect(
@@ -122,7 +124,7 @@ describe("Documentation Tests", () => {
   });
 
   it("GIVEN a document that does not exist WHEN removeDocument THEN transaction fails with DocumentDoesNotExist", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.DOCUMENTER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_DOCUMENTER, signer_C.address);
 
     // add document fails
     await expect(asset.connect(signer_C).removeDocument(documentName_1)).to.be.revertedWithCustomError(
@@ -133,7 +135,7 @@ describe("Documentation Tests", () => {
 
   it("GIVEN an account with documenter role WHEN setDocument and removeDocument THEN transaction succeeds", async () => {
     // ADD TO LIST ------------------------------------------------------------------
-    await asset.connect(signer_A).grantRole(ATS_ROLES.DOCUMENTER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_DOCUMENTER, signer_C.address);
 
     // check that Document not in the list
     let documents = await asset.getAllDocuments();
@@ -165,7 +167,7 @@ describe("Documentation Tests", () => {
   });
 
   it("GIVEN a document that is removed THEN docIndexes storage slot is zeroed (audit fix FIND-123)", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.DOCUMENTER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_DOCUMENTER, signer_C.address);
 
     await asset.connect(signer_C).setDocument(documentName_1, documentURI_1, documentHASH_1);
     await asset.connect(signer_C).removeDocument(documentName_1);
@@ -184,7 +186,7 @@ describe("Documentation Tests", () => {
   });
 
   it("GIVEN an existing document WHEN setDocument is called again with same name THEN document is updated without adding to docNames array", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.DOCUMENTER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_DOCUMENTER, signer_C.address);
 
     // Add initial document
     await asset.connect(signer_C).setDocument(documentName_1, documentURI_1, documentHASH_1);
@@ -219,11 +221,58 @@ describe("Documentation Tests", () => {
     it("GIVEN a deactivated asset WHEN setDocument THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).setDocument(ethers.ZeroHash, "", ethers.ZeroHash),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN removeDocument THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).removeDocument(ethers.ZeroHash),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("initializeDocumentation", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeDocumentation is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeDocumentation())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeDocumentation is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeDocumentation())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_DOCUMENTATION, 1);
+    });
+  });
+
+  describe("initializeDocumentation event", () => {
+    it("GIVEN a fresh deployment WHEN initializeDocumentation is called THEN emits DocumentationInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_DOCUMENTATION);
+      await expect(asset.initializeDocumentation()).to.emit(asset, "DocumentationInitialized");
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setDocument THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.setDocument(ethers.ZeroHash, "", ethers.ZeroHash)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN removeDocument THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.removeDocument(ethers.ZeroHash)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
   });
 });

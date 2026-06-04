@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IHoldFacet } from "./IHoldFacet.sol";
+import { IHoldFacet, RESOLVER_KEY_HOLD } from "./IHoldFacet.sol";
 import { Hold } from "./Hold.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { _HOLD_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-
 /**
  * @title HoldFacet
  * @notice Diamond facet exposing high-level hold read accessors.
@@ -16,12 +14,17 @@ import { _HOLD_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 contract HoldFacet is Hold, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _HOLD_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_HOLD;
     }
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.getHeldAmountFor.selector, this.getHoldThirdParty.selector);
+        return
+            Bytes4Builder.build(
+                this.initializeHold.selector,
+                this.getHeldAmountFor.selector,
+                this.getHoldThirdParty.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors

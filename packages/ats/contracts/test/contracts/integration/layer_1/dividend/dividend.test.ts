@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { type IAsset, type ResolverProxy } from "@contract-types";
+import { type IAsset, MockDiamondCut, type ResolverProxy } from "@contract-types";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import {
@@ -10,6 +10,8 @@ import {
   EMPTY_HEX_BYTES,
   dateToUnixTimestamp,
   EMPTY_STRING,
+  EQUITY_CONFIG_ID,
+  RESOLVER_KEY_DIVIDEND,
 } from "@scripts";
 import { MAX_UINT256, deployEquityTokenFixture, executeRbac } from "@test";
 import { ethers } from "hardhat";
@@ -45,6 +47,7 @@ describe("Dividends", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
   async function deploySecurityFixtureSinglePartition() {
     const base = await deployEquityTokenFixture();
     diamond = base.diamond;
@@ -53,17 +56,18 @@ describe("Dividends", () => {
     signer_C = base.user2;
 
     asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.KYC_ROLE,
+        role: ATS_ROLES.ROLE_KYC,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.SSI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_SSI_MANAGER,
         members: [signer_A.address],
       },
     ]);
@@ -97,8 +101,8 @@ describe("Dividends", () => {
   });
 
   it("GIVEN dividend with executed snapshot WHEN getting dividend holders THEN returns holders from snapshot", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
     await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
 
     await asset.connect(signer_C).issueByPartition({
@@ -147,8 +151,8 @@ describe("Dividends", () => {
   });
 
   it("GIVEN dividend without executed snapshot WHEN getting total dividend holders THEN returns current total holders", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
 
     // Issue tokens before creating dividend
     await asset.connect(signer_C).issueByPartition({
@@ -198,7 +202,7 @@ describe("Dividends", () => {
   });
 
   it("GIVEN a paused Token WHEN setDividend THEN transaction fails with IsPaused", async () => {
-    await grantRoleAndPauseToken(asset, ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A, signer_B, signer_C.address);
+    await grantRoleAndPauseToken(asset, ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A, signer_B, signer_C.address);
 
     await expect(asset.connect(signer_C).setDividend(dividendData)).to.be.revertedWithCustomError(asset, "IsPaused");
   });
@@ -206,7 +210,7 @@ describe("Dividends", () => {
   it("GIVEN an account with corporateActions role WHEN setDividend with wrong dates THEN transaction fails", async () => {
     const currentTimestamp = await asset.blockTimestamp();
     await asset.changeSystemTimestamp(currentTimestamp + 100n);
-    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
     const wrongDividendData_1 = {
       recordDate: dividendsExecutionDateInSeconds.toString(),
@@ -234,7 +238,7 @@ describe("Dividends", () => {
   });
 
   it("GIVEN an account with corporateActions role WHEN setDividend THEN transaction succeeds", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
     await expect(asset.connect(signer_C).setDividend(dividendData))
       .to.emit(asset, "DividendSet")
@@ -278,9 +282,9 @@ describe("Dividends", () => {
   });
 
   it("GIVEN an account with corporateActions role WHEN setDividend and lock THEN transaction succeeds", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES.LOCKER_ROLE, signer_C.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_LOCKER, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
 
     const TotalAmount = number_Of_Shares;
     const LockedAmount = TotalAmount - 5n;
@@ -319,13 +323,15 @@ describe("Dividends", () => {
     expect(dividendHolders.length).to.equal(dividendTotalHolder);
     expect([...dividendHolders]).to.have.members([signer_A.address]);
     expect(dividendAmountFor.recordDateReached).to.equal(dividendFor.recordDateReached);
-    expect(dividendAmountFor.numerator).to.equal(dividendFor.tokenBalance * dividendFor.amount);
-    expect(dividendAmountFor.denominator).to.equal(10n ** (dividendFor.decimals + dividendFor.amountDecimals));
+    expect(dividendAmountFor.numerator).to.equal(
+      (dividendFor.tokenBalance * dividendFor.amount) / 10n ** BigInt(dividendFor.decimals),
+    );
+    expect(dividendAmountFor.denominator).to.equal(10n ** BigInt(dividendFor.amountDecimals));
   });
 
   it("GIVEN an account with corporateActions role WHEN setDividend and hold THEN transaction succeeds", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
 
     const TotalAmount = number_Of_Shares;
     const HeldAmount = TotalAmount - 5n;
@@ -371,16 +377,18 @@ describe("Dividends", () => {
     expect(dividendHolders.length).to.equal(dividendTotalHolder);
     expect([...dividendHolders]).to.have.members([signer_A.address]);
     expect(dividendAmountFor.recordDateReached).to.equal(dividendFor.recordDateReached);
-    expect(dividendAmountFor.numerator).to.equal(dividendFor.tokenBalance * dividendFor.amount);
-    expect(dividendAmountFor.denominator).to.equal(10n ** (dividendFor.decimals + dividendFor.amountDecimals));
+    expect(dividendAmountFor.numerator).to.equal(
+      (dividendFor.tokenBalance * dividendFor.amount) / 10n ** BigInt(dividendFor.decimals),
+    );
+    expect(dividendAmountFor.denominator).to.equal(10n ** BigInt(dividendFor.amountDecimals));
   });
 
   it("GIVEN scheduled dividends WHEN record date is reached AND scheduled balance adjustments is set after record date THEN dividends are paid without adjusted balance", async () => {
-    await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
-    await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
-    await asset.grantRole(ATS_ROLES.LOCKER_ROLE, signer_C.address);
-    await asset.grantRole(ATS_ROLES.CLEARING_ROLE, signer_C.address);
-    await asset.grantRole(ATS_ROLES.FREEZE_MANAGER_ROLE, signer_C.address);
+    await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+    await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
+    await asset.grantRole(ATS_ROLES.ROLE_LOCKER, signer_C.address);
+    await asset.grantRole(ATS_ROLES.ROLE_CLEARING, signer_C.address);
+    await asset.grantRole(ATS_ROLES.ROLE_FREEZE_MANAGER, signer_C.address);
 
     const TotalAmount = number_Of_Shares;
     const amounts = TotalAmount / 5n;
@@ -432,14 +440,16 @@ describe("Dividends", () => {
     expect(dividendFor.amount).to.equal(dividendsAmountPerEquity);
     expect(dividendFor.amountDecimals).to.equal(dividendsAmountDecimalsPerEquity);
     expect(dividendAmountFor.recordDateReached).to.equal(dividendFor.recordDateReached);
-    expect(dividendAmountFor.numerator).to.equal(dividendFor.tokenBalance * dividendFor.amount);
-    expect(dividendAmountFor.denominator).to.equal(10n ** (dividendFor.decimals + dividendFor.amountDecimals));
+    expect(dividendAmountFor.numerator).to.equal(
+      (dividendFor.tokenBalance * dividendFor.amount) / 10n ** BigInt(dividendFor.decimals),
+    );
+    expect(dividendAmountFor.denominator).to.equal(10n ** BigInt(dividendFor.amountDecimals));
   });
 
   it("GIVEN frozen tokens WHEN calculating dividends without snapshot THEN frozen tokens are included in dividend calculation", async () => {
-    await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
-    await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
-    await asset.grantRole(ATS_ROLES.FREEZE_MANAGER_ROLE, signer_A.address);
+    await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
+    await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
+    await asset.grantRole(ATS_ROLES.ROLE_FREEZE_MANAGER, signer_A.address);
 
     const totalAmount = 1000n;
     const frozenAmount = 300n;
@@ -473,9 +483,10 @@ describe("Dividends", () => {
     expect(dividendFor.tokenBalance).to.equal(totalAmount);
     expect(dividendFor.recordDateReached).to.equal(true);
 
-    // Verify dividend calculation: (tokenBalance * amount) / (10^(decimals + amountDecimals))
-    const expectedDividendNumerator = dividendFor.tokenBalance * dividendFor.amount;
-    const expectedDividendDenominator = 10n ** (dividendFor.decimals + dividendFor.amountDecimals);
+    // Verify dividend calculation: mulDiv(tokenBalance, amount, 10^decimals) / 10^amountDecimals
+    const expectedDividendNumerator =
+      (dividendFor.tokenBalance * dividendFor.amount) / 10n ** BigInt(dividendFor.decimals);
+    const expectedDividendDenominator = 10n ** BigInt(dividendFor.amountDecimals);
     // Division result: expectedDividendNumerator / expectedDividendDenominator
 
     // Also get the dividendAmountFor to verify
@@ -484,8 +495,58 @@ describe("Dividends", () => {
     expect(dividendAmountFor.denominator).to.equal(expectedDividendDenominator);
   });
 
+  it("GIVEN a holder with very large balance WHEN computing dividend amount THEN it does not overflow", async () => {
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
+
+    // tokenBalance * amount = 1e40 * 1e40 = 1e80 > 2^256 → overflow without mulDiv
+    const largeBalance = 10n ** 40n;
+    const largeAmount = 10n ** 40n;
+    const amountDecimals = 0;
+
+    await asset.connect(signer_C).issueByPartition({
+      partition: DEFAULT_PARTITION,
+      tokenHolder: signer_A.address,
+      value: largeBalance,
+      data: "0x",
+    });
+
+    const overflowDividendData = {
+      recordDate: dividendsRecordDateInSeconds.toString(),
+      executionDate: dividendsExecutionDateInSeconds.toString(),
+      amount: largeAmount,
+      amountDecimals,
+    };
+
+    await asset.connect(signer_C).setDividend(overflowDividendData);
+    await asset.changeSystemTimestamp(dividendsRecordDateInSeconds + 1);
+
+    const dividendAmountFor = await asset.getDividendAmountFor(1, signer_A.address);
+    const decimals = BigInt((await asset.getDividendFor(1, signer_A.address)).decimals);
+
+    expect(dividendAmountFor.recordDateReached).to.equal(true);
+    expect(dividendAmountFor.numerator).to.equal((largeBalance * largeAmount) / 10n ** decimals);
+    expect(dividendAmountFor.denominator).to.equal(10n ** BigInt(amountDecimals));
+  });
+
+  it("GIVEN a dividend with amountDecimals >= 78 WHEN getDividendAmountFor after record date THEN reverts with ExponentOverflow", async () => {
+    await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
+    // amountDecimals = 78 == MAX_DECIMALS; 10^78 overflows uint256
+    await asset.setDividend({
+      recordDate: dividendsRecordDateInSeconds.toString(),
+      executionDate: dividendsExecutionDateInSeconds.toString(),
+      amount: dividendsAmountPerEquity,
+      amountDecimals: 78,
+    });
+    await asset.changeSystemTimestamp(dividendsRecordDateInSeconds + 1);
+    await expect(asset.getDividendAmountFor(1, signer_A.address)).to.be.revertedWithCustomError(
+      asset,
+      "ExponentOverflow",
+    );
+  });
+
   it("GIVEN a dividend created WHEN calling dividend methods with a wrong dividendId THEN transactions fail with WrongIndexForAction", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
     await asset.connect(signer_C).setDividend(dividendData);
 
@@ -502,13 +563,13 @@ describe("Dividends", () => {
 
   describe("Cancel Dividend", () => {
     it("GIVEN an account without corporateActions role WHEN cancelDividend THEN transaction fails with AccountHasNoRole", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_B.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_B.address);
       await asset.connect(signer_B).setDividend(dividendData);
       await expect(asset.connect(signer_C).cancelDividend(1)).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
 
     it("GIVEN a paused Token WHEN cancelDividend THEN transaction fails with IsPaused", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_B.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_B.address);
       await asset.connect(signer_B).setDividend(dividendData);
       await asset.connect(signer_B).pause();
 
@@ -516,7 +577,7 @@ describe("Dividends", () => {
     });
 
     it("GIVEN a dividend already executed WHEN cancelDividend THEN transaction fails with DividendAlreadyExecuted", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
       await asset.connect(signer_C).setDividend(dividendData);
 
@@ -529,7 +590,7 @@ describe("Dividends", () => {
     });
 
     it("GIVEN a dividend not yet executed WHEN cancelDividend THEN transaction succeeds", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
       await asset.connect(signer_C).setDividend(dividendData);
 
@@ -544,7 +605,7 @@ describe("Dividends", () => {
     });
 
     it("GIVEN a cancelled dividend WHEN getDividend THEN isDisabled is true", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
       await asset.connect(signer_C).setDividend(dividendData);
 
@@ -557,8 +618,8 @@ describe("Dividends", () => {
     });
 
     it("GIVEN a cancelled dividend WHEN getDividendFor THEN isDisabled is true and amount is still available", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
 
       await asset.connect(signer_C).issueByPartition({
         partition: DEFAULT_PARTITION,
@@ -578,13 +639,16 @@ describe("Dividends", () => {
     });
 
     it("GIVEN a non-existent dividend WHEN cancelDividend THEN transaction fails", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
-      await expect(asset.connect(signer_C).cancelDividend(999)).to.be.rejected;
+      await expect(asset.connect(signer_C).cancelDividend(999)).to.be.revertedWithCustomError(
+        asset,
+        "WrongIndexForAction",
+      );
     });
 
     it("GIVEN multiple dividends WHEN cancelDividend on one THEN only that dividend is cancelled", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
       // Create first dividend
       await asset.connect(signer_C).setDividend(dividendData);
@@ -614,17 +678,144 @@ describe("Dividends", () => {
     });
   });
 
+  describe("Force Cancel Dividend", () => {
+    it("GIVEN account with ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelDividend before execution date THEN transaction succeeds and isDisabled is true", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C.address);
+
+      await asset.connect(signer_C).setDividend(dividendData);
+
+      await expect(asset.connect(signer_C).forceCancelDividend(1))
+        .to.emit(asset, "DividendForceCancelled")
+        .withArgs(1, signer_C.address);
+      expect((await asset.getDividend(1)).isDisabled_).to.equal(true);
+    });
+
+    it("GIVEN account with ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelDividend after execution date THEN transaction succeeds bypassing date guard", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C.address);
+
+      await asset.connect(signer_C).setDividend(dividendData);
+
+      await asset.changeSystemTimestamp(dividendsExecutionDateInSeconds + 1000);
+
+      await expect(asset.connect(signer_C).forceCancelDividend(1))
+        .to.emit(asset, "DividendForceCancelled")
+        .withArgs(1, signer_C.address);
+      expect((await asset.getDividend(1)).isDisabled_).to.equal(true);
+    });
+
+    it("GIVEN account without ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelDividend THEN transaction fails with AccountHasNoRole", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_B.address);
+
+      await asset.connect(signer_B).setDividend(dividendData);
+
+      await expect(asset.connect(signer_C).forceCancelDividend(1)).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN paused token WHEN forceCancelDividend THEN transaction fails with IsPaused", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_B.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_B.address);
+
+      await asset.connect(signer_B).setDividend(dividendData);
+
+      await asset.connect(signer_B).pause();
+
+      await expect(asset.connect(signer_B).forceCancelDividend(1)).to.be.revertedWithCustomError(asset, "IsPaused");
+    });
+
+    it("GIVEN no existing dividend WHEN forceCancelDividend with invalid ID THEN transaction fails with WrongIndexForAction", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C.address);
+
+      await expect(asset.connect(signer_C).forceCancelDividend(999)).to.be.revertedWithCustomError(
+        asset,
+        "WrongIndexForAction",
+      );
+    });
+  });
+
   describe("Deactivated", () => {
     it("GIVEN a deactivated asset WHEN setDividend THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset
           .connect(base.deployer)
           .setDividend({ recordDate: 0, executionDate: 0, amount: 0, amountDecimals: 0 }),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN cancelDividend THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(deactivatedAsset.connect(base.deployer).cancelDividend(0)).to.be.revertedWithCustomError(
+        deactivatedAsset,
+        "Deactivated",
+      );
+    });
+
+    it("GIVEN a deactivated asset WHEN forceCancelDividend THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(deactivatedAsset.connect(base.deployer).forceCancelDividend(0)).to.be.revertedWithCustomError(
+        deactivatedAsset,
+        "Deactivated",
+      );
+    });
+  });
+
+  describe("initializeDividend", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeDividend is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeDividend())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeDividend is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeDividend())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_DIVIDEND, 1);
+    });
+  });
+
+  describe("initializeDividend event", () => {
+    it("GIVEN a fresh deployment WHEN initializeDividend is called THEN emits DividendInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_DIVIDEND);
+      await expect(asset.initializeDividend()).to.emit(asset, "DividendInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational WHEN setDividend is called THEN AssetNotOperational", async () => {
+      await expect(
+        asset.setDividend({
+          recordDate: 0n,
+          executionDate: 0n,
+          amount: 0n,
+          amountDecimals: 0n,
+        }),
+      )
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN cancelDividend is called THEN AssetNotOperational", async () => {
+      await expect(asset.cancelDividend(0n))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 });

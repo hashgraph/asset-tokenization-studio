@@ -18,6 +18,7 @@ import {
   extractRevertReason,
   formatGasUsage,
   info,
+  isNetworkError,
   section,
   success,
   validateAddress,
@@ -25,6 +26,9 @@ import {
   warn,
   GAS_LIMIT,
   hederaGasOverrides,
+  retryTransaction,
+  RetryOptions,
+  withNonceReset,
 } from "@scripts/infrastructure";
 import { FACET_REGISTRATION_BATCH_SIZE } from "../../domain/constants";
 
@@ -54,6 +58,21 @@ export interface RegisterFacetsOptions {
 
   /** Whether to verify facets exist before registration */
   verify?: boolean;
+
+  /**
+   * Number of facets registered per transaction. Defaults to
+   * {@link FACET_REGISTRATION_BATCH_SIZE} (10). Raise to 25 for nodes that
+   * can fit larger registration batches under their block gas limit (e.g.
+   * Besu) — typically combined with parallel facet deployment.
+   */
+  batchSize?: number;
+
+  /**
+   * Retry configuration for each batch registration transaction.
+   * On Hedera testnet, transient 502 responses can abort a batch mid-sequence.
+   * Default: no retries.
+   */
+  retryOptions?: RetryOptions;
 }
 
 /**
@@ -130,7 +149,12 @@ export async function registerFacets(
   blr: BusinessLogicResolver,
   options: RegisterFacetsOptions,
 ): Promise<RegisterFacetsResult> {
-  const { facets, overrides = {}, verify = true } = options;
+  const { facets, overrides = {}, verify = true, batchSize = FACET_REGISTRATION_BATCH_SIZE, retryOptions } = options;
+
+  // After a 502, the NonceManager's internal delta is already incremented even
+  // though Hedera never received the tx.  Reset before each retry so the next
+  // attempt re-fetches the confirmed nonce from the network.
+  const effectiveRetryOptions: RetryOptions = withNonceReset(blr.runner, retryOptions);
 
   // Get BLR address from contract instance
   const blrAddress = await blr.getAddress();
@@ -180,7 +204,22 @@ export async function registerFacets(
         validateAddress(facet.address, `${facet.name} address`);
 
         if (verify) {
-          const facetCode = await provider.getCode(facet.address);
+          let facetCode: string;
+          try {
+            facetCode = await retryTransaction(() => provider.getCode(facet.address), retryOptions);
+          } catch (codeErr) {
+            // After retries, network errors must not exclude the facet — it was
+            // just deployed so it exists on-chain. Only a genuine "0x" response
+            // means the contract is missing.
+            if (isNetworkError(codeErr)) {
+              warn(
+                `Could not verify ${facet.name} bytecode after retries (${extractRevertReason(codeErr)}), including in registration`,
+              );
+              debug(`${facet.name}: ${facet.address}`);
+              continue;
+            }
+            throw codeErr;
+          }
           if (facetCode === "0x") {
             warn(`No contract found at ${facet.name} address ${facet.address}`);
             failed.push(facet.name);
@@ -214,40 +253,40 @@ export async function registerFacets(
       businessLogicName: facet.name,
     }));
 
-    const iterations = Math.ceil(businessLogics.length / FACET_REGISTRATION_BATCH_SIZE);
+    const iterations = Math.ceil(businessLogics.length / batchSize);
     const transactionHashes = [];
     const blockNumbers = [];
     const transactionGas = [];
 
     for (let i = 0; i < iterations; i++) {
-      const businessLogicsSlice = businessLogics.slice(
-        i * FACET_REGISTRATION_BATCH_SIZE,
-        (i + 1) * FACET_REGISTRATION_BATCH_SIZE,
-      );
+      const businessLogicsSlice = businessLogics.slice(i * batchSize, (i + 1) * batchSize);
 
       // Skip empty slices (defensive guard)
       if (businessLogicsSlice.length === 0) {
         continue;
       }
 
-      const tx = await blr.registerBusinessLogics(businessLogicsSlice, {
-        gasLimit: GAS_LIMIT.high,
-        ...hederaGasOverrides(),
-        ...overrides,
-      });
-
-      info(`Registration transaction sent: ${tx.hash}`);
+      // Only retry the send step. Once Hedera accepts the tx (returns a hash)
+      // the BLR version counter is committed on success — re-submitting would
+      // register the same facets a second time and increment each version.
+      const tx = await retryTransaction(async () => {
+        const sentTx = await blr.registerBusinessLogics(businessLogicsSlice, {
+          gasLimit: GAS_LIMIT.high,
+          ...hederaGasOverrides(),
+          ...overrides,
+        });
+        info(`Registration transaction sent: ${sentTx.hash}`);
+        return sentTx;
+      }, effectiveRetryOptions);
 
       const receipt = await waitForTransaction(tx, 1, DEFAULT_TRANSACTION_TIMEOUT);
       transactionHashes.push(receipt.hash);
       blockNumbers.push(receipt.blockNumber);
       transactionGas.push(Number(receipt.gasUsed));
 
-      const gasUsed = formatGasUsage(receipt, tx.gasLimit);
-      debug(gasUsed);
+      debug(formatGasUsage(receipt, tx.gasLimit));
 
       const registeredSlice = businessLogicsSlice.map((f) => f.businessLogicName);
-
       registered.push(...registeredSlice);
 
       success(`Successfully registered ${registeredSlice.length} facets`);

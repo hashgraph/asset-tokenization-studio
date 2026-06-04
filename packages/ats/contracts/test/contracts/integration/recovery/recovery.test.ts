@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type IAsset, type ResolverProxy, ComplianceMock, IdentityRegistryMock } from "@contract-types";
+import { type IAsset, type ResolverProxy, ComplianceMock, IdentityRegistryMock, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 import {
@@ -15,6 +15,8 @@ import {
   EMPTY_HEX_BYTES,
   dateToUnixTimestamp,
   EIP1066_CODES,
+  EQUITY_CONFIG_ID,
+  RESOLVER_KEY_RECOVERY,
 } from "@scripts";
 
 const name = "TEST";
@@ -34,6 +36,7 @@ describe("Recovery Tests", () => {
   let signer_F: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   let identityRegistryMock: IdentityRegistryMock;
   let complianceMock: ComplianceMock;
@@ -70,57 +73,66 @@ describe("Recovery Tests", () => {
       signer_F = base.user5;
 
       asset = await ethers.getContractAt("IAsset", diamond.target);
-
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
       await executeRbac(asset, [
         {
-          role: ATS_ROLES.PAUSER_ROLE,
+          role: ATS_ROLES.ROLE_PAUSER,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES.ISSUER_ROLE,
+          role: ATS_ROLES.ROLE_ISSUER,
           members: [signer_C.address],
         },
         {
-          role: ATS_ROLES.KYC_ROLE,
+          role: ATS_ROLES.ROLE_KYC,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES.SSI_MANAGER_ROLE,
+          role: ATS_ROLES.ROLE_SSI_MANAGER,
           members: [signer_A.address],
         },
         {
-          role: ATS_ROLES.CLEARING_ROLE,
+          role: ATS_ROLES.ROLE_CLEARING,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES.CLEARING_VALIDATOR_ROLE,
+          role: ATS_ROLES.ROLE_CLEARING_VALIDATOR,
           members: [signer_A.address],
         },
         {
-          role: ATS_ROLES.AGENT_ROLE,
+          role: ATS_ROLES.ROLE_AGENT,
           members: [signer_A.address],
         },
         {
-          role: ATS_ROLES.TREX_OWNER_ROLE,
+          role: ATS_ROLES.ROLE_TREX_OWNER,
           members: [signer_A.address],
         },
       ]);
 
-      await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
       await asset.addIssuer(signer_E.address);
       await asset.connect(signer_B).grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
       await asset.connect(signer_B).grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
       await asset.connect(signer_B).grantKyc(signer_F.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
-      await asset.grantRole(ATS_ROLES.FREEZE_MANAGER_ROLE, signer_A.address);
-      await asset.grantRole(ATS_ROLES.PAUSER_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_FREEZE_MANAGER, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_PAUSER, signer_A.address);
     }
 
     beforeEach(async () => {
       await loadFixture(deployFixtureSinglePartition);
     });
 
+    describe("Paused", () => {
+      it("GIVEN a paused token WHEN recoveryAddress THEN transaction fails with IsPaused", async () => {
+        await asset.connect(signer_B).pause();
+        await expect(
+          asset.recoveryAddress(signer_A.address, signer_C.address, ADDRESS_ZERO),
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
+      });
+    });
+
     describe("AccessControl", () => {
-      it("GIVEN an account without AGENT_ROLE role WHEN recoveryAddress THEN transaction fails with AccountHasNoRole", async () => {
+      it("GIVEN an account without ROLE_AGENT role WHEN recoveryAddress THEN transaction fails with AccountHasNoRole", async () => {
         await expect(
           asset.connect(signer_C).recoveryAddress(signer_A.address, signer_B.address, signer_C.address),
         ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
@@ -129,7 +141,7 @@ describe("Recovery Tests", () => {
 
     describe("Recovery", () => {
       it("GIVEN lost wallet with pending locks, holds or clearings THEN recovery fails with CannotRecoverWallet", async () => {
-        await asset.grantRole(ATS_ROLES.LOCKER_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_LOCKER, signer_A.address);
         const amount = 1000;
         await asset.issueByPartition({
           partition: DEFAULT_PARTITION,
@@ -156,7 +168,7 @@ describe("Recovery Tests", () => {
         await expect(
           asset.recoveryAddress(signer_E.address, signer_B.address, ADDRESS_ZERO),
         ).to.be.revertedWithCustomError(asset, "CannotRecoverWallet");
-        await asset.changeSystemTimestamp(dateToUnixTimestamp("2030-01-01T00:00:06Z"));
+        await asset.changeSystemTimestamp(dateToUnixTimestamp("2030-01-01T00:00:05Z"));
         const holdIdentifier = {
           partition: DEFAULT_PARTITION,
           tokenHolder: signer_E.address,
@@ -178,7 +190,7 @@ describe("Recovery Tests", () => {
 
       it("GIVEN lost wallet WHEN calling recoveryAddress THEN normal balance and freeze balance and status is successfully transferred", async () => {
         const amount = 1000;
-        await asset.grantRole(ATS_ROLES.CONTROL_LIST_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_CONTROL_LIST, signer_A.address);
         await asset.issueByPartition({
           partition: DEFAULT_PARTITION,
           tokenHolder: signer_E.address,
@@ -206,19 +218,26 @@ describe("Recovery Tests", () => {
         expect(isRecovered).to.equal(true);
       });
 
-      it("GIVEN lost wallet WHEN calling recovery using a previously recovered address THEN recovered status is set to false", async () => {
+      it("GIVEN _lostWallet is already recovered WHEN recoveryAddress THEN transaction fails with WalletRecovered", async () => {
         await asset.recoveryAddress(signer_C.address, signer_B.address, ADDRESS_ZERO);
-        await asset.recoveryAddress(signer_B.address, signer_C.address, ADDRESS_ZERO);
-        const isRecoveredC = await asset.isAddressRecovered(signer_C.address);
-        expect(isRecoveredC).to.equal(false);
+        await expect(
+          asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO),
+        ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+      });
+
+      it("GIVEN _newWallet is already recovered WHEN recoveryAddress THEN transaction fails with WalletRecovered", async () => {
+        await asset.recoveryAddress(signer_C.address, signer_B.address, ADDRESS_ZERO);
+        await expect(
+          asset.recoveryAddress(signer_B.address, signer_C.address, ADDRESS_ZERO),
+        ).to.be.revertedWithCustomError(asset, "WalletRecovered");
       });
 
       it("GIVEN a recovered address THEN operations should fail", async () => {
         await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
         await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
         await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
-        await asset.grantRole(ATS_ROLES.PROTECTED_PARTITIONS_ROLE, signer_A.address);
-        await asset.grantRole(ATS_ROLES.LOCKER_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_PROTECTED_PARTITIONS, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_LOCKER, signer_A.address);
         await asset.connect(signer_C).authorizeOperator(signer_A.address);
         await asset.connect(signer_C).authorizeOperator(signer_B.address);
         await asset.connect(signer_A).authorizeOperator(signer_C.address);
@@ -241,7 +260,7 @@ describe("Recovery Tests", () => {
         ).to.be.revertedWithCustomError(asset, "WalletRecovered");
         const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
           ["bytes32", "bytes32"],
-          [ATS_ROLES.PROTECTED_PARTITIONS_PARTICIPANT_ROLE, DEFAULT_PARTITION],
+          [ATS_ROLES.ROLE_PROTECTED_PARTITIONS_PARTICIPANT, DEFAULT_PARTITION],
         );
         const packedDataWithoutPrefix = packedData.slice(2);
         const ProtectedPartitionRole_1 = ethers.keccak256("0x" + packedDataWithoutPrefix);
@@ -410,6 +429,36 @@ describe("Recovery Tests", () => {
         await expect(
           asset.lockByPartition(DEFAULT_PARTITION, amount, signer_C.address, MAX_UINT256),
         ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+        // FIND-127: recovered caller must not be able to issue/mint
+        await expect(
+          asset.connect(signer_C).issue(signer_D.address, amount, EMPTY_HEX_BYTES),
+        ).to.revertedWithCustomError(asset, "WalletRecovered");
+        await expect(asset.connect(signer_C).mint(signer_D.address, amount)).to.revertedWithCustomError(
+          asset,
+          "WalletRecovered",
+        );
+        await expect(asset.connect(signer_C).batchMint([signer_D.address], [amount])).to.revertedWithCustomError(
+          asset,
+          "WalletRecovered",
+        );
+        // FIND-127: release/releaseByPartition must not work on a recovered tokenHolder
+        await expect(asset.release(1, signer_C.address)).to.revertedWithCustomError(asset, "WalletRecovered");
+        await expect(asset.releaseByPartition(DEFAULT_PARTITION, 1, signer_C.address)).to.revertedWithCustomError(
+          asset,
+          "WalletRecovered",
+        );
+        // FIND-127: controllerCreateHoldByPartition must not work with a recovered _from
+        await asset.grantRole(ATS_ROLES.ROLE_CONTROLLER, signer_A.address);
+        const controllerHold = {
+          amount: amount,
+          expirationTimestamp: MAX_UINT256,
+          escrow: signer_B.address,
+          to: signer_A.address,
+          data: EMPTY_HEX_BYTES,
+        };
+        await expect(
+          asset.controllerCreateHoldByPartition(DEFAULT_PARTITION, signer_C.address, controllerHold, EMPTY_HEX_BYTES),
+        ).to.revertedWithCustomError(asset, "WalletRecovered");
         await asset.connect(signer_B).activateClearing();
         const clearingOperation = {
           partition: DEFAULT_PARTITION,
@@ -670,21 +719,21 @@ describe("Recovery Tests", () => {
 
       await executeRbac(asset, [
         {
-          role: ATS_ROLES.PAUSER_ROLE,
+          role: ATS_ROLES.ROLE_PAUSER,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES.CLEARING_ROLE,
+          role: ATS_ROLES.ROLE_CLEARING,
           members: [signer_B.address],
         },
       ]);
 
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROLLER_ROLE, signer_A.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CONTROLLER, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
     });
 
     it("GIVEN a multi partition token WHEN recoveryAddress THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
-      await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
       await expect(
         asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO),
       ).to.be.revertedWithCustomError(asset, "NotAllowedInMultiPartitionMode");
@@ -695,13 +744,46 @@ describe("Recovery Tests", () => {
     it("GIVEN a deactivated asset WHEN recoveryAddress THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset
           .connect(base.deployer)
           .recoveryAddress(ethers.ZeroAddress, ethers.ZeroAddress, ethers.ZeroAddress),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("initializeRecovery", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeRecovery is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeRecovery())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeRecovery is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeRecovery())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_RECOVERY, 1);
+    });
+  });
+
+  describe("initializeRecovery event", () => {
+    it("GIVEN a fresh deployment WHEN initializeRecovery is called THEN emits RecoveryInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_RECOVERY);
+      await expect(asset.initializeRecovery()).to.emit(asset, "RecoveryInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational WHEN recoveryAddress is called THEN AssetNotOperational", async () => {
+      await expect(asset.recoveryAddress(ethers.ZeroAddress, ethers.ZeroAddress, ethers.ZeroAddress))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 });

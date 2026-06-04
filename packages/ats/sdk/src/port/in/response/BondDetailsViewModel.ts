@@ -6,6 +6,6 @@ export default interface BondDetailsViewModel extends QueryResponse {
   currency: string;
   nominalValue: string;
   nominalValueDecimals: number;
-  startingDate: Date;
+  startingDate?: Date;
   maturityDate: Date;
 }

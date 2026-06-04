@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey AccessControl
+bytes32 constant RESOLVER_KEY_ACCESS_CONTROL = 0xccc2e755f9225e65f6c822a258c866fc0d57a124ad12c8928adf3ff875ffcd70;
+
 /**
  * @title IAccessControl
  * @author Asset Tokenization Studio Team
@@ -14,14 +17,6 @@ pragma solidity >=0.8.0 <0.9.0;
  *      checks and deterministic pagination.
  */
 interface IAccessControl {
-    /**
-     * @notice Emitted when the admin role for a given role is changed.
-     * @param role The role whose admin role was updated.
-     * @param previousAdminRole The previous admin role.
-     * @param newAdminRole The new admin role.
-     */
-    event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole);
-
     /**
      * @notice Emitted when a role is granted to an account.
      * @param operator The address that performed the grant.
@@ -47,11 +42,25 @@ interface IAccessControl {
 
     /**
      * @notice Emitted when multiple roles are applied to an account in a single operation.
-     * @param roles The roles that were processed.
-     * @param actives Corresponding grant/revoke flags; `true` means granted, `false` revoked.
+     * @param requestedRoles The roles that were submitted by the caller.
+     * @param requestedStates Corresponding grant/revoke flags; `true` means granted, `false` revoked.
      * @param account The account to which the roles were applied.
+     * @param appliedRoles The subset of `requestedRoles` whose state effectively changed.
+     * @param appliedStates The corresponding final state for each effectively applied role.
      */
-    event RolesApplied(bytes32[] roles, bool[] actives, address account);
+    event RolesApplied(
+        bytes32[] requestedRoles,
+        bool[] requestedStates,
+        address account,
+        bytes32[] appliedRoles,
+        bool[] appliedStates
+    );
+
+    /**
+     * @notice Emitted once when the AccessControl capability is initialised on a token.
+     * @dev Fires exclusively from `initializeAccessControl` after the registration succeeds.
+     */
+    event AccessControlInitialized();
 
     /**
      * @notice Thrown when an account does not hold a required role.
@@ -91,13 +100,17 @@ interface IAccessControl {
     error AccountNotAssignedToRole(bytes32 role, address account);
 
     /**
-     * @notice Thrown when a batch role application via `applyRoles` fails to persist all
-     *         requested changes.
-     * @param roles The roles that were attempted.
-     * @param actives The corresponding grant/revoke flags that were attempted.
-     * @param account The account targeted by the operation.
+     * @notice Thrown when the sole holder of `DEFAULT_ADMIN_ROLE` attempts to renounce it,
+     *         which would permanently lock all admin-gated functions.
      */
-    error RolesNotApplied(bytes32[] roles, bool[] actives, address account);
+    error CannotRenounceSoleAdmin();
+
+    /**
+     * @notice Initialises the AccessControl capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeAccessControl() external;
 
     /**
      * @notice Grants a role to an account.
@@ -136,17 +149,13 @@ interface IAccessControl {
      * @dev The caller must hold the admin role for each role in `_roles` (checked per entry in
      *      the storage layer). `_roles` and `_actives` must have equal length and contain no
      *      duplicate role entries. Grant entries where the account already holds the role and
-     *      revoke entries where it does not are silently skipped. Emits `RolesApplied`.
+     *      revoke entries where it does not are silently skipped. Emits `RolesApplied` with the
+     *      subset that effectively changed state.
      * @param _roles Array of role identifiers to process.
      * @param _actives Corresponding flags; `true` grants the role, `false` revokes it.
      * @param _account The account to which roles are applied.
-     * @return success_ True if the batch application completed without error.
      */
-    function applyRoles(
-        bytes32[] calldata _roles,
-        bool[] calldata _actives,
-        address _account
-    ) external returns (bool success_);
+    function applyRoles(bytes32[] calldata _roles, bool[] calldata _actives, address _account) external;
 
     /**
      * @notice Returns the number of roles currently assigned to an account.

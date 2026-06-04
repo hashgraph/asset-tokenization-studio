@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey BatchController
+bytes32 constant RESOLVER_KEY_BATCH_CONTROLLER = 0x535258ade68566dbac2304c09e172709e8b0ab3f78d2be54014d021ddb03ab58;
+
 /**
  * @title IBatchController
  * @notice Interface for controller-only batch transfer operations.
@@ -10,6 +13,19 @@ pragma solidity >=0.8.0 <0.9.0;
  *      batchBurn) remain on their own dedicated facets.
  */
 interface IBatchController {
+    /**
+     * @notice Emitted once when the batch controller capability is initialised on a token.
+     * @dev Fires exclusively from `initializeBatchController` after the storage write succeeds.
+     */
+    event BatchControllerInitialized();
+
+    /**
+     * @notice Initialises the batch controller capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeBatchController() external;
+
     /**
      * @notice Batch forced transfer of tokens from multiple source addresses to multiple destinations.
      * @dev Restricted to accounts holding the controller or agent role. Requires the token to be

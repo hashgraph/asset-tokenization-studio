@@ -3,10 +3,16 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type IAsset } from "@contract-types";
+import { type IAsset, MockDiamondCut } from "@contract-types";
 import { ZERO, EMPTY_STRING, ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployLoanTokenFixture, MAX_UINT256, executeRbac, getLoanDetails } from "@test";
+import {
+  deployAtsInfrastructureFixture,
+  deployLoanTokenFixture,
+  executeRbac,
+  getLoanDetails,
+  MAX_UINT256,
+} from "@test";
 
 const EMPTY_VC_ID = EMPTY_STRING;
 
@@ -16,6 +22,7 @@ describe("Loan Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let _mockDiamondCut: MockDiamondCut;
 
   let startingDate: number;
   let maturityDate: number;
@@ -32,22 +39,27 @@ describe("Loan Tests", () => {
     maturityDate = startingDate + 100_000;
 
     asset = await ethers.getContractAt("IAsset", base.tokenAddress);
+    _mockDiamondCut = await ethers.getContractAt("MockDiamondCut", base.tokenAddress);
 
     await executeRbac(asset, [
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.KYC_ROLE,
+        role: ATS_ROLES.ROLE_KYC,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.SSI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_SSI_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.LOAN_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_LOAN_MANAGER,
+        members: [signer_A.address],
+      },
+      {
+        role: ATS_ROLES.ROLE_ISSUER,
         members: [signer_A.address],
       },
     ]);
@@ -174,28 +186,37 @@ describe("Loan Tests", () => {
     });
   });
 
-  describe("initialize_Loan validations", () => {
-    const regulationData = {
-      regulationType: 1,
-      regulationSubType: 2,
-      dealSize: 1,
-      accreditedInvestors: 1,
-      maxNonAccreditedInvestors: 1,
-      manualInvestorVerification: 1,
-      internationalInvestors: 0,
-      resaleHoldPeriod: 1,
-    };
-    const additionalSecurityData = {
-      countriesControlListType: true,
-      listOfCountries: "US,CA",
-      info: "Info",
-      country: "US",
-    };
-    it("GIVEN an initialized loan WHEN trying to initialize again THEN transaction fails with AlreadyInitialized", async () => {
+  describe("initializeLoan validations", () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeLoan is called THEN it reverts with AccountHasNoRole", async () => {
       const loanDetails = await getLoanDetails();
-      await expect(
-        asset.connect(signer_A).initialize_Loan(loanDetails, regulationData, additionalSecurityData),
-      ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+      await expect(asset.connect(signer_C).initializeLoan(loanDetails)).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN an initialized loan WHEN trying to initialize again THEN transaction fails with FacetAlreadyRegistered", async () => {
+      const loanDetails = await getLoanDetails();
+      await expect(asset.connect(signer_A).initializeLoan(loanDetails)).to.be.revertedWithCustomError(
+        asset,
+        "FacetAlreadyRegistered",
+      );
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeLoan is called THEN it emits LoanInitialized", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const { LOAN_CONFIG_ID } = await import("@scripts/domain");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, LOAN_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", (await proxyTx.wait())!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      const loanDetails = await getLoanDetails();
+      const tx = await freshAsset.connect(infra.deployer).initializeLoan(loanDetails);
+      const receipt = await tx.wait();
+      const emitted = await decodeEvent(freshAsset, "LoanInitialized", receipt!);
+      expect(emitted.loanDetailsData.loanBasicData.currency).to.equal(loanDetails.loanBasicData.currency);
     });
 
     it("GIVEN startingDate is 0 WHEN deploying loan THEN transaction fails with WrongTimestamp", async () => {
@@ -232,16 +253,66 @@ describe("Loan Tests", () => {
     });
   });
 
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await _mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setLoanDetails THEN AssetNotOperational", async () => {
+      const loanDetails = await getLoanDetails();
+      await expect(asset.setLoanDetails(loanDetails)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+  });
+
   describe("Deactivated", () => {
     it("GIVEN a deactivated asset WHEN cancelAmortization THEN transaction fails with Deactivated", async () => {
       const base = await deployLoanTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(deactivatedAsset.connect(base.deployer).cancelAmortization(0)).to.be.revertedWithCustomError(
         deactivatedAsset,
         "Deactivated",
       );
+    });
+
+    it("GIVEN a deactivated asset WHEN setLoanDetails THEN transaction fails with Deactivated", async () => {
+      const base = await deployLoanTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).setLoanDetails({
+          loanBasicData: {
+            currency: "0x000000",
+            startingDate: 0,
+            maturityDate: 0,
+            loanStructureType: 0,
+            repaymentType: 0,
+            interestType: 0,
+            signingDate: 0,
+            originatorAccount: ethers.ZeroAddress,
+            servicerAccount: ethers.ZeroAddress,
+          },
+          loanInterestData: {
+            baseReferenceRate: 0,
+            floorRate: 0,
+            capRate: 0,
+            rateMargin: 0,
+            dayCount: 0,
+            paymentFrequency: 0,
+            firstAccrualDate: 0,
+            prepaymentPenalty: 0,
+            commitmentFee: 0,
+            utilizationFee: 0,
+            utilizationFeeType: 0,
+            servicingFee: 0,
+          },
+          riskData: { internalRiskGrade: "", defaultProbability: 0, lossGivenDefault: 0 },
+          collateral: { totalCollateralValue: 0, loanToValue: 0 },
+          loanPerformanceStatus: { performanceStatus: 0, daysPastDue: 0 },
+        }),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
 });

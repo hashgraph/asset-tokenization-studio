@@ -24,9 +24,43 @@
  * @module infrastructure/signer
  */
 
-import { Wallet, JsonRpcProvider, NonceManager, Signer } from "ethers";
+import { Wallet, JsonRpcProvider, NonceManager, Signer, FetchRequest } from "ethers";
 import { getNetworkConfig, getPrivateKey } from "./config";
-import { error } from "./utils/logging";
+import { error, warn } from "./utils/logging";
+
+const PROVIDER_RETRY_ATTEMPTS = 5;
+const PROVIDER_RETRY_BASE_DELAY_MS = 2_000;
+const PROVIDER_RETRY_MAX_DELAY_MS = 30_000;
+
+/**
+ * Creates a JsonRpcProvider whose HTTP layer retries 5xx gateway errors.
+ *
+ * Without this, transient 502/503 responses from hashio.io propagate into
+ * ethers' internal polling loop as unhandled promise rejections, crashing
+ * Node.js before the application-level retry logic in retryTransaction() can run.
+ *
+ * FetchRequest.retryFunc intercepts the raw HTTP response before ethers
+ * processes it, so 5xx errors are retried silently at the network layer and
+ * never reach application code.
+ */
+function createProvider(jsonRpcUrl: string): JsonRpcProvider {
+  const fetchRequest = new FetchRequest(jsonRpcUrl);
+
+  fetchRequest.retryFunc = async (_request, response, attempt) => {
+    if (attempt >= PROVIDER_RETRY_ATTEMPTS) return false;
+    if (response && response.statusCode >= 500 && response.statusCode < 600) {
+      const delay = Math.min(PROVIDER_RETRY_BASE_DELAY_MS * Math.pow(2, attempt), PROVIDER_RETRY_MAX_DELAY_MS);
+      warn(
+        `Provider HTTP ${response.statusCode} — retrying in ${delay}ms (attempt ${attempt + 1}/${PROVIDER_RETRY_ATTEMPTS})`,
+      );
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      return true;
+    }
+    return false;
+  };
+
+  return new JsonRpcProvider(fetchRequest);
+}
 
 /**
  * Result of creating a network signer.
@@ -82,7 +116,7 @@ export async function createNetworkSigner(network: string, keyIndex: number = 0)
 
   // Create provider and signer with NonceManager to prevent nonce caching
   // issues when deploying multiple contracts via JSON-RPC
-  const provider = new JsonRpcProvider(networkConfig.jsonRpcUrl);
+  const provider = createProvider(networkConfig.jsonRpcUrl);
   const wallet = new Wallet(privateKey, provider);
   const signer = new NonceManager(wallet);
   const address = await signer.getAddress();

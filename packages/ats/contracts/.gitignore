@@ -44,6 +44,20 @@ artifacts
 typechain
 typechain-types
 
+# Auto-generated contract registry data (BBND-1766).
+# The heavy registry file is regenerated on every `prepare` / `hardhat compile`.
+# The sibling `atsRoles.generated.ts` stays in git (small, audit-relevant).
+scripts/domain/atsRegistry.generated.ts
+
+# Legacy auto-generated registry-data mirror. Superseded by atsRegistry.generated.ts;
+# kept gitignored so a stale local copy never re-enters version control.
+scripts/domain/atsRegistry.data.ts
+
+# Auto-generated EVM accessor library.
+# Regenerated on every `hardhat compile` by `generate-evm-accessors`. The mode
+# (prod / test) is selected by ATS_TEST_MODE via Configuration.isTestMode.
+contracts/infrastructure/utils/EvmAccessors.sol
+
 #Slither
 Slither/*
 slither.db.json
@@ -72,4 +86,5 @@ deployments/**/.checkpoints/
 # Engram AI agent memory
 .engram/
 
-gasReporterOutput.json
+# Auto-generated MCP server context (added automatically)
+.mcp-server-context.md

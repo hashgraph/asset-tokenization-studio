@@ -4,8 +4,16 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO } from "@scripts";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import {
+  ADDRESS_ZERO,
+  ATS_ROLES,
+  DEFAULT_PARTITION,
+  EMPTY_STRING,
+  ZERO,
+  EQUITY_CONFIG_ID,
+  RESOLVER_KEY_ALLOWANCE,
+} from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const amount = 1000;
@@ -19,6 +27,7 @@ describe("Allowance Facet Tests", () => {
   let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   describe("Multi partition", () => {
     async function deployMultiPartitionFixture() {
@@ -33,6 +42,7 @@ describe("Allowance Facet Tests", () => {
       signer_D = base.user3;
 
       asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target, signer_A);
     }
 
     beforeEach(async () => {
@@ -68,15 +78,16 @@ describe("Allowance Facet Tests", () => {
       signer_D = base.user3;
 
       asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
       assetSignerC = await ethers.getContractAt("IAsset", diamond.target, signer_C);
       assetSignerD = await ethers.getContractAt("IAsset", diamond.target, signer_D);
 
       await executeRbac(asset, [
-        { role: ATS_ROLES.ISSUER_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES.PAUSER_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES.CONTROL_LIST_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_ISSUER, members: [signer_B.address] },
+        { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+        { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_PAUSER, members: [signer_B.address] },
+        { role: ATS_ROLES.ROLE_CONTROL_LIST, members: [signer_A.address] },
       ]);
 
       await asset.addIssuer(signer_D.address);
@@ -174,7 +185,7 @@ describe("Allowance Facet Tests", () => {
       });
 
       it("GIVEN a recovered caller WHEN increaseAllowance THEN reverts with WalletRecovered", async () => {
-        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
         await asset.recoveryAddress(signer_C.address, signer_A.address, ADDRESS_ZERO);
         await expect(assetSignerC.increaseAllowance(signer_D.address, amount)).to.be.revertedWithCustomError(
           asset,
@@ -183,7 +194,7 @@ describe("Allowance Facet Tests", () => {
       });
 
       it("GIVEN a recovered spender WHEN increaseAllowance THEN reverts with WalletRecovered", async () => {
-        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
         await asset.recoveryAddress(signer_D.address, signer_A.address, ADDRESS_ZERO);
         await expect(assetSignerC.increaseAllowance(signer_D.address, amount)).to.be.revertedWithCustomError(
           asset,
@@ -241,7 +252,7 @@ describe("Allowance Facet Tests", () => {
       });
 
       it("GIVEN a recovered caller WHEN decreaseAllowance THEN reverts with WalletRecovered", async () => {
-        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
         await asset.recoveryAddress(signer_C.address, signer_A.address, ADDRESS_ZERO);
         await expect(assetSignerC.decreaseAllowance(signer_D.address, amount)).to.be.revertedWithCustomError(
           asset,
@@ -250,7 +261,7 @@ describe("Allowance Facet Tests", () => {
       });
 
       it("GIVEN a recovered spender WHEN decreaseAllowance THEN reverts with WalletRecovered", async () => {
-        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
         await asset.recoveryAddress(signer_D.address, signer_A.address, ADDRESS_ZERO);
         await expect(assetSignerC.decreaseAllowance(signer_D.address, amount)).to.be.revertedWithCustomError(
           asset,
@@ -270,7 +281,7 @@ describe("Allowance Facet Tests", () => {
       });
 
       it("GIVEN a recovered sender WHEN approve THEN reverts with WalletRecovered", async () => {
-        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
         await asset.recoveryAddress(signer_C.address, signer_A.address, ADDRESS_ZERO);
 
         expect(await asset.isAddressRecovered(signer_C.address)).to.be.true;
@@ -282,7 +293,7 @@ describe("Allowance Facet Tests", () => {
       });
 
       it("GIVEN a recovered spender WHEN approve THEN reverts with WalletRecovered", async () => {
-        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
         await asset.recoveryAddress(signer_D.address, signer_A.address, ADDRESS_ZERO);
 
         expect(await asset.isAddressRecovered(signer_D.address)).to.be.true;
@@ -305,7 +316,7 @@ describe("Allowance Facet Tests", () => {
 
     describe("ABAF/LABAF – approve inflation (FIND-095)", () => {
       it("GIVEN balance adjustment already applied WHEN approve then transferFrom for more than approved THEN reverts with InsufficientAllowance", async () => {
-        await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
 
         const tokenAmount = 2000n;
         await asset.connect(signer_B).issue(signer_C.address, tokenAmount, "0x");
@@ -340,11 +351,75 @@ describe("Allowance Facet Tests", () => {
     it("GIVEN a deactivated asset WHEN approve THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).approve(ethers.ZeroAddress, 0),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN increaseAllowance THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).increaseAllowance(ethers.ZeroAddress, 0),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN decreaseAllowance THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).decreaseAllowance(ethers.ZeroAddress, 0),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+  describe("initializeAllowance", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeAllowance is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeAllowance())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeAllowance is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeAllowance())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_ALLOWANCE, 1);
+    });
+  });
+
+  describe("initializeAllowance event", () => {
+    it("GIVEN a fresh deployment WHEN initializeAllowance is called THEN emits AllowanceInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_ALLOWANCE);
+      await expect(asset.initializeAllowance()).to.emit(asset, "AllowanceInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational WHEN approve is called THEN AssetNotOperational", async () => {
+      await expect(asset.approve(ethers.ZeroAddress, 0n))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN increaseAllowance is called THEN AssetNotOperational", async () => {
+      await expect(asset.increaseAllowance(ethers.ZeroAddress, 0n))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN decreaseAllowance is called THEN AssetNotOperational", async () => {
+      await expect(asset.decreaseAllowance(ethers.ZeroAddress, 0n))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 });

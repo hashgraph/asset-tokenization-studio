@@ -2,11 +2,10 @@
 pragma solidity >=0.8.0 <0.9.0;
 import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 import { ZERO_ADDRESS, EMPTY_BYTES, _DEFAULT_PARTITION } from "../../constants/values.sol";
-import { _ERC1594_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { IKyc } from "../../facets/layer_1/kyc/IKyc.sol";
+import { IKyc } from "../../facets/kyc/IKyc.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { Eip1066 } from "../../constants/eip1066.sol";
-import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
+import { IClearingTypes } from "../../facets/clearing/IClearingTypes.sol";
 import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
 import { IIdentityRegistry } from "../../facets/layer_1/ERC3643/IIdentityRegistry.sol";
@@ -23,21 +22,23 @@ import { ControlListStorageWrapper } from "../core/ControlListStorageWrapper.sol
 import { KycStorageWrapper } from "../core/KycStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 import { AccessControlStorageWrapper } from "../core/AccessControlStorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-import { IMint } from "../../facets/mint/IMint.sol";
-import { IBurn } from "../../facets/burn/IBurn.sol";
+
+/// @custom:hash storage Erc1594
+bytes32 constant STORAGE_LOCATION_ERC1594 = 0x6bb5986b529cbe1ac563af7efd06b91a80c235aad83852a102d3c187f67c5400;
 
 /**
  * @notice Tracks whether token issuance is enabled and whether the module
  * has been initialised.
- * @param issuance When true, new tokens may be issued via the `issue` function.
- * @param initialized When true, the storage struct has been set to its default
- * operating state.
- * @author Asset Tokenization Studio Team
+ * @dev Fields: `initialized` (lifecycle flag), `issuance` (feature toggle).
+ * @custom:storage-location erc7201:security.token.standard.storage.Erc1594
  */
 struct ERC1594Storage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
     bool issuance;
-    bool initialized;
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 /**
@@ -49,7 +50,7 @@ struct ERC1594Storage {
  * controls (KYC, identity, compliance, control lists, allowances, partitions).
  * @dev All public functions revert with standard error selectors when
  * preconditions fail. Relies on EIP1066 status codes for categorisation.
- * Uses a diamond storage pattern anchored at `_ERC1594_STORAGE_POSITION`.
+ * Uses a diamond storage pattern anchored at `STORAGE_LOCATION_ERC1594`.
  * Internal and private helpers are designed for gas-efficient reusability
  * across transfer and redemption flows.
  */
@@ -64,7 +65,6 @@ library ERC1594StorageWrapper {
     function initialize() internal {
         ERC1594Storage storage ds = erc1594Storage();
         ds.issuance = true;
-        ds.initialized = true;
     }
 
     /**
@@ -133,6 +133,15 @@ library ERC1594StorageWrapper {
         }
     }
 
+    /**
+     * @notice Reverts if the given redemption cannot proceed.
+     * @dev Delegates to `isAbleToRedeemFromByPartition` and reverts with the
+     * encoded reason code and details on failure. The trailing `data` and
+     * `operatorData` slots are unused; retained for interface compatibility.
+     * @param from         Address whose tokens will be redeemed.
+     * @param partition    Partition identifier for the redemption.
+     * @param value        Amount of tokens to redeem.
+     */
     function checkCanRedeemFromByPartition(
         address from,
         bytes32 partition,
@@ -181,6 +190,16 @@ library ERC1594StorageWrapper {
         return _businessLogicChecks(checkAllowance, from, value, partition);
     }
 
+    /**
+     * @notice Reverts if the given transfer cannot proceed.
+     * @dev Delegates to `isAbleToTransferFromByPartition` and reverts with the
+     * encoded reason code and details on failure. The trailing `data` and
+     * `operatorData` slots are unused; retained for interface compatibility.
+     * @param from         Source address of the transfer.
+     * @param to           Destination address of the transfer.
+     * @param partition    Partition identifier for the transfer.
+     * @param value        Amount of tokens to transfer.
+     */
     function checkCanTransferFromByPartition(
         address from,
         address to,
@@ -270,7 +289,7 @@ library ERC1594StorageWrapper {
      * @return ds Storage reference to the `ERC1594Storage` struct.
      */
     function erc1594Storage() internal pure returns (ERC1594Storage storage ds) {
-        bytes32 position = _ERC1594_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_ERC1594;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             ds.slot := position
@@ -280,13 +299,19 @@ library ERC1594StorageWrapper {
     /**
      * @notice Performs system-wide checks that apply to all transfer and
      * redemption operations.
-     * @dev Currently reverts if the clearing mechanism is activated.
-     * @return status True if no system-level condition prevents the operation.
-     * @return statusCode EIP1066 status byte.
-     * @return reasonCode Selector of the blocking error.
-     * @return details Encoded error data (empty on success).
+     * @dev Currently reverts if the clearing mechanism is activated. Returns
+     * a 4-tuple: status (bool), statusCode (bytes1), reasonCode (bytes32),
+     * and details (bytes memory).
+     * @return ok_ True if no system-level condition prevents the operation.
+     * @return statusCode_ EIP1066 status code.
+     * @return reason_ Selector of the blocking error condition, if any.
+     * @return details_ Encoded error details (empty on success).
      */
-    function _genericChecks() private view returns (bool, bytes1, bytes32, bytes memory) {
+    function _genericChecks()
+        private
+        view
+        returns (bool ok_, bytes1 statusCode_, bytes32 reason_, bytes memory details_)
+    {
         if (ClearingStorageWrapper.isClearingActivated())
             return (false, Eip1066.UNAVAILABLE, IClearingTypes.ClearingIsActivated.selector, EMPTY_BYTES);
         return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
@@ -541,20 +566,24 @@ library ERC1594StorageWrapper {
      * @notice Checks whether the sender's allowance for `from` is
      * sufficient to cover `value`.
      * @dev Uses `ERC20StorageWrapper.allowanceAdjustedAt` with the current
-     * block timestamp.
+     * block timestamp. Returns a 4-tuple: status (bool), statusCode (bytes1),
+     * reasonCode (bytes32), and details (bytes memory).
      * @param from Token holder address.
      * @param value Required allowance amount.
-     * @return status True if allowance >= value.
-     * @return statusCode EIP1066 status byte.
-     * @return reasonCode Selector of the blocking error.
-     * @return details Encoded error data (sender, from, current allowance, value, default partition).
+     * @return ok_ True if allowance is sufficient.
+     * @return statusCode_ EIP1066 status code.
+     * @return reason_ Selector of the blocking error condition, if any.
+     * @return details_ Encoded error details (empty on success).
      */
-    function _checkAllowance(address from, uint256 value) private view returns (bool, bytes1, bytes32, bytes memory) {
+    function _checkAllowance(
+        address from,
+        uint256 value
+    ) private view returns (bool ok_, bytes1 statusCode_, bytes32 reason_, bytes memory details_) {
         address sender = EvmAccessors.getMsgSender();
         uint256 currentAllowance = ERC20StorageWrapper.allowanceAdjustedAt(
             from,
             sender,
-            TimeTravelStorageWrapper.getBlockTimestamp()
+            EvmAccessors.getBlockTimestamp()
         );
         if (currentAllowance < value) {
             return (
@@ -569,18 +598,20 @@ library ERC1594StorageWrapper {
 
     /**
      * @notice Validates that `partition` is a valid partition for `from`.
-     * @dev Delegates to `ERC1410StorageWrapper.validPartition`.
+     * @dev Delegates to `ERC1410StorageWrapper.validPartition`. Returns a
+     * 4-tuple: status (bool), statusCode (bytes1), reasonCode (bytes32),
+     * and details (bytes memory).
      * @param from Token holder address.
      * @param partition Partition identifier.
-     * @return status True if the partition is valid.
-     * @return statusCode EIP1066 status byte.
-     * @return reasonCode Selector of the blocking error.
-     * @return details Encoded error data (from, partition).
+     * @return ok_ True if the partition is valid.
+     * @return statusCode_ EIP1066 status code.
+     * @return reason_ Selector of the blocking error condition, if any.
+     * @return details_ Encoded error details (empty on success).
      */
     function _checkPartitionValidity(
         address from,
         bytes32 partition
-    ) private view returns (bool, bytes1, bytes32, bytes memory) {
+    ) private view returns (bool ok_, bytes1 statusCode_, bytes32 reason_, bytes memory details_) {
         if (!ERC1410StorageWrapper.validPartition(partition, from)) {
             return (
                 false,
@@ -596,24 +627,25 @@ library ERC1594StorageWrapper {
      * @notice Checks whether `from` holds at least `value` tokens in the
      * specified `partition`.
      * @dev Uses `AdjustBalancesStorageWrapper.balanceOfByPartitionAdjustedAt`
-     * with the current block timestamp.
+     * with the current block timestamp. Returns a 4-tuple: status (bool),
+     * statusCode (bytes1), reasonCode (bytes32), and details (bytes memory).
      * @param from Token holder address.
      * @param value Amount of tokens required.
      * @param partition Partition identifier.
-     * @return status True if the partition balance is sufficient.
-     * @return statusCode EIP1066 status byte.
-     * @return reasonCode Selector of the blocking error.
-     * @return details Encoded error data (from, current balance, required value, partition).
+     * @return ok_ True if the partition balance is sufficient.
+     * @return statusCode_ EIP1066 status code.
+     * @return reason_ Selector of the blocking error condition, if any.
+     * @return details_ Encoded error details (empty on success).
      */
     function _checkPartitionBalance(
         address from,
         uint256 value,
         bytes32 partition
-    ) private view returns (bool, bytes1, bytes32, bytes memory) {
+    ) private view returns (bool ok_, bytes1 statusCode_, bytes32 reason_, bytes memory details_) {
         uint256 currentPartitionBalance = AdjustBalancesStorageWrapper.balanceOfByPartitionAdjustedAt(
             partition,
             from,
-            TimeTravelStorageWrapper.getBlockTimestamp()
+            EvmAccessors.getBlockTimestamp()
         );
         if (currentPartitionBalance < value) {
             return (

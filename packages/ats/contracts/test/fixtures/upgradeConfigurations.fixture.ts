@@ -14,8 +14,8 @@ import { deployAtsInfrastructureFixture } from "./infrastructure.fixture";
 import { configureLogger, LogLevel } from "@scripts/infrastructure";
 import { deployEquityFromFactory, deployBondFromFactory, BOND_CONFIG_ID } from "@scripts/domain";
 import { getSecurityData, getRegulationData } from "./tokens/common.fixture";
-import { getEquityDetails } from "./tokens/equity.fixture";
-import { getBondDetails } from "./tokens/bond.fixture";
+import { makeEquityDetailsData } from "./tokens/equity.fixture";
+import { makeBondDetailsData } from "./tokens/bond.fixture";
 import { DiamondFacet__factory } from "@contract-types";
 import type { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import type { BusinessLogicResolver, IFactory, ProxyAdmin, DiamondFacet, ResolverProxy } from "@contract-types";
@@ -73,7 +73,7 @@ export async function deployUpgradeTestFixture(): Promise<UpgradeTestFixtureResu
   configureLogger({ level: LogLevel.SILENT });
 
   // Deploy full ATS infrastructure
-  const infrastructure = await deployAtsInfrastructureFixture(true, false);
+  const infrastructure = await deployAtsInfrastructureFixture(false);
 
   const { deployer, unknownSigner, blr, factory, proxyAdmin, deployment } = infrastructure;
 
@@ -91,7 +91,7 @@ export async function deployUpgradeTestFixture(): Promise<UpgradeTestFixtureResu
 
   // Deploy sample Equity token via Factory
   const equitySecurityData = getSecurityData(blr);
-  const equityDetails = getEquityDetails();
+  const equityDetails = makeEquityDetailsData();
   const equityRegulationData = getRegulationData();
 
   const equityTokenProxy = await deployEquityFromFactory(
@@ -114,7 +114,7 @@ export async function deployUpgradeTestFixture(): Promise<UpgradeTestFixtureResu
       version: 1,
     },
   });
-  const bondDetails = await getBondDetails();
+  const bondDetails = await makeBondDetailsData();
   const bondRegulationData = getRegulationData();
 
   const bondTokenProxy = await deployBondFromFactory(
@@ -175,7 +175,7 @@ export async function deployUpgradeInfrastructureOnlyFixture() {
   configureLogger({ level: LogLevel.SILENT });
 
   // Deploy full ATS infrastructure
-  const infrastructure = await deployAtsInfrastructureFixture(true, false);
+  const infrastructure = await deployAtsInfrastructureFixture(false);
 
   const { deployer, unknownSigner, blr, factory, proxyAdmin, deployment } = infrastructure;
 

@@ -1,7 +1,0 @@
-// SPDX-License-Identifier: Apache-2.0
-pragma solidity >=0.8.0 <0.9.0;
-
-import { BondUSAReadFixedRateFacet } from "../../../../facets/layer_3/bondUSA/fixedRate/BondUSAReadFixedRateFacet.sol";
-import { TimeTravelProvider } from "../../timeTravel/TimeTravelProvider.sol";
-
-contract BondUSAReadFixedRateFacetTimeTravel is BondUSAReadFixedRateFacet, TimeTravelProvider {}

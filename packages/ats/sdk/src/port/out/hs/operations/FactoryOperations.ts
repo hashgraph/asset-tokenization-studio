@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { ContractId } from "@hiero-ledger/sdk";
-import { Factory__factory, TREXFactoryAts__factory } from "@hashgraph/asset-tokenization-contracts";
+import { Factory__factory } from "@hashgraph/asset-tokenization-contracts";
 import { EVM_ZERO_ADDRESS, GAS } from "@core/Constants";
 import {
   FactoryBondToken,
@@ -98,14 +98,15 @@ export class FactoryOperations {
         conversionRight: equityInfo.conversionRight,
         redemptionRight: equityInfo.redemptionRight,
         putRight: equityInfo.putRight,
-        dividendRight: CastDividendType.toNumber(equityInfo.dividendRight),
+        dividendRight:
+          equityInfo.dividendRight !== undefined ? CastDividendType.toNumber(equityInfo.dividendRight) : undefined,
         currency: equityInfo.currency,
         nominalValue: equityInfo.nominalValue.toString(),
         nominalValueDecimals: equityInfo.nominalValueDecimals,
       };
       const securityTokenToCreate = new FactoryEquityToken(security, equityDetails);
       const additionalSecurityData: AdditionalSecurityData = {
-        countriesControlListType: securityInfo.isCountryControlListWhiteList,
+        countriesControlListType: securityInfo.isCountryControlListWhiteList ?? false,
         listOfCountries: securityInfo.countries ?? "",
         info: securityInfo.info ?? "",
       };
@@ -186,7 +187,7 @@ export class FactoryOperations {
         bondInfo.currency,
         bondInfo.nominalValue.toString(),
         bondInfo.nominalValueDecimals,
-        bondInfo.startingDate.toString(),
+        bondInfo.startingDate?.toString(),
         bondInfo.maturityDate.toString(),
       );
       const securityTokenToCreate = new FactoryBondToken(
@@ -196,7 +197,7 @@ export class FactoryOperations {
         proceedRecipientsData.map((data) => (data == "" ? "0x" : data)),
       );
       const additionalSecurityData: AdditionalSecurityData = {
-        countriesControlListType: securityInfo.isCountryControlListWhiteList,
+        countriesControlListType: securityInfo.isCountryControlListWhiteList ?? false,
         listOfCountries: securityInfo.countries ?? "",
         info: securityInfo.info ?? "",
       };
@@ -277,7 +278,7 @@ export class FactoryOperations {
         bondInfo.currency,
         bondInfo.nominalValue.toString(),
         bondInfo.nominalValueDecimals,
-        bondInfo.startingDate.toString(),
+        bondInfo.startingDate?.toString(),
         bondInfo.maturityDate.toString(),
       );
       const securityTokenToCreate = new FactoryBondToken(
@@ -287,7 +288,7 @@ export class FactoryOperations {
         proceedRecipientsData.map((data) => (data == "" ? "0x" : data)),
       );
       const additionalSecurityData: AdditionalSecurityData = {
-        countriesControlListType: securityInfo.isCountryControlListWhiteList,
+        countriesControlListType: securityInfo.isCountryControlListWhiteList ?? false,
         listOfCountries: securityInfo.countries ?? "",
         info: securityInfo.info ?? "",
       };
@@ -373,7 +374,7 @@ export class FactoryOperations {
         bondInfo.currency,
         bondInfo.nominalValue.toString(),
         bondInfo.nominalValueDecimals,
-        bondInfo.startingDate.toString(),
+        bondInfo.startingDate?.toString(),
         bondInfo.maturityDate.toString(),
       );
       const securityTokenToCreate = new FactoryBondToken(
@@ -383,7 +384,7 @@ export class FactoryOperations {
         proceedRecipientsData.map((data) => (data == "" ? "0x" : data)),
       );
       const additionalSecurityData: AdditionalSecurityData = {
-        countriesControlListType: securityInfo.isCountryControlListWhiteList,
+        countriesControlListType: securityInfo.isCountryControlListWhiteList ?? false,
         listOfCountries: securityInfo.countries ?? "",
         info: securityInfo.info ?? "",
       };
@@ -423,238 +424,6 @@ export class FactoryOperations {
         "deployBondKpiLinkedRate",
         [bondKpiLinkedRateData],
         GAS.CREATE_BOND_ST,
-      );
-    } catch (error) {
-      LogService.logError(error);
-      throw new SigningError(`Unexpected error in HederaTransactionAdapter create operation : ${error}`);
-    }
-  }
-
-  async createTrexSuiteBond(
-    salt: string,
-    owner: string,
-    irs: string,
-    onchainId: string,
-    irAgents: string[],
-    tokenAgents: string[],
-    compliancesModules: string[],
-    complianceSettings: string[],
-    claimTopics: number[],
-    issuers: string[],
-    issuerClaims: number[][],
-    security: Security,
-    bondDetails: BondDetails,
-    factory: EvmAddress,
-    resolver: EvmAddress,
-    configId: string,
-    configVersion: number,
-    compliance: EvmAddress,
-    identityRegistryAddress: EvmAddress,
-    diamondOwnerAccount: EvmAddress,
-    proceedRecipients: EvmAddress[] = [],
-    proceedRecipientsData: string[] = [],
-    externalPauses?: EvmAddress[],
-    externalControlLists?: EvmAddress[],
-    externalKycLists?: EvmAddress[],
-    factoryId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    LogService.logTrace(`Deploying trex suite bond: ${security.toString()}`);
-    if (!security.regulationType) throw new MissingRegulationType();
-    if (!security.regulationsubType) throw new MissingRegulationSubType();
-
-    const rbacAdmin: Rbac = {
-      role: SecurityRole._DEFAULT_ADMIN_ROLE,
-      members: [diamondOwnerAccount!.toString()],
-    };
-    const erc20MetadataInfo: ERC20MetadataInfo = {
-      name: security.name,
-      symbol: security.symbol,
-      isin: security.isin,
-      decimals: security.decimals,
-    };
-    const resolverProxyConfiguration: ResolverProxyConfiguration = {
-      key: configId,
-      version: configVersion,
-    };
-    const securityData: SecurityData = {
-      arePartitionsProtected: security.arePartitionsProtected,
-      isMultiPartition: security.isMultiPartition,
-      resolver: resolver.toString(),
-      resolverProxyConfiguration,
-      rbacs: [rbacAdmin],
-      isControllable: security.isControllable,
-      isWhiteList: security.isWhiteList,
-      maxSupply: security.maxSupply ? security.maxSupply.toString() : "0",
-      erc20MetadataInfo,
-      clearingActive: security.clearingActive,
-      internalKycActivated: security.internalKycActivated,
-      externalPauses: externalPauses?.map((address) => address.toString()) ?? [],
-      externalControlLists: externalControlLists?.map((address) => address.toString()) ?? [],
-      externalKycLists: externalKycLists?.map((address) => address.toString()) ?? [],
-      compliance: compliance.toString(),
-      identityRegistry: identityRegistryAddress.toString(),
-      erc20VotesActivated: security.erc20VotesActivated,
-    };
-    const bondDetailsData = new BondDetailsData(
-      bondDetails.currency,
-      bondDetails.nominalValue.toString(),
-      bondDetails.nominalValueDecimals,
-      bondDetails.startingDate.toString(),
-      bondDetails.maturityDate.toString(),
-    );
-    const securityTokenToCreate = new FactoryBondToken(
-      securityData,
-      bondDetailsData,
-      proceedRecipients.map((b) => b.toString()),
-      proceedRecipientsData.map((data) => (data == "" ? "0x" : data)),
-    );
-    const additionalSecurityData: AdditionalSecurityData = {
-      countriesControlListType: security.isCountryControlListWhiteList,
-      listOfCountries: security.countries ?? "",
-      info: security.info ?? "",
-    };
-    const factoryRegulationData = new FactoryRegulationData(
-      CastRegulationType.toNumber(security.regulationType),
-      CastRegulationSubType.toNumber(security.regulationsubType),
-      additionalSecurityData,
-    );
-    try {
-      return this.executor.executeContractCall(
-        factoryId!.toString(),
-        TREXFactoryAts__factory.createInterface(),
-        "deployTREXSuiteAtsBond",
-        [
-          salt,
-          {
-            owner,
-            irs,
-            ONCHAINID: onchainId,
-            irAgents,
-            tokenAgents,
-            complianceModules: compliancesModules,
-            complianceSettings,
-          },
-          { claimTopics, issuers, issuerClaims },
-          securityTokenToCreate,
-          factoryRegulationData,
-        ],
-        GAS.TREX_CREATE_SUITE,
-      );
-    } catch (error) {
-      LogService.logError(error);
-      throw new SigningError(`Unexpected error in TREXFactoryAts__factory deploy operation : ${error}`);
-    }
-  }
-
-  async createTrexSuiteEquity(
-    salt: string,
-    owner: string,
-    irs: string,
-    onchainId: string,
-    irAgents: string[],
-    tokenAgents: string[],
-    compliancesModules: string[],
-    complianceSettings: string[],
-    claimTopics: number[],
-    issuers: string[],
-    issuerClaims: number[][],
-    security: Security,
-    equityDetails: EquityDetails,
-    factory: EvmAddress,
-    resolver: EvmAddress,
-    configId: string,
-    configVersion: number,
-    compliance: EvmAddress,
-    identityRegistryAddress: EvmAddress,
-    diamondOwnerAccount: EvmAddress,
-    externalPauses?: EvmAddress[],
-    externalControlLists?: EvmAddress[],
-    externalKycLists?: EvmAddress[],
-    factoryId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    LogService.logTrace(`Deploying trex suite equity: ${security.toString()}`);
-    try {
-      if (!security.regulationType) throw new MissingRegulationType();
-      if (!security.regulationsubType) throw new MissingRegulationSubType();
-
-      const rbacAdmin: Rbac = {
-        role: SecurityRole._DEFAULT_ADMIN_ROLE,
-        members: [diamondOwnerAccount!.toString()],
-      };
-      const erc20MetadataInfo: ERC20MetadataInfo = {
-        name: security.name,
-        symbol: security.symbol,
-        isin: security.isin,
-        decimals: security.decimals,
-      };
-      const resolverProxyConfiguration: ResolverProxyConfiguration = {
-        key: configId,
-        version: configVersion,
-      };
-      const securityData: SecurityData = {
-        arePartitionsProtected: security.arePartitionsProtected,
-        isMultiPartition: security.isMultiPartition,
-        resolver: resolver.toString(),
-        resolverProxyConfiguration,
-        rbacs: [rbacAdmin],
-        isControllable: security.isControllable,
-        isWhiteList: security.isWhiteList,
-        maxSupply: security.maxSupply ? security.maxSupply.toString() : "0",
-        erc20MetadataInfo,
-        clearingActive: security.clearingActive,
-        internalKycActivated: security.internalKycActivated,
-        externalPauses: externalPauses?.map((address) => address.toString()) ?? [],
-        externalControlLists: externalControlLists?.map((address) => address.toString()) ?? [],
-        externalKycLists: externalKycLists?.map((address) => address.toString()) ?? [],
-        compliance: compliance.toString(),
-        identityRegistry: identityRegistryAddress?.toString(),
-        erc20VotesActivated: security.erc20VotesActivated,
-      };
-      const equityDetailsData: EquityDetailsData = {
-        votingRight: equityDetails.votingRight,
-        informationRight: equityDetails.informationRight,
-        liquidationRight: equityDetails.liquidationRight,
-        subscriptionRight: equityDetails.subscriptionRight,
-        conversionRight: equityDetails.conversionRight,
-        redemptionRight: equityDetails.redemptionRight,
-        putRight: equityDetails.putRight,
-        dividendRight: CastDividendType.toNumber(equityDetails.dividendRight),
-        currency: equityDetails.currency,
-        nominalValue: equityDetails.nominalValue.toString(),
-        nominalValueDecimals: equityDetails.nominalValueDecimals,
-      };
-      const securityTokenToCreate = new FactoryEquityToken(securityData, equityDetailsData);
-      const additionalSecurityData: AdditionalSecurityData = {
-        countriesControlListType: security.isCountryControlListWhiteList,
-        listOfCountries: security.countries ?? "",
-        info: security.info ?? "",
-      };
-      const factoryRegulationData = new FactoryRegulationData(
-        CastRegulationType.toNumber(security.regulationType),
-        CastRegulationSubType.toNumber(security.regulationsubType),
-        additionalSecurityData,
-      );
-      LogService.logTrace(`Deploying equity: ${{ security: securityTokenToCreate }}`);
-      return this.executor.executeContractCall(
-        factoryId!.toString(),
-        TREXFactoryAts__factory.createInterface(),
-        "deployTREXSuiteAtsEquity",
-        [
-          salt,
-          {
-            owner,
-            irs,
-            ONCHAINID: onchainId,
-            irAgents,
-            tokenAgents,
-            complianceModules: compliancesModules,
-            complianceSettings,
-          },
-          { claimTopics, issuers, issuerClaims },
-          securityTokenToCreate,
-          factoryRegulationData,
-        ],
-        GAS.TREX_CREATE_SUITE,
       );
     } catch (error) {
       LogService.logError(error);

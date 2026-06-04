@@ -2,15 +2,11 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 // Layer 1 — Core
-import {
-    IScheduledCrossOrderedTasks
-} from "./layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
+import { IScheduledCrossOrderedTasks } from "./scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
 import { IAccessControl } from "./accessControl/IAccessControl.sol";
 import { IAdjustBalances } from "./adjustBalances/IAdjustBalances.sol";
-import { IAmortization } from "./layer_2/amortization/IAmortization.sol";
-import { IBondUSA } from "./layer_3/bondUSA/IBondUSA.sol";
+import { IAmortization } from "./amortization/IAmortization.sol";
 import { IMaturity } from "./maturity/IMaturity.sol";
-import { IBondRead } from "./layer_2/bond/IBondRead.sol";
 import { IPrincipal } from "./principal/IPrincipal.sol";
 
 // Layer 1 — ERC1400
@@ -28,29 +24,26 @@ import { ICoreAdjusted } from "./coreAdjusted/ICoreAdjusted.sol";
 import { IAllowance } from "./allowance/IAllowance.sol";
 
 // Layer 1 — External lists
-import { IERC1410Management } from "./layer_1/ERC1400/ERC1410/IERC1410Management.sol";
 import { ITransferByPartition } from "./transferByPartition/ITransferByPartition.sol";
 
 import { IOperator } from "./operator/IOperator.sol";
 import { ITransfer } from "./transfer/ITransfer.sol";
 
 // Layer 1 — Remaining facets
-import { IERC20Votes } from "./layer_1/ERC1400/ERC20Votes/IERC20Votes.sol";
+import { IERC20Votes } from "./erc20Votes/IERC20Votes.sol";
 import { IERC3643 } from "./layer_1/ERC3643/IERC3643.sol";
-import { IEquity } from "./layer_2/equity/IEquity.sol";
-import { IEquityUSA } from "./layer_3/equityUSA/IEquityUSA.sol";
 import { IExternalControlList } from "./layer_1/externalControlList/IExternalControlList.sol";
 import { IExternalControlListManagement } from "./externalControlListManagement/IExternalControlListManagement.sol";
 import { IExternalKycList } from "./layer_1/externalKycList/IExternalKycList.sol";
 import { IExternalKycListManagement } from "./externalKycListManagement/IExternalKycListManagement.sol";
 import { IExternalPauseManagement } from "./externalPauseManagement/IExternalPauseManagement.sol";
-import { IFixedRate } from "./layer_2/interestRate/fixedRate/IFixedRate.sol";
-import { IKpiLinkedRate } from "./layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
+import { IFixedRate } from "./fixedRate/IFixedRate.sol";
+import { IKpiLinkedRate } from "./kpiLinkedRate/IKpiLinkedRate.sol";
 
 // Layer 2
 import { IOperatorHoldByPartition } from "./operatorHoldByPartition/IOperatorHoldByPartition.sol";
 import { IHoldByPartition } from "./holdByPartition/IHoldByPartition.sol";
-import { IKyc } from "./layer_1/kyc/IKyc.sol";
+import { IKyc } from "./kyc/IKyc.sol";
 // IKpiLinkedRate is excluded: it defines getInterestRate() with an incompatible return type
 // (different InterestRate struct), which cannot be reconciled in a single Solidity interface.
 // Use the typed instance directly when testing KPI-linked rate facets.
@@ -59,23 +52,23 @@ import { INominalValue } from "./layer_2/nominalValue/INominalValue.sol";
 import { INominalValueAtSnapshot } from "./nominalValueAtSnapshot/INominalValueAtSnapshot.sol";
 import { IPause } from "./pause/IPause.sol";
 import { ILoansPortfolio } from "./layer_2/loansPortfolio/ILoansPortfolio.sol";
-import { IVoting } from "./layer_2/voting/IVoting.sol";
+import { IVoting } from "./voting/IVoting.sol";
 import { IVotingSecurityHolders } from "./votingSecurityHolders/IVotingSecurityHolders.sol";
 
 // Layer 3
-import { ISecurity } from "./layer_2/security/ISecurity.sol";
 import { ISsiManagement } from "./ssiManagement/ISsiManagement.sol";
-import { ITimeTravel } from "../test/testTimeTravel/ITimeTravel.sol";
+// Test-only writer interface; its facet impl is excluded from prod compiles by the tasks/compile.ts filter.
+import { IEvmAccessorsFacet } from "../test/testAccessors/IEvmAccessorsFacet.sol";
 import { IBalanceTracker } from "./balanceTracker/IBalanceTracker.sol";
 import { IBalanceTrackerAdjusted } from "./balanceTrackerAdjusted/IBalanceTrackerAdjusted.sol";
-import { ITransferAndLock } from "./layer_3/transferAndLock/ITransferAndLock.sol";
+import { ITransferAndLock } from "./transferAndLock/ITransferAndLock.sol";
 import { ITransferAndLockByPartition } from "./transferAndLockByPartition/ITransferAndLockByPartition.sol";
 import { ICoupon } from "./coupon/ICoupon.sol";
 import { IDividend } from "./dividend/IDividend.sol";
 import { IDividendSecurityHolders } from "./dividendSecurityHolders/IDividendSecurityHolders.sol";
-import { IKpis } from "./layer_2/kpi/kpiLatest/IKpis.sol";
-import { IProtectedPartitions } from "./layer_1/protectedPartition/IProtectedPartitions.sol";
-import { IProceedRecipients } from "./layer_2/proceedRecipient/IProceedRecipients.sol";
+import { IKpis } from "./kpi/IKpis.sol";
+import { IProtectedPartitions } from "./protectedPartition/IProtectedPartitions.sol";
+import { IProceedRecipients } from "./proceedRecipient/IProceedRecipients.sol";
 import { ICap } from "./cap/ICap.sol";
 import { ICapByPartition } from "./capByPartition/ICapByPartition.sol";
 import { INonces } from "./nonces/INonces.sol";
@@ -96,11 +89,11 @@ import { IScheduledBalanceAdjustment } from "./scheduledBalanceAdjustment/ISched
 import { ICouponSecurityHolders } from "./couponSecurityHolders/ICouponSecurityHolders.sol";
 import { ISecurityHolders } from "./securityHolders/ISecurityHolders.sol";
 
-import { ILock } from "./layer_1/lock/ILock.sol";
+import { ILock } from "./lock/ILock.sol";
 import { ILockByPartition } from "./lockByPartition/ILockByPartition.sol";
 import { IFreeze } from "./freeze/IFreeze.sol";
 import { IBatchFreeze } from "./batchFreeze/IBatchFreeze.sol";
-import { ISnapshots } from "./layer_1/snapshot/ISnapshots.sol";
+import { ISnapshots } from "./snapshot/ISnapshots.sol";
 import { ISnapshotsByPartition } from "./snapshotsByPartition/ISnapshotsByPartition.sol";
 import { ISecurityHoldersAtSnapshot } from "./securityHoldersAtSnapshot/ISecurityHoldersAtSnapshot.sol";
 import { IFreezeAtSnapshot } from "./freezeAtSnapshot/IFreezeAtSnapshot.sol";
@@ -114,7 +107,7 @@ import {
 } from "./protectedClearingHoldByPartition/IProtectedClearingHoldByPartition.sol";
 import {
     IOperatorClearingHoldByPartition
-} from "./layer_1/clearing/operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol";
+} from "./operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol";
 import { IClearing } from "./clearing/IClearing.sol";
 import { IComplianceFacet } from "./compliance/IComplianceFacet.sol";
 import { IComplianceByPartition } from "./complianceByPartition/IComplianceByPartition.sol";
@@ -133,18 +126,30 @@ import { IControllerHoldByPartition } from "./controllerHoldByPartition/IControl
 import { IControllerByPartition } from "./controllerByPartition/IControllerByPartition.sol";
 import { IProtectedByPartition } from "./protectedByPartition/IProtectedByPartition.sol";
 import { IProtectedHoldByPartition } from "./protectedHoldByPartition/IProtectedHoldByPartition.sol";
-import { IERC20Permit } from "./layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
+import { IERC20Permit } from "./erc20Permit/IERC20Permit.sol";
 import { IEIP712 } from "./eip712/IEIP712.sol";
 import { IControlList } from "./controlList/IControlList.sol";
 import { IBatchBurn } from "./batchBurn/IBatchBurn.sol";
 import { IBatchMint } from "./batchMint/IBatchMint.sol";
 import { IBatchTransfer } from "./batchTransfer/IBatchTransfer.sol";
-import { IMetadata } from "./metadata/IMetadata.sol";
+import { ICustomData } from "./customData/ICustomData.sol";
 import { IDeactivate } from "./deactivate/IDeactivate.sol";
 import { IOperatorByPartition } from "./operatorByPartition/IOperatorByPartition.sol";
 import { IInterestRate } from "./interestRate/IInterestRate.sol";
+import { IInitializer } from "./initializer/IInitializer.sol";
+
+/// @custom:hash resolverKey TransferAndLock
+bytes32 constant RESOLVER_KEY_TRANSFER_AND_LOCK = 0xe92a301947f21b973cb1007aeba48f2eecd916d05107b6355fc499b783b8f7d9;
 
 // solhint-disable no-empty-blocks
+/// @custom:hash resolverKey TransferAndLockKpiLinkedRate
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_TRANSFER_AND_LOCK_KPI_LINKED_RATE = 0x2fbe9c91ad821641ca83a65f6399878b8419fd717379cd1abfac68f2c82940dd;
+
+/// @custom:hash resolverKey TransferAndLockFixedRate
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_TRANSFER_AND_LOCK_FIXED_RATE = 0x0405063ec31286ce4abbe4db662da098f2cbd15f96d745680e850bd60181eae2;
+
 /**
  * @title IAsset
  * @author Asset Tokenization Studio Team
@@ -153,10 +158,10 @@ import { IInterestRate } from "./interestRate/IInterestRate.sol";
  * @dev Intended for use in tests and external tooling to interact with all Diamond methods
  *      through a single typed object, rather than multiple per-facet instances.
  *
- *      Note: IHold already transitively includes IAccessControl, IERC1410Management,
- *      IHoldRead, and IHoldTokenHolder. IERC3643 already includes its
- *      sub-interfaces. IERC20Votes includes IERC5805 and IVotes. Solidity C3 linearisation
- *      handles the resulting diamond inheritance without conflicts.
+ *      Note: IHold already transitively includes IAccessControl,
+ *      IHoldRead, and IHoldTokenHolder. IERC3643 surfaces the shared ERC-3643 types,
+ *      events and errors (IERC3643Types). IERC20Votes includes IERC5805 and IVotes.
+ *      Solidity C3 linearisation handles the resulting diamond inheritance without conflicts.
  *
  *      Note: IKpiLinkedRate is intentionally excluded due to an irreconcilable function selector
  *      conflict on getInterestRate(). Consumers that need the KPI-linked rate surface must use
@@ -174,23 +179,19 @@ interface IAsset is
     IExternalKycList,
     IExternalKycListManagement,
     IKpis,
-    ITimeTravel,
+    IEvmAccessorsFacet,
     IDiamond,
     IOperatorHoldByPartition,
     ITransfer,
     IERC20Votes,
-    IERC1410Management,
     ITransferByPartition,
     IOperator,
     IERC3643,
     IRecovery,
     IBurn,
     IScheduledCrossOrderedTasks,
-    IBondRead,
     IPrincipal,
     IMaturity,
-    IEquity,
-    ISecurity,
     ICorporateActions,
     IProtectedPartitions,
     IProceedRecipients,
@@ -203,8 +204,6 @@ interface IAsset is
     ILoansPortfolio,
     IVoting,
     IVotingSecurityHolders,
-    IBondUSA,
-    IEquityUSA,
     ITransferAndLock,
     ITransferAndLockByPartition,
     // Corporate Actions
@@ -276,9 +275,10 @@ interface IAsset is
     IBatchBurn,
     IBatchMint,
     IBatchTransfer,
-    IMetadata,
+    ICustomData,
     IDeactivate,
     IOperatorByPartition,
     ISecurityHolders,
-    IInterestRate
+    IInterestRate,
+    IInitializer
 {}
