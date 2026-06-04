@@ -65,7 +65,6 @@ const makeMetadata = (overrides: Partial<ContractMetadata> = {}): ContractMetada
   sourceFile: "mocks/TestMock.sol",
   layer: 0,
   category: "core",
-  hasTimeTravel: false,
   roles: [],
   methods: [],
   events: [],
@@ -100,7 +99,7 @@ describe("Registry Generator - isDeployable", () => {
         }),
       });
 
-      const metadata = extractMetadata(contract, false);
+      const metadata = extractMetadata(contract);
       expect(metadata.isDeployable).to.be.true;
     });
 
@@ -116,7 +115,7 @@ describe("Registry Generator - isDeployable", () => {
         }),
       });
 
-      const metadata = extractMetadata(contract, false);
+      const metadata = extractMetadata(contract);
       expect(metadata.isDeployable).to.be.false;
     });
 
@@ -131,7 +130,7 @@ describe("Registry Generator - isDeployable", () => {
         }),
       });
 
-      const metadata = extractMetadata(contract, false);
+      const metadata = extractMetadata(contract);
       expect(metadata.isDeployable).to.be.false;
     });
 
@@ -147,7 +146,7 @@ describe("Registry Generator - isDeployable", () => {
         }),
       });
 
-      const metadata = extractMetadata(contract, false);
+      const metadata = extractMetadata(contract);
       expect(metadata.isDeployable).to.be.false;
     });
   });

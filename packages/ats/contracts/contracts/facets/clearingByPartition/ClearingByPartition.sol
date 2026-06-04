@@ -3,7 +3,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IClearingByPartition, RESOLVER_KEY_CLEARING_BY_PARTITION } from "./IClearingByPartition.sol";
 import { ROLE_CLEARING_VALIDATOR } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { ClearingOps } from "../../domain/orchestrator/ClearingOps.sol";
 import { ClearingLifecycleOps } from "../../domain/orchestrator/ClearingLifecycleOps.sol";
 import { ClearingReadOps } from "../../domain/orchestrator/ClearingReadOps.sol";
@@ -247,7 +246,7 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
                 _partition,
                 _tokenHolder,
                 _clearingId,
-                TimeTravelStorageWrapper.getBlockTimestamp()
+                EvmAccessors.getBlockTimestamp()
             );
     }
 
@@ -262,7 +261,7 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
                 _partition,
                 _tokenHolder,
                 _clearingId,
-                TimeTravelStorageWrapper.getBlockTimestamp()
+                EvmAccessors.getBlockTimestamp()
             );
     }
 
@@ -275,7 +274,7 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
             ClearingReadOps.getClearedAmountForByPartitionAdjustedAt(
                 _partition,
                 _tokenHolder,
-                TimeTravelStorageWrapper.getBlockTimestamp()
+                EvmAccessors.getBlockTimestamp()
             );
     }
 

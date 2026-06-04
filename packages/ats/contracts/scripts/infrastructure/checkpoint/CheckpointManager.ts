@@ -83,7 +83,6 @@ export class CheckpointManager {
    *   network: 'hedera-testnet',
    *   deployer: '0x123...',
    *   workflowType: 'newBlr',
-   *   options: { useTimeTravel: false }
    * })
    * ```
    */

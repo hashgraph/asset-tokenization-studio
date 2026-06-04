@@ -232,11 +232,11 @@ hid almost everything.
 
 ## Scenario 8 — hash stability check (positive case)
 
-Real check against `origin/development` for the current PR.
+Real check against `origin/develop` for the current PR.
 
 ```
-$ npm run ats:contracts:hashes:stability -- --base origin/development --soft
-✅ hash stability: no pre-existing hash changed vs origin/development
+$ npm run ats:contracts:hashes:stability -- --base origin/develop --soft
+✅ hash stability: no pre-existing hash changed vs origin/develop
 ```
 
 Exit 0. No pre-existing `(kind, arg) → hex` triple changed between base

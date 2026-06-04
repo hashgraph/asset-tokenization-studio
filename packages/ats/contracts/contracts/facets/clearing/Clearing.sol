@@ -8,7 +8,6 @@ import { Modifiers } from "../../services/Modifiers.sol";
 import { ClearingStorageWrapper } from "../../domain/asset/ClearingStorageWrapper.sol";
 import { ClearingReadOps } from "../../domain/orchestrator/ClearingReadOps.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
@@ -66,8 +65,7 @@ abstract contract Clearing is IClearing, Modifiers {
 
     /// @inheritdoc IClearing
     function getClearedAmountFor(address _tokenHolder) external view override returns (uint256 amount_) {
-        return
-            ClearingReadOps.getClearedAmountForAdjustedAt(_tokenHolder, TimeTravelStorageWrapper.getBlockTimestamp());
+        return ClearingReadOps.getClearedAmountForAdjustedAt(_tokenHolder, EvmAccessors.getBlockTimestamp());
     }
 
     /// @inheritdoc IClearing

@@ -8,7 +8,7 @@
 
 import * as path from "path";
 import { findSolidityFiles, readFile, getRelativePath } from "../utils/fileUtils";
-import { extractContractNames, isFacetName, isTimeTravelVariant, getBaseName } from "../utils/solidityUtils";
+import { extractContractNames, isFacetName } from "../utils/solidityUtils";
 
 /**
  * Discovered contract file information.
@@ -52,9 +52,6 @@ export interface HardhatArtifact {
 export interface CategorizedContracts {
   /** Facet contracts (ends with 'Facet') */
   facets: ContractFile[];
-
-  /** TimeTravel variant facets */
-  timeTravelFacets: ContractFile[];
 
   /** Infrastructure contracts (BLR, Factory, etc.) */
   infrastructure: ContractFile[];
@@ -124,7 +121,6 @@ export function findAllContracts(contractsDir: string, artifactDir: string): Con
 export function categorizeContracts(contracts: ContractFile[]): CategorizedContracts {
   const result: CategorizedContracts = {
     facets: [],
-    timeTravelFacets: [],
     infrastructure: [],
     test: [],
     interfaces: [],
@@ -139,12 +135,6 @@ export function categorizeContracts(contracts: ContractFile[]): CategorizedContr
     // This ensures MockTreasuryFacet goes to test category, not facets
     if (isTestContract(contract)) {
       result.test.push(contract);
-      continue;
-    }
-
-    // TimeTravel variants
-    if (isTimeTravelVariant(name)) {
-      result.timeTravelFacets.push(contract);
       continue;
     }
 
@@ -219,40 +209,4 @@ function isTestContract(contract: ContractFile): boolean {
   }
 
   return false;
-}
-
-/**
- * Find TimeTravel pair for a base facet.
- *
- * @param baseFacetName - Base facet name
- * @param allContracts - All discovered contracts
- * @returns TimeTravel variant contract file or null
- */
-export function findTimeTravelPair(baseFacetName: string, allContracts: ContractFile[]): ContractFile | null {
-  const timeTravelName = `${baseFacetName}TimeTravel`;
-
-  return allContracts.find((c) => c.primaryContract === timeTravelName) || null;
-}
-
-/**
- * Group TimeTravel variants with their base facets.
- *
- * @param facets - Base facet contracts
- * @param timeTravelFacets - TimeTravel variant contracts
- * @returns Map of base facet name to TimeTravel variant
- */
-export function pairTimeTravelVariants(
-  facets: ContractFile[],
-  timeTravelFacets: ContractFile[],
-): Map<string, ContractFile | null> {
-  const pairs = new Map<string, ContractFile | null>();
-
-  for (const facet of facets) {
-    const baseName = facet.primaryContract;
-    const timeTravelVariant = timeTravelFacets.find((tt) => getBaseName(tt.primaryContract) === baseName);
-
-    pairs.set(baseName, timeTravelVariant || null);
-  }
-
-  return pairs;
 }

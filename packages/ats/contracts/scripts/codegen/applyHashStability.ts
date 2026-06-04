@@ -25,7 +25,7 @@
 //
 // Modes:
 //   --base <ref>   Required. Git ref to compare against (e.g.
-//                  `origin/development`).
+//                  `origin/develop`).
 //   --soft         Default. Print `::warning::`-style annotations and exit 0
 //                  so this can roll out without blocking PRs while the team
 //                  gets used to it.

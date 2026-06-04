@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ILoan } from "../../facets/layer_2/loan/ILoan.sol";
+import { ILoan } from "../../facets/loan/ILoan.sol";
 import { ScheduledTasksOps } from "../orchestrator/ScheduledTasksOps.sol";
 
 /// @custom:hash storage Loan

@@ -7,7 +7,6 @@ import { Modifiers } from "../../services/Modifiers.sol";
 import { ClearingOps } from "../../domain/orchestrator/ClearingOps.sol";
 import { ClearingReadOps } from "../../domain/orchestrator/ClearingReadOps.sol";
 import { ThirdPartyType } from "../../domain/asset/types/ThirdPartyType.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
@@ -113,7 +112,7 @@ abstract contract ClearingHoldByPartition is IClearingHoldByPartition, Modifiers
                 _partition,
                 _tokenHolder,
                 _clearingId,
-                TimeTravelStorageWrapper.getBlockTimestamp()
+                EvmAccessors.getBlockTimestamp()
             );
     }
 }

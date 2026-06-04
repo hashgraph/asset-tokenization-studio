@@ -6,7 +6,6 @@ import { ILock, RESOLVER_KEY_LOCK } from "./ILock.sol";
 import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
 import { LockStorageWrapper } from "../../domain/asset/LockStorageWrapper.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
@@ -22,7 +21,7 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
  *      all-partition read methods declared in `ILock`. Partition-aware writes and
  *      partition-scoped reads live in the `LockByPartition` facet. All write operations
  *      delegate persistence to `LockStorageWrapper`; balance-adjusted reads are timestamped
- *      via `TimeTravelStorageWrapper.getBlockTimestamp` so they remain deterministic under
+ *      via `EvmAccessors.getBlockTimestamp` so they remain deterministic under
  *      time-travel testing.
  */
 abstract contract Lock is ILock, Modifiers {
@@ -185,30 +184,26 @@ abstract contract Lock is ILock, Modifiers {
      * @dev Reads the lock keyed by the message sender (resolved through `EvmAccessors`),
      *      not by an explicit token holder. Returns the unadjusted on-chain entry — callers
      *      that need balance-adjusted figures should use the partition-scoped reads on
-     *      `LockByPartitionFacet`. Marked `virtual` so test doubles such as
-     *      `LockFacetTimeTravel` can override it.
+     *      `LockByPartitionFacet`.
      * @param _partition The partition the lock lives on.
      * @param _lockId Identifier of the lock to read.
      * @return lockData_ The stored lock entry. All fields are zero when the identifier does
      *         not exist for the caller.
      */
-    function getLockByPartition(
-        bytes32 _partition,
-        uint256 _lockId
-    ) external view virtual returns (LockData memory lockData_) {
+    function getLockByPartition(bytes32 _partition, uint256 _lockId) external view returns (LockData memory lockData_) {
         lockData_ = LockStorageWrapper.getLock(_partition, EvmAccessors.getMsgSender(), _lockId);
     }
 
     /**
      * @inheritdoc ILock
      * @dev Returns the default-partition figure adjusted by any pending balance-adjustment
-     *      factors, evaluated at `TimeTravelStorageWrapper.getBlockTimestamp()`.
+     *      factors, evaluated at `EvmAccessors.getBlockTimestamp()`.
      */
     function getLockedAmountFor(address _tokenHolder) external view override returns (uint256 amount_) {
         amount_ = LockStorageWrapper.getLockedAmountForByPartitionAdjustedAt(
             _DEFAULT_PARTITION,
             _tokenHolder,
-            TimeTravelStorageWrapper.getBlockTimestamp()
+            EvmAccessors.getBlockTimestamp()
         );
     }
 
@@ -229,7 +224,7 @@ abstract contract Lock is ILock, Modifiers {
     /**
      * @inheritdoc ILock
      * @dev Returns the default-partition figures adjusted by any pending balance-adjustment
-     *      factors, evaluated at `TimeTravelStorageWrapper.getBlockTimestamp()`.
+     *      factors, evaluated at `EvmAccessors.getBlockTimestamp()`.
      */
     function getLockFor(
         address _tokenHolder,
@@ -239,7 +234,7 @@ abstract contract Lock is ILock, Modifiers {
             _DEFAULT_PARTITION,
             _tokenHolder,
             _lockId,
-            TimeTravelStorageWrapper.getBlockTimestamp()
+            EvmAccessors.getBlockTimestamp()
         );
     }
 }

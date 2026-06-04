@@ -180,9 +180,6 @@ export interface DeploymentWithExistingBlrOutput {
  * Options for deploying with existing BLR.
  */
 export interface DeploySystemWithExistingBlrOptions extends ResumeOptions {
-  /** Whether to use TimeTravel variants for facets */
-  useTimeTravel?: boolean;
-
   /** Whether to save deployment output to file */
   saveOutput?: boolean;
 
@@ -247,7 +244,6 @@ export interface DeploySystemWithExistingBlrOptions extends ResumeOptions {
  *     'hedera-testnet',
  *     '0x123...BLR...',
  *     {
- *         useTimeTravel: false,
  *         deployFacets: true,
  *         deployFactory: true,
  *         saveOutput: true
@@ -268,7 +264,6 @@ export async function deploySystemWithExistingBlr(
   const networkConfig = getDeploymentConfig(network);
 
   const {
-    useTimeTravel = false,
     saveOutput = true,
     outputPath,
     deployFacets: shouldDeployFacets = true,
@@ -298,7 +293,6 @@ export async function deploySystemWithExistingBlr(
   info(`📡 Network: ${network}`);
   info(`👤 Deployer: ${deployer}`);
   info(`🔷 BLR Address: ${blrAddress}`);
-  info(`🔄 TimeTravel: ${useTimeTravel ? "Enabled" : "Disabled"}`);
   info(`⏱️  Confirmations (deploy): ${confirmations}`);
   info(`🔁 Retry: ${enableRetry ? "Enabled" : "Disabled"}`);
   info(`✅ Verification: ${verifyDeployment ? "Enabled" : "Disabled"}`);
@@ -342,7 +336,6 @@ export async function deploySystemWithExistingBlr(
       deployer,
       workflowType: "existingBlr",
       options: {
-        useTimeTravel,
         saveOutput,
         outputPath,
         deployFacets: shouldDeployFacets,
@@ -494,33 +487,25 @@ export async function deploySystemWithExistingBlr(
           await checkpointManager.saveCheckpoint(checkpoint);
         }
 
-        let allFacets = atsRegistry.getAllFacets();
+        const allFacets = atsRegistry.getAllFacets();
         info(`   Found ${allFacets.length} facets in registry`);
-
-        if (!useTimeTravel) {
-          allFacets = allFacets.filter((f) => f.name !== "TimeTravelFacet");
-        }
 
         // Initialize facets Map if not exists
         if (!checkpoint.steps.facets) {
           checkpoint.steps.facets = new Map();
         }
 
-        // Create factories from registry
-        // When useTimeTravel=true, deploy TimeTravel variant facets instead of production ones
-        // Skip facets without factories (abstract contracts like LockFacet)
+        // Create factories from registry. Skip facets without factories
+        // (abstract contracts like LockFacet).
         const facetFactories: Record<string, ContractFactory> = {};
         for (const facet of allFacets) {
-          // Select factory: TimeTravel variant when available and enabled, else production
-          const selectedFactory = useTimeTravel && facet.timeTravelFactory ? facet.timeTravelFactory : facet.factory;
-
-          if (!selectedFactory) {
+          if (!facet.factory) {
             info(`   Skipping ${facet.name} (abstract contract, no factory)`);
             continue;
           }
 
           // Get factory
-          const factory = selectedFactory(signer) as ContractFactory;
+          const factory = facet.factory(signer) as ContractFactory;
           // Use the actual contract name from the factory
           const contractName = factory.constructor.name.replace("__factory", "");
 
@@ -624,13 +609,9 @@ export async function deploySystemWithExistingBlr(
 
         // Prepare facets with resolver keys from registry
         const facetsToRegister = Object.entries(facetAddresses).map(([facetName, facetAddress]) => {
-          // Strip "TimeTravel" suffix to get canonical name
-          const baseName = facetName.replace(/TimeTravel$/, "");
-
-          // Look up resolver key from registry
-          const definition = atsRegistry.getFacetDefinition(baseName);
+          const definition = atsRegistry.getFacetDefinition(facetName);
           if (!definition || !definition.resolverKey?.value) {
-            throw new Error(`Facet ${baseName} not found in registry or missing resolver key`);
+            throw new Error(`Facet ${facetName} not found in registry or missing resolver key`);
           }
 
           return {
@@ -701,7 +682,6 @@ export async function deploySystemWithExistingBlr(
           equityConfig = await createEquityConfiguration(
             blrContract,
             facetAddresses,
-            useTimeTravel,
             false,
             batchSize,
             confirmations,
@@ -746,7 +726,6 @@ export async function deploySystemWithExistingBlr(
           bondConfig = await createBondConfiguration(
             blrContract,
             facetAddresses,
-            useTimeTravel,
             false,
             batchSize,
             confirmations,
@@ -788,7 +767,6 @@ export async function deploySystemWithExistingBlr(
           bondFixedRateConfig = await createBondFixedRateConfiguration(
             blrContract,
             facetAddresses,
-            useTimeTravel,
             false,
             batchSize,
             confirmations,
@@ -832,7 +810,6 @@ export async function deploySystemWithExistingBlr(
           bondKpiLinkedRateConfig = await createBondKpiLinkedRateConfiguration(
             blrContract,
             facetAddresses,
-            useTimeTravel,
             false,
             batchSize,
             confirmations,
@@ -875,7 +852,6 @@ export async function deploySystemWithExistingBlr(
           depositTokenConfig = await createDepositTokenConfiguration(
             blrContract,
             facetAddresses,
-            useTimeTravel,
             false,
             batchSize,
             confirmations,
@@ -934,7 +910,6 @@ export async function deploySystemWithExistingBlr(
         factoryConfig = await createFactoryConfiguration(
           blrContractForFactory,
           facetAddresses,
-          useTimeTravel,
           false,
           batchSize,
           confirmations,

@@ -256,7 +256,7 @@ export async function deployLoansPortfolioTokenFixture({
   await asset.initializeBalanceAdjustments();
   await asset.initializeScheduledBalanceAdjustment();
   await asset.initializeNonces();
-  await asset.initializeTimeTravel();
+  await asset.initializeEvmAccessors();
 
   await initializerFacet.connect(deployer).initializeInitializer(150);
   await initializerFacet.connect(deployer).setOperationalStatus();

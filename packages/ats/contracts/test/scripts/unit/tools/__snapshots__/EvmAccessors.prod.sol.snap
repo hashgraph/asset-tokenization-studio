@@ -1,0 +1,28 @@
+// SPDX-License-Identifier: Apache-2.0
+/* solhint-disable */
+
+// AUTO-GENERATED — DO NOT EDIT.
+// Source: scripts/tools/accessor-generator/
+// Regenerated on every `npx hardhat compile` by the
+// `generate-evm-accessors` task in `tasks/compile.ts`.
+// Edits to this file will be silently overwritten.
+
+pragma solidity >=0.8.0 <0.9.0;
+
+library EvmAccessors {
+    function getBlockTimestamp() internal view returns (uint256) {
+        return block.timestamp;
+    }
+
+    function getBlockNumber() internal view returns (uint256) {
+        return block.number;
+    }
+
+    function getMsgSender() internal view returns (address) {
+        return msg.sender;
+    }
+
+    function getChainId() internal view returns (uint256) {
+        return block.chainid;
+    }
+}

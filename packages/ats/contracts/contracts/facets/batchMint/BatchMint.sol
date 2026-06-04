@@ -3,12 +3,11 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ROLE_ISSUER, ROLE_AGENT, DEFAULT_ADMIN_ROLE, _buildRoles } from "../../constants/roles.sol";
 import { IBatchMint, RESOLVER_KEY_BATCH_MINT } from "./IBatchMint.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { CapStorageWrapper } from "../../domain/core/CapStorageWrapper.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { IMint } from "../mint/IMint.sol";
-import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
@@ -59,7 +58,7 @@ abstract contract BatchMint is IBatchMint, Modifiers {
                 ++i;
             }
         }
-        CapStorageWrapper.checkMaxSupply(totalAmount, TimeTravelStorageWrapper.getBlockTimestamp());
+        CapStorageWrapper.checkMaxSupply(totalAmount, EvmAccessors.getBlockTimestamp());
         address sender = EvmAccessors.getMsgSender();
         for (uint256 i; i < length; ) {
             TokenCoreOps.issue(_toList[i], _amounts[i]);

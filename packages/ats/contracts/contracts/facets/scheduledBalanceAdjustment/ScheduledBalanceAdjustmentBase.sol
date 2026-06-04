@@ -9,7 +9,7 @@ import {
 import { IScheduledBalanceAdjustment } from "../../facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol";
 import { CorporateActionsStorageWrapper } from "../../domain/core/CorporateActionsStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "../../domain/asset/ScheduledTasksStorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 
 /**
@@ -107,7 +107,7 @@ abstract contract ScheduledBalanceAdjustmentBase {
         bytes32 corporateActionId,
         uint256 balanceAdjustmentId
     ) internal view {
-        if (executionDate <= TimeTravelStorageWrapper.getBlockTimestamp()) {
+        if (executionDate <= EvmAccessors.getBlockTimestamp()) {
             revert IScheduledBalanceAdjustment.BalanceAdjustmentAlreadyExecuted(corporateActionId, balanceAdjustmentId);
         }
     }

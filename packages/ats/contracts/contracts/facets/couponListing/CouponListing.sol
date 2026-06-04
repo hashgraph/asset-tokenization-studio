@@ -5,7 +5,7 @@ import { ICouponListing, RESOLVER_KEY_COUPON_LISTING } from "./ICouponListing.so
 import { ScheduledTask } from "../scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { CouponStorageWrapper } from "../../domain/asset/coupon/CouponStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "../../domain/asset/ScheduledTasksStorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
@@ -16,7 +16,7 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
  * @notice Abstract implementation of `ICouponListing`, providing read-only queries for the
  *         ordered coupon list and the scheduled coupon listing.
  * @dev Reads from `CouponStorageWrapper`, `ScheduledTasksStorageWrapper`, and
- *      `TimeTravelStorageWrapper`. Intended to be inherited by `CouponListingFacet`.
+ *      `EvmAccessors`. Intended to be inherited by `CouponListingFacet`.
  */
 abstract contract CouponListing is ICouponListing, Modifiers {
     /// @inheritdoc ICouponListing
@@ -50,7 +50,7 @@ abstract contract CouponListing is ICouponListing, Modifiers {
     /// @inheritdoc ICouponListing
     function getCouponsOrderedListTotal(bool _includeDisabled) external view override returns (uint256 total_) {
         total_ = CouponStorageWrapper.getCouponsOrderedListTotalAdjustedAt(
-            TimeTravelStorageWrapper.getBlockTimestamp(),
+            EvmAccessors.getBlockTimestamp(),
             _includeDisabled
         );
     }

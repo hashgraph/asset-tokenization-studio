@@ -20,7 +20,6 @@ import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 import { ControlListStorageWrapper } from "../core/ControlListStorageWrapper.sol";
 import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /// @custom:hash storage Hold
@@ -120,7 +119,7 @@ library HoldStorageWrapper {
             _from,
             NonceStorageWrapper.getNonceFor(_from),
             _protectedHold.deadline,
-            TimeTravelStorageWrapper.getBlockTimestamp()
+            EvmAccessors.getBlockTimestamp()
         );
 
         ProtectedPartitionsStorageWrapper.checkCreateHoldSignature(
@@ -762,7 +761,7 @@ library HoldStorageWrapper {
      * @return Whether the hold has expired.
      */
     function isHoldExpired(IHoldTypes.Hold memory _hold) internal view returns (bool) {
-        return TimeTravelStorageWrapper.getBlockTimestamp() >= _hold.expirationTimestamp;
+        return EvmAccessors.getBlockTimestamp() >= _hold.expirationTimestamp;
     }
 
     /**

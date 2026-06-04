@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IMaturity } from "../../facets/maturity/IMaturity.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /// @custom:hash storage MaturityDate
 bytes32 constant STORAGE_LOCATION_MATURITY_DATE = 0x1aa172d1ea72cd83510f1cf656de1afda1343aac6b18ede59e254f0b6b4e3000;
@@ -54,7 +54,7 @@ library MaturityDateStorageWrapper {
      * @param _maturityDate Proposed maturity timestamp (Unix epoch, seconds).
      */
     function checkValidMaturityDate(uint256 _maturityDate) internal view {
-        if (_maturityDate <= TimeTravelStorageWrapper.getBlockTimestamp()) {
+        if (_maturityDate <= EvmAccessors.getBlockTimestamp()) {
             revert IMaturity.MaturityDateInvalid();
         }
     }
@@ -64,7 +64,7 @@ library MaturityDateStorageWrapper {
      * @dev    Used to gate redemption — the token must have matured before any holder can redeem.
      */
     function checkMaturityReached() internal view {
-        if (TimeTravelStorageWrapper.getBlockTimestamp() < getMaturityDate()) {
+        if (EvmAccessors.getBlockTimestamp() < getMaturityDate()) {
             revert IMaturity.MaturityDateInvalid();
         }
     }

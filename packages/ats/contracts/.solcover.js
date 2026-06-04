@@ -10,6 +10,7 @@ module.exports = {
     "layer_2/erc3643/",
     "factory/ERC3643/interfaces/regulation.sol",
     "factory/ERC3643/interfaces/roles.sol",
+    "infrastructure/utils/EvmAccessors.sol",
   ],
   providerOptions: {
     allowUnlimitedContractSize: true,

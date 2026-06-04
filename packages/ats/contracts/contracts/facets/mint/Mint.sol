@@ -6,9 +6,8 @@ import { IMint, RESOLVER_KEY_MINT } from "./IMint.sol";
 import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 
 /**
  * @title Mint
@@ -45,7 +44,7 @@ abstract contract Mint is IMint, Modifiers {
         onlyWithoutMultiPartition
         onlyAnyRole(_buildRoles(ROLE_ISSUER, ROLE_AGENT))
         onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
-        onlyWithinMaxSupply(_value, TimeTravelStorageWrapper.getBlockTimestamp())
+        onlyWithinMaxSupply(_value, EvmAccessors.getBlockTimestamp())
         onlyIdentifiedAddresses(address(0), _tokenHolder)
         onlyCompliant(address(0), _tokenHolder, false)
     {
@@ -66,7 +65,7 @@ abstract contract Mint is IMint, Modifiers {
         onlyWithoutMultiPartition
         onlyAnyRole(_buildRoles(ROLE_ISSUER, ROLE_AGENT))
         onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
-        onlyWithinMaxSupply(_amount, TimeTravelStorageWrapper.getBlockTimestamp())
+        onlyWithinMaxSupply(_amount, EvmAccessors.getBlockTimestamp())
         onlyIdentifiedAddresses(address(0), _to)
         onlyCompliant(address(0), _to, false)
     {

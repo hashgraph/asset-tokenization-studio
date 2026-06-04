@@ -38,9 +38,6 @@ import { BusinessLogicResolver } from "@contract-types";
  *
  * Note: DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet functionality,
  * so we only include DiamondFacet to avoid selector collisions.
- *
- * Note: Loan Portfolio does NOT include TimeTravel variants (per spec). TimeTravelFacet
- * is injected automatically by the deploy script in test environments.
  */
 const LOANS_PORTFOLIO_FACETS = [
   "LoansPortfolioFacet",
@@ -149,20 +146,18 @@ const LOANS_PORTFOLIO_FACETS = [
 export async function createLoansPortfolioConfiguration(
   blrContract: BusinessLogicResolver,
   facetAddresses: Record<string, string>,
-  useTimeTravel: boolean = false,
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
   retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  const facetNames = buildFacetList(LOANS_PORTFOLIO_FACETS, useTimeTravel);
+  const facetNames = buildFacetList(LOANS_PORTFOLIO_FACETS);
 
   // Build facet data with resolver keys from registry
   const facets = facetNames.map((name) => {
-    const baseName = name.replace(/TimeTravel$/, "");
-    const facetDef = atsRegistry.getFacetDefinition(baseName) ?? getMockFacetDefinition(baseName);
+    const facetDef = atsRegistry.getFacetDefinition(name) ?? getMockFacetDefinition(name);
     if (!facetDef?.resolverKey?.value) {
-      throw new Error(`No resolver key found for facet: ${baseName}`);
+      throw new Error(`No resolver key found for facet: ${name}`);
     }
     return {
       facetName: name,

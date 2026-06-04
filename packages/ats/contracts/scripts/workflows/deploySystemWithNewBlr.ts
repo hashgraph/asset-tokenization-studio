@@ -6,7 +6,7 @@
  * Orchestrates the deployment of the entire Asset Tokenization Studio infrastructure:
  * - ProxyAdmin for upgrade management
  * - BusinessLogicResolver (BLR) with proxy
- * - All facets (46 total, with optional TimeTravel variants)
+ * - All facets (46 total)
  * - Facet registration in BLR
  * - Equity and Bond configurations
  * - Factory contract with proxy
@@ -47,6 +47,7 @@ import {
   isSuccess,
   err,
   resolveCheckpointForResume,
+  isTestMode,
 } from "@scripts/infrastructure";
 import {
   atsRegistry,
@@ -63,8 +64,7 @@ import {
   hasOrchestratorLibraryAddresses,
   setOrchestratorLibraryAddresses,
   getFacetDefinition,
-  // TEST-ONLY: InitializeMock domain — pulled in unconditionally; only used
-  // when `useTimeTravel` is enabled (see "InitializeMock Configurations" step).
+  // TEST-ONLY: InitializeMock domain — used by initializer-versioning tests.
   createInitializeMockConfiguration,
   getAllMockFacets,
   getMockFacetDefinition,
@@ -81,9 +81,6 @@ import { shouldFailAtStep, createTestFailureMessage } from "../infrastructure/te
  * Options for complete system deployment.
  */
 export interface DeploySystemWithNewBlrOptions extends ResumeOptions {
-  /** Whether to use TimeTravel variants for facets */
-  useTimeTravel?: boolean;
-
   /** Whether to save deployment output to file */
   saveOutput?: boolean;
 
@@ -157,7 +154,6 @@ export interface DeploySystemWithNewBlrOptions extends ResumeOptions {
  *
  * // Deploy system with new BLR to testnet
  * const output = await deploySystemWithNewBlr(signer, 'hedera-testnet', {
- *     useTimeTravel: false,
  *     saveOutput: true
  * })
  *
@@ -182,7 +178,6 @@ export async function deploySystemWithNewBlr(
   const networkConfig = getDeploymentConfig(network);
 
   const {
-    useTimeTravel = false,
     saveOutput = true,
     partialBatchDeploy = false,
     batchSize = DEFAULT_BATCH_SIZE,
@@ -212,7 +207,6 @@ export async function deploySystemWithNewBlr(
   info("═".repeat(60));
   info(`📡 Network: ${network}`);
   info(`👤 Deployer: ${deployer}`);
-  info(`🔄 TimeTravel: ${useTimeTravel ? "Enabled" : "Disabled"}`);
   info(`⏱️  Confirmations (deploy): ${confirmations}`);
   info(`🔁 Retry: ${enableRetry ? "Enabled" : "Disabled"}`);
   info(`✅ Verification: ${verifyDeployment ? "Enabled" : "Disabled"}`);
@@ -260,7 +254,6 @@ export async function deploySystemWithNewBlr(
       deployer,
       workflowType: "newBlr",
       options: {
-        useTimeTravel,
         confirmations,
         enableRetry,
         verifyDeployment,
@@ -372,10 +365,7 @@ export async function deploySystemWithNewBlr(
     let facetsResult: Awaited<ReturnType<typeof deployFacets>>;
 
     // Determine expected facet count for complete deployment check
-    let expectedFacets = atsRegistry.getAllFacets();
-    if (!useTimeTravel) {
-      expectedFacets = expectedFacets.filter((f) => f.name !== "TimeTravelFacet");
-    }
+    const expectedFacets = atsRegistry.getAllFacets();
     const expectedFacetCount = expectedFacets.length;
 
     // Resolve any pending facets left by a previous run that crashed between
@@ -439,33 +429,24 @@ export async function deploySystemWithNewBlr(
       info(`✅ Loaded ${facetsResult.deployed.size} facets from checkpoint`);
     } else {
       info(`\n📦 Step 3/${totalSteps}: Deploying all facets...`);
-      let allFacets = atsRegistry.getAllFacets();
+      const allFacets = atsRegistry.getAllFacets();
       info(`   Found ${allFacets.length} facets in registry`);
-
-      if (!useTimeTravel) {
-        allFacets = allFacets.filter((f) => f.name !== "TimeTravelFacet");
-        info("   TimeTravelFacet removed from deployment list");
-      }
 
       // Initialize facets Map if not exists
       if (!checkpoint.steps.facets) {
         checkpoint.steps.facets = new Map();
       }
 
-      // Create factories from registry
-      // When useTimeTravel=true, deploy TimeTravel variant facets instead of production ones
-      // Skip facets without factories (abstract contracts like LockFacet)
+      // Create factories from registry. Skip facets without factories
+      // (abstract contracts like LockFacet).
       const facetFactories: Record<string, ContractFactory> = {};
       for (const facet of allFacets) {
-        // Select factory: TimeTravel variant when available and enabled, else production
-        const selectedFactory = useTimeTravel && facet.timeTravelFactory ? facet.timeTravelFactory : facet.factory;
-
-        if (!selectedFactory) {
+        if (!facet.factory) {
           info(`   Skipping ${facet.name} (abstract contract, no factory)`);
           continue;
         }
 
-        const factory = selectedFactory(signer) as ContractFactory;
+        const factory = facet.factory(signer) as ContractFactory;
         // Use the actual contract name from the factory
         const contractName = factory.constructor.name.replace("__factory", "");
 
@@ -479,11 +460,11 @@ export async function deploySystemWithNewBlr(
         facetFactories[contractName] = factory;
       }
 
-      // TEST-ONLY: when `useTimeTravel` is enabled, also queue MockFacet1/2/3 for
+      // TEST-ONLY: when `ATS_TEST_MODE=true`, also queue MockFacet1/2/3 for
       // deployment. They live outside the auto-generated atsRegistry (see
       // `scripts/domain/initializeMock/mockFacetsRegistry.ts`) so we add them here
       // alongside the production facets.
-      if (useTimeTravel) {
+      if (isTestMode()) {
         for (const mockFacet of getAllMockFacets()) {
           if (!mockFacet.factory) continue;
           const factory = mockFacet.factory(signer) as ContractFactory;
@@ -501,8 +482,8 @@ export async function deploySystemWithNewBlr(
         info(`   Deploying ${Object.keys(facetFactories).length} remaining facets...`);
 
         // On real networks (Hedera) provide explicit gasLimit to skip eth_estimateGas.
-        // On instant-mining networks (Hardhat/local) let ethers auto-estimate so large
-        // contracts like TimeTravel facets get the gas they actually need.
+        // On instant-mining networks (Hardhat/local) let ethers auto-estimate so the
+        // larger test-mode facets get the gas they actually need.
         const facetOverrides = isInstantMiningNetwork(network) ? {} : { gasLimit: GAS_LIMIT.max };
 
         facetsResult = await deployFacets(facetFactories, {
@@ -605,15 +586,13 @@ export async function deploySystemWithNewBlr(
           throw new Error(`No address for facet: ${facetName}`);
         }
 
-        // Strip "TimeTravel" suffix to get canonical name
-        const baseName = facetName.replace(/TimeTravel$/, "");
         // TEST-ONLY: fall back to the mock registry so the three MockFacets
-        // (deployed only under `useTimeTravel`) can be registered alongside
+        // (deployed only when `ATS_TEST_MODE=true`) can be registered alongside
         // production facets.
-        const facetDef = getFacetDefinition(baseName) ?? getMockFacetDefinition(baseName);
+        const facetDef = getFacetDefinition(facetName) ?? getMockFacetDefinition(facetName);
 
         if (!facetDef?.resolverKey?.value) {
-          throw new Error(`Facet ${baseName} not found in registry or missing resolver key`);
+          throw new Error(`Facet ${facetName} not found in registry or missing resolver key`);
         }
 
         return {
@@ -688,7 +667,6 @@ export async function deploySystemWithNewBlr(
       equityConfig = await createEquityConfiguration(
         blrContract,
         facetAddresses,
-        useTimeTravel,
         partialBatchDeploy,
         batchSize,
         confirmations,
@@ -741,7 +719,6 @@ export async function deploySystemWithNewBlr(
       bondConfig = await createBondConfiguration(
         blrContract,
         facetAddresses,
-        useTimeTravel,
         partialBatchDeploy,
         batchSize,
         confirmations,
@@ -797,7 +774,6 @@ export async function deploySystemWithNewBlr(
       bondFixedRateConfig = await createBondFixedRateConfiguration(
         blrContract,
         facetAddresses,
-        useTimeTravel,
         partialBatchDeploy,
         batchSize,
         confirmations,
@@ -854,7 +830,6 @@ export async function deploySystemWithNewBlr(
       bondKpiLinkedRateConfig = await createBondKpiLinkedRateConfiguration(
         blrContract,
         facetAddresses,
-        useTimeTravel,
         partialBatchDeploy,
         batchSize,
         confirmations,
@@ -910,7 +885,6 @@ export async function deploySystemWithNewBlr(
       loanConfig = await createLoanConfiguration(
         blrContract,
         facetAddresses,
-        useTimeTravel,
         partialBatchDeploy,
         batchSize,
         confirmations,
@@ -965,7 +939,6 @@ export async function deploySystemWithNewBlr(
       loansPortfolioConfig = await createLoansPortfolioConfiguration(
         blrContract,
         facetAddresses,
-        useTimeTravel,
         partialBatchDeploy,
         batchSize,
         confirmations,
@@ -1022,7 +995,6 @@ export async function deploySystemWithNewBlr(
       depositTokenConfig = await createDepositTokenConfiguration(
         blrContract,
         facetAddresses,
-        useTimeTravel,
         partialBatchDeploy,
         batchSize,
         confirmations,
@@ -1077,7 +1049,7 @@ export async function deploySystemWithNewBlr(
     //       v1: { InitializerFacet:1, MockFacet1:1, MockFacet2:2, MockFacet3:1 }
     //       v2: { InitializerFacet:1, MockFacet1:3, MockFacet2:3, MockFacet3:3 }
     //
-    // Only executed under `useTimeTravel`; skipped (but the step slot is still
+    // Only executed when `ATS_TEST_MODE=true`; skipped (but the step slot is still
     // advanced) otherwise so Factory's step index stays stable across runs.
     //
     // Idempotency: before redeploying extra MockFacet copies we read the
@@ -1109,7 +1081,7 @@ export async function deploySystemWithNewBlr(
       info(`✅ InitializeMock Config ID: ${data.configId}`);
       info(`✅ InitializeMock Versions: [${data.versions.join(", ")}]`);
       info(`✅ InitializeMock Facets: ${data.facetCount}`);
-    } else if (useTimeTravel) {
+    } else if (isTestMode()) {
       info(`\n🧪 Step 12/${totalSteps}: Creating InitializeMock domain (3 MockFacet versions + 2 configIds)...`);
 
       // TEST-ONLY: bring each MockFacet's BLR version count up to 3 by
@@ -1213,8 +1185,8 @@ export async function deploySystemWithNewBlr(
       await checkpointManager.saveCheckpoint(checkpoint);
     } else {
       // TEST-ONLY: still advance currentStep so Factory's index stays stable
-      // when running without `useTimeTravel`.
-      info(`\n⏭️  Step 12/${totalSteps}: InitializeMock skipped (useTimeTravel disabled)`);
+      // when not running in test mode.
+      info(`\n⏭️  Step 12/${totalSteps}: InitializeMock skipped (ATS_TEST_MODE disabled)`);
       checkpoint.currentStep = 11;
       await checkpointManager.saveCheckpoint(checkpoint);
     }
@@ -1239,7 +1211,6 @@ export async function deploySystemWithNewBlr(
       factoryConfig = await createFactoryConfiguration(
         blrContract,
         facetAddresses,
-        useTimeTravel,
         partialBatchDeploy,
         batchSize,
         confirmations,

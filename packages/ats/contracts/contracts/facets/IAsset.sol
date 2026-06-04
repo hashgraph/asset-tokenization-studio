@@ -32,9 +32,9 @@ import { ITransfer } from "./transfer/ITransfer.sol";
 // Layer 1 — Remaining facets
 import { IERC20Votes } from "./erc20Votes/IERC20Votes.sol";
 import { IERC3643 } from "./layer_1/ERC3643/IERC3643.sol";
-import { IExternalControlList } from "./layer_1/externalControlList/IExternalControlList.sol";
+import { IExternalControlList } from "./externalControlListManagement/IExternalControlList.sol";
 import { IExternalControlListManagement } from "./externalControlListManagement/IExternalControlListManagement.sol";
-import { IExternalKycList } from "./layer_1/externalKycList/IExternalKycList.sol";
+import { IExternalKycList } from "./externalKycListManagement/IExternalKycList.sol";
 import { IExternalKycListManagement } from "./externalKycListManagement/IExternalKycListManagement.sol";
 import { IExternalPauseManagement } from "./externalPauseManagement/IExternalPauseManagement.sol";
 import { IFixedRate } from "./fixedRate/IFixedRate.sol";
@@ -47,17 +47,18 @@ import { IKyc } from "./kyc/IKyc.sol";
 // IKpiLinkedRate is excluded: it defines getInterestRate() with an incompatible return type
 // (different InterestRate struct), which cannot be reconciled in a single Solidity interface.
 // Use the typed instance directly when testing KPI-linked rate facets.
-import { ILoan } from "./layer_2/loan/ILoan.sol";
-import { INominalValue } from "./layer_2/nominalValue/INominalValue.sol";
+import { ILoan } from "./loan/ILoan.sol";
+import { INominalValue } from "./nominalValue/INominalValue.sol";
 import { INominalValueAtSnapshot } from "./nominalValueAtSnapshot/INominalValueAtSnapshot.sol";
 import { IPause } from "./pause/IPause.sol";
-import { ILoansPortfolio } from "./layer_2/loansPortfolio/ILoansPortfolio.sol";
+import { ILoansPortfolio } from "./loansPortfolio/ILoansPortfolio.sol";
 import { IVoting } from "./voting/IVoting.sol";
 import { IVotingSecurityHolders } from "./votingSecurityHolders/IVotingSecurityHolders.sol";
 
 // Layer 3
 import { ISsiManagement } from "./ssiManagement/ISsiManagement.sol";
-import { ITimeTravel } from "../test/testTimeTravel/ITimeTravel.sol";
+// Test-only writer interface; its facet impl is excluded from prod compiles by the tasks/compile.ts filter.
+import { IEvmAccessorsFacet } from "../test/testAccessors/IEvmAccessorsFacet.sol";
 import { IBalanceTracker } from "./balanceTracker/IBalanceTracker.sol";
 import { IBalanceTrackerAdjusted } from "./balanceTrackerAdjusted/IBalanceTrackerAdjusted.sol";
 import { ITransferAndLock } from "./transferAndLock/ITransferAndLock.sol";
@@ -178,7 +179,7 @@ interface IAsset is
     IExternalKycList,
     IExternalKycListManagement,
     IKpis,
-    ITimeTravel,
+    IEvmAccessorsFacet,
     IDiamond,
     IOperatorHoldByPartition,
     ITransfer,

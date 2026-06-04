@@ -10,7 +10,6 @@ import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Type
 import { ITransfer } from "../../facets/transfer/ITransfer.sol";
 import { ThirdPartyType } from "./types/ThirdPartyType.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
@@ -117,7 +116,7 @@ library AmortizationStorageWrapper {
 
         if (isDisabled) revert IAmortization.AmortizationNotActive(corporateActionId, _amortizationID);
 
-        if (registeredAmortization.amortization.executionDate <= TimeTravelStorageWrapper.getBlockTimestamp()) {
+        if (registeredAmortization.amortization.executionDate <= EvmAccessors.getBlockTimestamp()) {
             revert IAmortization.AmortizationAlreadyExecuted(corporateActionId, _amortizationID);
         }
 
@@ -325,7 +324,7 @@ library AmortizationStorageWrapper {
             _account
         );
 
-        uint256 timestamp = TimeTravelStorageWrapper.getBlockTimestamp();
+        uint256 timestamp = EvmAccessors.getBlockTimestamp();
         amortizationFor_.abafAtSnapshot = registeredAmortization.snapshotId != 0
             ? SnapshotsStorageWrapper.abafAtSnapshot(registeredAmortization.snapshotId)
             : amortizationFor_.abafAtSnapshot = AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp);
@@ -402,7 +401,7 @@ library AmortizationStorageWrapper {
 
         if (isDisabled && registeredAmortization.snapshotId == 0) return new address[](0);
 
-        uint256 now_ = TimeTravelStorageWrapper.getBlockTimestamp();
+        uint256 now_ = EvmAccessors.getBlockTimestamp();
         if (registeredAmortization.amortization.recordDate >= now_) return new address[](0);
 
         if (registeredAmortization.snapshotId != 0) {
@@ -427,7 +426,7 @@ library AmortizationStorageWrapper {
 
         if (isDisabled && registeredAmortization.snapshotId == 0) return 0;
 
-        uint256 now_ = TimeTravelStorageWrapper.getBlockTimestamp();
+        uint256 now_ = EvmAccessors.getBlockTimestamp();
         if (registeredAmortization.amortization.recordDate >= now_) return 0;
 
         if (registeredAmortization.snapshotId != 0) {

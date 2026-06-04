@@ -13,8 +13,6 @@ import { IDividendTypes } from "../../facets/dividend/IDividendTypes.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-
 /**
  * @title Dividend Storage Wrapper Library
  * @notice Provides internal functions to manage lifecycle and queries for dividend
@@ -68,7 +66,7 @@ library DividendStorageWrapper {
             dividendId
         );
 
-        if (registeredDividend.dividend.executionDate <= TimeTravelStorageWrapper.getBlockTimestamp()) {
+        if (registeredDividend.dividend.executionDate <= EvmAccessors.getBlockTimestamp()) {
             revert IDividend.DividendAlreadyExecuted(corporateActionId, dividendId);
         }
 
@@ -246,8 +244,7 @@ library DividendStorageWrapper {
     ) internal view returns (address[] memory holders_) {
         (IDividendTypes.RegisteredDividend memory registeredDividend, , ) = getDividend(dividendId);
 
-        if (registeredDividend.dividend.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp())
-            return new address[](0);
+        if (registeredDividend.dividend.recordDate >= EvmAccessors.getBlockTimestamp()) return new address[](0);
 
         if (registeredDividend.snapshotId != 0)
             return SnapshotsStorageWrapper.tokenHoldersAt(registeredDividend.snapshotId, pageIndex, pageLength);
@@ -265,7 +262,7 @@ library DividendStorageWrapper {
     function getTotalDividendHolders(uint256 dividendId) internal view returns (uint256) {
         (IDividendTypes.RegisteredDividend memory registeredDividend, , ) = getDividend(dividendId);
 
-        if (registeredDividend.dividend.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return 0;
+        if (registeredDividend.dividend.recordDate >= EvmAccessors.getBlockTimestamp()) return 0;
 
         if (registeredDividend.snapshotId != 0)
             return SnapshotsStorageWrapper.totalTokenHoldersAt(registeredDividend.snapshotId);

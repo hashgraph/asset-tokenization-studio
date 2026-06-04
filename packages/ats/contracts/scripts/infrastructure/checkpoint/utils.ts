@@ -31,7 +31,7 @@ const WORKFLOW_STEPS: Record<string, readonly string[]> = {
     "Loan Configuration",
     "Loans Portfolio Configuration",
     "Factory",
-    // TEST-ONLY: only executed when `useTimeTravel` is enabled; the workflow
+    // TEST-ONLY: only executed when `ATS_TEST_MODE=true`; the workflow
     // skips this step otherwise but its slot stays in the list so step indices
     "InitializeMock Configurations",
   ] as const,

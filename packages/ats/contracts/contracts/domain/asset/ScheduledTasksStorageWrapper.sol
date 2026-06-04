@@ -11,9 +11,9 @@ import {
 } from "../../constants/dispatchTypes.sol";
 import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageWrapper.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { ScheduledTasksDispatchOps } from "../orchestrator/ScheduledTasksDispatchOps.sol";
 
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 /// @custom:hash storage ScheduledSnapshots
 // solhint-disable-next-line max-line-length
 bytes32 constant STORAGE_LOCATION_SCHEDULED_SNAPSHOTS = 0xe2e07c157b61a7bd819a93fb196f6ac3e8a94f8b21b80c29eef98c4d9b337100;
@@ -62,7 +62,7 @@ struct ScheduledTasksDataStorage {
 library ScheduledTasksStorageWrapper {
     /**
      * @notice Reverts when a scheduled timestamp is not strictly in the future.
-     * @dev The current timestamp is read through `TimeTravelStorageWrapper`.
+     * @dev The current timestamp is read through `EvmAccessors`.
      * @param timeStamp Timestamp rejected for scheduling.
      */
     error WrongTimestamp(uint256 timeStamp);
@@ -87,7 +87,7 @@ library ScheduledTasksStorageWrapper {
         if (scheduledTasksLength == 0) return 0;
 
         uint256 limit;
-        uint256 currentBlockTimestamp = TimeTravelStorageWrapper.getBlockTimestamp();
+        uint256 currentBlockTimestamp = EvmAccessors.getBlockTimestamp();
         uint256 pos;
 
         unchecked {
@@ -226,7 +226,7 @@ library ScheduledTasksStorageWrapper {
      * @param _timestamp Timestamp to validate.
      */
     function requireValidTimestamp(uint256 _timestamp) internal view {
-        if (_timestamp <= TimeTravelStorageWrapper.getBlockTimestamp()) revert WrongTimestamp(_timestamp);
+        if (_timestamp <= EvmAccessors.getBlockTimestamp()) revert WrongTimestamp(_timestamp);
     }
 
     /**

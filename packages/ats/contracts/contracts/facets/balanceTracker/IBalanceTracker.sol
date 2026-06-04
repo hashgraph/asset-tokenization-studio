@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 /// @custom:hash resolverKey BalanceTracker
 bytes32 constant RESOLVER_KEY_BALANCE_TRACKER = 0xefbff5dcb4e5bf43bf472fd0646991b8b4731876498b2a4248f9aa9aee1a127b;
 
@@ -8,7 +9,7 @@ bytes32 constant RESOLVER_KEY_BALANCE_TRACKER = 0xefbff5dcb4e5bf43bf472fd0646991
  * @title IBalanceTracker
  * @notice Interface for querying token balances and total supply across all partitions,
  *         with support for time-adjusted values that simulate pending balance adjustments.
- * @dev All read operations resolve the current block timestamp via `TimeTravelStorageWrapper`,
+ * @dev All read operations resolve the current block timestamp via `EvmAccessors`,
  *      enabling deterministic results in test environments without altering production behaviour.
  */
 interface IBalanceTracker {

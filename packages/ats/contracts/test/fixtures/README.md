@@ -126,7 +126,7 @@ describe("Custom Setup Tests", () => {
 
 ### Infrastructure
 
-#### `deployAtsInfrastructureFixture(useTimeTravel = true)`
+#### `deployAtsInfrastructureFixture(partialBatchDeploy = false, batchSize = DEFAULT_BATCH_SIZE)`
 
 Deploys complete ATS infrastructure without any tokens.
 

@@ -216,7 +216,6 @@ const [signer] = await ethers.getSigners();
 // Deploy single facet
 const result = await deployFacets(signer, {
   facetNames: ["NewFacet"],
-  useTimeTravel: false,
   network: "hedera-testnet",
 });
 
@@ -276,11 +275,7 @@ const facetAddresses = {
 };
 
 // Create configuration
-const result = await createEquityConfiguration(
-  blr,
-  facetAddresses,
-  false, // useTimeTravel
-);
+const result = await createEquityConfiguration(blr, facetAddresses);
 
 if (result.success) {
   console.log(`Configuration version: ${result.data.version}`);
@@ -415,7 +410,6 @@ const FUND_FACETS = [
  *
  * @param blrContract - BusinessLogicResolver contract instance
  * @param facetAddresses - Map of facet names to their deployed addresses
- * @param useTimeTravel - Whether to use TimeTravel variants (default: false)
  * @param partialBatchDeploy - Whether this is a partial batch deployment (default: false)
  * @param batchSize - Number of facets per batch (default: DEFAULT_BATCH_SIZE)
  * @param confirmations - Number of confirmations to wait for (default: 0)
@@ -424,26 +418,15 @@ const FUND_FACETS = [
 export async function createFundConfiguration(
   blrContract: Contract,
   facetAddresses: Record<string, string>,
-  useTimeTravel: boolean = false,
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  // Get facet names based on time travel mode
-  const baseFacets = useTimeTravel ? [...FUND_FACETS, "TimeTravelFacet"] : FUND_FACETS;
-
-  const facetNames = useTimeTravel
-    ? baseFacets.map((name) => (name === "TimeTravelFacet" || name.endsWith("TimeTravel") ? name : `${name}TimeTravel`))
-    : baseFacets;
-
   // Build facet data with resolver keys from registry (internal lookup)
-  const facets = facetNames.map((name) => {
-    // Strip "TimeTravel" suffix to get base name for registry lookup
-    const baseName = name.replace(/TimeTravel$/, "");
-
-    const facetDef = atsRegistry.getFacetDefinition(baseName);
+  const facets = FUND_FACETS.map((name) => {
+    const facetDef = atsRegistry.getFacetDefinition(name);
     if (!facetDef?.resolverKey?.value) {
-      throw new Error(`No resolver key found for facet: ${baseName}`);
+      throw new Error(`No resolver key found for facet: ${name}`);
     }
     return {
       facetName: name,
@@ -513,7 +496,6 @@ const [signer] = await ethers.getSigners();
 
 const result = await deployFacets(signer, {
   facetNames: ["FundManagementFacet", "FundUSAFacet"],
-  useTimeTravel: false,
   network: "hedera-testnet",
 });
 
@@ -575,11 +557,7 @@ const facetAddresses = {
   FundUSAFacet: "0x...",
 };
 
-const result = await createFundConfiguration(
-  blr,
-  facetAddresses,
-  false, // useTimeTravel
-);
+const result = await createFundConfiguration(blr, facetAddresses);
 
 if (result.success) {
   console.log(`Fund configuration created!`);
@@ -596,7 +574,7 @@ If you want to include your new asset in complete deployment workflows, update [
 ```typescript
 // Add after bond configuration
 section("Creating Fund Configuration");
-const fundConfigResult = await createFundConfiguration(blrContract, facetAddresses, useTimeTravel);
+const fundConfigResult = await createFundConfiguration(blrContract, facetAddresses);
 
 if (!fundConfigResult.success) {
   throw new Error(`Fund configuration failed: ${fundConfigResult.error}`);
@@ -1248,7 +1226,6 @@ async function main() {
   const [signer] = await ethers.getSigners();
 
   const output = await deploySystemWithNewBlr(signer, "hedera-testnet", {
-    useTimeTravel: false, // Use standard facets (not TimeTravel variants)
     saveOutput: true, // Save deployment.json file
     batchSize: 15, // Deploy 15 facets per transaction
     confirmations: 2, // Wait for 2 confirmations per tx
@@ -1295,7 +1272,6 @@ async function main() {
     deployFacets: true, // Deploy all facets
     deployFactory: true, // Deploy Factory
     createConfigurations: true, // Create equity/bond configs
-    useTimeTravel: false,
     saveOutput: true,
     batchSize: 15,
   });

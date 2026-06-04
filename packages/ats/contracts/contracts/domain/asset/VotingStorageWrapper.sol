@@ -11,15 +11,13 @@ import { IVoting } from "../../facets/voting/IVoting.sol";
 import { IVotingTypes } from "../../facets/voting/IVotingTypes.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-
 /**
  * @title VotingStorageWrapper
  * @notice Library providing internal functions to manage voting rights corporate actions,
  *         including creation, cancellation, retrieval, and snapshot balance lookup.
  * @dev All functions are internal and designed to be called by facet contracts. Relies on
  *      CorporateActionsStorageWrapper, ScheduledTasksStorageWrapper, SnapshotsStorageWrapper,
- *      and TimeTravelStorageWrapper for storage and scheduling. Emits events from the IVoting
+ *      and EvmAccessors for storage and scheduling. Emits events from the IVoting
  *      interface. Reverts with IVoting errors on invalid operations.
  * @author Asset Tokenization Studio Team
  */
@@ -58,7 +56,7 @@ library VotingStorageWrapper {
     function cancelVoting(uint256 voteId) internal returns (bool success_) {
         (IVoting.RegisteredVoting memory registeredVoting, bytes32 corporateActionId, ) = getVoting(voteId);
 
-        if (registeredVoting.voting.recordDate <= TimeTravelStorageWrapper.getBlockTimestamp()) {
+        if (registeredVoting.voting.recordDate <= EvmAccessors.getBlockTimestamp()) {
             revert IVoting.VotingAlreadyRecorded(corporateActionId, voteId);
         }
 
@@ -179,7 +177,7 @@ library VotingStorageWrapper {
     ) internal view returns (address[] memory holders_) {
         (IVoting.RegisteredVoting memory registeredVoting, , ) = getVoting(voteID);
 
-        if (registeredVoting.voting.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return holders_;
+        if (registeredVoting.voting.recordDate >= EvmAccessors.getBlockTimestamp()) return holders_;
 
         if (registeredVoting.snapshotId != 0)
             return SnapshotsStorageWrapper.tokenHoldersAt(registeredVoting.snapshotId, pageIndex, pageLength);
@@ -197,7 +195,7 @@ library VotingStorageWrapper {
     function getTotalVotingHolders(uint256 voteID) internal view returns (uint256) {
         (IVoting.RegisteredVoting memory registeredVoting, , ) = getVoting(voteID);
 
-        if (registeredVoting.voting.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return 0;
+        if (registeredVoting.voting.recordDate >= EvmAccessors.getBlockTimestamp()) return 0;
 
         if (registeredVoting.snapshotId != 0)
             return SnapshotsStorageWrapper.totalTokenHoldersAt(registeredVoting.snapshotId);

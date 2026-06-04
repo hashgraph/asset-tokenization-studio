@@ -5,6 +5,7 @@ import { MAX_UINT256 } from "../../constants/values.sol";
 import { ICap } from "../../facets/cap/ICap.sol";
 import { AdjustBalancesStorageWrapper } from "../asset/AdjustBalancesStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /// @custom:hash storage Cap
 bytes32 constant STORAGE_LOCATION_CAP = 0xabd29859a2443302b9905d8be07aab508a353cf611fff647d31b2a10ccb92100;
@@ -48,7 +49,7 @@ library CapStorageWrapper {
             checkValidNewMaxSupplyByPartition(
                 partitionCap[i].partition,
                 partitionCap[i].maxSupply,
-                TimeTravelStorageWrapper.getBlockTimestamp()
+                EvmAccessors.getBlockTimestamp()
             );
             cs.maxSupplyByPartition[partitionCap[i].partition] = partitionCap[i].maxSupply;
             unchecked {

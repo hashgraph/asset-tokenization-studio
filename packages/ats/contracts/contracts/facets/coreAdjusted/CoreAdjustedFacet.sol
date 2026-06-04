@@ -7,14 +7,15 @@ import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunc
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 /**
  * @title CoreAdjustedFacet
+ * @author Asset Tokenization Studio Team
  * @notice Diamond facet for the CoreAdjusted domain. Registers the single selector that exposes
  *         time-adjusted ERC-20 decimal reads (`decimalsAt`) to the Diamond proxy.
  * @dev Implements `IStaticFunctionSelectors` so the BusinessLogicResolver can register the facet
  *      without an off-chain deployment step. The resolver key is `RESOLVER_KEY_CORE_ADJUSTED`,
  *      annotated `@custom:hash resolverKey CoreAdjusted` and derived from
  *      `keccak256("asset.tokenization.standard.resolverKey.CoreAdjusted")`.
- *      No TimeTravel variant is required because `decimalsAt` already accepts an explicit
- *      timestamp parameter, making block-timestamp substitution unnecessary.
+ *      `decimalsAt` accepts an explicit timestamp argument, so this facet needs no
+ *      block-timestamp accessor of its own.
  */
 contract CoreAdjustedFacet is CoreAdjusted, IStaticFunctionSelectors {
     /**

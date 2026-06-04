@@ -6,7 +6,6 @@ import { IKyc, RESOLVER_KEY_KYC } from "./IKyc.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { KycStorageWrapper } from "../../domain/core/KycStorageWrapper.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
@@ -15,7 +14,7 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  * @dev Implements `IKyc` and delegates persistent state to `KycStorageWrapper`.
  *      Mutating operations require the token to be operational, activated and unpaused, except
  *      initialisation, which is restricted to an unregistered facet. Time-dependent status checks
- *      use `TimeTravelStorageWrapper` as the canonical timestamp source.
+ *      use `EvmAccessors` as the canonical timestamp source.
  * @author Asset Tokenization Studio Team
  */
 abstract contract Kyc is IKyc, Modifiers {
@@ -73,7 +72,7 @@ abstract contract Kyc is IKyc, Modifiers {
         onlyRole(ROLE_KYC)
         notZeroAddress(_account)
         onlyValidKycStatus(KycStatus.NOT_GRANTED, _account)
-        onlyThreeValidDates(_validFrom, _validTo, TimeTravelStorageWrapper.getBlockTimestamp())
+        onlyThreeValidDates(_validFrom, _validTo, EvmAccessors.getBlockTimestamp())
         onlyValidIssuer(_issuer)
         returns (bool success_)
     {
@@ -101,7 +100,7 @@ abstract contract Kyc is IKyc, Modifiers {
 
     /// @inheritdoc IKyc
     function getKycStatusFor(address _account) external view virtual override returns (KycStatus kycStatus_) {
-        kycStatus_ = KycStorageWrapper.getKycStatusFor(_account, TimeTravelStorageWrapper.getBlockTimestamp());
+        kycStatus_ = KycStorageWrapper.getKycStatusFor(_account, EvmAccessors.getBlockTimestamp());
     }
 
     /// @inheritdoc IKyc

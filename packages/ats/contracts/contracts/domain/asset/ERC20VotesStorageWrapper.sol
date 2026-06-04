@@ -8,7 +8,6 @@ import { Checkpoints } from "../../infrastructure/utils/Checkpoints.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { ScheduledTasksOps } from "../orchestrator/ScheduledTasksOps.sol";
 import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 
@@ -146,7 +145,7 @@ library ERC20VotesStorageWrapper {
         moveVotingPower(
             currentDelegate,
             delegatee,
-            TokenCoreOps.getTotalBalanceForAdjustedAt(delegator, TimeTravelStorageWrapper.getBlockTimestamp())
+            TokenCoreOps.getTotalBalanceForAdjustedAt(delegator, EvmAccessors.getBlockTimestamp())
         );
     }
 
@@ -229,7 +228,7 @@ library ERC20VotesStorageWrapper {
      * @return The current block number cast to uint48.
      */
     function clock() internal view returns (uint48) {
-        return SafeCast.toUint48(TimeTravelStorageWrapper.getBlockNumber());
+        return SafeCast.toUint48(EvmAccessors.getBlockNumber());
     }
 
     /**
@@ -243,7 +242,7 @@ library ERC20VotesStorageWrapper {
     // solhint-disable-next-line func-name-mixedcase
     function CLOCK_MODE() internal view returns (string memory mode_) {
         // Check that the clock was not modified
-        if (clock() != TimeTravelStorageWrapper.getBlockNumber()) revert IERC20Votes.BrokenClockMode();
+        if (clock() != EvmAccessors.getBlockNumber()) revert IERC20Votes.BrokenClockMode();
         return "mode=blocknumber&from=default";
     }
 

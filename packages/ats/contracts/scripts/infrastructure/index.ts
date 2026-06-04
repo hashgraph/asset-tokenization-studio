@@ -121,7 +121,7 @@ export {
 // Configuration
 // ============================================================================
 
-export { getNetworkConfig, getAllNetworks, getPrivateKey, getPrivateKeys } from "./config";
+export { getNetworkConfig, getAllNetworks, getPrivateKey, getPrivateKeys, isTestMode } from "./config";
 
 // ============================================================================
 // Signer
@@ -270,14 +270,6 @@ export {
   LogLevel,
 } from "./utils/logging";
 export type { LoggerConfig } from "./utils/logging";
-
-export {
-  resolveContractName,
-  getTimeTravelVariant,
-  hasTimeTravelVariant,
-  getBaseContractName,
-  isTimeTravelVariant,
-} from "./utils/naming";
 
 export { fetchHederaContractId, getMirrorNodeUrl, isHederaNetwork } from "./utils/hedera";
 

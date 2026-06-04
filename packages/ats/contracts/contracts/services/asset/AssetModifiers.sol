@@ -15,7 +15,6 @@ import { KpisModifiers } from "./KpisModifiers.sol";
 import { LockModifiers } from "./LockModifiers.sol";
 import { MaturityModifiers } from "./MaturityModifiers.sol";
 import { ProceedRecipientModifiers } from "./ProceedRecipientModifiers.sol";
-import { ProtectedPartitionRoleValidatorModifiers } from "./ProtectedPartitionRoleValidatorModifiers.sol";
 import { StateModifiers } from "./StateModifiers.sol";
 import { AmortizationModifiers } from "./AmortizationModifiers.sol";
 import { LoansPortfolioModifiers } from "./LoansPortfolioModifiers.sol";
@@ -63,7 +62,6 @@ abstract contract AssetModifiers is
     LoansPortfolioModifiers,
     MaturityModifiers,
     ProceedRecipientModifiers,
-    ProtectedPartitionRoleValidatorModifiers,
     StateModifiers
 {
     // This contract aggregates all asset modifiers through inheritance

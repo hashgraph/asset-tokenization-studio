@@ -101,7 +101,7 @@ export async function deployContract(
     // Prepare deployment overrides.
     // gasPrice is set to skip eth_estimateGas issues on Hedera relay.
     // gasLimit is NOT defaulted here so Hardhat can auto-estimate it for large contracts
-    // (e.g. TimeTravel facets). Callers that need a fixed limit pass it via overrides.
+    // (e.g. test-mode accessor variants). Callers that need a fixed limit pass it via overrides.
     const deployOverrides: Overrides = { ...hederaGasOverrides(), ...overrides };
 
     // Deploy contract

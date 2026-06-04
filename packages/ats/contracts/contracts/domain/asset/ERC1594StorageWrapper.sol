@@ -22,7 +22,6 @@ import { ControlListStorageWrapper } from "../core/ControlListStorageWrapper.sol
 import { KycStorageWrapper } from "../core/KycStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 import { AccessControlStorageWrapper } from "../core/AccessControlStorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 /// @custom:hash storage Erc1594
 bytes32 constant STORAGE_LOCATION_ERC1594 = 0x6bb5986b529cbe1ac563af7efd06b91a80c235aad83852a102d3c187f67c5400;
@@ -670,7 +669,7 @@ library ERC1594StorageWrapper {
         uint256 currentAllowance = ERC20StorageWrapper.allowanceAdjustedAt(
             from,
             sender,
-            TimeTravelStorageWrapper.getBlockTimestamp()
+            EvmAccessors.getBlockTimestamp()
         );
         if (currentAllowance < value) {
             return (
@@ -732,7 +731,7 @@ library ERC1594StorageWrapper {
         uint256 currentPartitionBalance = AdjustBalancesStorageWrapper.balanceOfByPartitionAdjustedAt(
             partition,
             from,
-            TimeTravelStorageWrapper.getBlockTimestamp()
+            EvmAccessors.getBlockTimestamp()
         );
         if (currentPartitionBalance < value) {
             return (

@@ -73,7 +73,7 @@ export async function deployUpgradeTestFixture(): Promise<UpgradeTestFixtureResu
   configureLogger({ level: LogLevel.SILENT });
 
   // Deploy full ATS infrastructure
-  const infrastructure = await deployAtsInfrastructureFixture(true, false);
+  const infrastructure = await deployAtsInfrastructureFixture(false);
 
   const { deployer, unknownSigner, blr, factory, proxyAdmin, deployment } = infrastructure;
 
@@ -175,7 +175,7 @@ export async function deployUpgradeInfrastructureOnlyFixture() {
   configureLogger({ level: LogLevel.SILENT });
 
   // Deploy full ATS infrastructure
-  const infrastructure = await deployAtsInfrastructureFixture(true, false);
+  const infrastructure = await deployAtsInfrastructureFixture(false);
 
   const { deployer, unknownSigner, blr, factory, proxyAdmin, deployment } = infrastructure;
 
