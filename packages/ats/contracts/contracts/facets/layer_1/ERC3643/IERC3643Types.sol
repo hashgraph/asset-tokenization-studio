@@ -12,11 +12,11 @@ interface IERC3643Types {
 
     event IdentityRegistryAdded(address indexed identityRegistry);
 
-    event AgentAdded(address indexed _agent);
+    event AgentAdded(address indexed agent);
 
-    event AgentRemoved(address indexed _agent);
+    event AgentRemoved(address indexed agent);
 
-    event RecoverySuccess(address _lostWallet, address _newWallet, address _investorOnchainID);
+    event RecoverySuccess(address lostWallet, address newWallet, address investorOnchainID);
 
     event ComplianceAdded(address indexed compliance);
 

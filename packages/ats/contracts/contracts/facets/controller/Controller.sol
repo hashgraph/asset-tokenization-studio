@@ -69,6 +69,7 @@ abstract contract Controller is IController, Modifiers {
     }
 
     /// @inheritdoc IController
+    /// @dev Emits {FinalizedControllerFeature}.
     function finalizeControllable()
         external
         override
@@ -78,6 +79,7 @@ abstract contract Controller is IController, Modifiers {
         onlyControllable
     {
         ERC1644StorageWrapper.finalizeControllable();
+        emit IController.FinalizedControllerFeature(EvmAccessors.getMsgSender());
     }
 
     /// @inheritdoc IController

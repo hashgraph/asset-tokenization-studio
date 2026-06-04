@@ -109,24 +109,23 @@ library ERC3643StorageWrapper {
 
     /**
      * @notice Replaces the compliance contract wired into the token.
-     * @dev Emits `ComplianceAdded` so off-chain observers can rebuild the audit trail of which
-     *      compliance contract was authoritative at any point in time.
+     * @dev The calling facet (`Compliance`) emits `ComplianceAdded` so off-chain observers can
+     *      rebuild the audit trail of which compliance contract was authoritative at any point
+     *      in time.
      * @param _compliance New compliance contract address.
      */
     function setCompliance(address _compliance) internal {
         erc3643Storage().compliance = _compliance;
-        emit IERC3643Types.ComplianceAdded(_compliance);
     }
 
     /**
      * @notice Replaces the identity registry wired into the token.
-     * @dev Emits `IdentityRegistryAdded` so off-chain indexers can track which registry vetted
-     *      holders at any historical block.
+     * @dev The calling facet (`Identity`) emits `IdentityRegistryAdded` so off-chain indexers can
+     *      track which registry vetted holders at any historical block.
      * @param _identityRegistry New identity-registry address.
      */
     function setIdentityRegistry(address _identityRegistry) internal {
         erc3643Storage().identityRegistry = _identityRegistry;
-        emit IERC3643Types.IdentityRegistryAdded(_identityRegistry);
     }
 
     /**

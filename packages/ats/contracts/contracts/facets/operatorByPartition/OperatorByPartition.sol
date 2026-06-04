@@ -31,6 +31,7 @@ abstract contract OperatorByPartition is IOperatorByPartition, Modifiers {
     }
 
     /// @inheritdoc IOperatorByPartition
+    /// @dev Emits {AuthorizedOperatorByPartition}.
     function authorizeOperatorByPartition(
         bytes32 _partition,
         address _operator
@@ -44,11 +45,11 @@ abstract contract OperatorByPartition is IOperatorByPartition, Modifiers {
         onlyCompliant(EvmAccessors.getMsgSender(), _operator, false)
     {
         ERC1410StorageWrapper.authorizeOperatorByPartition(_partition, _operator);
+        emit IERC1410Types.AuthorizedOperatorByPartition(_partition, _operator, EvmAccessors.getMsgSender());
     }
 
     /// @inheritdoc IOperatorByPartition
-    /// @dev Emits {RevokedOperatorByPartition} via
-    ///      ERC1410StorageWrapper.revokeOperatorByPartition.
+    /// @dev Emits {RevokedOperatorByPartition}.
     function revokeOperatorByPartition(
         bytes32 _partition,
         address _operator
@@ -63,6 +64,7 @@ abstract contract OperatorByPartition is IOperatorByPartition, Modifiers {
         onlyCompliant(EvmAccessors.getMsgSender(), _operator, false)
     {
         ERC1410StorageWrapper.revokeOperatorByPartition(_partition, _operator);
+        emit IERC1410Types.RevokedOperatorByPartition(_partition, _operator, EvmAccessors.getMsgSender());
     }
 
     /// @inheritdoc IOperatorByPartition

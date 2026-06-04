@@ -75,8 +75,8 @@ library AmortizationStorageWrapper {
     /**
      * @notice Registers a new amortization corporate action and schedules its snapshot.
      * @dev Reverts with {AmortizationCreationFailed} when the registry returns a zero id;
-     *      otherwise schedules the snapshot task at the record date, records the active id
-     *      and emits {AmortizationSet}.
+     *      otherwise schedules the snapshot task at the record date and records the active id.
+     *      The calling facet (`Amortization`) emits {AmortizationSet}.
      * @param _newAmortization The amortization payload describing record and execution dates.
      * @return corporateActionId_ The identifier of the underlying corporate action.
      * @return amortizationID_ The one-based index of the amortization within its type list.
@@ -97,14 +97,6 @@ library AmortizationStorageWrapper {
         );
         ScheduledTasksStorageWrapper.addScheduledSnapshot(_newAmortization.recordDate, corporateActionId_);
         _amortizationStorage().activeAmortizationIds.add(amortizationID_);
-
-        emit IAmortization.AmortizationSet(
-            corporateActionId_,
-            amortizationID_,
-            EvmAccessors.getMsgSender(),
-            _newAmortization.recordDate,
-            _newAmortization.executionDate
-        );
     }
 
     /**
@@ -131,7 +123,6 @@ library AmortizationStorageWrapper {
 
         _executeCancelAmortization(corporateActionId, _amortizationID);
 
-        emit IAmortization.AmortizationCancelled(_amortizationID, EvmAccessors.getMsgSender());
         success_ = true;
     }
 
@@ -156,17 +147,19 @@ library AmortizationStorageWrapper {
      *      that hold is released first and the total adjusted accordingly. A new hold is
      *      then created on the default partition with the contract itself as escrow.
      *      Reverts with {AmortizationNotActive} if the amortization has been disabled or
-     *      {AmortizationHoldFailed} if the hold creation does not succeed.
+     *      {AmortizationHoldFailed} if the hold creation does not succeed. The calling facet
+     *      (`Amortization`) emits {AmortizationHoldSet}.
      * @param _amortizationID The one-based identifier of the amortization.
      * @param _tokenHolder The holder against whom the hold is taken.
      * @param _tokenAmount The amount to be held against the upcoming amortization payment.
+     * @return corporateActionId_ The identifier of the underlying amortization corporate action.
      * @return holdId_ The identifier of the newly created hold.
      */
     function setAmortizationHold(
         uint256 _amortizationID,
         address _tokenHolder,
         uint256 _tokenAmount
-    ) internal returns (uint256 holdId_) {
+    ) internal returns (bytes32 corporateActionId_, uint256 holdId_) {
         bytes32 corporateActionId = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
             CORPORATE_ACTION_TYPE_AMORTIZATION,
             _amortizationID - 1
@@ -215,25 +208,23 @@ library AmortizationStorageWrapper {
         s.activeHoldHolders[corporateActionId].add(_tokenHolder);
         s.totalHoldByAmortizationId[corporateActionId] += _tokenAmount;
         holdId_ = newHoldId;
-
-        emit IAmortization.AmortizationHoldSet(
-            corporateActionId,
-            _amortizationID,
-            _tokenHolder,
-            newHoldId,
-            _tokenAmount
-        );
+        corporateActionId_ = corporateActionId;
     }
 
     /**
      * @notice Releases the amortization hold previously taken for a token holder.
      * @dev Reverts with {AmortizationHoldNotActive} when no active hold is recorded.
      *      Decrements the active-holders set and the aggregate hold counter by the
-     *      released amount, then emits {AmortizationHoldReleased}.
+     *      released amount. The calling facet (`Amortization`) emits {AmortizationHoldReleased}.
      * @param _amortizationID The one-based identifier of the amortization.
      * @param _tokenHolder The holder whose hold is being released.
+     * @return corporateActionId_ The identifier of the underlying amortization corporate action.
+     * @return releasedHoldId_ The identifier of the hold that was released.
      */
-    function releaseAmortizationHold(uint256 _amortizationID, address _tokenHolder) internal {
+    function releaseAmortizationHold(
+        uint256 _amortizationID,
+        address _tokenHolder
+    ) internal returns (bytes32 corporateActionId_, uint256 releasedHoldId_) {
         bytes32 corporateActionId = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
             CORPORATE_ACTION_TYPE_AMORTIZATION,
             _amortizationID - 1
@@ -259,7 +250,8 @@ library AmortizationStorageWrapper {
         s.activeHoldHolders[corporateActionId].remove(_tokenHolder);
         s.totalHoldByAmortizationId[corporateActionId] -= holdAmount;
 
-        emit IAmortization.AmortizationHoldReleased(corporateActionId, _amortizationID, _tokenHolder, releasedHoldId);
+        corporateActionId_ = corporateActionId;
+        releasedHoldId_ = releasedHoldId;
     }
 
     /**

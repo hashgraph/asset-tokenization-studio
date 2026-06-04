@@ -24,13 +24,13 @@ interface IERC1410Types {
     }
 
     event TransferByPartition(
-        bytes32 indexed _fromPartition,
-        address _operator,
-        address indexed _from,
-        address indexed _to,
-        uint256 _value,
-        bytes _data,
-        bytes _operatorData
+        bytes32 indexed fromPartition,
+        address operator,
+        address indexed from,
+        address indexed to,
+        uint256 value,
+        bytes data,
+        bytes operatorData
     );
 
     event AuthorizedOperator(address indexed operator, address indexed tokenHolder);

@@ -2,7 +2,6 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IController } from "../../facets/controller/IController.sol";
-import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /// @custom:hash storage Erc1644
 bytes32 constant STORAGE_LOCATION_ERC1644 = 0x96356235f59c9d131a29a98816b8ce8d9e8a5aa2b64c6d01293c66354dba3000;
@@ -44,12 +43,11 @@ library ERC1644StorageWrapper {
 
     /**
      * @notice Permanently disables the controllable feature.
-     * @dev Emits `FinalizedControllerFeature`. After this call `isControllable` always
-     *      returns `false`; there is no path to re-enable.
+     * @dev After this call `isControllable` always returns `false`; there is no path to
+     *      re-enable. The caller (`Controller` facet) emits `FinalizedControllerFeature`.
      */
     function finalizeControllable() internal {
         erc1644Storage().isControllable = false;
-        emit IController.FinalizedControllerFeature(EvmAccessors.getMsgSender());
     }
 
     /**

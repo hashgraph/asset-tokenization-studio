@@ -24,35 +24,35 @@ interface IController is IERC3643Types {
 
     /**
      * @notice Emitted when an authorised controller transfers tokens between two holders.
-     * @param _controller The address of the controller that initiated the transfer.
-     * @param _from The address tokens are transferred from.
-     * @param _to The address tokens are transferred to.
-     * @param _value The amount of tokens transferred.
-     * @param _data Optional data attached to the transfer for validation.
-     * @param _operatorData Optional data attached by the controller for event attribution.
+     * @param controller The address of the controller that initiated the transfer.
+     * @param from The address tokens are transferred from.
+     * @param to The address tokens are transferred to.
+     * @param value The amount of tokens transferred.
+     * @param data Optional data attached to the transfer for validation.
+     * @param operatorData Optional data attached by the controller for event attribution.
      */
     event ControllerTransfer(
-        address _controller,
-        address indexed _from,
-        address indexed _to,
-        uint256 _value,
-        bytes _data,
-        bytes _operatorData
+        address controller,
+        address indexed from,
+        address indexed to,
+        uint256 value,
+        bytes data,
+        bytes operatorData
     );
     /**
      * @notice Emitted when an authorised controller redeems (burns) tokens on behalf of a holder.
-     * @param _controller The address of the controller that initiated the redemption.
-     * @param _tokenHolder The account whose tokens are redeemed.
-     * @param _value The amount of tokens redeemed.
-     * @param _data Optional data attached to the redemption for validation.
-     * @param _operatorData Optional data attached by the controller for event attribution.
+     * @param controller The address of the controller that initiated the redemption.
+     * @param tokenHolder The account whose tokens are redeemed.
+     * @param value The amount of tokens redeemed.
+     * @param data Optional data attached to the redemption for validation.
+     * @param operatorData Optional data attached by the controller for event attribution.
      */
     event ControllerRedemption(
-        address _controller,
-        address indexed _tokenHolder,
-        uint256 _value,
-        bytes _data,
-        bytes _operatorData
+        address controller,
+        address indexed tokenHolder,
+        uint256 value,
+        bytes data,
+        bytes operatorData
     );
 
     /// @notice Thrown when an operation requires the token to be controllable but it is not.

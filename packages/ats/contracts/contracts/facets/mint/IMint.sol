@@ -23,12 +23,12 @@ interface IMint {
 
     /**
      * @notice Emitted when new tokens are issued to a holder.
-     * @param _operator Account that invoked the issuance (issuer or agent).
-     * @param _to Recipient of the newly issued tokens.
-     * @param _value Amount of tokens issued, denominated in base units.
-     * @param _data Arbitrary payload forwarded alongside the issuance.
+     * @param operator Account that invoked the issuance (issuer or agent).
+     * @param to Recipient of the newly issued tokens.
+     * @param value Amount of tokens issued, denominated in base units.
+     * @param data Arbitrary payload forwarded alongside the issuance.
      */
-    event Issued(address indexed _operator, address indexed _to, uint256 _value, bytes _data);
+    event Issued(address indexed operator, address indexed to, uint256 value, bytes data);
 
     /**
      * @notice Initialises the ERC-1594 StorageWrapper on the calling contract.
