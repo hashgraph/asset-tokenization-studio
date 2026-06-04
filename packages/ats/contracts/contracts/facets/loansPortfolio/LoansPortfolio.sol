@@ -2,24 +2,27 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ILoansPortfolio, RESOLVER_KEY_LOANS_PORTFOLIO } from "./ILoansPortfolio.sol";
-import { ROLE_LOANS_PORTFOLIO_MANAGER, DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
-import { Modifiers } from "../../../services/Modifiers.sol";
-import { LoansPortfolioStorageWrapper } from "../../../domain/asset/LoansPortfolioStorageWrapper.sol";
-import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
-import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
+import { ROLE_LOANS_PORTFOLIO_MANAGER, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { LoansPortfolioStorageWrapper } from "../../domain/asset/LoansPortfolioStorageWrapper.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
-/// @title LoansPortfolio
-/// @author Asset Tokenization Studio Team
-/// @notice Abstract facet implementing the loans-portfolio lifecycle: initialisation,
-///         holdings registration, notifications and withdrawals.
-/// @dev Delegates persistence to `LoansPortfolioStorageWrapper` and security regulation
-///      to `SecurityStorageWrapper`; writers are gated by `ROLE_LOANS_PORTFOLIO_MANAGER`
-///      plus the global activation, pause, and zero-address invariants.
+/**
+ * @title  LoansPortfolio
+ * @author Asset Tokenization Studio Team
+ * @notice Abstract implementation of `ILoansPortfolio`.
+ * @dev    Delegates persistence to `LoansPortfolioStorageWrapper`; writers are gated by
+ *         `ROLE_LOANS_PORTFOLIO_MANAGER` plus the global activation, pause, and
+ *         zero-address invariants enforced via `Modifiers`.
+ */
 abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
-    /// @inheritdoc ILoansPortfolio
-    /// @dev Initialises both the portfolio configuration and the security regulation
-    ///      payload in a single atomic call; guarded by `onlyUninitialized` against the
-    ///      portfolio's initialisation flag so repeat invocations revert.
+    /**
+     * @inheritdoc ILoansPortfolio
+     * @dev Initialises both the portfolio configuration and the security regulation
+     *      payload in a single atomic call; guarded by `onlyFacetNotRegistered` so
+     *      repeat invocations revert.
+     */
     function initializeLoansPortfolio(
         ILoansPortfolio.LoansPortfolioDetailsData calldata _loansPortfolioData
     ) external onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_LOANS_PORTFOLIO) {
