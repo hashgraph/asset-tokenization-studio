@@ -310,6 +310,74 @@ function getActiveAmortizationIds(
 function getTotalActiveAmortizationIds() external view returns (uint256);
 ```
 
+#### Events
+
+```solidity
+event AmortizationCancelled(uint256 amortizationId, address indexed operator);
+event AmortizationForceCancelled(uint256 amortizationId, address indexed operator);
+event AmortizationHoldReleased(
+  bytes32 indexed corporateActionId,
+  uint256 indexed amortizationID,
+  address indexed tokenHolder,
+  uint256 holdId
+);
+event AmortizationHoldSet(
+  bytes32 indexed corporateActionId,
+  uint256 indexed amortizationID,
+  address indexed tokenHolder,
+  uint256 holdId,
+  uint256 tokenAmount
+);
+event AmortizationInitialized();
+event AmortizationSet(
+  bytes32 corporateActionId,
+  uint256 amortizationId,
+  address indexed operator,
+  uint256 recordDate,
+  uint256 executionDate
+);
+event Approval(address indexed owner, address indexed spender, uint256 value);
+event Transfer(address indexed from, address indexed to, uint256 value);
+event TransferByPartition(
+  bytes32 indexed _fromPartition,
+  address _operator,
+  address indexed _from,
+  address indexed _to,
+  uint256 _value,
+  bytes _data,
+  bytes _operatorData
+);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AmortizationAlreadyExecuted(bytes32 corporateActionId, uint256 amortizationId);
+error AmortizationCreationFailed();
+error AmortizationHasActiveHolds(bytes32 corporateActionId, uint256 amortizationID);
+error AmortizationHoldFailed(bytes32 corporateActionId, uint256 amortizationID);
+error AmortizationHoldNotActive(bytes32 corporateActionId, uint256 amortizationID, address tokenHolder);
+error AmortizationNotActive(bytes32 corporateActionId, uint256 amortizationID);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
+error InsufficientHoldBalance(uint256 holdAmount, uint256 amount);
+error InvalidAmortizationHoldAmount(uint256 amortizationID);
+error InvalidHoldAmount();
+error InvalidPartition(address account, bytes32 partition);
+error InvalidTimestamp();
+error IsPaused();
+error NotAllowedInMultiPartitionMode();
+error SnapshotIdDoesNotExists(uint256 snapshotId);
+error SnapshotIdNull();
+error UnexpectedError(bytes4 _errorId);
+error WrongDates(uint256 firstDate, uint256 secondDate);
+error WrongIndexForAction(uint256 index, bytes32 actionType);
+```
+
 #### Types
 
 ```solidity
@@ -2232,9 +2300,7 @@ error SnapshotIdDoesNotExists(uint256 snapshotId);
 error SnapshotIdNull();
 error UnexpectedError(bytes4 _errorId);
 error WrongDates(uint256 firstDate, uint256 secondDate);
-error WrongImpactDataValues(ImpactData impactData);
 error WrongIndexForAction(uint256 index, bytes32 actionType);
-error WrongInterestRateValues(InterestRate interestRate);
 ```
 
 #### Types
@@ -2370,9 +2436,7 @@ error GreaterThanMaxUint256(uint256 amount, uint8 decimals);
 error SnapshotIdDoesNotExists(uint256 snapshotId);
 error SnapshotIdNull();
 error UnexpectedError(bytes4 _errorId);
-error WrongImpactDataValues(ImpactData impactData);
 error WrongIndexForAction(uint256 index, bytes32 actionType);
-error WrongInterestRateValues(InterestRate interestRate);
 ```
 
 #### Types
@@ -3359,6 +3423,25 @@ function setRate(uint256 _newRate, uint8 _newRateDecimals) external;
 function getRate() external view returns (uint256 rate_, uint8 decimals_);
 ```
 
+#### Events
+
+```solidity
+event FixedRateInitialized(FixedRateData initData);
+event RateUpdated(address indexed operator, uint256 newRate, uint8 newRateDecimals);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InterestRateIsFixed();
+error IsPaused();
+```
+
 #### Types
 
 ```solidity
@@ -3931,6 +4014,27 @@ function getKpiLinkedRateInterestRate() external view returns (InterestRate memo
 function getKpiLinkedRateImpactData() external view returns (ImpactData memory impactData_);
 ```
 
+#### Events
+
+```solidity
+event ImpactDataUpdated(address indexed operator, ImpactData newImpactData);
+event InterestRateUpdated(address indexed operator, InterestRate newInterestRate);
+event KpiLinkedRateInitialized(InterestRate interestRate, ImpactData impactData);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IsPaused();
+error WrongImpactDataValues(ImpactData impactData);
+error WrongInterestRateValues(InterestRate interestRate);
+```
+
 #### Types
 
 ```solidity
@@ -3971,6 +4075,29 @@ function getLatestKpiData(
 ) external view returns (uint256 value_, bool exists_);
 function getMinDate() external view returns (uint256 minDate_);
 function isCheckPointDate(uint256 _date, address _project) external view returns (bool exists_);
+```
+
+#### Events
+
+```solidity
+event KpiDataAdded(address indexed project, uint256 date, uint256 value);
+event KpisInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error CouponNotFound(uint256 couponID);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InvalidDate(uint256 providedDate, uint256 minDate, uint256 maxDate);
+error InvalidDateRange(uint256 fromDate, uint256 toDate);
+error IsPaused();
+error KpiDataAlreadyExists(uint256 date);
+error UnexpectedError(bytes4 _errorId);
 ```
 
 ### KYC
@@ -4055,6 +4182,27 @@ struct KycData {
 function initializeLoan(LoanDetailsData calldata _loanDetailsData) external;
 function setLoanDetails(LoanDetailsData calldata loanDetailsData_) external;
 function getLoanDetails() external view returns (LoanDetailsData memory loanDetailsData_);
+```
+
+#### Events
+
+```solidity
+event LoanDetailsSet(LoanDetailsData loanDetails);
+event LoanInitialized(LoanDetailsData loanDetailsData);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InvalidTimestamp();
+error IsPaused();
+error WrongDates(uint256 firstDate, uint256 secondDate);
+error ZeroAddressNotAllowed();
 ```
 
 #### Types
@@ -4448,12 +4596,12 @@ error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AccountIsBlocked(address account);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
-error BondMaturityDateWrong();
 error ClearingIsActivated();
 error Deactivated();
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error InvalidKycStatus();
 error IsPaused();
+error MaturityDateInvalid();
 error WalletRecovered();
 error ZeroAddressNotAllowed();
 ```
@@ -4481,12 +4629,12 @@ error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
 error AccountIsBlocked(address account);
 error AssetNotOperational(bytes32 configId, uint256 versionId);
-error BondMaturityDateWrong();
 error ClearingIsActivated();
 error Deactivated();
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 error InvalidKycStatus();
 error IsPaused();
+error MaturityDateInvalid();
 error PartitionNotAllowedInSinglePartitionMode(bytes32 partition);
 error WalletRecovered();
 error ZeroAddressNotAllowed();
@@ -4931,6 +5079,152 @@ function operatorClearingCreateHoldByPartition(
 ) external returns (bool success_, uint256 clearingId_);
 ```
 
+#### Events
+
+```solidity
+event ClearedHoldByPartition(
+  address indexed operator,
+  address indexed tokenHolder,
+  bytes32 partition,
+  uint256 clearingId,
+  IHoldTypes.Hold hold,
+  uint256 expirationDate,
+  bytes data,
+  bytes operatorData
+);
+event ClearedHoldFromByPartition(
+  address indexed operator,
+  address indexed tokenHolder,
+  bytes32 partition,
+  uint256 clearingId,
+  IHoldTypes.Hold hold,
+  uint256 expirationDate,
+  bytes data,
+  bytes operatorData
+);
+event ClearedOperatorHoldByPartition(
+  address indexed operator,
+  address indexed tokenHolder,
+  bytes32 partition,
+  uint256 clearingId,
+  IHoldTypes.Hold hold,
+  uint256 expirationDate,
+  bytes data,
+  bytes operatorData
+);
+event ClearedOperatorRedeemByPartition(
+  address indexed operator,
+  address indexed tokenHolder,
+  bytes32 partition,
+  uint256 clearingId,
+  uint256 amount,
+  uint256 expirationDate,
+  bytes data,
+  bytes operatorData
+);
+event ClearedOperatorTransferByPartition(
+  address indexed operator,
+  address indexed tokenHolder,
+  address indexed to,
+  bytes32 partition,
+  uint256 clearingId,
+  uint256 amount,
+  uint256 expirationDate,
+  bytes data,
+  bytes operatorData
+);
+event ClearedRedeemByPartition(
+  address indexed operator,
+  address indexed tokenHolder,
+  bytes32 partition,
+  uint256 clearingId,
+  uint256 amount,
+  uint256 expirationDate,
+  bytes data,
+  bytes operatorData
+);
+event ClearedRedeemFromByPartition(
+  address indexed operator,
+  address indexed tokenHolder,
+  bytes32 partition,
+  uint256 clearingId,
+  uint256 amount,
+  uint256 expirationDate,
+  bytes data,
+  bytes operatorData
+);
+event ClearedTransferByPartition(
+  address indexed operator,
+  address indexed tokenHolder,
+  address indexed to,
+  bytes32 partition,
+  uint256 clearingId,
+  uint256 amount,
+  uint256 expirationDate,
+  bytes data,
+  bytes operatorData
+);
+event ClearedTransferFromByPartition(
+  address indexed operator,
+  address indexed tokenHolder,
+  address indexed to,
+  bytes32 partition,
+  uint256 clearingId,
+  uint256 amount,
+  uint256 expirationDate,
+  bytes data,
+  bytes operatorData
+);
+event ClearingActivated(address indexed operator);
+event ClearingDeactivated(address indexed operator);
+event ClearingOperationApproved(
+  address indexed operator,
+  address indexed tokenHolder,
+  bytes32 indexed partition,
+  uint256 clearingId,
+  ClearingOperationType clearingOperationType,
+  bytes operationData
+);
+event ClearingOperationCanceled(
+  address indexed operator,
+  address indexed tokenHolder,
+  bytes32 indexed partition,
+  uint256 clearingId,
+  ClearingOperationType clearingOperationType
+);
+event ClearingOperationReclaimed(
+  address indexed operator,
+  address indexed tokenHolder,
+  bytes32 indexed partition,
+  uint256 clearingId,
+  ClearingOperationType clearingOperationType
+);
+event OperatorClearingHoldByPartitionInitialized();
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error ClearingIsActivated();
+error ClearingIsDisabled();
+error Deactivated();
+error ExpirationDateNotReached();
+error ExpirationDateReached();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error InvalidClearingAmount();
+error IsPaused();
+error PartitionNotAllowedInSinglePartitionMode(bytes32 partition);
+error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
+error Unauthorized(address operator, address tokenHolder, bytes32 partition);
+error WalletRecovered();
+error WrongClearingId();
+error WrongExpirationTimestamp();
+error ZeroAddressNotAllowed();
+```
+
 #### Types
 
 ```solidity
@@ -5161,7 +5455,6 @@ event PrincipalInitialized();
 ```solidity
 error AccessControlRequired(bytes32 role, address sender);
 error AccountHasNoRole(address account, bytes32 role);
-error ExponentOverflow(uint256 exponent);
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 ```
 
@@ -5799,6 +6092,47 @@ function arePartitionsProtected() external view returns (bool);
 function calculateRoleForPartition(bytes32 _partition) external pure returns (bytes32 roleForPartition_);
 ```
 
+#### Events
+
+```solidity
+event PartitionsProtected(address indexed operator);
+event PartitionsUnProtected(address indexed operator);
+event ProtectedPartitionsInitialized(bool arePartitionsProtected);
+event ProtectedRedeemFrom(
+  bytes32 indexed partition,
+  address indexed operator,
+  address indexed from,
+  uint256 value,
+  uint256 deadline,
+  uint256 nonce,
+  bytes signature
+);
+event ProtectedTransferFrom(
+  bytes32 indexed partition,
+  address indexed operator,
+  address indexed from,
+  address to,
+  uint256 value,
+  uint256 deadline,
+  uint256 nonce,
+  bytes signature
+);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IsPaused();
+error PartitionsAreProtected();
+error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
+error PartitionsAreUnProtected();
+```
+
 ### Recovery
 
 - Interface: `contracts/facets/recovery/IRecovery.sol`
@@ -5972,6 +6306,24 @@ function getScheduledCrossOrderedTasks(
   uint256 _pageIndex,
   uint256 _pageLength
 ) external view returns (ScheduledTask[] memory scheduledTask_);
+```
+
+#### Events
+
+```solidity
+event ScheduledCrossOrderedTasksInitialized();
+event TaskExecutionFailed(bytes32 indexed actionId, bytes32 indexed taskType, uint256 scheduledTimestamp);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error IsPaused();
 ```
 
 #### Types
