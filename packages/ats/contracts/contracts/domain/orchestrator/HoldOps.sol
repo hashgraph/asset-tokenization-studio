@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { HoldStorageWrapper } from "../asset/HoldStorageWrapper.sol";
-import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
+import { IHoldTypes } from "../../facets/hold/IHoldTypes.sol";
 import { ThirdPartyType } from "../asset/types/ThirdPartyType.sol";
 
 /**

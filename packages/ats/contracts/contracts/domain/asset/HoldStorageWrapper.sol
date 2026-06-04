@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
+import { IHoldTypes } from "../../facets/hold/IHoldTypes.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
 import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
@@ -20,7 +20,6 @@ import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 import { ControlListStorageWrapper } from "../core/ControlListStorageWrapper.sol";
 import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /// @custom:hash storage Hold
@@ -120,7 +119,7 @@ library HoldStorageWrapper {
             _from,
             NonceStorageWrapper.getNonceFor(_from),
             _protectedHold.deadline,
-            TimeTravelStorageWrapper.getBlockTimestamp()
+            EvmAccessors.getBlockTimestamp()
         );
 
         ProtectedPartitionsStorageWrapper.checkCreateHoldSignature(
@@ -762,7 +761,7 @@ library HoldStorageWrapper {
      * @return Whether the hold has expired.
      */
     function isHoldExpired(IHoldTypes.Hold memory _hold) internal view returns (bool) {
-        return TimeTravelStorageWrapper.getBlockTimestamp() >= _hold.expirationTimestamp;
+        return EvmAccessors.getBlockTimestamp() >= _hold.expirationTimestamp;
     }
 
     /**

@@ -14,7 +14,7 @@ import { ERC20StorageWrapper } from "../ERC20StorageWrapper.sol";
 import { TokenCoreOps } from "../../orchestrator/TokenCoreOps.sol";
 import { ICoupon } from "../../../facets/coupon/ICoupon.sol";
 import { ICouponTypes } from "../../../facets/coupon/ICouponTypes.sol";
-import { BondStorageWrapper } from "../BondStorageWrapper.sol";
+import { MaturityDateStorageWrapper } from "../MaturityDateStorageWrapper.sol";
 import { CouponRateDispatch } from "./CouponRateDispatch.sol";
 import { DatesValidation } from "../../../infrastructure/utils/DatesValidation.sol";
 import { DecimalsLib } from "../../../infrastructure/utils/DecimalsLib.sol";
@@ -23,7 +23,7 @@ import { NominalValueStorageWrapper } from "../NominalValueStorageWrapper.sol";
 import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
 import { ScheduledTasksStorageWrapper } from "../ScheduledTasksStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "../SnapshotsStorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 import { InterestRateStorageWrapper } from "../InterestRateStorageWrapper.sol";
 import { IInterestRate } from "../../../facets/interestRate/IInterestRate.sol";
 
@@ -92,7 +92,7 @@ library CouponStorageWrapper {
         ICouponTypes.RegisteredCoupon memory registeredCoupon;
         bytes32 corporateActionId;
         (registeredCoupon, corporateActionId, ) = getCoupon(couponId);
-        if (registeredCoupon.coupon.executionDate <= TimeTravelStorageWrapper.getBlockTimestamp()) {
+        if (registeredCoupon.coupon.executionDate <= EvmAccessors.getBlockTimestamp()) {
             revert ICoupon.CouponAlreadyExecuted(corporateActionId, couponId);
         }
         CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
@@ -151,14 +151,41 @@ library CouponStorageWrapper {
     }
 
     /**
-     * @notice Reverts with `ICommonErrors.WrongDates` when the bond has a non-zero maturity date
-     *         and `endDate` exceeds it.
-     * @dev When `maturityDate` is zero the bond is treated as open-ended and no constraint is
+     * @notice Stamps a resolved fixed-rate value and decimals onto a previously
+     *         scheduled coupon.
+     * @dev Mutates the supplied `coupon` struct in memory and persists it via
+     *      `CorporateActionsStorageWrapper.updateCorporateActionData`. Rate status
+     *      is transitioned to SET.
+     * @param couponID One-indexed coupon identifier.
+     * @param coupon In-memory coupon struct modified by reference.
+     * @param rate Fixed-rate numerator resolved by `CouponRateDispatch`.
+     * @param rateDecimals Scale of the rate value.
+     */
+    function updateCouponRate(
+        uint256 couponID,
+        ICouponTypes.Coupon memory coupon,
+        uint256 rate,
+        uint8 rateDecimals
+    ) internal {
+        coupon.rate = rate;
+        coupon.rateDecimals = rateDecimals;
+        coupon.rateStatus = ICouponTypes.RateCalculationStatus.SET;
+
+        CorporateActionsStorageWrapper.updateCorporateActionData(
+            CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(CORPORATE_ACTION_TYPE_COUPON, couponID - 1),
+            abi.encode(coupon)
+        );
+    }
+
+    /**
+     * @notice Reverts with `ICommonErrors.WrongDates` when the security has a non-zero maturity
+     *         date and `endDate` exceeds it.
+     * @dev When `maturityDate` is zero the security is treated as open-ended and no constraint is
      *      applied. Delegates the ordered-date check to `DatesValidation.checkDates`.
-     * @param endDate Coupon end date to validate against the bond's maturity date.
+     * @param endDate Coupon end date to validate against the security's maturity date.
      */
     function checkEndDateAgainstMaturity(uint256 endDate) internal view {
-        uint256 maturityDate = BondStorageWrapper.getMaturityDate();
+        uint256 maturityDate = MaturityDateStorageWrapper.getMaturityDate();
         if (maturityDate != 0) {
             DatesValidation.checkDates(endDate, maturityDate);
         }
@@ -256,7 +283,7 @@ library CouponStorageWrapper {
         couponFor_.coupon = registeredCoupon.coupon;
         couponFor_.isDisabled = isDisabled;
 
-        if (registeredCoupon.coupon.recordDate < TimeTravelStorageWrapper.getBlockTimestamp() && !isDisabled) {
+        if (registeredCoupon.coupon.recordDate < EvmAccessors.getBlockTimestamp() && !isDisabled) {
             couponFor_.recordDateReached = true;
             if (registeredCoupon.snapshotId != 0) {
                 couponFor_.tokenBalance = SnapshotsStorageWrapper.getTotalBalanceOfAtSnapshot(
@@ -333,7 +360,7 @@ library CouponStorageWrapper {
     ) internal view returns (address[] memory holders_) {
         (ICouponTypes.RegisteredCoupon memory registeredCoupon, , ) = getCoupon(couponID);
 
-        if (registeredCoupon.coupon.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return holders_;
+        if (registeredCoupon.coupon.recordDate >= EvmAccessors.getBlockTimestamp()) return holders_;
 
         if (registeredCoupon.snapshotId != 0)
             return SnapshotsStorageWrapper.tokenHoldersAt(registeredCoupon.snapshotId, pageIndex, pageLength);
@@ -353,7 +380,7 @@ library CouponStorageWrapper {
     function getTotalCouponHolders(uint256 couponID) internal view returns (uint256 total_) {
         (ICouponTypes.RegisteredCoupon memory registeredCoupon, , ) = getCoupon(couponID);
 
-        if (registeredCoupon.coupon.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return 0;
+        if (registeredCoupon.coupon.recordDate >= EvmAccessors.getBlockTimestamp()) return 0;
 
         if (registeredCoupon.snapshotId != 0)
             return SnapshotsStorageWrapper.totalTokenHoldersAt(registeredCoupon.snapshotId);
@@ -373,8 +400,7 @@ library CouponStorageWrapper {
      *         of bounds.
      */
     function getCouponFromOrderedListAt(uint256 pos, bool _includeDisabled) internal view returns (uint256 couponID_) {
-        if (pos >= getCouponsOrderedListTotalAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp(), _includeDisabled))
-            return 0;
+        if (pos >= getCouponsOrderedListTotalAdjustedAt(EvmAccessors.getBlockTimestamp(), _includeDisabled)) return 0;
 
         uint256 actualOrderedListLengthTotal = getCouponsOrderedListTotal();
         if (pos < actualOrderedListLengthTotal) {
@@ -415,6 +441,7 @@ library CouponStorageWrapper {
      *      `getCouponFromOrderedListAt` for each position.
      * @param pageIndex Zero-indexed page to retrieve.
      * @param pageLength Number of coupons per page.
+     * @param _includeDisabled Whether to include disabled coupons in the result.
      * @return couponIDs_ Array of coupon identifiers on the requested page.
      */
     function getCouponsOrderedList(
@@ -428,7 +455,7 @@ library CouponStorageWrapper {
             Pagination.getSize(
                 start,
                 end,
-                getCouponsOrderedListTotalAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp(), _includeDisabled)
+                getCouponsOrderedListTotalAdjustedAt(EvmAccessors.getBlockTimestamp(), _includeDisabled)
             )
         );
 
@@ -486,7 +513,7 @@ library CouponStorageWrapper {
         bool _includeDisabled
     ) internal view returns (uint256 previousCouponID_) {
         uint256 orderedListLength = getCouponsOrderedListTotalAdjustedAt(
-            TimeTravelStorageWrapper.getBlockTimestamp(),
+            EvmAccessors.getBlockTimestamp(),
             _includeDisabled
         );
 

@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IKpiLinkedRateErrors } from "../layer_2/interestRate/kpiLinkedRate/IKpiLinkedRateErrors.sol";
-
 /**
  * @title ICouponTypes
  * @author Asset Tokenization Studio Team
@@ -11,10 +9,9 @@ import { IKpiLinkedRateErrors } from "../layer_2/interestRate/kpiLinkedRate/IKpi
  * @dev Pure types tier: structs + enums only. Domain events and errors live on the writer
  *      interface (`ICoupon`) where they are emitted/reverted; placing them here would force
  *      read-only sibling facets that inherit `ICouponTypes` to pick up symbols they never
- *      use, bloating their EIP-165 interfaceId. Inherits `IKpiLinkedRateErrors` so the
- *      KPI-linked rate variants can revert with the shared error set without redeclaration.
+ *      use, bloating their EIP-165 interfaceId.
  */
-interface ICouponTypes is IKpiLinkedRateErrors {
+interface ICouponTypes {
     /**
      * @notice Status of the rate-calculation lifecycle for a coupon.
      * @dev `PENDING` is set on creation for variants that compute the rate later (KPI-linked,
@@ -68,7 +65,7 @@ interface ICouponTypes is IKpiLinkedRateErrors {
      * @dev `recordDateReached` is true once the record date has passed; until then the balance
      *      and `couponAmount` fields are not yet meaningful.
      * @param tokenBalance Holder balance captured at the coupon snapshot (or zero if not yet reached).
-     * @param nominalValue Nominal value of the underlying bond per unit, used for amount maths.
+     * @param nominalValue Nominal value of the underlying security per unit, used for amount maths.
      * @param decimals Decimal precision of the underlying token at the snapshot.
      * @param recordDateReached True once the record date has passed.
      * @param coupon Underlying `Coupon` parameters.

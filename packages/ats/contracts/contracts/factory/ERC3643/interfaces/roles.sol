@@ -36,8 +36,8 @@ bytes32 constant ROLE_AGENT = 0x9830aa071a741c08855dd42130bdb0ff50f7bdf5a4b72f12
 /// @custom:hash role Amortization
 bytes32 constant ROLE_AMORTIZATION = 0x0c8c9cf3db23765397bf525e10c9158fd2a7b58b280d5da82a642247779ae3c1;
 
-/// @custom:hash role BondManager
-bytes32 constant ROLE_BOND_MANAGER = 0x68fe577385095e80beadf873ac12a3100f9a9d1b6d40f0d123eecf3d01bf5c49;
+/// @custom:hash role MaturityManager
+bytes32 constant ROLE_MATURITY_MANAGER = 0xc20b7fd7efe1a2c9f69003a21c2c55c79ef84e16252b62599246ff01f6207314;
 
 /// @custom:hash role Cap
 bytes32 constant ROLE_CAP = 0x58d502b7184e1a264e0cacf1a19a6c268356c6d9fda5ad83ab3b599cd3b7f41c;

@@ -27,10 +27,10 @@ import { buildFacetList } from "../facetEnvironment";
 import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
 
 /**
- * Equity-specific facets list (44 facets total).
+ * Equity-specific facets list.
  *
  * This is an explicit positive list of all facets required for equity tokens.
- * Includes all common facets plus EquityUSAFacet, VotingFacet, DividendFacet, and DividendSecurityHoldersFacet.
+ * Includes all common facets plus VotingFacet, DividendFacet, and DividendSecurityHoldersFacet.
  *
  * Note: DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet functionality,
  * so we only include DiamondFacet to avoid selector collisions.
@@ -139,10 +139,6 @@ const EQUITY_FACETS = [
 
   "InterestRateFacet",
   "ProceedRecipientsFacet",
-
-  // Jurisdiction-Specific (2)
-  "SecurityFacet",
-  "EquityUSAFacet",
 ] as const;
 
 /**
@@ -157,7 +153,6 @@ const EQUITY_FACETS = [
  *
  * @param blrContract - BusinessLogicResolver contract instance
  * @param facetAddresses - Map of facet names to their deployed addresses
- * @param useTimeTravel - Whether to use TimeTravel variants (default: false)
  * @param partialBatchDeploy - Whether this is a partial batch deployment (default: false)
  * @param batchSize - Number of facets per batch (default: DEFAULT_BATCH_SIZE)
  * @param confirmations - Number of confirmations to wait for (default: 0 for test environments)
@@ -196,22 +191,18 @@ const EQUITY_FACETS = [
 export async function createEquityConfiguration(
   blrContract: BusinessLogicResolver,
   facetAddresses: Record<string, string>,
-  useTimeTravel: boolean = false,
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
   retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  const facetNames = buildFacetList(EQUITY_FACETS, useTimeTravel);
+  const facetNames = buildFacetList(EQUITY_FACETS);
 
   // Build facet data with resolver keys from registry
   const facets = facetNames.map((name) => {
-    // Strip "TimeTravel" suffix to get base name for registry lookup
-    const baseName = name.replace(/TimeTravel$/, "");
-
-    const facetDef = atsRegistry.getFacetDefinition(baseName) ?? getMockFacetDefinition(baseName);
+    const facetDef = atsRegistry.getFacetDefinition(name) ?? getMockFacetDefinition(name);
     if (!facetDef?.resolverKey?.value) {
-      throw new Error(`No resolver key found for facet: ${baseName}`);
+      throw new Error(`No resolver key found for facet: ${name}`);
     }
     return {
       facetName: name,

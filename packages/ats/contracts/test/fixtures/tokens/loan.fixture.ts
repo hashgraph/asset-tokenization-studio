@@ -13,7 +13,7 @@
  */
 
 import { ethers } from "hardhat";
-import { ZeroAddress, ethers as ethersTypes } from "ethers";
+import { ZeroAddress } from "ethers";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture } from "../infrastructure.fixture";
 import {
@@ -252,7 +252,7 @@ export async function deployLoanTokenFixture({
   const externalControlListManagementFacet = IAsset__factory.connect(proxyAddress, deployer);
   const externalPauseManagementFacet = IAsset__factory.connect(proxyAddress, deployer);
   const proceedRecipientsFacet = IAsset__factory.connect(proxyAddress, deployer);
-  const timeTravelFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const evmAccessorsFacet = IAsset__factory.connect(proxyAddress, deployer);
 
   await controlListFacet.initializeControlList(securityData.isWhiteList);
   await controllerFacet.initializeController(securityData.isControllable);
@@ -287,11 +287,6 @@ export async function deployLoanTokenFixture({
   await asset.initializeTransferAndLock();
 
   await asset.initializeLoan(loanDetails);
-  await asset.initializeSecurity(buildRegulationData(regulationData.regulationType, regulationData.regulationSubType), {
-    countriesControlListType: regulationData.additionalSecurityData.countriesControlListType,
-    listOfCountries: regulationData.additionalSecurityData.listOfCountries,
-    info: regulationData.additionalSecurityData.info,
-  });
   await asset.initializeAccessControl();
 
   // Call all other initializations provided by the user list that are present in IAsset
@@ -367,7 +362,7 @@ export async function deployLoanTokenFixture({
   await asset.initializeBalanceTracker();
   await asset.initializeBalanceAdjustments();
   await asset.initializeScheduledBalanceAdjustment();
-  await asset.initializeTimeTravel();
+  await asset.initializeEvmAccessors();
 
   await asset.connect(deployer).initializeInitializer(150);
   await asset.connect(deployer).setOperationalStatus();
@@ -403,6 +398,6 @@ export async function deployLoanTokenFixture({
     externalControlListManagementFacet,
     externalPauseManagementFacet,
     proceedRecipientsFacet,
-    timeTravelFacet,
+    evmAccessorsFacet,
   };
 }

@@ -30,7 +30,7 @@ export const DEFAULT_BOND_PARAMS = {
   },
 } as const;
 
-export async function getBondDetails(params?: DeepPartial<BondDetailsDataParams>) {
+export async function makeBondDetailsData(params?: DeepPartial<BondDetailsDataParams>) {
   const maturityDate =
     params?.maturityDate ??
     (params?.startingDate
@@ -79,7 +79,7 @@ export async function deployBondTokenFixture({
       version: 1,
     },
   });
-  const bondDetails = await getBondDetails(bondDataParams?.bondDetails);
+  const bondDetails = await makeBondDetailsData(bondDataParams?.bondDetails);
 
   const diamond = await deployBondFromFactory(
     {

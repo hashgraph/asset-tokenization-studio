@@ -2,13 +2,13 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { KPI_KPIS_ADD_COUPON_DATE, KPI_KPIS_SET_MINDATE } from "../../constants/values.sol";
-import { IKpis } from "../../facets/layer_2/kpi/kpiLatest/IKpis.sol";
+import { IKpis } from "../../facets/kpi/IKpis.sol";
 import { Checkpoints } from "../../infrastructure/utils/Checkpoints.sol";
 import { CouponStorageWrapper } from "./coupon/CouponStorageWrapper.sol";
 import { ICouponTypes } from "../../facets/coupon/ICouponTypes.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 /// @custom:hash storage Kpis
 bytes32 constant STORAGE_LOCATION_KPIS = 0x0016dc918f7b373bc12e22119ae85cf4b20c396d9179f6ed9b5f01993586a000;
 
@@ -157,8 +157,8 @@ library KpisStorageWrapper {
      */
     function requireValidDate(uint256 date, address project) internal view {
         uint256 minDate = getMinDateAdjusted();
-        if (date <= minDate || date > TimeTravelStorageWrapper.getBlockTimestamp()) {
-            revert IKpis.InvalidDate(date, minDate, TimeTravelStorageWrapper.getBlockTimestamp());
+        if (date <= minDate || date > EvmAccessors.getBlockTimestamp()) {
+            revert IKpis.InvalidDate(date, minDate, EvmAccessors.getBlockTimestamp());
         }
         if (isCheckpointDate(date, project)) {
             revert IKpis.KpiDataAlreadyExists(date);
@@ -193,7 +193,7 @@ library KpisStorageWrapper {
         minDate_ = kpisDataStorage().minDate;
 
         uint256 total = CouponStorageWrapper.getCouponsOrderedListTotalAdjustedAt(
-            TimeTravelStorageWrapper.getBlockTimestamp(),
+            EvmAccessors.getBlockTimestamp(),
             true
         );
 

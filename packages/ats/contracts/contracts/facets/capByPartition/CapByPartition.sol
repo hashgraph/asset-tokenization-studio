@@ -6,7 +6,6 @@ import { ROLE_CAP, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { CapStorageWrapper } from "../../domain/core/CapStorageWrapper.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
@@ -15,7 +14,7 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  * @notice Abstract implementation of `ICapByPartition` providing per-partition maximum supply
  *         cap management.
  * @dev Delegates persistence to {CapStorageWrapper} and resolves the active timestamp via
- *      {TimeTravelStorageWrapper}. The setter is gated by `onlyUnpaused`, `onlyRole(ROLE_CAP)`
+ *      {EvmAccessors}. The setter is gated by `onlyUnpaused`, `onlyRole(ROLE_CAP)`
  *      and `onlyValidNewMaxSupplyByPartition`; the latter enforces the partition-vs-global
  *      relationship and rejects values below the partition's adjusted total supply. Intended
  *      to be inherited by `CapByPartitionFacet`.
@@ -43,19 +42,15 @@ abstract contract CapByPartition is ICapByPartition, Modifiers {
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_CAP)
-        onlyValidNewMaxSupplyByPartition(_partition, _maxSupply, TimeTravelStorageWrapper.getBlockTimestamp())
+        onlyValidNewMaxSupplyByPartition(_partition, _maxSupply, EvmAccessors.getBlockTimestamp())
         returns (bool success_)
     {
-        CapStorageWrapper.setMaxSupplyByPartition(_partition, _maxSupply, TimeTravelStorageWrapper.getBlockTimestamp());
+        CapStorageWrapper.setMaxSupplyByPartition(_partition, _maxSupply, EvmAccessors.getBlockTimestamp());
         success_ = true;
     }
 
     /// @inheritdoc ICapByPartition
     function getMaxSupplyByPartition(bytes32 _partition) external view override returns (uint256 maxSupply_) {
-        return
-            CapStorageWrapper.getMaxSupplyByPartitionAdjustedAt(
-                _partition,
-                TimeTravelStorageWrapper.getBlockTimestamp()
-            );
+        return CapStorageWrapper.getMaxSupplyByPartitionAdjustedAt(_partition, EvmAccessors.getBlockTimestamp());
     }
 }

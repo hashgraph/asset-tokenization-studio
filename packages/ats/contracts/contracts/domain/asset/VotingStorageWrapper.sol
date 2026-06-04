@@ -12,15 +12,13 @@ import { IVoting } from "../../facets/voting/IVoting.sol";
 import { IVotingTypes } from "../../facets/voting/IVotingTypes.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-
 /**
  * @title VotingStorageWrapper
  * @notice Library providing internal functions to manage voting rights corporate actions,
  *         including creation, cancellation, retrieval, and snapshot balance lookup.
  * @dev All functions are internal and designed to be called by facet contracts. Relies on
  *      CorporateActionsStorageWrapper, ScheduledTasksStorageWrapper, SnapshotsStorageWrapper,
- *      and TimeTravelStorageWrapper for storage and scheduling. Emits events from the IVoting
+ *      and EvmAccessors for storage and scheduling. Emits events from the IVoting
  *      interface. Reverts with IVoting errors on invalid operations.
  * @author Asset Tokenization Studio Team
  */
@@ -67,7 +65,7 @@ library VotingStorageWrapper {
     function cancelVoting(uint256 voteId) internal returns (bool success_) {
         (IVoting.RegisteredVoting memory registeredVoting, bytes32 corporateActionId, ) = getVoting(voteId);
 
-        if (registeredVoting.voting.recordDate <= TimeTravelStorageWrapper.getBlockTimestamp()) {
+        if (registeredVoting.voting.recordDate <= EvmAccessors.getBlockTimestamp()) {
             revert IVoting.VotingAlreadyRecorded(corporateActionId, voteId);
         }
 
@@ -162,15 +160,8 @@ library VotingStorageWrapper {
         votingFor_.data = registeredVoting.voting.data;
         votingFor_.isDisabled = isDisabled_;
 
-        (
-            votingFor_.tokenBalance,
-            votingFor_.decimals,
-            votingFor_.recordDateReached
-        ) = _getSnapshotBalanceForIfDateReached(
-            registeredVoting.voting.recordDate,
-            registeredVoting.snapshotId,
-            account
-        );
+        (votingFor_.tokenBalance, votingFor_.decimals, votingFor_.recordDateReached) = SnapshotsStorageWrapper
+            .getSnapshotTakenBalance(registeredVoting.voting.recordDate, registeredVoting.snapshotId, account);
     }
 
     /**
@@ -197,7 +188,7 @@ library VotingStorageWrapper {
     ) internal view returns (address[] memory holders_) {
         (IVoting.RegisteredVoting memory registeredVoting, , ) = getVoting(voteID);
 
-        if (registeredVoting.voting.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return holders_;
+        if (registeredVoting.voting.recordDate >= EvmAccessors.getBlockTimestamp()) return holders_;
 
         if (registeredVoting.snapshotId != 0)
             return SnapshotsStorageWrapper.tokenHoldersAt(registeredVoting.snapshotId, pageIndex, pageLength);
@@ -215,7 +206,7 @@ library VotingStorageWrapper {
     function getTotalVotingHolders(uint256 voteID) internal view returns (uint256) {
         (IVoting.RegisteredVoting memory registeredVoting, , ) = getVoting(voteID);
 
-        if (registeredVoting.voting.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return 0;
+        if (registeredVoting.voting.recordDate >= EvmAccessors.getBlockTimestamp()) return 0;
 
         if (registeredVoting.snapshotId != 0)
             return SnapshotsStorageWrapper.totalTokenHoldersAt(registeredVoting.snapshotId);
@@ -241,22 +232,5 @@ library VotingStorageWrapper {
      */
     function _executeCancelVoting(bytes32 corporateActionId) private {
         CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
-    }
-
-    function _getSnapshotBalanceForIfDateReached(
-        uint256 date,
-        uint256 snapshotId,
-        address account
-    ) private view returns (uint256 balance_, uint8 decimals_, bool dateReached_) {
-        if (date >= TimeTravelStorageWrapper.getBlockTimestamp()) return (balance_, decimals_, dateReached_);
-        dateReached_ = true;
-
-        balance_ = (snapshotId != 0)
-            ? SnapshotsStorageWrapper.getTotalBalanceOfAtSnapshot(snapshotId, account)
-            : TokenCoreOps.getTotalBalanceForAdjustedAt(account, date);
-
-        decimals_ = (snapshotId != 0)
-            ? SnapshotsStorageWrapper.decimalsAtSnapshot(snapshotId)
-            : ERC20StorageWrapper.decimalsAdjustedAt(date);
     }
 }

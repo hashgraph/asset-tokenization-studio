@@ -33,10 +33,7 @@ struct NominalValueDataStorage {
  * @title NominalValueStorageWrapper - Nominal Value Storage Wrapper
  * @notice Storage wrapper for nominal value data on a security token.
  * @dev Reads and writes the dedicated storage slot defined by
- *      `STORAGE_LOCATION_NOMINAL_VALUE`. Aggregation of any legacy bond/equity
- *      nominal-value slots has been retired — this slot is now the sole source
- *      of truth for `nominalValue`, `nominalValueDecimals`, and
- *      `nominalValueCurrency`.
+ *      `STORAGE_LOCATION_NOMINAL_VALUE`.
  * @author Asset Tokenization Studio Team
  */
 library NominalValueStorageWrapper {

@@ -8,7 +8,6 @@
  * - Resume deployments from checkpoints after simulated failures
  * - Isolate checkpoints by network
  * - Clean up old checkpoints
- * - Handle TimeTravel facet variants
  *
  * These tests verify the complete checkpoint lifecycle and resumability patterns
  * for both newBlr and existingBlr deployment workflows.
@@ -105,7 +104,6 @@ describe("Checkpoint Resumability - Integration Tests", () => {
           },
         },
         options: {
-          useTimeTravel: false,
           saveOutput: false,
         },
       });
@@ -152,7 +150,6 @@ describe("Checkpoint Resumability - Integration Tests", () => {
         currentStep: TEST_STEPS_NEW_BLR.FACTORY,
         workflowType: TEST_WORKFLOWS.NEW_BLR,
         options: {
-          useTimeTravel: false,
           saveOutput: true,
           confirmations: 2,
           enableRetry: true,
@@ -165,8 +162,6 @@ describe("Checkpoint Resumability - Integration Tests", () => {
       // Verify checkpoint options
       const checkpoints = await manager.findCheckpoints(TEST_NETWORKS.HARDHAT, TEST_CHECKPOINT_STATUS.COMPLETED);
       const saved = checkpoints[0];
-
-      expect(saved.options.useTimeTravel).to.be.false;
       expect(saved.options.saveOutput).to.be.true;
       expect(saved.options.confirmations).to.equal(2);
       expect(saved.options.enableRetry).to.be.true;
@@ -920,179 +915,6 @@ describe("Checkpoint Resumability - Integration Tests", () => {
       // Verify it's deleted
       loaded = await manager.loadCheckpoint(checkpoint.checkpointId);
       expect(loaded).to.be.null;
-    });
-  });
-
-  describe("Scenario 7: TimeTravel Facet Variants", () => {
-    let testDir: string;
-    let manager: CheckpointManager;
-
-    beforeEach(async () => {
-      testDir = createTestCheckpointsDir();
-      manager = new CheckpointManager(undefined, testDir);
-      await cleanupTestCheckpoints(testDir);
-    });
-
-    afterEach(async () => {
-      await cleanupTestCheckpoints(testDir);
-    });
-
-    it("should handle TimeTravel facet variants in checkpoints", async () => {
-      const deployer = signers[0];
-      const deployerAddress = await deployer.getAddress();
-
-      // Create checkpoint with TimeTravel variants
-      const checkpoint = await createCheckpointWithState(manager, {
-        network: TEST_NETWORKS.TESTNET,
-        deployer: deployerAddress,
-        status: TEST_CHECKPOINT_STATUS.IN_PROGRESS,
-        currentStep: TEST_STEPS_NEW_BLR.FACETS,
-        workflowType: TEST_WORKFLOWS.NEW_BLR,
-        steps: {
-          proxyAdmin: createDeployedContract("0x1111111111111111111111111111111111111111", "0xabc123"),
-          blr: {
-            address: "0x2222222222222222222222222222222222222222",
-            implementation: "0x3333333333333333333333333333333333333333",
-            proxy: "0x2222222222222222222222222222222222222222",
-            txHash: "0xdef456",
-            deployedAt: new Date().toISOString(),
-          },
-          facets: new Map([
-            [
-              "AccessControlFacetTimeTravel",
-              createDeployedContract("0x4444444444444444444444444444444444444444", "0xghi789"),
-            ],
-            [
-              "TransferFacetTimeTravel",
-              createDeployedContract("0x5555555555555555555555555555555555555555", "0xjkl012"),
-            ],
-            [
-              "SnapshotsFacetTimeTravel",
-              createDeployedContract("0x6666666666666666666666666666666666666666", "0xmno345"),
-            ],
-          ]),
-        },
-      });
-
-      await manager.saveCheckpoint(checkpoint);
-
-      // Load checkpoint and verify TimeTravel variants preserved
-      const loadedCheckpoint = await manager.loadCheckpoint(checkpoint.checkpointId);
-
-      expect(loadedCheckpoint).to.exist;
-      expect(loadedCheckpoint?.steps.facets).to.exist;
-      expect(loadedCheckpoint?.steps.facets?.has("AccessControlFacetTimeTravel")).to.be.true;
-      expect(loadedCheckpoint?.steps.facets?.has("TransferFacetTimeTravel")).to.be.true;
-      expect(loadedCheckpoint?.steps.facets?.has("SnapshotsFacetTimeTravel")).to.be.true;
-
-      // Verify facet names include "TimeTravel" suffix
-      const facetNames = Array.from(loadedCheckpoint!.steps.facets!.keys());
-      expect(facetNames.every((name) => name.includes("TimeTravel"))).to.be.true;
-
-      // Verify addresses are preserved
-      expect(loadedCheckpoint?.steps.facets?.get("AccessControlFacetTimeTravel")?.address).to.equal(
-        "0x4444444444444444444444444444444444444444",
-      );
-    });
-
-    it("should preserve mixed TimeTravel and non-TimeTravel facets", async () => {
-      const deployer = signers[0];
-      const deployerAddress = await deployer.getAddress();
-
-      // Create checkpoint with mix of TimeTravel and regular facets
-      const checkpoint = await createCheckpointWithState(manager, {
-        network: TEST_NETWORKS.TESTNET,
-        deployer: deployerAddress,
-        status: TEST_CHECKPOINT_STATUS.IN_PROGRESS,
-        currentStep: TEST_STEPS_NEW_BLR.FACETS,
-        workflowType: TEST_WORKFLOWS.NEW_BLR,
-        steps: {
-          proxyAdmin: createDeployedContract("0x1111111111111111111111111111111111111111", "0xabc123"),
-          blr: {
-            address: "0x2222222222222222222222222222222222222222",
-            implementation: "0x3333333333333333333333333333333333333333",
-            proxy: "0x2222222222222222222222222222222222222222",
-            txHash: "0xdef456",
-            deployedAt: new Date().toISOString(),
-          },
-          facets: new Map([
-            ["AccessControlFacet", createDeployedContract("0x4444444444444444444444444444444444444444", "0x111...")],
-            [
-              "AccessControlFacetTimeTravel",
-              createDeployedContract("0x5555555555555555555555555555555555555555", "0x222..."),
-            ],
-            ["KycFacet", createDeployedContract("0x6666666666666666666666666666666666666666", "0x333...")],
-            [
-              "TransferFacetTimeTravel",
-              createDeployedContract("0x7777777777777777777777777777777777777777", "0x444..."),
-            ],
-          ]),
-        },
-      });
-
-      await manager.saveCheckpoint(checkpoint);
-
-      // Load and verify both types preserved
-      const loaded = await manager.loadCheckpoint(checkpoint.checkpointId);
-
-      expect(loaded?.steps.facets?.size).to.equal(4);
-
-      // Regular facets
-      expect(loaded?.steps.facets?.has("AccessControlFacet")).to.be.true;
-      expect(loaded?.steps.facets?.has("KycFacet")).to.be.true;
-
-      // TimeTravel facets
-      expect(loaded?.steps.facets?.has("AccessControlFacetTimeTravel")).to.be.true;
-      expect(loaded?.steps.facets?.has("TransferFacetTimeTravel")).to.be.true;
-
-      // Verify distinction in naming
-      const facetNames = Array.from(loaded!.steps.facets!.keys());
-      const timeTravelCount = facetNames.filter((n) => n.includes("TimeTravel")).length;
-      const regularCount = facetNames.filter((n) => !n.includes("TimeTravel")).length;
-
-      expect(timeTravelCount).to.equal(2);
-      expect(regularCount).to.equal(2);
-    });
-
-    it("should handle TimeTravel deployment options in checkpoint", async () => {
-      const deployer = signers[0];
-      const deployerAddress = await deployer.getAddress();
-
-      // Create checkpoint with TimeTravel enabled
-      const checkpoint = await createCheckpointWithState(manager, {
-        network: TEST_NETWORKS.TESTNET,
-        deployer: deployerAddress,
-        status: TEST_CHECKPOINT_STATUS.IN_PROGRESS,
-        currentStep: TEST_STEPS_NEW_BLR.PROXY_ADMIN,
-        workflowType: TEST_WORKFLOWS.NEW_BLR,
-        options: {
-          useTimeTravel: true,
-        },
-      });
-
-      await manager.saveCheckpoint(checkpoint);
-
-      // Load and verify options preserved
-      const loaded = await manager.loadCheckpoint(checkpoint.checkpointId);
-      expect(loaded?.options.useTimeTravel).to.be.true;
-
-      // Create checkpoint with TimeTravel disabled
-      const checkpoint2 = await createCheckpointWithState(manager, {
-        network: TEST_NETWORKS.TESTNET,
-        deployer: deployerAddress,
-        status: TEST_CHECKPOINT_STATUS.IN_PROGRESS,
-        currentStep: TEST_STEPS_NEW_BLR.PROXY_ADMIN,
-        workflowType: TEST_WORKFLOWS.NEW_BLR,
-        options: {
-          useTimeTravel: false,
-        },
-      });
-
-      await manager.saveCheckpoint(checkpoint2);
-
-      // Load and verify
-      const loaded2 = await manager.loadCheckpoint(checkpoint2.checkpointId);
-      expect(loaded2?.options.useTimeTravel).to.be.false;
     });
   });
 

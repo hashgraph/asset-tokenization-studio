@@ -7,7 +7,7 @@ import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC20StorageWrapper } from "../../domain/asset/ERC20StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title Core
@@ -41,7 +41,7 @@ abstract contract Core is ICore, Modifiers {
 
     /// @inheritdoc ICore
     function decimals() external view override returns (uint8) {
-        return ERC20StorageWrapper.decimalsAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp());
+        return ERC20StorageWrapper.decimalsAdjustedAt(EvmAccessors.getBlockTimestamp());
     }
 
     /// @inheritdoc ICore
@@ -56,7 +56,7 @@ abstract contract Core is ICore, Modifiers {
 
     /// @inheritdoc ICore
     function getERC20Metadata() external view override returns (ICore.ERC20Metadata memory) {
-        return ERC20StorageWrapper.getERC20MetadataAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp());
+        return ERC20StorageWrapper.getERC20MetadataAdjustedAt(EvmAccessors.getBlockTimestamp());
     }
 
     /// @inheritdoc ICore

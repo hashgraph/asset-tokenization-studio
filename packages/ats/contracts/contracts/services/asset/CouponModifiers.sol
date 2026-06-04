@@ -15,10 +15,10 @@ import { CouponStorageWrapper } from "../../domain/asset/coupon/CouponStorageWra
  */
 abstract contract CouponModifiers {
     /**
-     * @notice Reverts when the bond has a non-zero maturity date and `_endDate` exceeds it.
-     * @dev Delegates to `CouponStorageWrapper.checkEndDateAgainstMaturity`. Open-ended bonds
-     *      (maturity date == 0) always pass.
-     * @param _endDate Coupon end date to validate against the bond's maturity date.
+     * @notice Reverts when the security has a non-zero maturity date and `_endDate` exceeds it.
+     * @dev Delegates to `CouponStorageWrapper.checkEndDateAgainstMaturity`. Securities without a
+     *      maturity date (maturity date == 0) always pass.
+     * @param _endDate Coupon end date to validate against the security's maturity date.
      */
     modifier onlyValidCouponEndDate(uint256 _endDate) {
         CouponStorageWrapper.checkEndDateAgainstMaturity(_endDate);

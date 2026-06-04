@@ -140,7 +140,6 @@ export const FACET_REGISTRY = {
         methods: ['grantRole', 'revokeRole', ...],
         events: ['RoleGranted', 'RoleRevoked', ...],
         errors: ['AccessControlUnauthorizedAccount', ...],
-        hasTimeTravel: false,
         resolverKey: undefined,
     },
     // ... 50+ facets
@@ -220,7 +219,6 @@ const result = await generateRegistryPipeline({
   contractsPath: "./contracts",
   outputPath: "./generated/myRegistry.data.ts",
   includeStorageWrappers: true,
-  includeTimeTravel: true,
   logLevel: "INFO",
 });
 
@@ -515,9 +513,6 @@ HEDERA_TESTNET_MIRROR_NODE_ENDPOINT='https://testnet.mirrornode.hedera.com'
 
 # Deployer private key (hex format with 0x prefix)
 HEDERA_TESTNET_PRIVATE_KEY_0='0x...'
-
-# Optional: TimeTravel mode (testing only)
-USE_TIMETRAVEL=false
 ```
 
 ### Step 2: Deploy
@@ -640,9 +635,7 @@ const [signer] = await ethers.getSigners();
 // or Standalone
 const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
 
-const output = await deploySystemWithNewBlr(signer, "hedera-testnet", {
-  useTimeTravel: false,
-});
+const output = await deploySystemWithNewBlr(signer, "hedera-testnet");
 ```
 
 ---
@@ -887,12 +880,11 @@ npm run upgrade:configs:hedera:testnet
 - `BLR_ADDRESS` - Existing BLR address (required)
 - `PROXY_ADDRESSES` - Comma-separated proxy addresses to update (optional)
 - `CONFIGURATIONS` - Which configs to create: `equity`, `bond`, or `both` (default: `both`)
-- `USE_TIMETRAVEL` - Include TimeTravel facet variants (default: `false`)
 
 ### What Happens During Upgrade
 
 1. **Validate BLR** - Checks BLR exists on-chain
-2. **Deploy Facets** - Deploys all 48-49 facets (with optional TimeTravel variants)
+2. **Deploy Facets** - Deploys all facets
 3. **Register in BLR** - Registers facets, creating new global version
 4. **Create Configurations** - Creates new Equity/Bond configuration versions (v2, v3, etc.)
 5. **Update Proxies** (optional) - Updates ResolverProxy tokens to new version
@@ -1266,7 +1258,6 @@ const blrContract = BusinessLogicResolver__factory.connect(blrAddress, signer)
 await createEquityConfiguration(provider, {
   blrContract,  // Contract instance, not address
   facetAddresses: { ... },
-  useTimeTravel: false
 })
 ```
 
@@ -1280,7 +1271,6 @@ Complete deployment workflows that compose operations and modules:
 import { deploySystemWithNewBlr } from "./workflows/deploySystemWithNewBlr";
 
 const output = await deploySystemWithNewBlr(signer, network, {
-  useTimeTravel: false,
   saveOutput: true,
 });
 ```
@@ -1310,7 +1300,6 @@ async function main() {
   // const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider)
 
   const output = await deploySystemWithNewBlr(signer, "hedera-testnet", {
-    useTimeTravel: false,
     saveOutput: true,
   });
 
@@ -1337,7 +1326,6 @@ async function main() {
   // Deploy specific facets
   const facetsResult = await deployFacets(signer, {
     facetNames: ["AccessControlFacet", "KycFacet"],
-    useTimeTravel: false,
   });
 
   // Deploy BusinessLogicResolver
@@ -1412,7 +1400,6 @@ async function deploySystemWithNewBlr(
 ): Promise<DeploymentOutput>;
 
 interface DeploySystemWithNewBlrOptions {
-  useTimeTravel?: boolean;
   saveOutput?: boolean;
   outputPath?: string;
   confirmations?: number; // Default: 2 (increased for Hedera reliability)
@@ -1438,7 +1425,6 @@ async function deploySystemWithExistingBlr(
 ): Promise<DeploymentWithExistingBlrOutput>;
 
 interface DeploySystemWithExistingBlrOptions {
-  useTimeTravel?: boolean;
   saveOutput?: boolean;
   outputPath?: string;
   deployFacets?: boolean;
@@ -1468,9 +1454,10 @@ async function deployBlr(signer: Signer, options?: { proxyAdminAddress?: string 
 async function createEquityConfiguration(
   blrContract: Contract, // BLR contract instance
   facetAddresses: Record<string, string>,
-  useTimeTravel?: boolean,
   partialBatchDeploy?: boolean,
   batchSize?: number,
+  confirmations?: number,
+  retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>>;
 ```
 
@@ -1480,9 +1467,10 @@ async function createEquityConfiguration(
 async function createBondConfiguration(
   blrContract: Contract, // BLR contract instance
   facetAddresses: Record<string, string>,
-  useTimeTravel?: boolean,
   partialBatchDeploy?: boolean,
   batchSize?: number,
+  confirmations?: number,
+  retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>>;
 ```
 
@@ -1541,7 +1529,6 @@ const facetName = TEST_STANDARD_CONTRACTS.ACCESS_CONTROL_FACET;
 - `TEST_TX_HASHES`: Sample transaction hashes
 - `TEST_TIMESTAMPS`: ISO format timestamps
 - `TEST_STANDARD_CONTRACTS`: Real contract/facet names
-- `TEST_TIME_TRAVEL_VARIANTS`: TimeTravel facet variant names
 
 ### Running Tests
 

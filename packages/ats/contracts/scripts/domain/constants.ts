@@ -217,9 +217,18 @@ export const RESOLVER_KEY_ERC20PERMIT = "0xb9b450cd33d22a14f4cc67bea5d1afefac1f0
  *
  * bytes32(uint256(9)) = 0x00...09
  * Used by BusinessLogicResolver to identify the mock initializer-test facet configuration.
- * Only registered when `useTimeTravel` is enabled in `deploySystemWithNewBlr`.
  */
 export const INITIALIZE_MOCK_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000009";
+
+/**
+ * Registry name of the test-only EVM accessor facet.
+ *
+ * Appended to a token configuration's facet list only when `isTestMode()` is
+ * true, so the resulting diamond can override `block.timestamp` / `block.number`
+ * / `block.chainid` during tests. In prod compiles the facet is excluded from the
+ * source graph and absent from the registry, so it must never be appended.
+ */
+export const EVM_ACCESSORS_FACET_NAME = "EvmAccessorsFacet";
 
 // ============================================================================
 // ATS-Specific Contract Names

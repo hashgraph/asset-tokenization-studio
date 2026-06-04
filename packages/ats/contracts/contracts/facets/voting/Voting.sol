@@ -61,13 +61,14 @@ abstract contract Voting is IVoting, Modifiers {
     }
 
     /// @inheritdoc IVoting
-    /// @dev Restricted to `ROLE_CORPORATE_ACTION_FORCE_CANCEL`; gated by `onlyUnpaused` and
-    ///      `onlyMatchingActionType(CORPORATE_ACTION_TYPE_VOTING_RIGHTS, _voteId - 1)`.
+    /// @dev Restricted to `ROLE_CORPORATE_ACTION_FORCE_CANCEL`; gated by `onlyOperational`,
+    ///      `onlyUnpaused`, and `onlyMatchingActionType(CORPORATE_ACTION_TYPE_VOTING_RIGHTS, _voteId - 1)`.
     function forceCancelVoting(
         uint256 _voteId
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_CORPORATE_ACTION_FORCE_CANCEL)

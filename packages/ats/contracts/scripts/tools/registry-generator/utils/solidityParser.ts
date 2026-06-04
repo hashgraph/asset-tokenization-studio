@@ -30,8 +30,8 @@ const BASE_CLASSES_TO_EXCLUDE = new Set([
   "TransferAndLockStorageWrapper",
   "ERC20StorageWrapper",
   "CorporateActionStorageWrapper",
-  "BondStorageWrapper",
-  "EquityStorageWrapper",
+
+  "BalanceAdjustmentOps",
   "ComplianceStorageWrapper",
   "ScheduledTaskStorageWrapper",
 ]);
@@ -364,7 +364,7 @@ export function extractFacetResolverKeyImport(source: string): string | undefine
     return keyName;
   }
 
-  // Second try: Check for inline constant definition (e.g., TimeTravelFacet)
+  // Second try: Check for inline constant definition
   const inlineKeys = extractResolverKeys(source);
   if (inlineKeys.length > 0) {
     return inlineKeys[0].name;
@@ -501,29 +501,6 @@ function parseSimpleImport(line: string): string | null {
  */
 export function isFacetName(contractName: string): boolean {
   return contractName.endsWith("Facet");
-}
-
-/**
- * Check if contract is a TimeTravel variant.
- *
- * @param contractName - Contract name to check
- * @returns true if name ends with 'TimeTravel'
- */
-export function isTimeTravelVariant(contractName: string): boolean {
-  return contractName.endsWith("TimeTravel");
-}
-
-/**
- * Get base contract name from TimeTravel variant.
- *
- * @param contractName - Contract name (potentially TimeTravel)
- * @returns Base contract name without 'TimeTravel' suffix
- */
-export function getBaseName(contractName: string): string {
-  if (isTimeTravelVariant(contractName)) {
-    return contractName.slice(0, -10); // Remove "TimeTravel"
-  }
-  return contractName;
 }
 
 /**

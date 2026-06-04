@@ -1,6 +1,6 @@
 {
   "name": "@hashgraph/asset-tokenization-contracts",
-  "version": "7.0.0",
+  "version": "7.0.1",
   "repository": "https://github.com/hashgraph/asset-tokenization-studio",
   "type": "commonjs",
   "main": "./build/typechain-types/index.js",
@@ -70,6 +70,7 @@
     "hashes:generate": "npx tsx scripts/codegen/applyHashGen.ts --write",
     "hashes:check": "npx tsx scripts/codegen/applyHashGen.ts --check",
     "hashes:stability": "npx tsx scripts/codegen/applyHashStability.ts",
+    "accessors:check:prod": "ATS_TEST_MODE=false npx hardhat compile && npx tsx scripts/tools/accessor-generator/checkProdArtifact.ts",
     "deploy:newBlr": "npm run build && npx tsx scripts/cli/deploySystemWithNewBlr.ts",
     "deploy:newBlr:local": "NETWORK=local npm run deploy:newBlr",
     "deploy:newBlr:local:auto": "npx hardhat node > hardhat-node.log 2>&1 & sleep 3 && npm run deploy:newBlr:local; kill $!",

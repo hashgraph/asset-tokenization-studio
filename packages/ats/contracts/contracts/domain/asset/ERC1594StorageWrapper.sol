@@ -5,7 +5,7 @@ import { ZERO_ADDRESS, EMPTY_BYTES, _DEFAULT_PARTITION } from "../../constants/v
 import { IKyc } from "../../facets/kyc/IKyc.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { Eip1066 } from "../../constants/eip1066.sol";
-import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
+import { IClearingTypes } from "../../facets/clearing/IClearingTypes.sol";
 import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
 import { IIdentityRegistry } from "../../facets/layer_1/ERC3643/IIdentityRegistry.sol";
@@ -22,7 +22,6 @@ import { ControlListStorageWrapper } from "../core/ControlListStorageWrapper.sol
 import { KycStorageWrapper } from "../core/KycStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 import { AccessControlStorageWrapper } from "../core/AccessControlStorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 /// @custom:hash storage Erc1594
 bytes32 constant STORAGE_LOCATION_ERC1594 = 0x6bb5986b529cbe1ac563af7efd06b91a80c235aad83852a102d3c187f67c5400;
@@ -670,7 +669,7 @@ library ERC1594StorageWrapper {
         uint256 currentAllowance = ERC20StorageWrapper.allowanceAdjustedAt(
             from,
             sender,
-            TimeTravelStorageWrapper.getBlockTimestamp()
+            EvmAccessors.getBlockTimestamp()
         );
         if (currentAllowance < value) {
             return (
@@ -732,7 +731,7 @@ library ERC1594StorageWrapper {
         uint256 currentPartitionBalance = AdjustBalancesStorageWrapper.balanceOfByPartitionAdjustedAt(
             partition,
             from,
-            TimeTravelStorageWrapper.getBlockTimestamp()
+            EvmAccessors.getBlockTimestamp()
         );
         if (currentPartitionBalance < value) {
             return (

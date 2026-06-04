@@ -70,15 +70,7 @@ async function main(): Promise<void> {
       logLevel: logLevel as any,
       useCache: options.useCache,
       cacheDir: process.cwd(),
-      excludePaths: [
-        "**/test/**",
-        "!**/test/timeTravel/**",
-        "**/tests/**",
-        "**/mocks/**",
-        "**/mock/**",
-        "**/*.t.sol",
-        "**/*.s.sol",
-      ],
+      excludePaths: ["**/test/**", "**/tests/**", "**/mocks/**", "**/mock/**", "**/*.t.sol", "**/*.s.sol"],
     },
     !options.dryRun,
   );

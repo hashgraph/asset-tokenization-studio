@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
+import { IHoldTypes } from "../hold/IHoldTypes.sol";
 import { ThirdPartyType } from "../../domain/asset/types/ThirdPartyType.sol";
 
 /// @custom:hash resolverKey HoldByPartition

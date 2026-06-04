@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IProtectedPartitions } from "../layer_1/protectedPartition/IProtectedPartitions.sol";
+import { IProtectedPartitions } from "../protectedPartition/IProtectedPartitions.sol";
 
 /// @custom:hash resolverKey ProtectedByPartition
 // solhint-disable-next-line max-line-length

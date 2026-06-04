@@ -47,7 +47,7 @@ export const SecurityPropsFixture = createFixture<SecurityProps>((security) => {
         ),
   );
   security.regulation?.fromFixture(RegulationFixture);
-  security.isCountryControlListWhiteList.faker((faker) => faker.datatype.boolean());
+  security.isCountryControlListWhiteList?.faker((faker) => faker.datatype.boolean());
   security.countries?.faker((faker) =>
     faker.helpers
       .arrayElements(

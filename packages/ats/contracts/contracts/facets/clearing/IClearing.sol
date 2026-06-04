@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IClearingTypes } from "../layer_1/clearing/IClearingTypes.sol";
+import { IClearingTypes } from "./IClearingTypes.sol";
 
 /// @custom:hash resolverKey Clearing
 bytes32 constant RESOLVER_KEY_CLEARING = 0xb101eca2006801ca94d6bc86288da88fc7f2ddf39849d3dd96fae75967a3d344;

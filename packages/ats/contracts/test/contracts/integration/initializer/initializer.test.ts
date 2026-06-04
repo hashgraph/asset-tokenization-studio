@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // TEST-ONLY: integration tests for the InitializeMock domain. Loads the full
-// ATS infrastructure fixture (which, with useTimeTravel=true, deploys three
+// ATS infrastructure fixture (which deploys three
 // distinct BLR versions of each of MockFacet1/2/3 — all backed by identical
 // bytecode — and creates two versions of the InitializeMock configuration:
 //   v1 = { InitializerFacet:1, MockDiamondCut:1, MockFacet1:1, MockFacet2:2, MockFacet3:1 }

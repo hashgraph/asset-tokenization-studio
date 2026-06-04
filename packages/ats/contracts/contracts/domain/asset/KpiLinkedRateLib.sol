@@ -9,12 +9,12 @@ import { CouponStorageWrapper } from "./coupon/CouponStorageWrapper.sol";
 import { DecimalsLib } from "../../infrastructure/utils/DecimalsLib.sol";
 import { KPI_LINKED_RATE_COUPON } from "../../constants/values.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title KpiLinkedRateLib
  * @dev Library for calculating KPI-linked interest rates.
- * This library implements the rate calculation logic for bonds with KPI-linked rates.
+ * This library implements the rate calculation logic for securities with KPI-linked rates.
  *
  * The rate is calculated based on:
  * - Start rate: Rate applied before the start period
@@ -41,7 +41,7 @@ library KpiLinkedRateLib {
         uint256 couponID,
         ICouponTypes.Coupon memory coupon
     ) internal view returns (uint256 rate_, uint8 rateDecimals_, ICouponTypes.RateCalculationStatus rateStatus_) {
-        if (coupon.fixingDate > TimeTravelStorageWrapper.getBlockTimestamp()) {
+        if (coupon.fixingDate > EvmAccessors.getBlockTimestamp()) {
             return (0, 0, ICouponTypes.RateCalculationStatus.PENDING);
         }
 

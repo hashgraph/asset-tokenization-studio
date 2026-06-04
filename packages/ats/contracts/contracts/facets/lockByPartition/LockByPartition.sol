@@ -5,10 +5,9 @@ import { ILockByPartition, RESOLVER_KEY_LOCK_BY_PARTITION } from "./ILockByParti
 import { ROLE_LOCKER } from "../../constants/roles.sol";
 import { LockStorageWrapper } from "../../domain/asset/LockStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title LockByPartition
@@ -19,7 +18,7 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  *      with the partition-scoped reads (`getLockedAmountForByPartition`,
  *      `getLockCountForByPartition`, `getLocksIdForByPartition`, `getLockForByPartition`).
  *      All write methods delegate persistence to `LockStorageWrapper`; balance-adjusted
- *      reads are timestamped via `TimeTravelStorageWrapper.getBlockTimestamp` so they
+ *      reads are timestamped via `EvmAccessors.getBlockTimestamp` so they
  *      remain deterministic under time-travel testing. Intended to be inherited by
  *      `LockByPartitionFacet`.
  */
@@ -135,7 +134,7 @@ abstract contract LockByPartition is ILockByPartition, Modifiers {
     /**
      * @inheritdoc ILockByPartition
      * @dev Returns the partition figure adjusted by any pending balance-adjustment factors,
-     *      evaluated at `TimeTravelStorageWrapper.getBlockTimestamp()`.
+     *      evaluated at `EvmAccessors.getBlockTimestamp()`.
      */
     function getLockedAmountForByPartition(
         bytes32 _partition,
@@ -144,7 +143,7 @@ abstract contract LockByPartition is ILockByPartition, Modifiers {
         amount_ = LockStorageWrapper.getLockedAmountForByPartitionAdjustedAt(
             _partition,
             _tokenHolder,
-            TimeTravelStorageWrapper.getBlockTimestamp()
+            EvmAccessors.getBlockTimestamp()
         );
     }
 
@@ -169,7 +168,7 @@ abstract contract LockByPartition is ILockByPartition, Modifiers {
     /**
      * @inheritdoc ILockByPartition
      * @dev Returns the partition figures adjusted by any pending balance-adjustment factors,
-     *      evaluated at `TimeTravelStorageWrapper.getBlockTimestamp()`.
+     *      evaluated at `EvmAccessors.getBlockTimestamp()`.
      */
     function getLockForByPartition(
         bytes32 _partition,
@@ -180,7 +179,7 @@ abstract contract LockByPartition is ILockByPartition, Modifiers {
             _partition,
             _tokenHolder,
             _lockId,
-            TimeTravelStorageWrapper.getBlockTimestamp()
+            EvmAccessors.getBlockTimestamp()
         );
     }
 }

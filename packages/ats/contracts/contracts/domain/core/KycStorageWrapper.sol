@@ -7,7 +7,7 @@ import { ExternalListManagementStorageWrapper } from "./ExternalListManagementSt
 import { SsiManagementStorageWrapper } from "./SsiManagementStorageWrapper.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /// @custom:hash storage Kyc
 bytes32 constant STORAGE_LOCATION_KYC = 0x88f619eb35d79dd51bdbedb0638479d77479fa6ca039bb2a23ffdf42c8e30900;
@@ -197,15 +197,15 @@ library KycStorageWrapper {
     /**
      * @notice Reports whether `_account` satisfies `_kycStatus` according to the active checks.
      * @dev Internal KYC is bypassed when the activation flag is off; the external KYC list is
-     *      always consulted. Uses `TimeTravelStorageWrapper.getBlockTimestamp` so test harnesses
-     *      can manipulate the validity window.
+     *      always consulted. Uses `EvmAccessors.getBlockTimestamp` so test harnesses can
+     *      manipulate the validity window; prod compiles inline `block.timestamp`.
      * @param _kycStatus Required KYC status.
      * @param _account Address being verified.
      * @return True when both internal (if active) and external checks recognise the status.
      */
     function verifyKycStatus(IKyc.KycStatus _kycStatus, address _account) internal view returns (bool) {
         bool internalKycValid = !kycStorage().internalKycActivated ||
-            getKycStatusFor(_account, TimeTravelStorageWrapper.getBlockTimestamp()) == _kycStatus;
+            getKycStatusFor(_account, EvmAccessors.getBlockTimestamp()) == _kycStatus;
         return internalKycValid && ExternalListManagementStorageWrapper.isExternallyGranted(_account, _kycStatus);
     }
 

@@ -39,7 +39,6 @@ const INITIALIZE_MOCK_FACETS = [
  * TEST-ONLY: create the InitializeMock configuration in BusinessLogicResolver.
  *
  * Behaves like `createBondConfiguration` and friends but:
- * - skips the TimeTravel branching (mocks have no TimeTravel variants);
  * - resolves the three mock facets through `getMockFacetDefinition` instead of
  *   the auto-generated atsRegistry;
  * - accepts an explicit per-facet BLR version map so a single configId can

@@ -55,7 +55,7 @@ export const MOCK_FACET_REGISTRY: Record<string, FacetDefinition> = {
   },
   MockFactoryFacet: {
     name: "MockFactoryFacet",
-    description: "TEST-ONLY factory facet that initialises TimeTravel on deployed securities",
+    description: "TEST-ONLY factory facet used to deploy securities in test environments",
     resolverKey: {
       name: "_FACTORY",
       value: "0x9fc26269cc1cb994e66f269ed6b58a5bb0c344a134b9dabd342ac466d48f95c7",

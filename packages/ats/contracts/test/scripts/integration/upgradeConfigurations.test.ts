@@ -8,7 +8,6 @@
  * - Configuration version creation (Equity, Bond, or both)
  * - Optional proxy updates with continue-on-error pattern
  * - Checkpoint resumability from each workflow step
- * - TimeTravel mode support
  * - Access control and error handling
  *
  * @module test/scripts/integration/upgradeConfigurations.test
@@ -44,7 +43,6 @@ describe("upgradeConfigurations - Integration Tests", () => {
 
       const result = await upgradeConfigurations(deployer, "hardhat", {
         blrAddress,
-        useTimeTravel: false,
         configurations: "both",
         saveOutput: false,
         ignoreCheckpoint: true,
@@ -65,7 +63,6 @@ describe("upgradeConfigurations - Integration Tests", () => {
 
       const result = await upgradeConfigurations(deployer, "hardhat", {
         blrAddress,
-        useTimeTravel: false,
         configurations: "equity",
         saveOutput: false,
         ignoreCheckpoint: true,
@@ -82,7 +79,6 @@ describe("upgradeConfigurations - Integration Tests", () => {
 
       const result = await upgradeConfigurations(deployer, "hardhat", {
         blrAddress,
-        useTimeTravel: false,
         configurations: "bond",
         saveOutput: false,
         ignoreCheckpoint: true,
@@ -99,7 +95,6 @@ describe("upgradeConfigurations - Integration Tests", () => {
 
       const result = await upgradeConfigurations(deployer, "hardhat", {
         blrAddress,
-        useTimeTravel: false,
         configurations: "equity",
         saveOutput: false,
         ignoreCheckpoint: true,
@@ -117,7 +112,6 @@ describe("upgradeConfigurations - Integration Tests", () => {
 
       const result = await upgradeConfigurations(deployer, "hardhat", {
         blrAddress,
-        useTimeTravel: false,
         configurations: "equity",
         saveOutput: false,
         ignoreCheckpoint: true,
@@ -143,7 +137,6 @@ describe("upgradeConfigurations - Integration Tests", () => {
 
       const result = await upgradeConfigurations(deployer, "hardhat", {
         blrAddress,
-        useTimeTravel: false,
         configurations: "equity",
         proxyAddresses: [equityTokenAddress],
         saveOutput: false,
@@ -171,7 +164,6 @@ describe("upgradeConfigurations - Integration Tests", () => {
 
       const result = await upgradeConfigurations(deployer, "hardhat", {
         blrAddress,
-        useTimeTravel: false,
         configurations: "both",
         proxyAddresses: [equityTokenAddress, bondTokenAddress],
         saveOutput: false,
@@ -198,7 +190,6 @@ describe("upgradeConfigurations - Integration Tests", () => {
 
       const result = await upgradeConfigurations(deployer, "hardhat", {
         blrAddress,
-        useTimeTravel: false,
         configurations: "equity",
         proxyAddresses: [invalidProxyAddress, equityTokenAddress],
         saveOutput: false,
@@ -227,7 +218,6 @@ describe("upgradeConfigurations - Integration Tests", () => {
 
       const result = await upgradeConfigurations(deployer, "hardhat", {
         blrAddress,
-        useTimeTravel: false,
         configurations: "equity",
         proxyAddresses: [],
         saveOutput: false,
@@ -245,7 +235,6 @@ describe("upgradeConfigurations - Integration Tests", () => {
 
       const result = await upgradeConfigurations(deployer, "hardhat", {
         blrAddress,
-        useTimeTravel: false,
         configurations: "equity",
         saveOutput: false,
         ignoreCheckpoint: true,
@@ -477,44 +466,6 @@ describe("upgradeConfigurations - Integration Tests", () => {
     });
   });
 
-  describe("TimeTravel Mode", () => {
-    it("should deploy TimeTravel facets when useTimeTravel is true", async () => {
-      const { deployer, blrAddress } = await loadFixture(deployUpgradeInfrastructureOnlyFixture);
-
-      const result = await upgradeConfigurations(deployer, "hardhat", {
-        blrAddress,
-        useTimeTravel: true,
-        configurations: "equity",
-        saveOutput: false,
-        ignoreCheckpoint: true,
-      });
-
-      expect(result.summary.success).to.be.true;
-
-      // Check that TimeTravel variants are present
-      const timeTravelFacets = result.facets.filter((f: { name: string }) => f.name.includes("TimeTravel"));
-      expect(timeTravelFacets.length).to.be.greaterThan(0);
-    });
-
-    it("should not deploy TimeTravel facets when useTimeTravel is false", async () => {
-      const { deployer, blrAddress } = await loadFixture(deployUpgradeInfrastructureOnlyFixture);
-
-      const result = await upgradeConfigurations(deployer, "hardhat", {
-        blrAddress,
-        useTimeTravel: false,
-        configurations: "equity",
-        saveOutput: false,
-        ignoreCheckpoint: true,
-      });
-
-      expect(result.summary.success).to.be.true;
-
-      // Check that no TimeTravel variants are present
-      const timeTravelFacets = result.facets.filter((f: { name: string }) => f.name.includes("TimeTravel"));
-      expect(timeTravelFacets.length).to.equal(0);
-    });
-  });
-
   describe("Error Handling", () => {
     it("should fail for invalid BLR address format", async () => {
       const [deployer] = await ethers.getSigners();
@@ -523,7 +474,6 @@ describe("upgradeConfigurations - Integration Tests", () => {
       try {
         await upgradeConfigurations(deployer, "hardhat", {
           blrAddress: "invalid-address",
-          useTimeTravel: false,
           configurations: "equity",
           saveOutput: false,
           ignoreCheckpoint: true,
@@ -544,7 +494,6 @@ describe("upgradeConfigurations - Integration Tests", () => {
       try {
         await upgradeConfigurations(deployer, "hardhat", {
           blrAddress: nonExistentBLR,
-          useTimeTravel: false,
           configurations: "equity",
           saveOutput: false,
           ignoreCheckpoint: true,
@@ -564,7 +513,6 @@ describe("upgradeConfigurations - Integration Tests", () => {
       try {
         await upgradeConfigurations(unauthorizedSigner, "hardhat", {
           blrAddress,
-          useTimeTravel: false,
           configurations: "equity",
           saveOutput: false,
           ignoreCheckpoint: true,
@@ -583,7 +531,6 @@ describe("upgradeConfigurations - Integration Tests", () => {
       try {
         await upgradeConfigurations(deployer, "hardhat", {
           blrAddress,
-          useTimeTravel: false,
           configurations: "equity",
           saveOutput: false,
           resumeFrom: nonExistentCheckpoint,
@@ -601,7 +548,6 @@ describe("upgradeConfigurations - Integration Tests", () => {
 
       const result = await upgradeConfigurations(deployer, "hardhat", {
         blrAddress,
-        useTimeTravel: false,
         configurations: "equity",
         batchSize: 10,
         saveOutput: false,
@@ -618,7 +564,6 @@ describe("upgradeConfigurations - Integration Tests", () => {
 
       const result = await upgradeConfigurations(deployer, "hardhat", {
         blrAddress,
-        useTimeTravel: false,
         configurations: "equity",
         confirmations: 1, // Use 1 confirmation for Hardhat network compatibility
         saveOutput: false,
@@ -639,7 +584,6 @@ describe("upgradeConfigurations - Integration Tests", () => {
 
       const result = await upgradeConfigurations(deployer, "hardhat", {
         blrAddress,
-        useTimeTravel: false,
         configurations: "equity",
         saveOutput: true,
         outputPath,
@@ -673,7 +617,6 @@ describe("upgradeConfigurations - Integration Tests", () => {
 
       const result = await upgradeConfigurations(deployer, "hardhat", {
         blrAddress,
-        useTimeTravel: false,
         configurations: "equity",
         proxyAddresses: [equityTokenAddress],
         saveOutput: false,
@@ -691,7 +634,6 @@ describe("upgradeConfigurations - Integration Tests", () => {
 
       const result = await upgradeConfigurations(deployer, "hardhat", {
         blrAddress,
-        useTimeTravel: false,
         configurations: "equity",
         proxyAddresses: [invalidProxy],
         saveOutput: false,
@@ -709,7 +651,6 @@ describe("upgradeConfigurations - Integration Tests", () => {
 
       const result = await upgradeConfigurations(deployer, "hardhat", {
         blrAddress,
-        useTimeTravel: false,
         configurations: "equity",
         proxyAddresses: [equityTokenAddress],
         saveOutput: false,
@@ -727,7 +668,6 @@ describe("upgradeConfigurations - Integration Tests", () => {
 
       const result = await upgradeConfigurations(deployer, "hardhat", {
         blrAddress,
-        useTimeTravel: false,
         configurations: "equity",
         saveOutput: false,
         ignoreCheckpoint: true,
@@ -742,7 +682,6 @@ describe("upgradeConfigurations - Integration Tests", () => {
 
       const resultEquity = await upgradeConfigurations(deployer, "hardhat", {
         blrAddress,
-        useTimeTravel: false,
         configurations: "equity",
         saveOutput: false,
         ignoreCheckpoint: true,
@@ -751,7 +690,6 @@ describe("upgradeConfigurations - Integration Tests", () => {
 
       const resultBoth = await upgradeConfigurations(deployer, "hardhat", {
         blrAddress,
-        useTimeTravel: false,
         configurations: "both",
         saveOutput: false,
         ignoreCheckpoint: true,
@@ -765,7 +703,6 @@ describe("upgradeConfigurations - Integration Tests", () => {
 
       const result = await upgradeConfigurations(deployer, "hardhat", {
         blrAddress,
-        useTimeTravel: false,
         configurations: "equity",
         proxyAddresses: [equityTokenAddress, invalidProxy],
         saveOutput: false,
@@ -781,7 +718,6 @@ describe("upgradeConfigurations - Integration Tests", () => {
 
       const result = await upgradeConfigurations(deployer, "hardhat", {
         blrAddress,
-        useTimeTravel: false,
         configurations: "equity",
         saveOutput: false,
         ignoreCheckpoint: true,
@@ -799,7 +735,6 @@ describe("upgradeConfigurations - Integration Tests", () => {
       const options = Object.freeze({
         blrAddress,
         configurations: "equity" as const,
-        useTimeTravel: false,
         batchSize: 10,
         proxyAddresses: Object.freeze([]),
         saveOutput: false,
@@ -816,7 +751,6 @@ describe("upgradeConfigurations - Integration Tests", () => {
       expect(options).to.deep.equal(originalOptions);
       expect(options.proxyAddresses).to.have.lengthOf(0);
       expect(options.configurations).to.equal("equity");
-      expect(options.useTimeTravel).to.be.false;
       expect(options.batchSize).to.equal(10);
     });
 
@@ -827,7 +761,6 @@ describe("upgradeConfigurations - Integration Tests", () => {
       const options = Object.freeze({
         blrAddress,
         configurations: "equity" as const,
-        useTimeTravel: false,
         proxyAddresses: Object.freeze([equityTokenAddress]),
         saveOutput: false,
         ignoreCheckpoint: true,

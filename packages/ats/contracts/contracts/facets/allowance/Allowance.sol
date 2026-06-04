@@ -5,7 +5,6 @@ import { IAllowance, RESOLVER_KEY_ALLOWANCE } from "./IAllowance.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC20StorageWrapper } from "../../domain/asset/ERC20StorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
@@ -95,6 +94,6 @@ abstract contract Allowance is IAllowance, Modifiers {
     /// @dev Reads the allowance at the current time-travel-adjusted block timestamp so
     ///      snapshot-aware facets observe a consistent storage view.
     function allowance(address owner, address spender) external view override returns (uint256) {
-        return ERC20StorageWrapper.allowanceAdjustedAt(owner, spender, TimeTravelStorageWrapper.getBlockTimestamp());
+        return ERC20StorageWrapper.allowanceAdjustedAt(owner, spender, EvmAccessors.getBlockTimestamp());
     }
 }

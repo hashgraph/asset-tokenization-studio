@@ -12,7 +12,7 @@ import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
 import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
-import { IProtectedPartitions } from "../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
+import { IProtectedPartitions } from "../../facets/protectedPartition/IProtectedPartitions.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
@@ -20,7 +20,6 @@ import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsSt
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
 import { ScheduledTasksOps } from "../orchestrator/ScheduledTasksOps.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { _DEFAULT_PARTITION, KPI_ERC1410_REMOVE_HOLDER } from "../../constants/values.sol";
 import { _checkNonceAndDeadline } from "../../infrastructure/utils/EIP712.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
@@ -481,7 +480,7 @@ library ERC1410StorageWrapper {
             from,
             NonceStorageWrapper.getNonceFor(from),
             protectionData.deadline,
-            TimeTravelStorageWrapper.getBlockTimestamp()
+            EvmAccessors.getBlockTimestamp()
         );
 
         ProtectedPartitionsStorageWrapper.checkTransferSignature(
@@ -527,7 +526,7 @@ library ERC1410StorageWrapper {
             from,
             NonceStorageWrapper.getNonceFor(from),
             protectionData.deadline,
-            TimeTravelStorageWrapper.getBlockTimestamp()
+            EvmAccessors.getBlockTimestamp()
         );
 
         ProtectedPartitionsStorageWrapper.checkRedeemSignature(
@@ -592,11 +591,10 @@ library ERC1410StorageWrapper {
         bool removeFrom;
 
         if (from != address(0)) {
-            removeFrom =
-                TokenCoreOps.getTotalBalanceForAdjustedAt(from, TimeTravelStorageWrapper.getBlockTimestamp()) == amount;
+            removeFrom = TokenCoreOps.getTotalBalanceForAdjustedAt(from, EvmAccessors.getBlockTimestamp()) == amount;
         }
         if (to != address(0)) {
-            addTo = TokenCoreOps.getTotalBalanceForAdjustedAt(to, TimeTravelStorageWrapper.getBlockTimestamp()) == 0;
+            addTo = TokenCoreOps.getTotalBalanceForAdjustedAt(to, EvmAccessors.getBlockTimestamp()) == 0;
         }
 
         if (!(addTo || removeFrom)) return;

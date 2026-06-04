@@ -14,6 +14,7 @@
   - [Access Control](#access-control)
   - [Adjust Balances](#adjust-balances)
   - [Allowance](#allowance)
+  - [Amortization](#amortization)
   - [Balance Tracker](#balance-tracker)
   - [Balance Tracker Adjusted](#balance-tracker-adjusted)
   - [Balance Tracker At Snapshot](#balance-tracker-at-snapshot)
@@ -59,10 +60,14 @@
   - [EIP712](#eip712)
   - [ERC20 Permit](#erc20-permit)
   - [ERC20 Votes](#erc20-votes)
+  - [External Control List](#external-control-list)
   - [External Control List Management](#external-control-list-management)
+  - [External KYC List](#external-kyc-list)
   - [External KYC List Management](#external-kyc-list-management)
+  - [External Pause](#external-pause)
   - [External Pause Management](#external-pause-management)
   - [Factory](#factory)
+  - [Fixed Rate](#fixed-rate)
   - [Freeze](#freeze)
   - [Freeze At Snapshot](#freeze-at-snapshot)
   - [Freeze At Snapshot By Partition](#freeze-at-snapshot-by-partition)
@@ -73,7 +78,10 @@
   - [Identity](#identity)
   - [Initializer](#initializer)
   - [Interest Rate](#interest-rate)
+  - [KPI Linked Rate](#kpi-linked-rate)
+  - [KPIs](#kpis)
   - [KYC](#kyc)
+  - [Loan](#loan)
   - [Lock](#lock)
   - [Lock At Snapshot](#lock-at-snapshot)
   - [Lock At Snapshot By Partition](#lock-at-snapshot-by-partition)
@@ -87,6 +95,7 @@
   - [Operator](#operator)
   - [Operator By Partition](#operator-by-partition)
   - [Operator Clearing By Partition](#operator-clearing-by-partition)
+  - [Operator Clearing Hold By Partition](#operator-clearing-hold-by-partition)
   - [Operator Hold By Partition](#operator-hold-by-partition)
   - [Ownership](#ownership)
   - [Partitions](#partitions)
@@ -97,9 +106,11 @@
   - [Protected Clearing By Partition](#protected-clearing-by-partition)
   - [Protected Clearing Hold By Partition](#protected-clearing-hold-by-partition)
   - [Protected Hold By Partition](#protected-hold-by-partition)
+  - [Protected Partitions](#protected-partitions)
   - [Recovery](#recovery)
   - [Revocation List](#revocation-list)
   - [Scheduled Balance Adjustment](#scheduled-balance-adjustment)
+  - [Scheduled Cross Ordered Tasks](#scheduled-cross-ordered-tasks)
   - [Security Holders](#security-holders)
   - [Security Holders At Snapshot](#security-holders-at-snapshot)
   - [Snapshots](#snapshots)
@@ -114,25 +125,9 @@
   - [Voting](#voting)
   - [Voting Security Holders](#voting-security-holders)
   - [Compliance](#compliance)
-  - [External Control List](#external-control-list)
-  - [External KYC List](#external-kyc-list)
-  - [External Pause](#external-pause)
   - [Identity Registry](#identity-registry)
-  - [Operator Clearing Hold By Partition](#operator-clearing-hold-by-partition)
-  - [Protected Partitions](#protected-partitions)
-  - [Amortization](#amortization)
-  - [Bond Read](#bond-read)
-  - [Equity](#equity)
-  - [Fixed Rate](#fixed-rate)
-  - [KPI Linked Rate](#kpi-linked-rate)
-  - [KPIs](#kpis)
-  - [Loan](#loan)
   - [Loans Portfolio](#loans-portfolio)
   - [Nominal Value](#nominal-value)
-  - [Scheduled Cross Ordered Tasks](#scheduled-cross-ordered-tasks)
-  - [Security](#security)
-  - [Bond USA](#bond-usa)
-  - [Equity USA](#equity-usa)
 - [Roles](#roles)
 
 ## Facets
@@ -264,6 +259,92 @@ error IsPaused();
 error NotAllowedInMultiPartitionMode();
 error SpenderWithZeroAddress();
 error ZeroOwnerAddress();
+```
+
+### Amortization
+
+- Interface: `contracts/facets/amortization/IAmortization.sol`
+- Resolver key: `RESOLVER_KEY_AMORTIZATION` = `0xc0d83d8b9295f78954b1c7c9648bec9775edf597a57f9f4110883e9ca2134739`
+
+```solidity
+function initializeAmortization() external;
+function setAmortization(Amortization calldata _amortization) external returns (bool success_, uint256 amortizationID_);
+function cancelAmortization(uint256 _amortizationID) external;
+function forceCancelAmortization(uint256 _amortizationID) external;
+function releaseAmortizationHold(uint256 _amortizationID, address _tokenHolder) external;
+function setAmortizationHold(
+  uint256 _amortizationID,
+  address _tokenHolder,
+  uint256 _tokenAmount
+) external returns (uint256 holdId_);
+function getAmortization(
+  uint256 _amortizationID
+) external view returns (RegisteredAmortization memory registeredAmortization_, bool isDisabled_);
+function getAmortizationFor(
+  uint256 _amortizationID,
+  address _account
+) external view returns (AmortizationFor memory amortizationFor_);
+function getAmortizationsFor(
+  uint256 _amortizationID,
+  uint256 _pageIndex,
+  uint256 _pageLength
+) external view returns (AmortizationFor[] memory amortizationsFor_, address[] memory holders_);
+function getAmortizationsCount() external view returns (uint256 amortizationCount_);
+function getAmortizationHolders(
+  uint256 _amortizationID,
+  uint256 _pageIndex,
+  uint256 _pageLength
+) external view returns (address[] memory holders_);
+function getTotalAmortizationHolders(uint256 _amortizationID) external view returns (uint256);
+function getAmortizationActiveHolders(
+  uint256 _amortizationID,
+  uint256 _pageIndex,
+  uint256 _pageLength
+) external view returns (address[] memory holders_);
+function getTotalAmortizationActiveHolders(uint256 _amortizationID) external view returns (uint256);
+function getTotalHoldByAmortizationId(uint256 _amortizationID) external view returns (uint256);
+function getActiveAmortizationIds(
+  uint256 _pageIndex,
+  uint256 _pageLength
+) external view returns (uint256[] memory activeIds_);
+function getTotalActiveAmortizationIds() external view returns (uint256);
+```
+
+#### Types
+
+```solidity
+// declared in contracts/facets/amortization/IAmortization.sol
+struct Amortization {
+  uint256 recordDate;
+  uint256 executionDate;
+  uint256 tokensToRedeem;
+}
+
+// declared in contracts/facets/amortization/IAmortization.sol
+struct RegisteredAmortization {
+  Amortization amortization;
+  uint256 snapshotId;
+}
+
+// declared in contracts/facets/amortization/IAmortization.sol
+struct AmortizationFor {
+  uint256 recordDate;
+  uint256 executionDate;
+  // Hold info (current values, adjusted as of now)
+  uint256 holdId; // 0 = no hold created yet
+  bool holdActive; // true = hold is active and awaiting DVP execution
+  uint256 tokenHeldAmount; // hold amount adjusted at current block time (0 if no hold)
+  uint8 decimalsHeld; // token decimals at current block time (0 if no hold)
+  uint256 abafAtHold; // ABAF at current block time (0 if no hold)
+  // Snapshot (historical values at record date)
+  uint256 tokenBalance; // balance at snapshot (or adjusted at recordDate if no snapshot yet)
+  uint8 decimalsBalance; // decimals at snapshot
+  bool recordDateReached; // whether record date has been reached
+  uint256 abafAtSnapshot; // ABAF at snapshot (0 if record date not reached yet)
+  // Nominal value
+  uint256 nominalValue; // face value of the token
+  uint8 nominalValueDecimals; // decimals of the nominal value
+}
 ```
 
 ### Balance Tracker
@@ -975,7 +1056,7 @@ error WrongClearingId();
 #### Types
 
 ```solidity
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
+// declared in contracts/facets/clearing/IClearingTypes.sol
 enum ClearingOperationType {
   Transfer,
   Redeem,
@@ -1239,7 +1320,7 @@ error ZeroAddressNotAllowed();
 #### Types
 
 ```solidity
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
+// declared in contracts/facets/clearing/IClearingTypes.sol
 struct ClearingOperationIdentifier {
   ClearingOperationType clearingOperationType;
   bytes32 partition;
@@ -1247,21 +1328,21 @@ struct ClearingOperationIdentifier {
   uint256 clearingId;
 }
 
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
+// declared in contracts/facets/clearing/IClearingTypes.sol
 struct ClearingOperation {
   bytes32 partition;
   uint256 expirationTimestamp;
   bytes data;
 }
 
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
+// declared in contracts/facets/clearing/IClearingTypes.sol
 struct ClearingOperationFrom {
   ClearingOperation clearingOperation;
   address from;
   bytes operatorData;
 }
 
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
+// declared in contracts/facets/clearing/IClearingTypes.sol
 struct ClearingRedeemData {
   uint256 amount;
   uint256 expirationTimestamp;
@@ -1270,7 +1351,7 @@ struct ClearingRedeemData {
   ThirdPartyType operatorType;
 }
 
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
+// declared in contracts/facets/clearing/IClearingTypes.sol
 struct ClearingTransferData {
   uint256 amount;
   uint256 expirationTimestamp;
@@ -1280,7 +1361,7 @@ struct ClearingTransferData {
   ThirdPartyType operatorType;
 }
 
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
+// declared in contracts/facets/clearing/IClearingTypes.sol
 enum ClearingOperationType {
   Transfer,
   Redeem,
@@ -1457,14 +1538,14 @@ error ZeroAddressNotAllowed();
 #### Types
 
 ```solidity
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
+// declared in contracts/facets/clearing/IClearingTypes.sol
 struct ClearingOperation {
   bytes32 partition;
   uint256 expirationTimestamp;
   bytes data;
 }
 
-// declared in contracts/facets/layer_1/hold/IHoldTypes.sol
+// declared in contracts/facets/hold/IHoldTypes.sol
 struct Hold {
   uint256 amount;
   uint256 expirationTimestamp;
@@ -1473,14 +1554,14 @@ struct Hold {
   bytes data;
 }
 
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
+// declared in contracts/facets/clearing/IClearingTypes.sol
 struct ClearingOperationFrom {
   ClearingOperation clearingOperation;
   address from;
   bytes operatorData;
 }
 
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
+// declared in contracts/facets/clearing/IClearingTypes.sol
 struct ClearingHoldCreationData {
   uint256 amount;
   uint256 expirationTimestamp;
@@ -1872,7 +1953,7 @@ error ZeroAddressNotAllowed();
 #### Types
 
 ```solidity
-// declared in contracts/facets/layer_1/hold/IHoldTypes.sol
+// declared in contracts/facets/hold/IHoldTypes.sol
 struct Hold {
   uint256 amount;
   uint256 expirationTimestamp;
@@ -2846,6 +2927,14 @@ struct Checkpoint {
 }
 ```
 
+### External Control List
+
+- Interface: `contracts/facets/externalControlListManagement/IExternalControlList.sol`
+
+```solidity
+function isAuthorized(address account) external view returns (bool);
+```
+
 ### External Control List Management
 
 - Interface: `contracts/facets/externalControlListManagement/IExternalControlListManagement.sol`
@@ -2891,6 +2980,24 @@ error ListedControlList(address controlList);
 error MaxExternalListSizeReached(uint256 max);
 error UnlistedControlList(address controlList);
 error ZeroAddressNotAllowed();
+```
+
+### External KYC List
+
+- Interface: `contracts/facets/externalKycListManagement/IExternalKycList.sol`
+
+```solidity
+function getKycStatus(address account) external view returns (IKyc.KycStatus);
+```
+
+#### Types
+
+```solidity
+// declared in contracts/facets/kyc/IKyc.sol
+enum KycStatus {
+  NOT_GRANTED,
+  GRANTED
+}
 ```
 
 ### External KYC List Management
@@ -2949,6 +3056,14 @@ enum KycStatus {
   NOT_GRANTED,
   GRANTED
 }
+```
+
+### External Pause
+
+- Interface: `contracts/facets/externalPauseManagement/IExternalPause.sol`
+
+```solidity
+function isPaused() external view returns (bool);
 ```
 
 ### External Pause Management
@@ -3083,7 +3198,7 @@ struct Rbac {
 // declared in contracts/factory/IFactory.sol
 struct EquityData {
   SecurityData security;
-  IEquity.EquityDetailsData equityDetails;
+  EquityDetailsData equityDetails;
 }
 
 // declared in contracts/factory/ERC3643/interfaces/regulation.sol
@@ -3096,7 +3211,7 @@ struct FactoryRegulationData {
 // declared in contracts/factory/IFactory.sol
 struct BondData {
   SecurityData security;
-  IBondRead.BondDetailsData bondDetails;
+  BondDetailsData bondDetails;
   address[] proceedRecipients;
   bytes[] proceedRecipientsData;
 }
@@ -3153,7 +3268,7 @@ struct SecurityData {
   bool erc20VotesActivated;
 }
 
-// declared in contracts/factory/ERC3643/interfaces/IEquity.sol
+// declared in contracts/factory/IFactory.sol
 struct EquityDetailsData {
   bool votingRight;
   bool informationRight;
@@ -3175,7 +3290,7 @@ struct AdditionalSecurityData {
   string info;
 }
 
-// declared in contracts/factory/ERC3643/interfaces/IBondTypes.sol
+// declared in contracts/factory/IFactory.sol
 struct BondDetailsData {
   bytes3 currency;
   uint256 nominalValue;
@@ -3222,11 +3337,35 @@ struct ERC20MetadataInfo {
   uint8 decimals;
 }
 
-// declared in contracts/factory/ERC3643/interfaces/IEquity.sol
+// declared in contracts/factory/IFactory.sol
 enum DividendType {
+  /// No dividend right.
   NONE,
+  /// Preferential dividend — paid before common holders.
   PREFERRED,
+  /// Ordinary dividend distributed pro-rata across common holders.
   COMMON
+}
+```
+
+### Fixed Rate
+
+- Interface: `contracts/facets/fixedRate/IFixedRate.sol`
+- Resolver key: `RESOLVER_KEY_FIXED_RATE` = `0x82f13d957a7f7af45723926c5ca1a184f2d667df5221c37434ce37278a9af521`
+
+```solidity
+function initializeFixedRate(FixedRateData calldata _initData) external;
+function setRate(uint256 _newRate, uint8 _newRateDecimals) external;
+function getRate() external view returns (uint256 rate_, uint8 decimals_);
+```
+
+#### Types
+
+```solidity
+// declared in contracts/factory/ERC3643/interfaces/IFixedRate.sol
+struct FixedRateData {
+  uint256 rate;
+  uint8 rateDecimals;
 }
 ```
 
@@ -3541,7 +3680,7 @@ error ZeroAddressNotAllowed();
 #### Types
 
 ```solidity
-// declared in contracts/facets/layer_1/hold/IHoldTypes.sol
+// declared in contracts/facets/hold/IHoldTypes.sol
 struct Hold {
   uint256 amount;
   uint256 expirationTimestamp;
@@ -3550,7 +3689,7 @@ struct Hold {
   bytes data;
 }
 
-// declared in contracts/facets/layer_1/hold/IHoldTypes.sol
+// declared in contracts/facets/hold/IHoldTypes.sol
 struct HoldIdentifier {
   bytes32 partition;
   address tokenHolder;
@@ -3656,7 +3795,7 @@ error WrongHoldId();
 #### Types
 
 ```solidity
-// declared in contracts/facets/layer_1/hold/IHoldTypes.sol
+// declared in contracts/facets/hold/IHoldTypes.sol
 struct HoldIdentifier {
   bytes32 partition;
   address tokenHolder;
@@ -3779,6 +3918,61 @@ enum RateType {
 }
 ```
 
+### KPI Linked Rate
+
+- Interface: `contracts/facets/kpiLinkedRate/IKpiLinkedRate.sol`
+- Resolver key: `RESOLVER_KEY_KPI_LINKED_RATE` = `0x47cd76ae576f0ec85f1abfc652d614750caefe22a465bef2c859f6cb32a89593`
+
+```solidity
+function initializeKpiLinkedRate(InterestRate calldata _interestRate, ImpactData calldata _impactData) external;
+function setKpiLinkedRateInterestRate(InterestRate calldata _newInterestRate) external;
+function setKpiLinkedRateImpactData(ImpactData calldata _newImpactData) external;
+function getKpiLinkedRateInterestRate() external view returns (InterestRate memory interestRate_);
+function getKpiLinkedRateImpactData() external view returns (ImpactData memory impactData_);
+```
+
+#### Types
+
+```solidity
+// declared in contracts/factory/ERC3643/interfaces/IKpiLinkedRate.sol
+struct InterestRate {
+  uint256 maxRate;
+  uint256 baseRate;
+  uint256 minRate;
+  uint256 startPeriod;
+  uint256 startRate;
+  uint256 missedPenalty;
+  uint256 reportPeriod;
+  uint8 rateDecimals;
+}
+
+// declared in contracts/factory/ERC3643/interfaces/IKpiLinkedRate.sol
+struct ImpactData {
+  uint256 maxDeviationCap;
+  uint256 baseLine;
+  uint256 maxDeviationFloor;
+  uint8 impactDataDecimals;
+  uint256 adjustmentPrecision;
+}
+```
+
+### KPIs
+
+- Interface: `contracts/facets/kpi/IKpis.sol`
+- Resolver key: `RESOLVER_KEY_KPIS` = `0xc0b75e6f4facfa630926f9653b857eeb3547c604941b210701f53f3b17521743`
+
+```solidity
+function initializeKpis() external;
+function addKpiData(uint256 _date, uint256 _value, address _project) external;
+function getLatestKpiData(
+  uint256 _from,
+  uint256 _to,
+  address _project
+) external view returns (uint256 value_, bool exists_);
+function getMinDate() external view returns (uint256 minDate_);
+function isCheckPointDate(uint256 _date, address _project) external view returns (bool exists_);
+```
+
 ### KYC
 
 - Interface: `contracts/facets/kyc/IKyc.sol`
@@ -3849,6 +4043,127 @@ struct KycData {
   string vcId;
   address issuer;
   KycStatus status;
+}
+```
+
+### Loan
+
+- Interface: `contracts/facets/loan/ILoan.sol`
+- Resolver key: `RESOLVER_KEY_LOAN` = `0x17c2126e932655e91a8e803b275de0a930c4b51a109b751567a95ee5d6bd6eba`
+
+```solidity
+function initializeLoan(LoanDetailsData calldata _loanDetailsData) external;
+function setLoanDetails(LoanDetailsData calldata loanDetailsData_) external;
+function getLoanDetails() external view returns (LoanDetailsData memory loanDetailsData_);
+```
+
+#### Types
+
+```solidity
+// declared in contracts/facets/loan/ILoan.sol
+struct LoanDetailsData {
+  LoanBasicData loanBasicData;
+  LoanInterestData loanInterestData;
+  RiskData riskData;
+  Collateral collateral;
+  LoanPerformanceStatus loanPerformanceStatus;
+}
+
+// declared in contracts/facets/loan/ILoan.sol
+struct LoanBasicData {
+  bytes3 currency;
+  uint256 startingDate;
+  uint256 maturityDate;
+  LoanStructureType loanStructureType;
+  RepaymentType repaymentType;
+  InterestType interestType;
+  uint256 signingDate;
+  address originatorAccount;
+  address servicerAccount;
+}
+
+// declared in contracts/facets/loan/ILoan.sol
+struct LoanInterestData {
+  BaseReferenceRate baseReferenceRate;
+  uint256 floorRate;
+  uint256 capRate;
+  uint256 rateMargin;
+  DayCount dayCount;
+  PaymentFrequency paymentFrequency;
+  uint256 firstAccrualDate;
+  uint256 prepaymentPenalty;
+  uint256 commitmentFee;
+  uint256 utilizationFee;
+  UtilizationFeeType utilizationFeeType;
+  uint256 servicingFee;
+}
+
+// declared in contracts/facets/loan/ILoan.sol
+struct RiskData {
+  string internalRiskGrade;
+  uint256 defaultProbability;
+  uint256 lossGivenDefault;
+}
+
+// declared in contracts/facets/loan/ILoan.sol
+struct Collateral {
+  uint256 totalCollateralValue;
+  uint256 loanToValue;
+}
+
+// declared in contracts/facets/loan/ILoan.sol
+struct LoanPerformanceStatus {
+  PerformanceStatus performanceStatus;
+  uint256 daysPastDue;
+}
+
+// declared in contracts/facets/loan/ILoan.sol
+enum LoanStructureType {
+  RCF, // Revolving Credit Facility
+  TERM_LOAN // Fixed-draw term loan
+}
+
+// declared in contracts/facets/loan/ILoan.sol
+enum RepaymentType {
+  BULLET, // Full principal repaid at maturity
+  AMORTIZING // Principal repaid in scheduled instalments
+}
+
+// declared in contracts/facets/loan/ILoan.sol
+enum InterestType {
+  FIXED // Rate is fixed for the life of the loan
+}
+
+// declared in contracts/facets/loan/ILoan.sol
+enum BaseReferenceRate {
+  NONE, // No external reference rate (fixed rate)
+  EURIBOR, // Euro Interbank Offered Rate
+  _3M // 3-month reference rate
+}
+
+// declared in contracts/facets/loan/ILoan.sol
+enum DayCount {
+  ACTUAL360 // Actual days elapsed over a 360-day year
+}
+
+// declared in contracts/facets/loan/ILoan.sol
+enum PaymentFrequency {
+  MONTHLY,
+  QUARTERLY,
+  YEARLY
+}
+
+// declared in contracts/facets/loan/ILoan.sol
+enum UtilizationFeeType {
+  EMBEDDED, // Fee included in the interest rate
+  SEPARATE // Fee invoiced as a distinct line item
+}
+
+// declared in contracts/facets/loan/ILoan.sol
+enum PerformanceStatus {
+  PERFORMING, // Borrower is current on all obligations
+  NON_PERFORMING, // Borrower has missed one or more payments
+  DEFAULT // Borrower is in formal default
 }
 ```
 
@@ -4113,16 +4428,17 @@ error WrongLockId();
 - Resolver key: `RESOLVER_KEY_MATURITY` = `0x16825792debc7c17efd86bdf71500575f9ff5d4aa20e3a35031c583437a3ca82`
 
 ```solidity
-function initializeMaturity() external;
+function initializeMaturity(uint256 _maturityDate) external;
 function fullRedeemAtMaturity(address _tokenHolder) external;
 function updateMaturityDate(uint256 _newMaturityDate) external returns (bool success_);
+function getMaturityDate() external view returns (uint256 maturityDate_);
 ```
 
 #### Events
 
 ```solidity
-event MaturityDateUpdated(address indexed bondId, uint256 indexed maturityDate, uint256 indexed previousMaturityDate);
-event MaturityInitialized();
+event MaturityDateUpdated(address indexed tokenId, uint256 indexed maturityDate, uint256 indexed previousMaturityDate);
+event MaturityInitialized(uint256 indexed maturityDate);
 ```
 
 #### Errors
@@ -4587,14 +4903,54 @@ error ZeroAddressNotAllowed();
 #### Types
 
 ```solidity
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
+// declared in contracts/facets/clearing/IClearingTypes.sol
 struct ClearingOperationFrom {
   ClearingOperation clearingOperation;
   address from;
   bytes operatorData;
 }
 
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
+// declared in contracts/facets/clearing/IClearingTypes.sol
+struct ClearingOperation {
+  bytes32 partition;
+  uint256 expirationTimestamp;
+  bytes data;
+}
+```
+
+### Operator Clearing Hold By Partition
+
+- Interface: `contracts/facets/operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol`
+- Resolver key: `RESOLVER_KEY_OPERATOR_CLEARING_HOLDBYPARTITION` = `0xab5e4afdccea84152256072fb9f39bf08d591a7666557783209dff003658d945`
+
+```solidity
+function initializeOperatorClearingHoldByPartition() external;
+function operatorClearingCreateHoldByPartition(
+  IClearingTypes.ClearingOperationFrom calldata _clearingOperationFrom,
+  IHoldTypes.Hold calldata _hold
+) external returns (bool success_, uint256 clearingId_);
+```
+
+#### Types
+
+```solidity
+// declared in contracts/facets/clearing/IClearingTypes.sol
+struct ClearingOperationFrom {
+  ClearingOperation clearingOperation;
+  address from;
+  bytes operatorData;
+}
+
+// declared in contracts/facets/hold/IHoldTypes.sol
+struct Hold {
+  uint256 amount;
+  uint256 expirationTimestamp;
+  address escrow;
+  address to;
+  bytes data;
+}
+
+// declared in contracts/facets/clearing/IClearingTypes.sol
 struct ClearingOperation {
   bytes32 partition;
   uint256 expirationTimestamp;
@@ -4706,7 +5062,7 @@ error ZeroAddressNotAllowed();
 #### Types
 
 ```solidity
-// declared in contracts/facets/layer_1/hold/IHoldTypes.sol
+// declared in contracts/facets/hold/IHoldTypes.sol
 struct Hold {
   uint256 amount;
   uint256 expirationTimestamp;
@@ -4812,9 +5168,11 @@ error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 #### Types
 
 ```solidity
-// declared in contracts/factory/ERC3643/interfaces/IBondTypes.sol
+// declared in contracts/facets/principal/IPrincipal.sol
 struct PrincipalFor {
+  /// @dev Numerator of the principal fraction.
   uint256 numerator;
+  /// @dev Denominator of the principal fraction; non-zero when balance > 0.
   uint256 denominator;
 }
 ```
@@ -4921,7 +5279,7 @@ error ProtectedPartitionRoleRequired(bytes32 partition, address sender);
 #### Types
 
 ```solidity
-// declared in contracts/facets/layer_1/protectedPartition/IProtectedPartitions.sol
+// declared in contracts/facets/protectedPartition/IProtectedPartitions.sol
 struct ProtectionData {
   uint256 deadline;
   uint256 nonce;
@@ -5107,7 +5465,7 @@ error ZeroAddressNotAllowed();
 #### Types
 
 ```solidity
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
+// declared in contracts/facets/clearing/IClearingTypes.sol
 struct ProtectedClearingOperation {
   ClearingOperation clearingOperation;
   address from;
@@ -5115,7 +5473,7 @@ struct ProtectedClearingOperation {
   uint256 nonce;
 }
 
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
+// declared in contracts/facets/clearing/IClearingTypes.sol
 struct ClearingOperation {
   bytes32 partition;
   uint256 expirationTimestamp;
@@ -5284,7 +5642,7 @@ error ZeroAddressNotAllowed();
 #### Types
 
 ```solidity
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
+// declared in contracts/facets/clearing/IClearingTypes.sol
 struct ProtectedClearingOperation {
   ClearingOperation clearingOperation;
   address from;
@@ -5292,7 +5650,7 @@ struct ProtectedClearingOperation {
   uint256 nonce;
 }
 
-// declared in contracts/facets/layer_1/hold/IHoldTypes.sol
+// declared in contracts/facets/hold/IHoldTypes.sol
 struct Hold {
   uint256 amount;
   uint256 expirationTimestamp;
@@ -5301,7 +5659,7 @@ struct Hold {
   bytes data;
 }
 
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
+// declared in contracts/facets/clearing/IClearingTypes.sol
 struct ClearingOperation {
   bytes32 partition;
   uint256 expirationTimestamp;
@@ -5411,14 +5769,14 @@ error ZeroAddressNotAllowed();
 #### Types
 
 ```solidity
-// declared in contracts/facets/layer_1/hold/IHoldTypes.sol
+// declared in contracts/facets/hold/IHoldTypes.sol
 struct ProtectedHold {
   Hold hold;
   uint256 deadline;
   uint256 nonce;
 }
 
-// declared in contracts/facets/layer_1/hold/IHoldTypes.sol
+// declared in contracts/facets/hold/IHoldTypes.sol
 struct Hold {
   uint256 amount;
   uint256 expirationTimestamp;
@@ -5426,6 +5784,19 @@ struct Hold {
   address to;
   bytes data;
 }
+```
+
+### Protected Partitions
+
+- Interface: `contracts/facets/protectedPartition/IProtectedPartitions.sol`
+- Resolver key: `RESOLVER_KEY_PROTECTED_PARTITIONS` = `0x895834530eae98f8a742fe98f3d528d3cce6c6a51af63b495414bdf391180dd7`
+
+```solidity
+function initializeProtectedPartitions(bool _arePartitionsProtected) external returns (bool success_);
+function protectPartitions() external returns (bool success_);
+function unprotectPartitions() external returns (bool success_);
+function arePartitionsProtected() external view returns (bool);
+function calculateRoleForPartition(bytes32 _partition) external pure returns (bytes32 roleForPartition_);
 ```
 
 ### Recovery
@@ -5580,6 +5951,32 @@ struct ScheduledBalanceAdjustment {
   uint8 decimals;
 }
 
+// declared in contracts/factory/ERC3643/interfaces/IScheduledTasksCommon.sol
+struct ScheduledTask {
+  uint256 scheduledTimestamp;
+  bytes data;
+}
+```
+
+### Scheduled Cross Ordered Tasks
+
+- Interface: `contracts/facets/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol`
+- Resolver key: `RESOLVER_KEY_SCHEDULED_TASKS` = `0x53ea769a267213f8e35c975a0dba3d7d8d73163d53f804c2ac6ea37d6c47c082`
+
+```solidity
+function initializeScheduledCrossOrderedTasks() external;
+function triggerPendingScheduledCrossOrderedTasks() external returns (uint256);
+function triggerScheduledCrossOrderedTasks(uint256 _max) external returns (uint256);
+function scheduledCrossOrderedTaskCount() external view returns (uint256);
+function getScheduledCrossOrderedTasks(
+  uint256 _pageIndex,
+  uint256 _pageLength
+) external view returns (ScheduledTask[] memory scheduledTask_);
+```
+
+#### Types
+
+```solidity
 // declared in contracts/factory/ERC3643/interfaces/IScheduledTasksCommon.sol
 struct ScheduledTask {
   uint256 scheduledTimestamp;
@@ -6092,40 +6489,6 @@ function destroyed(address _from, uint256 _amount) external;
 function canTransfer(address _from, address _to, uint256 _amount) external view returns (bool);
 ```
 
-### External Control List
-
-- Interface: `contracts/facets/layer_1/externalControlList/IExternalControlList.sol`
-
-```solidity
-function isAuthorized(address account) external view returns (bool);
-```
-
-### External KYC List
-
-- Interface: `contracts/facets/layer_1/externalKycList/IExternalKycList.sol`
-
-```solidity
-function getKycStatus(address account) external view returns (IKyc.KycStatus);
-```
-
-#### Types
-
-```solidity
-// declared in contracts/facets/kyc/IKyc.sol
-enum KycStatus {
-  NOT_GRANTED,
-  GRANTED
-}
-```
-
-### External Pause
-
-- Interface: `contracts/facets/layer_1/externalPause/IExternalPause.sol`
-
-```solidity
-function isPaused() external view returns (bool);
-```
-
 ### Identity Registry
 
 - Interface: `contracts/facets/layer_1/ERC3643/IIdentityRegistry.sol`
@@ -6134,738 +6497,7 @@ function isPaused() external view returns (bool);
 function isVerified(address _userAddress) external view returns (bool);
 ```
 
-### Operator Clearing Hold By Partition
-
-- Interface: `contracts/facets/layer_1/clearing/operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol`
-- Resolver key: `RESOLVER_KEY_OPERATOR_CLEARING_HOLDBYPARTITION` = `0xab5e4afdccea84152256072fb9f39bf08d591a7666557783209dff003658d945`
-
-```solidity
-function initializeOperatorClearingHoldByPartition() external;
-function operatorClearingCreateHoldByPartition(
-  IClearingTypes.ClearingOperationFrom calldata _clearingOperationFrom,
-  IHoldTypes.Hold calldata _hold
-) external returns (bool success_, uint256 clearingId_);
-```
-
-#### Events
-
-```solidity
-event ClearedHoldByPartition(
-  address indexed operator,
-  address indexed tokenHolder,
-  bytes32 partition,
-  uint256 clearingId,
-  IHoldTypes.Hold hold,
-  uint256 expirationDate,
-  bytes data,
-  bytes operatorData
-);
-event ClearedHoldFromByPartition(
-  address indexed operator,
-  address indexed tokenHolder,
-  bytes32 partition,
-  uint256 clearingId,
-  IHoldTypes.Hold hold,
-  uint256 expirationDate,
-  bytes data,
-  bytes operatorData
-);
-event ClearedOperatorHoldByPartition(
-  address indexed operator,
-  address indexed tokenHolder,
-  bytes32 partition,
-  uint256 clearingId,
-  IHoldTypes.Hold hold,
-  uint256 expirationDate,
-  bytes data,
-  bytes operatorData
-);
-event ClearedOperatorRedeemByPartition(
-  address indexed operator,
-  address indexed tokenHolder,
-  bytes32 partition,
-  uint256 clearingId,
-  uint256 amount,
-  uint256 expirationDate,
-  bytes data,
-  bytes operatorData
-);
-event ClearedOperatorTransferByPartition(
-  address indexed operator,
-  address indexed tokenHolder,
-  address indexed to,
-  bytes32 partition,
-  uint256 clearingId,
-  uint256 amount,
-  uint256 expirationDate,
-  bytes data,
-  bytes operatorData
-);
-event ClearedRedeemByPartition(
-  address indexed operator,
-  address indexed tokenHolder,
-  bytes32 partition,
-  uint256 clearingId,
-  uint256 amount,
-  uint256 expirationDate,
-  bytes data,
-  bytes operatorData
-);
-event ClearedRedeemFromByPartition(
-  address indexed operator,
-  address indexed tokenHolder,
-  bytes32 partition,
-  uint256 clearingId,
-  uint256 amount,
-  uint256 expirationDate,
-  bytes data,
-  bytes operatorData
-);
-event ClearedTransferByPartition(
-  address indexed operator,
-  address indexed tokenHolder,
-  address indexed to,
-  bytes32 partition,
-  uint256 clearingId,
-  uint256 amount,
-  uint256 expirationDate,
-  bytes data,
-  bytes operatorData
-);
-event ClearedTransferFromByPartition(
-  address indexed operator,
-  address indexed tokenHolder,
-  address indexed to,
-  bytes32 partition,
-  uint256 clearingId,
-  uint256 amount,
-  uint256 expirationDate,
-  bytes data,
-  bytes operatorData
-);
-event ClearingActivated(address indexed operator);
-event ClearingDeactivated(address indexed operator);
-event ClearingOperationApproved(
-  address indexed operator,
-  address indexed tokenHolder,
-  bytes32 indexed partition,
-  uint256 clearingId,
-  ClearingOperationType clearingOperationType,
-  bytes operationData
-);
-event ClearingOperationCanceled(
-  address indexed operator,
-  address indexed tokenHolder,
-  bytes32 indexed partition,
-  uint256 clearingId,
-  ClearingOperationType clearingOperationType
-);
-event ClearingOperationReclaimed(
-  address indexed operator,
-  address indexed tokenHolder,
-  bytes32 indexed partition,
-  uint256 clearingId,
-  ClearingOperationType clearingOperationType
-);
-event OperatorClearingHoldByPartitionInitialized();
-```
-
-#### Errors
-
-```solidity
-error AccessControlRequired(bytes32 role, address sender);
-error AccountHasNoRole(address account, bytes32 role);
-error AssetNotOperational(bytes32 configId, uint256 versionId);
-error ClearingIsActivated();
-error ClearingIsDisabled();
-error Deactivated();
-error ExpirationDateNotReached();
-error ExpirationDateReached();
-error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
-error InvalidClearingAmount();
-error IsPaused();
-error PartitionNotAllowedInSinglePartitionMode(bytes32 partition);
-error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
-error Unauthorized(address operator, address tokenHolder, bytes32 partition);
-error WalletRecovered();
-error WrongClearingId();
-error WrongExpirationTimestamp();
-error ZeroAddressNotAllowed();
-```
-
-#### Types
-
-```solidity
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
-struct ClearingOperationFrom {
-  ClearingOperation clearingOperation;
-  address from;
-  bytes operatorData;
-}
-
-// declared in contracts/facets/layer_1/hold/IHoldTypes.sol
-struct Hold {
-  uint256 amount;
-  uint256 expirationTimestamp;
-  address escrow;
-  address to;
-  bytes data;
-}
-
-// declared in contracts/facets/layer_1/clearing/IClearingTypes.sol
-struct ClearingOperation {
-  bytes32 partition;
-  uint256 expirationTimestamp;
-  bytes data;
-}
-```
-
-### Protected Partitions
-
-- Interface: `contracts/facets/layer_1/protectedPartition/IProtectedPartitions.sol`
-- Resolver key: `RESOLVER_KEY_PROTECTED_PARTITIONS` = `0x895834530eae98f8a742fe98f3d528d3cce6c6a51af63b495414bdf391180dd7`
-
-```solidity
-function initializeProtectedPartitions(bool _arePartitionsProtected) external returns (bool success_);
-function protectPartitions() external returns (bool success_);
-function unprotectPartitions() external returns (bool success_);
-function arePartitionsProtected() external view returns (bool);
-function calculateRoleForPartition(bytes32 _partition) external pure returns (bytes32 roleForPartition_);
-```
-
-#### Events
-
-```solidity
-event PartitionsProtected(address indexed operator);
-event PartitionsUnProtected(address indexed operator);
-event ProtectedPartitionsInitialized(bool arePartitionsProtected);
-event ProtectedRedeemFrom(
-  bytes32 indexed partition,
-  address indexed operator,
-  address indexed from,
-  uint256 value,
-  uint256 deadline,
-  uint256 nonce,
-  bytes signature
-);
-event ProtectedTransferFrom(
-  bytes32 indexed partition,
-  address indexed operator,
-  address indexed from,
-  address to,
-  uint256 value,
-  uint256 deadline,
-  uint256 nonce,
-  bytes signature
-);
-```
-
-#### Errors
-
-```solidity
-error AccessControlRequired(bytes32 role, address sender);
-error AccountHasNoRole(address account, bytes32 role);
-error AssetNotOperational(bytes32 configId, uint256 versionId);
-error Deactivated();
-error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
-error IsPaused();
-error PartitionsAreProtected();
-error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
-error PartitionsAreUnProtected();
-```
-
 <!-- layer_2 -->
-
-### Amortization
-
-- Interface: `contracts/facets/layer_2/amortization/IAmortization.sol`
-- Resolver key: `RESOLVER_KEY_AMORTIZATION` = `0xc0d83d8b9295f78954b1c7c9648bec9775edf597a57f9f4110883e9ca2134739`
-
-```solidity
-function initializeAmortization() external;
-function setAmortization(Amortization calldata _amortization) external returns (bool success_, uint256 amortizationID_);
-function cancelAmortization(uint256 _amortizationID) external;
-function forceCancelAmortization(uint256 _amortizationID) external;
-function releaseAmortizationHold(uint256 _amortizationID, address _tokenHolder) external;
-function setAmortizationHold(
-  uint256 _amortizationID,
-  address _tokenHolder,
-  uint256 _tokenAmount
-) external returns (uint256 holdId_);
-function getAmortization(
-  uint256 _amortizationID
-) external view returns (RegisteredAmortization memory registeredAmortization_, bool isDisabled_);
-function getAmortizationFor(
-  uint256 _amortizationID,
-  address _account
-) external view returns (AmortizationFor memory amortizationFor_);
-function getAmortizationsFor(
-  uint256 _amortizationID,
-  uint256 _pageIndex,
-  uint256 _pageLength
-) external view returns (AmortizationFor[] memory amortizationsFor_, address[] memory holders_);
-function getAmortizationsCount() external view returns (uint256 amortizationCount_);
-function getAmortizationHolders(
-  uint256 _amortizationID,
-  uint256 _pageIndex,
-  uint256 _pageLength
-) external view returns (address[] memory holders_);
-function getTotalAmortizationHolders(uint256 _amortizationID) external view returns (uint256);
-function getAmortizationActiveHolders(
-  uint256 _amortizationID,
-  uint256 _pageIndex,
-  uint256 _pageLength
-) external view returns (address[] memory holders_);
-function getTotalAmortizationActiveHolders(uint256 _amortizationID) external view returns (uint256);
-function getTotalHoldByAmortizationId(uint256 _amortizationID) external view returns (uint256);
-function getActiveAmortizationIds(
-  uint256 _pageIndex,
-  uint256 _pageLength
-) external view returns (uint256[] memory activeIds_);
-function getTotalActiveAmortizationIds() external view returns (uint256);
-```
-
-#### Events
-
-```solidity
-event AmortizationCancelled(uint256 amortizationId, address indexed operator);
-event AmortizationForceCancelled(uint256 amortizationId, address indexed operator);
-event AmortizationHoldReleased(
-  bytes32 indexed corporateActionId,
-  uint256 indexed amortizationID,
-  address indexed tokenHolder,
-  uint256 holdId
-);
-event AmortizationHoldSet(
-  bytes32 indexed corporateActionId,
-  uint256 indexed amortizationID,
-  address indexed tokenHolder,
-  uint256 holdId,
-  uint256 tokenAmount
-);
-event AmortizationInitialized();
-event AmortizationSet(
-  bytes32 corporateActionId,
-  uint256 amortizationId,
-  address indexed operator,
-  uint256 recordDate,
-  uint256 executionDate
-);
-event Approval(address indexed owner, address indexed spender, uint256 value);
-event Transfer(address indexed from, address indexed to, uint256 value);
-event TransferByPartition(
-  bytes32 indexed _fromPartition,
-  address _operator,
-  address indexed _from,
-  address indexed _to,
-  uint256 _value,
-  bytes _data,
-  bytes _operatorData
-);
-```
-
-#### Errors
-
-```solidity
-error AccessControlRequired(bytes32 role, address sender);
-error AccountHasNoRole(address account, bytes32 role);
-error AmortizationAlreadyExecuted(bytes32 corporateActionId, uint256 amortizationId);
-error AmortizationCreationFailed();
-error AmortizationHasActiveHolds(bytes32 corporateActionId, uint256 amortizationID);
-error AmortizationHoldFailed(bytes32 corporateActionId, uint256 amortizationID);
-error AmortizationHoldNotActive(bytes32 corporateActionId, uint256 amortizationID, address tokenHolder);
-error AmortizationNotActive(bytes32 corporateActionId, uint256 amortizationID);
-error AssetNotOperational(bytes32 configId, uint256 versionId);
-error Deactivated();
-error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
-error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
-error InsufficientHoldBalance(uint256 holdAmount, uint256 amount);
-error InvalidAmortizationHoldAmount(uint256 amortizationID);
-error InvalidHoldAmount();
-error InvalidPartition(address account, bytes32 partition);
-error InvalidTimestamp();
-error IsPaused();
-error NotAllowedInMultiPartitionMode();
-error SnapshotIdDoesNotExists(uint256 snapshotId);
-error SnapshotIdNull();
-error UnexpectedError(bytes4 _errorId);
-error WrongDates(uint256 firstDate, uint256 secondDate);
-error WrongIndexForAction(uint256 index, bytes32 actionType);
-```
-
-#### Types
-
-```solidity
-// declared in contracts/facets/layer_2/amortization/IAmortization.sol
-struct Amortization {
-  uint256 recordDate;
-  uint256 executionDate;
-  uint256 tokensToRedeem;
-}
-
-// declared in contracts/facets/layer_2/amortization/IAmortization.sol
-struct RegisteredAmortization {
-  Amortization amortization;
-  uint256 snapshotId;
-}
-
-// declared in contracts/facets/layer_2/amortization/IAmortization.sol
-struct AmortizationFor {
-  uint256 recordDate;
-  uint256 executionDate;
-  // Hold info (current values, adjusted as of now)
-  uint256 holdId; // 0 = no hold created yet
-  bool holdActive; // true = hold is active and awaiting DVP execution
-  uint256 tokenHeldAmount; // hold amount adjusted at current block time (0 if no hold)
-  uint8 decimalsHeld; // token decimals at current block time (0 if no hold)
-  uint256 abafAtHold; // ABAF at current block time (0 if no hold)
-  // Snapshot (historical values at record date)
-  uint256 tokenBalance; // balance at snapshot (or adjusted at recordDate if no snapshot yet)
-  uint8 decimalsBalance; // decimals at snapshot
-  bool recordDateReached; // whether record date has been reached
-  uint256 abafAtSnapshot; // ABAF at snapshot (0 if record date not reached yet)
-  // Nominal value
-  uint256 nominalValue; // face value of the token
-  uint8 nominalValueDecimals; // decimals of the nominal value
-}
-```
-
-### Bond Read
-
-- Interface: `contracts/facets/layer_2/bond/IBondRead.sol`
-
-```solidity
-function initializeBondUSARead() external;
-function getBondDetails() external view returns (IBondTypes.BondDetailsData memory bondDetailsData_);
-```
-
-#### Types
-
-```solidity
-// declared in contracts/factory/ERC3643/interfaces/IBondTypes.sol
-struct BondDetailsData {
-  bytes3 currency;
-  uint256 nominalValue;
-  uint8 nominalValueDecimals;
-  uint256 startingDate;
-  uint256 maturityDate;
-}
-```
-
-### Equity
-
-- Interface: `contracts/facets/layer_2/equity/IEquity.sol`
-
-```solidity
-function getEquityDetails() external view returns (EquityDetailsData memory equityDetailsData_);
-```
-
-#### Types
-
-```solidity
-// declared in contracts/factory/ERC3643/interfaces/IEquity.sol
-struct EquityDetailsData {
-  bool votingRight;
-  bool informationRight;
-  bool liquidationRight;
-  bool subscriptionRight;
-  bool conversionRight;
-  bool redemptionRight;
-  bool putRight;
-  DividendType dividendRight;
-  bytes3 currency;
-  uint256 nominalValue;
-  uint8 nominalValueDecimals;
-}
-
-// declared in contracts/factory/ERC3643/interfaces/IEquity.sol
-enum DividendType {
-  NONE,
-  PREFERRED,
-  COMMON
-}
-```
-
-### Fixed Rate
-
-- Interface: `contracts/facets/layer_2/interestRate/fixedRate/IFixedRate.sol`
-- Resolver key: `RESOLVER_KEY_FIXED_RATE` = `0x82f13d957a7f7af45723926c5ca1a184f2d667df5221c37434ce37278a9af521`
-
-```solidity
-function initializeFixedRate(FixedRateData calldata _initData) external;
-function setRate(uint256 _newRate, uint8 _newRateDecimals) external;
-function getRate() external view returns (uint256 rate_, uint8 decimals_);
-```
-
-#### Events
-
-```solidity
-event FixedRateInitialized(FixedRateData initData);
-event RateUpdated(address indexed operator, uint256 newRate, uint8 newRateDecimals);
-```
-
-#### Errors
-
-```solidity
-error AccessControlRequired(bytes32 role, address sender);
-error AccountHasNoRole(address account, bytes32 role);
-error AssetNotOperational(bytes32 configId, uint256 versionId);
-error Deactivated();
-error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
-error InterestRateIsFixed();
-error IsPaused();
-```
-
-#### Types
-
-```solidity
-// declared in contracts/factory/ERC3643/interfaces/IFixedRate.sol
-struct FixedRateData {
-  uint256 rate;
-  uint8 rateDecimals;
-}
-```
-
-### KPI Linked Rate
-
-- Interface: `contracts/facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol`
-- Resolver key: `RESOLVER_KEY_KPI_LINKED_RATE` = `0x47cd76ae576f0ec85f1abfc652d614750caefe22a465bef2c859f6cb32a89593`
-
-```solidity
-function initializeKpiLinkedRate(InterestRate calldata _interestRate, ImpactData calldata _impactData) external;
-function setKpiLinkedRateInterestRate(InterestRate calldata _newInterestRate) external;
-function setKpiLinkedRateImpactData(ImpactData calldata _newImpactData) external;
-function getKpiLinkedRateInterestRate() external view returns (InterestRate memory interestRate_);
-function getKpiLinkedRateImpactData() external view returns (ImpactData memory impactData_);
-```
-
-#### Events
-
-```solidity
-event ImpactDataUpdated(address indexed operator, ImpactData newImpactData);
-event InterestRateUpdated(address indexed operator, InterestRate newInterestRate);
-event KpiLinkedRateInitialized(InterestRate interestRate, ImpactData impactData);
-```
-
-#### Errors
-
-```solidity
-error AccessControlRequired(bytes32 role, address sender);
-error AccountHasNoRole(address account, bytes32 role);
-error AssetNotOperational(bytes32 configId, uint256 versionId);
-error Deactivated();
-error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
-error IsPaused();
-error WrongImpactDataValues(ImpactData impactData);
-error WrongInterestRateValues(InterestRate interestRate);
-```
-
-#### Types
-
-```solidity
-// declared in contracts/factory/ERC3643/interfaces/IKpiLinkedRateErrors.sol
-struct InterestRate {
-  uint256 maxRate;
-  uint256 baseRate;
-  uint256 minRate;
-  uint256 startPeriod;
-  uint256 startRate;
-  uint256 missedPenalty;
-  uint256 reportPeriod;
-  uint8 rateDecimals;
-}
-
-// declared in contracts/factory/ERC3643/interfaces/IKpiLinkedRateErrors.sol
-struct ImpactData {
-  uint256 maxDeviationCap;
-  uint256 baseLine;
-  uint256 maxDeviationFloor;
-  uint8 impactDataDecimals;
-  uint256 adjustmentPrecision;
-}
-```
-
-### KPIs
-
-- Interface: `contracts/facets/layer_2/kpi/kpiLatest/IKpis.sol`
-- Resolver key: `RESOLVER_KEY_KPIS` = `0xc0b75e6f4facfa630926f9653b857eeb3547c604941b210701f53f3b17521743`
-
-```solidity
-function initializeKpis() external;
-function addKpiData(uint256 _date, uint256 _value, address _project) external;
-function getLatestKpiData(
-  uint256 _from,
-  uint256 _to,
-  address _project
-) external view returns (uint256 value_, bool exists_);
-function getMinDate() external view returns (uint256 minDate_);
-function isCheckPointDate(uint256 _date, address _project) external view returns (bool exists_);
-```
-
-#### Events
-
-```solidity
-event KpiDataAdded(address indexed project, uint256 date, uint256 value);
-event KpisInitialized();
-```
-
-#### Errors
-
-```solidity
-error AccessControlRequired(bytes32 role, address sender);
-error AccountHasNoRole(address account, bytes32 role);
-error AssetNotOperational(bytes32 configId, uint256 versionId);
-error CouponNotFound(uint256 couponID);
-error Deactivated();
-error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
-error InvalidDate(uint256 providedDate, uint256 minDate, uint256 maxDate);
-error InvalidDateRange(uint256 fromDate, uint256 toDate);
-error IsPaused();
-error KpiDataAlreadyExists(uint256 date);
-error UnexpectedError(bytes4 _errorId);
-```
-
-### Loan
-
-- Interface: `contracts/facets/layer_2/loan/ILoan.sol`
-- Resolver key: `RESOLVER_KEY_LOAN` = `0x17c2126e932655e91a8e803b275de0a930c4b51a109b751567a95ee5d6bd6eba`
-
-```solidity
-function initializeLoan(LoanDetailsData calldata _loanDetailsData) external;
-function setLoanDetails(LoanDetailsData calldata loanDetailsData_) external;
-function getLoanDetails() external view returns (LoanDetailsData memory loanDetailsData_);
-```
-
-#### Events
-
-```solidity
-event LoanDetailsSet(LoanDetailsData loanDetails);
-event LoanInitialized(LoanDetailsData loanDetailsData);
-```
-
-#### Errors
-
-```solidity
-error AccessControlRequired(bytes32 role, address sender);
-error AccountHasNoRole(address account, bytes32 role);
-error AssetNotOperational(bytes32 configId, uint256 versionId);
-error Deactivated();
-error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
-error InvalidTimestamp();
-error IsPaused();
-error WrongDates(uint256 firstDate, uint256 secondDate);
-error ZeroAddressNotAllowed();
-```
-
-#### Types
-
-```solidity
-// declared in contracts/facets/layer_2/loan/ILoan.sol
-struct LoanDetailsData {
-  LoanBasicData loanBasicData;
-  LoanInterestData loanInterestData;
-  RiskData riskData;
-  Collateral collateral;
-  LoanPerformanceStatus loanPerformanceStatus;
-}
-
-// declared in contracts/facets/layer_2/loan/ILoan.sol
-struct LoanBasicData {
-  bytes3 currency;
-  uint256 startingDate;
-  uint256 maturityDate;
-  LoanStructureType loanStructureType;
-  RepaymentType repaymentType;
-  InterestType interestType;
-  uint256 signingDate;
-  address originatorAccount;
-  address servicerAccount;
-}
-
-// declared in contracts/facets/layer_2/loan/ILoan.sol
-struct LoanInterestData {
-  BaseReferenceRate baseReferenceRate;
-  uint256 floorRate;
-  uint256 capRate;
-  uint256 rateMargin;
-  DayCount dayCount;
-  PaymentFrequency paymentFrequency;
-  uint256 firstAccrualDate;
-  uint256 prepaymentPenalty;
-  uint256 commitmentFee;
-  uint256 utilizationFee;
-  UtilizationFeeType utilizationFeeType;
-  uint256 servicingFee;
-}
-
-// declared in contracts/facets/layer_2/loan/ILoan.sol
-struct RiskData {
-  string internalRiskGrade;
-  uint256 defaultProbability;
-  uint256 lossGivenDefault;
-}
-
-// declared in contracts/facets/layer_2/loan/ILoan.sol
-struct Collateral {
-  uint256 totalCollateralValue;
-  uint256 loanToValue;
-}
-
-// declared in contracts/facets/layer_2/loan/ILoan.sol
-struct LoanPerformanceStatus {
-  PerformanceStatus performanceStatus;
-  uint256 daysPastDue;
-}
-
-// declared in contracts/facets/layer_2/loan/ILoan.sol
-enum LoanStructureType {
-  RCF,
-  TERM_LOAN
-}
-
-// declared in contracts/facets/layer_2/loan/ILoan.sol
-enum RepaymentType {
-  BULLET,
-  AMORTIZING
-}
-
-// declared in contracts/facets/layer_2/loan/ILoan.sol
-enum InterestType {
-  FIXED
-}
-
-// declared in contracts/facets/layer_2/loan/ILoan.sol
-enum BaseReferenceRate {
-  NONE,
-  EURIBOR,
-  _3M
-}
-
-// declared in contracts/facets/layer_2/loan/ILoan.sol
-enum DayCount {
-  ACTUAL360
-}
-
-// declared in contracts/facets/layer_2/loan/ILoan.sol
-enum PaymentFrequency {
-  MONTHLY,
-  QUARTERLY,
-  YEARLY
-}
-
-// declared in contracts/facets/layer_2/loan/ILoan.sol
-enum UtilizationFeeType {
-  EMBEDDED,
-  SEPARATE
-}
-
-// declared in contracts/facets/layer_2/loan/ILoan.sol
-enum PerformanceStatus {
-  PERFORMING,
-  NON_PERFORMING,
-  DEFAULT
-}
-```
 
 ### Loans Portfolio
 
@@ -7010,233 +6642,6 @@ error Deactivated();
 error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 ```
 
-### Scheduled Cross Ordered Tasks
-
-- Interface: `contracts/facets/layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol`
-- Resolver key: `RESOLVER_KEY_SCHEDULED_TASKS` = `0x53ea769a267213f8e35c975a0dba3d7d8d73163d53f804c2ac6ea37d6c47c082`
-
-```solidity
-function initializeScheduledCrossOrderedTasks() external;
-function triggerPendingScheduledCrossOrderedTasks() external returns (uint256);
-function triggerScheduledCrossOrderedTasks(uint256 _max) external returns (uint256);
-function scheduledCrossOrderedTaskCount() external view returns (uint256);
-function getScheduledCrossOrderedTasks(
-  uint256 _pageIndex,
-  uint256 _pageLength
-) external view returns (ScheduledTask[] memory scheduledTask_);
-```
-
-#### Events
-
-```solidity
-event ScheduledCrossOrderedTasksInitialized();
-event TaskExecutionFailed(bytes32 indexed actionId, bytes32 indexed taskType, uint256 scheduledTimestamp);
-```
-
-#### Errors
-
-```solidity
-error AccessControlRequired(bytes32 role, address sender);
-error AccountHasNoRole(address account, bytes32 role);
-error AssetNotOperational(bytes32 configId, uint256 versionId);
-error Deactivated();
-error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
-error IsPaused();
-```
-
-#### Types
-
-```solidity
-// declared in contracts/factory/ERC3643/interfaces/IScheduledTasksCommon.sol
-struct ScheduledTask {
-  uint256 scheduledTimestamp;
-  bytes data;
-}
-```
-
-### Security
-
-- Interface: `contracts/facets/layer_2/security/ISecurity.sol`
-- Resolver key: `RESOLVER_KEY_SECURITY` = `0x4a0ea8dcc902efa355c705fe7211cb0da08f05ad9fc8888237dd67a8c4dc6f1a`
-
-```solidity
-function initializeSecurity(
-  RegulationData memory _regulationData,
-  AdditionalSecurityData calldata _additionalSecurityData
-) external;
-function getSecurityRegulationData() external view returns (SecurityRegulationData memory securityRegulationData_);
-```
-
-#### Events
-
-```solidity
-event SecurityInitialized(RegulationData regulationData, AdditionalSecurityData additionalSecurityData);
-```
-
-#### Errors
-
-```solidity
-error AccessControlRequired(bytes32 role, address sender);
-error AccountHasNoRole(address account, bytes32 role);
-error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
-```
-
-#### Types
-
-```solidity
-// declared in contracts/factory/ERC3643/interfaces/regulation.sol
-struct RegulationData {
-  RegulationType regulationType;
-  RegulationSubType regulationSubType;
-  uint256 dealSize;
-  AccreditedInvestors accreditedInvestors;
-  uint256 maxNonAccreditedInvestors;
-  ManualInvestorVerification manualInvestorVerification;
-  InternationalInvestors internationalInvestors;
-  ResaleHoldPeriod resaleHoldPeriod;
-}
-
-// declared in contracts/factory/ERC3643/interfaces/regulation.sol
-struct AdditionalSecurityData {
-  bool countriesControlListType;
-  string listOfCountries;
-  string info;
-}
-
-// declared in contracts/facets/layer_2/security/ISecurity.sol
-struct SecurityRegulationData {
-  RegulationData regulationData;
-  AdditionalSecurityData additionalSecurityData;
-}
-
-// declared in contracts/factory/ERC3643/interfaces/regulation.sol
-enum RegulationType {
-  NONE,
-  REG_S,
-  REG_D
-}
-
-// declared in contracts/factory/ERC3643/interfaces/regulation.sol
-enum RegulationSubType {
-  NONE,
-  REG_D_506_B,
-  REG_D_506_C
-}
-
-// declared in contracts/factory/ERC3643/interfaces/regulation.sol
-enum AccreditedInvestors {
-  NONE,
-  ACCREDITATION_REQUIRED
-}
-
-// declared in contracts/factory/ERC3643/interfaces/regulation.sol
-enum ManualInvestorVerification {
-  NOTHING_TO_VERIFY,
-  VERIFICATION_INVESTORS_FINANCIAL_DOCUMENTS_REQUIRED
-}
-
-// declared in contracts/factory/ERC3643/interfaces/regulation.sol
-enum InternationalInvestors {
-  NOT_ALLOWED,
-  ALLOWED
-}
-
-// declared in contracts/factory/ERC3643/interfaces/regulation.sol
-enum ResaleHoldPeriod {
-  NOT_APPLICABLE,
-  APPLICABLE_FROM_6_MOTHS_TO_1_YEAR
-}
-```
-
-<!-- layer_3 -->
-
-### Bond USA
-
-- Interface: `contracts/facets/layer_3/bondUSA/IBondUSA.sol`
-- Resolver key: `RESOLVER_KEY_BOND_VARIABLE_RATE` = `0xbc8b53a2f8803b138aac441fbeb6b767a51b66a5f4d735c3d15af67cc72b9daa`
-
-```solidity
-function initializeBondUSA(IBondTypes.BondDetailsData calldata _bondDetailsData) external;
-```
-
-#### Events
-
-```solidity
-event BondUSAInitialized(IBondTypes.BondDetailsData bondDetailsData);
-event MaturityDateUpdated(address indexed bondId, uint256 indexed maturityDate, uint256 indexed previousMaturityDate);
-```
-
-#### Errors
-
-```solidity
-error AccessControlRequired(bytes32 role, address sender);
-error AccountHasNoRole(address account, bytes32 role);
-error BondMaturityDateWrong();
-error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
-```
-
-#### Types
-
-```solidity
-// declared in contracts/factory/ERC3643/interfaces/IBondTypes.sol
-struct BondDetailsData {
-  bytes3 currency;
-  uint256 nominalValue;
-  uint8 nominalValueDecimals;
-  uint256 startingDate;
-  uint256 maturityDate;
-}
-```
-
-### Equity USA
-
-- Interface: `contracts/facets/layer_3/equityUSA/IEquityUSA.sol`
-- Resolver key: `RESOLVER_KEY_EQUITY` = `0x32d1b4f5d593b1e786f1c491656e2db7e35a80754244b3c5e787a03db7fcef31`
-
-```solidity
-function initializeEquityUSA(EquityDetailsData calldata _equityDetailsData) external;
-```
-
-#### Events
-
-```solidity
-event EquityUSAInitialized(EquityDetailsData equityDetailsData);
-```
-
-#### Errors
-
-```solidity
-error AccessControlRequired(bytes32 role, address sender);
-error AccountHasNoRole(address account, bytes32 role);
-error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
-```
-
-#### Types
-
-```solidity
-// declared in contracts/factory/ERC3643/interfaces/IEquity.sol
-struct EquityDetailsData {
-  bool votingRight;
-  bool informationRight;
-  bool liquidationRight;
-  bool subscriptionRight;
-  bool conversionRight;
-  bool redemptionRight;
-  bool putRight;
-  DividendType dividendRight;
-  bytes3 currency;
-  uint256 nominalValue;
-  uint8 nominalValueDecimals;
-}
-
-// declared in contracts/factory/ERC3643/interfaces/IEquity.sol
-enum DividendType {
-  NONE,
-  PREFERRED,
-  COMMON
-}
-```
-
 ## Roles
 
 | Role                                    | Value                                                                |
@@ -7245,7 +6650,6 @@ enum DividendType {
 | `ROLE_ADJUSTMENT_BALANCE`               | `0xb246506a8ded65dd6360e8ce033fd9462936d1be64fb9f85c5f60d28cd3ca6da` |
 | `ROLE_AGENT`                            | `0x9830aa071a741c08855dd42130bdb0ff50f7bdf5a4b72f12181eefded0c6542b` |
 | `ROLE_AMORTIZATION`                     | `0x0c8c9cf3db23765397bf525e10c9158fd2a7b58b280d5da82a642247779ae3c1` |
-| `ROLE_BOND_MANAGER`                     | `0x68fe577385095e80beadf873ac12a3100f9a9d1b6d40f0d123eecf3d01bf5c49` |
 | `ROLE_CAP`                              | `0x58d502b7184e1a264e0cacf1a19a6c268356c6d9fda5ad83ab3b599cd3b7f41c` |
 | `ROLE_CLEARING`                         | `0xd0fe259e861ec493f60fb83851f1a173155b0f2acc3da153de2a23fb0ad26db6` |
 | `ROLE_CLEARING_VALIDATOR`               | `0xa24ef577c383d98a9326f932c69c76129dd89a71abcb626993d9f047f4e74abb` |
@@ -7267,6 +6671,7 @@ enum DividendType {
 | `ROLE_LOAN_MANAGER`                     | `0xcfd49258c7f1641d56add8e8efadca919969eb6aab447ec47f2ed34c8492547a` |
 | `ROLE_LOANS_PORTFOLIO_MANAGER`          | `0x90f7adc9b7132ce9c095619ba3e77e8505f2824b906ee99892386b8349a016c6` |
 | `ROLE_LOCKER`                           | `0xd327cd9a2be405896f3d4584b3b437d798833cc4aa0aafb34c870659c0d47184` |
+| `ROLE_MATURITY_MANAGER`                 | `0xc20b7fd7efe1a2c9f69003a21c2c55c79ef84e16252b62599246ff01f6207314` |
 | `ROLE_MATURITY_REDEEMER`                | `0x433f48f8aca23480f6ab07666cbc9131d32a0b4672033453f65e18f4dd390523` |
 | `ROLE_NOMINAL_VALUE`                    | `0xebf9ab6852aef7bc1e4068a64bd360845c54d5d95d4fed9fd47c52bbe7c15b8b` |
 | `ROLE_PAUSE_MANAGER`                    | `0x03e7c996eea5565d823330975718325a2eccfaf55d5ec99de9a1d9d7253c318e` |

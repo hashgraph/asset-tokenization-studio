@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IDocumentation, RESOLVER_KEY_DOCUMENTATION } from "./IDocumentation.sol";
 import { ROLE_DOCUMENTER, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { DocumentationStorageWrapper } from "../../domain/core/DocumentationStorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
@@ -15,7 +15,7 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
  *      Write operations require an operational, activated and unpaused token, and are
  *      restricted to authorised documenters. Document data is persisted through
  *      `DocumentationStorageWrapper`, while timestamps are resolved through
- *      `TimeTravelStorageWrapper` to support deterministic test execution.
+ *      `EvmAccessors` to support deterministic test execution.
  * @author Hashgraph Asset Tokenization
  */
 abstract contract Documentation is IDocumentation, Modifiers {
@@ -49,12 +49,7 @@ abstract contract Documentation is IDocumentation, Modifiers {
         notEmptyURI(_uri)
         notEmptyHash(_documentHash)
     {
-        DocumentationStorageWrapper.setDocumentEntry(
-            _name,
-            _documentHash,
-            TimeTravelStorageWrapper.getBlockTimestamp(),
-            _uri
-        );
+        DocumentationStorageWrapper.setDocumentEntry(_name, _documentHash, EvmAccessors.getBlockTimestamp(), _uri);
         emit DocumentUpdated(_name, _uri, _documentHash);
     }
 

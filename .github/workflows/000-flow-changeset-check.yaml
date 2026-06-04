@@ -4,7 +4,6 @@ on:
   pull_request:
     branches:
       - develop
-      - development
     types:
       - opened
       - synchronize
@@ -52,7 +51,7 @@ jobs:
           # `npx changeset status` reads `baseBranch` from .changeset/config.json
           # (currently "main") and resolves it locally via `getDivergedCommit`. The
           # previous "Fetch base branch" step only fetches the PR base, so `main`
-          # is absent for PRs targeting `development` and the status command
+          # is absent for PRs targeting `develop` and the status command
           # fails with "Failed to find where HEAD diverged from 'main'".
           git fetch origin main:main
 

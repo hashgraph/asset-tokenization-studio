@@ -152,9 +152,6 @@ const BOND_FACETS = [
   "MaturityByPartitionFacet",
 
   // Jurisdiction-Specific
-  "SecurityFacet",
-  "BondUSAFacet",
-  "BondUSAReadFacet",
   "PrincipalFacet",
 ] as const;
 
@@ -170,7 +167,6 @@ const BOND_FACETS = [
  *
  * @param blrContract - BusinessLogicResolver contract instance
  * @param facetAddresses - Map of facet names to their deployed addresses
- * @param useTimeTravel - Whether to use TimeTravel variants (default: false)
  * @param partialBatchDeploy - Whether this is a partial batch deployment (default: false)
  * @param batchSize - Number of facets per batch (default: DEFAULT_BATCH_SIZE)
  * @param confirmations - Number of confirmations to wait for (default: 0 for test environments)
@@ -208,22 +204,18 @@ const BOND_FACETS = [
 export async function createBondConfiguration(
   blrContract: BusinessLogicResolver,
   facetAddresses: Record<string, string>,
-  useTimeTravel: boolean = false,
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
   retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  const facetNames = buildFacetList(BOND_FACETS, useTimeTravel);
+  const facetNames = buildFacetList(BOND_FACETS);
 
   // Build facet data with resolver keys from registry
   const facets = facetNames.map((name) => {
-    // Strip "TimeTravel" suffix to get base name for registry lookup
-    const baseName = name.replace(/TimeTravel$/, "");
-
-    const facetDef = atsRegistry.getFacetDefinition(baseName) ?? getMockFacetDefinition(baseName);
+    const facetDef = atsRegistry.getFacetDefinition(name) ?? getMockFacetDefinition(name);
     if (!facetDef?.resolverKey?.value) {
-      throw new Error(`No resolver key found for facet: ${baseName}`);
+      throw new Error(`No resolver key found for facet: ${name}`);
     }
     return {
       facetName: name,

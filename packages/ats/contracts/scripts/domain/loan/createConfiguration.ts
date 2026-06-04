@@ -33,9 +33,6 @@ import { atsRegistry } from "../atsRegistry";
  *
  * Note: DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet functionality,
  * so we only include DiamondFacet to avoid selector collisions.
- *
- * Note: Loan does NOT include TimeTravel variants (per spec). TimeTravelFacet
- * is injected automatically by the deploy script in test environments.
  */
 const LOAN_FACETS = [
   // Loan Functionality
@@ -151,9 +148,6 @@ const LOAN_FACETS = [
   "AdjustBalancesFacet",
   "ScheduledBalanceAdjustmentFacet",
   "ProtectedPartitionsFacet",
-
-  // Jurisdiction-Specific
-  "SecurityFacet",
 ] as const;
 
 /**
@@ -165,8 +159,6 @@ const LOAN_FACETS = [
  *
  * All implementation logic is handled by the generic createConfiguration()
  * operation in core/operations/blrConfigurations.ts.
- *
- * Note: Loan configuration does NOT include TimeTravel variants.
  *
  * @param blrContract - BusinessLogicResolver contract instance
  * @param facetAddresses - Map of facet names to their deployed addresses
@@ -206,19 +198,17 @@ const LOAN_FACETS = [
 export async function createLoanConfiguration(
   blrContract: BusinessLogicResolver,
   facetAddresses: Record<string, string>,
-  useTimeTravel: boolean = false,
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
   retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  const facetNames = buildFacetList(LOAN_FACETS, useTimeTravel);
+  const facetNames = buildFacetList(LOAN_FACETS);
 
   const facets = facetNames.map((name) => {
-    const baseName = name.replace(/TimeTravel$/, "");
-    const facetDef = atsRegistry.getFacetDefinition(baseName) ?? getMockFacetDefinition(baseName);
+    const facetDef = atsRegistry.getFacetDefinition(name) ?? getMockFacetDefinition(name);
     if (!facetDef?.resolverKey?.value) {
-      throw new Error(`No resolver key found for facet: ${baseName}`);
+      throw new Error(`No resolver key found for facet: ${name}`);
     }
     return {
       facetName: name,

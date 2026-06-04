@@ -5,7 +5,7 @@ import { IRecovery, RESOLVER_KEY_RECOVERY } from "./IRecovery.sol";
 import { ROLE_AGENT } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
@@ -48,7 +48,7 @@ abstract contract Recovery is IRecovery, Modifiers {
             _lostWallet,
             _newWallet,
             _investorOnchainID,
-            TimeTravelStorageWrapper.getBlockTimestamp()
+            EvmAccessors.getBlockTimestamp()
         );
     }
 

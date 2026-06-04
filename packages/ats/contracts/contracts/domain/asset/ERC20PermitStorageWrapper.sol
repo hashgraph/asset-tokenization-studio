@@ -9,7 +9,6 @@ import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ResolverProxyStorageWrapper } from "../core/ResolverProxyStorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
@@ -46,7 +45,7 @@ library ERC20PermitStorageWrapper {
         bytes32 r,
         bytes32 s
     ) internal {
-        if (TimeTravelStorageWrapper.getBlockTimestamp() > deadline) {
+        if (EvmAccessors.getBlockTimestamp() > deadline) {
             revert IERC20Permit.ERC2612ExpiredSignature(deadline);
         }
 

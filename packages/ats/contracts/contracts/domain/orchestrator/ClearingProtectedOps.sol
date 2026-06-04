@@ -2,16 +2,15 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ClearingOps } from "./ClearingOps.sol";
-import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
-import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
+import { IClearingTypes } from "../../facets/clearing/IClearingTypes.sol";
+import { IHoldTypes } from "../../facets/hold/IHoldTypes.sol";
 import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../asset/ERC1594StorageWrapper.sol";
 import { ERC20StorageWrapper } from "../asset/ERC20StorageWrapper.sol";
 import { ThirdPartyType } from "../asset/types/ThirdPartyType.sol";
 import { _checkNonceAndDeadline } from "../../infrastructure/utils/EIP712.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 /**
  * @title ClearingProtectedOps
  * @author Asset Tokenization Studio Team
@@ -45,7 +44,7 @@ library ClearingProtectedOps {
             _protectedClearingOperation.from,
             NonceStorageWrapper.getNonceFor(_protectedClearingOperation.from),
             _protectedClearingOperation.deadline,
-            TimeTravelStorageWrapper.getBlockTimestamp()
+            EvmAccessors.getBlockTimestamp()
         );
 
         ERC1594StorageWrapper.requireNotRecoveredAddresses(_protectedClearingOperation.from, _to);
@@ -90,7 +89,7 @@ library ClearingProtectedOps {
             _protectedClearingOperation.from,
             NonceStorageWrapper.getNonceFor(_protectedClearingOperation.from),
             _protectedClearingOperation.deadline,
-            TimeTravelStorageWrapper.getBlockTimestamp()
+            EvmAccessors.getBlockTimestamp()
         );
 
         ERC1594StorageWrapper.requireNotRecoveredAddresses(_protectedClearingOperation.from, address(0));
@@ -133,7 +132,7 @@ library ClearingProtectedOps {
             _protectedClearingOperation.from,
             NonceStorageWrapper.getNonceFor(_protectedClearingOperation.from),
             _protectedClearingOperation.deadline,
-            TimeTravelStorageWrapper.getBlockTimestamp()
+            EvmAccessors.getBlockTimestamp()
         );
 
         ERC1594StorageWrapper.requireNotRecoveredAddresses(_protectedClearingOperation.from, _hold.to);

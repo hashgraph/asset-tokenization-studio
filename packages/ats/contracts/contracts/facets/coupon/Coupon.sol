@@ -18,7 +18,7 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
  * @title Coupon
  * @author Asset Tokenization Studio Team
  * @notice Abstract base of the unified coupon writer surface exposed by `CouponFacet` for
- *         every bond rate variant (standard, fixed-rate, KPI-linked, SPT). Provides the
+ *         every security rate variant (standard, fixed-rate, KPI-linked, SPT). Provides the
  *         shared coupon lifecycle (`setCoupon`, `cancelCoupon`) plus the per-record reads
  *         consumers need before executing a coupon.
  * @dev Thin forwarder over `CouponStorageWrapper`; holds no storage of its own. Write

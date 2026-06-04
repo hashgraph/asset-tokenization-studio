@@ -641,7 +641,10 @@ describe("Dividends", () => {
     it("GIVEN a non-existent dividend WHEN cancelDividend THEN transaction fails", async () => {
       await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
-      await expect(asset.connect(signer_C).cancelDividend(999)).to.be.rejected;
+      await expect(asset.connect(signer_C).cancelDividend(999)).to.be.revertedWithCustomError(
+        asset,
+        "WrongIndexForAction",
+      );
     });
 
     it("GIVEN multiple dividends WHEN cancelDividend on one THEN only that dividend is cancelled", async () => {
@@ -753,6 +756,17 @@ describe("Dividends", () => {
       await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(deactivatedAsset.connect(base.deployer).cancelDividend(0)).to.be.revertedWithCustomError(
+        deactivatedAsset,
+        "Deactivated",
+      );
+    });
+
+    it("GIVEN a deactivated asset WHEN forceCancelDividend THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(deactivatedAsset.connect(base.deployer).forceCancelDividend(0)).to.be.revertedWithCustomError(
         deactivatedAsset,
         "Deactivated",
       );
