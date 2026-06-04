@@ -31,23 +31,23 @@ Choose the right command based on user input:
 **Default** (staged + unstaged, no user input):
 
 ```
-{ git -C /home/slimbook/proyects/asset-tokenization-studio diff HEAD --diff-filter=d -- '*.sol'; git -C /home/slimbook/proyects/asset-tokenization-studio diff --cached HEAD --diff-filter=d -- '*.sol'; }
+REPO=$(git rev-parse --show-toplevel); { git -C "$REPO" diff HEAD --diff-filter=d -- '*.sol'; git -C "$REPO" diff --cached HEAD --diff-filter=d -- '*.sol'; }
 ```
 
 **User provides `<branch> <base>`** (fork-point diff):
 
 ```
-git -C /home/slimbook/proyects/asset-tokenization-studio diff --diff-filter=d $(git -C /home/slimbook/proyects/asset-tokenization-studio merge-base <branch> <base>)...<branch> -- '*.sol'
+REPO=$(git rev-parse --show-toplevel); git -C "$REPO" diff --diff-filter=d $(git -C "$REPO" merge-base <branch> <base>)...<branch> -- '*.sol'
 ```
 
 **User provides only a branch** — ask before building the command:
 
-> ¿Desde qué rama parte `<branch>`? (ej. `main`, `develop`, `feat/otra-rama`)
+> What is the base branch for `<branch>`? (e.g. `main`, `develop`, `feat/other-branch`)
 
 **User provides a commit hash**:
 
 ```
-git -C /home/slimbook/proyects/asset-tokenization-studio diff --diff-filter=d <hash>^..<hash> -- '*.sol'
+REPO=$(git rev-parse --show-toplevel); git -C "$REPO" diff --diff-filter=d <hash>^..<hash> -- '*.sol'
 ```
 
 ---
@@ -80,15 +80,15 @@ Then check the line count:
 wc -l < /tmp/ats-style-review.diff
 ```
 
-- If **0 lines**: return exactly: `✅ No hay cambios .sol en packages/ats/contracts/contracts/.`
-- If **> 8000 lines**: return exactly: `⚠️ Diff demasiado grande (N líneas). Estrecha el scope.`
+- If **0 lines**: return exactly: `✅ No .sol changes found in packages/ats/contracts/contracts/.`
+- If **> 8000 lines**: return exactly: `⚠️ Diff too large (N lines). Narrow the scope.`
 - Otherwise: continue to STEP B.
 
 **STEP B — Run solhint on the changed files only.** Extract the file paths from the diff and lint only those:
 
 ```bash
 CHANGED=$(grep '^+++ b/' /tmp/ats-style-review.diff | sed 's|^+++ b/||')
-cd /home/slimbook/proyects/asset-tokenization-studio && npx solhint --config packages/ats/contracts/solhint.config.js $CHANGED 2>&1
+cd $(git rev-parse --show-toplevel) && npx solhint --config packages/ats/contracts/solhint.config.js $CHANGED 2>&1
 ```
 
 - If there are solhint violations, collect them as a `LINTING` section to prepend in the output, format:
