@@ -815,7 +815,7 @@ if ! $SKIP_COVERAGE && $ALL_OK; then
   # Build the coverage command respecting --test-file and --test-grep.
   # --testfiles filters files; TEST_GREP is passed via env var (read by hardhat.config.ts).
   COVERAGE_CMD=(npx hardhat coverage)
-  if [[ -n "$_ats_wrapper" ]]; then
+  if [[ -n "${_ats_wrapper:-}" ]]; then
     COVERAGE_CMD+=(--testfiles "$_ats_wrapper")
   elif [[ -n "$TEST_FILE" ]]; then
     COVERAGE_CMD+=(--testfiles "$TEST_FILE")

@@ -15,9 +15,11 @@
  *   Defaults to ./coverage.json in the current working directory.
  */
 
+/* eslint-disable @typescript-eslint/no-require-imports */
 const fs = require("fs");
 const path = require("path");
 const { execSync } = require("child_process");
+/* eslint-enable @typescript-eslint/no-require-imports */
 
 // ── ANSI ─────────────────────────────────────────────────────────────────────
 const R = "\x1b[0m";
@@ -177,7 +179,7 @@ try {
     .map((line) => path.resolve(gitRoot, line.slice(3).trim()));
 
   pendingEntries = allEntries.filter((e) => pendingPaths.includes(e.fullPath));
-} catch (_) {
+} catch {
   // not a git repo or git unavailable
 }
 
