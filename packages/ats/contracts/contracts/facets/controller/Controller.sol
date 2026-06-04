@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IController, RESOLVER_KEY_CONTROLLER } from "./IController.sol";
-import { IERC3643Types } from "../layer_1/ERC3643/IERC3643Types.sol";
+import { IERC3643Types } from "../commonTypes/IERC3643Types.sol";
 import { DEFAULT_ADMIN_ROLE, ROLE_CONTROLLER, ROLE_AGENT, _buildRoles } from "../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
 import { ERC1644StorageWrapper } from "../../domain/asset/ERC1644StorageWrapper.sol";

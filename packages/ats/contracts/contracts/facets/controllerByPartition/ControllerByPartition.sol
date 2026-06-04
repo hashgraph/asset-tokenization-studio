@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IControllerByPartition, RESOLVER_KEY_CONTROLLER_BY_PARTITION } from "./IControllerByPartition.sol";
 import { ROLE_CONTROLLER, ROLE_AGENT, _buildRoles, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
-import { IERC1410Types } from "../layer_1/ERC1400/ERC1410/IERC1410Types.sol";
+import { IERC1410Types } from "../commonTypes/IERC1410Types.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
