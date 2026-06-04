@@ -42,8 +42,8 @@ abstract contract ERC20Permit is IERC20Permit, Modifiers {
         onlyOperational
         onlyActivated
         onlyUnpaused
-        onlyAddressNotZero(owner)
-        onlyAddressNotZero(spender)
+        validateAddressNotZero(owner)
+        validateAddressNotZero(spender)
         onlyCompliant(owner, spender, false)
         onlyWithoutMultiPartition
     {

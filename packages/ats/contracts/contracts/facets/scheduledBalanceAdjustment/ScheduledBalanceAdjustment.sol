@@ -76,7 +76,7 @@ abstract contract ScheduledBalanceAdjustment is IScheduledBalanceAdjustment, Sch
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_CORPORATE_ACTION)
-        onlyValueNotZero(_balanceAdjustmentId)
+        validateUint256NotZero(_balanceAdjustmentId)
         returns (bool success_)
     {
         ScheduledBalanceAdjustmentBase._cancelScheduledBalanceAdjustment(_balanceAdjustmentId);
@@ -116,7 +116,7 @@ abstract contract ScheduledBalanceAdjustment is IScheduledBalanceAdjustment, Sch
         external
         view
         override
-        onlyValueNotZero(_balanceAdjustmentID)
+        validateUint256NotZero(_balanceAdjustmentID)
         onlyMatchingActionType(CORPORATE_ACTION_TYPE_BALANCE_ADJUSTMENT, _balanceAdjustmentID - 1)
         returns (IScheduledBalanceAdjustment.ScheduledBalanceAdjustment memory balanceAdjustment_, bool isDisabled_)
     {

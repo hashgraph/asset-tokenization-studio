@@ -48,8 +48,8 @@ abstract contract Loan is ILoan, Modifiers {
         onlyValidTimestamp(loanDetailsData_.loanBasicData.signingDate)
         onlyValidTimestamp(loanDetailsData_.loanInterestData.firstAccrualDate)
         validateDates(loanDetailsData_.loanBasicData.startingDate, loanDetailsData_.loanBasicData.maturityDate)
-        onlyAddressNotZero(loanDetailsData_.loanBasicData.originatorAccount)
-        onlyAddressNotZero(loanDetailsData_.loanBasicData.servicerAccount)
+        validateAddressNotZero(loanDetailsData_.loanBasicData.originatorAccount)
+        validateAddressNotZero(loanDetailsData_.loanBasicData.servicerAccount)
     {
         LoanStorageWrapper.setLoanDetails(loanDetailsData_);
     }

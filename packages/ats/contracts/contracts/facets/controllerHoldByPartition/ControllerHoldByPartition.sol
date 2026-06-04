@@ -47,8 +47,8 @@ abstract contract ControllerHoldByPartition is IControllerHoldByPartition, Modif
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_CONTROLLER)
-        onlyAddressNotZero(_from)
-        onlyAddressNotZero(_hold.escrow)
+        validateAddressNotZero(_from)
+        validateAddressNotZero(_hold.escrow)
         onlyUnrecoveredAddress(_from)
         onlyValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyDefaultPartitionWithSinglePartition(_partition)

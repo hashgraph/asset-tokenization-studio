@@ -17,7 +17,7 @@ abstract contract Initializer is IInitializer, Modifiers {
     )
         external
         override
-        onlyValueNotZero(_maxInitializerFacetIndex)
+        validateUint256NotZero(_maxInitializerFacetIndex)
         onlyFacetNotRegistered(RESOLVER_KEY_INITIALIZER)
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
@@ -29,7 +29,7 @@ abstract contract Initializer is IInitializer, Modifiers {
     /// @inheritdoc IInitializer
     function updateMaxInitializerFacetIndex(
         uint256 _newMaxInitializerFacetIndex
-    ) external override onlyValueNotZero(_newMaxInitializerFacetIndex) onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external override validateUint256NotZero(_newMaxInitializerFacetIndex) onlyRole(DEFAULT_ADMIN_ROLE) {
         InitializerStorageWrapper.setMaxInitializerFacetIndex(_newMaxInitializerFacetIndex);
         emit MaxInitializerFacetIndexUpdated(EvmAccessors.getMsgSender(), _newMaxInitializerFacetIndex);
     }

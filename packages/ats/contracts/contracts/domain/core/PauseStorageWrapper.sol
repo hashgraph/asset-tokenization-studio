@@ -24,7 +24,6 @@ bytes32 constant STORAGE_LOCATION_PAUSE = 0x3bf57dcdaf5f1e5afff95a10b7216bcff83f
  *      New fields must be appended below the APPEND-ONLY marker to preserve upgrade safety.
  * @custom:storage-location erc7201:security.token.standard.storage.Pause
  */
-
 struct PauseDataStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
     bool paused;

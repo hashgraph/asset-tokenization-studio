@@ -51,7 +51,7 @@ abstract contract ProtectedClearingHoldByPartition is IProtectedClearingHoldByPa
         onlyUnrecoveredAddress(_protectedClearingOperation.from)
         onlyUnrecoveredAddress(_hold.to)
         onlyProtectedPartitions
-        onlyAddressNotZero(_protectedClearingOperation.from)
+        validateAddressNotZero(_protectedClearingOperation.from)
         onlyWithValidExpirationTimestamp(_protectedClearingOperation.clearingOperation.expirationTimestamp)
         onlyRole(
             ProtectedPartitionsStorageWrapper.protectedPartitionsRole(
