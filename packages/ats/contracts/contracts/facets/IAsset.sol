@@ -48,10 +48,10 @@ import { IKyc } from "./kyc/IKyc.sol";
 // (different InterestRate struct), which cannot be reconciled in a single Solidity interface.
 // Use the typed instance directly when testing KPI-linked rate facets.
 import { ILoan } from "./loan/ILoan.sol";
-import { INominalValue } from "./layer_2/nominalValue/INominalValue.sol";
+import { INominalValue } from "./nominalValue/INominalValue.sol";
 import { INominalValueAtSnapshot } from "./nominalValueAtSnapshot/INominalValueAtSnapshot.sol";
 import { IPause } from "./pause/IPause.sol";
-import { ILoansPortfolio } from "./layer_2/loansPortfolio/ILoansPortfolio.sol";
+import { ILoansPortfolio } from "./loansPortfolio/ILoansPortfolio.sol";
 import { IVoting } from "./voting/IVoting.sol";
 import { IVotingSecurityHolders } from "./votingSecurityHolders/IVotingSecurityHolders.sol";
 

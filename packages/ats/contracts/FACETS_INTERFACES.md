@@ -82,6 +82,7 @@
   - [KPIs](#kpis)
   - [KYC](#kyc)
   - [Loan](#loan)
+  - [Loans Portfolio](#loans-portfolio)
   - [Lock](#lock)
   - [Lock At Snapshot](#lock-at-snapshot)
   - [Lock At Snapshot By Partition](#lock-at-snapshot-by-partition)
@@ -90,6 +91,7 @@
   - [Maturity By Partition](#maturity-by-partition)
   - [Mint](#mint)
   - [Mint By Partition](#mint-by-partition)
+  - [Nominal Value](#nominal-value)
   - [Nominal Value At Snapshot](#nominal-value-at-snapshot)
   - [Nonces](#nonces)
   - [Operator](#operator)
@@ -126,8 +128,6 @@
   - [Voting Security Holders](#voting-security-holders)
   - [Compliance](#compliance)
   - [Identity Registry](#identity-registry)
-  - [Loans Portfolio](#loans-portfolio)
-  - [Nominal Value](#nominal-value)
 - [Roles](#roles)
 
 ## Facets
@@ -4315,6 +4315,113 @@ enum PerformanceStatus {
 }
 ```
 
+### Loans Portfolio
+
+- Interface: `contracts/facets/loansPortfolio/ILoansPortfolio.sol`
+- Resolver key: `RESOLVER_KEY_LOANS_PORTFOLIO` = `0x3f6ea14bbeaea82befb49409b874caf151715c6619ac1d26ba858039b7ece33e`
+
+```solidity
+function initializeLoansPortfolio(ILoansPortfolio.LoansPortfolioDetailsData calldata _loansPortfolioData) external;
+function addHoldingsAsset(HoldingsAsset memory _holdingsAsset) external returns (bool success_);
+function removeHoldingsAsset(HoldingsAsset memory _holdingsAsset) external returns (bool success_);
+function notifyLoanHoldingsAssetUpdate(address _holdingsAssetAddress) external returns (bool success_);
+function loansPortfolioWithdraw(address _assetAddress, address _to, uint256 _amount) external returns (bool success_);
+function getLoansPortfolioData() external view returns (LoansPortfolioDetailsData memory loansPortfolioData_);
+function getHoldingsAssets(uint256 _pageIndex, uint256 _pageLength) external view returns (address[] memory assets_);
+function getLoanHoldingsAssets(
+  uint256 _pageIndex,
+  uint256 _pageLength
+) external view returns (address[] memory assets_);
+function getHoldingsAssetOwnership(
+  uint256 _pageIndex,
+  uint256 _pageLength
+) external view returns (address[] memory assets_, uint256[] memory balances_);
+function getNumberOfAssets() external view returns (uint256 numberOfAssets_);
+function getNumberOfLoans() external view returns (uint256 numberOfLoans_);
+function getNumberOfCash() external view returns (uint256 numberOfCash_);
+function getNumberOfPerformingLoans() external view returns (uint256 numberOfPerformingLoans_);
+function getNumberOfNonPerformingLoans() external view returns (uint256 numberOfNonPerformingLoans_);
+function getNumberDefaultedLoans() external view returns (uint256 numberDefaultedLoans_);
+function getSecuredLoansRatio() external view returns (uint256 numerator_, uint256 denominator_);
+function getPerformingLoansRatio() external view returns (uint256 numerator_, uint256 denominator_);
+function getNonPerformingLoansRatio() external view returns (uint256 numerator_, uint256 denominator_);
+function getDefaultedLoansRatio() external view returns (uint256 numerator_, uint256 denominator_);
+function getGeographicalExposure() external view returns (GeographicalExposureData[] memory geographicalExposure_);
+```
+
+#### Events
+
+```solidity
+event HoldingsAssetAdded(HoldingsAsset holdingsAsset);
+event HoldingsAssetRemoved(HoldingsAsset holdingsAsset);
+event LoanHoldingsAssetUpdated(address loanHoldingsAsset);
+event LoansPortfolioInitialized(LoansPortfolioDetailsData loansPortfolioData);
+event LoansPortfolioWithdrawn(address assetAddress, address to, uint256 amount);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
+error HoldingAssetNotFound(address assetAddress);
+error HoldingsAssetAlreadyExists(address assetAddress);
+error HoldingsAssetTypeNotSupported(uint8 holdingsAssetType);
+error IsPaused();
+error ZeroAddressNotAllowed();
+error ZeroValue();
+```
+
+#### Types
+
+```solidity
+// declared in contracts/facets/loansPortfolio/ILoansPortfolio.sol
+struct LoansPortfolioDetailsData {
+  PortfolioType portfolioType;
+  DistributionPolicy distributionPolicy;
+}
+
+// declared in contracts/facets/loansPortfolio/ILoansPortfolio.sol
+struct HoldingsAsset {
+  address assetAddress;
+  HoldingsAssetType holdingsAssetType;
+  string country;
+}
+
+// declared in contracts/facets/loansPortfolio/ILoansPortfolio.sol
+struct GeographicalExposureData {
+  string country;
+  uint256 count;
+}
+
+// declared in contracts/facets/loansPortfolio/ILoansPortfolio.sol
+enum PortfolioType {
+  NONE,
+  STATIC,
+  REVOLVING,
+  MANAGED,
+  OPEN,
+  CLOSED
+}
+
+// declared in contracts/facets/loansPortfolio/ILoansPortfolio.sol
+enum DistributionPolicy {
+  NONE,
+  DIRECT_PASSTHROUGH,
+  ACCRUED
+}
+
+// declared in contracts/facets/loansPortfolio/ILoansPortfolio.sol
+enum HoldingsAssetType {
+  NONE,
+  LOAN,
+  CASH
+}
+```
+
 ### Lock
 
 - Interface: `contracts/facets/lock/ILock.sol`
@@ -4716,6 +4823,42 @@ struct IssueData {
   uint256 value;
   bytes data;
 }
+```
+
+### Nominal Value
+
+- Interface: `contracts/facets/nominalValue/INominalValue.sol`
+- Resolver key: `RESOLVER_KEY_NOMINAL_VALUE` = `0xfa54bc09a6a76763f17be0504e29b9c28edd15cdc3432c07f92c2b6962f2fbbe`
+
+```solidity
+function initializeNominalValue(
+  uint256 _nominalValue,
+  uint8 _nominalValueDecimals,
+  bytes3 _nominalValueCurrency
+) external;
+function setNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals) external;
+function setNominalValueCurrency(bytes3 _nominalValueCurrency) external;
+function getNominalValue() external view returns (uint256);
+function getNominalValueDecimals() external view returns (uint8);
+function getNominalValueCurrency() external view returns (bytes3);
+```
+
+#### Events
+
+```solidity
+event NominalValueCurrencySet(address indexed operator, bytes3 nominalValueCurrency);
+event NominalValueInitialized(uint256 nominalValue, uint8 nominalValueDecimals, bytes3 nominalValueCurrency);
+event NominalValueSet(address indexed operator, uint256 nominalValue, uint8 nominalValueDecimals);
+```
+
+#### Errors
+
+```solidity
+error AccessControlRequired(bytes32 role, address sender);
+error AccountHasNoRole(address account, bytes32 role);
+error AssetNotOperational(bytes32 configId, uint256 versionId);
+error Deactivated();
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 ```
 
 ### Nominal Value At Snapshot
@@ -6847,151 +6990,6 @@ function canTransfer(address _from, address _to, uint256 _amount) external view 
 
 ```solidity
 function isVerified(address _userAddress) external view returns (bool);
-```
-
-<!-- layer_2 -->
-
-### Loans Portfolio
-
-- Interface: `contracts/facets/layer_2/loansPortfolio/ILoansPortfolio.sol`
-- Resolver key: `RESOLVER_KEY_LOANS_PORTFOLIO` = `0x3f6ea14bbeaea82befb49409b874caf151715c6619ac1d26ba858039b7ece33e`
-
-```solidity
-function initializeLoansPortfolio(ILoansPortfolio.LoansPortfolioDetailsData calldata _loansPortfolioData) external;
-function addHoldingsAsset(HoldingsAsset memory _holdingsAsset) external returns (bool success_);
-function removeHoldingsAsset(HoldingsAsset memory _holdingsAsset) external returns (bool success_);
-function notifyLoanHoldingsAssetUpdate(address _holdingsAssetAddress) external returns (bool success_);
-function loansPortfolioWithdraw(address _assetAddress, address _to, uint256 _amount) external returns (bool success_);
-function getLoansPortfolioData() external view returns (LoansPortfolioDetailsData memory loansPortfolioData_);
-function getHoldingsAssets(uint256 _pageIndex, uint256 _pageLength) external view returns (address[] memory assets_);
-function getLoanHoldingsAssets(
-  uint256 _pageIndex,
-  uint256 _pageLength
-) external view returns (address[] memory assets_);
-function getHoldingsAssetOwnership(
-  uint256 _pageIndex,
-  uint256 _pageLength
-) external view returns (address[] memory assets_, uint256[] memory balances_);
-function getNumberOfAssets() external view returns (uint256 numberOfAssets_);
-function getNumberOfLoans() external view returns (uint256 numberOfLoans_);
-function getNumberOfCash() external view returns (uint256 numberOfCash_);
-function getNumberOfPerformingLoans() external view returns (uint256 numberOfPerformingLoans_);
-function getNumberOfNonPerformingLoans() external view returns (uint256 numberOfNonPerformingLoans_);
-function getNumberDefaultedLoans() external view returns (uint256 numberDefaultedLoans_);
-function getSecuredLoansRatio() external view returns (uint256 numerator_, uint256 denominator_);
-function getPerformingLoansRatio() external view returns (uint256 numerator_, uint256 denominator_);
-function getNonPerformingLoansRatio() external view returns (uint256 numerator_, uint256 denominator_);
-function getDefaultedLoansRatio() external view returns (uint256 numerator_, uint256 denominator_);
-function getGeographicalExposure() external view returns (GeographicalExposureData[] memory geographicalExposure_);
-```
-
-#### Events
-
-```solidity
-event HoldingsAssetAdded(HoldingsAsset holdingsAsset);
-event HoldingsAssetRemoved(HoldingsAsset holdingsAsset);
-event LoanHoldingsAssetUpdated(address loanHoldingsAsset);
-event LoansPortfolioInitialized(LoansPortfolioDetailsData loansPortfolioData);
-event LoansPortfolioWithdrawn(address assetAddress, address to, uint256 amount);
-```
-
-#### Errors
-
-```solidity
-error AccessControlRequired(bytes32 role, address sender);
-error AccountHasNoRole(address account, bytes32 role);
-error AssetNotOperational(bytes32 configId, uint256 versionId);
-error Deactivated();
-error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
-error HoldingAssetNotFound(address assetAddress);
-error HoldingsAssetAlreadyExists(address assetAddress);
-error HoldingsAssetTypeNotSupported(uint8 holdingsAssetType);
-error IsPaused();
-error ZeroAddressNotAllowed();
-error ZeroValue();
-```
-
-#### Types
-
-```solidity
-// declared in contracts/facets/layer_2/loansPortfolio/ILoansPortfolio.sol
-struct LoansPortfolioDetailsData {
-  PortfolioType portfolioType;
-  DistributionPolicy distributionPolicy;
-}
-
-// declared in contracts/facets/layer_2/loansPortfolio/ILoansPortfolio.sol
-struct HoldingsAsset {
-  address assetAddress;
-  HoldingsAssetType holdingsAssetType;
-  string country;
-}
-
-// declared in contracts/facets/layer_2/loansPortfolio/ILoansPortfolio.sol
-struct GeographicalExposureData {
-  string country;
-  uint256 count;
-}
-
-// declared in contracts/facets/layer_2/loansPortfolio/ILoansPortfolio.sol
-enum PortfolioType {
-  NONE,
-  STATIC,
-  REVOLVING,
-  MANAGED,
-  OPEN,
-  CLOSED
-}
-
-// declared in contracts/facets/layer_2/loansPortfolio/ILoansPortfolio.sol
-enum DistributionPolicy {
-  NONE,
-  DIRECT_PASSTHROUGH,
-  ACCRUED
-}
-
-// declared in contracts/facets/layer_2/loansPortfolio/ILoansPortfolio.sol
-enum HoldingsAssetType {
-  NONE,
-  LOAN,
-  CASH
-}
-```
-
-### Nominal Value
-
-- Interface: `contracts/facets/layer_2/nominalValue/INominalValue.sol`
-- Resolver key: `RESOLVER_KEY_NOMINAL_VALUE` = `0xfa54bc09a6a76763f17be0504e29b9c28edd15cdc3432c07f92c2b6962f2fbbe`
-
-```solidity
-function initializeNominalValue(
-  uint256 _nominalValue,
-  uint8 _nominalValueDecimals,
-  bytes3 _nominalValueCurrency
-) external;
-function setNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals) external;
-function setNominalValueCurrency(bytes3 _nominalValueCurrency) external;
-function getNominalValue() external view returns (uint256);
-function getNominalValueDecimals() external view returns (uint8);
-function getNominalValueCurrency() external view returns (bytes3);
-```
-
-#### Events
-
-```solidity
-event NominalValueCurrencySet(address indexed operator, bytes3 nominalValueCurrency);
-event NominalValueInitialized(uint256 nominalValue, uint8 nominalValueDecimals, bytes3 nominalValueCurrency);
-event NominalValueSet(address indexed operator, uint256 nominalValue, uint8 nominalValueDecimals);
-```
-
-#### Errors
-
-```solidity
-error AccessControlRequired(bytes32 role, address sender);
-error AccountHasNoRole(address account, bytes32 role);
-error AssetNotOperational(bytes32 configId, uint256 versionId);
-error Deactivated();
-error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion);
 ```
 
 ## Roles
