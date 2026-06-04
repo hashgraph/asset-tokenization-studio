@@ -32,9 +32,9 @@ import { ITransfer } from "./transfer/ITransfer.sol";
 // Layer 1 — Remaining facets
 import { IERC20Votes } from "./erc20Votes/IERC20Votes.sol";
 import { IERC3643 } from "./layer_1/ERC3643/IERC3643.sol";
-import { IExternalControlList } from "./layer_1/externalControlList/IExternalControlList.sol";
+import { IExternalControlList } from "./externalControlListManagement/IExternalControlList.sol";
 import { IExternalControlListManagement } from "./externalControlListManagement/IExternalControlListManagement.sol";
-import { IExternalKycList } from "./layer_1/externalKycList/IExternalKycList.sol";
+import { IExternalKycList } from "./externalKycListManagement/IExternalKycList.sol";
 import { IExternalKycListManagement } from "./externalKycListManagement/IExternalKycListManagement.sol";
 import { IExternalPauseManagement } from "./externalPauseManagement/IExternalPauseManagement.sol";
 import { IFixedRate } from "./fixedRate/IFixedRate.sol";
@@ -47,11 +47,11 @@ import { IKyc } from "./kyc/IKyc.sol";
 // IKpiLinkedRate is excluded: it defines getInterestRate() with an incompatible return type
 // (different InterestRate struct), which cannot be reconciled in a single Solidity interface.
 // Use the typed instance directly when testing KPI-linked rate facets.
-import { ILoan } from "./layer_2/loan/ILoan.sol";
-import { INominalValue } from "./layer_2/nominalValue/INominalValue.sol";
+import { ILoan } from "./loan/ILoan.sol";
+import { INominalValue } from "./nominalValue/INominalValue.sol";
 import { INominalValueAtSnapshot } from "./nominalValueAtSnapshot/INominalValueAtSnapshot.sol";
 import { IPause } from "./pause/IPause.sol";
-import { ILoansPortfolio } from "./layer_2/loansPortfolio/ILoansPortfolio.sol";
+import { ILoansPortfolio } from "./loansPortfolio/ILoansPortfolio.sol";
 import { IVoting } from "./voting/IVoting.sol";
 import { IVotingSecurityHolders } from "./votingSecurityHolders/IVotingSecurityHolders.sol";
 

@@ -2,17 +2,19 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ILoan, RESOLVER_KEY_LOAN } from "./ILoan.sol";
-import { ROLE_LOAN_MANAGER, DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
-import { LoanStorageWrapper } from "../../../domain/asset/LoanStorageWrapper.sol";
-import { Modifiers } from "../../../services/Modifiers.sol";
-import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
-import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
+import { ROLE_LOAN_MANAGER, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { LoanStorageWrapper } from "../../domain/asset/LoanStorageWrapper.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
- * @title Loan
- * @notice Abstract contract implementing loan lifecycle operations
- * @dev Provides loan creation, state management, interest accrual, and redemption
- * @author Hashgraph
+ * @title  Loan
+ * @author Asset Tokenization Studio Team
+ * @notice Abstract implementation of `ILoan`.
+ * @dev    Delegates all storage reads and writes to `LoanStorageWrapper`. Access guards
+ *         are enforced via `Modifiers`; date validation uses `onlyValidTimestamp` and
+ *         `validateDates`.
  */
 abstract contract Loan is ILoan, Modifiers {
     /// @inheritdoc ILoan

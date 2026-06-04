@@ -3,9 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
-import { ILoansPortfolio } from "../../facets/layer_2/loansPortfolio/ILoansPortfolio.sol";
-import { ILoan } from "../../facets/layer_2/loan/ILoan.sol";
+import { ILoan } from "../../facets/loan/ILoan.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
+import { ILoansPortfolio } from "../../facets/loansPortfolio/ILoansPortfolio.sol";
 import { ITransferByPartition } from "../../facets/transferByPartition/ITransferByPartition.sol";
 import { IBalanceTrackerByPartition } from "../../facets/balanceTrackerByPartition/IBalanceTrackerByPartition.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";

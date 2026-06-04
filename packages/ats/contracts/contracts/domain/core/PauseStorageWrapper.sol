@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IExternalPause } from "../../facets/layer_1/externalPause/IExternalPause.sol";
+import { IExternalPause } from "../../facets/externalPauseManagement/IExternalPause.sol";
 import { IPause } from "../../facets/pause/IPause.sol";
 import {
     ExternalListManagementStorageWrapper,

@@ -3,8 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { NominalValue } from "./NominalValue.sol";
 import { INominalValue, RESOLVER_KEY_NOMINAL_VALUE } from "./INominalValue.sol";
-import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import { Bytes4Builder } from "../../../infrastructure/proxy/Bytes4Builder.sol";
+import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 /**
  * @title NominalValueFacet
  * @author Asset Tokenization Studio Team
