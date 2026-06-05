@@ -1,7 +1,7 @@
 # docs/ats/api/contracts is fully regenerated on every doc build by dodoc
 # (hardhat-dodoc with freshOutput: true wipes and recreates the whole folder),
-# so merging another branch's copy is never meaningful. Always keep our local
-# version to avoid spurious merge conflicts. This requires each clone to register
-# the "ours" driver locally (done via the root "prepare" npm script):
-# git config merge.ours.driver true
-docs/ats/api/contracts/** merge=ours
+# so merging another branch's copy is never meaningful. Always take the incoming
+# branch's version to avoid spurious merge conflicts. This requires each clone to
+# register the "theirs" driver locally (done via the root "prepare" npm script):
+# git config merge.theirs.driver 'cp -f "%B" "%A"'
+docs/ats/api/contracts/** merge=theirs
