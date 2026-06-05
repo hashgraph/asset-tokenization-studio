@@ -246,21 +246,6 @@ Emitted when a protected hold authorised by an EIP-712 signature is created.
 
 ## Errors
 
-### AccessControlRequired
-
-```solidity
-error AccessControlRequired(bytes32 role, address sender)
-```
-
-_Emitted when a role check fails_
-
-#### Parameters
-
-| Name   | Type    | Description |
-| ------ | ------- | ----------- |
-| role   | bytes32 | undefined   |
-| sender | address | undefined   |
-
 ### AccountHasNoRole
 
 ```solidity

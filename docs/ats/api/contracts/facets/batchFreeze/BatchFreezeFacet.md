@@ -237,21 +237,6 @@ Raised when attempting to change ABAF for a block that is forbidden
 | ----------- | ------- | ---------------------------------- |
 | blockNumber | uint256 | The block number that is forbidden |
 
-### AccessControlRequired
-
-```solidity
-error AccessControlRequired(bytes32 role, address sender)
-```
-
-_Emitted when a role check fails_
-
-#### Parameters
-
-| Name   | Type    | Description |
-| ------ | ------- | ----------- |
-| role   | bytes32 | undefined   |
-| sender | address | undefined   |
-
 ### AccountHasNoRole
 
 ```solidity

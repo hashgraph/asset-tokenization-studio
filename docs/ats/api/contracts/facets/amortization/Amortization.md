@@ -487,21 +487,6 @@ event TransferByPartition(bytes32 indexed _fromPartition, address _operator, add
 
 ## Errors
 
-### AccessControlRequired
-
-```solidity
-error AccessControlRequired(bytes32 role, address sender)
-```
-
-_Emitted when a role check fails_
-
-#### Parameters
-
-| Name   | Type    | Description |
-| ------ | ------- | ----------- |
-| role   | bytes32 | undefined   |
-| sender | address | undefined   |
-
 ### AccountHasNoRole
 
 ```solidity
