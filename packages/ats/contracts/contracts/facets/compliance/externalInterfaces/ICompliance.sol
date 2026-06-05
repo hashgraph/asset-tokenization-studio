@@ -8,7 +8,6 @@ pragma solidity >=0.8.0 <0.9.0;
  *         token. The token calls these functions on every transfer, issuance, and redemption
  *         so the compliance module can enforce rules and maintain its own internal state.
  */
-/* solhint-disable-next-line no-empty-blocks */
 interface ICompliance {
     /**
      * @notice Notifies the compliance module that a transfer has been executed.

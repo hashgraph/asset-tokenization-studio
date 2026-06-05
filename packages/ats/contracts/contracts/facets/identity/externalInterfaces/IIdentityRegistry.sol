@@ -8,7 +8,6 @@ pragma solidity >=0.8.0 <0.9.0;
  *         registered on the token. The token calls `isVerified` before allowing a transfer
  *         to ensure the recipient has passed KYC/AML checks.
  */
-/* solhint-disable-next-line no-empty-blocks */
 interface IIdentityRegistry {
     /**
      * @notice Returns whether `_userAddress` has a verified identity in the registry.
