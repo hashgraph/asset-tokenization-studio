@@ -9,7 +9,7 @@ import { IPause } from "../pause/IPause.sol";
 import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
 import { Eip1066 } from "../../constants/eip1066.sol";
-import { ICompliance } from "../layer_1/ERC3643/ICompliance.sol";
+import { ICompliance } from "./externalInterfaces/ICompliance.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 

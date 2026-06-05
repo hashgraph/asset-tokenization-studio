@@ -6,7 +6,7 @@ import { SNAPSHOT_RESULT_ID, _DEFAULT_PARTITION } from "../../constants/values.s
 import { CORPORATE_ACTION_TYPE_AMORTIZATION, SCHEDULED_TASK_TYPE_SNAPSHOT } from "../../constants/dispatchTypes.sol";
 import { IAmortization } from "../../facets/amortization/IAmortization.sol";
 import { IHoldTypes } from "../../facets/hold/IHoldTypes.sol";
-import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
+import { IERC1410Types } from "../../facets/commonTypes/IERC1410Types.sol";
 import { ITransfer } from "../../facets/transfer/ITransfer.sol";
 import { ThirdPartyType } from "./types/ThirdPartyType.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
