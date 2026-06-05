@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ICompliance } from "../layer_1/ERC3643/ICompliance.sol";
+import { ICompliance } from "./externalInterfaces/ICompliance.sol";
 
 /// @custom:hash resolverKey Compliance
 bytes32 constant RESOLVER_KEY_COMPLIANCE = 0x0e30d654f46079d52767224a07d1fe1adc91d7edba6504f2f0adca0fca972180;

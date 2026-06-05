@@ -9,7 +9,7 @@ import { ERC1410StorageWrapper } from "../asset/ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "../asset/ERC20StorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../asset/ERC1594StorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "../asset/SnapshotsStorageWrapper.sol";
-import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
+import { IERC1410Types } from "../../facets/commonTypes/IERC1410Types.sol";
 import { IProtectedPartitions } from "../../facets/protectedPartition/IProtectedPartitions.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { IPrincipal } from "../../facets/principal/IPrincipal.sol";
