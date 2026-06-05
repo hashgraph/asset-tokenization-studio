@@ -74,8 +74,6 @@ abstract contract Burn is IBurn, Modifiers {
         override
         onlyOperational
         onlyActivated
-        onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
-        onlyUnrecoveredAddress(_tokenHolder)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
         onlyCanRedeemFromByPartition(_tokenHolder, _DEFAULT_PARTITION, _value)

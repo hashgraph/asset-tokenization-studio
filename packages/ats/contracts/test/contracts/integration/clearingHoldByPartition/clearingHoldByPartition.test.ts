@@ -234,7 +234,7 @@ describe("ClearingHoldByPartitionFacet Tests", () => {
         });
       });
 
-      describe("notZeroAddress modifier", () => {
+      describe("onlyAddressNotZero modifier", () => {
         it("GIVEN a zero escrow address WHEN clearingCreateHoldByPartition THEN transaction fails with ZeroAddressNotAllowed", async () => {
           const hold_wrong = { ...hold, escrow: ADDRESS_ZERO };
           await expect(
@@ -397,7 +397,7 @@ describe("ClearingHoldByPartitionFacet Tests", () => {
         });
       });
 
-      describe("notZeroAddress modifier", () => {
+      describe("onlyAddressNotZero modifier", () => {
         it("GIVEN a zero from address WHEN clearingCreateHoldFromByPartition THEN transaction fails with ZeroAddressNotAllowed", async () => {
           const clearingOperationFrom_wrong = { ...clearingOperationFrom, from: ADDRESS_ZERO };
           await expect(

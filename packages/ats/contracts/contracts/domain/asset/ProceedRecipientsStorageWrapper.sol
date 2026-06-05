@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IProceedRecipients } from "../../facets/proceedRecipient/IProceedRecipients.sol";
 import { ExternalListManagementStorageWrapper } from "../core/ExternalListManagementStorageWrapper.sol";
+import { DefaultValueValidation } from "../../infrastructure/utils/DefaultValueValidation.sol";
 
 /// @custom:hash storage ProceedRecipients
 // solhint-disable-next-line max-line-length
@@ -50,7 +51,7 @@ library ProceedRecipientsStorageWrapper {
     function initializeProceedRecipients(address[] calldata _proceedRecipients, bytes[] calldata _data) internal {
         uint256 length = _proceedRecipients.length;
         for (uint256 index; index < length; ) {
-            ExternalListManagementStorageWrapper.checkValidAddress(_proceedRecipients[index]);
+            DefaultValueValidation.checkZeroAddress(_proceedRecipients[index]);
             addProceedRecipient(_proceedRecipients[index], _data[index]);
             unchecked {
                 ++index;

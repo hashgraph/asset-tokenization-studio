@@ -7,6 +7,7 @@ import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { EMPTY_BYTES } from "../../constants/values.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
@@ -48,11 +49,13 @@ abstract contract BatchTransfer is IBatchTransfer, Modifiers {
     {
         uint256 length = _toList.length;
         for (uint256 i; i < length; ) {
-            ERC1594StorageWrapper.requireCanTransferFromByPartition(
+            ERC1594StorageWrapper.checkCanTransferFromByPartition(
                 EvmAccessors.getMsgSender(),
                 _toList[i],
                 _DEFAULT_PARTITION,
-                _amounts[i]
+                _amounts[i],
+                EMPTY_BYTES,
+                EMPTY_BYTES
             );
             unchecked {
                 ++i;

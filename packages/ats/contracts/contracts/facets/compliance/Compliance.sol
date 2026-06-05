@@ -52,7 +52,7 @@ abstract contract Compliance is IComplianceFacet, Modifiers {
         if (PauseStorageWrapper.isPaused()) {
             return (false, Eip1066.PAUSED, IPause.IsPaused.selector);
         }
-        (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.isAbleToTransferFromByPartition(
+        (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.canTransferFromByPartition(
             EvmAccessors.getMsgSender(),
             _to,
             _DEFAULT_PARTITION,
@@ -74,7 +74,7 @@ abstract contract Compliance is IComplianceFacet, Modifiers {
         if (PauseStorageWrapper.isPaused()) {
             return (false, Eip1066.PAUSED, IPause.IsPaused.selector);
         }
-        (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.isAbleToTransferFromByPartition(
+        (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.canTransferFromByPartition(
             _from,
             _to,
             _DEFAULT_PARTITION,
