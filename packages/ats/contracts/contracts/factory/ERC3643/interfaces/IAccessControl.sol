@@ -50,16 +50,8 @@ interface TRexIAccessControl {
      * @param requestedRoles The roles that were submitted by the caller.
      * @param requestedStates Corresponding grant/revoke flags; `true` means granted, `false` revoked.
      * @param account The account to which the roles were applied.
-     * @param appliedRoles The subset of `requestedRoles` whose state effectively changed.
-     * @param appliedStates The corresponding final state for each effectively applied role.
      */
-    event RolesApplied(
-        bytes32[] requestedRoles,
-        bool[] requestedStates,
-        address account,
-        bytes32[] appliedRoles,
-        bool[] appliedStates
-    );
+    event RolesApplied(bytes32[] requestedRoles, bool[] requestedStates, address account);
 
     /**
      * @notice Emitted once when the AccessControl capability is initialised on a token.
