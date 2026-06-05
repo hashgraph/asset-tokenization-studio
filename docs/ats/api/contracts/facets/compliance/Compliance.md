@@ -117,11 +117,13 @@ _Requires an operational, activated, unpaused token and `TREX_OWNER_ROLE`._
 event ComplianceAdded(address indexed compliance)
 ```
 
+Emitted when the compliance contract address is updated.
+
 #### Parameters
 
-| Name                 | Type    | Description |
-| -------------------- | ------- | ----------- |
-| compliance `indexed` | address | undefined   |
+| Name                 | Type    | Description                                     |
+| -------------------- | ------- | ----------------------------------------------- |
+| compliance `indexed` | address | Address of the newly wired compliance contract. |
 
 ### ComplianceInitialized
 
@@ -207,3 +209,5 @@ Thrown when an operation that requires the token to be unpaused is attempted whi
 ```solidity
 error NotAllowedInMultiPartitionMode()
 ```
+
+Thrown when a single-partition operation is attempted on a multi-partition token.

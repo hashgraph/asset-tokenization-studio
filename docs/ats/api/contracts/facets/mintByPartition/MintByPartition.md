@@ -157,14 +157,18 @@ Thrown when a mint would cause a partition&#39;s total supply to exceed its cap.
 error PartitionNotAllowedInSinglePartitionMode(bytes32 partition)
 ```
 
+Thrown when a multi-partition operation specifies a partition not permitted in single-partition mode.
+
 #### Parameters
 
-| Name      | Type    | Description |
-| --------- | ------- | ----------- |
-| partition | bytes32 | undefined   |
+| Name      | Type    | Description                                      |
+| --------- | ------- | ------------------------------------------------ |
+| partition | bytes32 | The disallowed partition supplied by the caller. |
 
 ### WalletRecovered
 
 ```solidity
 error WalletRecovered()
 ```
+
+Thrown when attempting to recover a wallet that has already been recovered.

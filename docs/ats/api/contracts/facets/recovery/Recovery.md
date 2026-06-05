@@ -72,11 +72,13 @@ _Caller must hold `ROLE_AGENT`. The lost wallet must not have already been recov
 event AgentAdded(address indexed _agent)
 ```
 
+Emitted when an agent is granted transfer-management permissions.
+
 #### Parameters
 
-| Name              | Type    | Description |
-| ----------------- | ------- | ----------- |
-| \_agent `indexed` | address | undefined   |
+| Name              | Type    | Description                       |
+| ----------------- | ------- | --------------------------------- |
+| \_agent `indexed` | address | Address of the newly added agent. |
 
 ### AgentRemoved
 
@@ -84,11 +86,13 @@ event AgentAdded(address indexed _agent)
 event AgentRemoved(address indexed _agent)
 ```
 
+Emitted when an agent&#39;s transfer-management permissions are revoked.
+
 #### Parameters
 
-| Name              | Type    | Description |
-| ----------------- | ------- | ----------- |
-| \_agent `indexed` | address | undefined   |
+| Name              | Type    | Description                   |
+| ----------------- | ------- | ----------------------------- |
+| \_agent `indexed` | address | Address of the removed agent. |
 
 ### ComplianceAdded
 
@@ -96,11 +100,13 @@ event AgentRemoved(address indexed _agent)
 event ComplianceAdded(address indexed compliance)
 ```
 
+Emitted when the compliance contract address is updated.
+
 #### Parameters
 
-| Name                 | Type    | Description |
-| -------------------- | ------- | ----------- |
-| compliance `indexed` | address | undefined   |
+| Name                 | Type    | Description                                     |
+| -------------------- | ------- | ----------------------------------------------- |
+| compliance `indexed` | address | Address of the newly wired compliance contract. |
 
 ### DelegateVotesChanged
 
@@ -124,11 +130,13 @@ Emitted when delegate votes change due to balance changes
 event IdentityRegistryAdded(address indexed identityRegistry)
 ```
 
+Emitted when the identity registry contract address is updated.
+
 #### Parameters
 
-| Name                       | Type    | Description |
-| -------------------------- | ------- | ----------- |
-| identityRegistry `indexed` | address | undefined   |
+| Name                       | Type    | Description                                   |
+| -------------------------- | ------- | --------------------------------------------- |
+| identityRegistry `indexed` | address | Address of the newly wired identity registry. |
 
 ### RecoveryInitialized
 
@@ -146,13 +154,15 @@ _Fires exclusively from `initializeRecovery`._
 event RecoverySuccess(address _lostWallet, address _newWallet, address _investorOnchainID)
 ```
 
+Emitted when a lost wallet is successfully recovered to a new address.
+
 #### Parameters
 
-| Name                | Type    | Description |
-| ------------------- | ------- | ----------- |
-| \_lostWallet        | address | undefined   |
-| \_newWallet         | address | undefined   |
-| \_investorOnchainID | address | undefined   |
+| Name                | Type    | Description                                        |
+| ------------------- | ------- | -------------------------------------------------- |
+| \_lostWallet        | address | Address of the wallet that was lost.               |
+| \_newWallet         | address | Address of the replacement wallet.                 |
+| \_investorOnchainID | address | OnchainID of the investor performing the recovery. |
 
 ### Transfer
 
@@ -176,17 +186,19 @@ Emitted whenever tokens move between accounts, are minted, or are burned.
 event TransferByPartition(bytes32 indexed _fromPartition, address _operator, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)
 ```
 
+Emitted when tokens are transferred from one partition to another or within the same partition.
+
 #### Parameters
 
-| Name                      | Type    | Description |
-| ------------------------- | ------- | ----------- |
-| \_fromPartition `indexed` | bytes32 | undefined   |
-| \_operator                | address | undefined   |
-| \_from `indexed`          | address | undefined   |
-| \_to `indexed`            | address | undefined   |
-| \_value                   | uint256 | undefined   |
-| \_data                    | bytes   | undefined   |
-| \_operatorData            | bytes   | undefined   |
+| Name                      | Type    | Description                           |
+| ------------------------- | ------- | ------------------------------------- |
+| \_fromPartition `indexed` | bytes32 | Source partition.                     |
+| \_operator                | address | Address that initiated the transfer.  |
+| \_from `indexed`          | address | Token holder whose balance decreased. |
+| \_to `indexed`            | address | Recipient whose balance increased.    |
+| \_value                   | uint256 | Token quantity transferred.           |
+| \_data                    | bytes   | Caller-supplied data.                 |
+| \_operatorData            | bytes   | Operator-supplied data.               |
 
 ### UpdatedTokenInformation
 
@@ -194,15 +206,17 @@ event TransferByPartition(bytes32 indexed _fromPartition, address _operator, add
 event UpdatedTokenInformation(string indexed newName, string indexed newSymbol, uint8 newDecimals, string newVersion, address indexed newOnchainID)
 ```
 
+Emitted when core token metadata is updated.
+
 #### Parameters
 
-| Name                   | Type    | Description |
-| ---------------------- | ------- | ----------- |
-| newName `indexed`      | string  | undefined   |
-| newSymbol `indexed`    | string  | undefined   |
-| newDecimals            | uint8   | undefined   |
-| newVersion             | string  | undefined   |
-| newOnchainID `indexed` | address | undefined   |
+| Name                   | Type    | Description                                      |
+| ---------------------- | ------- | ------------------------------------------------ |
+| newName `indexed`      | string  | New token name.                                  |
+| newSymbol `indexed`    | string  | New token symbol.                                |
+| newDecimals            | uint8   | New decimal precision.                           |
+| newVersion             | string  | New token version string.                        |
+| newOnchainID `indexed` | address | New onchainID address associated with the token. |
 
 ## Errors
 
@@ -241,6 +255,8 @@ Thrown when an account does not hold a required role.
 error AddressNotVerified()
 ```
 
+Thrown when a transfer target address has not passed identity verification.
+
 ### AssetNotOperational
 
 ```solidity
@@ -262,17 +278,23 @@ Raised by `InitializerStorageWrapper.checkOperational` (and the related `isConfi
 error CannotRecoverWallet()
 ```
 
+Thrown when wallet recovery preconditions are not met (e.g. identity mismatch).
+
 ### ComplianceCallFailed
 
 ```solidity
 error ComplianceCallFailed()
 ```
 
+Thrown when an external call to the compliance contract reverts or returns false.
+
 ### ComplianceNotAllowed
 
 ```solidity
 error ComplianceNotAllowed()
 ```
+
+Thrown when a transfer is blocked by the compliance module.
 
 ### Deactivated
 
@@ -303,17 +325,23 @@ Raised when an initialiser tries to register a facet that already has a non-zero
 error IdentityRegistryCallFailed()
 ```
 
+Thrown when an external call to the identity registry reverts or returns false.
+
 ### InputAmountsArrayLengthMismatch
 
 ```solidity
 error InputAmountsArrayLengthMismatch()
 ```
 
+Thrown when the lengths of two input amount arrays do not match.
+
 ### InputBoolArrayLengthMismatch
 
 ```solidity
 error InputBoolArrayLengthMismatch()
 ```
+
+Thrown when the lengths of two input boolean arrays do not match.
 
 ### InsufficientBalance
 
@@ -338,14 +366,16 @@ Thrown when a transfer or redemption is attempted with insufficient partition ba
 error InsufficientFrozenBalance(address user, uint256 requestedUnfreeze, uint256 availableFrozen, bytes32 partition)
 ```
 
+Thrown when an unfreeze request exceeds the address&#39;s available frozen balance.
+
 #### Parameters
 
-| Name              | Type    | Description |
-| ----------------- | ------- | ----------- |
-| user              | address | undefined   |
-| requestedUnfreeze | uint256 | undefined   |
-| availableFrozen   | uint256 | undefined   |
-| partition         | bytes32 | undefined   |
+| Name              | Type    | Description                                        |
+| ----------------- | ------- | -------------------------------------------------- |
+| user              | address | Address whose frozen balance was checked.          |
+| requestedUnfreeze | uint256 | Amount the caller attempted to unfreeze.           |
+| availableFrozen   | uint256 | Actual frozen balance available for unfreezing.    |
+| partition         | bytes32 | Partition on which the frozen balance was checked. |
 
 ### InvalidFreezeAmount
 
@@ -363,12 +393,14 @@ _Checked at the start of `ERC3643StorageWrapper.freezeTokens`, the entry point f
 error InvalidPartition(address account, bytes32 partition)
 ```
 
+Thrown when an account does not hold or is not associated with the specified partition.
+
 #### Parameters
 
-| Name      | Type    | Description |
-| --------- | ------- | ----------- |
-| account   | address | undefined   |
-| partition | bytes32 | undefined   |
+| Name      | Type    | Description                                   |
+| --------- | ------- | --------------------------------------------- |
+| account   | address | Address that was checked.                     |
+| partition | bytes32 | Partition that was not found for the account. |
 
 ### IsPaused
 
@@ -383,6 +415,8 @@ Thrown when an operation that requires the token to be unpaused is attempted whi
 ```solidity
 error NotAllowedInMultiPartitionMode()
 ```
+
+Thrown when a single-partition operation is attempted on a multi-partition token.
 
 ### SnapshotIdDoesNotExists
 
@@ -412,11 +446,13 @@ Thrown when a snapshot identifier of zero is supplied; zero is reserved and neve
 error TokenHolderNotFound(address tokenHolder)
 ```
 
+Thrown when an operation targets a token holder address that has no registered balance.
+
 #### Parameters
 
-| Name        | Type    | Description |
-| ----------- | ------- | ----------- |
-| tokenHolder | address | undefined   |
+| Name        | Type    | Description                     |
+| ----------- | ------- | ------------------------------- |
+| tokenHolder | address | The address that was not found. |
 
 ### UnexpectedError
 
@@ -439,3 +475,5 @@ _Replaces assertions for defensive handling of logically impossible states._
 ```solidity
 error WalletRecovered()
 ```
+
+Thrown when attempting to recover a wallet that has already been recovered.

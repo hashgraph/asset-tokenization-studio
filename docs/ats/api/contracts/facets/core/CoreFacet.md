@@ -182,15 +182,17 @@ _Fires exclusively from `initializeCore` after the storage write succeeds._
 event UpdatedTokenInformation(string indexed newName, string indexed newSymbol, uint8 newDecimals, string newVersion, address indexed newOnchainID)
 ```
 
+Emitted when core token metadata is updated.
+
 #### Parameters
 
-| Name                   | Type    | Description |
-| ---------------------- | ------- | ----------- |
-| newName `indexed`      | string  | undefined   |
-| newSymbol `indexed`    | string  | undefined   |
-| newDecimals            | uint8   | undefined   |
-| newVersion             | string  | undefined   |
-| newOnchainID `indexed` | address | undefined   |
+| Name                   | Type    | Description                                      |
+| ---------------------- | ------- | ------------------------------------------------ |
+| newName `indexed`      | string  | New token name.                                  |
+| newSymbol `indexed`    | string  | New token symbol.                                |
+| newDecimals            | uint8   | New decimal precision.                           |
+| newVersion             | string  | New token version string.                        |
+| newOnchainID `indexed` | address | New onchainID address associated with the token. |
 
 ## Errors
 

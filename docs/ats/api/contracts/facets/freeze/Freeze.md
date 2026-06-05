@@ -211,17 +211,19 @@ Emitted whenever tokens move between accounts, are minted, or are burned.
 event TransferByPartition(bytes32 indexed _fromPartition, address _operator, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)
 ```
 
+Emitted when tokens are transferred from one partition to another or within the same partition.
+
 #### Parameters
 
-| Name                      | Type    | Description |
-| ------------------------- | ------- | ----------- |
-| \_fromPartition `indexed` | bytes32 | undefined   |
-| \_operator                | address | undefined   |
-| \_from `indexed`          | address | undefined   |
-| \_to `indexed`            | address | undefined   |
-| \_value                   | uint256 | undefined   |
-| \_data                    | bytes   | undefined   |
-| \_operatorData            | bytes   | undefined   |
+| Name                      | Type    | Description                           |
+| ------------------------- | ------- | ------------------------------------- |
+| \_fromPartition `indexed` | bytes32 | Source partition.                     |
+| \_operator                | address | Address that initiated the transfer.  |
+| \_from `indexed`          | address | Token holder whose balance decreased. |
+| \_to `indexed`            | address | Recipient whose balance increased.    |
+| \_value                   | uint256 | Token quantity transferred.           |
+| \_data                    | bytes   | Caller-supplied data.                 |
+| \_operatorData            | bytes   | Operator-supplied data.               |
 
 ## Errors
 
@@ -330,14 +332,16 @@ Thrown when a transfer or redemption is attempted with insufficient partition ba
 error InsufficientFrozenBalance(address user, uint256 requestedUnfreeze, uint256 availableFrozen, bytes32 partition)
 ```
 
+Thrown when an unfreeze request exceeds the address&#39;s available frozen balance.
+
 #### Parameters
 
-| Name              | Type    | Description |
-| ----------------- | ------- | ----------- |
-| user              | address | undefined   |
-| requestedUnfreeze | uint256 | undefined   |
-| availableFrozen   | uint256 | undefined   |
-| partition         | bytes32 | undefined   |
+| Name              | Type    | Description                                        |
+| ----------------- | ------- | -------------------------------------------------- |
+| user              | address | Address whose frozen balance was checked.          |
+| requestedUnfreeze | uint256 | Amount the caller attempted to unfreeze.           |
+| availableFrozen   | uint256 | Actual frozen balance available for unfreezing.    |
+| partition         | bytes32 | Partition on which the frozen balance was checked. |
 
 ### InvalidFreezeAmount
 
@@ -355,12 +359,14 @@ _Checked at the start of `ERC3643StorageWrapper.freezeTokens`, the entry point f
 error InvalidPartition(address account, bytes32 partition)
 ```
 
+Thrown when an account does not hold or is not associated with the specified partition.
+
 #### Parameters
 
-| Name      | Type    | Description |
-| --------- | ------- | ----------- |
-| account   | address | undefined   |
-| partition | bytes32 | undefined   |
+| Name      | Type    | Description                                   |
+| --------- | ------- | --------------------------------------------- |
+| account   | address | Address that was checked.                     |
+| partition | bytes32 | Partition that was not found for the account. |
 
 ### IsPaused
 
@@ -375,6 +381,8 @@ Thrown when an operation that requires the token to be unpaused is attempted whi
 ```solidity
 error NotAllowedInMultiPartitionMode()
 ```
+
+Thrown when a single-partition operation is attempted on a multi-partition token.
 
 ### SnapshotIdDoesNotExists
 
@@ -419,6 +427,8 @@ _Replaces assertions for defensive handling of logically impossible states._
 ```solidity
 error WalletRecovered()
 ```
+
+Thrown when attempting to recover a wallet that has already been recovered.
 
 ### ZeroAddressNotAllowed
 

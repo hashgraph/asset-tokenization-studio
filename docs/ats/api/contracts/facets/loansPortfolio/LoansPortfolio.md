@@ -536,3 +536,5 @@ _Prevents invalid account, contract, or recipient references._
 ```solidity
 error ZeroValue()
 ```
+
+Thrown when a zero token amount is supplied to an operation that requires a positive value.

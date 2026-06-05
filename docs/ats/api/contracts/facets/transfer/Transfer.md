@@ -245,6 +245,8 @@ Thrown when an operation that requires the token to be unpaused is attempted whi
 error NotAllowedInMultiPartitionMode()
 ```
 
+Thrown when a single-partition operation is attempted on a multi-partition token.
+
 ### PartitionsAreProtectedAndNoRole
 
 ```solidity
@@ -265,3 +267,5 @@ Reverts when a transfer is attempted while partitions are protected and the call
 ```solidity
 error WalletRecovered()
 ```
+
+Thrown when attempting to recover a wallet that has already been recovered.

@@ -32,16 +32,18 @@ Emitted when delegate votes change due to balance changes
 event RedeemedByPartition(bytes32 indexed partition, address indexed operator, address indexed from, uint256 value, bytes data, bytes operatorData)
 ```
 
+Emitted when tokens are redeemed from a partition.
+
 #### Parameters
 
-| Name                | Type    | Description |
-| ------------------- | ------- | ----------- |
-| partition `indexed` | bytes32 | undefined   |
-| operator `indexed`  | address | undefined   |
-| from `indexed`      | address | undefined   |
-| value               | uint256 | undefined   |
-| data                | bytes   | undefined   |
-| operatorData        | bytes   | undefined   |
+| Name                | Type    | Description                                        |
+| ------------------- | ------- | -------------------------------------------------- |
+| partition `indexed` | bytes32 | Partition the tokens were redeemed from.           |
+| operator `indexed`  | address | Address that performed the redemption.             |
+| from `indexed`      | address | Token holder whose tokens were redeemed.           |
+| value               | uint256 | Token quantity redeemed.                           |
+| data                | bytes   | Caller-supplied data attached to the redemption.   |
+| operatorData        | bytes   | Operator-supplied data attached to the redemption. |
 
 ### Transfer
 
@@ -65,17 +67,19 @@ Emitted whenever tokens move between accounts, are minted, or are burned.
 event TransferByPartition(bytes32 indexed _fromPartition, address _operator, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)
 ```
 
+Emitted when tokens are transferred from one partition to another or within the same partition.
+
 #### Parameters
 
-| Name                      | Type    | Description |
-| ------------------------- | ------- | ----------- |
-| \_fromPartition `indexed` | bytes32 | undefined   |
-| \_operator                | address | undefined   |
-| \_from `indexed`          | address | undefined   |
-| \_to `indexed`            | address | undefined   |
-| \_value                   | uint256 | undefined   |
-| \_data                    | bytes   | undefined   |
-| \_operatorData            | bytes   | undefined   |
+| Name                      | Type    | Description                           |
+| ------------------------- | ------- | ------------------------------------- |
+| \_fromPartition `indexed` | bytes32 | Source partition.                     |
+| \_operator                | address | Address that initiated the transfer.  |
+| \_from `indexed`          | address | Token holder whose balance decreased. |
+| \_to `indexed`            | address | Recipient whose balance increased.    |
+| \_value                   | uint256 | Token quantity transferred.           |
+| \_data                    | bytes   | Caller-supplied data.                 |
+| \_operatorData            | bytes   | Operator-supplied data.               |
 
 ## Errors
 
@@ -99,12 +103,14 @@ Raised when attempting to change ABAF for a block that is forbidden
 error InvalidPartition(address account, bytes32 partition)
 ```
 
+Thrown when an account does not hold or is not associated with the specified partition.
+
 #### Parameters
 
-| Name      | Type    | Description |
-| --------- | ------- | ----------- |
-| account   | address | undefined   |
-| partition | bytes32 | undefined   |
+| Name      | Type    | Description                                   |
+| --------- | ------- | --------------------------------------------- |
+| account   | address | Address that was checked.                     |
+| partition | bytes32 | Partition that was not found for the account. |
 
 ### SnapshotIdDoesNotExists
 
@@ -134,11 +140,13 @@ Thrown when a snapshot identifier of zero is supplied; zero is reserved and neve
 error TokenHolderNotFound(address tokenHolder)
 ```
 
+Thrown when an operation targets a token holder address that has no registered balance.
+
 #### Parameters
 
-| Name        | Type    | Description |
-| ----------- | ------- | ----------- |
-| tokenHolder | address | undefined   |
+| Name        | Type    | Description                     |
+| ----------- | ------- | ------------------------------- |
+| tokenHolder | address | The address that was not found. |
 
 ### UnexpectedError
 

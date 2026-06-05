@@ -143,6 +143,8 @@ Raised when an initialiser tries to register a facet that already has a non-zero
 error InputAmountsArrayLengthMismatch()
 ```
 
+Thrown when the lengths of two input amount arrays do not match.
+
 ### IsPaused
 
 ```solidity
@@ -156,6 +158,8 @@ Thrown when an operation that requires the token to be unpaused is attempted whi
 ```solidity
 error NotAllowedInMultiPartitionMode()
 ```
+
+Thrown when a single-partition operation is attempted on a multi-partition token.
 
 ### TokenIsNotControllable
 

@@ -217,6 +217,8 @@ error MaturityDateInvalid()
 error WalletRecovered()
 ```
 
+Thrown when attempting to recover a wallet that has already been recovered.
+
 ### ZeroAddressNotAllowed
 
 ```solidity

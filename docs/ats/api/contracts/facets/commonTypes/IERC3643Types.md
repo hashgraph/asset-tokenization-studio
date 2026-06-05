@@ -1,66 +1,10 @@
-# IRecovery
+# IERC3643Types
 
 _Asset Tokenization Studio Team_
 
-> IRecovery
+> IERC3643Types
 
-Interface for the Recovery facet, exposing lost-wallet recovery and recovery-status reads.
-
-## Methods
-
-### initializeRecovery
-
-```solidity
-function initializeRecovery() external nonpayable
-```
-
-Initialises the recovery capability on the token.
-
-_Callable once; subsequent calls revert with `FacetAlreadyRegistered`. Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment._
-
-### isAddressRecovered
-
-```solidity
-function isAddressRecovered(address _wallet) external view returns (bool)
-```
-
-Returns whether a wallet address has been marked as recovered.
-
-#### Parameters
-
-| Name     | Type    | Description       |
-| -------- | ------- | ----------------- |
-| \_wallet | address | Address to query. |
-
-#### Returns
-
-| Name | Type | Description                                                                |
-| ---- | ---- | -------------------------------------------------------------------------- |
-| \_0  | bool | `true` if the address has previously been recovered via {recoveryAddress}. |
-
-### recoveryAddress
-
-```solidity
-function recoveryAddress(address _lostWallet, address _newWallet, address _investorOnchainID) external nonpayable returns (bool success_)
-```
-
-Transfers the token balance and frozen amounts of a lost wallet to a new wallet, marking the lost wallet as recovered.
-
-_Caller must hold `ROLE_AGENT`. The lost wallet must not have already been recovered, must carry no pending locks, holds, or clearings, and the token must be single-partition. Emits {RecoverySuccess} on success._
-
-#### Parameters
-
-| Name                | Type    | Description                                                       |
-| ------------------- | ------- | ----------------------------------------------------------------- |
-| \_lostWallet        | address | Address of the wallet that was lost.                              |
-| \_newWallet         | address | Address of the replacement wallet that will receive the balances. |
-| \_investorOnchainID | address | On-chain identity address of the investor (may be zero address).  |
-
-#### Returns
-
-| Name      | Type | Description                                      |
-| --------- | ---- | ------------------------------------------------ |
-| success\_ | bool | `true` when the recovery completes successfully. |
+Shared events and errors for the ERC-3643 (T-REX) compliant security token standard. Imported by every facet and storage wrapper that participates in identity verification, compliance enforcement, agent management, or wallet recovery.
 
 ## Events
 
@@ -119,16 +63,6 @@ Emitted when the identity registry contract address is updated.
 | Name                       | Type    | Description                                   |
 | -------------------------- | ------- | --------------------------------------------- |
 | identityRegistry `indexed` | address | Address of the newly wired identity registry. |
-
-### RecoveryInitialized
-
-```solidity
-event RecoveryInitialized()
-```
-
-Emitted once when the recovery capability is initialised on a token.
-
-_Fires exclusively from `initializeRecovery`._
 
 ### RecoverySuccess
 

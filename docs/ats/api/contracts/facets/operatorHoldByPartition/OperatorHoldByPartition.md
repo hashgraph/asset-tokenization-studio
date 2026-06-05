@@ -341,11 +341,13 @@ Thrown when an operation that requires the token to be unpaused is attempted whi
 error PartitionNotAllowedInSinglePartitionMode(bytes32 partition)
 ```
 
+Thrown when a multi-partition operation specifies a partition not permitted in single-partition mode.
+
 #### Parameters
 
-| Name      | Type    | Description |
-| --------- | ------- | ----------- |
-| partition | bytes32 | undefined   |
+| Name      | Type    | Description                                      |
+| --------- | ------- | ------------------------------------------------ |
+| partition | bytes32 | The disallowed partition supplied by the caller. |
 
 ### PartitionsAreProtectedAndNoRole
 
@@ -368,19 +370,23 @@ Reverts when a transfer is attempted while partitions are protected and the call
 error Unauthorized(address operator, address tokenHolder, bytes32 partition)
 ```
 
+Thrown when the caller is not an authorised operator for the token holder on the given partition.
+
 #### Parameters
 
-| Name        | Type    | Description |
-| ----------- | ------- | ----------- |
-| operator    | address | undefined   |
-| tokenHolder | address | undefined   |
-| partition   | bytes32 | undefined   |
+| Name        | Type    | Description                                   |
+| ----------- | ------- | --------------------------------------------- |
+| operator    | address | Address that attempted the operation.         |
+| tokenHolder | address | Token holder whose tokens were targeted.      |
+| partition   | bytes32 | Partition on which authorisation was checked. |
 
 ### WalletRecovered
 
 ```solidity
 error WalletRecovered()
 ```
+
+Thrown when attempting to recover a wallet that has already been recovered.
 
 ### WrongExpirationTimestamp
 

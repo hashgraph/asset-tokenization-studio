@@ -8864,11 +8864,13 @@ Emitted when an immediate balance adjustment is applied.
 event AgentAdded(address indexed _agent)
 ```
 
+Emitted when an agent is granted transfer-management permissions.
+
 #### Parameters
 
-| Name              | Type    | Description |
-| ----------------- | ------- | ----------- |
-| \_agent `indexed` | address | undefined   |
+| Name              | Type    | Description                       |
+| ----------------- | ------- | --------------------------------- |
+| \_agent `indexed` | address | Address of the newly added agent. |
 
 ### AgentRemoved
 
@@ -8876,11 +8878,13 @@ event AgentAdded(address indexed _agent)
 event AgentRemoved(address indexed _agent)
 ```
 
+Emitted when an agent&#39;s transfer-management permissions are revoked.
+
 #### Parameters
 
-| Name              | Type    | Description |
-| ----------------- | ------- | ----------- |
-| \_agent `indexed` | address | undefined   |
+| Name              | Type    | Description                   |
+| ----------------- | ------- | ----------------------------- |
+| \_agent `indexed` | address | Address of the removed agent. |
 
 ### AllowanceInitialized
 
@@ -9009,12 +9013,14 @@ _Mirrors the ERC-20 `Approval` event. `value` is the resulting, absolute allowan
 event AuthorizedOperator(address indexed operator, address indexed tokenHolder)
 ```
 
+Emitted when an operator is authorised to manage all partitions of a token holder.
+
 #### Parameters
 
-| Name                  | Type    | Description |
-| --------------------- | ------- | ----------- |
-| operator `indexed`    | address | undefined   |
-| tokenHolder `indexed` | address | undefined   |
+| Name                  | Type    | Description                                 |
+| --------------------- | ------- | ------------------------------------------- |
+| operator `indexed`    | address | Newly authorised operator address.          |
+| tokenHolder `indexed` | address | Token holder who granted the authorisation. |
 
 ### AuthorizedOperatorByPartition
 
@@ -9022,13 +9028,15 @@ event AuthorizedOperator(address indexed operator, address indexed tokenHolder)
 event AuthorizedOperatorByPartition(bytes32 indexed partition, address indexed operator, address indexed tokenHolder)
 ```
 
+Emitted when an operator is authorised for a specific partition of a token holder.
+
 #### Parameters
 
-| Name                  | Type    | Description |
-| --------------------- | ------- | ----------- |
-| partition `indexed`   | bytes32 | undefined   |
-| operator `indexed`    | address | undefined   |
-| tokenHolder `indexed` | address | undefined   |
+| Name                  | Type    | Description                                 |
+| --------------------- | ------- | ------------------------------------------- |
+| partition `indexed`   | bytes32 | Partition the authorisation applies to.     |
+| operator `indexed`    | address | Newly authorised operator address.          |
+| tokenHolder `indexed` | address | Token holder who granted the authorisation. |
 
 ### BalanceAdjustmentsInitialized
 
@@ -9524,11 +9532,13 @@ Emitted when an expired clearing operation is reclaimed, releasing the locked to
 event ComplianceAdded(address indexed compliance)
 ```
 
+Emitted when the compliance contract address is updated.
+
 #### Parameters
 
-| Name                 | Type    | Description |
-| -------------------- | ------- | ----------- |
-| compliance `indexed` | address | undefined   |
+| Name                 | Type    | Description                                     |
+| -------------------- | ------- | ----------------------------------------------- |
+| compliance `indexed` | address | Address of the newly wired compliance contract. |
 
 ### ComplianceByPartitionInitialized
 
@@ -10393,11 +10403,13 @@ _Fires exclusively from `initializeIdentity`._
 event IdentityRegistryAdded(address indexed identityRegistry)
 ```
 
+Emitted when the identity registry contract address is updated.
+
 #### Parameters
 
-| Name                       | Type    | Description |
-| -------------------------- | ------- | ----------- |
-| identityRegistry `indexed` | address | undefined   |
+| Name                       | Type    | Description                                   |
+| -------------------------- | ------- | --------------------------------------------- |
+| identityRegistry `indexed` | address | Address of the newly wired identity registry. |
 
 ### ImpactDataUpdated
 
@@ -10497,15 +10509,17 @@ Emitted when new tokens are issued to a holder.
 event IssuedByPartition(bytes32 indexed partition, address indexed operator, address indexed to, uint256 value, bytes data)
 ```
 
+Emitted when new tokens are issued into a partition.
+
 #### Parameters
 
-| Name                | Type    | Description |
-| ------------------- | ------- | ----------- |
-| partition `indexed` | bytes32 | undefined   |
-| operator `indexed`  | address | undefined   |
-| to `indexed`        | address | undefined   |
-| value               | uint256 | undefined   |
-| data                | bytes   | undefined   |
+| Name                | Type    | Description                                    |
+| ------------------- | ------- | ---------------------------------------------- |
+| partition `indexed` | bytes32 | Partition the tokens were issued into.         |
+| operator `indexed`  | address | Address that performed the issuance.           |
+| to `indexed`        | address | Recipient of the issued tokens.                |
+| value               | uint256 | Token quantity issued.                         |
+| data                | bytes   | Caller-supplied data attached to the issuance. |
 
 ### KpiDataAdded
 
@@ -11481,13 +11495,15 @@ _Fires exclusively from `initializeRecovery`._
 event RecoverySuccess(address _lostWallet, address _newWallet, address _investorOnchainID)
 ```
 
+Emitted when a lost wallet is successfully recovered to a new address.
+
 #### Parameters
 
-| Name                | Type    | Description |
-| ------------------- | ------- | ----------- |
-| \_lostWallet        | address | undefined   |
-| \_newWallet         | address | undefined   |
-| \_investorOnchainID | address | undefined   |
+| Name                | Type    | Description                                        |
+| ------------------- | ------- | -------------------------------------------------- |
+| \_lostWallet        | address | Address of the wallet that was lost.               |
+| \_newWallet         | address | Address of the replacement wallet.                 |
+| \_investorOnchainID | address | OnchainID of the investor performing the recovery. |
 
 ### Redeemed
 
@@ -11512,16 +11528,18 @@ Emitted when tokens are redeemed from a holder&#39;s balance.
 event RedeemedByPartition(bytes32 indexed partition, address indexed operator, address indexed from, uint256 value, bytes data, bytes operatorData)
 ```
 
+Emitted when tokens are redeemed from a partition.
+
 #### Parameters
 
-| Name                | Type    | Description |
-| ------------------- | ------- | ----------- |
-| partition `indexed` | bytes32 | undefined   |
-| operator `indexed`  | address | undefined   |
-| from `indexed`      | address | undefined   |
-| value               | uint256 | undefined   |
-| data                | bytes   | undefined   |
-| operatorData        | bytes   | undefined   |
+| Name                | Type    | Description                                        |
+| ------------------- | ------- | -------------------------------------------------- |
+| partition `indexed` | bytes32 | Partition the tokens were redeemed from.           |
+| operator `indexed`  | address | Address that performed the redemption.             |
+| from `indexed`      | address | Token holder whose tokens were redeemed.           |
+| value               | uint256 | Token quantity redeemed.                           |
+| data                | bytes   | Caller-supplied data attached to the redemption.   |
+| operatorData        | bytes   | Operator-supplied data attached to the redemption. |
 
 ### RemovedFromControlList
 
@@ -11619,12 +11637,14 @@ Emitted when the revocation registry address is updated.
 event RevokedOperator(address indexed operator, address indexed tokenHolder)
 ```
 
+Emitted when an operator&#39;s authorisation over all partitions of a token holder is revoked.
+
 #### Parameters
 
-| Name                  | Type    | Description |
-| --------------------- | ------- | ----------- |
-| operator `indexed`    | address | undefined   |
-| tokenHolder `indexed` | address | undefined   |
+| Name                  | Type    | Description                                 |
+| --------------------- | ------- | ------------------------------------------- |
+| operator `indexed`    | address | Operator whose authorisation was revoked.   |
+| tokenHolder `indexed` | address | Token holder who revoked the authorisation. |
 
 ### RevokedOperatorByPartition
 
@@ -11632,13 +11652,15 @@ event RevokedOperator(address indexed operator, address indexed tokenHolder)
 event RevokedOperatorByPartition(bytes32 indexed partition, address indexed operator, address indexed tokenHolder)
 ```
 
+Emitted when an operator&#39;s authorisation for a specific partition of a token holder is revoked.
+
 #### Parameters
 
-| Name                  | Type    | Description |
-| --------------------- | ------- | ----------- |
-| partition `indexed`   | bytes32 | undefined   |
-| operator `indexed`    | address | undefined   |
-| tokenHolder `indexed` | address | undefined   |
+| Name                  | Type    | Description                                 |
+| --------------------- | ------- | ------------------------------------------- |
+| partition `indexed`   | bytes32 | Partition the revocation applies to.        |
+| operator `indexed`    | address | Operator whose authorisation was revoked.   |
+| tokenHolder `indexed` | address | Token holder who revoked the authorisation. |
 
 ### RoleGranted
 
@@ -12036,17 +12058,19 @@ _Fires exclusively from `initializeTransferAndLock`._
 event TransferByPartition(bytes32 indexed _fromPartition, address _operator, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)
 ```
 
+Emitted when tokens are transferred from one partition to another or within the same partition.
+
 #### Parameters
 
-| Name                      | Type    | Description |
-| ------------------------- | ------- | ----------- |
-| \_fromPartition `indexed` | bytes32 | undefined   |
-| \_operator                | address | undefined   |
-| \_from `indexed`          | address | undefined   |
-| \_to `indexed`            | address | undefined   |
-| \_value                   | uint256 | undefined   |
-| \_data                    | bytes   | undefined   |
-| \_operatorData            | bytes   | undefined   |
+| Name                      | Type    | Description                           |
+| ------------------------- | ------- | ------------------------------------- |
+| \_fromPartition `indexed` | bytes32 | Source partition.                     |
+| \_operator                | address | Address that initiated the transfer.  |
+| \_from `indexed`          | address | Token holder whose balance decreased. |
+| \_to `indexed`            | address | Recipient whose balance increased.    |
+| \_value                   | uint256 | Token quantity transferred.           |
+| \_data                    | bytes   | Caller-supplied data.                 |
+| \_operatorData            | bytes   | Operator-supplied data.               |
 
 ### TransferByPartitionInitialized
 
@@ -12123,15 +12147,17 @@ Emitted when the token&#39;s internal pause flag is cleared to `false`.
 event UpdatedTokenInformation(string indexed newName, string indexed newSymbol, uint8 newDecimals, string newVersion, address indexed newOnchainID)
 ```
 
+Emitted when core token metadata is updated.
+
 #### Parameters
 
-| Name                   | Type    | Description |
-| ---------------------- | ------- | ----------- |
-| newName `indexed`      | string  | undefined   |
-| newSymbol `indexed`    | string  | undefined   |
-| newDecimals            | uint8   | undefined   |
-| newVersion             | string  | undefined   |
-| newOnchainID `indexed` | address | undefined   |
+| Name                   | Type    | Description                                      |
+| ---------------------- | ------- | ------------------------------------------------ |
+| newName `indexed`      | string  | New token name.                                  |
+| newSymbol `indexed`    | string  | New token symbol.                                |
+| newDecimals            | uint8   | New decimal precision.                           |
+| newVersion             | string  | New token version string.                        |
+| newOnchainID `indexed` | address | New onchainID address associated with the token. |
 
 ### VotingCancelled
 
@@ -12313,6 +12339,8 @@ Thrown when attempting to revoke or renounce a role from an account that does no
 error AddressNotVerified()
 ```
 
+Thrown when a transfer target address has not passed identity verification.
+
 ### AlreadyInitialized
 
 ```solidity
@@ -12459,6 +12487,8 @@ Raised when the clock mode is broken
 error CannotRecoverWallet()
 ```
 
+Thrown when wallet recovery preconditions are not met (e.g. identity mismatch).
+
 ### CannotRenounceSoleAdmin
 
 ```solidity
@@ -12489,11 +12519,15 @@ Thrown when a clearing-dependent operation is attempted while the clearing featu
 error ComplianceCallFailed()
 ```
 
+Thrown when an external call to the compliance contract reverts or returns false.
+
 ### ComplianceNotAllowed
 
 ```solidity
 error ComplianceNotAllowed()
 ```
+
+Thrown when a transfer is blocked by the compliance module.
 
 ### ContradictoryValuesInArray
 
@@ -12978,17 +13012,23 @@ Thrown when a holdings asset declares a type outside the supported set.
 error IdentityRegistryCallFailed()
 ```
 
+Thrown when an external call to the identity registry reverts or returns false.
+
 ### InputAmountsArrayLengthMismatch
 
 ```solidity
 error InputAmountsArrayLengthMismatch()
 ```
 
+Thrown when the lengths of two input amount arrays do not match.
+
 ### InputBoolArrayLengthMismatch
 
 ```solidity
 error InputBoolArrayLengthMismatch()
 ```
+
+Thrown when the lengths of two input boolean arrays do not match.
 
 ### InsufficientAllowance
 
@@ -13030,14 +13070,16 @@ Thrown when a transfer or redemption is attempted with insufficient partition ba
 error InsufficientFrozenBalance(address user, uint256 requestedUnfreeze, uint256 availableFrozen, bytes32 partition)
 ```
 
+Thrown when an unfreeze request exceeds the address&#39;s available frozen balance.
+
 #### Parameters
 
-| Name              | Type    | Description |
-| ----------------- | ------- | ----------- |
-| user              | address | undefined   |
-| requestedUnfreeze | uint256 | undefined   |
-| availableFrozen   | uint256 | undefined   |
-| partition         | bytes32 | undefined   |
+| Name              | Type    | Description                                        |
+| ----------------- | ------- | -------------------------------------------------- |
+| user              | address | Address whose frozen balance was checked.          |
+| requestedUnfreeze | uint256 | Amount the caller attempted to unfreeze.           |
+| availableFrozen   | uint256 | Actual frozen balance available for unfreezing.    |
+| partition         | bytes32 | Partition on which the frozen balance was checked. |
 
 ### InsufficientHoldBalance
 
@@ -13224,12 +13266,14 @@ _Checked at the start of `LockStorageWrapper.lockByPartition`, which is the sing
 error InvalidPartition(address account, bytes32 partition)
 ```
 
+Thrown when an account does not hold or is not associated with the specified partition.
+
 #### Parameters
 
-| Name      | Type    | Description |
-| --------- | ------- | ----------- |
-| account   | address | undefined   |
-| partition | bytes32 | undefined   |
+| Name      | Type    | Description                                   |
+| --------- | ------- | --------------------------------------------- |
+| account   | address | Address that was checked.                     |
+| partition | bytes32 | Partition that was not found for the account. |
 
 ### InvalidRateType
 
@@ -13497,17 +13541,21 @@ Thrown when a proposed new global cap is below the current adjusted total supply
 error NotAllowedInMultiPartitionMode()
 ```
 
+Thrown when a single-partition operation is attempted on a multi-partition token.
+
 ### PartitionNotAllowedInSinglePartitionMode
 
 ```solidity
 error PartitionNotAllowedInSinglePartitionMode(bytes32 partition)
 ```
 
+Thrown when a multi-partition operation specifies a partition not permitted in single-partition mode.
+
 #### Parameters
 
-| Name      | Type    | Description |
-| --------- | ------- | ----------- |
-| partition | bytes32 | undefined   |
+| Name      | Type    | Description                                      |
+| --------- | ------- | ------------------------------------------------ |
+| partition | bytes32 | The disallowed partition supplied by the caller. |
 
 ### PartitionsAreProtected
 
@@ -13632,11 +13680,13 @@ Reverts when the zero address is supplied as `spender` in an allowance update.
 error TokenHolderNotFound(address tokenHolder)
 ```
 
+Thrown when an operation targets a token holder address that has no registered balance.
+
 #### Parameters
 
-| Name        | Type    | Description |
-| ----------- | ------- | ----------- |
-| tokenHolder | address | undefined   |
+| Name        | Type    | Description                     |
+| ----------- | ------- | ------------------------------- |
+| tokenHolder | address | The address that was not found. |
 
 ### TokenIsNotControllable
 
@@ -13660,13 +13710,15 @@ Reverts when the proposed factor would overflow the projected total supply.
 error Unauthorized(address operator, address tokenHolder, bytes32 partition)
 ```
 
+Thrown when the caller is not an authorised operator for the token holder on the given partition.
+
 #### Parameters
 
-| Name        | Type    | Description |
-| ----------- | ------- | ----------- |
-| operator    | address | undefined   |
-| tokenHolder | address | undefined   |
-| partition   | bytes32 | undefined   |
+| Name        | Type    | Description                                   |
+| ----------- | ------- | --------------------------------------------- |
+| operator    | address | Address that attempted the operation.         |
+| tokenHolder | address | Token holder whose tokens were targeted.      |
+| partition   | bytes32 | Partition on which authorisation was checked. |
 
 ### UnexpectedError
 
@@ -13782,6 +13834,8 @@ Raised when voting rights creation fails
 ```solidity
 error WalletRecovered()
 ```
+
+Thrown when attempting to recover a wallet that has already been recovered.
 
 ### WrongChainId
 
@@ -13950,11 +14004,15 @@ _Defensive guard against mis-wired flows or malformed calldata reaching the unde
 error ZeroPartition()
 ```
 
+Thrown when the zero bytes32 value is supplied as a partition identifier.
+
 ### ZeroValue
 
 ```solidity
 error ZeroValue()
 ```
+
+Thrown when a zero token amount is supplied to an operation that requires a positive value.
 
 ### ZeroValueNotAllowed
 

@@ -341,17 +341,19 @@ Emitted whenever tokens move between accounts, are minted, or are burned.
 event TransferByPartition(bytes32 indexed _fromPartition, address _operator, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)
 ```
 
+Emitted when tokens are transferred from one partition to another or within the same partition.
+
 #### Parameters
 
-| Name                      | Type    | Description |
-| ------------------------- | ------- | ----------- |
-| \_fromPartition `indexed` | bytes32 | undefined   |
-| \_operator                | address | undefined   |
-| \_from `indexed`          | address | undefined   |
-| \_to `indexed`            | address | undefined   |
-| \_value                   | uint256 | undefined   |
-| \_data                    | bytes   | undefined   |
-| \_operatorData            | bytes   | undefined   |
+| Name                      | Type    | Description                           |
+| ------------------------- | ------- | ------------------------------------- |
+| \_fromPartition `indexed` | bytes32 | Source partition.                     |
+| \_operator                | address | Address that initiated the transfer.  |
+| \_from `indexed`          | address | Token holder whose balance decreased. |
+| \_to `indexed`            | address | Recipient whose balance increased.    |
+| \_value                   | uint256 | Token quantity transferred.           |
+| \_data                    | bytes   | Caller-supplied data.                 |
+| \_operatorData            | bytes   | Operator-supplied data.               |
 
 ## Errors
 
@@ -455,12 +457,14 @@ _Checked at the start of `LockStorageWrapper.lockByPartition`, which is the sing
 error InvalidPartition(address account, bytes32 partition)
 ```
 
+Thrown when an account does not hold or is not associated with the specified partition.
+
 #### Parameters
 
-| Name      | Type    | Description |
-| --------- | ------- | ----------- |
-| account   | address | undefined   |
-| partition | bytes32 | undefined   |
+| Name      | Type    | Description                                   |
+| --------- | ------- | --------------------------------------------- |
+| account   | address | Address that was checked.                     |
+| partition | bytes32 | Partition that was not found for the account. |
 
 ### IsPaused
 
@@ -486,11 +490,13 @@ _Used by the `onlyWithLockedExpirationTimestamp` modifier and by `LockStorageWra
 error PartitionNotAllowedInSinglePartitionMode(bytes32 partition)
 ```
 
+Thrown when a multi-partition operation specifies a partition not permitted in single-partition mode.
+
 #### Parameters
 
-| Name      | Type    | Description |
-| --------- | ------- | ----------- |
-| partition | bytes32 | undefined   |
+| Name      | Type    | Description                                      |
+| --------- | ------- | ------------------------------------------------ |
+| partition | bytes32 | The disallowed partition supplied by the caller. |
 
 ### SnapshotIdDoesNotExists
 
@@ -535,6 +541,8 @@ _Replaces assertions for defensive handling of logically impossible states._
 ```solidity
 error WalletRecovered()
 ```
+
+Thrown when attempting to recover a wallet that has already been recovered.
 
 ### WrongExpirationTimestamp
 

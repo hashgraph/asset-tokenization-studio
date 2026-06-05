@@ -685,11 +685,13 @@ Thrown when an operation that requires the token to be unpaused is attempted whi
 error PartitionNotAllowedInSinglePartitionMode(bytes32 partition)
 ```
 
+Thrown when a multi-partition operation specifies a partition not permitted in single-partition mode.
+
 #### Parameters
 
-| Name      | Type    | Description |
-| --------- | ------- | ----------- |
-| partition | bytes32 | undefined   |
+| Name      | Type    | Description                                      |
+| --------- | ------- | ------------------------------------------------ |
+| partition | bytes32 | The disallowed partition supplied by the caller. |
 
 ### PartitionsAreProtectedAndNoRole
 
@@ -711,6 +713,8 @@ Reverts when a transfer is attempted while partitions are protected and the call
 ```solidity
 error WalletRecovered()
 ```
+
+Thrown when attempting to recover a wallet that has already been recovered.
 
 ### WrongClearingId
 

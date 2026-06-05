@@ -228,6 +228,8 @@ Thrown when an operation that requires the token to be unpaused is attempted whi
 error NotAllowedInMultiPartitionMode()
 ```
 
+Thrown when a single-partition operation is attempted on a multi-partition token.
+
 ### SpenderWithZeroAddress
 
 ```solidity
