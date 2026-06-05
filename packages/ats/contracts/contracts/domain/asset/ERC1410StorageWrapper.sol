@@ -1063,16 +1063,6 @@ library ERC1410StorageWrapper {
     }
 
     /**
-     * @notice Reverts when `account` is the zero address.
-     * @dev Delegates to `DefaultValueValidation.checkZeroAddress` to keep error semantics consistent
-     *      with the rest of the codebase.
-     * @param account Address being validated.
-     */
-    function requireValidAddress(address account) internal pure {
-        DefaultValueValidation.checkZeroAddress(account);
-    }
-
-    /**
      * @notice Returns a storage pointer to the ERC-1410 basic storage namespace.
      * @dev Resolves the ERC-7201 slot constant `STORAGE_LOCATION_ERC1410_BASIC` via inline assembly so
      *      every helper reads and writes the same persistent struct.

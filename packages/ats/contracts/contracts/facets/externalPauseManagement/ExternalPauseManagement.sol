@@ -67,7 +67,7 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_PAUSE_MANAGER)
-        onlyValidAddress(_pause)
+        validateAddressNotZero(_pause)
         returns (bool success_)
     {
         success_ = ExternalListManagementStorageWrapper.addExternalList(STORAGE_LOCATION_PAUSE_MANAGEMENT, _pause);
