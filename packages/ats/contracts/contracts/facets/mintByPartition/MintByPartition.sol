@@ -42,7 +42,6 @@ abstract contract MintByPartition is IMintByPartition, Modifiers {
         onlyActivated
         onlyUnpaused
         onlyAnyRole(_buildRoles(ROLE_ISSUER, ROLE_AGENT))
-        onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyDefaultPartitionWithSinglePartition(_issueData.partition)
         onlyWithinMaxSupply(_issueData.value, TimeTravelStorageWrapper.getBlockTimestamp())
         onlyWithinMaxSupplyByPartition(
@@ -51,7 +50,7 @@ abstract contract MintByPartition is IMintByPartition, Modifiers {
             TimeTravelStorageWrapper.getBlockTimestamp()
         )
         onlyIdentifiedAddresses(address(0), _issueData.tokenHolder)
-        onlyCompliant(address(0), _issueData.tokenHolder, false)
+        onlyCompliant(EvmAccessors.getMsgSender(), _issueData.tokenHolder, false)
     {
         TokenCoreOps.issueByPartition(_issueData);
     }

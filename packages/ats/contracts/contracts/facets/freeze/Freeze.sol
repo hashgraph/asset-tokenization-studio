@@ -45,7 +45,7 @@ abstract contract Freeze is IFreeze, Modifiers {
         onlyOperational
         onlyActivated
         onlyUnpaused
-        notZeroAddress(_userAddress)
+        validateAddressNotZero(_userAddress)
         onlyUnrecoveredAddress(_userAddress)
         onlyFreezeRoles(EvmAccessors.getMsgSender())
     {
@@ -64,7 +64,7 @@ abstract contract Freeze is IFreeze, Modifiers {
         onlyActivated
         onlyUnpaused
         onlyUnrecoveredAddress(_userAddress)
-        notZeroAddress(_userAddress)
+        validateAddressNotZero(_userAddress)
         onlyWithoutMultiPartition
         onlyFreezeRoles(EvmAccessors.getMsgSender())
     {
@@ -83,7 +83,7 @@ abstract contract Freeze is IFreeze, Modifiers {
         onlyActivated
         onlyUnpaused
         onlyUnrecoveredAddress(_userAddress)
-        notZeroAddress(_userAddress)
+        validateAddressNotZero(_userAddress)
         onlyWithoutMultiPartition
         onlyFreezeRoles(EvmAccessors.getMsgSender())
     {

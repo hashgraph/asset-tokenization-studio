@@ -47,8 +47,8 @@ abstract contract ProtectedHoldByPartition is IProtectedHoldByPartition, Modifie
         onlyActivated
         onlyUnpaused
         onlyRole(ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition))
-        notZeroAddress(_from)
-        notZeroAddress(_protectedHold.hold.escrow)
+        validateAddressNotZero(_from)
+        validateAddressNotZero(_protectedHold.hold.escrow)
         onlyClearingDisabled
         onlyValidExpirationTimestamp(_protectedHold.hold.expirationTimestamp)
         onlyUnrecoveredAddress(_from)

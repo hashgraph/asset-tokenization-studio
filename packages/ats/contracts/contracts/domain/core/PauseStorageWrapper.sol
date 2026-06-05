@@ -8,6 +8,7 @@ import {
     ExternalListDataStorage
 } from "./ExternalListManagementStorageWrapper.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import { DefaultValueValidation } from "../../infrastructure/utils/DefaultValueValidation.sol";
 
 /// @custom:hash storage PauseManagement
 bytes32 constant STORAGE_LOCATION_PAUSE_MANAGEMENT = 0x930ab19e093b9d470c1f7056ddf51dcaf1bdf62558a355b33b78972be23e2500;
@@ -64,7 +65,7 @@ library PauseStorageWrapper {
     function initializeExternalPauses(address[] calldata _pauses) internal {
         uint256 length = _pauses.length;
         for (uint256 index; index < length; ) {
-            ExternalListManagementStorageWrapper.checkValidAddress(_pauses[index]);
+            DefaultValueValidation.checkZeroAddress(_pauses[index]);
             ExternalListManagementStorageWrapper.addExternalList(STORAGE_LOCATION_PAUSE_MANAGEMENT, _pauses[index]);
             unchecked {
                 ++index;

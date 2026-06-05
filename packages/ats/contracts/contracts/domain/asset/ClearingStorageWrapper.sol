@@ -10,6 +10,7 @@ import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { LockStorageWrapper } from "./LockStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { ThirdPartyType } from "./types/ThirdPartyType.sol";
+import { DefaultValueValidation } from "../../infrastructure/utils/DefaultValueValidation.sol";
 
 /// @custom:hash storage Clearing
 bytes32 constant STORAGE_LOCATION_CLEARING = 0xd7a6e2f3304ec7238486e8af625921e3cfd501a713f0b2036d4a701fd3e81800;
@@ -755,8 +756,8 @@ library ClearingStorageWrapper {
         ERC3643StorageWrapper.requireUnrecoveredAddress(_to);
         ERC3643StorageWrapper.requireUnrecoveredAddress(_from);
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
-        ERC1410StorageWrapper.requireValidAddress(_from);
-        ERC1410StorageWrapper.requireValidAddress(_to);
+        DefaultValueValidation.checkZeroAddress(_from);
+        DefaultValueValidation.checkZeroAddress(_to);
         ERC1410StorageWrapper.requireOperator(_partition, _from);
     }
 
@@ -785,8 +786,8 @@ library ClearingStorageWrapper {
         ERC3643StorageWrapper.requireUnrecoveredAddress(_account);
         ERC3643StorageWrapper.requireUnrecoveredAddress(_to);
         ERC3643StorageWrapper.requireUnrecoveredAddress(_from);
-        ERC1410StorageWrapper.requireValidAddress(_escrow);
-        ERC1410StorageWrapper.requireValidAddress(_from);
+        DefaultValueValidation.checkZeroAddress(_escrow);
+        DefaultValueValidation.checkZeroAddress(_from);
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
     }
 

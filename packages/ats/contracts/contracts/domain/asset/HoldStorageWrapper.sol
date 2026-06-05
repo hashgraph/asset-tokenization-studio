@@ -22,6 +22,7 @@ import { ControlListStorageWrapper } from "../core/ControlListStorageWrapper.sol
 import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { DefaultValueValidation } from "../../infrastructure/utils/DefaultValueValidation.sol";
 
 /// @custom:hash storage Hold
 bytes32 constant STORAGE_LOCATION_HOLD = 0xaee7bac248b1ceeb630aa06b36647d058252989965cf9b4a02eac9b8aec67000;
@@ -812,8 +813,8 @@ library HoldStorageWrapper {
         ERC3643StorageWrapper.requireUnrecoveredAddress(_account);
         ERC3643StorageWrapper.requireUnrecoveredAddress(_to);
         ERC3643StorageWrapper.requireUnrecoveredAddress(_from);
-        ERC1410StorageWrapper.requireValidAddress(_from);
-        ERC1410StorageWrapper.requireValidAddress(_escrow);
+        DefaultValueValidation.checkZeroAddress(_from);
+        DefaultValueValidation.checkZeroAddress(_escrow);
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
     }
 
@@ -1079,7 +1080,7 @@ library HoldStorageWrapper {
         IHoldTypes.HoldData memory holdData,
         address _to
     ) private view {
-        if (!ControlListStorageWrapper.isAbleToAccess(_holdIdentifier.tokenHolder)) {
+        if (!ControlListStorageWrapper.canAccess(_holdIdentifier.tokenHolder)) {
             revert ICommonErrors.AccountIsBlocked(_holdIdentifier.tokenHolder);
         }
 
