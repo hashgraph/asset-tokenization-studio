@@ -161,21 +161,6 @@ Emitted when tokens are redeemed from a holder&#39;s balance.
 
 ## Errors
 
-### AccessControlRequired
-
-```solidity
-error AccessControlRequired(bytes32 role, address sender)
-```
-
-_Emitted when a role check fails_
-
-#### Parameters
-
-| Name   | Type    | Description |
-| ------ | ------- | ----------- |
-| role   | bytes32 | undefined   |
-| sender | address | undefined   |
-
 ### AccountHasNoRole
 
 ```solidity

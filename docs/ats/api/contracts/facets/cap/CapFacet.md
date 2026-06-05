@@ -157,21 +157,6 @@ Emitted when the global maximum supply is updated.
 
 ## Errors
 
-### AccessControlRequired
-
-```solidity
-error AccessControlRequired(bytes32 role, address sender)
-```
-
-_Emitted when a role check fails_
-
-#### Parameters
-
-| Name   | Type    | Description |
-| ------ | ------- | ----------- |
-| role   | bytes32 | undefined   |
-| sender | address | undefined   |
-
 ### AccountHasNoRole
 
 ```solidity
