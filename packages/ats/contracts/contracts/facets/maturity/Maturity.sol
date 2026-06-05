@@ -47,7 +47,7 @@ abstract contract Maturity is IMaturity, Modifiers {
         onlyUnpaused
         onlyClearingDisabled
         onlyRole(ROLE_MATURITY_REDEEMER)
-        onlyValidAddress(_tokenHolder)
+        validateAddressNotZero(_tokenHolder)
         onlyUnrecoveredAddress(_tokenHolder)
         onlyListedAllowed(_tokenHolder)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)

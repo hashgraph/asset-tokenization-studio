@@ -92,9 +92,6 @@ abstract contract Transfer is ITransfer, Modifiers {
         override
         onlyOperational
         onlyActivated
-        onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
-        onlyUnrecoveredAddress(_to)
-        onlyUnrecoveredAddress(_from)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
         onlyCanTransferFromByPartition(_from, _to, _DEFAULT_PARTITION, _value)

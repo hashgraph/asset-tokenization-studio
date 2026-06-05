@@ -14,7 +14,7 @@ bytes32 constant RESOLVER_KEY_CONTROL_LIST = 0x7bbee58c68b6e19a08128d25f150956d2
  *      `STORAGE_LOCATION_CONTROL_LIST` via `ControlListStorageWrapper`. `ROLE_CONTROL_LIST` is
  *      required for all state-mutating functions after initialisation. Note that
  *      `isInControlList` reflects raw set membership only; effective access is determined by
- *      `ControlListStorageWrapper.isAbleToAccess`, which combines the membership result with the
+ *      `ControlListStorageWrapper.canAccess`, which combines the membership result with the
  *      `isWhiteList` flag and external control list authorisation.
  */
 interface IControlList {

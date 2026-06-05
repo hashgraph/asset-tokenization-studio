@@ -60,7 +60,7 @@ abstract contract ProceedRecipients is IProceedRecipients, Modifiers {
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_PROCEED_RECIPIENT_MANAGER)
-        notZeroAddress(_proceedRecipient)
+        validateAddressNotZero(_proceedRecipient)
         onlyIfProceedRecipient(_proceedRecipient)
     {
         ScheduledTasksOps.triggerPendingScheduledCrossOrderedTasks();
