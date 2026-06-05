@@ -31,10 +31,18 @@ abstract contract ProceedRecipients is IProceedRecipients, Modifiers {
     function addProceedRecipient(
         address _proceedRecipient,
         bytes calldata _data
-    ) external virtual override onlyOperational onlyActivated onlyUnpaused onlyRole(ROLE_PROCEED_RECIPIENT_MANAGER) {
+    )
+        external
+        virtual
+        override
+        onlyOperational
+        onlyActivated
+        onlyUnpaused
+        onlyRole(ROLE_PROCEED_RECIPIENT_MANAGER)
+        validateAddressNotZero(_proceedRecipient)
+        onlyIfNotProceedRecipient(_proceedRecipient)
+    {
         ScheduledTasksOps.triggerPendingScheduledCrossOrderedTasks();
-        DefaultValueValidation.checkZeroAddress(_proceedRecipient);
-        ProceedRecipientsStorageWrapper.requireNotProceedRecipient(_proceedRecipient);
         ProceedRecipientsStorageWrapper.addProceedRecipient(_proceedRecipient, _data);
         emit ProceedRecipientAdded(EvmAccessors.getMsgSender(), _proceedRecipient, _data);
     }
@@ -42,9 +50,17 @@ abstract contract ProceedRecipients is IProceedRecipients, Modifiers {
     /// @inheritdoc IProceedRecipients
     function removeProceedRecipient(
         address _proceedRecipient
-    ) external virtual override onlyOperational onlyActivated onlyUnpaused onlyRole(ROLE_PROCEED_RECIPIENT_MANAGER) {
+    )
+        external
+        virtual
+        override
+        onlyOperational
+        onlyActivated
+        onlyUnpaused
+        onlyRole(ROLE_PROCEED_RECIPIENT_MANAGER)
+        onlyIfProceedRecipient(_proceedRecipient)
+    {
         ScheduledTasksOps.triggerPendingScheduledCrossOrderedTasks();
-        ProceedRecipientsStorageWrapper.requireProceedRecipient(_proceedRecipient);
         ProceedRecipientsStorageWrapper.removeProceedRecipient(_proceedRecipient);
         emit ProceedRecipientRemoved(EvmAccessors.getMsgSender(), _proceedRecipient);
     }
