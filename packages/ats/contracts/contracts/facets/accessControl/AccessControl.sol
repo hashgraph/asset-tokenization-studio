@@ -99,11 +99,7 @@ abstract contract AccessControl is AccessControlRead {
         onlySameRolesAndActivesLength(_roles.length, _actives.length)
         onlyConsistentRoles(_roles, _actives)
     {
-        (bytes32[] memory appliedRoles, bool[] memory appliedStates) = AccessControlStorageWrapper.applyRoles(
-            _roles,
-            _actives,
-            _account
-        );
-        emit RolesApplied(_roles, _actives, _account, appliedRoles, appliedStates);
+        AccessControlStorageWrapper.applyRoles(_roles, _actives, _account);
+        emit RolesApplied(_roles, _actives, _account);
     }
 }

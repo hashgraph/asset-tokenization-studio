@@ -11690,7 +11690,7 @@ Emitted when a role is revoked from an account.
 ### RolesApplied
 
 ```solidity
-event RolesApplied(bytes32[] requestedRoles, bool[] requestedStates, address account, bytes32[] appliedRoles, bool[] appliedStates)
+event RolesApplied(bytes32[] requestedRoles, bool[] requestedStates, address account)
 ```
 
 Emitted when multiple roles are applied to an account in a single operation.
@@ -11702,8 +11702,6 @@ Emitted when multiple roles are applied to an account in a single operation.
 | requestedRoles  | bytes32[] | The roles that were submitted by the caller.                             |
 | requestedStates | bool[]    | Corresponding grant/revoke flags; `true` means granted, `false` revoked. |
 | account         | address   | The account to which the roles were applied.                             |
-| appliedRoles    | bytes32[] | The subset of `requestedRoles` whose state effectively changed.          |
-| appliedStates   | bool[]    | The corresponding final state for each effectively applied role.         |
 
 ### ScheduledBalanceAdjustmentCancelled
 
