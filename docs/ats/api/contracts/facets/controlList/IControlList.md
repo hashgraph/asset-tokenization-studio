@@ -6,7 +6,7 @@ _Asset Tokenization Studio Team_
 
 Interface for managing the on-chain control list of a security token. The control list operates in one of two modes set at initialisation: whitelist (only listed addresses may transfer) or blacklist (listed addresses are blocked from transferring).
 
-_Part of the Diamond facet system. Control list state is stored at `STORAGE_LOCATION_CONTROL_LIST` via `ControlListStorageWrapper`. `ROLE_CONTROL_LIST` is required for all state-mutating functions after initialisation. Note that `isInControlList` reflects raw set membership only; effective access is determined by `ControlListStorageWrapper.isAbleToAccess`, which combines the membership result with the `isWhiteList` flag and external control list authorisation._
+_Part of the Diamond facet system. Control list state is stored at `STORAGE_LOCATION_CONTROL_LIST` via `ControlListStorageWrapper`. `ROLE_CONTROL_LIST` is required for all state-mutating functions after initialisation. Note that `isInControlList` reflects raw set membership only; effective access is determined by `ControlListStorageWrapper.canAccess`, which combines the membership result with the `isWhiteList` flag and external control list authorisation._
 
 ## Methods
 

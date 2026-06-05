@@ -6,7 +6,7 @@ _Asset Tokenization Studio Team_
 
 Abstract implementation of `IComplianceByPartition`, providing partition-aware transfer and redemption eligibility checks.
 
-_Delegates the actual validation to `ERC1594StorageWrapper.isAbleToTransferFromByPartition` and `ERC1594StorageWrapper.isAbleToRedeemFromByPartition`. When the token is paused both checks short-circuit with the EIP-1066 PAUSED status code. Intended to be inherited by `ComplianceByPartitionFacet`._
+_Delegates the actual validation to `ERC1594StorageWrapper.canTransferFromByPartition` and `ERC1594StorageWrapper.canRedeemFromByPartition`. When the token is paused both checks short-circuit with the EIP-1066 PAUSED status code. Intended to be inherited by `ComplianceByPartitionFacet`._
 
 ## Methods
 
