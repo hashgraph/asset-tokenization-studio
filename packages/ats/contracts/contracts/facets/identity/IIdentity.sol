@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IIdentityRegistry } from "../layer_1/ERC3643/IIdentityRegistry.sol";
+import { IIdentityRegistry } from "./externalInterfaces/IIdentityRegistry.sol";
 
 /// @custom:hash resolverKey Identity
 bytes32 constant RESOLVER_KEY_IDENTITY = 0xbb0d93867bfe08218b429804914b1d345b2c899740c5dd110cb9c6141a01d36e;
