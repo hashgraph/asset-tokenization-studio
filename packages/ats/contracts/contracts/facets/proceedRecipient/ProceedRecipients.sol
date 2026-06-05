@@ -18,6 +18,16 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract ProceedRecipients is IProceedRecipients, Modifiers {
     /// @inheritdoc IProceedRecipients
+    function initializeProceedRecipients(
+        address[] calldata _proceedRecipients,
+        bytes[] calldata _data
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_PROCEED_RECIPIENTS) {
+        ProceedRecipientsStorageWrapper.initializeProceedRecipients(_proceedRecipients, _data);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_PROCEED_RECIPIENTS);
+        emit ProceedRecipientsInitialized(_proceedRecipients, _data);
+    }
+
+    /// @inheritdoc IProceedRecipients
     function addProceedRecipient(
         address _proceedRecipient,
         bytes calldata _data
