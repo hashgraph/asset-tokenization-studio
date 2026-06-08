@@ -41,12 +41,13 @@ interface ILoansPortfolio {
      *      exposure; `assetAddress` is the on-chain handle of the loan or cash token.
      * @param assetAddress       On-chain address of the loan or cash token.
      * @param holdingsAssetType  Category of the underlying asset (`LOAN` or `CASH`).
-     * @param country            ISO-style country code used for geographical exposure aggregation.
+     * @param countryCode        ISO-style country code associated with the asset, used for
+     *                            geographical exposure aggregation.
      */
     struct HoldingsAsset {
         address assetAddress;
         HoldingsAssetType holdingsAssetType;
-        string country;
+        bytes4 countryCode;
     }
 
     /**
@@ -61,17 +62,18 @@ interface ILoansPortfolio {
 
     /**
      * @notice Per-country aggregate showing how many holdings reference the same country.
-     * @param country Country code matching the `HoldingsAsset.country` field.
+     * @param countryCode Country code matching the `HoldingsAsset.country` field.
      * @param count   Number of holdings assets registered under this country.
      */
     struct GeographicalExposureData {
-        string country;
+        bytes4 countryCode;
         uint256 count;
     }
 
     /**
      * @notice Emitted once when the LoansPortfolio capability is initialised on a token.
      * @dev Fires exclusively from `initializeLoansPortfolio` after the storage write succeeds.
+     * @param loansPortfolioData The portfolio configuration captured at initialisation.
      */
     event LoansPortfolioInitialized(LoansPortfolioDetailsData loansPortfolioData);
 
@@ -118,6 +120,12 @@ interface ILoansPortfolio {
      * @param holdingsAssetType The unsupported `HoldingsAssetType` value (as `uint8`).
      */
     error HoldingsAssetTypeNotSupported(uint8 holdingsAssetType);
+
+    /**
+     * @notice Thrown when a holdings asset references an unsupported country code.
+     * @param _countryCode The unsupported country code.
+     */
+    error WrongCountryCode(bytes4 _countryCode);
 
     /**
      * @notice Initialises the loans-portfolio capability on the token.

@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ICustomData } from "../../facets/customData/ICustomData.sol";
-
 /// @custom:hash storage CustomData
 bytes32 constant STORAGE_LOCATION_CUSTOM_DATA = 0x92acc34fbd05df4f7a3d758b1a1755231ecd82ae24df88ea7a638c1b704de700;
 
@@ -46,7 +44,7 @@ library CustomDataStorageWrapper {
      * @param _key   The custom data key whose value is being written.
      * @param _value The ordered list of byte payloads to persist under `_key`.
      */
-    function setCustomData(bytes32 _key, bytes[] calldata _value) internal {
+    function setCustomData(bytes32 _key, bytes[] memory _value) internal {
         bytes[] storage stored = customDataStorage().customData[_key];
         delete customDataStorage().customData[_key];
         uint256 length = _value.length;
