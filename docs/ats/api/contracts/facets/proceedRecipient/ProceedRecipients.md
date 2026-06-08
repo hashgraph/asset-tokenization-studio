@@ -230,6 +230,21 @@ error Deactivated()
 
 Thrown when an operation guarded by `onlyActivated` is attempted on a token whose deactivation flag has already been set.
 
+### FacetAlreadyRegistered
+
+```solidity
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion)
+```
+
+Raised when an initialiser tries to register a facet that already has a non-zero last registered version (i.e. the facet is being re-initialised on a fresh install).
+
+#### Parameters
+
+| Name        | Type    | Description                                                    |
+| ----------- | ------- | -------------------------------------------------------------- |
+| facetId     | bytes32 | Identifier of the offending facet.                             |
+| lastVersion | uint256 | Last version recorded for that facet at the time of the check. |
+
 ### IsPaused
 
 ```solidity
