@@ -145,10 +145,17 @@ const config: HardhatUserConfig = {
   },
   dodoc: {
     runOnCompile: false,
-    outputDir: "./docs/api",
+    outputDir: "../../../docs/ats/api/contracts",
     freshOutput: true,
     include: ["contracts"],
-    exclude: ["contracts/test", "contracts/test/mocks", "node_modules"],
+    exclude: [
+      "contracts/test",
+      "contracts/test/mocks",
+      "node_modules",
+      "@openzeppelin",
+      "@tokenysolutions",
+      "@onchain-id",
+    ],
   },
 };
 

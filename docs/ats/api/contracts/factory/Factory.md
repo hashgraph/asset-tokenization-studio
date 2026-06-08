@@ -1,0 +1,297 @@
+# Factory
+
+_Asset Tokenization Studio Team_
+
+> Factory
+
+Provides shared proxy deployment and initialisation flows for ATS securities.
+
+_Concrete factories inherit this contract to deploy resolver-backed security proxies. Deployment temporarily grants this factory `DEFAULT_ADMIN_ROLE`, initialises all required facets, verifies operational status, and then renounces the temporary role._
+
+## Methods
+
+### deployBond
+
+```solidity
+function deployBond(IFactory.BondData _bondData, FactoryRegulationData _factoryRegulationData) external nonpayable returns (address bondAddress_)
+```
+
+#### Parameters
+
+| Name                    | Type                  | Description |
+| ----------------------- | --------------------- | ----------- |
+| \_bondData              | IFactory.BondData     | undefined   |
+| \_factoryRegulationData | FactoryRegulationData | undefined   |
+
+#### Returns
+
+| Name          | Type    | Description |
+| ------------- | ------- | ----------- |
+| bondAddress\_ | address | undefined   |
+
+### deployDepositToken
+
+```solidity
+function deployDepositToken(IFactory.DepositTokenData _depositTokenData, FactoryRegulationData _factoryRegulationData) external nonpayable returns (address depositTokenAddress_)
+```
+
+#### Parameters
+
+| Name                    | Type                      | Description |
+| ----------------------- | ------------------------- | ----------- |
+| \_depositTokenData      | IFactory.DepositTokenData | undefined   |
+| \_factoryRegulationData | FactoryRegulationData     | undefined   |
+
+#### Returns
+
+| Name                  | Type    | Description |
+| --------------------- | ------- | ----------- |
+| depositTokenAddress\_ | address | undefined   |
+
+### deployEquity
+
+```solidity
+function deployEquity(IFactory.EquityData _equityData, FactoryRegulationData _factoryRegulationData) external nonpayable returns (address equityAddress_)
+```
+
+#### Parameters
+
+| Name                    | Type                  | Description |
+| ----------------------- | --------------------- | ----------- |
+| \_equityData            | IFactory.EquityData   | undefined   |
+| \_factoryRegulationData | FactoryRegulationData | undefined   |
+
+#### Returns
+
+| Name            | Type    | Description |
+| --------------- | ------- | ----------- |
+| equityAddress\_ | address | undefined   |
+
+### deployProxy
+
+```solidity
+function deployProxy(contract IBusinessLogicResolver _resolver, bytes32 _configKey, uint256 _version, IResolverProxy.Rbac[] _rbacs) external nonpayable returns (address proxyAddress_)
+```
+
+#### Parameters
+
+| Name        | Type                            | Description |
+| ----------- | ------------------------------- | ----------- |
+| \_resolver  | contract IBusinessLogicResolver | undefined   |
+| \_configKey | bytes32                         | undefined   |
+| \_version   | uint256                         | undefined   |
+| \_rbacs     | IResolverProxy.Rbac[]           | undefined   |
+
+#### Returns
+
+| Name           | Type    | Description |
+| -------------- | ------- | ----------- |
+| proxyAddress\_ | address | undefined   |
+
+### getAppliedRegulationData
+
+```solidity
+function getAppliedRegulationData(enum RegulationType _regulationType, enum RegulationSubType _regulationSubType) external pure returns (struct RegulationData regulationData_)
+```
+
+Returns the regulation data that applies to a given type/sub-type pair.
+
+#### Parameters
+
+| Name                | Type                   | Description                         |
+| ------------------- | ---------------------- | ----------------------------------- |
+| \_regulationType    | enum RegulationType    | Primary regulation category.        |
+| \_regulationSubType | enum RegulationSubType | Sub-category within the regulation. |
+
+#### Returns
+
+| Name             | Type           | Description                       |
+| ---------------- | -------------- | --------------------------------- |
+| regulationData\_ | RegulationData | Matched regulation configuration. |
+
+## Events
+
+### BondDeployed
+
+```solidity
+event BondDeployed(address indexed deployer, address bondAddress, IFactory.BondData bondData, FactoryRegulationData regulationData)
+```
+
+Emitted when a new variable-rate bond is deployed.
+
+#### Parameters
+
+| Name               | Type                  | Description                                     |
+| ------------------ | --------------------- | ----------------------------------------------- |
+| deployer `indexed` | address               | Address that initiated the deployment.          |
+| bondAddress        | address               | Address of the newly deployed bond proxy.       |
+| bondData           | IFactory.BondData     | Full bond configuration supplied at deployment. |
+| regulationData     | FactoryRegulationData | Regulation settings applied to the bond.        |
+
+### DepositTokenDeployed
+
+```solidity
+event DepositTokenDeployed(address indexed deployer, address depositTokenAddress, IFactory.DepositTokenData depositTokenData, FactoryRegulationData regulationData)
+```
+
+Emitted when a new deposit token is deployed.
+
+#### Parameters
+
+| Name                | Type                      | Description                                        |
+| ------------------- | ------------------------- | -------------------------------------------------- |
+| deployer `indexed`  | address                   | Address that initiated the deployment.             |
+| depositTokenAddress | address                   | Address of the newly deployed deposit token proxy. |
+| depositTokenData    | IFactory.DepositTokenData | Full deposit token configuration.                  |
+| regulationData      | FactoryRegulationData     | Regulation data validated for the deposit token.   |
+
+### EquityDeployed
+
+```solidity
+event EquityDeployed(address indexed deployer, address equityAddress, IFactory.EquityData equityData, FactoryRegulationData regulationData)
+```
+
+Emitted when a new equity token is deployed.
+
+#### Parameters
+
+| Name               | Type                  | Description                                       |
+| ------------------ | --------------------- | ------------------------------------------------- |
+| deployer `indexed` | address               | Address that initiated the deployment.            |
+| equityAddress      | address               | Address of the newly deployed equity proxy.       |
+| equityData         | IFactory.EquityData   | Full equity configuration supplied at deployment. |
+| regulationData     | FactoryRegulationData | Regulation settings applied to the equity.        |
+
+### ProxyDeployed
+
+```solidity
+event ProxyDeployed(address indexed proxyAddress, contract IBusinessLogicResolver resolver, bytes32 configKey, uint256 version, IResolverProxy.Rbac[] rbac)
+```
+
+Emitted when a new resolver proxy is deployed.
+
+#### Parameters
+
+| Name                   | Type                            | Description                                             |
+| ---------------------- | ------------------------------- | ------------------------------------------------------- |
+| proxyAddress `indexed` | address                         | Address of the newly deployed proxy.                    |
+| resolver               | contract IBusinessLogicResolver | Business-logic resolver attached to the proxy.          |
+| configKey              | bytes32                         | Configuration identifier used by the proxy.             |
+| version                | uint256                         | Initial configuration version.                          |
+| rbac                   | IResolverProxy.Rbac[]           | Role-based access control entries seeded at deployment. |
+
+## Errors
+
+### EmptyResolver
+
+```solidity
+error EmptyResolver(contract IBusinessLogicResolver resolver)
+```
+
+Raised when the supplied resolver address is the zero address.
+
+#### Parameters
+
+| Name     | Type                            | Description                                       |
+| -------- | ------------------------------- | ------------------------------------------------- |
+| resolver | contract IBusinessLogicResolver | The zero-address resolver that caused the revert. |
+
+### NoInitialAdmins
+
+```solidity
+error NoInitialAdmins()
+```
+
+Raised when no admin role assignments are provided for the new proxy.
+
+### RegulationTypeAndSubTypeForbidden
+
+```solidity
+error RegulationTypeAndSubTypeForbidden(enum RegulationType regulationType, enum RegulationSubType regulationSubType)
+```
+
+Raised when the requested regulation type and sub-type combination is not permitted.
+
+#### Parameters
+
+| Name              | Type                   | Description                         |
+| ----------------- | ---------------------- | ----------------------------------- |
+| regulationType    | enum RegulationType    | Primary regulation category.        |
+| regulationSubType | enum RegulationSubType | Sub-category within the regulation. |
+
+### UnexpectedError
+
+```solidity
+error UnexpectedError(bytes4 _errorId)
+```
+
+Reverts when an unreachable validation state is detected.
+
+_Replaces assertions for defensive handling of logically impossible states._
+
+#### Parameters
+
+| Name      | Type   | Description                                        |
+| --------- | ------ | -------------------------------------------------- |
+| \_errorId | bytes4 | Identifier of the unexpected validation condition. |
+
+### WrongDates
+
+```solidity
+error WrongDates(uint256 firstDate, uint256 secondDate)
+```
+
+Reverts when two date values fail their required ordering constraint.
+
+_The expected relationship between both dates is defined by the caller&#39;s validation context._
+
+#### Parameters
+
+| Name       | Type    | Description                                         |
+| ---------- | ------- | --------------------------------------------------- |
+| firstDate  | uint256 | First date participating in the failed comparison.  |
+| secondDate | uint256 | Second date participating in the failed comparison. |
+
+### WrongISIN
+
+```solidity
+error WrongISIN(string isin)
+```
+
+Raised when the provided ISIN does not meet the expected format or length.
+
+#### Parameters
+
+| Name | Type   | Description              |
+| ---- | ------ | ------------------------ |
+| isin | string | The invalid ISIN string. |
+
+### WrongISINChecksum
+
+```solidity
+error WrongISINChecksum(string isin)
+```
+
+Raised when the ISIN checksum is invalid.
+
+#### Parameters
+
+| Name | Type   | Description              |
+| ---- | ------ | ------------------------ |
+| isin | string | The invalid ISIN string. |
+
+### WrongTimestamp
+
+```solidity
+error WrongTimestamp(uint256 timeStamp)
+```
+
+Reverts when a scheduled timestamp is not strictly in the future.
+
+_The current timestamp is read through `EvmAccessors`._
+
+#### Parameters
+
+| Name      | Type    | Description                        |
+| --------- | ------- | ---------------------------------- |
+| timeStamp | uint256 | Timestamp rejected for scheduling. |
