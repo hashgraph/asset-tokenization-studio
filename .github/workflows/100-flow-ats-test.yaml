@@ -66,7 +66,7 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run: npm ci
+        run: npm run ats:install
 
       # BBND-1766: `atsRegistry.generated.ts` is gitignored and regenerated
       # by the contracts package's `prepare` script during `npm ci`. This
