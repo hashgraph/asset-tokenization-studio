@@ -10,16 +10,6 @@ import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 
 contract ProceedRecipientsFacet is ProceedRecipients, IStaticFunctionSelectors {
-    /// @inheritdoc IProceedRecipients
-    function initializeProceedRecipients(
-        address[] calldata _proceedRecipients,
-        bytes[] calldata _data
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_PROCEED_RECIPIENTS) {
-        ProceedRecipientsStorageWrapper.initializeProceedRecipients(_proceedRecipients, _data);
-        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_PROCEED_RECIPIENTS);
-        emit IProceedRecipients.ProceedRecipientsInitialized(_proceedRecipients, _data);
-    }
-
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = RESOLVER_KEY_PROCEED_RECIPIENTS;

@@ -99,7 +99,7 @@ library ProceedRecipientsStorageWrapper {
      * @notice Reverts when the supplied address is not a registered proceed recipient.
      * @param _proceedRecipient Address to check.
      */
-    function requireProceedRecipient(address _proceedRecipient) internal view {
+    function checkProceedRecipient(address _proceedRecipient) internal view {
         if (!isProceedRecipient(_proceedRecipient)) {
             revert IProceedRecipients.ProceedRecipientNotFound(_proceedRecipient);
         }
@@ -109,7 +109,7 @@ library ProceedRecipientsStorageWrapper {
      * @notice Reverts when the supplied address is already a registered proceed recipient.
      * @param _proceedRecipient Address to check.
      */
-    function requireNotProceedRecipient(address _proceedRecipient) internal view {
+    function checkNotProceedRecipient(address _proceedRecipient) internal view {
         if (isProceedRecipient(_proceedRecipient)) {
             revert IProceedRecipients.ProceedRecipientAlreadyExists(_proceedRecipient);
         }
