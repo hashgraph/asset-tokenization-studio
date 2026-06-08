@@ -169,8 +169,6 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   // ScheduledTasksDispatchOps dependencies — ScheduledTasksStorageWrapper uses try/catch delegatecall to this lib
   SnapshotsFacet: ["scheduledTasksDispatchOps"],
   ScheduledCrossOrderedTasksFacet: ["scheduledTasksDispatchOps"],
-  ScheduledCrossOrderedTasksKpiLinkedRateFacet: ["scheduledTasksDispatchOps"],
-  ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet: ["scheduledTasksDispatchOps"],
   // Additional facets with ScheduledTasksOps dependencies
   BatchFreezeFacet: ["scheduledTasksOps"],
   FreezeFacet: ["scheduledTasksOps"],
@@ -178,7 +176,7 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   LockByPartitionFacet: ["scheduledTasksOps"],
   LockFacet: ["scheduledTasksOps"],
   NominalValueFacet: ["scheduledTasksOps"],
-  ProceedRecipientsKpiLinkedRateFacet: ["scheduledTasksOps"],
+  ProceedRecipientsFacet: ["scheduledTasksOps"],
   RecoveryFacet: ["scheduledTasksOps"],
 };
 

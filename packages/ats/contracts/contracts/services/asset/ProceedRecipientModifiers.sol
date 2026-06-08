@@ -25,7 +25,7 @@ abstract contract ProceedRecipientModifiers {
      * @param _proceedRecipient The address to check
      */
     modifier onlyIfProceedRecipient(address _proceedRecipient) {
-        ProceedRecipientsStorageWrapper.requireProceedRecipient(_proceedRecipient);
+        ProceedRecipientsStorageWrapper.checkProceedRecipient(_proceedRecipient);
         _;
     }
 
@@ -39,7 +39,7 @@ abstract contract ProceedRecipientModifiers {
      * @param _proceedRecipient The address to check
      */
     modifier onlyIfNotProceedRecipient(address _proceedRecipient) {
-        ProceedRecipientsStorageWrapper.requireNotProceedRecipient(_proceedRecipient);
+        ProceedRecipientsStorageWrapper.checkNotProceedRecipient(_proceedRecipient);
         _;
     }
 }
