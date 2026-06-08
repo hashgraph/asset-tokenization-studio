@@ -6,10 +6,6 @@ import { ScheduledTask } from "../scheduledTasksCommon/IScheduledTasksCommon.sol
 /// @custom:hash resolverKey ScheduledTasks
 bytes32 constant RESOLVER_KEY_SCHEDULED_TASKS = 0x53ea769a267213f8e35c975a0dba3d7d8d73163d53f804c2ac6ea37d6c47c082;
 
-/// @custom:hash resolverKey ScheduledCrossOrderedTasksKpiLinkedRate
-// solhint-disable-next-line max-line-length
-bytes32 constant RESOLVER_KEY_SCHEDULED_CROSS_ORDERED_TASKS_KPI_LINKED_RATE = 0x93bfe3f155b9757d312214a75d3bcd8c8c84967e4a8cbaafdbdc40ea1ce2fd4c;
-
 /**
  * @title Scheduled Cross-Ordered Tasks Interface
  * @notice Defines the external API for querying and triggering cross-ordered scheduled tasks.

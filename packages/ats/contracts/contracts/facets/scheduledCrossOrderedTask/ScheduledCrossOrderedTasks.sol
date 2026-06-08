@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IScheduledCrossOrderedTasks } from "./IScheduledCrossOrderedTasks.sol";
+import { IScheduledCrossOrderedTasks, RESOLVER_KEY_SCHEDULED_TASKS } from "./IScheduledCrossOrderedTasks.sol";
 import { ScheduledTask } from "../scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ScheduledTasksStorageWrapper } from "../../domain/asset/ScheduledTasksStorageWrapper.sol";
@@ -22,9 +22,9 @@ abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks, Mod
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(_getResolverKey())
+        onlyFacetNotRegistered(RESOLVER_KEY_SCHEDULED_TASKS)
     {
-        InitializerStorageWrapper.setFacetToReady(_getResolverKey());
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_SCHEDULED_TASKS);
         emit ScheduledCrossOrderedTasksInitialized();
     }
 
@@ -62,11 +62,4 @@ abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks, Mod
             _pageLength
         );
     }
-
-    /**
-     * @notice Internal function to get the resolver key for the facet.
-     * @dev Must be implemented by inheriting facets to provide their specific resolver key.
-     * @return resolverKey_ The resolver key for the facet.
-     */
-    function _getResolverKey() internal pure virtual returns (bytes32 resolverKey_);
 }
