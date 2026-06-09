@@ -394,9 +394,9 @@ _Fires exclusively from `initializeLoansPortfolio` after the storage write succe
 
 #### Parameters
 
-| Name               | Type                                      | Description |
-| ------------------ | ----------------------------------------- | ----------- |
-| loansPortfolioData | ILoansPortfolio.LoansPortfolioDetailsData | undefined   |
+| Name               | Type                                      | Description                                             |
+| ------------------ | ----------------------------------------- | ------------------------------------------------------- |
+| loansPortfolioData | ILoansPortfolio.LoansPortfolioDetailsData | The portfolio configuration captured at initialisation. |
 
 ### LoansPortfolioWithdrawn
 
@@ -457,3 +457,17 @@ Thrown when a holdings asset declares a type outside the supported set.
 | Name              | Type  | Description                                             |
 | ----------------- | ----- | ------------------------------------------------------- |
 | holdingsAssetType | uint8 | The unsupported `HoldingsAssetType` value (as `uint8`). |
+
+### WrongCountryCode
+
+```solidity
+error WrongCountryCode(bytes4 _countryCode)
+```
+
+Thrown when a holdings asset references an unsupported country code.
+
+#### Parameters
+
+| Name          | Type   | Description                   |
+| ------------- | ------ | ----------------------------- |
+| \_countryCode | bytes4 | The unsupported country code. |

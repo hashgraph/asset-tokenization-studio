@@ -10666,9 +10666,9 @@ _Fires exclusively from `initializeLoansPortfolio` after the storage write succe
 
 #### Parameters
 
-| Name               | Type                                      | Description |
-| ------------------ | ----------------------------------------- | ----------- |
-| loansPortfolioData | ILoansPortfolio.LoansPortfolioDetailsData | undefined   |
+| Name               | Type                                      | Description                                             |
+| ------------------ | ----------------------------------------- | ------------------------------------------------------- |
+| loansPortfolioData | ILoansPortfolio.LoansPortfolioDetailsData | The portfolio configuration captured at initialisation. |
 
 ### LoansPortfolioWithdrawn
 
@@ -13852,6 +13852,20 @@ error WrongClearingId()
 ```
 
 Thrown when the supplied `clearingId` does not correspond to an existing or active clearing operation for the given holder and partition.
+
+### WrongCountryCode
+
+```solidity
+error WrongCountryCode(bytes4 _countryCode)
+```
+
+Thrown when a holdings asset references an unsupported country code.
+
+#### Parameters
+
+| Name          | Type   | Description                   |
+| ------------- | ------ | ----------------------------- |
+| \_countryCode | bytes4 | The unsupported country code. |
 
 ### WrongDates
 

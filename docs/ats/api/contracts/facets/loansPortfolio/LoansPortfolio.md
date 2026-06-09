@@ -396,9 +396,9 @@ _Fires exclusively from `initializeLoansPortfolio` after the storage write succe
 
 #### Parameters
 
-| Name               | Type                                      | Description |
-| ------------------ | ----------------------------------------- | ----------- |
-| loansPortfolioData | ILoansPortfolio.LoansPortfolioDetailsData | undefined   |
+| Name               | Type                                      | Description                                             |
+| ------------------ | ----------------------------------------- | ------------------------------------------------------- |
+| loansPortfolioData | ILoansPortfolio.LoansPortfolioDetailsData | The portfolio configuration captured at initialisation. |
 
 ### LoansPortfolioWithdrawn
 
@@ -471,6 +471,22 @@ Raised when an initialiser tries to register a facet that already has a non-zero
 | facetId     | bytes32 | Identifier of the offending facet.                             |
 | lastVersion | uint256 | Last version recorded for that facet at the time of the check. |
 
+### FacetPreviousVersionNotAccepted
+
+```solidity
+error FacetPreviousVersionNotAccepted(bytes32 facetId, uint256 lastVersion, uint256[] expectedVersions)
+```
+
+Raised when an initialiser requires the facet&#39;s previously registered version to match one of an expected set and the current `lastVersion` falls outside that set.
+
+#### Parameters
+
+| Name             | Type      | Description                                  |
+| ---------------- | --------- | -------------------------------------------- |
+| facetId          | bytes32   | Identifier of the facet being upgraded.      |
+| lastVersion      | uint256   | Last version currently stored for the facet. |
+| expectedVersions | uint256[] | List of acceptable predecessor versions.     |
+
 ### HoldingAssetNotFound
 
 ```solidity
@@ -520,6 +536,20 @@ error IsPaused()
 ```
 
 Thrown when an operation that requires the token to be unpaused is attempted while the token is paused (own flag or any external pause contract).
+
+### WrongCountryCode
+
+```solidity
+error WrongCountryCode(bytes4 _countryCode)
+```
+
+Thrown when a holdings asset references an unsupported country code.
+
+#### Parameters
+
+| Name          | Type   | Description                   |
+| ------------- | ------ | ----------------------------- |
+| \_countryCode | bytes4 | The unsupported country code. |
 
 ### ZeroAddressNotAllowed
 
