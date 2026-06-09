@@ -127,37 +127,37 @@ _Fires exclusively from `initializeBurn`._
 ### ControllerRedemption
 
 ```solidity
-event ControllerRedemption(address _controller, address indexed _tokenHolder, uint256 _value, bytes _data, bytes _operatorData)
+event ControllerRedemption(address controller, address indexed tokenHolder, uint256 value, bytes data, bytes operatorData)
 ```
 
 Emitted when an authorised controller redeems (burns) tokens on behalf of a holder.
 
 #### Parameters
 
-| Name                    | Type    | Description                                                     |
-| ----------------------- | ------- | --------------------------------------------------------------- |
-| \_controller            | address | The address of the controller that initiated the redemption.    |
-| \_tokenHolder `indexed` | address | The account whose tokens are redeemed.                          |
-| \_value                 | uint256 | The amount of tokens redeemed.                                  |
-| \_data                  | bytes   | Optional data attached to the redemption for validation.        |
-| \_operatorData          | bytes   | Optional data attached by the controller for event attribution. |
+| Name                  | Type    | Description                                                     |
+| --------------------- | ------- | --------------------------------------------------------------- |
+| controller            | address | The address of the controller that initiated the redemption.    |
+| tokenHolder `indexed` | address | The account whose tokens are redeemed.                          |
+| value                 | uint256 | The amount of tokens redeemed.                                  |
+| data                  | bytes   | Optional data attached to the redemption for validation.        |
+| operatorData          | bytes   | Optional data attached by the controller for event attribution. |
 
 ### Redeemed
 
 ```solidity
-event Redeemed(address indexed _operator, address indexed _from, uint256 _value, bytes _data)
+event Redeemed(address indexed operator, address indexed from, uint256 value, bytes data)
 ```
 
 Emitted when tokens are redeemed from a holder&#39;s balance.
 
 #### Parameters
 
-| Name                 | Type    | Description                                           |
-| -------------------- | ------- | ----------------------------------------------------- |
-| \_operator `indexed` | address | Account that executed the redemption.                 |
-| \_from `indexed`     | address | Address from which tokens were burnt.                 |
-| \_value              | uint256 | Amount of tokens redeemed, denominated in base units. |
-| \_data               | bytes   | Arbitrary payload forwarded alongside the redemption. |
+| Name               | Type    | Description                                           |
+| ------------------ | ------- | ----------------------------------------------------- |
+| operator `indexed` | address | Account that executed the redemption.                 |
+| from `indexed`     | address | Address from which tokens were burnt.                 |
+| value              | uint256 | Amount of tokens redeemed, denominated in base units. |
+| data               | bytes   | Arbitrary payload forwarded alongside the redemption. |
 
 ## Errors
 
