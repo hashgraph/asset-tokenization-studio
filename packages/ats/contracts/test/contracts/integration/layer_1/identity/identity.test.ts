@@ -3,7 +3,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { isinGenerator } from "@thomaschaplin/isin-generator";
 import { ComplianceMock, IdentityRegistryMock, type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 import { ADDRESS_ZERO, ATS_ROLES, RESOLVER_KEY_IDENTITY } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -13,7 +12,6 @@ const name = "TEST";
 const symbol = "TAC";
 const decimals = 6;
 const version = "1";
-const isin = isinGenerator();
 const MAX_SUPPLY = 10000000;
 const onchainId = ethers.Wallet.createRandom().address;
 
@@ -47,7 +45,7 @@ describe("Identity Tests", () => {
           compliance: complianceMock.target as string,
           identityRegistry: identityRegistryMock.target as string,
           maxSupply: MAX_SUPPLY,
-          erc20MetadataInfo: { name, symbol, decimals, isin },
+          erc20MetadataInfo: { name, symbol, decimals },
         },
       },
       infrastructure,

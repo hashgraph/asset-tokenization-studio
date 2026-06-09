@@ -255,18 +255,6 @@ interface TRexIFactory {
     error NoInitialAdmins();
 
     /**
-     * @notice Raised when the provided ISIN does not meet the expected format or length.
-     * @param isin The invalid ISIN string.
-     */
-    error WrongISIN(string isin);
-
-    /**
-     * @notice Raised when the ISIN checksum is invalid.
-     * @param isin The invalid ISIN string.
-     */
-    error WrongISINChecksum(string isin);
-
-    /**
      * @notice Raised when the requested regulation type and sub-type combination is not permitted.
      * @param regulationType Primary regulation category.
      * @param regulationSubType Sub-category within the regulation.

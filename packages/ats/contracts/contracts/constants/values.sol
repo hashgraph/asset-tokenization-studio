@@ -56,8 +56,6 @@ bytes1 constant _ADDRESS_RECOVERED_TO_ERROR_ID = 0x55;
 
 bytes1 constant _SUCCESS = 0x00;
 
-uint256 constant _ISIN_LENGTH = 12;
-uint256 constant _CHECKSUM_POSITION_IN_ISIN = 11;
 uint8 constant _TEN = 10;
 uint8 constant _UINT_WITH_ONE_DIGIT = 9;
 uint8 constant _ASCII_9 = 57;

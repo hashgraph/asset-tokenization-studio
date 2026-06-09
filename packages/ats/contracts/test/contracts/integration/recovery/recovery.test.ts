@@ -22,7 +22,6 @@ import {
 const name = "TEST";
 const symbol = "TAC";
 const decimals = 6;
-const isin = "US0231351067";
 const MAX_SUPPLY = 10000000;
 const EMPTY_VC_ID = EMPTY_STRING;
 
@@ -59,7 +58,7 @@ describe("Recovery Tests", () => {
             compliance: complianceMock.target as string,
             identityRegistry: identityRegistryMock.target as string,
             maxSupply: MAX_SUPPLY,
-            erc20MetadataInfo: { name, symbol, decimals, isin },
+            erc20MetadataInfo: { name, symbol, decimals },
           },
         },
         infrastructure,
