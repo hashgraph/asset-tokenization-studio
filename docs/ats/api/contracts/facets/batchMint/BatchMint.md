@@ -52,19 +52,19 @@ _Fires exclusively from `initializeBatchMint` after the storage write succeeds._
 ### Issued
 
 ```solidity
-event Issued(address indexed _operator, address indexed _to, uint256 _value, bytes _data)
+event Issued(address indexed operator, address indexed to, uint256 value, bytes data)
 ```
 
 Emitted when new tokens are issued to a holder.
 
 #### Parameters
 
-| Name                 | Type    | Description                                          |
-| -------------------- | ------- | ---------------------------------------------------- |
-| \_operator `indexed` | address | Account that invoked the issuance (issuer or agent). |
-| \_to `indexed`       | address | Recipient of the newly issued tokens.                |
-| \_value              | uint256 | Amount of tokens issued, denominated in base units.  |
-| \_data               | bytes   | Arbitrary payload forwarded alongside the issuance.  |
+| Name               | Type    | Description                                          |
+| ------------------ | ------- | ---------------------------------------------------- |
+| operator `indexed` | address | Account that invoked the issuance (issuer or agent). |
+| to `indexed`       | address | Recipient of the newly issued tokens.                |
+| value              | uint256 | Amount of tokens issued, denominated in base units.  |
+| data               | bytes   | Arbitrary payload forwarded alongside the issuance.  |
 
 ## Errors
 

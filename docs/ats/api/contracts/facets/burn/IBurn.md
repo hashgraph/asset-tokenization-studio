@@ -83,16 +83,16 @@ _Fires exclusively from `initializeBurn`._
 ### Redeemed
 
 ```solidity
-event Redeemed(address indexed _operator, address indexed _from, uint256 _value, bytes _data)
+event Redeemed(address indexed operator, address indexed from, uint256 value, bytes data)
 ```
 
 Emitted when tokens are redeemed from a holder&#39;s balance.
 
 #### Parameters
 
-| Name                 | Type    | Description                                           |
-| -------------------- | ------- | ----------------------------------------------------- |
-| \_operator `indexed` | address | Account that executed the redemption.                 |
-| \_from `indexed`     | address | Address from which tokens were burnt.                 |
-| \_value              | uint256 | Amount of tokens redeemed, denominated in base units. |
-| \_data               | bytes   | Arbitrary payload forwarded alongside the redemption. |
+| Name               | Type    | Description                                           |
+| ------------------ | ------- | ----------------------------------------------------- |
+| operator `indexed` | address | Account that executed the redemption.                 |
+| from `indexed`     | address | Address from which tokens were burnt.                 |
+| value              | uint256 | Amount of tokens redeemed, denominated in base units. |
+| data               | bytes   | Arbitrary payload forwarded alongside the redemption. |
