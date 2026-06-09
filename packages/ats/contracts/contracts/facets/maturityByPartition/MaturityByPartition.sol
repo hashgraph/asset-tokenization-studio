@@ -42,7 +42,7 @@ abstract contract MaturityByPartition is IMaturityByPartition, Modifiers {
         onlyUnpaused
         onlyClearingDisabled
         onlyRole(ROLE_MATURITY_REDEEMER)
-        onlyValidAddress(_tokenHolder)
+        validateAddressNotZero(_tokenHolder)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnrecoveredAddress(_tokenHolder)
         onlyListedAllowed(_tokenHolder)

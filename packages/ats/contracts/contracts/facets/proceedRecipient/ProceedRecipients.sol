@@ -8,7 +8,7 @@ import { ProceedRecipientsStorageWrapper } from "../../domain/asset/ProceedRecip
 import { DefaultValueValidation } from "../../infrastructure/utils/DefaultValueValidation.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
-
+import { ScheduledTasksOps } from "../../domain/orchestrator/ScheduledTasksOps.sol";
 /**
  * @title Proceed Recipients
  * @notice Manages the addresses entitled to receive proceeds and their associated data.
@@ -18,18 +18,51 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract ProceedRecipients is IProceedRecipients, Modifiers {
     /// @inheritdoc IProceedRecipients
+    function initializeProceedRecipients(
+        address[] calldata _proceedRecipients,
+        bytes[] calldata _data
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_PROCEED_RECIPIENTS) {
+        ProceedRecipientsStorageWrapper.initializeProceedRecipients(_proceedRecipients, _data);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_PROCEED_RECIPIENTS);
+        emit ProceedRecipientsInitialized(_proceedRecipients, _data);
+    }
+
+    /// @inheritdoc IProceedRecipients
     function addProceedRecipient(
         address _proceedRecipient,
         bytes calldata _data
-    ) external virtual override onlyOperational onlyActivated onlyUnpaused onlyRole(ROLE_PROCEED_RECIPIENT_MANAGER) {
-        _addProceedRecipientInternal(_proceedRecipient, _data);
+    )
+        external
+        virtual
+        override
+        onlyOperational
+        onlyActivated
+        onlyUnpaused
+        onlyRole(ROLE_PROCEED_RECIPIENT_MANAGER)
+        validateAddressNotZero(_proceedRecipient)
+        onlyIfNotProceedRecipient(_proceedRecipient)
+    {
+        ScheduledTasksOps.triggerPendingScheduledCrossOrderedTasks();
+        ProceedRecipientsStorageWrapper.addProceedRecipient(_proceedRecipient, _data);
+        emit ProceedRecipientAdded(EvmAccessors.getMsgSender(), _proceedRecipient, _data);
     }
 
     /// @inheritdoc IProceedRecipients
     function removeProceedRecipient(
         address _proceedRecipient
-    ) external virtual override onlyOperational onlyActivated onlyUnpaused onlyRole(ROLE_PROCEED_RECIPIENT_MANAGER) {
-        _removeProceedRecipientInternal(_proceedRecipient);
+    )
+        external
+        virtual
+        override
+        onlyOperational
+        onlyActivated
+        onlyUnpaused
+        onlyRole(ROLE_PROCEED_RECIPIENT_MANAGER)
+        onlyIfProceedRecipient(_proceedRecipient)
+    {
+        ScheduledTasksOps.triggerPendingScheduledCrossOrderedTasks();
+        ProceedRecipientsStorageWrapper.removeProceedRecipient(_proceedRecipient);
+        emit ProceedRecipientRemoved(EvmAccessors.getMsgSender(), _proceedRecipient);
     }
 
     /// @inheritdoc IProceedRecipients
@@ -43,9 +76,10 @@ abstract contract ProceedRecipients is IProceedRecipients, Modifiers {
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_PROCEED_RECIPIENT_MANAGER)
-        notZeroAddress(_proceedRecipient)
+        validateAddressNotZero(_proceedRecipient)
         onlyIfProceedRecipient(_proceedRecipient)
     {
+        ScheduledTasksOps.triggerPendingScheduledCrossOrderedTasks();
         ProceedRecipientsStorageWrapper.setProceedRecipientData(_proceedRecipient, _data);
         emit ProceedRecipientDataUpdated(EvmAccessors.getMsgSender(), _proceedRecipient, _data);
     }
@@ -71,31 +105,5 @@ abstract contract ProceedRecipients is IProceedRecipients, Modifiers {
         uint256 _pageLength
     ) external view override returns (address[] memory proceedRecipients_) {
         return ProceedRecipientsStorageWrapper.getProceedRecipients(_pageIndex, _pageLength);
-    }
-
-    /**
-     * @notice Adds a proceed recipient and emits the corresponding registration event.
-     * @dev Reverts for the zero address or when the address is already registered. Intended for
-     *      reuse by external entry points that apply the required access and lifecycle checks.
-     * @param _proceedRecipient Address to register as a proceed recipient.
-     * @param _data Metadata payload associated with the proceed recipient.
-     */
-    function _addProceedRecipientInternal(address _proceedRecipient, bytes calldata _data) internal {
-        DefaultValueValidation.checkZeroAddress(_proceedRecipient);
-        ProceedRecipientsStorageWrapper.requireNotProceedRecipient(_proceedRecipient);
-        ProceedRecipientsStorageWrapper.addProceedRecipient(_proceedRecipient, _data);
-        emit ProceedRecipientAdded(EvmAccessors.getMsgSender(), _proceedRecipient, _data);
-    }
-
-    /**
-     * @notice Removes a proceed recipient and emits the corresponding removal event.
-     * @dev Reverts when the address is not registered. Intended for reuse by external entry
-     *      points that apply the required access and lifecycle checks.
-     * @param _proceedRecipient Address to remove from the proceed recipient registry.
-     */
-    function _removeProceedRecipientInternal(address _proceedRecipient) internal {
-        ProceedRecipientsStorageWrapper.requireProceedRecipient(_proceedRecipient);
-        ProceedRecipientsStorageWrapper.removeProceedRecipient(_proceedRecipient);
-        emit ProceedRecipientRemoved(EvmAccessors.getMsgSender(), _proceedRecipient);
     }
 }

@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IProceedRecipients } from "../../facets/proceedRecipient/IProceedRecipients.sol";
 import { ExternalListManagementStorageWrapper } from "../core/ExternalListManagementStorageWrapper.sol";
+import { DefaultValueValidation } from "../../infrastructure/utils/DefaultValueValidation.sol";
 
 /// @custom:hash storage ProceedRecipients
 // solhint-disable-next-line max-line-length
@@ -50,7 +51,7 @@ library ProceedRecipientsStorageWrapper {
     function initializeProceedRecipients(address[] calldata _proceedRecipients, bytes[] calldata _data) internal {
         uint256 length = _proceedRecipients.length;
         for (uint256 index; index < length; ) {
-            ExternalListManagementStorageWrapper.checkValidAddress(_proceedRecipients[index]);
+            DefaultValueValidation.checkZeroAddress(_proceedRecipients[index]);
             addProceedRecipient(_proceedRecipients[index], _data[index]);
             unchecked {
                 ++index;
@@ -98,7 +99,7 @@ library ProceedRecipientsStorageWrapper {
      * @notice Reverts when the supplied address is not a registered proceed recipient.
      * @param _proceedRecipient Address to check.
      */
-    function requireProceedRecipient(address _proceedRecipient) internal view {
+    function checkProceedRecipient(address _proceedRecipient) internal view {
         if (!isProceedRecipient(_proceedRecipient)) {
             revert IProceedRecipients.ProceedRecipientNotFound(_proceedRecipient);
         }
@@ -108,7 +109,7 @@ library ProceedRecipientsStorageWrapper {
      * @notice Reverts when the supplied address is already a registered proceed recipient.
      * @param _proceedRecipient Address to check.
      */
-    function requireNotProceedRecipient(address _proceedRecipient) internal view {
+    function checkNotProceedRecipient(address _proceedRecipient) internal view {
         if (isProceedRecipient(_proceedRecipient)) {
             revert IProceedRecipients.ProceedRecipientAlreadyExists(_proceedRecipient);
         }

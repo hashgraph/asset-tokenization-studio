@@ -44,7 +44,7 @@ abstract contract OperatorClearingByPartition is IOperatorClearingByPartition, M
         onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
         onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyUnrecoveredAddress(_clearingOperationFrom.from)
-        notZeroAddress(_clearingOperationFrom.from)
+        validateAddressNotZero(_clearingOperationFrom.from)
         onlyDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition)
         onlyUnProtectedPartitionsOrWildCardRole
         onlyOperator(_clearingOperationFrom.clearingOperation.partition, _clearingOperationFrom.from)

@@ -46,7 +46,7 @@ abstract contract ClearingHoldByPartition is IClearingHoldByPartition, Modifiers
         onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
         onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyUnrecoveredAddress(_hold.to)
-        notZeroAddress(_hold.escrow)
+        validateAddressNotZero(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 clearingId_)

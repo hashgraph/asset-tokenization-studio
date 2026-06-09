@@ -6,11 +6,11 @@ import { IKyc } from "../../facets/kyc/IKyc.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { Eip1066 } from "../../constants/eip1066.sol";
 import { IClearingTypes } from "../../facets/clearing/IClearingTypes.sol";
-import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
-import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
-import { IIdentityRegistry } from "../../facets/layer_1/ERC3643/IIdentityRegistry.sol";
+import { IERC3643Types } from "../../facets/commonTypes/IERC3643Types.sol";
+import { ICompliance } from "../../facets/compliance/externalInterfaces/ICompliance.sol";
+import { IIdentityRegistry } from "../../facets/identity/externalInterfaces/IIdentityRegistry.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
-import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
+import { IERC1410Types } from "../../facets/commonTypes/IERC1410Types.sol";
 import { ITransfer } from "../../facets/transfer/ITransfer.sol";
 import { IAllowanceTypes } from "../../facets/allowance/IAllowanceTypes.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
@@ -109,65 +109,6 @@ library ERC1594StorageWrapper {
     }
 
     /**
-     * @notice Returns whether the ERC1594 storage has been initialised.
-     * @return `true` if `initialize` has been called successfully.
-     */
-    /**
-     * @notice Reverts if a transfer from `from` to `to` of `value` in
-     * `partition` is not allowed.
-     * @dev Calls `checkCanTransferFromByPartition` with empty data and
-     * operator data. Reverts with the appropriate reason code otherwise.
-     * @param from Source address of the transfer.
-     * @param to Destination address of the transfer.
-     * @param partition Partition identifier for the transfer.
-     * @param value Amount of tokens to transfer.
-     */
-    function requireCanTransferFromByPartition(
-        address from,
-        address to,
-        bytes32 partition,
-        uint256 value
-    ) internal view {
-        checkCanTransferFromByPartition(from, to, partition, value, EMPTY_BYTES, EMPTY_BYTES);
-    }
-
-    /**
-     * @notice Reverts if a redemption from `from` in `partition` of `value`
-     * is not allowed.
-     * @dev Calls `checkCanRedeemFromByPartition` with empty data.
-     * @param from Address whose tokens will be redeemed.
-     * @param partition Partition identifier for the redemption.
-     * @param value Amount of tokens to redeem.
-     */
-    function requireCanRedeemFromByPartition(address from, bytes32 partition, uint256 value) internal view {
-        checkCanRedeemFromByPartition(from, partition, value, EMPTY_BYTES, EMPTY_BYTES);
-    }
-
-    /**
-     * @notice Reverts if either `from` or `to` fails identity verification.
-     * @dev Forwards to `checkIdentity`.
-     * @param from Source address.
-     * @param to Destination address.
-     */
-    function requireIdentified(address from, address to) internal view {
-        checkIdentity(from, to);
-    }
-
-    /**
-     * @notice Reverts if the transfer between `from` and `to` fails
-     * compliance checks. Optionally checks sender compliance.
-     * @dev Forwards to `checkCompliance`. Used when the sender is not
-     * necessarily the `from` parameter.
-     * @param from Source address.
-     * @param to Destination address.
-     * @param checkSender Whether to perform compliance validation on the
-     * current `msg.sender`.
-     */
-    function requireCompliant(address from, address to, bool checkSender) internal view {
-        checkCompliance(from, to, checkSender);
-    }
-
-    /**
      * @notice Reverts if either `from` or `to` is listed as a recovered
      * wallet.
      * @dev Reverts with `WalletRecovered` for any non-zero address whose
@@ -185,56 +126,54 @@ library ERC1594StorageWrapper {
     }
 
     /**
-     * @notice Reverts if the given redemption cannot proceed.
-     * @dev Delegates to `isAbleToRedeemFromByPartition` and reverts with the
-     * encoded reason code and details on failure. The trailing `data` and
-     * `operatorData` slots are unused; retained for interface compatibility.
-     * @param from         Address whose tokens will be redeemed.
-     * @param partition    Partition identifier for the redemption.
-     * @param value        Amount of tokens to redeem.
+     * @notice Validates whether tokens can be redeemed from an account for a partition.
+     * @dev Reverts with the low-level reason returned by `isAbleToRedeemFromByPartition` when the
+     *      redemption is not permitted. The `_data` and `_operatorData` inputs are intentionally
+     *      ignored and empty payloads are used for the underlying validation.
+     * @param from Account whose partition balance is checked for redemption.
+     * @param partition Partition identifier from which tokens are redeemed.
+     * @param value Amount of tokens to redeem.
      */
     function checkCanRedeemFromByPartition(
         address from,
         bytes32 partition,
         uint256 value,
-        bytes memory /*_data*/,
-        bytes memory /*_operatorData*/
+        bytes memory _data,
+        bytes memory _operatorData
     ) internal view {
-        (bool isAbleToRedeemFrom, , bytes32 reasonCode, bytes memory details) = isAbleToRedeemFromByPartition(
+        (bool canRedeemFrom, , bytes32 reasonCode, bytes memory details) = canRedeemFromByPartition(
             from,
             partition,
             value,
-            EMPTY_BYTES,
-            EMPTY_BYTES
+            _data,
+            _operatorData
         );
-        if (!isAbleToRedeemFrom) {
+        if (!canRedeemFrom) {
             LowLevelCall.revertWithData(bytes4(reasonCode), details);
         }
     }
 
     /**
-     * @notice Determines whether a redemption can proceed for the given parameters.
-     * @dev Performs cascading checks: system state (clearing), format validation,
-     * compliance, identity, and business logic (allowance, partition, balance).
-     * Returns early on first failure. The trailing `data` and `operatorData`
-     * slots are unused; retained for interface compatibility.
-     * @param from               Address whose tokens will be redeemed.
-     * @param partition          Partition identifier for the redemption.
-     * @param value              Amount of tokens to redeem.
-     * @return isAbleToRedeemFrom True if the redemption is permitted.
-     * @return statusCode        EIP1066 status byte.
-     * @return reasonCode        Selector of the blocking error (if not permitted).
-     * @return details           Encoded error data.
+     * @notice Reports whether tokens can be redeemed from an account for a partition.
+     * @dev Performs generic, address, compliance, identity, authorisation, allowance, and business
+     *      rule checks without mutating state. Returns early on the first failed validation.
+     * @param from Account whose partition balance is checked for redemption.
+     * @param partition Partition identifier from which tokens are redeemed.
+     * @param value Amount of tokens to redeem.
+     * @return canRedeemFrom True when the redemption is permitted.
+     * @return statusCode EIP-1066 status code describing the validation result.
+     * @return reasonCode Error selector or reason identifier associated with the result.
+     * @return details Encoded contextual data for the returned reason, when available.
      */
-    function isAbleToRedeemFromByPartition(
+    function canRedeemFromByPartition(
         address from,
         bytes32 partition,
         uint256 value,
         bytes memory /*_data*/,
         bytes memory /*_operatorData*/
-    ) internal view returns (bool isAbleToRedeemFrom, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
-        (isAbleToRedeemFrom, statusCode, reasonCode, details) = _genericChecks();
-        if (!isAbleToRedeemFrom) return (isAbleToRedeemFrom, statusCode, reasonCode, details);
+    ) internal view returns (bool canRedeemFrom, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
+        (canRedeemFrom, statusCode, reasonCode, details) = _genericChecks();
+        if (!canRedeemFrom) return (canRedeemFrom, statusCode, reasonCode, details);
         // Format validation
         if (from == ZERO_ADDRESS) {
             return (
@@ -245,76 +184,68 @@ library ERC1594StorageWrapper {
             );
         }
         address sender = EvmAccessors.getMsgSender();
-        bool checkSender = _checkSenderHasProtectedPartitionRole(from, sender, partition);
-        (isAbleToRedeemFrom, statusCode, reasonCode, details) = _isCompliant(
-            from,
-            address(0),
-            value,
-            sender,
-            checkSender
-        );
-        if (!isAbleToRedeemFrom) return (isAbleToRedeemFrom, statusCode, reasonCode, details);
-        (isAbleToRedeemFrom, statusCode, reasonCode, details) = _isIdentified(from, address(0));
-        if (!isAbleToRedeemFrom) return (isAbleToRedeemFrom, statusCode, reasonCode, details);
+        bool checkSender = _isSenderComplianceRequired(from, sender, partition);
+        (canRedeemFrom, statusCode, reasonCode, details) = _isCompliant(from, address(0), value, sender, checkSender);
+        if (!canRedeemFrom) return (canRedeemFrom, statusCode, reasonCode, details);
+        (canRedeemFrom, statusCode, reasonCode, details) = _isIdentified(from, address(0));
+        if (!canRedeemFrom) return (canRedeemFrom, statusCode, reasonCode, details);
         // Allowance check for the 'from' methods
         bool checkAllowance = checkSender && !ERC1410StorageWrapper.isAuthorized(partition, sender, from);
         return _businessLogicChecks(checkAllowance, from, value, partition);
     }
 
     /**
-     * @notice Reverts if the given transfer cannot proceed.
-     * @dev Delegates to `isAbleToTransferFromByPartition` and reverts with the
-     * encoded reason code and details on failure. The trailing `data` and
-     * `operatorData` slots are unused; retained for interface compatibility.
-     * @param from         Source address of the transfer.
-     * @param to           Destination address of the transfer.
-     * @param partition    Partition identifier for the transfer.
-     * @param value        Amount of tokens to transfer.
+     * @notice Validates whether tokens can be transferred from an account to another for a partition.
+     * @dev Reverts with the low-level reason returned by `isAbleToTransferFromByPartition` when the
+     *      transfer is not permitted. The `_data` and `_operatorData` inputs are intentionally
+     *      ignored and empty payloads are used for the underlying validation.
+     * @param from Account whose partition balance is checked for transfer.
+     * @param to Recipient account checked against transfer eligibility rules.
+     * @param partition Partition identifier from which tokens are transferred.
+     * @param value Amount of tokens to transfer.
      */
     function checkCanTransferFromByPartition(
         address from,
         address to,
         bytes32 partition,
         uint256 value,
-        bytes memory /*_data*/,
-        bytes memory /*_operatorData*/
+        bytes memory _data,
+        bytes memory _operatorData
     ) internal view {
-        (bool isAbleToTransfer, , bytes32 reasonCode, bytes memory details) = isAbleToTransferFromByPartition(
+        (bool canTransfer, , bytes32 reasonCode, bytes memory details) = canTransferFromByPartition(
             from,
             to,
             partition,
             value,
-            EMPTY_BYTES,
-            EMPTY_BYTES
+            _data,
+            _operatorData
         );
-        if (!isAbleToTransfer) LowLevelCall.revertWithData(bytes4(reasonCode), details);
+        if (!canTransfer) LowLevelCall.revertWithData(bytes4(reasonCode), details);
     }
 
     /**
-     * @notice Determines whether a transfer can proceed for the given parameters.
-     * @dev Performs cascading checks: system state (clearing), format validation,
-     * compliance, identity, and business logic (allowance, partition, balance).
-     * Returns early on first failure. The trailing `data` and `operatorData`
-     * slots are unused; retained for interface compatibility.
-     * @param from             Source address of the transfer.
-     * @param to               Destination address of the transfer.
-     * @param partition        Partition identifier for the transfer.
-     * @param value            Amount of tokens to transfer.
-     * @return isAbleToTransfer True if the transfer is permitted.
-     * @return statusCode      EIP1066 status byte.
-     * @return reasonCode      Selector of the blocking error (if not permitted).
-     * @return details         Encoded error data.
+     * @notice Reports whether tokens can be transferred from an account to another for a partition.
+     * @dev Performs generic, address, compliance, identity, authorisation, allowance, and business
+     *      rule checks without mutating state. Returns early on the first failed validation.
+     * @param from Account whose partition balance is checked for transfer.
+     * @param to Recipient account checked against transfer eligibility rules.
+     * @param partition Partition identifier from which tokens are transferred.
+     * @param value Amount of tokens to transfer.
+     * @return canTransfer True when the transfer is permitted.
+     * @return statusCode EIP-1066 status code describing the validation result.
+     * @return reasonCode Error selector or reason identifier associated with the result.
+     * @return details Encoded contextual data for the returned reason, when available.
      */
-    function isAbleToTransferFromByPartition(
+    function canTransferFromByPartition(
         address from,
         address to,
         bytes32 partition,
         uint256 value,
         bytes memory /*_data*/,
         bytes memory /*_operatorData*/
-    ) internal view returns (bool isAbleToTransfer, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
-        (isAbleToTransfer, statusCode, reasonCode, details) = _genericChecks();
-        if (!isAbleToTransfer) return (isAbleToTransfer, statusCode, reasonCode, details);
+    ) internal view returns (bool canTransfer, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
+        (canTransfer, statusCode, reasonCode, details) = _genericChecks();
+        if (!canTransfer) return (canTransfer, statusCode, reasonCode, details);
         // Format validation
         if (from == ZERO_ADDRESS || to == ZERO_ADDRESS) {
             return (
@@ -325,11 +256,11 @@ library ERC1594StorageWrapper {
             );
         }
         address sender = EvmAccessors.getMsgSender();
-        bool checkSender = _checkSenderHasProtectedPartitionRole(from, sender, partition);
-        (isAbleToTransfer, statusCode, reasonCode, details) = _isCompliant(from, to, value, sender, checkSender);
-        if (!isAbleToTransfer) return (isAbleToTransfer, statusCode, reasonCode, details);
-        (isAbleToTransfer, statusCode, reasonCode, details) = _isIdentified(from, to);
-        if (!isAbleToTransfer) return (isAbleToTransfer, statusCode, reasonCode, details);
+        bool checkSender = _isSenderComplianceRequired(from, sender, partition);
+        (canTransfer, statusCode, reasonCode, details) = _isCompliant(from, to, value, sender, checkSender);
+        if (!canTransfer) return (canTransfer, statusCode, reasonCode, details);
+        (canTransfer, statusCode, reasonCode, details) = _isIdentified(from, to);
+        if (!canTransfer) return (canTransfer, statusCode, reasonCode, details);
         // Allowance check for the 'from' methods
         bool checkAllowance = checkSender && !ERC1410StorageWrapper.isAuthorized(partition, sender, from);
         return _businessLogicChecks(checkAllowance, from, value, partition);
@@ -404,27 +335,30 @@ library ERC1594StorageWrapper {
     }
 
     /**
-     * @notice Determines whether the sender requires compliance and
-     * allowance checks when acting on behalf of `_from` for a given
-     * `_partition`.
-     * @dev The sender needs checking if it is different from `_from` and
-     * does not hold the protected partition role for that partition.
-     * @param _from Token holder address.
+     * @notice Determines whether an operator is subject to compliance and allowance checks.
+     * @dev Returns false when the sender is the token holder. If partition protection is
+     *      enabled, also returns false for senders holding the role associated with the
+     *      protected partition. Returns true for all other delegated operations. Does not
+     *      mutate state and only reads protected partition and access-control storage.
+     * @param _from Token holder whose balance or partitioned balance is being acted upon.
      * @param _sender Address initiating the operation.
-     * @param _partition Partition identifier.
-     * @return checkSender_ True if the sender must pass additional checks.
+     * @param _partition Partition identifier used to resolve privileged sender permissions.
+     * @return True when the sender must satisfy additional compliance and allowance checks.
      */
-    function _checkSenderHasProtectedPartitionRole(
+    function _isSenderComplianceRequired(
         address _from,
         address _sender,
         bytes32 _partition
-    ) private view returns (bool checkSender_) {
-        checkSender_ =
-            _from != _sender &&
-            !AccessControlStorageWrapper.hasRole(
-                ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition),
-                _sender
-            );
+    ) private view returns (bool) {
+        return
+            _from == _sender
+                ? false
+                : ProtectedPartitionsStorageWrapper.arePartitionsProtected()
+                    ? !AccessControlStorageWrapper.hasRole(
+                        ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition),
+                        _sender
+                    )
+                    : true;
     }
 
     /**
@@ -488,7 +422,7 @@ library ERC1594StorageWrapper {
         if (ERC3643StorageWrapper.isRecovered(account)) {
             return (false, Eip1066.REVOKED_OR_BANNED, IERC3643Types.WalletRecovered.selector, details);
         }
-        if (!ControlListStorageWrapper.isAbleToAccess(account)) {
+        if (!ControlListStorageWrapper.canAccess(account)) {
             return (false, Eip1066.DISALLOWED_OR_STOP, ICommonErrors.AccountIsBlocked.selector, details);
         }
         return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
@@ -626,7 +560,7 @@ library ERC1594StorageWrapper {
      * @param from Token holder address.
      * @param value Amount of tokens to transfer/redeem.
      * @param partition Partition identifier.
-     * @return isAbleToTransfer True if all business conditions are met.
+     * @return canTransfer True if all business conditions are met.
      * @return statusCode EIP1066 status byte.
      * @return reasonCode Selector of the blocking error.
      * @return details Encoded error data.
@@ -636,15 +570,15 @@ library ERC1594StorageWrapper {
         address from,
         uint256 value,
         bytes32 partition
-    ) private view returns (bool isAbleToTransfer, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
+    ) private view returns (bool canTransfer, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
         if (checkAllowance) {
-            (isAbleToTransfer, statusCode, reasonCode, details) = _checkAllowance(from, value);
-            if (!isAbleToTransfer) return (isAbleToTransfer, statusCode, reasonCode, details);
+            (canTransfer, statusCode, reasonCode, details) = _checkAllowance(from, value);
+            if (!canTransfer) return (canTransfer, statusCode, reasonCode, details);
         }
-        (isAbleToTransfer, statusCode, reasonCode, details) = _checkPartitionValidity(from, partition);
-        if (!isAbleToTransfer) return (isAbleToTransfer, statusCode, reasonCode, details);
-        (isAbleToTransfer, statusCode, reasonCode, details) = _checkPartitionBalance(from, value, partition);
-        if (!isAbleToTransfer) return (isAbleToTransfer, statusCode, reasonCode, details);
+        (canTransfer, statusCode, reasonCode, details) = _checkPartitionValidity(from, partition);
+        if (!canTransfer) return (canTransfer, statusCode, reasonCode, details);
+        (canTransfer, statusCode, reasonCode, details) = _checkPartitionBalance(from, value, partition);
+        if (!canTransfer) return (canTransfer, statusCode, reasonCode, details);
         return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
     }
 

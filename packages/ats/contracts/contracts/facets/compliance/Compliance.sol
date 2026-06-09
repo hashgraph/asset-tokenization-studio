@@ -9,7 +9,7 @@ import { IPause } from "../pause/IPause.sol";
 import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
 import { Eip1066 } from "../../constants/eip1066.sol";
-import { ICompliance } from "../layer_1/ERC3643/ICompliance.sol";
+import { ICompliance } from "./externalInterfaces/ICompliance.sol";
 import { IERC3643Types } from "../layer_1/ERC3643/IERC3643Types.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
@@ -55,7 +55,7 @@ abstract contract Compliance is IComplianceFacet, Modifiers {
         if (PauseStorageWrapper.isPaused()) {
             return (false, Eip1066.PAUSED, IPause.IsPaused.selector);
         }
-        (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.isAbleToTransferFromByPartition(
+        (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.canTransferFromByPartition(
             EvmAccessors.getMsgSender(),
             _to,
             _DEFAULT_PARTITION,
@@ -77,7 +77,7 @@ abstract contract Compliance is IComplianceFacet, Modifiers {
         if (PauseStorageWrapper.isPaused()) {
             return (false, Eip1066.PAUSED, IPause.IsPaused.selector);
         }
-        (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.isAbleToTransferFromByPartition(
+        (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.canTransferFromByPartition(
             _from,
             _to,
             _DEFAULT_PARTITION,

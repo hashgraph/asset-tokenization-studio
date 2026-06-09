@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ITransfer } from "../../facets/transfer/ITransfer.sol";
-import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
+import { IERC1410Types } from "../../facets/commonTypes/IERC1410Types.sol";
 import { DefaultValueValidation } from "../../infrastructure/utils/DefaultValueValidation.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
@@ -10,8 +10,8 @@ import { ERC20VotesStorageWrapper } from "./ERC20VotesStorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
-import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
-import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
+import { ICompliance } from "../../facets/compliance/externalInterfaces/ICompliance.sol";
+import { IERC3643Types } from "../../facets/commonTypes/IERC3643Types.sol";
 import { IProtectedPartitions } from "../../facets/protectedPartition/IProtectedPartitions.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
@@ -1057,16 +1057,6 @@ library ERC1410StorageWrapper {
         if (partition == bytes32(0)) {
             revert IERC1410Types.ZeroPartition();
         }
-    }
-
-    /**
-     * @notice Reverts when `account` is the zero address.
-     * @dev Delegates to `DefaultValueValidation.checkZeroAddress` to keep error semantics consistent
-     *      with the rest of the codebase.
-     * @param account Address being validated.
-     */
-    function requireValidAddress(address account) internal pure {
-        DefaultValueValidation.checkZeroAddress(account);
     }
 
     /**

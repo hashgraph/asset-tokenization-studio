@@ -1,0 +1,187 @@
+name: "106: [FLOW] ATS Contract Docs Check"
+
+# Keeps docs/ats/api/contracts (the dodoc-generated contract API docs) in sync
+# with the committed contract sources. Behaviour depends on the PR target branch:
+#
+#   * PR into main  -> VERIFY ONLY. Regenerate from the committed sources and fail
+#                      the PR on content drift. Nothing is pushed back. This is the
+#                      authoritative gate (the husky pre-commit hook does the same
+#                      locally, but hooks can be skipped via `--no-verify` or by a
+#                      dev who never installed husky).
+#
+#   * PR into any    -> REGENERATE & PUSH BACK. Run `npm run ats:contracts:doc`
+#     other branch     (dodoc with freshOutput wipes and recreates the whole
+#                      directory), then commit the result back onto the PR's head
+#                      branch, overwriting whatever docs it contained. No
+#                      verification — the regenerated output simply wins.
+#
+# Both paths normalise through CI's pinned Prettier so the result matches exactly
+# what the pre-commit hook produces locally.
+
+on:
+  pull_request:
+    paths:
+      - "packages/ats/contracts/**"
+      - "docs/ats/api/contracts/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".nvmrc"
+      - ".github/workflows/106-flow-ats-docs-check.yaml"
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # --------------------------------------------------------------------------
+  # VERIFY-ONLY — PRs into main (and manual workflow_dispatch runs).
+  # --------------------------------------------------------------------------
+  contract-docs-verify:
+    name: contract-docs-verify
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' && github.base_ref == 'main')
+    runs-on: token-studio-linux-medium
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Setup NodeJS Environment
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify generated contract docs are in sync (format-insensitive)
+        run: |
+          set -euo pipefail
+          DOCS_DIR="docs/ats/api/contracts"
+
+          # 1) Regenerate the API docs from the committed sources. dodoc runs
+          #    with freshOutput, so it wipes and recreates the whole directory.
+          npm run ats:contracts:doc
+
+          # 2) Normalise through CI's pinned Prettier, exactly as the pre-commit
+          #    hook (lint-staged) does. Running in place means Prettier resolves
+          #    the same prettier.config.mjs that applies to the committed files,
+          #    so any remaining diff is genuine content drift, not formatting.
+          npm run format:staged -- "${DOCS_DIR}/**/*.md"
+
+          # 3) Stage everything (-A) so additions, modifications AND deletions
+          #    are captured, then diff the index against the committed PR state.
+          git add -A "${DOCS_DIR}"
+          if ! git diff --cached --quiet -- "${DOCS_DIR}"; then
+            echo "::error::Generated contract docs in ${DOCS_DIR} are out of date. Regenerate them locally (npm run ats:contracts:doc && npm run format) and commit the result. Tip: ensure husky is installed (npm install) so the pre-commit hook does this automatically, and avoid 'git commit --no-verify'."
+            echo "----- Changed files -----"
+            git diff --cached --name-status -- "${DOCS_DIR}"
+            echo "----- Full diff -----"
+            git diff --cached -- "${DOCS_DIR}"
+            exit 1
+          fi
+          echo "✅ Generated contract docs are in sync with the committed sources."
+
+  # --------------------------------------------------------------------------
+  # REGENERATE & PUSH BACK — PRs into any branch other than main.
+  # --------------------------------------------------------------------------
+  contract-docs-regenerate:
+    name: contract-docs-regenerate
+    if: >-
+      github.event_name == 'pull_request' && github.base_ref != 'main'
+    runs-on: token-studio-linux-medium
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout PR head branch
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          # Check out the PR's source branch (not the detached merge commit) so
+          # we can commit the regenerated docs straight back onto it. The default
+          # GITHUB_TOKEN is persisted as the push credential.
+          ref: ${{ github.head_ref }}
+
+      - name: Setup NodeJS Environment
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Regenerate contract docs and push back to the PR branch
+        env:
+          PR_HEAD_REF: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          DOCS_DIR="docs/ats/api/contracts"
+
+          # --no-verify skips the husky pre-commit/pre-push hooks (npm ci
+          # installed them); the Signed-off-by line keeps the DCO gate satisfied.
+          # A push made with GITHUB_TOKEN does not re-trigger workflows.
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Up to 5 attempts. Each attempt regenerates against the current branch
+          # tip, commits and pushes. If the push is rejected because the branch
+          # advanced underneath us — a concurrent run of THIS workflow, or a
+          # developer push, slipping through the best-effort concurrency guard —
+          # we re-sync to the new tip and try again rather than failing the PR.
+          #
+          # This converges instead of looping: dodoc runs with freshOutput and
+          # regenerates deterministically from the committed sources, so once a
+          # concurrent run has already pushed the same docs, the next attempt
+          # produces no diff and we exit cleanly.
+          for attempt in 1 2 3 4 5; do
+            # 1) Regenerate from the committed sources (freshOutput wipes and
+            #    recreates the directory), then format exactly as locally.
+            npm run ats:contracts:doc
+            npm run format:staged -- "${DOCS_DIR}/**/*.md"
+
+            # 2) Stage the whole directory (-A captures adds, edits and deletes).
+            git add -A "${DOCS_DIR}"
+            if git diff --cached --quiet -- "${DOCS_DIR}"; then
+              echo "✅ Generated contract docs already match the branch — nothing to push."
+              exit 0
+            fi
+
+            # 3) Commit and push back onto the PR head branch.
+            git commit --no-verify -s \
+              -m "chore(docs): regenerate contract API docs [skip ci]"
+            if git push --no-verify origin "HEAD:${PR_HEAD_REF}"; then
+              echo "✅ Regenerated contract docs pushed to ${PR_HEAD_REF} (attempt ${attempt})."
+              exit 0
+            fi
+
+            echo "::warning::Push attempt ${attempt} rejected (branch advanced). Re-syncing to origin/${PR_HEAD_REF} and retrying."
+            git fetch origin "${PR_HEAD_REF}"
+            git reset --hard FETCH_HEAD
+            sleep $((attempt * 3))
+          done
+
+          echo "::error::Could not push regenerated contract docs to ${PR_HEAD_REF} after 5 attempts."
+          exit 1

@@ -3,11 +3,11 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ROLE_AGENT } from "../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
-import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
+import { IERC3643Types } from "../../facets/commonTypes/IERC3643Types.sol";
 import { IFreeze } from "../../facets/freeze/IFreeze.sol";
 import { IAccessControl } from "../../facets/accessControl/IAccessControl.sol";
-import { IIdentityRegistry } from "../../facets/layer_1/ERC3643/IIdentityRegistry.sol";
-import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
+import { IIdentityRegistry } from "../../facets/identity/externalInterfaces/IIdentityRegistry.sol";
+import { ICompliance } from "../../facets/compliance/externalInterfaces/ICompliance.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
