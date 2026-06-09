@@ -11,6 +11,7 @@ import { IVoting } from "../../facets/voting/IVoting.sol";
 import { IVotingTypes } from "../../facets/voting/IVotingTypes.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 /**
  * @title VotingStorageWrapper
  * @notice Library providing internal functions to manage voting rights corporate actions,

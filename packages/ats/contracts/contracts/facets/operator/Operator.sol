@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IOperator, RESOLVER_KEY_OPERATOR } from "./IOperator.sol";
-import { IERC1410Types } from "../layer_1/ERC1400/ERC1410/IERC1410Types.sol";
+import { IERC1410Types } from "../commonTypes/IERC1410Types.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
