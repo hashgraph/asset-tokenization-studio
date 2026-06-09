@@ -6,7 +6,7 @@ _Asset Tokenization Studio Team_
 
 Abstract implementation of `IBatchBurn` that burns tokens from multiple addresses in a single, atomic transaction.
 
-_Caller must hold `ROLE_CONTROLLER` or `ROLE_AGENT`. The token must be unpaused and configured for a single partition. Delegates burn execution to `TokenCoreOps` and emits `IController.ControllerRedemption` for each address processed. Intended to be inherited by `BatchBurnFacet`._
+_Caller must hold `ROLE_CONTROLLER` or `ROLE_AGENT`. The token must be unpaused and configured for a single partition. Delegates burn execution to `TokenCoreOps` and emits `IControllerTypes.ControllerRedemption` for each address processed. Intended to be inherited by `BatchBurnFacet`._
 
 ## Methods
 
