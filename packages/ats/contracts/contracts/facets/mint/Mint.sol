@@ -49,7 +49,7 @@ abstract contract Mint is IMint, Modifiers {
         onlyCompliant(address(0), _tokenHolder, false)
     {
         TokenCoreOps.issue(_tokenHolder, _value);
-        emit IMint.Issued(EvmAccessors.getMsgSender(), _tokenHolder, _value, _data);
+        emit Issued(EvmAccessors.getMsgSender(), _tokenHolder, _value, _data);
     }
 
     /// @inheritdoc IMint
@@ -70,7 +70,7 @@ abstract contract Mint is IMint, Modifiers {
         onlyCompliant(address(0), _to, false)
     {
         TokenCoreOps.issue(_to, _amount);
-        emit IMint.Issued(EvmAccessors.getMsgSender(), _to, _amount, "");
+        emit Issued(EvmAccessors.getMsgSender(), _to, _amount, "");
     }
 
     /// @inheritdoc IMint

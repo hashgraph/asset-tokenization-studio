@@ -45,7 +45,7 @@ abstract contract Controller is IController, Modifiers {
         onlyAnyRole(_buildRoles(ROLE_CONTROLLER, ROLE_AGENT))
     {
         TokenCoreOps.transfer(_from, _to, _value);
-        emit IController.ControllerTransfer(EvmAccessors.getMsgSender(), _from, _to, _value, _data, _operatorData);
+        emit ControllerTransfer(EvmAccessors.getMsgSender(), _from, _to, _value, _data, _operatorData);
     }
 
     /// @inheritdoc IController
@@ -65,7 +65,7 @@ abstract contract Controller is IController, Modifiers {
         onlyAnyRole(_buildRoles(ROLE_CONTROLLER, ROLE_AGENT))
     {
         TokenCoreOps.burn(_tokenHolder, _value);
-        emit IController.ControllerRedemption(EvmAccessors.getMsgSender(), _tokenHolder, _value, _data, _operatorData);
+        emit ControllerRedemption(EvmAccessors.getMsgSender(), _tokenHolder, _value, _data, _operatorData);
     }
 
     /// @inheritdoc IController
@@ -99,7 +99,7 @@ abstract contract Controller is IController, Modifiers {
         returns (bool)
     {
         TokenCoreOps.transfer(_from, _to, _amount);
-        emit IController.ControllerTransfer(EvmAccessors.getMsgSender(), _from, _to, _amount, "", "");
+        emit ControllerTransfer(EvmAccessors.getMsgSender(), _from, _to, _amount, "", "");
         return true;
     }
 

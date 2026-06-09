@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC3643Types } from "../commonTypes/IERC3643Types.sol";
+import { IControllerTypes } from "./IControllerTypes.sol";
 
 /// @custom:hash resolverKey Controller
 bytes32 constant RESOLVER_KEY_CONTROLLER = 0xf020acbcf895b1f0961c02558f58e8e3f0a254c27f0e6287127ac2f43893df46;
@@ -12,7 +13,7 @@ bytes32 constant RESOLVER_KEY_CONTROLLER = 0xf020acbcf895b1f0961c02558f58e8e3f0a
  * @dev Combines ERC-1644 forced-transfer / controllability lifecycle with ERC-3643 agent role
  *      management. Inherits `AgentAdded` and `AgentRemoved` events from `IERC3643Types`.
  */
-interface IController is IERC3643Types {
+interface IController is IERC3643Types, IControllerTypes {
     /**
      * @notice Emitted when the controller feature is initialised for a token.
      * @dev Fired inside `initializeController` once the facet is marked ready.
@@ -21,39 +22,6 @@ interface IController is IERC3643Types {
 
     /// @notice Emitted when the controller feature is permanently disabled for a token.
     event FinalizedControllerFeature(address operator);
-
-    /**
-     * @notice Emitted when an authorised controller transfers tokens between two holders.
-     * @param controller The address of the controller that initiated the transfer.
-     * @param from The address tokens are transferred from.
-     * @param to The address tokens are transferred to.
-     * @param value The amount of tokens transferred.
-     * @param data Optional data attached to the transfer for validation.
-     * @param operatorData Optional data attached by the controller for event attribution.
-     */
-    event ControllerTransfer(
-        address controller,
-        address indexed from,
-        address indexed to,
-        uint256 value,
-        bytes data,
-        bytes operatorData
-    );
-    /**
-     * @notice Emitted when an authorised controller redeems (burns) tokens on behalf of a holder.
-     * @param controller The address of the controller that initiated the redemption.
-     * @param tokenHolder The account whose tokens are redeemed.
-     * @param value The amount of tokens redeemed.
-     * @param data Optional data attached to the redemption for validation.
-     * @param operatorData Optional data attached by the controller for event attribution.
-     */
-    event ControllerRedemption(
-        address controller,
-        address indexed tokenHolder,
-        uint256 value,
-        bytes data,
-        bytes operatorData
-    );
 
     /// @notice Thrown when an operation requires the token to be controllable but it is not.
     error TokenIsNotControllable();

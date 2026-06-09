@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import { IMintTypes } from "./IMintTypes.sol";
+
 /// @custom:hash resolverKey Mint
 bytes32 constant RESOLVER_KEY_MINT = 0x394ec838636f78e91b7dbb3e4ea567e07bbb3886ab70a66652c40be856ab9b7a;
 
@@ -13,22 +15,13 @@ bytes32 constant RESOLVER_KEY_MINT = 0x394ec838636f78e91b7dbb3e4ea567e07bbb3886a
  *      role, honour max-supply and compliance checks, and emit the `Issued` event from
  *      `IERC1594`.
  */
-interface IMint {
+interface IMint is IMintTypes {
     /**
     /**
      * @notice Emitted once when the ERC-1594 capability is initialised on a token.
      * @dev Fires exclusively from `initializeERC1594` after the storage write succeeds.
      */
     event ERC1594Initialized();
-
-    /**
-     * @notice Emitted when new tokens are issued to a holder.
-     * @param operator Account that invoked the issuance (issuer or agent).
-     * @param to Recipient of the newly issued tokens.
-     * @param value Amount of tokens issued, denominated in base units.
-     * @param data Arbitrary payload forwarded alongside the issuance.
-     */
-    event Issued(address indexed operator, address indexed to, uint256 value, bytes data);
 
     /**
      * @notice Initialises the ERC-1594 StorageWrapper on the calling contract.

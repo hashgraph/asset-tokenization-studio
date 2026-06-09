@@ -316,6 +316,8 @@ library AdjustBalancesStorageWrapper {
         CapStorageWrapper.adjustMaxSupply(_factor);
         updateAbaf(_factor);
 
+        // Emitted here, not in the facet: also reached via scheduled dispatch
+        // (ScheduledTasksDispatchOps), not only the AdjustBalances facet.
         emit IAdjustBalances.AdjustmentBalanceSet(EvmAccessors.getMsgSender(), _factor, _decimals);
     }
 
