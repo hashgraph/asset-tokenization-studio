@@ -14,15 +14,17 @@ _Inherits from existing DiamondCut and DiamondLoupe abstracts and adds the initi
 function getConfigInfo() external view returns (address resolver_, bytes32 configurationId_, uint256 version_)
 ```
 
-Returns the configuration used by the secuirity
+Returns the active resolver-proxy configuration tuple.
+
+_Reads resolver-proxy storage without mutating state._
 
 #### Returns
 
-| Name              | Type    | Description |
-| ----------------- | ------- | ----------- |
-| resolver\_        | address | undefined   |
-| configurationId\_ | bytes32 | undefined   |
-| version\_         | uint256 | undefined   |
+| Name              | Type    | Description                                     |
+| ----------------- | ------- | ----------------------------------------------- |
+| resolver\_        | address | Address of the active business-logic resolver.  |
+| configurationId\_ | bytes32 | Active resolver-proxy configuration identifier. |
+| version\_         | uint256 | Active resolver-proxy configuration version.    |
 
 ### getFacet
 
@@ -109,21 +111,21 @@ Get all the facet addresses used by a resolverProxy
 function getFacetIdBySelector(bytes4 _selector) external view returns (bytes32 facetId_)
 ```
 
-Gets the facet key that supports the given selector
+Returns the facet identifier registered for a function selector.
 
-_If facet is not found return address(0)_
+_Reads resolver-proxy selector metadata and returns zero when the selector is absent._
 
 #### Parameters
 
-| Name       | Type   | Description           |
-| ---------- | ------ | --------------------- |
-| \_selector | bytes4 | The function selector |
+| Name       | Type   | Description                   |
+| ---------- | ------ | ----------------------------- |
+| \_selector | bytes4 | Function selector to resolve. |
 
 #### Returns
 
-| Name      | Type    | Description   |
-| --------- | ------- | ------------- |
-| facetId\_ | bytes32 | The facet key |
+| Name      | Type    | Description                                    |
+| --------- | ------- | ---------------------------------------------- |
+| facetId\_ | bytes32 | Facet identifier associated with the selector. |
 
 ### getFacetIds
 
@@ -351,6 +353,8 @@ function updateConfig(bytes32 _newConfigurationId, uint256 _newVersion) external
 
 For the current BLR update its configuration\*
 
+_Requires `DEFAULT_ADMIN_ROLE` and validates the configuration before storing the new configuration identifier and pinned version._
+
 #### Parameters
 
 | Name                 | Type    | Description |
@@ -366,6 +370,8 @@ function updateConfigVersion(uint256 _newVersion) external nonpayable
 
 For the current BLR and configuration, update the used version
 
+_Requires `DEFAULT_ADMIN_ROLE` and preserves the active configuration identifier and resolver while updating only the pinned configuration version._
+
 #### Parameters
 
 | Name         | Type    | Description |
@@ -379,6 +385,8 @@ function updateResolver(contract IBusinessLogicResolver _newResolver, bytes32 _n
 ```
 
 Updates the BLR to a new one
+
+_Requires `DEFAULT_ADMIN_ROLE` and validates the target configuration against the new resolver before replacing the resolver pointer, configuration identifier and version._
 
 #### Parameters
 

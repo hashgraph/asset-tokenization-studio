@@ -4,9 +4,9 @@ _Asset Tokenization Studio Team_
 
 > Diamond Cut Manager
 
-Manages versioned diamond configurations used to resolve facets and selectors.
+Manages versioned diamond configurations used by resolver proxies.
 
-_Provides creation, batched creation, cancellation, and read access for resolver proxy configurations. Mutating operations are restricted to valid, unpaused configurations owned by the caller according to inherited storage and validation rules._
+_Coordinates configuration creation, batched creation, cancellation, and lookup. Mutating operations require a non-zero configuration identifier, an unpaused state, and caller ownership according to inherited validation rules. Read operations that target a version validate the requested configuration/version pair before resolving facet, selector, interface, or pagination data from manager storage._
 
 ## Methods
 
@@ -390,13 +390,13 @@ function getFacetVersionByConfigurationIdVersionAndFacetId(bytes32 _configuratio
 
 Returns the facet version assigned within a configuration version.
 
-_Reads diamond cut manager storage without mutating state. The configuration version must exist according to inherited version validation._
+_Reads manager storage without mutating state. The configuration version must exist according to inherited version validation before the facet version is read._
 
 #### Parameters
 
 | Name              | Type    | Description                                                    |
 | ----------------- | ------- | -------------------------------------------------------------- |
-| \_configurationId | bytes32 | Identifier of the diamond configuration to query.              |
+| \_configurationId | bytes32 | Identifier of the diamond configuration to inspect.            |
 | \_version         | uint256 | Version of the configuration to inspect.                       |
 | \_facetId         | bytes32 | Identifier of the facet whose registered version is requested. |
 

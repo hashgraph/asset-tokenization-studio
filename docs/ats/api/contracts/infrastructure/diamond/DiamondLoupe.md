@@ -2,11 +2,11 @@
 
 _Asset Tokenization Studio Team_
 
-> DiamondLoupe
+> Diamond Loupe
 
-Abstract facet providing EIP-2535 introspection: enumeration of all registered facets, their selectors, addresses, and ERC-165 interface support queries.
+Exposes read-only introspection helpers for resolver-proxy facet metadata.
 
-_All public functions delegate to the `ResolverProxyUnstructured` internal helpers which forward the call to the Business Logic Resolver for the proxy&#39;s current configuration. Concrete tokens inherit this contract as part of their facet stack._
+_Implements the EIP-2535 loupe view surface over resolver-proxy storage. All queries are read-only and delegate pagination, selector, facet and ERC-165 lookups to inherited storage helpers._
 
 ## Methods
 
@@ -95,21 +95,21 @@ Get all the facet addresses used by a resolverProxy
 function getFacetIdBySelector(bytes4 _selector) external view returns (bytes32 facetId_)
 ```
 
-Gets the facet key that supports the given selector
+Returns the facet identifier registered for a function selector.
 
-_If facet is not found return address(0)_
+_Reads resolver-proxy selector metadata and returns zero when the selector is absent._
 
 #### Parameters
 
-| Name       | Type   | Description           |
-| ---------- | ------ | --------------------- |
-| \_selector | bytes4 | The function selector |
+| Name       | Type   | Description                   |
+| ---------- | ------ | ----------------------------- |
+| \_selector | bytes4 | Function selector to resolve. |
 
 #### Returns
 
-| Name      | Type    | Description   |
-| --------- | ------- | ------------- |
-| facetId\_ | bytes32 | The facet key |
+| Name      | Type    | Description                                    |
+| --------- | ------- | ---------------------------------------------- |
+| facetId\_ | bytes32 | Facet identifier associated with the selector. |
 
 ### getFacetIds
 

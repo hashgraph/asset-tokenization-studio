@@ -2,8 +2,8 @@
 
 _Asset Tokenization Studio Team_
 
-> ResolverProxyUnstructured
+> Resolver Proxy Unstructured Base
 
-Abstract base for EIP-2535 diamond proxies that store their resolver, configuration id, and version in ERC-7201 unstructured storage slots rather than at fixed offsets.
+Provides internal resolver-proxy initialisation, configuration, RBAC, and loupe helpers.
 
-_All resolver queries are forwarded to the `IBusinessLogicResolver` recorded in `ResolverProxyStorageWrapper`. Concrete proxies (`ResolverProxy`) and abstract facets (`DiamondCut`, `DiamondLoupe`) inherit this contract to share the same internal helpers._
+_Stores resolver-proxy configuration through dedicated storage wrappers and queries facet metadata from the configured business-logic resolver. Intended to be inherited by proxy contracts that expose public entry points and delegate calls to resolved facets._

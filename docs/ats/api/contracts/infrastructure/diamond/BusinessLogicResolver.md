@@ -1,5 +1,13 @@
 # BusinessLogicResolver
 
+_Asset Tokenization Studio Team_
+
+> Business Logic Resolver
+
+Maintains versioned business logic registrations and resolver-proxy configurations.
+
+_Combines business-logic version resolution with diamond-cut configuration management. Initialisation grants the default admin role to the caller and must occur once._
+
 ## Methods
 
 ### acceptOwnership
@@ -25,6 +33,8 @@ function addSelectorsToBlacklist(bytes32 _configurationId, bytes4[] _selectors) 
 ```
 
 Adds a list of selectors to the blacklist
+
+_Restricted to default admins while unpaused. Blacklisted selectors are rejected when future configurations register facet selectors for the same configuration._
 
 #### Parameters
 
@@ -382,13 +392,13 @@ function getFacetVersionByConfigurationIdVersionAndFacetId(bytes32 _configuratio
 
 Returns the facet version assigned within a configuration version.
 
-_Reads diamond cut manager storage without mutating state. The configuration version must exist according to inherited version validation._
+_Reads manager storage without mutating state. The configuration version must exist according to inherited version validation before the facet version is read._
 
 #### Parameters
 
 | Name              | Type    | Description                                                    |
 | ----------------- | ------- | -------------------------------------------------------------- |
-| \_configurationId | bytes32 | Identifier of the diamond configuration to query.              |
+| \_configurationId | bytes32 | Identifier of the diamond configuration to inspect.            |
 | \_version         | uint256 | Version of the configuration to inspect.                       |
 | \_facetId         | bytes32 | Identifier of the facet whose registered version is requested. |
 
@@ -490,7 +500,7 @@ function getLatestVersions(bytes32[] _businessLogicKeys) external view returns (
 
 Batched variant of `getLatestVersion` that resolves many keys in a single call.
 
-_Issued so off-chain consumers can avoid one `eth_call` per key — JSON-RPC relays such as Hedera&#39;s enforce per-IP rate limits on `eth_call` and reject bursts. Returns 0 for keys that have never been registered (same semantics as the scalar variant)._
+_Iterates over all supplied keys and returns zero for keys with no registered version._
 
 #### Parameters
 
@@ -735,6 +745,8 @@ _Callable once; subsequent calls revert with `FacetAlreadyRegistered`. Requires 
 function initializeBusinessLogicResolver() external nonpayable returns (bool success_)
 ```
 
+_Grants `DEFAULT_ADMIN_ROLE` to the current EVM sender and marks the resolver as initialised before emitting `BusinessLogicResolverInitialized`._
+
 #### Returns
 
 | Name      | Type | Description |
@@ -823,6 +835,8 @@ function removeSelectorsFromBlacklist(bytes32 _configurationId, bytes4[] _select
 ```
 
 Removes a list of selectors from the blacklist
+
+_Restricted to default admins while unpaused. Removing a selector only affects subsequent validation and does not mutate already activated configurations._
 
 #### Parameters
 
@@ -1561,6 +1575,10 @@ Thrown when attempting to register a selector that is globally blacklisted.
 ```solidity
 error Unimplemented()
 ```
+
+Indicates that a requested operation is not implemented by this resolver.
+
+_Reserved for interface compatibility or future extension points._
 
 ### VersionZero
 

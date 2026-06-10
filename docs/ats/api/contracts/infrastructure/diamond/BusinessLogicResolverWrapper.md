@@ -1,5 +1,13 @@
 # BusinessLogicResolverWrapper
 
+_Asset Tokenization Studio Team_
+
+> Business Logic Resolver Wrapper
+
+Provides internal storage and registry operations for business logic resolution.
+
+_Implements shared resolver mechanics for derived contracts, including version registration, selector blacklists, pagination helpers, and ERC-7201 storage access._
+
 ## Methods
 
 ### addSelectorsToBlacklist
