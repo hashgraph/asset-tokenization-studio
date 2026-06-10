@@ -45,7 +45,7 @@ describe("ResolverProxy Tests", () => {
 
     await resolverContract.registerBusinessLogics(businessLogicsRegistryDatas);
 
-    await resolverContract.createConfiguration(configID, facetConfigurations as any);
+    await resolverContract.createConfiguration(configID, facetConfigurations as any, "0x");
   }
 
   async function deployResolver(): Promise<BusinessLogicResolver> {
