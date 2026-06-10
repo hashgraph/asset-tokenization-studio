@@ -667,8 +667,8 @@ library HoldStorageWrapper {
      * @notice Returns the full array of hold ids for `_tokenHolder` on `_partition`.
      * @dev Use with caution; unbounded array reads can cause OOG errors. Prefer
      *      `getHoldsIdForByPartition` with pagination for external callers.
-     * @param _partition The partition whose hold ids are listed.
      * @param _tokenHolder The holder whose hold ids are listed.
+     * @param _partition The partition whose hold ids are listed.
      * @return holdsId_ The full array of hold ids for the specified holder and partition.
      */
     function getHoldsIdByAccountAndPartition(
