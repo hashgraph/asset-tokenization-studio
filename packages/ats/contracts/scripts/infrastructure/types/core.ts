@@ -760,6 +760,8 @@ export interface DeploymentOutputType {
     loansPortfolio: ConfigurationMetadata;
     depositToken: ConfigurationMetadata;
     factory: ConfigurationMetadata;
+    // TEST-ONLY: AssetMock configuration — present only when ATS_TEST_MODE=true.
+    assetMock: ConfigurationMetadata;
   };
   summary: {
     totalContracts: number;
@@ -778,6 +780,7 @@ export interface DeploymentOutputType {
     getDepositTokenFacets(): FacetMetadata[];
     getLoansPortfolioFacets(): FacetMetadata[];
     getFactoryFacets(): FacetMetadata[];
+    getAssetMockFacets(): FacetMetadata[];
   };
 }
 
