@@ -34,51 +34,44 @@ struct ResolverProxyStorage {
  */
 library ResolverProxyStorageWrapper {
     /**
-     * @notice Sets the `BusinessLogicResolver` contract that supplies the facet selectors.
-     * @param _resolver The resolver instance to set for this proxy.
+     * @notice Initializes the resolver-proxy storage.
+     * @param _resolver The `BusinessLogicResolver` instance.
+     * @param _resolverProxyConfigurationId The configuration identifier.
+     * @param _version The configuration version.
      */
-    function setResolver(IBusinessLogicResolver _resolver) internal {
+    function initResolverProxyStorage(
+        IBusinessLogicResolver _resolver,
+        bytes32 _resolverProxyConfigurationId,
+        uint256 _version
+    ) internal {
+        ResolverProxyStorage storage ds = resolverProxyStorage();
+        ds.resolver = _resolver;
+        ds.resolverProxyConfigurationId = _resolverProxyConfigurationId;
+        ds.version = _version;
+    }
+
+    /**
+     * @notice Updates the `BusinessLogicResolver` instance.
+     * @param _resolver The new resolver instance.
+     */
+    function setBusinessLogicResolver(IBusinessLogicResolver _resolver) internal {
         resolverProxyStorage().resolver = _resolver;
     }
 
     /**
-     * @notice Sets the configuration identifier selecting the facet set served by the proxy.
-     * @param _resolverProxyConfigurationId The `bytes32` identifier to set.
+     * @notice Updates the configuration identifier.
+     * @param _resolverProxyConfigurationId The new configuration identifier.
      */
     function setResolverProxyConfigurationId(bytes32 _resolverProxyConfigurationId) internal {
         resolverProxyStorage().resolverProxyConfigurationId = _resolverProxyConfigurationId;
     }
 
     /**
-     * @notice Sets the pinned configuration version served by the proxy.
-     * @param _version The configuration version to set, zero to track the latest.
+     * @notice Updates the configuration version.
+     * @param _version The new configuration version.
      */
-    function setVersion(uint256 _version) internal {
+    function setResolverProxyVersion(uint256 _version) internal {
         resolverProxyStorage().version = _version;
-    }
-
-    /**
-     * @notice Returns the `BusinessLogicResolver` contract that supplies the facet selectors.
-     * @return The active resolver instance for this proxy.
-     */
-    function getResolver() internal view returns (IBusinessLogicResolver) {
-        return resolverProxyStorage().resolver;
-    }
-
-    /**
-     * @notice Returns the configuration identifier selecting the facet set served by the proxy.
-     * @return The configured `bytes32` identifier.
-     */
-    function getResolverProxyConfiguration() internal view returns (bytes32) {
-        return resolverProxyStorage().resolverProxyConfigurationId;
-    }
-
-    /**
-     * @notice Returns the pinned configuration version served by the proxy.
-     * @return The configuration version, zero when the proxy tracks the latest.
-     */
-    function getVersion() internal view returns (uint256) {
-        return resolverProxyStorage().version;
     }
 
     /**

@@ -4,10 +4,13 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IBusinessLogicResolver } from "./IBusinessLogicResolver.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSetBytes4 } from "../../infrastructure/utils/EnumerableSetBytes4.sol";
-
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { DefaultValueValidation } from "../utils/DefaultValueValidation.sol";
 
+/**
+ * @notice Storage slot used by the business-logic resolver wrapper.
+ * @dev ERC-7201-style location; changing it corrupts resolver state across upgrades.
+ */
 /// @custom:hash storage BusinessLogicResolver
 // solhint-disable-next-line max-line-length
 bytes32 constant STORAGE_LOCATION_BUSINESS_LOGIC_RESOLVER = 0xde52d5af2ee0e84dfa9eb9bcc42ec14eed20a1d286bfef34d73589ea7ee18800;
@@ -18,6 +21,13 @@ bytes32 constant STORAGE_LOCATION_BUSINESS_LOGIC_RESOLVER = 0xde52d5af2ee0e84dfa
  *      determine which logic a resolver-proxy delegates to. Hoisted to file scope per the
  *      project's ERC-7201 storage convention; new fields must be appended below the
  *      APPEND-ONLY marker to preserve upgrade safety.
+ * @param initialized Whether the resolver storage has been initialised.
+ * @param latestVersionByFacetId Latest registered version for each business logic key.
+ * @param activeBusinessLogics Ordered list of active business logic keys.
+ * @param businessLogicActive Whether a business logic key is currently active.
+ * @param businessLogics Version history and implementation address per business logic key.
+ * @param statusByFacetIdAndVersion Status indexed by the hash of key and version.
+ * @param selectorBlacklist Blacklisted selectors per resolver-proxy configuration id.
  * @custom:storage-location erc7201:security.token.standard.storage.BusinessLogicResolver
  */
 struct BusinessLogicResolverDataStorage {
@@ -39,12 +49,31 @@ struct BusinessLogicResolverDataStorage {
     // ─── APPEND-ONLY ZONE BELOW ───
 }
 
+/**
+ * @title Business Logic Resolver Wrapper
+ * @notice Provides internal storage and registry operations for business logic resolution.
+ * @dev Implements shared resolver mechanics for derived contracts, including version
+ *      registration, selector blacklists, pagination helpers, and ERC-7201 storage access.
+ * @author Asset Tokenization Studio Team
+ */
 abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
+    /**
+     * @notice Restricts execution to an existing version for the given business logic key.
+     * @dev Reverts when the version is zero or exceeds the latest registered version.
+     * @param _businessLogicKey Business logic key whose version is validated.
+     * @param _version Version number to validate.
+     */
     modifier validVersion(bytes32 _businessLogicKey, uint256 _version) {
         _checkValidVersion(_businessLogicKey, _version);
         _;
     }
 
+    /**
+     * @notice Restricts execution to non-zero, unique keys and non-zero implementation addresses.
+     * @dev Validates all entries before the guarded function executes; duplicate detection is
+     *      quadratic in the number of registry entries.
+     * @param _businessLogicsRegistryDatas Registry entries to validate.
+     */
     modifier onlyValidKeysAndAddresses(
         IBusinessLogicResolver.BusinessLogicRegistryData[] calldata _businessLogicsRegistryDatas
     ) {
@@ -52,22 +81,25 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
         _;
     }
 
+    /**
+     * @notice Registers new business logic versions and activates unseen business logic keys.
+     * @dev Increments the latest version per key, validates the implementation static resolver
+     *      key, stores each implementation as activated, and returns versions in input order.
+     *      Reverts if an implementation reports a different key.
+     * @param _businessLogicsRegistryDatas Business logic registry entries to add.
+     * @return latestVersion_ New latest version per entry, aligned with input order.
+     */
     function _registerBusinessLogics(
         IBusinessLogicResolver.BusinessLogicRegistryData[] calldata _businessLogicsRegistryDatas
     ) internal returns (uint256[] memory latestVersion_) {
         BusinessLogicResolverDataStorage storage businessLogicResolverDataStorage = _businessLogicResolverStorage();
-
         IBusinessLogicResolver.BusinessLogicRegistryData memory _businessLogicsRegistryData;
-
         uint256 length = _businessLogicsRegistryDatas.length;
         latestVersion_ = new uint256[](length);
-
         for (uint256 index; index < length; ) {
             _businessLogicsRegistryData = _businessLogicsRegistryDatas[index];
-
             bytes32 actualBLKey = IStaticFunctionSelectors(_businessLogicsRegistryData.businessLogicAddress)
                 .getStaticResolverKey();
-
             if (actualBLKey != _businessLogicsRegistryData.businessLogicKey) {
                 revert BusinessLogicKeyMismatch(
                     _businessLogicsRegistryData.businessLogicAddress,
@@ -75,12 +107,10 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
                     _businessLogicsRegistryData.businessLogicKey
                 );
             }
-
             uint256 newVersion = ++businessLogicResolverDataStorage.latestVersionByFacetId[
                 _businessLogicsRegistryData.businessLogicKey
             ];
             latestVersion_[index] = newVersion;
-
             if (!businessLogicResolverDataStorage.businessLogicActive[_businessLogicsRegistryData.businessLogicKey]) {
                 businessLogicResolverDataStorage.businessLogicActive[
                     _businessLogicsRegistryData.businessLogicKey
@@ -89,10 +119,8 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
                     _businessLogicsRegistryData.businessLogicKey
                 );
             }
-
             IBusinessLogicResolver.BusinessLogicVersion[] storage versions = businessLogicResolverDataStorage
                 .businessLogics[_businessLogicsRegistryData.businessLogicKey];
-
             versions.push(
                 IBusinessLogicResolver.BusinessLogicVersion({
                     versionData: IBusinessLogicResolver.VersionData({
@@ -102,21 +130,34 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
                     businessLogicAddress: _businessLogicsRegistryData.businessLogicAddress
                 })
             );
-
             bytes32 facetIdAndVersion = keccak256(
                 abi.encodePacked(_businessLogicsRegistryData.businessLogicKey, newVersion)
             );
-
             businessLogicResolverDataStorage.statusByFacetIdAndVersion[facetIdAndVersion] = IBusinessLogicResolver
                 .VersionStatus
                 .ACTIVATED;
-
             unchecked {
                 ++index;
             }
         }
     }
 
+    /**
+     * @notice Sets the resolver initialisation flag.
+     * @dev Mutates only the lifecycle flag; callers must enforce initialisation policy.
+     * @param _initialized New initialisation state.
+     */
+    function _setInitialized(bool _initialized) internal {
+        _businessLogicResolverStorage().initialized = _initialized;
+    }
+
+    /**
+     * @notice Adds selectors to the blacklist for a resolver-proxy configuration.
+     * @dev Duplicate selectors are ignored by the underlying enumerable set. Mutates only the
+     *      blacklist associated with `_configurationId`.
+     * @param _configurationId Resolver-proxy configuration identifier.
+     * @param _selectors Selectors to blacklist.
+     */
     function _addSelectorsToBlacklist(bytes32 _configurationId, bytes4[] calldata _selectors) internal {
         EnumerableSetBytes4.Bytes4Set storage selectorBlacklist = _businessLogicResolverStorage().selectorBlacklist[
             _configurationId
@@ -131,6 +172,13 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
         }
     }
 
+    /**
+     * @notice Removes selectors from the blacklist for a resolver-proxy configuration.
+     * @dev Missing selectors are ignored by the underlying enumerable set. Mutates only the
+     *      blacklist associated with `_configurationId`.
+     * @param _configurationId Resolver-proxy configuration identifier.
+     * @param _selectors Selectors to remove from the blacklist.
+     */
     function _removeSelectorsFromBlacklist(bytes32 _configurationId, bytes4[] calldata _selectors) internal {
         EnumerableSetBytes4.Bytes4Set storage selectorBlacklist = _businessLogicResolverStorage().selectorBlacklist[
             _configurationId
@@ -145,6 +193,13 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
         }
     }
 
+    /**
+     * @notice Returns the status stored for a business logic version.
+     * @dev Returns `NONE` for keys or versions without an explicit status entry.
+     * @param _businessLogicKey Business logic key to query.
+     * @param _version Version number to query.
+     * @return status_ Current status of the requested version.
+     */
     function _getVersionStatus(
         bytes32 _businessLogicKey,
         uint256 _version
@@ -153,10 +208,23 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
         status_ = _businessLogicResolverStorage().statusByFacetIdAndVersion[facetIdAndVersion];
     }
 
+    /**
+     * @notice Returns the latest registered version for a business logic key.
+     * @dev Returns zero when the key has never been registered.
+     * @param _businessLogicKey Business logic key to query.
+     * @return latestVersion_ Latest version recorded for the key.
+     */
     function _getLatestVersion(bytes32 _businessLogicKey) internal view returns (uint256 latestVersion_) {
         latestVersion_ = _businessLogicResolverStorage().latestVersionByFacetId[_businessLogicKey];
     }
 
+    /**
+     * @notice Resolves the latest implementation address for a business logic key.
+     * @dev Delegates to version-based resolution using the key's latest recorded version.
+     *      Returns `address(0)` when the key is inactive.
+     * @param _businessLogicKey Business logic key to resolve.
+     * @return businessLogicAddress_ Implementation address for the latest version.
+     */
     function _resolveLatestBusinessLogic(
         bytes32 _businessLogicKey
     ) internal view returns (address businessLogicAddress_) {
@@ -166,53 +234,56 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
         );
     }
 
+    /**
+     * @notice Returns the number of active business logic keys.
+     * @dev Reflects the length of the active key list and excludes inactive keys.
+     * @return businessLogicCount_ Number of active business logic keys.
+     */
     function _getBusinessLogicCount() internal view returns (uint256 businessLogicCount_) {
         businessLogicCount_ = _businessLogicResolverStorage().activeBusinessLogics.length;
     }
 
+    /**
+     * @notice Returns a paginated list of active business logic keys.
+     * @dev Uses the shared pagination helper; ordering follows first activation order.
+     * @param _pageIndex Zero-based page index.
+     * @param _pageLength Maximum number of keys to return.
+     * @return businessLogicKeys_ Page of active business logic keys.
+     */
     function _getBusinessLogicKeys(
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (bytes32[] memory businessLogicKeys_) {
         BusinessLogicResolverDataStorage storage businessLogicResolverDataStorage = _businessLogicResolverStorage();
-
         (uint256 start, uint256 end) = Pagination.getStartAndEnd(_pageIndex, _pageLength);
-
         uint256 size = Pagination.getSize(start, end, businessLogicResolverDataStorage.activeBusinessLogics.length);
         businessLogicKeys_ = new bytes32[](size);
-
-        for (uint256 index; index < size; index++) {
+        for (uint256 index; index < size; ++index) {
             businessLogicKeys_[index] = businessLogicResolverDataStorage.activeBusinessLogics[index + start];
         }
     }
 
-    /**
-     * @notice Resolves the business logic address registered for `_businessLogicKey` at `_version`.
-     * @dev Relies on the invariant maintained by `_registerBusinessLogics`:
-     *      `businessLogics[key].length == latestVersionByFacetId[key]`,
-     *      so version `v` lives at array index `v - 1`. The `validVersion` modifier on the
-     *      external entry points gates `v` to `[1, latestVersionByFacetId[key]]`, keeping
-     *      the array access in bounds.
-     * @param _businessLogicKey key of the business logic to resolve.
-     * @param _version version to resolve. Must satisfy `1 <= _version <= latest`.
-     * @return businessLogic address registered for the given key/version, or `address(0)` if
-     *         the key has been deactivated.
-     */
     function _resolveBusinessLogicByVersion(
         bytes32 _businessLogicKey,
         uint256 _version
     ) internal view returns (address) {
         BusinessLogicResolverDataStorage storage businessLogicResolverDataStorage = _businessLogicResolverStorage();
-
         if (!businessLogicResolverDataStorage.businessLogicActive[_businessLogicKey]) {
             return address(0);
         }
-
         IBusinessLogicResolver.BusinessLogicVersion memory businessLogicVersion = businessLogicResolverDataStorage
             .businessLogics[_businessLogicKey][_version - 1];
         return businessLogicVersion.businessLogicAddress;
     }
 
+    /**
+     * @notice Returns a paginated selector blacklist for a configuration.
+     * @dev Reads from the enumerable set associated with `_configurationId`.
+     * @param _configurationId Resolver-proxy configuration identifier.
+     * @param _pageIndex Zero-based page index.
+     * @param _pageLength Maximum number of selectors to return.
+     * @return page_ Page of blacklisted selectors.
+     */
     function _getSelectorsBlacklist(
         bytes32 _configurationId,
         uint256 _pageIndex,
@@ -224,8 +295,67 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
         page_ = Pagination.getFromSet(selectorBlacklist, _pageIndex, _pageLength);
     }
 
+    /**
+     * @notice Checks whether a selector is blacklisted for a configuration.
+     * @dev Performs an enumerable-set membership lookup.
+     * @param _configurationId Resolver-proxy configuration identifier.
+     * @param _selector Function selector to check.
+     * @return True when the selector is blacklisted for the configuration.
+     */
+    function _isSelectorBlacklisted(bytes32 _configurationId, bytes4 _selector) internal view returns (bool) {
+        return
+            EnumerableSetBytes4.contains(
+                _businessLogicResolverStorage().selectorBlacklist[_configurationId],
+                _selector
+            );
+    }
+
+    /**
+     * @notice Reverts if any selector is blacklisted for a configuration.
+     * @dev Reads the blacklist from business-logic resolver storage.
+     * @param _configurationId Identifier of the configuration whose blacklist applies.
+     * @param _selectors Selectors to validate.
+     */
+    function _checkSelectorsBlacklist(bytes32 _configurationId, bytes4[] memory _selectors) internal view {
+        uint256 length = _selectors.length;
+        for (uint256 index; index < length; ) {
+            bytes4 selector = _selectors[index];
+            if (_isSelectorBlacklisted(_configurationId, selector)) {
+                revert SelectorBlacklisted(selector);
+            }
+            unchecked {
+                ++index;
+            }
+        }
+    }
+
+    /**
+     * @notice Returns whether resolver storage has been initialised.
+     * @dev Reads the lifecycle flag used by derived initialisation flows.
+     * @return True when the resolver has been marked as initialised.
+     */
+    function _isInitialized() internal view returns (bool) {
+        return _businessLogicResolverStorage().initialized;
+    }
+
+    /**
+     * @notice Validates that a business logic version exists.
+     * @dev Reverts when `_version` is zero or greater than the key's latest registered version.
+     * @param _businessLogicKey Business logic key whose latest version bounds the check.
+     * @param _version Version number to validate.
+     */
+    function _checkValidVersion(bytes32 _businessLogicKey, uint256 _version) private view {
+        if (_version == 0 || _version > _businessLogicResolverStorage().latestVersionByFacetId[_businessLogicKey])
+            revert BusinessLogicVersionDoesNotExist(_version);
+    }
+
+    /**
+     * @notice Returns the resolver wrapper storage pointer.
+     * @dev Uses a fixed ERC-7201-style storage slot shared by all derived implementations.
+     * @return businessLogicResolverData_ Storage pointer for resolver state.
+     */
     function _businessLogicResolverStorage()
-        internal
+        private
         pure
         returns (BusinessLogicResolverDataStorage storage businessLogicResolverData_)
     {
@@ -236,11 +366,12 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
         }
     }
 
-    function _checkValidVersion(bytes32 _businessLogicKey, uint256 _version) private view {
-        if (_version == 0 || _version > _businessLogicResolverStorage().latestVersionByFacetId[_businessLogicKey])
-            revert BusinessLogicVersionDoesNotExist(_version);
-    }
-
+    /**
+     * @notice Validates registry keys and implementation addresses.
+     * @dev Reverts on zero keys, zero implementation addresses, or duplicate keys within the
+     *      submitted batch. Duplicate detection is O(n²).
+     * @param _businessLogicsRegistryDatas Registry entries to validate.
+     */
     function _checkValidKeysAndAddresses(
         IBusinessLogicResolver.BusinessLogicRegistryData[] calldata _businessLogicsRegistryDatas
     ) private pure {
@@ -252,9 +383,7 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
         for (uint256 index; index < length; ) {
             currentKey = _businessLogicsRegistryDatas[index].businessLogicKey;
             if (uint256(currentKey) == 0) revert ZeroKeyNotValidForBusinessLogic();
-
             DefaultValueValidation.checkZeroAddress(_businessLogicsRegistryDatas[index].businessLogicAddress);
-
             unchecked {
                 innerIndex = index + 1;
             }
