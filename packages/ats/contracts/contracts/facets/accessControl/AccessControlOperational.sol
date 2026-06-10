@@ -107,7 +107,6 @@ abstract contract AccessControlOperational is AccessControlRead {
             _actives,
             _account
         );
-        emit RolesApplied(_roles, _actives, _account);
-        emit EffectivelyRolesApplied(appliedRoles, appliedStates);
+        emit RolesApplied(_roles, _actives, _account, appliedRoles, appliedStates);
     }
 }

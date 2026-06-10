@@ -53,7 +53,7 @@ _Intended to gate resolver-proxy operations; reverts with {ResolverProxyConfigur
 ### createBatchConfiguration
 
 ```solidity
-function createBatchConfiguration(bytes32 _configurationId, IDiamondCutManager.FacetConfiguration[] _facetConfigurations, bool _isLastBatch) external nonpayable
+function createBatchConfiguration(bytes32 _configurationId, IDiamondCutManager.FacetConfiguration[] _facetConfigurations, bool _isLastBatch, bytes _data) external nonpayable
 ```
 
 #### Parameters
@@ -63,11 +63,12 @@ function createBatchConfiguration(bytes32 _configurationId, IDiamondCutManager.F
 | \_configurationId     | bytes32                                 | undefined   |
 | \_facetConfigurations | IDiamondCutManager.FacetConfiguration[] | undefined   |
 | \_isLastBatch         | bool                                    | undefined   |
+| \_data                | bytes                                   | undefined   |
 
 ### createConfiguration
 
 ```solidity
-function createConfiguration(bytes32 _configurationId, IDiamondCutManager.FacetConfiguration[] _facetConfigurations) external nonpayable
+function createConfiguration(bytes32 _configurationId, IDiamondCutManager.FacetConfiguration[] _facetConfigurations, bytes _data) external nonpayable
 ```
 
 #### Parameters
@@ -76,6 +77,7 @@ function createConfiguration(bytes32 _configurationId, IDiamondCutManager.FacetC
 | --------------------- | --------------------------------------- | ----------- |
 | \_configurationId     | bytes32                                 | undefined   |
 | \_facetConfigurations | IDiamondCutManager.FacetConfiguration[] | undefined   |
+| \_data                | bytes                                   | undefined   |
 
 ### getBusinessLogicCount
 
@@ -705,7 +707,7 @@ Emitted when an in-progress batch configuration is discarded.
 ### DiamondBatchConfigurationCreated
 
 ```solidity
-event DiamondBatchConfigurationCreated(bytes32 configurationId, IDiamondCutManager.FacetConfiguration[] facetConfigurations, bool _isLastBatch, uint256 version)
+event DiamondBatchConfigurationCreated(bytes32 configurationId, IDiamondCutManager.FacetConfiguration[] facetConfigurations, bool _isLastBatch, uint256 version, bytes data)
 ```
 
 Emitted on every {createBatchConfiguration} call, including the final batch.
@@ -718,11 +720,12 @@ Emitted on every {createBatchConfiguration} call, including the final batch.
 | facetConfigurations | IDiamondCutManager.FacetConfiguration[] | Facets appended in this batch.                           |
 | \_isLastBatch       | bool                                    | True when this call finalises the configuration version. |
 | version             | uint256                                 | Version number being assembled for this configuration.   |
+| data                | bytes                                   | Additional data passed to the configuration.             |
 
 ### DiamondConfigurationCreated
 
 ```solidity
-event DiamondConfigurationCreated(bytes32 configurationId, IDiamondCutManager.FacetConfiguration[] facetConfigurations, uint256 version)
+event DiamondConfigurationCreated(bytes32 configurationId, IDiamondCutManager.FacetConfiguration[] facetConfigurations, uint256 version, bytes data)
 ```
 
 Emitted when a configuration is created atomically via {createConfiguration}.
@@ -734,6 +737,7 @@ Emitted when a configuration is created atomically via {createConfiguration}.
 | configurationId     | bytes32                                 | Configuration key that was registered.                      |
 | facetConfigurations | IDiamondCutManager.FacetConfiguration[] | Facets (id, version) that compose the new configuration.    |
 | version             | uint256                                 | Version number assigned to the newly created configuration. |
+| data                | bytes                                   | Additional data passed to the configuration.                |
 
 ## Errors
 
