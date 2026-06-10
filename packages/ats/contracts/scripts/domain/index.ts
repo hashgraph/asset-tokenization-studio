@@ -96,3 +96,6 @@ export * from "./loanPortfolio/types";
 // TEST-ONLY: InitializeMock domain — stub configuration used by initializer-versioning tests.
 export * from "./initializeMock/createConfiguration";
 export * from "./initializeMock/mockFacetsRegistry";
+
+// TEST-ONLY: AssetMock domain — full-IAsset facet union configuration for shared-fixture tests.
+export * from "./assetMock/createConfiguration";
