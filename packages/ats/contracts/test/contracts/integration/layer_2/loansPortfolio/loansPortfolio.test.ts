@@ -16,13 +16,6 @@ import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO, LOANS_P
 import { HoldingsAssetType } from "@scripts/domain";
 import { ethers } from "hardhat";
 
-function toBytes4(str: string): string {
-  const bytes = ethers.toUtf8Bytes(str);
-  const padded = new Uint8Array(4);
-  padded.set(bytes.slice(0, 4));
-  return ethers.hexlify(padded);
-}
-
 describe("LoansPortfolio Token Tests", () => {
   let asset: IAsset;
   let mockDiamondCut: MockDiamondCut;

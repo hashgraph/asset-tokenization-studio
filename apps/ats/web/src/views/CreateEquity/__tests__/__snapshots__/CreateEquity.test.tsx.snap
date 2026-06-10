@@ -537,29 +537,6 @@ exports[`CreateEquity render correctly 1`] = `
                   </svg>
                 </div>
               </div>
-              <div
-                class="chakra-form-control css-1kxonj9"
-                role="group"
-              >
-                <label
-                  class="css-1fey8w1"
-                  for="isin"
-                >
-                  <div
-                    class="chakra-input__group css-pwmwmr"
-                    data-group="true"
-                  >
-                    <input
-                      class="chakra-input css-ixs4pt"
-                      data-testid="isin"
-                      id="isin"
-                      name="isin"
-                      placeholder="12"
-                      value=""
-                    />
-                  </div>
-                </label>
-              </div>
             </div>
             <div
               class="css-7xu97p"
@@ -626,7 +603,7 @@ exports[`CreateEquity render correctly 1`] = `
                       <label
                         class="chakra-form__label css-1ii0m7i"
                         for="isControllable"
-                        id="field-:rd:-label"
+                        id="field-:rc:-label"
                       >
                         Controllable
                       </label>
@@ -690,7 +667,7 @@ exports[`CreateEquity render correctly 1`] = `
                       <label
                         class="chakra-form__label css-1ii0m7i"
                         for="isBlocklist"
-                        id="field-:rg:-label"
+                        id="field-:rf:-label"
                       >
                         Blocklist
                       </label>
@@ -750,7 +727,7 @@ exports[`CreateEquity render correctly 1`] = `
                       <label
                         class="chakra-form__label css-1ii0m7i"
                         for="isApproval"
-                        id="field-:rj:-label"
+                        id="field-:ri:-label"
                       >
                         Approval list
                       </label>
@@ -837,7 +814,7 @@ exports[`CreateEquity render correctly 1`] = `
                       <label
                         class="chakra-form__label css-1ii0m7i"
                         for="isClearing"
-                        id="field-:rn:-label"
+                        id="field-:rm:-label"
                       >
                         Clearing mode enabled
                       </label>
@@ -901,7 +878,7 @@ exports[`CreateEquity render correctly 1`] = `
                       <label
                         class="chakra-form__label css-1ii0m7i"
                         for="internalKycActivated"
-                        id="field-:rq:-label"
+                        id="field-:rp:-label"
                       >
                         Internal Kyc Activated
                       </label>

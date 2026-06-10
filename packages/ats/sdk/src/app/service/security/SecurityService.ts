@@ -18,16 +18,14 @@ export default class SecurityService extends Service {
   async get(securityId: string): Promise<Security> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     const viewModel = (await this.queryBus.execute(new GetSecurityQuery(securityId))).security;
-    const { name, decimals, symbol, evmDiamondAddress, isin } = viewModel;
-    if (!name || decimals === undefined || !symbol || !isin || !evmDiamondAddress)
-      throw new SecurityNotFound(securityId);
+    const { name, decimals, symbol, evmDiamondAddress } = viewModel;
+    if (!name || decimals === undefined || !symbol || !evmDiamondAddress) throw new SecurityNotFound(securityId);
 
     return new Security({
       ...viewModel,
       name,
       decimals,
       symbol,
-      isin,
     });
   }
 }
