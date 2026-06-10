@@ -69,6 +69,9 @@ import {
   getAllMockFacets,
   getMockFacetDefinition,
   INITIALIZE_MOCK_CONFIG_ID,
+  // TEST-ONLY: AssetMock domain — full-IAsset facet union for shared-fixture tests.
+  createAssetMockConfiguration,
+  getAssetMockFacets,
 } from "@scripts/domain";
 import {
   BusinessLogicResolver__factory,
@@ -1288,6 +1291,68 @@ export async function deploySystemWithNewBlr(
       throw new Error(createTestFailureMessage("step", "factory"));
     }
 
+    // ====================================================================
+    // TEST-ONLY: Step 13 — AssetMock Configuration.
+    //
+    // Registers the union of all asset-class facets plus MockDiamondCut under
+    // ASSET_MOCK_CONFIG_ID so a single test fixture can deploy one diamond
+    // exposing every IAsset function. Only executed when ATS_TEST_MODE=true.
+    // ====================================================================
+    let assetMockConfig: Awaited<ReturnType<typeof createAssetMockConfiguration>> = {
+      success: false,
+      error: "SKIPPED" as const,
+      message: "AssetMock config not created (ATS_TEST_MODE disabled)",
+    } as unknown as Awaited<ReturnType<typeof createAssetMockConfiguration>>;
+
+    if (checkpoint.steps.configurations?.assetMock && checkpoint.currentStep >= 12) {
+      info(`\n✓ Step 13/${totalSteps}: AssetMock configuration already created (resuming)`);
+      const data = checkpoint.steps.configurations.assetMock;
+      info(`✅ AssetMock Config ID: ${data.configId}`);
+      info(`✅ AssetMock Facets: ${data.facetCount}`);
+      assetMockConfig = toConfigurationData(data);
+    } else if (isTestMode()) {
+      info(`\n🧪 Step 13/${totalSteps}: Creating AssetMock configuration (full IAsset facet union)...`);
+      info(`   AssetMock facets: ${getAssetMockFacets().length} facets`);
+
+      assetMockConfig = await createAssetMockConfiguration(
+        blrContract,
+        facetAddresses,
+        partialBatchDeploy,
+        batchSize,
+        confirmations,
+        enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
+      );
+
+      if (!assetMockConfig.success) {
+        throw new Error(`AssetMock config creation failed: ${assetMockConfig.error} - ${assetMockConfig.message}`);
+      }
+
+      info(`✅ AssetMock Config ID: ${assetMockConfig.data.configurationId}`);
+      info(`✅ AssetMock Version: ${assetMockConfig.data.version}`);
+      info(`✅ AssetMock Facets: ${assetMockConfig.data.facetKeys.length}`);
+
+      if (!checkpoint.steps.configurations) {
+        checkpoint.steps.configurations = {};
+      }
+      checkpoint.steps.configurations.assetMock = {
+        configId: assetMockConfig.data.configurationId,
+        version: assetMockConfig.data.version,
+        facetCount: assetMockConfig.data.facetKeys.length,
+        facets: assetMockConfig.data.facetKeys,
+        txHash: "",
+      };
+      checkpoint.currentStep = 12;
+      await checkpointManager.saveCheckpoint(checkpoint);
+    } else {
+      info(`\n⏭️  Step 13/${totalSteps}: AssetMock configuration skipped (ATS_TEST_MODE disabled)`);
+      checkpoint.currentStep = 12;
+      await checkpointManager.saveCheckpoint(checkpoint);
+    }
+
+    if (shouldFailAtStep("assetMock")) {
+      throw new Error(createTestFailureMessage("step", "assetMock"));
+    }
+
     // Get Hedera Contract IDs if on Hedera network
     const getContractId = async (address: string) => {
       return network.toLowerCase().includes("hedera") ? await fetchHederaContractId(network, address) : undefined;
@@ -1474,12 +1539,25 @@ export async function deploySystemWithNewBlr(
               facetCount: 0,
               facets: [],
             },
+        assetMock: isSuccess(assetMockConfig)
+          ? {
+              configId: assetMockConfig.data.configurationId,
+              version: assetMockConfig.data.version,
+              facetCount: assetMockConfig.data.facetKeys.length,
+              facets: assetMockConfig.data.facetKeys,
+            }
+          : {
+              configId: "",
+              version: 0,
+              facetCount: 0,
+              facets: [],
+            },
       },
 
       summary: {
         totalContracts: 3, // ProxyAdmin, BLR, Factory
         totalFacets: facetsResult.deployed.size,
-        totalConfigurations: deployOnlyBondConfig ? 2 : 8,
+        totalConfigurations: deployOnlyBondConfig ? 2 : isTestMode() ? 9 : 8,
         deploymentTime: Date.now() - startTime,
         gasUsed: totalGasUsed.toString(),
         success: true,
@@ -1540,6 +1618,15 @@ export async function deploySystemWithNewBlr(
           if (!isSuccess(factoryConfig)) return [];
           const factoryKeys = new Set(factoryConfig.data.facetKeys.map((f) => f.key));
           const filtered = output.facets.filter((facet) => factoryKeys.has(facet.key));
+          return Array.from(new Map(filtered.map((f) => [f.key, f])).values());
+        },
+        getAssetMockFacets() {
+          // TEST-ONLY: returns facets that would be resolved by the AssetMock config.
+          // Uses the exported helper from the AssetMock domain module rather than
+          // the deployment output (which may not have the config if test mode is off).
+          if (!isSuccess(assetMockConfig)) return [];
+          const assetMockKeys = new Set(assetMockConfig.data.facetKeys.map((f) => f.key));
+          const filtered = output.facets.filter((facet) => assetMockKeys.has(facet.key));
           return Array.from(new Map(filtered.map((f) => [f.key, f])).values());
         },
       },
