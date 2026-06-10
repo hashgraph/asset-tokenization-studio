@@ -57,16 +57,4 @@ abstract contract LoansPortfolioModifiers {
         }
         _;
     }
-
-    /**
-     * @notice Reverts when `_country` is not a well-formed ISO 3166-1 alpha-2 code.
-     * @dev Delegates the format check to `LoansPortfolioStorageWrapper.checkCountryCode`, which
-     *      requires exactly two uppercase ASCII letters followed by two null bytes. The zero value
-     *      (`bytes4(0)`) is also rejected. Raises `WrongCountryCode` with the offending value.
-     * @param _countryCode The country code to validate before the body executes.
-     */
-    modifier onlyValidCountryCode(bytes4 _countryCode) {
-        LoansPortfolioStorageWrapper.checkCountryCode(_countryCode);
-        _;
-    }
 }

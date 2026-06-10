@@ -42,7 +42,6 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
      *      `validateAddressNotZero(_holdingsAsset.assetAddress)` →
      *      `onlySupportedHoldingsAssetType(_holdingsAsset)` →
      *      `onlyNotExistingHoldingsAsset(_holdingsAsset.assetAddress)` →
-     *      `onlyValidCountryCode(_holdingsAsset.countryCode)`.
      */
     function addHoldingsAsset(
         ILoansPortfolio.HoldingsAsset calldata _holdingsAsset
@@ -57,7 +56,6 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
         validateAddressNotZero(_holdingsAsset.assetAddress)
         onlySupportedHoldingsAssetType(_holdingsAsset)
         onlyNotExistingHoldingsAsset(_holdingsAsset.assetAddress)
-        onlyValidCountryCode(_holdingsAsset.countryCode)
         returns (bool success_)
     {
         LoansPortfolioStorageWrapper.addHoldingsAsset(_holdingsAsset);
@@ -72,7 +70,6 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
      *      `validateAddressNotZero(_holdingsAsset.assetAddress)` →
      *      `onlySupportedHoldingsAssetType(_holdingsAsset)` →
      *      `onlyAlreadyExistingHoldingsAsset(_holdingsAsset.assetAddress)` →
-     *      `onlyValidCountryCode(_holdingsAsset.countryCode)`.
      */
     function removeHoldingsAsset(
         ILoansPortfolio.HoldingsAsset calldata _holdingsAsset
@@ -87,7 +84,6 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
         validateAddressNotZero(_holdingsAsset.assetAddress)
         onlySupportedHoldingsAssetType(_holdingsAsset)
         onlyAlreadyExistingHoldingsAsset(_holdingsAsset.assetAddress)
-        onlyValidCountryCode(_holdingsAsset.countryCode)
         returns (bool success_)
     {
         LoansPortfolioStorageWrapper.removeHoldingsAsset(_holdingsAsset);
@@ -212,15 +208,5 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
     /// @inheritdoc ILoansPortfolio
     function getDefaultedLoansRatio() external view override returns (uint256 numerator_, uint256 denominator_) {
         (numerator_, denominator_) = LoansPortfolioStorageWrapper.getDefaultedLoansRatio();
-    }
-
-    /// @inheritdoc ILoansPortfolio
-    function getGeographicalExposure()
-        external
-        view
-        override
-        returns (ILoansPortfolio.GeographicalExposureData[] memory geographicalExposure_)
-    {
-        geographicalExposure_ = LoansPortfolioStorageWrapper.getGeographicalExposure();
     }
 }
