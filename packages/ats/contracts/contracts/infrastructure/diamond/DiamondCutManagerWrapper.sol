@@ -258,6 +258,7 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
      * @param _dcms Diamond cut manager storage reference.
      * @param _configurationId Identifier of the configuration to query.
      * @param _version Configuration version to query.
+     * @param _replacementEnabled Flag indicating whether selector replacement is enabled for the resolver proxy.
      * @param _selector Function selector to resolve.
      * @return facetAddress_ Facet address registered for the selector, or zero if absent.
      */
@@ -265,9 +266,16 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
         uint256 _version,
+        bool _replacementEnabled,
         bytes4 _selector
     ) internal view returns (address facetAddress_) {
         facetAddress_ = _dcms.facetAddress[_buildHashSelector(_configurationId, _version, _selector)];
+        if (_replacementEnabled) {
+            address replacementAddress = _getReplacementAddress(facetAddress_);
+            if (replacementAddress != address(0)) {
+                facetAddress_ = replacementAddress;
+            }
+        }
     }
 
     /**

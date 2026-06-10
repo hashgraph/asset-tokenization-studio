@@ -45,6 +45,21 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
         _removeSelectorsFromBlacklist(_configurationId, _selectors);
     }
 
+    function updateReplacementAddress(
+        address _oldAddress,
+        address _newAddress
+    )
+        external
+        override
+        validateReplacedAddress(_oldAddress)
+        validateReplacementAddress(_newAddress)
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyUnpaused
+    {
+        _updateReplacementAddress(_oldAddress, _newAddress);
+        emit ReplacementAddressUpdated(_oldAddress, _newAddress);
+    }
+
     function getVersionStatus(
         bytes32 _businessLogicKey,
         uint256 _version

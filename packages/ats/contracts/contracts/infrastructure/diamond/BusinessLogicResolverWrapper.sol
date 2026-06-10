@@ -37,6 +37,9 @@ struct BusinessLogicResolverDataStorage {
     mapping(bytes32 facetIdAndVersion => IBusinessLogicResolver.VersionStatus status) statusByFacetIdAndVersion;
     mapping(bytes32 => EnumerableSetBytes4.Bytes4Set) selectorBlacklist;
     // ─── APPEND-ONLY ZONE BELOW ───
+    // ─── APPEND-ONLY ZONE BELOW ───
+    mapping(address => address) replacementAddressMap;
+    mapping(address => bool) isReplacementAddress;
 }
 
 abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
@@ -49,6 +52,16 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
         IBusinessLogicResolver.BusinessLogicRegistryData[] calldata _businessLogicsRegistryDatas
     ) {
         _checkValidKeysAndAddresses(_businessLogicsRegistryDatas);
+        _;
+    }
+
+    modifier validateReplacementAddress(address _replacementAddress) {
+        _checkReplacementAddress(_replacementAddress);
+        _;
+    }
+
+    modifier validateReplacedAddress(address _replacedAddress) {
+        _checkReplacedAddress(_replacedAddress);
         _;
     }
 
@@ -145,6 +158,13 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
         }
     }
 
+    function _updateReplacementAddress(address _oldAddress, address _newAddress) internal {
+        BusinessLogicResolverDataStorage storage businessLogicResolverDataStorage = _businessLogicResolverStorage();
+        businessLogicResolverDataStorage.replacementAddressMap[_oldAddress] = _newAddress;
+        if (_newAddress == address(0)) return;
+        businessLogicResolverDataStorage.isReplacementAddress[_newAddress] = true;
+    }
+
     function _getVersionStatus(
         bytes32 _businessLogicKey,
         uint256 _version
@@ -222,6 +242,38 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
             _configurationId
         ];
         page_ = Pagination.getFromSet(selectorBlacklist, _pageIndex, _pageLength);
+    }
+
+    function _getReplacementAddress(address _address) internal view returns (address) {
+        return _businessLogicResolverStorage().replacementAddressMap[_address];
+    }
+
+    function _isReplacementAddress(address _address) internal view returns (bool) {
+        return _businessLogicResolverStorage().isReplacementAddress[_address];
+    }
+
+    /**
+     * @notice Reverts when a replacement address is itself been replaced by another one.
+     * @param _replacementAddress The replacement address been replaced.
+     */
+    function _checkReplacementAddress(address _replacementAddress) internal view {
+        if (_getReplacementAddress(_replacementAddress) != address(0)) {
+            revert InvalidReplacementAddress(_replacementAddress);
+        }
+    }
+
+    /**
+     * @notice Reverts when a replaced address is itself replacing other addresses.
+     * @param _replacedAddress The replaced address been used as replacement.
+     */
+    function _checkReplacedAddress(address _replacedAddress) internal view {
+        if (_replacedAddress == address(0)) {
+            revert AddressZero();
+        }
+
+        if (_isReplacementAddress(_replacedAddress)) {
+            revert InvalidReplacedAddress(_replacedAddress);
+        }
     }
 
     function _businessLogicResolverStorage()

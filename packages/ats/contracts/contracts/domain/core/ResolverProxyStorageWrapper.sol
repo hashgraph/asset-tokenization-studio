@@ -22,6 +22,7 @@ struct ResolverProxyStorage {
     uint256 version;
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     // ─── APPEND-ONLY ZONE BELOW ───
+    bool replacementEnabled;
 }
 
 /**
