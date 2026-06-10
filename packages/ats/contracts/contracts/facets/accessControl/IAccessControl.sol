@@ -41,21 +41,25 @@ interface IAccessControl {
     event RoleRenounced(address indexed account, bytes32 indexed role);
 
     /**
-     * @notice Emitted when multiple roles are applied to an account in a single operation.
-     * @param requestedRoles The roles that were submitted by the caller.
-     * @param requestedStates Corresponding grant/revoke flags; `true` means granted, `false` revoked.
-     * @param account The account to which the roles were applied.
-     * @param appliedRoles The subset of `requestedRoles` whose state effectively changed.
-     * @param appliedStates The corresponding final state for each effectively applied role.
+     * @notice Emitted when multiple role operations are requested for an account.
+     * @dev `roles` and `actives` are parallel arrays and must have the same length.
+     *      Entries represent the requested role state changes, not necessarily only
+     *      the effective storage mutations.
+     * @param roles The roles processed by the batch operation.
+     * @param actives The requested state for each role; `true` grants and `false` revokes.
+     * @param account The account for which the role operations are requested.
      */
-    event RolesApplied(
-        bytes32[] requestedRoles,
-        bool[] requestedStates,
-        address account,
-        bytes32[] appliedRoles,
-        bool[] appliedStates
-    );
+    event RolesApplied(bytes32[] roles, bool[] actives, address account);
 
+    /**
+     * @notice Emitted when one or more role changes are effectively applied.
+     * @dev `roles` and `actives` are parallel arrays containing the role states that
+     *      resulted in effective storage mutations.
+     * @param roles The roles whose assigned state changed.
+     * @param actives The effective state applied to each role; `true` granted and
+     *        `false` revoked.
+     */
+    event EffectivelyRolesApplied(bytes32[] roles, bool[] actives);
     /**
      * @notice Emitted once when the AccessControl capability is initialised on a token.
      * @dev Fires exclusively from `initializeAccessControl` after the registration succeeds.

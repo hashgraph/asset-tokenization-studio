@@ -129,12 +129,12 @@ export async function deployResolverProxyFixture(): Promise<ResolverProxyFixture
     id: f.resolverKey,
     version: 1,
   }));
-  await blr.createConfiguration(TEST_CONFIG_ID, facetConfigs);
+  await blr.createConfiguration(TEST_CONFIG_ID, facetConfigs, "0x");
 
   // Create configuration at version 2 (same facets, allows version upgrades)
   // Note: BLR configurations are versioned - to update proxy to version 2,
   // there must be a configuration at version 2 in the BLR
-  await blr.createConfiguration(TEST_CONFIG_ID, facetConfigs);
+  await blr.createConfiguration(TEST_CONFIG_ID, facetConfigs, "0x");
 
   // Deploy ResolverProxy pointing to BLR and test configuration
   const initialVersion = 1;
@@ -196,10 +196,10 @@ export async function deployResolverProxyWithAltConfigFixture(): Promise<
     id: f.resolverKey,
     version: 1,
   }));
-  await blr.createConfiguration(ALT_CONFIG_ID, facetConfigs);
+  await blr.createConfiguration(ALT_CONFIG_ID, facetConfigs, "0x");
 
   // Create alternative configuration at version 2 (allows version upgrades)
-  await blr.createConfiguration(ALT_CONFIG_ID, facetConfigs);
+  await blr.createConfiguration(ALT_CONFIG_ID, facetConfigs, "0x");
 
   return {
     ...base,
