@@ -124,7 +124,7 @@ export async function deployLoansPortfolioTokenFixture({
 
   const blrProxyAddress = infrastructure.deployment.infrastructure.blr.proxy;
 
-  const tx = await factory.deployProxy(blrProxyAddress, LOANS_PORTFOLIO_CONFIG_ID, 1, rbacs);
+  const tx = await factory.deployProxy(blrProxyAddress, LOANS_PORTFOLIO_CONFIG_ID, 1, rbacs, "0x");
   const receipt = await tx.wait();
   const proxyAddress = (await decodeEvent(factory, "ProxyDeployed", receipt)).proxyAddress;
 
