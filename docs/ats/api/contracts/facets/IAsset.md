@@ -3160,20 +3160,6 @@ Returns the total amount of tokens currently frozen for a wallet.
 | ---- | ------- | ----------------------------------------------------------------------- |
 | \_0  | uint256 | The total frozen token amount for `_userAddress` across all partitions. |
 
-### getGeographicalExposure
-
-```solidity
-function getGeographicalExposure() external view returns (struct ILoansPortfolio.GeographicalExposureData[] geographicalExposure_)
-```
-
-Returns the geographical exposure aggregated by country.
-
-#### Returns
-
-| Name                   | Type                                       | Description                                                                                        |
-| ---------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------- |
-| geographicalExposure\_ | ILoansPortfolio.GeographicalExposureData[] | Array of `(country, count)` tuples covering every country present in the portfolio&#39;s holdings. |
-
 ### getHeldAmountFor
 
 ```solidity
@@ -13852,20 +13838,6 @@ error WrongClearingId()
 ```
 
 Thrown when the supplied `clearingId` does not correspond to an existing or active clearing operation for the given holder and partition.
-
-### WrongCountryCode
-
-```solidity
-error WrongCountryCode(bytes4 _countryCode)
-```
-
-Thrown when a holdings asset references an unsupported country code.
-
-#### Parameters
-
-| Name          | Type   | Description                   |
-| ------------- | ------ | ----------------------------- |
-| \_countryCode | bytes4 | The unsupported country code. |
 
 ### WrongDates
 

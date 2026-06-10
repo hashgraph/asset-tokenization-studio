@@ -41,20 +41,6 @@ Returns the defaulted-loans ratio as a numerator/denominator pair.
 | numerator\_   | uint256 | Numerator of the defaulted-loans ratio.   |
 | denominator\_ | uint256 | Denominator of the defaulted-loans ratio. |
 
-### getGeographicalExposure
-
-```solidity
-function getGeographicalExposure() external view returns (struct ILoansPortfolio.GeographicalExposureData[] geographicalExposure_)
-```
-
-Returns the geographical exposure aggregated by country.
-
-#### Returns
-
-| Name                   | Type                                       | Description                                                                                        |
-| ---------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------- |
-| geographicalExposure\_ | ILoansPortfolio.GeographicalExposureData[] | Array of `(country, count)` tuples covering every country present in the portfolio&#39;s holdings. |
-
 ### getHoldingsAssetOwnership
 
 ```solidity
@@ -457,17 +443,3 @@ Thrown when a holdings asset declares a type outside the supported set.
 | Name              | Type  | Description                                             |
 | ----------------- | ----- | ------------------------------------------------------- |
 | holdingsAssetType | uint8 | The unsupported `HoldingsAssetType` value (as `uint8`). |
-
-### WrongCountryCode
-
-```solidity
-error WrongCountryCode(bytes4 _countryCode)
-```
-
-Thrown when a holdings asset references an unsupported country code.
-
-#### Parameters
-
-| Name          | Type   | Description                   |
-| ------------- | ------ | ----------------------------- |
-| \_countryCode | bytes4 | The unsupported country code. |
