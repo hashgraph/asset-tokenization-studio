@@ -1,5 +1,13 @@
 # DiamondCut
 
+_Asset Tokenization Studio Team_
+
+> DiamondCut
+
+Abstract facet that exposes the diamond-cut upgrade surface: version bumps, configuration-id swaps, and full resolver migrations, all gated behind `DEFAULT_ADMIN_ROLE`.
+
+_Inherits `ResolverProxyUnstructured` for ERC-7201 storage access and implements `IDiamondCut`. Concrete tokens inherit this contract as part of their facet stack._
+
 ## Methods
 
 ### getConfigInfo
