@@ -1085,23 +1085,6 @@ Emitted when a configuration is created atomically via {createConfiguration}.
 | version             | uint256                                 | Version number assigned to the newly created configuration. |
 | data                | bytes                                   | Additional data passed to the configuration.                |
 
-### EffectivelyRolesApplied
-
-```solidity
-event EffectivelyRolesApplied(bytes32[] roles, bool[] actives)
-```
-
-Emitted when one or more role changes are effectively applied.
-
-_`roles` and `actives` are parallel arrays containing the role states that resulted in effective storage mutations._
-
-#### Parameters
-
-| Name    | Type      | Description                                                                   |
-| ------- | --------- | ----------------------------------------------------------------------------- |
-| roles   | bytes32[] | The roles whose assigned state changed.                                       |
-| actives | bool[]    | The effective state applied to each role; `true` granted and `false` revoked. |
-
 ### OwnershipAccepted
 
 ```solidity
@@ -1212,20 +1195,20 @@ Emitted when a role is revoked from an account.
 ### RolesApplied
 
 ```solidity
-event RolesApplied(bytes32[] roles, bool[] actives, address account)
+event RolesApplied(bytes32[] requestedRoles, bool[] requestedStates, address account, bytes32[] appliedRoles, bool[] appliedStates)
 ```
 
-Emitted when multiple role operations are requested for an account.
-
-_`roles` and `actives` are parallel arrays and must have the same length. Entries represent the requested role state changes, not necessarily only the effective storage mutations._
+Emitted when multiple roles are applied to an account in a single operation.
 
 #### Parameters
 
-| Name    | Type      | Description                                                           |
-| ------- | --------- | --------------------------------------------------------------------- |
-| roles   | bytes32[] | The roles processed by the batch operation.                           |
-| actives | bool[]    | The requested state for each role; `true` grants and `false` revokes. |
-| account | address   | The account for which the role operations are requested.              |
+| Name            | Type      | Description                                                              |
+| --------------- | --------- | ------------------------------------------------------------------------ |
+| requestedRoles  | bytes32[] | The roles that were submitted by the caller.                             |
+| requestedStates | bool[]    | Corresponding grant/revoke flags; `true` means granted, `false` revoked. |
+| account         | address   | The account to which the roles were applied.                             |
+| appliedRoles    | bytes32[] | The subset of `requestedRoles` whose state effectively changed.          |
+| appliedStates   | bool[]    | The corresponding final state for each effectively applied role.         |
 
 ### Unpaused
 
