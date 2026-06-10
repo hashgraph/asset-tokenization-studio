@@ -300,20 +300,6 @@ library ERC1594StorageWrapper {
     }
 
     /**
-     * @notice Returns the ERC1594 storage slot using the predefined
-     * position constant.
-     * @dev Uses inline assembly to retrieve the storage pointer.
-     * @return ds Storage reference to the `ERC1594Storage` struct.
-     */
-    function erc1594Storage() internal pure returns (ERC1594Storage storage ds) {
-        bytes32 position = STORAGE_LOCATION_ERC1594;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            ds.slot := position
-        }
-    }
-
-    /**
      * @notice Performs system-wide checks that apply to all transfer and
      * redemption operations.
      * @dev Currently reverts if the clearing mechanism is activated. Returns
@@ -449,7 +435,7 @@ library ERC1594StorageWrapper {
         address to,
         uint256 value
     ) private view returns (bool status, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
-        bytes memory result = ERC3643StorageWrapper.erc3643Storage().compliance.functionStaticCall(
+        bytes memory result = address(ERC3643StorageWrapper.getCompliance()).functionStaticCall(
             abi.encodeWithSelector(ICompliance.canTransfer.selector, sender, address(0), 0),
             IERC3643Types.ComplianceCallFailed.selector
         );
@@ -483,7 +469,7 @@ library ERC1594StorageWrapper {
         address to,
         uint256 value
     ) private view returns (bool status, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
-        bytes memory result = ERC3643StorageWrapper.erc3643Storage().compliance.functionStaticCall(
+        bytes memory result = address(ERC3643StorageWrapper.getCompliance()).functionStaticCall(
             abi.encodeWithSelector(ICompliance.canTransfer.selector, from, to, value),
             IERC3643Types.ComplianceCallFailed.selector
         );
@@ -542,7 +528,7 @@ library ERC1594StorageWrapper {
         if (!KycStorageWrapper.verifyKycStatus(IKyc.KycStatus.GRANTED, account)) {
             return (false, Eip1066.DISALLOWED_OR_STOP, IKyc.InvalidKycStatus.selector, abi.encode(account));
         }
-        bytes memory isVerified = (ERC3643StorageWrapper.erc3643Storage().identityRegistry).functionStaticCall(
+        bytes memory isVerified = address(ERC3643StorageWrapper.getIdentityRegistry()).functionStaticCall(
             abi.encodeWithSelector(IIdentityRegistry.isVerified.selector, account),
             IERC3643Types.IdentityRegistryCallFailed.selector
         );
@@ -676,5 +662,19 @@ library ERC1594StorageWrapper {
             );
         }
         return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
+    }
+
+    /**
+     * @notice Returns the ERC1594 storage slot using the predefined
+     * position constant.
+     * @dev Uses inline assembly to retrieve the storage pointer.
+     * @return ds Storage reference to the `ERC1594Storage` struct.
+     */
+    function erc1594Storage() private pure returns (ERC1594Storage storage ds) {
+        bytes32 position = STORAGE_LOCATION_ERC1594;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            ds.slot := position
+        }
     }
 }

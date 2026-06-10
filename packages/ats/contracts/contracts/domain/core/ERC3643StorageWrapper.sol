@@ -138,11 +138,10 @@ library ERC3643StorageWrapper {
      */
     function setName(string calldata _name) internal {
         ERC20StorageWrapper.setName(_name);
-        ERC20Storage storage erc20Storage_ = ERC20StorageWrapper.erc20Storage();
         emit IERC3643Types.UpdatedTokenInformation(
-            erc20Storage_.name,
-            erc20Storage_.symbol,
-            erc20Storage_.decimals,
+            ERC20StorageWrapper.getName(),
+            ERC20StorageWrapper.getSymbol(),
+            ERC20StorageWrapper.decimals(),
             version(),
             erc3643Storage().onchainID
         );
@@ -155,11 +154,10 @@ library ERC3643StorageWrapper {
      */
     function setSymbol(string calldata _symbol) internal {
         ERC20StorageWrapper.setSymbol(_symbol);
-        ERC20Storage storage erc20Storage_ = ERC20StorageWrapper.erc20Storage();
         emit IERC3643Types.UpdatedTokenInformation(
-            erc20Storage_.name,
-            erc20Storage_.symbol,
-            erc20Storage_.decimals,
+            ERC20StorageWrapper.getName(),
+            ERC20StorageWrapper.getSymbol(),
+            ERC20StorageWrapper.decimals(),
             version(),
             erc3643Storage().onchainID
         );
@@ -173,11 +171,10 @@ library ERC3643StorageWrapper {
      */
     function setOnchainID(address _onchainID) internal {
         erc3643Storage().onchainID = _onchainID;
-        ERC20Storage storage erc20Storage_ = ERC20StorageWrapper.erc20Storage();
         emit IERC3643Types.UpdatedTokenInformation(
-            erc20Storage_.name,
-            erc20Storage_.symbol,
-            erc20Storage_.decimals,
+            ERC20StorageWrapper.getName(),
+            ERC20StorageWrapper.getSymbol(),
+            ERC20StorageWrapper.decimals(),
             version(),
             _onchainID
         );
@@ -538,21 +535,6 @@ library ERC3643StorageWrapper {
     }
 
     /**
-     * @notice Returns a storage pointer to the ERC3643 namespace.
-     * @dev Uses inline assembly to bind the returned reference to the deterministic ERC-7201
-     *      slot `STORAGE_LOCATION_ERC3643`. Marked `pure` because Solidity treats slot literals
-     *      as pure even though the returned reference reads/writes storage.
-     * @return erc3643Storage_ Storage reference for the ERC3643 namespace.
-     */
-    function erc3643Storage() internal pure returns (ERC3643Storage storage erc3643Storage_) {
-        bytes32 position = STORAGE_LOCATION_ERC3643;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            erc3643Storage_.slot := position
-        }
-    }
-
-    /**
      * @notice Reverts unless the addresses and amounts arrays have the same length.
      * @dev Pre-condition guard for batch freeze/unfreeze entry points; raises
      *      `InputAmountsArrayLengthMismatch` to surface caller error explicitly.
@@ -625,6 +607,21 @@ library ERC3643StorageWrapper {
         uint256 frozenAmount = getFrozenAmountForByPartitionAdjustedAt(_partition, _userAddress, _timestamp);
         if (frozenAmount < _amount) {
             revert IERC3643Types.InsufficientFrozenBalance(_userAddress, _amount, frozenAmount, _partition);
+        }
+    }
+
+    /**
+     * @notice Returns a storage pointer to the ERC3643 namespace.
+     * @dev Uses inline assembly to bind the returned reference to the deterministic ERC-7201
+     *      slot `STORAGE_LOCATION_ERC3643`. Marked `pure` because Solidity treats slot literals
+     *      as pure even though the returned reference reads/writes storage.
+     * @return erc3643Storage_ Storage reference for the ERC3643 namespace.
+     */
+    function erc3643Storage() private pure returns (ERC3643Storage storage erc3643Storage_) {
+        bytes32 position = STORAGE_LOCATION_ERC3643;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc3643Storage_.slot := position
         }
     }
 }

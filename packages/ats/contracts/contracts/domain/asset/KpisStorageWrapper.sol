@@ -226,7 +226,7 @@ library KpisStorageWrapper {
      * @dev Uses inline assembly to load the ERC-7201 slot from a precomputed constant.
      * @return kpisDataStorage_ Storage pointer to `KpisDataStorage`.
      */
-    function kpisDataStorage() internal pure returns (KpisDataStorage storage kpisDataStorage_) {
+    function kpisDataStorage() private pure returns (KpisDataStorage storage kpisDataStorage_) {
         bytes32 position = STORAGE_LOCATION_KPIS;
         // solhint-disable-next-line no-inline-assembly
         assembly {

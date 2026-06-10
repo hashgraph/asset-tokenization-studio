@@ -219,6 +219,102 @@ library InterestRateStorageWrapper {
     }
 
     /**
+     * @notice Returns the start period timestamp for the KPI-linked rate.
+     * @return startPeriod_ The Unix timestamp marking the start of the KPI-linked rate period.
+     */
+    function getStartPeriod() internal view returns (uint256 startPeriod_) {
+        startPeriod_ = kpiLinkedRateStorage().startPeriod;
+    }
+
+    /**
+     * @notice Returns the baseline value for the KPI-linked rate impact calculations.
+     * @return baseLine_ The baseline against which KPI deviations are measured.
+     */
+    function getBaseLine() internal view returns (uint256 baseLine_) {
+        baseLine_ = kpiLinkedRateStorage().baseLine;
+    }
+
+    /**
+     * @notice Returns the precision factor used in KPI-linked rate adjustments.
+     * @return adjustmentPrecision_ The precision factor for rate adjustments based on KPI impact.
+     */
+    function getAdjustmentPrecision() internal view returns (uint256 adjustmentPrecision_) {
+        adjustmentPrecision_ = kpiLinkedRateStorage().adjustmentPrecision;
+    }
+
+    /**
+     * @notice Returns the start rate for the KPI-linked rate.
+     * @return startRate_ The initial interest rate applicable at the start period.
+     */
+    function getStartRate() internal view returns (uint256 startRate_) {
+        startRate_ = kpiLinkedRateStorage().startRate;
+    }
+
+    /**
+     * @notice Returns the report period duration for the KPI-linked rate.
+     * @return reportPeriod_ The duration in seconds between successive KPI reports.
+     */
+    function getReportPeriod() internal view returns (uint256 reportPeriod_) {
+        reportPeriod_ = kpiLinkedRateStorage().reportPeriod;
+    }
+
+    /**
+     * @notice Returns the number of decimals used for KPI-linked rate values.
+     * @return rateDecimals_ The number of decimal places for KPI-linked rates.
+     */
+    function getRateDecimals() internal view returns (uint8 rateDecimals_) {
+        rateDecimals_ = kpiLinkedRateStorage().rateDecimals;
+    }
+
+    /**
+     * @notice Returns the penalty rate applied when a KPI report is missed.
+     * @return missedPenalty_ The penalty rate for missed KPI reports.
+     */
+    function getMissedPenalty() internal view returns (uint256 missedPenalty_) {
+        missedPenalty_ = kpiLinkedRateStorage().missedPenalty;
+    }
+
+    /**
+     * @notice Returns the upper deviation floor for KPI-linked impact data.
+     * @return maxDeviationFloor_ The maximum deviation floor for KPI impact data.
+     */
+    function getMaxDeviationFloor() internal view returns (uint256 maxDeviationFloor_) {
+        maxDeviationFloor_ = kpiLinkedRateStorage().maxDeviationFloor;
+    }
+
+    /**
+     * @notice Returns the upper deviation cap for KPI-linked impact data.
+     * @return maxDeviationCap_ The maximum deviation cap for KPI impact data.
+     */
+    function getMaxDeviationCap() internal view returns (uint256 maxDeviationCap_) {
+        maxDeviationCap_ = kpiLinkedRateStorage().maxDeviationCap;
+    }
+
+    /**
+     * @notice Returns the upper bound for the KPI-linked interest rate.
+     * @return maxRate_ The maximum possible interest rate under the KPI-linked model.
+     */
+    function getMaxRate() internal view returns (uint256 maxRate_) {
+        maxRate_ = kpiLinkedRateStorage().maxRate;
+    }
+
+    /**
+     * @notice Returns the lower bound for the KPI-linked interest rate.
+     * @return minRate_ The minimum possible interest rate under the KPI-linked model.
+     */
+    function getMinRate() internal view returns (uint256 minRate_) {
+        minRate_ = kpiLinkedRateStorage().minRate;
+    }
+
+    /**
+     * @notice Returns the base rate from which KPI-linked adjustments are applied.
+     * @return baseRate_ The base interest rate for the KPI-linked model.
+     */
+    function getBaseRate() internal view returns (uint256 baseRate_) {
+        baseRate_ = kpiLinkedRateStorage().baseRate;
+    }
+
+    /**
      * @notice Reverts when `NONE` is supplied as the rate type.
      * @dev `NONE` is the zero-value default reserved for uninitialised assets; it must never
      *      be set explicitly.
@@ -267,7 +363,7 @@ library InterestRateStorageWrapper {
      * @dev Uses inline assembly to load the slot from a precomputed constant value.
      * @return fixedRateDataStorage_ Storage pointer to FixedRateDataStorage.
      */
-    function fixedRateStorage() internal pure returns (FixedRateDataStorage storage fixedRateDataStorage_) {
+    function fixedRateStorage() private pure returns (FixedRateDataStorage storage fixedRateDataStorage_) {
         bytes32 position = STORAGE_LOCATION_FIXED_RATE;
         // solhint-disable-next-line no-inline-assembly
         assembly {
@@ -280,7 +376,7 @@ library InterestRateStorageWrapper {
      * @dev Uses inline assembly to load the slot from a precomputed constant value.
      * @return kpiLinkedRateDataStorage_ Storage pointer to KpiLinkedRateDataStorage.
      */
-    function kpiLinkedRateStorage() internal pure returns (KpiLinkedRateDataStorage storage kpiLinkedRateDataStorage_) {
+    function kpiLinkedRateStorage() private pure returns (KpiLinkedRateDataStorage storage kpiLinkedRateDataStorage_) {
         bytes32 position = STORAGE_LOCATION_KPI_LINKED_RATE;
         // solhint-disable-next-line no-inline-assembly
         assembly {

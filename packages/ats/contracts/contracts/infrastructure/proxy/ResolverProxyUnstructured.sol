@@ -19,23 +19,22 @@ abstract contract ResolverProxyUnstructured {
         IResolverProxy.Rbac[] memory _rbacs
     ) internal {
         _resolver.checkResolverProxyConfigurationRegistered(_resolverProxyConfigurationId, _version);
-        ResolverProxyStorage storage ds = ResolverProxyStorageWrapper.resolverProxyStorage();
-        _updateResolver(ds, _resolver);
-        _updateConfigId(ds, _resolverProxyConfigurationId);
-        _updateVersion(ds, _version);
+        _updateResolver(_resolver);
+        _updateConfigId(_resolverProxyConfigurationId);
+        _updateVersion(_version);
         _assignRbacRoles(_rbacs);
     }
 
-    function _updateResolver(ResolverProxyStorage storage _ds, IBusinessLogicResolver _resolver) internal {
-        _ds.resolver = _resolver;
+    function _updateResolver(IBusinessLogicResolver _resolver) internal {
+        ResolverProxyStorageWrapper.setResolver(_resolver);
     }
 
-    function _updateConfigId(ResolverProxyStorage storage _ds, bytes32 _resolverProxyConfigurationId) internal {
-        _ds.resolverProxyConfigurationId = _resolverProxyConfigurationId;
+    function _updateConfigId(bytes32 _resolverProxyConfigurationId) internal {
+        ResolverProxyStorageWrapper.setResolverProxyConfigurationId(_resolverProxyConfigurationId);
     }
 
-    function _updateVersion(ResolverProxyStorage storage _ds, uint256 _version) internal {
-        _ds.version = _version;
+    function _updateVersion(uint256 _version) internal {
+        ResolverProxyStorageWrapper.setVersion(_version);
     }
     function _assignRbacRoles(IResolverProxy.Rbac[] memory _rbacs) internal {
         for (uint256 rbacIndex; rbacIndex < _rbacs.length; rbacIndex++) {
@@ -45,111 +44,99 @@ abstract contract ResolverProxyUnstructured {
         }
     }
 
-    function _getFacetsLength(ResolverProxyStorage storage _ds) internal view returns (uint256 facetsLength_) {
-        facetsLength_ = _ds.resolver.getFacetsLengthByConfigurationIdAndVersion(
-            _ds.resolverProxyConfigurationId,
-            _ds.version
+    function _getFacetsLength() internal view returns (uint256 facetsLength_) {
+        facetsLength_ = ResolverProxyStorageWrapper.getResolver().getFacetsLengthByConfigurationIdAndVersion(
+            ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
+            ResolverProxyStorageWrapper.getVersion()
         );
     }
 
     function _getFacets(
-        ResolverProxyStorage storage _ds,
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (IDiamondLoupe.Facet[] memory facets_) {
-        facets_ = _ds.resolver.getFacetsByConfigurationIdAndVersion(
-            _ds.resolverProxyConfigurationId,
-            _ds.version,
+        facets_ = ResolverProxyStorageWrapper.getResolver().getFacetsByConfigurationIdAndVersion(
+            ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
+            ResolverProxyStorageWrapper.getVersion(),
             _pageIndex,
             _pageLength
         );
     }
 
-    function _getFacetSelectorsLength(
-        ResolverProxyStorage storage _ds,
-        bytes32 _facetId
-    ) internal view returns (uint256 facetSelectorsLength_) {
-        facetSelectorsLength_ = _ds.resolver.getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(
-            _ds.resolverProxyConfigurationId,
-            _ds.version,
-            _facetId
-        );
+    function _getFacetSelectorsLength(bytes32 _facetId) internal view returns (uint256 facetSelectorsLength_) {
+        facetSelectorsLength_ = ResolverProxyStorageWrapper
+            .getResolver()
+            .getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(
+                ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
+                ResolverProxyStorageWrapper.getVersion(),
+                _facetId
+            );
     }
 
     function _getFacetSelectors(
-        ResolverProxyStorage storage _ds,
         bytes32 _facetId,
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (bytes4[] memory facetSelectors_) {
-        facetSelectors_ = _ds.resolver.getFacetSelectorsByConfigurationIdVersionAndFacetId(
-            _ds.resolverProxyConfigurationId,
-            _ds.version,
+        facetSelectors_ = ResolverProxyStorageWrapper.getResolver().getFacetSelectorsByConfigurationIdVersionAndFacetId(
+            ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
+            ResolverProxyStorageWrapper.getVersion(),
             _facetId,
             _pageIndex,
             _pageLength
         );
     }
 
-    function _getFacetIds(
-        ResolverProxyStorage storage _ds,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view returns (bytes32[] memory facetIds_) {
-        facetIds_ = _ds.resolver.getFacetIdsByConfigurationIdAndVersion(
-            _ds.resolverProxyConfigurationId,
-            _ds.version,
+    function _getFacetIds(uint256 _pageIndex, uint256 _pageLength) internal view returns (bytes32[] memory facetIds_) {
+        facetIds_ = ResolverProxyStorageWrapper.getResolver().getFacetIdsByConfigurationIdAndVersion(
+            ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
+            ResolverProxyStorageWrapper.getVersion(),
             _pageIndex,
             _pageLength
         );
     }
 
     function _getFacetAddresses(
-        ResolverProxyStorage storage _ds,
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory facetAddresses_) {
-        facetAddresses_ = _ds.resolver.getFacetAddressesByConfigurationIdAndVersion(
-            _ds.resolverProxyConfigurationId,
-            _ds.version,
+        facetAddresses_ = ResolverProxyStorageWrapper.getResolver().getFacetAddressesByConfigurationIdAndVersion(
+            ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
+            ResolverProxyStorageWrapper.getVersion(),
             _pageIndex,
             _pageLength
         );
     }
 
-    function _getFacetIdBySelector(
-        ResolverProxyStorage storage _ds,
-        bytes4 _selector
-    ) internal view returns (bytes32 facetId_) {
-        facetId_ = _ds.resolver.getFacetIdByConfigurationIdVersionAndSelector(
-            _ds.resolverProxyConfigurationId,
-            _ds.version,
+    function _getFacetIdBySelector(bytes4 _selector) internal view returns (bytes32 facetId_) {
+        facetId_ = ResolverProxyStorageWrapper.getResolver().getFacetIdByConfigurationIdVersionAndSelector(
+            ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
+            ResolverProxyStorageWrapper.getVersion(),
             _selector
         );
     }
 
-    function _getFacet(
-        ResolverProxyStorage storage _ds,
-        bytes32 _facetId
-    ) internal view returns (IDiamondLoupe.Facet memory facet_) {
-        facet_ = _ds.resolver.getFacetByConfigurationIdVersionAndFacetId(
-            _ds.resolverProxyConfigurationId,
-            _ds.version,
+    function _getFacet(bytes32 _facetId) internal view returns (IDiamondLoupe.Facet memory facet_) {
+        facet_ = ResolverProxyStorageWrapper.getResolver().getFacetByConfigurationIdVersionAndFacetId(
+            ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
+            ResolverProxyStorageWrapper.getVersion(),
             _facetId
         );
     }
 
-    function _getFacetAddress(ResolverProxyStorage storage _ds, bytes4 _selector) internal view returns (address) {
-        return _ds.resolver.resolveResolverProxyCall(_ds.resolverProxyConfigurationId, _ds.version, _selector);
+    function _getFacetAddress(bytes4 _selector) internal view returns (address) {
+        return
+            ResolverProxyStorageWrapper.getResolver().resolveResolverProxyCall(
+                ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
+                ResolverProxyStorageWrapper.getVersion(),
+                _selector
+            );
     }
 
-    function _supportsInterface(
-        ResolverProxyStorage storage _ds,
-        bytes4 _interfaceId
-    ) internal view returns (bool isSupported_) {
-        isSupported_ = _ds.resolver.resolveSupportsInterface(
-            _ds.resolverProxyConfigurationId,
-            _ds.version,
+    function _supportsInterface(bytes4 _interfaceId) internal view returns (bool isSupported_) {
+        isSupported_ = ResolverProxyStorageWrapper.getResolver().resolveSupportsInterface(
+            ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
+            ResolverProxyStorageWrapper.getVersion(),
             _interfaceId
         );
     }

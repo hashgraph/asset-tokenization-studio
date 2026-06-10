@@ -73,7 +73,7 @@ library ERC1644StorageWrapper {
      * @dev Resolves the dedicated EIP-2535 storage slot via inline assembly.
      * @return erc1644Storage_ Storage reference to the `ERC1644Storage` struct.
      */
-    function erc1644Storage() internal pure returns (ERC1644Storage storage erc1644Storage_) {
+    function erc1644Storage() private pure returns (ERC1644Storage storage erc1644Storage_) {
         bytes32 position = STORAGE_LOCATION_ERC1644;
         // solhint-disable-next-line no-inline-assembly
         assembly {

@@ -175,7 +175,7 @@ library ClearingLifecycleOps {
         TokenCoreOps.checkCompliance(_id.tokenHolder, transferData.destination, false);
 
         // Notify compliance module for every partition; zero-target short-circuits in LowLevelCall.
-        (ERC3643StorageWrapper.erc3643Storage().compliance).functionCall(
+        address(ERC3643StorageWrapper.getCompliance()).functionCall(
             abi.encodeWithSelector(
                 ICompliance.transferred.selector,
                 _id.tokenHolder,
@@ -228,7 +228,7 @@ library ClearingLifecycleOps {
         ERC1410StorageWrapper.reduceTotalSupplyByPartition(_id.partition, redeemData.amount);
 
         // Notify compliance module for every partition; zero-target short-circuits in LowLevelCall.
-        (ERC3643StorageWrapper.erc3643Storage().compliance).functionCall(
+        address(ERC3643StorageWrapper.getCompliance()).functionCall(
             abi.encodeWithSelector(ICompliance.destroyed.selector, _id.tokenHolder, redeemData.amount),
             IERC3643Types.ComplianceCallFailed.selector
         );

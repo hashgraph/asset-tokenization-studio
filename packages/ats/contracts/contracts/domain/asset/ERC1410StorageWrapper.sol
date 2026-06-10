@@ -3,7 +3,6 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ITransfer } from "../../facets/transfer/ITransfer.sol";
 import { IERC1410Types } from "../../facets/commonTypes/IERC1410Types.sol";
-import { DefaultValueValidation } from "../../infrastructure/utils/DefaultValueValidation.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ERC20VotesStorageWrapper } from "./ERC20VotesStorageWrapper.sol";
@@ -327,7 +326,7 @@ library ERC1410StorageWrapper {
         );
 
         if (from != basicTransferInfo.to) {
-            (ERC3643StorageWrapper.erc3643Storage().compliance).functionCall(
+            address(ERC3643StorageWrapper.getCompliance()).functionCall(
                 abi.encodeWithSelector(
                     ICompliance.transferred.selector,
                     from,
@@ -387,7 +386,7 @@ library ERC1410StorageWrapper {
 
         increaseTotalSupplyByPartition(issueData.partition, issueData.value);
 
-        ERC3643StorageWrapper.erc3643Storage().compliance.functionCall(
+        address(ERC3643StorageWrapper.getCompliance()).functionCall(
             abi.encodeWithSelector(ICompliance.created.selector, issueData.tokenHolder, issueData.value),
             IERC3643Types.ComplianceCallFailed.selector
         );
@@ -445,7 +444,7 @@ library ERC1410StorageWrapper {
 
         reduceTotalSupplyByPartition(partition, value);
 
-        ERC3643StorageWrapper.erc3643Storage().compliance.functionCall(
+        address(ERC3643StorageWrapper.getCompliance()).functionCall(
             abi.encodeWithSelector(ICompliance.destroyed.selector, from, value),
             IERC3643Types.ComplianceCallFailed.selector
         );
@@ -1048,6 +1047,19 @@ library ERC1410StorageWrapper {
     }
 
     /**
+     * @notice Returns the reverse index of `partition` in `holder`'s partition array.
+     * @dev Used by the transfer logic to find the partition slot when the identifier is given; returns
+     *      zero when the holder has no entry for the partition, so callers must check for presence via
+     *      `validPartition` or similar before using the result.
+     * @param holder Address whose partition index is queried.
+     * @param partition Partition identifier being queried.
+     * @return One-based index of the partition in the holder's array, or zero if absent.
+     */
+    function partitionsToIndexes(address holder, bytes32 partition) internal view returns (uint256) {
+        return erc1410BasicStorage().partitionToIndex[holder][partition];
+    }
+
+    /**
      * @notice Rejects zero-value transfers and the zero-partition identifier.
      * @dev Reverts with `ZeroValue` or `ZeroPartition` from `IERC1410Types`; pure check on the inputs.
      * @param partition Partition identifier being validated.
@@ -1059,34 +1071,6 @@ library ERC1410StorageWrapper {
         }
         if (partition == bytes32(0)) {
             revert IERC1410Types.ZeroPartition();
-        }
-    }
-
-    /**
-     * @notice Returns a storage pointer to the ERC-1410 basic storage namespace.
-     * @dev Resolves the ERC-7201 slot constant `STORAGE_LOCATION_ERC1410_BASIC` via inline assembly so
-     *      every helper reads and writes the same persistent struct.
-     * @return erc1410BasicStorage_ Storage pointer to the basic partition state.
-     */
-    function erc1410BasicStorage() internal pure returns (ERC1410BasicStorage storage erc1410BasicStorage_) {
-        bytes32 position = STORAGE_LOCATION_ERC1410_BASIC;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            erc1410BasicStorage_.slot := position
-        }
-    }
-
-    /**
-     * @notice Returns a storage pointer to the ERC-1410 operator storage namespace.
-     * @dev Resolves the ERC-7201 slot constant `STORAGE_LOCATION_ERC1410_OPERATOR` via inline assembly
-     *      so every authorisation read/write addresses the same persistent struct.
-     * @return erc1410OperatorStorage_ Storage pointer to the operator approval state.
-     */
-    function erc1410OperatorStorage() internal pure returns (ERC1410OperatorStorage storage erc1410OperatorStorage_) {
-        bytes32 position = STORAGE_LOCATION_ERC1410_OPERATOR;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            erc1410OperatorStorage_.slot := position
         }
     }
 
@@ -1171,5 +1155,33 @@ library ERC1410StorageWrapper {
         delete erc1410Storage.partitionToIndex[holder][partition];
         erc1410Storage.partitions[holder].pop();
         AdjustBalancesStorageWrapper.popLabafUserPartition(holder);
+    }
+
+    /**
+     * @notice Returns a storage pointer to the ERC-1410 basic storage namespace.
+     * @dev Resolves the ERC-7201 slot constant `STORAGE_LOCATION_ERC1410_BASIC` via inline assembly so
+     *      every helper reads and writes the same persistent struct.
+     * @return erc1410BasicStorage_ Storage pointer to the basic partition state.
+     */
+    function erc1410BasicStorage() private pure returns (ERC1410BasicStorage storage erc1410BasicStorage_) {
+        bytes32 position = STORAGE_LOCATION_ERC1410_BASIC;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc1410BasicStorage_.slot := position
+        }
+    }
+
+    /**
+     * @notice Returns a storage pointer to the ERC-1410 operator storage namespace.
+     * @dev Resolves the ERC-7201 slot constant `STORAGE_LOCATION_ERC1410_OPERATOR` via inline assembly
+     *      so every authorisation read/write addresses the same persistent struct.
+     * @return erc1410OperatorStorage_ Storage pointer to the operator approval state.
+     */
+    function erc1410OperatorStorage() private pure returns (ERC1410OperatorStorage storage erc1410OperatorStorage_) {
+        bytes32 position = STORAGE_LOCATION_ERC1410_OPERATOR;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc1410OperatorStorage_.slot := position
+        }
     }
 }

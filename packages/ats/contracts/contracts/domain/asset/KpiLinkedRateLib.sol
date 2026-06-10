@@ -45,43 +45,45 @@ library KpiLinkedRateLib {
             return (0, 0, ICouponTypes.RateCalculationStatus.PENDING);
         }
 
-        KpiLinkedRateDataStorage memory kpiData = InterestRateStorageWrapper.kpiLinkedRateStorage();
-
-        if (coupon.fixingDate < kpiData.startPeriod) {
-            (rate_, rateDecimals_) = _getStartRate(kpiData);
+        if (coupon.fixingDate < InterestRateStorageWrapper.getStartPeriod()) {
+            (rate_, rateDecimals_) = _getStartRate();
             return (rate_, rateDecimals_, ICouponTypes.RateCalculationStatus.SET);
         }
 
-        (uint256 impactData, bool reportFound) = _collectImpactData(coupon.fixingDate, kpiData.reportPeriod);
+        (uint256 impactData, bool reportFound) = _collectImpactData(
+            coupon.fixingDate,
+            InterestRateStorageWrapper.getReportPeriod()
+        );
 
         if (!reportFound) {
-            (rate_, rateDecimals_) = _getRateWhenNoReport(couponID, kpiData);
+            (rate_, rateDecimals_) = _getRateWhenNoReport(couponID);
             return (rate_, rateDecimals_, ICouponTypes.RateCalculationStatus.SET);
         }
 
-        (rate_, rateDecimals_) = _getRateFromImpact(impactData, kpiData);
+        (rate_, rateDecimals_) = _getRateFromImpact(impactData);
         return (rate_, rateDecimals_, ICouponTypes.RateCalculationStatus.SET);
     }
 
-    function _getRateWhenNoReport(
-        uint256 couponID,
-        KpiLinkedRateDataStorage memory kpiData
-    ) private view returns (uint256 rate_, uint8 rateDecimals_) {
+    function _getRateWhenNoReport(uint256 couponID) private view returns (uint256 rate_, uint8 rateDecimals_) {
         (uint256 previousRate, uint8 previousRateDecimals, bool found) = _previousRate(couponID);
 
         rate_ =
             (
                 (found)
-                    ? DecimalsLib.calculateDecimalsAdjustment(previousRate, previousRateDecimals, kpiData.rateDecimals)
-                    : kpiData.baseRate
+                    ? DecimalsLib.calculateDecimalsAdjustment(
+                        previousRate,
+                        previousRateDecimals,
+                        InterestRateStorageWrapper.getRateDecimals()
+                    )
+                    : InterestRateStorageWrapper.getBaseRate()
             ) +
-            kpiData.missedPenalty;
+            InterestRateStorageWrapper.getMissedPenalty();
 
-        if (rate_ > kpiData.maxRate) {
-            rate_ = kpiData.maxRate;
+        if (rate_ > InterestRateStorageWrapper.getMaxRate()) {
+            rate_ = InterestRateStorageWrapper.getMaxRate();
         }
 
-        return (rate_, kpiData.rateDecimals);
+        return (rate_, InterestRateStorageWrapper.getRateDecimals());
     }
 
     function _collectImpactData(
@@ -134,54 +136,53 @@ library KpiLinkedRateLib {
         return (previousCoupon.coupon.rate, previousCoupon.coupon.rateDecimals, true);
     }
 
-    function _getStartRate(
-        KpiLinkedRateDataStorage memory kpiData
-    ) private pure returns (uint256 rate_, uint8 rateDecimals_) {
-        return (kpiData.startRate, kpiData.rateDecimals);
+    function _getStartRate() private view returns (uint256 rate_, uint8 rateDecimals_) {
+        return (InterestRateStorageWrapper.getStartRate(), InterestRateStorageWrapper.getRateDecimals());
     }
 
-    function _getRateFromImpact(
-        uint256 impactData,
-        KpiLinkedRateDataStorage memory kpiData
-    ) private pure returns (uint256 rate_, uint8 rateDecimals_) {
-        uint256 factor = 10 ** kpiData.adjustmentPrecision;
+    function _getRateFromImpact(uint256 impactData) private view returns (uint256 rate_, uint8 rateDecimals_) {
+        uint256 factor = 10 ** InterestRateStorageWrapper.getAdjustmentPrecision();
 
-        if (impactData < kpiData.baseLine) {
-            return _getDecreasedRate(impactData, kpiData, factor);
+        if (impactData < InterestRateStorageWrapper.getBaseLine()) {
+            return _getDecreasedRate(impactData, factor);
         }
 
-        return _getIncreasedRate(impactData, kpiData, factor);
+        return _getIncreasedRate(impactData, factor);
     }
 
     function _getDecreasedRate(
         uint256 impactData,
-        KpiLinkedRateDataStorage memory kpiData,
         uint256 factor
-    ) private pure returns (uint256 rate_, uint8 rateDecimals_) {
-        uint256 impactDeltaRate = (factor * (kpiData.baseLine - impactData)) /
-            (kpiData.baseLine - kpiData.maxDeviationFloor);
+    ) private view returns (uint256 rate_, uint8 rateDecimals_) {
+        uint256 impactDeltaRate = (factor * (InterestRateStorageWrapper.getBaseLine() - impactData)) /
+            (InterestRateStorageWrapper.getBaseLine() - InterestRateStorageWrapper.getMaxDeviationFloor());
 
         if (impactDeltaRate > factor) {
             impactDeltaRate = factor;
         }
 
-        rate_ = kpiData.baseRate - (((kpiData.baseRate - kpiData.minRate) * impactDeltaRate) / factor);
-        return (rate_, kpiData.rateDecimals);
+        rate_ =
+            InterestRateStorageWrapper.getBaseRate() -
+            (((InterestRateStorageWrapper.getBaseRate() - InterestRateStorageWrapper.getMinRate()) * impactDeltaRate) /
+                factor);
+        return (rate_, InterestRateStorageWrapper.getRateDecimals());
     }
 
     function _getIncreasedRate(
         uint256 impactData,
-        KpiLinkedRateDataStorage memory kpiData,
         uint256 factor
-    ) private pure returns (uint256 rate_, uint8 rateDecimals_) {
-        uint256 impactDeltaRate = (factor * (impactData - kpiData.baseLine)) /
-            (kpiData.maxDeviationCap - kpiData.baseLine);
+    ) private view returns (uint256 rate_, uint8 rateDecimals_) {
+        uint256 impactDeltaRate = (factor * (impactData - InterestRateStorageWrapper.getBaseLine())) /
+            (InterestRateStorageWrapper.getMaxDeviationCap() - InterestRateStorageWrapper.getBaseLine());
 
         if (impactDeltaRate > factor) {
             impactDeltaRate = factor;
         }
 
-        rate_ = kpiData.baseRate + (((kpiData.maxRate - kpiData.baseRate) * impactDeltaRate) / factor);
-        return (rate_, kpiData.rateDecimals);
+        rate_ =
+            InterestRateStorageWrapper.getBaseRate() +
+            (((InterestRateStorageWrapper.getMaxRate() - InterestRateStorageWrapper.getBaseRate()) * impactDeltaRate) /
+                factor);
+        return (rate_, InterestRateStorageWrapper.getRateDecimals());
     }
 }
