@@ -234,13 +234,15 @@ interface TRexIFactory {
      * @param configKey Configuration identifier used by the proxy.
      * @param version Initial configuration version.
      * @param rbac Role-based access control entries seeded at deployment.
+     * @param data Additional data for the proxy deployment.
      */
     event ProxyDeployed(
         address indexed proxyAddress,
         IBusinessLogicResolver resolver,
         bytes32 configKey,
         uint256 version,
-        IResolverProxy.Rbac[] rbac
+        IResolverProxy.Rbac[] rbac,
+        bytes data
     );
 
     /**
@@ -279,13 +281,15 @@ interface TRexIFactory {
      * @param _configKey Configuration identifier for the proxy.
      * @param _version Initial configuration version.
      * @param _rbacs Role-based access control entries to seed.
+     * @param _data Additional data for the proxy deployment.
      * @return proxyAddress_ Address of the deployed proxy.
      */
     function deployProxy(
         IBusinessLogicResolver _resolver,
         bytes32 _configKey,
         uint256 _version,
-        IResolverProxy.Rbac[] memory _rbacs
+        IResolverProxy.Rbac[] memory _rbacs,
+        bytes calldata _data
     ) external returns (address proxyAddress_);
 
     /**

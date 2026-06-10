@@ -41,25 +41,29 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
     /// @inheritdoc IDiamondCutManager
     function createConfiguration(
         bytes32 _configurationId,
-        FacetConfiguration[] calldata _facetConfigurations
+        FacetConfiguration[] calldata _facetConfigurations,
+        bytes calldata _data
     ) external override validateConfigurationId(_configurationId) onlyUnpaused onlyOwner(_configurationId) {
         emit DiamondConfigurationCreated(
             _configurationId,
             _facetConfigurations,
-            _createConfiguration(_configurationId, _facetConfigurations)
+            _createConfiguration(_configurationId, _facetConfigurations),
+            _data
         );
     }
     /// @inheritdoc IDiamondCutManager
     function createBatchConfiguration(
         bytes32 _configurationId,
         FacetConfiguration[] calldata _facetConfigurations,
-        bool _isLastBatch
+        bool _isLastBatch,
+        bytes calldata _data
     ) external override validateConfigurationId(_configurationId) onlyUnpaused onlyOwner(_configurationId) {
         emit DiamondBatchConfigurationCreated(
             _configurationId,
             _facetConfigurations,
             _isLastBatch,
-            _createBatchConfiguration(_configurationId, _facetConfigurations, _isLastBatch)
+            _createBatchConfiguration(_configurationId, _facetConfigurations, _isLastBatch),
+            _data
         );
     }
 

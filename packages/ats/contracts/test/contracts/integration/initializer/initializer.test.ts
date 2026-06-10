@@ -130,7 +130,7 @@ describe("Initializer — InitializeMock domain", () => {
   // Each test gets its own proxy so initializer state never leaks between them.
   const deployMockAsset = async (version: number) => {
     const rbacs = [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [deployer.address] }];
-    const tx = await factory.deployProxy(blrAddress, INITIALIZE_MOCK_CONFIG_ID, version, rbacs);
+    const tx = await factory.deployProxy(blrAddress, INITIALIZE_MOCK_CONFIG_ID, version, rbacs, "0x");
     const receipt = await tx.wait();
     const proxyAddress = (await decodeEvent(factory, "ProxyDeployed", receipt!)).proxyAddress as string;
 
@@ -593,9 +593,13 @@ describe("Initializer — InitializeMock domain", () => {
   describe("initializeDiamondCut", () => {
     it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeDiamondCut is called THEN AccountHasNoRole", async () => {
       const infra = await loadFixture(deployAtsInfrastructureFixture);
-      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
-        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
-      ]);
+      const proxyTx = await infra.factory.deployProxy(
+        infra.blr.target as string,
+        EQUITY_CONFIG_ID,
+        1,
+        [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] }],
+        "0x",
+      );
       const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", (await proxyTx.wait())!);
       const diamond = IDiamondFacet__factory.connect(proxyAddress as string, infra.deployer);
       const asset = await ethers.getContractAt("IAsset", proxyAddress as string);
@@ -607,9 +611,13 @@ describe("Initializer — InitializeMock domain", () => {
 
     it("GIVEN already-initialised WHEN initializeDiamondCut is called again THEN FacetAlreadyRegistered", async () => {
       const infra = await loadFixture(deployAtsInfrastructureFixture);
-      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
-        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
-      ]);
+      const proxyTx = await infra.factory.deployProxy(
+        infra.blr.target as string,
+        EQUITY_CONFIG_ID,
+        1,
+        [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] }],
+        "0x",
+      );
       const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", (await proxyTx.wait())!);
       const diamond = IDiamondFacet__factory.connect(proxyAddress as string, infra.deployer);
       const asset = await ethers.getContractAt("IAsset", proxyAddress as string);
@@ -624,9 +632,13 @@ describe("Initializer — InitializeMock domain", () => {
   describe("initializeDiamondCut event", () => {
     it("GIVEN a fresh deployment WHEN initializeDiamondCut is called THEN emits DiamondCutInitialized", async () => {
       const infra = await loadFixture(deployAtsInfrastructureFixture);
-      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
-        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
-      ]);
+      const proxyTx = await infra.factory.deployProxy(
+        infra.blr.target as string,
+        EQUITY_CONFIG_ID,
+        1,
+        [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] }],
+        "0x",
+      );
       const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", (await proxyTx.wait())!);
       const diamond = IDiamondFacet__factory.connect(proxyAddress as string, infra.deployer);
       await expect(diamond.connect(infra.deployer).initializeDiamondCut()).to.emit(diamond, "DiamondCutInitialized");
