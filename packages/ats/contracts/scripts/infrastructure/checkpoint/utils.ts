@@ -215,13 +215,6 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
         facetCount: steps.configurations.factory?.facetCount ?? 0,
         facets: [], // Will be populated in actual workflow
       },
-      // TEST-ONLY: populated when ATS_TEST_MODE=true
-      assetMock: steps.configurations?.assetMock ?? {
-        configId: "",
-        version: 0,
-        facetCount: 0,
-        facets: [],
-      },
     },
 
     summary: {
@@ -242,7 +235,6 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
       getDepositTokenFacets: () => [],
       getLoansPortfolioFacets: () => [],
       getFactoryFacets: () => [],
-      getAssetMockFacets: () => [],
     },
   };
 }

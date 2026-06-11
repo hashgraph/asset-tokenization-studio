@@ -140,11 +140,5 @@ export async function deployAtsInfrastructureFixture(partialBatchDeploy = false,
       },
       {} as Record<string, string>,
     ),
-
-    // TEST-ONLY: AssetMock configuration metadata.
-    // Set to the ASSET_MOCK_CONFIG_ID constant when the config was registered;
-    // empty-string placeholders when test mode is off (no config was created).
-    assetMockConfigId: deployment.configurations.assetMock.configId,
-    assetMockFacets: deployment.helpers.getAssetMockFacets(),
   };
 }

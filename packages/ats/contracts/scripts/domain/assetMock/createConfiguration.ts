@@ -1,13 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
-// TEST-ONLY FILE: AssetMock domain configuration. Registers the union of every
-// asset-class facet set (equity, bond, bondFixedRate, bondKpiLinkedRate, loan,
-// loansPortfolio, depositToken) + MockDiamondCut under a single configId so
-// tests can deploy one asset exposing every IAsset function.
+// TEST-ONLY FILE: AssetMock domain configuration. Registers the full IAsset facet
+// union (all 7 asset-class facet sets, deduplicated) with DiamondFacet → MockDiamondCut
+// and EvmAccessorsFacet under a single configId so tests can deploy one asset exposing
+// every IAsset interface.
 //
-// The facet union is built programmatically from per-type seed arrays that
-// mirror each sibling createConfiguration.ts. Duplicates are removed via Set.
-// DiamondFacet is swapped for MockDiamondCut.
+// The facet list is the sorted, deduped union of EQUITY_FACETS, BOND_FACETS,
+// BOND_FIXED_RATE_FACETS, BOND_KPI_LINKED_RATE_FACETS, LOAN_FACETS,
+// LOANS_PORTFOLIO_FACETS, and DEPOSIT_TOKEN_FACETS, with DiamondFacet replaced by
+// MockDiamondCut and EvmAccessorsFacet appended.
+//
+// The config is consumed by MockFactory.deployAssetMock() which force-readies every
+// facet (skipping real initialisers) and marks the proxy operational.  No assertions
+// that depend on initialised facet state.
 
 import {
   ConfigurationData,
@@ -58,6 +63,8 @@ const EQUITY_FACETS = [
   "ClearingAtSnapshotFacet",
   "ClearingAtSnapshotByPartitionFacet",
   "HoldAtSnapshotByPartitionFacet",
+
+  // ERC Standards
   "MintByPartitionFacet",
   "ProtectedByPartitionFacet",
   "OperatorFacet",
@@ -82,6 +89,8 @@ const EQUITY_FACETS = [
   "ComplianceByPartitionFacet",
   "MintFacet",
   "BurnFacet",
+
+  // Clearing & Settlement
   "ClearingByPartitionFacet",
   "ProtectedClearingHoldByPartitionFacet",
   "ClearingHoldByPartitionFacet",
@@ -95,9 +104,13 @@ const EQUITY_FACETS = [
   "ControllerByPartitionFacet",
   "ProtectedHoldByPartitionFacet",
   "HoldByPartitionFacet",
+
+  // External Management
   "ExternalControlListManagementFacet",
   "ExternalKycListManagementFacet",
   "ExternalPauseManagementFacet",
+
+  // Advanced Features
   "AdjustBalancesFacet",
   "ScheduledBalanceAdjustmentFacet",
   "DividendFacet",
@@ -576,6 +589,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "OperatorClearingHoldByPartitionFacet",
   "ClearingFacet",
   "ClearingByPartitionFacet",
+  "ClearingHoldByPartitionFacet",
   "ScheduledCrossOrderedTasksFacet",
   "CouponListingFacet",
   "ExternalPauseManagementFacet",
@@ -637,32 +651,38 @@ const DEPOSIT_TOKEN_FACETS = [
   "PauseFacet",
 ];
 
-// ── Build the deduplicated union ────────────────────────────────────────────
-
-const ALL_ASSET_FACET_SETS = [
-  EQUITY_FACETS,
-  BOND_FACETS,
-  BOND_FIXED_RATE_FACETS,
-  BOND_KPI_LINKED_RATE_FACETS,
-  LOAN_FACETS,
-  LOANS_PORTFOLIO_FACETS,
-  DEPOSIT_TOKEN_FACETS,
-];
+// ── Build the full deduplicated union ───────────────────────────────────────
 
 function buildAssetMockFacetList(): string[] {
-  const facetSet = new Set<string>();
-  for (const list of ALL_ASSET_FACET_SETS) {
-    for (const name of list) {
-      facetSet.add(name);
-    }
-  }
-  const result = [...facetSet].sort();
+  // Seed with the union of all 7 asset-class facet arrays
+  const allSeeds = [
+    ...EQUITY_FACETS,
+    ...BOND_FACETS,
+    ...BOND_FIXED_RATE_FACETS,
+    ...BOND_KPI_LINKED_RATE_FACETS,
+    ...LOAN_FACETS,
+    ...LOANS_PORTFOLIO_FACETS,
+    ...DEPOSIT_TOKEN_FACETS,
+  ];
+
+  // Deduplicate and sort
+  const result = [...new Set(allSeeds)].sort();
+
   // Swap DiamondFacet → MockDiamondCut so the test asset exposes
-  // forceNonOperational / forceFacetNotRegistered under RESOLVER_KEY_DIAMOND.
+  // forceNonOperational / forceFacetNotRegistered / forceFacetReady /
+  // forceFacetsReady under RESOLVER_KEY_DIAMOND.
   const diamondIdx = result.indexOf("DiamondFacet");
   if (diamondIdx >= 0) {
     result[diamondIdx] = "MockDiamondCut";
   }
+
+  // Append EvmAccessorsFacet — the MockFactory._deploySecurity override
+  // calls initializeEvmAccessors() on every new security proxy, requiring
+  // this test-only facet to be present in the configuration.
+  if (!result.includes("EvmAccessorsFacet")) {
+    result.push("EvmAccessorsFacet");
+  }
+
   return result;
 }
 
