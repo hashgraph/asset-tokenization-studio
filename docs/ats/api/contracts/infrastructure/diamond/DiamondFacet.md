@@ -16,17 +16,15 @@ _Provides static resolver metadata for the core Diamond facet under `RESOLVER_KE
 function getConfigInfo() external view returns (address resolver_, bytes32 configurationId_, uint256 version_)
 ```
 
-Returns the active resolver-proxy configuration tuple.
-
-_Reads resolver-proxy storage without mutating state._
+Returns the configuration used by the secuirity
 
 #### Returns
 
-| Name              | Type    | Description                                     |
-| ----------------- | ------- | ----------------------------------------------- |
-| resolver\_        | address | Address of the active business-logic resolver.  |
-| configurationId\_ | bytes32 | Active resolver-proxy configuration identifier. |
-| version\_         | uint256 | Active resolver-proxy configuration version.    |
+| Name              | Type    | Description |
+| ----------------- | ------- | ----------- |
+| resolver\_        | address | undefined   |
+| configurationId\_ | bytes32 | undefined   |
+| version\_         | uint256 | undefined   |
 
 ### getFacet
 
