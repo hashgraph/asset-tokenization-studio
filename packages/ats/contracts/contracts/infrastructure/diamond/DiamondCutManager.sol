@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { Pause } from "../../facets/pause/Pause.sol";
 import { AccessControl } from "../../facets/accessControl/AccessControl.sol";
 import { DiamondCutManagerWrapper } from "./DiamondCutManagerWrapper.sol";
@@ -10,17 +9,20 @@ import { IDiamondLoupe } from "../proxy/IDiamondLoupe.sol";
 
 /**
  * @title Diamond Cut Manager
- * @notice Manages versioned diamond configurations used to resolve facets and selectors.
- * @dev Provides creation, batched creation, cancellation, and read access for resolver proxy
- *      configurations. Mutating operations are restricted to valid, unpaused configurations
- *      owned by the caller according to inherited storage and validation rules.
+ * @notice Manages versioned diamond configurations used by resolver proxies.
+ * @dev Coordinates configuration creation, batched creation, cancellation, and lookup.
+ *      Mutating operations require a non-zero configuration identifier, an unpaused state,
+ *      and caller ownership according to inherited validation rules. Read operations that
+ *      target a version validate the requested configuration/version pair before resolving
+ *      facet, selector, interface, or pagination data from manager storage.
  * @author Asset Tokenization Studio Team
  */
 abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWrapper {
     /**
-     * @notice Ensures a configuration identifier is non-zero before execution.
-     * @dev Reverts with `DefaultValueForConfigurationIdNotPermitted` for the zero bytes32 value.
-     * @param _configurationId Identifier of the diamond configuration being validated.
+     * @notice Requires the configuration identifier to be non-zero.
+     * @dev Reverts when `_configurationId` is the default bytes32 value, preventing
+     *      ambiguous reads or writes against configuration storage.
+     * @param _configurationId Identifier of the diamond configuration to validate.
      */
     modifier validateConfigurationId(bytes32 _configurationId) {
         _checkConfigurationId(_configurationId);
@@ -28,9 +30,10 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
     }
 
     /**
-     * @notice Restricts execution to callers permitted to manage the configuration.
-     * @dev Delegates ownership validation to inherited storage checks and reverts on failure.
-     * @param _configurationId Identifier of the diamond configuration being checked.
+     * @notice Restricts execution to the authorised owner of a configuration.
+     * @dev Delegates ownership validation to inherited storage checks and reverts if the
+     *      caller is not permitted to manage `_configurationId`.
+     * @param _configurationId Identifier of the diamond configuration being managed.
      */
     modifier onlyOwner(bytes32 _configurationId) {
         _checkAlreadyOwned(_configurationId);
@@ -38,6 +41,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
     }
 
     // TODO: Format validations in all transactions.
+
     /// @inheritdoc IDiamondCutManager
     function createConfiguration(
         bytes32 _configurationId,
@@ -51,6 +55,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
             _data
         );
     }
+
     /// @inheritdoc IDiamondCutManager
     function createBatchConfiguration(
         bytes32 _configurationId,
@@ -81,7 +86,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         uint256 _version,
         bytes4 _selector
     ) external view override validateConfigurationVersion(_configurationId, _version) returns (address facetAddress_) {
-        facetAddress_ = _resolveResolverProxyCall(_diamondCutManagerStorage(), _configurationId, _version, _selector);
+        facetAddress_ = _resolveResolverProxyCall(_configurationId, _version, _selector);
     }
 
     /// @inheritdoc IDiamondCutManager
@@ -90,7 +95,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         uint256 _version,
         bytes4 _interfaceId
     ) external view override validateConfigurationVersion(_configurationId, _version) returns (bool exists_) {
-        exists_ = _resolveSupportsInterface(_diamondCutManagerStorage(), _configurationId, _version, _interfaceId);
+        exists_ = _resolveSupportsInterface(_configurationId, _version, _interfaceId);
     }
 
     /// @inheritdoc IDiamondCutManager
@@ -98,11 +103,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         bytes32 _configurationId,
         uint256 _version
     ) external view override returns (bool isRegistered_) {
-        isRegistered_ = _isResolverProxyConfigurationRegistered(
-            _diamondCutManagerStorage(),
-            _configurationId,
-            _version
-        );
+        isRegistered_ = _isResolverProxyConfigurationRegistered(_configurationId, _version);
     }
 
     /// @inheritdoc IDiamondCutManager
@@ -110,12 +111,12 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         bytes32 _configurationId,
         uint256 _version
     ) external view override validateConfigurationVersion(_configurationId, _version) {
-        _checkResolverProxyConfigurationRegistered(_diamondCutManagerStorage(), _configurationId, _version);
+        _checkResolverProxyConfigurationRegistered(_configurationId, _version);
     }
 
     /// @inheritdoc IDiamondCutManager
     function getConfigurationsLength() external view override returns (uint256 configurationsLength_) {
-        configurationsLength_ = _diamondCutManagerStorage().configurations.length;
+        configurationsLength_ = _getConfigurationsLength();
     }
 
     /// @inheritdoc IDiamondCutManager
@@ -123,14 +124,14 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (bytes32[] memory configurationIds_) {
-        configurationIds_ = _getConfigurations(_diamondCutManagerStorage(), _pageIndex, _pageLength);
+        configurationIds_ = _getConfigurations(_pageIndex, _pageLength);
     }
 
     /// @inheritdoc IDiamondCutManager
     function getLatestVersionByConfiguration(
         bytes32 _configurationId
     ) external view override returns (uint256 latestVersion_) {
-        latestVersion_ = _diamondCutManagerStorage().latestVersion[_configurationId];
+        latestVersion_ = _getLatestVersionByConfiguration(_configurationId);
     }
 
     /// @inheritdoc IDiamondCutManager
@@ -138,11 +139,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         bytes32 _configurationId,
         uint256 _version
     ) external view override validateConfigurationVersion(_configurationId, _version) returns (uint256 facetsLength_) {
-        facetsLength_ = _getFacetsLengthByConfigurationIdAndVersion(
-            _diamondCutManagerStorage(),
-            _configurationId,
-            _version
-        );
+        facetsLength_ = _getFacetsLengthByConfigurationIdAndVersion(_configurationId, _version);
     }
 
     /// @inheritdoc IDiamondCutManager
@@ -158,13 +155,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         validateConfigurationVersion(_configurationId, _version)
         returns (IDiamondLoupe.Facet[] memory facets_)
     {
-        facets_ = _getFacetsByConfigurationIdAndVersion(
-            _diamondCutManagerStorage(),
-            _configurationId,
-            _version,
-            _pageIndex,
-            _pageLength
-        );
+        facets_ = _getFacetsByConfigurationIdAndVersion(_configurationId, _version, _pageIndex, _pageLength);
     }
 
     /// @inheritdoc IDiamondCutManager
@@ -180,7 +171,6 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         returns (uint256 facetSelectorsLength_)
     {
         facetSelectorsLength_ = _getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(
-            _diamondCutManagerStorage(),
             _configurationId,
             _version,
             _facetId
@@ -202,7 +192,6 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         returns (bytes4[] memory facetSelectors_)
     {
         facetSelectors_ = _getFacetSelectorsByConfigurationIdVersionAndFacetId(
-            _diamondCutManagerStorage(),
             _configurationId,
             _version,
             _facetId,
@@ -224,13 +213,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         validateConfigurationVersion(_configurationId, _version)
         returns (bytes32[] memory facetIds_)
     {
-        facetIds_ = _getFacetIdsByConfigurationIdAndVersion(
-            _diamondCutManagerStorage(),
-            _configurationId,
-            _version,
-            _pageIndex,
-            _pageLength
-        );
+        facetIds_ = _getFacetIdsByConfigurationIdAndVersion(_configurationId, _version, _pageIndex, _pageLength);
     }
 
     /// @inheritdoc IDiamondCutManager
@@ -247,7 +230,6 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         returns (FacetConfiguration[] memory facetConfigurations_)
     {
         facetConfigurations_ = _getFacetConfigurationsByConfigurationIdAndVersion(
-            _diamondCutManagerStorage(),
             _configurationId,
             _version,
             _start,
@@ -269,7 +251,6 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         returns (address[] memory facetAddresses_)
     {
         facetAddresses_ = _getFacetAddressesByConfigurationIdAndVersion(
-            _diamondCutManagerStorage(),
             _configurationId,
             _version,
             _pageIndex,
@@ -283,12 +264,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         uint256 _version,
         bytes4 _selector
     ) external view override validateConfigurationVersion(_configurationId, _version) returns (bytes32 facetId_) {
-        facetId_ = _getFacetIdByConfigurationIdVersionAndSelector(
-            _diamondCutManagerStorage(),
-            _configurationId,
-            _version,
-            _selector
-        );
+        facetId_ = _getFacetIdByConfigurationIdVersionAndSelector(_configurationId, _version, _selector);
     }
 
     /// @inheritdoc IDiamondCutManager
@@ -303,12 +279,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         validateConfigurationVersion(_configurationId, _version)
         returns (IDiamondLoupe.Facet memory facet_)
     {
-        facet_ = _getFacetByConfigurationIdVersionAndFacetId(
-            _diamondCutManagerStorage(),
-            _configurationId,
-            _version,
-            _facetId
-        );
+        facet_ = _getFacetByConfigurationIdVersionAndFacetId(_configurationId, _version, _facetId);
     }
 
     /// @inheritdoc IDiamondCutManager
@@ -317,40 +288,22 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         uint256 _version,
         bytes32 _facetId
     ) external view override validateConfigurationVersion(_configurationId, _version) returns (address facetAddress_) {
-        facetAddress_ = _getFacetAddressByConfigurationIdVersionAndFacetId(
-            _diamondCutManagerStorage(),
-            _configurationId,
-            _version,
-            _facetId
-        );
+        facetAddress_ = _getFacetAddressByConfigurationIdVersionAndFacetId(_configurationId, _version, _facetId);
     }
 
-    /**
-     * @notice Returns the facet version assigned within a configuration version.
-     * @dev Reads diamond cut manager storage without mutating state. The configuration version
-     *      must exist according to inherited version validation.
-     * @param _configurationId Identifier of the diamond configuration to query.
-     * @param _version Version of the configuration to inspect.
-     * @param _facetId Identifier of the facet whose registered version is requested.
-     * @return facetVersion_ Facet version registered for the requested configuration version.
-     */
+    /// @inheritdoc IDiamondCutManager
     function getFacetVersionByConfigurationIdVersionAndFacetId(
         bytes32 _configurationId,
         uint256 _version,
         bytes32 _facetId
-    ) external view validateConfigurationVersion(_configurationId, _version) returns (uint256 facetVersion_) {
-        facetVersion_ = _getFacetVersionByConfigurationIdVersionAndFacetId(
-            _diamondCutManagerStorage(),
-            _configurationId,
-            _version,
-            _facetId
-        );
+    ) external view override validateConfigurationVersion(_configurationId, _version) returns (uint256 facetVersion_) {
+        facetVersion_ = _getFacetVersionByConfigurationIdVersionAndFacetId(_configurationId, _version, _facetId);
     }
 
     /**
      * @notice Validates that a configuration identifier is not the default value.
-     * @dev Reverts with `DefaultValueForConfigurationIdNotPermitted` when `_configurationId`
-     *      is zero, preventing ambiguous configuration storage access.
+     * @dev Reverts with `DefaultValueForConfigurationIdNotPermitted` when
+     *      `_configurationId` is zero.
      * @param _configurationId Identifier to validate.
      */
     function _checkConfigurationId(bytes32 _configurationId) private pure {
