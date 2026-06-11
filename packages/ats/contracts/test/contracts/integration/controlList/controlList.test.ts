@@ -177,8 +177,8 @@ export function controlListTests(getCtx: () => AssetMockCtx): void {
 
         await expect(
           asset.connect(signer_A).addToControlList(ADDRESS_ZERO
-        )).to.be.revertedWithCustomError(
-          asset,
+        )
+        ).to.be.revertedWithCustomError(asset,
           "Deactivated",
       );
       });
