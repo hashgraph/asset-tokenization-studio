@@ -134,7 +134,7 @@ library PauseStorageWrapper {
      *      `STORAGE_LOCATION_PAUSE`.
      * @return pause_ Storage reference to the `PauseDataStorage` struct.
      */
-    function pauseStorage() internal pure returns (PauseDataStorage storage pause_) {
+    function pauseStorage() private pure returns (PauseDataStorage storage pause_) {
         bytes32 position = STORAGE_LOCATION_PAUSE;
         // solhint-disable-next-line no-inline-assembly
         assembly {

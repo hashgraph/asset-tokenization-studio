@@ -9,41 +9,65 @@ import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStor
 import { ResolverProxyStorageWrapper, ResolverProxyStorage } from "../../domain/core/ResolverProxyStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
+/**
+ * @title DiamondCut
+ * @author Asset Tokenization Studio Team
+ * @notice Abstract facet that exposes the diamond-cut upgrade surface: version bumps,
+ *         configuration-id swaps, and full resolver migrations, all gated behind
+ *         `DEFAULT_ADMIN_ROLE`.
+ * @dev Inherits `ResolverProxyUnstructured` for ERC-7201 storage access and implements
+ *      `IDiamondCut`. Concrete tokens inherit this contract as part of their facet stack.
+ */
 abstract contract DiamondCut is IDiamondCut, ResolverProxyUnstructured {
+    /**
+     * @notice Guards a function so only accounts holding `_role` may call it.
+     * @param _role The role identifier (bytes32 hash) that the caller must possess.
+     */
     modifier onlyRole(bytes32 _role) {
         AccessControlStorageWrapper.checkRole(_role, EvmAccessors.getMsgSender());
         _;
     }
+
+    /// @inheritdoc IDiamondCut
     function updateConfigVersion(uint256 _newVersion) external override onlyRole(DEFAULT_ADMIN_ROLE) {
-        ResolverProxyStorage storage ds = ResolverProxyStorageWrapper.resolverProxyStorage();
-        ds.resolver.checkResolverProxyConfigurationRegistered(ds.resolverProxyConfigurationId, _newVersion);
-        _updateVersion(ds, _newVersion);
+        ResolverProxyStorageWrapper.getResolver().checkResolverProxyConfigurationRegistered(
+            ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
+            _newVersion
+        );
+        _updateVersion(_newVersion);
     }
 
+    /// @inheritdoc IDiamondCut
     function updateConfig(
         bytes32 _newConfigurationId,
         uint256 _newVersion
     ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
-        ResolverProxyStorage storage ds = ResolverProxyStorageWrapper.resolverProxyStorage();
-        ds.resolver.checkResolverProxyConfigurationRegistered(_newConfigurationId, _newVersion);
-        _updateConfigId(ds, _newConfigurationId);
-        _updateVersion(ds, _newVersion);
+        ResolverProxyStorageWrapper.getResolver().checkResolverProxyConfigurationRegistered(
+            _newConfigurationId,
+            _newVersion
+        );
+        _updateConfigId(_newConfigurationId);
+        _updateVersion(_newVersion);
     }
 
+    /// @inheritdoc IDiamondCut
     function updateResolver(
         IBusinessLogicResolver _newResolver,
         bytes32 _newConfigurationId,
         uint256 _newVersion
     ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         _newResolver.checkResolverProxyConfigurationRegistered(_newConfigurationId, _newVersion);
-        ResolverProxyStorage storage ds = ResolverProxyStorageWrapper.resolverProxyStorage();
-        _updateResolver(ds, _newResolver);
-        _updateConfigId(ds, _newConfigurationId);
-        _updateVersion(ds, _newVersion);
+        _updateResolver(_newResolver);
+        _updateConfigId(_newConfigurationId);
+        _updateVersion(_newVersion);
     }
 
+    /// @inheritdoc IDiamondCut
     function getConfigInfo() external view returns (address resolver_, bytes32 configurationId_, uint256 version_) {
-        ResolverProxyStorage storage ds = ResolverProxyStorageWrapper.resolverProxyStorage();
-        return (address(ds.resolver), ds.resolverProxyConfigurationId, ds.version);
+        return (
+            address(ResolverProxyStorageWrapper.getResolver()),
+            ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
+            ResolverProxyStorageWrapper.getVersion()
+        );
     }
 }

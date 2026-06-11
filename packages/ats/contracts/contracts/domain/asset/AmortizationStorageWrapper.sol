@@ -13,7 +13,7 @@ import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
-import { HoldStorageWrapper, HoldDataStorage } from "./HoldStorageWrapper.sol";
+import { HoldStorageWrapper } from "./HoldStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
@@ -559,47 +559,33 @@ library AmortizationStorageWrapper {
      */
     function _releaseHold(address _tokenHolder, uint256 _holdId, uint256 _amount) private returns (bool) {
         bytes32 partition = _DEFAULT_PARTITION;
+        IHoldTypes.HoldIdentifier memory identifier = IHoldTypes.HoldIdentifier({
+            partition: partition,
+            tokenHolder: _tokenHolder,
+            holdId: _holdId
+        });
 
-        // Direct storage access - no calldata conversion needed
-        HoldDataStorage storage holdStorageRef = HoldStorageWrapper.holdStorage();
-
-        // Get hold data
-        IHoldTypes.HoldData storage holdData = holdStorageRef.holdsByAccountPartitionAndId[_tokenHolder][partition][
-            _holdId
-        ];
-
-        // Validate hold exists and has sufficient amount
-        if (holdData.hold.amount < _amount) {
-            revert IHoldTypes.InsufficientHoldBalance(holdData.hold.amount, _amount);
+        uint256 holdAmount = HoldStorageWrapper.getHold(identifier).hold.amount;
+        if (holdAmount < _amount) {
+            revert IHoldTypes.InsufficientHoldBalance(holdAmount, _amount);
         }
 
-        // Decrease or remove hold
-        if (_amount == holdData.hold.amount) {
-            // Remove completely
-            holdStorageRef.holdIdsByAccountAndPartition[_tokenHolder][partition].remove(_holdId);
-            delete holdStorageRef.holdsByAccountPartitionAndId[_tokenHolder][partition][_holdId];
-            delete holdStorageRef.holdThirdPartyByAccountPartitionAndId[_tokenHolder][partition][_holdId];
-        } else {
-            // Decrease amount
-            holdData.hold.amount -= _amount;
-        }
-
-        // Update totals
-        holdStorageRef.totalHeldAmountByAccount[_tokenHolder] -= _amount;
-        holdStorageRef.totalHeldAmountByAccountAndPartition[_tokenHolder][partition] -= _amount;
-
-        // Restore allowance if AUTHORIZED third party
-        if (holdData.thirdPartyType == ThirdPartyType.AUTHORIZED) {
-            address thirdParty = holdStorageRef.holdThirdPartyByAccountPartitionAndId[_tokenHolder][partition][_holdId];
+        // Restore allowance before any deletion so the third-party record is still readable
+        if (HoldStorageWrapper.getHold(identifier).thirdPartyType == ThirdPartyType.AUTHORIZED) {
+            address thirdParty = HoldStorageWrapper.getHoldThirdParty(identifier);
             if (thirdParty != address(0)) {
                 ERC20StorageWrapper.increaseAllowedBalance(_tokenHolder, thirdParty, _amount);
             }
         }
 
-        // Remove LABAF hold
-        AdjustBalancesStorageWrapper.removeLabafHold(partition, _tokenHolder, _holdId);
+        if (_amount == holdAmount) {
+            // Full removal: clears id set, hold record, third-party record, and LABAF entry
+            HoldStorageWrapper.removeHold(identifier);
+        } else {
+            // Partial release: decrements hold.amount and both held-amount counters in storage
+            HoldStorageWrapper.decreaseHeldAmount(identifier, _amount);
+        }
 
-        // Emit events
         emit IERC1410Types.TransferByPartition(
             partition,
             EvmAccessors.getMsgSender(),
@@ -631,14 +617,14 @@ library AmortizationStorageWrapper {
     ) private view returns (uint256 amount_) {
         bytes32 partition = _DEFAULT_PARTITION;
 
-        // Direct storage access - no calldata conversion needed
-        HoldDataStorage storage holdStorageRef = HoldStorageWrapper.holdStorage();
-        IHoldTypes.HoldData storage holdData = holdStorageRef.holdsByAccountPartitionAndId[_tokenHolder][partition][
-            _holdId
-        ];
+        IHoldTypes.HoldIdentifier memory identifier = IHoldTypes.HoldIdentifier({
+            partition: partition,
+            tokenHolder: _tokenHolder,
+            holdId: _holdId
+        });
 
         // Get base amount
-        amount_ = holdData.hold.amount;
+        amount_ = HoldStorageWrapper.getHold(identifier).hold.amount;
 
         // Apply adjustment factor for timestamp
         uint256 abafAdjusted = AdjustBalancesStorageWrapper.getAbafAdjustedAt(_timestamp);

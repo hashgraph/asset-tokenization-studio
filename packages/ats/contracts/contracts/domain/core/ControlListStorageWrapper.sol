@@ -154,7 +154,7 @@ library ControlListStorageWrapper {
      * @return controlList_ A storage reference to `ControlListStorage` at the
      *         ERC-7201 slot.
      */
-    function controlListStorage() internal pure returns (ControlListStorage storage controlList_) {
+    function controlListStorage() private pure returns (ControlListStorage storage controlList_) {
         bytes32 position = STORAGE_LOCATION_CONTROL_LIST;
         // solhint-disable-next-line no-inline-assembly
         assembly {

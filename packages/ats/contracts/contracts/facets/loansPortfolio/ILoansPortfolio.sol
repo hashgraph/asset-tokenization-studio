@@ -72,6 +72,7 @@ interface ILoansPortfolio {
     /**
      * @notice Emitted once when the LoansPortfolio capability is initialised on a token.
      * @dev Fires exclusively from `initializeLoansPortfolio` after the storage write succeeds.
+     * @param loansPortfolioData The portfolio configuration persisted at initialisation.
      */
     event LoansPortfolioInitialized(LoansPortfolioDetailsData loansPortfolioData);
 
