@@ -2,11 +2,11 @@
 
 _Asset Tokenization Studio Team_
 
-> ResolverProxy
+> Resolver Proxy
 
-Concrete EIP-2535 diamond proxy that routes every call to the facet address resolved by the Business Logic Resolver for the proxy&#39;s registered configuration and version.
+Delegates calls to facet implementations resolved from a versioned resolver configuration.
 
-_Inherits `ResolverProxyUnstructured` for ERC-7201 storage and initialisation helpers. Both `receive` and `fallback` are payable to support native-token transfers and arbitrary delegatecall dispatching respectively._
+_Initialises resolver-proxy storage at deployment and dispatches unknown selectors through `delegatecall`. Facet resolution depends on the configured business-logic resolver, configuration identifier and version. Calls to unregistered selectors revert with `FunctionNotFound`._
 
 ## Errors
 

@@ -3,20 +3,17 @@ pragma solidity >=0.8.0 <0.9.0;
 
 // The functions in DiamondLoupeFacet.sol.sol MUST be added to a resolverProxy.
 // The EIP-2535 ResolverProxy standard requires these functions.
-
 import { ResolverProxyUnstructured } from "../proxy/ResolverProxyUnstructured.sol";
 import { IDiamondLoupe } from "../proxy/IDiamondLoupe.sol";
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
-import { ResolverProxyStorageWrapper } from "../../domain/core/ResolverProxyStorageWrapper.sol";
 
 /**
- * @title DiamondLoupe
+ * @title Diamond Loupe
+ * @notice Exposes read-only introspection helpers for resolver-proxy facet metadata.
+ * @dev Implements the EIP-2535 loupe view surface over resolver-proxy storage. All queries are
+ *      read-only and delegate pagination, selector, facet and ERC-165 lookups to inherited
+ *      storage helpers.
  * @author Asset Tokenization Studio Team
- * @notice Abstract facet providing EIP-2535 introspection: enumeration of all registered facets,
- *         their selectors, addresses, and ERC-165 interface support queries.
- * @dev All public functions delegate to the `ResolverProxyUnstructured` internal helpers which
- *      forward the call to the Business Logic Resolver for the proxy's current configuration.
- *      Concrete tokens inherit this contract as part of their facet stack.
  */
 abstract contract DiamondLoupe is IDiamondLoupe, IERC165, ResolverProxyUnstructured {
     /// @inheritdoc IDiamondLoupe
@@ -82,7 +79,12 @@ abstract contract DiamondLoupe is IDiamondLoupe, IERC165, ResolverProxyUnstructu
         facetAddresses_ = _getFacetAddresses(_pageIndex, _pageLength);
     }
 
-    /// @inheritdoc IDiamondLoupe
+    /**
+     * @notice Returns the facet identifier registered for a function selector.
+     * @dev Reads resolver-proxy selector metadata and returns zero when the selector is absent.
+     * @param _selector Function selector to resolve.
+     * @return facetId_ Facet identifier associated with the selector.
+     */
     function getFacetIdBySelector(bytes4 _selector) external view returns (bytes32 facetId_) {
         facetId_ = _getFacetIdBySelector(_selector);
     }
