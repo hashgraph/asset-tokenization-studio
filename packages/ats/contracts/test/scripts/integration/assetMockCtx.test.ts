@@ -55,5 +55,6 @@ describe("AssetMock context fixture", () => {
 
     expect(await ctx1.asset.getAddress()).to.equal(await ctx2.asset.getAddress());
     expect(await ctx1.asset.getAddress()).to.equal(await ctx2.asset.getAddress());
+    expect(await ctx1.mockDiamondCut.getAddress()).to.equal(await ctx2.mockDiamondCut.getAddress());
   });
 });

@@ -15,7 +15,6 @@ import {
 } from "@contract-types";
 import {
   ATS_ROLES,
-  ASSET_MOCK_CONFIG_ID,
   BOND_CONFIG_ID,
   BOND_FIXED_RATE_CONFIG_ID,
   BOND_KPI_LINKED_RATE_CONFIG_ID,
@@ -328,12 +327,10 @@ describe("DiamondCutManager", () => {
 
   it("GIVEN a resolver WHEN reading configuration information THEN everything matches", async () => {
     const configLength = Number(await diamondCutManager.getConfigurationsLength());
-    const configIds = await diamondCutManager.getConfigurations(0, configLength);
-    const hasAssetMockConfig = [...configIds].includes(ASSET_MOCK_CONFIG_ID);
-    const expectedConfigCount = hasAssetMockConfig ? 10 : 9;
-    expect(configLength).to.equal(expectedConfigCount);
+    expect(configLength).to.equal(9);
 
-    const expectedConfigIds = [
+    const configIds = await diamondCutManager.getConfigurations(0, configLength);
+    expect([...configIds]).to.have.members([
       EQUITY_CONFIG_ID,
       BOND_CONFIG_ID,
       BOND_FIXED_RATE_CONFIG_ID,
@@ -343,24 +340,10 @@ describe("DiamondCutManager", () => {
       LOANS_PORTFOLIO_CONFIG_ID,
       FACTORY_CONFIG_ID,
       INITIALIZE_MOCK_CONFIG_ID,
-    ];
-    if (hasAssetMockConfig) {
-      expectedConfigIds.push(ASSET_MOCK_CONFIG_ID);
-    }
-    expect([...configIds]).to.have.members(expectedConfigIds);
+    ]);
 
     for (const configId of configIds) {
       if (configId == INITIALIZE_MOCK_CONFIG_ID) continue;
-      // Skip full facet-map validation for the test-only AssetMock config
-      // (its facet set is the union of all asset classes, not a production subset).
-      // Instead assert it resolves by verifying the facet count is non-zero.
-      if (configId == ASSET_MOCK_CONFIG_ID) {
-        const mockFacetsLength = Number(
-          await diamondCutManager.getFacetsLengthByConfigurationIdAndVersion(configId, 1),
-        );
-        expect(mockFacetsLength).to.be.greaterThan(0);
-        continue;
-      }
       const configLatestVersion = Number(await diamondCutManager.getLatestVersionByConfiguration(configId));
       expect(configLatestVersion).to.equal(1);
 
