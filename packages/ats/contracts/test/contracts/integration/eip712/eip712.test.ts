@@ -6,6 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { IAssetMock, type MockEIP712 } from "@contract-types";
 import type { AssetMockCtx } from "@test";
 import { ATS_ROLES, RESOLVER_KEY_EIP712 } from "@scripts";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 export function eip712Tests(getCtx: () => AssetMockCtx): void {
   describe("EIP712 Tests", () => {
