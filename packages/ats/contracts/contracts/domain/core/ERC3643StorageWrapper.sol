@@ -344,7 +344,7 @@ library ERC3643StorageWrapper {
      *      wallets (e.g. mint/transfer entry points).
      * @param _account Wallet whose recovery status is being checked.
      */
-    function requireUnrecoveredAddress(address _account) internal view {
+    function checkUnrecoveredAddress(address _account) internal view {
         if (isRecovered(_account)) revert IERC3643Types.WalletRecovered();
     }
 

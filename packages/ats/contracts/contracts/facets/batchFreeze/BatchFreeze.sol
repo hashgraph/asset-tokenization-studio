@@ -48,7 +48,7 @@ abstract contract BatchFreeze is IBatchFreeze, Modifiers {
         address sender = EvmAccessors.getMsgSender();
         for (uint256 i; i < length; ) {
             DefaultValueValidation.checkZeroAddress(_userAddresses[i]);
-            ERC3643StorageWrapper.requireUnrecoveredAddress(_userAddresses[i]);
+            ERC3643StorageWrapper.checkUnrecoveredAddress(_userAddresses[i]);
             ERC3643StorageWrapper.setAddressFrozen(_userAddresses[i], _freeze[i]);
             emit IFreezeTypes.AddressFrozen(_userAddresses[i], _freeze[i], sender);
             unchecked {
@@ -74,7 +74,7 @@ abstract contract BatchFreeze is IBatchFreeze, Modifiers {
         uint256 length = _userAddresses.length;
         for (uint256 i; i < length; ) {
             DefaultValueValidation.checkZeroAddress(_userAddresses[i]);
-            ERC3643StorageWrapper.requireUnrecoveredAddress(_userAddresses[i]);
+            ERC3643StorageWrapper.checkUnrecoveredAddress(_userAddresses[i]);
             ERC3643StorageWrapper.freezeTokens(_userAddresses[i], _amounts[i]);
             emit IFreezeTypes.TokensFrozen(_userAddresses[i], _amounts[i], _DEFAULT_PARTITION);
             unchecked {
@@ -100,7 +100,7 @@ abstract contract BatchFreeze is IBatchFreeze, Modifiers {
         uint256 length = _userAddresses.length;
         for (uint256 i; i < length; ) {
             DefaultValueValidation.checkZeroAddress(_userAddresses[i]);
-            ERC3643StorageWrapper.requireUnrecoveredAddress(_userAddresses[i]);
+            ERC3643StorageWrapper.checkUnrecoveredAddress(_userAddresses[i]);
             ERC3643StorageWrapper.unfreezeTokens(_userAddresses[i], _amounts[i], 0);
             emit IFreezeTypes.TokensUnfrozen(_userAddresses[i], _amounts[i], _DEFAULT_PARTITION);
             unchecked {
