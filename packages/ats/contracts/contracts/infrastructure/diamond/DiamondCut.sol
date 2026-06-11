@@ -69,14 +69,13 @@ abstract contract DiamondCut is IDiamondCut, ResolverProxyUnstructured {
         _updateVersion(_newVersion);
     }
 
-    /**
-     * @notice Returns the active resolver-proxy configuration tuple.
-     * @dev Reads resolver-proxy storage without mutating state.
-     * @return resolver_ Address of the active business-logic resolver.
-     * @return configurationId_ Active resolver-proxy configuration identifier.
-     * @return version_ Active resolver-proxy configuration version.
-     */
-    function getConfigInfo() external view returns (address resolver_, bytes32 configurationId_, uint256 version_) {
+    /// @inheritdoc IDiamondCut
+    function getConfigInfo()
+        external
+        view
+        override
+        returns (address resolver_, bytes32 configurationId_, uint256 version_)
+    {
         return (
             address(ResolverProxyStorageWrapper.getBusinessLogicResolver()),
             ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),

@@ -119,9 +119,7 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
                     _businessLogicsRegistryData.businessLogicKey
                 );
             }
-            IBusinessLogicResolver.BusinessLogicVersion[] storage versions = businessLogicResolverDataStorage
-                .businessLogics[_businessLogicsRegistryData.businessLogicKey];
-            versions.push(
+            businessLogicResolverDataStorage.businessLogics[_businessLogicsRegistryData.businessLogicKey].push(
                 IBusinessLogicResolver.BusinessLogicVersion({
                     versionData: IBusinessLogicResolver.VersionData({
                         version: newVersion,
@@ -130,12 +128,9 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
                     businessLogicAddress: _businessLogicsRegistryData.businessLogicAddress
                 })
             );
-            bytes32 facetIdAndVersion = keccak256(
-                abi.encodePacked(_businessLogicsRegistryData.businessLogicKey, newVersion)
-            );
-            businessLogicResolverDataStorage.statusByFacetIdAndVersion[facetIdAndVersion] = IBusinessLogicResolver
-                .VersionStatus
-                .ACTIVATED;
+            businessLogicResolverDataStorage.statusByFacetIdAndVersion[
+                keccak256(abi.encodePacked(_businessLogicsRegistryData.businessLogicKey, newVersion))
+            ] = IBusinessLogicResolver.VersionStatus.ACTIVATED;
             unchecked {
                 ++index;
             }
@@ -164,8 +159,7 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
         ];
         uint256 length = _selectors.length;
         for (uint256 index; index < length; ) {
-            bytes4 selector = _selectors[index];
-            EnumerableSetBytes4.add(selectorBlacklist, selector);
+            EnumerableSetBytes4.add(selectorBlacklist, _selectors[index]);
             unchecked {
                 ++index;
             }
@@ -185,8 +179,7 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
         ];
         uint256 length = _selectors.length;
         for (uint256 index; index < length; ) {
-            bytes4 selector = _selectors[index];
-            EnumerableSetBytes4.remove(selectorBlacklist, selector);
+            EnumerableSetBytes4.remove(selectorBlacklist, _selectors[index]);
             unchecked {
                 ++index;
             }
@@ -204,8 +197,9 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
         bytes32 _businessLogicKey,
         uint256 _version
     ) internal view returns (IBusinessLogicResolver.VersionStatus status_) {
-        bytes32 facetIdAndVersion = keccak256(abi.encodePacked(_businessLogicKey, _version));
-        status_ = _businessLogicResolverStorage().statusByFacetIdAndVersion[facetIdAndVersion];
+        status_ = _businessLogicResolverStorage().statusByFacetIdAndVersion[
+            keccak256(abi.encodePacked(_businessLogicKey, _version))
+        ];
     }
 
     /**
@@ -258,11 +252,23 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
         (uint256 start, uint256 end) = Pagination.getStartAndEnd(_pageIndex, _pageLength);
         uint256 size = Pagination.getSize(start, end, businessLogicResolverDataStorage.activeBusinessLogics.length);
         businessLogicKeys_ = new bytes32[](size);
-        for (uint256 index; index < size; ++index) {
-            businessLogicKeys_[index] = businessLogicResolverDataStorage.activeBusinessLogics[index + start];
+        for (uint256 index; index < size; ) {
+            unchecked {
+                businessLogicKeys_[index] = businessLogicResolverDataStorage.activeBusinessLogics[index + start];
+                ++index;
+            }
         }
     }
 
+    /**
+     * @notice Resolves the implementation address for an active business logic version.
+     * @dev Returns the zero address when the business logic key is inactive. Versions are
+     *      one-based and map to zero-based storage indexes, so callers must pass a non-zero
+     *      version already known to exist.
+     * @param _businessLogicKey Identifier of the business logic family to resolve.
+     * @param _version One-based version of the requested business logic implementation.
+     * @return The implementation address registered for the requested key and version.
+     */
     function _resolveBusinessLogicByVersion(
         bytes32 _businessLogicKey,
         uint256 _version
@@ -271,9 +277,7 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
         if (!businessLogicResolverDataStorage.businessLogicActive[_businessLogicKey]) {
             return address(0);
         }
-        IBusinessLogicResolver.BusinessLogicVersion memory businessLogicVersion = businessLogicResolverDataStorage
-            .businessLogics[_businessLogicKey][_version - 1];
-        return businessLogicVersion.businessLogicAddress;
+        return businessLogicResolverDataStorage.businessLogics[_businessLogicKey][_version - 1].businessLogicAddress;
     }
 
     /**
@@ -289,10 +293,11 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (bytes4[] memory page_) {
-        EnumerableSetBytes4.Bytes4Set storage selectorBlacklist = _businessLogicResolverStorage().selectorBlacklist[
-            _configurationId
-        ];
-        page_ = Pagination.getFromSet(selectorBlacklist, _pageIndex, _pageLength);
+        page_ = Pagination.getFromSet(
+            _businessLogicResolverStorage().selectorBlacklist[_configurationId],
+            _pageIndex,
+            _pageLength
+        );
     }
 
     /**
