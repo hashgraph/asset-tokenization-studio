@@ -30,6 +30,9 @@ import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 interface IMockDiamondCut {
     function forceNonOperational() external;
     function forceFacetNotRegistered(bytes32 facetKey_) external;
+    function forceFacetReady(bytes32 facetKey_) external;
+    function forceFacetsReady(bytes32[] calldata facetKeys_) external;
+    function forceSetOperational() external;
 }
 
 // `IStaticFunctionSelectors` is intentionally not listed: it is already pulled
@@ -64,6 +67,41 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
         InitializerStorageWrapper.setFacetLastVersionTo(facetKey_, 0);
     }
 
+    /// @notice Forces a single facet to READY status (status=1) without running its initialiser.
+    /// @dev Uses `InitializerStorageWrapper.setFacetToReady` which reads the current version from
+    ///      the BLR and marks status=1 for that `(facetId, version)` pair.
+    /// @param facetKey_ The resolver key of the facet to mark ready.
+    function forceFacetReady(bytes32 facetKey_) external override {
+        InitializerStorageWrapper.setFacetToReady(facetKey_);
+    }
+
+    /// @notice Forces a batch of facets to READY status in one call.
+    /// @dev Iterates over the supplied array and calls `setFacetToReady` for each entry.
+    ///      Intended for the `deployAssetMock` workflow where all facets of a configuration
+    ///      must be marked ready before `setOperationalStatus` can succeed.
+    /// @param facetKeys_ Array of resolver keys to mark ready.
+    function forceFacetsReady(bytes32[] calldata facetKeys_) external override {
+        uint256 len = facetKeys_.length;
+        for (uint256 i; i < len; ) {
+            InitializerStorageWrapper.setFacetToReady(facetKeys_[i]);
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    /// @notice Marks the proxy's active configuration as operational without walking the
+    ///         facet list. All facets MUST already be in READY status before calling this.
+    /// @dev Bypasses the `InitializerStorageWrapper.setOperationalStatus` batch-walk logic
+    ///      (which requires `maxInitializerFacetIndex` to have been seeded on the proxy).
+    ///      Since `deployAssetMock` force-readies every facet before this call, direct
+    ///      status-setting is equivalent and avoids the index-seeding requirement.
+    function forceSetOperational() external override {
+        bytes32 configId = ResolverProxyStorageWrapper.getResolverProxyConfigurationId();
+        uint256 versionId = ResolverProxyStorageWrapper.getResolverProxyVersion();
+        InitializerStorageWrapper.setConfigVersion(configId, versionId, 1);
+    }
+
     function getStaticResolverKey() external pure returns (bytes32 staticResolverKey_) {
         // Must return the production `RESOLVER_KEY_DIAMOND` so the BLR
         // registration matches the `atsRegistry.data.ts` entry. The internal
@@ -73,11 +111,14 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
     }
 
     function getStaticFunctionSelectors() external pure returns (bytes4[] memory staticFunctionSelectors_) {
-        staticFunctionSelectors_ = new bytes4[](21);
+        staticFunctionSelectors_ = new bytes4[](24);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this.initializeDiamondCut.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.forceNonOperational.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.forceFacetNotRegistered.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.forceFacetReady.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.forceFacetsReady.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.forceSetOperational.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.updateConfigVersion.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.updateConfig.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.updateResolver.selector;

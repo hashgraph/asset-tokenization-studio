@@ -12,7 +12,7 @@
 
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployAtsInfrastructureFixture } from "../../fixtures/infrastructure.fixture";
+import { deployAtsInfrastructureFullAssetFixture } from "../../fixtures/deploy/fullAsset";
 import { ASSET_MOCK_CONFIG_ID, getAssetMockFacets } from "@scripts/domain";
 import { BusinessLogicResolver__factory } from "@contract-types";
 import { silenceScriptLogging } from "@test";
@@ -20,10 +20,10 @@ import { silenceScriptLogging } from "@test";
 describe("AssetMock BLR Configuration - Integration Tests", () => {
   before(silenceScriptLogging);
 
-  let ctx: Awaited<ReturnType<typeof deployAtsInfrastructureFixture>>;
+  let ctx: Awaited<ReturnType<typeof deployAtsInfrastructureFullAssetFixture>>;
 
   beforeEach(async () => {
-    ctx = await loadFixture(deployAtsInfrastructureFixture);
+    ctx = await loadFixture(deployAtsInfrastructureFullAssetFixture);
   });
 
   it("should register the AssetMock configuration in the BLR", async () => {
@@ -74,7 +74,7 @@ describe("AssetMock BLR Configuration - Integration Tests", () => {
     const expectedFacets = getAssetMockFacets();
 
     // WHEN we deploy infrastructure again via loadFixture (restores snapshot)
-    const ctx2 = await loadFixture(deployAtsInfrastructureFixture);
+    const ctx2 = await loadFixture(deployAtsInfrastructureFullAssetFixture);
     const blr2 = BusinessLogicResolver__factory.connect(ctx2.deployment.infrastructure.blr.proxy, ctx2.deployer);
     const version2 = await blr2.getLatestVersionByConfiguration(ASSET_MOCK_CONFIG_ID);
     const facetCount2 = await blr2.getFacetsLengthByConfigurationIdAndVersion(ASSET_MOCK_CONFIG_ID, version2);

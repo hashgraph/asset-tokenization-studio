@@ -161,13 +161,6 @@ describe("Deployment File Utilities", () => {
           },
         ],
       },
-      // TEST-ONLY: ignored in unit-test context (placedholder)
-      assetMock: {
-        configId: "",
-        version: 0,
-        facetCount: 0,
-        facets: [],
-      },
     },
     summary: {
       totalContracts: 48,
@@ -186,7 +179,6 @@ describe("Deployment File Utilities", () => {
       getDepositTokenFacets: () => [],
       getLoansPortfolioFacets: () => [],
       getFactoryFacets: () => [],
-      getAssetMockFacets: () => [],
     },
   });
 
