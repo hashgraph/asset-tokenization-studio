@@ -510,19 +510,6 @@ library ScheduledTasksStorageWrapper {
     }
 
     /**
-     * @notice Returns the storage pointer for scheduled snapshot tasks.
-     * @dev Uses the fixed unstructured storage slot reserved for scheduled snapshots.
-     * @return scheduledSnapshots_ Storage reference for the snapshot task queue.
-     */
-    function scheduledSnapshotStorage() internal pure returns (ScheduledTasksDataStorage storage scheduledSnapshots_) {
-        bytes32 position = STORAGE_LOCATION_SCHEDULED_SNAPSHOTS;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            scheduledSnapshots_.slot := position
-        }
-    }
-
-    /**
      * @notice Returns the storage pointer for scheduled coupon listing tasks.
      * @dev Uses the fixed unstructured storage slot reserved for coupon listing tasks.
      * @return scheduledCouponListing_ Storage reference for the coupon listing task queue.
@@ -655,6 +642,19 @@ library ScheduledTasksStorageWrapper {
             assembly {
                 mstore(result_, collected)
             }
+        }
+    }
+
+    /**
+     * @notice Returns the storage pointer for scheduled snapshot tasks.
+     * @dev Uses the fixed unstructured storage slot reserved for scheduled snapshots.
+     * @return scheduledSnapshots_ Storage reference for the snapshot task queue.
+     */
+    function scheduledSnapshotStorage() private pure returns (ScheduledTasksDataStorage storage scheduledSnapshots_) {
+        bytes32 position = STORAGE_LOCATION_SCHEDULED_SNAPSHOTS;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            scheduledSnapshots_.slot := position
         }
     }
 }

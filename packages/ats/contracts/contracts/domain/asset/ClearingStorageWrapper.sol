@@ -85,7 +85,7 @@ library ClearingStorageWrapper {
      * @dev Resolved via inline assembly against {STORAGE_LOCATION_CLEARING}.
      * @return clearing_ The storage reference for the clearing data struct.
      */
-    function clearingStorage() internal pure returns (ClearingDataStorage storage clearing_) {
+    function clearingStorage() private pure returns (ClearingDataStorage storage clearing_) {
         bytes32 position = STORAGE_LOCATION_CLEARING;
         // solhint-disable-next-line no-inline-assembly
         assembly {

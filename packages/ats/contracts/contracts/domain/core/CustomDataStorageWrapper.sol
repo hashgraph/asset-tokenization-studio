@@ -98,7 +98,7 @@ library CustomDataStorageWrapper {
      * @return customData_ Reference to the `CustomDataDataStorage` struct at the custom data
      *         storage slot.
      */
-    function customDataStorage() internal pure returns (CustomDataDataStorage storage customData_) {
+    function customDataStorage() private pure returns (CustomDataDataStorage storage customData_) {
         bytes32 position = STORAGE_LOCATION_CUSTOM_DATA;
         // solhint-disable-next-line no-inline-assembly
         assembly {

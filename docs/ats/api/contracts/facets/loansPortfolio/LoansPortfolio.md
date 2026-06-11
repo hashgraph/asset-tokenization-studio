@@ -396,9 +396,9 @@ _Fires exclusively from `initializeLoansPortfolio` after the storage write succe
 
 #### Parameters
 
-| Name               | Type                                      | Description |
-| ------------------ | ----------------------------------------- | ----------- |
-| loansPortfolioData | ILoansPortfolio.LoansPortfolioDetailsData | undefined   |
+| Name               | Type                                      | Description                                              |
+| ------------------ | ----------------------------------------- | -------------------------------------------------------- |
+| loansPortfolioData | ILoansPortfolio.LoansPortfolioDetailsData | The portfolio configuration persisted at initialisation. |
 
 ### LoansPortfolioWithdrawn
 

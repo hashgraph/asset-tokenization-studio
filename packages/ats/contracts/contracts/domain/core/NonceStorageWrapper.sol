@@ -52,7 +52,7 @@ library NonceStorageWrapper {
      *      `STORAGE_LOCATION_NONCE`.
      * @return nonces_ Storage reference to the `NonceDataStorage` struct.
      */
-    function nonceStorage() internal pure returns (NonceDataStorage storage nonces_) {
+    function nonceStorage() private pure returns (NonceDataStorage storage nonces_) {
         bytes32 position = STORAGE_LOCATION_NONCE;
         // solhint-disable-next-line no-inline-assembly
         assembly {

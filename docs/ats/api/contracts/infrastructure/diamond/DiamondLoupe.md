@@ -1,5 +1,13 @@
 # DiamondLoupe
 
+_Asset Tokenization Studio Team_
+
+> DiamondLoupe
+
+Abstract facet providing EIP-2535 introspection: enumeration of all registered facets, their selectors, addresses, and ERC-165 interface support queries.
+
+_All public functions delegate to the `ResolverProxyUnstructured` internal helpers which forward the call to the Business Logic Resolver for the proxy&#39;s current configuration. Concrete tokens inherit this contract as part of their facet stack._
+
 ## Methods
 
 ### getFacet
@@ -296,6 +304,8 @@ Gets the static resolver key
 ```solidity
 function supportsInterface(bytes4 _interfaceId) external view returns (bool)
 ```
+
+_Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section] to learn more about how these ids are created. This function call must use less than 30 000 gas._
 
 #### Parameters
 

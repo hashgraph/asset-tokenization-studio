@@ -1410,9 +1410,9 @@ Returns the decimals simulating non-triggered decimal adjustments up until curre
 
 #### Returns
 
-| Name | Type  | Description |
-| ---- | ----- | ----------- |
-| \_0  | uint8 | undefined   |
+| Name | Type  | Description                                    |
+| ---- | ----- | ---------------------------------------------- |
+| \_0  | uint8 | The number of decimals used for token amounts. |
 
 ### decimalsAt
 
@@ -2735,9 +2735,9 @@ Returns the full metadata struct of the security token.
 
 #### Returns
 
-| Name | Type                | Description |
-| ---- | ------------------- | ----------- |
-| \_0  | ICore.ERC20Metadata | undefined   |
+| Name | Type                | Description                           |
+| ---- | ------------------- | ------------------------------------- |
+| \_0  | ICore.ERC20Metadata | The persisted `ERC20Metadata` bundle. |
 
 ### getExternalControlListsCount
 
@@ -6676,9 +6676,9 @@ Returns the name of the security token.
 
 #### Returns
 
-| Name | Type   | Description |
-| ---- | ------ | ----------- |
-| \_0  | string | undefined   |
+| Name | Type   | Description            |
+| ---- | ------ | ---------------------- |
+| \_0  | string | The token name string. |
 
 ### nominalValueAtSnapshot
 
@@ -7993,9 +7993,9 @@ Updates the token name. Restricted to the TREX owner role.
 
 #### Parameters
 
-| Name   | Type   | Description |
-| ------ | ------ | ----------- |
-| \_name | string | undefined   |
+| Name   | Type   | Description                      |
+| ------ | ------ | -------------------------------- |
+| \_name | string | New name to assign to the token. |
 
 ### setNominalValue
 
@@ -8130,9 +8130,9 @@ Updates the token symbol. Restricted to the TREX owner role.
 
 #### Parameters
 
-| Name     | Type   | Description |
-| -------- | ------ | ----------- |
-| \_symbol | string | undefined   |
+| Name     | Type   | Description                        |
+| -------- | ------ | ---------------------------------- |
+| \_symbol | string | New symbol to assign to the token. |
 
 ### setVoting
 
@@ -8162,9 +8162,9 @@ Returns the symbol of the security token.
 
 #### Returns
 
-| Name | Type   | Description |
-| ---- | ------ | ----------- |
-| \_0  | string | undefined   |
+| Name | Type   | Description              |
+| ---- | ------ | ------------------------ |
+| \_0  | string | The token symbol string. |
 
 ### takeSnapshot
 
@@ -8735,9 +8735,9 @@ Returns the ERC3643 version string of the token.
 
 #### Returns
 
-| Name | Type   | Description |
-| ---- | ------ | ----------- |
-| \_0  | string | undefined   |
+| Name | Type   | Description                                    |
+| ---- | ------ | ---------------------------------------------- |
+| \_0  | string | The version string (e.g. `&quot;4.0.0&quot;`). |
 
 ## Events
 
@@ -9706,9 +9706,9 @@ _Fires exclusively from `initializeCore` after the storage write succeeds._
 
 #### Parameters
 
-| Name     | Type                | Description |
-| -------- | ------------------- | ----------- |
-| metadata | ICore.ERC20Metadata | undefined   |
+| Name     | Type                | Description                                                  |
+| -------- | ------------------- | ------------------------------------------------------------ |
+| metadata | ICore.ERC20Metadata | The full ERC-20 metadata bundle persisted at initialisation. |
 
 ### CorporateActionAdded
 
@@ -10666,9 +10666,9 @@ _Fires exclusively from `initializeLoansPortfolio` after the storage write succe
 
 #### Parameters
 
-| Name               | Type                                      | Description |
-| ------------------ | ----------------------------------------- | ----------- |
-| loansPortfolioData | ILoansPortfolio.LoansPortfolioDetailsData | undefined   |
+| Name               | Type                                      | Description                                              |
+| ------------------ | ----------------------------------------- | -------------------------------------------------------- |
+| loansPortfolioData | ILoansPortfolio.LoansPortfolioDetailsData | The portfolio configuration persisted at initialisation. |
 
 ### LoansPortfolioWithdrawn
 

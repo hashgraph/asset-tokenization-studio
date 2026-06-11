@@ -356,20 +356,6 @@ library LoansPortfolioStorageWrapper {
     }
 
     /**
-     * @notice Returns the storage slot for the loans portfolio data.
-     * @dev Uses inline assembly to load the storage pointer from the constant position
-     *      `STORAGE_LOCATION_LOANS_PORTFOLIO`.
-     * @return loansPortfolioData_ Reference to the `LoansPortfolioDataStorage` struct in storage.
-     */
-    function loansPortfolioStorage() internal pure returns (LoansPortfolioDataStorage storage loansPortfolioData_) {
-        bytes32 position = STORAGE_LOCATION_LOANS_PORTFOLIO;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            loansPortfolioData_.slot := position
-        }
-    }
-
-    /**
      * @notice Adds a loan asset to the loan holdings set and classifies it by collateral and performance.
      * @dev Fetches loan details, adds the address to the loan set, classifies by collateral,
      *      then by performance status.
@@ -478,5 +464,19 @@ library LoansPortfolioStorageWrapper {
         denominator_ = loansPortfolioStorage().loanHoldingsAssets.length();
         if (denominator_ == 0) return (0, 0);
         numerator_ = _subSet.length();
+    }
+
+    /**
+     * @notice Returns the storage slot for the loans portfolio data.
+     * @dev Uses inline assembly to load the storage pointer from the constant position
+     *      `STORAGE_LOCATION_LOANS_PORTFOLIO`.
+     * @return loansPortfolioData_ Reference to the `LoansPortfolioDataStorage` struct in storage.
+     */
+    function loansPortfolioStorage() private pure returns (LoansPortfolioDataStorage storage loansPortfolioData_) {
+        bytes32 position = STORAGE_LOCATION_LOANS_PORTFOLIO;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            loansPortfolioData_.slot := position
+        }
     }
 }

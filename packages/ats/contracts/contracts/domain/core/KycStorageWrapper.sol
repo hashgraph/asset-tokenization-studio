@@ -223,7 +223,7 @@ library KycStorageWrapper {
      *      `STORAGE_LOCATION_KYC`.
      * @return kyc_ Storage reference to the `KycStorage` struct.
      */
-    function kycStorage() internal pure returns (KycStorage storage kyc_) {
+    function kycStorage() private pure returns (KycStorage storage kyc_) {
         bytes32 position = STORAGE_LOCATION_KYC;
         // solhint-disable-next-line no-inline-assembly
         assembly {

@@ -34,6 +34,54 @@ struct ResolverProxyStorage {
  */
 library ResolverProxyStorageWrapper {
     /**
+     * @notice Sets the `BusinessLogicResolver` contract that supplies the facet selectors.
+     * @param _resolver The resolver instance to set for this proxy.
+     */
+    function setResolver(IBusinessLogicResolver _resolver) internal {
+        resolverProxyStorage().resolver = _resolver;
+    }
+
+    /**
+     * @notice Sets the configuration identifier selecting the facet set served by the proxy.
+     * @param _resolverProxyConfigurationId The `bytes32` identifier to set.
+     */
+    function setResolverProxyConfigurationId(bytes32 _resolverProxyConfigurationId) internal {
+        resolverProxyStorage().resolverProxyConfigurationId = _resolverProxyConfigurationId;
+    }
+
+    /**
+     * @notice Sets the pinned configuration version served by the proxy.
+     * @param _version The configuration version to set, zero to track the latest.
+     */
+    function setVersion(uint256 _version) internal {
+        resolverProxyStorage().version = _version;
+    }
+
+    /**
+     * @notice Returns the `BusinessLogicResolver` contract that supplies the facet selectors.
+     * @return The active resolver instance for this proxy.
+     */
+    function getResolver() internal view returns (IBusinessLogicResolver) {
+        return resolverProxyStorage().resolver;
+    }
+
+    /**
+     * @notice Returns the configuration identifier selecting the facet set served by the proxy.
+     * @return The configured `bytes32` identifier.
+     */
+    function getResolverProxyConfiguration() internal view returns (bytes32) {
+        return resolverProxyStorage().resolverProxyConfigurationId;
+    }
+
+    /**
+     * @notice Returns the pinned configuration version served by the proxy.
+     * @return The configuration version, zero when the proxy tracks the latest.
+     */
+    function getVersion() internal view returns (uint256) {
+        return resolverProxyStorage().version;
+    }
+
+    /**
      * @notice Returns the `BusinessLogicResolver` contract that supplies the facet selectors.
      * @return The active resolver instance for this proxy.
      */
@@ -63,7 +111,7 @@ library ResolverProxyStorageWrapper {
      *      `STORAGE_LOCATION_RESOLVER_PROXY`.
      * @return ds Storage reference to the `ResolverProxyStorage` struct.
      */
-    function resolverProxyStorage() internal pure returns (ResolverProxyStorage storage ds) {
+    function resolverProxyStorage() private pure returns (ResolverProxyStorage storage ds) {
         bytes32 position = STORAGE_LOCATION_RESOLVER_PROXY;
         // solhint-disable-next-line no-inline-assembly
         assembly {
