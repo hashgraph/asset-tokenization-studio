@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import { ROLE_CREATE_CONFIGURATION } from "../../constants/roles.sol";
 import { Pause } from "../../facets/pause/Pause.sol";
 import { AccessControl } from "../../facets/accessControl/AccessControl.sol";
 import { DiamondCutManagerWrapper } from "./DiamondCutManagerWrapper.sol";
@@ -47,7 +48,14 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         bytes32 _configurationId,
         FacetConfiguration[] calldata _facetConfigurations,
         bytes calldata _data
-    ) external override validateConfigurationId(_configurationId) onlyUnpaused onlyOwner(_configurationId) {
+    )
+        external
+        override
+        validateConfigurationId(_configurationId)
+        onlyUnpaused
+        onlyOwner(_configurationId)
+        onlyRole(ROLE_CREATE_CONFIGURATION)
+    {
         emit DiamondConfigurationCreated(
             _configurationId,
             _facetConfigurations,
@@ -62,7 +70,14 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         FacetConfiguration[] calldata _facetConfigurations,
         bool _isLastBatch,
         bytes calldata _data
-    ) external override validateConfigurationId(_configurationId) onlyUnpaused onlyOwner(_configurationId) {
+    )
+        external
+        override
+        validateConfigurationId(_configurationId)
+        onlyUnpaused
+        onlyOwner(_configurationId)
+        onlyRole(ROLE_CREATE_CONFIGURATION)
+    {
         emit DiamondBatchConfigurationCreated(
             _configurationId,
             _facetConfigurations,
@@ -75,7 +90,14 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
     /// @inheritdoc IDiamondCutManager
     function cancelBatchConfiguration(
         bytes32 _configurationId
-    ) external override validateConfigurationId(_configurationId) onlyUnpaused onlyOwner(_configurationId) {
+    )
+        external
+        override
+        validateConfigurationId(_configurationId)
+        onlyUnpaused
+        onlyOwner(_configurationId)
+        onlyRole(ROLE_CREATE_CONFIGURATION)
+    {
         uint256 version = _cancelBatchConfiguration(_configurationId);
         emit DiamondBatchConfigurationCanceled(_configurationId, version);
     }

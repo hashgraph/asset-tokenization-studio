@@ -20,16 +20,16 @@ import { EvmAccessors } from "../utils/EvmAccessors.sol";
 abstract contract Ownership is IOwnership, Pause, OwnershipWrapper {
     /**
      * @inheritdoc IOwnership
-     * @dev Gated by {onlyUnpaused} and {onlyConfigurationOwner}: only the existing owner can
-     *      nominate a successor, and only while the diamond is unpaused. Stores `_newOwner`
+     * @dev Gated by {onlyUnpaused}, {onlyConfigurationOwner} and {onlyCreateConfigurationRole}:
+     *      only the existing owner can nominate a successor who was previously granted the
+     *      ROLE_CREATE_CONFIGURATION, and only while the diamond is unpaused. Stores `_newOwner`
      *      as the pending owner without touching the current owner; finalisation happens in
-     *      {acceptOwnership}. Emits {OwnershipTransfered} with the caller as the outgoing
-     *      owner.
+     *      {acceptOwnership}. Emits {OwnershipTransfered} with the caller as the outgoing owner.
      */
     function transferOwnership(
         bytes32 _configId,
         address _newOwner
-    ) external onlyUnpaused onlyConfigurationOwner(_configId) {
+    ) external onlyUnpaused onlyConfigurationOwner(_configId) onlyCreateConfigurationRole(_newOwner) {
         _setPendingOwner(_configId, _newOwner);
         emit OwnershipTransfered(_configId, EvmAccessors.getMsgSender(), _newOwner);
     }
