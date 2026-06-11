@@ -109,24 +109,23 @@ library ERC3643StorageWrapper {
 
     /**
      * @notice Replaces the compliance contract wired into the token.
-     * @dev Emits `ComplianceAdded` so off-chain observers can rebuild the audit trail of which
-     *      compliance contract was authoritative at any point in time.
+     * @dev The calling facet (`Compliance`) emits `ComplianceAdded` so off-chain observers can
+     *      rebuild the audit trail of which compliance contract was authoritative at any point
+     *      in time.
      * @param _compliance New compliance contract address.
      */
     function setCompliance(address _compliance) internal {
         erc3643Storage().compliance = _compliance;
-        emit IERC3643Types.ComplianceAdded(_compliance);
     }
 
     /**
      * @notice Replaces the identity registry wired into the token.
-     * @dev Emits `IdentityRegistryAdded` so off-chain indexers can track which registry vetted
-     *      holders at any historical block.
+     * @dev The calling facet (`Identity`) emits `IdentityRegistryAdded` so off-chain indexers can
+     *      track which registry vetted holders at any historical block.
      * @param _identityRegistry New identity-registry address.
      */
     function setIdentityRegistry(address _identityRegistry) internal {
         erc3643Storage().identityRegistry = _identityRegistry;
-        emit IERC3643Types.IdentityRegistryAdded(_identityRegistry);
     }
 
     /**
@@ -310,23 +309,16 @@ library ERC3643StorageWrapper {
      *         ERC3643 recovery flow.
      * @dev Workflow: unfreezes any frozen balance on the lost wallet, transfers the spendable
      *      and previously-frozen balances to `_newWallet`, re-freezes the same amount on the
-     *      new wallet, mirrors the lost wallet's control-list presence onto the new wallet,
-     *      flips the `addressRecovered` flag on both, and emits `RecoverySuccess`. All balance
-     *      reads use the adjustment-factor-aware accessors so the recovery is consistent with
-     *      the holder's historical position.
+     *      new wallet, mirrors the lost wallet's control-list presence onto the new wallet, and
+     *      flips the `addressRecovered` flag on both. The calling facet (`Recovery`) emits
+     *      `RecoverySuccess`. All balance reads use the adjustment-factor-aware accessors so the
+     *      recovery is consistent with the holder's historical position.
      * @param _lostWallet Wallet being abandoned.
      * @param _newWallet Wallet receiving the migrated balances.
-     * @param _investorOnchainID OnchainID of the underlying investor, included in the emitted
-     *        event for off-chain reconciliation.
      * @param _timestamp Reference timestamp for adjustment-factor calculations.
      * @return Always `true` on success; the function reverts otherwise.
      */
-    function recoveryAddress(
-        address _lostWallet,
-        address _newWallet,
-        address _investorOnchainID,
-        uint256 _timestamp
-    ) internal returns (bool) {
+    function recoveryAddress(address _lostWallet, address _newWallet, uint256 _timestamp) internal returns (bool) {
         ERC3643Storage storage $ = erc3643Storage();
         $.addressRecovered[_lostWallet] = true;
         $.addressRecovered[_newWallet] = false;
@@ -346,7 +338,6 @@ library ERC3643StorageWrapper {
             ControlListStorageWrapper.addToControlList(_newWallet);
         }
 
-        emit IERC3643Types.RecoverySuccess(_lostWallet, _newWallet, _investorOnchainID);
         return true;
     }
 

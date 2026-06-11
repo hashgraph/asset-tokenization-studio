@@ -8861,30 +8861,30 @@ Emitted when an immediate balance adjustment is applied.
 ### AgentAdded
 
 ```solidity
-event AgentAdded(address indexed _agent)
+event AgentAdded(address indexed agent)
 ```
 
 Emitted when an agent is granted transfer-management permissions.
 
 #### Parameters
 
-| Name              | Type    | Description                       |
-| ----------------- | ------- | --------------------------------- |
-| \_agent `indexed` | address | Address of the newly added agent. |
+| Name            | Type    | Description                       |
+| --------------- | ------- | --------------------------------- |
+| agent `indexed` | address | Address of the newly added agent. |
 
 ### AgentRemoved
 
 ```solidity
-event AgentRemoved(address indexed _agent)
+event AgentRemoved(address indexed agent)
 ```
 
 Emitted when an agent&#39;s transfer-management permissions are revoked.
 
 #### Parameters
 
-| Name              | Type    | Description                   |
-| ----------------- | ------- | ----------------------------- |
-| \_agent `indexed` | address | Address of the removed agent. |
+| Name            | Type    | Description                   |
+| --------------- | ------- | ----------------------------- |
+| agent `indexed` | address | Address of the removed agent. |
 
 ### AllowanceInitialized
 
@@ -9640,39 +9640,39 @@ _Fired inside `initializeController` once the facet is marked ready._
 ### ControllerRedemption
 
 ```solidity
-event ControllerRedemption(address _controller, address indexed _tokenHolder, uint256 _value, bytes _data, bytes _operatorData)
+event ControllerRedemption(address controller, address indexed tokenHolder, uint256 value, bytes data, bytes operatorData)
 ```
 
 Emitted when an authorised controller redeems (burns) tokens on behalf of a holder.
 
 #### Parameters
 
-| Name                    | Type    | Description                                                     |
-| ----------------------- | ------- | --------------------------------------------------------------- |
-| \_controller            | address | The address of the controller that initiated the redemption.    |
-| \_tokenHolder `indexed` | address | The account whose tokens are redeemed.                          |
-| \_value                 | uint256 | The amount of tokens redeemed.                                  |
-| \_data                  | bytes   | Optional data attached to the redemption for validation.        |
-| \_operatorData          | bytes   | Optional data attached by the controller for event attribution. |
+| Name                  | Type    | Description                                                     |
+| --------------------- | ------- | --------------------------------------------------------------- |
+| controller            | address | The address of the controller that initiated the redemption.    |
+| tokenHolder `indexed` | address | The account whose tokens are redeemed.                          |
+| value                 | uint256 | The amount of tokens redeemed.                                  |
+| data                  | bytes   | Optional data attached to the redemption for validation.        |
+| operatorData          | bytes   | Optional data attached by the controller for event attribution. |
 
 ### ControllerTransfer
 
 ```solidity
-event ControllerTransfer(address _controller, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)
+event ControllerTransfer(address controller, address indexed from, address indexed to, uint256 value, bytes data, bytes operatorData)
 ```
 
 Emitted when an authorised controller transfers tokens between two holders.
 
 #### Parameters
 
-| Name             | Type    | Description                                                     |
-| ---------------- | ------- | --------------------------------------------------------------- |
-| \_controller     | address | The address of the controller that initiated the transfer.      |
-| \_from `indexed` | address | The address tokens are transferred from.                        |
-| \_to `indexed`   | address | The address tokens are transferred to.                          |
-| \_value          | uint256 | The amount of tokens transferred.                               |
-| \_data           | bytes   | Optional data attached to the transfer for validation.          |
-| \_operatorData   | bytes   | Optional data attached by the controller for event attribution. |
+| Name           | Type    | Description                                                     |
+| -------------- | ------- | --------------------------------------------------------------- |
+| controller     | address | The address of the controller that initiated the transfer.      |
+| from `indexed` | address | The address tokens are transferred from.                        |
+| to `indexed`   | address | The address tokens are transferred to.                          |
+| value          | uint256 | The amount of tokens transferred.                               |
+| data           | bytes   | Optional data attached to the transfer for validation.          |
+| operatorData   | bytes   | Optional data attached by the controller for event attribution. |
 
 ### CoreAdjustedInitialized
 
@@ -10489,19 +10489,19 @@ _Emitted when Internal Kyc is updated_
 ### Issued
 
 ```solidity
-event Issued(address indexed _operator, address indexed _to, uint256 _value, bytes _data)
+event Issued(address indexed operator, address indexed to, uint256 value, bytes data)
 ```
 
 Emitted when new tokens are issued to a holder.
 
 #### Parameters
 
-| Name                 | Type    | Description                                          |
-| -------------------- | ------- | ---------------------------------------------------- |
-| \_operator `indexed` | address | Account that invoked the issuance (issuer or agent). |
-| \_to `indexed`       | address | Recipient of the newly issued tokens.                |
-| \_value              | uint256 | Amount of tokens issued, denominated in base units.  |
-| \_data               | bytes   | Arbitrary payload forwarded alongside the issuance.  |
+| Name               | Type    | Description                                          |
+| ------------------ | ------- | ---------------------------------------------------- |
+| operator `indexed` | address | Account that invoked the issuance (issuer or agent). |
+| to `indexed`       | address | Recipient of the newly issued tokens.                |
+| value              | uint256 | Amount of tokens issued, denominated in base units.  |
+| data               | bytes   | Arbitrary payload forwarded alongside the issuance.  |
 
 ### IssuedByPartition
 
@@ -11492,35 +11492,35 @@ _Fires exclusively from `initializeRecovery`._
 ### RecoverySuccess
 
 ```solidity
-event RecoverySuccess(address _lostWallet, address _newWallet, address _investorOnchainID)
+event RecoverySuccess(address lostWallet, address newWallet, address investorOnchainID)
 ```
 
 Emitted when a lost wallet is successfully recovered to a new address.
 
 #### Parameters
 
-| Name                | Type    | Description                                        |
-| ------------------- | ------- | -------------------------------------------------- |
-| \_lostWallet        | address | Address of the wallet that was lost.               |
-| \_newWallet         | address | Address of the replacement wallet.                 |
-| \_investorOnchainID | address | OnchainID of the investor performing the recovery. |
+| Name              | Type    | Description                                        |
+| ----------------- | ------- | -------------------------------------------------- |
+| lostWallet        | address | Address of the wallet that was lost.               |
+| newWallet         | address | Address of the replacement wallet.                 |
+| investorOnchainID | address | OnchainID of the investor performing the recovery. |
 
 ### Redeemed
 
 ```solidity
-event Redeemed(address indexed _operator, address indexed _from, uint256 _value, bytes _data)
+event Redeemed(address indexed operator, address indexed from, uint256 value, bytes data)
 ```
 
 Emitted when tokens are redeemed from a holder&#39;s balance.
 
 #### Parameters
 
-| Name                 | Type    | Description                                           |
-| -------------------- | ------- | ----------------------------------------------------- |
-| \_operator `indexed` | address | Account that executed the redemption.                 |
-| \_from `indexed`     | address | Address from which tokens were burnt.                 |
-| \_value              | uint256 | Amount of tokens redeemed, denominated in base units. |
-| \_data               | bytes   | Arbitrary payload forwarded alongside the redemption. |
+| Name               | Type    | Description                                           |
+| ------------------ | ------- | ----------------------------------------------------- |
+| operator `indexed` | address | Account that executed the redemption.                 |
+| from `indexed`     | address | Address from which tokens were burnt.                 |
+| value              | uint256 | Amount of tokens redeemed, denominated in base units. |
+| data               | bytes   | Arbitrary payload forwarded alongside the redemption. |
 
 ### RedeemedByPartition
 
@@ -12055,22 +12055,22 @@ _Fires exclusively from `initializeTransferAndLock`._
 ### TransferByPartition
 
 ```solidity
-event TransferByPartition(bytes32 indexed _fromPartition, address _operator, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)
+event TransferByPartition(bytes32 indexed fromPartition, address operator, address indexed from, address indexed to, uint256 value, bytes data, bytes operatorData)
 ```
 
 Emitted when tokens are transferred from one partition to another or within the same partition.
 
 #### Parameters
 
-| Name                      | Type    | Description                           |
-| ------------------------- | ------- | ------------------------------------- |
-| \_fromPartition `indexed` | bytes32 | Source partition.                     |
-| \_operator                | address | Address that initiated the transfer.  |
-| \_from `indexed`          | address | Token holder whose balance decreased. |
-| \_to `indexed`            | address | Recipient whose balance increased.    |
-| \_value                   | uint256 | Token quantity transferred.           |
-| \_data                    | bytes   | Caller-supplied data.                 |
-| \_operatorData            | bytes   | Operator-supplied data.               |
+| Name                    | Type    | Description                           |
+| ----------------------- | ------- | ------------------------------------- |
+| fromPartition `indexed` | bytes32 | Source partition.                     |
+| operator                | address | Address that initiated the transfer.  |
+| from `indexed`          | address | Token holder whose balance decreased. |
+| to `indexed`            | address | Recipient whose balance increased.    |
+| value                   | uint256 | Token quantity transferred.           |
+| data                    | bytes   | Caller-supplied data.                 |
+| operatorData            | bytes   | Operator-supplied data.               |
 
 ### TransferByPartitionInitialized
 

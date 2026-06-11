@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IOperator, RESOLVER_KEY_OPERATOR } from "./IOperator.sol";
+import { IERC1410Types } from "../commonTypes/IERC1410Types.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
@@ -39,6 +40,7 @@ abstract contract Operator is IOperator, Modifiers {
         onlyCompliant(EvmAccessors.getMsgSender(), _operator, false)
     {
         ERC1410StorageWrapper.authorizeOperator(_operator);
+        emit IERC1410Types.AuthorizedOperator(_operator, EvmAccessors.getMsgSender());
         emit OperatorAuthorized(_operator, EvmAccessors.getMsgSender());
     }
 
@@ -55,6 +57,7 @@ abstract contract Operator is IOperator, Modifiers {
         onlyCompliant(EvmAccessors.getMsgSender(), _operator, false)
     {
         ERC1410StorageWrapper.revokeOperator(_operator);
+        emit IERC1410Types.RevokedOperator(_operator, EvmAccessors.getMsgSender());
         emit OperatorRevoked(_operator, EvmAccessors.getMsgSender());
     }
 

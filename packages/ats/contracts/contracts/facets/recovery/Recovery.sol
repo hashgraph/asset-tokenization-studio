@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IRecovery, RESOLVER_KEY_RECOVERY } from "./IRecovery.sol";
+import { IERC3643Types } from "../commonTypes/IERC3643Types.sol";
 import { ROLE_AGENT } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
@@ -44,12 +45,8 @@ abstract contract Recovery is IRecovery, Modifiers {
         onlyWithoutMultiPartition
         returns (bool success_)
     {
-        success_ = ERC3643StorageWrapper.recoveryAddress(
-            _lostWallet,
-            _newWallet,
-            _investorOnchainID,
-            EvmAccessors.getBlockTimestamp()
-        );
+        success_ = ERC3643StorageWrapper.recoveryAddress(_lostWallet, _newWallet, EvmAccessors.getBlockTimestamp());
+        emit IERC3643Types.RecoverySuccess(_lostWallet, _newWallet, _investorOnchainID);
     }
 
     /// @inheritdoc IRecovery

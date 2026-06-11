@@ -63,18 +63,13 @@ library ProtectedPartitionsStorageWrapper {
     }
 
     /**
-     * @notice Sets the partition-protection flag and emits the corresponding state event.
-     * @dev Emits `PartitionsProtected` when the flag is turned on and `PartitionsUnProtected`
-     *      when it is turned off.
+     * @notice Sets the partition-protection flag.
+     * @dev The calling facet (`ProtectedPartitions`) emits `PartitionsProtected` when the flag
+     *      is turned on and `PartitionsUnProtected` when it is turned off.
      * @param _protected New value of the partition-protection flag.
      */
     function setProtectedPartitions(bool _protected) internal {
         protectedPartitionsStorage().arePartitionsProtected = _protected;
-        if (_protected) {
-            emit IProtectedPartitions.PartitionsProtected(EvmAccessors.getMsgSender());
-            return;
-        }
-        emit IProtectedPartitions.PartitionsUnProtected(EvmAccessors.getMsgSender());
     }
 
     /**

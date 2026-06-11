@@ -52,7 +52,15 @@ abstract contract Amortization is IAmortization, Modifiers {
         onlyValidDates(_amortization.recordDate, _amortization.executionDate)
         returns (bool success_, uint256 amortizationID_)
     {
-        (, amortizationID_) = AmortizationStorageWrapper.setAmortization(_amortization);
+        bytes32 corporateActionId_;
+        (corporateActionId_, amortizationID_) = AmortizationStorageWrapper.setAmortization(_amortization);
+        emit IAmortization.AmortizationSet(
+            corporateActionId_,
+            amortizationID_,
+            EvmAccessors.getMsgSender(),
+            _amortization.recordDate,
+            _amortization.executionDate
+        );
         success_ = true;
     }
 
@@ -72,6 +80,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         onlyNoActiveAmortizationHolds(_amortizationID)
     {
         AmortizationStorageWrapper.cancelAmortization(_amortizationID);
+        emit IAmortization.AmortizationCancelled(_amortizationID, EvmAccessors.getMsgSender());
     }
 
     /// @inheritdoc IAmortization
@@ -108,7 +117,11 @@ abstract contract Amortization is IAmortization, Modifiers {
         onlyRole(ROLE_AMORTIZATION)
         onlyMatchingActionType(CORPORATE_ACTION_TYPE_AMORTIZATION, _amortizationID - 1)
     {
-        AmortizationStorageWrapper.releaseAmortizationHold(_amortizationID, _tokenHolder);
+        (bytes32 corporateActionId_, uint256 releasedHoldId_) = AmortizationStorageWrapper.releaseAmortizationHold(
+            _amortizationID,
+            _tokenHolder
+        );
+        emit IAmortization.AmortizationHoldReleased(corporateActionId_, _amortizationID, _tokenHolder, releasedHoldId_);
     }
 
     /// @inheritdoc IAmortization
@@ -129,7 +142,19 @@ abstract contract Amortization is IAmortization, Modifiers {
         onlyPositiveTokenAmount(_tokenAmount, _amortizationID)
         returns (uint256 holdId_)
     {
-        return AmortizationStorageWrapper.setAmortizationHold(_amortizationID, _tokenHolder, _tokenAmount);
+        bytes32 corporateActionId_;
+        (corporateActionId_, holdId_) = AmortizationStorageWrapper.setAmortizationHold(
+            _amortizationID,
+            _tokenHolder,
+            _tokenAmount
+        );
+        emit IAmortization.AmortizationHoldSet(
+            corporateActionId_,
+            _amortizationID,
+            _tokenHolder,
+            holdId_,
+            _tokenAmount
+        );
     }
 
     /// @inheritdoc IAmortization
