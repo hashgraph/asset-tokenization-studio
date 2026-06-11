@@ -268,7 +268,7 @@ export async function sendBatchConfiguration(
     const retryOpts = withNonceReset(signer, retryOptions);
 
     await retryTransaction(async () => {
-      const txResponse = await blrContract.createBatchConfiguration(configId, configurations, finalBatch, {
+      const txResponse = await blrContract.createBatchConfiguration(configId, configurations, finalBatch, "0x", {
         ...gasLimitOverride(gasLimit || GAS_LIMIT.businessLogicResolver.createConfiguration),
         ...hederaGasOverrides(),
       });
@@ -287,7 +287,7 @@ export async function sendBatchConfiguration(
     // Re-simulate with staticCall to surface the decoded revert reason (custom
     // errors, panic codes, etc.) that status=0 receipts don't carry.
     try {
-      await blrContract.createBatchConfiguration.staticCall(configId, configurations, finalBatch, {
+      await blrContract.createBatchConfiguration.staticCall(configId, configurations, finalBatch, "0x", {
         gasLimit: gasLimit || GAS_LIMIT.businessLogicResolver.createConfiguration,
       });
     } catch (simErr) {

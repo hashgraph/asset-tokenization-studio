@@ -92,6 +92,7 @@ export async function deployLoansPortfolioFromFactory(
     resolverProxyConfiguration.key,
     resolverProxyConfiguration.version,
     rbacs,
+    "0x",
     {
       gasLimit: GAS_LIMIT.high,
     },

@@ -45,11 +45,13 @@ interface TRexIDiamondCutManager {
      * @param configurationId Configuration key that was registered.
      * @param facetConfigurations Facets (id, version) that compose the new configuration.
      * @param version Version number assigned to the newly created configuration.
+     * @param data Additional data passed to the configuration.
      */
     event DiamondConfigurationCreated(
         bytes32 configurationId,
         FacetConfiguration[] facetConfigurations,
-        uint256 version
+        uint256 version,
+        bytes data
     );
 
     /**
@@ -58,12 +60,14 @@ interface TRexIDiamondCutManager {
      * @param facetConfigurations Facets appended in this batch.
      * @param _isLastBatch True when this call finalises the configuration version.
      * @param version Version number being assembled for this configuration.
+     * @param data Additional data passed to the configuration.
      */
     event DiamondBatchConfigurationCreated(
         bytes32 configurationId,
         FacetConfiguration[] facetConfigurations,
         bool _isLastBatch,
-        uint256 version
+        uint256 version,
+        bytes data
     );
 
     /**
@@ -149,8 +153,13 @@ interface TRexIDiamondCutManager {
      * @param _configurationId Unique configuration key to register; must not be `bytes32(0)`.
      * @param _facetConfigurations List of facets (id + pinned version) composing the
      *        configuration; facet ids must be unique within the list.
+     * @param _data Additional data to be passed to the configuration.
      */
-    function createConfiguration(bytes32 _configurationId, FacetConfiguration[] calldata _facetConfigurations) external;
+    function createConfiguration(
+        bytes32 _configurationId,
+        FacetConfiguration[] calldata _facetConfigurations,
+        bytes calldata _data
+    ) external;
 
     /**
      * @notice Appends facets to a configuration in batches; the configuration becomes
@@ -163,11 +172,13 @@ interface TRexIDiamondCutManager {
      *        across all batches contributing to the same version.
      * @param _isLastBatch True to finalise and register the version, false to keep
      *        accepting further batches.
+     * @param _data Additional data to be passed to the configuration.
      */
     function createBatchConfiguration(
         bytes32 _configurationId,
         FacetConfiguration[] calldata _facetConfigurations,
-        bool _isLastBatch
+        bool _isLastBatch,
+        bytes calldata _data
     ) external;
 
     /**

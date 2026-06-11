@@ -207,9 +207,13 @@ describe("Loan Tests", () => {
       const { decodeEvent } = await import("@scripts/infrastructure");
       const { LOAN_CONFIG_ID } = await import("@scripts/domain");
       const infra = await loadFixture(deployAtsInfrastructureFixture);
-      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, LOAN_CONFIG_ID, 1, [
-        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
-      ]);
+      const proxyTx = await infra.factory.deployProxy(
+        infra.blr.target as string,
+        LOAN_CONFIG_ID,
+        1,
+        [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] }],
+        "0x",
+      );
       const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", (await proxyTx.wait())!);
       const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
       const loanDetails = await getLoanDetails();

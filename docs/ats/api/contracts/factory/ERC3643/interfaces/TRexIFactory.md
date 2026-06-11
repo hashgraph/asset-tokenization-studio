@@ -68,7 +68,7 @@ function deployEquity(TRexIFactory.EquityData _equityData, FactoryRegulationData
 ### deployProxy
 
 ```solidity
-function deployProxy(contract TRexIBusinessLogicResolver _resolver, bytes32 _configKey, uint256 _version, TRexIResolverProxy.Rbac[] _rbacs) external nonpayable returns (address proxyAddress_)
+function deployProxy(contract TRexIBusinessLogicResolver _resolver, bytes32 _configKey, uint256 _version, TRexIResolverProxy.Rbac[] _rbacs, bytes _data) external nonpayable returns (address proxyAddress_)
 ```
 
 #### Parameters
@@ -79,6 +79,7 @@ function deployProxy(contract TRexIBusinessLogicResolver _resolver, bytes32 _con
 | \_configKey | bytes32                             | undefined   |
 | \_version   | uint256                             | undefined   |
 | \_rbacs     | TRexIResolverProxy.Rbac[]           | undefined   |
+| \_data      | bytes                               | undefined   |
 
 #### Returns
 
@@ -163,7 +164,7 @@ Emitted when a new equity token is deployed.
 ### ProxyDeployed
 
 ```solidity
-event ProxyDeployed(address indexed proxyAddress, contract TRexIBusinessLogicResolver resolver, bytes32 configKey, uint256 version, TRexIResolverProxy.Rbac[] rbac)
+event ProxyDeployed(address indexed proxyAddress, contract TRexIBusinessLogicResolver resolver, bytes32 configKey, uint256 version, TRexIResolverProxy.Rbac[] rbac, bytes data)
 ```
 
 Emitted when a new resolver proxy is deployed.
@@ -177,6 +178,7 @@ Emitted when a new resolver proxy is deployed.
 | configKey              | bytes32                             | Configuration identifier used by the proxy.             |
 | version                | uint256                             | Initial configuration version.                          |
 | rbac                   | TRexIResolverProxy.Rbac[]           | Role-based access control entries seeded at deployment. |
+| data                   | bytes                               | Additional data for the proxy deployment.               |
 
 ## Errors
 
