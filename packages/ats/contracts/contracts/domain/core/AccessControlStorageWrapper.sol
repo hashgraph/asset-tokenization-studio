@@ -149,6 +149,56 @@ library AccessControlStorageWrapper {
     }
 
     /**
+     * @notice Moves every role held by `_from` to `_to`, leaving `_from` with no roles. Callers
+     *         must ensure `_from != _to` and that the operation is authorised; this function
+     *         performs no access-control checks.
+     * @dev Backs the wallet-recovery flow: a recovered (lost) wallet must retain no privileges
+     *      while the new wallet inherits them. The membership snapshot is taken into memory via
+     *      `values()` before any mutation, so iteration is unaffected by the shrinking set. For
+     *      each role the grant on `_to` happens before the revoke on `_from`, so the
+     *      `DEFAULT_ADMIN_ROLE` holder count never transiently reaches zero when the lost wallet
+     *      is the sole admin. Both index directions are kept in sync, mirroring `grantRole` /
+     *      `revokeRole`. The two returned arrays let the caller (the `Recovery` facet) emit the
+     *      per-role `RoleGranted` / `RoleRevoked` events from the facet layer; `grantedRoles_`
+     *      excludes roles `_to` already held so no spurious `RoleGranted` is emitted for them.
+     * @param _from Wallet losing the roles (the recovered/lost wallet).
+     * @param _to Wallet receiving the roles (the new wallet).
+     * @return grantedRoles_ Roles newly granted to `_to` (those `_to` did not already hold).
+     * @return revokedRoles_ Every role removed from `_from` (its full membership before mutation).
+     */
+    function migrateRoles(
+        address _from,
+        address _to
+    ) internal returns (bytes32[] memory grantedRoles_, bytes32[] memory revokedRoles_) {
+        RoleDataStorage storage roleDataStorage = rolesStorage();
+        revokedRoles_ = roleDataStorage.memberRoles[_from].values();
+        uint256 length = revokedRoles_.length;
+        grantedRoles_ = new bytes32[](length);
+        uint256 grantedCount;
+        for (uint256 index; index < length; ) {
+            bytes32 role = revokedRoles_[index];
+            if (roleDataStorage.roles[role].roleMembers.add(_to)) {
+                grantedRoles_[grantedCount] = role;
+                unchecked {
+                    ++grantedCount;
+                }
+            }
+            roleDataStorage.memberRoles[_to].add(role);
+            roleDataStorage.roles[role].roleMembers.remove(_from);
+            roleDataStorage.memberRoles[_from].remove(role);
+            unchecked {
+                ++index;
+            }
+        }
+
+        // Shrink grantedRoles_ to the count of roles actually newly granted to `_to`.
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            mstore(grantedRoles_, grantedCount)
+        }
+    }
+
+    /**
      * @notice Reverts with `AccountHasNoRole` when `_account` does not hold `_role`.
      * @param _role    Role required.
      * @param _account Account being checked.

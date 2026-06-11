@@ -64,6 +64,9 @@ interface IERC3643Types {
     /// @notice Thrown when wallet recovery preconditions are not met (e.g. identity mismatch).
     error CannotRecoverWallet();
 
+    /// @notice Thrown when wallet recovery is requested with the same address for lost and new wallet.
+    error SameWalletAddress();
+
     /// @notice Thrown when the lengths of two input amount arrays do not match.
     error InputAmountsArrayLengthMismatch();
 

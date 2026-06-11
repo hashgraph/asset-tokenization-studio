@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { AccessControlStorageWrapper, RoleDataStorage } from "../../domain/core/AccessControlStorageWrapper.sol";
+import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
 import { ROLE_FREEZE_MANAGER, ROLE_AGENT } from "../../constants/roles.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
@@ -23,16 +24,19 @@ abstract contract AccessControlModifiers {
      * @dev Modifier that validates msg.sender has the specified role
      *
      * Requirements:
+     * - msg.sender must not be a recovered (lost) wallet
      * - msg.sender must have the role specified in _role parameter
      *
      * @param _role The role to check for
      */
     modifier onlyRole(bytes32 _role) virtual {
+        ERC3643StorageWrapper.requireUnrecoveredAddress(EvmAccessors.getMsgSender());
         AccessControlStorageWrapper.checkRole(_role, EvmAccessors.getMsgSender());
         _;
     }
 
     modifier onlyAdminRole() virtual {
+        ERC3643StorageWrapper.requireUnrecoveredAddress(EvmAccessors.getMsgSender());
         AccessControlStorageWrapper.checkRole(
             AccessControlStorageWrapper.getRoleAdmin(ROLE_AGENT),
             EvmAccessors.getMsgSender()
@@ -44,11 +48,13 @@ abstract contract AccessControlModifiers {
      * @dev Modifier that validates msg.sender has any of the specified roles
      *
      * Requirements:
+     * - msg.sender must not be a recovered (lost) wallet
      * - msg.sender must have at least one role from the _roles array
      *
      * @param _roles Array of roles to check for
      */
     modifier onlyAnyRole(bytes32[] memory _roles) virtual {
+        ERC3643StorageWrapper.requireUnrecoveredAddress(EvmAccessors.getMsgSender());
         AccessControlStorageWrapper.checkAnyRole(_roles, EvmAccessors.getMsgSender());
         _;
     }

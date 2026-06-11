@@ -306,16 +306,25 @@ library ERC3643StorageWrapper {
      *         ERC3643 recovery flow.
      * @dev Workflow: unfreezes any frozen balance on the lost wallet, transfers the spendable
      *      and previously-frozen balances to `_newWallet`, re-freezes the same amount on the
-     *      new wallet, mirrors the lost wallet's control-list presence onto the new wallet, and
-     *      flips the `addressRecovered` flag on both. The calling facet (`Recovery`) emits
-     *      `RecoverySuccess`. All balance reads use the adjustment-factor-aware accessors so the
-     *      recovery is consistent with the holder's historical position.
+     *      new wallet, mirrors the lost wallet's control-list presence onto the new wallet,
+     *      migrates every role held by the lost wallet to the new wallet, and flips the
+     *      `addressRecovered` flag on both. Role migration ensures a compromised role-bearing
+     *      wallet retains no privileges after recovery. The calling facet (`Recovery`) emits
+     *      `RecoverySuccess` plus the per-role `RoleGranted` / `RoleRevoked` events for the
+     *      returned sets. Callers must ensure `_lostWallet != _newWallet`. All balance reads use
+     *      the adjustment-factor-aware accessors so the recovery is consistent with the holder's
+     *      historical position.
      * @param _lostWallet Wallet being abandoned.
-     * @param _newWallet Wallet receiving the migrated balances.
+     * @param _newWallet Wallet receiving the migrated balances and roles.
      * @param _timestamp Reference timestamp for adjustment-factor calculations.
-     * @return Always `true` on success; the function reverts otherwise.
+     * @return grantedRoles_ Roles newly granted to the new wallet, for the facet to emit.
+     * @return revokedRoles_ Roles removed from the lost wallet, for the facet to emit.
      */
-    function recoveryAddress(address _lostWallet, address _newWallet, uint256 _timestamp) internal returns (bool) {
+    function recoveryAddress(
+        address _lostWallet,
+        address _newWallet,
+        uint256 _timestamp
+    ) internal returns (bytes32[] memory grantedRoles_, bytes32[] memory revokedRoles_) {
         ERC3643Storage storage $ = erc3643Storage();
         $.addressRecovered[_lostWallet] = true;
         $.addressRecovered[_newWallet] = false;
@@ -335,7 +344,7 @@ library ERC3643StorageWrapper {
             ControlListStorageWrapper.addToControlList(_newWallet);
         }
 
-        return true;
+        (grantedRoles_, revokedRoles_) = AccessControlStorageWrapper.migrateRoles(_lostWallet, _newWallet);
     }
 
     /**
@@ -549,6 +558,18 @@ library ERC3643StorageWrapper {
         if (_addresses.length != _status.length) {
             revert IERC3643Types.InputBoolArrayLengthMismatch();
         }
+    }
+
+    /**
+     * @notice Reverts when wallet recovery targets the same address for the lost and new wallet.
+     * @dev Pre-condition guard for `recoveryAddress`; recovering a wallet onto itself would strip
+     *      all its roles (the per-role grant is a no-op while the revoke executes), so it is
+     *      rejected up front with `SameWalletAddress`.
+     * @param _lostWallet Wallet being abandoned.
+     * @param _newWallet Wallet receiving the migrated state.
+     */
+    function requireDifferentWallets(address _lostWallet, address _newWallet) internal pure {
+        if (_lostWallet == _newWallet) revert IERC3643Types.SameWalletAddress();
     }
 
     /**

@@ -43,6 +43,20 @@ abstract contract ERC3643Modifiers {
     }
 
     /**
+     * @dev Modifier that validates the lost and new wallet are different addresses
+     *
+     * Requirements:
+     * - _lostWallet must not equal _newWallet
+     *
+     * @param _lostWallet The wallet being abandoned
+     * @param _newWallet The wallet receiving the migrated state
+     */
+    modifier onlyDifferentWallets(address _lostWallet, address _newWallet) {
+        ERC3643StorageWrapper.requireDifferentWallets(_lostWallet, _newWallet);
+        _;
+    }
+
+    /**
      * @dev Modifier that validates input amounts array length matches addresses array
      *
      * Requirements:

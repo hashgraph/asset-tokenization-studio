@@ -199,7 +199,7 @@ describe("Recovery Tests", () => {
         });
         await asset.freezePartialTokens(signer_E.address, amount / 2);
         await asset.addToControlList(signer_E.address);
-        expect(await asset.recoveryAddress(signer_E.address, signer_B.address, ADDRESS_ZERO))
+        await expect(asset.recoveryAddress(signer_E.address, signer_B.address, ADDRESS_ZERO))
           .to.emit(asset, "RecoverySuccess")
           .withArgs(signer_E.address, signer_B.address, ADDRESS_ZERO);
         const balanceE = await asset.balanceOf(signer_E.address);
@@ -694,6 +694,77 @@ describe("Recovery Tests", () => {
         await expect(
           asset.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO),
         ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+      });
+
+      describe("Role migration", () => {
+        // signer_C holds ROLE_ISSUER from the RBAC fixture; signer_D holds no roles. ROLE_PAUSER
+        // is added so the test exercises migration of more than one role in a single recovery.
+        it("GIVEN a lost wallet holding roles WHEN recoveryAddress THEN every role migrates to the new wallet emitting per-role events", async () => {
+          await asset.grantRole(ATS_ROLES.ROLE_PAUSER, signer_C.address);
+          expect(await asset.getRoleCountFor(signer_C.address)).to.equal(2);
+          expect(await asset.getRoleCountFor(signer_D.address)).to.equal(0);
+
+          const tx = asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
+          await expect(tx)
+            .to.emit(asset, "RoleRevoked")
+            .withArgs(signer_A.address, signer_C.address, ATS_ROLES.ROLE_ISSUER);
+          await expect(tx)
+            .to.emit(asset, "RoleGranted")
+            .withArgs(signer_A.address, signer_D.address, ATS_ROLES.ROLE_ISSUER);
+          await expect(tx)
+            .to.emit(asset, "RoleRevoked")
+            .withArgs(signer_A.address, signer_C.address, ATS_ROLES.ROLE_PAUSER);
+          await expect(tx)
+            .to.emit(asset, "RoleGranted")
+            .withArgs(signer_A.address, signer_D.address, ATS_ROLES.ROLE_PAUSER);
+
+          expect(await asset.getRoleCountFor(signer_C.address)).to.equal(0);
+          expect(await asset.hasRole(ATS_ROLES.ROLE_ISSUER, signer_D.address)).to.equal(true);
+          expect(await asset.hasRole(ATS_ROLES.ROLE_PAUSER, signer_D.address)).to.equal(true);
+          expect(await asset.getRoleCountFor(signer_D.address)).to.equal(2);
+        });
+
+        it("GIVEN the new wallet already holds a migrated role WHEN recoveryAddress THEN it is revoked from the lost wallet without re-emitting RoleGranted", async () => {
+          // signer_C holds only ROLE_ISSUER; signer_D is pre-granted the same role.
+          await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_D.address);
+
+          const tx = asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
+          await expect(tx)
+            .to.emit(asset, "RoleRevoked")
+            .withArgs(signer_A.address, signer_C.address, ATS_ROLES.ROLE_ISSUER);
+          // ROLE_ISSUER was already held by signer_D, so no spurious RoleGranted is emitted.
+          await expect(tx).to.not.emit(asset, "RoleGranted");
+
+          expect(await asset.hasRole(ATS_ROLES.ROLE_ISSUER, signer_C.address)).to.equal(false);
+          expect(await asset.hasRole(ATS_ROLES.ROLE_ISSUER, signer_D.address)).to.equal(true);
+          expect(await asset.getRoleCountFor(signer_D.address)).to.equal(1);
+        });
+
+        it("GIVEN the same address for lost and new wallet WHEN recoveryAddress THEN it reverts with SameWalletAddress", async () => {
+          await expect(
+            asset.recoveryAddress(signer_C.address, signer_C.address, ADDRESS_ZERO),
+          ).to.be.revertedWithCustomError(asset, "SameWalletAddress");
+        });
+
+        it("GIVEN DEFAULT_ADMIN_ROLE held by the lost wallet WHEN recoveryAddress THEN the new wallet inherits admin powers", async () => {
+          await asset.grantRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, signer_C.address);
+
+          await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
+
+          expect(await asset.hasRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, signer_C.address)).to.equal(false);
+          expect(await asset.hasRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, signer_D.address)).to.equal(true);
+          // The new wallet can now exercise admin powers; reverts if admin did not migrate.
+          await asset.connect(signer_D).grantRole(ATS_ROLES.ROLE_LOCKER, signer_F.address);
+          expect(await asset.hasRole(ATS_ROLES.ROLE_LOCKER, signer_F.address)).to.equal(true);
+        });
+
+        it("GIVEN a recovered wallet later granted a role WHEN it calls a role-gated function THEN it reverts with WalletRecovered", async () => {
+          await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
+          // Granting to a recovered wallet only checks the caller, so the grant itself succeeds...
+          await asset.grantRole(ATS_ROLES.ROLE_PAUSER, signer_C.address);
+          // ...but the recovered wallet can no longer pass any role gate.
+          await expect(asset.connect(signer_C).pause()).to.be.revertedWithCustomError(asset, "WalletRecovered");
+        });
       });
     });
   });
