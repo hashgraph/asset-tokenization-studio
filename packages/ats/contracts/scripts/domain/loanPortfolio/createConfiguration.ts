@@ -22,126 +22,25 @@ import {
 } from "@scripts/infrastructure";
 import { LOANS_PORTFOLIO_CONFIG_ID } from "../constants";
 import { atsRegistry } from "../atsRegistry";
+import type { FacetName } from "../atsRegistry";
 import { buildFacetList } from "../facetEnvironment";
+import { COMMON_TOKEN_FACETS, EXTENDED_TOKEN_FACETS } from "../facetSets";
 import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
 import { BusinessLogicResolver } from "@contract-types";
 
 /**
  * Loan Portfolio Facets
  *
- * This is an explicit positive list of all facets required for loan portfolio tokens.
- * Includes all infrastructure facets EXCEPT:
- * - BondUSAReadFacet
- * - ProceedRecipientsFacet
- * - EquityUSAFacet
- * - CouponFacet
- *
- * Note: DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet functionality,
- * so we only include DiamondFacet to avoid selector collisions.
+ * The common token tiers plus the portfolio-specific facets: the portfolio
+ * facet itself, coupon listing, and nonces.
  */
-const LOANS_PORTFOLIO_FACETS = [
-  "LoansPortfolioFacet",
-  // Core Functionality
-  "AccessControlFacet",
-  "AllowanceFacet",
-  "CapFacet",
-  "CapByPartitionFacet",
-  "ControlListFacet",
-  "CorporateActionsFacet",
-  "DiamondFacet",
-  "CoreFacet",
-  "TransferFacet",
-  "CoreAdjustedFacet",
-  "InitializerFacet", // Core initializer facet
-  "CustomDataFacet",
-  "FreezeFacet",
-  "BatchFreezeFacet",
-  "KycFacet",
-  "PauseFacet",
-  "BalanceTrackerFacet",
-  "BalanceTrackerAdjustedFacet",
-  "SnapshotsFacet",
-  "SnapshotsByPartitionFacet",
-  "SecurityHoldersAtSnapshotFacet",
-  "HoldAtSnapshotFacet",
-  "LockAtSnapshotByPartitionFacet",
-  "FreezeAtSnapshotFacet",
-  "FreezeAtSnapshotByPartitionFacet",
-  "LockAtSnapshotFacet",
-  "CoreAtSnapshotFacet",
-  "SsiManagementFacet",
-  "BalanceTrackerByPartitionFacet",
-  "BalanceTrackerAtSnapshotFacet",
-  "BalanceTrackerAtSnapshotByPartitionFacet",
-  "ClearingAtSnapshotFacet",
-  "ClearingAtSnapshotByPartitionFacet",
-  "HoldAtSnapshotByPartitionFacet",
-
-  // ERC Standards
-  "MintByPartitionFacet",
-  "ProtectedByPartitionFacet",
-  "OperatorFacet",
-  "TransferByPartitionFacet",
-  "PartitionsFacet",
-  "OperatorByPartitionFacet",
-  "BurnByPartitionFacet",
-  "DocumentationFacet",
-  "ControllerFacet",
-  "ERC20PermitFacet",
-  "EIP712Facet",
-  "NoncesFacet",
-  "DeactivateFacet",
-  "ERC20VotesFacet",
-  "BatchControllerFacet",
-  "BatchBurnFacet",
-  "BatchMintFacet",
-  "BatchTransferFacet",
-  "RecoveryFacet",
-  "IdentityFacet",
-  "ComplianceFacet",
-  "ComplianceByPartitionFacet",
-  "MintFacet",
-  "BurnFacet",
-
-  // Nominal Value
-  "NominalValueFacet",
-  "NominalValueAtSnapshotFacet",
-
-  // Hold
-  "HoldFacet",
-  "OperatorHoldByPartitionFacet",
-  "ControllerHoldByPartitionFacet",
-  "ControllerByPartitionFacet",
-  "ProtectedHoldByPartitionFacet",
-  "HoldByPartitionFacet",
-
-  // Clearing & Settlement
-  "OperatorClearingByPartitionFacet",
-  "ProtectedClearingByPartitionFacet",
-  "ProtectedClearingHoldByPartitionFacet",
-  "OperatorClearingHoldByPartitionFacet",
-  "ClearingFacet",
-  "ClearingByPartitionFacet",
-
-  // Scheduled Tasks
-  "ScheduledCrossOrderedTasksFacet",
+export const LOANS_PORTFOLIO_FACETS: readonly FacetName[] = [
+  ...COMMON_TOKEN_FACETS,
+  ...EXTENDED_TOKEN_FACETS,
   "CouponListingFacet",
-
-  // External Management
-  "ExternalPauseManagementFacet",
-  "ExternalControlListManagementFacet",
-  "ExternalKycListManagementFacet",
-
-  // Advanced Features
-  "AdjustBalancesFacet",
-  "ScheduledBalanceAdjustmentFacet",
-  "LockFacet",
-  "LockByPartitionFacet",
-  "ProtectedPartitionsFacet",
-  "SecurityHoldersFacet",
-  "TransferAndLockFacet",
-  "TransferAndLockByPartitionFacet",
-] as const;
+  "LoansPortfolioFacet",
+  "NoncesFacet",
+];
 
 export async function createLoansPortfolioConfiguration(
   blrContract: BusinessLogicResolver,

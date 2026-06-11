@@ -22,145 +22,31 @@ import {
 } from "@scripts/infrastructure";
 import { BOND_CONFIG_ID } from "../constants";
 import { atsRegistry } from "../atsRegistry";
+import type { FacetName } from "../atsRegistry";
 import { buildFacetList } from "../facetEnvironment";
+import { COMMON_TOKEN_FACETS, EXTENDED_TOKEN_FACETS, BOND_COMMON_FACETS } from "../facetSets";
 import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
 import { BusinessLogicResolver } from "@contract-types";
 
 /**
  * Bond Token Configuration
  *
- * Defines the set of facets for Bond tokens.
- * Includes all common facets plus BondUSAFacet (NOT EquityUSAFacet).
- *
- * Note: DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet functionality,
- * so we only include DiamondFacet to avoid selector collisions.
- *
- * Updated to match origin/develop feature parity (all facets registered).
- *
+ * The common token tiers plus the bond-shared facets (coupons, maturity,
+ * interest rate, principal). The bondFixedRate / bondKpiLinkedRate variants
+ * extend this same composition with their rate-specific facets.
  */
-const BOND_FACETS = [
-  // Core Functionality
-  "AccessControlFacet",
-  "CapFacet",
-  "CapByPartitionFacet",
-  "ControlListFacet",
-  "CorporateActionsFacet",
-  "DiamondFacet", // Combined: includes DiamondCutFacet + DiamondLoupeFacet functionality
-  "FreezeFacet",
-  "BatchFreezeFacet",
-  "KycFacet",
-  "PauseFacet",
-  "SnapshotsFacet",
-  "SnapshotsByPartitionFacet",
-  "SecurityHoldersAtSnapshotFacet",
-  "HoldAtSnapshotFacet",
-  "LockAtSnapshotByPartitionFacet",
-  "FreezeAtSnapshotFacet",
-  "FreezeAtSnapshotByPartitionFacet",
-  "LockAtSnapshotFacet",
-  "CoreAtSnapshotFacet",
-  "BalanceTrackerFacet",
-  "BalanceTrackerAdjustedFacet",
-  "BalanceTrackerByPartitionFacet",
-  "BalanceTrackerAtSnapshotFacet",
-  "BalanceTrackerAtSnapshotByPartitionFacet",
-  "ClearingAtSnapshotFacet",
-  "ClearingAtSnapshotByPartitionFacet",
-  "HoldAtSnapshotByPartitionFacet",
-
-  // Core
-  "CoreFacet",
-
-  // Allowance
-  "AllowanceFacet",
-
-  // CoreAdjusted
-  "CoreAdjustedFacet",
-  "InitializerFacet", // Core initializer facet
-
-  //CustomData
-  "CustomDataFacet",
-
-  // ERC Standards
-  "TransferFacet",
-  "MintByPartitionFacet",
-  "ProtectedByPartitionFacet",
-  "OperatorFacet",
-  "TransferByPartitionFacet",
-  "PartitionsFacet",
-  "OperatorByPartitionFacet",
-  "BurnByPartitionFacet",
-  "DocumentationFacet",
-  "ControllerFacet",
-  "ERC20PermitFacet",
-  "EIP712Facet",
-  "NoncesFacet",
-  "DeactivateFacet",
-  "ERC20VotesFacet",
-  "BatchControllerFacet",
-  "BatchBurnFacet",
-  "BatchMintFacet",
-  "BatchTransferFacet",
-  "RecoveryFacet",
-  "IdentityFacet",
-  "ComplianceFacet",
-  "ComplianceByPartitionFacet",
-  "MintFacet",
-  "BurnFacet",
-
-  // Clearing & Settlement
-  "ClearingByPartitionFacet",
-  "ProtectedClearingHoldByPartitionFacet",
-  "ClearingHoldByPartitionFacet",
-  "OperatorClearingHoldByPartitionFacet",
-  "ClearingFacet",
-  "OperatorClearingByPartitionFacet",
-  "ProtectedClearingByPartitionFacet",
-  "HoldFacet",
-  "OperatorHoldByPartitionFacet",
-  "ControllerHoldByPartitionFacet",
-  "ControllerByPartitionFacet",
-  "ProtectedHoldByPartitionFacet",
-  "HoldByPartitionFacet",
-
-  // External Management
-  "ExternalControlListManagementFacet",
-  "ExternalKycListManagementFacet",
-  "ExternalPauseManagementFacet",
-
-  // Advanced Features
-  "AdjustBalancesFacet",
-  "ScheduledBalanceAdjustmentFacet",
-  "CouponFacet",
-  "CouponSecurityHoldersFacet",
-  "LockFacet",
-  "LockByPartitionFacet",
-  "MaturityFacet",
-  "NominalValueFacet",
-  "NominalValueAtSnapshotFacet",
-  "ProceedRecipientsFacet",
-  "ProtectedPartitionsFacet",
-  "ScheduledCrossOrderedTasksFacet",
-  "SecurityHoldersFacet",
-  "CouponListingFacet",
-  "SsiManagementFacet",
-  "TransferAndLockFacet",
-  "TransferAndLockByPartitionFacet",
-  "InterestRateFacet",
-
-  // Maturity By Partition
-  "MaturityByPartitionFacet",
-
-  // Jurisdiction-Specific
-  "PrincipalFacet",
-] as const;
+export const BOND_FACETS: readonly FacetName[] = [
+  ...COMMON_TOKEN_FACETS,
+  ...EXTENDED_TOKEN_FACETS,
+  ...BOND_COMMON_FACETS,
+];
 
 /**
  * Create bond token configuration in BusinessLogicResolver.
  *
  * Thin wrapper that calls the generic core operation with bond-specific data:
  * - Configuration ID: BOND_CONFIG_ID
- * - Facet list: BOND_FACETS (43 facets)
+ * - Facet list: BOND_FACETS
  *
  * All implementation logic is handled by the generic createConfiguration()
  * operation in core/operations/blrConfigurations.ts.
@@ -184,7 +70,6 @@ const BOND_FACETS = [
  *     blr,
  *     {
  *         'AccessControlFacet': '0xabc...',
- *         'BondUSAFacet': '0xdef...',
  *         // ... more facets
  *     },
  *     false,
