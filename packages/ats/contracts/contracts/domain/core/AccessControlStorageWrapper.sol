@@ -6,6 +6,7 @@ import { ArrayValidation } from "../../infrastructure/utils/ArrayValidation.sol"
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { IAccessControl } from "../../facets/accessControl/IAccessControl.sol";
+import { ERC3643StorageWrapper } from "./ERC3643StorageWrapper.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 
 /// @custom:hash storage AccessControl
@@ -149,20 +150,31 @@ library AccessControlStorageWrapper {
     }
 
     /**
-     * @notice Reverts with `AccountHasNoRole` when `_account` does not hold `_role`.
+     * @notice Reverts with `WalletRecovered` when `_account` has been recovered, or with
+     *         `AccountHasNoRole` when `_account` does not hold `_role`.
+     * @dev Centralised authorization gate: every role-gated path funnels through here (the
+     *      `only*Role` modifiers, `onlyFreezeRoles`, `applyRoles`, `grantRole`, `revokeRole`),
+     *      so rejecting recovered wallets here disables a recovered/lost wallet everywhere a
+     *      single role is required — including paths that call this helper directly rather than
+     *      through a modifier.
      * @param _role    Role required.
      * @param _account Account being checked.
      */
     function checkRole(bytes32 _role, address _account) internal view {
+        ERC3643StorageWrapper.checkUnrecoveredAddress(_account);
         if (!hasRole(_role, _account)) revert IAccessControl.AccountHasNoRole(_account, _role);
     }
 
     /**
-     * @notice Reverts with `AccountHasNoRoles` when `_account` holds none of `_roles`.
+     * @notice Reverts with `WalletRecovered` when `_account` has been recovered, or with
+     *         `AccountHasNoRoles` when `_account` holds none of `_roles`.
+     * @dev Any-of-N counterpart to `checkRole`; same centralised recovered-wallet gate (used by
+     *      `onlyAnyRole` and `onlyFreezeRoles`).
      * @param _roles   Set of acceptable roles for the caller.
      * @param _account Account being checked.
      */
     function checkAnyRole(bytes32[] memory _roles, address _account) internal view {
+        ERC3643StorageWrapper.checkUnrecoveredAddress(_account);
         if (!hasAnyRole(_roles, _account)) revert IAccessControl.AccountHasNoRoles(_account, _roles);
     }
 

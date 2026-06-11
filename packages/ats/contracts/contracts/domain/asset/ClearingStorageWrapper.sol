@@ -752,9 +752,9 @@ library ClearingStorageWrapper {
         bytes32 _partition
     ) internal view {
         LockStorageWrapper.requireValidExpirationTimestamp(_expirationTimestamp);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_account);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_to);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_from);
+        ERC3643StorageWrapper.checkUnrecoveredAddress(_account);
+        ERC3643StorageWrapper.checkUnrecoveredAddress(_to);
+        ERC3643StorageWrapper.checkUnrecoveredAddress(_from);
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
         DefaultValueValidation.checkZeroAddress(_from);
         DefaultValueValidation.checkZeroAddress(_to);
@@ -783,9 +783,9 @@ library ClearingStorageWrapper {
     ) internal view {
         LockStorageWrapper.requireValidExpirationTimestamp(_holdExpirationTimestamp);
         LockStorageWrapper.requireValidExpirationTimestamp(_operationExpirationTimestamp);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_account);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_to);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_from);
+        ERC3643StorageWrapper.checkUnrecoveredAddress(_account);
+        ERC3643StorageWrapper.checkUnrecoveredAddress(_to);
+        ERC3643StorageWrapper.checkUnrecoveredAddress(_from);
         DefaultValueValidation.checkZeroAddress(_escrow);
         DefaultValueValidation.checkZeroAddress(_from);
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
