@@ -291,20 +291,12 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         facetAddress_ = _getFacetAddressByConfigurationIdVersionAndFacetId(_configurationId, _version, _facetId);
     }
 
-    /**
-     * @notice Returns the facet version assigned within a configuration version.
-     * @dev Reads manager storage without mutating state. The configuration version must
-     *      exist according to inherited version validation before the facet version is read.
-     * @param _configurationId Identifier of the diamond configuration to inspect.
-     * @param _version Version of the configuration to inspect.
-     * @param _facetId Identifier of the facet whose registered version is requested.
-     * @return facetVersion_ Facet version registered for the requested configuration version.
-     */
+    /// @inheritdoc IDiamondCutManager
     function getFacetVersionByConfigurationIdVersionAndFacetId(
         bytes32 _configurationId,
         uint256 _version,
         bytes32 _facetId
-    ) external view validateConfigurationVersion(_configurationId, _version) returns (uint256 facetVersion_) {
+    ) external view override validateConfigurationVersion(_configurationId, _version) returns (uint256 facetVersion_) {
         facetVersion_ = _getFacetVersionByConfigurationIdVersionAndFacetId(_configurationId, _version, _facetId);
     }
 
