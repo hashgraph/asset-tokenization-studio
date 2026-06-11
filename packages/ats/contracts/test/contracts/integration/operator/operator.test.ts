@@ -9,6 +9,7 @@ import { executeRbac, grantKycToHolders } from "@test";
 import type { AssetMockCtx } from "@test";
 
 export function operatorTests(getCtx: () => AssetMockCtx): void {
+  export function operatorTests(): void {
   describe("Operator Facet Tests", () => {
     let signer_A: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
@@ -55,7 +56,8 @@ export function operatorTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN KYC'd addresses WHEN authorizeOperator THEN emits AuthorizedOperator and  state is updated", async () => {
         await expect(asset.connect(signer_C).authorizeOperator(signer_B.address))
           .to.emit(asset, "AuthorizedOperator")
-          .withArgs(signer_B.address, signer_C.address);
+          .withArgs(signer_B.address, signer_C.address)
+          ;
 
         expect(await asset.isOperator(signer_B.address, signer_C.address)).to.equal(true);
       });
@@ -83,7 +85,8 @@ export function operatorTests(getCtx: () => AssetMockCtx): void {
 
         await expect(asset.connect(signer_C).revokeOperator(signer_B.address))
           .to.emit(asset, "RevokedOperator")
-          .withArgs(signer_B.address, signer_C.address);
+          .withArgs(signer_B.address, signer_C.address)
+          ;
 
         expect(await asset.isOperator(signer_B.address, signer_C.address)).to.equal(false);
       });
@@ -110,21 +113,23 @@ export function operatorTests(getCtx: () => AssetMockCtx): void {
     describe("Deactivated", () => {
       beforeEach(async () => {
         await asset.forceDeactivate();
-      });
-      it("GIVEN a deactivated asset WHEN authorizeOperator THEN transaction fails with Deactivated", async () => {
-        await expect(asset.connect(signer_A).authorizeOperator(ethers.ZeroAddress)).to.be.revertedWithCustomError(
-          asset,
+      });it("GIVEN a deactivated asset WHEN authorizeOperator THEN transaction fails with Deactivated", async () => {
+
+        await expect(
+          asset.connect(signer_A).authorizeOperator(ethers.ZeroAddress)
+        ).to.be.revertedWithCustomError(asset,
           "Deactivated",
-        );
+      );
       });
 
       it("GIVEN a deactivated asset WHEN revokeOperator THEN transaction fails with Deactivated", async () => {
-        await expect(asset.connect(signer_A).revokeOperator(ethers.ZeroAddress)).to.be.revertedWithCustomError(
-          asset,
+
+        await expect(
+          asset.connect(signer_A).revokeOperator(ethers.ZeroAddress)
+        ).to.be.revertedWithCustomError(asset,
           "Deactivated",
-        );
-      });
-    });
+      );
+    });});
 
     describe("initializeOperator", () => {
       it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeOperator is called THEN AccountHasNoRole", async () => {
