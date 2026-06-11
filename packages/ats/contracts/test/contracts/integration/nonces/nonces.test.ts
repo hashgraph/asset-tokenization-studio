@@ -5,6 +5,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
 import { ATS_ROLES, RESOLVER_KEY_NONCES } from "@scripts";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 export function noncesTests(getCtx: () => AssetMockCtx): void {
   describe("Nonces Tests", () => {
