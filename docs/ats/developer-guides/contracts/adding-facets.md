@@ -419,64 +419,51 @@ abstract contract Common is
 }
 ```
 
-### Step 10: Update Registry
+### Step 10: Add to the Deployment Configurations
 
-Add your facet to the deployment registry.
+Facet lists for each token type are **composed from shared, type-checked tiers**
+in `scripts/domain/facetSets.ts` plus a small per-domain delta in each
+`scripts/domain/<domain>/createConfiguration.ts`. Add your facet name in the
+place that matches its scope:
 
-**File**: `scripts/domain/atsRegistry.ts`
-
-```typescript
-import { RewardsFacet__factory } from "../../typechain-types";
-import { RESOLVER_KEY_REWARDS } from "./constants";
-
-// Add to FACET_FACTORIES
-export const FACET_FACTORIES = {
-  // ... existing facets
-  RewardsFacet: RewardsFacet__factory,
-  // ... more facets
-};
-
-// Add to FACET_REGISTRY (auto-generated after compilation)
-// Run: npm run generate:registry
-```
-
-### Step 11: Add to Configurations
-
-Include your facet in equity/bond configurations as appropriate.
+- **Needed by every token domain** → add it to `COMMON_TOKEN_FACETS` in
+  `scripts/domain/facetSets.ts`.
+- **Needed by every token domain except depositToken** → `EXTENDED_TOKEN_FACETS`.
+- **Shared by the three bond variants** → `BOND_COMMON_FACETS`.
+- **Specific to a single domain** (e.g. only equity) → add it to that domain's
+  delta in `scripts/domain/<domain>/createConfiguration.ts`.
 
 **File**: `scripts/domain/equity/createConfiguration.ts`
 
 ```typescript
-export async function createEquityConfiguration(
-  blr: BusinessLogicResolver,
-  facetAddresses: Map<string, string>,
-  options?: CreateConfigurationOptions,
-): Promise<CreateConfigurationResult> {
-  const facetConfigurations: FacetConfiguration[] = [
-    // ... existing facets
-    {
-      facetName: "RewardsFacet",
-      resolverKey: atsRegistry.getFacetDefinition("RewardsFacet").resolverKey.value,
-      address: facetAddresses.get("RewardsFacet")!,
-    },
-    // ... more facets
-  ];
-
-  // ... rest of configuration creation
-}
+export const EQUITY_FACETS: readonly FacetName[] = [
+  ...COMMON_TOKEN_FACETS,
+  ...EXTENDED_TOKEN_FACETS,
+  // ... existing equity-specific facets
+  "RewardsFacet",
+];
 ```
+
+Every entry is checked against the generated `FacetName` union, so a typo or an
+unknown facet name is a **compile error**. Adding a facet to a shared tier
+automatically includes it in every domain that composes from that tier — no
+per-domain edits required, and no facet-count bookkeeping in the tests.
+
+### Step 11: Regenerate the Registry
+
+The facet registry is **auto-generated** from the compiled artifacts — you do
+not edit it by hand. Compiling rewrites the (gitignored)
+`scripts/domain/atsRegistry.generated.ts` with the `FACET_REGISTRY` entry for
+your facet (resolver key, factory, methods) and adds `"RewardsFacet"` to the
+generated `FacetName` union that the configuration lists above are typed
+against.
 
 ### Step 12: Compile and Generate Types
 
 ```bash
-# Compile contracts
-npm run compile
-
-# Generate TypeChain types
-npm run typechain
-
-# Update registry
-npm run generate:registry
+# Compiles the contracts, generates the TypeChain types, and regenerates the
+# registry (including the FacetName union) via the post-compile hook.
+npx hardhat compile
 ```
 
 ## Testing Your Facet

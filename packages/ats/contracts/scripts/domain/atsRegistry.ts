@@ -64,6 +64,18 @@ import type {
   INFRASTRUCTURE_CONTRACTS as INFRASTRUCTURE_CONTRACTS_TYPE,
   STORAGE_WRAPPER_REGISTRY as STORAGE_WRAPPER_REGISTRY_TYPE,
 } from "./atsRegistry.generated";
+
+/**
+ * Union of every facet contract name known to the registry.
+ *
+ * @remarks
+ * Auto-generated alongside `FACET_REGISTRY`. Re-exported here so consumers
+ * import it from `@scripts/domain` rather than reaching into the gitignored
+ * generated file. The `export type` is fully erased at runtime — like the
+ * `import type` above, it never resolves `./atsRegistry.generated`, so module
+ * load stays bootstrap-safe.
+ */
+export type { FacetName } from "./atsRegistry.generated";
 import type {
   FacetDefinition,
   ContractDefinition,

@@ -232,50 +232,47 @@ library ERC1410StorageWrapper {
 
     /**
      * @notice Grants `operator` cross-partition authorisation on behalf of the caller.
-     * @dev Sets the global approval flag for the calling holder and emits `AuthorizedOperator`. Does
-     *      not affect per-partition approvals — those remain managed by
-     *      `authorizeOperatorByPartition`.
+     * @dev Sets the global approval flag for the calling holder. Does not affect per-partition
+     *      approvals — those remain managed by `authorizeOperatorByPartition`. The calling facet
+     *      (`Operator`) emits `AuthorizedOperator`.
      * @param operator Address being authorised to act for the caller.
      */
     function authorizeOperator(address operator) internal {
         erc1410OperatorStorage().approvals[EvmAccessors.getMsgSender()][operator] = true;
-        emit IERC1410Types.AuthorizedOperator(operator, EvmAccessors.getMsgSender());
     }
 
     /**
      * @notice Revokes the cross-partition authorisation previously granted to `operator`.
-     * @dev Clears the global approval flag for the calling holder and emits `RevokedOperator`. Has no
-     *      effect on per-partition approvals.
+     * @dev Clears the global approval flag for the calling holder. Has no effect on per-partition
+     *      approvals. The calling facet (`Operator`) emits `RevokedOperator`.
      * @param operator Address whose cross-partition authorisation is removed.
      */
     function revokeOperator(address operator) internal {
         erc1410OperatorStorage().approvals[EvmAccessors.getMsgSender()][operator] = false;
-        emit IERC1410Types.RevokedOperator(operator, EvmAccessors.getMsgSender());
     }
 
     /**
      * @notice Grants `operator` authorisation on `partition` on behalf of the caller.
-     * @dev Sets the partition-scoped approval flag for the calling holder and emits
-     *      `AuthorizedOperatorByPartition`. Independent from the global approval set by
-     *      `authorizeOperator`.
+     * @dev Sets the partition-scoped approval flag for the calling holder. Independent from the
+     *      global approval set by `authorizeOperator`. The calling facet (`OperatorByPartition`)
+     *      emits `AuthorizedOperatorByPartition`.
      * @param partition Partition identifier whose operator set is updated.
      * @param operator  Address being authorised on the partition.
      */
     function authorizeOperatorByPartition(bytes32 partition, address operator) internal {
         erc1410OperatorStorage().partitionApprovals[EvmAccessors.getMsgSender()][partition][operator] = true;
-        emit IERC1410Types.AuthorizedOperatorByPartition(partition, operator, EvmAccessors.getMsgSender());
     }
 
     /**
      * @notice Revokes the authorisation previously granted to `operator` on `partition`.
-     * @dev Clears the partition-scoped approval flag for the calling holder and emits
-     *      `RevokedOperatorByPartition`. Cross-partition approvals are untouched.
+     * @dev Clears the partition-scoped approval flag for the calling holder. Cross-partition
+     *      approvals are untouched. The calling facet (`OperatorByPartition`) emits
+     *      `RevokedOperatorByPartition`.
      * @param partition Partition identifier whose operator set is updated.
      * @param operator  Address whose partition-scoped authorisation is removed.
      */
     function revokeOperatorByPartition(bytes32 partition, address operator) internal {
         erc1410OperatorStorage().partitionApprovals[EvmAccessors.getMsgSender()][partition][operator] = false;
-        emit IERC1410Types.RevokedOperatorByPartition(partition, operator, EvmAccessors.getMsgSender());
     }
 
     /**
