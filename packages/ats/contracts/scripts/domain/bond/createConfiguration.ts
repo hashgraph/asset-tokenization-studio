@@ -22,23 +22,20 @@ import {
 } from "@scripts/infrastructure";
 import { BOND_CONFIG_ID } from "../constants";
 import { atsRegistry } from "../atsRegistry";
+import type { FacetName } from "../atsRegistry";
 import { buildFacetList } from "../facetEnvironment";
+
 import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
 import { BusinessLogicResolver } from "@contract-types";
 
 /**
  * Bond Token Configuration
  *
- * Defines the set of facets for Bond tokens.
- * Includes all common facets plus BondUSAFacet (NOT EquityUSAFacet).
- *
- * Note: DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet functionality,
- * so we only include DiamondFacet to avoid selector collisions.
- *
- * Updated to match origin/develop feature parity (all facets registered).
- *
+ * The common token tiers plus the bond-shared facets (coupons, maturity,
+ * interest rate, principal). The bondFixedRate / bondKpiLinkedRate variants
+ * extend this same composition with their rate-specific facets.
  */
-const BOND_FACETS = [
+const BOND_FACETS: readonly FacetName[] = [
   // Core Functionality
   "AccessControlFacet",
   "CapFacet",
@@ -161,7 +158,7 @@ const BOND_FACETS = [
  *
  * Thin wrapper that calls the generic core operation with bond-specific data:
  * - Configuration ID: BOND_CONFIG_ID
- * - Facet list: BOND_FACETS (43 facets)
+ * - Facet list: BOND_FACETS
  *
  * All implementation logic is handled by the generic createConfiguration()
  * operation in core/operations/blrConfigurations.ts.
@@ -186,7 +183,6 @@ const BOND_FACETS = [
  *     blr,
  *     {
  *         'AccessControlFacet': '0xabc...',
- *         'BondUSAFacet': '0xdef...',
  *         // ... more facets
  *     },
  *     false,

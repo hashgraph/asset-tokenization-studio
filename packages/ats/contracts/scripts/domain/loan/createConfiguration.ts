@@ -23,11 +23,13 @@ import {
 import { BusinessLogicResolver } from "@contract-types";
 import { LOAN_CONFIG_ID } from "../constants";
 import { buildFacetList } from "../facetEnvironment";
+import { COMMON_TOKEN_FACETS, EXTENDED_TOKEN_FACETS } from "../facetSets";
 import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
 import { atsRegistry } from "../atsRegistry";
+import type { FacetName } from "../atsRegistry";
 
 /**
- * Loan-specific facets list (46 facets total).
+ * Loan-specific facets list.
  *
  * This is an explicit positive list of all facets required for loan tokens.
  *
@@ -37,128 +39,24 @@ import { atsRegistry } from "../atsRegistry";
  * Note: Loan does NOT include TimeTravel variants (per spec). TimeTravelFacet
  * is injected automatically by the deploy script in test environments.
  */
-const LOAN_FACETS = [
-  // Loan Functionality
-  "LoanFacet",
-  "CouponFacet",
-  "CouponSecurityHoldersFacet",
-  "CouponListingFacet",
-  "NominalValueFacet",
-  "NominalValueAtSnapshotFacet",
+export const LOAN_FACETS: readonly FacetName[] = [
+  ...COMMON_TOKEN_FACETS,
+  ...EXTENDED_TOKEN_FACETS,
   "AmortizationFacet",
-  "ProceedRecipientsFacet",
-
-  // Core Functionality
-  "AccessControlFacet",
-  "BalanceTrackerFacet",
-  "BalanceTrackerAdjustedFacet",
-  "BalanceTrackerByPartitionFacet",
-  "BalanceTrackerAtSnapshotFacet",
-  "BalanceTrackerAtSnapshotByPartitionFacet",
-  "ClearingAtSnapshotFacet",
-  "ClearingAtSnapshotByPartitionFacet",
-  "HoldAtSnapshotByPartitionFacet",
-  "CapFacet",
-  "CapByPartitionFacet",
-  "ControlListFacet",
-  "KycFacet",
-  "SsiManagementFacet",
-  "FreezeFacet",
-  "BatchFreezeFacet",
-  "PauseFacet",
-
-  // Core
-  "CoreFacet",
-
-  // Allowance
-  "AllowanceFacet",
-
-  // ERC Standards
-  "TransferFacet",
-  "CoreAdjustedFacet",
-  "InitializerFacet", // Core initializer facet
-  "CustomDataFacet",
-  "ERC20PermitFacet",
-  "EIP712Facet",
-  "ERC20VotesFacet",
-  "DocumentationFacet",
-  "ControllerFacet",
-  "OperatorFacet",
-  "ProtectedByPartitionFacet",
-  "MintByPartitionFacet",
-  "TransferByPartitionFacet",
-  "PartitionsFacet",
-  "OperatorByPartitionFacet",
-  "BurnByPartitionFacet",
-  "RecoveryFacet",
-  "IdentityFacet",
-  "BatchControllerFacet",
-  "BatchBurnFacet",
-  "BatchMintFacet",
-  "BatchTransferFacet",
-  "ComplianceFacet",
-  "ComplianceByPartitionFacet",
-  "MintFacet",
-  "BurnFacet",
-
-  // Hold
-  "HoldFacet",
-  "OperatorHoldByPartitionFacet",
-  "ControllerHoldByPartitionFacet",
-  "ControllerByPartitionFacet",
-  "ProtectedHoldByPartitionFacet",
-  "HoldByPartitionFacet",
-
-  // Clearing & Settlement
-  "OperatorClearingByPartitionFacet",
-  "ProtectedClearingByPartitionFacet",
-  "ProtectedClearingHoldByPartitionFacet",
   "ClearingHoldByPartitionFacet",
-  "OperatorClearingHoldByPartitionFacet",
-  "ClearingFacet",
-  "ClearingByPartitionFacet",
-
-  // Scheduled Tasks
-  "ScheduledCrossOrderedTasksFacet",
-
-  // External Management
-  "ExternalPauseManagementFacet",
-  "ExternalControlListManagementFacet",
-  "ExternalKycListManagementFacet",
-
-  // Deactivate
-  "DeactivateFacet",
-
-  // Diamond
-  "DiamondFacet",
-
-  // Advanced Features
-  "SnapshotsFacet",
-  "SnapshotsByPartitionFacet",
-  "SecurityHoldersAtSnapshotFacet",
-  "HoldAtSnapshotFacet",
-  "LockAtSnapshotByPartitionFacet",
-  "FreezeAtSnapshotFacet",
-  "FreezeAtSnapshotByPartitionFacet",
-  "LockAtSnapshotFacet",
-  "CoreAtSnapshotFacet",
-  "CorporateActionsFacet",
-  "SecurityHoldersFacet",
-  "TransferAndLockFacet",
-  "TransferAndLockByPartitionFacet",
-  "LockFacet",
-  "LockByPartitionFacet",
-  "AdjustBalancesFacet",
-  "ScheduledBalanceAdjustmentFacet",
-  "ProtectedPartitionsFacet",
-] as const;
+  "CouponFacet",
+  "CouponListingFacet",
+  "CouponSecurityHoldersFacet",
+  "LoanFacet",
+  "ProceedRecipientsFacet",
+];
 
 /**
  * Create loan token configuration in BusinessLogicResolver.
  *
  * Thin wrapper that calls the generic core operation with loan-specific data:
  * - Configuration ID: LOAN_CONFIG_ID
- * - Facet list: LOAN_FACETS (46 facets)
+ * - Facet list: LOAN_FACETS
  *
  * All implementation logic is handled by the generic createConfiguration()
  * operation in core/operations/blrConfigurations.ts.

@@ -48,6 +48,9 @@ export * from "./constants";
 // Test-environment facet substitution
 export * from "./facetEnvironment";
 
+// Shared, type-checked facet sets for deployment configurations
+export * from "./facetSets";
+
 // Orchestrator library management
 export * from "./orchestratorLibraries";
 

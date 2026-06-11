@@ -28,7 +28,7 @@ const _DIAMOND = "0xd9202bb838fd8d0f2866f13141398cfb9fa74cbbbce7449c9158caffa9c5
 // TEST-ONLY: registry of the mock facets, keyed by the contract name used in
 // `INITIALIZE_MOCK_FACETS`. Shape matches the production `FACET_REGISTRY` so
 // the deploy + configuration code can treat it the same way.
-export const MOCK_FACET_REGISTRY: Record<string, FacetDefinition> = {
+export const MOCK_FACET_REGISTRY = {
   MockDiamondCut: {
     name: "MockDiamondCut",
     description: "TEST-ONLY mock variant of DiamondFacet used by InitializeMock domain",
@@ -62,11 +62,18 @@ export const MOCK_FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     factory: (signer) => new MockFactoryFacet__factory(signer),
   },
-};
+} satisfies Record<string, FacetDefinition>;
+
+// TEST-ONLY: union of the mock facet contract names. Lets the InitializeMock
+// configuration type its facet list as `FacetName | MockFacetName` so the mock
+// entries (absent from the generated registry) still type-check.
+export type MockFacetName = keyof typeof MOCK_FACET_REGISTRY;
 
 // TEST-ONLY: convenience helper mirroring `atsRegistry.getFacetDefinition` for the mocks.
 export function getMockFacetDefinition(name: string): FacetDefinition | undefined {
-  return MOCK_FACET_REGISTRY[name];
+  // `satisfies` keeps the literal keys for `MockFacetName`, so widen here to
+  // index by an arbitrary runtime string.
+  return (MOCK_FACET_REGISTRY as Record<string, FacetDefinition>)[name];
 }
 
 // TEST-ONLY: returns the three mock FacetDefinitions in declaration order, for

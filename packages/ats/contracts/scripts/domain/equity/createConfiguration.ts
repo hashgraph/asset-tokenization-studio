@@ -23,130 +23,36 @@ import {
 import { BusinessLogicResolver } from "@contract-types";
 import { EQUITY_CONFIG_ID } from "../constants";
 import { atsRegistry } from "../atsRegistry";
+import type { FacetName } from "../atsRegistry";
 import { buildFacetList } from "../facetEnvironment";
+import { COMMON_TOKEN_FACETS, EXTENDED_TOKEN_FACETS } from "../facetSets";
 import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
 
 /**
  * Equity-specific facets list.
  *
- * This is an explicit positive list of all facets required for equity tokens.
- * Includes all common facets plus VotingFacet, DividendFacet, and DividendSecurityHoldersFacet.
- *
- * Note: DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet functionality,
- * so we only include DiamondFacet to avoid selector collisions.
- *
- * Based on origin/develop configuration where equity uses ALL common facets.
+ * The common token tiers plus the equity-specific facets: dividends, voting,
+ * and the supporting interest-rate / proceed-recipients / clearing-hold facets.
  */
-const EQUITY_FACETS = [
-  // Core Functionality (10 - DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet)
-  "AccessControlFacet",
-  "AllowanceFacet",
-  "CapFacet",
-  "CapByPartitionFacet",
-  "ControlListFacet",
-  "CorporateActionsFacet",
-  "DiamondFacet",
-  "CoreFacet",
-  "TransferFacet",
-  "CoreAdjustedFacet",
-  "InitializerFacet",
-  "CustomDataFacet",
-  "FreezeFacet",
-  "BatchFreezeFacet",
-  "KycFacet",
-  "PauseFacet",
-  "BalanceTrackerFacet",
-  "BalanceTrackerAdjustedFacet",
-  "SnapshotsFacet",
-  "SnapshotsByPartitionFacet",
-  "SecurityHoldersAtSnapshotFacet",
-  "HoldAtSnapshotFacet",
-  "LockAtSnapshotByPartitionFacet",
-  "FreezeAtSnapshotFacet",
-  "FreezeAtSnapshotByPartitionFacet",
-  "LockAtSnapshotFacet",
-  "CoreAtSnapshotFacet",
-  "BalanceTrackerByPartitionFacet",
-  "BalanceTrackerAtSnapshotFacet",
-  "BalanceTrackerAtSnapshotByPartitionFacet",
-  "ClearingAtSnapshotFacet",
-  "ClearingAtSnapshotByPartitionFacet",
-  "HoldAtSnapshotByPartitionFacet",
-
-  // ERC Standards (13)
-  "MintByPartitionFacet",
-  "ProtectedByPartitionFacet",
-  "OperatorFacet",
-  "TransferByPartitionFacet",
-  "PartitionsFacet",
-  "OperatorByPartitionFacet",
-  "BurnByPartitionFacet",
-  "DocumentationFacet",
-  "ControllerFacet",
-  "ERC20PermitFacet",
-  "EIP712Facet",
-  "NoncesFacet",
-  "DeactivateFacet",
-  "ERC20VotesFacet",
-  "BatchControllerFacet",
-  "BatchBurnFacet",
-  "BatchMintFacet",
-  "BatchTransferFacet",
-  "RecoveryFacet",
-  "IdentityFacet",
-  "ComplianceFacet",
-  "ComplianceByPartitionFacet",
-  "MintFacet",
-  "BurnFacet",
-
-  // Clearing & Settlement (7)
-  "ClearingByPartitionFacet",
-  "ProtectedClearingHoldByPartitionFacet",
+export const EQUITY_FACETS: readonly FacetName[] = [
+  ...COMMON_TOKEN_FACETS,
+  ...EXTENDED_TOKEN_FACETS,
   "ClearingHoldByPartitionFacet",
-  "OperatorClearingHoldByPartitionFacet",
-  "ClearingFacet",
-  "OperatorClearingByPartitionFacet",
-  "ProtectedClearingByPartitionFacet",
-  "HoldFacet",
-  "OperatorHoldByPartitionFacet",
-  "ControllerHoldByPartitionFacet",
-  "ControllerByPartitionFacet",
-  "ProtectedHoldByPartitionFacet",
-  "HoldByPartitionFacet",
-
-  // External Management (3)
-  "ExternalControlListManagementFacet",
-  "ExternalKycListManagementFacet",
-  "ExternalPauseManagementFacet",
-
-  // Advanced Features (12)
-  "AdjustBalancesFacet",
-  "ScheduledBalanceAdjustmentFacet",
   "DividendFacet",
   "DividendSecurityHoldersFacet",
-  "LockFacet",
-  "LockByPartitionFacet",
-  "NominalValueFacet",
-  "NominalValueAtSnapshotFacet",
-  "ProtectedPartitionsFacet",
-  "ScheduledCrossOrderedTasksFacet",
-  "SecurityHoldersFacet",
-  "SsiManagementFacet",
-  "TransferAndLockFacet",
-  "TransferAndLockByPartitionFacet",
+  "InterestRateFacet",
+  "NoncesFacet",
+  "ProceedRecipientsFacet",
   "VotingFacet",
   "VotingSecurityHoldersFacet",
-
-  "InterestRateFacet",
-  "ProceedRecipientsFacet",
-] as const;
+];
 
 /**
  * Create equity token configuration in BusinessLogicResolver.
  *
  * Thin wrapper that calls the generic core operation with equity-specific data:
  * - Configuration ID: EQUITY_CONFIG_ID
- * - Facet list: EQUITY_FACETS (42 facets)
+ * - Facet list: EQUITY_FACETS
  *
  * All implementation logic is handled by the generic createConfiguration()
  * operation in core/operations/blrConfigurations.ts.

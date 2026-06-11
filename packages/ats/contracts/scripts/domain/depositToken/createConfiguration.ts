@@ -22,6 +22,7 @@ import {
 import { BusinessLogicResolver } from "@contract-types";
 import { DEPOSIT_TOKEN_CONFIG_ID } from "../constants";
 import { atsRegistry } from "../atsRegistry";
+import type { FacetName } from "../atsRegistry";
 
 /**
  * Deposit Token configuration: 69 facets (68 capability facets + InitializerFacet).
@@ -32,7 +33,7 @@ import { atsRegistry } from "../atsRegistry";
  * and voting-holder facets so a deposit-token resolver configuration exposes the full capability
  * set it needs.
  */
-const DEPOSIT_TOKEN_FACETS = [
+const DEPOSIT_TOKEN_FACETS: readonly FacetName[] = [
   // Always-on (initializers + diamond infra)
   "AccessControlFacet",
   "DiamondFacet",
@@ -157,7 +158,7 @@ const DEPOSIT_TOKEN_FACETS = [
  * Thin wrapper that calls the generic core operation with deposit-token-specific
  * data:
  * - Configuration ID: DEPOSIT_TOKEN_CONFIG_ID
- * - Facet list: DEPOSIT_TOKEN_FACETS (69 facets)
+ * - Facet list: DEPOSIT_TOKEN_FACETS
  *
  * @param blrContract - BusinessLogicResolver contract instance
  * @param facetAddresses - Map of facet names to their deployed addresses
