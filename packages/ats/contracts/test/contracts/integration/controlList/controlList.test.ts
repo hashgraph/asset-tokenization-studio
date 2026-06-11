@@ -16,6 +16,7 @@ export function controlListTests(getCtx: () => AssetMockCtx): void {
     let signer_D: HardhatEthersSigner;
 
     let asset: IAssetMock;
+    let mockDiamondCut: MockDiamondCut;
     let factory: IFactory;
     let blr: BusinessLogicResolver;
 
@@ -193,13 +194,13 @@ export function controlListTests(getCtx: () => AssetMockCtx): void {
     describe("Deactivated", () => {
       beforeEach(async () => {
         await asset.forceDeactivate();
-      });
+      });it("GIVEN a deactivated asset WHEN addToControlList THEN transaction fails with Deactivated", async () => {
 
-      it("GIVEN a deactivated asset WHEN addToControlList THEN transaction fails with Deactivated", async () => {
-        await expect(asset.connect(signer_A).addToControlList(ethers.ZeroAddress)).to.be.revertedWithCustomError(
-          asset,
+        await expect(
+          asset.connect(signer_A).addToControlList(ethers.ZeroAddress)
+        ).to.be.revertedWithCustomError(asset,
           "Deactivated",
-        );
+      );
       });
 
       it("GIVEN a deactivated asset WHEN removeFromControlList THEN transaction fails with Deactivated", async () => {
