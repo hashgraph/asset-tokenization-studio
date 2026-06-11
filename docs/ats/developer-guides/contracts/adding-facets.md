@@ -66,7 +66,7 @@ Every facet consists of two contracts:
 
 1. **Business Logic Contract** (Abstract)
    - Contains the actual implementation
-   - Inherits from `Common` (Layer 1)
+   - Inherits from `Modifiers` (`contracts/services/Modifiers.sol`)
    - Implements domain-specific interface
    - Can be tested independently
 
@@ -78,14 +78,17 @@ Every facet consists of two contracts:
 ### File Organization
 
 ```
-contracts/layer_2/myFeature/
+contracts/facets/myFeature/
+├── IMyFeature.sol                     # Public interface (+ resolver-key constant)
 ├── MyFeature.sol                      # Business logic (abstract)
-├── MyFeatureFacet.sol                 # Facet wrapper (concrete)
-└── interfaces/
-    └── myFeature/
-        ├── IMyFeature.sol             # Public interface
-        └── IMyFeatureStorageWrapper.sol  # Storage events/errors
+└── MyFeatureFacet.sol                 # Facet wrapper (concrete)
 ```
+
+Facet folders are **flat** under `contracts/facets/` (one folder per feature) —
+the old `layer_1/`, `layer_2/`, `layer_3/` nesting was removed; the layer 1/2/3
+distinction is now a purely logical one. The storage wrapper and its
+events/errors interface live separately under `contracts/domain/{core,asset}/`
+(see Steps 2–3).
 
 ## Step-by-Step Implementation
 
@@ -93,7 +96,7 @@ contracts/layer_2/myFeature/
 
 Create the public interface defining your facet's functionality.
 
-**File**: `contracts/layer_2/interfaces/rewards/IRewards.sol`
+**File**: `contracts/facets/rewards/IRewards.sol`
 
 ```solidity
 // SPDX-License-Identifier: MIT
@@ -140,7 +143,7 @@ fields** — the empty banners are scaffolding that fixes each field's insertion
 region numbering. Never renumber a region when its only field is removed; leave the empty
 banner in place.
 
-**File**: `contracts/domain/asset/rewards/RewardsStorageWrapper.sol`
+**File**: `contracts/domain/asset/RewardsStorageWrapper.sol`
 
 ```solidity
 // SPDX-License-Identifier: Apache-2.0
@@ -201,7 +204,7 @@ abstract contract RewardsStorageWrapper is IRewardsStorageWrapper {
 
 ### Step 3: Define Storage Events/Errors Interface
 
-**File**: `contracts/domain/asset/rewards/IRewardsStorageWrapper.sol`
+**File**: `contracts/domain/asset/IRewardsStorageWrapper.sol`
 
 ```solidity
 // SPDX-License-Identifier: Apache-2.0
@@ -237,7 +240,7 @@ interface file (`I<Feature>.sol`). The annotation `/// @custom:hash resolverKey
 placeholder that `npm run generate:hashes` (or the post-compile hook in
 `hardhat compile`) rewrites to the canonical value.
 
-**File**: `contracts/layer_2/rewards/IRewards.sol`
+**File**: `contracts/facets/rewards/IRewards.sol`
 
 ```solidity
 // SPDX-License-Identifier: Apache-2.0
@@ -283,20 +286,20 @@ The canonical hex is `keccak256("asset.tokenization.standard.role.RewardsDistrib
 
 Implement the core facet logic.
 
-**File**: `contracts/layer_2/rewards/Rewards.sol`
+**File**: `contracts/facets/rewards/Rewards.sol`
 
 ```solidity
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
-import { IRewards } from "../interfaces/rewards/IRewards.sol";
-import { Common } from "../../layer_1/common/Common.sol";
+import { IRewards } from "./IRewards.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
 
 /**
  * @title Rewards
  * @notice Business logic for token holder rewards
  */
-abstract contract Rewards is IRewards, Common {
+abstract contract Rewards is IRewards, Modifiers {
   /**
    * @notice Initialize rewards functionality
    * @dev Can only be called once
@@ -355,15 +358,15 @@ abstract contract Rewards is IRewards, Common {
 
 Implement the concrete facet with metadata.
 
-**File**: `contracts/layer_2/rewards/RewardsFacet.sol`
+**File**: `contracts/facets/rewards/RewardsFacet.sol`
 
 ```solidity
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
 import { Rewards } from "./Rewards.sol";
-import { IStaticFunctionSelectors } from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
-import { IRewards } from "../interfaces/rewards/IRewards.sol";
+import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { IRewards } from "./IRewards.sol";
 
 /**
  * @title RewardsFacet
@@ -402,20 +405,27 @@ contract RewardsFacet is Rewards, IStaticFunctionSelectors {
 }
 ```
 
-### Step 9: Update Common Contract (if needed)
+### Step 9: Wire Shared Modifiers / Storage Access (if needed)
 
-If your facet requires storage access across all facets, update the `Common` contract inheritance chain.
+There is no monolithic `Common` contract any more. Facets get shared
+access/pause/validation modifiers — and, through them, cross-facet storage
+access — by inheriting `Modifiers` (`contracts/services/Modifiers.sol`), which
+aggregates `CoreModifiers` and `AssetModifiers`.
 
-**File**: `contracts/layer_1/common/Common.sol`
+If your facet needs its own reusable modifiers (or its storage wrapper exposed
+across facets), add a `RewardsModifiers` contract that inherits the storage
+wrapper, then register it in the matching aggregator — `CoreModifiers` for
+core features, `AssetModifiers` for asset features.
+
+**File**: `contracts/services/asset/AssetModifiers.sol`
 
 ```solidity
-// Add RewardsStorageWrapper to inheritance
-abstract contract Common is
-    // ... existing wrappers
-    RewardsStorageWrapper,
-    // ... other wrappers
-{
-    // ... existing code
+// Add RewardsModifiers to the aggregated inheritance
+import { RewardsModifiers } from "./RewardsModifiers.sol";
+
+// ... existing modifier contracts
+abstract contract AssetModifiers is RewardsModifiers {
+  // Aggregates all asset-level modifiers through inheritance
 }
 ```
 
@@ -470,7 +480,7 @@ npx hardhat compile
 
 ### Step 1: Create Unit Tests
 
-**File**: `test/layer_2/rewards/Rewards.test.ts`
+**File**: `test/contracts/integration/rewards/rewards.test.ts`
 
 ```typescript
 import { expect } from "chai";
@@ -560,7 +570,7 @@ describe("RewardsFacet", function () {
 ### Step 2: Run Tests
 
 ```bash
-npm run test -- test/layer_2/rewards/Rewards.test.ts
+npm run test -- test/contracts/integration/rewards/rewards.test.ts
 ```
 
 ## Integration Guide
@@ -633,7 +643,7 @@ const tx = await factory.createEquityToken(
 
 1. **Always use unique storage positions**: Use `keccak256` of unique strings
 2. **Access storage via assembly**: Follow EIP-1967 pattern
-3. **Inherit storage wrappers**: Add to `Common` for cross-facet access
+3. **Inherit storage wrappers**: Wire into the `Modifiers` aggregator (via a `<Feature>Modifiers`) for cross-facet access
 4. **Document storage layout**: Add comments explaining structure
 
 ### Access Control
@@ -670,7 +680,7 @@ Simple facet with no state changes:
 
 ```solidity
 // TokenMetadataFacet.sol - Read-only token metadata
-abstract contract TokenMetadata is ITokenMetadata, Common {
+abstract contract TokenMetadata is ITokenMetadata, Modifiers {
   function getTokenMetadata() external view override returns (MetadataData memory) {
     return MetadataData({ name: _name(), symbol: _symbol(), decimals: _decimals(), totalSupply: _totalSupply() });
   }
@@ -683,7 +693,7 @@ For complex features with many read operations:
 
 ```solidity
 // StakingWrite.sol - Write operations
-abstract contract StakingWrite is IStakingWrite, Common {
+abstract contract StakingWrite is IStakingWrite, Modifiers {
   function stake(uint256 amount) external override {
     /* ... */
   }
@@ -693,7 +703,7 @@ abstract contract StakingWrite is IStakingWrite, Common {
 }
 
 // StakingRead.sol - Read operations
-abstract contract StakingRead is IStakingRead, Common {
+abstract contract StakingRead is IStakingRead, Modifiers {
   function getStakedBalance(address holder) external view override {
     /* ... */
   }

@@ -205,7 +205,7 @@ configurationVersion = 0;  // or LATEST_VERSION
 ```bash
 cd packages/ats/contracts
 
-# Make your changes to contracts/layer_2/bond/Bond.sol
+# Make your changes to contracts/facets/bond/Bond.sol
 # Update version in comments/NatSpec
 ```
 
@@ -216,7 +216,7 @@ cd packages/ats/contracts
 npm run compile
 
 # Run specific tests
-npm run test -- test/layer_2/bond/Bond.test.ts
+npm run test -- test/contracts/integration/bond/bond.test.ts
 
 # Run all tests
 npm run test
