@@ -53,6 +53,11 @@ interface IBusinessLogicResolver is IDiamondCutManager {
     /// @param newAddress new address replacing the old one.
     event ReplacementAddressUpdated(address indexed oldAddress, address indexed newAddress);
 
+    /// @notice Event emitted when a replacement address is removed
+    /// @param oldAddress address for which the replacement is being removed.
+    /// @param newAddressRemoved removed replacement address.
+    event ReplacementAddressRemoved(address indexed oldAddress, address indexed newAddressRemoved);
+
     error BusinessLogicVersionDoesNotExist(uint256 version);
     error BusinessLogicKeyDuplicated(bytes32 businessLogicKey);
     error BusinessLogicKeyMismatch(address implementation, bytes32 actualKey, bytes32 expectedKey);
@@ -101,6 +106,12 @@ interface IBusinessLogicResolver is IDiamondCutManager {
      * @param _newAddress the new address to replace it with
      */
     function updateReplacementAddress(address _oldAddress, address _newAddress) external;
+
+    /**
+     * @notice Removes the replacement address for a given address
+     * @param _oldAddress the address for which to remove the replacement
+     */
+    function removeReplacementAddress(address _oldAddress) external;
 
     /**
      * @notice Returns the current status of a given version

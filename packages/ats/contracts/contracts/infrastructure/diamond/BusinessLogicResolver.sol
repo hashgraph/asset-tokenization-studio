@@ -60,6 +60,11 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
         emit ReplacementAddressUpdated(_oldAddress, _newAddress);
     }
 
+    function removeReplacementAddress(address _oldAddress) external {
+        address newAddressRemoved = _removeReplacementAddress(_oldAddress);
+        emit ReplacementAddressRemoved(_oldAddress, newAddressRemoved);
+    }
+
     function getVersionStatus(
         bytes32 _businessLogicKey,
         uint256 _version
