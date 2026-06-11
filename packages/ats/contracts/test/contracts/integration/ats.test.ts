@@ -96,4 +96,28 @@ describe("ATS — IAsset Suites", () => {
   snapshotsByPartitionTests(() => ctx);
   votingSecurityHoldersTests(() => ctx);
   transferAndLockByPartitionTests(() => ctx);
+
+  describe("Freeze", () => {
+    freezeTests();
+  });
+
+  describe("Deactivate", () => {
+    deactivateTests();
+  });
+
+  describe("Operator", () => {
+    operatorTests();
+  });
+
+  describe("EIP712", () => {
+    eip712Tests();
+  });
+
+  describe("Nonces", () => {
+    noncesTests();
+  });
+
+  describe("Control List", () => {
+    controlListTests();
+  });
 });
