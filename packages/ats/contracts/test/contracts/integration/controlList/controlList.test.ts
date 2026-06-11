@@ -46,6 +46,8 @@ export function controlListTests(getCtx: () => AssetMockCtx): void {
       );
     });
 
+
+
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeControlList is called THEN it reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_D).initializeControlList(true)).to.be.revertedWithCustomError(
         asset,
@@ -53,9 +55,14 @@ export function controlListTests(getCtx: () => AssetMockCtx): void {
       );
     });
 
+
+
     it("GIVEN a new deployment WHEN initializeControlList is called THEN it emits ControlListInitialized", async () => {
-      await asset.forceFacetNotRegistered(RESOLVER_KEY_CONTROL_LIST);
-      await expect(asset.initializeControlList(true)).to.emit(asset, "ControlListInitialized");
+       await asset.forceFacetNotRegistered(RESOLVER_KEY_CONTROL_LIST);
+      await expect(asset.initializeControlList(true)).to.emit(
+        asset,
+        "ControlListInitialized"
+      );
     });
 
     it("GIVEN a paused Token WHEN addToControlList THEN transaction fails with IsPaused", async () => {
@@ -152,13 +159,14 @@ export function controlListTests(getCtx: () => AssetMockCtx): void {
     describe("Deactivated", () => {
       beforeEach(async () => {
         await asset.forceDeactivate();
-      });
+      });it("GIVEN a deactivated asset WHEN addToControlList THEN transaction fails with Deactivated", async () => {
 
-      it("GIVEN a deactivated asset WHEN addToControlList THEN transaction fails with Deactivated", async () => {
-        await expect(asset.connect(signer_A).addToControlList(ADDRESS_ZERO)).to.be.revertedWithCustomError(
+        await expect(
+          asset.connect(signer_A).addToControlList(ADDRESS_ZERO
+        )).to.be.revertedWithCustomError(
           asset,
           "Deactivated",
-        );
+      );
       });
 
       it("GIVEN a deactivated asset WHEN removeFromControlList THEN transaction fails with Deactivated", async () => {
