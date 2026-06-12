@@ -281,3 +281,11 @@ Thrown when attempting to remove an address that is not present in the control l
 | Name    | Type    | Description                     |
 | ------- | ------- | ------------------------------- |
 | account | address | The address that was not found. |
+
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.

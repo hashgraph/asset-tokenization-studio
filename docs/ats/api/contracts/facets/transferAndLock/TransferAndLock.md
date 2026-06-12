@@ -261,6 +261,14 @@ error SnapshotIdNull()
 
 Thrown when a snapshot identifier of zero is supplied; zero is reserved and never assigned to a valid snapshot.
 
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.
+
 ### WrongExpirationTimestamp
 
 ```solidity

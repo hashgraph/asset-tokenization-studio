@@ -267,3 +267,11 @@ error TokenIsNotControllable()
 ```
 
 Thrown when an operation requires the token to be controllable but it is not.
+
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.

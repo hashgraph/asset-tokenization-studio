@@ -322,3 +322,11 @@ error PartitionsAreUnProtected()
 ```
 
 Reverts when a protected-mode operation is attempted but partitions are not currently protected.
+
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.

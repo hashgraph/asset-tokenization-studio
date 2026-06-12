@@ -251,3 +251,11 @@ error NotAllowedInMultiPartitionMode()
 ```
 
 Thrown when a single-partition operation is attempted on a multi-partition token.
+
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.

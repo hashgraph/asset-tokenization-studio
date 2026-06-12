@@ -135,3 +135,11 @@ Thrown when an account does not hold a required role.
 | ------- | ------- | -------------------------------- |
 | account | address | The account that lacks the role. |
 | role    | bytes32 | The role that is not held.       |
+
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.
