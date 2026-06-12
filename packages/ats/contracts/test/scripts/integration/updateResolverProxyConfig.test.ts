@@ -42,7 +42,7 @@ import {
 } from "@test";
 
 // Contract types
-import { AccessControl, AccessControlFacet__factory, BusinessLogicResolver__factory } from "@contract-types";
+import { BusinessLogicResolver__factory } from "@contract-types";
 
 describe("updateResolverProxy* - Integration Tests", () => {
   before(silenceScriptLogging);

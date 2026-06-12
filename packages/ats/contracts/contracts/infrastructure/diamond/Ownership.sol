@@ -5,6 +5,7 @@ import { IOwnership } from "./IOwnership.sol";
 import { OwnershipWrapper } from "./OwnershipWrapper.sol";
 import { Pause } from "../../facets/pause/Pause.sol";
 import { EvmAccessors } from "../utils/EvmAccessors.sol";
+import { ROLE_CREATE_CONFIGURATION } from "../../constants/roles.sol";
 
 /**
  * @title Ownership
@@ -29,7 +30,7 @@ abstract contract Ownership is IOwnership, Pause, OwnershipWrapper {
     function transferOwnership(
         bytes32 _configId,
         address _newOwner
-    ) external onlyUnpaused onlyConfigurationOwner(_configId) onlyCreateConfigurationRole(_newOwner) {
+    ) external onlyUnpaused onlyConfigurationOwner(_configId) onlyRoleForAccount(ROLE_CREATE_CONFIGURATION, _newOwner) {
         _setPendingOwner(_configId, _newOwner);
         emit OwnershipTransfered(_configId, EvmAccessors.getMsgSender(), _newOwner);
     }

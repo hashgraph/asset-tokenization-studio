@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { AccessControlStorageWrapper, RoleDataStorage } from "../../domain/core/AccessControlStorageWrapper.sol";
-import { ROLE_FREEZE_MANAGER, ROLE_AGENT, ROLE_CREATE_CONFIGURATION } from "../../constants/roles.sol";
+import { ROLE_FREEZE_MANAGER, ROLE_AGENT } from "../../constants/roles.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
@@ -100,13 +100,15 @@ abstract contract AccessControlModifiers {
     }
 
     /**
-     * @notice Restricts execution to accounts holding ROLE_CREATE_CONFIGURATION.
-     * @dev Delegates the membership check to `AccessControlStorageWrapper.checkRole`, which
-     *      reverts with `AccountHasNoRole` when `_account` does not hold the role.
+     * @notice Restricts execution to a given account holding the specified role.
+     * @dev Unlike `onlyRole`, which checks `msg.sender`, this modifier validates an
+     *      explicitly supplied `_account`. Delegates to `AccessControlStorageWrapper.checkRole`,
+     *      which reverts with `AccountHasNoRole(_account, _role)` on failure.
+     * @param _role The role that `_account` must hold.
      * @param _account The address whose role membership is validated.
      */
-    modifier onlyCreateConfigurationRole(address _account) virtual {
-        AccessControlStorageWrapper.checkRole(ROLE_CREATE_CONFIGURATION, _account);
+    modifier onlyRoleForAccount(bytes32 _role, address _account) virtual {
+        AccessControlStorageWrapper.checkRole(_role, _account);
         _;
     }
 }
