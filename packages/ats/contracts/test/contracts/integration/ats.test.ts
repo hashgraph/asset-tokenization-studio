@@ -25,6 +25,14 @@ import { customDataTests } from "./customData/customData.test";
 import { ssiTests } from "./ssi/ssi.test";
 import { operatorByPartitionTests } from "./operatorByPartition/operatorByPartition.test";
 
+// ── W1: Layer 1 suites ────────────────────────────────────────────
+import { corporateActionsTests } from "./layer_1/corporateActions/corporateActions.test";
+import { dividendSecurityHoldersTests } from "./layer_1/dividendSecurityHolders/dividendSecurityHolders.test";
+import { documentationTests } from "./layer_1/documentation/documentation.test";
+import { scheduledBalanceAdjustmentsTests } from "./layer_1/scheduledTasks/scheduledBalanceAdjustments/scheduledBalanceAdjustments.test";
+import { freezeAtSnapshotTests } from "./layer_1/freezeAtSnapshot/freezeAtSnapshot.test";
+import { freezeAtSnapshotByPartitionTests } from "./layer_1/freezeAtSnapshotByPartition/freezeAtSnapshotByPartition.test";
+
 // ── W2: Multi-partition suites ──────────────────────────────────────────
 import { holdAtSnapshotTests } from "./holdAtSnapshot/holdAtSnapshot.test";
 import { lockAtSnapshotTests } from "./lockAtSnapshot/lockAtSnapshot.test";
@@ -50,6 +58,14 @@ describe("ATS — IAsset Suites", () => {
   customDataTests();
   ssiTests();
   operatorByPartitionTests();
+
+  // ── W1: Layer 1 suites ────────────────────────────────────────────
+  corporateActionsTests();
+  dividendSecurityHoldersTests();
+  documentationTests();
+  scheduledBalanceAdjustmentsTests();
+  freezeAtSnapshotTests();
+  freezeAtSnapshotByPartitionTests();
 
   // ── W2: Multi-partition suites ──────────────────────────────────────
   holdAtSnapshotTests();
