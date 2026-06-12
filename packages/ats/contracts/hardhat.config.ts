@@ -40,16 +40,6 @@ const config: HardhatUserConfig = {
           evmVersion: "cancun",
         },
       },
-      {
-        version: "0.8.17",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 100,
-          },
-          evmVersion: "london",
-        },
-      },
     ],
   },
   paths: {
