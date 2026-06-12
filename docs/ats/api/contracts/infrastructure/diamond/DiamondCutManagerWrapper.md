@@ -1205,6 +1205,14 @@ _Callers that want the most recent registered version must read it first via {ge
 | --------------- | ------- | ------------------------------------- |
 | configurationId | bytes32 | Configuration key that was looked up. |
 
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.
+
 ### ZeroKeyNotValidForBusinessLogic
 
 ```solidity

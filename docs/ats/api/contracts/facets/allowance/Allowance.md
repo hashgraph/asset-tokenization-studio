@@ -238,6 +238,14 @@ error SpenderWithZeroAddress()
 
 Reverts when the zero address is supplied as `spender` in an allowance update.
 
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.
+
 ### ZeroOwnerAddress
 
 ```solidity

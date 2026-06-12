@@ -304,3 +304,11 @@ Raised when the caller is not the pending owner of the configuration.
 | configId     | bytes32 | Configuration whose pending handover was targeted.          |
 | sender       | address | Caller that attempted to accept ownership.                  |
 | pendingOwner | address | Address currently nominated as pending owner of `configId`. |
+
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.

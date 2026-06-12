@@ -293,6 +293,14 @@ error ProceedRecipientNotFound(address proceedRecipient)
 | ---------------- | ------- | ----------- |
 | proceedRecipient | address | undefined   |
 
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.
+
 ### ZeroAddressNotAllowed
 
 ```solidity

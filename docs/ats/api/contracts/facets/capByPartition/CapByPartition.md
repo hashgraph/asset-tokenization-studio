@@ -180,3 +180,11 @@ Thrown when a proposed new partition cap is below the partition&#39;s current ad
 | partition   | bytes32 | The partition whose cap would be set below its current supply. |
 | maxSupply   | uint256 | The proposed new maximum supply for the partition.             |
 | totalSupply | uint256 | The current adjusted total supply for the partition.           |
+
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.

@@ -275,6 +275,14 @@ Raised by `checkFacetNotReady` when a facet is already marked ready for the reso
 | facetId   | bytes32 | Identifier of the facet already flagged as ready. |
 | versionId | uint256 | Version for which the facet is already ready.     |
 
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.
+
 ### ZeroValueNotAllowed
 
 ```solidity
