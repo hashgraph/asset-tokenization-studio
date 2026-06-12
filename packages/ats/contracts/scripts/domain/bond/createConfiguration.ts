@@ -147,6 +147,7 @@ const BOND_FACETS = [
   "TransferAndLockFacet",
   "TransferAndLockByPartitionFacet",
   "InterestRateFacet",
+  "FixedRateFacet",
 
   // Maturity By Partition
   "MaturityByPartitionFacet",

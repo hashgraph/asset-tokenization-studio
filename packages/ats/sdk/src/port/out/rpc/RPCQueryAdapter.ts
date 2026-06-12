@@ -282,7 +282,7 @@ export class RPCQueryAdapter {
     const nominalValue = await this.connect(IAsset__factory, address.toString()).getNominalValue();
     const nominalValueCurrency = await this.connect(IAsset__factory, address.toString()).getNominalValueCurrency();
     const nominalValueDecimals = await this.connect(IAsset__factory, address.toString()).getNominalValueDecimals();
-    const maturityDate = await this.connect(IAsset__factory, address.toString()).getMaturityDate;
+    const maturityDate = await this.connect(IAsset__factory, address.toString()).getMaturityDate();
 
     return new BondDetails(
       nominalValueCurrency,
