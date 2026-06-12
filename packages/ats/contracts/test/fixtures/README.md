@@ -38,11 +38,9 @@ fixtures/
 ├── tokens/
 │   ├── equity.fixture.ts       # Equity token fixtures (single/multi-partition, etc.)
 │   └── common.fixture.ts       # Shared token utilities and constants
-├── features/
-│   ├── pause.fixture.ts        # Pause functionality with external pause mocks
-│   └── controlList.fixture.ts  # Control list setup
-└── trex/
-    └── fullSuite.fixture.ts    # T-REX (ERC-3643) full suite deployment
+└── features/
+    ├── pause.fixture.ts        # Pause functionality with external pause mocks
+    └── controlList.fixture.ts  # Control list setup
 ```
 
 ## Usage Patterns
