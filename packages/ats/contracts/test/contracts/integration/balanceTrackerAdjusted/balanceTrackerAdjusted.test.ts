@@ -9,6 +9,7 @@ import { DEFAULT_PARTITION, executeRbac, grantKycToHolders } from "@test";
 import type { AssetMockCtx } from "@test";
 
 export function balanceTrackerAdjustedTests(getCtx: () => AssetMockCtx): void {
+  export function balanceTrackerAdjustedTests(): void {
   describe("BalanceTrackerAdjusted Tests", () => {
     let signer_A: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
@@ -30,24 +31,24 @@ export function balanceTrackerAdjustedTests(getCtx: () => AssetMockCtx): void {
         signer_B = ctx.user1;
         signer_C = ctx.user2;
 
-        await executeRbac(asset, [
-          {
-            role: ATS_ROLES.ROLE_ISSUER,
-            members: [signer_B.address],
-          },
-          {
-            role: ATS_ROLES.ROLE_KYC,
-            members: [signer_B.address],
-          },
-          {
-            role: ATS_ROLES.ROLE_CORPORATE_ACTION,
-            members: [signer_A.address],
-          },
-          {
-            role: ATS_ROLES.ROLE_SSI_MANAGER,
-            members: [signer_A.address],
-          },
-        ]);
+      await executeRbac(asset, [
+        {
+          role: ATS_ROLES.ROLE_ISSUER,
+          members: [signer_B.address],
+        },
+        {
+          role: ATS_ROLES.ROLE_KYC,
+          members: [signer_B.address],
+        },
+        {
+          role: ATS_ROLES.ROLE_CORPORATE_ACTION,
+          members: [signer_A.address],
+        },
+        {
+          role: ATS_ROLES.ROLE_SSI_MANAGER,
+          members: [signer_A.address],
+        },
+      ]);
 
         await asset.connect(signer_A).addIssuer(signer_B.address);
         await grantKycToHolders(asset, signer_B, [signer_A, signer_B]);

@@ -8,6 +8,7 @@ import { DEFAULT_PARTITION, PARTITION_ID_2, executeRbac, grantKycToHolders } fro
 import type { AssetMockCtx } from "@test";
 
 export function balanceTrackerAtSnapshotByPartitionTests(getCtx: () => AssetMockCtx): void {
+  export function balanceTrackerAtSnapshotByPartitionTests(): void {
   describe("BalanceTrackerAtSnapshotByPartition Tests", () => {
     let signer_A: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
@@ -79,7 +80,9 @@ export function balanceTrackerAtSnapshotByPartitionTests(getCtx: () => AssetMock
           data: "0x",
         });
 
-        expect(await asset.balanceOfAtSnapshotByPartition(DEFAULT_PARTITION, 1, signer_A.address)).to.equal(mintAmount);
+        expect(await asset.balanceOfAtSnapshotByPartition(DEFAULT_PARTITION, 1, signer_A.address)).to.equal(
+          mintAmount,
+        );
       });
 
       it("GIVEN a snapshot WHEN balanceOfAtSnapshotByPartition for an unknown partition THEN returns zero", async () => {
