@@ -45,8 +45,7 @@ export function balanceTrackerAtSnapshotByPartitionTests(getCtx: () => AssetMock
       ]);
 
       await asset.connect(signer_A).addIssuer(signer_B.address);
-      await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
-      await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
+      await grantKycToHolders(asset, signer_B, [signer_A, signer_B]);
     }
 
     beforeEach(async () => {
@@ -85,9 +84,7 @@ export function balanceTrackerAtSnapshotByPartitionTests(getCtx: () => AssetMock
           data: "0x",
         });
 
-        expect(await asset.balanceOfAtSnapshotByPartition(DEFAULT_PARTITION, 1, signer_A.address)).to.equal(
-          mintAmount,
-        );
+        expect(await asset.balanceOfAtSnapshotByPartition(DEFAULT_PARTITION, 1, signer_A.address)).to.equal(mintAmount);
       });
 
       it("GIVEN a snapshot WHEN balanceOfAtSnapshotByPartition for an unknown partition THEN returns zero", async () => {

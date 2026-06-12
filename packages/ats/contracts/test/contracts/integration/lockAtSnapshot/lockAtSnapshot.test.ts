@@ -4,8 +4,15 @@ import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ATS_ROLES, EMPTY_STRING, ZERO, RESOLVER_KEY_LOCK_AT_SNAPSHOT } from "@scripts";
-import { deployAssetMockCtx, executeRbac, MAX_UINT256 } from "@test";
+import { ATS_ROLES, RESOLVER_KEY_LOCK_AT_SNAPSHOT } from "@scripts";
+import {
+  DEFAULT_PARTITION,
+  PARTITION_ID_2,
+  deployAssetMockCtx,
+  executeRbac,
+  grantKycToHolders,
+  MAX_UINT256,
+} from "@test";
 
 const amount = 1000;
 
@@ -35,9 +42,7 @@ export function lockAtSnapshotTests(): void {
       ]);
 
       await asset.connect(signer_A).addIssuer(signer_B.address);
-      await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
-      await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
-      await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
+      await grantKycToHolders(asset, signer_B, [signer_A, signer_B, signer_C]);
     }
 
     beforeEach(async () => {

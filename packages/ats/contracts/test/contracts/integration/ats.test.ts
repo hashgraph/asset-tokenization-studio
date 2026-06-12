@@ -133,39 +133,13 @@ describe("ATS — IAsset Suites", () => {
   });
 
   // ── W2: Multi-partition suites ──────────────────────────────────────
-  describe("HoldAtSnapshot", () => {
-    holdAtSnapshotTests();
-  });
-
-  describe("LockAtSnapshot", () => {
-    lockAtSnapshotTests();
-  });
-
-  describe("LockAtSnapshotByPartition", () => {
-    lockAtSnapshotByPartitionTests();
-  });
-
-  describe("BalanceTrackerAdjusted", () => {
-    balanceTrackerAdjustedTests();
-  });
-
-  describe("BalanceTrackerAtSnapshotByPartition", () => {
-    balanceTrackerAtSnapshotByPartitionTests();
-  });
-
-  describe("BalanceTrackerAtSnapshot", () => {
-    balanceTrackerAtSnapshotTests();
-  });
-
-  describe("SnapshotsByPartition", () => {
-    snapshotsByPartitionTests();
-  });
-
-  describe("VotingSecurityHolders", () => {
-    votingSecurityHoldersTests();
-  });
-
-  describe("TransferAndLockByPartition", () => {
-    transferAndLockByPartitionTests();
-  });
+  holdAtSnapshotTests();
+  lockAtSnapshotTests();
+  lockAtSnapshotByPartitionTests();
+  balanceTrackerAdjustedTests();
+  balanceTrackerAtSnapshotByPartitionTests();
+  balanceTrackerAtSnapshotTests();
+  snapshotsByPartitionTests();
+  votingSecurityHoldersTests();
+  transferAndLockByPartitionTests();
 });

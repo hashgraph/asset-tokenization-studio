@@ -45,8 +45,7 @@ export function balanceTrackerAtSnapshotTests(getCtx: () => AssetMockCtx): void 
       ]);
 
       await asset.connect(signer_A).addIssuer(signer_B.address);
-      await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
-      await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
+      await grantKycToHolders(asset, signer_B, [signer_A, signer_B]);
     }
 
     beforeEach(async () => {
