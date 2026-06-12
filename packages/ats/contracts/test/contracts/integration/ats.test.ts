@@ -19,6 +19,11 @@ import { operatorTests } from "./operator/operator.test";
 import { eip712Tests } from "./eip712/eip712.test";
 import { noncesTests } from "./nonces/nonces.test";
 import { controlListTests } from "./controlList/controlList.test";
+import { kycTests } from "./kyc/kyc.test";
+import { coreAtSnapshotTests } from "./coreAtSnapshot/coreAtSnapshot.test";
+import { customDataTests } from "./customData/customData.test";
+import { ssiTests } from "./ssi/ssi.test";
+import { operatorByPartitionTests } from "./operatorByPartition/operatorByPartition.test";
 
 // ── W2: Multi-partition suites ──────────────────────────────────────────
 import { holdAtSnapshotTests } from "./holdAtSnapshot/holdAtSnapshot.test";
@@ -40,6 +45,11 @@ describe("ATS — IAsset Suites", () => {
   eip712Tests();
   noncesTests();
   controlListTests();
+  kycTests();
+  coreAtSnapshotTests();
+  customDataTests();
+  ssiTests();
+  operatorByPartitionTests();
 
   // ── W2: Multi-partition suites ──────────────────────────────────────
   holdAtSnapshotTests();
