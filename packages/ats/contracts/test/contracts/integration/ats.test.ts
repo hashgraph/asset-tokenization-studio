@@ -107,6 +107,14 @@ describe("ATS — IAsset Suites", () => {
   ssiTests();
   operatorByPartitionTests();
 
+  // ── W1: Layer 1 suites ────────────────────────────────────────────
+  corporateActionsTests();
+  dividendSecurityHoldersTests();
+  documentationTests();
+  scheduledBalanceAdjustmentsTests();
+  freezeAtSnapshotTests();
+  freezeAtSnapshotByPartitionTests();
+
   // ── W2: Multi-partition suites ──────────────────────────────────────
   holdAtSnapshotTests(() => ctx);
   lockAtSnapshotTests(() => ctx);
