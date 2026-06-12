@@ -289,30 +289,25 @@ export function operatorByPartitionTests(): void {
     });
 
     describe("Deactivated", () => {
+      beforeEach(async () => {
+        await asset.forceDeactivate();
+      });
+
       it("GIVEN a deactivated asset WHEN authorizeOperatorByPartition THEN transaction fails with Deactivated", async () => {
-        const ctx = await loadFixture(deployAssetMockCtx);
-        const deactivatedAsset = ctx.asset;
-        await deactivatedAsset.forceDeactivate();
         await expect(
-          deactivatedAsset.connect(ctx.deployer).authorizeOperatorByPartition(ethers.ZeroHash, ethers.ZeroAddress),
-        ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+          asset.connect(signer_A).authorizeOperatorByPartition(ethers.ZeroHash, ethers.ZeroAddress),
+        ).to.be.revertedWithCustomError(asset, "Deactivated");
       });
 
       it("GIVEN a deactivated asset WHEN revokeOperatorByPartition THEN transaction fails with Deactivated", async () => {
-        const ctx = await loadFixture(deployAssetMockCtx);
-        const deactivatedAsset = ctx.asset;
-        await deactivatedAsset.forceDeactivate();
         await expect(
-          deactivatedAsset.connect(ctx.deployer).revokeOperatorByPartition(ethers.ZeroHash, ethers.ZeroAddress),
-        ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+          asset.connect(signer_A).revokeOperatorByPartition(ethers.ZeroHash, ethers.ZeroAddress),
+        ).to.be.revertedWithCustomError(asset, "Deactivated");
       });
 
       it("GIVEN a deactivated asset WHEN operatorTransferByPartition THEN transaction fails with Deactivated", async () => {
-        const ctx = await loadFixture(deployAssetMockCtx);
-        const deactivatedAsset = ctx.asset;
-        await deactivatedAsset.forceDeactivate();
         await expect(
-          deactivatedAsset.connect(ctx.deployer).operatorTransferByPartition({
+          asset.connect(signer_A).operatorTransferByPartition({
             partition: ethers.ZeroHash,
             from: ethers.ZeroAddress,
             to: ethers.ZeroAddress,
@@ -320,18 +315,13 @@ export function operatorByPartitionTests(): void {
             data: "0x",
             operatorData: "0x",
           }),
-        ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+        ).to.be.revertedWithCustomError(asset, "Deactivated");
       });
 
       it("GIVEN a deactivated asset WHEN operatorRedeemByPartition THEN transaction fails with Deactivated", async () => {
-        const ctx = await loadFixture(deployAssetMockCtx);
-        const deactivatedAsset = ctx.asset;
-        await deactivatedAsset.forceDeactivate();
         await expect(
-          deactivatedAsset
-            .connect(ctx.deployer)
-            .operatorRedeemByPartition(ethers.ZeroHash, ethers.ZeroAddress, 0, "0x", "0x"),
-        ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+          asset.connect(signer_A).operatorRedeemByPartition(ethers.ZeroHash, ethers.ZeroAddress, 0, "0x", "0x"),
+        ).to.be.revertedWithCustomError(asset, "Deactivated");
       });
     });
 

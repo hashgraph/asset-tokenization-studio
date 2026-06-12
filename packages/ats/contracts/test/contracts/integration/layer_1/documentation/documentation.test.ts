@@ -216,15 +216,17 @@ export function documentationTests(): void {
     });
 
     describe("Deactivated", () => {
-      it("GIVEN a deactivated asset WHEN setDocument THEN transaction fails with Deactivated", async () => {
+      beforeEach(async () => {
         await asset.forceDeactivate();
+      });
+
+      it("GIVEN a deactivated asset WHEN setDocument THEN transaction fails with Deactivated", async () => {
         await expect(
           asset.connect(deployer).setDocument(ethers.ZeroHash, "", ethers.ZeroHash),
         ).to.be.revertedWithCustomError(asset, "Deactivated");
       });
 
       it("GIVEN a deactivated asset WHEN removeDocument THEN transaction fails with Deactivated", async () => {
-        await asset.forceDeactivate();
         await expect(asset.connect(deployer).removeDocument(ethers.ZeroHash)).to.be.revertedWithCustomError(
           asset,
           "Deactivated",

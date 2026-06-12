@@ -27,7 +27,7 @@ export function ssiTests(): void {
     let equityAsset: IAssetMock;
     let revocationList: MockedT3RevocationRegistry;
 
-    async function deploySecurityFixture() {
+    async function deployFixture() {
       const ctx = await loadFixture(deployAssetMockCtx);
       signer_A = ctx.deployer;
       signer_B = ctx.user2;
@@ -35,6 +35,7 @@ export function ssiTests(): void {
       unknownSigner = ctx.unknownSigner;
 
       asset = ctx.asset;
+      equityAsset = ctx.asset;
       await executeRbac(asset, [
         {
           role: ATS_ROLES.ROLE_PAUSER,
@@ -50,7 +51,7 @@ export function ssiTests(): void {
     }
 
     beforeEach(async () => {
-      await loadFixture(deploySecurityFixture);
+      await loadFixture(deployFixture);
     });
 
     describe("Paused", () => {
@@ -173,7 +174,7 @@ export function ssiTests(): void {
       const AMOUNT = 1000;
       let revertingRegistry: RevertingRevocationRegistry;
 
-      async function deployRevocationFixture() {
+      beforeEach(async () => {
         const ctx = await loadFixture(deployAssetMockCtx);
         signer_A = ctx.deployer;
         signer_B = ctx.user1;
@@ -201,10 +202,6 @@ export function ssiTests(): void {
 
         revocationList = await (await ethers.getContractFactory("MockedT3RevocationRegistry")).deploy();
         revertingRegistry = await (await ethers.getContractFactory("RevertingRevocationRegistry")).deploy();
-      }
-
-      beforeEach(async () => {
-        await loadFixture(deployRevocationFixture);
       });
 
       it("GIVEN a reverting registry WHEN transfer THEN succeeds treating KYC credential as not revoked", async () => {
@@ -230,31 +227,28 @@ export function ssiTests(): void {
     });
 
     describe("Deactivated", () => {
+      beforeEach(async () => {
+        await asset.forceDeactivate();
+      });
+
       it("GIVEN a deactivated asset WHEN addIssuer THEN transaction fails with Deactivated", async () => {
-        const ctx = await loadFixture(deployAssetMockCtx);
-        const deactivatedAsset = ctx.asset;
-        await deactivatedAsset.forceDeactivate();
-        await expect(
-          deactivatedAsset.connect(ctx.deployer).addIssuer(ethers.ZeroAddress),
-        ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+        await expect(asset.connect(signer_A).addIssuer(ethers.ZeroAddress)).to.be.revertedWithCustomError(
+          asset,
+          "Deactivated",
+        );
       });
 
       it("GIVEN a deactivated asset WHEN removeIssuer THEN transaction fails with Deactivated", async () => {
-        const ctx = await loadFixture(deployAssetMockCtx);
-        const deactivatedAsset = ctx.asset;
-        await deactivatedAsset.forceDeactivate();
-        await expect(
-          deactivatedAsset.connect(ctx.deployer).removeIssuer(ethers.ZeroAddress),
-        ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+        await expect(asset.connect(signer_A).removeIssuer(ethers.ZeroAddress)).to.be.revertedWithCustomError(
+          asset,
+          "Deactivated",
+        );
       });
 
       it("GIVEN a deactivated asset WHEN setRevocationRegistryAddress THEN transaction fails with Deactivated", async () => {
-        const ctx = await loadFixture(deployAssetMockCtx);
-        const deactivatedAsset = ctx.asset;
-        await deactivatedAsset.forceDeactivate();
         await expect(
-          deactivatedAsset.connect(ctx.deployer).setRevocationRegistryAddress(ethers.ZeroAddress),
-        ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+          asset.connect(signer_A).setRevocationRegistryAddress(ethers.ZeroAddress),
+        ).to.be.revertedWithCustomError(asset, "Deactivated");
       });
     });
 

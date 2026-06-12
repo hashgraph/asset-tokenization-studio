@@ -111,13 +111,15 @@ export function customDataTests(): void {
     });
 
     describe("Deactivated", () => {
+      beforeEach(async () => {
+        await asset.forceDeactivate();
+      });
+
       it("GIVEN a deactivated asset WHEN setCustomData THEN transaction fails with Deactivated", async () => {
-        const ctx = await loadFixture(deployAssetMockCtx);
-        const deactivatedAsset = ctx.asset;
-        await deactivatedAsset.forceDeactivate();
-        await expect(
-          deactivatedAsset.connect(ctx.deployer).setCustomData(ethers.ZeroHash, []),
-        ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+        await expect(asset.connect(signer_A).setCustomData(ethers.ZeroHash, [])).to.be.revertedWithCustomError(
+          asset,
+          "Deactivated",
+        );
       });
     });
 

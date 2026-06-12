@@ -32,6 +32,8 @@ import { documentationTests } from "./layer_1/documentation/documentation.test";
 import { scheduledBalanceAdjustmentsTests } from "./layer_1/scheduledTasks/scheduledBalanceAdjustments/scheduledBalanceAdjustments.test";
 import { freezeAtSnapshotTests } from "./layer_1/freezeAtSnapshot/freezeAtSnapshot.test";
 import { freezeAtSnapshotByPartitionTests } from "./layer_1/freezeAtSnapshotByPartition/freezeAtSnapshotByPartition.test";
+import { securityHoldersTests } from "./layer_2/SecurityHolders.test";
+import { votingTests } from "./voting/voting.test";
 
 // ── W2: Multi-partition suites ──────────────────────────────────────────
 import { holdAtSnapshotTests } from "./holdAtSnapshot/holdAtSnapshot.test";
@@ -66,6 +68,8 @@ describe("ATS — IAsset Suites", () => {
   scheduledBalanceAdjustmentsTests();
   freezeAtSnapshotTests();
   freezeAtSnapshotByPartitionTests();
+  securityHoldersTests();
+  votingTests();
 
   // ── W2: Multi-partition suites ──────────────────────────────────────
   holdAtSnapshotTests();

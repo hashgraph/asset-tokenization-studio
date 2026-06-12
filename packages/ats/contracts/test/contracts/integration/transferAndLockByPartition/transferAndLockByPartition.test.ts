@@ -61,21 +61,7 @@ export function transferAndLockByPartitionTests(): void {
       await grantKycToHolders(asset, signer_B, [signer_A, signer_C], signer_A.address);
     }
 
-    async function deployMultiFixture() {
-      const ctx = await loadFixture(deployAssetMockCtx);
-      asset = ctx.asset;
-      await asset.setMultiPartition(true);
-
-      signer_A = ctx.deployer;
-      signer_B = ctx.user2;
-      signer_C = ctx.user3;
-      signer_D = ctx.user4;
-
-      await executeRbac(asset, set_initRbacs());
-      await setFacets(asset);
-    }
-
-    async function deploySingleFixture() {
+    async function deployFixture() {
       const ctx = await loadFixture(deployAssetMockCtx);
       asset = ctx.asset;
 
@@ -86,16 +72,18 @@ export function transferAndLockByPartitionTests(): void {
 
       await executeRbac(asset, set_initRbacs());
       await setFacets(asset);
+
+      currentTimestamp = await getDltTimestamp();
+      expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS;
     }
 
     beforeEach(async () => {
-      currentTimestamp = await getDltTimestamp();
-      expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS;
+      await loadFixture(deployFixture);
     });
 
     describe("Multi-partition enabled", () => {
       beforeEach(async () => {
-        await loadFixture(deployMultiFixture);
+        await asset.setMultiPartition(true);
       });
 
       describe("transferAndLockByPartition", () => {
@@ -185,7 +173,7 @@ export function transferAndLockByPartitionTests(): void {
 
     describe("Multi-partition disabled", () => {
       beforeEach(async () => {
-        await loadFixture(deploySingleFixture);
+        await loadFixture(deployFixture);
       });
 
       describe("transferAndLockByPartition", () => {
@@ -227,15 +215,17 @@ export function transferAndLockByPartitionTests(): void {
     });
 
     describe("Deactivated", () => {
-      it("GIVEN a deactivated asset WHEN transferAndLockByPartition THEN transaction fails with Deactivated", async () => {
+      beforeEach(async () => {
         const ctx = await loadFixture(deployAssetMockCtx);
-        const deactivatedAsset = ctx.asset;
-        await deactivatedAsset.forceDeactivate();
+        asset = ctx.asset;
+        signer_A = ctx.deployer;
+        await asset.forceDeactivate();
+      });
+
+      it("GIVEN a deactivated asset WHEN transferAndLockByPartition THEN transaction fails with Deactivated", async () => {
         await expect(
-          deactivatedAsset
-            .connect(ctx.deployer)
-            .transferAndLockByPartition(ethers.ZeroHash, ethers.ZeroAddress, 0, "0x", 0),
-        ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+          asset.connect(signer_A).transferAndLockByPartition(ethers.ZeroHash, ethers.ZeroAddress, 0, "0x", 0),
+        ).to.be.revertedWithCustomError(asset, "Deactivated");
       });
     });
 
@@ -265,7 +255,7 @@ export function transferAndLockByPartitionTests(): void {
 
     describe("nonOperational", () => {
       beforeEach(async () => {
-        await loadFixture(deployMultiFixture);
+        await asset.setMultiPartition(true);
         await asset.forceNonOperational();
       });
 

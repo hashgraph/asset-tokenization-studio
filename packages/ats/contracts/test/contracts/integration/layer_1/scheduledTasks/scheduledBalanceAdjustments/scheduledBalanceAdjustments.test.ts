@@ -163,15 +163,17 @@ export function scheduledBalanceAdjustmentsTests(): void {
     });
 
     describe("Deactivated", () => {
-      it("GIVEN a deactivated asset WHEN setScheduledBalanceAdjustment THEN transaction fails with Deactivated", async () => {
+      beforeEach(async () => {
         await asset.forceDeactivate();
+      });
+
+      it("GIVEN a deactivated asset WHEN setScheduledBalanceAdjustment THEN transaction fails with Deactivated", async () => {
         await expect(
           asset.connect(deployer).setScheduledBalanceAdjustment({ executionDate: 0, factor: 0, decimals: 0 }),
         ).to.be.revertedWithCustomError(asset, "Deactivated");
       });
 
       it("GIVEN a deactivated asset WHEN cancelScheduledBalanceAdjustment THEN transaction fails with Deactivated", async () => {
-        await asset.forceDeactivate();
         await expect(asset.connect(deployer).cancelScheduledBalanceAdjustment(0)).to.be.revertedWithCustomError(
           asset,
           "Deactivated",

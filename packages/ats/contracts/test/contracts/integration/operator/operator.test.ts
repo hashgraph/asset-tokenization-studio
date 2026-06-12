@@ -115,22 +115,22 @@ export function operatorTests(): void {
     });
 
     describe("Deactivated", () => {
+      beforeEach(async () => {
+        await asset.forceDeactivate();
+      });
+
       it("GIVEN a deactivated asset WHEN authorizeOperator THEN transaction fails with Deactivated", async () => {
-        const ctx = await loadFixture(deployAssetMockCtx);
-        const deactivatedAsset = ctx.asset;
-        await deactivatedAsset.forceDeactivate();
-        await expect(
-          deactivatedAsset.connect(ctx.deployer).authorizeOperator(ethers.ZeroAddress),
-        ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+        await expect(asset.connect(signer_A).authorizeOperator(ethers.ZeroAddress)).to.be.revertedWithCustomError(
+          asset,
+          "Deactivated",
+        );
       });
 
       it("GIVEN a deactivated asset WHEN revokeOperator THEN transaction fails with Deactivated", async () => {
-        const ctx = await loadFixture(deployAssetMockCtx);
-        const deactivatedAsset = ctx.asset;
-        await deactivatedAsset.forceDeactivate();
-        await expect(
-          deactivatedAsset.connect(ctx.deployer).revokeOperator(ethers.ZeroAddress),
-        ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+        await expect(asset.connect(signer_A).revokeOperator(ethers.ZeroAddress)).to.be.revertedWithCustomError(
+          asset,
+          "Deactivated",
+        );
       });
     });
 
