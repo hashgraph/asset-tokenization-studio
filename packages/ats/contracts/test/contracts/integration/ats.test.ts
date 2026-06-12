@@ -132,6 +132,14 @@ describe("ATS — IAsset Suites", () => {
     controlListTests();
   });
 
+  // ── W1: Layer 1 suites ────────────────────────────────────────────
+  corporateActionsTests();
+  dividendSecurityHoldersTests();
+  documentationTests();
+  scheduledBalanceAdjustmentsTests();
+  freezeAtSnapshotTests();
+  freezeAtSnapshotByPartitionTests();
+
   // ── W2: Multi-partition suites ──────────────────────────────────────
   holdAtSnapshotTests();
   lockAtSnapshotTests();
