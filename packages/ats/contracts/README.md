@@ -459,13 +459,6 @@ The ATS contracts implement a **4-layer hierarchical design** using the **Diamon
 - Routes via BLR resolution
 - Location: `contracts/infrastructure/proxy/ResolverProxy.sol`
 
-**TREXFactory**
-
-- Factory pattern for deploying complete token ecosystems
-- Creates tokens with specific configurations (Equity/Bond)
-- Handles initialization of all required facets
-- Location: `contracts/factory/ERC3643/TREXFactory.sol`
-
 ### Core Facet Categories
 
 **ERC1400 Token Standard Facets:**

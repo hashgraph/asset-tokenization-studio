@@ -14,10 +14,6 @@ pragma solidity >=0.8.0 <0.9.0;
  *
  * Exception: `DEFAULT_ADMIN_ROLE = 0x00` keeps its OpenZeppelin-compatible
  * shape — that name is part of the OZ public API and cannot be renamed.
- *
- * CANONICAL SOURCE — a pragma-rewritten copy is auto-generated to
- * contracts/factory/ERC3643/interfaces/roles.sol on every compile by the
- * `erc3643-clone-interfaces` task. Do NOT edit the generated copy.
  */
 
 bytes32 constant DEFAULT_ADMIN_ROLE = 0x00;
