@@ -4,7 +4,8 @@ import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import { ATS_ROLES, RESOLVER_KEY_LOCK_AT_SNAPSHOT_BY_PARTITION } from "@scripts";
-import { DEFAULT_PARTITION, PARTITION_ID_2, executeRbac, grantKycToHolders, MAX_UINT256 } from "@test";
+import { DEFAULT_PARTITION, PARTITION_ID_2, deployAssetMockCtx, executeRbac, grantKycToHolders, MAX_UINT256 } from "@test";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import type { AssetMockCtx } from "@test";
 
 const amount = 1000;
