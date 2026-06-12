@@ -220,3 +220,11 @@ error IsUnpaused()
 ```
 
 Thrown when `unpause` is called while the token&#39;s internal pause flag is already cleared.
+
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.

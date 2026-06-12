@@ -229,6 +229,14 @@ error IsPaused()
 
 Thrown when an operation that requires the token to be unpaused is attempted while the token is paused (own flag or any external pause contract).
 
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.
+
 ### WrongImpactDataValues
 
 ```solidity

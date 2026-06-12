@@ -263,3 +263,11 @@ _Replaces assertions for defensive handling of logically impossible states._
 | Name      | Type   | Description                                        |
 | --------- | ------ | -------------------------------------------------- |
 | \_errorId | bytes4 | Identifier of the unexpected validation condition. |
+
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.

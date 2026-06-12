@@ -434,6 +434,14 @@ Thrown when the caller is not an authorised operator for the token holder on the
 | tokenHolder | address | Token holder whose tokens were targeted.      |
 | partition   | bytes32 | Partition on which authorisation was checked. |
 
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.
+
 ### ZeroAddressNotAllowed
 
 ```solidity

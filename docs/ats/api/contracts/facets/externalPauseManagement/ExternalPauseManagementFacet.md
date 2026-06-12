@@ -395,6 +395,14 @@ Thrown when attempting to remove an address not present in the external pause li
 | ----- | ------- | --------------------------------------------- |
 | pause | address | The unlisted external pause contract address. |
 
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.
+
 ### ZeroAddressNotAllowed
 
 ```solidity

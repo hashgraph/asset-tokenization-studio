@@ -183,3 +183,11 @@ error TotalSupplyOverflow()
 ```
 
 Reverts when the proposed factor would overflow the projected total supply.
+
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.

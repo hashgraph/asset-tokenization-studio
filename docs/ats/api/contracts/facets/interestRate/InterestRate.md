@@ -159,3 +159,11 @@ _`NONE` is reserved as the uninitialized default; it must never be set explicitl
 | Name     | Type                        | Description                                   |
 | -------- | --------------------------- | --------------------------------------------- |
 | rateType | enum IInterestRate.RateType | The invalid rate type supplied by the caller. |
+
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.

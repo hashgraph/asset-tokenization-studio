@@ -370,6 +370,14 @@ error VotingRightsCreationFailed()
 
 Raised when voting rights creation fails
 
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.
+
 ### WrongIndexForAction
 
 ```solidity

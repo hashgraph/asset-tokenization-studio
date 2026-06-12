@@ -312,6 +312,14 @@ error IsNotEscrow()
 
 Reverts when a caller that is not the recorded escrow attempts to execute the hold.
 
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.
+
 ### WrongHoldId
 
 ```solidity

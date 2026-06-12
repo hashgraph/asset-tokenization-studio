@@ -127,3 +127,11 @@ Raised when an initialiser tries to register a facet that already has a non-zero
 | ----------- | ------- | -------------------------------------------------------------- |
 | facetId     | bytes32 | Identifier of the offending facet.                             |
 | lastVersion | uint256 | Last version recorded for that facet at the time of the check. |
+
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.
