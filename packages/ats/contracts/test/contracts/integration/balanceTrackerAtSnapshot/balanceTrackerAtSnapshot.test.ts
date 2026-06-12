@@ -1,191 +1,189 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { expect } from "chai";
-import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import { IAssetMock } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ATS_ROLES, EMPTY_STRING, ZERO, RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT } from "@scripts";
-import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
+import { deployAssetMockCtx, executeRbac, MAX_UINT256 } from "@test";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
 const EMPTY_VC_ID = EMPTY_STRING;
 
-describe("BalanceTrackerAtSnapshot Tests", () => {
-  let diamond: ResolverProxy;
-  let signer_A: HardhatEthersSigner;
-  let signer_B: HardhatEthersSigner;
-  let signer_C: HardhatEthersSigner;
+export function balanceTrackerAtSnapshotTests(): void {
+  describe("BalanceTrackerAtSnapshot Tests", () => {
+    let signer_A: HardhatEthersSigner;
+    let signer_B: HardhatEthersSigner;
+    let signer_C: HardhatEthersSigner;
 
-  let asset: IAsset;
-  let mockDiamondCut: MockDiamondCut;
+    let asset: IAssetMock;
 
-  async function deployEquity() {
-    const base = await deployEquityTokenFixture();
-    diamond = base.diamond;
-    signer_A = base.deployer;
-    signer_B = base.user1;
-    signer_C = base.user2;
+    async function deployFixture() {
+      const ctx = await loadFixture(deployAssetMockCtx);
+      asset = ctx.asset;
+      await asset.setMultiPartition(true);
 
-    asset = await ethers.getContractAt("IAsset", diamond.target);
-    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
+      signer_A = ctx.deployer;
+      signer_B = ctx.user1;
+      signer_C = ctx.user2;
 
-    await executeRbac(asset, [
-      {
-        role: ATS_ROLES.ROLE_ISSUER,
-        members: [signer_B.address],
-      },
-      {
-        role: ATS_ROLES.ROLE_KYC,
-        members: [signer_B.address],
-      },
-      {
-        role: ATS_ROLES.ROLE_SNAPSHOT,
-        members: [signer_A.address],
-      },
-      {
-        role: ATS_ROLES.ROLE_SSI_MANAGER,
-        members: [signer_A.address],
-      },
-    ]);
+      await executeRbac(asset, [
+        {
+          role: ATS_ROLES.ROLE_ISSUER,
+          members: [signer_B.address],
+        },
+        {
+          role: ATS_ROLES.ROLE_KYC,
+          members: [signer_B.address],
+        },
+        {
+          role: ATS_ROLES.ROLE_SNAPSHOT,
+          members: [signer_A.address],
+        },
+        {
+          role: ATS_ROLES.ROLE_SSI_MANAGER,
+          members: [signer_A.address],
+        },
+      ]);
 
-    await asset.connect(signer_A).addIssuer(signer_B.address);
-    await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
-    await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
-  }
+      await asset.connect(signer_A).addIssuer(signer_B.address);
+      await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
+      await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
+    }
 
-  beforeEach(async () => {
-    await loadFixture(deployEquity);
-  });
-
-  describe("balanceOfAtSnapshot", () => {
-    it("GIVEN no snapshot taken WHEN balanceOfAtSnapshot at id 0 THEN reverts with SnapshotIdNull", async () => {
-      await expect(asset.balanceOfAtSnapshot(0, signer_A.address)).to.be.revertedWithCustomError(
-        asset,
-        "SnapshotIdNull",
-      );
+    beforeEach(async () => {
+      await loadFixture(deployFixture);
     });
 
-    it("GIVEN no snapshot taken WHEN balanceOfAtSnapshot at unknown id THEN reverts with SnapshotIdDoesNotExists", async () => {
-      await expect(asset.balanceOfAtSnapshot(1, signer_A.address)).to.be.revertedWithCustomError(
-        asset,
-        "SnapshotIdDoesNotExists",
-      );
-    });
-
-    it("GIVEN a snapshot of a token holder WHEN balanceOfAtSnapshot THEN returns recorded balance", async () => {
-      const mintAmount = 1000;
-      await asset.connect(signer_B).issueByPartition({
-        partition: _DEFAULT_PARTITION,
-        tokenHolder: signer_A.address,
-        value: mintAmount,
-        data: "0x",
+    describe("balanceOfAtSnapshot", () => {
+      it("GIVEN no snapshot taken WHEN balanceOfAtSnapshot at id 0 THEN reverts with SnapshotIdNull", async () => {
+        await expect(asset.balanceOfAtSnapshot(0, signer_A.address)).to.be.revertedWithCustomError(
+          asset,
+          "SnapshotIdNull",
+        );
       });
 
-      await asset.connect(signer_A).takeSnapshot();
-
-      // mutating the balance after the snapshot should not change the snapshotted value
-      await asset.connect(signer_B).issueByPartition({
-        partition: _DEFAULT_PARTITION,
-        tokenHolder: signer_A.address,
-        value: 500,
-        data: "0x",
+      it("GIVEN no snapshot taken WHEN balanceOfAtSnapshot at unknown id THEN reverts with SnapshotIdDoesNotExists", async () => {
+        await expect(asset.balanceOfAtSnapshot(1, signer_A.address)).to.be.revertedWithCustomError(
+          asset,
+          "SnapshotIdDoesNotExists",
+        );
       });
 
-      expect(await asset.balanceOfAtSnapshot(1, signer_A.address)).to.equal(mintAmount);
-    });
+      it("GIVEN a snapshot of a token holder WHEN balanceOfAtSnapshot THEN returns recorded balance", async () => {
+        const mintAmount = 1000;
+        await asset.connect(signer_B).issueByPartition({
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: mintAmount,
+          data: "0x",
+        });
 
-    it("GIVEN a snapshot WHEN balanceOfAtSnapshot for an account without tokens THEN returns zero", async () => {
-      await asset.connect(signer_A).takeSnapshot();
-      expect(await asset.balanceOfAtSnapshot(1, signer_C.address)).to.equal(0);
-    });
-  });
+        await asset.connect(signer_A).takeSnapshot();
 
-  describe("balancesOfAtSnapshot", () => {
-    it("GIVEN multiple holders snapshotted WHEN balancesOfAtSnapshot paginated THEN returns recorded (holder, balance) pairs", async () => {
-      const mintAmountA = 1000;
-      const mintAmountB = 250;
+        // mutating the balance after the snapshot should not change the snapshotted value
+        await asset.connect(signer_B).issueByPartition({
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: 500,
+          data: "0x",
+        });
 
-      await asset.connect(signer_B).issueByPartition({
-        partition: _DEFAULT_PARTITION,
-        tokenHolder: signer_A.address,
-        value: mintAmountA,
-        data: "0x",
-      });
-      await asset.connect(signer_B).issueByPartition({
-        partition: _DEFAULT_PARTITION,
-        tokenHolder: signer_B.address,
-        value: mintAmountB,
-        data: "0x",
+        expect(await asset.balanceOfAtSnapshot(1, signer_A.address)).to.equal(mintAmount);
       });
 
-      await asset.connect(signer_A).takeSnapshot();
-
-      const page = await asset.balancesOfAtSnapshot(1, 0, 50);
-      const balances: Record<string, bigint> = {};
-      for (const entry of page) {
-        balances[entry.holder] = entry.balance;
-      }
-
-      expect(balances[signer_A.address]).to.equal(BigInt(mintAmountA));
-      expect(balances[signer_B.address]).to.equal(BigInt(mintAmountB));
+      it("GIVEN a snapshot WHEN balanceOfAtSnapshot for an account without tokens THEN returns zero", async () => {
+        await asset.connect(signer_A).takeSnapshot();
+        expect(await asset.balanceOfAtSnapshot(1, signer_C.address)).to.equal(0);
+      });
     });
 
-    it("GIVEN a snapshot WHEN balancesOfAtSnapshot with id 0 THEN reverts with SnapshotIdNull", async () => {
-      await asset.connect(signer_A).takeSnapshot();
-      await expect(asset.balancesOfAtSnapshot(0, 0, 50)).to.be.revertedWithCustomError(asset, "SnapshotIdNull");
-    });
-  });
+    describe("balancesOfAtSnapshot", () => {
+      it("GIVEN multiple holders snapshotted WHEN balancesOfAtSnapshot paginated THEN returns recorded (holder, balance) pairs", async () => {
+        const mintAmountA = 1000;
+        const mintAmountB = 250;
 
-  describe("totalSupplyAtSnapshot", () => {
-    it("GIVEN no snapshot WHEN totalSupplyAtSnapshot at id 0 THEN reverts with SnapshotIdNull", async () => {
-      await expect(asset.totalSupplyAtSnapshot(0)).to.be.revertedWithCustomError(asset, "SnapshotIdNull");
-    });
+        await asset.connect(signer_B).issueByPartition({
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: mintAmountA,
+          data: "0x",
+        });
+        await asset.connect(signer_B).issueByPartition({
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_B.address,
+          value: mintAmountB,
+          data: "0x",
+        });
 
-    it("GIVEN no snapshot WHEN totalSupplyAtSnapshot at unknown id THEN reverts with SnapshotIdDoesNotExists", async () => {
-      await expect(asset.totalSupplyAtSnapshot(1)).to.be.revertedWithCustomError(asset, "SnapshotIdDoesNotExists");
-    });
+        await asset.connect(signer_A).takeSnapshot();
 
-    it("GIVEN tokens issued and a snapshot WHEN totalSupplyAtSnapshot THEN returns recorded total supply", async () => {
-      const mintAmount = 1000;
-      await asset.connect(signer_B).issueByPartition({
-        partition: _DEFAULT_PARTITION,
-        tokenHolder: signer_A.address,
-        value: mintAmount,
-        data: "0x",
+        const page = await asset.balancesOfAtSnapshot(1, 0, 50);
+        const balances: Record<string, bigint> = {};
+        for (const entry of page) {
+          balances[entry.holder] = entry.balance;
+        }
+
+        expect(balances[signer_A.address]).to.equal(BigInt(mintAmountA));
+        expect(balances[signer_B.address]).to.equal(BigInt(mintAmountB));
       });
 
-      await asset.connect(signer_A).takeSnapshot();
+      it("GIVEN a snapshot WHEN balancesOfAtSnapshot with id 0 THEN reverts with SnapshotIdNull", async () => {
+        await asset.connect(signer_A).takeSnapshot();
+        await expect(asset.balancesOfAtSnapshot(0, 0, 50)).to.be.revertedWithCustomError(asset, "SnapshotIdNull");
+      });
+    });
 
-      // post-snapshot mint must not influence the snapshotted total supply
-      await asset.connect(signer_B).issueByPartition({
-        partition: _DEFAULT_PARTITION,
-        tokenHolder: signer_A.address,
-        value: 500,
-        data: "0x",
+    describe("totalSupplyAtSnapshot", () => {
+      it("GIVEN no snapshot WHEN totalSupplyAtSnapshot at id 0 THEN reverts with SnapshotIdNull", async () => {
+        await expect(asset.totalSupplyAtSnapshot(0)).to.be.revertedWithCustomError(asset, "SnapshotIdNull");
       });
 
-      expect(await asset.totalSupplyAtSnapshot(1)).to.equal(mintAmount);
+      it("GIVEN no snapshot WHEN totalSupplyAtSnapshot at unknown id THEN reverts with SnapshotIdDoesNotExists", async () => {
+        await expect(asset.totalSupplyAtSnapshot(1)).to.be.revertedWithCustomError(asset, "SnapshotIdDoesNotExists");
+      });
+
+      it("GIVEN tokens issued and a snapshot WHEN totalSupplyAtSnapshot THEN returns recorded total supply", async () => {
+        const mintAmount = 1000;
+        await asset.connect(signer_B).issueByPartition({
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: mintAmount,
+          data: "0x",
+        });
+
+        await asset.connect(signer_A).takeSnapshot();
+
+        // post-snapshot mint must not influence the snapshotted total supply
+        await asset.connect(signer_B).issueByPartition({
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: 500,
+          data: "0x",
+        });
+
+        expect(await asset.totalSupplyAtSnapshot(1)).to.equal(mintAmount);
+      });
     });
-  });
-  describe("initializeBalanceTrackerAtSnapshot", () => {
-    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeBalanceTrackerAtSnapshot is called THEN AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeBalanceTrackerAtSnapshot())
-        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
-        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    describe("initializeBalanceTrackerAtSnapshot", () => {
+      it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeBalanceTrackerAtSnapshot is called THEN AccountHasNoRole", async () => {
+        await expect(asset.connect(signer_C).initializeBalanceTrackerAtSnapshot())
+          .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+          .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+      });
+
+      it("GIVEN already-initialised WHEN initializeBalanceTrackerAtSnapshot is called again THEN FacetAlreadyRegistered", async () => {
+        await expect(asset.initializeBalanceTrackerAtSnapshot())
+          .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+          .withArgs(RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT, 1);
+      });
     });
 
-    it("GIVEN already-initialised WHEN initializeBalanceTrackerAtSnapshot is called again THEN FacetAlreadyRegistered", async () => {
-      await expect(asset.initializeBalanceTrackerAtSnapshot())
-        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT, 1);
+    describe("initializeBalanceTrackerAtSnapshot event", () => {
+      it("GIVEN a fresh deployment WHEN initializeBalanceTrackerAtSnapshot is called THEN emits BalanceTrackerAtSnapshotInitialized", async () => {
+        await asset.forceFacetNotRegistered(RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT);
+        await expect(asset.initializeBalanceTrackerAtSnapshot()).to.emit(asset, "BalanceTrackerAtSnapshotInitialized");
+      });
     });
   });
-
-  describe("initializeBalanceTrackerAtSnapshot event", () => {
-    it("GIVEN a fresh deployment WHEN initializeBalanceTrackerAtSnapshot is called THEN emits BalanceTrackerAtSnapshotInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT);
-      await expect(asset.initializeBalanceTrackerAtSnapshot()).to.emit(asset, "BalanceTrackerAtSnapshotInitialized");
-    });
-  });
-});
+}

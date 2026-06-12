@@ -4,14 +4,12 @@ import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { ATS_ROLES, RESOLVER_KEY_DEACTIVATE } from "@scripts";
-import { deployEquityTokenFixture, grantRoleAndPauseToken, deployAssetMockCtx } from "@test";
-import { type IAsset, MockDiamondCut } from "@contract-types";
-import { ethers } from "hardhat";
+import { grantRoleAndPauseToken, deployAssetMockCtx } from "@test";
+import { IAssetMock } from "@contract-types";
 
 export function deactivateTests(): void {
   describe("Deactivate Tests", () => {
-    let asset: IAsset;
-    let mockDiamondCut: MockDiamondCut;
+    let asset: IAssetMock;
     let deployer: HardhatEthersSigner;
     let unknownSigner: HardhatEthersSigner;
 
@@ -19,7 +17,6 @@ export function deactivateTests(): void {
     async function deployEquityForDeactivateFixture() {
       const ctx = await loadFixture(deployAssetMockCtx);
       asset = ctx.asset;
-      mockDiamondCut = ctx.mockDiamondCut;
       deployer = ctx.deployer;
       unknownSigner = ctx.unknownSigner;
     }
@@ -71,11 +68,11 @@ export function deactivateTests(): void {
 
     describe("Deactivated", () => {
       it("GIVEN a deactivated asset WHEN deactivate THEN transaction fails with Deactivated", async () => {
-        const base = await deployEquityTokenFixture();
-        const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-        await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
-        await deactivatedAsset.connect(base.deployer).deactivate();
-        await expect(deactivatedAsset.connect(base.deployer).deactivate()).to.be.revertedWithCustomError(
+        const ctx = await loadFixture(deployAssetMockCtx);
+        const deactivatedAsset = ctx.asset;
+        await deactivatedAsset.grantRole(ATS_ROLES.ROLE_DEACTIVATE, ctx.deployer.address);
+        await deactivatedAsset.connect(ctx.deployer).deactivate();
+        await expect(deactivatedAsset.connect(ctx.deployer).deactivate()).to.be.revertedWithCustomError(
           deactivatedAsset,
           "Deactivated",
         );
@@ -98,14 +95,14 @@ export function deactivateTests(): void {
 
     describe("initializeDeactivate event", () => {
       it("GIVEN a fresh deployment WHEN initializeDeactivate is called THEN emits DeactivateInitialized", async () => {
-        await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_DEACTIVATE);
+        await asset.forceFacetNotRegistered(RESOLVER_KEY_DEACTIVATE);
         await expect(asset.initializeDeactivate()).to.emit(asset, "DeactivateInitialized");
       });
     });
 
     describe("nonOperational", () => {
       beforeEach(async () => {
-        await mockDiamondCut.forceNonOperational();
+        await asset.forceNonOperational();
       });
 
       it("GIVEN non-operational asset WHEN deactivate THEN reverts with AssetNotOperational", async () => {

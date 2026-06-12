@@ -2,16 +2,9 @@
 
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import {
-  type IAsset,
-  type IFactory,
-  type BusinessLogicResolver,
-  IAsset__factory,
-  MockDiamondCut,
-} from "@contract-types";
+import { IAssetMock, type IFactory, type BusinessLogicResolver, IAssetMock__factory } from "@contract-types";
 import { ADDRESS_ZERO, ATS_ROLES, GAS_LIMIT } from "@scripts";
 import {
-  deployEquityTokenFixture,
   getSecurityData,
   getRegulationData,
   makeEquityDetailsData,
@@ -29,8 +22,7 @@ export function controlListTests(): void {
     let signer_C: HardhatEthersSigner;
     let signer_D: HardhatEthersSigner;
 
-    let asset: IAsset;
-    let mockDiamondCut: MockDiamondCut;
+    let asset: IAssetMock;
     let factory: IFactory;
     let blr: BusinessLogicResolver;
 
@@ -44,7 +36,6 @@ export function controlListTests(): void {
       blr = ctx.blr as BusinessLogicResolver;
 
       asset = ctx.asset;
-      mockDiamondCut = ctx.mockDiamondCut;
 
       await executeRbac(asset, [{ role: ATS_ROLES.ROLE_PAUSER, members: [signer_B.address] }]);
     }
@@ -98,7 +89,7 @@ export function controlListTests(): void {
       };
       const tx = await factory.deployEquity(equityData, getRegulationData(), { gasLimit: GAS_LIMIT.high });
       const receipt = await tx.wait();
-      const iface = IAsset__factory.createInterface();
+      const iface = IAssetMock__factory.createInterface();
       const event = receipt!.logs
         .map((log) => {
           try {
@@ -212,29 +203,27 @@ export function controlListTests(): void {
 
     describe("Deactivated", () => {
       it("GIVEN a deactivated asset WHEN addToControlList THEN transaction fails with Deactivated", async () => {
-        const base = await deployEquityTokenFixture();
-        const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-        await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
-        await deactivatedAsset.connect(base.deployer).deactivate();
+        const ctx = await loadFixture(deployAssetMockCtx);
+        const deactivatedAsset = ctx.asset;
+        await deactivatedAsset.forceDeactivate();
         await expect(
-          deactivatedAsset.connect(base.deployer).addToControlList(ethers.ZeroAddress),
+          deactivatedAsset.connect(ctx.deployer).addToControlList(ethers.ZeroAddress),
         ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
       });
 
       it("GIVEN a deactivated asset WHEN removeFromControlList THEN transaction fails with Deactivated", async () => {
-        const base = await deployEquityTokenFixture();
-        const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-        await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
-        await deactivatedAsset.connect(base.deployer).deactivate();
+        const ctx = await loadFixture(deployAssetMockCtx);
+        const deactivatedAsset = ctx.asset;
+        await deactivatedAsset.forceDeactivate();
         await expect(
-          deactivatedAsset.connect(base.deployer).removeFromControlList(ethers.ZeroAddress),
+          deactivatedAsset.connect(ctx.deployer).removeFromControlList(ethers.ZeroAddress),
         ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
       });
     });
 
     describe("nonOperational", () => {
       beforeEach(async () => {
-        await mockDiamondCut.forceNonOperational();
+        await asset.forceNonOperational();
       });
 
       it("GIVEN non-operational asset WHEN addToControlList THEN reverts with AssetNotOperational", async () => {

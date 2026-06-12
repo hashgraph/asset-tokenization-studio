@@ -13,8 +13,8 @@
  * @see openspec/changes/test-optimization-shared-fixtures
  */
 
-import type { ResolverProxy, IAsset, MockDiamondCut } from "@contract-types";
-import { ResolverProxy__factory, IAsset__factory, MockDiamondCut__factory } from "@contract-types";
+import type { ResolverProxy, IAssetMock } from "@contract-types";
+import { ResolverProxy__factory, IAssetMock__factory } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFullAssetFixture } from "../deploy/fullAsset";
 
@@ -30,17 +30,14 @@ type InfraData = Awaited<ReturnType<typeof deployAtsInfrastructureFullAssetFixtu
 /**
  * Resolved AssetMock context with every contract handle bound to the same proxy.
  *
- * - `asset` — typed as IAsset (full ERC-1400 + ERC-20 interface)
- * - `mockDiamondCut` — typed as MockDiamondCut (forceNonOperational, etc.)
+ * - `asset` — typed as IAssetMock (full IAsset + MockDiamondCut interface)
  * - `diamond` — the ResolverProxy (diamond) contract instance
  * - All infrastructure handles from the base fixture (blr, factory, accessControl,
  *   signers, etc.) — inherited via the spread of InfraData.
  */
 export interface AssetMockCtx extends InfraData {
-  /** IAsset handle bound to the diamond proxy address. */
-  asset: IAsset;
-  /** MockDiamondCut handle bound to the diamond proxy address. */
-  mockDiamondCut: MockDiamondCut;
+  /** IAssetMock handle bound to the diamond proxy address (combines IAsset + MockDiamondCut). */
+  asset: IAssetMock;
   /** The deployed ResolverProxy (diamond) contract. */
   diamond: ResolverProxy;
 }
@@ -78,7 +75,7 @@ async function deployAssetMockToken(infra: InfraData): Promise<ResolverProxy> {
 /**
  * Assemble the AssetMockCtx from base infrastructure + deployed diamond.
  *
- * Binds `asset` and `mockDiamondCut` to `diamond.target`, spreads all
+ * Binds `asset` (IAssetMock) to `diamond.target`, spreads all
  * infrastructure handles, and asserts the invariant before returning.
  *
  * @param base - Infrastructure data combined with the deployed diamond
@@ -90,8 +87,7 @@ export async function buildAssetMockCtx(base: InfraData & { diamond: ResolverPro
   const ctx: AssetMockCtx = {
     ...base,
     diamond: base.diamond,
-    asset: IAsset__factory.connect(target, base.deployer),
-    mockDiamondCut: MockDiamondCut__factory.connect(target, base.deployer),
+    asset: IAssetMock__factory.connect(target, base.deployer),
   };
 
   assertHandlesBound(ctx);
@@ -113,10 +109,7 @@ export async function buildAssetMockCtx(base: InfraData & { diamond: ResolverPro
 export function assertHandlesBound(ctx: AssetMockCtx): void {
   const diamondTarget = ctx.diamond.target as string;
 
-  const contractHandles: [string, object | undefined][] = [
-    ["asset", ctx.asset],
-    ["mockDiamondCut", ctx.mockDiamondCut],
-  ];
+  const contractHandles: [string, object | undefined][] = [["asset", ctx.asset]];
 
   for (const [name, handle] of contractHandles) {
     if (handle && typeof handle === "object" && "target" in handle) {
@@ -146,7 +139,7 @@ export function assertHandlesBound(ctx: AssetMockCtx): void {
  * @example
  * ```typescript
  * const ctx = await loadFixture(deployAssetMockCtx);
- * // ctx.asset, ctx.mockDiamondCut, ctx.diamond all point to the same address
+ * // ctx.asset and ctx.diamond point to the same address
  * ```
  */
 export async function deployAssetMockCtx(): Promise<AssetMockCtx> {

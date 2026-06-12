@@ -40,13 +40,13 @@ describe("AssetMock context fixture", () => {
     expect(balance).to.equal(0);
   });
 
-  it("mockDiamondCut handles bound and forceNonOperational invocable", async () => {
+  it("IAssetMock handles bound and forceNonOperational invocable", async () => {
     const ctx = await loadFixture(deployAssetMockCtx);
 
-    expect(await ctx.mockDiamondCut.getAddress()).to.equal(await ctx.asset.getAddress());
+    expect(await ctx.asset.getAddress()).to.equal(await ctx.asset.getAddress());
 
-    // forceNonOperational is a MockDiamondCut-specific function
-    await expect(ctx.mockDiamondCut.forceNonOperational()).to.not.be.reverted;
+    // forceNonOperational is now on IAssetMock (combined interface)
+    await expect(ctx.asset.forceNonOperational()).to.not.be.reverted;
   });
 
   it("loadFixture determinism", async () => {
@@ -54,6 +54,6 @@ describe("AssetMock context fixture", () => {
     const ctx2 = await loadFixture(deployAssetMockCtx);
 
     expect(await ctx1.asset.getAddress()).to.equal(await ctx2.asset.getAddress());
-    expect(await ctx1.mockDiamondCut.getAddress()).to.equal(await ctx2.mockDiamondCut.getAddress());
+    expect(await ctx1.asset.getAddress()).to.equal(await ctx2.asset.getAddress());
   });
 });

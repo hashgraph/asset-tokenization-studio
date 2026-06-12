@@ -23,7 +23,9 @@ import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol
 import { InitializerModifiers } from "../../services/core/InitializerModifiers.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { ResolverProxyStorageWrapper } from "../../domain/core/ResolverProxyStorageWrapper.sol";
+import { DeactivateStorageWrapper } from "../../domain/core/DeactivateStorageWrapper.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 
 /* solhint-disable */
 
@@ -33,6 +35,8 @@ interface IMockDiamondCut {
     function forceFacetReady(bytes32 facetKey_) external;
     function forceFacetsReady(bytes32[] calldata facetKeys_) external;
     function forceSetOperational() external;
+    function setMultiPartition(bool _multiPartition) external;
+    function forceDeactivate() external;
 }
 
 // `IStaticFunctionSelectors` is intentionally not listed: it is already pulled
@@ -102,6 +106,23 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
         InitializerStorageWrapper.setConfigVersion(configId, versionId, 1);
     }
 
+    /// @notice Sets the multi-partition mode flag for testing.
+    /// @dev Writes directly to `ERC1410BasicStorage.multiPartition` via the storage wrapper,
+    ///      the same path used by the production `PartitionsFacet.initializePartitions(bool)`.
+    ///      Call this in a migrated suite's `beforeEach` to enable partition-based behaviour
+    ///      without re-deploying the asset.
+    /// @param _multiPartition `true` to enable multi-partition mode, `false` for single-partition.
+    function setMultiPartition(bool _multiPartition) external override {
+        ERC1410StorageWrapper.initializeERC1410(_multiPartition);
+    }
+
+    /// @notice Forces the asset into deactivated state for testing `Deactivated` guards.
+    /// @dev Uses `DeactivateStorageWrapper.deactivate()` — the same storage path as the
+    ///      production `Deactivate.deactivate()` facet, without requiring role grants.
+    function forceDeactivate() external override {
+        DeactivateStorageWrapper.deactivate();
+    }
+
     function getStaticResolverKey() external pure returns (bytes32 staticResolverKey_) {
         // Must return the production `RESOLVER_KEY_DIAMOND` so the BLR
         // registration matches the `atsRegistry.data.ts` entry. The internal
@@ -111,7 +132,7 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
     }
 
     function getStaticFunctionSelectors() external pure returns (bytes4[] memory staticFunctionSelectors_) {
-        staticFunctionSelectors_ = new bytes4[](24);
+        staticFunctionSelectors_ = new bytes4[](26);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this.initializeDiamondCut.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.forceNonOperational.selector;
@@ -119,6 +140,8 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
         staticFunctionSelectors_[selectorsIndex++] = this.forceFacetReady.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.forceFacetsReady.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.forceSetOperational.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.setMultiPartition.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.forceDeactivate.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.updateConfigVersion.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.updateConfig.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.updateResolver.selector;

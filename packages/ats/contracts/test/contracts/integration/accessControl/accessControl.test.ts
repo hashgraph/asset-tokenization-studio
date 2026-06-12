@@ -2,7 +2,7 @@
 
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type IAsset, MockDiamondCut } from "@contract-types";
+import { IAssetMock } from "@contract-types";
 import { ATS_ROLES, RESOLVER_KEY_ACCESS_CONTROL, ASSET_MOCK_CONFIG_ID } from "@scripts";
 import { deployAssetMockCtx, executeRbac } from "@test";
 
@@ -10,8 +10,7 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 export function accessControlTests(): void {
   describe("Access Control Tests", () => {
-    let asset: IAsset;
-    let mockDiamondCut: MockDiamondCut;
+    let asset: IAssetMock;
     let deployer: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
     let signer_C: HardhatEthersSigner;
@@ -20,7 +19,6 @@ export function accessControlTests(): void {
     async function deployFixture() {
       const ctx = await loadFixture(deployAssetMockCtx);
       asset = ctx.asset;
-      mockDiamondCut = ctx.mockDiamondCut;
       await executeRbac(asset, [{ role: ATS_ROLES.ROLE_PAUSER, members: [ctx.user1.address] }]);
 
       deployer = ctx.deployer;
@@ -34,8 +32,7 @@ export function accessControlTests(): void {
     });
 
     it("GIVEN a deactivated asset WHEN grantRole THEN transaction fails with Deactivated", async () => {
-      await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, deployer.address);
-      await asset.connect(deployer).deactivate();
+      await asset.forceDeactivate();
       await expect(
         asset.connect(deployer).grantRole(ATS_ROLES.ROLE_PAUSER, unknownSigner.address),
       ).to.be.revertedWithCustomError(asset, "Deactivated");
@@ -48,8 +45,7 @@ export function accessControlTests(): void {
     });
 
     it("GIVEN a deactivated asset WHEN revokeRole THEN transaction fails with Deactivated", async () => {
-      await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, deployer.address);
-      await asset.connect(deployer).deactivate();
+      await asset.forceDeactivate();
       await expect(
         asset.connect(deployer).revokeRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, unknownSigner.address),
       ).to.be.revertedWithCustomError(asset, "Deactivated");
@@ -62,8 +58,7 @@ export function accessControlTests(): void {
     });
 
     it("GIVEN a deactivated asset WHEN applyRoles THEN transaction fails with Deactivated", async () => {
-      await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, deployer.address);
-      await asset.connect(deployer).deactivate();
+      await asset.forceDeactivate();
       await expect(
         asset.connect(signer_C).applyRoles([ATS_ROLES.DEFAULT_ADMIN_ROLE], [true], unknownSigner.address),
       ).to.be.revertedWithCustomError(asset, "Deactivated");
@@ -123,8 +118,7 @@ export function accessControlTests(): void {
     });
 
     it("GIVEN a deactivated asset WHEN renounceRole THEN transaction fails with Deactivated", async () => {
-      await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, deployer.address);
-      await asset.connect(deployer).deactivate();
+      await asset.forceDeactivate();
       await expect(asset.connect(signer_C).renounceRole(ATS_ROLES.ROLE_PAUSER)).to.be.revertedWithCustomError(
         asset,
         "Deactivated",
@@ -413,14 +407,14 @@ export function accessControlTests(): void {
 
     describe("initializeAccessControl event", () => {
       it("GIVEN a fresh deployment WHEN initializeAccessControl is called THEN it emits AccessControlInitialized", async () => {
-        await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_ACCESS_CONTROL);
+        await asset.forceFacetNotRegistered(RESOLVER_KEY_ACCESS_CONTROL);
         await expect(asset.initializeAccessControl()).to.emit(asset, "AccessControlInitialized");
       });
     });
 
     describe("nonOperational", () => {
       beforeEach(async () => {
-        await mockDiamondCut.forceNonOperational();
+        await asset.forceNonOperational();
       });
 
       it("GIVEN non-operational WHEN grantRole is called THEN AssetNotOperational", async () => {

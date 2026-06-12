@@ -2,7 +2,7 @@
 
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type IAsset, MockDiamondCut } from "@contract-types";
+import { IAssetMock } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAssetMockCtx } from "@test";
 import { ADDRESS_ZERO, ATS_ROLES, RESOLVER_KEY_FREEZE } from "@scripts";
@@ -11,15 +11,13 @@ export function freezeTests(): void {
   describe("Freeze Tests", () => {
     let signer_D: HardhatEthersSigner;
 
-    let asset: IAsset;
-    let mockDiamondCut: MockDiamondCut;
+    let asset: IAssetMock;
 
     async function deployFreezeFixture() {
       const ctx = await loadFixture(deployAssetMockCtx);
       signer_D = ctx.user3;
 
       asset = ctx.asset;
-      mockDiamondCut = ctx.mockDiamondCut;
     }
 
     beforeEach(async () => {
@@ -42,14 +40,14 @@ export function freezeTests(): void {
 
     describe("initializeFreeze event", () => {
       it("GIVEN a fresh deployment WHEN initializeFreeze is called THEN emits FreezeInitialized", async () => {
-        await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_FREEZE);
+        await asset.forceFacetNotRegistered(RESOLVER_KEY_FREEZE);
         await expect(asset.initializeFreeze()).to.emit(asset, "FreezeInitialized");
       });
     });
 
     describe("nonOperational", () => {
       beforeEach(async () => {
-        await mockDiamondCut.forceNonOperational();
+        await asset.forceNonOperational();
       });
 
       it("GIVEN non-operational asset WHEN setAddressFrozen THEN reverts with AssetNotOperational", async () => {

@@ -4,9 +4,9 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { type IAsset, MockDiamondCut } from "@contract-types";
+import { IAssetMock } from "@contract-types";
 import { ATS_ROLES, EMPTY_STRING, RESOLVER_KEY_OPERATOR, ZERO } from "@scripts";
-import { deployEquityTokenFixture, deployAssetMockCtx, executeRbac, MAX_UINT256 } from "@test";
+import { deployAssetMockCtx, executeRbac, MAX_UINT256 } from "@test";
 
 const EMPTY_VC_ID = EMPTY_STRING;
 
@@ -16,8 +16,7 @@ export function operatorTests(): void {
     let signer_B: HardhatEthersSigner;
     let signer_C: HardhatEthersSigner;
 
-    let asset: IAsset;
-    let mockDiamondCut: MockDiamondCut;
+    let asset: IAssetMock;
 
     async function deployFixture() {
       const ctx = await loadFixture(deployAssetMockCtx);
@@ -26,7 +25,6 @@ export function operatorTests(): void {
       signer_C = ctx.user2;
 
       asset = ctx.asset;
-      mockDiamondCut = ctx.mockDiamondCut;
       await executeRbac(asset, [
         { role: ATS_ROLES.ROLE_ISSUER, members: [signer_A.address] },
         { role: ATS_ROLES.ROLE_KYC, members: [signer_A.address] },
@@ -122,22 +120,20 @@ export function operatorTests(): void {
 
     describe("Deactivated", () => {
       it("GIVEN a deactivated asset WHEN authorizeOperator THEN transaction fails with Deactivated", async () => {
-        const base = await deployEquityTokenFixture();
-        const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-        await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
-        await deactivatedAsset.connect(base.deployer).deactivate();
+        const ctx = await loadFixture(deployAssetMockCtx);
+        const deactivatedAsset = ctx.asset;
+        await deactivatedAsset.forceDeactivate();
         await expect(
-          deactivatedAsset.connect(base.deployer).authorizeOperator(ethers.ZeroAddress),
+          deactivatedAsset.connect(ctx.deployer).authorizeOperator(ethers.ZeroAddress),
         ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
       });
 
       it("GIVEN a deactivated asset WHEN revokeOperator THEN transaction fails with Deactivated", async () => {
-        const base = await deployEquityTokenFixture();
-        const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-        await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
-        await deactivatedAsset.connect(base.deployer).deactivate();
+        const ctx = await loadFixture(deployAssetMockCtx);
+        const deactivatedAsset = ctx.asset;
+        await deactivatedAsset.forceDeactivate();
         await expect(
-          deactivatedAsset.connect(base.deployer).revokeOperator(ethers.ZeroAddress),
+          deactivatedAsset.connect(ctx.deployer).revokeOperator(ethers.ZeroAddress),
         ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
       });
     });
@@ -158,7 +154,7 @@ export function operatorTests(): void {
 
     describe("initializeOperator event", () => {
       it("GIVEN a fresh deployment WHEN initializeOperator is called THEN emits OperatorInitialized", async () => {
-        await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_OPERATOR);
+        await asset.forceFacetNotRegistered(RESOLVER_KEY_OPERATOR);
         await expect(asset.initializeOperator()).to.emit(asset, "OperatorInitialized");
       });
     });
@@ -172,7 +168,7 @@ export function operatorTests(): void {
 
     describe("nonOperational", () => {
       beforeEach(async () => {
-        await mockDiamondCut.forceNonOperational();
+        await asset.forceNonOperational();
       });
 
       it("GIVEN non-operational asset WHEN authorizeOperator THEN reverts with AssetNotOperational", async () => {

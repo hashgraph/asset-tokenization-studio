@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type IAsset, type MockEIP712, MockDiamondCut } from "@contract-types";
+import { IAssetMock, type MockEIP712 } from "@contract-types";
 import { deployAssetMockCtx } from "@test";
 import { ATS_ROLES, RESOLVER_KEY_EIP712 } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -12,15 +12,13 @@ export function eip712Tests(): void {
   describe("EIP712 Tests", () => {
     let nonAdmin: HardhatEthersSigner;
 
-    let asset: IAsset;
-    let mockDiamondCut: MockDiamondCut;
+    let asset: IAssetMock;
 
     beforeEach(async () => {
       const ctx = await loadFixture(deployAssetMockCtx);
       nonAdmin = ctx.user1;
 
       asset = ctx.asset;
-      mockDiamondCut = ctx.mockDiamondCut;
     });
 
     describe("Single Partition", () => {
@@ -92,7 +90,7 @@ export function eip712Tests(): void {
 
     describe("initializeEIP712 event", () => {
       it("GIVEN a fresh deployment WHEN initializeEIP712 is called THEN emits EIP712Initialized", async () => {
-        await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_EIP712);
+        await asset.forceFacetNotRegistered(RESOLVER_KEY_EIP712);
         await expect(asset.initializeEIP712()).to.emit(asset, "EIP712Initialized");
       });
     });

@@ -2,7 +2,7 @@
 
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type IAsset, MockDiamondCut } from "@contract-types";
+import { IAssetMock } from "@contract-types";
 import { deployAssetMockCtx } from "@test";
 import { ATS_ROLES, RESOLVER_KEY_NONCES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -12,8 +12,7 @@ export function noncesTests(): void {
     let signer_A: HardhatEthersSigner;
     let signer_C: HardhatEthersSigner;
 
-    let asset: IAsset;
-    let mockDiamondCut: MockDiamondCut;
+    let asset: IAssetMock;
 
     beforeEach(async () => {
       const ctx = await loadFixture(deployAssetMockCtx);
@@ -21,7 +20,6 @@ export function noncesTests(): void {
       signer_C = ctx.user2;
 
       asset = ctx.asset;
-      mockDiamondCut = ctx.mockDiamondCut;
     });
 
     describe("Nonces", () => {
@@ -47,7 +45,7 @@ export function noncesTests(): void {
 
     describe("initializeNonces event", () => {
       it("GIVEN a fresh deployment WHEN initializeNonces is called THEN emits NoncesInitialized", async () => {
-        await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_NONCES);
+        await asset.forceFacetNotRegistered(RESOLVER_KEY_NONCES);
         await expect(asset.initializeNonces()).to.emit(asset, "NoncesInitialized");
       });
     });
