@@ -41,20 +41,6 @@ Returns the defaulted-loans ratio as a numerator/denominator pair.
 | numerator\_   | uint256 | Numerator of the defaulted-loans ratio.   |
 | denominator\_ | uint256 | Denominator of the defaulted-loans ratio. |
 
-### getGeographicalExposure
-
-```solidity
-function getGeographicalExposure() external view returns (struct ILoansPortfolio.GeographicalExposureData[] geographicalExposure_)
-```
-
-Returns the geographical exposure aggregated by country.
-
-#### Returns
-
-| Name                   | Type                                       | Description                                                                                        |
-| ---------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------- |
-| geographicalExposure\_ | ILoansPortfolio.GeographicalExposureData[] | Array of `(country, count)` tuples covering every country present in the portfolio&#39;s holdings. |
-
 ### getHoldingsAssetOwnership
 
 ```solidity

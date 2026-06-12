@@ -2500,7 +2500,7 @@ function getCouponsFor(uint256 _couponID, uint256 _pageIndex, uint256 _pageLengt
 
 Returns coupon information for every holder of a given coupon, paginated.
 
-_Internally resolves the holder page then retrieves per-holder coupon details. The two returned arrays share the same index: `couponFor_[i]`corresponds to`holders*[i]`.*
+_Internally resolves the holder page then retrieves per-holder coupon details. The two returned arrays share the same index: `couponFor_[i]` corresponds to `holders_[i]`._
 
 #### Parameters
 
@@ -3159,20 +3159,6 @@ Returns the total amount of tokens currently frozen for a wallet.
 | Name | Type    | Description                                                             |
 | ---- | ------- | ----------------------------------------------------------------------- |
 | \_0  | uint256 | The total frozen token amount for `_userAddress` across all partitions. |
-
-### getGeographicalExposure
-
-```solidity
-function getGeographicalExposure() external view returns (struct ILoansPortfolio.GeographicalExposureData[] geographicalExposure_)
-```
-
-Returns the geographical exposure aggregated by country.
-
-#### Returns
-
-| Name                   | Type                                       | Description                                                                                        |
-| ---------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------- |
-| geographicalExposure\_ | ILoansPortfolio.GeographicalExposureData[] | Array of `(country, count)` tuples covering every country present in the portfolio&#39;s holdings. |
 
 ### getHeldAmountFor
 
