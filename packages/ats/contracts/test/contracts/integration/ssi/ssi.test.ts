@@ -198,7 +198,9 @@ export function ssiTests(getCtx: () => AssetMockCtx): void {
 
         revocationList = await (await ethers.getContractFactory("MockedT3RevocationRegistry")).deploy();
         revertingRegistry = await (await ethers.getContractFactory("RevertingRevocationRegistry")).deploy();
-      });
+      }
+
+      );
 
       it("GIVEN a reverting registry WHEN transfer THEN succeeds treating KYC credential as not revoked", async () => {
         await equityAsset.setRevocationRegistryAddress(revertingRegistry.target);
