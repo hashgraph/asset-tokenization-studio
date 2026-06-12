@@ -5,11 +5,8 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { IAssetMock, ISnapshotsByPartition__factory, ISnapshotsByPartition } from "@contract-types";
 import { ZERO, EMPTY_STRING, ATS_ROLES, RESOLVER_KEY_SNAPSHOTS_BY_PARTITION } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployAssetMockCtx, executeRbac, MAX_UINT256 } from "@test";
+import { DEFAULT_PARTITION, PARTITION_ID_2, PARTITION_ID_3, deployAssetMockCtx, executeRbac, MAX_UINT256 } from "@test";
 
-const _PARTITION_ID_1 = "0x0000000000000000000000000000000000000000000000000000000000000001";
-const _PARTITION_ID_2 = "0x0000000000000000000000000000000000000000000000000000000000000002";
-const _PARTITION_ID_3 = "0x0000000000000000000000000000000000000000000000000000000000000003";
 const EMPTY_VC_ID = EMPTY_STRING;
 const amount = 1000;
 
@@ -66,7 +63,7 @@ export function snapshotsByPartitionTests(): void {
         await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
 
         await asset.connect(signer_A).issueByPartition({
-          partition: _PARTITION_ID_1,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_C.address,
           value: amount,
           data: "0x",
@@ -85,7 +82,7 @@ export function snapshotsByPartitionTests(): void {
         await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
 
         await asset.connect(signer_A).issueByPartition({
-          partition: _PARTITION_ID_1,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_C.address,
           value: amount,
           data: "0x",
@@ -95,7 +92,7 @@ export function snapshotsByPartitionTests(): void {
 
         const partitions = await snapshotsByPartitionFacet.partitionsOfAtSnapshot(1, signer_C.address);
         expect(partitions.length).to.equal(1);
-        expect(partitions[0]).to.equal(_PARTITION_ID_1);
+        expect(partitions[0]).to.equal(DEFAULT_PARTITION);
       });
 
       it("GIVEN a token holder with multiple partitions at snapshot THEN returns all partitions", async () => {
@@ -106,13 +103,13 @@ export function snapshotsByPartitionTests(): void {
         await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
 
         await asset.connect(signer_A).issueByPartition({
-          partition: _PARTITION_ID_1,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
           value: amount,
           data: "0x",
         });
         await asset.connect(signer_A).issueByPartition({
-          partition: _PARTITION_ID_2,
+          partition: PARTITION_ID_2,
           tokenHolder: signer_A.address,
           value: amount,
           data: "0x",
@@ -122,7 +119,7 @@ export function snapshotsByPartitionTests(): void {
 
         const partitions = await snapshotsByPartitionFacet.partitionsOfAtSnapshot(1, signer_A.address);
         expect(partitions.length).to.equal(2);
-        expect([...partitions]).to.have.members([_PARTITION_ID_1, _PARTITION_ID_2]);
+        expect([...partitions]).to.have.members([DEFAULT_PARTITION, PARTITION_ID_2]);
       });
 
       it("GIVEN token transfers after snapshot THEN partitions reflect state at snapshot time", async () => {
@@ -133,7 +130,7 @@ export function snapshotsByPartitionTests(): void {
         await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
 
         await asset.connect(signer_A).issueByPartition({
-          partition: _PARTITION_ID_1,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_C.address,
           value: amount,
           data: "0x",
@@ -144,7 +141,7 @@ export function snapshotsByPartitionTests(): void {
 
         // After snapshot: C receives partition 2 tokens
         await asset.connect(signer_A).issueByPartition({
-          partition: _PARTITION_ID_2,
+          partition: PARTITION_ID_2,
           tokenHolder: signer_C.address,
           value: amount,
           data: "0x",
@@ -155,11 +152,11 @@ export function snapshotsByPartitionTests(): void {
 
         const partitionsAtSnapshot1 = await snapshotsByPartitionFacet.partitionsOfAtSnapshot(1, signer_C.address);
         expect(partitionsAtSnapshot1.length).to.equal(1);
-        expect(partitionsAtSnapshot1[0]).to.equal(_PARTITION_ID_1);
+        expect(partitionsAtSnapshot1[0]).to.equal(DEFAULT_PARTITION);
 
         const partitionsAtSnapshot2 = await snapshotsByPartitionFacet.partitionsOfAtSnapshot(2, signer_C.address);
         expect(partitionsAtSnapshot2.length).to.equal(2);
-        expect([...partitionsAtSnapshot2]).to.have.members([_PARTITION_ID_1, _PARTITION_ID_2]);
+        expect([...partitionsAtSnapshot2]).to.have.members([DEFAULT_PARTITION, PARTITION_ID_2]);
       });
 
       it("GIVEN a middle partition emptied after snapshot THEN snapshot keeps the full pre-delete list (swap branch)", async () => {
@@ -169,19 +166,19 @@ export function snapshotsByPartitionTests(): void {
         await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
 
         await asset.connect(signer_A).issueByPartition({
-          partition: _PARTITION_ID_1,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_C.address,
           value: amount,
           data: "0x",
         });
         await asset.connect(signer_A).issueByPartition({
-          partition: _PARTITION_ID_2,
+          partition: PARTITION_ID_2,
           tokenHolder: signer_C.address,
           value: amount,
           data: "0x",
         });
         await asset.connect(signer_A).issueByPartition({
-          partition: _PARTITION_ID_3,
+          partition: PARTITION_ID_3,
           tokenHolder: signer_C.address,
           value: amount,
           data: "0x",
@@ -191,21 +188,21 @@ export function snapshotsByPartitionTests(): void {
         await asset.connect(signer_C).takeSnapshot();
 
         // C empties the middle partition P2 → deletePartitionForHolder with swap (P3 moves into P2's slot)
-        await asset.connect(signer_C).redeemByPartition(_PARTITION_ID_2, amount, "0x");
+        await asset.connect(signer_C).redeemByPartition(PARTITION_ID_2, amount, "0x");
 
         // Snapshot 2: C now has [P1, P3]
         await asset.connect(signer_C).takeSnapshot();
 
         const atSnapshot1 = await snapshotsByPartitionFacet.partitionsOfAtSnapshot(1, signer_C.address);
         expect(atSnapshot1.length).to.equal(3);
-        expect([...atSnapshot1]).to.have.members([_PARTITION_ID_1, _PARTITION_ID_2, _PARTITION_ID_3]);
+        expect([...atSnapshot1]).to.have.members([DEFAULT_PARTITION, PARTITION_ID_2, PARTITION_ID_3]);
 
         const atSnapshot2 = await snapshotsByPartitionFacet.partitionsOfAtSnapshot(2, signer_C.address);
         expect(atSnapshot2.length).to.equal(2);
-        expect([...atSnapshot2]).to.have.members([_PARTITION_ID_1, _PARTITION_ID_3]);
+        expect([...atSnapshot2]).to.have.members([DEFAULT_PARTITION, PARTITION_ID_3]);
 
         const live = await asset.partitionsOf(signer_C.address);
-        expect([...live]).to.have.members([_PARTITION_ID_1, _PARTITION_ID_3]);
+        expect([...live]).to.have.members([DEFAULT_PARTITION, PARTITION_ID_3]);
       });
 
       it("GIVEN the last partition emptied after snapshot THEN snapshot keeps the full pre-delete list (no-swap branch)", async () => {
@@ -215,13 +212,13 @@ export function snapshotsByPartitionTests(): void {
         await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
 
         await asset.connect(signer_A).issueByPartition({
-          partition: _PARTITION_ID_1,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_C.address,
           value: amount,
           data: "0x",
         });
         await asset.connect(signer_A).issueByPartition({
-          partition: _PARTITION_ID_2,
+          partition: PARTITION_ID_2,
           tokenHolder: signer_C.address,
           value: amount,
           data: "0x",
@@ -231,18 +228,18 @@ export function snapshotsByPartitionTests(): void {
         await asset.connect(signer_C).takeSnapshot();
 
         // C empties the last partition P2 → deletePartitionForHolder without swap (plain pop)
-        await asset.connect(signer_C).redeemByPartition(_PARTITION_ID_2, amount, "0x");
+        await asset.connect(signer_C).redeemByPartition(PARTITION_ID_2, amount, "0x");
 
         // Snapshot 2: C now has [P1]
         await asset.connect(signer_C).takeSnapshot();
 
         const atSnapshot1 = await snapshotsByPartitionFacet.partitionsOfAtSnapshot(1, signer_C.address);
         expect(atSnapshot1.length).to.equal(2);
-        expect([...atSnapshot1]).to.have.members([_PARTITION_ID_1, _PARTITION_ID_2]);
+        expect([...atSnapshot1]).to.have.members([DEFAULT_PARTITION, PARTITION_ID_2]);
 
         const atSnapshot2 = await snapshotsByPartitionFacet.partitionsOfAtSnapshot(2, signer_C.address);
         expect(atSnapshot2.length).to.equal(1);
-        expect(atSnapshot2[0]).to.equal(_PARTITION_ID_1);
+        expect(atSnapshot2[0]).to.equal(DEFAULT_PARTITION);
       });
 
       it("GIVEN several partitions emptied within the same snapshot THEN earlier snapshots stay intact (idempotency)", async () => {
@@ -252,19 +249,19 @@ export function snapshotsByPartitionTests(): void {
         await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
 
         await asset.connect(signer_A).issueByPartition({
-          partition: _PARTITION_ID_1,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_C.address,
           value: amount,
           data: "0x",
         });
         await asset.connect(signer_A).issueByPartition({
-          partition: _PARTITION_ID_2,
+          partition: PARTITION_ID_2,
           tokenHolder: signer_C.address,
           value: amount,
           data: "0x",
         });
         await asset.connect(signer_A).issueByPartition({
-          partition: _PARTITION_ID_3,
+          partition: PARTITION_ID_3,
           tokenHolder: signer_C.address,
           value: amount,
           data: "0x",
@@ -274,16 +271,16 @@ export function snapshotsByPartitionTests(): void {
         await asset.connect(signer_C).takeSnapshot();
 
         // Two deletes under the SAME active snapshot (snapshot 1 stays open).
-        await asset.connect(signer_C).redeemByPartition(_PARTITION_ID_2, amount, "0x");
-        await asset.connect(signer_C).redeemByPartition(_PARTITION_ID_3, amount, "0x");
+        await asset.connect(signer_C).redeemByPartition(PARTITION_ID_2, amount, "0x");
+        await asset.connect(signer_C).redeemByPartition(PARTITION_ID_3, amount, "0x");
 
         // Snapshot 1 must still reflect the original three partitions.
         const atSnapshot1 = await snapshotsByPartitionFacet.partitionsOfAtSnapshot(1, signer_C.address);
         expect(atSnapshot1.length).to.equal(3);
-        expect([...atSnapshot1]).to.have.members([_PARTITION_ID_1, _PARTITION_ID_2, _PARTITION_ID_3]);
+        expect([...atSnapshot1]).to.have.members([DEFAULT_PARTITION, PARTITION_ID_2, PARTITION_ID_3]);
 
         const live = await asset.partitionsOf(signer_C.address);
-        expect([...live]).to.have.members([_PARTITION_ID_1]);
+        expect([...live]).to.have.members([DEFAULT_PARTITION]);
       });
     });
 

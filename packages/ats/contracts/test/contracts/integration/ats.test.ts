@@ -33,68 +33,22 @@ import { transferAndLockByPartitionTests } from "./transferAndLockByPartition/tr
 
 describe("ATS — IAsset Suites", () => {
   // ── W1: Generic single-partition suites ──────────────────────────────
-  describe("Access Control", () => {
-    accessControlTests();
-  });
-
-  describe("Freeze", () => {
-    freezeTests();
-  });
-
-  describe("Deactivate", () => {
-    deactivateTests();
-  });
-
-  describe("Operator", () => {
-    operatorTests();
-  });
-
-  describe("EIP712", () => {
-    eip712Tests();
-  });
-
-  describe("Nonces", () => {
-    noncesTests();
-  });
-
-  describe("Control List", () => {
-    controlListTests();
-  });
+  accessControlTests();
+  freezeTests();
+  deactivateTests();
+  operatorTests();
+  eip712Tests();
+  noncesTests();
+  controlListTests();
 
   // ── W2: Multi-partition suites ──────────────────────────────────────
-  describe("HoldAtSnapshot", () => {
-    holdAtSnapshotTests();
-  });
-
-  describe("LockAtSnapshot", () => {
-    lockAtSnapshotTests();
-  });
-
-  describe("LockAtSnapshotByPartition", () => {
-    lockAtSnapshotByPartitionTests();
-  });
-
-  describe("BalanceTrackerAdjusted", () => {
-    balanceTrackerAdjustedTests();
-  });
-
-  describe("BalanceTrackerAtSnapshotByPartition", () => {
-    balanceTrackerAtSnapshotByPartitionTests();
-  });
-
-  describe("BalanceTrackerAtSnapshot", () => {
-    balanceTrackerAtSnapshotTests();
-  });
-
-  describe("SnapshotsByPartition", () => {
-    snapshotsByPartitionTests();
-  });
-
-  describe("VotingSecurityHolders", () => {
-    votingSecurityHoldersTests();
-  });
-
-  describe("TransferAndLockByPartition", () => {
-    transferAndLockByPartitionTests();
-  });
+  holdAtSnapshotTests();
+  lockAtSnapshotTests();
+  lockAtSnapshotByPartitionTests();
+  balanceTrackerAdjustedTests();
+  balanceTrackerAtSnapshotByPartitionTests();
+  balanceTrackerAtSnapshotTests();
+  snapshotsByPartitionTests();
+  votingSecurityHoldersTests();
+  transferAndLockByPartitionTests();
 });

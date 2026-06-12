@@ -3,13 +3,17 @@
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { ATS_ROLES, EMPTY_STRING, ZERO, RESOLVER_KEY_LOCK_AT_SNAPSHOT_BY_PARTITION } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEY_LOCK_AT_SNAPSHOT_BY_PARTITION } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployAssetMockCtx, executeRbac, MAX_UINT256 } from "@test";
+import {
+  DEFAULT_PARTITION,
+  PARTITION_ID_2,
+  deployAssetMockCtx,
+  executeRbac,
+  grantKycToHolders,
+  MAX_UINT256,
+} from "@test";
 
-const _PARTITION_ID_1 = "0x0000000000000000000000000000000000000000000000000000000000000001";
-const _PARTITION_ID_2 = "0x0000000000000000000000000000000000000000000000000000000000000002";
-const EMPTY_VC_ID = EMPTY_STRING;
 const amount = 1000;
 
 export function lockAtSnapshotByPartitionTests(): void {
@@ -38,9 +42,7 @@ export function lockAtSnapshotByPartitionTests(): void {
       ]);
 
       await asset.connect(signer_A).addIssuer(signer_B.address);
-      await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
-      await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
-      await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
+      await grantKycToHolders(asset, signer_B, [signer_A, signer_B, signer_C]);
     }
 
     beforeEach(async () => {
@@ -50,19 +52,19 @@ export function lockAtSnapshotByPartitionTests(): void {
     describe("lockedBalanceOfAtSnapshotByPartition", () => {
       it("GIVEN no snapshot taken WHEN lockedBalanceOfAtSnapshotByPartition at id 0 THEN reverts with SnapshotIdNull", async () => {
         await expect(
-          asset.lockedBalanceOfAtSnapshotByPartition(_PARTITION_ID_1, 0, signer_A.address),
+          asset.lockedBalanceOfAtSnapshotByPartition(DEFAULT_PARTITION, 0, signer_A.address),
         ).to.be.revertedWithCustomError(asset, "SnapshotIdNull");
       });
 
       it("GIVEN no snapshot taken WHEN lockedBalanceOfAtSnapshotByPartition at id 1 THEN reverts with SnapshotIdDoesNotExists", async () => {
         await expect(
-          asset.lockedBalanceOfAtSnapshotByPartition(_PARTITION_ID_1, 1, signer_A.address),
+          asset.lockedBalanceOfAtSnapshotByPartition(DEFAULT_PARTITION, 1, signer_A.address),
         ).to.be.revertedWithCustomError(asset, "SnapshotIdDoesNotExists");
       });
 
       it("GIVEN a snapshot taken WHEN lockedBalanceOfAtSnapshotByPartition for holder with no locks THEN returns zero", async () => {
         await asset.connect(signer_B).issueByPartition({
-          partition: _PARTITION_ID_1,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
           value: amount,
           data: "0x",
@@ -70,7 +72,7 @@ export function lockAtSnapshotByPartitionTests(): void {
 
         await asset.connect(signer_A).takeSnapshot();
 
-        const balance = await asset.lockedBalanceOfAtSnapshotByPartition(_PARTITION_ID_1, 1, signer_A.address);
+        const balance = await asset.lockedBalanceOfAtSnapshotByPartition(DEFAULT_PARTITION, 1, signer_A.address);
         expect(balance).to.equal(0);
       });
 
@@ -78,17 +80,17 @@ export function lockAtSnapshotByPartitionTests(): void {
         const lockedAmount = 300;
 
         await asset.connect(signer_B).issueByPartition({
-          partition: _PARTITION_ID_1,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
           value: amount,
           data: "0x",
         });
 
-        await asset.connect(signer_B).lockByPartition(_PARTITION_ID_1, lockedAmount, signer_A.address, MAX_UINT256);
+        await asset.connect(signer_B).lockByPartition(DEFAULT_PARTITION, lockedAmount, signer_A.address, MAX_UINT256);
 
         await asset.connect(signer_A).takeSnapshot();
 
-        const balance = await asset.lockedBalanceOfAtSnapshotByPartition(_PARTITION_ID_1, 1, signer_A.address);
+        const balance = await asset.lockedBalanceOfAtSnapshotByPartition(DEFAULT_PARTITION, 1, signer_A.address);
         expect(balance).to.equal(lockedAmount);
       });
 
@@ -97,7 +99,7 @@ export function lockAtSnapshotByPartitionTests(): void {
         const lockedAmountSecond = 200;
 
         await asset.connect(signer_B).issueByPartition({
-          partition: _PARTITION_ID_1,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
           value: amount,
           data: "0x",
@@ -108,22 +110,22 @@ export function lockAtSnapshotByPartitionTests(): void {
 
         await asset
           .connect(signer_B)
-          .lockByPartition(_PARTITION_ID_1, lockedAmountFirst, signer_A.address, MAX_UINT256);
+          .lockByPartition(DEFAULT_PARTITION, lockedAmountFirst, signer_A.address, MAX_UINT256);
 
         // snapshot 2: first lock active
         await asset.connect(signer_A).takeSnapshot();
 
         await asset
           .connect(signer_B)
-          .lockByPartition(_PARTITION_ID_1, lockedAmountSecond, signer_A.address, MAX_UINT256);
+          .lockByPartition(DEFAULT_PARTITION, lockedAmountSecond, signer_A.address, MAX_UINT256);
 
         const balanceAtSnapshot1 = await asset.lockedBalanceOfAtSnapshotByPartition(
-          _PARTITION_ID_1,
+          DEFAULT_PARTITION,
           1,
           signer_A.address,
         );
         const balanceAtSnapshot2 = await asset.lockedBalanceOfAtSnapshotByPartition(
-          _PARTITION_ID_1,
+          DEFAULT_PARTITION,
           2,
           signer_A.address,
         );
@@ -138,34 +140,38 @@ export function lockAtSnapshotByPartitionTests(): void {
         const lockedAmountC_P1 = 3;
 
         await asset.connect(signer_B).issueByPartition({
-          partition: _PARTITION_ID_1,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
           value: amount,
           data: "0x",
         });
         await asset.connect(signer_B).issueByPartition({
-          partition: _PARTITION_ID_2,
+          partition: PARTITION_ID_2,
           tokenHolder: signer_A.address,
           value: amount,
           data: "0x",
         });
         await asset.connect(signer_B).issueByPartition({
-          partition: _PARTITION_ID_1,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_C.address,
           value: amount,
           data: "0x",
         });
 
-        await asset.connect(signer_B).lockByPartition(_PARTITION_ID_1, lockedAmountA_P1, signer_A.address, MAX_UINT256);
-        await asset.connect(signer_B).lockByPartition(_PARTITION_ID_2, lockedAmountA_P2, signer_A.address, MAX_UINT256);
-        await asset.connect(signer_B).lockByPartition(_PARTITION_ID_1, lockedAmountC_P1, signer_C.address, MAX_UINT256);
+        await asset
+          .connect(signer_B)
+          .lockByPartition(DEFAULT_PARTITION, lockedAmountA_P1, signer_A.address, MAX_UINT256);
+        await asset.connect(signer_B).lockByPartition(PARTITION_ID_2, lockedAmountA_P2, signer_A.address, MAX_UINT256);
+        await asset
+          .connect(signer_B)
+          .lockByPartition(DEFAULT_PARTITION, lockedAmountC_P1, signer_C.address, MAX_UINT256);
 
         await asset.connect(signer_A).takeSnapshot();
 
-        const balanceA_P1 = await asset.lockedBalanceOfAtSnapshotByPartition(_PARTITION_ID_1, 1, signer_A.address);
-        const balanceA_P2 = await asset.lockedBalanceOfAtSnapshotByPartition(_PARTITION_ID_2, 1, signer_A.address);
-        const balanceC_P1 = await asset.lockedBalanceOfAtSnapshotByPartition(_PARTITION_ID_1, 1, signer_C.address);
-        const balanceC_P2 = await asset.lockedBalanceOfAtSnapshotByPartition(_PARTITION_ID_2, 1, signer_C.address);
+        const balanceA_P1 = await asset.lockedBalanceOfAtSnapshotByPartition(DEFAULT_PARTITION, 1, signer_A.address);
+        const balanceA_P2 = await asset.lockedBalanceOfAtSnapshotByPartition(PARTITION_ID_2, 1, signer_A.address);
+        const balanceC_P1 = await asset.lockedBalanceOfAtSnapshotByPartition(DEFAULT_PARTITION, 1, signer_C.address);
+        const balanceC_P2 = await asset.lockedBalanceOfAtSnapshotByPartition(PARTITION_ID_2, 1, signer_C.address);
 
         expect(balanceA_P1).to.equal(lockedAmountA_P1);
         expect(balanceA_P2).to.equal(lockedAmountA_P2);

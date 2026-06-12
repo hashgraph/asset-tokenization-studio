@@ -5,10 +5,8 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { IAssetMock } from "@contract-types";
-import { ATS_ROLES, EMPTY_STRING, RESOLVER_KEY_OPERATOR, ZERO } from "@scripts";
-import { deployAssetMockCtx, executeRbac, MAX_UINT256 } from "@test";
-
-const EMPTY_VC_ID = EMPTY_STRING;
+import { ATS_ROLES, RESOLVER_KEY_OPERATOR } from "@scripts";
+import { deployAssetMockCtx, executeRbac, grantKycToHolders } from "@test";
 
 export function operatorTests(): void {
   describe("Operator Facet Tests", () => {
@@ -34,9 +32,7 @@ export function operatorTests(): void {
       ]);
 
       await asset.addIssuer(signer_A.address);
-      await asset.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-      await asset.grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-      await asset.grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+      await grantKycToHolders(asset, signer_A, [signer_A, signer_B, signer_C]);
     }
 
     beforeEach(async () => {

@@ -3,7 +3,8 @@
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { ATS_ROLES, RESOLVER_KEY_ACCESS_CONTROL, ASSET_MOCK_CONFIG_ID } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEY_ACCESS_CONTROL } from "@scripts";
+import { ASSET_MOCK_CONFIG_ID } from "../../../fixtures/deploy/assetMockConfiguration";
 import { deployAssetMockCtx, executeRbac } from "@test";
 
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";

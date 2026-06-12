@@ -5,11 +5,8 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ATS_ROLES, dateToUnixTimestamp, EMPTY_STRING, ZERO, RESOLVER_KEY_BALANCE_TRACKER_ADJUSTED } from "@scripts";
-import { deployAssetMockCtx, executeRbac, MAX_UINT256 } from "@test";
-
-const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
-const EMPTY_VC_ID = EMPTY_STRING;
+import { ATS_ROLES, dateToUnixTimestamp, RESOLVER_KEY_BALANCE_TRACKER_ADJUSTED } from "@scripts";
+import { DEFAULT_PARTITION, deployAssetMockCtx, executeRbac, grantKycToHolders } from "@test";
 
 export function balanceTrackerAdjustedTests(): void {
   describe("BalanceTrackerAdjusted Tests", () => {
@@ -48,8 +45,7 @@ export function balanceTrackerAdjustedTests(): void {
       ]);
 
       await asset.connect(signer_A).addIssuer(signer_B.address);
-      await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
-      await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
+      await grantKycToHolders(asset, signer_B, [signer_A, signer_B]);
     }
 
     afterEach(async () => {
@@ -64,7 +60,7 @@ export function balanceTrackerAdjustedTests(): void {
       it("GIVEN a token holder with minted tokens WHEN balanceOfAt at current time THEN returns minted amount", async () => {
         const mintAmount = 1000;
         await asset.connect(signer_B).issueByPartition({
-          partition: _DEFAULT_PARTITION,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
           value: mintAmount,
           data: "0x",
@@ -82,7 +78,7 @@ export function balanceTrackerAdjustedTests(): void {
       it("GIVEN a token holder with minted tokens WHEN balanceOfAt at timestamp 0 THEN returns minted amount unchanged", async () => {
         const mintAmount = 500;
         await asset.connect(signer_B).issueByPartition({
-          partition: _DEFAULT_PARTITION,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
           value: mintAmount,
           data: "0x",
@@ -95,7 +91,7 @@ export function balanceTrackerAdjustedTests(): void {
       it("GIVEN a scheduled balance adjustment WHEN balanceOfAt before the adjustment THEN returns original balance", async () => {
         const mintAmount = 100;
         await asset.connect(signer_B).issueByPartition({
-          partition: _DEFAULT_PARTITION,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
           value: mintAmount,
           data: "0x",
@@ -115,7 +111,7 @@ export function balanceTrackerAdjustedTests(): void {
       it("GIVEN a scheduled balance adjustment WHEN balanceOfAt after the adjustment THEN returns adjusted balance", async () => {
         const mintAmount = 100;
         await asset.connect(signer_B).issueByPartition({
-          partition: _DEFAULT_PARTITION,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
           value: mintAmount,
           data: "0x",
@@ -136,7 +132,7 @@ export function balanceTrackerAdjustedTests(): void {
       it("GIVEN multiple scheduled adjustments WHEN balanceOfAt between them THEN applies only the earlier adjustment", async () => {
         const mintAmount = 100;
         await asset.connect(signer_B).issueByPartition({
-          partition: _DEFAULT_PARTITION,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
           value: mintAmount,
           data: "0x",

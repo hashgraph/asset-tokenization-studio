@@ -27,7 +27,7 @@ import {
   type ConfigurationMetadata,
   type FacetMetadata,
 } from "../../../scripts";
-import { createAssetMockConfiguration, getAssetMockFacets } from "../../../scripts/domain";
+import { createAssetMockConfiguration } from "./assetMockConfiguration";
 import { BusinessLogicResolver__factory, IMockFactory__factory, ProxyAdmin__factory } from "@contract-types";
 import type { IMockFactory, BusinessLogicResolver, ProxyAdmin } from "@contract-types";
 
@@ -78,15 +78,37 @@ export async function deploySystemWithNewBlrFullAsset(
     facetAddresses[facet.name] = facet.address;
   }
 
-  // 3. Connect to BLR and create assetMock configuration
+  // 3. Build the dynamic facet union from all 7 asset-class deployment helpers
+  const allFacetNames = [
+    ...deployment.helpers.getEquityFacets(),
+    ...deployment.helpers.getBondFacets(),
+    ...deployment.helpers.getBondFixedRateFacets(),
+    ...deployment.helpers.getBondKpiLinkedRateFacets(),
+    ...deployment.helpers.getLoanFacets(),
+    ...deployment.helpers.getLoansPortfolioFacets(),
+    ...deployment.helpers.getDepositTokenFacets(),
+  ]
+    .map((f) => f.name)
+    .filter((name, idx, arr) => arr.indexOf(name) === idx)
+    .sort();
+
+  const diamondIdx = allFacetNames.indexOf("DiamondFacet");
+  if (diamondIdx >= 0) {
+    allFacetNames[diamondIdx] = "MockDiamondCut";
+  }
+  if (!allFacetNames.includes("EvmAccessorsFacet")) {
+    allFacetNames.push("EvmAccessorsFacet");
+  }
+
+  // 4. Connect to BLR and create assetMock configuration
   const blrContract = BusinessLogicResolver__factory.connect(deployment.infrastructure.blr.proxy, signer);
-  const assetMockConfig = await createAssetMockConfiguration(blrContract, facetAddresses);
+  const assetMockConfig = await createAssetMockConfiguration(blrContract, allFacetNames, facetAddresses);
 
   if (!assetMockConfig.success) {
     throw new Error(`AssetMock config creation failed: ${assetMockConfig.error} - ${assetMockConfig.message}`);
   }
 
-  // 4. Augment deployment with assetMock info
+  // 5. Augment deployment with assetMock info
   return {
     ...deployment,
     configurations: {

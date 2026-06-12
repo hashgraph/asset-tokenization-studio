@@ -4,11 +4,8 @@ import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ATS_ROLES, EMPTY_STRING, ZERO, RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT } from "@scripts";
-import { deployAssetMockCtx, executeRbac, MAX_UINT256 } from "@test";
-
-const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
-const EMPTY_VC_ID = EMPTY_STRING;
+import { ATS_ROLES, RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT } from "@scripts";
+import { DEFAULT_PARTITION, deployAssetMockCtx, executeRbac, grantKycToHolders } from "@test";
 
 export function balanceTrackerAtSnapshotTests(): void {
   describe("BalanceTrackerAtSnapshot Tests", () => {
@@ -47,8 +44,7 @@ export function balanceTrackerAtSnapshotTests(): void {
       ]);
 
       await asset.connect(signer_A).addIssuer(signer_B.address);
-      await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
-      await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
+      await grantKycToHolders(asset, signer_B, [signer_A, signer_B]);
     }
 
     beforeEach(async () => {
@@ -73,7 +69,7 @@ export function balanceTrackerAtSnapshotTests(): void {
       it("GIVEN a snapshot of a token holder WHEN balanceOfAtSnapshot THEN returns recorded balance", async () => {
         const mintAmount = 1000;
         await asset.connect(signer_B).issueByPartition({
-          partition: _DEFAULT_PARTITION,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
           value: mintAmount,
           data: "0x",
@@ -83,7 +79,7 @@ export function balanceTrackerAtSnapshotTests(): void {
 
         // mutating the balance after the snapshot should not change the snapshotted value
         await asset.connect(signer_B).issueByPartition({
-          partition: _DEFAULT_PARTITION,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
           value: 500,
           data: "0x",
@@ -104,13 +100,13 @@ export function balanceTrackerAtSnapshotTests(): void {
         const mintAmountB = 250;
 
         await asset.connect(signer_B).issueByPartition({
-          partition: _DEFAULT_PARTITION,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
           value: mintAmountA,
           data: "0x",
         });
         await asset.connect(signer_B).issueByPartition({
-          partition: _DEFAULT_PARTITION,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_B.address,
           value: mintAmountB,
           data: "0x",
@@ -146,7 +142,7 @@ export function balanceTrackerAtSnapshotTests(): void {
       it("GIVEN tokens issued and a snapshot WHEN totalSupplyAtSnapshot THEN returns recorded total supply", async () => {
         const mintAmount = 1000;
         await asset.connect(signer_B).issueByPartition({
-          partition: _DEFAULT_PARTITION,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
           value: mintAmount,
           data: "0x",
@@ -156,7 +152,7 @@ export function balanceTrackerAtSnapshotTests(): void {
 
         // post-snapshot mint must not influence the snapshotted total supply
         await asset.connect(signer_B).issueByPartition({
-          partition: _DEFAULT_PARTITION,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
           value: 500,
           data: "0x",

@@ -5,8 +5,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { IAssetMock } from "@contract-types";
 import { DEFAULT_PARTITION, ATS_ROLES, ZERO, EMPTY_STRING, RESOLVER_KEY_VOTING_SECURITY_HOLDERS } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployAssetMockCtx, MAX_UINT256 } from "@test";
-import { executeRbac } from "@test";
+import { deployAssetMockCtx, executeRbac, grantKycToHolders, MAX_UINT256 } from "@test";
 
 const voteData = "0x";
 const EMPTY_VC_ID = EMPTY_STRING;
@@ -38,7 +37,7 @@ export function votingSecurityHoldersTests(): void {
       ]);
 
       await asset.connect(signer_A).addIssuer(signer_A.address);
-      await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+      await grantKycToHolders(asset, signer_B, [signer_A], signer_A.address);
     }
 
     beforeEach(async () => {

@@ -4,12 +4,16 @@ import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ATS_ROLES, EMPTY_STRING, ZERO, RESOLVER_KEY_HOLD_AT_SNAPSHOT } from "@scripts";
-import { deployAssetMockCtx, executeRbac, MAX_UINT256 } from "@test";
+import { ATS_ROLES, RESOLVER_KEY_HOLD_AT_SNAPSHOT } from "@scripts";
+import {
+  DEFAULT_PARTITION,
+  PARTITION_ID_2,
+  deployAssetMockCtx,
+  executeRbac,
+  grantKycToHolders,
+  MAX_UINT256,
+} from "@test";
 
-const _PARTITION_ID_1 = "0x0000000000000000000000000000000000000000000000000000000000000001";
-const _PARTITION_ID_2 = "0x0000000000000000000000000000000000000000000000000000000000000002";
-const EMPTY_VC_ID = EMPTY_STRING;
 const amount = 1000;
 
 export function holdAtSnapshotTests(): void {
@@ -37,9 +41,7 @@ export function holdAtSnapshotTests(): void {
       ]);
 
       await asset.connect(signer_A).addIssuer(signer_B.address);
-      await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
-      await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
-      await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
+      await grantKycToHolders(asset, signer_B, [signer_A, signer_B, signer_C]);
     }
 
     beforeEach(async () => {
@@ -63,7 +65,7 @@ export function holdAtSnapshotTests(): void {
 
       it("GIVEN a snapshot taken WHEN heldBalanceOfAtSnapshot for holder with no holds THEN returns zero", async () => {
         await asset.connect(signer_B).issueByPartition({
-          partition: _PARTITION_ID_1,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
           value: amount,
           data: "0x",
@@ -79,13 +81,13 @@ export function holdAtSnapshotTests(): void {
         const heldAmount = 300;
 
         await asset.connect(signer_B).issueByPartition({
-          partition: _PARTITION_ID_1,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
           value: amount,
           data: "0x",
         });
 
-        await asset.connect(signer_A).createHoldByPartition(_PARTITION_ID_1, {
+        await asset.connect(signer_A).createHoldByPartition(DEFAULT_PARTITION, {
           amount: heldAmount,
           expirationTimestamp: MAX_UINT256,
           escrow: signer_B.address,
@@ -104,7 +106,7 @@ export function holdAtSnapshotTests(): void {
         const heldAmountSecond = 250;
 
         await asset.connect(signer_B).issueByPartition({
-          partition: _PARTITION_ID_1,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
           value: amount,
           data: "0x",
@@ -113,7 +115,7 @@ export function holdAtSnapshotTests(): void {
         // snapshot 1: no holds yet
         await asset.connect(signer_A).takeSnapshot();
 
-        await asset.connect(signer_A).createHoldByPartition(_PARTITION_ID_1, {
+        await asset.connect(signer_A).createHoldByPartition(DEFAULT_PARTITION, {
           amount: heldAmountFirst,
           expirationTimestamp: MAX_UINT256,
           escrow: signer_B.address,
@@ -124,7 +126,7 @@ export function holdAtSnapshotTests(): void {
         // snapshot 2: first hold active
         await asset.connect(signer_A).takeSnapshot();
 
-        await asset.connect(signer_A).createHoldByPartition(_PARTITION_ID_1, {
+        await asset.connect(signer_A).createHoldByPartition(DEFAULT_PARTITION, {
           amount: heldAmountSecond,
           expirationTimestamp: MAX_UINT256,
           escrow: signer_B.address,
@@ -144,26 +146,26 @@ export function holdAtSnapshotTests(): void {
         const heldAmountC = 450;
 
         await asset.connect(signer_B).issueByPartition({
-          partition: _PARTITION_ID_1,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
           value: amount,
           data: "0x",
         });
         await asset.connect(signer_B).issueByPartition({
-          partition: _PARTITION_ID_2,
+          partition: PARTITION_ID_2,
           tokenHolder: signer_C.address,
           value: amount,
           data: "0x",
         });
 
-        await asset.connect(signer_A).createHoldByPartition(_PARTITION_ID_1, {
+        await asset.connect(signer_A).createHoldByPartition(DEFAULT_PARTITION, {
           amount: heldAmountA,
           expirationTimestamp: MAX_UINT256,
           escrow: signer_B.address,
           to: signer_C.address,
           data: "0x",
         });
-        await asset.connect(signer_C).createHoldByPartition(_PARTITION_ID_2, {
+        await asset.connect(signer_C).createHoldByPartition(PARTITION_ID_2, {
           amount: heldAmountC,
           expirationTimestamp: MAX_UINT256,
           escrow: signer_B.address,

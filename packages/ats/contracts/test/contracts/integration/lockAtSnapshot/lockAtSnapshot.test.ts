@@ -4,12 +4,16 @@ import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ATS_ROLES, EMPTY_STRING, ZERO, RESOLVER_KEY_LOCK_AT_SNAPSHOT } from "@scripts";
-import { deployAssetMockCtx, executeRbac, MAX_UINT256 } from "@test";
+import { ATS_ROLES, RESOLVER_KEY_LOCK_AT_SNAPSHOT } from "@scripts";
+import {
+  DEFAULT_PARTITION,
+  PARTITION_ID_2,
+  deployAssetMockCtx,
+  executeRbac,
+  grantKycToHolders,
+  MAX_UINT256,
+} from "@test";
 
-const _PARTITION_ID_1 = "0x0000000000000000000000000000000000000000000000000000000000000001";
-const _PARTITION_ID_2 = "0x0000000000000000000000000000000000000000000000000000000000000002";
-const EMPTY_VC_ID = EMPTY_STRING;
 const amount = 1000;
 
 export function lockAtSnapshotTests(): void {
@@ -38,9 +42,7 @@ export function lockAtSnapshotTests(): void {
       ]);
 
       await asset.connect(signer_A).addIssuer(signer_B.address);
-      await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
-      await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
-      await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
+      await grantKycToHolders(asset, signer_B, [signer_A, signer_B, signer_C]);
     }
 
     beforeEach(async () => {
@@ -64,7 +66,7 @@ export function lockAtSnapshotTests(): void {
 
       it("GIVEN a snapshot taken for a holder with no locks WHEN lockedBalanceOfAtSnapshot THEN returns zero", async () => {
         await asset.connect(signer_B).issueByPartition({
-          partition: _PARTITION_ID_1,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
           value: amount,
           data: "0x",
@@ -80,13 +82,13 @@ export function lockAtSnapshotTests(): void {
         const lockedAmount = 300;
 
         await asset.connect(signer_B).issueByPartition({
-          partition: _PARTITION_ID_1,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
           value: amount,
           data: "0x",
         });
 
-        await asset.connect(signer_B).lockByPartition(_PARTITION_ID_1, lockedAmount, signer_A.address, MAX_UINT256);
+        await asset.connect(signer_B).lockByPartition(DEFAULT_PARTITION, lockedAmount, signer_A.address, MAX_UINT256);
 
         await asset.connect(signer_A).takeSnapshot();
 
@@ -99,7 +101,7 @@ export function lockAtSnapshotTests(): void {
         const lockedAmountSecond = 250;
 
         await asset.connect(signer_B).issueByPartition({
-          partition: _PARTITION_ID_1,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
           value: amount,
           data: "0x",
@@ -110,14 +112,14 @@ export function lockAtSnapshotTests(): void {
 
         await asset
           .connect(signer_B)
-          .lockByPartition(_PARTITION_ID_1, lockedAmountFirst, signer_A.address, MAX_UINT256);
+          .lockByPartition(DEFAULT_PARTITION, lockedAmountFirst, signer_A.address, MAX_UINT256);
 
         // snapshot 2: first lock active
         await asset.connect(signer_A).takeSnapshot();
 
         await asset
           .connect(signer_B)
-          .lockByPartition(_PARTITION_ID_1, lockedAmountSecond, signer_A.address, MAX_UINT256);
+          .lockByPartition(DEFAULT_PARTITION, lockedAmountSecond, signer_A.address, MAX_UINT256);
 
         const balanceAtSnapshot1 = await asset.lockedBalanceOfAtSnapshot(1, signer_A.address);
         const balanceAtSnapshot2 = await asset.lockedBalanceOfAtSnapshot(2, signer_A.address);
@@ -131,20 +133,20 @@ export function lockAtSnapshotTests(): void {
         const lockedAmountC = 450;
 
         await asset.connect(signer_B).issueByPartition({
-          partition: _PARTITION_ID_1,
+          partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
           value: amount,
           data: "0x",
         });
         await asset.connect(signer_B).issueByPartition({
-          partition: _PARTITION_ID_2,
+          partition: PARTITION_ID_2,
           tokenHolder: signer_C.address,
           value: amount,
           data: "0x",
         });
 
-        await asset.connect(signer_B).lockByPartition(_PARTITION_ID_1, lockedAmountA, signer_A.address, MAX_UINT256);
-        await asset.connect(signer_B).lockByPartition(_PARTITION_ID_2, lockedAmountC, signer_C.address, MAX_UINT256);
+        await asset.connect(signer_B).lockByPartition(DEFAULT_PARTITION, lockedAmountA, signer_A.address, MAX_UINT256);
+        await asset.connect(signer_B).lockByPartition(PARTITION_ID_2, lockedAmountC, signer_C.address, MAX_UINT256);
 
         await asset.connect(signer_A).takeSnapshot();
 

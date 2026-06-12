@@ -13,7 +13,7 @@
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFullAssetFixture } from "../../fixtures/deploy/fullAsset";
-import { ASSET_MOCK_CONFIG_ID, getAssetMockFacets } from "@scripts/domain";
+import { ASSET_MOCK_CONFIG_ID, getAssetMockFacets } from "../../fixtures/deploy/assetMockConfiguration";
 import { BusinessLogicResolver__factory } from "@contract-types";
 import { silenceScriptLogging } from "@test";
 
