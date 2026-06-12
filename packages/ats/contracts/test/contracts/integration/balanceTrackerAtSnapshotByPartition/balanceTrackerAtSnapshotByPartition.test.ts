@@ -80,9 +80,7 @@ export function balanceTrackerAtSnapshotByPartitionTests(getCtx: () => AssetMock
           data: "0x",
         });
 
-        expect(await asset.balanceOfAtSnapshotByPartition(DEFAULT_PARTITION, 1, signer_A.address)).to.equal(
-          mintAmount,
-        );
+        expect(await asset.balanceOfAtSnapshotByPartition(DEFAULT_PARTITION, 1, signer_A.address)).to.equal(mintAmount);
       });
 
       it("GIVEN a snapshot WHEN balanceOfAtSnapshotByPartition for an unknown partition THEN returns zero", async () => {

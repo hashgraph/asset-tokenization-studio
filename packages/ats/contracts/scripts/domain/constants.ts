@@ -223,16 +223,6 @@ export const RESOLVER_KEY_EXTERNAL_PAUSE = "0x7a8980089ef3860d6c0e831805ee28105e
  */
 export const INITIALIZE_MOCK_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000009";
 
-// TEST-ONLY: configuration ID for the AssetMock domain used by shared-fixture integration tests.
-/**
- * Asset Mock configuration ID (TEST-ONLY).
- *
- * bytes32(uint256(10)) = 0x00...0A
- * Used by BusinessLogicResolver to identify the test-only asset configuration that registers
- * the union of all IAsset facets + MockDiamondCut under RESOLVER_KEY_DIAMOND.
- */
-export const ASSET_MOCK_CONFIG_ID = "0x000000000000000000000000000000000000000000000000000000000000000a";
-
 /**
  * Registry name of the test-only EVM accessor facet.
  *
