@@ -30,31 +30,25 @@ abstract contract LoansPortfolioModifiers {
 
     /**
      * @notice Reverts when `_holdingsAssetAddress` is not registered in the portfolio.
-     * @dev Delegates the membership check to
-     *      `LoansPortfolioStorageWrapper._checkHoldingAssetAlreadyExists`. Use on any
-     *      writer that requires the asset to be present before mutating it (e.g. remove,
-     *      update). Raises `HoldingAssetNotFound` with the offending address.
+     * @dev Delegates to `LoansPortfolioStorageWrapper._checkAlreadyExistingHoldingsAsset`.
+     *      Apply on writers that require the asset to be present before mutating it
+     *      (e.g. remove, update). Reverts with `HoldingAssetNotFound`.
      * @param _holdingsAssetAddress The holdings asset address whose presence is required.
      */
     modifier onlyAlreadyExistingHoldingsAsset(address _holdingsAssetAddress) {
-        if (!LoansPortfolioStorageWrapper._checkHoldingAssetAlreadyExists(_holdingsAssetAddress)) {
-            revert ILoansPortfolio.HoldingAssetNotFound(_holdingsAssetAddress);
-        }
+        LoansPortfolioStorageWrapper._checkAlreadyExistingHoldingsAsset(_holdingsAssetAddress);
         _;
     }
 
     /**
      * @notice Reverts when `_holdingsAssetAddress` is already registered in the portfolio.
-     * @dev Delegates the membership check to
-     *      `LoansPortfolioStorageWrapper._checkHoldingAssetAlreadyExists`. Use on any
-     *      writer that must not register the same asset twice (e.g. add). Raises
-     *      `HoldingsAssetAlreadyExists` with the offending address.
+     * @dev Delegates to `LoansPortfolioStorageWrapper._checkNotExistingHoldingsAsset`.
+     *      Apply on writers that must not register the same asset twice (e.g. add).
+     *      Reverts with `HoldingsAssetAlreadyExists`.
      * @param _holdingsAssetAddress The holdings asset address that must not yet exist.
      */
     modifier onlyNotExistingHoldingsAsset(address _holdingsAssetAddress) {
-        if (LoansPortfolioStorageWrapper._checkHoldingAssetAlreadyExists(_holdingsAssetAddress)) {
-            revert ILoansPortfolio.HoldingsAssetAlreadyExists(_holdingsAssetAddress);
-        }
+        LoansPortfolioStorageWrapper._checkNotExistingHoldingsAsset(_holdingsAssetAddress);
         _;
     }
 }

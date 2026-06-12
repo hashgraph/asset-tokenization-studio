@@ -2,7 +2,6 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { EnumerableSetBytes4 } from "../../infrastructure/utils/EnumerableSetBytes4.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { ILoan } from "../../facets/loan/ILoan.sol";
 import { IERC1410Types } from "../../facets/commonTypes/IERC1410Types.sol";
@@ -65,7 +64,6 @@ struct LoansPortfolioDataStorage {
  */
 library LoansPortfolioStorageWrapper {
     using EnumerableSet for EnumerableSet.AddressSet;
-    using EnumerableSetBytes4 for EnumerableSetBytes4.Bytes4Set;
     using Pagination for EnumerableSet.AddressSet;
 
     /**
@@ -356,15 +354,27 @@ library LoansPortfolioStorageWrapper {
     }
 
     /**
-     * @notice Validates that a holding asset address is not already present in the portfolio.
-     * @dev Reverts with `HoldingsAssetAlreadyExists` if the asset address is found in the holdings set.
-     * @param _assetAddress The asset address to check for existence.
-     * @return exists_ True if the asset address already exists in the holdings set, false otherwise.
-     * @custom:error HoldingsAssetAlreadyExists If the asset address already exists in the holdings set.
+     * @notice Reverts if the given holdings asset is already registered in the portfolio.
+     * @dev Used as a pre-condition guard before adding a new asset to prevent duplicates.
+     *      Reverts with `HoldingsAssetAlreadyExists` when the address is present in the set.
+     * @param _holdingsAssetAddress Address of the holdings asset to check.
      */
-    function _checkHoldingAssetAlreadyExists(address _assetAddress) internal view returns (bool) {
-        LoansPortfolioDataStorage storage _loanPortfolioStorage = loansPortfolioStorage();
-        return _loanPortfolioStorage.holdingsAssets.contains(_assetAddress);
+    function _checkNotExistingHoldingsAsset(address _holdingsAssetAddress) internal view {
+        if (loansPortfolioStorage().holdingsAssets.contains(_holdingsAssetAddress)) {
+            revert ILoansPortfolio.HoldingsAssetAlreadyExists(_holdingsAssetAddress);
+        }
+    }
+
+    /**
+     * @notice Reverts if the given holdings asset is not registered in the portfolio.
+     * @dev Used as a pre-condition guard before updating or removing an asset.
+     *      Reverts with `HoldingAssetNotFound` when the address is absent from the set.
+     * @param _holdingsAssetAddress Address of the holdings asset to check.
+     */
+    function _checkAlreadyExistingHoldingsAsset(address _holdingsAssetAddress) internal view {
+        if (!loansPortfolioStorage().holdingsAssets.contains(_holdingsAssetAddress)) {
+            revert ILoansPortfolio.HoldingAssetNotFound(_holdingsAssetAddress);
+        }
     }
 
     /**

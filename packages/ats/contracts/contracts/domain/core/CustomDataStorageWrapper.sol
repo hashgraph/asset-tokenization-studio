@@ -44,7 +44,7 @@ library CustomDataStorageWrapper {
      * @param _key   The custom data key whose value is being written.
      * @param _value The ordered list of byte payloads to persist under `_key`.
      */
-    function setCustomData(bytes32 _key, bytes[] memory _value) internal {
+    function setCustomData(bytes32 _key, bytes[] calldata _value) internal {
         bytes[] storage stored = customDataStorage().customData[_key];
         delete customDataStorage().customData[_key];
         uint256 length = _value.length;
