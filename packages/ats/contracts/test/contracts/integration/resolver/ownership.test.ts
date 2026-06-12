@@ -164,14 +164,6 @@ describe("Ownership", () => {
         ownership.connect(signer_B).transferOwnership(CONFIG_ID_A, signer_C.address),
       ).to.be.revertedWithCustomError(pause, "IsPaused");
     });
-
-    it("GIVEN the current owner WHEN transferring ownership to an account without ROLE_CREATE_CONFIGURATION THEN reverts with AccountHasNoRole", async () => {
-      await seedOwner(CONFIG_ID_A, signer_B.address);
-
-      await expect(ownership.connect(signer_B).transferOwnership(CONFIG_ID_A, signer_B.address))
-        .to.be.revertedWithCustomError(accessControl, "AccountHasNoRole")
-        .withArgs(signer_B.address, ATS_ROLES.ROLE_CREATE_CONFIGURATION);
-    });
   });
 
   describe("acceptOwnership", () => {

@@ -98,17 +98,4 @@ abstract contract AccessControlModifiers {
         AccessControlStorageWrapper.checkAnyRole(roles, _account);
         _;
     }
-
-    /**
-     * @notice Restricts execution to a given account holding the specified role.
-     * @dev Unlike `onlyRole`, which checks `msg.sender`, this modifier validates an
-     *      explicitly supplied `_account`. Delegates to `AccessControlStorageWrapper.checkRole`,
-     *      which reverts with `AccountHasNoRole(_account, _role)` on failure.
-     * @param _role The role that `_account` must hold.
-     * @param _account The address whose role membership is validated.
-     */
-    modifier onlyRoleForAccount(bytes32 _role, address _account) virtual {
-        AccessControlStorageWrapper.checkRole(_role, _account);
-        _;
-    }
 }
