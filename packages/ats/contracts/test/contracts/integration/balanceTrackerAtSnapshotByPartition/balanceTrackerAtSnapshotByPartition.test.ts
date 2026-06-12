@@ -3,11 +3,12 @@
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { ATS_ROLES, RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT_BY_PARTITION } from "@scripts";
-import { DEFAULT_PARTITION, PARTITION_ID_2, executeRbac, grantKycToHolders } from "@test";
-import type { AssetMockCtx } from "@test";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { ATS_ROLES, EMPTY_STRING, ZERO, RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT_BY_PARTITION } from "@scripts";
+import { deployAssetMockCtx, executeRbac, MAX_UINT256 } from "@test";
 
 export function balanceTrackerAtSnapshotByPartitionTests(getCtx: () => AssetMockCtx): void {
+  export function balanceTrackerAtSnapshotByPartitionTests(): void {
   describe("BalanceTrackerAtSnapshotByPartition Tests", () => {
     let signer_A: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
@@ -15,8 +16,8 @@ export function balanceTrackerAtSnapshotByPartitionTests(getCtx: () => AssetMock
 
     let asset: IAssetMock;
 
-    beforeEach(async () => {
-      const ctx = getCtx();
+    async function deployFixture() {
+      const ctx = await loadFixture(deployAssetMockCtx);
       asset = ctx.asset;
       await asset.setMultiPartition(true);
 
@@ -44,7 +45,12 @@ export function balanceTrackerAtSnapshotByPartitionTests(getCtx: () => AssetMock
       ]);
 
       await asset.connect(signer_A).addIssuer(signer_B.address);
-      await grantKycToHolders(asset, signer_B, [signer_A, signer_B]);
+      await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
+      await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
+    }
+
+    beforeEach(async () => {
+      await loadFixture(deployFixture);
     });
 
     describe("balanceOfAtSnapshotByPartition", () => {
@@ -79,7 +85,9 @@ export function balanceTrackerAtSnapshotByPartitionTests(getCtx: () => AssetMock
           data: "0x",
         });
 
-        expect(await asset.balanceOfAtSnapshotByPartition(DEFAULT_PARTITION, 1, signer_A.address)).to.equal(mintAmount);
+        expect(await asset.balanceOfAtSnapshotByPartition(DEFAULT_PARTITION, 1, signer_A.address)).to.equal(
+          mintAmount,
+        );
       });
 
       it("GIVEN a snapshot WHEN balanceOfAtSnapshotByPartition for an unknown partition THEN returns zero", async () => {

@@ -4,11 +4,12 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { ATS_ROLES, dateToUnixTimestamp, RESOLVER_KEY_BALANCE_TRACKER_ADJUSTED } from "@scripts";
-import { DEFAULT_PARTITION, executeRbac, grantKycToHolders } from "@test";
-import type { AssetMockCtx } from "@test";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { ATS_ROLES, dateToUnixTimestamp, EMPTY_STRING, ZERO, RESOLVER_KEY_BALANCE_TRACKER_ADJUSTED } from "@scripts";
+import { deployAssetMockCtx, executeRbac, MAX_UINT256 } from "@test";
 
 export function balanceTrackerAdjustedTests(getCtx: () => AssetMockCtx): void {
+  export function balanceTrackerAdjustedTests(): void {
   describe("BalanceTrackerAdjusted Tests", () => {
     let signer_A: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
@@ -16,41 +17,46 @@ export function balanceTrackerAdjustedTests(getCtx: () => AssetMockCtx): void {
 
     let asset: IAssetMock;
 
+    async function deployFixture() {
+      const ctx = await loadFixture(deployAssetMockCtx);
+      asset = ctx.asset;
+      await asset.setMultiPartition(true);
+
+      signer_A = ctx.deployer;
+      signer_B = ctx.user1;
+      signer_C = ctx.user2;
+
+      await executeRbac(asset, [
+        {
+          role: ATS_ROLES.ROLE_ISSUER,
+          members: [signer_B.address],
+        },
+        {
+          role: ATS_ROLES.ROLE_KYC,
+          members: [signer_B.address],
+        },
+        {
+          role: ATS_ROLES.ROLE_CORPORATE_ACTION,
+          members: [signer_A.address],
+        },
+        {
+          role: ATS_ROLES.ROLE_SSI_MANAGER,
+          members: [signer_A.address],
+        },
+      ]);
+
+      await asset.connect(signer_A).addIssuer(signer_B.address);
+      await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
+      await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
+    }
+
     afterEach(async () => {
       await asset.resetSystemTimestamp();
     });
 
     describe("balanceOfAt", () => {
       beforeEach(async () => {
-        const ctx = getCtx();
-        asset = ctx.asset;
-        await asset.setMultiPartition(true);
-
-        signer_A = ctx.deployer;
-        signer_B = ctx.user1;
-        signer_C = ctx.user2;
-
-        await executeRbac(asset, [
-          {
-            role: ATS_ROLES.ROLE_ISSUER,
-            members: [signer_B.address],
-          },
-          {
-            role: ATS_ROLES.ROLE_KYC,
-            members: [signer_B.address],
-          },
-          {
-            role: ATS_ROLES.ROLE_CORPORATE_ACTION,
-            members: [signer_A.address],
-          },
-          {
-            role: ATS_ROLES.ROLE_SSI_MANAGER,
-            members: [signer_A.address],
-          },
-        ]);
-
-        await asset.connect(signer_A).addIssuer(signer_B.address);
-        await grantKycToHolders(asset, signer_B, [signer_A, signer_B]);
+        await loadFixture(deployFixture);
       });
 
       it("GIVEN a token holder with minted tokens WHEN balanceOfAt at current time THEN returns minted amount", async () => {

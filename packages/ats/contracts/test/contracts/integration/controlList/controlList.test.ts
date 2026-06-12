@@ -1,9 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { expect } from "chai";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { IAssetMock, type IFactory, type BusinessLogicResolver, IAssetMock__factory } from "@contract-types";
 import { ADDRESS_ZERO, ATS_ROLES, GAS_LIMIT } from "@scripts";
-import { getSecurityData, getRegulationData, makeEquityDetailsData, grantRoleAndPauseToken, executeRbac } from "@test";
+import {
+  getSecurityData,
+  getRegulationData,
+  makeEquityDetailsData,
+  grantRoleAndPauseToken,
+   executeRbac } from "@test";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { ethers } from "hardhat";
 import type { AssetMockCtx } from "@test";
@@ -16,7 +22,6 @@ export function controlListTests(getCtx: () => AssetMockCtx): void {
     let signer_D: HardhatEthersSigner;
 
     let asset: IAssetMock;
-    let mockDiamondCut: MockDiamondCut;
     let factory: IFactory;
     let blr: BusinessLogicResolver;
 
@@ -192,22 +197,22 @@ export function controlListTests(getCtx: () => AssetMockCtx): void {
     });
 
     describe("Deactivated", () => {
-      beforeEach(async () => {
-        await asset.forceDeactivate();
-      });it("GIVEN a deactivated asset WHEN addToControlList THEN transaction fails with Deactivated", async () => {
-
+      it("GIVEN a deactivated asset WHEN addToControlList THEN transaction fails with Deactivated", async () => {
+        const ctx = await loadFixture(deployAssetMockCtx);
+        const deactivatedAsset = ctx.asset;
+        await deactivatedAsset.forceDeactivate();
         await expect(
-          asset.connect(signer_A).addToControlList(ethers.ZeroAddress)
-        ).to.be.revertedWithCustomError(asset,
-          "Deactivated",
-      );
+          deactivatedAsset.connect(ctx.deployer).addToControlList(ethers.ZeroAddress),
+        ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
       });
 
       it("GIVEN a deactivated asset WHEN removeFromControlList THEN transaction fails with Deactivated", async () => {
-        await expect(asset.connect(signer_A).removeFromControlList(ethers.ZeroAddress)).to.be.revertedWithCustomError(
-          asset,
-          "Deactivated",
-        );
+        const ctx = await loadFixture(deployAssetMockCtx);
+        const deactivatedAsset = ctx.asset;
+        await deactivatedAsset.forceDeactivate();
+        await expect(
+          deactivatedAsset.connect(ctx.deployer).removeFromControlList(ethers.ZeroAddress),
+        ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
       });
     });
 

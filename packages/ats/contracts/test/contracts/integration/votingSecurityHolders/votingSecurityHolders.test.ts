@@ -39,6 +39,7 @@ export function votingSecurityHoldersTests(getCtx: () => AssetMockCtx): void {
       await asset.connect(signer_A).addIssuer(signer_A.address);
       await grantKycToHolders(asset, signer_B, [signer_A], signer_A.address);
 
+
       const currentTimestamp = await asset.blockTimestamp();
       const ONE_DAY = 86400n;
       votingRecordDateInSeconds = Number(currentTimestamp + ONE_DAY);

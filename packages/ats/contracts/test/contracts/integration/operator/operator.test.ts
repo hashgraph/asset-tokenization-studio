@@ -3,10 +3,10 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { IAssetMock } from "@contract-types";
-import { ATS_ROLES, RESOLVER_KEY_OPERATOR } from "@scripts";
-import { executeRbac, grantKycToHolders } from "@test";
-import type { AssetMockCtx } from "@test";
+import { ATS_ROLES, EMPTY_STRING, RESOLVER_KEY_OPERATOR, ZERO } from "@scripts";
+import { deployAssetMockCtx, executeRbac, MAX_UINT256 } from "@test";
 
 export function operatorTests(getCtx: () => AssetMockCtx): void {
   export function operatorTests(): void {

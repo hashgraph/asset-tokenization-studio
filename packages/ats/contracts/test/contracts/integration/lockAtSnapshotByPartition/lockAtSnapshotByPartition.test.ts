@@ -3,13 +3,13 @@
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { ATS_ROLES, RESOLVER_KEY_LOCK_AT_SNAPSHOT_BY_PARTITION } from "@scripts";
-import { DEFAULT_PARTITION, PARTITION_ID_2, executeRbac, grantKycToHolders, MAX_UINT256 } from "@test";
-import type { AssetMockCtx } from "@test";
+import { ATS_ROLES, EMPTY_STRING, ZERO, RESOLVER_KEY_LOCK_AT_SNAPSHOT_BY_PARTITION } from "@scripts";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { deployAssetMockCtx, executeRbac, MAX_UINT256 } from "@test";
 
 const amount = 1000;
 
-export function lockAtSnapshotByPartitionTests(getCtx: () => AssetMockCtx): void {
+export function lockAtSnapshotByPartitionTests(): void {
   describe("LockAtSnapshotByPartition Tests", () => {
     let signer_A: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
@@ -17,8 +17,8 @@ export function lockAtSnapshotByPartitionTests(getCtx: () => AssetMockCtx): void
 
     let asset: IAssetMock;
 
-    beforeEach(async () => {
-      const ctx = getCtx();
+    async function deployFixture() {
+      const ctx = await loadFixture(deployAssetMockCtx);
       asset = ctx.asset;
       await asset.setMultiPartition(true);
 
@@ -35,7 +35,13 @@ export function lockAtSnapshotByPartitionTests(getCtx: () => AssetMockCtx): void
       ]);
 
       await asset.connect(signer_A).addIssuer(signer_B.address);
-      await grantKycToHolders(asset, signer_B, [signer_A, signer_B, signer_C]);
+      await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
+      await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
+      await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
+    }
+
+    beforeEach(async () => {
+      await loadFixture(deployFixture);
     });
 
     describe("lockedBalanceOfAtSnapshotByPartition", () => {

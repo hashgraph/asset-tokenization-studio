@@ -12,10 +12,15 @@ export function freezeTests(getCtx: () => AssetMockCtx): void {
 
     let asset: IAssetMock;
 
-    beforeEach(async () => {
-      const ctx = getCtx();
+    async function deployFreezeFixture() {
+      const ctx = await loadFixture(deployAssetMockCtx);
       signer_D = ctx.user3;
+
       asset = ctx.asset;
+    }
+
+    beforeEach(async () => {
+      await loadFixture(deployFreezeFixture);
     });
 
     describe("initializeFreeze", () => {
