@@ -19,6 +19,8 @@ export function accessControlTests(getCtx: () => AssetMockCtx): void {
     beforeEach(async () => {
       const ctx = getCtx();
       asset = ctx.asset;
+      await executeRbac(asset, [{ role: ATS_ROLES.ROLE_PAUSER, members: [ctx.user1.address] }]);
+
       deployer = ctx.deployer;
       signer_B = ctx.user1;
       signer_C = ctx.user2;

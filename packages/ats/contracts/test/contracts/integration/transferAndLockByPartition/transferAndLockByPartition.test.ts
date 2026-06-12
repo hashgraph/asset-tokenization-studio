@@ -54,6 +54,33 @@ export function transferAndLockByPartitionTests(getCtx: () => AssetMockCtx): voi
       await grantKycToHolders(asset, signer_B, [signer_A, signer_C], signer_A.address);
     }
 
+    async function deployMultiFixture() {
+      const ctx = await loadFixture(deployAssetMockCtx);
+      asset = ctx.asset;
+      await asset.setMultiPartition(true);
+
+      signer_A = ctx.deployer;
+      signer_B = ctx.user2;
+      signer_C = ctx.user3;
+      signer_D = ctx.user4;
+
+      await executeRbac(asset, set_initRbacs());
+      await setFacets(asset);
+    }
+
+    async function deploySingleFixture() {
+      const ctx = await loadFixture(deployAssetMockCtx);
+      asset = ctx.asset;
+
+      signer_A = ctx.deployer;
+      signer_B = ctx.user2;
+      signer_C = ctx.user3;
+      signer_D = ctx.user4;
+
+      await executeRbac(asset, set_initRbacs());
+      await setFacets(asset);
+    }
+
     beforeEach(async () => {
       const ctx = getCtx();
       asset = ctx.asset;
@@ -158,6 +185,10 @@ export function transferAndLockByPartitionTests(getCtx: () => AssetMockCtx): voi
     });
 
     describe("Multi-partition disabled", () => {
+      beforeEach(async () => {
+        await loadFixture(deploySingleFixture);
+      });
+
       describe("transferAndLockByPartition", () => {
         it("GIVEN a token with multi-partition disabled GIVEN transferAndLockByPartition with non-default partition THEN fails with PartitionNotAllowedInSinglePartitionMode", async () => {
           await expect(
