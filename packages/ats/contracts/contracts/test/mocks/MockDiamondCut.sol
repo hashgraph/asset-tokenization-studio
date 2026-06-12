@@ -26,6 +26,9 @@ import { ResolverProxyStorageWrapper } from "../../domain/core/ResolverProxyStor
 import { DeactivateStorageWrapper } from "../../domain/core/DeactivateStorageWrapper.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
+import { ControlListStorageWrapper } from "../../domain/core/ControlListStorageWrapper.sol";
+import { KycStorageWrapper } from "../../domain/core/KycStorageWrapper.sol";
+import { ProtectedPartitionsStorageWrapper } from "../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 
 /* solhint-disable */
 
@@ -37,6 +40,7 @@ interface IMockDiamondCut {
     function forceSetOperational() external;
     function setMultiPartition(bool _multiPartition) external;
     function forceDeactivate() external;
+    function forceSecurityFlags(bool n) external;
 }
 
 // `IStaticFunctionSelectors` is intentionally not listed: it is already pulled
@@ -123,6 +127,20 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
         DeactivateStorageWrapper.deactivate();
     }
 
+    /// @notice Sets all four security flags (multi-partition, whitelist, internal KYC, protected
+    ///         partitions) to a single value in one call.
+    /// @dev Each initialiser writes to the same storage slot that the production facet initialiser
+    ///      would. On a freshly-snapshot-restored asset (all flags at EVM-default false), calling
+    ///      `forceSecurityFlags(true)` is equivalent to having deployed with all four features
+    ///      enabled, and `forceSecurityFlags(false)` restores the EVM-default state.
+    /// @param n `true` to enable all four security features, `false` to disable them.
+    function forceSecurityFlags(bool n) external override {
+        ERC1410StorageWrapper.initializeERC1410(n);
+        ControlListStorageWrapper.initializeControlList(n);
+        KycStorageWrapper.initializeInternalKyc(n);
+        ProtectedPartitionsStorageWrapper.initializeProtectedPartitions(n);
+    }
+
     function getStaticResolverKey() external pure returns (bytes32 staticResolverKey_) {
         // Must return the production `RESOLVER_KEY_DIAMOND` so the BLR
         // registration matches the `atsRegistry.data.ts` entry. The internal
@@ -132,7 +150,7 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
     }
 
     function getStaticFunctionSelectors() external pure returns (bytes4[] memory staticFunctionSelectors_) {
-        staticFunctionSelectors_ = new bytes4[](26);
+        staticFunctionSelectors_ = new bytes4[](27);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this.initializeDiamondCut.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.forceNonOperational.selector;
@@ -142,6 +160,7 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
         staticFunctionSelectors_[selectorsIndex++] = this.forceSetOperational.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.setMultiPartition.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.forceDeactivate.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.forceSecurityFlags.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.updateConfigVersion.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.updateConfig.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.updateResolver.selector;
