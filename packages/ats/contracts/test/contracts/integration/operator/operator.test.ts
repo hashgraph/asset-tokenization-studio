@@ -113,23 +113,25 @@ export function operatorTests(getCtx: () => AssetMockCtx): void {
     describe("Deactivated", () => {
       beforeEach(async () => {
         await asset.forceDeactivate();
-      });it("GIVEN a deactivated asset WHEN authorizeOperator THEN transaction fails with Deactivated", async () => {
+      });
 
-        await expect(
-          asset.connect(signer_A).authorizeOperator(ethers.ZeroAddress)
-        ).to.be.revertedWithCustomError(asset,
+      it("GIVEN a deactivated asset WHEN authorizeOperator THEN transaction fails with Deactivated", async () => {
+        await expect(asset.connect(signer_A).authorizeOperator(ethers.ZeroAddress)
+        ).to.be.revertedWithCustomError(
+          asset,
           "Deactivated",
-      );
+        );
       });
 
       it("GIVEN a deactivated asset WHEN revokeOperator THEN transaction fails with Deactivated", async () => {
 
-        await expect(
-          asset.connect(signer_A).revokeOperator(ethers.ZeroAddress)
-        ).to.be.revertedWithCustomError(asset,
+        await expect(asset.connect(signer_A).revokeOperator(ethers.ZeroAddress)
+        ).to.be.revertedWithCustomError(
+          asset,
           "Deactivated",
-      );
-    });});
+        );
+      });
+    });
 
     describe("initializeOperator", () => {
       it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeOperator is called THEN AccountHasNoRole", async () => {

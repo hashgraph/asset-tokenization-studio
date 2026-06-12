@@ -60,15 +60,13 @@ export function deactivateTests(getCtx: () => AssetMockCtx): void {
     });
 
     describe("Deactivated", () => {
+      beforeEach(async () => {
+        await asset.grantRole(ATS_ROLES.ROLE_DEACTIVATE, deployer.address);
+        await asset.connect(deployer).deactivate();
+      });
+
       it("GIVEN a deactivated asset WHEN deactivate THEN transaction fails with Deactivated", async () => {
-        const ctx = await loadFixture(deployAssetMockCtx);
-        const deactivatedAsset = ctx.asset;
-        await deactivatedAsset.grantRole(ATS_ROLES.ROLE_DEACTIVATE, ctx.deployer.address);
-        await deactivatedAsset.connect(ctx.deployer).deactivate();
-        await expect(deactivatedAsset.connect(ctx.deployer).deactivate()).to.be.revertedWithCustomError(
-          deactivatedAsset,
-          "Deactivated",
-        );
+        await expect(asset.connect(deployer).deactivate()).to.be.revertedWithCustomError(asset, "Deactivated");
       });
     });
 

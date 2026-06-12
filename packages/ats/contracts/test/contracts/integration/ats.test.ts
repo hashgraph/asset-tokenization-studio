@@ -53,17 +53,6 @@ import { snapshotsByPartitionTests } from "./snapshotsByPartition/snapshotsByPar
 import { votingSecurityHoldersTests } from "./votingSecurityHolders/votingSecurityHolders.test";
 import { transferAndLockByPartitionTests } from "./transferAndLockByPartition/transferAndLockByPartition.test";
 
-// ── W2: Multi-partition suites ──────────────────────────────────────────
-import { holdAtSnapshotTests } from "./holdAtSnapshot/holdAtSnapshot.test";
-import { lockAtSnapshotTests } from "./lockAtSnapshot/lockAtSnapshot.test";
-import { lockAtSnapshotByPartitionTests } from "./lockAtSnapshotByPartition/lockAtSnapshotByPartition.test";
-import { balanceTrackerAdjustedTests } from "./balanceTrackerAdjusted/balanceTrackerAdjusted.test";
-import { balanceTrackerAtSnapshotByPartitionTests } from "./balanceTrackerAtSnapshotByPartition/balanceTrackerAtSnapshotByPartition.test";
-import { balanceTrackerAtSnapshotTests } from "./balanceTrackerAtSnapshot/balanceTrackerAtSnapshot.test";
-import { snapshotsByPartitionTests } from "./snapshotsByPartition/snapshotsByPartition.test";
-import { votingSecurityHoldersTests } from "./votingSecurityHolders/votingSecurityHolders.test";
-import { transferAndLockByPartitionTests } from "./transferAndLockByPartition/transferAndLockByPartition.test";
-
 describe("ATS — IAsset Suites", () => {
   let ctx: Awaited<ReturnType<typeof deployAssetMockCtx>>;
 
@@ -107,47 +96,4 @@ describe("ATS — IAsset Suites", () => {
   snapshotsByPartitionTests(() => ctx);
   votingSecurityHoldersTests(() => ctx);
   transferAndLockByPartitionTests(() => ctx);
-
-  describe("Freeze", () => {
-    freezeTests();
-  });
-
-  describe("Deactivate", () => {
-    deactivateTests();
-  });
-
-  describe("Operator", () => {
-    operatorTests();
-  });
-
-  describe("EIP712", () => {
-    eip712Tests();
-  });
-
-  describe("Nonces", () => {
-    noncesTests();
-  });
-
-  describe("Control List", () => {
-    controlListTests();
-  });
-
-  // ── W1: Layer 1 suites ────────────────────────────────────────────
-  corporateActionsTests();
-  dividendSecurityHoldersTests();
-  documentationTests();
-  scheduledBalanceAdjustmentsTests();
-  freezeAtSnapshotTests();
-  freezeAtSnapshotByPartitionTests();
-
-  // ── W2: Multi-partition suites ──────────────────────────────────────
-  holdAtSnapshotTests();
-  lockAtSnapshotTests();
-  lockAtSnapshotByPartitionTests();
-  balanceTrackerAdjustedTests();
-  balanceTrackerAtSnapshotByPartitionTests();
-  balanceTrackerAtSnapshotTests();
-  snapshotsByPartitionTests();
-  votingSecurityHoldersTests();
-  transferAndLockByPartitionTests();
 });

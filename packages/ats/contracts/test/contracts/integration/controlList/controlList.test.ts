@@ -197,22 +197,22 @@ export function controlListTests(getCtx: () => AssetMockCtx): void {
     });
 
     describe("Deactivated", () => {
+      beforeEach(async () => {
+        await asset.forceDeactivate();
+      });
+
       it("GIVEN a deactivated asset WHEN addToControlList THEN transaction fails with Deactivated", async () => {
-        const ctx = await loadFixture(deployAssetMockCtx);
-        const deactivatedAsset = ctx.asset;
-        await deactivatedAsset.forceDeactivate();
-        await expect(
-          deactivatedAsset.connect(ctx.deployer).addToControlList(ethers.ZeroAddress),
-        ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+        await expect(asset.connect(signer_A).addToControlList(ethers.ZeroAddress)).to.be.revertedWithCustomError(
+          asset,
+          "Deactivated",
+        );
       });
 
       it("GIVEN a deactivated asset WHEN removeFromControlList THEN transaction fails with Deactivated", async () => {
-        const ctx = await loadFixture(deployAssetMockCtx);
-        const deactivatedAsset = ctx.asset;
-        await deactivatedAsset.forceDeactivate();
-        await expect(
-          deactivatedAsset.connect(ctx.deployer).removeFromControlList(ethers.ZeroAddress),
-        ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+        await expect(asset.connect(signer_A).removeFromControlList(ethers.ZeroAddress)).to.be.revertedWithCustomError(
+          asset,
+          "Deactivated",
+        );
       });
     });
 
