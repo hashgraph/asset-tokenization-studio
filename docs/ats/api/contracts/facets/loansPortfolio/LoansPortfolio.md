@@ -43,6 +43,20 @@ Returns the defaulted-loans ratio as a numerator/denominator pair.
 | numerator\_   | uint256 | Numerator of the defaulted-loans ratio.   |
 | denominator\_ | uint256 | Denominator of the defaulted-loans ratio. |
 
+### getGeographicalExposure
+
+```solidity
+function getGeographicalExposure() external view returns (struct ILoansPortfolio.GeographicalExposureData[] geographicalExposure_)
+```
+
+Returns the geographical exposure aggregated by country.
+
+#### Returns
+
+| Name                   | Type                                       | Description                                                                                        |
+| ---------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| geographicalExposure\_ | ILoansPortfolio.GeographicalExposureData[] | Array of `(country, count)` tuples covering every country present in the portfolio&#39;s holdings. |
+
 ### getHoldingsAssetOwnership
 
 ```solidity
@@ -382,9 +396,9 @@ _Fires exclusively from `initializeLoansPortfolio` after the storage write succe
 
 #### Parameters
 
-| Name               | Type                                      | Description                                             |
-| ------------------ | ----------------------------------------- | ------------------------------------------------------- |
-| loansPortfolioData | ILoansPortfolio.LoansPortfolioDetailsData | The portfolio configuration captured at initialisation. |
+| Name               | Type                                      | Description                                              |
+| ------------------ | ----------------------------------------- | -------------------------------------------------------- |
+| loansPortfolioData | ILoansPortfolio.LoansPortfolioDetailsData | The portfolio configuration persisted at initialisation. |
 
 ### LoansPortfolioWithdrawn
 
@@ -456,22 +470,6 @@ Raised when an initialiser tries to register a facet that already has a non-zero
 | ----------- | ------- | -------------------------------------------------------------- |
 | facetId     | bytes32 | Identifier of the offending facet.                             |
 | lastVersion | uint256 | Last version recorded for that facet at the time of the check. |
-
-### FacetPreviousVersionNotAccepted
-
-```solidity
-error FacetPreviousVersionNotAccepted(bytes32 facetId, uint256 lastVersion, uint256[] expectedVersions)
-```
-
-Raised when an initialiser requires the facet&#39;s previously registered version to match one of an expected set and the current `lastVersion` falls outside that set.
-
-#### Parameters
-
-| Name             | Type      | Description                                  |
-| ---------------- | --------- | -------------------------------------------- |
-| facetId          | bytes32   | Identifier of the facet being upgraded.      |
-| lastVersion      | uint256   | Last version currently stored for the facet. |
-| expectedVersions | uint256[] | List of acceptable predecessor versions.     |
 
 ### HoldingAssetNotFound
 

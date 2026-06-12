@@ -98,13 +98,13 @@ library LoanStorageWrapper {
     }
 
     /**
-     * @notice Overwrites the loan details and emits `LoanDetailsSet`.
-     * @dev Used for post-initialisation updates; does not toggle the `initialized` flag.
+     * @notice Overwrites the loan details.
+     * @dev Used for post-initialisation updates; does not toggle the `initialized` flag. The
+     *      caller (`Loan` facet) emits `LoanDetailsSet`.
      * @param _loanDetails The new loan details to persist.
      */
     function setLoanDetails(ILoan.LoanDetailsData memory _loanDetails) internal {
         _writeLoanDetails(_loanDetails, _loanStorage());
-        emit ILoan.LoanDetailsSet(_loanDetails);
     }
 
     /**

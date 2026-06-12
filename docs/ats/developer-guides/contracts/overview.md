@@ -89,10 +89,11 @@ contracts/
 ├── domain/             # Storage wrappers (formerly layer_0/)
 │   ├── core/           # Cross-cutting storage (ERC1400, AccessControl, KYC, Cap, Nonce)
 │   └── asset/          # Asset-specific storage (Bond, Equity, CorporateAction, NominalValue)
-├── facets/             # Business logic facets
-│   ├── layer_1/        # Core implementations (ERC-1400, ERC-3643, Freeze, Hold)
-│   ├── layer_2/        # Domain features (Bond, Equity, NominalValue, Scheduled Tasks)
-│   └── layer_3/        # Jurisdiction-specific (USA)
+├── facets/             # Business logic facets — one flat folder per feature
+│   ├── cap/            #   e.g. ICap.sol, Cap.sol, CapFacet.sol
+│   ├── coupon/         #   (~90 feature folders; the old layer_1/2/3 nesting
+│   └── …               #    was removed — layers 1/2/3 are now logical only)
+├── services/           # Shared modifiers (CoreModifiers + AssetModifiers, via Modifiers)
 ├── infrastructure/     # Diamond pattern infrastructure (formerly resolver/ and proxies/)
 │   ├── diamond/        # Diamond proxy and resolver
 │   ├── proxy/          # Upgradeable proxies
@@ -117,9 +118,9 @@ contracts/
 └───────┬──────────┘  └─────────────────┘
         │
         ├─ domain/: Storage Wrappers (core + asset)
-        ├─ facets/layer_1/: Core Logic (ERC-1400, ERC-3643)
-        ├─ facets/layer_2/: Domain Features (Bond, Equity, NominalValue, Corporate Actions)
-        └─ facets/layer_3/: Jurisdiction-Specific (USA)
+        ├─ services/: Shared modifiers (Modifiers ⊃ CoreModifiers + AssetModifiers)
+        └─ facets/: Business logic facets (flat folders; logical layers —
+             1 core standards, 2 domain features, 3 jurisdiction-specific)
 ```
 
 ## Contract Layers
@@ -157,7 +158,7 @@ Base implementations of standards:
 - **Freeze** - Account and partial freezing
 - **Hold** - Token holds and escrow
 - **ControlList** - Whitelisting and blacklisting
-- **Common** - Shared logic across facets
+- **Modifiers** - Shared access/pause/compliance/validation modifiers, aggregated from `CoreModifiers` + `AssetModifiers` (`contracts/services/`); replaced the former `Common` base contract
 - **Nonces** - Centralized EIP712 nonce management for signature verification
 
 **Purpose**: Reusable base logic for all token types

@@ -136,6 +136,8 @@ describe("Registry Generation Pipeline - Integration Tests", () => {
       expect(result.code).to.include("Record<string,");
       expect(result.code).to.include("FacetDefinition");
       expect(result.code).to.include("ContractDefinition");
+      // FacetName union is emitted alongside FACET_REGISTRY.
+      expect(result.code).to.include("export type FacetName =");
 
       // Should not have syntax errors
       expect(result.code).to.not.include("undefined");

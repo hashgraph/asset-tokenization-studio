@@ -6,7 +6,7 @@ _Asset Tokenization Studio Team_
 
 Abstract implementation of `IBatchBurn` that burns tokens from multiple addresses in a single, atomic transaction.
 
-_Caller must hold `ROLE_CONTROLLER` or `ROLE_AGENT`. The token must be unpaused and configured for a single partition. Delegates burn execution to `TokenCoreOps` and emits `IController.ControllerRedemption` for each address processed. Intended to be inherited by `BatchBurnFacet`._
+_Caller must hold `ROLE_CONTROLLER` or `ROLE_AGENT`. The token must be unpaused and configured for a single partition. Delegates burn execution to `TokenCoreOps` and emits `IControllerTypes.ControllerRedemption` for each address processed. Intended to be inherited by `BatchBurnFacet`._
 
 ## Methods
 
@@ -52,20 +52,20 @@ _Fires exclusively from `initializeBatchBurn` after the storage write succeeds._
 ### ControllerRedemption
 
 ```solidity
-event ControllerRedemption(address _controller, address indexed _tokenHolder, uint256 _value, bytes _data, bytes _operatorData)
+event ControllerRedemption(address controller, address indexed tokenHolder, uint256 value, bytes data, bytes operatorData)
 ```
 
 Emitted when an authorised controller redeems (burns) tokens on behalf of a holder.
 
 #### Parameters
 
-| Name                    | Type    | Description                                                     |
-| ----------------------- | ------- | --------------------------------------------------------------- |
-| \_controller            | address | The address of the controller that initiated the redemption.    |
-| \_tokenHolder `indexed` | address | The account whose tokens are redeemed.                          |
-| \_value                 | uint256 | The amount of tokens redeemed.                                  |
-| \_data                  | bytes   | Optional data attached to the redemption for validation.        |
-| \_operatorData          | bytes   | Optional data attached by the controller for event attribution. |
+| Name                  | Type    | Description                                                     |
+| --------------------- | ------- | --------------------------------------------------------------- |
+| controller            | address | The address of the controller that initiated the redemption.    |
+| tokenHolder `indexed` | address | The account whose tokens are redeemed.                          |
+| value                 | uint256 | The amount of tokens redeemed.                                  |
+| data                  | bytes   | Optional data attached to the redemption for validation.        |
+| operatorData          | bytes   | Optional data attached by the controller for event attribution. |
 
 ## Errors
 

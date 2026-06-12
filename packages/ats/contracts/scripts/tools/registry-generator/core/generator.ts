@@ -148,6 +148,7 @@ export function generateRegistry(
     mocks,
   );
   const facetRegistry = generateFacetRegistry(facets);
+  const facetNameUnion = generateFacetNameUnion(facets);
   const contractRegistry = generateContractRegistry(infrastructure);
   const storageWrapperRegistry = storageWrappers ? generateStorageWrapperRegistry(storageWrappers) : "";
   const mockRegistry = mocks && mocks.length > 0 ? generateMockRegistry(mocks) : "";
@@ -160,7 +161,7 @@ export function generateRegistry(
    * roles file remain checked into git while the rest of this file is
    * gitignored and regenerated on `prepare`.
    */
-  const registries = [header, facetRegistry, contractRegistry];
+  const registries = [header, facetRegistry, facetNameUnion, contractRegistry];
   if (storageWrapperRegistry) {
     registries.push(storageWrapperRegistry);
   }
@@ -326,6 +327,38 @@ ${entries.join(",\n\n")}
  * Total number of facets in the registry.
  */
 export const TOTAL_FACETS = ${facets.length} as const`;
+}
+
+/**
+ * Generate the `FacetName` string-literal union type.
+ *
+ * Emits a union of every facet contract name in the registry, sorted
+ * alphabetically for deterministic output. Consumers (e.g. deployment
+ * configuration facet sets) type their lists as `readonly FacetName[]` so an
+ * unknown or mis-typed facet name is a compile error rather than a runtime
+ * lookup miss. `keyof typeof FACET_REGISTRY` cannot serve this purpose because
+ * the registry is typed `Record<string, FacetDefinition>` and widens its keys
+ * to `string`; the explicit literal union preserves the names.
+ *
+ * Emits `never` when there are no facets so the output is always valid
+ * TypeScript (an empty union is a syntax error).
+ *
+ * @param facets - Array of facet metadata
+ * @returns TypeScript code for the FacetName union type
+ */
+function generateFacetNameUnion(facets: ContractMetadata[]): string {
+  const sortedNames = [...facets].map((f) => f.name).sort((a, b) => a.localeCompare(b));
+
+  const body = sortedNames.length > 0 ? sortedNames.map((name) => `    | '${name}'`).join("\n") : "    never";
+
+  return `/**
+ * Union of every facet contract name known to the registry.
+ *
+ * Type the facet-name lists that drive deployment configurations as
+ * \`readonly FacetName[]\` so typos and renames surface as compile errors.
+ */
+export type FacetName =
+${body}`;
 }
 
 /**

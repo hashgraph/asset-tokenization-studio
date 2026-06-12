@@ -18,7 +18,7 @@ function addKpiData(uint256 _date, uint256 _value, address _project) external no
 
 Records a KPI data point for `_project` at `_date`.
 
-_Persists a KPI checkpoint for `_project`; reverts unless `_date` is valid._
+_Persists a KPI checkpoint for `_project`; reverts unless `_date` is valid. Emits {KpiDataAdded}._
 
 #### Parameters
 

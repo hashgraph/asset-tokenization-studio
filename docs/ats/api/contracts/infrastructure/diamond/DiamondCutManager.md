@@ -4,9 +4,9 @@ _Asset Tokenization Studio Team_
 
 > Diamond Cut Manager
 
-Manages versioned diamond configurations used to resolve facets and selectors.
+Manages versioned diamond configurations used by resolver proxies.
 
-_Provides creation, batched creation, cancellation, and read access for resolver proxy configurations. Mutating operations are restricted to valid, unpaused configurations owned by the caller according to inherited storage and validation rules._
+_Coordinates configuration creation, batched creation, cancellation, and lookup. Mutating operations require a non-zero configuration identifier, an unpaused state, and caller ownership according to inherited validation rules. Read operations that target a version validate the requested configuration/version pair before resolving facet, selector, interface, or pagination data from manager storage._
 
 ## Methods
 
@@ -388,23 +388,23 @@ Returns the number of selectors registered for a facet inside a configuration ve
 function getFacetVersionByConfigurationIdVersionAndFacetId(bytes32 _configurationId, uint256 _version, bytes32 _facetId) external view returns (uint256 facetVersion_)
 ```
 
-Returns the facet version assigned within a configuration version.
+Returns the pinned facet version stored inside a configuration version.
 
-_Reads diamond cut manager storage without mutating state. The configuration version must exist according to inherited version validation._
+_Reverts with {FacetIdNotRegistered} when the facet is not part of the configuration version, and with {VersionZero} when `_version` is 0._
 
 #### Parameters
 
-| Name              | Type    | Description                                                    |
-| ----------------- | ------- | -------------------------------------------------------------- |
-| \_configurationId | bytes32 | Identifier of the diamond configuration to query.              |
-| \_version         | uint256 | Version of the configuration to inspect.                       |
-| \_facetId         | bytes32 | Identifier of the facet whose registered version is requested. |
+| Name              | Type    | Description                                                                                                 |
+| ----------------- | ------- | ----------------------------------------------------------------------------------------------------------- |
+| \_configurationId | bytes32 | Configuration key to query.                                                                                 |
+| \_version         | uint256 | Version to query; must be &gt; 0. Read {getLatestVersionByConfiguration} first when the latest is required. |
+| \_facetId         | bytes32 | Facet key to look up.                                                                                       |
 
 #### Returns
 
-| Name           | Type    | Description                                                       |
-| -------------- | ------- | ----------------------------------------------------------------- |
-| facetVersion\_ | uint256 | Facet version registered for the requested configuration version. |
+| Name           | Type    | Description                                            |
+| -------------- | ------- | ------------------------------------------------------ |
+| facetVersion\_ | uint256 | Pinned facet version inside the configuration version. |
 
 ### getFacetsByConfigurationIdAndVersion
 
@@ -1061,7 +1061,7 @@ Emitted when an in-progress batch configuration is discarded.
 ### DiamondBatchConfigurationCreated
 
 ```solidity
-event DiamondBatchConfigurationCreated(bytes32 configurationId, IDiamondCutManager.FacetConfiguration[] facetConfigurations, bool _isLastBatch, uint256 version, bytes data)
+event DiamondBatchConfigurationCreated(bytes32 configurationId, IDiamondCutManager.FacetConfiguration[] facetConfigurations, bool isLastBatch, uint256 version, bytes data)
 ```
 
 Emitted on every {createBatchConfiguration} call, including the final batch.
@@ -1072,7 +1072,7 @@ Emitted on every {createBatchConfiguration} call, including the final batch.
 | ------------------- | --------------------------------------- | -------------------------------------------------------- |
 | configurationId     | bytes32                                 | Configuration key being assembled.                       |
 | facetConfigurations | IDiamondCutManager.FacetConfiguration[] | Facets appended in this batch.                           |
-| \_isLastBatch       | bool                                    | True when this call finalises the configuration version. |
+| isLastBatch         | bool                                    | True when this call finalises the configuration version. |
 | version             | uint256                                 | Version number being assembled for this configuration.   |
 | data                | bytes                                   | Additional data passed to the configuration.             |
 

@@ -54,7 +54,17 @@ abstract contract Dividend is IDividend, Modifiers {
         onlyValidTimestamp(newDividend.recordDate)
         returns (uint256 dividendId_)
     {
-        (, dividendId_) = DividendStorageWrapper.setDividend(newDividend);
+        bytes32 corporateActionId_;
+        (corporateActionId_, dividendId_) = DividendStorageWrapper.setDividend(newDividend);
+        emit IDividend.DividendSet(
+            corporateActionId_,
+            dividendId_,
+            EvmAccessors.getMsgSender(),
+            newDividend.recordDate,
+            newDividend.executionDate,
+            newDividend.amount,
+            newDividend.amountDecimals
+        );
     }
 
     /// @inheritdoc IDividend
@@ -73,6 +83,7 @@ abstract contract Dividend is IDividend, Modifiers {
         returns (bool success_)
     {
         success_ = DividendStorageWrapper.cancelDividend(dividendId);
+        emit IDividend.DividendCancelled(dividendId, EvmAccessors.getMsgSender());
     }
 
     /// @inheritdoc IDividend

@@ -67,30 +67,30 @@ _Caller must hold `ROLE_AGENT`. The lost wallet must not have already been recov
 ### AgentAdded
 
 ```solidity
-event AgentAdded(address indexed _agent)
+event AgentAdded(address indexed agent)
 ```
 
 Emitted when an agent is granted transfer-management permissions.
 
 #### Parameters
 
-| Name              | Type    | Description                       |
-| ----------------- | ------- | --------------------------------- |
-| \_agent `indexed` | address | Address of the newly added agent. |
+| Name            | Type    | Description                       |
+| --------------- | ------- | --------------------------------- |
+| agent `indexed` | address | Address of the newly added agent. |
 
 ### AgentRemoved
 
 ```solidity
-event AgentRemoved(address indexed _agent)
+event AgentRemoved(address indexed agent)
 ```
 
 Emitted when an agent&#39;s transfer-management permissions are revoked.
 
 #### Parameters
 
-| Name              | Type    | Description                   |
-| ----------------- | ------- | ----------------------------- |
-| \_agent `indexed` | address | Address of the removed agent. |
+| Name            | Type    | Description                   |
+| --------------- | ------- | ----------------------------- |
+| agent `indexed` | address | Address of the removed agent. |
 
 ### ComplianceAdded
 
@@ -133,18 +133,18 @@ _Fires exclusively from `initializeRecovery`._
 ### RecoverySuccess
 
 ```solidity
-event RecoverySuccess(address _lostWallet, address _newWallet, address _investorOnchainID)
+event RecoverySuccess(address lostWallet, address newWallet, address investorOnchainID)
 ```
 
 Emitted when a lost wallet is successfully recovered to a new address.
 
 #### Parameters
 
-| Name                | Type    | Description                                        |
-| ------------------- | ------- | -------------------------------------------------- |
-| \_lostWallet        | address | Address of the wallet that was lost.               |
-| \_newWallet         | address | Address of the replacement wallet.                 |
-| \_investorOnchainID | address | OnchainID of the investor performing the recovery. |
+| Name              | Type    | Description                                        |
+| ----------------- | ------- | -------------------------------------------------- |
+| lostWallet        | address | Address of the wallet that was lost.               |
+| newWallet         | address | Address of the replacement wallet.                 |
+| investorOnchainID | address | OnchainID of the investor performing the recovery. |
 
 ### UpdatedTokenInformation
 

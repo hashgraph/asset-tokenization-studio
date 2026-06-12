@@ -53,22 +53,22 @@ interface IERC1410Types {
 
     /**
      * @notice Emitted when tokens are transferred from one partition to another or within the same partition.
-     * @param _fromPartition Source partition.
-     * @param _operator      Address that initiated the transfer.
-     * @param _from          Token holder whose balance decreased.
-     * @param _to            Recipient whose balance increased.
-     * @param _value         Token quantity transferred.
-     * @param _data          Caller-supplied data.
-     * @param _operatorData  Operator-supplied data.
+     * @param fromPartition Source partition.
+     * @param operator      Address that initiated the transfer.
+     * @param from          Token holder whose balance decreased.
+     * @param to            Recipient whose balance increased.
+     * @param value         Token quantity transferred.
+     * @param data          Caller-supplied data.
+     * @param operatorData  Operator-supplied data.
      */
     event TransferByPartition(
-        bytes32 indexed _fromPartition,
-        address _operator,
-        address indexed _from,
-        address indexed _to,
-        uint256 _value,
-        bytes _data,
-        bytes _operatorData
+        bytes32 indexed fromPartition,
+        address operator,
+        address indexed from,
+        address indexed to,
+        uint256 value,
+        bytes data,
+        bytes operatorData
     );
 
     /**

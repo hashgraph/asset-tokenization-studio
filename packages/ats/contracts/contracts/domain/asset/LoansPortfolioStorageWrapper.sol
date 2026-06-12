@@ -95,7 +95,7 @@ library LoansPortfolioStorageWrapper {
      * @notice Adds a holding asset (loan or cash) to the portfolio.
      * @dev Reverts if the asset already exists in the holdings set. If the asset type is LOAN,
      *      it is classified by collateral and performance status; otherwise it is added to cash holdings.
-     *      Emits a `HoldingsAssetAdded` event.
+     *      The calling facet (`LoansPortfolio`) emits `HoldingsAssetAdded`.
      * @param _holdingsAsset The holding asset structure including address and type.
      * @custom:error HoldingsAssetAlreadyExists If the asset address already exists in the portfolio.
      */
@@ -114,7 +114,8 @@ library LoansPortfolioStorageWrapper {
     /**
      * @notice Removes a holding asset from the portfolio.
      * @dev Checks that the asset exists, then removes it from the appropriate subsets
-     *      (loan or cash) and from the master holdings set. Emits a `HoldingsAssetRemoved` event.
+     *      (loan or cash) and from the master holdings set. The calling facet (`LoansPortfolio`)
+     *      emits `HoldingsAssetRemoved`.
      * @param _holdingsAsset The holding asset structure to remove.
      * @custom:error HoldingAssetNotFound If the asset address is not present in the portfolio.
      */
@@ -128,14 +129,13 @@ library LoansPortfolioStorageWrapper {
             cashAssets.remove(assetAddress);
         }
         loanPortfolioStorage.holdingsAssets.remove(assetAddress);
-        emit ILoansPortfolio.HoldingsAssetRemoved(_holdingsAsset);
     }
 
     /**
      * @notice Updates the classification of a loan holding asset after its details change.
      * @dev Reclassifies the loan based on its current collateral and performance status.
      *      Removes the loan from all collateral and performance subsets before re-adding.
-     *      Emits a `LoanHoldingsAssetUpdated` event.
+     *      The calling facet (`LoansPortfolio`) emits `LoanHoldingsAssetUpdated`.
      * @param _holdingsAssetAddress The address of the loan to reclassify.
      * @custom:error HoldingAssetNotFound If the asset address is not in the portfolio.
      */
@@ -154,14 +154,13 @@ library LoansPortfolioStorageWrapper {
             _holdingsAssetAddress,
             loanDetails.loanPerformanceStatus.performanceStatus
         );
-        emit ILoansPortfolio.LoanHoldingsAssetUpdated(_holdingsAssetAddress);
     }
 
     /**
      * @notice Withdraws a specified amount of a holding asset from the portfolio.
      * @dev Uses the `transferByPartition` function on the target ERC1410 token.
      *      Reverts if the amount is zero or if the asset does not exist in the portfolio.
-     *      Emits a `LoansPortfolioWithdrawn` event.
+     *      The calling facet (`LoansPortfolio`) emits `LoansPortfolioWithdrawn`.
      * @param _assetAddress The ERC1410 token address to withdraw.
      * @param _to The recipient address.
      * @param _amount The amount to withdraw (must be > 0).
@@ -183,7 +182,6 @@ library LoansPortfolioStorageWrapper {
             value: _amount
         });
         ITransferByPartition(_assetAddress).transferByPartition(_DEFAULT_PARTITION, transferInfo, "");
-        emit ILoansPortfolio.LoansPortfolioWithdrawn(_assetAddress, _to, _amount);
         success_ = true;
     }
 
@@ -370,20 +368,6 @@ library LoansPortfolioStorageWrapper {
     }
 
     /**
-     * @notice Returns the storage slot for the loans portfolio data.
-     * @dev Uses inline assembly to load the storage pointer from the constant position
-     *      `STORAGE_LOCATION_LOANS_PORTFOLIO`.
-     * @return loansPortfolioData_ Reference to the `LoansPortfolioDataStorage` struct in storage.
-     */
-    function loansPortfolioStorage() internal pure returns (LoansPortfolioDataStorage storage loansPortfolioData_) {
-        bytes32 position = STORAGE_LOCATION_LOANS_PORTFOLIO;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            loansPortfolioData_.slot := position
-        }
-    }
-
-    /**
      * @notice Adds a loan asset to the loan holdings set and classifies it by collateral and performance.
      * @dev Fetches loan details, adds the address to the loan set, classifies by collateral,
      *      then by performance status.
@@ -492,5 +476,19 @@ library LoansPortfolioStorageWrapper {
         denominator_ = loansPortfolioStorage().loanHoldingsAssets.length();
         if (denominator_ == 0) return (0, 0);
         numerator_ = _subSet.length();
+    }
+
+    /**
+     * @notice Returns the storage slot for the loans portfolio data.
+     * @dev Uses inline assembly to load the storage pointer from the constant position
+     *      `STORAGE_LOCATION_LOANS_PORTFOLIO`.
+     * @return loansPortfolioData_ Reference to the `LoansPortfolioDataStorage` struct in storage.
+     */
+    function loansPortfolioStorage() private pure returns (LoansPortfolioDataStorage storage loansPortfolioData_) {
+        bytes32 position = STORAGE_LOCATION_LOANS_PORTFOLIO;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            loansPortfolioData_.slot := position
+        }
     }
 }

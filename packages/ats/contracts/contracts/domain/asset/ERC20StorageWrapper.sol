@@ -448,6 +448,14 @@ library ERC20StorageWrapper {
     }
 
     /**
+     * @notice Returns the stored token symbol.
+     * @return The ERC-20 token symbol string.
+     */
+    function getSymbol() internal view returns (string memory) {
+        return erc20Storage().symbol;
+    }
+
+    /**
      * @notice Returns the number of decimal places used by the token.
      * @return The ERC-20 decimals value.
      */
@@ -526,7 +534,7 @@ library ERC20StorageWrapper {
      *      through this accessor.
      * @return erc20Storage_ Storage pointer to the ERC-20 data slot.
      */
-    function erc20Storage() internal pure returns (ERC20Storage storage erc20Storage_) {
+    function erc20Storage() private pure returns (ERC20Storage storage erc20Storage_) {
         bytes32 position = STORAGE_LOCATION_ERC20;
         // solhint-disable-next-line no-inline-assembly
         assembly {

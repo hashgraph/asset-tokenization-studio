@@ -475,7 +475,7 @@ Emitted when an in-progress batch configuration is discarded.
 ### DiamondBatchConfigurationCreated
 
 ```solidity
-event DiamondBatchConfigurationCreated(bytes32 configurationId, TRexIDiamondCutManager.FacetConfiguration[] facetConfigurations, bool _isLastBatch, uint256 version, bytes data)
+event DiamondBatchConfigurationCreated(bytes32 configurationId, TRexIDiamondCutManager.FacetConfiguration[] facetConfigurations, bool isLastBatch, uint256 version, bytes data)
 ```
 
 Emitted on every {createBatchConfiguration} call, including the final batch.
@@ -486,7 +486,7 @@ Emitted on every {createBatchConfiguration} call, including the final batch.
 | ------------------- | ------------------------------------------- | -------------------------------------------------------- |
 | configurationId     | bytes32                                     | Configuration key being assembled.                       |
 | facetConfigurations | TRexIDiamondCutManager.FacetConfiguration[] | Facets appended in this batch.                           |
-| \_isLastBatch       | bool                                        | True when this call finalises the configuration version. |
+| isLastBatch         | bool                                        | True when this call finalises the configuration version. |
 | version             | uint256                                     | Version number being assembled for this configuration.   |
 | data                | bytes                                       | Additional data passed to the configuration.             |
 

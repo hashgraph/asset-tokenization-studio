@@ -17,8 +17,10 @@ import {
 } from "@scripts/infrastructure";
 import { BusinessLogicResolver } from "@contract-types";
 import { atsRegistry } from "../atsRegistry";
+import type { FacetName } from "../atsRegistry";
 import { INITIALIZE_MOCK_CONFIG_ID } from "../constants";
 import { getMockFacetDefinition } from "./mockFacetsRegistry";
+import type { MockFacetName } from "./mockFacetsRegistry";
 
 // TEST-ONLY: facet set for the InitializeMock domain — the real InitializerFacet
 // followed by `MockDiamondCut` (a mock variant of `DiamondFacet` that exposes
@@ -27,13 +29,13 @@ import { getMockFacetDefinition } from "./mockFacetsRegistry";
 // `InitializerFacet` is resolved from `atsRegistry`; the mocks are resolved
 // from the local mock registry since they are excluded from the auto-generated
 // atsRegistry.
-const INITIALIZE_MOCK_FACETS = [
+export const INITIALIZE_MOCK_FACETS: readonly (FacetName | MockFacetName)[] = [
   "InitializerFacet",
   "MockDiamondCut",
   "MockFacet1",
   "MockFacet2",
   "MockFacet3",
-] as const;
+];
 
 /**
  * TEST-ONLY: create the InitializeMock configuration in BusinessLogicResolver.
