@@ -218,31 +218,3 @@ Raised when the requested regulation type and sub-type combination is not permit
 | ----------------- | ---------------------- | ----------------------------------- |
 | regulationType    | enum RegulationType    | Primary regulation category.        |
 | regulationSubType | enum RegulationSubType | Sub-category within the regulation. |
-
-### WrongISIN
-
-```solidity
-error WrongISIN(string isin)
-```
-
-Raised when the provided ISIN does not meet the expected format or length.
-
-#### Parameters
-
-| Name | Type   | Description              |
-| ---- | ------ | ------------------------ |
-| isin | string | The invalid ISIN string. |
-
-### WrongISINChecksum
-
-```solidity
-error WrongISINChecksum(string isin)
-```
-
-Raised when the ISIN checksum is invalid.
-
-#### Parameters
-
-| Name | Type   | Description              |
-| ---- | ------ | ------------------------ |
-| isin | string | The invalid ISIN string. |

@@ -3160,20 +3160,6 @@ Returns the total amount of tokens currently frozen for a wallet.
 | ---- | ------- | ----------------------------------------------------------------------- |
 | \_0  | uint256 | The total frozen token amount for `_userAddress` across all partitions. |
 
-### getGeographicalExposure
-
-```solidity
-function getGeographicalExposure() external view returns (struct ILoansPortfolio.GeographicalExposureData[] geographicalExposure_)
-```
-
-Returns the geographical exposure aggregated by country.
-
-#### Returns
-
-| Name                   | Type                                       | Description                                                                                        |
-| ---------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------- |
-| geographicalExposure\_ | ILoansPortfolio.GeographicalExposureData[] | Array of `(country, count)` tuples covering every country present in the portfolio&#39;s holdings. |
-
 ### getHeldAmountFor
 
 ```solidity

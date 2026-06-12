@@ -2,11 +2,11 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ILoansPortfolio, RESOLVER_KEY_LOANS_PORTFOLIO } from "./ILoansPortfolio.sol";
+import { RESOLVER_KEY_CUSTOM_DATA } from "../customData/ICustomData.sol";
 import { ROLE_LOANS_PORTFOLIO_MANAGER, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { LoansPortfolioStorageWrapper } from "../../domain/asset/LoansPortfolioStorageWrapper.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title  LoansPortfolio
@@ -34,18 +34,28 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
         emit ILoansPortfolio.LoansPortfolioInitialized(_loansPortfolioData);
     }
 
-    /// @inheritdoc ILoansPortfolio
+    /**
+     * @inheritdoc ILoansPortfolio
+     * @dev Guard stack (in evaluation order): `onlyOperational` →
+     *      `onlyFacetRegistered(RESOLVER_KEY_CUSTOM_DATA)` → `onlyActivated` →
+     *      `onlyUnpaused` → `onlyRole(ROLE_LOANS_PORTFOLIO_MANAGER)` →
+     *      `validateAddressNotZero(_holdingsAsset.assetAddress)` →
+     *      `onlySupportedHoldingsAssetType(_holdingsAsset)` →
+     *      `onlyNotExistingHoldingsAsset(_holdingsAsset.assetAddress)` →
+     */
     function addHoldingsAsset(
-        ILoansPortfolio.HoldingsAsset memory _holdingsAsset
+        ILoansPortfolio.HoldingsAsset calldata _holdingsAsset
     )
         external
         override
         onlyOperational
+        onlyFacetRegistered(RESOLVER_KEY_CUSTOM_DATA, new uint256[](0))
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_LOANS_PORTFOLIO_MANAGER)
         validateAddressNotZero(_holdingsAsset.assetAddress)
         onlySupportedHoldingsAssetType(_holdingsAsset)
+        onlyNotExistingHoldingsAsset(_holdingsAsset.assetAddress)
         returns (bool success_)
     {
         LoansPortfolioStorageWrapper.addHoldingsAsset(_holdingsAsset);
@@ -53,18 +63,28 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
         success_ = true;
     }
 
-    /// @inheritdoc ILoansPortfolio
+    /**
+     * @inheritdoc ILoansPortfolio
+     * @dev Guard stack (in evaluation order): `onlyOperational` →
+     *      `onlyFacetRegistered(RESOLVER_KEY_CUSTOM_DATA)` → `onlyActivated` →
+     *      `onlyUnpaused` → `onlyRole(ROLE_LOANS_PORTFOLIO_MANAGER)` →
+     *      `validateAddressNotZero(_holdingsAsset.assetAddress)` →
+     *      `onlySupportedHoldingsAssetType(_holdingsAsset)` →
+     *      `onlyAlreadyExistingHoldingsAsset(_holdingsAsset.assetAddress)` →
+     */
     function removeHoldingsAsset(
-        ILoansPortfolio.HoldingsAsset memory _holdingsAsset
+        ILoansPortfolio.HoldingsAsset calldata _holdingsAsset
     )
         external
         override
         onlyOperational
+        onlyFacetRegistered(RESOLVER_KEY_CUSTOM_DATA, new uint256[](0))
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_LOANS_PORTFOLIO_MANAGER)
         validateAddressNotZero(_holdingsAsset.assetAddress)
         onlySupportedHoldingsAssetType(_holdingsAsset)
+        onlyAlreadyExistingHoldingsAsset(_holdingsAsset.assetAddress)
         returns (bool success_)
     {
         LoansPortfolioStorageWrapper.removeHoldingsAsset(_holdingsAsset);
@@ -192,15 +212,5 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
     /// @inheritdoc ILoansPortfolio
     function getDefaultedLoansRatio() external view override returns (uint256 numerator_, uint256 denominator_) {
         (numerator_, denominator_) = LoansPortfolioStorageWrapper.getDefaultedLoansRatio();
-    }
-
-    /// @inheritdoc ILoansPortfolio
-    function getGeographicalExposure()
-        external
-        view
-        override
-        returns (ILoansPortfolio.GeographicalExposureData[] memory geographicalExposure_)
-    {
-        geographicalExposure_ = LoansPortfolioStorageWrapper.getGeographicalExposure();
     }
 }

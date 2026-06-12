@@ -119,7 +119,6 @@ describe("LoansPortfolio Token Tests", () => {
       const holdingsAsset = {
         assetAddress: await loanAsset.getAddress(),
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       };
 
       await expect(asset.addHoldingsAsset(holdingsAsset))
@@ -135,7 +134,6 @@ describe("LoansPortfolio Token Tests", () => {
       const holdingsAsset = {
         assetAddress: signer_B.address,
         holdingsAssetType: HoldingsAssetType.CASH,
-        country: "",
       };
 
       await expect(asset.addHoldingsAsset(holdingsAsset))
@@ -152,7 +150,6 @@ describe("LoansPortfolio Token Tests", () => {
         asset.addHoldingsAsset({
           assetAddress: signer_B.address,
           holdingsAssetType: HoldingsAssetType.NONE,
-          country: "",
         }),
       )
         .to.be.revertedWithCustomError(asset, "HoldingsAssetTypeNotSupported")
@@ -164,7 +161,6 @@ describe("LoansPortfolio Token Tests", () => {
         asset.addHoldingsAsset({
           assetAddress: ADDRESS_ZERO,
           holdingsAssetType: HoldingsAssetType.LOAN,
-          country: "ES",
         }),
       ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
     });
@@ -176,7 +172,6 @@ describe("LoansPortfolio Token Tests", () => {
         asset.addHoldingsAsset({
           assetAddress: await loanAsset.getAddress(),
           holdingsAssetType: HoldingsAssetType.LOAN,
-          country: "ES",
         }),
       ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
@@ -186,7 +181,6 @@ describe("LoansPortfolio Token Tests", () => {
         asset.connect(signer_C).addHoldingsAsset({
           assetAddress: await loanAsset.getAddress(),
           holdingsAssetType: HoldingsAssetType.LOAN,
-          country: "ES",
         }),
       )
         .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
@@ -197,7 +191,6 @@ describe("LoansPortfolio Token Tests", () => {
       const holdingsAsset = {
         assetAddress: await loanAsset.getAddress(),
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       };
       await asset.addHoldingsAsset(holdingsAsset);
 
@@ -212,7 +205,6 @@ describe("LoansPortfolio Token Tests", () => {
       const holdingsAsset = {
         assetAddress: await loanAsset.getAddress(),
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       };
       await asset.addHoldingsAsset(holdingsAsset);
       expect(await asset.getNumberOfLoans()).to.equal(1);
@@ -229,7 +221,6 @@ describe("LoansPortfolio Token Tests", () => {
       const holdingsAsset = {
         assetAddress: signer_C.address,
         holdingsAssetType: HoldingsAssetType.CASH,
-        country: "",
       };
       await asset.addHoldingsAsset(holdingsAsset);
 
@@ -246,7 +237,6 @@ describe("LoansPortfolio Token Tests", () => {
         asset.removeHoldingsAsset({
           assetAddress: signer_B.address,
           holdingsAssetType: HoldingsAssetType.NONE,
-          country: "",
         }),
       )
         .to.be.revertedWithCustomError(asset, "HoldingsAssetTypeNotSupported")
@@ -258,7 +248,6 @@ describe("LoansPortfolio Token Tests", () => {
         asset.removeHoldingsAsset({
           assetAddress: signer_C.address,
           holdingsAssetType: HoldingsAssetType.LOAN,
-          country: "ES",
         }),
       )
         .to.be.revertedWithCustomError(asset, "HoldingAssetNotFound")
@@ -270,7 +259,6 @@ describe("LoansPortfolio Token Tests", () => {
         asset.removeHoldingsAsset({
           assetAddress: signer_C.address,
           holdingsAssetType: HoldingsAssetType.CASH,
-          country: "",
         }),
       )
         .to.be.revertedWithCustomError(asset, "HoldingAssetNotFound")
@@ -282,7 +270,6 @@ describe("LoansPortfolio Token Tests", () => {
         asset.removeHoldingsAsset({
           assetAddress: ADDRESS_ZERO,
           holdingsAssetType: HoldingsAssetType.LOAN,
-          country: "ES",
         }),
       ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
     });
@@ -291,7 +278,6 @@ describe("LoansPortfolio Token Tests", () => {
       const holdingsAsset = {
         assetAddress: await loanAsset.getAddress(),
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       };
       await asset.addHoldingsAsset(holdingsAsset);
       await asset.connect(signer_B).pause();
@@ -303,7 +289,6 @@ describe("LoansPortfolio Token Tests", () => {
       const holdingsAsset = {
         assetAddress: await loanAsset.getAddress(),
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       };
       await asset.addHoldingsAsset(holdingsAsset);
 
@@ -321,7 +306,6 @@ describe("LoansPortfolio Token Tests", () => {
       await asset.addHoldingsAsset({
         assetAddress: loanAddress,
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       });
 
       expect(await asset.getNumberOfPerformingLoans()).to.equal(1);
@@ -350,7 +334,6 @@ describe("LoansPortfolio Token Tests", () => {
       await asset.addHoldingsAsset({
         assetAddress: loanAddress,
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       });
 
       const beforeUpdate = await asset.getSecuredLoansRatio();
@@ -383,7 +366,6 @@ describe("LoansPortfolio Token Tests", () => {
       await asset.addHoldingsAsset({
         assetAddress: loanAddress,
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       });
       await asset.connect(signer_B).pause();
 
@@ -407,7 +389,6 @@ describe("LoansPortfolio Token Tests", () => {
       await asset.addHoldingsAsset({
         assetAddress: loanAddress,
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       });
 
       const mintAmount = 1000n;
@@ -430,7 +411,6 @@ describe("LoansPortfolio Token Tests", () => {
       await asset.addHoldingsAsset({
         assetAddress: await loanAsset.getAddress(),
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       });
 
       await expect(
@@ -442,7 +422,6 @@ describe("LoansPortfolio Token Tests", () => {
       await asset.addHoldingsAsset({
         assetAddress: await loanAsset.getAddress(),
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       });
 
       await asset.connect(signer_B).pause();
@@ -482,7 +461,6 @@ describe("LoansPortfolio Token Tests", () => {
       await asset.addHoldingsAsset({
         assetAddress: loanAddress,
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       });
 
       await expect(asset.loansPortfolioWithdraw(loanAddress, signer_A.address, 100n)).to.be.revertedWithCustomError(
@@ -495,7 +473,6 @@ describe("LoansPortfolio Token Tests", () => {
       await asset.addHoldingsAsset({
         assetAddress: await loanAsset.getAddress(),
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       });
 
       await expect(asset.connect(signer_C).loansPortfolioWithdraw(await loanAsset.getAddress(), signer_A.address, 100n))
@@ -525,12 +502,10 @@ describe("LoansPortfolio Token Tests", () => {
       await asset.addHoldingsAsset({
         assetAddress: loanAddress,
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       });
       await asset.addHoldingsAsset({
         assetAddress: signer_B.address,
         holdingsAssetType: HoldingsAssetType.CASH,
-        country: "",
       });
 
       const result = await asset.getHoldingsAssets(0, 10);
@@ -544,7 +519,6 @@ describe("LoansPortfolio Token Tests", () => {
       await asset.addHoldingsAsset({
         assetAddress: await loanAsset.getAddress(),
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       });
 
       const result = await asset.getHoldingsAssets(10, 10);
@@ -565,7 +539,6 @@ describe("LoansPortfolio Token Tests", () => {
       await asset.addHoldingsAsset({
         assetAddress: loanAddress,
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       });
 
       const result = await asset.getLoanHoldingsAssets(0, 10);
@@ -578,7 +551,6 @@ describe("LoansPortfolio Token Tests", () => {
       await asset.addHoldingsAsset({
         assetAddress: signer_B.address,
         holdingsAssetType: HoldingsAssetType.CASH,
-        country: "",
       });
 
       const result = await asset.getLoanHoldingsAssets(0, 10);
@@ -594,12 +566,10 @@ describe("LoansPortfolio Token Tests", () => {
       await asset.addHoldingsAsset({
         assetAddress: loanAddress,
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       });
       await asset.addHoldingsAsset({
         assetAddress: loan2Address,
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "US",
       });
 
       const page0 = await asset.getLoanHoldingsAssets(0, 1);
@@ -626,7 +596,6 @@ describe("LoansPortfolio Token Tests", () => {
       await asset.addHoldingsAsset({
         assetAddress: await loanAsset.getAddress(),
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       });
 
       const { assets_, balances_ } = await asset.getHoldingsAssetOwnership(0, 10);
@@ -644,7 +613,6 @@ describe("LoansPortfolio Token Tests", () => {
       await asset.addHoldingsAsset({
         assetAddress: loanAddress,
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       });
 
       const mintAmount = 1000n;
@@ -672,12 +640,10 @@ describe("LoansPortfolio Token Tests", () => {
       await asset.addHoldingsAsset({
         assetAddress: await loanAsset.getAddress(),
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       });
       await asset.addHoldingsAsset({
         assetAddress: signer_B.address,
         holdingsAssetType: HoldingsAssetType.CASH,
-        country: "",
       });
 
       expect(await asset.getNumberOfAssets()).to.equal(2n);
@@ -693,7 +659,6 @@ describe("LoansPortfolio Token Tests", () => {
       await asset.addHoldingsAsset({
         assetAddress: await loanAsset.getAddress(),
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       });
 
       expect(await asset.getNumberOfLoans()).to.equal(1n);
@@ -703,7 +668,6 @@ describe("LoansPortfolio Token Tests", () => {
       await asset.addHoldingsAsset({
         assetAddress: await loanAsset.getAddress(),
         holdingsAssetType: HoldingsAssetType.CASH,
-        country: "",
       });
 
       expect(await asset.getNumberOfLoans()).to.equal(0n);
@@ -719,7 +683,6 @@ describe("LoansPortfolio Token Tests", () => {
       await asset.addHoldingsAsset({
         assetAddress: signer_B.address,
         holdingsAssetType: HoldingsAssetType.CASH,
-        country: "",
       });
 
       expect(await asset.getNumberOfCash()).to.equal(1n);
@@ -729,7 +692,6 @@ describe("LoansPortfolio Token Tests", () => {
       await asset.addHoldingsAsset({
         assetAddress: await loanAsset.getAddress(),
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       });
       expect(await asset.getNumberOfCash()).to.equal(0n);
     });
@@ -744,7 +706,6 @@ describe("LoansPortfolio Token Tests", () => {
       await asset.addHoldingsAsset({
         assetAddress: await loanAsset.getAddress(),
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       });
 
       expect(await asset.getNumberOfPerformingLoans()).to.equal(1n);
@@ -762,7 +723,6 @@ describe("LoansPortfolio Token Tests", () => {
       await asset.addHoldingsAsset({
         assetAddress: await nonPerformingLoan.getAddress(),
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       });
 
       expect(await asset.getNumberOfNonPerformingLoans()).to.equal(1n);
@@ -780,7 +740,6 @@ describe("LoansPortfolio Token Tests", () => {
       await asset.addHoldingsAsset({
         assetAddress: await defaultedLoan.getAddress(),
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       });
 
       expect(await asset.getNumberDefaultedLoans()).to.equal(1n);
@@ -799,7 +758,6 @@ describe("LoansPortfolio Token Tests", () => {
       await asset.addHoldingsAsset({
         assetAddress: await loanAsset.getAddress(),
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       });
 
       const { numerator_, denominator_ } = await asset.getSecuredLoansRatio();
@@ -814,7 +772,6 @@ describe("LoansPortfolio Token Tests", () => {
       await asset.addHoldingsAsset({
         assetAddress: await securedLoan.getAddress(),
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       });
 
       const { numerator_, denominator_ } = await asset.getSecuredLoansRatio();
@@ -836,7 +793,6 @@ describe("LoansPortfolio Token Tests", () => {
       await asset.addHoldingsAsset({
         assetAddress: await loanAsset.getAddress(),
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       });
 
       const { numerator_, denominator_ } = await asset.getPerformingLoansRatio();
@@ -860,7 +816,6 @@ describe("LoansPortfolio Token Tests", () => {
       await asset.addHoldingsAsset({
         assetAddress: await nonPerformingLoan.getAddress(),
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       });
 
       const { numerator_, denominator_ } = await asset.getNonPerformingLoansRatio();
@@ -884,92 +839,12 @@ describe("LoansPortfolio Token Tests", () => {
       await asset.addHoldingsAsset({
         assetAddress: await defaultedLoan.getAddress(),
         holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
       });
 
       const { numerator_, denominator_ } = await asset.getDefaultedLoansRatio();
 
       expect(numerator_).to.equal(1n);
       expect(denominator_).to.equal(1n);
-    });
-  });
-
-  describe("getGeographicalExposure", () => {
-    it("GIVEN no loans WHEN querying THEN returns empty array", async () => {
-      const result = await asset.getGeographicalExposure();
-
-      expect(result.length).to.equal(0);
-    });
-
-    it.skip("GIVEN one loan in country ES WHEN querying THEN returns one entry with count 1", async () => {
-      await asset.addHoldingsAsset({
-        assetAddress: await loanAsset.getAddress(),
-        holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
-      });
-
-      const result = await asset.getGeographicalExposure();
-
-      expect(result.length).to.equal(1);
-      expect(result[0].country).to.equal("ES");
-      expect(result[0].count).to.equal(1n);
-    });
-
-    it.skip("GIVEN two loans in different countries WHEN querying THEN returns two entries with count 1 each", async () => {
-      const loan2 = await deployLoanToken({ performanceStatus: 0 });
-
-      await asset.addHoldingsAsset({
-        assetAddress: await loanAsset.getAddress(),
-        holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
-      });
-      await asset.addHoldingsAsset({
-        assetAddress: await loan2.getAddress(),
-        holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "US",
-      });
-
-      const result = await asset.getGeographicalExposure();
-
-      expect(result.length).to.equal(2);
-      const countryMap = Object.fromEntries(
-        result.map((e: { country: string; count: bigint }) => [e.country, e.count]),
-      );
-      expect(countryMap["ES"]).to.equal(1n);
-      expect(countryMap["US"]).to.equal(1n);
-    });
-
-    it.skip("GIVEN two loans in the same country WHEN querying THEN returns one entry with count 2", async () => {
-      const loan2 = await deployLoanToken({ performanceStatus: 0 });
-
-      await asset.addHoldingsAsset({
-        assetAddress: await loanAsset.getAddress(),
-        holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
-      });
-      await asset.addHoldingsAsset({
-        assetAddress: await loan2.getAddress(),
-        holdingsAssetType: HoldingsAssetType.LOAN,
-        country: "ES",
-      });
-
-      const result = await asset.getGeographicalExposure();
-
-      expect(result.length).to.equal(1);
-      expect(result[0].country).to.equal("ES");
-      expect(result[0].count).to.equal(2n);
-    });
-
-    it("GIVEN CASH assets only WHEN querying THEN returns empty array", async () => {
-      await asset.addHoldingsAsset({
-        assetAddress: signer_B.address,
-        holdingsAssetType: HoldingsAssetType.CASH,
-        country: "",
-      });
-
-      const result = await asset.getGeographicalExposure();
-
-      expect(result.length).to.equal(0);
     });
   });
 
@@ -982,7 +857,7 @@ describe("LoansPortfolio Token Tests", () => {
       await expect(
         deactivatedAsset
           .connect(base.deployer)
-          .addHoldingsAsset({ assetAddress: ethers.ZeroAddress, holdingsAssetType: 0, country: "" }),
+          .addHoldingsAsset({ assetAddress: ethers.ZeroAddress, holdingsAssetType: 0 }),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
 
@@ -994,7 +869,7 @@ describe("LoansPortfolio Token Tests", () => {
       await expect(
         deactivatedAsset
           .connect(base.deployer)
-          .removeHoldingsAsset({ assetAddress: ethers.ZeroAddress, holdingsAssetType: 0, country: "" }),
+          .removeHoldingsAsset({ assetAddress: ethers.ZeroAddress, holdingsAssetType: 0 }),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
 
@@ -1026,7 +901,10 @@ describe("LoansPortfolio Token Tests", () => {
 
     it("GIVEN non-operational asset WHEN addHoldingsAsset THEN reverts with AssetNotOperational", async () => {
       await expect(
-        asset.addHoldingsAsset({ assetAddress: ADDRESS_ZERO, holdingsAssetType: HoldingsAssetType.LOAN, country: "" }),
+        asset.addHoldingsAsset({
+          assetAddress: ADDRESS_ZERO,
+          holdingsAssetType: HoldingsAssetType.LOAN,
+        }),
       ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
 
@@ -1035,7 +913,6 @@ describe("LoansPortfolio Token Tests", () => {
         asset.removeHoldingsAsset({
           assetAddress: ADDRESS_ZERO,
           holdingsAssetType: HoldingsAssetType.LOAN,
-          country: "",
         }),
       ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
