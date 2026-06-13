@@ -11,6 +11,9 @@
  * @see openspec/changes/test-optimization-shared-fixtures
  */
 
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { deployAssetMockCtx } from "@test";
+
 // ── Migrated suites (W1+) ─────────────────────────────────────────────
 import { accessControlTests } from "./accessControl/accessControl.test";
 import { freezeTests } from "./freeze/freeze.test";
@@ -47,8 +50,14 @@ import { votingSecurityHoldersTests } from "./votingSecurityHolders/votingSecuri
 import { transferAndLockByPartitionTests } from "./transferAndLockByPartition/transferAndLockByPartition.test";
 
 describe("ATS — IAsset Suites", () => {
+  let ctx: Awaited<ReturnType<typeof deployAssetMockCtx>>;
+
+  beforeEach(async () => {
+    ctx = await loadFixture(deployAssetMockCtx);
+  });
+
   // ── W1: Generic single-partition suites ──────────────────────────────
-  accessControlTests();
+  accessControlTests(() => ctx);
   freezeTests();
   deactivateTests();
   operatorTests();
@@ -80,5 +89,5 @@ describe("ATS — IAsset Suites", () => {
   balanceTrackerAtSnapshotTests();
   snapshotsByPartitionTests();
   votingSecurityHoldersTests();
-  transferAndLockByPartitionTests();
+  transferAndLockByPartitionTests(() => ctx);
 });

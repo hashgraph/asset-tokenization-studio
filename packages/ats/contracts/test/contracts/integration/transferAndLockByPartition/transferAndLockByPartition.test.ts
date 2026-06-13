@@ -6,19 +6,12 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { IAssetMock } from "@contract-types";
 import { ATS_ROLES, RESOLVER_KEY_TRANSFER_AND_LOCK_BY_PARTITION } from "@scripts";
 import { ASSET_MOCK_CONFIG_ID } from "../../../fixtures/deploy/assetMockConfiguration";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import {
-  deployAssetMockCtx,
-  executeRbac,
-  getDltTimestamp,
-  grantKycToHolders,
-  NON_DEFAULT_PARTITION,
-  DEFAULT_PARTITION,
-} from "@test";
+import { executeRbac, getDltTimestamp, grantKycToHolders, NON_DEFAULT_PARTITION, DEFAULT_PARTITION } from "@test";
+import type { AssetMockCtx } from "@test";
 
 const _AMOUNT = 1000;
 
-export function transferAndLockByPartitionTests(): void {
+export function transferAndLockByPartitionTests(getCtx: () => AssetMockCtx): void {
   describe("TransferAndLockByPartition Tests", () => {
     let signer_A: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
@@ -61,24 +54,17 @@ export function transferAndLockByPartitionTests(): void {
       await grantKycToHolders(asset, signer_B, [signer_A, signer_C], signer_A.address);
     }
 
-    async function deployFixture() {
-      const ctx = await loadFixture(deployAssetMockCtx);
+    beforeEach(async () => {
+      const ctx = getCtx();
       asset = ctx.asset;
-
       signer_A = ctx.deployer;
       signer_B = ctx.user2;
       signer_C = ctx.user3;
       signer_D = ctx.user4;
-
       await executeRbac(asset, set_initRbacs());
       await setFacets(asset);
-
       currentTimestamp = await getDltTimestamp();
       expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS;
-    }
-
-    beforeEach(async () => {
-      await loadFixture(deployFixture);
     });
 
     describe("Multi-partition enabled", () => {
@@ -172,10 +158,6 @@ export function transferAndLockByPartitionTests(): void {
     });
 
     describe("Multi-partition disabled", () => {
-      beforeEach(async () => {
-        await loadFixture(deployFixture);
-      });
-
       describe("transferAndLockByPartition", () => {
         it("GIVEN a token with multi-partition disabled GIVEN transferAndLockByPartition with non-default partition THEN fails with PartitionNotAllowedInSinglePartitionMode", async () => {
           await expect(
@@ -216,7 +198,7 @@ export function transferAndLockByPartitionTests(): void {
 
     describe("Deactivated", () => {
       beforeEach(async () => {
-        const ctx = await loadFixture(deployAssetMockCtx);
+        const ctx = getCtx();
         asset = ctx.asset;
         signer_A = ctx.deployer;
         await asset.forceDeactivate();

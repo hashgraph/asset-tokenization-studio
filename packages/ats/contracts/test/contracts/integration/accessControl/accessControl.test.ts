@@ -5,11 +5,10 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { IAssetMock } from "@contract-types";
 import { ATS_ROLES, RESOLVER_KEY_ACCESS_CONTROL } from "@scripts";
 import { ASSET_MOCK_CONFIG_ID } from "../../../fixtures/deploy/assetMockConfiguration";
-import { deployAssetMockCtx, executeRbac } from "@test";
+import { executeRbac } from "@test";
+import type { AssetMockCtx } from "@test";
 
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-
-export function accessControlTests(): void {
+export function accessControlTests(getCtx: () => AssetMockCtx): void {
   describe("Access Control Tests", () => {
     let asset: IAssetMock;
     let deployer: HardhatEthersSigner;
@@ -17,19 +16,14 @@ export function accessControlTests(): void {
     let signer_C: HardhatEthersSigner;
     let unknownSigner: HardhatEthersSigner;
 
-    async function deployFixture() {
-      const ctx = await loadFixture(deployAssetMockCtx);
+    beforeEach(async () => {
+      const ctx = getCtx();
       asset = ctx.asset;
-      await executeRbac(asset, [{ role: ATS_ROLES.ROLE_PAUSER, members: [ctx.user1.address] }]);
-
       deployer = ctx.deployer;
       signer_B = ctx.user1;
       signer_C = ctx.user2;
       unknownSigner = ctx.unknownSigner;
-    }
-
-    beforeEach(async () => {
-      await loadFixture(deployFixture);
+      await executeRbac(asset, [{ role: ATS_ROLES.ROLE_PAUSER, members: [ctx.user1.address] }]);
     });
 
     it("GIVEN a deactivated asset WHEN grantRole THEN transaction fails with Deactivated", async () => {
