@@ -54,8 +54,8 @@ export function transferAndLockByPartitionTests(getCtx: () => AssetMockCtx): voi
       await grantKycToHolders(asset, signer_B, [signer_A, signer_C], signer_A.address);
     }
 
-    async function deployFixture() {
-      const ctx = await loadFixture(deployAssetMockCtx);
+    beforeEach(async () => {
+      const ctx = getCtx();
       asset = ctx.asset;
 
       signer_A = ctx.deployer;
@@ -77,10 +77,6 @@ export function transferAndLockByPartitionTests(getCtx: () => AssetMockCtx): voi
       await setFacets(asset);
       currentTimestamp = await getDltTimestamp();
       expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS;
-    }
-
-    beforeEach(async () => {
-      await loadFixture(deployFixture);
     });
 
     describe("Multi-partition enabled", () => {
@@ -174,10 +170,6 @@ export function transferAndLockByPartitionTests(getCtx: () => AssetMockCtx): voi
     });
 
     describe("Multi-partition disabled", () => {
-      beforeEach(async () => {
-        await loadFixture(deployFixture);
-      });
-
       describe("transferAndLockByPartition", () => {
         it("GIVEN a token with multi-partition disabled GIVEN transferAndLockByPartition with non-default partition THEN fails with PartitionNotAllowedInSinglePartitionMode", async () => {
           await expect(
