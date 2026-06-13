@@ -65,10 +65,6 @@ export function transferAndLockByPartitionTests(getCtx: () => AssetMockCtx): voi
       await setFacets(asset);
       currentTimestamp = await getDltTimestamp();
       expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS;
-    }
-
-    beforeEach(async () => {
-      await loadFixture(deployFixture);
     });
 
     describe("Multi-partition enabled", () => {
