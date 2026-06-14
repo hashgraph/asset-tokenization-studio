@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { IAssetMock } from "@contract-types";
 import { ADDRESS_ZERO, ATS_ROLES, RESOLVER_KEY_CONTROL_LIST } from "@scripts";
-import { grantRoleAndPauseToken, executeRbac } from "@test";
+import {  grantRoleAndPauseToken, executeRbac } from "@test";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import type { AssetMockCtx } from "@test";
 

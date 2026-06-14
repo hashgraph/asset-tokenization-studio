@@ -40,9 +40,7 @@ export function customDataTests(getCtx: () => AssetMockCtx): void {
           members: [signer_A.address],
         },
       ]);
-    }
-
-    );
+    });
 
     describe("AccessControl", () => {
       it("GIVEN an account without custom data manager role WHEN setCustomData THEN transaction fails with AccountHasNoRole", async () => {
