@@ -8,7 +8,7 @@ import { DEFAULT_PARTITION, PARTITION_ID_2, executeRbac, grantKycToHolders } fro
 import type { AssetMockCtx } from "@test";
 
 export function balanceTrackerAtSnapshotByPartitionTests(getCtx: () => AssetMockCtx): void {
-  export function balanceTrackerAtSnapshotByPartitionTests(): void {
+  export function balanceTrackerAtSnapshotByPartitionTests(getCtx: () => AssetMockCtx): void {
   describe("BalanceTrackerAtSnapshotByPartition Tests", () => {
     let signer_A: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
