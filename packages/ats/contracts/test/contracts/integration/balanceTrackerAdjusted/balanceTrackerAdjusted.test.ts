@@ -9,7 +9,7 @@ import { ATS_ROLES, dateToUnixTimestamp, EMPTY_STRING, ZERO, RESOLVER_KEY_BALANC
 import { deployAssetMockCtx, executeRbac, MAX_UINT256 } from "@test";
 
 export function balanceTrackerAdjustedTests(getCtx: () => AssetMockCtx): void {
-  export function balanceTrackerAdjustedTests(): void {
+  export function balanceTrackerAdjustedTests(getCtx: () => AssetMockCtx): void {
   describe("BalanceTrackerAdjusted Tests", () => {
     let signer_A: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
@@ -17,45 +17,41 @@ export function balanceTrackerAdjustedTests(getCtx: () => AssetMockCtx): void {
 
     let asset: IAssetMock;
 
-    async function deployFixture() {
-      const ctx = await loadFixture(deployAssetMockCtx);
-      asset = ctx.asset;
-      await asset.setMultiPartition(true);
-
-      signer_A = ctx.deployer;
-      signer_B = ctx.user1;
-      signer_C = ctx.user2;
-
-      await executeRbac(asset, [
-        {
-          role: ATS_ROLES.ROLE_ISSUER,
-          members: [signer_B.address],
-        },
-        {
-          role: ATS_ROLES.ROLE_KYC,
-          members: [signer_B.address],
-        },
-        {
-          role: ATS_ROLES.ROLE_CORPORATE_ACTION,
-          members: [signer_A.address],
-        },
-        {
-          role: ATS_ROLES.ROLE_SSI_MANAGER,
-          members: [signer_A.address],
-        },
-      ]);
-
-      await asset.connect(signer_A).addIssuer(signer_B.address);
-      await grantKycToHolders(asset, signer_B, [signer_A, signer_B]);
-    }
-
     afterEach(async () => {
       await asset.resetSystemTimestamp();
     });
 
     describe("balanceOfAt", () => {
       beforeEach(async () => {
-        await loadFixture(deployFixture);
+        const ctx = getCtx();
+        asset = ctx.asset;
+        await asset.setMultiPartition(true);
+
+        signer_A = ctx.deployer;
+        signer_B = ctx.user1;
+        signer_C = ctx.user2;
+
+        await executeRbac(asset, [
+          {
+            role: ATS_ROLES.ROLE_ISSUER,
+            members: [signer_B.address],
+          },
+          {
+            role: ATS_ROLES.ROLE_KYC,
+            members: [signer_B.address],
+          },
+          {
+            role: ATS_ROLES.ROLE_CORPORATE_ACTION,
+            members: [signer_A.address],
+          },
+          {
+            role: ATS_ROLES.ROLE_SSI_MANAGER,
+            members: [signer_A.address],
+          },
+        ]);
+
+        await asset.connect(signer_A).addIssuer(signer_B.address);
+        await grantKycToHolders(asset, signer_B, [signer_A, signer_B]);
       });
 
       it("GIVEN a token holder with minted tokens WHEN balanceOfAt at current time THEN returns minted amount", async () => {

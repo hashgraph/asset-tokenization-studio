@@ -8,7 +8,7 @@ import { ATS_ROLES, EMPTY_STRING, ZERO, RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT
 import { deployAssetMockCtx, executeRbac, MAX_UINT256 } from "@test";
 
 export function balanceTrackerAtSnapshotByPartitionTests(getCtx: () => AssetMockCtx): void {
-  export function balanceTrackerAtSnapshotByPartitionTests(): void {
+  export function balanceTrackerAtSnapshotByPartitionTests(getCtx: () => AssetMockCtx): void {
   describe("BalanceTrackerAtSnapshotByPartition Tests", () => {
     let signer_A: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
@@ -16,8 +16,8 @@ export function balanceTrackerAtSnapshotByPartitionTests(getCtx: () => AssetMock
 
     let asset: IAssetMock;
 
-    async function deployFixture() {
-      const ctx = await loadFixture(deployAssetMockCtx);
+    beforeEach(async () => {
+      const ctx = getCtx();
       asset = ctx.asset;
       await asset.setMultiPartition(true);
 
@@ -46,10 +46,6 @@ export function balanceTrackerAtSnapshotByPartitionTests(getCtx: () => AssetMock
 
       await asset.connect(signer_A).addIssuer(signer_B.address);
       await grantKycToHolders(asset, signer_B, [signer_A, signer_B]);
-    }
-
-    beforeEach(async () => {
-      await loadFixture(deployFixture);
     });
 
     describe("balanceOfAtSnapshotByPartition", () => {
