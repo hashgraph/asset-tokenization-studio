@@ -3,7 +3,6 @@
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ATS_ROLES, RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT_BY_PARTITION } from "@scripts";
 import { DEFAULT_PARTITION, PARTITION_ID_2, executeRbac, grantKycToHolders } from "@test";
 import type { AssetMockCtx } from "@test";
