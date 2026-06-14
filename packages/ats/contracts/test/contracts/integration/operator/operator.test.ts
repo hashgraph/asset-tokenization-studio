@@ -9,7 +9,7 @@ import { executeRbac, grantKycToHolders } from "@test";
 import type { AssetMockCtx } from "@test";
 
 export function operatorTests(getCtx: () => AssetMockCtx): void {
-  export function operatorTests(): void {
+  export function operatorTests(getCtx: () => AssetMockCtx): void {
   describe("Operator Facet Tests", () => {
     let signer_A: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
