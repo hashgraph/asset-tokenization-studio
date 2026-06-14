@@ -81,13 +81,13 @@ describe("ATS — IAsset Suites", () => {
   votingTests(() => ctx);
 
   // ── W2: Multi-partition suites ──────────────────────────────────────
-  holdAtSnapshotTests();
-  lockAtSnapshotTests();
-  lockAtSnapshotByPartitionTests();
-  balanceTrackerAdjustedTests();
-  balanceTrackerAtSnapshotByPartitionTests();
-  balanceTrackerAtSnapshotTests();
-  snapshotsByPartitionTests();
+  holdAtSnapshotTests(() => ctx);
+  lockAtSnapshotTests(() => ctx);
+  lockAtSnapshotByPartitionTests(() => ctx);
+  balanceTrackerAdjustedTests(() => ctx);
+  balanceTrackerAtSnapshotByPartitionTests(() => ctx);
+  balanceTrackerAtSnapshotTests(() => ctx);
+  snapshotsByPartitionTests(() => ctx);
   votingSecurityHoldersTests();
   transferAndLockByPartitionTests(() => ctx);
 });

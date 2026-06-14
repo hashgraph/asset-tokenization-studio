@@ -4,13 +4,13 @@ import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock, ISnapshotsByPartition__factory, ISnapshotsByPartition } from "@contract-types";
 import { ZERO, EMPTY_STRING, ATS_ROLES, RESOLVER_KEY_SNAPSHOTS_BY_PARTITION } from "@scripts";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { DEFAULT_PARTITION, PARTITION_ID_2, PARTITION_ID_3, deployAssetMockCtx, executeRbac, MAX_UINT256 } from "@test";
+import { DEFAULT_PARTITION, PARTITION_ID_2, PARTITION_ID_3, executeRbac, MAX_UINT256 } from "@test";
+import type { AssetMockCtx } from "@test";
 
 const EMPTY_VC_ID = EMPTY_STRING;
 const amount = 1000;
 
-export function snapshotsByPartitionTests(): void {
+export function snapshotsByPartitionTests(getCtx: () => AssetMockCtx): void {
   describe("SnapshotsByPartition Tests", () => {
     let signer_A: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
@@ -19,8 +19,8 @@ export function snapshotsByPartitionTests(): void {
     let asset: IAssetMock;
     let snapshotsByPartitionFacet: ISnapshotsByPartition;
 
-    async function deployFixture() {
-      const ctx = await loadFixture(deployAssetMockCtx);
+    beforeEach(async () => {
+      const ctx = getCtx();
       const target = await ctx.diamond.getAddress();
       asset = ctx.asset;
       await asset.setMultiPartition(true);
@@ -35,10 +35,6 @@ export function snapshotsByPartitionTests(): void {
         { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
         { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
       ]);
-    }
-
-    beforeEach(async () => {
-      await loadFixture(deployFixture);
     });
 
     describe("AccessControl", () => {

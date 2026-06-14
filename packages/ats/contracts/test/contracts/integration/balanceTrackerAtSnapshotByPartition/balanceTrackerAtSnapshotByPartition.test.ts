@@ -3,11 +3,11 @@
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ATS_ROLES, RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT_BY_PARTITION } from "@scripts";
-import { DEFAULT_PARTITION, PARTITION_ID_2, deployAssetMockCtx, executeRbac, grantKycToHolders } from "@test";
+import { DEFAULT_PARTITION, PARTITION_ID_2, executeRbac, grantKycToHolders } from "@test";
+import type { AssetMockCtx } from "@test";
 
-export function balanceTrackerAtSnapshotByPartitionTests(): void {
+export function balanceTrackerAtSnapshotByPartitionTests(getCtx: () => AssetMockCtx): void {
   describe("BalanceTrackerAtSnapshotByPartition Tests", () => {
     let signer_A: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
@@ -15,8 +15,8 @@ export function balanceTrackerAtSnapshotByPartitionTests(): void {
 
     let asset: IAssetMock;
 
-    async function deployFixture() {
-      const ctx = await loadFixture(deployAssetMockCtx);
+    beforeEach(async () => {
+      const ctx = getCtx();
       asset = ctx.asset;
       await asset.setMultiPartition(true);
 
@@ -45,10 +45,6 @@ export function balanceTrackerAtSnapshotByPartitionTests(): void {
 
       await asset.connect(signer_A).addIssuer(signer_B.address);
       await grantKycToHolders(asset, signer_B, [signer_A, signer_B]);
-    }
-
-    beforeEach(async () => {
-      await loadFixture(deployFixture);
     });
 
     describe("balanceOfAtSnapshotByPartition", () => {

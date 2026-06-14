@@ -4,19 +4,12 @@ import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import { ATS_ROLES, RESOLVER_KEY_LOCK_AT_SNAPSHOT_BY_PARTITION } from "@scripts";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import {
-  DEFAULT_PARTITION,
-  PARTITION_ID_2,
-  deployAssetMockCtx,
-  executeRbac,
-  grantKycToHolders,
-  MAX_UINT256,
-} from "@test";
+import { DEFAULT_PARTITION, PARTITION_ID_2, executeRbac, grantKycToHolders, MAX_UINT256 } from "@test";
+import type { AssetMockCtx } from "@test";
 
 const amount = 1000;
 
-export function lockAtSnapshotByPartitionTests(): void {
+export function lockAtSnapshotByPartitionTests(getCtx: () => AssetMockCtx): void {
   describe("LockAtSnapshotByPartition Tests", () => {
     let signer_A: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
@@ -24,8 +17,8 @@ export function lockAtSnapshotByPartitionTests(): void {
 
     let asset: IAssetMock;
 
-    async function deployFixture() {
-      const ctx = await loadFixture(deployAssetMockCtx);
+    beforeEach(async () => {
+      const ctx = getCtx();
       asset = ctx.asset;
       await asset.setMultiPartition(true);
 
@@ -43,10 +36,6 @@ export function lockAtSnapshotByPartitionTests(): void {
 
       await asset.connect(signer_A).addIssuer(signer_B.address);
       await grantKycToHolders(asset, signer_B, [signer_A, signer_B, signer_C]);
-    }
-
-    beforeEach(async () => {
-      await loadFixture(deployFixture);
     });
 
     describe("lockedBalanceOfAtSnapshotByPartition", () => {
