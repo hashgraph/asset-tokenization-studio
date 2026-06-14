@@ -45,9 +45,7 @@ export function operatorByPartitionTests(getCtx: () => AssetMockCtx): void {
         value: AMOUNT,
         data: EMPTY_HEX_BYTES,
       });
-    }
-
-    );
+    });
 
     // ─── authorizeOperatorByPartition ────────────────────────────────────────────
 

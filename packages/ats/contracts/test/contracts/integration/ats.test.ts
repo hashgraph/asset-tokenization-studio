@@ -115,7 +115,7 @@ describe("ATS — IAsset Suites", () => {
   freezeAtSnapshotTests();
   freezeAtSnapshotByPartitionTests();
   securityHoldersTests();
-  votingTests();
+  votingTests(() => ctx);
 
   // ── W2: Multi-partition suites ──────────────────────────────────────
   holdAtSnapshotTests(() => ctx);

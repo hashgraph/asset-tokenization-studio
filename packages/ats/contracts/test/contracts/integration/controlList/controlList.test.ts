@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { IAssetMock } from "@contract-types";
 import { ADDRESS_ZERO, ATS_ROLES, RESOLVER_KEY_CONTROL_LIST } from "@scripts";
-import { grantRoleAndPauseToken, executeRbac } from "@test";
+import {  grantRoleAndPauseToken, executeRbac } from "@test";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import type { AssetMockCtx } from "@test";
 
@@ -46,16 +46,12 @@ export function controlListTests(getCtx: () => AssetMockCtx): void {
       );
     });
 
-
-
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeControlList is called THEN it reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_D).initializeControlList(true)).to.be.revertedWithCustomError(
         asset,
         "AccountHasNoRole",
       );
     });
-
-
 
     it("GIVEN a new deployment WHEN initializeControlList is called THEN it emits ControlListInitialized", async () => {
        await asset.forceFacetNotRegistered(RESOLVER_KEY_CONTROL_LIST);
