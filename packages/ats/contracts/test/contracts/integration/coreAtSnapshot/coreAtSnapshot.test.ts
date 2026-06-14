@@ -4,21 +4,20 @@ import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import { ATS_ROLES, RESOLVER_KEY_CORE_AT_SNAPSHOT } from "@scripts";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployAssetMockCtx, executeRbac, grantKycToHolders, DEFAULT_PARTITION } from "@test";
+import { executeRbac, grantKycToHolders, DEFAULT_PARTITION } from "@test";
+import type { AssetMockCtx } from "@test";
 
-export function coreAtSnapshotTests(): void {
+export function coreAtSnapshotTests(getCtx: () => AssetMockCtx): void {
   describe("CoreAtSnapshot Tests", () => {
     let signer_A: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
 
     let asset: IAssetMock;
 
-    async function deployEquity() {
-      const ctx = await loadFixture(deployAssetMockCtx);
+    beforeEach(async () => {
+      const ctx = getCtx();
       signer_A = ctx.deployer;
       signer_B = ctx.user1;
-
       asset = ctx.asset;
 
       await executeRbac(asset, [
@@ -42,10 +41,6 @@ export function coreAtSnapshotTests(): void {
 
       await asset.connect(signer_A).addIssuer(signer_B.address);
       await grantKycToHolders(asset, signer_B, [signer_A]);
-    }
-
-    beforeEach(async () => {
-      await loadFixture(deployEquity);
     });
 
     describe("decimalsAtSnapshot", () => {

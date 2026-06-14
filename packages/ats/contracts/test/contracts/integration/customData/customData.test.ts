@@ -5,8 +5,8 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import { ATS_ROLES, RESOLVER_KEY_CUSTOM_DATA } from "@scripts";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployAssetMockCtx, executeRbac } from "@test";
+import { executeRbac } from "@test";
+import type { AssetMockCtx } from "@test";
 
 const KEY_A = ethers.id("customData.test.key.A");
 const UNSET_KEY = ethers.id("customData.test.key.unset");
@@ -15,7 +15,7 @@ const PAYLOAD_1 = ethers.hexlify(ethers.toUtf8Bytes("payload-one"));
 const PAYLOAD_2 = ethers.hexlify(ethers.toUtf8Bytes("payload-two-longer-content"));
 const PAYLOAD_3 = ethers.hexlify(ethers.toUtf8Bytes("payload-three"));
 
-export function customDataTests(): void {
+export function customDataTests(getCtx: () => AssetMockCtx): void {
   describe("CustomData Tests", () => {
     let asset: IAssetMock;
 
@@ -23,12 +23,11 @@ export function customDataTests(): void {
     let signer_B: HardhatEthersSigner; // pauser
     let signer_C: HardhatEthersSigner; // unprivileged caller
 
-    async function deployCustomDataFixture() {
-      const ctx = await loadFixture(deployAssetMockCtx);
+    beforeEach(async () => {
+      const ctx = getCtx();
       signer_A = ctx.deployer;
       signer_B = ctx.user2;
       signer_C = ctx.user3;
-
       asset = ctx.asset;
 
       await executeRbac(asset, [
@@ -41,10 +40,6 @@ export function customDataTests(): void {
           members: [signer_A.address],
         },
       ]);
-    }
-
-    beforeEach(async () => {
-      await loadFixture(deployCustomDataFixture);
     });
 
     describe("AccessControl", () => {

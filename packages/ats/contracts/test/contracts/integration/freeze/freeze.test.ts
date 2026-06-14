@@ -3,25 +3,19 @@
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployAssetMockCtx } from "@test";
+import type { AssetMockCtx } from "@test";
 import { ADDRESS_ZERO, ATS_ROLES, RESOLVER_KEY_FREEZE } from "@scripts";
 
-export function freezeTests(): void {
+export function freezeTests(getCtx: () => AssetMockCtx): void {
   describe("Freeze Tests", () => {
     let signer_D: HardhatEthersSigner;
 
     let asset: IAssetMock;
 
-    async function deployFreezeFixture() {
-      const ctx = await loadFixture(deployAssetMockCtx);
-      signer_D = ctx.user3;
-
-      asset = ctx.asset;
-    }
-
     beforeEach(async () => {
-      await loadFixture(deployFreezeFixture);
+      const ctx = getCtx();
+      signer_D = ctx.user3;
+      asset = ctx.asset;
     });
 
     describe("initializeFreeze", () => {

@@ -4,20 +4,18 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock, type MockEIP712 } from "@contract-types";
-import { deployAssetMockCtx } from "@test";
+import type { AssetMockCtx } from "@test";
 import { ATS_ROLES, RESOLVER_KEY_EIP712 } from "@scripts";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
-export function eip712Tests(): void {
+export function eip712Tests(getCtx: () => AssetMockCtx): void {
   describe("EIP712 Tests", () => {
     let nonAdmin: HardhatEthersSigner;
 
     let asset: IAssetMock;
 
     beforeEach(async () => {
-      const ctx = await loadFixture(deployAssetMockCtx);
+      const ctx = getCtx();
       nonAdmin = ctx.user1;
-
       asset = ctx.asset;
     });
 

@@ -1,29 +1,23 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { expect } from "chai";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { ATS_ROLES, RESOLVER_KEY_DEACTIVATE } from "@scripts";
-import { grantRoleAndPauseToken, deployAssetMockCtx } from "@test";
+import { grantRoleAndPauseToken } from "@test";
 import { IAssetMock } from "@contract-types";
+import type { AssetMockCtx } from "@test";
 
-export function deactivateTests(): void {
+export function deactivateTests(getCtx: () => AssetMockCtx): void {
   describe("Deactivate Tests", () => {
     let asset: IAssetMock;
     let deployer: HardhatEthersSigner;
     let unknownSigner: HardhatEthersSigner;
 
-    // Fixture: Deploy asset used as the Deactivate facet host
-    async function deployEquityForDeactivateFixture() {
-      const ctx = await loadFixture(deployAssetMockCtx);
+    beforeEach(async () => {
+      const ctx = getCtx();
       asset = ctx.asset;
       deployer = ctx.deployer;
       unknownSigner = ctx.unknownSigner;
-    }
-
-    // Pre-load fixture to separate deployment time from test execution time
-    beforeEach(async () => {
-      await loadFixture(deployEquityForDeactivateFixture);
     });
 
     it("GIVEN an account without deactivate role WHEN deactivate THEN transaction fails with AccountHasNoRole", async () => {

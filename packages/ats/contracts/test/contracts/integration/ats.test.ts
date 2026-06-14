@@ -58,17 +58,17 @@ describe("ATS — IAsset Suites", () => {
 
   // ── W1: Generic single-partition suites ──────────────────────────────
   accessControlTests(() => ctx);
-  freezeTests();
-  deactivateTests();
-  operatorTests();
-  eip712Tests();
-  noncesTests();
-  controlListTests();
-  kycTests();
-  coreAtSnapshotTests();
-  customDataTests();
-  ssiTests();
-  operatorByPartitionTests();
+  freezeTests(() => ctx);
+  deactivateTests(() => ctx);
+  operatorTests(() => ctx);
+  eip712Tests(() => ctx);
+  noncesTests(() => ctx);
+  controlListTests(() => ctx);
+  kycTests(() => ctx);
+  coreAtSnapshotTests(() => ctx);
+  customDataTests(() => ctx);
+  ssiTests(() => ctx);
+  operatorByPartitionTests(() => ctx);
 
   // ── W1: Layer 1 suites ────────────────────────────────────────────
   corporateActionsTests();
@@ -78,7 +78,7 @@ describe("ATS — IAsset Suites", () => {
   freezeAtSnapshotTests();
   freezeAtSnapshotByPartitionTests();
   securityHoldersTests();
-  votingTests();
+  votingTests(() => ctx);
 
   // ── W2: Multi-partition suites ──────────────────────────────────────
   holdAtSnapshotTests();

@@ -1,10 +1,10 @@
 import { IAssetMock } from "@contract-types";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ATS_ROLES, DEFAULT_PARTITION, RESOLVER_KEY_VOTING } from "@scripts";
 import { ASSET_MOCK_CONFIG_ID } from "../../../fixtures/deploy/assetMockConfiguration";
-import { deployAssetMockCtx, executeRbac, grantKycToHolders, grantRoleAndPauseToken } from "@test";
+import { executeRbac, grantKycToHolders, grantRoleAndPauseToken } from "@test";
 import { expect } from "chai";
+import type { AssetMockCtx } from "@test";
 
 const voteData = "0x";
 let votingRecordDateInSeconds = 0n;
@@ -20,7 +20,7 @@ let dividendData = {
   amountDecimals: 1,
 };
 
-export function votingTests(): void {
+export function votingTests(getCtx: () => AssetMockCtx): void {
   describe("Voting rights", () => {
     let signer_A: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
@@ -28,8 +28,8 @@ export function votingTests(): void {
 
     let asset: IAssetMock;
 
-    async function deploySecurityFixtureSinglePartition() {
-      const ctx = await loadFixture(deployAssetMockCtx);
+    beforeEach(async () => {
+      const ctx = getCtx();
       signer_A = ctx.deployer;
       signer_B = ctx.user1;
       signer_C = ctx.user2;
@@ -63,9 +63,6 @@ export function votingTests(): void {
         amount: 10,
         amountDecimals: 1,
       };
-    }
-    beforeEach(async () => {
-      await loadFixture(deploySecurityFixtureSinglePartition);
     });
     describe("initializeVoting", () => {
       it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeVoting is called THEN it reverts with AccountHasNoRole", async () => {

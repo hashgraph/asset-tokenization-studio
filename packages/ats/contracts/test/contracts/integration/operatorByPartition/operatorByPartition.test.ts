@@ -3,15 +3,15 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { IAssetMock } from "@contract-types";
 import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES, RESOLVER_KEY_OPERATOR_BY_PARTITION } from "@scripts";
-import { deployAssetMockCtx, executeRbac, grantKycToHolders } from "@test";
+import { executeRbac, grantKycToHolders } from "@test";
+import type { AssetMockCtx } from "@test";
 
 const WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
 const AMOUNT = 1000;
 
-export function operatorByPartitionTests(): void {
+export function operatorByPartitionTests(getCtx: () => AssetMockCtx): void {
   describe("OperatorByPartitionFacet Tests", () => {
     let signer_A: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
@@ -20,8 +20,8 @@ export function operatorByPartitionTests(): void {
 
     let asset: IAssetMock;
 
-    async function deployFixture() {
-      const ctx = await loadFixture(deployAssetMockCtx);
+    beforeEach(async () => {
+      const ctx = getCtx();
       signer_A = ctx.deployer;
       signer_B = ctx.user1;
       signer_C = ctx.user2;
@@ -45,10 +45,6 @@ export function operatorByPartitionTests(): void {
         value: AMOUNT,
         data: EMPTY_HEX_BYTES,
       });
-    }
-
-    beforeEach(async () => {
-      await loadFixture(deployFixture);
     });
 
     // ─── authorizeOperatorByPartition ────────────────────────────────────────────

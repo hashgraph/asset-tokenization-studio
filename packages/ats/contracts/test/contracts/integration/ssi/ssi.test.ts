@@ -3,7 +3,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { IAssetMock, MockedT3RevocationRegistry, RevertingRevocationRegistry } from "@contract-types";
 import {
   ATS_ROLES,
@@ -14,9 +13,10 @@ import {
   RESOLVER_KEY_KYC,
   RESOLVER_KEY_SSI_MANAGEMENT,
 } from "@scripts";
-import { deployAssetMockCtx, executeRbac, MAX_UINT256 } from "@test";
+import { executeRbac, MAX_UINT256 } from "@test";
+import type { AssetMockCtx } from "@test";
 
-export function ssiTests(): void {
+export function ssiTests(getCtx: () => AssetMockCtx): void {
   describe("SSI Tests", () => {
     let signer_A: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
@@ -27,8 +27,8 @@ export function ssiTests(): void {
     let equityAsset: IAssetMock;
     let revocationList: MockedT3RevocationRegistry;
 
-    async function deployFixture() {
-      const ctx = await loadFixture(deployAssetMockCtx);
+    beforeEach(async () => {
+      const ctx = getCtx();
       signer_A = ctx.deployer;
       signer_B = ctx.user2;
       signer_C = ctx.user3;
@@ -48,10 +48,6 @@ export function ssiTests(): void {
       ]);
       revocationList = await (await ethers.getContractFactory("MockedT3RevocationRegistry", signer_C)).deploy();
       await revocationList.waitForDeployment();
-    }
-
-    beforeEach(async () => {
-      await loadFixture(deployFixture);
     });
 
     describe("Paused", () => {
@@ -175,7 +171,7 @@ export function ssiTests(): void {
       let revertingRegistry: RevertingRevocationRegistry;
 
       beforeEach(async () => {
-        const ctx = await loadFixture(deployAssetMockCtx);
+        const ctx = getCtx();
         signer_A = ctx.deployer;
         signer_B = ctx.user1;
         signer_C = ctx.user2;

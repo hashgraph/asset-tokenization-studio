@@ -3,12 +3,12 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { IAssetMock } from "@contract-types";
 import { ATS_ROLES, RESOLVER_KEY_OPERATOR } from "@scripts";
-import { deployAssetMockCtx, executeRbac, grantKycToHolders } from "@test";
+import { executeRbac, grantKycToHolders } from "@test";
+import type { AssetMockCtx } from "@test";
 
-export function operatorTests(): void {
+export function operatorTests(getCtx: () => AssetMockCtx): void {
   describe("Operator Facet Tests", () => {
     let signer_A: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
@@ -16,12 +16,11 @@ export function operatorTests(): void {
 
     let asset: IAssetMock;
 
-    async function deployFixture() {
-      const ctx = await loadFixture(deployAssetMockCtx);
+    beforeEach(async () => {
+      const ctx = getCtx();
       signer_A = ctx.deployer;
       signer_B = ctx.user1;
       signer_C = ctx.user2;
-
       asset = ctx.asset;
       await executeRbac(asset, [
         { role: ATS_ROLES.ROLE_ISSUER, members: [signer_A.address] },
@@ -33,10 +32,6 @@ export function operatorTests(): void {
 
       await asset.addIssuer(signer_A.address);
       await grantKycToHolders(asset, signer_A, [signer_A, signer_B, signer_C]);
-    }
-
-    beforeEach(async () => {
-      await loadFixture(deployFixture);
     });
 
     describe("isOperator", () => {

@@ -1,21 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { expect } from "chai";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { IAssetMock, type IFactory, type BusinessLogicResolver, IAssetMock__factory } from "@contract-types";
 import { ADDRESS_ZERO, ATS_ROLES, GAS_LIMIT } from "@scripts";
-import {
-  getSecurityData,
-  getRegulationData,
-  makeEquityDetailsData,
-  grantRoleAndPauseToken,
-  deployAssetMockCtx,
-  executeRbac,
-} from "@test";
+import { getSecurityData, getRegulationData, makeEquityDetailsData, grantRoleAndPauseToken, executeRbac } from "@test";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { ethers } from "hardhat";
+import type { AssetMockCtx } from "@test";
 
-export function controlListTests(): void {
+export function controlListTests(getCtx: () => AssetMockCtx): void {
   describe("Control List Tests", () => {
     let signer_A: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
@@ -26,8 +19,8 @@ export function controlListTests(): void {
     let factory: IFactory;
     let blr: BusinessLogicResolver;
 
-    async function deployEquityWithControlListFixture() {
-      const ctx = await loadFixture(deployAssetMockCtx);
+    beforeEach(async () => {
+      const ctx = getCtx();
       signer_A = ctx.deployer;
       signer_B = ctx.user1;
       signer_C = ctx.user2;
@@ -38,10 +31,6 @@ export function controlListTests(): void {
       asset = ctx.asset;
 
       await executeRbac(asset, [{ role: ATS_ROLES.ROLE_PAUSER, members: [signer_B.address] }]);
-    }
-
-    beforeEach(async () => {
-      await loadFixture(deployEquityWithControlListFixture);
     });
 
     it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with FacetAlreadyRegistered", async () => {

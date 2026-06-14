@@ -4,23 +4,18 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { RESOLVER_KEY_KYC } from "@scripts";
-import { deployAssetMockCtx } from "@test";
+import type { AssetMockCtx } from "@test";
 
-export function kycTests(): void {
+export function kycTests(getCtx: () => AssetMockCtx): void {
   describe("Kyc Init Tests", () => {
     let signer_D: HardhatEthersSigner;
     let asset: IAssetMock;
 
-    async function deployFixture() {
-      const ctx = await loadFixture(deployAssetMockCtx);
+    beforeEach(async () => {
+      const ctx = getCtx();
       signer_D = ctx.user3;
       asset = ctx.asset;
-    }
-
-    beforeEach(async () => {
-      await loadFixture(deployFixture);
     });
 
     it("GIVEN an initialized contract WHEN initializeInternalKyc is called again THEN it reverts with FacetAlreadyRegistered", async () => {

@@ -3,11 +3,10 @@
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { deployAssetMockCtx } from "@test";
+import type { AssetMockCtx } from "@test";
 import { ATS_ROLES, RESOLVER_KEY_NONCES } from "@scripts";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
-export function noncesTests(): void {
+export function noncesTests(getCtx: () => AssetMockCtx): void {
   describe("Nonces Tests", () => {
     let signer_A: HardhatEthersSigner;
     let signer_C: HardhatEthersSigner;
@@ -15,10 +14,9 @@ export function noncesTests(): void {
     let asset: IAssetMock;
 
     beforeEach(async () => {
-      const ctx = await loadFixture(deployAssetMockCtx);
+      const ctx = getCtx();
       signer_A = ctx.deployer;
       signer_C = ctx.user2;
-
       asset = ctx.asset;
     });
 
