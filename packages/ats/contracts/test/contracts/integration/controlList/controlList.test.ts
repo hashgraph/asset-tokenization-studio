@@ -1,15 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { expect } from "chai";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { IAssetMock, type IFactory, type BusinessLogicResolver, IAssetMock__factory } from "@contract-types";
 import { ADDRESS_ZERO, ATS_ROLES, GAS_LIMIT } from "@scripts";
-import {
-  getSecurityData,
-  getRegulationData,
-  makeEquityDetailsData,
-  grantRoleAndPauseToken,
-   executeRbac } from "@test";
+import { getSecurityData, getRegulationData, makeEquityDetailsData, grantRoleAndPauseToken, executeRbac } from "@test";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { ethers } from "hardhat";
 import type { AssetMockCtx } from "@test";

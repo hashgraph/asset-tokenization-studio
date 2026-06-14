@@ -3,8 +3,9 @@
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { ATS_ROLES, RESOLVER_KEY_DEACTIVATE } from "@scripts";
-import { grantRoleAndPauseToken, deployAssetMockCtx } from "@test";
+import { grantRoleAndPauseToken } from "@test";
 import { IAssetMock } from "@contract-types";
+import type { AssetMockCtx } from "@test";
 
 export function deactivateTests(getCtx: () => AssetMockCtx): void {
   describe("Deactivate Tests", () => {

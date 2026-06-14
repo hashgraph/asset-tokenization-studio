@@ -3,13 +3,13 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { IAssetMock } from "@contract-types";
 import { ATS_ROLES, EMPTY_STRING, RESOLVER_KEY_OPERATOR, ZERO } from "@scripts";
-import { deployAssetMockCtx, executeRbac, MAX_UINT256 } from "@test";
+import { executeRbac, MAX_UINT256 } from "@test";
+import type { AssetMockCtx } from "@test";
 
 export function operatorTests(getCtx: () => AssetMockCtx): void {
-  export function operatorTests(): void {
+  export function operatorTests(getCtx: () => AssetMockCtx): void {
   describe("Operator Facet Tests", () => {
     let signer_A: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
