@@ -62,6 +62,13 @@ import { externalControlListTests } from "./externalControlLists/externalControl
 import { externalKycListTests } from "./externalKycLists/externalKycList.test";
 import { externalPauseTests } from "./externalPauses/externalPause.test";
 import { externalListSizeCapTests } from "./externalPauses/externalListSizeCap.test";
+
+// ── W3: Cap / batch suites ──────────────────────────────────────────────
+import { capTests } from "./cap/cap.test";
+import { capByPartitionTests } from "./capByPartition/capByPartition.test";
+import { batchMintTests } from "./batchMint/batchMint.test";
+import { batchBurnTests } from "./batchBurn/batchBurn.test";
+import { batchControllerTests } from "./batchController/batchController.test";
 import { allowanceTests } from "./allowance/allowance.test";
 import { controllerTests } from "./controller/controller.test";
 import { holdTests } from "./hold/hold.test";
