@@ -5,21 +5,20 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import { ATS_ROLES, ATS_CORPORATE_ACTION, RESOLVER_KEY_CORPORATE_ACTIONS } from "@scripts";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployAssetMockCtx } from "@test";
 import { executeRbac } from "@test";
+import type { AssetMockCtx } from "@test";
 
 const corporateActionId_1 = "0x0000000000000000000000000000000000000000000000000000000000000001";
 
-export function corporateActionsTests(): void {
+export function corporateActionsTests(getCtx: () => AssetMockCtx): void {
   describe("Corporate Actions Tests", () => {
     let signer_B: HardhatEthersSigner;
     let signer_C: HardhatEthersSigner;
 
     let asset: IAssetMock;
 
-    async function deployFixture() {
-      const ctx = await loadFixture(deployAssetMockCtx);
+    beforeEach(async () => {
+      const ctx = getCtx();
       signer_B = ctx.user1;
       signer_C = ctx.user2;
 
@@ -35,10 +34,6 @@ export function corporateActionsTests(): void {
           members: [signer_C.address],
         },
       ]);
-    }
-
-    beforeEach(async () => {
-      await loadFixture(deployFixture);
     });
 
     it("GIVEN a token with a corporate action the functions returns the data", async () => {

@@ -71,13 +71,13 @@ describe("ATS — IAsset Suites", () => {
   operatorByPartitionTests(() => ctx);
 
   // ── W1: Layer 1 suites ────────────────────────────────────────────
-  corporateActionsTests();
-  dividendSecurityHoldersTests();
-  documentationTests();
-  scheduledBalanceAdjustmentsTests();
-  freezeAtSnapshotTests();
-  freezeAtSnapshotByPartitionTests();
-  securityHoldersTests();
+  corporateActionsTests(() => ctx);
+  dividendSecurityHoldersTests(() => ctx);
+  documentationTests(() => ctx);
+  scheduledBalanceAdjustmentsTests(() => ctx);
+  freezeAtSnapshotTests(() => ctx);
+  freezeAtSnapshotByPartitionTests(() => ctx);
+  securityHoldersTests(() => ctx);
   votingTests(() => ctx);
 
   // ── W2: Multi-partition suites ──────────────────────────────────────
@@ -88,6 +88,6 @@ describe("ATS — IAsset Suites", () => {
   balanceTrackerAtSnapshotByPartitionTests(() => ctx);
   balanceTrackerAtSnapshotTests(() => ctx);
   snapshotsByPartitionTests(() => ctx);
-  votingSecurityHoldersTests();
+  votingSecurityHoldersTests(() => ctx);
   transferAndLockByPartitionTests(() => ctx);
 });

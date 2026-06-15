@@ -4,13 +4,13 @@ import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import { DEFAULT_PARTITION, ATS_ROLES, ZERO, EMPTY_STRING, RESOLVER_KEY_VOTING_SECURITY_HOLDERS } from "@scripts";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployAssetMockCtx, executeRbac, grantKycToHolders, MAX_UINT256 } from "@test";
+import { executeRbac, grantKycToHolders, MAX_UINT256 } from "@test";
+import type { AssetMockCtx } from "@test";
 
 const voteData = "0x";
 const EMPTY_VC_ID = EMPTY_STRING;
 
-export function votingSecurityHoldersTests(): void {
+export function votingSecurityHoldersTests(getCtx: () => AssetMockCtx): void {
   describe("VotingSecurityHoldersFacet Tests", () => {
     let signer_A: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
@@ -21,15 +21,15 @@ export function votingSecurityHoldersTests(): void {
     let votingRecordDateInSeconds = 0;
     let votingData = { recordDate: "0", data: voteData };
 
-    async function deployFixture() {
-      const ctx = await loadFixture(deployAssetMockCtx);
-      asset = ctx.asset;
-      await asset.setMultiPartition(true);
-
+    beforeEach(async () => {
+      const ctx = getCtx();
       signer_A = ctx.deployer;
       signer_B = ctx.user1;
       signer_C = ctx.user2;
       unknownSigner = ctx.unknownSigner;
+
+      asset = ctx.asset;
+      await asset.setMultiPartition(true);
 
       await executeRbac(asset, [
         { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
@@ -38,10 +38,6 @@ export function votingSecurityHoldersTests(): void {
 
       await asset.connect(signer_A).addIssuer(signer_A.address);
       await grantKycToHolders(asset, signer_B, [signer_A], signer_A.address);
-    }
-
-    beforeEach(async () => {
-      await loadFixture(deployFixture);
 
       const currentTimestamp = await asset.blockTimestamp();
       const ONE_DAY = 86400n;

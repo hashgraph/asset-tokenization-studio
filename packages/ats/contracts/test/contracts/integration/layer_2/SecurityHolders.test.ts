@@ -5,10 +5,10 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock, MockERC1410StorageWrapper } from "@contract-types";
 import { DEFAULT_PARTITION, ATS_ROLES, EMPTY_HEX_BYTES, RESOLVER_KEY_SECURITYHOLDERS } from "@scripts";
-import { deployAssetMockCtx, executeRbac, grantKycToHolders, MAX_UINT256 } from "@test";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { executeRbac, grantKycToHolders, MAX_UINT256 } from "@test";
+import type { AssetMockCtx } from "@test";
 
-export function securityHoldersTests(): void {
+export function securityHoldersTests(getCtx: () => AssetMockCtx): void {
   describe("SecurityHoldersFacet Tests", () => {
     let signer_A: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
@@ -18,8 +18,8 @@ export function securityHoldersTests(): void {
 
     let asset: IAssetMock;
 
-    async function deploySecurityHoldersFixture() {
-      const ctx = await loadFixture(deployAssetMockCtx);
+    beforeEach(async () => {
+      const ctx = getCtx();
       signer_A = ctx.deployer;
       signer_B = ctx.user1;
       signer_C = ctx.user2;
@@ -46,10 +46,6 @@ export function securityHoldersTests(): void {
       // Grant KYC to all signers
       await asset.connect(signer_A).addIssuer(signer_A.address);
       await grantKycToHolders(asset, signer_A, [signer_B, signer_C, signer_D]);
-    }
-
-    beforeEach(async () => {
-      await loadFixture(deploySecurityHoldersFixture);
     });
 
     describe("getSecurityHolders", () => {

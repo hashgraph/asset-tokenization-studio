@@ -10,14 +10,14 @@ import {
   DEFAULT_PARTITION,
   RESOLVER_KEY_FREEZE_AT_SNAPSHOT_BY_PARTITION,
 } from "@scripts";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployAssetMockCtx, MAX_UINT256 } from "@test";
+import { MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
+import type { AssetMockCtx } from "@test";
 
 const balanceOf_C_Original = 2000;
 const EMPTY_VC_ID = EMPTY_STRING;
 
-export function freezeAtSnapshotByPartitionTests(): void {
+export function freezeAtSnapshotByPartitionTests(getCtx: () => AssetMockCtx): void {
   describe("FreezeAtSnapshotByPartition Tests", () => {
     let deployer: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
@@ -50,8 +50,8 @@ export function freezeAtSnapshotByPartitionTests(): void {
       ];
     }
 
-    async function deployFixture() {
-      const ctx = await loadFixture(deployAssetMockCtx);
+    beforeEach(async () => {
+      const ctx = getCtx();
       deployer = ctx.deployer;
       signer_B = ctx.user2;
       signer_C = ctx.user3;
@@ -59,10 +59,6 @@ export function freezeAtSnapshotByPartitionTests(): void {
       asset = ctx.asset;
 
       await executeRbac(asset, set_initRbacs(deployer.address, signer_B.address));
-    }
-
-    beforeEach(async () => {
-      await loadFixture(deployFixture);
     });
 
     it("GIVEN snapshot exists WHEN querying frozen balances by partition THEN returns correct values", async () => {

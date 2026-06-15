@@ -4,11 +4,10 @@ import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import { dateToUnixTimestamp, ATS_ROLES, RESOLVER_KEY_SCHEDULED_BALANCE_ADJUSTMENT } from "@scripts";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployAssetMockCtx } from "@test";
 import { executeRbac } from "@test";
+import type { AssetMockCtx } from "@test";
 
-export function scheduledBalanceAdjustmentsTests(): void {
+export function scheduledBalanceAdjustmentsTests(getCtx: () => AssetMockCtx): void {
   describe("Scheduled BalanceAdjustments Tests", () => {
     let deployer: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
@@ -16,8 +15,8 @@ export function scheduledBalanceAdjustmentsTests(): void {
 
     let asset: IAssetMock;
 
-    async function deployFixture() {
-      const ctx = await loadFixture(deployAssetMockCtx);
+    beforeEach(async () => {
+      const ctx = getCtx();
       deployer = ctx.deployer;
       signer_B = ctx.user2;
       signer_C = ctx.user3;
@@ -30,10 +29,6 @@ export function scheduledBalanceAdjustmentsTests(): void {
           members: [signer_B.address],
         },
       ]);
-    }
-
-    beforeEach(async () => {
-      await loadFixture(deployFixture);
     });
 
     afterEach(async () => {

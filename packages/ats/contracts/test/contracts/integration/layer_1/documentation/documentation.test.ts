@@ -4,10 +4,9 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, IAssetMock } from "@contract-types";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { grantRoleAndPauseToken } from "../../../../common";
-import { deployAssetMockCtx } from "@test";
 import { executeRbac } from "@test";
+import type { AssetMockCtx } from "@test";
 import { ATS_ROLES, RESOLVER_KEY_DOCUMENTATION } from "@scripts";
 
 const documentName_1 = "0x000000000000000000000000000000000000000000000000000000000000aa23";
@@ -17,7 +16,7 @@ const documentHASH_1 = "0x000000000000000000000000000000000000000000000000000000
 const documentURI_2 = "https://whatever2.com";
 const documentHASH_2 = "0x000000000000000000000000000000000000000000000000000000000002cc32";
 
-export function documentationTests(): void {
+export function documentationTests(getCtx: () => AssetMockCtx): void {
   describe("Documentation Tests", () => {
     let deployer: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
@@ -26,8 +25,8 @@ export function documentationTests(): void {
     let asset: IAssetMock;
     let diamond: ResolverProxy;
 
-    async function deployFixture() {
-      const ctx = await loadFixture(deployAssetMockCtx);
+    beforeEach(async () => {
+      const ctx = getCtx();
       deployer = ctx.deployer;
       signer_B = ctx.user1;
       signer_C = ctx.user2;
@@ -41,10 +40,6 @@ export function documentationTests(): void {
           members: [signer_B.address],
         },
       ]);
-    }
-
-    beforeEach(async () => {
-      await loadFixture(deployFixture);
     });
 
     it("GIVEN an account without documenter role WHEN setDocument THEN transaction fails with AccountHasNoRole", async () => {

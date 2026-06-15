@@ -3,25 +3,20 @@
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { IAssetMock } from "@contract-types";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ATS_ROLES, RESOLVER_KEY_DIVIDEND_SECURITY_HOLDERS } from "@scripts";
-import { deployAssetMockCtx } from "@test";
+import type { AssetMockCtx } from "@test";
 
-export function dividendSecurityHoldersTests(): void {
+export function dividendSecurityHoldersTests(getCtx: () => AssetMockCtx): void {
   describe("DividendSecurityHolders Tests", () => {
     let signer_C: HardhatEthersSigner;
 
     let asset: IAssetMock;
 
-    async function deployFixture() {
-      const ctx = await loadFixture(deployAssetMockCtx);
+    beforeEach(async () => {
+      const ctx = getCtx();
       signer_C = ctx.user2;
 
       asset = ctx.asset;
-    }
-
-    beforeEach(async () => {
-      await loadFixture(deployFixture);
     });
 
     describe("initializeDividendSecurityHolders", () => {

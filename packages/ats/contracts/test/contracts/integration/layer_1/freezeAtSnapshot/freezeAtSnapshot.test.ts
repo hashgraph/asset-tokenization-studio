@@ -4,14 +4,14 @@ import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import { ZERO, EMPTY_STRING, ATS_ROLES, DEFAULT_PARTITION, RESOLVER_KEY_FREEZE_AT_SNAPSHOT } from "@scripts";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployAssetMockCtx, MAX_UINT256 } from "@test";
+import { MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
+import type { AssetMockCtx } from "@test";
 
 const AMOUNT = 1000;
 const EMPTY_VC_ID = EMPTY_STRING;
 
-export function freezeAtSnapshotTests(): void {
+export function freezeAtSnapshotTests(getCtx: () => AssetMockCtx): void {
   describe("FreezeAtSnapshot Tests", () => {
     let deployer: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
@@ -44,8 +44,8 @@ export function freezeAtSnapshotTests(): void {
       ];
     }
 
-    async function deployFixture() {
-      const ctx = await loadFixture(deployAssetMockCtx);
+    beforeEach(async () => {
+      const ctx = getCtx();
       deployer = ctx.deployer;
       signer_B = ctx.user2;
       signer_C = ctx.user3;
@@ -53,10 +53,6 @@ export function freezeAtSnapshotTests(): void {
       asset = ctx.asset;
 
       await executeRbac(asset, set_initRbacs(deployer.address, signer_B.address));
-    }
-
-    beforeEach(async () => {
-      await loadFixture(deployFixture);
     });
 
     it("GIVEN an account with snapshot role WHEN takeSnapshot and Freeze THEN frozen balance is captured per snapshot", async () => {
