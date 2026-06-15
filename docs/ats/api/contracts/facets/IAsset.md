@@ -2488,9 +2488,9 @@ Returns the stored coupon rate type.
 
 #### Returns
 
-| Name | Type                        | Description                                                |
-| ---- | --------------------------- | ---------------------------------------------------------- |
-| \_0  | enum IInterestRate.RateType | The `RateType` value; defaults to `NONE` (0) if never set. |
+| Name | Type                        | Description           |
+| ---- | --------------------------- | --------------------- |
+| \_0  | enum IInterestRate.RateType | The `RateType` value. |
 
 ### getCouponsFor
 
@@ -5614,7 +5614,7 @@ function initializeInterestRateType(enum IInterestRate.RateType rateType) extern
 
 Initializes the coupon rate type during asset deployment.
 
-_Intended to be called by the factory immediately after proxy creation. No role required — the factory is trusted at deploy time. Reverts with `InvalidRateType` if `rateType` is `NONE`._
+_Intended to be called by the factory immediately after proxy creation. No role required — the factory is trusted at deploy time._
 
 #### Parameters
 
@@ -7811,7 +7811,7 @@ function setCouponRateType(enum IInterestRate.RateType rateType) external nonpay
 
 Sets the coupon rate type discriminator for this asset.
 
-_Requires `ROLE_INTEREST_RATE_MANAGER`. Reverts with `InvalidRateType` if `rateType` is `NONE`._
+_Requires `ROLE_INTEREST_RATE_MANAGER`._
 
 #### Parameters
 
@@ -13230,22 +13230,6 @@ Thrown when an account does not hold or is not associated with the specified par
 | --------- | ------- | --------------------------------------------- |
 | account   | address | Address that was checked.                     |
 | partition | bytes32 | Partition that was not found for the account. |
-
-### InvalidRateType
-
-```solidity
-error InvalidRateType(enum IInterestRate.RateType rateType)
-```
-
-Reverts when `NONE` is passed as a rate type.
-
-_`NONE` is reserved as the uninitialized default; it must never be set explicitly._
-
-#### Parameters
-
-| Name     | Type                        | Description                                   |
-| -------- | --------------------------- | --------------------------------------------- |
-| rateType | enum IInterestRate.RateType | The invalid rate type supplied by the caller. |
 
 ### InvalidSender
 

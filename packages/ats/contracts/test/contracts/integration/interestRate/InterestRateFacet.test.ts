@@ -10,10 +10,9 @@ import { deployBondFixedRateTokenFixture, deployBondTokenFixture, executeRbac } 
 
 // Must match ICouponTypes.RateType order
 enum RateType {
-  NONE = 0,
-  STANDARD = 1,
-  FIXED = 2,
-  KPI_LINKED = 3,
+  STANDARD = 0,
+  FIXED = 1,
+  KPI_LINKED = 2,
 }
 
 describe("InterestRateFacet Tests", () => {
@@ -70,13 +69,6 @@ describe("InterestRateFacet Tests", () => {
         .withArgs(admin.address, RateType.STANDARD);
 
       expect(await asset.getCouponRateType()).to.equal(RateType.STANDARD);
-    });
-
-    it("GIVEN admin WHEN setCouponRateType(NONE) THEN reverts with InvalidRateType", async () => {
-      await expect(asset.connect(admin).setCouponRateType(RateType.NONE)).to.be.revertedWithCustomError(
-        asset,
-        "InvalidRateType",
-      );
     });
 
     it("GIVEN non-admin WHEN setCouponRateType THEN reverts with AccountHasNoRole", async () => {
