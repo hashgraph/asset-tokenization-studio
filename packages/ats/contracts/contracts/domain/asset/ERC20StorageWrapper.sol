@@ -85,6 +85,19 @@ library ERC20StorageWrapper {
         erc20Storage().symbol = _symbol;
     }
 
+    /**
+     * @notice Overwrites the decimal count in the ERC-20 storage slot.
+     * @dev This is a minimal raw-struct setter intended for test scaffolding
+     *      (`MockDiamondCut.forceDecimals`). It writes only the `decimals`
+     *      field via the private `erc20Storage()` accessor and does NOT
+     *      trigger `ScheduledTasksOps` or overwrite name/symbol — making it
+     *      safe to use alongside snapshot scheduled-tasks tests.
+     * @param d The new decimal count to store.
+     */
+    function setDecimals(uint8 d) internal {
+        erc20Storage().decimals = d;
+    }
+
     /// @notice Updates ERC-20 balances and emits the EIP-20 Transfer event.
     /// @dev Single source of truth for all balance-changing operations.
     ///      `from == address(0)` skips the debit (mint path).

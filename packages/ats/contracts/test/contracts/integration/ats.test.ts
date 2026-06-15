@@ -53,6 +53,12 @@ import { snapshotsByPartitionTests } from "./snapshotsByPartition/snapshotsByPar
 import { votingSecurityHoldersTests } from "./votingSecurityHolders/votingSecurityHolders.test";
 import { transferAndLockByPartitionTests } from "./transferAndLockByPartition/transferAndLockByPartition.test";
 
+// ── W2: New suites ─────────────────────────────────────────────────────
+import { allowanceTests } from "./allowance/allowance.test";
+import { controllerTests } from "./controller/controller.test";
+import { holdTests } from "./hold/hold.test";
+import { snapshotsTests } from "./snapshots/snapshots.test";
+
 describe("ATS — IAsset Suites", () => {
   let ctx: Awaited<ReturnType<typeof deployAssetMockCtx>>;
 
@@ -97,27 +103,9 @@ describe("ATS — IAsset Suites", () => {
   votingSecurityHoldersTests(() => ctx);
   transferAndLockByPartitionTests(() => ctx);
 
-  describe("Freeze", () => {
-    freezeTests();
-  });
-
-  describe("Deactivate", () => {
-    deactivateTests();
-  });
-
-  describe("Operator", () => {
-    operatorTests();
-  });
-
-  describe("EIP712", () => {
-    eip712Tests();
-  });
-
-  describe("Nonces", () => {
-    noncesTests();
-  });
-
-  describe("Control List", () => {
-    controlListTests();
-  });
+  // ── W2: New suites ─────────────────────────────────────────────────
+  allowanceTests(() => ctx);
+  controllerTests(() => ctx);
+  holdTests(() => ctx);
+  snapshotsTests(() => ctx);
 });
