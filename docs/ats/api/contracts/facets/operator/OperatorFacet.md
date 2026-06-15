@@ -128,21 +128,6 @@ Emitted when an operator is authorised to manage all partitions of a token holde
 | operator `indexed`    | address | Newly authorised operator address.          |
 | tokenHolder `indexed` | address | Token holder who granted the authorisation. |
 
-### OperatorAuthorized
-
-```solidity
-event OperatorAuthorized(address indexed operator, address indexed tokenHolder)
-```
-
-Emitted when an operator is authorized by an account for all partitions of the account
-
-#### Parameters
-
-| Name                  | Type    | Description                               |
-| --------------------- | ------- | ----------------------------------------- |
-| operator `indexed`    | address | The account that changed their delegation |
-| tokenHolder `indexed` | address | The account who authorized the operator   |
-
 ### OperatorInitialized
 
 ```solidity
@@ -152,21 +137,6 @@ event OperatorInitialized()
 Emitted once when the operator capability is initialised on a token.
 
 _Fires exclusively from `initializeOperator`._
-
-### OperatorRevoked
-
-```solidity
-event OperatorRevoked(address indexed operator, address indexed tokenHolder)
-```
-
-Emitted when an operator is revoked by an account for all partitions of the account
-
-#### Parameters
-
-| Name                  | Type    | Description                               |
-| --------------------- | ------- | ----------------------------------------- |
-| operator `indexed`    | address | The account that changed their delegation |
-| tokenHolder `indexed` | address | The account who revoked the operator      |
 
 ### RevokedOperator
 

@@ -62,7 +62,7 @@ function setIdentityRegistry(address _identityRegistry) external nonpayable
 
 Sets the identity registry contract address.
 
-_Restricted to `ROLE_TREX_OWNER` and only callable when the token is not paused. Emits an `IdentityRegistryAdded` event from the underlying storage wrapper._
+_Emits `IdentityRegistryAdded` so off-chain indexers can track which registry vetted holders at any historical block._
 
 #### Parameters
 

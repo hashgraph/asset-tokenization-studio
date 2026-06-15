@@ -10991,21 +10991,6 @@ Emitted by `setOperationalStatus` when every facet of the configuration version 
 | configurationId | bytes32 | Resolver-proxy configuration that became operational. |
 | version         | uint256 | Configuration version that became operational.        |
 
-### OperatorAuthorized
-
-```solidity
-event OperatorAuthorized(address indexed operator, address indexed tokenHolder)
-```
-
-Emitted when an operator is authorized by an account for all partitions of the account
-
-#### Parameters
-
-| Name                  | Type    | Description                               |
-| --------------------- | ------- | ----------------------------------------- |
-| operator `indexed`    | address | The account that changed their delegation |
-| tokenHolder `indexed` | address | The account who authorized the operator   |
-
 ### OperatorByPartitionInitialized
 
 ```solidity
@@ -11074,21 +11059,6 @@ event OperatorInitialized()
 Emitted once when the operator capability is initialised on a token.
 
 _Fires exclusively from `initializeOperator`._
-
-### OperatorRevoked
-
-```solidity
-event OperatorRevoked(address indexed operator, address indexed tokenHolder)
-```
-
-Emitted when an operator is revoked by an account for all partitions of the account
-
-#### Parameters
-
-| Name                  | Type    | Description                               |
-| --------------------- | ------- | ----------------------------------------- |
-| operator `indexed`    | address | The account that changed their delegation |
-| tokenHolder `indexed` | address | The account who revoked the operator      |
 
 ### PartitionTransferredAndLocked
 
