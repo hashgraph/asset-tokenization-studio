@@ -58,6 +58,9 @@ import { capByPartitionTests } from "./capByPartition/capByPartition.test";
 import { batchMintTests } from "./batchMint/batchMint.test";
 import { batchBurnTests } from "./batchBurn/batchBurn.test";
 import { batchControllerTests } from "./batchController/batchController.test";
+import { mintTests } from "./mint/mint.test";
+import { mintByPartitionTests } from "./mintByPartition/mintByPartition.test";
+import { burnByPartitionTests } from "./burnByPartition/burnByPartition.test";
 import { allowanceTests } from "./allowance/allowance.test";
 import { controllerTests } from "./controller/controller.test";
 import { holdTests } from "./hold/hold.test";
@@ -149,4 +152,9 @@ describe("ATS — IAsset Suites", () => {
   batchMintTests(() => ctx);
   batchBurnTests(() => ctx);
   batchControllerTests(() => ctx);
+
+  // ── W3: Mint / burn suites ────────────────────────────────────────────
+  mintTests(() => ctx);
+  mintByPartitionTests(() => ctx);
+  burnByPartitionTests(() => ctx);
 });
