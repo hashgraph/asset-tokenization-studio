@@ -6,7 +6,6 @@ import { ADDRESS_ZERO, ATS_ROLES, RESOLVER_KEY_CONTROL_LIST } from "@scripts";
 import {  grantRoleAndPauseToken, executeRbac } from "@test";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import type { AssetMockCtx } from "@test";
-import type { AssetMockCtx } from "@test";
 
 export function controlListTests(getCtx: () => AssetMockCtx): void {
   describe("Control List Tests", () => {
@@ -160,14 +159,14 @@ export function controlListTests(getCtx: () => AssetMockCtx): void {
     describe("Deactivated", () => {
       beforeEach(async () => {
         await asset.forceDeactivate();
-      });it("GIVEN a deactivated asset WHEN addToControlList THEN transaction fails with Deactivated", async () => {
+      });
 
         await expect(
           asset.connect(signer_A).addToControlList(ADDRESS_ZERO
         )
         ).to.be.revertedWithCustomError(asset,
           "Deactivated",
-      );
+        );
       });
 
       it("GIVEN a deactivated asset WHEN removeFromControlList THEN transaction fails with Deactivated", async () => {
