@@ -72,6 +72,8 @@ import { batchControllerTests } from "./batchController/batchController.test";
 import { mintTests } from "./mint/mint.test";
 import { mintByPartitionTests } from "./mintByPartition/mintByPartition.test";
 import { burnByPartitionTests } from "./burnByPartition/burnByPartition.test";
+import { lockByPartitionTests } from "./lockByPartition/lockByPartition.test";
+import { batchFreezeTests } from "./batchFreeze/batchFreeze.test";
 import { allowanceTests } from "./allowance/allowance.test";
 import { controllerTests } from "./controller/controller.test";
 import { holdTests } from "./hold/hold.test";
