@@ -53,7 +53,10 @@ import { snapshotsByPartitionTests } from "./snapshotsByPartition/snapshotsByPar
 import { votingSecurityHoldersTests } from "./votingSecurityHolders/votingSecurityHolders.test";
 import { transferAndLockByPartitionTests } from "./transferAndLockByPartition/transferAndLockByPartition.test";
 
-// ── W2: New suites ─────────────────────────────────────────────────────
+// ── W2: layer_1 suites ────────────────────────────────────────────────
+import { lockTests } from "./layer_1/lock/lock.test";
+import { partitionsTests } from "./layer_1/partitions/partitions.test";
+import { transferAndLockTests } from "./layer_1/transferAndLock/transferAndLock.test";
 import { allowanceTests } from "./allowance/allowance.test";
 import { controllerTests } from "./controller/controller.test";
 import { holdTests } from "./hold/hold.test";
@@ -112,4 +115,9 @@ describe("ATS — IAsset Suites", () => {
   holdTests(() => ctx);
   snapshotsTests(() => ctx);
   securityHoldersAtSnapshotTests(() => ctx);
+
+  // ── W2: layer_1 suites ─────────────────────────────────────────────
+  lockTests(() => ctx);
+  partitionsTests(() => ctx);
+  transferAndLockTests(() => ctx);
 });
