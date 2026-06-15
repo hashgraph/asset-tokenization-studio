@@ -169,7 +169,7 @@ library InterestRateStorageWrapper {
 
     /**
      * @notice Returns the stored coupon rate type.
-     * @return rateType_ The `IInterestRate.RateType` value; defaults to `NONE` (0) if never set.
+     * @return rateType_ The `IInterestRate.RateType` value.
      */
     function getCouponRateType() internal view returns (IInterestRate.RateType rateType_) {
         return interestRateTypeStorage().rateType;
@@ -312,17 +312,6 @@ library InterestRateStorageWrapper {
      */
     function getBaseRate() internal view returns (uint256 baseRate_) {
         baseRate_ = kpiLinkedRateStorage().baseRate;
-    }
-
-    /**
-     * @notice Reverts when `NONE` is supplied as the rate type.
-     * @dev `NONE` is the zero-value default reserved for uninitialised assets; it must never
-     *      be set explicitly.
-     * @param _rateType The rate type to validate.
-     * @custom:revert IInterestRate.InvalidRateType If `_rateType` is `NONE`.
-     */
-    function checkValidRateType(IInterestRate.RateType _rateType) internal pure {
-        if (_rateType == IInterestRate.RateType.NONE) revert IInterestRate.InvalidRateType(_rateType);
     }
 
     /**

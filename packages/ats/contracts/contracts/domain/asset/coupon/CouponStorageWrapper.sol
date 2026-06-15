@@ -64,7 +64,7 @@ library CouponStorageWrapper {
      * @return couponID_ One-indexed identifier assigned to the new coupon.
      * @return resolved_ The persisted coupon after variant-specific rate stamping (input
      *         struct unchanged for the STANDARD / KPI_LINKED variants; `rate`,
-     *         `rateDecimals`, `rateStatus` overwritten for FIXED and forced to zero for NONE).
+     *         `rateDecimals`, `rateStatus` overwritten for FIXED).
      */
     function setCoupon(
         ICouponTypes.Coupon memory newCoupon
@@ -225,7 +225,7 @@ library CouponStorageWrapper {
      * @dev Returns the coupon's associated corporate-action identifier and
      *      cancellation flag. For STANDARD and KPI_LINKED coupons, or when the
      *      fixing date has not yet occurred, returns the coupon unchanged.
-     *      For FIXED and NONE coupons, or when rate resolution applies,
+     *      For FIXED, or when rate resolution applies,
      *      delegates to `CouponRateDispatch.resolveRate` to compute the
      *      effective rate and optionally update it in-memory.
      * @param couponID One-indexed coupon identifier.

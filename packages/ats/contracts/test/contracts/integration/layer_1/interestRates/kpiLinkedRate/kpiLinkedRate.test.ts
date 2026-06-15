@@ -432,7 +432,7 @@ describe("Kpi Linked Rate Tests", () => {
     });
 
     it("GIVEN non-operational asset WHEN setCouponRateType THEN reverts with AssetNotOperational", async () => {
-      await expect(asset.setCouponRateType(3)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+      await expect(asset.setCouponRateType(2)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
 
     it("GIVEN non-operational asset WHEN setKpiLinkedRateImpactData THEN reverts with AssetNotOperational", async () => {

@@ -123,7 +123,7 @@ describe("Fixed Rate Tests", () => {
     });
 
     it("GIVEN non-operational asset WHEN setCouponRateType THEN reverts with AssetNotOperational", async () => {
-      await expect(asset.setCouponRateType(2)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+      await expect(asset.setCouponRateType(1)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
 
     it("GIVEN non-operational asset WHEN setRate THEN reverts with AssetNotOperational", async () => {
