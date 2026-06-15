@@ -38,6 +38,10 @@ import { freezeAtSnapshotByPartitionTests } from "./layer_1/freezeAtSnapshotByPa
 import { securityHoldersTests } from "./layer_2/SecurityHolders.test";
 import { votingTests } from "./voting/voting.test";
 
+// ── W1: Balance adjustments and pause ────────────────────────────────
+import { adjustBalancesFacetTests } from "./adjustBalances/adjustBalancesFacet.test";
+import { pauseTests } from "./pause/pause.test";
+
 // ── W2: Multi-partition suites ──────────────────────────────────────────
 import { holdAtSnapshotTests } from "./holdAtSnapshot/holdAtSnapshot.test";
 import { lockAtSnapshotTests } from "./lockAtSnapshot/lockAtSnapshot.test";
@@ -58,6 +62,7 @@ describe("ATS — IAsset Suites", () => {
 
   // ── W1: Generic single-partition suites ──────────────────────────────
   accessControlTests(() => ctx);
+  adjustBalancesFacetTests(() => ctx);
   freezeTests(() => ctx);
   deactivateTests(() => ctx);
   operatorTests(() => ctx);
@@ -69,6 +74,7 @@ describe("ATS — IAsset Suites", () => {
   customDataTests(() => ctx);
   ssiTests(() => ctx);
   operatorByPartitionTests(() => ctx);
+  pauseTests(() => ctx);
 
   // ── W1: Layer 1 suites ────────────────────────────────────────────
   corporateActionsTests(() => ctx);
