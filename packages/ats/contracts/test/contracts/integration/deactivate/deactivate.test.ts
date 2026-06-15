@@ -64,14 +64,12 @@ export function deactivateTests(getCtx: () => AssetMockCtx): void {
       beforeEach(async () => {
         await asset.grantRole(ATS_ROLES.ROLE_DEACTIVATE, deployer.address);
         await asset.connect(deployer).deactivate();
-      });it("GIVEN a deactivated asset WHEN deactivate THEN transaction fails with Deactivated", async () => {
-
-        await expect(asset.connect(deployer).deactivate()).to.be.revertedWithCustomError(
-          asset,
-          "Deactivated");
-        });
       });
 
+      it("GIVEN a deactivated asset WHEN deactivate THEN transaction fails with Deactivated", async () => {
+        await expect(asset.connect(deployer).deactivate()).to.be.revertedWithCustomError(asset, "Deactivated");
+      });
+    });
 
     describe("initializeDeactivate", () => {
       it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeDeactivate is called THEN AccountHasNoRole", async () => {
