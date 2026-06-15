@@ -15,16 +15,6 @@ interface IOperator {
      */
     event OperatorInitialized();
 
-    /// @notice Emitted when an operator is authorized by an account for all partitions of the account
-    /// @param operator The account that changed their delegation
-    /// @param tokenHolder The account who authorized the operator
-    event OperatorAuthorized(address indexed operator, address indexed tokenHolder);
-
-    /// @notice Emitted when an operator is revoked by an account for all partitions of the account
-    /// @param operator The account that changed their delegation
-    /// @param tokenHolder The account who revoked the operator
-    event OperatorRevoked(address indexed operator, address indexed tokenHolder);
-
     /**
      * @notice Initialises the operator capability on the token.
      * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.

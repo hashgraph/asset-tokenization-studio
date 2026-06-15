@@ -39,7 +39,6 @@ abstract contract Operator is IOperator, Modifiers {
         onlyCompliant(EvmAccessors.getMsgSender(), _operator, false)
     {
         ERC1410StorageWrapper.authorizeOperator(_operator);
-        emit OperatorAuthorized(_operator, EvmAccessors.getMsgSender());
     }
 
     /// @inheritdoc IOperator
@@ -55,7 +54,6 @@ abstract contract Operator is IOperator, Modifiers {
         onlyCompliant(EvmAccessors.getMsgSender(), _operator, false)
     {
         ERC1410StorageWrapper.revokeOperator(_operator);
-        emit OperatorRevoked(_operator, EvmAccessors.getMsgSender());
     }
 
     /// @inheritdoc IOperator

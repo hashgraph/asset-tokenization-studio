@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ROLE_TREX_OWNER, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { IComplianceFacet, RESOLVER_KEY_COMPLIANCE } from "./IComplianceFacet.sol";
+import { IERC3643Types } from "../commonTypes/IERC3643Types.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { PauseStorageWrapper } from "../../domain/core/PauseStorageWrapper.sol";
 import { IPause } from "../pause/IPause.sol";
@@ -35,11 +36,14 @@ abstract contract Compliance is IComplianceFacet, Modifiers {
     }
 
     /// @inheritdoc IComplianceFacet
-    /// @dev Requires an operational, activated, unpaused token and `TREX_OWNER_ROLE`.
+    /// @dev Requires an operational, activated, unpaused token and `TREX_OWNER_ROLE`. Emits
+    ///      `ComplianceAdded` so off-chain observers can track which compliance contract was
+    ///      authoritative at any point in time.
     function setCompliance(
         address _compliance
     ) external override onlyOperational onlyActivated onlyUnpaused onlyRole(ROLE_TREX_OWNER) {
         ERC3643StorageWrapper.setCompliance(_compliance);
+        emit IERC3643Types.ComplianceAdded(_compliance);
     }
 
     /// @inheritdoc IComplianceFacet
