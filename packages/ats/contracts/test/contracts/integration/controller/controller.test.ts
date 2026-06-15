@@ -51,26 +51,22 @@ export function controllerTests(getCtx: () => AssetMockCtx): void {
         await asset.forceControllable(true);
       });
 
-      describe("initializeController", () => {
-        it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with FacetAlreadyRegistered", async () => {
-          await expect(asset.initializeController(false)).to.be.revertedWithCustomError(
-            asset,
-            "FacetAlreadyRegistered",
-          );
+      describe("initializeController", () => {it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with FacetAlreadyRegistered", async () => {
+        await expect(asset.initializeController(false)).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered",
+      );
         });
 
-        it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeController is called THEN it reverts with AccountHasNoRole", async () => {
-          await expect(asset.connect(unknownSigner).initializeController(false)).to.be.revertedWithCustomError(
-            asset,
-            "AccountHasNoRole",
-          );
-        });
-
-        it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeController is called THEN ControllerInitialized event is emitted", async () => {
-          await asset.forceFacetNotRegistered(RESOLVER_KEY_CONTROLLER);
-          await expect(asset.initializeController(false)).to.emit(asset, "ControllerInitialized").withArgs(false);
-        });
+      it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeController is called THEN it reverts with AccountHasNoRole", async () => {
+        await expect(asset.connect(unknownSigner).initializeController(false)).to.be.revertedWithCustomError(
+          asset,
+          "AccountHasNoRole",
+        );
       });
+
+      it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeController is called THEN ControllerInitialized event is emitted", async () => {
+        await asset.forceFacetNotRegistered(RESOLVER_KEY_CONTROLLER);
+        await expect(asset.initializeController(false)).to.emit(asset, "ControllerInitialized").withArgs(false);
+      });});
 
       describe("Paused", () => {
         beforeEach(async () => {
