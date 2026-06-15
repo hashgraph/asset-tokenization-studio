@@ -159,14 +159,14 @@ export function controlListTests(getCtx: () => AssetMockCtx): void {
     describe("Deactivated", () => {
       beforeEach(async () => {
         await asset.forceDeactivate();
-      });it("GIVEN a deactivated asset WHEN addToControlList THEN transaction fails with Deactivated", async () => {
+      });
 
         await expect(
           asset.connect(signer_A).addToControlList(ADDRESS_ZERO
         )
         ).to.be.revertedWithCustomError(asset,
           "Deactivated",
-      );
+        );
       });
 
       it("GIVEN a deactivated asset WHEN removeFromControlList THEN transaction fails with Deactivated", async () => {
