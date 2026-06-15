@@ -10,6 +10,8 @@ import { DEFAULT_BOND_FIXED_RATE_PARAMS, deployBondFixedRateTokenFixture } from 
 import { executeRbac } from "@test";
 
 describe("Fixed Rate Tests", () => {
+  const FIXED_INTEREST_RATE_TYPE = 1;
+
   let diamond: ResolverProxy;
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
@@ -123,7 +125,10 @@ describe("Fixed Rate Tests", () => {
     });
 
     it("GIVEN non-operational asset WHEN setCouponRateType THEN reverts with AssetNotOperational", async () => {
-      await expect(asset.setCouponRateType(1)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+      await expect(asset.setCouponRateType(FIXED_INTEREST_RATE_TYPE)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
     });
 
     it("GIVEN non-operational asset WHEN setRate THEN reverts with AssetNotOperational", async () => {

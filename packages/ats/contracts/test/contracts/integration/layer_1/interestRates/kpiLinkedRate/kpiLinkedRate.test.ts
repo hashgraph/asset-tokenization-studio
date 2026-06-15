@@ -9,6 +9,8 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { DEFAULT_BOND_KPI_LINKED_RATE_PARAMS, deployBondKpiLinkedRateTokenFixture, executeRbac } from "@test";
 
 describe("Kpi Linked Rate Tests", () => {
+  const KPI_INTEREST_RATE_TYPE = 2;
+
   let diamond: ResolverProxy;
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
@@ -432,7 +434,10 @@ describe("Kpi Linked Rate Tests", () => {
     });
 
     it("GIVEN non-operational asset WHEN setCouponRateType THEN reverts with AssetNotOperational", async () => {
-      await expect(asset.setCouponRateType(2)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+      await expect(asset.setCouponRateType(KPI_INTEREST_RATE_TYPE)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
     });
 
     it("GIVEN non-operational asset WHEN setKpiLinkedRateImpactData THEN reverts with AssetNotOperational", async () => {
