@@ -8,6 +8,12 @@ sidebar_label: Documenting Contracts
 
 This guide explains how to properly document Solidity smart contracts using NatSpec (Natural Specification) format and generate API documentation automatically.
 
+:::info Normative reference
+The normative NatSpec rules live in `packages/ats/contracts/conventions/code-quality.md`
+(source of truth, rule IDs `ATS-XXX-NNN`); agent tooling authors NatSpec via the
+`/solidity-natspec` skill. This guide is the human-oriented walkthrough.
+:::
+
 ## Overview
 
 The ATS contracts use **NatSpec** (Ethereum Natural Language Specification Format) for inline documentation. This documentation is automatically extracted and published to the API Documentation section.
