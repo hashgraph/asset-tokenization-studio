@@ -57,6 +57,7 @@ import { transferAndLockByPartitionTests } from "./transferAndLockByPartition/tr
 import { lockTests } from "./layer_1/lock/lock.test";
 import { partitionsTests } from "./layer_1/partitions/partitions.test";
 import { transferAndLockTests } from "./layer_1/transferAndLock/transferAndLock.test";
+import { erc20PermitTests } from "./layer_1/ERC1400/ERC20Permit/erc20Permit.test";
 import { allowanceTests } from "./allowance/allowance.test";
 import { controllerTests } from "./controller/controller.test";
 import { holdTests } from "./hold/hold.test";
@@ -120,4 +121,5 @@ describe("ATS — IAsset Suites", () => {
   lockTests(() => ctx);
   partitionsTests(() => ctx);
   transferAndLockTests(() => ctx);
+  erc20PermitTests(() => ctx);
 });
