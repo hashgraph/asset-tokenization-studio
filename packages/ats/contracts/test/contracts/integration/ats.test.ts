@@ -59,6 +59,9 @@ import { partitionsTests } from "./layer_1/partitions/partitions.test";
 import { transferAndLockTests } from "./layer_1/transferAndLock/transferAndLock.test";
 import { erc20PermitTests } from "./layer_1/ERC1400/ERC20Permit/erc20Permit.test";
 import { externalControlListTests } from "./externalControlLists/externalControlList.test";
+import { externalKycListTests } from "./externalKycLists/externalKycList.test";
+import { externalPauseTests } from "./externalPauses/externalPause.test";
+import { externalListSizeCapTests } from "./externalPauses/externalListSizeCap.test";
 import { allowanceTests } from "./allowance/allowance.test";
 import { controllerTests } from "./controller/controller.test";
 import { holdTests } from "./hold/hold.test";
@@ -124,4 +127,7 @@ describe("ATS — IAsset Suites", () => {
   transferAndLockTests(() => ctx);
   erc20PermitTests(() => ctx);
   externalControlListTests(() => ctx);
+  externalKycListTests(() => ctx);
+  externalPauseTests(() => ctx);
+  externalListSizeCapTests(() => ctx);
 });
