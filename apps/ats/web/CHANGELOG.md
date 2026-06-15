@@ -58,22 +58,7 @@
   - Replace the inline `reset() + window.location.reload()` in the Header disconnect button with a proper call to `SDKService.disconnectWallet()` (via `useSDKDisconnectFromMetamask`) so the WalletConnect session is cleanly terminated and navigation back to the landing page is handled by the router, without a full page reload
   - Remove leftover debug `console.log` from the `walletDisconnect` event handler
 
-- Updated dependencies [3703219]
-- Updated dependencies [ffeb27e]
-- Updated dependencies [8b4258b]
-- Updated dependencies [24ee150]
-- Updated dependencies [6ea0fb0]
-- Updated dependencies [33ae16a]
-- Updated dependencies [545cab0]
-- Updated dependencies [63e3f5c]
-- Updated dependencies [f2979e5]
-- Updated dependencies [308289b]
-- Updated dependencies [f2979e5]
-- Updated dependencies [206b234]
-- Updated dependencies [f76e0de]
-- Updated dependencies [96f0781]
-- Updated dependencies [e407034]
-- Updated dependencies [841a069]
+- Updated dependencies:
   - @hashgraph/asset-tokenization-sdk@8.0.0
 
 ## 7.0.0
@@ -87,11 +72,7 @@
   - Replace the inline `reset() + window.location.reload()` in the Header disconnect button with a proper call to `SDKService.disconnectWallet()` (via `useSDKDisconnectFromMetamask`) so the WalletConnect session is cleanly terminated and navigation back to the landing page is handled by the router, without a full page reload
   - Remove leftover debug `console.log` from the `walletDisconnect` event handler
 
-- Updated dependencies [4431f2e]
-- Updated dependencies [add9335]
-- Updated dependencies [2b68e6c]
-- Updated dependencies [ca1807d]
-- Updated dependencies [a166566]
+- Updated dependencies:
   - @hashgraph/asset-tokenization-sdk@7.0.0
 
 ## 6.0.0
@@ -121,12 +102,7 @@
   - Grant \_KPI_MANAGER_ROLE to bond creator in createBond mock to enable addKpiData tests
 
 - 3048bbf: Enable docusarus documentation deployments with Netlify and fix ats web deployment build
-- Updated dependencies [77aa333]
-- Updated dependencies [2e5fdcf]
-- Updated dependencies [5e58601]
-- Updated dependencies [77aa333]
-- Updated dependencies [77aa333]
-- Updated dependencies [3048bbf]
+- Updated dependencies:
   - @hashgraph/asset-tokenization-sdk@6.0.0
 
 ## 5.0.0
@@ -155,9 +131,7 @@
   - Add register() and createBond() mocks to DFNS, Fireblocks, and AWSKMS custodial adapter mocks
   - Grant \_KPI_MANAGER_ROLE to bond creator in createBond mock to enable addKpiData tests
 
-- Updated dependencies [77aa333]
-- Updated dependencies [77aa333]
-- Updated dependencies [77aa333]
+- Updated dependencies:
   - @hashgraph/asset-tokenization-sdk@5.0.0
 
 ## 4.3.0
@@ -175,7 +149,7 @@
 ### Patch Changes
 
 - 9ef7139: Add loading overlay in security's details page and a fill form button in create security page
-- Updated dependencies [5ba3560]
+- Updated dependencies:
   - @hashgraph/asset-tokenization-sdk@4.3.0
 
 ## 4.2.0
@@ -183,8 +157,7 @@
 ### Patch Changes
 
 - 9f22ba7: Fix select all roles in edit roles page
-- Updated dependencies [c5b2a50]
-- Updated dependencies [2a26b41]
+- Updated dependencies:
   - @hashgraph/asset-tokenization-sdk@4.2.0
 
 ## 4.1.1
@@ -198,7 +171,7 @@
 ### Patch Changes
 
 - 8ffc87f: Fixed all linting issues and applied code formatting across the codebase. Updated license headers in all source files to use standardized SPDX format (`// SPDX-License-Identifier: Apache-2.0`). Added automated license header validation script (`check-license.js`) that runs during pre-commit to ensure all `.sol`, `.ts`, and `.tsx` files include the required SPDX license identifier.
-- Updated dependencies [8ffc87f]
+- Updated dependencies:
   - @hashgraph/asset-tokenization-sdk@4.1.0
 
 ## 4.0.1
@@ -219,13 +192,7 @@
 
 ### Patch Changes
 
-- Updated dependencies [3ba32c9]
-- Updated dependencies [902fea1]
-- Updated dependencies [650874b]
-- Updated dependencies [6950d41]
-- Updated dependencies [8f7487a]
-- Updated dependencies [c10a8ee]
-- Updated dependencies [cbcc1db]
+- Updated dependencies:
   - @hashgraph/asset-tokenization-sdk@4.0.0
 
 ## 3.1.0
@@ -245,9 +212,7 @@
 
 ### Patch Changes
 
-- Updated dependencies [e0a3f03]
-- Updated dependencies [e0a3f03]
-- Updated dependencies [e0a3f03]
+- Updated dependencies:
   - @hashgraph/asset-tokenization-sdk@3.0.0
 
 ## 2.0.0
@@ -268,10 +233,7 @@
 
 - c62eb6e: Add decimal precision display to nominal value in bonds and equity views
 
-- Updated dependencies [c62eb6e]
-- Updated dependencies [c62eb6e]
-- Updated dependencies [c62eb6e]
-- Updated dependencies [c62eb6e]
+- Updated dependencies:
   - @hashgraph/asset-tokenization-sdk@2.0.0
 
 ## 1.17.1
@@ -284,40 +246,14 @@
 
 ### Minor Changes
 
-- a36b1c8: Integrate Changesets for version management and implement enterprise-grade release workflow
-
-  #### Changesets Integration
-  - Add Changesets configuration with fixed versioning for ATS packages (contracts, SDK, dapp)
-  - Configure develop-branch strategy as base for version management
-  - Add comprehensive changeset management scripts: create, version, publish, status, snapshot
-  - Implement automated semantic versioning and changelog generation
-  - Add @changesets/cli dependency for modern monorepo version management
-
-  #### Enterprise Release Workflow
-  - Implement new ats.publish.yml workflow focused exclusively on contracts and SDK packages
-  - Add manual trigger with dry-run capability for safe testing before actual releases
-  - Configure parallel execution of contracts and SDK publishing jobs for improved performance
-  - Support automatic triggers on version tags, release branches, and GitHub releases
-  - Add changeset validation workflow to enforce one changeset per PR requirement
-  - Include bypass labels for non-feature changes (no-changeset, docs-only, hotfix, chore)
-
-  #### Repository Configuration
-  - Update .gitignore to properly track .github/ workflows while excluding build artifacts
-  - Remove deprecated all.publish.yml workflow in favor of focused ATS publishing
-  - Update package.json with complete changeset workflow scripts and release commands
-  - Enhance documentation with new version management workflow and enterprise practices
-
-  #### Benefits
-  - **Modern Version Management**: Semantic versioning with automated changelog generation
-  - **Enterprise Compliance**: Manual release control with proper audit trails
-  - **Parallel Publishing**: Improved CI/CD performance with independent job execution
-  - **Developer Experience**: Simplified workflow with comprehensive documentation
-  - **Quality Assurance**: Mandatory changeset validation ensures all changes are documented
-
-  This establishes a production-ready, enterprise-grade release management system that follows modern monorepo practices while maintaining backward compatibility with existing development workflows.
+- a36b1c8: Integrate Changesets for version management and a manual-control release workflow.
+  - Add Changesets with fixed versioning for the ATS packages (contracts, SDK, dapp) on a develop-branch base, plus create/version/publish/status/snapshot scripts for automated semantic versioning and changelog generation.
+  - Add the `ats.publish.yml` workflow (contracts + SDK) with a dry-run manual trigger, parallel publish jobs, and automatic triggers on version tags, release branches and GitHub releases.
+  - Add changeset validation enforcing one changeset per PR, with bypass labels (no-changeset, docs-only, hotfix, chore).
+  - Track `.github/` workflows in `.gitignore`, remove the deprecated `all.publish.yml`, and update `package.json` release scripts.
 
 ### Patch Changes
 
 - Display proceed recipients' data in text format in ats web
-- Updated dependencies
+- Updated dependencies:
   - @hashgraph/asset-tokenization-sdk@1.17.0
