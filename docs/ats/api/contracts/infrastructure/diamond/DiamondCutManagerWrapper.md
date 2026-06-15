@@ -776,7 +776,7 @@ function transferOwnership(bytes32 _configId, address _newOwner) external nonpay
 
 Nominates `_newOwner` as the pending owner of `_configId`.
 
-_Gated by {onlyUnpaused} and {onlyConfigurationOwner}: only the existing owner can nominate a successor, and only while the diamond is unpaused. Stores `_newOwner` as the pending owner without touching the current owner; finalisation happens in {acceptOwnership}. Emits {OwnershipTransfered} with the caller as the outgoing owner._
+_Gated by {onlyUnpaused}, {onlyConfigurationOwner} and {onlyCreateConfigurationRole}: only the existing owner can nominate a successor who was previously granted the ROLE_CREATE_CONFIGURATION, and only while the diamond is unpaused. Stores `_newOwner` as the pending owner without touching the current owner; finalisation happens in {acceptOwnership}. Emits {OwnershipTransfered} with the caller as the outgoing owner._
 
 #### Parameters
 
@@ -846,7 +846,7 @@ Emitted when an in-progress batch configuration is discarded.
 ### DiamondBatchConfigurationCreated
 
 ```solidity
-event DiamondBatchConfigurationCreated(bytes32 configurationId, IDiamondCutManager.FacetConfiguration[] facetConfigurations, bool _isLastBatch, uint256 version, bytes data)
+event DiamondBatchConfigurationCreated(bytes32 configurationId, IDiamondCutManager.FacetConfiguration[] facetConfigurations, bool isLastBatch, uint256 version, bytes data)
 ```
 
 Emitted on every {createBatchConfiguration} call, including the final batch.
@@ -857,7 +857,7 @@ Emitted on every {createBatchConfiguration} call, including the final batch.
 | ------------------- | --------------------------------------- | -------------------------------------------------------- |
 | configurationId     | bytes32                                 | Configuration key being assembled.                       |
 | facetConfigurations | IDiamondCutManager.FacetConfiguration[] | Facets appended in this batch.                           |
-| \_isLastBatch       | bool                                    | True when this call finalises the configuration version. |
+| isLastBatch         | bool                                    | True when this call finalises the configuration version. |
 | version             | uint256                                 | Version number being assembled for this configuration.   |
 | data                | bytes                                   | Additional data passed to the configuration.             |
 
@@ -1204,6 +1204,14 @@ _Callers that want the most recent registered version must read it first via {ge
 | Name            | Type    | Description                           |
 | --------------- | ------- | ------------------------------------- |
 | configurationId | bytes32 | Configuration key that was looked up. |
+
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.
 
 ### ZeroKeyNotValidForBusinessLogic
 

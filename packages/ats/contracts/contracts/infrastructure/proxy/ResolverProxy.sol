@@ -1,19 +1,35 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
-
 /******************************************************************************\
 * Author: Nick Mudge <nick@perfectabstractions.com>, Twitter/Github: @mudgen
 * EIP-2535 ResolverProxys
 *
 * Implementation of a resolverProxy.
 /******************************************************************************/
-
 import { ResolverProxyUnstructured } from "./ResolverProxyUnstructured.sol";
 import { IResolverProxy } from "./IResolverProxy.sol";
 import { IBusinessLogicResolver } from "../diamond/IBusinessLogicResolver.sol";
-import { ResolverProxyStorageWrapper } from "../../domain/core/ResolverProxyStorageWrapper.sol";
 
+/**
+ * @title Resolver Proxy
+ * @notice Delegates calls to facet implementations resolved from a versioned resolver configuration.
+ * @dev Initialises resolver-proxy storage at deployment and dispatches unknown selectors through
+ *      `delegatecall`. Facet resolution depends on the configured business-logic resolver,
+ *      configuration identifier and version. Calls to unregistered selectors revert with
+ *      `FunctionNotFound`.
+ * @author Asset Tokenization Studio Team
+ */
 contract ResolverProxy is ResolverProxyUnstructured {
+    /**
+     * @notice Deploys and initialises the resolver proxy with its resolver configuration and roles.
+     * @dev Validates that the requested configuration is registered before storing proxy
+     *      configuration data and assigning RBAC roles. The constructor is payable to support
+     *      prefunding during deployment.
+     * @param _resolver Business-logic resolver used to resolve selectors to facet addresses.
+     * @param _resolverProxyConfigurationId Configuration identifier served by this proxy.
+     * @param _version Configuration version pinned for selector resolution.
+     * @param _rbac Role assignments granted during initialisation.
+     */
     constructor(
         IBusinessLogicResolver _resolver,
         bytes32 _resolverProxyConfigurationId,
@@ -23,14 +39,22 @@ contract ResolverProxy is ResolverProxyUnstructured {
         _initialize(_resolver, _resolverProxyConfigurationId, _version, _rbac);
     }
 
+    /**
+     * @notice Accepts native token transfers sent directly to the proxy.
+     * @dev Does not mutate proxy configuration or delegate execution.
+     */
     receive() external payable {}
 
-    // Find facet for function that is called and execute the
-    // function if a facet is found and return any value.
+    /**
+     * @notice Delegates calls to facet implementations.
+     * @dev Reverts with `FunctionNotFound` when no facet is registered. Otherwise forwards all
+     *      calldata and remaining gas using `delegatecall`, then bubbles returned data or revert
+     *      data unchanged to the original caller.
+     */
     // solhint-disable-next-line no-complex-fallback
     fallback() external payable {
         // get facet from function selector
-        address facet = _getFacetAddress(ResolverProxyStorageWrapper.resolverProxyStorage(), msg.sig);
+        address facet = _getFacetAddress(msg.sig);
         if (facet == address(0)) {
             revert IResolverProxy.FunctionNotFound(msg.sig);
         }

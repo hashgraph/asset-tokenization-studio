@@ -470,22 +470,22 @@ Emitted whenever tokens move between accounts, are minted, or are burned.
 ### TransferByPartition
 
 ```solidity
-event TransferByPartition(bytes32 indexed _fromPartition, address _operator, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)
+event TransferByPartition(bytes32 indexed fromPartition, address operator, address indexed from, address indexed to, uint256 value, bytes data, bytes operatorData)
 ```
 
 Emitted when tokens are transferred from one partition to another or within the same partition.
 
 #### Parameters
 
-| Name                      | Type    | Description                           |
-| ------------------------- | ------- | ------------------------------------- |
-| \_fromPartition `indexed` | bytes32 | Source partition.                     |
-| \_operator                | address | Address that initiated the transfer.  |
-| \_from `indexed`          | address | Token holder whose balance decreased. |
-| \_to `indexed`            | address | Recipient whose balance increased.    |
-| \_value                   | uint256 | Token quantity transferred.           |
-| \_data                    | bytes   | Caller-supplied data.                 |
-| \_operatorData            | bytes   | Operator-supplied data.               |
+| Name                    | Type    | Description                           |
+| ----------------------- | ------- | ------------------------------------- |
+| fromPartition `indexed` | bytes32 | Source partition.                     |
+| operator                | address | Address that initiated the transfer.  |
+| from `indexed`          | address | Token holder whose balance decreased. |
+| to `indexed`            | address | Recipient whose balance increased.    |
+| value                   | uint256 | Token quantity transferred.           |
+| data                    | bytes   | Caller-supplied data.                 |
+| operatorData            | bytes   | Operator-supplied data.               |
 
 ## Errors
 
@@ -758,6 +758,14 @@ _Replaces assertions for defensive handling of logically impossible states._
 | Name      | Type   | Description                                        |
 | --------- | ------ | -------------------------------------------------- |
 | \_errorId | bytes4 | Identifier of the unexpected validation condition. |
+
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.
 
 ### WrongDates
 

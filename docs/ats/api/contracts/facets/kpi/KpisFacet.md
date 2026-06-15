@@ -18,7 +18,7 @@ function addKpiData(uint256 _date, uint256 _value, address _project) external no
 
 Records a KPI data point for `_project` at `_date`.
 
-_Persists a KPI checkpoint for `_project`; reverts unless `_date` is valid._
+_Persists a KPI checkpoint for `_project`; reverts unless `_date` is valid. Emits {KpiDataAdded}._
 
 #### Parameters
 
@@ -305,3 +305,11 @@ _Replaces assertions for defensive handling of logically impossible states._
 | Name      | Type   | Description                                        |
 | --------- | ------ | -------------------------------------------------- |
 | \_errorId | bytes4 | Identifier of the unexpected validation condition. |
+
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.

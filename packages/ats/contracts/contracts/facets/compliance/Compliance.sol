@@ -11,6 +11,7 @@ import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
 import { Eip1066 } from "../../constants/eip1066.sol";
 import { ICompliance } from "./externalInterfaces/ICompliance.sol";
+import { IERC3643Types } from "../commonTypes/IERC3643Types.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
@@ -32,6 +33,7 @@ abstract contract Compliance is IComplianceFacet, Modifiers {
     ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_COMPLIANCE) {
         ERC3643StorageWrapper.setCompliance(_compliance);
         InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_COMPLIANCE);
+        emit IERC3643Types.ComplianceAdded(_compliance);
         emit ComplianceInitialized(_compliance);
     }
 

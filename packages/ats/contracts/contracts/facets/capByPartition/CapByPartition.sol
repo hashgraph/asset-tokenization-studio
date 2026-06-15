@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ICapByPartition, RESOLVER_KEY_CAP_BY_PARTITION } from "./ICapByPartition.sol";
+import { ICap } from "../cap/ICap.sol";
 import { ROLE_CAP, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { CapStorageWrapper } from "../../domain/core/CapStorageWrapper.sol";
@@ -32,6 +33,7 @@ abstract contract CapByPartition is ICapByPartition, Modifiers {
     }
 
     /// @inheritdoc ICapByPartition
+    /// @dev Emits {ICap.MaxSupplyByPartitionSet}.
     function setMaxSupplyByPartition(
         bytes32 _partition,
         uint256 _maxSupply
@@ -45,7 +47,12 @@ abstract contract CapByPartition is ICapByPartition, Modifiers {
         onlyValidNewMaxSupplyByPartition(_partition, _maxSupply, EvmAccessors.getBlockTimestamp())
         returns (bool success_)
     {
-        CapStorageWrapper.setMaxSupplyByPartition(_partition, _maxSupply, EvmAccessors.getBlockTimestamp());
+        emit ICap.MaxSupplyByPartitionSet(
+            EvmAccessors.getMsgSender(),
+            _partition,
+            _maxSupply,
+            CapStorageWrapper.setMaxSupplyByPartition(_partition, _maxSupply, EvmAccessors.getBlockTimestamp())
+        );
         success_ = true;
     }
 

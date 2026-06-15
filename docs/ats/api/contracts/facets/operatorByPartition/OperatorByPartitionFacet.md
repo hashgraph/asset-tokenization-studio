@@ -18,7 +18,7 @@ function authorizeOperatorByPartition(bytes32 _partition, address _operator) ext
 
 Authorises an operator to manage a specific partition of `msg.sender`&#39;s tokens.
 
-_The token must not be paused. Both `msg.sender` and `_operator` must pass compliance checks. Reverts when the partition is incompatible with the token&#39;s partition mode (single-partition tokens only accept the default partition). Emits {AuthorizedOperatorByPartition} via `ERC1410StorageWrapper.authorizeOperatorByPartition`._
+_Emits {AuthorizedOperatorByPartition}._
 
 #### Parameters
 
@@ -149,7 +149,7 @@ function revokeOperatorByPartition(bytes32 _partition, address _operator) extern
 
 Revokes a previously authorised operator from a specific partition of `msg.sender`&#39;s tokens.
 
-_Emits {RevokedOperatorByPartition} via ERC1410StorageWrapper.revokeOperatorByPartition._
+_Emits {RevokedOperatorByPartition}._
 
 #### Parameters
 
@@ -272,22 +272,22 @@ Emitted when an operator&#39;s authorisation for a specific partition of a token
 ### TransferByPartition
 
 ```solidity
-event TransferByPartition(bytes32 indexed _fromPartition, address _operator, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)
+event TransferByPartition(bytes32 indexed fromPartition, address operator, address indexed from, address indexed to, uint256 value, bytes data, bytes operatorData)
 ```
 
 Emitted when tokens are transferred from one partition to another or within the same partition.
 
 #### Parameters
 
-| Name                      | Type    | Description                           |
-| ------------------------- | ------- | ------------------------------------- |
-| \_fromPartition `indexed` | bytes32 | Source partition.                     |
-| \_operator                | address | Address that initiated the transfer.  |
-| \_from `indexed`          | address | Token holder whose balance decreased. |
-| \_to `indexed`            | address | Recipient whose balance increased.    |
-| \_value                   | uint256 | Token quantity transferred.           |
-| \_data                    | bytes   | Caller-supplied data.                 |
-| \_operatorData            | bytes   | Operator-supplied data.               |
+| Name                    | Type    | Description                           |
+| ----------------------- | ------- | ------------------------------------- |
+| fromPartition `indexed` | bytes32 | Source partition.                     |
+| operator                | address | Address that initiated the transfer.  |
+| from `indexed`          | address | Token holder whose balance decreased. |
+| to `indexed`            | address | Recipient whose balance increased.    |
+| value                   | uint256 | Token quantity transferred.           |
+| data                    | bytes   | Caller-supplied data.                 |
+| operatorData            | bytes   | Operator-supplied data.               |
 
 ## Errors
 
@@ -433,6 +433,14 @@ Thrown when the caller is not an authorised operator for the token holder on the
 | operator    | address | Address that attempted the operation.         |
 | tokenHolder | address | Token holder whose tokens were targeted.      |
 | partition   | bytes32 | Partition on which authorisation was checked. |
+
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.
 
 ### ZeroAddressNotAllowed
 

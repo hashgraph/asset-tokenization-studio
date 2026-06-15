@@ -481,3 +481,11 @@ Thrown when the `roles` and `actives` arrays passed to `applyRoles` differ in le
 | ------------- | ------- | ---------------------------- |
 | rolesLength   | uint256 | Length of the roles array.   |
 | activesLength | uint256 | Length of the actives array. |
+
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.

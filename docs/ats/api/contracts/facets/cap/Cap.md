@@ -243,3 +243,11 @@ Thrown when a proposed new global cap is below the current adjusted total supply
 | ----------- | ------- | -------------------------------------------------- |
 | maxSupply   | uint256 | The proposed new maximum supply.                   |
 | totalSupply | uint256 | The current adjusted total supply that exceeds it. |
+
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.

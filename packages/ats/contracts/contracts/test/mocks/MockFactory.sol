@@ -83,7 +83,7 @@ interface IMockFactory is IFactory {
 
     /**
      * @notice Deploys and initialises a fixed-rate bond security proxy.
-     * @dev Validates resolver, ISIN, admin RBAC, regulation data and bond dates. Initialises
+     * @dev Validates resolver, admin RBAC, regulation data and bond dates. Initialises
      *      bond-specific and fixed-rate facets, marks the proxy operational, renounces this
      *      factory's temporary admin role and emits `BondFixedRateDeployed`.
      * @param _bondFixedRateData Fixed-rate bond deployment, regulation and rate data.
@@ -93,7 +93,7 @@ interface IMockFactory is IFactory {
 
     /**
      * @notice Deploys and initialises a KPI-linked-rate bond security proxy.
-     * @dev Validates resolver, ISIN, admin RBAC, regulation data, bond dates, interest-rate
+     * @dev Validates resolver, admin RBAC, regulation data, bond dates, interest-rate
      *      and impact data. Initialises bond-specific and KPI facets, marks the proxy
      *      operational, renounces this factory's temporary admin role and emits
      *      `BondKpiLinkedRateDeployed`.
@@ -132,7 +132,7 @@ abstract contract MockFactory is Factory, IMockFactory {
 
     /**
      * @notice Deploys and initialises a fixed-rate bond security proxy.
-     * @dev Validates resolver, ISIN, admin RBAC, regulation data and bond dates. Initialises
+     * @dev Validates resolver, admin RBAC, regulation data and bond dates. Initialises
      *      bond-specific and fixed-rate facets, marks the proxy operational, renounces this
      *      factory's temporary admin role and emits `BondFixedRateDeployed`.
      * @param _bondFixedRateData Fixed-rate bond deployment, regulation and rate data.
@@ -143,7 +143,6 @@ abstract contract MockFactory is Factory, IMockFactory {
     )
         external
         onlyValidResolver(_bondFixedRateData.bondData.security.resolver)
-        onlyValidISIN(_bondFixedRateData.bondData.security.erc20MetadataInfo.isin)
         onlyValidAdmins(_bondFixedRateData.bondData.security.rbacs)
         onlyValidRegulation(
             _bondFixedRateData.factoryRegulationData.regulationType,
@@ -166,7 +165,7 @@ abstract contract MockFactory is Factory, IMockFactory {
 
     /**
      * @notice Deploys and initialises a KPI-linked-rate bond security proxy.
-     * @dev Validates resolver, ISIN, admin RBAC, regulation data, KPI rate data, impact data
+     * @dev Validates resolver, admin RBAC, regulation data, KPI rate data, impact data
      *      and bond dates. Initialises bond-specific and KPI-linked facets, marks the proxy
      *      operational, renounces this factory's temporary admin role and emits
      *      `BondKpiLinkedRateDeployed`.
@@ -178,7 +177,6 @@ abstract contract MockFactory is Factory, IMockFactory {
     )
         external
         onlyValidResolver(_bondKpiLinkedRateData.bondData.security.resolver)
-        onlyValidISIN(_bondKpiLinkedRateData.bondData.security.erc20MetadataInfo.isin)
         onlyValidAdmins(_bondKpiLinkedRateData.bondData.security.rbacs)
         onlyValidRegulation(
             _bondKpiLinkedRateData.factoryRegulationData.regulationType,

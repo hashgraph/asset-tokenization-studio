@@ -34,23 +34,23 @@ interface IERC3643Types {
 
     /**
      * @notice Emitted when an agent is granted transfer-management permissions.
-     * @param _agent Address of the newly added agent.
+     * @param agent Address of the newly added agent.
      */
-    event AgentAdded(address indexed _agent);
+    event AgentAdded(address indexed agent);
 
     /**
      * @notice Emitted when an agent's transfer-management permissions are revoked.
-     * @param _agent Address of the removed agent.
+     * @param agent Address of the removed agent.
      */
-    event AgentRemoved(address indexed _agent);
+    event AgentRemoved(address indexed agent);
 
     /**
      * @notice Emitted when a lost wallet is successfully recovered to a new address.
-     * @param _lostWallet          Address of the wallet that was lost.
-     * @param _newWallet           Address of the replacement wallet.
-     * @param _investorOnchainID   OnchainID of the investor performing the recovery.
+     * @param lostWallet          Address of the wallet that was lost.
+     * @param newWallet           Address of the replacement wallet.
+     * @param investorOnchainID   OnchainID of the investor performing the recovery.
      */
-    event RecoverySuccess(address _lostWallet, address _newWallet, address _investorOnchainID);
+    event RecoverySuccess(address lostWallet, address newWallet, address investorOnchainID);
 
     /**
      * @notice Emitted when the compliance contract address is updated.

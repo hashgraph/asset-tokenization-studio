@@ -11,6 +11,7 @@
 
 import { Signer } from "ethers";
 import { BusinessLogicResolver__factory, ProxyAdmin } from "@contract-types";
+import { ATS_ROLES } from "@scripts/domain";
 import {
   DeployProxyResult,
   deployProxy,
@@ -122,7 +123,15 @@ export async function deployBlr(signer: Signer, options: DeployBlrOptions = {}):
       });
       await initTx.wait();
 
+      // Grant configuration-creation rights to the deployer
+      const grantTx = await blr.grantRole(ATS_ROLES.ROLE_CREATE_CONFIGURATION, await signer.getAddress(), {
+        ...gasLimitOverride(GAS_LIMIT.initialize.businessLogicResolver),
+        ...hederaGasOverrides(),
+      });
+      await grantTx.wait();
+
       initialized = true;
+
       success("BLR initialized");
     }
 

@@ -1,5 +1,13 @@
 # DiamondCut
 
+_Asset Tokenization Studio Team_
+
+> Diamond Cut
+
+Provides privileged resolver-proxy configuration update operations.
+
+_Mutates resolver-proxy storage after validating target configurations through the configured or supplied business-logic resolver. Access is restricted to accounts holding the default admin role in the proxy access-control storage._
+
 ## Methods
 
 ### getConfigInfo
@@ -68,6 +76,8 @@ function updateConfig(bytes32 _newConfigurationId, uint256 _newVersion) external
 
 For the current BLR update its configuration\*
 
+_Requires `DEFAULT_ADMIN_ROLE` and validates the configuration before storing the new configuration identifier and pinned version._
+
 #### Parameters
 
 | Name                 | Type    | Description |
@@ -83,6 +93,8 @@ function updateConfigVersion(uint256 _newVersion) external nonpayable
 
 For the current BLR and configuration, update the used version
 
+_Requires `DEFAULT_ADMIN_ROLE` and preserves the active configuration identifier and resolver while updating only the pinned configuration version._
+
 #### Parameters
 
 | Name         | Type    | Description |
@@ -96,6 +108,8 @@ function updateResolver(contract IBusinessLogicResolver _newResolver, bytes32 _n
 ```
 
 Updates the BLR to a new one
+
+_Requires `DEFAULT_ADMIN_ROLE` and validates the target configuration against the new resolver before replacing the resolver pointer, configuration identifier and version._
 
 #### Parameters
 
@@ -121,3 +135,11 @@ Thrown when an account does not hold a required role.
 | ------- | ------- | -------------------------------- |
 | account | address | The account that lacks the role. |
 | role    | bytes32 | The role that is not held.       |
+
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.

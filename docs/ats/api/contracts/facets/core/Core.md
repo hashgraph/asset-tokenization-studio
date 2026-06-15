@@ -16,9 +16,9 @@ Returns the decimals simulating non-triggered decimal adjustments up until curre
 
 #### Returns
 
-| Name | Type  | Description |
-| ---- | ----- | ----------- |
-| \_0  | uint8 | undefined   |
+| Name | Type  | Description                                    |
+| ---- | ----- | ---------------------------------------------- |
+| \_0  | uint8 | The number of decimals used for token amounts. |
 
 ### getERC20Metadata
 
@@ -30,9 +30,9 @@ Returns the full metadata struct of the security token.
 
 #### Returns
 
-| Name | Type                | Description |
-| ---- | ------------------- | ----------- |
-| \_0  | ICore.ERC20Metadata | undefined   |
+| Name | Type                | Description                           |
+| ---- | ------------------- | ------------------------------------- |
+| \_0  | ICore.ERC20Metadata | The persisted `ERC20Metadata` bundle. |
 
 ### initializeCore
 
@@ -56,9 +56,9 @@ Returns the name of the security token.
 
 #### Returns
 
-| Name | Type   | Description |
-| ---- | ------ | ----------- |
-| \_0  | string | undefined   |
+| Name | Type   | Description            |
+| ---- | ------ | ---------------------- |
+| \_0  | string | The token name string. |
 
 ### setName
 
@@ -70,9 +70,9 @@ Updates the token name. Restricted to the TREX owner role.
 
 #### Parameters
 
-| Name   | Type   | Description |
-| ------ | ------ | ----------- |
-| \_name | string | undefined   |
+| Name   | Type   | Description                      |
+| ------ | ------ | -------------------------------- |
+| \_name | string | New name to assign to the token. |
 
 ### setSymbol
 
@@ -84,9 +84,9 @@ Updates the token symbol. Restricted to the TREX owner role.
 
 #### Parameters
 
-| Name     | Type   | Description |
-| -------- | ------ | ----------- |
-| \_symbol | string | undefined   |
+| Name     | Type   | Description                        |
+| -------- | ------ | ---------------------------------- |
+| \_symbol | string | New symbol to assign to the token. |
 
 ### symbol
 
@@ -98,9 +98,9 @@ Returns the symbol of the security token.
 
 #### Returns
 
-| Name | Type   | Description |
-| ---- | ------ | ----------- |
-| \_0  | string | undefined   |
+| Name | Type   | Description              |
+| ---- | ------ | ------------------------ |
+| \_0  | string | The token symbol string. |
 
 ### version
 
@@ -112,9 +112,9 @@ Returns the ERC3643 version string of the token.
 
 #### Returns
 
-| Name | Type   | Description |
-| ---- | ------ | ----------- |
-| \_0  | string | undefined   |
+| Name | Type   | Description                                    |
+| ---- | ------ | ---------------------------------------------- |
+| \_0  | string | The version string (e.g. `&quot;4.0.0&quot;`). |
 
 ## Events
 
@@ -130,9 +130,9 @@ _Fires exclusively from `initializeCore` after the storage write succeeds._
 
 #### Parameters
 
-| Name     | Type                | Description |
-| -------- | ------------------- | ----------- |
-| metadata | ICore.ERC20Metadata | undefined   |
+| Name     | Type                | Description                                                  |
+| -------- | ------------------- | ------------------------------------------------------------ |
+| metadata | ICore.ERC20Metadata | The full ERC-20 metadata bundle persisted at initialisation. |
 
 ### UpdatedTokenInformation
 
@@ -214,3 +214,11 @@ error IsPaused()
 ```
 
 Thrown when an operation that requires the token to be unpaused is attempted while the token is paused (own flag or any external pause contract).
+
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.

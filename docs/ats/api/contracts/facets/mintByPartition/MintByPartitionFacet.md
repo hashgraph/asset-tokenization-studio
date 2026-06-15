@@ -206,3 +206,11 @@ Thrown when a multi-partition operation specifies a partition not permitted in s
 | Name      | Type    | Description                                      |
 | --------- | ------- | ------------------------------------------------ |
 | partition | bytes32 | The disallowed partition supplied by the caller. |
+
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.

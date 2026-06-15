@@ -68,20 +68,6 @@ exports[`Details should render correctly 1`] = `
           </div>
           <div
             class="css-tvba8"
-            data-testid="definition-list-item-ISIN"
-            tabindex="0"
-          >
-            <p
-              class="chakra-text css-vbc1qe"
-            >
-              ISIN
-            </p>
-            <p
-              class="chakra-text css-uivqlt"
-            />
-          </div>
-          <div
-            class="css-tvba8"
             data-testid="definition-list-item-EVM Address"
             tabindex="0"
           >

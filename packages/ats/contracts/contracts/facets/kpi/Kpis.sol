@@ -27,7 +27,8 @@ abstract contract Kpis is IKpis, Modifiers {
     }
 
     /// @inheritdoc IKpis
-    /// @dev Persists a KPI checkpoint for `_project`; reverts unless `_date` is valid.
+    /// @dev Persists a KPI checkpoint for `_project`; reverts unless `_date` is valid. Emits
+    ///      {KpiDataAdded}.
     function addKpiData(
         uint256 _date,
         uint256 _value,
@@ -42,6 +43,7 @@ abstract contract Kpis is IKpis, Modifiers {
         onlyValidDate(_date, _project)
     {
         KpisStorageWrapper.addKpiData(_date, _value, _project);
+        emit IKpis.KpiDataAdded(_project, _date, _value);
     }
 
     /// @inheritdoc IKpis

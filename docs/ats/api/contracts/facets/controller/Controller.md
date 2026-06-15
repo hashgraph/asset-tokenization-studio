@@ -69,7 +69,7 @@ function finalizeControllable() external nonpayable
 
 It is used to end the controller feature from the token
 
-_It only be called by the `owner/issuer` of the token_
+_Emits {FinalizedControllerFeature}._
 
 ### forcedTransfer
 
@@ -162,30 +162,30 @@ _Can only be called by the role admin_
 ### AgentAdded
 
 ```solidity
-event AgentAdded(address indexed _agent)
+event AgentAdded(address indexed agent)
 ```
 
 Emitted when an agent is granted transfer-management permissions.
 
 #### Parameters
 
-| Name              | Type    | Description                       |
-| ----------------- | ------- | --------------------------------- |
-| \_agent `indexed` | address | Address of the newly added agent. |
+| Name            | Type    | Description                       |
+| --------------- | ------- | --------------------------------- |
+| agent `indexed` | address | Address of the newly added agent. |
 
 ### AgentRemoved
 
 ```solidity
-event AgentRemoved(address indexed _agent)
+event AgentRemoved(address indexed agent)
 ```
 
 Emitted when an agent&#39;s transfer-management permissions are revoked.
 
 #### Parameters
 
-| Name              | Type    | Description                   |
-| ----------------- | ------- | ----------------------------- |
-| \_agent `indexed` | address | Address of the removed agent. |
+| Name            | Type    | Description                   |
+| --------------- | ------- | ----------------------------- |
+| agent `indexed` | address | Address of the removed agent. |
 
 ### ComplianceAdded
 
@@ -220,39 +220,39 @@ _Fired inside `initializeController` once the facet is marked ready._
 ### ControllerRedemption
 
 ```solidity
-event ControllerRedemption(address _controller, address indexed _tokenHolder, uint256 _value, bytes _data, bytes _operatorData)
+event ControllerRedemption(address controller, address indexed tokenHolder, uint256 value, bytes data, bytes operatorData)
 ```
 
 Emitted when an authorised controller redeems (burns) tokens on behalf of a holder.
 
 #### Parameters
 
-| Name                    | Type    | Description                                                     |
-| ----------------------- | ------- | --------------------------------------------------------------- |
-| \_controller            | address | The address of the controller that initiated the redemption.    |
-| \_tokenHolder `indexed` | address | The account whose tokens are redeemed.                          |
-| \_value                 | uint256 | The amount of tokens redeemed.                                  |
-| \_data                  | bytes   | Optional data attached to the redemption for validation.        |
-| \_operatorData          | bytes   | Optional data attached by the controller for event attribution. |
+| Name                  | Type    | Description                                                     |
+| --------------------- | ------- | --------------------------------------------------------------- |
+| controller            | address | The address of the controller that initiated the redemption.    |
+| tokenHolder `indexed` | address | The account whose tokens are redeemed.                          |
+| value                 | uint256 | The amount of tokens redeemed.                                  |
+| data                  | bytes   | Optional data attached to the redemption for validation.        |
+| operatorData          | bytes   | Optional data attached by the controller for event attribution. |
 
 ### ControllerTransfer
 
 ```solidity
-event ControllerTransfer(address _controller, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)
+event ControllerTransfer(address controller, address indexed from, address indexed to, uint256 value, bytes data, bytes operatorData)
 ```
 
 Emitted when an authorised controller transfers tokens between two holders.
 
 #### Parameters
 
-| Name             | Type    | Description                                                     |
-| ---------------- | ------- | --------------------------------------------------------------- |
-| \_controller     | address | The address of the controller that initiated the transfer.      |
-| \_from `indexed` | address | The address tokens are transferred from.                        |
-| \_to `indexed`   | address | The address tokens are transferred to.                          |
-| \_value          | uint256 | The amount of tokens transferred.                               |
-| \_data           | bytes   | Optional data attached to the transfer for validation.          |
-| \_operatorData   | bytes   | Optional data attached by the controller for event attribution. |
+| Name           | Type    | Description                                                     |
+| -------------- | ------- | --------------------------------------------------------------- |
+| controller     | address | The address of the controller that initiated the transfer.      |
+| from `indexed` | address | The address tokens are transferred from.                        |
+| to `indexed`   | address | The address tokens are transferred to.                          |
+| value          | uint256 | The amount of tokens transferred.                               |
+| data           | bytes   | Optional data attached to the transfer for validation.          |
+| operatorData   | bytes   | Optional data attached by the controller for event attribution. |
 
 ### FinalizedControllerFeature
 
@@ -285,18 +285,18 @@ Emitted when the identity registry contract address is updated.
 ### RecoverySuccess
 
 ```solidity
-event RecoverySuccess(address _lostWallet, address _newWallet, address _investorOnchainID)
+event RecoverySuccess(address lostWallet, address newWallet, address investorOnchainID)
 ```
 
 Emitted when a lost wallet is successfully recovered to a new address.
 
 #### Parameters
 
-| Name                | Type    | Description                                        |
-| ------------------- | ------- | -------------------------------------------------- |
-| \_lostWallet        | address | Address of the wallet that was lost.               |
-| \_newWallet         | address | Address of the replacement wallet.                 |
-| \_investorOnchainID | address | OnchainID of the investor performing the recovery. |
+| Name              | Type    | Description                                        |
+| ----------------- | ------- | -------------------------------------------------- |
+| lostWallet        | address | Address of the wallet that was lost.               |
+| newWallet         | address | Address of the replacement wallet.                 |
+| investorOnchainID | address | OnchainID of the investor performing the recovery. |
 
 ### UpdatedTokenInformation
 

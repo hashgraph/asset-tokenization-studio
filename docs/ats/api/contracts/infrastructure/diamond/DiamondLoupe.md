@@ -1,5 +1,13 @@
 # DiamondLoupe
 
+_Asset Tokenization Studio Team_
+
+> Diamond Loupe
+
+Exposes read-only introspection helpers for resolver-proxy facet metadata.
+
+_Implements the EIP-2535 loupe view surface over resolver-proxy storage. All queries are read-only and delegate pagination, selector, facet and ERC-165 lookups to inherited storage helpers._
+
 ## Methods
 
 ### getFacet
@@ -87,21 +95,21 @@ Get all the facet addresses used by a resolverProxy
 function getFacetIdBySelector(bytes4 _selector) external view returns (bytes32 facetId_)
 ```
 
-Gets the facet key that supports the given selector
+Returns the facet identifier registered for a function selector.
 
-_If facet is not found return address(0)_
+_Reads resolver-proxy selector metadata and returns zero when the selector is absent._
 
 #### Parameters
 
-| Name       | Type   | Description           |
-| ---------- | ------ | --------------------- |
-| \_selector | bytes4 | The function selector |
+| Name       | Type   | Description                   |
+| ---------- | ------ | ----------------------------- |
+| \_selector | bytes4 | Function selector to resolve. |
 
 #### Returns
 
-| Name      | Type    | Description   |
-| --------- | ------- | ------------- |
-| facetId\_ | bytes32 | The facet key |
+| Name      | Type    | Description                                    |
+| --------- | ------- | ---------------------------------------------- |
+| facetId\_ | bytes32 | Facet identifier associated with the selector. |
 
 ### getFacetIds
 
@@ -296,6 +304,8 @@ Gets the static resolver key
 ```solidity
 function supportsInterface(bytes4 _interfaceId) external view returns (bool)
 ```
+
+_Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section] to learn more about how these ids are created. This function call must use less than 30 000 gas._
 
 #### Parameters
 

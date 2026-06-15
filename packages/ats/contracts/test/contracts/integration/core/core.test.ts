@@ -4,7 +4,6 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { isinGenerator } from "@thomaschaplin/isin-generator";
 import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 import { ATS_ROLES, RESOLVER_KEY_CORE } from "@scripts";
 import { SecurityType } from "@scripts/domain";
@@ -13,7 +12,6 @@ import { assertObject, deployEquityTokenFixture, executeRbac } from "@test";
 const name = "TEST_Core";
 const symbol = "TCR";
 const decimals = 6;
-const isin = isinGenerator();
 const newName = "TEST_Core_Updated";
 const newSymbol = "TCR_Updated";
 
@@ -31,7 +29,7 @@ describe("Core Facet Tests", () => {
     const base = await deployEquityTokenFixture({
       equityDataParams: {
         securityData: {
-          erc20MetadataInfo: { name, symbol, decimals, isin },
+          erc20MetadataInfo: { name, symbol, decimals },
         },
       },
     });
@@ -58,7 +56,7 @@ describe("Core Facet Tests", () => {
     it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeCore is called THEN AccountHasNoRole", async () => {
       await expect(
         asset.connect(signer_D).initializeCore({
-          info: { name: "X", symbol: "Y", isin: "ES1234567890", decimals: 6 },
+          info: { name: "X", symbol: "Y", decimals: 6 },
           securityType: SecurityType.BOND_VARIABLE_RATE,
         }),
       ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
@@ -67,7 +65,7 @@ describe("Core Facet Tests", () => {
     it("GIVEN already-initialised WHEN initializeCore is called again THEN FacetAlreadyRegistered", async () => {
       await expect(
         asset.initializeCore({
-          info: { name: "X", symbol: "Y", isin: "ES1234567890", decimals: 6 },
+          info: { name: "X", symbol: "Y", decimals: 6 },
           securityType: SecurityType.BOND_VARIABLE_RATE,
         }),
       ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
@@ -79,7 +77,7 @@ describe("Core Facet Tests", () => {
       await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_CORE);
       await expect(
         asset.initializeCore({
-          info: { name, symbol, decimals, isin },
+          info: { name, symbol, decimals },
           securityType: SecurityType.EQUITY,
         }),
       ).to.emit(asset, "CoreInitialized");
@@ -89,7 +87,7 @@ describe("Core Facet Tests", () => {
   describe("readers", () => {
     it("GIVEN an initialized token WHEN getERC20Metadata THEN returns the configured metadata", async () => {
       const metadata = await asset.getERC20Metadata();
-      assertObject(metadata.info, { name, symbol, isin, decimals });
+      assertObject(metadata.info, { name, symbol, decimals });
       expect(metadata.securityType).to.equal(SecurityType.EQUITY);
     });
 

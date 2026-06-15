@@ -24,7 +24,7 @@ describe("CoreAdjusted Facet Tests", () => {
     const base = await deployEquityTokenFixture({
       equityDataParams: {
         securityData: {
-          erc20MetadataInfo: { name: "TEST_CoreAdjusted", symbol: "TCA", decimals, isin: "US0378331005" },
+          erc20MetadataInfo: { name: "TEST_CoreAdjusted", symbol: "TCA", decimals },
         },
       },
     });

@@ -51,21 +51,21 @@ _Fires exclusively from `initializeBatchController` after the storage write succ
 ### ControllerTransfer
 
 ```solidity
-event ControllerTransfer(address _controller, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)
+event ControllerTransfer(address controller, address indexed from, address indexed to, uint256 value, bytes data, bytes operatorData)
 ```
 
 Emitted when an authorised controller transfers tokens between two holders.
 
 #### Parameters
 
-| Name             | Type    | Description                                                     |
-| ---------------- | ------- | --------------------------------------------------------------- |
-| \_controller     | address | The address of the controller that initiated the transfer.      |
-| \_from `indexed` | address | The address tokens are transferred from.                        |
-| \_to `indexed`   | address | The address tokens are transferred to.                          |
-| \_value          | uint256 | The amount of tokens transferred.                               |
-| \_data           | bytes   | Optional data attached to the transfer for validation.          |
-| \_operatorData   | bytes   | Optional data attached by the controller for event attribution. |
+| Name           | Type    | Description                                                     |
+| -------------- | ------- | --------------------------------------------------------------- |
+| controller     | address | The address of the controller that initiated the transfer.      |
+| from `indexed` | address | The address tokens are transferred from.                        |
+| to `indexed`   | address | The address tokens are transferred to.                          |
+| value          | uint256 | The amount of tokens transferred.                               |
+| data           | bytes   | Optional data attached to the transfer for validation.          |
+| operatorData   | bytes   | Optional data attached by the controller for event attribution. |
 
 ## Errors
 
@@ -168,3 +168,11 @@ error TokenIsNotControllable()
 ```
 
 Thrown when an operation requires the token to be controllable but it is not.
+
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.

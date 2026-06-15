@@ -111,21 +111,21 @@ Get all the facet addresses used by a resolverProxy
 function getFacetIdBySelector(bytes4 _selector) external view returns (bytes32 facetId_)
 ```
 
-Gets the facet key that supports the given selector
+Returns the facet identifier registered for a function selector.
 
-_If facet is not found return address(0)_
+_Reads resolver-proxy selector metadata and returns zero when the selector is absent._
 
 #### Parameters
 
-| Name       | Type   | Description           |
-| ---------- | ------ | --------------------- |
-| \_selector | bytes4 | The function selector |
+| Name       | Type   | Description                   |
+| ---------- | ------ | ----------------------------- |
+| \_selector | bytes4 | Function selector to resolve. |
 
 #### Returns
 
-| Name      | Type    | Description   |
-| --------- | ------- | ------------- |
-| facetId\_ | bytes32 | The facet key |
+| Name      | Type    | Description                                    |
+| --------- | ------- | ---------------------------------------------- |
+| facetId\_ | bytes32 | Facet identifier associated with the selector. |
 
 ### getFacetIds
 
@@ -335,6 +335,8 @@ _Callable once; subsequent calls revert with `FacetAlreadyRegistered`. Requires 
 function supportsInterface(bytes4 _interfaceId) external view returns (bool)
 ```
 
+_Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section] to learn more about how these ids are created. This function call must use less than 30 000 gas._
+
 #### Parameters
 
 | Name          | Type   | Description |
@@ -355,6 +357,8 @@ function updateConfig(bytes32 _newConfigurationId, uint256 _newVersion) external
 
 For the current BLR update its configuration\*
 
+_Requires `DEFAULT_ADMIN_ROLE` and validates the configuration before storing the new configuration identifier and pinned version._
+
 #### Parameters
 
 | Name                 | Type    | Description |
@@ -370,6 +374,8 @@ function updateConfigVersion(uint256 _newVersion) external nonpayable
 
 For the current BLR and configuration, update the used version
 
+_Requires `DEFAULT_ADMIN_ROLE` and preserves the active configuration identifier and resolver while updating only the pinned configuration version._
+
 #### Parameters
 
 | Name         | Type    | Description |
@@ -383,6 +389,8 @@ function updateResolver(contract IBusinessLogicResolver _newResolver, bytes32 _n
 ```
 
 Updates the BLR to a new one
+
+_Requires `DEFAULT_ADMIN_ROLE` and validates the target configuration against the new resolver before replacing the resolver pointer, configuration identifier and version._
 
 #### Parameters
 
@@ -435,3 +443,11 @@ Raised when an initialiser tries to register a facet that already has a non-zero
 | ----------- | ------- | -------------------------------------------------------------- |
 | facetId     | bytes32 | Identifier of the offending facet.                             |
 | lastVersion | uint256 | Last version recorded for that facet at the time of the check. |
+
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.

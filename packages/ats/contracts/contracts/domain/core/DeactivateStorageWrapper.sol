@@ -68,7 +68,7 @@ library DeactivateStorageWrapper {
      *      returned reference is the entry point for read/write helpers in this library.
      * @return deactivate_ Storage reference to the `DeactivateDataStorage` struct.
      */
-    function deactivateStorage() internal pure returns (DeactivateDataStorage storage deactivate_) {
+    function deactivateStorage() private pure returns (DeactivateDataStorage storage deactivate_) {
         bytes32 position = STORAGE_LOCATION_DEACTIVATE;
         // solhint-disable-next-line no-inline-assembly
         assembly {

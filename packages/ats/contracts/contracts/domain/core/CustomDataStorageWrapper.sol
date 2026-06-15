@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ICustomData } from "../../facets/customData/ICustomData.sol";
-
 /// @custom:hash storage CustomData
 bytes32 constant STORAGE_LOCATION_CUSTOM_DATA = 0x92acc34fbd05df4f7a3d758b1a1755231ecd82ae24df88ea7a638c1b704de700;
 
@@ -80,7 +78,7 @@ library CustomDataStorageWrapper {
      * @return customData_ Reference to the `CustomDataDataStorage` struct at the custom data
      *         storage slot.
      */
-    function customDataStorage() internal pure returns (CustomDataDataStorage storage customData_) {
+    function customDataStorage() private pure returns (CustomDataDataStorage storage customData_) {
         bytes32 position = STORAGE_LOCATION_CUSTOM_DATA;
         // solhint-disable-next-line no-inline-assembly
         assembly {
