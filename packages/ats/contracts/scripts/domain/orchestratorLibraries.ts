@@ -17,7 +17,14 @@
  */
 
 import { Signer } from "ethers";
-import { info, retryTransaction, RetryOptions, withNonceReset } from "@scripts/infrastructure";
+import {
+  GAS_LIMIT,
+  hederaGasOverrides,
+  info,
+  retryTransaction,
+  RetryOptions,
+  withNonceReset,
+} from "@scripts/infrastructure";
 
 /**
  * Deployed addresses of all orchestrator libraries.
@@ -313,16 +320,18 @@ export async function deployOrchestratorLibraries(
     });
 
   // Phase 1: ScheduledTasksDispatchOps and ClearingReadOps have no library dependencies.
+  const gasOverrides = { ...hederaGasOverrides(), gasLimit: GAS_LIMIT.high };
+
   const scheduledTasksDispatchOpsAddr = await deployLib("ScheduledTasksDispatchOps", () =>
     new ScheduledTasksDispatchOps__factory(signer)
-      .deploy()
+      .deploy(gasOverrides)
       .then((c) => c.waitForDeployment())
       .then((c) => c.getAddress()),
   );
 
   const clearingReadOpsAddr = await deployLib("ClearingReadOps", () =>
     new ClearingReadOps__factory(signer)
-      .deploy()
+      .deploy(gasOverrides)
       .then((c) => c.waitForDeployment())
       .then((c) => c.getAddress()),
   );
@@ -333,7 +342,7 @@ export async function deployOrchestratorLibraries(
       { [LIBRARY_KEYS.scheduledTasksDispatchOps]: scheduledTasksDispatchOpsAddr } as any,
       signer,
     )
-      .deploy()
+      .deploy(gasOverrides)
       .then((c) => c.waitForDeployment())
       .then((c) => c.getAddress()),
   );
@@ -346,14 +355,14 @@ export async function deployOrchestratorLibraries(
 
   const tokenCoreOpsAddr = await deployLib("TokenCoreOps", () =>
     new TokenCoreOps__factory(phase3Links, signer)
-      .deploy()
+      .deploy(gasOverrides)
       .then((c) => c.waitForDeployment())
       .then((c) => c.getAddress()),
   );
 
   const holdOpsAddr = await deployLib("HoldOps", () =>
     new HoldOps__factory(phase3Links, signer)
-      .deploy()
+      .deploy(gasOverrides)
       .then((c) => c.waitForDeployment())
       .then((c) => c.getAddress()),
   );
@@ -368,7 +377,7 @@ export async function deployOrchestratorLibraries(
 
   const clearingOpsAddr = await deployLib("ClearingOps", () =>
     new ClearingOps__factory(phase4Links, signer)
-      .deploy()
+      .deploy(gasOverrides)
       .then((c) => c.waitForDeployment())
       .then((c) => c.getAddress()),
   );
@@ -379,7 +388,7 @@ export async function deployOrchestratorLibraries(
   // TokenCoreOps, HoldOps, ClearingReadOps, and ScheduledTasksOps.
   const clearingLifecycleOpsAddr = await deployLib("ClearingLifecycleOps", () =>
     new ClearingLifecycleOps__factory(phase4Links, signer)
-      .deploy()
+      .deploy(gasOverrides)
       .then((c) => c.waitForDeployment())
       .then((c) => c.getAddress()),
   );
@@ -387,7 +396,7 @@ export async function deployOrchestratorLibraries(
   // Phase 6: ClearingProtectedOps depends on ClearingOps via internal calls.
   const clearingProtectedOpsAddr = await deployLib("ClearingProtectedOps", () =>
     new ClearingProtectedOps__factory({ [LIBRARY_KEYS.clearingOps]: clearingOpsAddr } as any, signer)
-      .deploy()
+      .deploy(gasOverrides)
       .then((c) => c.waitForDeployment())
       .then((c) => c.getAddress()),
   );

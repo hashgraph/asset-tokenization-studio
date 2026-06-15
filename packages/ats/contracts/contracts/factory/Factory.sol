@@ -49,8 +49,6 @@ import { IExternalKycListManagement } from "../facets/externalKycListManagement/
 import { IKyc } from "../facets/kyc/IKyc.sol";
 import { _validateISIN } from "./isinValidator.sol";
 import { IInterestRate } from "../facets/interestRate/IInterestRate.sol";
-import { IMaturity } from "../facets/maturity/IMaturity.sol";
-import { ICustomData } from "../facets/customData/ICustomData.sol";
 import { EvmAccessors } from "../infrastructure/utils/EvmAccessors.sol";
 import { DatesValidation } from "../infrastructure/utils/DatesValidation.sol";
 import { IAdjustBalances } from "../facets/adjustBalances/IAdjustBalances.sol";
@@ -132,6 +130,7 @@ import { ITransferAndLockByPartition } from "../facets/transferAndLockByPartitio
 import { ITransferByPartition } from "../facets/transferByPartition/ITransferByPartition.sol";
 import { IVoting } from "../facets/voting/IVoting.sol";
 import { IVotingSecurityHolders } from "../facets/votingSecurityHolders/IVotingSecurityHolders.sol";
+import { IFixedRate } from "../facets/fixedRate/IFixedRate.sol";
 
 /**
  * @title Factory
@@ -289,6 +288,7 @@ abstract contract Factory is IFactory {
     {
         bondAddress_ = _deployBond(_bondData, SecurityType.BondVariableRate);
         IInterestRate(bondAddress_).initializeInterestRateType(IInterestRate.RateType.STANDARD);
+        IFixedRate(bondAddress_).initializeFixedRate(IFixedRate.FixedRateData({ rate: 0, rateDecimals: 0 }));
         (bool isOperational_, ) = IInitializer(bondAddress_).setOperationalStatus();
         _checkUnexpectedError(!isOperational_, FACTORY_OPERATIONAL_STATUS);
         IAccessControl(bondAddress_).renounceRole(DEFAULT_ADMIN_ROLE);

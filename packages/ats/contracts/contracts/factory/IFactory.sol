@@ -22,10 +22,10 @@ interface IFactory {
      * @dev Used internally to select the correct initialisation path in the factory.
      */
     enum SecurityType {
-        /// @notice An equity instrument (shares).
-        Equity,
         /// @notice A bond whose coupon rate floats against an external index.
         BondVariableRate,
+        /// @notice An equity instrument (shares).
+        Equity,
         /// @notice A bond with a fixed coupon rate.
         BondFixedRate,
         /// @notice A bond whose coupon is tied to KPI performance metrics.
