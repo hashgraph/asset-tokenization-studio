@@ -58,6 +58,8 @@ import { allowanceTests } from "./allowance/allowance.test";
 import { controllerTests } from "./controller/controller.test";
 import { holdTests } from "./hold/hold.test";
 import { snapshotsTests } from "./snapshots/snapshots.test";
+import { controllerByPartitionTests } from "./controllerByPartition/controllerByPartition.test";
+import { securityHoldersAtSnapshotTests } from "./securityHoldersAtSnapshot/securityHoldersAtSnapshot.test";
 
 describe("ATS — IAsset Suites", () => {
   let ctx: Awaited<ReturnType<typeof deployAssetMockCtx>>;
@@ -106,6 +108,8 @@ describe("ATS — IAsset Suites", () => {
   // ── W2: New suites ─────────────────────────────────────────────────
   allowanceTests(() => ctx);
   controllerTests(() => ctx);
+  controllerByPartitionTests(() => ctx);
   holdTests(() => ctx);
   snapshotsTests(() => ctx);
+  securityHoldersAtSnapshotTests(() => ctx);
 });
