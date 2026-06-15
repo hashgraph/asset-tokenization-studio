@@ -29,6 +29,7 @@ import {
   MockedWhitelist__factory,
   ResolverProxy__factory,
 } from "@contract-types";
+import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFullAssetFixture } from "../deploy/fullAsset";
 
