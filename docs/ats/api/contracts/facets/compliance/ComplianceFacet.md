@@ -141,7 +141,7 @@ function setCompliance(address _compliance) external nonpayable
 
 Sets the compliance contract address
 
-_Requires an operational, activated, unpaused token and `TREX_OWNER_ROLE`._
+_Requires an operational, activated, unpaused token and `TREX_OWNER_ROLE`. Emits `ComplianceAdded` so off-chain observers can track which compliance contract was authoritative at any point in time._
 
 #### Parameters
 
