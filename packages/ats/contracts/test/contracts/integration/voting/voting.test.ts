@@ -64,6 +64,7 @@ export function votingTests(getCtx: () => AssetMockCtx): void {
         amountDecimals: 1,
       };
     });
+
     describe("initializeVoting", () => {
       it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeVoting is called THEN it reverts with AccountHasNoRole", async () => {
         await expect(asset.connect(signer_C).initializeVoting()).to.be.revertedWithCustomError(
