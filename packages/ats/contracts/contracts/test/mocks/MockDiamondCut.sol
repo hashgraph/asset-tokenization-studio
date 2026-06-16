@@ -48,6 +48,7 @@ interface IMockDiamondCut {
     function forceDecimals(uint8 _newDecimals) external;
     function forceErc20VotesActivated(bool _newActivate) external;
     function forceWhitelist(bool _newWhitelist) external;
+    function forceErc20VotesActivated(bool n) external;
 }
 
 // `IStaticFunctionSelectors` is intentionally not listed: it is already pulled
@@ -185,6 +186,15 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
     ///      time with no runtime toggle, so this mirrors the deploy-time state.
     function forceWhitelist(bool _newWhiteList) external override {
         ControlListStorageWrapper.initializeControlList(_newWhiteList);
+    }
+
+    /// @notice Forces the ERC20Votes activation flag for testing without running the facet initialiser.
+    /// @dev Delegates to ERC20VotesStorageWrapper.setActivate, which writes the activation flag through the
+    ///      ERC20Votes storage struct (layout-independent). The production flag is set only at
+    ///      initializeERC20Votes time with no runtime toggle, so this mirrors the deploy-time state directly.
+    /// @param n true to activate ERC20Votes, false to deactivate.
+    function forceErc20VotesActivated(bool n) external override {
+        ERC20VotesStorageWrapper.setActivate(n);
     }
 
     function getStaticResolverKey() external pure returns (bytes32 staticResolverKey_) {
