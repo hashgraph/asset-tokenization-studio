@@ -91,6 +91,18 @@ library ResolverProxyStorageWrapper {
     }
 
     /**
+     * @notice Returns the full V2 configuration payload served by the proxy.
+     * @return The decoded V2 configuration.
+     */
+    function getResolverProxyConfigurationV2()
+        internal
+        view
+        returns (IResolverProxy.ResolverProxyConfigurationV2 memory)
+    {
+        return _decodeV2();
+    }
+
+    /**
      * @notice Returns the storage pointer for the ResolverProxy namespace.
      * @dev Resolves the ERC-7201 slot via inline assembly to obtain a struct reference at
      *      `STORAGE_LOCATION_RESOLVER_PROXY`.
@@ -102,18 +114,6 @@ library ResolverProxyStorageWrapper {
         assembly {
             ds.slot := position
         }
-    }
-
-    /**
-     * @notice Returns the full V2 configuration payload served by the proxy.
-     * @return The decoded V2 configuration.
-     */
-    function getResolverProxyConfigurationV2()
-        internal
-        view
-        returns (IResolverProxy.ResolverProxyConfigurationV2 memory)
-    {
-        return _decodeV2();
     }
 
     /**
