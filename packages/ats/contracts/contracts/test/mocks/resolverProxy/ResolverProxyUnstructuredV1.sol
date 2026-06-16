@@ -2,12 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IResolverProxyV1 } from "./IResolverProxyV1.sol";
-import { IBusinessLogicResolver } from "../../../infrastructure/diamond/IBusinessLogicResolver.sol";
-import { IDiamondLoupe } from "../../../infrastructure/proxy/IDiamondLoupe.sol";
-import {
-    ResolverProxyStorageWrapper,
-    ResolverProxyStorage
-} from "../../../domain/core/ResolverProxyStorageWrapper.sol";
+import { IBusinessLogicResolverV1 } from "./IBusinessLogicResolverV1.sol";
+import { IDiamondLoupeV1 } from "./IDiamondLoupeV1.sol";
+import { ResolverProxyStorageWrapperV1, ResolverProxyStorage } from "./ResolverProxyStorageWrapperV1.sol";
 import { AccessControlStorageWrapper, RoleDataStorage } from "../../../domain/core/AccessControlStorageWrapper.sol";
 
 // Remember to add the loupe functions from DiamondLoupeFacet.sol.sol to the resolverProxy.
@@ -16,20 +13,20 @@ abstract contract ResolverProxyUnstructuredV1 {
     using AccessControlStorageWrapper for RoleDataStorage;
 
     function _initialize(
-        IBusinessLogicResolver _resolver,
+        IBusinessLogicResolverV1 _resolver,
         bytes32 _resolverProxyConfigurationId,
         uint256 _version,
         IResolverProxyV1.Rbac[] memory _rbacs
     ) internal {
         _resolver.checkResolverProxyConfigurationRegistered(_resolverProxyConfigurationId, _version);
-        ResolverProxyStorage storage ds = ResolverProxyStorageWrapper.resolverProxyStorage();
+        ResolverProxyStorage storage ds = ResolverProxyStorageWrapperV1.resolverProxyStorage();
         _updateResolver(ds, _resolver);
         _updateConfigId(ds, _resolverProxyConfigurationId);
         _updateVersion(ds, _version);
         _assignRbacRoles(_rbacs);
     }
 
-    function _updateResolver(ResolverProxyStorage storage _ds, IBusinessLogicResolver _resolver) internal {
+    function _updateResolver(ResolverProxyStorage storage _ds, IBusinessLogicResolverV1 _resolver) internal {
         _ds.resolver = _resolver;
     }
 
@@ -59,7 +56,7 @@ abstract contract ResolverProxyUnstructuredV1 {
         ResolverProxyStorage storage _ds,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (IDiamondLoupe.Facet[] memory facets_) {
+    ) internal view returns (IDiamondLoupeV1.Facet[] memory facets_) {
         facets_ = _ds.resolver.getFacetsByConfigurationIdAndVersion(
             _ds.resolverProxyConfigurationId,
             _ds.version,
@@ -134,7 +131,7 @@ abstract contract ResolverProxyUnstructuredV1 {
     function _getFacet(
         ResolverProxyStorage storage _ds,
         bytes32 _facetId
-    ) internal view returns (IDiamondLoupe.Facet memory facet_) {
+    ) internal view returns (IDiamondLoupeV1.Facet memory facet_) {
         facet_ = _ds.resolver.getFacetByConfigurationIdVersionAndFacetId(
             _ds.resolverProxyConfigurationId,
             _ds.version,
