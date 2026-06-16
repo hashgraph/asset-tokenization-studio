@@ -92,18 +92,6 @@ import { snapshotsTests } from "./snapshots/snapshots.test";
 import { controllerByPartitionTests } from "./controllerByPartition/controllerByPartition.test";
 import { securityHoldersAtSnapshotTests } from "./securityHoldersAtSnapshot/securityHoldersAtSnapshot.test";
 
-// ── W3: Cap / batch suites ──────────────────────────────────────────────
-import { capTests } from "./cap/cap.test";
-import { capByPartitionTests } from "./capByPartition/capByPartition.test";
-import { batchMintTests } from "./batchMint/batchMint.test";
-import { batchBurnTests } from "./batchBurn/batchBurn.test";
-import { batchControllerTests } from "./batchController/batchController.test";
-import { mintTests } from "./mint/mint.test";
-import { mintByPartitionTests } from "./mintByPartition/mintByPartition.test";
-import { burnByPartitionTests } from "./burnByPartition/burnByPartition.test";
-import { lockByPartitionTests } from "./lockByPartition/lockByPartition.test";
-import { batchFreezeTests } from "./batchFreeze/batchFreeze.test";
-
 describe("ATS — IAsset Suites", () => {
   let ctx: Awaited<ReturnType<typeof deployAssetMockCtx>>;
 
