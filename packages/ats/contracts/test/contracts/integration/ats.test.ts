@@ -74,6 +74,11 @@ import { mintByPartitionTests } from "./mintByPartition/mintByPartition.test";
 import { burnByPartitionTests } from "./burnByPartition/burnByPartition.test";
 import { lockByPartitionTests } from "./lockByPartition/lockByPartition.test";
 import { batchFreezeTests } from "./batchFreeze/batchFreeze.test";
+
+// ── W4: Clearing / balance / batch suites ───────────────────────────────
+import { clearingAtSnapshotTests } from "./clearingAtSnapshot/clearingAtSnapshot.test";
+import { balanceTrackerTests } from "./balanceTracker/balanceTracker.test";
+import { batchTransferTests } from "./batchTransfer/batchTransfer.test";
 import { allowanceTests } from "./allowance/allowance.test";
 import { controllerTests } from "./controller/controller.test";
 import { holdTests } from "./hold/hold.test";
@@ -170,4 +175,9 @@ describe("ATS — IAsset Suites", () => {
   // ── W3: Lock / freeze suites ──────────────────────────────────────────
   lockByPartitionTests(() => ctx);
   batchFreezeTests(() => ctx);
+
+  // ── W4: Clearing / balance / batch suites ─────────────────────────────
+  clearingAtSnapshotTests(() => ctx);
+  balanceTrackerTests(() => ctx);
+  batchTransferTests(() => ctx);
 });
