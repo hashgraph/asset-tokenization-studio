@@ -8,12 +8,12 @@ coverage:
   status:
     patch:
       default:
-        target: 80%
-        threshold: 1%
+        target: auto
+        threshold: 0%
     project:
       default:
-        target: 80%
-        threshold: 1%
+        target: auto
+        threshold: 0%
 
 ignore:
   - "packages/*/dist"

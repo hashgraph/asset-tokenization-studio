@@ -92,6 +92,10 @@ jobs:
       - name: Run ATS tests
         run: npm run ats:test:ci
 
+      - name: Generate coverage report
+        id: generate_coverage
+        run: npm run ats:contracts:test:coverage
+
       - name: Upload coverage report
-        if: ${{ !cancelled() && always() }}
+        if: ${{ steps.generate_coverage.outcome == 'success' }}
         uses: codecov/codecov-action@e28ff129e5465c2c0dcc6f003fc735cb6ae0c673 # v5.4.0
