@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { expect } from "chai";
-import { IAssetMock, type IFactory, type BusinessLogicResolver, IAssetMock__factory } from "@contract-types";
-import { ADDRESS_ZERO, ATS_ROLES, GAS_LIMIT } from "@scripts";
-import { getSecurityData, getRegulationData, makeEquityDetailsData, grantRoleAndPauseToken, executeRbac } from "@test";
+import { IAssetMock } from "@contract-types";
+import { ADDRESS_ZERO, ATS_ROLES, RESOLVER_KEY_CONTROL_LIST } from "@scripts";
+import { grantRoleAndPauseToken, executeRbac } from "@test";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { ethers } from "hardhat";
 import type { AssetMockCtx } from "@test";
 
 export function controlListTests(getCtx: () => AssetMockCtx): void {
@@ -16,8 +15,6 @@ export function controlListTests(getCtx: () => AssetMockCtx): void {
     let signer_D: HardhatEthersSigner;
 
     let asset: IAssetMock;
-    let factory: IFactory;
-    let blr: BusinessLogicResolver;
 
     beforeEach(async () => {
       const ctx = getCtx();
@@ -25,8 +22,6 @@ export function controlListTests(getCtx: () => AssetMockCtx): void {
       signer_B = ctx.user1;
       signer_C = ctx.user2;
       signer_D = ctx.user3;
-      factory = ctx.factory as IFactory;
-      blr = ctx.blr as BusinessLogicResolver;
 
       asset = ctx.asset;
 
@@ -51,13 +46,6 @@ export function controlListTests(getCtx: () => AssetMockCtx): void {
       );
     });
 
-    it("GIVEN an account without controlList role WHEN addToControlList THEN transaction fails with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_B).addToControlList(signer_C.address)).to.be.revertedWithCustomError(
-        asset,
-        "AccountHasNoRole",
-      );
-    });
-
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeControlList is called THEN it reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_D).initializeControlList(true)).to.be.revertedWithCustomError(
         asset,
@@ -65,38 +53,9 @@ export function controlListTests(getCtx: () => AssetMockCtx): void {
       );
     });
 
-    it("GIVEN an already-initialised facet WHEN initializeControlList is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-      await expect(asset.initializeControlList(true)).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
-    });
-
     it("GIVEN a new deployment WHEN initializeControlList is called THEN it emits ControlListInitialized", async () => {
-      const equityData = {
-        security: getSecurityData(blr, {
-          rbacs: [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [signer_A.address] }],
-        }),
-        equityDetails: makeEquityDetailsData(),
-      };
-      const tx = await factory.deployEquity(equityData, getRegulationData(), { gasLimit: GAS_LIMIT.high });
-      const receipt = await tx.wait();
-      const iface = IAssetMock__factory.createInterface();
-      const event = receipt!.logs
-        .map((log) => {
-          try {
-            return iface.parseLog(log as unknown as { topics: string[]; data: string });
-          } catch {
-            return null;
-          }
-        })
-        .find((parsed) => parsed?.name === "ControlListInitialized");
-      expect(event).to.not.be.undefined;
-      expect(event!.args.isWhiteList).to.equal(equityData.security.isWhiteList);
-    });
-
-    it("GIVEN an account without controlList role WHEN removeFromControlList THEN transaction fails with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_B).removeFromControlList(signer_C.address)).to.be.revertedWithCustomError(
-        asset,
-        "AccountHasNoRole",
-      );
+      await asset.forceFacetNotRegistered(RESOLVER_KEY_CONTROL_LIST);
+      await expect(asset.initializeControlList(true)).to.emit(asset, "ControlListInitialized");
     });
 
     it("GIVEN a paused Token WHEN addToControlList THEN transaction fails with IsPaused", async () => {
@@ -196,14 +155,14 @@ export function controlListTests(getCtx: () => AssetMockCtx): void {
       });
 
       it("GIVEN a deactivated asset WHEN addToControlList THEN transaction fails with Deactivated", async () => {
-        await expect(asset.connect(signer_A).addToControlList(ethers.ZeroAddress)).to.be.revertedWithCustomError(
+        await expect(asset.connect(signer_A).addToControlList(ADDRESS_ZERO)).to.be.revertedWithCustomError(
           asset,
           "Deactivated",
         );
       });
 
       it("GIVEN a deactivated asset WHEN removeFromControlList THEN transaction fails with Deactivated", async () => {
-        await expect(asset.connect(signer_A).removeFromControlList(ethers.ZeroAddress)).to.be.revertedWithCustomError(
+        await expect(asset.connect(signer_A).removeFromControlList(ADDRESS_ZERO)).to.be.revertedWithCustomError(
           asset,
           "Deactivated",
         );

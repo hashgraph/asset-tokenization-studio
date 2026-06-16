@@ -26,9 +26,11 @@ import { ResolverProxyStorageWrapper } from "../../domain/core/ResolverProxyStor
 import { DeactivateStorageWrapper } from "../../domain/core/DeactivateStorageWrapper.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
+import { ERC1644StorageWrapper } from "../../domain/asset/ERC1644StorageWrapper.sol";
 import { ControlListStorageWrapper } from "../../domain/core/ControlListStorageWrapper.sol";
 import { KycStorageWrapper } from "../../domain/core/KycStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../domain/core/ProtectedPartitionsStorageWrapper.sol";
+import { ERC20StorageWrapper } from "../../domain/asset/ERC20StorageWrapper.sol";
 
 /* solhint-disable */
 
@@ -41,6 +43,8 @@ interface IMockDiamondCut {
     function setMultiPartition(bool _multiPartition) external;
     function forceDeactivate() external;
     function forceSecurityFlags(bool n) external;
+    function forceControllable(bool n) external;
+    function forceDecimals(uint8 d) external;
 }
 
 // `IStaticFunctionSelectors` is intentionally not listed: it is already pulled
@@ -141,6 +145,27 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
         ProtectedPartitionsStorageWrapper.initializeProtectedPartitions(n);
     }
 
+    /// @notice Forces the ERC-1644 controllable flag for testing without running the facet
+    ///         initialiser.
+    /// @dev Calls `ERC1644StorageWrapper.initializeController` — the same storage path used by
+    ///      the production `Controller.initializeController` facet.
+    /// @param n `true` to enable controllable transfers, `false` to disable them.
+    function forceControllable(bool n) external override {
+        ERC1644StorageWrapper.initializeController(n);
+    }
+
+    /// @notice Forces the ERC-20 decimal count for testing without running the facet
+    ///         initialiser.
+    /// @dev Delegates to `ERC20StorageWrapper.setDecimals` which writes through the
+    ///      private `erc20Storage()` struct accessor — the same layout-independent path
+    ///      the production `CoreFacet.initializeERC20` uses via `ERC20StorageWrapper`.
+    ///      Unlike `initializeERC20`, this does NOT trigger `ScheduledTasksOps` or
+    ///      overwrite name/symbol, making it safe alongside snapshot scheduled-tasks tests.
+    /// @param d The decimal count to set (e.g. 6 for the standard equity token value).
+    function forceDecimals(uint8 d) external override {
+        ERC20StorageWrapper.setDecimals(d);
+    }
+
     function getStaticResolverKey() external pure returns (bytes32 staticResolverKey_) {
         // Must return the production `RESOLVER_KEY_DIAMOND` so the BLR
         // registration matches the `atsRegistry.data.ts` entry. The internal
@@ -150,7 +175,7 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
     }
 
     function getStaticFunctionSelectors() external pure returns (bytes4[] memory staticFunctionSelectors_) {
-        staticFunctionSelectors_ = new bytes4[](27);
+        staticFunctionSelectors_ = new bytes4[](29);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this.initializeDiamondCut.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.forceNonOperational.selector;
@@ -161,6 +186,8 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
         staticFunctionSelectors_[selectorsIndex++] = this.setMultiPartition.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.forceDeactivate.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.forceSecurityFlags.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.forceControllable.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.forceDecimals.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.updateConfigVersion.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.updateConfig.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.updateResolver.selector;

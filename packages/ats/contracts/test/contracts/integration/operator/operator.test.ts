@@ -111,7 +111,6 @@ export function operatorTests(getCtx: () => AssetMockCtx): void {
       beforeEach(async () => {
         await asset.forceDeactivate();
       });
-
       it("GIVEN a deactivated asset WHEN authorizeOperator THEN transaction fails with Deactivated", async () => {
         await expect(asset.connect(signer_A).authorizeOperator(ethers.ZeroAddress)).to.be.revertedWithCustomError(
           asset,

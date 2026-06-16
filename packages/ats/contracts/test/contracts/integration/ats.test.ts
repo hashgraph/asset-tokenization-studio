@@ -53,6 +53,22 @@ import { snapshotsByPartitionTests } from "./snapshotsByPartition/snapshotsByPar
 import { votingSecurityHoldersTests } from "./votingSecurityHolders/votingSecurityHolders.test";
 import { transferAndLockByPartitionTests } from "./transferAndLockByPartition/transferAndLockByPartition.test";
 
+// ── W2: layer_1 suites ────────────────────────────────────────────────
+import { lockTests } from "./layer_1/lock/lock.test";
+import { partitionsTests } from "./layer_1/partitions/partitions.test";
+import { transferAndLockTests } from "./layer_1/transferAndLock/transferAndLock.test";
+import { erc20PermitTests } from "./layer_1/ERC1400/ERC20Permit/erc20Permit.test";
+import { externalControlListTests } from "./externalControlLists/externalControlList.test";
+import { externalKycListTests } from "./externalKycLists/externalKycList.test";
+import { externalPauseTests } from "./externalPauses/externalPause.test";
+import { externalListSizeCapTests } from "./externalPauses/externalListSizeCap.test";
+import { allowanceTests } from "./allowance/allowance.test";
+import { controllerTests } from "./controller/controller.test";
+import { holdTests } from "./hold/hold.test";
+import { snapshotsTests } from "./snapshots/snapshots.test";
+import { controllerByPartitionTests } from "./controllerByPartition/controllerByPartition.test";
+import { securityHoldersAtSnapshotTests } from "./securityHoldersAtSnapshot/securityHoldersAtSnapshot.test";
+
 describe("ATS — IAsset Suites", () => {
   let ctx: Awaited<ReturnType<typeof deployAssetMockCtx>>;
 
@@ -96,4 +112,22 @@ describe("ATS — IAsset Suites", () => {
   snapshotsByPartitionTests(() => ctx);
   votingSecurityHoldersTests(() => ctx);
   transferAndLockByPartitionTests(() => ctx);
+
+  // ── W2: New suites ─────────────────────────────────────────────────
+  allowanceTests(() => ctx);
+  controllerTests(() => ctx);
+  controllerByPartitionTests(() => ctx);
+  holdTests(() => ctx);
+  snapshotsTests(() => ctx);
+  securityHoldersAtSnapshotTests(() => ctx);
+
+  // ── W2: layer_1 suites ─────────────────────────────────────────────
+  lockTests(() => ctx);
+  partitionsTests(() => ctx);
+  transferAndLockTests(() => ctx);
+  erc20PermitTests(() => ctx);
+  externalControlListTests(() => ctx);
+  externalKycListTests(() => ctx);
+  externalPauseTests(() => ctx);
+  externalListSizeCapTests(() => ctx);
 });

@@ -13,8 +13,22 @@
  * @see openspec/changes/test-optimization-shared-fixtures
  */
 
-import type { ResolverProxy, IAssetMock } from "@contract-types";
-import { ResolverProxy__factory, IAssetMock__factory } from "@contract-types";
+import type {
+  ResolverProxy,
+  IAssetMock,
+  MockedWhitelist,
+  MockedBlacklist,
+  MockedExternalKycList,
+  MockedExternalPause,
+} from "@contract-types";
+import {
+  IAssetMock__factory,
+  MockedBlacklist__factory,
+  MockedExternalKycList__factory,
+  MockedExternalPause__factory,
+  MockedWhitelist__factory,
+  ResolverProxy__factory,
+} from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFullAssetFixture } from "../deploy/fullAsset";
 
@@ -40,6 +54,13 @@ export interface AssetMockCtx extends InfraData {
   asset: IAssetMock;
   /** The deployed ResolverProxy (diamond) contract. */
   diamond: ResolverProxy;
+  /** Pool of external mock contracts deployed alongside the asset for external-control-list tests. */
+  externalMocks: {
+    whitelist: MockedWhitelist[];
+    blacklist: MockedBlacklist[];
+    kyc: MockedExternalKycList[];
+    pause: MockedExternalPause[];
+  };
 }
 
 // ============================================================================
@@ -83,20 +104,57 @@ async function deployAssetMockToken(infra: InfraData): Promise<ResolverProxy> {
  */
 export async function buildAssetMockCtx(base: InfraData & { diamond: ResolverProxy }): Promise<AssetMockCtx> {
   const target = await base.diamond.getAddress();
+  const externalMocks = await deployExternalMockPool(base.deployer);
 
   const ctx: AssetMockCtx = {
     ...base,
     diamond: base.diamond,
     asset: IAssetMock__factory.connect(target, base.deployer),
+    externalMocks,
   };
 
   assertHandlesBound(ctx);
   return ctx;
 }
 
-// ============================================================================
-// Invariant guard
-// ============================================================================
+/**
+ * Deploy a pool of external mock contracts for use by external-control-list,
+ * external-KYC-list, and external-pause suites. The mocks are stateless until
+ * a suite registers and configures them on the shared asset at runtime.
+ */
+async function deployExternalMockPool(deployer: InfraData["deployer"]): Promise<AssetMockCtx["externalMocks"]> {
+  const deployWhitelist = () => new MockedWhitelist__factory(deployer).deploy();
+  const deployBlacklist = () => new MockedBlacklist__factory(deployer).deploy();
+  const deployKyc = () => new MockedExternalKycList__factory(deployer).deploy();
+  const deployPause = () => new MockedExternalPause__factory(deployer).deploy();
+
+  const whitelist = await Promise.all([
+    (await deployWhitelist()).waitForDeployment(),
+    (await deployWhitelist()).waitForDeployment(),
+    (await deployWhitelist()).waitForDeployment(),
+  ]);
+  const blacklist = await Promise.all([
+    (await deployBlacklist()).waitForDeployment(),
+    (await deployBlacklist()).waitForDeployment(),
+    (await deployBlacklist()).waitForDeployment(),
+  ]);
+  const kyc = await Promise.all([
+    (await deployKyc()).waitForDeployment(),
+    (await deployKyc()).waitForDeployment(),
+    (await deployKyc()).waitForDeployment(),
+    (await deployKyc()).waitForDeployment(),
+    (await deployKyc()).waitForDeployment(),
+  ]);
+  const pause = await Promise.all([
+    (await deployPause()).waitForDeployment(),
+    (await deployPause()).waitForDeployment(),
+    (await deployPause()).waitForDeployment(),
+    (await deployPause()).waitForDeployment(),
+    (await deployPause()).waitForDeployment(),
+  ]);
+
+  return { whitelist, blacklist, kyc, pause } as AssetMockCtx["externalMocks"];
+}
 
 /**
  * Assert that every contract handle in the context points to the same proxy address.
