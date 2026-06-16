@@ -1508,7 +1508,6 @@ export async function deploySystemWithNewBlr(
       summary: {
         totalContracts: 3, // ProxyAdmin, BLR, Factory
         totalFacets: facetsResult.deployed.size,
-        // Bond + Factory (bond-only) or Equity + Bond + BondFixedRate + BondKpiLinkedRate + Loan + LoansPortfolio + DepositToken + Factory
         totalConfigurations: deployOnlyBondConfig ? 2 : 8,
         deploymentTime: Date.now() - startTime,
         gasUsed: totalGasUsed.toString(),
