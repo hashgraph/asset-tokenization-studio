@@ -32,13 +32,13 @@
 //   --strict       Exit 1 on any change. Use once the warning rollout has
 //                  bedded in.
 
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 import path from "path";
 
 import { HashKind, isHashKind, isValidPascalArg } from "./hashGen";
 
 const PKG_ROOT = path.resolve(__dirname, "..", "..");
-const REPO_ROOT = execSync("git rev-parse --show-toplevel", { cwd: PKG_ROOT, encoding: "utf8" }).trim();
+const REPO_ROOT = execFileSync("git", ["rev-parse", "--show-toplevel"], { cwd: PKG_ROOT, encoding: "utf8" }).trim();
 // Path of the contracts source tree relative to the repository root. Both
 // `git ls-tree` output and `git show <ref>:<path>` argument MUST use this
 // repo-root-relative form, even though the script's invocation cwd is the
@@ -59,7 +59,7 @@ interface Entry {
 }
 
 function git(args: string[]): string {
-  return execSync(`git ${args.join(" ")}`, {
+  return execFileSync("git", args, {
     cwd: REPO_ROOT,
     encoding: "utf8",
     maxBuffer: 64 * 1024 * 1024,
