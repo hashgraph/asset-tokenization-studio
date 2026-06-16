@@ -284,7 +284,7 @@ export function snapshotsTests(getCtx: () => AssetMockCtx): void {
       expect([...snapshot_TokenHolders_2]).to.have.members([signer_A.address, signer_C.address]);
     });
 
-    describe("Scheduled tasks", async () => {
+    describe("Scheduled tasks", () => {
       it("GIVEN an account with snapshot role WHEN takeSnapshot THEN scheduled tasks get executed succeeds", async () => {
         await asset.forceDecimals(6);
 

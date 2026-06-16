@@ -20,6 +20,8 @@ export function externalListSizeCapTests(getCtx: () => AssetMockCtx): void {
     let signer_A: HardhatEthersSigner;
     let asset: IAssetMock;
 
+    // Deploys outside the shared ctx.externalMocks pool because the boundary tests
+    // need up to 11 instances per type, whereas the shared pool only provides 5.
     async function deployMockAddresses(contractName: string, count: number): Promise<string[]> {
       const factory = await ethers.getContractFactory(contractName, signer_A);
       const addresses: string[] = [];

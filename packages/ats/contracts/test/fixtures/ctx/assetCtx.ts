@@ -21,8 +21,14 @@ import type {
   MockedExternalKycList,
   MockedExternalPause,
 } from "@contract-types";
-import { ResolverProxy__factory, IAssetMock__factory } from "@contract-types";
-import { ethers } from "hardhat";
+import {
+  IAssetMock__factory,
+  MockedBlacklist__factory,
+  MockedExternalKycList__factory,
+  MockedExternalPause__factory,
+  MockedWhitelist__factory,
+  ResolverProxy__factory,
+} from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFullAssetFixture } from "../deploy/fullAsset";
 
@@ -117,34 +123,34 @@ export async function buildAssetMockCtx(base: InfraData & { diamond: ResolverPro
  * a suite registers and configures them on the shared asset at runtime.
  */
 async function deployExternalMockPool(deployer: InfraData["deployer"]): Promise<AssetMockCtx["externalMocks"]> {
-  const whitelistFactory = await ethers.getContractFactory("MockedWhitelist", deployer);
-  const blacklistFactory = await ethers.getContractFactory("MockedBlacklist", deployer);
-  const kycFactory = await ethers.getContractFactory("MockedExternalKycList", deployer);
-  const pauseFactory = await ethers.getContractFactory("MockedExternalPause", deployer);
+  const deployWhitelist = () => new MockedWhitelist__factory(deployer).deploy();
+  const deployBlacklist = () => new MockedBlacklist__factory(deployer).deploy();
+  const deployKyc = () => new MockedExternalKycList__factory(deployer).deploy();
+  const deployPause = () => new MockedExternalPause__factory(deployer).deploy();
 
   const whitelist = await Promise.all([
-    (await whitelistFactory.deploy()).waitForDeployment(),
-    (await whitelistFactory.deploy()).waitForDeployment(),
-    (await whitelistFactory.deploy()).waitForDeployment(),
+    (await deployWhitelist()).waitForDeployment(),
+    (await deployWhitelist()).waitForDeployment(),
+    (await deployWhitelist()).waitForDeployment(),
   ]);
   const blacklist = await Promise.all([
-    (await blacklistFactory.deploy()).waitForDeployment(),
-    (await blacklistFactory.deploy()).waitForDeployment(),
-    (await blacklistFactory.deploy()).waitForDeployment(),
+    (await deployBlacklist()).waitForDeployment(),
+    (await deployBlacklist()).waitForDeployment(),
+    (await deployBlacklist()).waitForDeployment(),
   ]);
   const kyc = await Promise.all([
-    (await kycFactory.deploy()).waitForDeployment(),
-    (await kycFactory.deploy()).waitForDeployment(),
-    (await kycFactory.deploy()).waitForDeployment(),
-    (await kycFactory.deploy()).waitForDeployment(),
-    (await kycFactory.deploy()).waitForDeployment(),
+    (await deployKyc()).waitForDeployment(),
+    (await deployKyc()).waitForDeployment(),
+    (await deployKyc()).waitForDeployment(),
+    (await deployKyc()).waitForDeployment(),
+    (await deployKyc()).waitForDeployment(),
   ]);
   const pause = await Promise.all([
-    (await pauseFactory.deploy()).waitForDeployment(),
-    (await pauseFactory.deploy()).waitForDeployment(),
-    (await pauseFactory.deploy()).waitForDeployment(),
-    (await pauseFactory.deploy()).waitForDeployment(),
-    (await pauseFactory.deploy()).waitForDeployment(),
+    (await deployPause()).waitForDeployment(),
+    (await deployPause()).waitForDeployment(),
+    (await deployPause()).waitForDeployment(),
+    (await deployPause()).waitForDeployment(),
+    (await deployPause()).waitForDeployment(),
   ]);
 
   return { whitelist, blacklist, kyc, pause } as AssetMockCtx["externalMocks"];

@@ -4,12 +4,11 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ATS_ROLES, dateToUnixTimestamp, EMPTY_STRING, ZERO, RESOLVER_KEY_BALANCE_TRACKER_ADJUSTED } from "@scripts";
-import { deployAssetMockCtx, executeRbac, MAX_UINT256 } from "@test";
+import { ATS_ROLES, dateToUnixTimestamp, RESOLVER_KEY_BALANCE_TRACKER_ADJUSTED } from "@scripts";
+import { DEFAULT_PARTITION, executeRbac, grantKycToHolders } from "@test";
+import type { AssetMockCtx } from "@test";
 
 export function balanceTrackerAdjustedTests(getCtx: () => AssetMockCtx): void {
-  export function balanceTrackerAdjustedTests(getCtx: () => AssetMockCtx): void {
   describe("BalanceTrackerAdjusted Tests", () => {
     let signer_A: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
