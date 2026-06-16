@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.28;
+pragma solidity >=0.8.0 <0.9.0;
 
 import { IAsset } from "../../facets/IAsset.sol";
 import { IMockDiamondCut } from "../mocks/MockDiamondCut.sol";
