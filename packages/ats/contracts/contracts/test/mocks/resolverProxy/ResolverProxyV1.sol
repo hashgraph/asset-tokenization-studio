@@ -10,12 +10,12 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ResolverProxyUnstructuredV1 } from "./ResolverProxyUnstructuredV1.sol";
 import { IResolverProxyV1 } from "./IResolverProxyV1.sol";
-import { IBusinessLogicResolver } from "../../../infrastructure/diamond/IBusinessLogicResolver.sol";
+import { IBusinessLogicResolverV1 } from "./IBusinessLogicResolverV1.sol";
 import { ResolverProxyStorageWrapperV1 } from "./ResolverProxyStorageWrapperV1.sol";
 
 contract ResolverProxyV1 is ResolverProxyUnstructuredV1 {
     constructor(
-        IBusinessLogicResolver _resolver,
+        IBusinessLogicResolverV1 _resolver,
         bytes32 _resolverProxyConfigurationId,
         uint256 _version,
         IResolverProxyV1.Rbac[] memory _rbac
