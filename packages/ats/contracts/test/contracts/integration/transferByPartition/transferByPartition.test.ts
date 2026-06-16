@@ -3,193 +3,170 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { type IAsset, type ResolverProxy, ITransferByPartition__factory, MockDiamondCut } from "@contract-types";
+import { IAssetMock } from "@contract-types";
+import type { AssetMockCtx } from "@test";
 import { RESOLVER_KEY_TRANSFER_BY_PARTITION } from "@scripts";
-import {
-  ADDRESS_ZERO,
-  ATS_ROLES,
-  DEFAULT_PARTITION,
-  EMPTY_HEX_BYTES,
-  EMPTY_STRING,
-  ZERO,
-  EQUITY_CONFIG_ID,
-} from "@scripts";
-import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
+import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
+import { executeRbac, MAX_UINT256 } from "@test";
 
 const _WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
 const _AMOUNT = 1000;
 const EMPTY_VC_ID = EMPTY_STRING;
 
-describe("TransferByPartition Facet Tests", () => {
-  let diamond: ResolverProxy;
-  let signer_A: HardhatEthersSigner;
-  let signer_B: HardhatEthersSigner;
-  let signer_C: HardhatEthersSigner;
+export function transferByPartitionTests(getCtx: () => AssetMockCtx): void {
+  describe("TransferByPartition Facet Tests", () => {
+    let signer_A: HardhatEthersSigner;
+    let signer_B: HardhatEthersSigner;
+    let signer_C: HardhatEthersSigner;
+    let unknownSigner: HardhatEthersSigner;
 
-  let asset: IAsset;
-  let mockDiamondCut: MockDiamondCut;
+    let asset: IAssetMock;
 
-  async function setupBalances() {
-    await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-    await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-    await asset.connect(signer_B).issueByPartition({
-      partition: DEFAULT_PARTITION,
-      tokenHolder: signer_A.address,
-      value: _AMOUNT,
-      data: EMPTY_HEX_BYTES,
-    });
-  }
+    async function setupBalances() {
+      await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+      await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+      await asset.connect(signer_B).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: _AMOUNT,
+        data: EMPTY_HEX_BYTES,
+      });
+    }
 
-  async function deployFixtureSinglePartition() {
-    const base = await deployEquityTokenFixture();
-    diamond = base.diamond;
-    signer_A = base.deployer;
-    signer_B = base.user1;
-    signer_C = base.user2;
-
-    asset = await ethers.getContractAt("IAsset", diamond.target);
-
-    await executeRbac(asset, [
-      { role: ATS_ROLES.ROLE_ISSUER, members: [signer_B.address] },
-      { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
-      { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
-    ]);
-
-    await asset.connect(signer_A).addIssuer(signer_A.address);
-    await setupBalances();
-  }
-
-  async function deployFixtureMultiPartition() {
-    const base = await deployEquityTokenFixture({
-      equityDataParams: {
-        securityData: {
-          isMultiPartition: true,
-          clearingActive: true,
-        },
-      },
-    });
-    diamond = base.diamond;
-    signer_A = base.deployer;
-    signer_B = base.user1;
-    signer_C = base.user2;
-
-    asset = await ethers.getContractAt("IAsset", diamond.target);
-    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
-    await executeRbac(asset, [
-      { role: ATS_ROLES.ROLE_ISSUER, members: [signer_B.address] },
-      { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
-      { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
-      { role: ATS_ROLES.ROLE_CLEARING, members: [signer_A.address] },
-    ]);
-
-    await asset.connect(signer_A).addIssuer(signer_A.address);
-    await setupBalances();
-  }
-
-  describe("Single partition mode", () => {
     beforeEach(async () => {
-      await loadFixture(deployFixtureSinglePartition);
+      const ctx = getCtx();
+      signer_A = ctx.deployer;
+      signer_B = ctx.user1;
+      signer_C = ctx.user2;
+      unknownSigner = ctx.unknownSigner;
+      asset = ctx.asset;
     });
 
-    describe("onlyDefaultPartitionWithSinglePartition", () => {
-      it("GIVEN a non-default partition in single-partition mode WHEN transferByPartition THEN reverts with PartitionNotAllowedInSinglePartitionMode", async () => {
-        const transferByPartition = ITransferByPartition__factory.connect(await diamond.getAddress(), signer_A);
+    describe("Single partition mode", () => {
+      beforeEach(async () => {
+        await executeRbac(asset, [
+          { role: ATS_ROLES.ROLE_ISSUER, members: [signer_B.address] },
+          { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+          { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
+        ]);
 
-        await expect(
-          transferByPartition.transferByPartition(_WRONG_PARTITION, { to: signer_C.address, value: _AMOUNT }, "0x"),
-        ).to.be.revertedWithCustomError(transferByPartition, "PartitionNotAllowedInSinglePartitionMode");
+        await asset.connect(signer_A).addIssuer(signer_A.address);
+        await setupBalances();
+      });
+
+      describe("onlyDefaultPartitionWithSinglePartition", () => {
+        it("GIVEN a non-default partition in single-partition mode WHEN transferByPartition THEN reverts with PartitionNotAllowedInSinglePartitionMode", async () => {
+          await expect(
+            asset
+              .connect(signer_A)
+              .transferByPartition(_WRONG_PARTITION, { to: signer_C.address, value: _AMOUNT }, "0x"),
+          ).to.be.revertedWithCustomError(asset, "PartitionNotAllowedInSinglePartitionMode");
+        });
+      });
+
+      describe("Happy path", () => {
+        it("GIVEN valid parameters WHEN transferByPartition in single-partition mode THEN emits TransferByPartition and Transfer", async () => {
+          await expect(
+            asset
+              .connect(signer_A)
+              .transferByPartition(DEFAULT_PARTITION, { to: signer_C.address, value: _AMOUNT }, EMPTY_HEX_BYTES),
+          )
+            .to.emit(asset, "TransferByPartition")
+            .withArgs(
+              DEFAULT_PARTITION,
+              ADDRESS_ZERO,
+              signer_A.address,
+              signer_C.address,
+              _AMOUNT,
+              EMPTY_HEX_BYTES,
+              "0x",
+            )
+            .to.emit(asset, "Transfer")
+            .withArgs(signer_A.address, signer_C.address, _AMOUNT);
+        });
       });
     });
 
-    describe("Happy path", () => {
-      it("GIVEN valid parameters WHEN transferByPartition THEN emits TransferByPartition and Transfer", async () => {
-        const transferByPartition = ITransferByPartition__factory.connect(await diamond.getAddress(), signer_A);
+    describe("Multi partition mode", () => {
+      beforeEach(async () => {
+        await asset.setMultiPartition(true);
 
+        await executeRbac(asset, [
+          { role: ATS_ROLES.ROLE_ISSUER, members: [signer_B.address] },
+          { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+          { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
+        ]);
+
+        await asset.connect(signer_A).addIssuer(signer_A.address);
+        await setupBalances();
+      });
+
+      describe("Happy path", () => {
+        it("GIVEN valid parameters WHEN transferByPartition in multi-partition mode THEN emits TransferByPartition and Transfer", async () => {
+          await expect(
+            asset
+              .connect(signer_A)
+              .transferByPartition(DEFAULT_PARTITION, { to: signer_C.address, value: _AMOUNT }, EMPTY_HEX_BYTES),
+          )
+            .to.emit(asset, "TransferByPartition")
+            .withArgs(
+              DEFAULT_PARTITION,
+              ADDRESS_ZERO,
+              signer_A.address,
+              signer_C.address,
+              _AMOUNT,
+              EMPTY_HEX_BYTES,
+              "0x",
+            )
+            .to.emit(asset, "Transfer")
+            .withArgs(signer_A.address, signer_C.address, _AMOUNT);
+        });
+      });
+    });
+
+    describe("Deactivated", () => {
+      beforeEach(async () => {
+        await asset.forceDeactivate();
+      });
+
+      it("GIVEN a deactivated asset WHEN transferByPartition THEN transaction fails with Deactivated", async () => {
         await expect(
-          transferByPartition.transferByPartition(
-            DEFAULT_PARTITION,
-            { to: signer_C.address, value: _AMOUNT },
-            EMPTY_HEX_BYTES,
-          ),
-        )
-          .to.emit(transferByPartition, "TransferByPartition")
-          .withArgs(DEFAULT_PARTITION, ADDRESS_ZERO, signer_A.address, signer_C.address, _AMOUNT, EMPTY_HEX_BYTES, "0x")
-          .to.emit(asset, "Transfer")
-          .withArgs(signer_A.address, signer_C.address, _AMOUNT);
+          asset.connect(signer_A).transferByPartition(ethers.ZeroHash, { to: ethers.ZeroAddress, value: 0 }, "0x"),
+        ).to.be.revertedWithCustomError(asset, "Deactivated");
+      });
+    });
+
+    describe("initializeTransferByPartition", () => {
+      it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeTransferByPartition is called THEN AccountHasNoRole", async () => {
+        await expect(asset.connect(unknownSigner).initializeTransferByPartition())
+          .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+          .withArgs(unknownSigner.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+      });
+
+      it("GIVEN already-initialised WHEN initializeTransferByPartition is called again THEN FacetAlreadyRegistered", async () => {
+        await expect(asset.initializeTransferByPartition())
+          .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+          .withArgs(RESOLVER_KEY_TRANSFER_BY_PARTITION, 1);
+      });
+    });
+
+    describe("initializeTransferByPartition event", () => {
+      it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeTransferByPartition is called THEN emits TransferByPartitionInitialized", async () => {
+        await asset.forceFacetNotRegistered(RESOLVER_KEY_TRANSFER_BY_PARTITION);
+        await expect(asset.initializeTransferByPartition()).to.emit(asset, "TransferByPartitionInitialized");
+      });
+    });
+
+    describe("nonOperational", () => {
+      beforeEach(async () => {
+        await asset.forceNonOperational();
+      });
+
+      it("GIVEN non-operational WHEN transferByPartition is called THEN AssetNotOperational", async () => {
+        await expect(
+          asset.transferByPartition(ethers.ZeroHash, { to: ethers.ZeroAddress, value: 0n }, "0x"),
+        ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
       });
     });
   });
-
-  describe("Multi partition mode", () => {
-    beforeEach(async () => {
-      await loadFixture(deployFixtureMultiPartition);
-      await asset.connect(signer_A).deactivateClearing();
-    });
-
-    describe("Happy path", () => {
-      it("GIVEN valid parameters WHEN transferByPartition THEN emits TransferByPartition and Transfer", async () => {
-        const transferByPartition = ITransferByPartition__factory.connect(await diamond.getAddress(), signer_A);
-
-        await expect(
-          transferByPartition.transferByPartition(
-            DEFAULT_PARTITION,
-            { to: signer_C.address, value: _AMOUNT },
-            EMPTY_HEX_BYTES,
-          ),
-        )
-          .to.emit(transferByPartition, "TransferByPartition")
-          .withArgs(DEFAULT_PARTITION, ADDRESS_ZERO, signer_A.address, signer_C.address, _AMOUNT, EMPTY_HEX_BYTES, "0x")
-          .to.emit(asset, "Transfer")
-          .withArgs(signer_A.address, signer_C.address, _AMOUNT);
-      });
-    });
-  });
-
-  describe("Deactivated", () => {
-    it("GIVEN a deactivated asset WHEN transferByPartition THEN transaction fails with Deactivated", async () => {
-      const base = await deployEquityTokenFixture();
-      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
-      await deactivatedAsset.connect(base.deployer).deactivate();
-      await expect(
-        deactivatedAsset
-          .connect(base.deployer)
-          .transferByPartition(ethers.ZeroHash, { to: ethers.ZeroAddress, value: 0 }, "0x"),
-      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
-    });
-  });
-
-  describe("initializeTransferByPartition", () => {
-    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeTransferByPartition is called THEN AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeTransferByPartition())
-        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
-        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
-    });
-
-    it("GIVEN already-initialised WHEN initializeTransferByPartition is called again THEN FacetAlreadyRegistered", async () => {
-      await expect(asset.initializeTransferByPartition())
-        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(RESOLVER_KEY_TRANSFER_BY_PARTITION, 1);
-    });
-  });
-
-  describe("initializeTransferByPartition event", () => {
-    it("GIVEN a fresh deployment WHEN initializeTransferByPartition is called THEN emits TransferByPartitionInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_TRANSFER_BY_PARTITION);
-      await expect(asset.initializeTransferByPartition()).to.emit(asset, "TransferByPartitionInitialized");
-    });
-  });
-
-  describe("nonOperational", () => {
-    beforeEach(async () => {
-      await mockDiamondCut.forceNonOperational();
-    });
-
-    it("GIVEN non-operational WHEN transferByPartition is called THEN AssetNotOperational", async () => {
-      await expect(asset.transferByPartition(ethers.ZeroHash, { to: ethers.ZeroAddress, value: 0n }, "0x"))
-        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
-        .withArgs(EQUITY_CONFIG_ID, 1);
-    });
-  });
-});
+}

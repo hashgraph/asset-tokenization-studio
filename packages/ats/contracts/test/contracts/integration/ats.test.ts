@@ -79,6 +79,9 @@ import { batchFreezeTests } from "./batchFreeze/batchFreeze.test";
 import { clearingAtSnapshotTests } from "./clearingAtSnapshot/clearingAtSnapshot.test";
 import { balanceTrackerTests } from "./balanceTracker/balanceTracker.test";
 import { batchTransferTests } from "./batchTransfer/batchTransfer.test";
+import { transferTests } from "./transfer/transfer.test";
+import { transferByPartitionTests } from "./transferByPartition/transferByPartition.test";
+import { burnTests } from "./burn/burn.test";
 import { allowanceTests } from "./allowance/allowance.test";
 import { controllerTests } from "./controller/controller.test";
 import { holdTests } from "./hold/hold.test";
@@ -180,4 +183,9 @@ describe("ATS — IAsset Suites", () => {
   clearingAtSnapshotTests(() => ctx);
   balanceTrackerTests(() => ctx);
   batchTransferTests(() => ctx);
+
+  // ── W4: Transfer / burn suites ────────────────────────────────────────
+  transferTests(() => ctx);
+  transferByPartitionTests(() => ctx);
+  burnTests(() => ctx);
 });
