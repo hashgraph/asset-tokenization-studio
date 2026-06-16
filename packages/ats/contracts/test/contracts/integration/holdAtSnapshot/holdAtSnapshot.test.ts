@@ -6,7 +6,6 @@ import { IAssetMock } from "@contract-types";
 import { ATS_ROLES, RESOLVER_KEY_HOLD_AT_SNAPSHOT } from "@scripts";
 import { DEFAULT_PARTITION, PARTITION_ID_2, executeRbac, grantKycToHolders, MAX_UINT256 } from "@test";
 import type { AssetMockCtx } from "@test";
-import type { AssetMockCtx } from "@test";
 
 const amount = 1000;
 

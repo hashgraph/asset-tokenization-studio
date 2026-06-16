@@ -57,18 +57,6 @@ export function transferAndLockByPartitionTests(getCtx: () => AssetMockCtx): voi
     beforeEach(async () => {
       const ctx = getCtx();
       asset = ctx.asset;
-
-      signer_A = ctx.deployer;
-      signer_B = ctx.user2;
-      signer_C = ctx.user3;
-      signer_D = ctx.user4;
-
-      await executeRbac(asset, set_initRbacs());
-      await setFacets(asset);
-
-    beforeEach(async () => {
-      const ctx = getCtx();
-      asset = ctx.asset;
       signer_A = ctx.deployer;
       signer_B = ctx.user2;
       signer_C = ctx.user3;
