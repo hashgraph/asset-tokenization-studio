@@ -87,7 +87,7 @@ describe("updateResolverProxy* - Integration Tests", () => {
 
       // Verify initial version
       const configBefore = await getResolverProxyConfigInfo(deployer, proxyAddress);
-      expect(configBefore.version).to.equal(BLR_VERSIONS.FIRST);
+      expect(configBefore.configurationVersion).to.equal(BLR_VERSIONS.FIRST);
 
       // Update version
       await updateResolverProxyVersion(deployer, proxyAddress, initialVersion + 1, {
@@ -96,7 +96,7 @@ describe("updateResolverProxy* - Integration Tests", () => {
 
       // Verify new version on-chain
       const configAfter = await getResolverProxyConfigInfo(deployer, proxyAddress);
-      expect(configAfter.version).to.equal(BLR_VERSIONS.SECOND);
+      expect(configAfter.configurationVersion).to.equal(BLR_VERSIONS.SECOND);
     });
   });
 
@@ -347,7 +347,7 @@ describe("updateResolverProxy* - Integration Tests", () => {
 
       // Verify persistence by reading again
       const configInfo = await getResolverProxyConfigInfo(deployer, proxyAddress);
-      expect(configInfo.version).to.equal(BLR_VERSIONS.SECOND);
+      expect(configInfo.configurationVersion).to.equal(BLR_VERSIONS.SECOND);
     });
 
     it("should allow subsequent version updates within registered versions", async () => {
@@ -361,7 +361,7 @@ describe("updateResolverProxy* - Integration Tests", () => {
 
       // Verify final state is at max registered version
       const configInfo = await getResolverProxyConfigInfo(deployer, proxyAddress);
-      expect(configInfo.version).to.equal(maxVersion);
+      expect(configInfo.configurationVersion).to.equal(maxVersion);
     });
 
     it("should allow subsequent config updates", async () => {
@@ -378,7 +378,7 @@ describe("updateResolverProxy* - Integration Tests", () => {
       // Verify final state
       const configInfo = await getResolverProxyConfigInfo(deployer, proxyAddress);
       expect(configInfo.configurationId).to.equal(altConfigId);
-      expect(configInfo.version).to.equal(initialVersion + 1);
+      expect(configInfo.configurationVersion).to.equal(initialVersion + 1);
     });
   });
 

@@ -84,11 +84,15 @@ export interface ResolverProxyConfigInfo {
   /** Current BusinessLogicResolver address */
   resolver: string;
 
+  version: number;
+
   /** Current configuration ID */
   configurationId: string;
 
   /** Current version */
-  version: number;
+  configurationVersion: number;
+
+  replacementEnabled: boolean;
 }
 
 /**
@@ -157,12 +161,15 @@ export async function getResolverProxyConfigInfo(
     validateAddress(proxyAddress, "ResolverProxy address");
 
     const diamondCutFacet = DiamondFacet__factory.connect(proxyAddress, signerOrProvider);
-    const [resolver, configId, version] = await diamondCutFacet.getConfigInfo();
+    const [resolver, version, configId, configurationVersion, replacementEnabled] =
+      await diamondCutFacet.getConfigInfo();
 
     return {
       resolver,
-      configurationId: configId,
       version: Number(version),
+      configurationId: configId,
+      configurationVersion: Number(configurationVersion),
+      replacementEnabled: replacementEnabled,
     };
   } catch (err) {
     const errorMessage = extractRevertReason(err);

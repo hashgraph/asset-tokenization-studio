@@ -39,6 +39,8 @@ const TEST_CONFIG_IDS = {
   BLACKLIST_TEST: "0x0000000000000000000000000000000000000000000000000000000000000006",
 };
 
+const RESOLVER_PROXY_VERSION_V2 = "0x0000000000000002"; // bytes8
+
 describe("DiamondCutManager", () => {
   function createFacetConfigurations(ids: string[], versions: number[]): IDiamondCutManager.FacetConfigurationStruct[] {
     return ids.map((id, index) => ({
@@ -67,6 +69,33 @@ describe("DiamondCutManager", () => {
 
   async function atsInfrastructureFixture() {
     return await deployAtsInfrastructureFixture();
+  }
+
+  function buildBytes(
+    resolverProxyVersion: string,
+    configId: string,
+    configurationVersion: number,
+    replacementEnabled: boolean,
+  ): string {
+    const coder = ethers.AbiCoder.defaultAbiCoder();
+
+    // content = abi.encode(ResolverProxyConfigurationV2{ configurationId, configurationVersion, replacementEnabled })
+    const content = coder.encode(
+      ["tuple(bytes32 configurationId, uint256 configurationVersion, bool replacementEnabled)"],
+      [
+        {
+          configurationId: configId,
+          configurationVersion: configurationVersion,
+          replacementEnabled: replacementEnabled,
+        },
+      ],
+    );
+
+    // resolverProxyConfiguration = abi.encode(ResolverProxyConfigurationGeneric{ resolverProxyVersion, content })
+    return coder.encode(
+      ["tuple(bytes8 resolverProxyVersion, bytes content)"],
+      [{ resolverProxyVersion: resolverProxyVersion, content }],
+    );
   }
 
   beforeEach(async () => {
@@ -272,9 +301,10 @@ describe("DiamondCutManager", () => {
         selectorId,
       );
 
+      const resolverProxyConfiguration = buildBytes(RESOLVER_PROXY_VERSION_V2, configId, configVersion, false);
+
       const facetAddressForSelector = await diamondCutManager.resolveResolverProxyCall(
-        configId,
-        configVersion,
+        resolverProxyConfiguration,
         selectorId,
       );
 
@@ -382,7 +412,9 @@ describe("DiamondCutManager", () => {
       ),
     ).to.be.revertedWithCustomError(diamondCutManager, "ResolverProxyConfigurationNoRegistered");
 
-    const noFacetAddress = await diamondCutManager.resolveResolverProxyCall(EQUITY_CONFIG_ID, 1, "0x00000001");
+    const resolverProxyConfiguration = buildBytes(RESOLVER_PROXY_VERSION_V2, EQUITY_CONFIG_ID, 1, false);
+
+    const noFacetAddress = await diamondCutManager.resolveResolverProxyCall(resolverProxyConfiguration, "0x00000001");
     expect(noFacetAddress).to.equal("0x0000000000000000000000000000000000000000");
 
     const interfaceDoesnotExist = await diamondCutManager.resolveSupportsInterface(EQUITY_CONFIG_ID, 1, "0x00000001");
@@ -844,7 +876,10 @@ describe("DiamondCutManager", () => {
 
   it("GIVEN an existing configuration WHEN resolving a call with version 0 THEN reverts with VersionZero", async () => {
     const pauseSelector = "0x8456cb59";
-    await expect(diamondCutManager.resolveResolverProxyCall(EQUITY_CONFIG_ID, 0, pauseSelector))
+
+    const resolverProxyConfiguration = buildBytes(RESOLVER_PROXY_VERSION_V2, EQUITY_CONFIG_ID, 0, false);
+
+    await expect(diamondCutManager.resolveResolverProxyCall(resolverProxyConfiguration, pauseSelector))
       .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
       .withArgs(EQUITY_CONFIG_ID);
   });

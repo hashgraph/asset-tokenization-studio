@@ -16,7 +16,7 @@ import {
   KycFacet__factory,
   LockFacet,
 } from "@contract-types";
-import { EQUITY_CONFIG_ID, ATS_ROLES } from "@scripts";
+import { EQUITY_CONFIG_ID, ATS_ROLES, ADDRESS_ZERO } from "@scripts";
 import { deployOrchestratorLibraries, getFacetLibraryLinks, hasOrchestratorLibraryAddresses } from "@scripts/domain";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 
@@ -123,6 +123,21 @@ describe("BusinessLogicResolver", () => {
         businessLogicResolver.removeSelectorsFromBlacklist(EQUITY_CONFIG_ID, ["0x8456cb59"]),
       ).to.be.revertedWithCustomError(businessLogicResolver, "IsPaused");
     });
+
+    it("GIVEN a paused contract WHEN updateReplacementAddress is called THEN transaction fails with IsPaused", async () => {
+      await expect(
+        businessLogicResolver.updateReplacementAddress(
+          "0x0102030405010203040501020304050102030405",
+          "0x0504030201050403020105040302010504030201",
+        ),
+      ).to.be.revertedWithCustomError(businessLogicResolver, "IsPaused");
+    });
+
+    it("GIVEN a paused contract WHEN removeReplacementAddress is called THEN transaction fails with IsPaused", async () => {
+      await expect(
+        businessLogicResolver.removeReplacementAddress("0x0102030405010203040501020304050102030405"),
+      ).to.be.revertedWithCustomError(businessLogicResolver, "IsPaused");
+    });
   });
 
   describe("AccessControl", () => {
@@ -146,6 +161,23 @@ describe("BusinessLogicResolver", () => {
 
       await expect(
         businessLogicResolver.connect(signer_C).removeSelectorsFromBlacklist(EQUITY_CONFIG_ID, blackListedSelectors),
+      ).to.be.revertedWithCustomError(businessLogicResolver, "AccountHasNoRole");
+    });
+
+    it("GIVEN an account without admin role WHEN updating replacement address THEN transaction fails with AccountHasNoRole", async () => {
+      await expect(
+        businessLogicResolver
+          .connect(signer_C)
+          .updateReplacementAddress(
+            "0x0102030405010203040501020304050102030405",
+            "0x0504030201050403020105040302010504030201",
+          ),
+      ).to.be.revertedWithCustomError(businessLogicResolver, "AccountHasNoRole");
+    });
+
+    it("GIVEN an account without admin role WHEN removing replacement address THEN transaction fails with AccountHasNoRole", async () => {
+      await expect(
+        businessLogicResolver.connect(signer_C).removeReplacementAddress("0x0102030405010203040501020304050102030405"),
       ).to.be.revertedWithCustomError(businessLogicResolver, "AccountHasNoRole");
     });
   });
@@ -356,6 +388,36 @@ describe("BusinessLogicResolver", () => {
       // Remove a selector that doesn't exist
       await businessLogicResolver.removeSelectorsFromBlacklist(EQUITY_CONFIG_ID, blackListedSelectors);
       expect(await businessLogicResolver.getSelectorsBlacklist(EQUITY_CONFIG_ID, 0, 100)).to.deep.equal([]);
+    });
+
+    it("GIVEN address zero WHEN replacing it THEN transaction fails with AddressZero", async () => {
+      await expect(
+        businessLogicResolver.updateReplacementAddress(ADDRESS_ZERO, "0x0504030201050403020105040302010504030201"),
+      ).to.be.revertedWithCustomError(businessLogicResolver, "AddressZero");
+    });
+
+    it("GIVEN address zero WHEN using it to replace another one THEN transaction fails with AddressZero", async () => {
+      await expect(
+        businessLogicResolver.updateReplacementAddress("0x0504030201050403020105040302010504030201", ADDRESS_ZERO),
+      ).to.be.revertedWithCustomError(businessLogicResolver, "AddressZero");
+    });
+
+    it("GIVEN an address WHEN replacing it then removing itTHEN transactions success", async () => {
+      const replacedAddress = "0x0102030405010203040501020304050102030405";
+      const newAddress = "0x0504030201050403020105040302010504030201";
+      await expect(businessLogicResolver.updateReplacementAddress(replacedAddress, newAddress))
+        .to.emit(businessLogicResolver, "ReplacementAddressUpdated")
+        .withArgs(replacedAddress, newAddress);
+
+      const replacementAddress = await businessLogicResolver.getReplacementAddress(replacedAddress);
+      expect(replacementAddress).to.equal(newAddress);
+
+      await expect(businessLogicResolver.removeReplacementAddress(replacedAddress))
+        .to.emit(businessLogicResolver, "ReplacementAddressRemoved")
+        .withArgs(replacedAddress, newAddress);
+
+      const replacementAddressAfterRemoval = await businessLogicResolver.getReplacementAddress(replacedAddress);
+      expect(replacementAddressAfterRemoval).to.equal(ADDRESS_ZERO);
     });
   });
 

@@ -114,6 +114,11 @@ interface IBusinessLogicResolver is IDiamondCutManager {
     function removeReplacementAddress(address _oldAddress) external;
 
     /**
+     * @notice Returns the replacement address for a given address, or address(0) if none exists
+     */
+    function getReplacementAddress(address _oldAddress) external view returns (address replacementAddress_);
+
+    /**
      * @notice Returns the current status of a given version
      */
     function getVersionStatus(

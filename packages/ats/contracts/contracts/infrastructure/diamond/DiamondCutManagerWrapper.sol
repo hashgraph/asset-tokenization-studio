@@ -300,6 +300,9 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
                 configuration.content,
                 (IResolverProxy.ResolverProxyConfigurationV2)
             );
+
+            _checkExplicitVersion(configurationV2.configurationId, configurationV2.configurationVersion);
+
             facetAddress_ = _resolveResolverProxyCallV2(
                 _dcms,
                 configurationV2.configurationId,

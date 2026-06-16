@@ -135,7 +135,7 @@ describe("BurnByPartitionFacet Tests", () => {
       it("GIVEN a token holder WHEN protectedRedeemFromByPartition THEN Transfer event is emitted from holder to address(0)", async () => {
         const domain = {
           name: (await asset.getERC20Metadata()).info.name,
-          version: (await asset.getConfigInfo()).version_.toString(),
+          version: (await asset.getConfigInfo()).configurationVersion_.toString(),
           chainId: await network.provider.send("eth_chainId"),
           verifyingContract: diamond.target as string,
         };

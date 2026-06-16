@@ -60,9 +60,13 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
         emit ReplacementAddressUpdated(_oldAddress, _newAddress);
     }
 
-    function removeReplacementAddress(address _oldAddress) external {
+    function removeReplacementAddress(address _oldAddress) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyUnpaused {
         address newAddressRemoved = _removeReplacementAddress(_oldAddress);
         emit ReplacementAddressRemoved(_oldAddress, newAddressRemoved);
+    }
+
+    function getReplacementAddress(address _oldAddress) external view returns (address replacementAddress_) {
+        replacementAddress_ = _getReplacementAddress(_oldAddress);
     }
 
     function getVersionStatus(
