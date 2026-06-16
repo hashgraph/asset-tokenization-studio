@@ -55,8 +55,7 @@ export function operatorTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN KYC'd addresses WHEN authorizeOperator THEN emits AuthorizedOperator and  state is updated", async () => {
         await expect(asset.connect(signer_C).authorizeOperator(signer_B.address))
           .to.emit(asset, "AuthorizedOperator")
-          .withArgs(signer_B.address, signer_C.address)
-          ;
+          .withArgs(signer_B.address, signer_C.address);
 
         expect(await asset.isOperator(signer_B.address, signer_C.address)).to.equal(true);
       });
@@ -84,8 +83,7 @@ export function operatorTests(getCtx: () => AssetMockCtx): void {
 
         await expect(asset.connect(signer_C).revokeOperator(signer_B.address))
           .to.emit(asset, "RevokedOperator")
-          .withArgs(signer_B.address, signer_C.address)
-          ;
+          .withArgs(signer_B.address, signer_C.address);
 
         expect(await asset.isOperator(signer_B.address, signer_C.address)).to.equal(false);
       });
