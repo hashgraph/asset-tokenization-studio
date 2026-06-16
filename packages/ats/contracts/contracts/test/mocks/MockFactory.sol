@@ -15,6 +15,11 @@ import { IKpiLinkedRate } from "../../facets/kpiLinkedRate/IKpiLinkedRate.sol";
 import { InterestRateStorageWrapper } from "../../domain/asset/InterestRateStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
+import { IDiamondCutManager } from "../../infrastructure/diamond/IDiamondCutManager.sol";
+import { IMockDiamondCut } from "./MockDiamondCut.sol";
+import { ResolverProxy } from "../../infrastructure/proxy/ResolverProxy.sol";
+import { IResolverProxy } from "../../infrastructure/proxy/IResolverProxy.sol";
+import { IBusinessLogicResolver } from "../../infrastructure/diamond/IBusinessLogicResolver.sol";
 
 /**
  * @title Mock Factory
@@ -100,6 +105,15 @@ interface IMockFactory is IFactory {
     function deployBondKpiLinkedRate(
         BondKpiLinkedRateData calldata _bondKpiLinkedRateData
     ) external returns (address bondAddress_);
+
+    /// @notice Deploy a test-only asset diamond against the AssetMock configuration.
+    /// @dev Mirrors `Factory._deploySecurityProxy` but force-readies every facet via
+    ///      `MockDiamondCut.forceFacetsReady` instead of running per-facet initialisers.
+    ///      The caller (test deployer) receives `DEFAULT_ADMIN_ROLE` on the proxy so per-suite test
+    ///      configuration (forceNonOperational, etc.) remains possible.
+    /// @param resolver_ The deployed BusinessLogicResolver (BLR) address.
+    /// @return assetAddress_ Address of the freshly deployed, fully ready test asset proxy.
+    function deployAssetMock(IBusinessLogicResolver resolver_) external returns (address assetAddress_);
 }
 
 /**
@@ -107,6 +121,14 @@ interface IMockFactory is IFactory {
  * @author Asset Tokenization Studio Team
  */
 abstract contract MockFactory is Factory, IMockFactory {
+    /// @notice Resolver configuration ID that registers the full IAsset facet union.
+    /// @dev All 7 asset-class facet sets (equity, bond, bondFixedRate, bondKpiLinkedRate,
+    ///      loan, loansPortfolio, depositToken) with DiamondFacet swapped for MockDiamondCut
+    ///      and EvmAccessorsFacet appended. Created by the TypeScript-side
+    ///      `createAssetMockConfiguration` at infrastructure deploy time.
+    ///      Value: 0x000000000000000000000000000000000000000000000000000000000000000a
+    bytes32 private constant _ASSET_MOCK_CONFIG_ID = 0x000000000000000000000000000000000000000000000000000000000000000a;
+
     /**
      * @notice Guarantees KPI-linked interest rate data is valid before deployment.
      * @dev Delegates to `_checkInterestRate`, which reverts for invalid interest-rate data.
@@ -192,6 +214,49 @@ abstract contract MockFactory is Factory, IMockFactory {
         _checkUnexpectedError(!isOperational_, FACTORY_OPERATIONAL_STATUS);
         IAccessControl(bondAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
         _emitBondKpiLinkedRateDeployed(bondAddress_, _bondKpiLinkedRateData);
+    }
+
+    // ── Test-only: deploy a diamond proxy against AssetMock config ──────────
+
+    /// @inheritdoc IMockFactory
+    function deployAssetMock(IBusinessLogicResolver resolver_) external returns (address assetAddress_) {
+        // 1. Build RBAC: seed the caller as temporary DEFAULT_ADMIN_ROLE holder
+        IResolverProxy.Rbac[] memory rbacs = new IResolverProxy.Rbac[](1);
+        rbacs[0] = IResolverProxy.Rbac({ role: DEFAULT_ADMIN_ROLE, members: new address[](1) });
+        rbacs[0].members[0] = msg.sender;
+
+        // 2. Deploy a bare ResolverProxy against ASSET_MOCK_CONFIG_ID, version 1.
+        //    Mirrors Factory._deploySecurityProxy but creates the proxy directly
+        //    without the SecurityData indirection (no ISIN, regulation, etc.).
+        ResolverProxy proxy = new ResolverProxy(resolver_, _ASSET_MOCK_CONFIG_ID, 1, rbacs);
+        assetAddress_ = address(proxy);
+
+        // 3. Read the full facet list from the BLR for the AssetMock config
+        uint256 facetsLen = resolver_.getFacetsLengthByConfigurationIdAndVersion(_ASSET_MOCK_CONFIG_ID, 1);
+        bytes32[] memory facetIds = resolver_.getFacetIdsByConfigurationIdAndVersion(
+            _ASSET_MOCK_CONFIG_ID,
+            1,
+            0,
+            facetsLen
+        );
+
+        // 4. Force every facet to READY status — skips per-facet initialisers.
+        //    This includes EvmAccessorsFacet (part of the full union), so the
+        //    explicit initializeEvmAccessors() call from the production path is
+        //    redundant here.
+        IMockDiamondCut(assetAddress_).forceFacetsReady(facetIds);
+
+        // 5. Mark the proxy operational.  We use `forceSetOperational` (a mock
+        //    control) instead of the production `IInitializer.setOperationalStatus`
+        //    because that function requires `maxInitializerFacetIndex` to be seeded
+        //    on the proxy first — something the production path does via
+        //    `IInitializer.initializeInitializer(150)`, which cannot be called here
+        //    because `forceFacetsReady` already marked the InitializerFacet.
+        //    Since every facet is already READY, direct status-setting is equivalent.
+        IMockDiamondCut(assetAddress_).forceSetOperational();
+
+        // 6. Do NOT renounce DEFAULT_ADMIN_ROLE — the caller needs it for
+        //    per-suite reconfiguration (forceNonOperational, etc.).
     }
 
     /// @inheritdoc Factory

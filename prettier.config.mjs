@@ -29,7 +29,7 @@ const baseConfig = {
         printWidth: 120,
         singleQuote: false,
         semi: true,
-        compiler: "0.8.18",
+        compiler: "0.8.28",
       },
     },
     {

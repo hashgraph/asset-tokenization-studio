@@ -292,6 +292,21 @@ export const TEST_BYTES32 = {
 } as const;
 
 // ============================================================================
+// Partition Identifiers (bytes32)
+// ============================================================================
+
+/**
+ * Canonical partition identifiers used across IAsset integration test suites.
+ *
+ * Every suite that creates multi-partition holds, locks, or balances should
+ * import these constants instead of spelling them out as hex literals.
+ */
+export const DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
+export const PARTITION_ID_2 = "0x0000000000000000000000000000000000000000000000000000000000000002";
+export const PARTITION_ID_3 = "0x0000000000000000000000000000000000000000000000000000000000000003";
+export const NON_DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000011";
+
+// ============================================================================
 // Resolver Keys
 // ============================================================================
 

@@ -29,7 +29,8 @@ contract MockFactoryFacet is MockFactory, IStaticFunctionSelectors {
                 this.deployBondFixedRate.selector,
                 this.deployBond.selector,
                 this.deployEquity.selector,
-                this.deployProxy.selector
+                this.deployProxy.selector,
+                this.deployAssetMock.selector
             );
     }
 
