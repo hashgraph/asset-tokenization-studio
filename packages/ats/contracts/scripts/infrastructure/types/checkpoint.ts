@@ -228,8 +228,6 @@ export interface DeploymentCheckpoint {
       loansPortfolio?: ConfigurationResult;
       /** Factory configuration */
       factory?: ConfigurationResult;
-      // TEST-ONLY: AssetMock configuration — full IAsset facet union for shared-fixture tests.
-      assetMock?: ConfigurationResult;
       // TEST-ONLY: InitializeMock configuration. Records every version minted
       // for the same configId in a single workflow step — the workflow calls
       // `createInitializeMockConfiguration` multiple times in a row to mint v1..vN.

@@ -62,12 +62,6 @@ import { externalControlListTests } from "./externalControlLists/externalControl
 import { externalKycListTests } from "./externalKycLists/externalKycList.test";
 import { externalPauseTests } from "./externalPauses/externalPause.test";
 import { externalListSizeCapTests } from "./externalPauses/externalListSizeCap.test";
-import { allowanceTests } from "./allowance/allowance.test";
-import { controllerTests } from "./controller/controller.test";
-import { holdTests } from "./hold/hold.test";
-import { snapshotsTests } from "./snapshots/snapshots.test";
-import { controllerByPartitionTests } from "./controllerByPartition/controllerByPartition.test";
-import { securityHoldersAtSnapshotTests } from "./securityHoldersAtSnapshot/securityHoldersAtSnapshot.test";
 
 // ── W3: Cap / batch suites ──────────────────────────────────────────────
 import { capTests } from "./cap/cap.test";
@@ -80,6 +74,23 @@ import { mintByPartitionTests } from "./mintByPartition/mintByPartition.test";
 import { burnByPartitionTests } from "./burnByPartition/burnByPartition.test";
 import { lockByPartitionTests } from "./lockByPartition/lockByPartition.test";
 import { batchFreezeTests } from "./batchFreeze/batchFreeze.test";
+
+// ── W4: Clearing / balance / batch suites ───────────────────────────────
+import { clearingAtSnapshotTests } from "./clearingAtSnapshot/clearingAtSnapshot.test";
+import { balanceTrackerTests } from "./balanceTracker/balanceTracker.test";
+import { batchTransferTests } from "./batchTransfer/batchTransfer.test";
+import { transferTests } from "./transfer/transfer.test";
+import { transferByPartitionTests } from "./transferByPartition/transferByPartition.test";
+import { burnTests } from "./burn/burn.test";
+import { clearingByPartitionTests } from "./clearingByPartition/clearingByPartition.test";
+import { clearingHoldByPartitionTests } from "./clearingHoldByPartition/clearingHoldByPartition.test";
+import { complianceTests } from "./compliance/compliance.test";
+import { allowanceTests } from "./allowance/allowance.test";
+import { controllerTests } from "./controller/controller.test";
+import { holdTests } from "./hold/hold.test";
+import { snapshotsTests } from "./snapshots/snapshots.test";
+import { controllerByPartitionTests } from "./controllerByPartition/controllerByPartition.test";
+import { securityHoldersAtSnapshotTests } from "./securityHoldersAtSnapshot/securityHoldersAtSnapshot.test";
 
 describe("ATS — IAsset Suites", () => {
   let ctx: Awaited<ReturnType<typeof deployAssetMockCtx>>;
@@ -158,4 +169,23 @@ describe("ATS — IAsset Suites", () => {
   // ── W3: Lock / freeze suites ──────────────────────────────────────────
   lockByPartitionTests(() => ctx);
   batchFreezeTests(() => ctx);
+
+  // ── W4: Clearing / balance / batch suites ─────────────────────────────
+  clearingAtSnapshotTests(() => ctx);
+  balanceTrackerTests(() => ctx);
+  batchTransferTests(() => ctx);
+
+  // ── W4: Transfer / burn suites ────────────────────────────────────────
+  transferTests(() => ctx);
+  transferByPartitionTests(() => ctx);
+  burnTests(() => ctx);
+
+  // ── W4: Clearing-by-partition suite ───────────────────────────────────
+  clearingByPartitionTests(() => ctx);
+
+  // ── W4: Clearing-hold suite ───────────────────────────────────────────
+  clearingHoldByPartitionTests(() => ctx);
+
+  // ── W4: Compliance suite ──────────────────────────────────────────────
+  complianceTests(() => ctx);
 });
