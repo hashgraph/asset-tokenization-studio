@@ -92,10 +92,10 @@ library ERC20StorageWrapper {
      *      field via the private `erc20Storage()` accessor and does NOT
      *      trigger `ScheduledTasksOps` or overwrite name/symbol — making it
      *      safe to use alongside snapshot scheduled-tasks tests.
-     * @param d The new decimal count to store.
+     * @param _newDecimals The new decimal count to store.
      */
-    function setDecimals(uint8 d) internal {
-        erc20Storage().decimals = d;
+    function setDecimals(uint8 _newDecimals) internal {
+        erc20Storage().decimals = _newDecimals;
     }
 
     /// @notice Updates ERC-20 balances and emits the EIP-20 Transfer event.

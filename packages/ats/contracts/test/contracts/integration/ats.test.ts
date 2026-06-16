@@ -42,6 +42,17 @@ import { votingTests } from "./voting/voting.test";
 import { adjustBalancesFacetTests } from "./adjustBalances/adjustBalancesFacet.test";
 import { pauseTests } from "./pause/pause.test";
 
+// ── W2: Multi-partition suites ──────────────────────────────────────────
+import { holdAtSnapshotTests } from "./holdAtSnapshot/holdAtSnapshot.test";
+import { lockAtSnapshotTests } from "./lockAtSnapshot/lockAtSnapshot.test";
+import { lockAtSnapshotByPartitionTests } from "./lockAtSnapshotByPartition/lockAtSnapshotByPartition.test";
+import { balanceTrackerAdjustedTests } from "./balanceTrackerAdjusted/balanceTrackerAdjusted.test";
+import { balanceTrackerAtSnapshotByPartitionTests } from "./balanceTrackerAtSnapshotByPartition/balanceTrackerAtSnapshotByPartition.test";
+import { balanceTrackerAtSnapshotTests } from "./balanceTrackerAtSnapshot/balanceTrackerAtSnapshot.test";
+import { snapshotsByPartitionTests } from "./snapshotsByPartition/snapshotsByPartition.test";
+import { votingSecurityHoldersTests } from "./votingSecurityHolders/votingSecurityHolders.test";
+import { transferAndLockByPartitionTests } from "./transferAndLockByPartition/transferAndLockByPartition.test";
+
 // ── W2: layer_1 suites ────────────────────────────────────────────────
 import { lockTests } from "./layer_1/lock/lock.test";
 import { partitionsTests } from "./layer_1/partitions/partitions.test";
@@ -51,6 +62,12 @@ import { externalControlListTests } from "./externalControlLists/externalControl
 import { externalKycListTests } from "./externalKycLists/externalKycList.test";
 import { externalPauseTests } from "./externalPauses/externalPause.test";
 import { externalListSizeCapTests } from "./externalPauses/externalListSizeCap.test";
+import { allowanceTests } from "./allowance/allowance.test";
+import { controllerTests } from "./controller/controller.test";
+import { holdTests } from "./hold/hold.test";
+import { snapshotsTests } from "./snapshots/snapshots.test";
+import { controllerByPartitionTests } from "./controllerByPartition/controllerByPartition.test";
+import { securityHoldersAtSnapshotTests } from "./securityHoldersAtSnapshot/securityHoldersAtSnapshot.test";
 
 // ── W3: Cap / batch suites ──────────────────────────────────────────────
 import { capTests } from "./cap/cap.test";
@@ -63,23 +80,6 @@ import { mintByPartitionTests } from "./mintByPartition/mintByPartition.test";
 import { burnByPartitionTests } from "./burnByPartition/burnByPartition.test";
 import { lockByPartitionTests } from "./lockByPartition/lockByPartition.test";
 import { batchFreezeTests } from "./batchFreeze/batchFreeze.test";
-import { allowanceTests } from "./allowance/allowance.test";
-import { controllerTests } from "./controller/controller.test";
-import { holdTests } from "./hold/hold.test";
-import { snapshotsTests } from "./snapshots/snapshots.test";
-import { controllerByPartitionTests } from "./controllerByPartition/controllerByPartition.test";
-import { securityHoldersAtSnapshotTests } from "./securityHoldersAtSnapshot/securityHoldersAtSnapshot.test";
-
-// ── W2: Multi-partition suites ──────────────────────────────────────────
-import { holdAtSnapshotTests } from "./holdAtSnapshot/holdAtSnapshot.test";
-import { lockAtSnapshotTests } from "./lockAtSnapshot/lockAtSnapshot.test";
-import { lockAtSnapshotByPartitionTests } from "./lockAtSnapshotByPartition/lockAtSnapshotByPartition.test";
-import { balanceTrackerAdjustedTests } from "./balanceTrackerAdjusted/balanceTrackerAdjusted.test";
-import { balanceTrackerAtSnapshotByPartitionTests } from "./balanceTrackerAtSnapshotByPartition/balanceTrackerAtSnapshotByPartition.test";
-import { balanceTrackerAtSnapshotTests } from "./balanceTrackerAtSnapshot/balanceTrackerAtSnapshot.test";
-import { snapshotsByPartitionTests } from "./snapshotsByPartition/snapshotsByPartition.test";
-import { votingSecurityHoldersTests } from "./votingSecurityHolders/votingSecurityHolders.test";
-import { transferAndLockByPartitionTests } from "./transferAndLockByPartition/transferAndLockByPartition.test";
 
 describe("ATS — IAsset Suites", () => {
   let ctx: Awaited<ReturnType<typeof deployAssetMockCtx>>;
