@@ -31,6 +31,7 @@ import { ControlListStorageWrapper } from "../../domain/core/ControlListStorageW
 import { KycStorageWrapper } from "../../domain/core/KycStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC20StorageWrapper } from "../../domain/asset/ERC20StorageWrapper.sol";
+import { ERC20VotesStorageWrapper } from "../../domain/asset/ERC20VotesStorageWrapper.sol";
 
 /* solhint-disable */
 
@@ -45,6 +46,7 @@ interface IMockDiamondCut {
     function forceSecurityFlags(bool n) external;
     function forceControllable(bool n) external;
     function forceDecimals(uint8 d) external;
+    function forceErc20VotesActivated(bool n) external;
 }
 
 // `IStaticFunctionSelectors` is intentionally not listed: it is already pulled
@@ -166,6 +168,15 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
         ERC20StorageWrapper.setDecimals(d);
     }
 
+    /// @notice Forces the ERC20Votes activation flag for testing without running the facet initialiser.
+    /// @dev Delegates to ERC20VotesStorageWrapper.setActivate, which writes the activation flag through the
+    ///      ERC20Votes storage struct (layout-independent). The production flag is set only at
+    ///      initializeERC20Votes time with no runtime toggle, so this mirrors the deploy-time state directly.
+    /// @param n true to activate ERC20Votes, false to deactivate.
+    function forceErc20VotesActivated(bool n) external override {
+        ERC20VotesStorageWrapper.setActivate(n);
+    }
+
     function getStaticResolverKey() external pure returns (bytes32 staticResolverKey_) {
         // Must return the production `RESOLVER_KEY_DIAMOND` so the BLR
         // registration matches the `atsRegistry.data.ts` entry. The internal
@@ -175,7 +186,7 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
     }
 
     function getStaticFunctionSelectors() external pure returns (bytes4[] memory staticFunctionSelectors_) {
-        staticFunctionSelectors_ = new bytes4[](29);
+        staticFunctionSelectors_ = new bytes4[](30);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this.initializeDiamondCut.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.forceNonOperational.selector;
@@ -188,6 +199,7 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
         staticFunctionSelectors_[selectorsIndex++] = this.forceSecurityFlags.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.forceControllable.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.forceDecimals.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.forceErc20VotesActivated.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.updateConfigVersion.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.updateConfig.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.updateResolver.selector;
