@@ -83,6 +83,7 @@ import { transferTests } from "./transfer/transfer.test";
 import { transferByPartitionTests } from "./transferByPartition/transferByPartition.test";
 import { burnTests } from "./burn/burn.test";
 import { clearingByPartitionTests } from "./clearingByPartition/clearingByPartition.test";
+import { clearingHoldByPartitionTests } from "./clearingHoldByPartition/clearingHoldByPartition.test";
 import { allowanceTests } from "./allowance/allowance.test";
 import { controllerTests } from "./controller/controller.test";
 import { holdTests } from "./hold/hold.test";
@@ -192,4 +193,7 @@ describe("ATS — IAsset Suites", () => {
 
   // ── W4: Clearing-by-partition suite ───────────────────────────────────
   clearingByPartitionTests(() => ctx);
+
+  // ── W4: Clearing-hold suite ───────────────────────────────────────────
+  clearingHoldByPartitionTests(() => ctx);
 });
