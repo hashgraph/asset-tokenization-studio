@@ -81,7 +81,20 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         uint256 _version,
         bytes4 _selector
     ) external view override validateConfigurationVersion(_configurationId, _version) returns (address facetAddress_) {
-        facetAddress_ = _resolveResolverProxyCall(_diamondCutManagerStorage(), _configurationId, _version, _selector);
+        facetAddress_ = _resolveResolverProxyCallV2(
+            _diamondCutManagerStorage(),
+            _configurationId,
+            _version,
+            false,
+            _selector
+        );
+    }
+
+    function resolveResolverProxyCall(
+        bytes calldata _resolverProxyConfiguration,
+        bytes4 _selector
+    ) external view override returns (address facetAddress_) {
+        facetAddress_ = _resolveResolverProxyCall(_diamondCutManagerStorage(), _resolverProxyConfiguration, _selector);
     }
 
     /// @inheritdoc IDiamondCutManager

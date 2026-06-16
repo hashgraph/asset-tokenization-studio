@@ -117,3 +117,6 @@ uint256 constant POW10_15 = 1e15;
 uint256 constant POW10_16 = 1e16;
 uint256 constant POW10_17 = 1e17;
 uint256 constant POW10_18 = 1e18;
+
+bytes8 constant RESOLVER_PROXY_VERSION_V2 = 0x0000000000000002;
+uint256 constant RESOLVER_PROXY_CONFIGURATION_MINIMUM_LENGTH = 128;

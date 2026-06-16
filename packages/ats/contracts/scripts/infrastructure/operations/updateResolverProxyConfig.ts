@@ -67,6 +67,8 @@ interface InternalUpdateOptions {
   newVersion: number;
   /** New configuration ID (required for 'config' and 'resolver' types) */
   newConfigurationId?: string;
+  /** New replacement enabled flag (required for 'config' and 'resolver' types) */
+  newReplacementEnabled?: boolean;
   /** New BLR address (required for 'resolver' type) */
   newBlrAddress?: string;
   /** Transaction overrides */
@@ -342,6 +344,7 @@ async function _updateResolverProxyInternal(
     updateType,
     newVersion,
     newConfigurationId,
+    newReplacementEnabled,
     newBlrAddress,
     overrides = {},
     confirmations,
@@ -382,7 +385,13 @@ async function _updateResolverProxyInternal(
       switch (updateType) {
         case "resolver":
           debug("Calling updateResolver()");
-          updateTx = await diamondCutFacet.updateResolver(newBlrAddress!, newConfigurationId!, newVersion, overrides);
+          updateTx = await diamondCutFacet.updateResolver(
+            newBlrAddress!,
+            newConfigurationId!,
+            newVersion,
+            newReplacementEnabled ?? false,
+            overrides,
+          );
           break;
         case "config":
           debug("Calling updateConfig()");

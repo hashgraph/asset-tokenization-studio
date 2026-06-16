@@ -109,9 +109,10 @@ export async function deployUpgradeTestFixture(): Promise<UpgradeTestFixtureResu
 
   // Deploy sample Bond token via Factory
   const bondSecurityData = getSecurityData(blr, {
-    resolverProxyConfiguration: {
-      key: BOND_CONFIG_ID,
-      version: 1,
+    resolverProxyConfigurationV2: {
+      configurationId: BOND_CONFIG_ID,
+      configurationVersion: 1,
+      replacementEnabled: true,
     },
   });
   const bondDetails = await makeBondDetailsData();

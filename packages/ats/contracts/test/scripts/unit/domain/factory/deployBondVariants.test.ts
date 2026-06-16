@@ -85,9 +85,9 @@ describe("Bond Variant Deployments", () => {
         await deployBondFixedRateFromFactory(params, regulationData, fixedRateParams);
 
         const callArgs = mockFactory.deployBondFixedRate.getCall(0).args[0];
-        const config = callArgs.bondData.security.resolverProxyConfiguration;
+        const config = callArgs.bondData.security.resolverProxyConfigurationV2;
 
-        expect(config.key).to.equal(BOND_FIXED_RATE_CONFIG_ID);
+        expect(config.configurationId).to.equal(BOND_FIXED_RATE_CONFIG_ID);
       });
     });
 
@@ -249,9 +249,9 @@ describe("Bond Variant Deployments", () => {
         await deployBondKpiLinkedRateFromFactory(params, regulationData, interestRateParams, impactDataParams);
 
         const callArgs = mockFactory.deployBondKpiLinkedRate.getCall(0).args[0];
-        const config = callArgs.bondData.security.resolverProxyConfiguration;
+        const config = callArgs.bondData.security.resolverProxyConfigurationV2;
 
-        expect(config.key).to.equal(BOND_KPI_LINKED_RATE_CONFIG_ID);
+        expect(config.configurationId).to.equal(BOND_KPI_LINKED_RATE_CONFIG_ID);
       });
     });
 

@@ -210,21 +210,26 @@ abstract contract Factory is IFactory {
      * @dev The resolver must be non-zero and `_rbacs` must include at least one non-zero
      *      `DEFAULT_ADMIN_ROLE` member. Emits `ProxyDeployed`.
      * @param _resolver Business logic resolver used by the proxy.
-     * @param _configKey Resolver configuration key selecting the facet set.
-     * @param _version Resolver configuration version to activate.
+     * @param _resolverProxyConfigurationV2 Resolver configuration data for the proxy.
      * @param _rbacs Initial RBAC assignments applied by the proxy constructor.
      * @param _data Additional data for the proxy deployment.
      * @return proxyAddress_ Address of the deployed resolver proxy.
      */
     function deployProxy(
         IBusinessLogicResolver _resolver,
-        bytes32 _configKey,
-        uint256 _version,
+        IResolverProxy.ResolverProxyConfigurationV2 memory _resolverProxyConfigurationV2,
         IResolverProxy.Rbac[] calldata _rbacs,
         bytes calldata _data
     ) external onlyValidResolver(_resolver) onlyValidAdmins(_rbacs) returns (address proxyAddress_) {
-        proxyAddress_ = address(new ResolverProxy(_resolver, _configKey, _version, _rbacs));
-        emit ProxyDeployed(proxyAddress_, _resolver, _configKey, _version, _rbacs, _data);
+        proxyAddress_ = address(new ResolverProxy(_resolver, _resolverProxyConfigurationV2, _rbacs));
+        emit ProxyDeployed(
+            proxyAddress_,
+            _resolver,
+            _resolverProxyConfigurationV2.configurationId,
+            _resolverProxyConfigurationV2.configurationVersion,
+            _rbacs,
+            _data
+        );
     }
 
     /**
@@ -453,8 +458,7 @@ abstract contract Factory is IFactory {
         extendedRbacs[rbacsLen].members[0] = address(this);
         ResolverProxy proxy = new ResolverProxy(
             _securityData.resolver,
-            _securityData.resolverProxyConfiguration.key,
-            _securityData.resolverProxyConfiguration.version,
+            _securityData.resolverProxyConfigurationV2,
             extendedRbacs
         );
         securityAddress_ = address(proxy);

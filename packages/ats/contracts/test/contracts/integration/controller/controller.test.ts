@@ -81,8 +81,7 @@ describe("Controller Tests", () => {
       const infra = await loadFixture(deployAtsInfrastructureFixture);
       const proxyTx = await infra.factory.deployProxy(
         infra.blr.target as string,
-        EQUITY_CONFIG_ID,
-        1,
+        { configurationId: EQUITY_CONFIG_ID, configurationVersion: 1, replacementEnabled: true },
         [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] }],
         "0x",
       );
@@ -100,8 +99,7 @@ describe("Controller Tests", () => {
       const infra = await loadFixture(deployAtsInfrastructureFixture);
       const proxyTx = await infra.factory.deployProxy(
         infra.blr.target as string,
-        EQUITY_CONFIG_ID,
-        1,
+        { configurationId: EQUITY_CONFIG_ID, configurationVersion: 1, replacementEnabled: true },
         [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] }],
         "0x",
       );

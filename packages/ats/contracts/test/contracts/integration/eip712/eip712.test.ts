@@ -30,7 +30,7 @@ describe("EIP712 Tests", () => {
       it("GIVEN a deployed contract WHEN DOMAIN_SEPARATOR is called THEN the correct domain separator is returned", async () => {
         const domainSeparator = await asset.DOMAIN_SEPARATOR();
         const CONTRACT_NAME = (await asset.getERC20Metadata()).info.name;
-        const CONTRACT_VERSION = (await asset.getConfigInfo()).version_.toString();
+        const CONTRACT_VERSION = (await asset.getConfigInfo()).configurationVersion_.toString();
         const domain = {
           name: CONTRACT_NAME,
           version: CONTRACT_VERSION,

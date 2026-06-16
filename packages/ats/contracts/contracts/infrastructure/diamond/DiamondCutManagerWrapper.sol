@@ -9,6 +9,8 @@ import { IDiamondLoupe } from "../proxy/IDiamondLoupe.sol";
 import { BusinessLogicResolverWrapper } from "./BusinessLogicResolverWrapper.sol";
 import { Ownership } from "./Ownership.sol";
 import { EvmAccessors } from "../utils/EvmAccessors.sol";
+import { IResolverProxy } from "../../infrastructure/proxy/IResolverProxy.sol";
+import { RESOLVER_PROXY_VERSION_V2, RESOLVER_PROXY_CONFIGURATION_MINIMUM_LENGTH } from "../../constants/values.sol";
 
 /// @custom:hash storage DiamondCutManager
 // solhint-disable-next-line max-line-length
@@ -262,7 +264,7 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
      * @param _selector Function selector to resolve.
      * @return facetAddress_ Facet address registered for the selector, or zero if absent.
      */
-    function _resolveResolverProxyCall(
+    function _resolveResolverProxyCallV2(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
         uint256 _version,
@@ -276,6 +278,38 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
                 facetAddress_ = replacementAddress;
             }
         }
+    }
+
+    function _resolveResolverProxyCall(
+        DiamondCutManagerStorage storage _dcms,
+        bytes calldata _resolverProxyConfiguration,
+        bytes4 _selector
+    ) internal view returns (address facetAddress_) {
+        if (
+            _resolverProxyConfiguration.length < RESOLVER_PROXY_CONFIGURATION_MINIMUM_LENGTH ||
+            _resolverProxyConfiguration.length % 32 != 0
+        ) revert InvalidResolverProxyConfiguration(_resolverProxyConfiguration);
+
+        IResolverProxy.ResolverProxyConfigurationGeneric memory configuration = abi.decode(
+            _resolverProxyConfiguration,
+            (IResolverProxy.ResolverProxyConfigurationGeneric)
+        );
+
+        if (configuration.resolverProxyVersion == RESOLVER_PROXY_VERSION_V2) {
+            IResolverProxy.ResolverProxyConfigurationV2 memory configurationV2 = abi.decode(
+                configuration.content,
+                (IResolverProxy.ResolverProxyConfigurationV2)
+            );
+            facetAddress_ = _resolveResolverProxyCallV2(
+                _dcms,
+                configurationV2.configurationId,
+                configurationV2.configurationVersion,
+                configurationV2.replacementEnabled,
+                _selector
+            );
+            return facetAddress_;
+        }
+        revert UnrecognizedResolverProxyVersion(configuration.resolverProxyVersion);
     }
 
     /**

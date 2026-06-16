@@ -149,7 +149,7 @@ describe("ERC20Permit Tests", () => {
         const nonce = await asset.nonces(signer_A.address);
         const expiry = (await getDltTimestamp()) + 3600; // 1 hour in the future
         const CONTRACT_NAME = (await asset.getERC20Metadata()).info.name;
-        const CONTRACT_VERSION = (await asset.getConfigInfo()).version_.toString();
+        const CONTRACT_VERSION = (await asset.getConfigInfo()).configurationVersion_.toString();
 
         const domain = {
           name: CONTRACT_NAME,
@@ -188,7 +188,7 @@ describe("ERC20Permit Tests", () => {
         const nonce = await asset.nonces(signer_A.address);
         const expiry = (await getDltTimestamp()) + 3600; // 1 hour in the future
         const CONTRACT_NAME = (await asset.getERC20Metadata()).info.name;
-        const CONTRACT_VERSION = (await asset.getConfigInfo()).version_.toString();
+        const CONTRACT_VERSION = (await asset.getConfigInfo()).configurationVersion_.toString();
 
         const domain = {
           name: CONTRACT_NAME,
@@ -313,8 +313,7 @@ describe("ERC20Permit Tests", () => {
       const infra = await loadFixture(deployAtsInfrastructureFixture);
       const proxyTx = await infra.factory.deployProxy(
         infra.blr.target as string,
-        EQUITY_CONFIG_ID,
-        1,
+        { configurationId: EQUITY_CONFIG_ID, configurationVersion: 1, replacementEnabled: false },
         [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] }],
         "0x",
       );
@@ -331,8 +330,7 @@ describe("ERC20Permit Tests", () => {
       const infra = await loadFixture(deployAtsInfrastructureFixture);
       const proxyTx = await infra.factory.deployProxy(
         infra.blr.target as string,
-        EQUITY_CONFIG_ID,
-        1,
+        { configurationId: EQUITY_CONFIG_ID, configurationVersion: 1, replacementEnabled: false },
         [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] }],
         "0x",
       );
@@ -350,8 +348,7 @@ describe("ERC20Permit Tests", () => {
       const infra = await loadFixture(deployAtsInfrastructureFixture);
       const proxyTx = await infra.factory.deployProxy(
         infra.blr.target as string,
-        EQUITY_CONFIG_ID,
-        1,
+        { configurationId: EQUITY_CONFIG_ID, configurationVersion: 1, replacementEnabled: false },
         [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] }],
         "0x",
       );

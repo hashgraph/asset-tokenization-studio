@@ -16,11 +16,10 @@ import { ResolverProxyStorageWrapper } from "../../domain/core/ResolverProxyStor
 contract ResolverProxy is ResolverProxyUnstructured {
     constructor(
         IBusinessLogicResolver _resolver,
-        bytes32 _resolverProxyConfigurationId,
-        uint256 _version,
+        IResolverProxy.ResolverProxyConfigurationV2 memory _resolverProxyConfigurationV2,
         IResolverProxy.Rbac[] memory _rbac
     ) payable {
-        _initialize(_resolver, _resolverProxyConfigurationId, _version, _rbac);
+        _initialize(_resolver, _resolverProxyConfigurationV2, _rbac);
     }
 
     receive() external payable {}

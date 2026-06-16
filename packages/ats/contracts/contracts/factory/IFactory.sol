@@ -48,16 +48,6 @@ interface IFactory {
     }
 
     /**
-     * @notice Identifies the business-logic resolver version to wire into a new proxy.
-     * @param key     Resolver key that maps to the registered BusinessLogicResolver address.
-     * @param version Configuration version to load from the resolver.
-     */
-    struct ResolverProxyConfiguration {
-        bytes32 key;
-        uint256 version;
-    }
-
-    /**
      * @notice Core configuration shared across all security types.
      * @dev Passed verbatim to the proxy initialiser; all addresses must be non-zero where
      *      the corresponding feature is activated.
@@ -82,7 +72,7 @@ interface IFactory {
     struct SecurityData {
         IBusinessLogicResolver resolver;
         uint256 maxSupply;
-        ResolverProxyConfiguration resolverProxyConfiguration;
+        IResolverProxy.ResolverProxyConfigurationV2 resolverProxyConfigurationV2;
         ICore.ERC20MetadataInfo erc20MetadataInfo;
         IResolverProxy.Rbac[] rbacs;
         address[] externalPauses;
@@ -273,16 +263,14 @@ interface IFactory {
     /**
      * @notice Deploys a new resolver proxy and initialises its RBAC.
      * @param _resolver Business-logic resolver to attach.
-     * @param _configKey Configuration identifier for the proxy.
-     * @param _version Initial configuration version.
+     * @param _resolverProxyConfigurationV2 Resolver configuration data for the proxy.
      * @param _rbacs Role-based access control entries to seed.
      * @param _data Additional data for the proxy deployment.
      * @return proxyAddress_ Address of the deployed proxy.
      */
     function deployProxy(
         IBusinessLogicResolver _resolver,
-        bytes32 _configKey,
-        uint256 _version,
+        IResolverProxy.ResolverProxyConfigurationV2 memory _resolverProxyConfigurationV2,
         IResolverProxy.Rbac[] memory _rbacs,
         bytes calldata _data
     ) external returns (address proxyAddress_);

@@ -56,14 +56,14 @@ export async function deployLoanFromFactory(
   ];
 
   // Build resolver proxy configuration
-  const resolverProxyConfiguration = securityDataParams.resolverProxyConfiguration;
+  const resolverProxyConfigurationV2 = securityDataParams.resolverProxyConfigurationV2;
 
   // Build security data structure
   const securityData = {
     arePartitionsProtected: securityDataParams.arePartitionsProtected,
     isMultiPartition: securityDataParams.isMultiPartition,
     resolver: securityDataParams.resolver,
-    resolverProxyConfiguration,
+    resolverProxyConfigurationV2,
     rbacs,
     isControllable: securityDataParams.isControllable,
     isWhiteList: securityDataParams.isWhiteList,
@@ -85,16 +85,9 @@ export async function deployLoanFromFactory(
   };
 
   // Deploy loan token via factory using deployProxy (generic proxy deployer)
-  const tx = await factory.deployProxy(
-    securityData.resolver,
-    resolverProxyConfiguration.key,
-    resolverProxyConfiguration.version,
-    rbacs,
-    "0x",
-    {
-      gasLimit: GAS_LIMIT.high,
-    },
-  );
+  const tx = await factory.deployProxy(securityData.resolver, resolverProxyConfigurationV2, rbacs, "0x", {
+    gasLimit: GAS_LIMIT.high,
+  });
   const receipt = await tx.wait();
 
   // Find ProxyDeployed event to get diamond address

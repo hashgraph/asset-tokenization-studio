@@ -137,6 +137,10 @@ interface IDiamondCutManager {
      */
     error SelectorAlreadyRegistered(bytes32 configurationId, uint256 version, bytes32 facetId, bytes4 selector);
 
+    error InvalidResolverProxyConfiguration(bytes _resolverProxyConfiguration);
+
+    error UnrecognizedResolverProxyVersion(bytes8 _resolverProxyVersion);
+
     /**
      * @notice Registers a new configuration atomically, pinning each facet at the supplied
      *         version.
@@ -211,6 +215,20 @@ interface IDiamondCutManager {
     function resolveResolverProxyCall(
         bytes32 _configurationId,
         uint256 _version,
+        bytes4 _selector
+    ) external view returns (address facetAddress_);
+
+    /**
+     * @notice Resolves the facet address that implements a selector for a given
+     *         configuration and version.
+     * @dev Used by resolver proxies during dispatch. Returns `address(0)` when no facet
+     *      claims the selector.
+     * @param _resolverProxyConfiguration Resolver proxy full configuration.
+     * @return facetAddress_ Address of the facet that owns `_selector`, or `address(0)` if
+     *         the selector is not registered for the given configuration/version.
+     */
+    function resolveResolverProxyCall(
+        bytes calldata _resolverProxyConfiguration,
         bytes4 _selector
     ) external view returns (address facetAddress_);
 

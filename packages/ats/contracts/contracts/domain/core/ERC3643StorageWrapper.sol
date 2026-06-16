@@ -428,7 +428,7 @@ library ERC3643StorageWrapper {
                     Strings.toHexString(uint256(ResolverProxyStorageWrapper.getResolverProxyConfigurationId()), 32),
                     '", ',
                     '"Version": "',
-                    Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
+                    Strings.toString(ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion()),
                     '"',
                     "}"
                     // solhint-enable quotes

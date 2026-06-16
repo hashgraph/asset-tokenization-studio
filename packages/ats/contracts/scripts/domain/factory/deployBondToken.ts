@@ -80,9 +80,10 @@ export async function deployBondFromFactory(
   ];
 
   // Build resolver proxy configuration
-  const resolverProxyConfiguration = {
-    key: BOND_CONFIG_ID,
-    version: 1,
+  const resolverProxyConfigurationV2 = {
+    configurationId: BOND_CONFIG_ID,
+    configurationVersion: 1,
+    replacementEnabled: true,
   };
 
   // Build security data structure
@@ -90,7 +91,7 @@ export async function deployBondFromFactory(
     arePartitionsProtected: securityDataParams.arePartitionsProtected,
     isMultiPartition: securityDataParams.isMultiPartition,
     resolver: securityDataParams.resolver,
-    resolverProxyConfiguration,
+    resolverProxyConfigurationV2,
     rbacs,
     isControllable: securityDataParams.isControllable,
     isWhiteList: securityDataParams.isWhiteList,

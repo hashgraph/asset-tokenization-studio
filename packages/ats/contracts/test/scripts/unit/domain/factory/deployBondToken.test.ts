@@ -106,9 +106,9 @@ describe("Bond Token Deployment", () => {
       await deployBondFromFactory(params, regulationData);
 
       const callArgs = mockFactory.deployBond.getCall(0).args[0];
-      const config = callArgs.security.resolverProxyConfiguration;
+      const config = callArgs.security.resolverProxyConfigurationV2;
 
-      expect(config.key).to.equal(BOND_CONFIG_ID);
+      expect(config.configurationId).to.equal(BOND_CONFIG_ID);
     });
 
     it("should set version to 1", async () => {
@@ -120,9 +120,23 @@ describe("Bond Token Deployment", () => {
       await deployBondFromFactory(params, regulationData);
 
       const callArgs = mockFactory.deployBond.getCall(0).args[0];
-      const config = callArgs.security.resolverProxyConfiguration;
+      const config = callArgs.security.resolverProxyConfigurationV2;
 
-      expect(config.version).to.equal(1);
+      expect(config.configVersion).to.equal(1);
+    });
+
+    it("should set replacementEnabled to true", async () => {
+      const diamondAddress = TEST_ADDRESSES.VALID_3;
+      const mockFactory = createMockFactory(TEST_FACTORY_EVENTS.BOND_DEPLOYED, diamondAddress);
+      const params = createDeployBondParams(mockFactory);
+      const regulationData = createMockRegulationData();
+
+      await deployBondFromFactory(params, regulationData);
+
+      const callArgs = mockFactory.deployBond.getCall(0).args[0];
+      const config = callArgs.security.resolverProxyConfigurationV2;
+
+      expect(config.replacementEnabled).to.equal(true);
     });
   });
 

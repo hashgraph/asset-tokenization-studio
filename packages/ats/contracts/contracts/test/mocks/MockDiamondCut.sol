@@ -46,7 +46,7 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
     /// @dev Uses InitializerStorageWrapper.setConfigVersion to write 0 to the status slot.
     function forceNonOperational() external override {
         bytes32 configId = ResolverProxyStorageWrapper.getResolverProxyConfigurationId();
-        uint256 versionId = ResolverProxyStorageWrapper.getResolverProxyVersion();
+        uint256 versionId = ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion();
         InitializerStorageWrapper.setConfigVersion(configId, versionId, 0);
     }
 
@@ -57,7 +57,7 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
             .getBusinessLogicResolver()
             .getFacetVersionByConfigurationIdVersionAndFacetId(
                 ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
-                ResolverProxyStorageWrapper.getResolverProxyVersion(),
+                ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion(),
                 facetKey_
             );
         InitializerStorageWrapper.setFacetStatusForVersion(facetKey_, v, 0);

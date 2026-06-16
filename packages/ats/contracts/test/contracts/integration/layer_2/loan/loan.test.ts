@@ -209,8 +209,7 @@ describe("Loan Tests", () => {
       const infra = await loadFixture(deployAtsInfrastructureFixture);
       const proxyTx = await infra.factory.deployProxy(
         infra.blr.target as string,
-        LOAN_CONFIG_ID,
-        1,
+        { configurationId: LOAN_CONFIG_ID, configurationVersion: 1, replacementEnabled: false },
         [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] }],
         "0x",
       );

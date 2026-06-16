@@ -47,9 +47,10 @@ export interface SecurityDataParams {
   compliance: string;
   /** Identity registry contract address */
   identityRegistry: string;
-  resolverProxyConfiguration: {
-    key: string;
-    version: number;
+  resolverProxyConfigurationV2: {
+    configurationId: string;
+    configurationVersion: number;
+    replacementEnabled: boolean;
   };
   /** RBAC roles and their assigned addresses */
   rbacs: Rbac[];

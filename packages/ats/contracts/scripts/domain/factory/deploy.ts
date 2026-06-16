@@ -97,8 +97,7 @@ export async function deployFactory(signer: Signer, options: DeployFactoryOption
     const resolverProxyFactory = new ResolverProxy__factory(signer);
     const factoryProxy = await resolverProxyFactory.deploy(
       blrAddress,
-      FACTORY_CONFIG_ID,
-      factoryVersion,
+      { configurationId: FACTORY_CONFIG_ID, configurationVersion: factoryVersion, replacementEnabled: true },
       [], // empty rbacs — Factory is permissionless in v1
       {
         ...gasLimitOverride(GAS_LIMIT.high),

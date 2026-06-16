@@ -146,7 +146,7 @@ describe("ERC3643 Tests", () => {
       const json = await asset.version();
       const parsed = JSON.parse(json);
 
-      const [configResolver, configId, configVersion] = await asset.getConfigInfo();
+      const [configResolver, , configId, configVersion] = await asset.getConfigInfo();
 
       expect(parsed["Resolver"].toLowerCase()).to.equal(configResolver.toLowerCase());
       expect(parsed["Config ID"].toLowerCase()).to.equal(configId.toLowerCase());

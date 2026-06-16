@@ -82,7 +82,7 @@ library InitializerStorageWrapper {
         returns (bool isOperational_, uint256 lastFacetIndex_, bytes32 configId_, uint256 versionId_)
     {
         configId_ = ResolverProxyStorageWrapper.getResolverProxyConfigurationId();
-        versionId_ = ResolverProxyStorageWrapper.getResolverProxyVersion();
+        versionId_ = ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion();
 
         uint256 operationStatus = getOperationalStatus(configId_, versionId_);
 
@@ -192,7 +192,7 @@ library InitializerStorageWrapper {
     function checkOperational() internal view {
         isConfigVersionOperational(
             ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
-            ResolverProxyStorageWrapper.getResolverProxyVersion()
+            ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion()
         );
     }
 
@@ -316,7 +316,7 @@ library InitializerStorageWrapper {
         return
             ResolverProxyStorageWrapper.getBusinessLogicResolver().getFacetVersionByConfigurationIdVersionAndFacetId(
                 ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
-                ResolverProxyStorageWrapper.getResolverProxyVersion(),
+                ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion(),
                 _facetId
             );
     }
