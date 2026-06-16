@@ -6,6 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { ComplianceMock, IdentityRegistryMock, IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
+import { ASSET_MOCK_CONFIG_ID } from "../../../fixtures/deploy/assetMockConfiguration";
 import { ATS_ROLES, EMPTY_STRING, ZERO, ADDRESS_ZERO, RESOLVER_KEY_BATCH_TRANSFER } from "@scripts";
 
 const AMOUNT = 1000;
@@ -301,7 +302,9 @@ export function batchTransferTests(getCtx: () => AssetMockCtx): void {
       });
 
       it("GIVEN non-operational WHEN batchTransfer is called THEN AssetNotOperational", async () => {
-        await expect(asset.batchTransfer([], [])).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+        await expect(asset.batchTransfer([], []))
+          .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+          .withArgs(ASSET_MOCK_CONFIG_ID, 1);
       });
     });
   });

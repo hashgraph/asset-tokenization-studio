@@ -15,6 +15,7 @@ import {
   RESOLVER_KEY_CLEARING_BY_PARTITION,
 } from "@scripts";
 import { executeRbac, MAX_UINT256 } from "@test";
+import { ASSET_MOCK_CONFIG_ID } from "../../../fixtures/deploy/assetMockConfiguration";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
 const _WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
@@ -1847,7 +1848,9 @@ export function clearingByPartitionTests(getCtx: () => AssetMockCtx): void {
             { partition: _DEFAULT_PARTITION, expirationTimestamp: EXPIRATION_TIMESTAMP, data: EMPTY_HEX_BYTES },
             _AMOUNT,
           ),
-        ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+        )
+          .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+          .withArgs(ASSET_MOCK_CONFIG_ID, 1);
       });
 
       it("GIVEN non-operational WHEN clearingRedeemFromByPartition is called THEN AssetNotOperational", async () => {
@@ -1864,7 +1867,9 @@ export function clearingByPartitionTests(getCtx: () => AssetMockCtx): void {
             },
             _AMOUNT,
           ),
-        ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+        )
+          .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+          .withArgs(ASSET_MOCK_CONFIG_ID, 1);
       });
 
       it("GIVEN non-operational WHEN clearingTransferByPartition is called THEN AssetNotOperational", async () => {
@@ -1874,7 +1879,9 @@ export function clearingByPartitionTests(getCtx: () => AssetMockCtx): void {
             _AMOUNT,
             signer_B.address,
           ),
-        ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+        )
+          .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+          .withArgs(ASSET_MOCK_CONFIG_ID, 1);
       });
 
       it("GIVEN non-operational WHEN clearingTransferFromByPartition is called THEN AssetNotOperational", async () => {
@@ -1892,7 +1899,9 @@ export function clearingByPartitionTests(getCtx: () => AssetMockCtx): void {
             _AMOUNT,
             signer_C.address,
           ),
-        ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+        )
+          .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+          .withArgs(ASSET_MOCK_CONFIG_ID, 1);
       });
 
       it("GIVEN non-operational WHEN approveClearingOperationByPartition is called THEN AssetNotOperational", async () => {
@@ -1903,7 +1912,9 @@ export function clearingByPartitionTests(getCtx: () => AssetMockCtx): void {
             tokenHolder: signer_A.address,
             clearingId: 1,
           }),
-        ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+        )
+          .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+          .withArgs(ASSET_MOCK_CONFIG_ID, 1);
       });
 
       it("GIVEN non-operational WHEN cancelClearingOperationByPartition is called THEN AssetNotOperational", async () => {
@@ -1914,7 +1925,9 @@ export function clearingByPartitionTests(getCtx: () => AssetMockCtx): void {
             tokenHolder: signer_A.address,
             clearingId: 1,
           }),
-        ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+        )
+          .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+          .withArgs(ASSET_MOCK_CONFIG_ID, 1);
       });
 
       it("GIVEN non-operational WHEN reclaimClearingOperationByPartition is called THEN AssetNotOperational", async () => {
@@ -1925,7 +1938,9 @@ export function clearingByPartitionTests(getCtx: () => AssetMockCtx): void {
             tokenHolder: signer_A.address,
             clearingId: 1,
           }),
-        ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+        )
+          .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+          .withArgs(ASSET_MOCK_CONFIG_ID, 1);
       });
     });
   });

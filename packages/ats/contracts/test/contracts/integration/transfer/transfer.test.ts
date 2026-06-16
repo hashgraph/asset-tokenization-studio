@@ -7,6 +7,7 @@ import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
 import { ATS_ROLES, DEFAULT_PARTITION, EIP1066_CODES, EMPTY_STRING, ZERO, RESOLVER_KEY_TRANSFER } from "@scripts";
 import { executeRbac, MAX_UINT256 } from "@test";
+import { ASSET_MOCK_CONFIG_ID } from "../../../fixtures/deploy/assetMockConfiguration";
 
 const amount = 1000;
 const DATA = "0x1234";
@@ -493,30 +494,27 @@ export function transferTests(getCtx: () => AssetMockCtx): void {
       });
 
       it("GIVEN non-operational WHEN transfer is called THEN AssetNotOperational", async () => {
-        await expect(asset.transfer(ethers.ZeroAddress, 0n)).to.be.revertedWithCustomError(
-          asset,
-          "AssetNotOperational",
-        );
+        await expect(asset.transfer(ethers.ZeroAddress, 0n))
+          .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+          .withArgs(ASSET_MOCK_CONFIG_ID, 1);
       });
 
       it("GIVEN non-operational WHEN transferFrom is called THEN AssetNotOperational", async () => {
-        await expect(asset.transferFrom(ethers.ZeroAddress, ethers.ZeroAddress, 0n)).to.be.revertedWithCustomError(
-          asset,
-          "AssetNotOperational",
-        );
+        await expect(asset.transferFrom(ethers.ZeroAddress, ethers.ZeroAddress, 0n))
+          .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+          .withArgs(ASSET_MOCK_CONFIG_ID, 1);
       });
 
       it("GIVEN non-operational WHEN transferWithData is called THEN AssetNotOperational", async () => {
-        await expect(asset.transferWithData(ethers.ZeroAddress, 0n, "0x")).to.be.revertedWithCustomError(
-          asset,
-          "AssetNotOperational",
-        );
+        await expect(asset.transferWithData(ethers.ZeroAddress, 0n, "0x"))
+          .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+          .withArgs(ASSET_MOCK_CONFIG_ID, 1);
       });
 
       it("GIVEN non-operational WHEN transferFromWithData is called THEN AssetNotOperational", async () => {
-        await expect(
-          asset.transferFromWithData(ethers.ZeroAddress, ethers.ZeroAddress, 0n, "0x"),
-        ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+        await expect(asset.transferFromWithData(ethers.ZeroAddress, ethers.ZeroAddress, 0n, "0x"))
+          .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+          .withArgs(ASSET_MOCK_CONFIG_ID, 1);
       });
     });
   });

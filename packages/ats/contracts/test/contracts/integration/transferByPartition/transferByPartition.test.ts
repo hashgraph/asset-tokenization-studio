@@ -8,6 +8,7 @@ import type { AssetMockCtx } from "@test";
 import { RESOLVER_KEY_TRANSFER_BY_PARTITION } from "@scripts";
 import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
 import { executeRbac, MAX_UINT256 } from "@test";
+import { ASSET_MOCK_CONFIG_ID } from "../../../fixtures/deploy/assetMockConfiguration";
 
 const _WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
 const _AMOUNT = 1000;
@@ -163,9 +164,9 @@ export function transferByPartitionTests(getCtx: () => AssetMockCtx): void {
       });
 
       it("GIVEN non-operational WHEN transferByPartition is called THEN AssetNotOperational", async () => {
-        await expect(
-          asset.transferByPartition(ethers.ZeroHash, { to: ethers.ZeroAddress, value: 0n }, "0x"),
-        ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+        await expect(asset.transferByPartition(ethers.ZeroHash, { to: ethers.ZeroAddress, value: 0n }, "0x"))
+          .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+          .withArgs(ASSET_MOCK_CONFIG_ID, 1);
       });
     });
   });

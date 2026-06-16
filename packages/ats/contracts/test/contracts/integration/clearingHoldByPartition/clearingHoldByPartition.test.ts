@@ -15,6 +15,7 @@ import {
   RESOLVER_KEY_CLEARING_HOLDBYPARTITION,
 } from "@scripts";
 import { executeRbac, MAX_UINT256 } from "@test";
+import { ASSET_MOCK_CONFIG_ID } from "../../../fixtures/deploy/assetMockConfiguration";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
 const _WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
@@ -715,7 +716,9 @@ export function clearingHoldByPartitionTests(getCtx: () => AssetMockCtx): void {
               data: _DATA,
             },
           ),
-        ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+        )
+          .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+          .withArgs(ASSET_MOCK_CONFIG_ID, 1);
       });
 
       it("GIVEN non-operational WHEN clearingCreateHoldFromByPartition is called THEN AssetNotOperational", async () => {
@@ -734,7 +737,9 @@ export function clearingHoldByPartitionTests(getCtx: () => AssetMockCtx): void {
               data: _DATA,
             },
           ),
-        ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+        )
+          .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+          .withArgs(ASSET_MOCK_CONFIG_ID, 1);
       });
     });
   });

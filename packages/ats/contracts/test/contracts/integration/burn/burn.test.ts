@@ -6,6 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
+import { ASSET_MOCK_CONFIG_ID } from "../../../fixtures/deploy/assetMockConfiguration";
 import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO, RESOLVER_KEY_BURN } from "@scripts";
 
 const AMOUNT = 1000;
@@ -379,18 +380,21 @@ export function burnTests(getCtx: () => AssetMockCtx): void {
       });
 
       it("GIVEN non-operational WHEN burn is called THEN AssetNotOperational", async () => {
-        await expect(asset.burn(ethers.ZeroAddress, 0n)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+        await expect(asset.burn(ethers.ZeroAddress, 0n))
+          .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+          .withArgs(ASSET_MOCK_CONFIG_ID, 1);
       });
 
       it("GIVEN non-operational WHEN redeem is called THEN AssetNotOperational", async () => {
-        await expect(asset.redeem(0n, "0x")).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+        await expect(asset.redeem(0n, "0x"))
+          .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+          .withArgs(ASSET_MOCK_CONFIG_ID, 1);
       });
 
       it("GIVEN non-operational WHEN redeemFrom is called THEN AssetNotOperational", async () => {
-        await expect(asset.redeemFrom(ethers.ZeroAddress, 0n, "0x")).to.be.revertedWithCustomError(
-          asset,
-          "AssetNotOperational",
-        );
+        await expect(asset.redeemFrom(ethers.ZeroAddress, 0n, "0x"))
+          .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+          .withArgs(ASSET_MOCK_CONFIG_ID, 1);
       });
     });
   });
