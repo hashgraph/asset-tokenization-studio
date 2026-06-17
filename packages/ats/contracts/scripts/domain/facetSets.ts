@@ -134,3 +134,50 @@ export const BOND_COMMON_FACETS = [
   "PrincipalFacet",
   "ProceedRecipientsFacet",
 ] as const satisfies readonly FacetName[];
+
+/**
+ * Asset-class "type" facets — the per-class additions that sit on top of the shared
+ * tiers (the deltas in each domain's `*_FACETS` list that are not already part of
+ * `COMMON_TOKEN_FACETS`, `EXTENDED_TOKEN_FACETS`, or `BOND_COMMON_FACETS`).
+ *
+ * Kept here so {@link ALL_ASSET_FACETS} can be composed without importing the per-class
+ * `createConfiguration` modules (which import this file, so importing them back would be
+ * circular). A drift test asserts the union below stays equal to the per-class lists.
+ */
+export const ASSET_TYPE_FACETS = [
+  "AmortizationFacet",
+  "DividendFacet",
+  "DividendSecurityHoldersFacet",
+  "FixedRateFacet",
+  "KpiLinkedRateFacet",
+  "KpisFacet",
+  "LoanFacet",
+  "LoansPortfolioFacet",
+  "VotingFacet",
+  "VotingSecurityHoldersFacet",
+] as const satisfies readonly FacetName[];
+
+/**
+ * The full union of every asset-class facet — all seven asset classes deduplicated.
+ *
+ * Equal to the deduplicated union of `EQUITY_FACETS`, `BOND_FACETS`,
+ * `BOND_FIXED_RATE_FACETS`, `BOND_KPI_LINKED_RATE_FACETS`, `LOAN_FACETS`,
+ * `LOANS_PORTFOLIO_FACETS`, and `DEPOSIT_TOKEN_FACETS`. Composed here from the shared
+ * tiers plus {@link ASSET_TYPE_FACETS} so it stays a single, compile-checked source of
+ * truth rather than a hand-maintained ~90-entry list; every input is already
+ * `satisfies readonly FacetName[]`, so typos are caught upstream.
+ *
+ * Production has no single asset that deploys every facet, so this currently has one
+ * consumer — the test-only AssetMock "mega-asset" configuration, which passes it through
+ * `buildFacetList()` to apply the `DiamondFacet`→`MockDiamondCut` swap and append the
+ * test-only `EvmAccessorsFacet`. It is intentionally a production-domain constant (it is
+ * a facet *set*, like the tiers) so it is reusable for future registry/config validation.
+ */
+export const ALL_ASSET_FACETS: readonly FacetName[] = [
+  ...new Set<FacetName>([
+    ...COMMON_TOKEN_FACETS,
+    ...EXTENDED_TOKEN_FACETS,
+    ...BOND_COMMON_FACETS,
+    ...ASSET_TYPE_FACETS,
+  ]),
+];
