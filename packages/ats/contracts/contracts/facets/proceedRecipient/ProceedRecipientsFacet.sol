@@ -3,12 +3,15 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IProceedRecipients, RESOLVER_KEY_PROCEED_RECIPIENTS } from "./IProceedRecipients.sol";
 import { ProceedRecipients } from "./ProceedRecipients.sol";
-import { ProceedRecipientsStorageWrapper } from "../../domain/asset/ProceedRecipientsStorageWrapper.sol";
-import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 
+/**
+ * @title ProceedRecipientsFacet
+ * @author Asset Tokenization Studio Team
+ * @notice Diamond facet that exposes proceed-recipient management operations through the
+ *         `IProceedRecipients` interface, registered under `RESOLVER_KEY_PROCEED_RECIPIENTS`.
+ */
 contract ProceedRecipientsFacet is ProceedRecipients, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

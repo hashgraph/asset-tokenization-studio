@@ -49,7 +49,7 @@ interface IProtectedHoldByPartition is IHoldTypes {
     function protectedCreateHoldByPartition(
         bytes32 _partition,
         address _from,
-        IHoldTypes.ProtectedHold memory _protectedHold,
+        IHoldTypes.ProtectedHold calldata _protectedHold,
         bytes calldata _signature
     ) external returns (bool success_, uint256 holdId_);
 }

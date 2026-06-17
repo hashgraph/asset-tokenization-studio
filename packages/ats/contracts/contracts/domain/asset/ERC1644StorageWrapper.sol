@@ -36,7 +36,6 @@ library ERC1644StorageWrapper {
      * @dev Sets `initialized` to `true`; must be called exactly once during deployment.
      * @param _controllable Whether the token is controllable at deployment time.
      */
-    // solhint-disable-next-line func-name-mixedcase
     function initializeController(bool _controllable) internal {
         erc1644Storage().isControllable = _controllable;
     }

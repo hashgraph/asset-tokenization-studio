@@ -37,6 +37,6 @@ interface ITransferByPartition is IERC1410Types {
     function transferByPartition(
         bytes32 _partition,
         BasicTransferInfo calldata _basicTransferInfo,
-        bytes memory _data
+        bytes calldata _data
     ) external returns (bytes32);
 }

@@ -5,7 +5,6 @@ import { ROLE_TREX_OWNER, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { IIdentity, RESOLVER_KEY_IDENTITY } from "./IIdentity.sol";
 import { IERC3643Types } from "../commonTypes/IERC3643Types.sol";
 import { IIdentityRegistry } from "./externalInterfaces/IIdentityRegistry.sol";
-import { IERC3643Types } from "../commonTypes/IERC3643Types.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";

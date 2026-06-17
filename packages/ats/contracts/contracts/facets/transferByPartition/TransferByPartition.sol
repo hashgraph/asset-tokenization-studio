@@ -31,7 +31,7 @@ abstract contract TransferByPartition is ITransferByPartition, Modifiers {
     function transferByPartition(
         bytes32 _partition,
         IERC1410Types.BasicTransferInfo calldata _basicTransferInfo,
-        bytes memory _data
+        bytes calldata _data
     )
         external
         override
