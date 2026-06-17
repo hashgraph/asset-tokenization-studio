@@ -48,11 +48,10 @@ Prefix/suffix rules for identifiers and artifact types.
   2. A modifier delegates to one or more `_check*` helpers and is named for the guaranteed
      property (`onlyValidHoldId`), not for the act of checking (`checkValidHoldId`).
   3. `valid` and `validate` are not interchangeable as a **modifier** prefix: the house form is
-     `onlyValid<Property>` (the dominant form, ~30 modifiers), never `validate<Property>`. The
-     three legacy exceptions — `validateConfigurationId`, `validateConfigurationVersion`,
-     `validateDates` — are standardised away by renaming to `onlyValid…` (e.g. `validateDates`
-     → `onlyValidDates`, which already exists elsewhere). `validate` stays a verb on helper
-     functions only, where the table's `_check*` form applies.
+     `onlyValid<Property>`, never `validate<Property>`. `validate` stays a verb on helper
+     functions only, where the table's `_check*` form applies. (A `validate*` modifier whose
+     guard duplicates an existing `onlyValid*` one is removed in favour of the existing modifier,
+     not renamed.)
 - Fix: rename to the construct's pattern — modifier prefixes become `only*`/`not*` (never
   `validate*`), the reverting assertion it delegates to becomes `_check*`, and a non-reverting
   `bool` accessor becomes `is*`/`has*`.

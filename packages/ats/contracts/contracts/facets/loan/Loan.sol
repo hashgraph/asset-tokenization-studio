@@ -14,7 +14,7 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  * @notice Abstract implementation of `ILoan`.
  * @dev    Delegates all storage reads and writes to `LoanStorageWrapper`. Access guards
  *         are enforced via `Modifiers`; date validation uses `onlyValidTimestamp` and
- *         `validateDates`.
+ *         `onlyValidDates`.
  */
 abstract contract Loan is ILoan, Modifiers {
     /// @inheritdoc ILoan
@@ -26,7 +26,7 @@ abstract contract Loan is ILoan, Modifiers {
         onlyRole(DEFAULT_ADMIN_ROLE)
         onlyFacetNotRegistered(RESOLVER_KEY_LOAN)
         onlyValidTimestamp(_loanDetailsData.loanBasicData.startingDate)
-        validateDates(_loanDetailsData.loanBasicData.startingDate, _loanDetailsData.loanBasicData.maturityDate)
+        onlyValidDates(_loanDetailsData.loanBasicData.startingDate, _loanDetailsData.loanBasicData.maturityDate)
     {
         LoanStorageWrapper.initializeLoan(_loanDetailsData);
         // TODO: [LOAN-INTEGRATION] Security data should be initialised through TreasuryToken/deployment layer.
@@ -49,7 +49,7 @@ abstract contract Loan is ILoan, Modifiers {
         onlyValidTimestamp(loanDetailsData_.loanBasicData.maturityDate)
         onlyValidTimestamp(loanDetailsData_.loanBasicData.signingDate)
         onlyValidTimestamp(loanDetailsData_.loanInterestData.firstAccrualDate)
-        validateDates(loanDetailsData_.loanBasicData.startingDate, loanDetailsData_.loanBasicData.maturityDate)
+        onlyValidDates(loanDetailsData_.loanBasicData.startingDate, loanDetailsData_.loanBasicData.maturityDate)
         notZeroAddress(loanDetailsData_.loanBasicData.originatorAccount)
         notZeroAddress(loanDetailsData_.loanBasicData.servicerAccount)
     {

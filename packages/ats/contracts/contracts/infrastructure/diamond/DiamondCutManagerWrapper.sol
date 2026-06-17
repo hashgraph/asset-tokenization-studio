@@ -80,7 +80,7 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
      * @param _configurationId Identifier of the configuration being validated.
      * @param _version Configuration version that must be non-zero.
      */
-    modifier validateConfigurationVersion(bytes32 _configurationId, uint256 _version) {
+    modifier onlyValidConfigurationVersion(bytes32 _configurationId, uint256 _version) {
         _checkExplicitVersion(_configurationId, _version);
         _;
     }
@@ -325,7 +325,7 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
     /**
      * @notice Reverts unless a resolver proxy configuration version is registered.
      * @dev Version zero is not explicitly rejected here unless the configuration is inactive;
-     *      callers requiring explicit versions should use `validateConfigurationVersion`.
+     *      callers requiring explicit versions should use `onlyValidConfigurationVersion`.
      * @param _dcms Diamond cut manager storage reference.
      * @param _configurationId Identifier of the configuration to validate.
      * @param _version Version to validate against the latest active version.
