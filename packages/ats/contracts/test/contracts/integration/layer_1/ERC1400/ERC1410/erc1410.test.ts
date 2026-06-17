@@ -94,51 +94,6 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
     let asset: IAssetMock;
 
     const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
-
-    function set_initRbacs() {
-      return [
-        {
-          role: ATS_ROLES.ROLE_ISSUER,
-          members: [signer_B.address],
-        },
-        {
-          role: ATS_ROLES.ROLE_PAUSER,
-          members: [signer_D.address],
-        },
-        {
-          role: ATS_ROLES.ROLE_KYC,
-          members: [signer_B.address],
-        },
-        {
-          role: ATS_ROLES.ROLE_SSI_MANAGER,
-          members: [signer_A.address],
-        },
-        {
-          role: ATS_ROLES.ROLE_CLEARING,
-          members: [signer_A.address],
-        },
-        {
-          role: ATS_ROLES.ROLE_CORPORATE_ACTION,
-          members: [signer_B.address],
-        },
-        {
-          role: ATS_ROLES.ROLE_CONTROL_LIST,
-          members: [signer_E.address],
-        },
-        {
-          role: ATS_ROLES.ROLE_CONTROLLER,
-          members: [signer_C.address],
-        },
-        {
-          role: ATS_ROLES.ROLE_PROTECTED_PARTITIONS,
-          members: [signer_B.address],
-        },
-        {
-          role: ATS_ROLES.ROLE_AGENT,
-          members: [signer_A.address],
-        },
-      ];
-    }
     let currentTimestamp = 0;
     let expirationTimestamp = 0;
 
@@ -3584,10 +3539,11 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
       });
     });
 
-    describe.skip("Multi Partition", async () => {
+    describe("Multi Partition", async () => {
       beforeEach(async () => {
         await asset.setMultiPartition(true);
         await asset.grantRole(ATS_ROLES.ROLE_CLEARING, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_CLEARING_VALIDATOR, signer_A.address);
         await asset.activateClearing();
         await executeRbac(asset, [
           { role: ATS_ROLES.ROLE_ISSUER, members: [signer_B.address] },
@@ -3597,6 +3553,7 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
           { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
           { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
         ]);
+        await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
         await setFacets();
       });
 
@@ -3853,11 +3810,8 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
         };
 
         async function protectedClearingFixture() {
-          await asset.grantRole(ATS_ROLES.ROLE_CLEARING, signer_A.address);
-          await asset.activateClearing();
-          await executeRbac(asset, set_initRbacs());
+          await asset.grantRole(ATS_ROLES.ROLE_PROTECTED_PARTITIONS, signer_B.address);
           await asset.connect(signer_B).protectPartitions();
-          await setFacets();
         }
 
         beforeEach(async () => {
@@ -4848,7 +4802,7 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
             data: _DATA,
           });
 
-          // Recover signer_A's address to signer_B
+          await asset.setMultiPartition(false);
           await asset.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
 
           const message = {
@@ -4876,7 +4830,7 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
             data: _DATA,
           });
 
-          // Recover signer_C's address to signer_D
+          await asset.setMultiPartition(false);
           await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
 
           const message = {
@@ -4931,7 +4885,7 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
           const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
           await asset.grantRole(protectedPartitionRole, signer_B.address);
 
-          // Recover signer_A's address to signer_B
+          await asset.setMultiPartition(false);
           await asset.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
 
           // Try to call - should hit onlyUnrecoveredAddress before signature validation
@@ -4950,7 +4904,7 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
             data: _DATA,
           });
 
-          // Recover signer_A's address to signer_B
+          await asset.setMultiPartition(false);
           await asset.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
 
           const holdForClearing = {
@@ -4985,7 +4939,7 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
             data: _DATA,
           });
 
-          // Recover signer_C's address (the "to" address in hold) to signer_D
+          await asset.setMultiPartition(false);
           await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
 
           const holdForClearing = {
