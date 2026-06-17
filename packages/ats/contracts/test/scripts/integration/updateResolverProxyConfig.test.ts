@@ -113,7 +113,7 @@ describe("updateResolverProxy* - Integration Tests", () => {
       expect(result.success).to.be.true;
       expect(result.updateType).to.equal("config");
       expect(result.newConfig?.configurationId).to.equal(altConfigId);
-      expect(result.newConfig?.version).to.equal(BLR_VERSIONS.SECOND);
+      expect(result.newConfig?.configurationVersion).to.equal(BLR_VERSIONS.SECOND);
     });
 
     it("should verify configId changed on-chain", async () => {

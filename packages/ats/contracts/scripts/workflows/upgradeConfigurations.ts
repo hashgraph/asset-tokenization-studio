@@ -829,7 +829,7 @@ async function updateProxiesPhase(ctx: UpgradePhaseContext): Promise<ProxyUpdate
       let previousVersion: number | undefined;
       try {
         const currentConfig = await getResolverProxyConfigInfo(signer, proxyAddress);
-        previousVersion = currentConfig.version;
+        previousVersion = currentConfig.configurationVersion;
       } catch {
         // Unable to get current config, continue anyway
       }
@@ -841,8 +841,8 @@ async function updateProxiesPhase(ctx: UpgradePhaseContext): Promise<ProxyUpdate
       const updateResult: ProxyUpdateResult = {
         proxyAddress,
         success: result.success,
-        previousVersion: result.previousConfig?.version,
-        newVersion: result.newConfig?.version,
+        previousVersion: result.previousConfig?.configurationVersion,
+        newVersion: result.newConfig?.configurationVersion,
         updateType: result.updateType,
         error: result.error,
         transactionHash: result.transactionHash,
@@ -856,14 +856,14 @@ async function updateProxiesPhase(ctx: UpgradePhaseContext): Promise<ProxyUpdate
         success: result.success,
         transactionHash: result.transactionHash,
         error: result.error,
-        previousVersion: result.previousConfig?.version,
-        newVersion: result.newConfig?.version,
+        previousVersion: result.previousConfig?.configurationVersion,
+        newVersion: result.newConfig?.configurationVersion,
       });
       checkpoint.currentStep = UPGRADE_WORKFLOW_STEPS.UPDATE_PROXIES;
       await checkpointManager.saveCheckpoint(checkpoint);
 
       if (result.success) {
-        info(`   ✅ ${proxyAddress}: v${previousVersion} → v${result.newConfig?.version}`);
+        info(`   ✅ ${proxyAddress}: v${previousVersion} → v${result.newConfig?.configurationVersion}`);
         ctx.totalGasUsed += result.gasUsed || 0;
       } else {
         warn(`   ⚠️ ${proxyAddress}: Update failed - ${result.error}`);

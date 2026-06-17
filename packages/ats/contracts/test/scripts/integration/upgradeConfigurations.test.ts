@@ -128,7 +128,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
   });
 
   describe("Proxy Updates", () => {
-    it.only("should update single proxy successfully", async () => {
+    it("should update single proxy successfully", async () => {
       const { deployer, blrAddress, equityTokenAddress } = await loadFixture(deployUpgradeTestFixture);
 
       // Verify initial version
