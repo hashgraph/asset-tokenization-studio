@@ -119,6 +119,7 @@ describe("ResolverProxy Tests", () => {
     expect(result.resolver_).to.equal(resolver.target);
     expect(result.configurationId_).to.equal(CONFIG_ID);
     expect(result.configurationVersion_).to.equal(1);
+    expect(result.replacementEnabled_).to.equal(false);
 
     const diamondLoupe = await ethers.getContractAt("DiamondFacet", resolverProxy.target);
 
@@ -323,6 +324,7 @@ describe("ResolverProxy Tests", () => {
     expect(result.resolver_).to.equal(resolver.target);
     expect(result.configurationId_).to.equal(CONFIG_ID);
     expect(result.configurationVersion_).to.equal(oldVersion);
+    expect(result.replacementEnabled_).to.equal(false);
 
     const newVersion = 1;
 
@@ -333,6 +335,86 @@ describe("ResolverProxy Tests", () => {
     expect(result.resolver_).to.equal(resolver.target);
     expect(result.configurationId_).to.equal(CONFIG_ID);
     expect(result.configurationVersion_).to.equal(newVersion);
+    expect(result.replacementEnabled_).to.equal(false);
+  });
+
+  it("GIVEN resolverProxy and non-admin user WHEN updating replacement enabled flag THEN fails with AccountHasNoRole", async () => {
+    const businessLogicsRegistryDatas = [
+      {
+        businessLogicKey: await diamondFacet.getStaticResolverKey(),
+        businessLogicAddress: diamondFacet.target,
+      },
+      {
+        businessLogicKey: await accessControlImpl.getStaticResolverKey(),
+        businessLogicAddress: accessControlImpl.target,
+      },
+    ];
+
+    await setUpResolver(businessLogicsRegistryDatas);
+
+    const resolverProxy = await (
+      await ethers.getContractFactory("ResolverProxy")
+    ).deploy(resolver.target, { configurationId: CONFIG_ID, configurationVersion: 1, replacementEnabled: false }, []);
+
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target);
+
+    await expect(diamondCut.updateReplacementEnabled(true)).to.be.revertedWithCustomError(
+      diamondCut,
+      "AccountHasNoRole",
+    );
+  });
+
+  it("GIVEN resolverProxy and admin user WHEN updating replacement enabled flag THEN succeeds", async () => {
+    const businessLogicsRegistryDatas = [
+      {
+        businessLogicKey: await diamondFacet.getStaticResolverKey(),
+        businessLogicAddress: diamondFacet.target,
+      },
+      {
+        businessLogicKey: await accessControlImpl.getStaticResolverKey(),
+        businessLogicAddress: accessControlImpl.target,
+      },
+    ];
+
+    await setUpResolver(businessLogicsRegistryDatas);
+
+    const rbac = [
+      {
+        role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
+        members: [signer_A.address],
+      },
+    ];
+
+    const version = 1;
+    const oldReplacementEnabledFlag = false;
+
+    const resolverProxy = await (
+      await ethers.getContractFactory("ResolverProxy")
+    ).deploy(
+      resolver.target,
+      { configurationId: CONFIG_ID, configurationVersion: version, replacementEnabled: oldReplacementEnabledFlag },
+      rbac,
+    );
+
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target, signer_A);
+
+    let result = await diamondCut.getConfigInfo();
+
+    expect(result.resolver_).to.equal(resolver.target);
+    expect(result.configurationId_).to.equal(CONFIG_ID);
+    expect(result.configurationVersion_).to.equal(version);
+    expect(result.replacementEnabled_).to.equal(oldReplacementEnabledFlag);
+
+    const newReplacementEnabledFlag = !oldReplacementEnabledFlag;
+
+    await diamondCut.updateReplacementEnabled(newReplacementEnabledFlag);
+
+    result = await diamondCut.getConfigInfo();
+
+    expect(result.resolver_).to.equal(resolver.target);
+    expect(result.configurationId_).to.equal(CONFIG_ID);
+    expect(result.configurationVersion_).to.equal(version);
+    expect(result.replacementEnabled_).to.equal(newReplacementEnabledFlag);
   });
 
   it("GIVEN resolverProxy and non-admin user WHEN updating configID THEN fails with AccountHasNoRole", async () => {
@@ -430,6 +512,7 @@ describe("ResolverProxy Tests", () => {
     expect(result.resolver_).to.equal(resolver.target);
     expect(result.configurationId_).to.equal(CONFIG_ID);
     expect(result.configurationVersion_).to.equal(oldVersion);
+    expect(result.replacementEnabled_).to.equal(false);
 
     const newVersion = 1;
 
@@ -440,6 +523,7 @@ describe("ResolverProxy Tests", () => {
     expect(result.resolver_).to.equal(resolver.target);
     expect(result.configurationId_).to.equal(CONFIG_ID_2);
     expect(result.configurationVersion_).to.equal(newVersion);
+    expect(result.replacementEnabled_).to.equal(false);
   });
 
   it("GIVEN resolverProxy and non-admin user WHEN updating resolver THEN fails with AccountHasNoRole", async () => {
@@ -546,6 +630,7 @@ describe("ResolverProxy Tests", () => {
     expect(result.resolver_).to.equal(resolver.target);
     expect(result.configurationId_).to.equal(CONFIG_ID);
     expect(result.configurationVersion_).to.equal(oldVersion);
+    expect(result.replacementEnabled_).to.equal(false);
 
     const newVersion = 1;
 
