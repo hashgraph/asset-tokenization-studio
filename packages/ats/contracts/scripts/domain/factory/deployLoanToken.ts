@@ -71,7 +71,6 @@ export async function deployLoanFromFactory(
     erc20MetadataInfo: {
       name: securityDataParams.erc20MetadataInfo.name,
       symbol: securityDataParams.erc20MetadataInfo.symbol,
-      isin: securityDataParams.erc20MetadataInfo.isin,
       decimals: securityDataParams.erc20MetadataInfo.decimals,
     },
     clearingActive: securityDataParams.clearingActive,
@@ -90,6 +89,7 @@ export async function deployLoanFromFactory(
     resolverProxyConfiguration.key,
     resolverProxyConfiguration.version,
     rbacs,
+    "0x",
     {
       gasLimit: GAS_LIMIT.high,
     },
@@ -122,7 +122,6 @@ export async function deployLoanFromFactory(
     info: {
       name: securityData.erc20MetadataInfo.name,
       symbol: securityData.erc20MetadataInfo.symbol,
-      isin: securityData.erc20MetadataInfo.isin,
       decimals: securityData.erc20MetadataInfo.decimals,
     },
     securityType: 5,

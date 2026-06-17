@@ -8,11 +8,11 @@ import { ERC1410StorageWrapper } from "../asset/ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "../asset/ERC20StorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "../asset/SnapshotsStorageWrapper.sol";
 import { HoldStorageWrapper } from "../asset/HoldStorageWrapper.sol";
-import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
+import { IERC1410Types } from "../../facets/commonTypes/IERC1410Types.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { IClearingTypes } from "../../facets/clearing/IClearingTypes.sol";
-import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
-import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
+import { ICompliance } from "../../facets/compliance/externalInterfaces/ICompliance.sol";
+import { IERC3643Types } from "../../facets/commonTypes/IERC3643Types.sol";
 import { IHoldTypes } from "../../facets/hold/IHoldTypes.sol";
 import { ThirdPartyType } from "../asset/types/ThirdPartyType.sol";
 import { HoldOps } from "./HoldOps.sol";
@@ -175,7 +175,7 @@ library ClearingLifecycleOps {
         TokenCoreOps.checkCompliance(_id.tokenHolder, transferData.destination, false);
 
         // Notify compliance module for every partition; zero-target short-circuits in LowLevelCall.
-        (ERC3643StorageWrapper.erc3643Storage().compliance).functionCall(
+        address(ERC3643StorageWrapper.getCompliance()).functionCall(
             abi.encodeWithSelector(
                 ICompliance.transferred.selector,
                 _id.tokenHolder,
@@ -228,7 +228,7 @@ library ClearingLifecycleOps {
         ERC1410StorageWrapper.reduceTotalSupplyByPartition(_id.partition, redeemData.amount);
 
         // Notify compliance module for every partition; zero-target short-circuits in LowLevelCall.
-        (ERC3643StorageWrapper.erc3643Storage().compliance).functionCall(
+        address(ERC3643StorageWrapper.getCompliance()).functionCall(
             abi.encodeWithSelector(ICompliance.destroyed.selector, _id.tokenHolder, redeemData.amount),
             IERC3643Types.ComplianceCallFailed.selector
         );

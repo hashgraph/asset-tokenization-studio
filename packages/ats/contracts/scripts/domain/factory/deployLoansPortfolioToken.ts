@@ -74,7 +74,6 @@ export async function deployLoansPortfolioFromFactory(
     erc20MetadataInfo: {
       name: securityDataParams.erc20MetadataInfo.name,
       symbol: securityDataParams.erc20MetadataInfo.symbol,
-      isin: securityDataParams.erc20MetadataInfo.isin,
       decimals: securityDataParams.erc20MetadataInfo.decimals,
     },
     clearingActive: securityDataParams.clearingActive,
@@ -93,6 +92,7 @@ export async function deployLoansPortfolioFromFactory(
     resolverProxyConfiguration.key,
     resolverProxyConfiguration.version,
     rbacs,
+    "0x",
     {
       gasLimit: GAS_LIMIT.high,
     },

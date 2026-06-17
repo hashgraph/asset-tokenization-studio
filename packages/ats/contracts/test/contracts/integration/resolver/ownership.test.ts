@@ -3,6 +3,7 @@
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
+  AccessControl,
   AccessControlFacet__factory,
   BusinessLogicResolver,
   IOwnership,
@@ -33,6 +34,7 @@ describe("Ownership", () => {
   let blr: BusinessLogicResolver;
   let ownership: IOwnership;
   let pause: Pause;
+  let accessControl: AccessControl;
 
   // Storage slot helpers. The OwnershipStorage struct is anchored at
   // OWNERSHIP_STORAGE_SLOT; `configOwners` is field 0 and
@@ -61,8 +63,9 @@ describe("Ownership", () => {
     signer_C = infrastructure.user2;
     signer_Pauser = infrastructure.user3;
 
-    const accessControl = AccessControlFacet__factory.connect(blr.target.toString(), signer_A);
+    accessControl = AccessControlFacet__factory.connect(blr.target.toString(), signer_A);
     await accessControl.grantRole(ATS_ROLES.ROLE_PAUSER, signer_Pauser.address);
+    await accessControl.grantRole(ATS_ROLES.ROLE_CREATE_CONFIGURATION, signer_C.address);
 
     pause = Pause__factory.connect(blr.target.toString(), signer_A);
     ownership = IOwnership__factory.connect(blr.target.toString(), signer_A);
@@ -140,6 +143,7 @@ describe("Ownership", () => {
     it("GIVEN the current owner WHEN nominating the zero address THEN the nomination is recorded without validation", async () => {
       await seedOwner(CONFIG_ID_A, signer_B.address);
 
+      await accessControl.grantRole(ATS_ROLES.ROLE_CREATE_CONFIGURATION, ZERO_ADDRESS);
       await expect(ownership.connect(signer_B).transferOwnership(CONFIG_ID_A, ZERO_ADDRESS))
         .to.emit(ownership, "OwnershipTransfered")
         .withArgs(CONFIG_ID_A, signer_B.address, ZERO_ADDRESS);

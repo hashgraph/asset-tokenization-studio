@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IController, RESOLVER_KEY_CONTROLLER } from "./IController.sol";
-import { IERC3643Types } from "../layer_1/ERC3643/IERC3643Types.sol";
+import { IERC3643Types } from "../commonTypes/IERC3643Types.sol";
 import { DEFAULT_ADMIN_ROLE, ROLE_CONTROLLER, ROLE_AGENT, _buildRoles } from "../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
 import { ERC1644StorageWrapper } from "../../domain/asset/ERC1644StorageWrapper.sol";
@@ -45,7 +45,7 @@ abstract contract Controller is IController, Modifiers {
         onlyAnyRole(_buildRoles(ROLE_CONTROLLER, ROLE_AGENT))
     {
         TokenCoreOps.transfer(_from, _to, _value);
-        emit IController.ControllerTransfer(EvmAccessors.getMsgSender(), _from, _to, _value, _data, _operatorData);
+        emit ControllerTransfer(EvmAccessors.getMsgSender(), _from, _to, _value, _data, _operatorData);
     }
 
     /// @inheritdoc IController
@@ -65,10 +65,11 @@ abstract contract Controller is IController, Modifiers {
         onlyAnyRole(_buildRoles(ROLE_CONTROLLER, ROLE_AGENT))
     {
         TokenCoreOps.burn(_tokenHolder, _value);
-        emit IController.ControllerRedemption(EvmAccessors.getMsgSender(), _tokenHolder, _value, _data, _operatorData);
+        emit ControllerRedemption(EvmAccessors.getMsgSender(), _tokenHolder, _value, _data, _operatorData);
     }
 
     /// @inheritdoc IController
+    /// @dev Emits {FinalizedControllerFeature}.
     function finalizeControllable()
         external
         override
@@ -78,6 +79,7 @@ abstract contract Controller is IController, Modifiers {
         onlyControllable
     {
         ERC1644StorageWrapper.finalizeControllable();
+        emit IController.FinalizedControllerFeature(EvmAccessors.getMsgSender());
     }
 
     /// @inheritdoc IController
@@ -97,7 +99,7 @@ abstract contract Controller is IController, Modifiers {
         returns (bool)
     {
         TokenCoreOps.transfer(_from, _to, _amount);
-        emit IController.ControllerTransfer(EvmAccessors.getMsgSender(), _from, _to, _amount, "", "");
+        emit ControllerTransfer(EvmAccessors.getMsgSender(), _from, _to, _amount, "", "");
         return true;
     }
 

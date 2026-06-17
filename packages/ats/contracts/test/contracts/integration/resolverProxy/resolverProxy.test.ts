@@ -45,7 +45,11 @@ describe("ResolverProxy Tests", () => {
 
     await resolverContract.registerBusinessLogics(businessLogicsRegistryDatas);
 
-    await resolverContract.createConfiguration(configID, facetConfigurations as any);
+    const accessControl = await ethers.getContractAt("AccessControl", resolverContract.target);
+    if (!(await accessControl.hasRole(ATS_ROLES.ROLE_CREATE_CONFIGURATION, signer_A.address))) {
+      await accessControl.grantRole(ATS_ROLES.ROLE_CREATE_CONFIGURATION, signer_A.address);
+    }
+    await resolverContract.createConfiguration(configID, facetConfigurations as any, "0x");
   }
 
   async function deployResolver(): Promise<BusinessLogicResolver> {

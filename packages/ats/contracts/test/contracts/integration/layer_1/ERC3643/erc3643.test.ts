@@ -3,7 +3,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { isinGenerator } from "@thomaschaplin/isin-generator";
 import { IAsset, type ResolverProxy, ComplianceMock, IdentityRegistryMock, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture } from "@test";
@@ -26,7 +25,6 @@ const newName = "TEST_ERC3643";
 const newSymbol = "TAC_ERC3643";
 const decimals = 6;
 const version = "1";
-const isin = isinGenerator();
 const AMOUNT = 1000;
 const MAX_SUPPLY = 10000000;
 const EMPTY_VC_ID = EMPTY_STRING;
@@ -71,7 +69,7 @@ describe("ERC3643 Tests", () => {
             compliance: complianceMock.target as string,
             identityRegistry: identityRegistryMock.target as string,
             maxSupply: MAX_SUPPLY,
-            erc20MetadataInfo: { name, symbol, decimals, isin },
+            erc20MetadataInfo: { name, symbol, decimals },
           },
         },
         infrastructure,

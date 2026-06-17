@@ -3,19 +3,19 @@
 import { expect } from "chai";
 import { ethers, network } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
-import { IAsset, MockDiamondCut, type ResolverProxy } from "@contract-types";
+import { IAssetMock } from "@contract-types";
+import type { AssetMockCtx } from "@test";
 import {
   ADDRESS_ZERO,
   ATS_ROLES,
   EMPTY_HEX_BYTES,
   EMPTY_STRING,
   ZERO,
-  EQUITY_CONFIG_ID,
   RESOLVER_KEY_CLEARING_HOLDBYPARTITION,
 } from "@scripts";
-import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
+import { executeRbac, MAX_UINT256 } from "@test";
+import { ASSET_MOCK_CONFIG_ID } from "../../../fixtures/deploy/assetMockConfiguration";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
 const _WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
@@ -49,715 +49,698 @@ enum ClearingOperationType {
   HoldCreation,
 }
 
-let clearingOperation: ClearingOperation;
-let clearingOperationFrom: ClearingOperationFrom;
-let hold: Hold;
+export function clearingHoldByPartitionTests(getCtx: () => AssetMockCtx): void {
+  let clearingOperation: ClearingOperation;
+  let clearingOperationFrom: ClearingOperationFrom;
+  let hold: Hold;
 
-describe("ClearingHoldByPartitionFacet Tests", () => {
-  let diamond: ResolverProxy;
-  let signer_A: HardhatEthersSigner;
-  let signer_B: HardhatEthersSigner;
-  let signer_C: HardhatEthersSigner;
-  let signer_D: HardhatEthersSigner;
-  let signer_E: HardhatEthersSigner;
+  describe("ClearingHoldByPartitionFacet Tests", () => {
+    let signer_A: HardhatEthersSigner;
+    let signer_B: HardhatEthersSigner;
+    let signer_C: HardhatEthersSigner;
+    let signer_D: HardhatEthersSigner;
+    let signer_E: HardhatEthersSigner;
+    let unknownSigner: HardhatEthersSigner;
 
-  let asset: IAsset;
-  let mockDiamondCut: MockDiamondCut;
+    let asset: IAssetMock;
 
-  const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
-  let currentTimestamp = 0;
-  let expirationTimestamp = 0;
+    const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
+    let currentTimestamp = 0;
+    let expirationTimestamp = 0;
 
-  async function setFacets(asset: IAsset) {
-    await asset.connect(signer_A).addIssuer(signer_A.address);
-    await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-    await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-    await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+    async function setFacets() {
+      await asset.connect(signer_A).addIssuer(signer_A.address);
+      await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+      await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+      await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
 
-    await asset.connect(signer_B).issueByPartition({
-      partition: _DEFAULT_PARTITION,
-      tokenHolder: signer_A.address,
-      value: 3 * _AMOUNT,
-      data: EMPTY_HEX_BYTES,
-    });
+      await asset.connect(signer_B).issueByPartition({
+        partition: _DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: 3 * _AMOUNT,
+        data: EMPTY_HEX_BYTES,
+      });
 
-    await asset.connect(signer_B).issueByPartition({
-      partition: _DEFAULT_PARTITION,
-      tokenHolder: signer_B.address,
-      value: 3 * _AMOUNT,
-      data: EMPTY_HEX_BYTES,
-    });
-  }
+      await asset.connect(signer_B).issueByPartition({
+        partition: _DEFAULT_PARTITION,
+        tokenHolder: signer_B.address,
+        value: 3 * _AMOUNT,
+        data: EMPTY_HEX_BYTES,
+      });
+    }
 
-  async function deploySecurityFixtureSinglePartition() {
-    const base = await deployEquityTokenFixture({
-      equityDataParams: {
-        securityData: {
-          isMultiPartition: false,
-          clearingActive: true,
-        },
-      },
-    });
-    diamond = base.diamond;
-    signer_A = base.deployer;
-    signer_B = base.user1;
-    signer_C = base.user2;
-    signer_D = base.user3;
-    signer_E = base.user4;
-
-    asset = await ethers.getContractAt("IAsset", diamond.target);
-    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
-    await executeRbac(asset, [
-      { role: ATS_ROLES.ROLE_ISSUER, members: [signer_B.address] },
-      { role: ATS_ROLES.ROLE_CONTROLLER, members: [signer_C.address] },
-      { role: ATS_ROLES.ROLE_PAUSER, members: [signer_D.address] },
-      { role: ATS_ROLES.ROLE_CONTROL_LIST, members: [signer_E.address] },
-      { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
-      { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
-      { role: ATS_ROLES.ROLE_CLEARING, members: [signer_A.address] },
-      { role: ATS_ROLES.ROLE_CLEARING_VALIDATOR, members: [signer_A.address] },
-      { role: ATS_ROLES.ROLE_PROTECTED_PARTITIONS, members: [signer_B.address] },
-      { role: ATS_ROLES.ROLE_AGENT, members: [signer_A.address] },
-    ]);
-
-    await setFacets(asset);
-  }
-
-  beforeEach(async () => {
-    const block = await ethers.provider.getBlock("latest");
-    if (!block) throw new Error("Failed to get latest block");
-    currentTimestamp = block.timestamp;
-    expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS;
-    [signer_A, signer_B, signer_C, signer_D, signer_E] = await ethers.getSigners();
-    hold = {
-      amount: BigInt(_AMOUNT),
-      expirationTimestamp: BigInt(expirationTimestamp),
-      escrow: signer_B.address,
-      to: signer_C.address,
-      data: _DATA,
-    };
-
-    clearingOperation = {
-      partition: _DEFAULT_PARTITION,
-      expirationTimestamp,
-      data: _DATA,
-    };
-
-    clearingOperationFrom = {
-      clearingOperation,
-      from: signer_A.address,
-      operatorData: _DATA,
-    };
-  });
-
-  afterEach(async () => {
-    await asset.resetSystemTimestamp();
-  });
-
-  describe("Single Partition", async () => {
     beforeEach(async () => {
-      await loadFixture(deploySecurityFixtureSinglePartition);
+      const ctx = getCtx();
+      signer_A = ctx.deployer;
+      signer_B = ctx.user1;
+      signer_C = ctx.user2;
+      signer_D = ctx.user3;
+      signer_E = ctx.user4;
+      unknownSigner = ctx.unknownSigner;
+      asset = ctx.asset;
+
+      const block = await ethers.provider.getBlock("latest");
+      if (!block) throw new Error("Failed to get latest block");
+      currentTimestamp = block.timestamp;
+      expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS;
+      hold = {
+        amount: BigInt(_AMOUNT),
+        expirationTimestamp: BigInt(expirationTimestamp),
+        escrow: signer_B.address,
+        to: signer_C.address,
+        data: _DATA,
+      };
+      clearingOperation = {
+        partition: _DEFAULT_PARTITION,
+        expirationTimestamp,
+        data: _DATA,
+      };
+      clearingOperationFrom = {
+        clearingOperation,
+        from: signer_A.address,
+        operatorData: _DATA,
+      };
     });
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // clearingCreateHoldByPartition
-    // ─────────────────────────────────────────────────────────────────────────
-
-    describe("clearingCreateHoldByPartition", () => {
-      it("GIVEN a Token WHEN creating clearing hold THEN transaction succeeds and emits ClearedHoldByPartition", async () => {
-        await expect(asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold))
-          .to.emit(asset, "ClearedHoldByPartition")
-          .withArgs(
-            signer_A.address,
-            signer_A.address,
-            clearingOperation.partition,
-            1,
-            Object.values(hold),
-            clearingOperation.expirationTimestamp,
-            clearingOperation.data,
-            EMPTY_HEX_BYTES,
-          );
-
-        const clearing = await asset.getClearingCreateHoldForByPartition(_DEFAULT_PARTITION, signer_A.address, 1);
-        expect(clearing.amount).to.equal(_AMOUNT);
-        expect(clearing.holdTo).to.equal(hold.to);
-        expect(clearing.holdEscrow).to.equal(hold.escrow);
-      });
-
-      it("GIVEN a Token WHEN creating clearing hold with amount 1 THEN transaction succeeds", async () => {
-        const minimalHold = { ...hold, amount: 1n };
-        await expect(asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, minimalHold)).to.emit(
-          asset,
-          "ClearedHoldByPartition",
-        );
-        const clearing = await asset.getClearingCreateHoldForByPartition(_DEFAULT_PARTITION, signer_A.address, 1);
-        expect(clearing.amount).to.equal(1);
-      });
-
-      describe("onlyUnpaused modifier", () => {
-        it("GIVEN a paused Token WHEN clearingCreateHoldByPartition THEN transaction fails with IsPaused", async () => {
-          await asset.connect(signer_D).pause();
-          await expect(
-            asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold),
-          ).to.be.revertedWithCustomError(asset, "IsPaused");
-        });
-      });
-
-      describe("onlyClearingActivated modifier", () => {
-        it("GIVEN clearing deactivated WHEN clearingCreateHoldByPartition THEN transaction fails with ClearingIsDisabled", async () => {
-          await asset.connect(signer_A).deactivateClearing();
-          await expect(
-            asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold),
-          ).to.be.revertedWithCustomError(asset, "ClearingIsDisabled");
-        });
-      });
-
-      describe("onlyWithValidExpirationTimestamp modifier", () => {
-        it("GIVEN an expired clearing expirationTimestamp WHEN clearingCreateHoldByPartition THEN transaction fails with WrongExpirationTimestamp", async () => {
-          const wrongExpirationTimestamp = currentTimestamp - 1;
-          await asset.changeSystemTimestamp(currentTimestamp);
-
-          const clearingOperation_wrong = { ...clearingOperation, expirationTimestamp: wrongExpirationTimestamp };
-          await expect(
-            asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation_wrong, hold),
-          ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
-        });
-
-        it("GIVEN an expired hold expirationTimestamp WHEN clearingCreateHoldByPartition THEN transaction fails with WrongExpirationTimestamp", async () => {
-          const wrongExpirationTimestamp = currentTimestamp - 1;
-          await asset.changeSystemTimestamp(currentTimestamp);
-
-          const hold_wrong = { ...hold, expirationTimestamp: BigInt(wrongExpirationTimestamp) };
-          await expect(
-            asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold_wrong),
-          ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
-        });
-      });
-
-      describe("notZeroAddress modifier", () => {
-        it("GIVEN a zero escrow address WHEN clearingCreateHoldByPartition THEN transaction fails with ZeroAddressNotAllowed", async () => {
-          const hold_wrong = { ...hold, escrow: ADDRESS_ZERO };
-          await expect(
-            asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold_wrong),
-          ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
-        });
-      });
-
-      describe("onlyDefaultPartitionWithSinglePartition modifier", () => {
-        it("GIVEN a wrong partition in single-partition mode WHEN clearingCreateHoldByPartition THEN transaction fails with PartitionNotAllowedInSinglePartitionMode", async () => {
-          const clearingOperation_wrong = { ...clearingOperation, partition: _WRONG_PARTITION };
-          await expect(
-            asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation_wrong, hold),
-          ).to.be.revertedWithCustomError(asset, "PartitionNotAllowedInSinglePartitionMode");
-        });
-      });
-
-      describe("onlyUnProtectedPartitionsOrWildCardRole modifier", () => {
-        it("GIVEN protected partitions without wildcard role WHEN clearingCreateHoldByPartition THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
-          await asset.connect(signer_B).protectPartitions();
-          await expect(
-            asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold),
-          ).to.be.revertedWithCustomError(asset, "PartitionsAreProtectedAndNoRole");
-        });
-
-        it("GIVEN protected partitions with wildcard role WHEN clearingCreateHoldByPartition THEN transaction succeeds", async () => {
-          await asset.connect(signer_B).protectPartitions();
-          await asset.grantRole(ATS_ROLES.ROLE_WILD_CARD, signer_A.address);
-          await expect(asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold)).to.not.be
-            .reverted;
-        });
-      });
-
-      describe("onlyUnrecoveredAddress modifier", () => {
-        it("GIVEN a recovered msgSender WHEN calling clearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
-          await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
-          await expect(
-            asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold),
-          ).to.be.revertedWithCustomError(asset, "WalletRecovered");
-        });
-
-        it("GIVEN a recovered hold.to address WHEN calling clearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
-          await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
-          await expect(
-            asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold),
-          ).to.be.revertedWithCustomError(asset, "WalletRecovered");
-        });
-      });
-
-      describe("InsufficientBalance", () => {
-        it("GIVEN amount bigger than balance WHEN clearingCreateHoldByPartition THEN transaction fails with InsufficientBalance", async () => {
-          const hold_wrong = { ...hold, amount: BigInt(4 * _AMOUNT) };
-          await expect(
-            asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold_wrong),
-          ).to.be.revertedWithCustomError(asset, "InsufficientBalance");
-        });
-      });
+    afterEach(async () => {
+      await asset.resetSystemTimestamp();
     });
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // clearingCreateHoldFromByPartition
-    // ─────────────────────────────────────────────────────────────────────────
+    describe("Single Partition", async () => {
+      beforeEach(async () => {
+        await executeRbac(asset, [
+          { role: ATS_ROLES.ROLE_ISSUER, members: [signer_B.address] },
+          { role: ATS_ROLES.ROLE_CONTROLLER, members: [signer_C.address] },
+          { role: ATS_ROLES.ROLE_PAUSER, members: [signer_D.address] },
+          { role: ATS_ROLES.ROLE_CONTROL_LIST, members: [signer_E.address] },
+          { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+          { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
+          { role: ATS_ROLES.ROLE_CLEARING, members: [signer_A.address] },
+          { role: ATS_ROLES.ROLE_CLEARING_VALIDATOR, members: [signer_A.address] },
+          { role: ATS_ROLES.ROLE_PROTECTED_PARTITIONS, members: [signer_B.address] },
+          { role: ATS_ROLES.ROLE_AGENT, members: [signer_A.address] },
+        ]);
 
-    describe("clearingCreateHoldFromByPartition", () => {
-      it("GIVEN an approved third party WHEN clearingCreateHoldFromByPartition THEN transaction succeeds and emits ClearedHoldFromByPartition", async () => {
-        await asset.connect(signer_A).increaseAllowance(signer_B.address, _AMOUNT);
+        await asset.connect(signer_A).activateClearing();
+        await setFacets();
+      });
 
-        await expect(asset.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom, hold))
-          .to.emit(asset, "ClearedHoldFromByPartition")
-          .withArgs(
-            signer_B.address,
-            clearingOperationFrom.from,
-            clearingOperationFrom.clearingOperation.partition,
-            1,
-            Object.values(hold),
-            clearingOperationFrom.clearingOperation.expirationTimestamp,
-            clearingOperationFrom.clearingOperation.data,
-            clearingOperationFrom.operatorData,
+      // ─────────────────────────────────────────────────────────────────────────
+      // clearingCreateHoldByPartition
+      // ─────────────────────────────────────────────────────────────────────────
+
+      describe("clearingCreateHoldByPartition", () => {
+        it("GIVEN a Token WHEN creating clearing hold THEN transaction succeeds and emits ClearedHoldByPartition", async () => {
+          await expect(asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold))
+            .to.emit(asset, "ClearedHoldByPartition")
+            .withArgs(
+              signer_A.address,
+              signer_A.address,
+              clearingOperation.partition,
+              1,
+              Object.values(hold),
+              clearingOperation.expirationTimestamp,
+              clearingOperation.data,
+              EMPTY_HEX_BYTES,
+            );
+
+          const clearing = await asset.getClearingCreateHoldForByPartition(_DEFAULT_PARTITION, signer_A.address, 1);
+          expect(clearing.amount).to.equal(_AMOUNT);
+          expect(clearing.holdTo).to.equal(hold.to);
+          expect(clearing.holdEscrow).to.equal(hold.escrow);
+        });
+
+        it("GIVEN a Token WHEN creating clearing hold with amount 1 THEN transaction succeeds", async () => {
+          const minimalHold = { ...hold, amount: 1n };
+          await expect(asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, minimalHold)).to.emit(
+            asset,
+            "ClearedHoldByPartition",
           );
+          const clearing = await asset.getClearingCreateHoldForByPartition(_DEFAULT_PARTITION, signer_A.address, 1);
+          expect(clearing.amount).to.equal(1);
+        });
 
-        const clearing = await asset.getClearingCreateHoldForByPartition(_DEFAULT_PARTITION, signer_A.address, 1);
-        expect(clearing.amount).to.equal(_AMOUNT);
-        expect(clearing.holdTo).to.equal(hold.to);
-      });
+        describe("onlyUnpaused modifier", () => {
+          it("GIVEN a paused Token WHEN clearingCreateHoldByPartition THEN transaction fails with IsPaused", async () => {
+            await asset.connect(signer_D).pause();
+            await expect(
+              asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold),
+            ).to.be.revertedWithCustomError(asset, "IsPaused");
+          });
+        });
 
-      it("GIVEN an approved third party that clearingCreateHoldFromByPartition WHEN approving it THEN Hold is properly created with allowancesubstracted from original thrid party", async () => {
-        await asset.connect(signer_A).increaseAllowance(signer_D.address, _AMOUNT);
-        const allowanceBeforeAll = await asset.allowance(signer_A.address, signer_D.address);
+        describe("onlyClearingActivated modifier", () => {
+          it("GIVEN clearing deactivated WHEN clearingCreateHoldByPartition THEN transaction fails with ClearingIsDisabled", async () => {
+            await asset.connect(signer_A).deactivateClearing();
+            await expect(
+              asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold),
+            ).to.be.revertedWithCustomError(asset, "ClearingIsDisabled");
+          });
+        });
 
-        await asset.connect(signer_D).clearingCreateHoldFromByPartition(clearingOperationFrom, hold);
-        const allowanceAfterClearingCreation = await asset.allowance(signer_A.address, signer_D.address);
+        describe("onlyWithValidExpirationTimestamp modifier", () => {
+          it("GIVEN an expired clearing expirationTimestamp WHEN clearingCreateHoldByPartition THEN transaction fails with WrongExpirationTimestamp", async () => {
+            const wrongExpirationTimestamp = currentTimestamp - 1;
+            await asset.changeSystemTimestamp(currentTimestamp);
 
-        const identifier = {
-          clearingOperationType: ClearingOperationType.HoldCreation,
-          partition: _DEFAULT_PARTITION,
-          tokenHolder: signer_A.address,
-          clearingId: 1,
-        };
+            const clearingOperation_wrong = { ...clearingOperation, expirationTimestamp: wrongExpirationTimestamp };
+            await expect(
+              asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation_wrong, hold),
+            ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
+          });
 
-        await asset.grantRole(ATS_ROLES.ROLE_CLEARING_VALIDATOR, signer_E.address);
-        await asset.connect(signer_E).approveClearingOperationByPartition(identifier);
-        const allowanceAfterClearingApproval = await asset.allowance(signer_A.address, signer_D.address);
+          it("GIVEN an expired hold expirationTimestamp WHEN clearingCreateHoldByPartition THEN transaction fails with WrongExpirationTimestamp", async () => {
+            const wrongExpirationTimestamp = currentTimestamp - 1;
+            await asset.changeSystemTimestamp(currentTimestamp);
 
-        const holdIdentifier = {
-          partition: _DEFAULT_PARTITION,
-          tokenHolder: signer_A.address,
-          holdId: 1,
-        };
+            const hold_wrong = { ...hold, expirationTimestamp: BigInt(wrongExpirationTimestamp) };
+            await expect(
+              asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold_wrong),
+            ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
+          });
+        });
 
-        await asset.connect(signer_B).releaseHoldByPartition(holdIdentifier, _AMOUNT);
-        const allowanceAfterHoldReleased = await asset.allowance(signer_A.address, signer_D.address);
+        describe("onlyAddressNotZero modifier", () => {
+          it("GIVEN a zero escrow address WHEN clearingCreateHoldByPartition THEN transaction fails with ZeroAddressNotAllowed", async () => {
+            const hold_wrong = { ...hold, escrow: ADDRESS_ZERO };
+            await expect(
+              asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold_wrong),
+            ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
+          });
+        });
 
-        expect(allowanceBeforeAll).to.equal(BigInt(_AMOUNT));
-        expect(allowanceAfterClearingCreation).to.equal(0);
-        expect(allowanceAfterClearingApproval).to.equal(0);
-        expect(allowanceAfterHoldReleased).to.equal(BigInt(_AMOUNT));
-      });
+        describe("onlyDefaultPartitionWithSinglePartition modifier", () => {
+          it("GIVEN a wrong partition in single-partition mode WHEN clearingCreateHoldByPartition THEN transaction fails with PartitionNotAllowedInSinglePartitionMode", async () => {
+            const clearingOperation_wrong = { ...clearingOperation, partition: _WRONG_PARTITION };
+            await expect(
+              asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation_wrong, hold),
+            ).to.be.revertedWithCustomError(asset, "PartitionNotAllowedInSinglePartitionMode");
+          });
+        });
 
-      describe("onlyUnpaused modifier", () => {
-        it("GIVEN a paused Token WHEN clearingCreateHoldFromByPartition THEN transaction fails with IsPaused", async () => {
-          await asset.connect(signer_D).pause();
-          await expect(
-            asset.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom, hold),
-          ).to.be.revertedWithCustomError(asset, "IsPaused");
+        describe("onlyUnProtectedPartitionsOrWildCardRole modifier", () => {
+          it("GIVEN protected partitions without wildcard role WHEN clearingCreateHoldByPartition THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
+            await asset.connect(signer_B).protectPartitions();
+            await expect(
+              asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold),
+            ).to.be.revertedWithCustomError(asset, "PartitionsAreProtectedAndNoRole");
+          });
+
+          it("GIVEN protected partitions with wildcard role WHEN clearingCreateHoldByPartition THEN transaction succeeds", async () => {
+            await asset.connect(signer_B).protectPartitions();
+            await asset.grantRole(ATS_ROLES.ROLE_WILD_CARD, signer_A.address);
+            await expect(asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold)).to.not.be
+              .reverted;
+          });
+        });
+
+        describe("onlyUnrecoveredAddress modifier", () => {
+          it("GIVEN a recovered msgSender WHEN calling clearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
+            await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
+            await expect(
+              asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold),
+            ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+          });
+
+          it("GIVEN a recovered hold.to address WHEN calling clearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
+            await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
+            await expect(
+              asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold),
+            ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+          });
+        });
+
+        describe("InsufficientBalance", () => {
+          it("GIVEN amount bigger than balance WHEN clearingCreateHoldByPartition THEN transaction fails with InsufficientBalance", async () => {
+            const hold_wrong = { ...hold, amount: BigInt(4 * _AMOUNT) };
+            await expect(
+              asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold_wrong),
+            ).to.be.revertedWithCustomError(asset, "InsufficientBalance");
+          });
         });
       });
 
-      describe("onlyClearingActivated modifier", () => {
-        it("GIVEN clearing deactivated WHEN clearingCreateHoldFromByPartition THEN transaction fails with ClearingIsDisabled", async () => {
-          await asset.connect(signer_A).deactivateClearing();
-          await expect(
-            asset.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom, hold),
-          ).to.be.revertedWithCustomError(asset, "ClearingIsDisabled");
-        });
-      });
+      // ─────────────────────────────────────────────────────────────────────────
+      // clearingCreateHoldFromByPartition
+      // ─────────────────────────────────────────────────────────────────────────
 
-      describe("onlyWithValidExpirationTimestamp modifier", () => {
-        it("GIVEN an expired clearing expirationTimestamp WHEN clearingCreateHoldFromByPartition THEN transaction fails with WrongExpirationTimestamp", async () => {
-          const wrongExpirationTimestamp = currentTimestamp - 1;
-          await asset.changeSystemTimestamp(currentTimestamp);
-
-          const clearingOperation_wrong = { ...clearingOperation, expirationTimestamp: wrongExpirationTimestamp };
-          const clearingOperationFrom_wrong = {
-            ...clearingOperationFrom,
-            clearingOperation: clearingOperation_wrong,
-          };
-          await expect(
-            asset.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom_wrong, hold),
-          ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
-        });
-
-        it("GIVEN an expired hold expirationTimestamp WHEN clearingCreateHoldFromByPartition THEN transaction fails with WrongExpirationTimestamp", async () => {
-          const wrongExpirationTimestamp = currentTimestamp - 1;
-          await asset.changeSystemTimestamp(currentTimestamp);
-
-          const hold_wrong = { ...hold, expirationTimestamp: BigInt(wrongExpirationTimestamp) };
-          await expect(
-            asset.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom, hold_wrong),
-          ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
-        });
-      });
-
-      describe("notZeroAddress modifier", () => {
-        it("GIVEN a zero from address WHEN clearingCreateHoldFromByPartition THEN transaction fails with ZeroAddressNotAllowed", async () => {
-          const clearingOperationFrom_wrong = { ...clearingOperationFrom, from: ADDRESS_ZERO };
-          await expect(
-            asset.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom_wrong, hold),
-          ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
-        });
-
-        it("GIVEN a zero escrow address WHEN clearingCreateHoldFromByPartition THEN transaction fails with ZeroAddressNotAllowed", async () => {
-          const hold_wrong = { ...hold, escrow: ADDRESS_ZERO };
-          await expect(
-            asset.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom, hold_wrong),
-          ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
-        });
-      });
-
-      describe("onlyDefaultPartitionWithSinglePartition modifier", () => {
-        it("GIVEN a wrong partition in single-partition mode WHEN clearingCreateHoldFromByPartition THEN transaction fails with PartitionNotAllowedInSinglePartitionMode", async () => {
-          const clearingOperation_wrong = { ...clearingOperation, partition: _WRONG_PARTITION };
-          const clearingOperationFrom_wrong = {
-            ...clearingOperationFrom,
-            clearingOperation: clearingOperation_wrong,
-          };
-          await expect(
-            asset.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom_wrong, hold),
-          ).to.be.revertedWithCustomError(asset, "PartitionNotAllowedInSinglePartitionMode");
-        });
-      });
-
-      describe("onlyUnProtectedPartitionsOrWildCardRole modifier", () => {
-        it("GIVEN protected partitions without wildcard role WHEN clearingCreateHoldFromByPartition THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
-          await asset.connect(signer_B).protectPartitions();
-          await expect(
-            asset.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom, hold),
-          ).to.be.revertedWithCustomError(asset, "PartitionsAreProtectedAndNoRole");
-        });
-
-        it("GIVEN protected partitions with wildcard role WHEN clearingCreateHoldFromByPartition THEN transaction succeeds", async () => {
+      describe("clearingCreateHoldFromByPartition", () => {
+        it("GIVEN an approved third party WHEN clearingCreateHoldFromByPartition THEN transaction succeeds and emits ClearedHoldFromByPartition", async () => {
           await asset.connect(signer_A).increaseAllowance(signer_B.address, _AMOUNT);
-          await asset.connect(signer_B).protectPartitions();
-          await asset.grantRole(ATS_ROLES.ROLE_WILD_CARD, signer_B.address);
-          await expect(asset.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom, hold)).to.not.be
-            .reverted;
-        });
-      });
 
-      describe("onlyUnrecoveredAddress modifier", () => {
-        it("GIVEN a recovered msgSender WHEN calling clearingCreateHoldFromByPartition THEN transaction fails with WalletRecovered", async () => {
-          await asset.connect(signer_B).authorizeOperator(signer_A.address);
-          await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
+          await expect(asset.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom, hold))
+            .to.emit(asset, "ClearedHoldFromByPartition")
+            .withArgs(
+              signer_B.address,
+              clearingOperationFrom.from,
+              clearingOperationFrom.clearingOperation.partition,
+              1,
+              Object.values(hold),
+              clearingOperationFrom.clearingOperation.expirationTimestamp,
+              clearingOperationFrom.clearingOperation.data,
+              clearingOperationFrom.operatorData,
+            );
 
-          const clearingOperationFromB = { ...clearingOperationFrom, from: signer_B.address };
-          await expect(
-            asset.connect(signer_A).clearingCreateHoldFromByPartition(clearingOperationFromB, hold),
-          ).to.be.revertedWithCustomError(asset, "WalletRecovered");
-        });
-
-        it("GIVEN a recovered hold.to WHEN calling clearingCreateHoldFromByPartition THEN transaction fails with WalletRecovered", async () => {
-          await asset.connect(signer_B).authorizeOperator(signer_A.address);
-          await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
-
-          const clearingOperationFromB = { ...clearingOperationFrom, from: signer_B.address };
-          await expect(
-            asset.connect(signer_A).clearingCreateHoldFromByPartition(clearingOperationFromB, hold),
-          ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+          const clearing = await asset.getClearingCreateHoldForByPartition(_DEFAULT_PARTITION, signer_A.address, 1);
+          expect(clearing.amount).to.equal(_AMOUNT);
+          expect(clearing.holdTo).to.equal(hold.to);
         });
 
-        it("GIVEN a recovered from address WHEN calling clearingCreateHoldFromByPartition THEN transaction fails with WalletRecovered", async () => {
-          await asset.connect(signer_B).authorizeOperator(signer_A.address);
-          await asset.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
+        it("GIVEN an approved third party that clearingCreateHoldFromByPartition WHEN approving it THEN Hold is properly created with allowancesubstracted from original thrid party", async () => {
+          await asset.connect(signer_A).increaseAllowance(signer_D.address, _AMOUNT);
+          const allowanceBeforeAll = await asset.allowance(signer_A.address, signer_D.address);
 
-          const clearingOperationFromB = { ...clearingOperationFrom, from: signer_B.address };
-          await expect(
-            asset.connect(signer_A).clearingCreateHoldFromByPartition(clearingOperationFromB, hold),
-          ).to.be.revertedWithCustomError(asset, "WalletRecovered");
-        });
-      });
+          await asset.connect(signer_D).clearingCreateHoldFromByPartition(clearingOperationFrom, hold);
+          const allowanceAfterClearingCreation = await asset.allowance(signer_A.address, signer_D.address);
 
-      describe("InsufficientAllowance", () => {
-        it("GIVEN no allowance WHEN clearingCreateHoldFromByPartition THEN transaction fails with InsufficientAllowance", async () => {
-          await expect(
-            asset.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom, hold),
-          ).to.be.revertedWithCustomError(asset, "InsufficientAllowance");
-        });
-      });
-
-      describe("InsufficientBalance", () => {
-        it("GIVEN amount bigger than balance WHEN clearingCreateHoldFromByPartition THEN transaction fails with InsufficientBalance", async () => {
-          const clearingOperationFromB = { ...clearingOperationFrom, from: signer_B.address };
-          const hold_wrong = { ...hold, amount: BigInt(4 * _AMOUNT) };
-          await asset.connect(signer_B).increaseAllowance(signer_A.address, 4 * _AMOUNT);
-          await expect(
-            asset.connect(signer_A).clearingCreateHoldFromByPartition(clearingOperationFromB, hold_wrong),
-          ).to.be.revertedWithCustomError(asset, "InsufficientBalance");
-        });
-      });
-    });
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // getClearingCreateHoldForByPartition
-    // ─────────────────────────────────────────────────────────────────────────
-
-    describe("getClearingCreateHoldForByPartition", () => {
-      it("GIVEN a created clearing hold WHEN getClearingCreateHoldForByPartition THEN returns correct data", async () => {
-        await asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold);
-
-        const clearing = await asset.getClearingCreateHoldForByPartition(_DEFAULT_PARTITION, signer_A.address, 1);
-
-        expect(clearing.amount).to.equal(_AMOUNT);
-        expect(clearing.expirationTimestamp).to.equal(clearingOperation.expirationTimestamp);
-        expect(clearing.holdTo).to.equal(hold.to);
-        expect(clearing.holdEscrow).to.equal(hold.escrow);
-        expect(clearing.holdExpirationTimestamp).to.equal(hold.expirationTimestamp);
-        expect(clearing.holdData).to.equal(hold.data);
-      });
-
-      it("GIVEN a created clearingFrom hold WHEN getClearingCreateHoldForByPartition THEN returns correct data", async () => {
-        await asset.connect(signer_A).increaseAllowance(signer_B.address, _AMOUNT);
-        await asset.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom, hold);
-
-        const clearing = await asset.getClearingCreateHoldForByPartition(_DEFAULT_PARTITION, signer_A.address, 1);
-
-        expect(clearing.amount).to.equal(_AMOUNT);
-        expect(clearing.holdTo).to.equal(hold.to);
-      });
-
-      it("GIVEN no clearing WHEN getClearingCreateHoldForByPartition with non-existent id THEN returns zero data", async () => {
-        const clearing = await asset.getClearingCreateHoldForByPartition(_DEFAULT_PARTITION, signer_A.address, 999);
-        expect(clearing.amount).to.equal(0);
-      });
-    });
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // bug Transfer: clearingCreateHoldByPartition to address(0)
-    // ─────────────────────────────────────────────────────────────────────────
-
-    describe("bug Transfer", () => {
-      it("A9: GIVEN clearingCreateHoldByPartition WHEN transfer to address(0) THEN emits Transfer to ZeroAddress", async () => {
-        await expect(
-          asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, {
-            ...hold,
-            to: ethers.ZeroAddress,
-          }),
-        )
-          .to.emit(asset, "Transfer")
-          .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
-      });
-
-      it("A10: GIVEN clearingCreateHoldFromByPartition WHEN transfer to address(0) THEN emits Transfer to ZeroAddress", async () => {
-        await asset.connect(signer_A).increaseAllowance(signer_B.address, _AMOUNT);
-        await expect(
-          asset
-            .connect(signer_B)
-            .clearingCreateHoldFromByPartition(
-              { ...clearingOperationFrom, clearingOperation: { ...clearingOperation } },
-              { ...hold, to: ethers.ZeroAddress },
-            ),
-        )
-          .to.emit(asset, "Transfer")
-          .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
-      });
-
-      it("A11: GIVEN operatorClearingCreateHoldByPartition WHEN transfer to address(0) THEN emits Transfer to ZeroAddress", async () => {
-        await asset.connect(signer_A).authorizeOperator(signer_B.address);
-        await expect(
-          asset.connect(signer_B).operatorClearingCreateHoldByPartition(clearingOperationFrom, {
-            ...hold,
-            to: ethers.ZeroAddress,
-          }),
-        )
-          .to.emit(asset, "Transfer")
-          .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
-      });
-
-      it("A12: GIVEN protectedClearingCreateHoldByPartition WHEN transfer to address(0) THEN emits Transfer to ZeroAddress", async () => {
-        // Setup protected partitions
-        await asset.grantRole(ATS_ROLES.ROLE_PROTECTED_PARTITIONS, signer_A.address);
-        await asset.protectPartitions();
-
-        // Grant role for protected partition
-        const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
-          ["bytes32", "bytes32"],
-          [ATS_ROLES.ROLE_PROTECTED_PARTITIONS_PARTICIPANT, _DEFAULT_PARTITION],
-        );
-        const packedDataWithoutPrefix = packedData.slice(2);
-        const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
-        await asset.grantRole(protectedPartitionRole, signer_A.address);
-
-        // Get nonce
-        const nonce = Number(await asset.nonces(signer_A.address)) + 1;
-
-        const protectedClearingOperation = {
-          clearingOperation: {
+          const identifier = {
+            clearingOperationType: ClearingOperationType.HoldCreation,
             partition: _DEFAULT_PARTITION,
-            expirationTimestamp: expirationTimestamp,
+            tokenHolder: signer_A.address,
+            clearingId: 1,
+          };
+
+          await asset.grantRole(ATS_ROLES.ROLE_CLEARING_VALIDATOR, signer_E.address);
+          await asset.connect(signer_E).approveClearingOperationByPartition(identifier);
+          const allowanceAfterClearingApproval = await asset.allowance(signer_A.address, signer_D.address);
+
+          const holdIdentifier = {
+            partition: _DEFAULT_PARTITION,
+            tokenHolder: signer_A.address,
+            holdId: 1,
+          };
+
+          await asset.connect(signer_B).releaseHoldByPartition(holdIdentifier, _AMOUNT);
+          const allowanceAfterHoldReleased = await asset.allowance(signer_A.address, signer_D.address);
+
+          expect(allowanceBeforeAll).to.equal(BigInt(_AMOUNT));
+          expect(allowanceAfterClearingCreation).to.equal(0);
+          expect(allowanceAfterClearingApproval).to.equal(0);
+          expect(allowanceAfterHoldReleased).to.equal(BigInt(_AMOUNT));
+        });
+
+        describe("onlyUnpaused modifier", () => {
+          it("GIVEN a paused Token WHEN clearingCreateHoldFromByPartition THEN transaction fails with IsPaused", async () => {
+            await asset.connect(signer_D).pause();
+            await expect(
+              asset.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom, hold),
+            ).to.be.revertedWithCustomError(asset, "IsPaused");
+          });
+        });
+
+        describe("onlyClearingActivated modifier", () => {
+          it("GIVEN clearing deactivated WHEN clearingCreateHoldFromByPartition THEN transaction fails with ClearingIsDisabled", async () => {
+            await asset.connect(signer_A).deactivateClearing();
+            await expect(
+              asset.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom, hold),
+            ).to.be.revertedWithCustomError(asset, "ClearingIsDisabled");
+          });
+        });
+
+        describe("onlyWithValidExpirationTimestamp modifier", () => {
+          it("GIVEN an expired clearing expirationTimestamp WHEN clearingCreateHoldFromByPartition THEN transaction fails with WrongExpirationTimestamp", async () => {
+            const wrongExpirationTimestamp = currentTimestamp - 1;
+            await asset.changeSystemTimestamp(currentTimestamp);
+
+            const clearingOperation_wrong = { ...clearingOperation, expirationTimestamp: wrongExpirationTimestamp };
+            const clearingOperationFrom_wrong = {
+              ...clearingOperationFrom,
+              clearingOperation: clearingOperation_wrong,
+            };
+            await expect(
+              asset.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom_wrong, hold),
+            ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
+          });
+
+          it("GIVEN an expired hold expirationTimestamp WHEN clearingCreateHoldFromByPartition THEN transaction fails with WrongExpirationTimestamp", async () => {
+            const wrongExpirationTimestamp = currentTimestamp - 1;
+            await asset.changeSystemTimestamp(currentTimestamp);
+
+            const hold_wrong = { ...hold, expirationTimestamp: BigInt(wrongExpirationTimestamp) };
+            await expect(
+              asset.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom, hold_wrong),
+            ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
+          });
+        });
+
+        describe("onlyAddressNotZero modifier", () => {
+          it("GIVEN a zero from address WHEN clearingCreateHoldFromByPartition THEN transaction fails with ZeroAddressNotAllowed", async () => {
+            const clearingOperationFrom_wrong = { ...clearingOperationFrom, from: ADDRESS_ZERO };
+            await expect(
+              asset.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom_wrong, hold),
+            ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
+          });
+
+          it("GIVEN a zero escrow address WHEN clearingCreateHoldFromByPartition THEN transaction fails with ZeroAddressNotAllowed", async () => {
+            const hold_wrong = { ...hold, escrow: ADDRESS_ZERO };
+            await expect(
+              asset.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom, hold_wrong),
+            ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
+          });
+        });
+
+        describe("onlyDefaultPartitionWithSinglePartition modifier", () => {
+          it("GIVEN a wrong partition in single-partition mode WHEN clearingCreateHoldFromByPartition THEN transaction fails with PartitionNotAllowedInSinglePartitionMode", async () => {
+            const clearingOperation_wrong = { ...clearingOperation, partition: _WRONG_PARTITION };
+            const clearingOperationFrom_wrong = {
+              ...clearingOperationFrom,
+              clearingOperation: clearingOperation_wrong,
+            };
+            await expect(
+              asset.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom_wrong, hold),
+            ).to.be.revertedWithCustomError(asset, "PartitionNotAllowedInSinglePartitionMode");
+          });
+        });
+
+        describe("onlyUnProtectedPartitionsOrWildCardRole modifier", () => {
+          it("GIVEN protected partitions without wildcard role WHEN clearingCreateHoldFromByPartition THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
+            await asset.connect(signer_B).protectPartitions();
+            await expect(
+              asset.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom, hold),
+            ).to.be.revertedWithCustomError(asset, "PartitionsAreProtectedAndNoRole");
+          });
+
+          it("GIVEN protected partitions with wildcard role WHEN clearingCreateHoldFromByPartition THEN transaction succeeds", async () => {
+            await asset.connect(signer_A).increaseAllowance(signer_B.address, _AMOUNT);
+            await asset.connect(signer_B).protectPartitions();
+            await asset.grantRole(ATS_ROLES.ROLE_WILD_CARD, signer_B.address);
+            await expect(asset.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom, hold)).to.not
+              .be.reverted;
+          });
+        });
+
+        describe("onlyUnrecoveredAddress modifier", () => {
+          it("GIVEN a recovered msgSender WHEN calling clearingCreateHoldFromByPartition THEN transaction fails with WalletRecovered", async () => {
+            await asset.connect(signer_B).authorizeOperator(signer_A.address);
+            await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
+
+            const clearingOperationFromB = { ...clearingOperationFrom, from: signer_B.address };
+            await expect(
+              asset.connect(signer_A).clearingCreateHoldFromByPartition(clearingOperationFromB, hold),
+            ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+          });
+
+          it("GIVEN a recovered hold.to WHEN calling clearingCreateHoldFromByPartition THEN transaction fails with WalletRecovered", async () => {
+            await asset.connect(signer_B).authorizeOperator(signer_A.address);
+            await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
+
+            const clearingOperationFromB = { ...clearingOperationFrom, from: signer_B.address };
+            await expect(
+              asset.connect(signer_A).clearingCreateHoldFromByPartition(clearingOperationFromB, hold),
+            ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+          });
+
+          it("GIVEN a recovered from address WHEN calling clearingCreateHoldFromByPartition THEN transaction fails with WalletRecovered", async () => {
+            await asset.connect(signer_B).authorizeOperator(signer_A.address);
+            await asset.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
+
+            const clearingOperationFromB = { ...clearingOperationFrom, from: signer_B.address };
+            await expect(
+              asset.connect(signer_A).clearingCreateHoldFromByPartition(clearingOperationFromB, hold),
+            ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+          });
+        });
+
+        describe("InsufficientAllowance", () => {
+          it("GIVEN no allowance WHEN clearingCreateHoldFromByPartition THEN transaction fails with InsufficientAllowance", async () => {
+            await expect(
+              asset.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom, hold),
+            ).to.be.revertedWithCustomError(asset, "InsufficientAllowance");
+          });
+        });
+
+        describe("InsufficientBalance", () => {
+          it("GIVEN amount bigger than balance WHEN clearingCreateHoldFromByPartition THEN transaction fails with InsufficientBalance", async () => {
+            const clearingOperationFromB = { ...clearingOperationFrom, from: signer_B.address };
+            const hold_wrong = { ...hold, amount: BigInt(4 * _AMOUNT) };
+            await asset.connect(signer_B).increaseAllowance(signer_A.address, 4 * _AMOUNT);
+            await expect(
+              asset.connect(signer_A).clearingCreateHoldFromByPartition(clearingOperationFromB, hold_wrong),
+            ).to.be.revertedWithCustomError(asset, "InsufficientBalance");
+          });
+        });
+      });
+
+      // ─────────────────────────────────────────────────────────────────────────
+      // getClearingCreateHoldForByPartition
+      // ─────────────────────────────────────────────────────────────────────────
+
+      describe("getClearingCreateHoldForByPartition", () => {
+        it("GIVEN a created clearing hold WHEN getClearingCreateHoldForByPartition THEN returns correct data", async () => {
+          await asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold);
+
+          const clearing = await asset.getClearingCreateHoldForByPartition(_DEFAULT_PARTITION, signer_A.address, 1);
+
+          expect(clearing.amount).to.equal(_AMOUNT);
+          expect(clearing.expirationTimestamp).to.equal(clearingOperation.expirationTimestamp);
+          expect(clearing.holdTo).to.equal(hold.to);
+          expect(clearing.holdEscrow).to.equal(hold.escrow);
+          expect(clearing.holdExpirationTimestamp).to.equal(hold.expirationTimestamp);
+          expect(clearing.holdData).to.equal(hold.data);
+        });
+
+        it("GIVEN a created clearingFrom hold WHEN getClearingCreateHoldForByPartition THEN returns correct data", async () => {
+          await asset.connect(signer_A).increaseAllowance(signer_B.address, _AMOUNT);
+          await asset.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom, hold);
+
+          const clearing = await asset.getClearingCreateHoldForByPartition(_DEFAULT_PARTITION, signer_A.address, 1);
+
+          expect(clearing.amount).to.equal(_AMOUNT);
+          expect(clearing.holdTo).to.equal(hold.to);
+        });
+
+        it("GIVEN no clearing WHEN getClearingCreateHoldForByPartition with non-existent id THEN returns zero data", async () => {
+          const clearing = await asset.getClearingCreateHoldForByPartition(_DEFAULT_PARTITION, signer_A.address, 999);
+          expect(clearing.amount).to.equal(0);
+        });
+      });
+
+      // ─────────────────────────────────────────────────────────────────────────
+      // bug Transfer: clearingCreateHoldByPartition to address(0)
+      // ─────────────────────────────────────────────────────────────────────────
+
+      describe("bug Transfer", () => {
+        it("A9: GIVEN clearingCreateHoldByPartition WHEN transfer to address(0) THEN emits Transfer to ZeroAddress", async () => {
+          await expect(
+            asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, {
+              ...hold,
+              to: ethers.ZeroAddress,
+            }),
+          )
+            .to.emit(asset, "Transfer")
+            .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
+        });
+
+        it("A10: GIVEN clearingCreateHoldFromByPartition WHEN transfer to address(0) THEN emits Transfer to ZeroAddress", async () => {
+          await asset.connect(signer_A).increaseAllowance(signer_B.address, _AMOUNT);
+          await expect(
+            asset
+              .connect(signer_B)
+              .clearingCreateHoldFromByPartition(
+                { ...clearingOperationFrom, clearingOperation: { ...clearingOperation } },
+                { ...hold, to: ethers.ZeroAddress },
+              ),
+          )
+            .to.emit(asset, "Transfer")
+            .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
+        });
+
+        it("A11: GIVEN operatorClearingCreateHoldByPartition WHEN transfer to address(0) THEN emits Transfer to ZeroAddress", async () => {
+          await asset.connect(signer_A).authorizeOperator(signer_B.address);
+          await expect(
+            asset.connect(signer_B).operatorClearingCreateHoldByPartition(clearingOperationFrom, {
+              ...hold,
+              to: ethers.ZeroAddress,
+            }),
+          )
+            .to.emit(asset, "Transfer")
+            .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
+        });
+
+        it("A12: GIVEN protectedClearingCreateHoldByPartition WHEN transfer to address(0) THEN emits Transfer to ZeroAddress", async () => {
+          // Setup protected partitions
+          await asset.grantRole(ATS_ROLES.ROLE_PROTECTED_PARTITIONS, signer_A.address);
+          await asset.protectPartitions();
+
+          // Grant role for protected partition
+          const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
+            ["bytes32", "bytes32"],
+            [ATS_ROLES.ROLE_PROTECTED_PARTITIONS_PARTICIPANT, _DEFAULT_PARTITION],
+          );
+          const packedDataWithoutPrefix = packedData.slice(2);
+          const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
+          await asset.grantRole(protectedPartitionRole, signer_A.address);
+
+          // Get nonce
+          const nonce = Number(await asset.nonces(signer_A.address)) + 1;
+
+          const protectedClearingOperation = {
+            clearingOperation: {
+              partition: _DEFAULT_PARTITION,
+              expirationTimestamp: expirationTimestamp,
+              data: _DATA,
+            },
+            from: signer_A.address,
+            deadline: expirationTimestamp,
+            nonce: nonce,
+          };
+
+          const holdForClearing = {
+            amount: BigInt(_AMOUNT),
+            expirationTimestamp: BigInt(expirationTimestamp),
+            escrow: signer_B.address,
+            to: ethers.ZeroAddress,
             data: _DATA,
-          },
-          from: signer_A.address,
-          deadline: expirationTimestamp,
-          nonce: nonce,
-        };
+          };
 
-        const holdForClearing = {
-          amount: BigInt(_AMOUNT),
-          expirationTimestamp: BigInt(expirationTimestamp),
-          escrow: signer_B.address,
-          to: ethers.ZeroAddress,
-          data: _DATA,
-        };
+          // EIP-712 domain
+          const name = (await asset.getERC20Metadata()).info.name;
+          const version = (await asset.getConfigInfo()).version_.toString();
+          const chainId = await network.provider.send("eth_chainId");
 
-        // EIP-712 domain
-        const name = (await asset.getERC20Metadata()).info.name;
-        const version = (await asset.getConfigInfo()).version_.toString();
-        const chainId = await network.provider.send("eth_chainId");
+          const domain = {
+            name: name,
+            version: version,
+            chainId: parseInt(chainId, 16),
+            verifyingContract: await asset.getAddress(),
+          };
 
-        const domain = {
-          name: name,
-          version: version,
-          chainId: parseInt(chainId, 16),
-          verifyingContract: diamond.target.toString(),
-        };
+          const types = {
+            ClearingOperation: [
+              { name: "partition", type: "bytes32" },
+              { name: "expirationTimestamp", type: "uint256" },
+              { name: "data", type: "bytes" },
+            ],
+            ProtectedClearingOperation: [
+              { name: "clearingOperation", type: "ClearingOperation" },
+              { name: "from", type: "address" },
+              { name: "deadline", type: "uint256" },
+              { name: "nonce", type: "uint256" },
+            ],
+            Hold: [
+              { name: "amount", type: "uint256" },
+              { name: "expirationTimestamp", type: "uint256" },
+              { name: "escrow", type: "address" },
+              { name: "to", type: "address" },
+              { name: "data", type: "bytes" },
+            ],
+            protectedClearingCreateHoldByPartition: [
+              { name: "_protectedClearingOperation", type: "ProtectedClearingOperation" },
+              { name: "_hold", type: "Hold" },
+            ],
+          };
 
-        const types = {
-          ClearingOperation: [
-            { name: "partition", type: "bytes32" },
-            { name: "expirationTimestamp", type: "uint256" },
-            { name: "data", type: "bytes" },
-          ],
-          ProtectedClearingOperation: [
-            { name: "clearingOperation", type: "ClearingOperation" },
-            { name: "from", type: "address" },
-            { name: "deadline", type: "uint256" },
-            { name: "nonce", type: "uint256" },
-          ],
-          Hold: [
-            { name: "amount", type: "uint256" },
-            { name: "expirationTimestamp", type: "uint256" },
-            { name: "escrow", type: "address" },
-            { name: "to", type: "address" },
-            { name: "data", type: "bytes" },
-          ],
-          protectedClearingCreateHoldByPartition: [
-            { name: "_protectedClearingOperation", type: "ProtectedClearingOperation" },
-            { name: "_hold", type: "Hold" },
-          ],
-        };
+          const message = {
+            _protectedClearingOperation: protectedClearingOperation,
+            _hold: holdForClearing,
+          };
 
-        const message = {
-          _protectedClearingOperation: protectedClearingOperation,
-          _hold: holdForClearing,
-        };
+          const signature = await signer_A.signTypedData(domain, types, message);
 
-        const signature = await signer_A.signTypedData(domain, types, message);
+          await expect(
+            asset
+              .connect(signer_A)
+              .protectedClearingCreateHoldByPartition(protectedClearingOperation, holdForClearing, signature),
+          )
+            .to.emit(asset, "Transfer")
+            .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
+        });
+      });
+    });
 
+    describe("Deactivated", () => {
+      beforeEach(async () => {
+        await asset.forceDeactivate();
+      });
+
+      it("GIVEN a deactivated asset WHEN clearingCreateHoldByPartition THEN transaction fails with Deactivated", async () => {
         await expect(
           asset
             .connect(signer_A)
-            .protectedClearingCreateHoldByPartition(protectedClearingOperation, holdForClearing, signature),
+            .clearingCreateHoldByPartition(
+              { partition: _DEFAULT_PARTITION, expirationTimestamp, data: _DATA },
+              { amount: 0n, expirationTimestamp: 0n, escrow: ADDRESS_ZERO, to: ADDRESS_ZERO, data: "0x" },
+            ),
+        ).to.be.revertedWithCustomError(asset, "Deactivated");
+      });
+
+      it("GIVEN a deactivated asset WHEN clearingCreateHoldFromByPartition THEN transaction fails with Deactivated", async () => {
+        await expect(
+          asset.connect(signer_B).clearingCreateHoldFromByPartition(
+            {
+              clearingOperation: { partition: _DEFAULT_PARTITION, expirationTimestamp, data: _DATA },
+              from: ADDRESS_ZERO,
+              operatorData: "0x",
+            },
+            { amount: 0n, expirationTimestamp: 0n, escrow: ADDRESS_ZERO, to: ADDRESS_ZERO, data: "0x" },
+          ),
+        ).to.be.revertedWithCustomError(asset, "Deactivated");
+      });
+    });
+
+    describe("initializeClearingHoldByPartition", () => {
+      it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeClearingHoldByPartition is called THEN AccountHasNoRole", async () => {
+        await expect(asset.connect(unknownSigner).initializeClearingHoldByPartition())
+          .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+          .withArgs(unknownSigner.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+      });
+
+      it("GIVEN already-initialised WHEN initializeClearingHoldByPartition is called again THEN FacetAlreadyRegistered", async () => {
+        await expect(asset.initializeClearingHoldByPartition())
+          .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+          .withArgs(RESOLVER_KEY_CLEARING_HOLDBYPARTITION, 1);
+      });
+    });
+
+    describe("initializeClearingHoldByPartition event", () => {
+      it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeClearingHoldByPartition is called THEN emits ClearingHoldByPartitionInitialized", async () => {
+        await asset.forceFacetNotRegistered(RESOLVER_KEY_CLEARING_HOLDBYPARTITION);
+        await expect(asset.initializeClearingHoldByPartition()).to.emit(asset, "ClearingHoldByPartitionInitialized");
+      });
+    });
+
+    describe("nonOperational", () => {
+      beforeEach(async () => {
+        await asset.forceNonOperational();
+      });
+
+      it("GIVEN non-operational WHEN clearingCreateHoldByPartition is called THEN AssetNotOperational", async () => {
+        await expect(
+          asset.clearingCreateHoldByPartition(
+            { partition: _DEFAULT_PARTITION, expirationTimestamp, data: _DATA },
+            {
+              amount: BigInt(_AMOUNT),
+              expirationTimestamp: BigInt(expirationTimestamp),
+              escrow: signer_B.address,
+              to: signer_C.address,
+              data: _DATA,
+            },
+          ),
         )
-          .to.emit(asset, "Transfer")
-          .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
+          .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+          .withArgs(ASSET_MOCK_CONFIG_ID, 1);
+      });
+
+      it("GIVEN non-operational WHEN clearingCreateHoldFromByPartition is called THEN AssetNotOperational", async () => {
+        await expect(
+          asset.clearingCreateHoldFromByPartition(
+            {
+              clearingOperation: { partition: _DEFAULT_PARTITION, expirationTimestamp, data: _DATA },
+              from: signer_A.address,
+              operatorData: _DATA,
+            },
+            {
+              amount: BigInt(_AMOUNT),
+              expirationTimestamp: BigInt(expirationTimestamp),
+              escrow: signer_B.address,
+              to: signer_C.address,
+              data: _DATA,
+            },
+          ),
+        )
+          .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+          .withArgs(ASSET_MOCK_CONFIG_ID, 1);
       });
     });
   });
-
-  describe("Deactivated", () => {
-    it("GIVEN a deactivated asset WHEN clearingCreateHoldByPartition THEN transaction fails with Deactivated", async () => {
-      const base = await deployEquityTokenFixture();
-      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
-      await deactivatedAsset.connect(base.deployer).deactivate();
-      await expect(
-        deactivatedAsset
-          .connect(base.deployer)
-          .clearingCreateHoldByPartition(
-            { partition: ethers.ZeroHash, expirationTimestamp: 0, data: "0x" },
-            { amount: 0, expirationTimestamp: 0, escrow: ethers.ZeroAddress, to: ethers.ZeroAddress, data: "0x" },
-          ),
-      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
-    });
-
-    it("GIVEN a deactivated asset WHEN clearingCreateHoldFromByPartition THEN transaction fails with Deactivated", async () => {
-      const base = await deployEquityTokenFixture();
-      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
-      await deactivatedAsset.connect(base.deployer).deactivate();
-      await expect(
-        deactivatedAsset.connect(base.deployer).clearingCreateHoldFromByPartition(
-          {
-            clearingOperation: { partition: ethers.ZeroHash, expirationTimestamp: 0, data: "0x" },
-            from: ethers.ZeroAddress,
-            operatorData: "0x",
-          },
-          { amount: 0, expirationTimestamp: 0, escrow: ethers.ZeroAddress, to: ethers.ZeroAddress, data: "0x" },
-        ),
-      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
-    });
-  });
-
-  describe("initializeClearingHoldByPartition", () => {
-    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeClearingHoldByPartition is called THEN AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeClearingHoldByPartition())
-        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
-        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
-    });
-
-    it("GIVEN already-initialised WHEN initializeClearingHoldByPartition is called again THEN FacetAlreadyRegistered", async () => {
-      await expect(asset.initializeClearingHoldByPartition())
-        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(RESOLVER_KEY_CLEARING_HOLDBYPARTITION, 1);
-    });
-  });
-
-  describe("initializeClearingHoldByPartition event", () => {
-    it("GIVEN a fresh deployment WHEN initializeClearingHoldByPartition is called THEN emits ClearingHoldByPartitionInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_CLEARING_HOLDBYPARTITION);
-      await expect(asset.initializeClearingHoldByPartition()).to.emit(asset, "ClearingHoldByPartitionInitialized");
-    });
-  });
-
-  describe("nonOperational", () => {
-    beforeEach(async () => {
-      await mockDiamondCut.forceNonOperational();
-    });
-
-    it("GIVEN non-operational WHEN clearingCreateHoldByPartition is called THEN AssetNotOperational", async () => {
-      await expect(
-        asset.clearingCreateHoldByPartition(
-          { partition: _DEFAULT_PARTITION, expirationTimestamp, data: _DATA },
-          {
-            amount: BigInt(_AMOUNT),
-            expirationTimestamp: BigInt(expirationTimestamp),
-            escrow: signer_B.address,
-            to: signer_C.address,
-            data: _DATA,
-          },
-        ),
-      )
-        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
-        .withArgs(EQUITY_CONFIG_ID, 1);
-    });
-
-    it("GIVEN non-operational WHEN clearingCreateHoldFromByPartition is called THEN AssetNotOperational", async () => {
-      await expect(
-        asset.clearingCreateHoldFromByPartition(
-          {
-            clearingOperation: { partition: _DEFAULT_PARTITION, expirationTimestamp, data: _DATA },
-            from: signer_A.address,
-            operatorData: _DATA,
-          },
-          {
-            amount: BigInt(_AMOUNT),
-            expirationTimestamp: BigInt(expirationTimestamp),
-            escrow: signer_B.address,
-            to: signer_C.address,
-            data: _DATA,
-          },
-        ),
-      )
-        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
-        .withArgs(EQUITY_CONFIG_ID, 1);
-    });
-  });
-});
+}

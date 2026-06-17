@@ -110,8 +110,7 @@ export const DigitalSecuritiesList = () => {
         security.name.toLowerCase().includes(searchFixed) ||
         security.symbol.toLowerCase().includes(searchFixed) ||
         security.type?.toLowerCase().includes(searchFixed) ||
-        security.address.toLowerCase().includes(searchFixed) ||
-        security.isin.toLowerCase().includes(searchFixed),
+        security.address.toLowerCase().includes(searchFixed),
     );
 
     return list;
@@ -197,20 +196,6 @@ export const DigitalSecuritiesList = () => {
       size: 160,
       enableSorting: false,
       cell: ({ getValue }) => getValue(),
-    }),
-    columnsHelper.accessor("isin", {
-      header: tTable("fields.isin"),
-      size: 160,
-      cell: ({ getValue }) => {
-        const isin = getValue();
-        return (
-          <HStack gap={1.5}>
-            <Text>{isin}</Text>
-            <ClipboardButton sx={{ color: "secondary.500" }} value={isin} />
-          </HStack>
-        );
-      },
-      enableSorting: false,
     }),
     columnsHelper.accessor("address", {
       header: tTable("fields.address"),

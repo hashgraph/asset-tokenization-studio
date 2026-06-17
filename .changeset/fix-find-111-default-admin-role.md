@@ -2,8 +2,4 @@
 "@hashgraph/asset-tokenization-contracts": patch
 ---
 
-Fix FIND-111: grant DEFAULT_ADMIN_ROLE to \_tRexOwner in SecurityDeploymentLib.\_prepareRbacs.
-
-`_prepareRbacs` only added `address(this)` (the `TREXFactoryAts` factory) as a `DEFAULT_ADMIN_ROLE` member. After deployment, `TREXBaseDeploymentLib::deployTREXSuite` calls `renounceRole(DEFAULT_ADMIN_ROLE)` on behalf of the factory, removing the sole holder. If the token owner did not explicitly include themselves in `DEFAULT_ADMIN_ROLE` during the initial RBAC setup, all admin-gated functions on the deployed token were permanently locked with no recovery path.
-
-The fix adds `_tRexOwner` alongside `address(this)` in the `DEFAULT_ADMIN_ROLE` members array appended by `_prepareRbacs`. The factory continues to hold the role temporarily during deployment and renounces it afterwards, while the token owner retains permanent admin access regardless of whether they passed an explicit RBAC configuration.
+Fix FIND-111: grant `DEFAULT_ADMIN_ROLE` to `_tRexOwner` in `SecurityDeploymentLib._prepareRbacs`. It previously added only `address(this)` (the `TREXFactoryAts`) as admin, and since `deployTREXSuite` makes the factory renounce `DEFAULT_ADMIN_ROLE` after deployment, a token owner who didn't explicitly include themselves was left with all admin-gated functions permanently locked and no recovery path. The fix adds `_tRexOwner` alongside `address(this)` in the admin members array, so the owner retains permanent admin access while the factory still renounces its temporary role.

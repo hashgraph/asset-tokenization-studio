@@ -12,7 +12,7 @@ import {
   ToggleController,
   InfoDivider,
 } from "io-bricks-ui";
-import { greaterOrEqualThan, isISINValid, lowerOrEqualThan, maxLength, required } from "../../../utils/rules";
+import { greaterOrEqualThan, lowerOrEqualThan, maxLength, required } from "../../../utils/rules";
 import { useFormContext, useFormState } from "react-hook-form";
 import { ICreateBondFormValues } from "../ICreateBondFormValues";
 import { CancelButton } from "../../../components/CancelButton";
@@ -104,17 +104,6 @@ export const StepTokenDetails = () => {
             <PhosphorIcon as={Info} />
           </Tooltip>
         </HStack>
-        <InputController
-          id="isin"
-          control={control}
-          placeholder={t("stepTokenDetails.placeholderIsin")}
-          backgroundColor="neutral.600"
-          size="md"
-          rules={{
-            required,
-            validate: isISINValid,
-          }}
-        />
       </Stack>
       <InfoDivider title={t("stepTokenDetails.bondPermissions")} type="main" />
       <Stack w="full" gap={6}>

@@ -2,16 +2,15 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ITransfer } from "../../facets/transfer/ITransfer.sol";
-import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
-import { DefaultValueValidation } from "../../infrastructure/utils/DefaultValueValidation.sol";
+import { IERC1410Types } from "../../facets/commonTypes/IERC1410Types.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ERC20VotesStorageWrapper } from "./ERC20VotesStorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
-import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
-import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
+import { ICompliance } from "../../facets/compliance/externalInterfaces/ICompliance.sol";
+import { IERC3643Types } from "../../facets/commonTypes/IERC3643Types.sol";
 import { IProtectedPartitions } from "../../facets/protectedPartition/IProtectedPartitions.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
@@ -233,50 +232,47 @@ library ERC1410StorageWrapper {
 
     /**
      * @notice Grants `operator` cross-partition authorisation on behalf of the caller.
-     * @dev Sets the global approval flag for the calling holder and emits `AuthorizedOperator`. Does
-     *      not affect per-partition approvals — those remain managed by
-     *      `authorizeOperatorByPartition`.
+     * @dev Sets the global approval flag for the calling holder. Does not affect per-partition
+     *      approvals — those remain managed by `authorizeOperatorByPartition`. The calling facet
+     *      (`Operator`) emits `AuthorizedOperator`.
      * @param operator Address being authorised to act for the caller.
      */
     function authorizeOperator(address operator) internal {
         erc1410OperatorStorage().approvals[EvmAccessors.getMsgSender()][operator] = true;
-        emit IERC1410Types.AuthorizedOperator(operator, EvmAccessors.getMsgSender());
     }
 
     /**
      * @notice Revokes the cross-partition authorisation previously granted to `operator`.
-     * @dev Clears the global approval flag for the calling holder and emits `RevokedOperator`. Has no
-     *      effect on per-partition approvals.
+     * @dev Clears the global approval flag for the calling holder. Has no effect on per-partition
+     *      approvals. The calling facet (`Operator`) emits `RevokedOperator`.
      * @param operator Address whose cross-partition authorisation is removed.
      */
     function revokeOperator(address operator) internal {
         erc1410OperatorStorage().approvals[EvmAccessors.getMsgSender()][operator] = false;
-        emit IERC1410Types.RevokedOperator(operator, EvmAccessors.getMsgSender());
     }
 
     /**
      * @notice Grants `operator` authorisation on `partition` on behalf of the caller.
-     * @dev Sets the partition-scoped approval flag for the calling holder and emits
-     *      `AuthorizedOperatorByPartition`. Independent from the global approval set by
-     *      `authorizeOperator`.
+     * @dev Sets the partition-scoped approval flag for the calling holder. Independent from the
+     *      global approval set by `authorizeOperator`. The calling facet (`OperatorByPartition`)
+     *      emits `AuthorizedOperatorByPartition`.
      * @param partition Partition identifier whose operator set is updated.
      * @param operator  Address being authorised on the partition.
      */
     function authorizeOperatorByPartition(bytes32 partition, address operator) internal {
         erc1410OperatorStorage().partitionApprovals[EvmAccessors.getMsgSender()][partition][operator] = true;
-        emit IERC1410Types.AuthorizedOperatorByPartition(partition, operator, EvmAccessors.getMsgSender());
     }
 
     /**
      * @notice Revokes the authorisation previously granted to `operator` on `partition`.
-     * @dev Clears the partition-scoped approval flag for the calling holder and emits
-     *      `RevokedOperatorByPartition`. Cross-partition approvals are untouched.
+     * @dev Clears the partition-scoped approval flag for the calling holder. Cross-partition
+     *      approvals are untouched. The calling facet (`OperatorByPartition`) emits
+     *      `RevokedOperatorByPartition`.
      * @param partition Partition identifier whose operator set is updated.
      * @param operator  Address whose partition-scoped authorisation is removed.
      */
     function revokeOperatorByPartition(bytes32 partition, address operator) internal {
         erc1410OperatorStorage().partitionApprovals[EvmAccessors.getMsgSender()][partition][operator] = false;
-        emit IERC1410Types.RevokedOperatorByPartition(partition, operator, EvmAccessors.getMsgSender());
     }
 
     /**
@@ -327,7 +323,7 @@ library ERC1410StorageWrapper {
         );
 
         if (from != basicTransferInfo.to) {
-            (ERC3643StorageWrapper.erc3643Storage().compliance).functionCall(
+            address(ERC3643StorageWrapper.getCompliance()).functionCall(
                 abi.encodeWithSelector(
                     ICompliance.transferred.selector,
                     from,
@@ -387,7 +383,7 @@ library ERC1410StorageWrapper {
 
         increaseTotalSupplyByPartition(issueData.partition, issueData.value);
 
-        ERC3643StorageWrapper.erc3643Storage().compliance.functionCall(
+        address(ERC3643StorageWrapper.getCompliance()).functionCall(
             abi.encodeWithSelector(ICompliance.created.selector, issueData.tokenHolder, issueData.value),
             IERC3643Types.ComplianceCallFailed.selector
         );
@@ -445,7 +441,7 @@ library ERC1410StorageWrapper {
 
         reduceTotalSupplyByPartition(partition, value);
 
-        ERC3643StorageWrapper.erc3643Storage().compliance.functionCall(
+        address(ERC3643StorageWrapper.getCompliance()).functionCall(
             abi.encodeWithSelector(ICompliance.destroyed.selector, from, value),
             IERC3643Types.ComplianceCallFailed.selector
         );
@@ -1048,6 +1044,19 @@ library ERC1410StorageWrapper {
     }
 
     /**
+     * @notice Returns the reverse index of `partition` in `holder`'s partition array.
+     * @dev Used by the transfer logic to find the partition slot when the identifier is given; returns
+     *      zero when the holder has no entry for the partition, so callers must check for presence via
+     *      `validPartition` or similar before using the result.
+     * @param holder Address whose partition index is queried.
+     * @param partition Partition identifier being queried.
+     * @return One-based index of the partition in the holder's array, or zero if absent.
+     */
+    function partitionsToIndexes(address holder, bytes32 partition) internal view returns (uint256) {
+        return erc1410BasicStorage().partitionToIndex[holder][partition];
+    }
+
+    /**
      * @notice Rejects zero-value transfers and the zero-partition identifier.
      * @dev Reverts with `ZeroValue` or `ZeroPartition` from `IERC1410Types`; pure check on the inputs.
      * @param partition Partition identifier being validated.
@@ -1059,44 +1068,6 @@ library ERC1410StorageWrapper {
         }
         if (partition == bytes32(0)) {
             revert IERC1410Types.ZeroPartition();
-        }
-    }
-
-    /**
-     * @notice Reverts when `account` is the zero address.
-     * @dev Delegates to `DefaultValueValidation.checkZeroAddress` to keep error semantics consistent
-     *      with the rest of the codebase.
-     * @param account Address being validated.
-     */
-    function requireValidAddress(address account) internal pure {
-        DefaultValueValidation.checkZeroAddress(account);
-    }
-
-    /**
-     * @notice Returns a storage pointer to the ERC-1410 basic storage namespace.
-     * @dev Resolves the ERC-7201 slot constant `STORAGE_LOCATION_ERC1410_BASIC` via inline assembly so
-     *      every helper reads and writes the same persistent struct.
-     * @return erc1410BasicStorage_ Storage pointer to the basic partition state.
-     */
-    function erc1410BasicStorage() internal pure returns (ERC1410BasicStorage storage erc1410BasicStorage_) {
-        bytes32 position = STORAGE_LOCATION_ERC1410_BASIC;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            erc1410BasicStorage_.slot := position
-        }
-    }
-
-    /**
-     * @notice Returns a storage pointer to the ERC-1410 operator storage namespace.
-     * @dev Resolves the ERC-7201 slot constant `STORAGE_LOCATION_ERC1410_OPERATOR` via inline assembly
-     *      so every authorisation read/write addresses the same persistent struct.
-     * @return erc1410OperatorStorage_ Storage pointer to the operator approval state.
-     */
-    function erc1410OperatorStorage() internal pure returns (ERC1410OperatorStorage storage erc1410OperatorStorage_) {
-        bytes32 position = STORAGE_LOCATION_ERC1410_OPERATOR;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            erc1410OperatorStorage_.slot := position
         }
     }
 
@@ -1181,5 +1152,33 @@ library ERC1410StorageWrapper {
         delete erc1410Storage.partitionToIndex[holder][partition];
         erc1410Storage.partitions[holder].pop();
         AdjustBalancesStorageWrapper.popLabafUserPartition(holder);
+    }
+
+    /**
+     * @notice Returns a storage pointer to the ERC-1410 basic storage namespace.
+     * @dev Resolves the ERC-7201 slot constant `STORAGE_LOCATION_ERC1410_BASIC` via inline assembly so
+     *      every helper reads and writes the same persistent struct.
+     * @return erc1410BasicStorage_ Storage pointer to the basic partition state.
+     */
+    function erc1410BasicStorage() private pure returns (ERC1410BasicStorage storage erc1410BasicStorage_) {
+        bytes32 position = STORAGE_LOCATION_ERC1410_BASIC;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc1410BasicStorage_.slot := position
+        }
+    }
+
+    /**
+     * @notice Returns a storage pointer to the ERC-1410 operator storage namespace.
+     * @dev Resolves the ERC-7201 slot constant `STORAGE_LOCATION_ERC1410_OPERATOR` via inline assembly
+     *      so every authorisation read/write addresses the same persistent struct.
+     * @return erc1410OperatorStorage_ Storage pointer to the operator approval state.
+     */
+    function erc1410OperatorStorage() private pure returns (ERC1410OperatorStorage storage erc1410OperatorStorage_) {
+        bytes32 position = STORAGE_LOCATION_ERC1410_OPERATOR;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc1410OperatorStorage_.slot := position
+        }
     }
 }

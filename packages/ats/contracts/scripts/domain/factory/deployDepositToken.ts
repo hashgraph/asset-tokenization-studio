@@ -80,7 +80,6 @@ export async function deployDepositTokenFromFactory(
     erc20MetadataInfo: {
       name: securityDataParams.erc20MetadataInfo.name,
       symbol: securityDataParams.erc20MetadataInfo.symbol,
-      isin: securityDataParams.erc20MetadataInfo.isin,
       decimals: securityDataParams.erc20MetadataInfo.decimals,
     },
     clearingActive: securityDataParams.clearingActive,

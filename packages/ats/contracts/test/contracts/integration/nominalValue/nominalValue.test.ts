@@ -18,9 +18,13 @@ describe("NominalValue Init Tests", () => {
   it("GIVEN an already-initialised facet WHEN initializeNominalValue is called again THEN it reverts with FacetAlreadyRegistered", async () => {
     const { decodeEvent } = await import("@scripts/infrastructure");
     const infra = await loadFixture(deployAtsInfrastructureFixture);
-    const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
-      { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
-    ]);
+    const proxyTx = await infra.factory.deployProxy(
+      infra.blr.target as string,
+      EQUITY_CONFIG_ID,
+      1,
+      [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] }],
+      "0x",
+    );
     const proxyReceipt = await proxyTx.wait();
     const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
     const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
@@ -33,9 +37,13 @@ describe("NominalValue Init Tests", () => {
   it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeNominalValue is called THEN it reverts with AccountHasNoRole", async () => {
     const { decodeEvent } = await import("@scripts/infrastructure");
     const infra = await loadFixture(deployAtsInfrastructureFixture);
-    const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
-      { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
-    ]);
+    const proxyTx = await infra.factory.deployProxy(
+      infra.blr.target as string,
+      EQUITY_CONFIG_ID,
+      1,
+      [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] }],
+      "0x",
+    );
     const proxyReceipt = await proxyTx.wait();
     const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
     const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
@@ -48,9 +56,13 @@ describe("NominalValue Init Tests", () => {
   it("GIVEN a new deployment WHEN initializeNominalValue is called THEN it emits NominalValueInitialized", async () => {
     const { decodeEvent } = await import("@scripts/infrastructure");
     const infra = await loadFixture(deployAtsInfrastructureFixture);
-    const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
-      { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
-    ]);
+    const proxyTx = await infra.factory.deployProxy(
+      infra.blr.target as string,
+      EQUITY_CONFIG_ID,
+      1,
+      [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] }],
+      "0x",
+    );
     const proxyReceipt = await proxyTx.wait();
     const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
     const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);

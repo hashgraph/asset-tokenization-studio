@@ -14,10 +14,6 @@ pragma solidity >=0.8.0 <0.9.0;
  *
  * Exception: `DEFAULT_ADMIN_ROLE = 0x00` keeps its OpenZeppelin-compatible
  * shape — that name is part of the OZ public API and cannot be renamed.
- *
- * CANONICAL SOURCE — a pragma-rewritten copy is auto-generated to
- * contracts/factory/ERC3643/interfaces/roles.sol on every compile by the
- * `erc3643-clone-interfaces` task. Do NOT edit the generated copy.
  */
 
 bytes32 constant DEFAULT_ADMIN_ROLE = 0x00;
@@ -131,6 +127,9 @@ bytes32 constant ROLE_TREX_OWNER = 0xd9e1264632ee9a37e8673a0c55a0a1d8b38c758e843
 
 /// @custom:hash role WildCard
 bytes32 constant ROLE_WILD_CARD = 0x309337df95ff8f6d0075117d46b40fd103d8ae87db1914f1c60acb63487fb157;
+
+/// @custom:hash role CreateConfiguration
+bytes32 constant ROLE_CREATE_CONFIGURATION = 0x185bc02f8b16b873d7c8b9a6cb21f91bb77dcec0ee1f4af6cc568f084b1da9f8;
 
 function _buildRoles(bytes32 role1, bytes32 role2) pure returns (bytes32[] memory roles_) {
     roles_ = new bytes32[](2);

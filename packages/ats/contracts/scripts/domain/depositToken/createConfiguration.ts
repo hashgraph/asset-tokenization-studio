@@ -22,93 +22,20 @@ import {
 import { BusinessLogicResolver } from "@contract-types";
 import { DEPOSIT_TOKEN_CONFIG_ID } from "../constants";
 import { buildFacetList } from "../facetEnvironment";
+import { COMMON_TOKEN_FACETS } from "../facetSets";
 import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
 import { atsRegistry } from "../atsRegistry";
+import type { FacetName } from "../atsRegistry";
 
 /**
- * Deposit Token configuration: 43 facets (42 capability facets + InitializerFacet).
+ * Deposit Token configuration.
  *
- * A deposit token is a minimal cash-style asset, so this list omits the facets for capabilities
- * it does not expose (compliance, KYC, external KYC, external pause, protected partitions,
- * identity, snapshots, lock, coupon, maturity, …). Each facet listed here has a matching
- * initialiser in `Factory._deployDepositToken`.
+ * A deposit token is a minimal cash-style asset, so it uses only the common
+ * token tier (no compliance, KYC, snapshots, locks, coupons, maturity, …) plus
+ * `ClearingHoldByPartitionFacet`. Each facet here has a matching initialiser in
+ * `Factory._deployDepositToken`.
  */
-const DEPOSIT_TOKEN_FACETS = [
-  // Always-on (initializers + diamond infra)
-  "AccessControlFacet",
-  "DiamondFacet",
-  "InitializerFacet", // required by setOperationalStatus / Factory._deployDepositToken
-  "ControlListFacet", // also = Eligibility
-  "CoreFacet", // also = Core
-  "CapFacet", // also = Cap
-
-  // Allowance (includes approve)
-  "AllowanceFacet",
-
-  // Balance Tracker
-  "BalanceTrackerFacet",
-  "BalanceTrackerByPartitionFacet",
-
-  // Transfer
-  "TransferFacet",
-  "TransferByPartitionFacet",
-
-  // Mint
-  "MintFacet",
-  "MintByPartitionFacet",
-
-  // Burn
-  "BurnFacet",
-  "BurnByPartitionFacet",
-
-  // Controller
-  "ControllerFacet",
-  "ControllerByPartitionFacet",
-  "ControllerHoldByPartitionFacet",
-
-  // Operator
-  "OperatorFacet",
-  "OperatorByPartitionFacet",
-  "OperatorHoldByPartitionFacet",
-  "OperatorClearingByPartitionFacet",
-  "OperatorClearingHoldByPartitionFacet",
-
-  // Partitions
-  "PartitionsFacet",
-
-  // Batch
-  "BatchControllerFacet",
-  "BatchBurnFacet",
-  "BatchMintFacet",
-  "BatchTransferFacet",
-  "BatchFreezeFacet",
-
-  // Freeze
-  "FreezeFacet",
-
-  // Cap per-partition
-  "CapByPartitionFacet",
-
-  // Clearing
-  "ClearingFacet",
-  "ClearingByPartitionFacet",
-  "ClearingHoldByPartitionFacet",
-
-  // Hold
-  "HoldFacet",
-  "HoldByPartitionFacet",
-
-  // External Eligibility
-  "ExternalControlListManagementFacet",
-
-  // Other YES capabilities
-  "SecurityHoldersFacet",
-  "DeactivateFacet",
-  "DocumentationFacet",
-  "CustomDataFacet",
-  "NominalValueFacet",
-  "PauseFacet",
-] as const;
+export const DEPOSIT_TOKEN_FACETS: readonly FacetName[] = [...COMMON_TOKEN_FACETS, "ClearingHoldByPartitionFacet"];
 
 /**
  * Create the deposit token configuration in BusinessLogicResolver.
@@ -116,7 +43,7 @@ const DEPOSIT_TOKEN_FACETS = [
  * Thin wrapper that calls the generic core operation with deposit-token-specific
  * data:
  * - Configuration ID: DEPOSIT_TOKEN_CONFIG_ID
- * - Facet list: DEPOSIT_TOKEN_FACETS (43 facets)
+ * - Facet list: DEPOSIT_TOKEN_FACETS
  *
  * @param blrContract - BusinessLogicResolver contract instance
  * @param facetAddresses - Map of facet names to their deployed addresses

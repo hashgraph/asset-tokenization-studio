@@ -40,16 +40,6 @@ const config: HardhatUserConfig = {
           evmVersion: "cancun",
         },
       },
-      {
-        version: "0.8.17",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 100,
-          },
-          evmVersion: "london",
-        },
-      },
     ],
   },
   paths: {
@@ -125,30 +115,16 @@ const config: HardhatUserConfig = {
   },
   dependencyCompiler: {
     paths: [
-      "@tokenysolutions/t-rex/contracts/registry/implementation/ClaimTopicsRegistry.sol",
-      "@tokenysolutions/t-rex/contracts/registry/implementation/TrustedIssuersRegistry.sol",
-      "@tokenysolutions/t-rex/contracts/registry/implementation/IdentityRegistryStorage.sol",
-      "@tokenysolutions/t-rex/contracts/registry/implementation/IdentityRegistry.sol",
-      "@tokenysolutions/t-rex/contracts/compliance/modular/ModularCompliance.sol",
-      "@tokenysolutions/t-rex/contracts/proxy/authority/TREXImplementationAuthority.sol",
-      "@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol",
-      "@tokenysolutions/t-rex/contracts/proxy/ClaimTopicsRegistryProxy.sol",
-      "@tokenysolutions/t-rex/contracts/proxy/IdentityRegistryProxy.sol",
-      "@tokenysolutions/t-rex/contracts/proxy/IdentityRegistryStorageProxy.sol",
-      "@tokenysolutions/t-rex/contracts/proxy/ModularComplianceProxy.sol",
-      "@tokenysolutions/t-rex/contracts/compliance/legacy/DefaultCompliance.sol",
-      "@onchain-id/solidity/contracts/Identity.sol",
-      "@onchain-id/solidity/contracts/ClaimIssuer.sol",
       "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol",
       "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol",
     ],
   },
   dodoc: {
     runOnCompile: false,
-    outputDir: "./docs/api",
+    outputDir: "../../../docs/ats/api/contracts",
     freshOutput: true,
     include: ["contracts"],
-    exclude: ["contracts/test", "contracts/test/mocks", "node_modules"],
+    exclude: ["contracts/test", "contracts/test/mocks", "node_modules", "@openzeppelin"],
   },
 };
 

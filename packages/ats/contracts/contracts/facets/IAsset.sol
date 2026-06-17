@@ -31,7 +31,6 @@ import { ITransfer } from "./transfer/ITransfer.sol";
 
 // Layer 1 — Remaining facets
 import { IERC20Votes } from "./erc20Votes/IERC20Votes.sol";
-import { IERC3643 } from "./layer_1/ERC3643/IERC3643.sol";
 import { IExternalControlList } from "./externalControlListManagement/IExternalControlList.sol";
 import { IExternalControlListManagement } from "./externalControlListManagement/IExternalControlListManagement.sol";
 import { IExternalKycList } from "./externalKycListManagement/IExternalKycList.sol";
@@ -186,7 +185,6 @@ interface IAsset is
     IERC20Votes,
     ITransferByPartition,
     IOperator,
-    IERC3643,
     IRecovery,
     IBurn,
     IScheduledCrossOrderedTasks,

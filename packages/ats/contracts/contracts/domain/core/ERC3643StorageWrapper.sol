@@ -3,11 +3,11 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ROLE_AGENT } from "../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
-import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
+import { IERC3643Types } from "../../facets/commonTypes/IERC3643Types.sol";
 import { IFreeze } from "../../facets/freeze/IFreeze.sol";
 import { IAccessControl } from "../../facets/accessControl/IAccessControl.sol";
-import { IIdentityRegistry } from "../../facets/layer_1/ERC3643/IIdentityRegistry.sol";
-import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
+import { IIdentityRegistry } from "../../facets/identity/externalInterfaces/IIdentityRegistry.sol";
+import { ICompliance } from "../../facets/compliance/externalInterfaces/ICompliance.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
@@ -109,24 +109,22 @@ library ERC3643StorageWrapper {
 
     /**
      * @notice Replaces the compliance contract wired into the token.
-     * @dev Emits `ComplianceAdded` so off-chain observers can rebuild the audit trail of which
-     *      compliance contract was authoritative at any point in time.
+     * @dev Pure storage write; the owning `Compliance` facet emits the public event for the
+     *      change (`ComplianceAdded` on the setter, `ComplianceInitialized` on initialisation).
      * @param _compliance New compliance contract address.
      */
     function setCompliance(address _compliance) internal {
         erc3643Storage().compliance = _compliance;
-        emit IERC3643Types.ComplianceAdded(_compliance);
     }
 
     /**
      * @notice Replaces the identity registry wired into the token.
-     * @dev Emits `IdentityRegistryAdded` so off-chain indexers can track which registry vetted
-     *      holders at any historical block.
+     * @dev Pure storage write; the owning `Identity` facet emits the public event for the change
+     *      (`IdentityRegistryAdded` on the setter, `IdentityInitialized` on initialisation).
      * @param _identityRegistry New identity-registry address.
      */
     function setIdentityRegistry(address _identityRegistry) internal {
         erc3643Storage().identityRegistry = _identityRegistry;
-        emit IERC3643Types.IdentityRegistryAdded(_identityRegistry);
     }
 
     /**
@@ -138,11 +136,10 @@ library ERC3643StorageWrapper {
      */
     function setName(string calldata _name) internal {
         ERC20StorageWrapper.setName(_name);
-        ERC20Storage storage erc20Storage_ = ERC20StorageWrapper.erc20Storage();
         emit IERC3643Types.UpdatedTokenInformation(
-            erc20Storage_.name,
-            erc20Storage_.symbol,
-            erc20Storage_.decimals,
+            ERC20StorageWrapper.getName(),
+            ERC20StorageWrapper.getSymbol(),
+            ERC20StorageWrapper.decimals(),
             version(),
             erc3643Storage().onchainID
         );
@@ -155,11 +152,10 @@ library ERC3643StorageWrapper {
      */
     function setSymbol(string calldata _symbol) internal {
         ERC20StorageWrapper.setSymbol(_symbol);
-        ERC20Storage storage erc20Storage_ = ERC20StorageWrapper.erc20Storage();
         emit IERC3643Types.UpdatedTokenInformation(
-            erc20Storage_.name,
-            erc20Storage_.symbol,
-            erc20Storage_.decimals,
+            ERC20StorageWrapper.getName(),
+            ERC20StorageWrapper.getSymbol(),
+            ERC20StorageWrapper.decimals(),
             version(),
             erc3643Storage().onchainID
         );
@@ -173,11 +169,10 @@ library ERC3643StorageWrapper {
      */
     function setOnchainID(address _onchainID) internal {
         erc3643Storage().onchainID = _onchainID;
-        ERC20Storage storage erc20Storage_ = ERC20StorageWrapper.erc20Storage();
         emit IERC3643Types.UpdatedTokenInformation(
-            erc20Storage_.name,
-            erc20Storage_.symbol,
-            erc20Storage_.decimals,
+            ERC20StorageWrapper.getName(),
+            ERC20StorageWrapper.getSymbol(),
+            ERC20StorageWrapper.decimals(),
             version(),
             _onchainID
         );
@@ -310,23 +305,16 @@ library ERC3643StorageWrapper {
      *         ERC3643 recovery flow.
      * @dev Workflow: unfreezes any frozen balance on the lost wallet, transfers the spendable
      *      and previously-frozen balances to `_newWallet`, re-freezes the same amount on the
-     *      new wallet, mirrors the lost wallet's control-list presence onto the new wallet,
-     *      flips the `addressRecovered` flag on both, and emits `RecoverySuccess`. All balance
-     *      reads use the adjustment-factor-aware accessors so the recovery is consistent with
-     *      the holder's historical position.
+     *      new wallet, mirrors the lost wallet's control-list presence onto the new wallet, and
+     *      flips the `addressRecovered` flag on both. The calling facet (`Recovery`) emits
+     *      `RecoverySuccess`. All balance reads use the adjustment-factor-aware accessors so the
+     *      recovery is consistent with the holder's historical position.
      * @param _lostWallet Wallet being abandoned.
      * @param _newWallet Wallet receiving the migrated balances.
-     * @param _investorOnchainID OnchainID of the underlying investor, included in the emitted
-     *        event for off-chain reconciliation.
      * @param _timestamp Reference timestamp for adjustment-factor calculations.
      * @return Always `true` on success; the function reverts otherwise.
      */
-    function recoveryAddress(
-        address _lostWallet,
-        address _newWallet,
-        address _investorOnchainID,
-        uint256 _timestamp
-    ) internal returns (bool) {
+    function recoveryAddress(address _lostWallet, address _newWallet, uint256 _timestamp) internal returns (bool) {
         ERC3643Storage storage $ = erc3643Storage();
         $.addressRecovered[_lostWallet] = true;
         $.addressRecovered[_newWallet] = false;
@@ -346,7 +334,6 @@ library ERC3643StorageWrapper {
             ControlListStorageWrapper.addToControlList(_newWallet);
         }
 
-        emit IERC3643Types.RecoverySuccess(_lostWallet, _newWallet, _investorOnchainID);
         return true;
     }
 
@@ -356,7 +343,7 @@ library ERC3643StorageWrapper {
      *      wallets (e.g. mint/transfer entry points).
      * @param _account Wallet whose recovery status is being checked.
      */
-    function requireUnrecoveredAddress(address _account) internal view {
+    function checkUnrecoveredAddress(address _account) internal view {
         if (isRecovered(_account)) revert IERC3643Types.WalletRecovered();
     }
 
@@ -538,21 +525,6 @@ library ERC3643StorageWrapper {
     }
 
     /**
-     * @notice Returns a storage pointer to the ERC3643 namespace.
-     * @dev Uses inline assembly to bind the returned reference to the deterministic ERC-7201
-     *      slot `STORAGE_LOCATION_ERC3643`. Marked `pure` because Solidity treats slot literals
-     *      as pure even though the returned reference reads/writes storage.
-     * @return erc3643Storage_ Storage reference for the ERC3643 namespace.
-     */
-    function erc3643Storage() internal pure returns (ERC3643Storage storage erc3643Storage_) {
-        bytes32 position = STORAGE_LOCATION_ERC3643;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            erc3643Storage_.slot := position
-        }
-    }
-
-    /**
      * @notice Reverts unless the addresses and amounts arrays have the same length.
      * @dev Pre-condition guard for batch freeze/unfreeze entry points; raises
      *      `InputAmountsArrayLengthMismatch` to surface caller error explicitly.
@@ -625,6 +597,21 @@ library ERC3643StorageWrapper {
         uint256 frozenAmount = getFrozenAmountForByPartitionAdjustedAt(_partition, _userAddress, _timestamp);
         if (frozenAmount < _amount) {
             revert IERC3643Types.InsufficientFrozenBalance(_userAddress, _amount, frozenAmount, _partition);
+        }
+    }
+
+    /**
+     * @notice Returns a storage pointer to the ERC3643 namespace.
+     * @dev Uses inline assembly to bind the returned reference to the deterministic ERC-7201
+     *      slot `STORAGE_LOCATION_ERC3643`. Marked `pure` because Solidity treats slot literals
+     *      as pure even though the returned reference reads/writes storage.
+     * @return erc3643Storage_ Storage reference for the ERC3643 namespace.
+     */
+    function erc3643Storage() private pure returns (ERC3643Storage storage erc3643Storage_) {
+        bytes32 position = STORAGE_LOCATION_ERC3643;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc3643Storage_.slot := position
         }
     }
 }

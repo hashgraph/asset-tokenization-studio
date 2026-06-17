@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ROLE_CONTROLLER, ROLE_AGENT, _buildRoles, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { IBurn, RESOLVER_KEY_BURN } from "./IBurn.sol";
-import { IController } from "../controller/IController.sol";
+import { IControllerTypes } from "../controller/IControllerTypes.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
@@ -43,7 +43,7 @@ abstract contract Burn is IBurn, Modifiers {
     {
         address sender = EvmAccessors.getMsgSender();
         TokenCoreOps.burn(_userAddress, _amount);
-        emit IController.ControllerRedemption(sender, _userAddress, _amount, "", "");
+        emit IControllerTypes.ControllerRedemption(sender, _userAddress, _amount, "", "");
     }
 
     /// @inheritdoc IBurn
@@ -74,8 +74,6 @@ abstract contract Burn is IBurn, Modifiers {
         override
         onlyOperational
         onlyActivated
-        onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
-        onlyUnrecoveredAddress(_tokenHolder)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
         onlyCanRedeemFromByPartition(_tokenHolder, _DEFAULT_PARTITION, _value)

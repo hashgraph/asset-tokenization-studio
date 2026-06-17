@@ -6,7 +6,7 @@ import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableS
 import { ILock } from "../../facets/lock/ILock.sol";
 import { ILockTypes } from "../../facets/lock/ILockTypes.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
-import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
+import { IERC1410Types } from "../../facets/commonTypes/IERC1410Types.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
@@ -532,21 +532,6 @@ library LockStorageWrapper {
     }
 
     /**
-     * @notice Returns a storage pointer to the Lock namespace.
-     * @dev Uses inline assembly to bind the returned reference to the deterministic ERC-7201
-     *      slot `STORAGE_LOCATION_LOCK`. Marked `pure` because Solidity treats slot literals
-     *      as pure even though the returned reference reads/writes storage.
-     * @return lock_ Storage reference for the Lock namespace.
-     */
-    function lockStorage() internal pure returns (LockDataStorage storage lock_) {
-        bytes32 position = STORAGE_LOCATION_LOCK;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            lock_.slot := position
-        }
-    }
-
-    /**
      * @notice Reverts when the supplied lock amount is zero.
      * @dev Cheap sanity check used by `lockByPartition`; raises `ILockTypes.InvalidLockAmount`.
      * @param amount Lock amount being validated.
@@ -704,5 +689,20 @@ library LockStorageWrapper {
     function _emitReleaseEvents(bytes32 partition, address operator, address tokenHolder, uint256 lockAmount) private {
         ERC20StorageWrapper.performTransfer(address(0), tokenHolder, lockAmount);
         emit IERC1410Types.TransferByPartition(partition, operator, address(0), tokenHolder, lockAmount, "", "");
+    }
+
+    /**
+     * @notice Returns a storage pointer to the Lock namespace.
+     * @dev Uses inline assembly to bind the returned reference to the deterministic ERC-7201
+     *      slot `STORAGE_LOCATION_LOCK`. Marked `pure` because Solidity treats slot literals
+     *      as pure even though the returned reference reads/writes storage.
+     * @return lock_ Storage reference for the Lock namespace.
+     */
+    function lockStorage() private pure returns (LockDataStorage storage lock_) {
+        bytes32 position = STORAGE_LOCATION_LOCK;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            lock_.slot := position
+        }
     }
 }

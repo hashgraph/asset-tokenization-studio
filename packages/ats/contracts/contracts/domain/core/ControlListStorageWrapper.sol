@@ -80,7 +80,7 @@ library ControlListStorageWrapper {
      * @param _account The address to check.
      */
     function checkControlList(address _account) internal view {
-        if (!isAbleToAccess(_account)) {
+        if (!canAccess(_account)) {
             revert ICommonErrors.AccountIsBlocked(_account);
         }
     }
@@ -107,7 +107,7 @@ library ControlListStorageWrapper {
      * @return True if the account is able to access; false otherwise.
      */
     // ✅ Internal function - ERC1594StorageWrapper calls this directly
-    function isAbleToAccess(address _account) internal view returns (bool) {
+    function canAccess(address _account) internal view returns (bool) {
         ControlListStorage storage cls = controlListStorage();
         return (cls.isWhiteList == cls.list.contains(_account) &&
             ExternalListManagementStorageWrapper.isExternallyAuthorized(_account));
@@ -154,7 +154,7 @@ library ControlListStorageWrapper {
      * @return controlList_ A storage reference to `ControlListStorage` at the
      *         ERC-7201 slot.
      */
-    function controlListStorage() internal pure returns (ControlListStorage storage controlList_) {
+    function controlListStorage() private pure returns (ControlListStorage storage controlList_) {
         bytes32 position = STORAGE_LOCATION_CONTROL_LIST;
         // solhint-disable-next-line no-inline-assembly
         assembly {

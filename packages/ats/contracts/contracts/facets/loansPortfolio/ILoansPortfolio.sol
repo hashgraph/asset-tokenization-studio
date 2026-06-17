@@ -37,16 +37,12 @@ interface ILoansPortfolio {
 
     /**
      * @notice Tuple describing one underlying holding tracked by the portfolio.
-     * @dev `country` is the ISO-style identifier used when aggregating geographical
-     *      exposure; `assetAddress` is the on-chain handle of the loan or cash token.
      * @param assetAddress       On-chain address of the loan or cash token.
      * @param holdingsAssetType  Category of the underlying asset (`LOAN` or `CASH`).
-     * @param country            ISO-style country code used for geographical exposure aggregation.
      */
     struct HoldingsAsset {
         address assetAddress;
         HoldingsAssetType holdingsAssetType;
-        string country;
     }
 
     /**
@@ -60,18 +56,9 @@ interface ILoansPortfolio {
     }
 
     /**
-     * @notice Per-country aggregate showing how many holdings reference the same country.
-     * @param country Country code matching the `HoldingsAsset.country` field.
-     * @param count   Number of holdings assets registered under this country.
-     */
-    struct GeographicalExposureData {
-        string country;
-        uint256 count;
-    }
-
-    /**
      * @notice Emitted once when the LoansPortfolio capability is initialised on a token.
      * @dev Fires exclusively from `initializeLoansPortfolio` after the storage write succeeds.
+     * @param loansPortfolioData The portfolio configuration persisted at initialisation.
      */
     event LoansPortfolioInitialized(LoansPortfolioDetailsData loansPortfolioData);
 
@@ -268,11 +255,4 @@ interface ILoansPortfolio {
      * @return denominator_ Denominator of the defaulted-loans ratio.
      */
     function getDefaultedLoansRatio() external view returns (uint256 numerator_, uint256 denominator_);
-
-    /**
-     * @notice Returns the geographical exposure aggregated by country.
-     * @return geographicalExposure_ Array of `(country, count)` tuples covering every
-     *         country present in the portfolio's holdings.
-     */
-    function getGeographicalExposure() external view returns (GeographicalExposureData[] memory geographicalExposure_);
 }

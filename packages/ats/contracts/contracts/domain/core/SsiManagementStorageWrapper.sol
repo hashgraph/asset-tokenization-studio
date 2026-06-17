@@ -117,7 +117,7 @@ library SsiManagementStorageWrapper {
      * @dev Uses inline assembly to bind the struct to {STORAGE_LOCATION_SSI_MANAGEMENT}.
      * @return ssiManagement_ Storage reference to the {SsiManagementStorage} layout.
      */
-    function ssiManagementStorage() internal pure returns (SsiManagementStorage storage ssiManagement_) {
+    function ssiManagementStorage() private pure returns (SsiManagementStorage storage ssiManagement_) {
         bytes32 position = STORAGE_LOCATION_SSI_MANAGEMENT;
         // solhint-disable-next-line no-inline-assembly
         assembly {

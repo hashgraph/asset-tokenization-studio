@@ -6,7 +6,7 @@ import { ICore } from "../../facets/core/ICore.sol";
 import { IFactory } from "../../factory/IFactory.sol";
 import { ITransfer } from "../../facets/transfer/ITransfer.sol";
 import { IAllowanceTypes } from "../../facets/allowance/IAllowanceTypes.sol";
-import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
+import { IERC1410Types } from "../../facets/commonTypes/IERC1410Types.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
@@ -20,7 +20,7 @@ bytes32 constant STORAGE_LOCATION_ERC20 = 0xba2beddc557de36eb4836f4ff1fd9d33a28d
 /**
  * @title ERC20Storage
  * @notice Backing storage for the ERC-20 metadata, balances, and allowances of an asset.
- * @dev Sole source of truth for name, symbol, ISIN, decimals, security type, total
+ * @dev Sole source of truth for name, symbol, decimals, security type, total
  *      supply, per-holder balances, and per-spender allowances; mutated only via
  *      `ERC20StorageWrapper` against the deterministic ERC-7201 slot.
  * @custom:storage-location erc7201:security.token.standard.storage.Erc20
@@ -33,7 +33,6 @@ struct ERC20Storage {
     // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     string name;
     string symbol;
-    string isin;
     uint256 totalSupply;
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(address => uint256) balances;
@@ -56,7 +55,7 @@ library ERC20StorageWrapper {
     /**
      * @notice Initialises the ERC-20 storage with metadata from the deployment
      *         configuration and marks the slot as initialised.
-     * @dev Writes name, symbol, ISIN, decimals, and security type from `erc20Metadata`
+     * @dev Writes name, symbol, decimals, and security type from `erc20Metadata`
      *      then sets `initialized` to `true`. One-shot guarantee is enforced by the
      *      caller via `onlyNotERC20Initialized`.
      * @param erc20Metadata The metadata struct containing token info and security type.
@@ -66,7 +65,6 @@ library ERC20StorageWrapper {
         ERC20Storage storage erc20Stor = erc20Storage();
         erc20Stor.name = erc20Metadata.info.name;
         erc20Stor.symbol = erc20Metadata.info.symbol;
-        erc20Stor.isin = erc20Metadata.info.isin;
         erc20Stor.decimals = erc20Metadata.info.decimals;
         erc20Stor.securityType = erc20Metadata.securityType;
     }
@@ -85,6 +83,19 @@ library ERC20StorageWrapper {
      */
     function setSymbol(string calldata _symbol) internal {
         erc20Storage().symbol = _symbol;
+    }
+
+    /**
+     * @notice Overwrites the decimal count in the ERC-20 storage slot.
+     * @dev This is a minimal raw-struct setter intended for test scaffolding
+     *      (`MockDiamondCut.forceDecimals`). It writes only the `decimals`
+     *      field via the private `erc20Storage()` accessor and does NOT
+     *      trigger `ScheduledTasksOps` or overwrite name/symbol — making it
+     *      safe to use alongside snapshot scheduled-tasks tests.
+     * @param _newDecimals The new decimal count to store.
+     */
+    function setDecimals(uint8 _newDecimals) internal {
+        erc20Storage().decimals = _newDecimals;
     }
 
     /// @notice Updates ERC-20 balances and emits the EIP-20 Transfer event.
@@ -450,6 +461,14 @@ library ERC20StorageWrapper {
     }
 
     /**
+     * @notice Returns the stored token symbol.
+     * @return The ERC-20 token symbol string.
+     */
+    function getSymbol() internal view returns (string memory) {
+        return erc20Storage().symbol;
+    }
+
+    /**
      * @notice Returns the number of decimal places used by the token.
      * @return The ERC-20 decimals value.
      */
@@ -467,7 +486,6 @@ library ERC20StorageWrapper {
         ICore.ERC20MetadataInfo memory erc20Info = ICore.ERC20MetadataInfo({
             name: erc20Stor.name,
             symbol: erc20Stor.symbol,
-            isin: erc20Stor.isin,
             decimals: erc20Stor.decimals
         });
         erc20Metadata_ = ICore.ERC20Metadata({ info: erc20Info, securityType: erc20Stor.securityType });
@@ -529,7 +547,7 @@ library ERC20StorageWrapper {
      *      through this accessor.
      * @return erc20Storage_ Storage pointer to the ERC-20 data slot.
      */
-    function erc20Storage() internal pure returns (ERC20Storage storage erc20Storage_) {
+    function erc20Storage() private pure returns (ERC20Storage storage erc20Storage_) {
         bytes32 position = STORAGE_LOCATION_ERC20;
         // solhint-disable-next-line no-inline-assembly
         assembly {

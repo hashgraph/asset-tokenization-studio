@@ -29,7 +29,7 @@ import {
 } from "@scripts/infrastructure";
 
 // Domain layer
-import { atsRegistry } from "@scripts/domain";
+import { ATS_ROLES, atsRegistry } from "@scripts/domain";
 
 // Test helpers
 import {
@@ -176,10 +176,12 @@ describe("updateResolverProxy* - Integration Tests", () => {
         id: f.resolverKey,
         version: 1,
       }));
+
       // Create version 1
-      await newBlr.createConfiguration(newConfigId, facetConfigs);
+      await newBlr.grantRole(ATS_ROLES.ROLE_CREATE_CONFIGURATION, deployer.address);
+      await newBlr.createConfiguration(newConfigId, facetConfigs, "0x");
       // Create version 2
-      await newBlr.createConfiguration(newConfigId, facetConfigs);
+      await newBlr.createConfiguration(newConfigId, facetConfigs, "0x");
 
       // Update resolver to new BLR
       const result = await updateResolverProxyResolver(
@@ -209,9 +211,9 @@ describe("updateResolverProxy* - Integration Tests", () => {
         version: 1,
       }));
       // Create version 1
-      await blr.createConfiguration(newConfigId, facetConfigs);
+      await blr.createConfiguration(newConfigId, facetConfigs, "0x");
       // Create version 2
-      await blr.createConfiguration(newConfigId, facetConfigs);
+      await blr.createConfiguration(newConfigId, facetConfigs, "0x");
 
       // Update resolver (using same BLR but different config)
       await updateResolverProxyResolver(deployer, proxyAddress, blrAddress, newConfigId, initialVersion + 1, {

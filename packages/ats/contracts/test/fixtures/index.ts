@@ -66,13 +66,6 @@ export {
   type ResolverProxyFixtureResult,
 } from "./resolverProxy.fixture";
 
-// T-REX fixtures (legacy support)
-export {
-  deployIdentityProxy,
-  deployFullSuiteFixture,
-  deploySuiteWithModularCompliancesFixture,
-} from "./trex/fullSuite.fixture";
-
 // TUP upgrade fixtures
 export {
   deployTupUpgradeTestFixture,
@@ -83,6 +76,12 @@ export {
   type TupInfrastructureOnlyFixture,
   type V2ImplementationResult,
 } from "./upgradeTupProxies.fixture";
+
+// Full-asset infrastructure fixture (test-only, includes AssetMock config)
+export { deploySystemWithNewBlrFullAsset, deployAtsInfrastructureFullAssetFixture } from "./deploy/fullAsset";
+
+// AssetMock context fixture (shared fixture for migrated integration suites)
+export { AssetMockCtx, deployAssetMockCtx, buildAssetMockCtx, assertHandlesBound } from "./ctx/assetCtx";
 
 // Hardhat-dependent test helpers (RBAC, timestamps)
 export { grantRoleAndPauseToken, getDltTimestamp } from "./hardhatHelpers";

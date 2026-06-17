@@ -229,13 +229,15 @@ interface IFactory {
      * @param configKey Configuration identifier used by the proxy.
      * @param version Initial configuration version.
      * @param rbac Role-based access control entries seeded at deployment.
+     * @param data Additional data for the proxy deployment.
      */
     event ProxyDeployed(
         address indexed proxyAddress,
         IBusinessLogicResolver resolver,
         bytes32 configKey,
         uint256 version,
-        IResolverProxy.Rbac[] rbac
+        IResolverProxy.Rbac[] rbac,
+        bytes data
     );
 
     /**
@@ -250,18 +252,6 @@ interface IFactory {
     error NoInitialAdmins();
 
     /**
-     * @notice Raised when the provided ISIN does not meet the expected format or length.
-     * @param isin The invalid ISIN string.
-     */
-    error WrongISIN(string isin);
-
-    /**
-     * @notice Raised when the ISIN checksum is invalid.
-     * @param isin The invalid ISIN string.
-     */
-    error WrongISINChecksum(string isin);
-
-    /**
      * @notice Raised when the requested regulation type and sub-type combination is not permitted.
      * @param regulationType Primary regulation category.
      * @param regulationSubType Sub-category within the regulation.
@@ -274,13 +264,15 @@ interface IFactory {
      * @param _configKey Configuration identifier for the proxy.
      * @param _version Initial configuration version.
      * @param _rbacs Role-based access control entries to seed.
+     * @param _data Additional data for the proxy deployment.
      * @return proxyAddress_ Address of the deployed proxy.
      */
     function deployProxy(
         IBusinessLogicResolver _resolver,
         bytes32 _configKey,
         uint256 _version,
-        IResolverProxy.Rbac[] memory _rbacs
+        IResolverProxy.Rbac[] memory _rbacs,
+        bytes calldata _data
     ) external returns (address proxyAddress_);
 
     /**

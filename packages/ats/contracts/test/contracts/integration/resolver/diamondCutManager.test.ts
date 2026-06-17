@@ -29,6 +29,7 @@ import { deployAtsInfrastructureFixture, registerTransferFacetFixture } from "@t
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ethers } from "hardhat";
 import { deployContract, registerFacets } from "@scripts/infrastructure";
+import { assertObject } from "@test";
 
 // Test-specific configuration IDs for negative test cases
 // These are separate from EQUITY_CONFIG_ID/BOND_CONFIG_ID to avoid conflicts
@@ -394,7 +395,11 @@ describe("DiamondCutManager", () => {
     await expect(
       diamondCutManager
         .connect(signer_A)
-        .createConfiguration("0x0000000000000000000000000000000000000000000000000000000000000000", facetConfigurations),
+        .createConfiguration(
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+          facetConfigurations,
+          "0x",
+        ),
     ).to.be.revertedWithCustomError(diamondCutManager, "DefaultValueForConfigurationIdNotPermitted");
   });
 
@@ -402,7 +407,7 @@ describe("DiamondCutManager", () => {
     const facetConfigurations = createFacetConfigurations(equityFacetIdList, equityFacetVersionList);
 
     await expect(
-      diamondCutManager.connect(signer_B).createConfiguration(EQUITY_CONFIG_ID, facetConfigurations),
+      diamondCutManager.connect(signer_B).createConfiguration(EQUITY_CONFIG_ID, facetConfigurations, "0x"),
     ).to.be.revertedWithCustomError(diamondCutManager, "AccountHasNoRole");
   });
 
@@ -412,7 +417,7 @@ describe("DiamondCutManager", () => {
     const facetConfigurations = createFacetConfigurations(equityFacetIdList, equityFacetVersionList);
 
     await expect(
-      diamondCutManager.connect(signer_A).createConfiguration(TEST_CONFIG_IDS.PAUSE_TEST, facetConfigurations),
+      diamondCutManager.connect(signer_A).createConfiguration(TEST_CONFIG_IDS.PAUSE_TEST, facetConfigurations, "0x"),
     ).to.be.revertedWithCustomError(diamondCutManager, "IsPaused");
 
     await pause.connect(signer_B).unpause();
@@ -427,7 +432,7 @@ describe("DiamondCutManager", () => {
     ];
 
     await expect(
-      diamondCutManager.connect(signer_A).createConfiguration(EQUITY_CONFIG_ID, facetConfigurations),
+      diamondCutManager.connect(signer_A).createConfiguration(EQUITY_CONFIG_ID, facetConfigurations, "0x"),
     ).to.be.revertedWithCustomError(diamondCutManager, "FacetIdNotRegistered");
   });
 
@@ -440,7 +445,7 @@ describe("DiamondCutManager", () => {
     await expect(
       diamondCutManager
         .connect(signer_A)
-        .createConfiguration(EQUITY_CONFIG_ID, facetConfigurations, { gasLimit: 60_000_000 }),
+        .createConfiguration(EQUITY_CONFIG_ID, facetConfigurations, "0x", { gasLimit: 60_000_000 }),
     ).to.be.revertedWithCustomError(diamondCutManager, "DuplicatedFacetInConfiguration");
   });
 
@@ -455,7 +460,25 @@ describe("DiamondCutManager", () => {
       },
     ];
 
-    await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, facetConfigurations, false);
+    const data = "0x12345678122334343453453452342452345243523452";
+
+    await expect(
+      diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, facetConfigurations, false, data),
+    )
+      .to.emit(diamondCutManager, "DiamondBatchConfigurationCreated")
+      .withArgs(
+        testConfigId,
+        (emitted: unknown) => {
+          assertObject(
+            emitted,
+            facetConfigurations.map((f) => ({ id: f.id, version: BigInt(f.version) })),
+          );
+          return true;
+        },
+        false,
+        1,
+        data,
+      );
 
     // With partialBatch: false, the batch is incomplete, so getLatestVersionByConfiguration returns 0
     const configLatestVersion = Number(await diamondCutManager.getLatestVersionByConfiguration(testConfigId));
@@ -491,6 +514,7 @@ describe("DiamondCutManager", () => {
           "0x0000000000000000000000000000000000000000000000000000000000000000",
           facetConfigurations,
           false,
+          "0x",
         ),
     ).to.be.revertedWithCustomError(diamondCutManager, "DefaultValueForConfigurationIdNotPermitted");
   });
@@ -499,7 +523,7 @@ describe("DiamondCutManager", () => {
     const facetConfigurations = createFacetConfigurations(equityFacetIdList, equityFacetVersionList);
 
     await expect(
-      diamondCutManager.connect(signer_B).createBatchConfiguration(EQUITY_CONFIG_ID, facetConfigurations, false),
+      diamondCutManager.connect(signer_B).createBatchConfiguration(EQUITY_CONFIG_ID, facetConfigurations, false, "0x"),
     ).to.be.revertedWithCustomError(diamondCutManager, "AccountHasNoRole");
   });
 
@@ -511,7 +535,7 @@ describe("DiamondCutManager", () => {
     await expect(
       diamondCutManager
         .connect(signer_A)
-        .createBatchConfiguration(TEST_CONFIG_IDS.PAUSE_BATCH_TEST, facetConfigurations, false),
+        .createBatchConfiguration(TEST_CONFIG_IDS.PAUSE_BATCH_TEST, facetConfigurations, false, "0x"),
     ).to.be.revertedWithCustomError(diamondCutManager, "IsPaused");
 
     await pause.connect(signer_B).unpause();
@@ -526,7 +550,7 @@ describe("DiamondCutManager", () => {
     ];
 
     await expect(
-      diamondCutManager.connect(signer_A).createBatchConfiguration(EQUITY_CONFIG_ID, facetConfigurations, false),
+      diamondCutManager.connect(signer_A).createBatchConfiguration(EQUITY_CONFIG_ID, facetConfigurations, false, "0x"),
     ).to.be.revertedWithCustomError(diamondCutManager, "FacetIdNotRegistered");
   });
 
@@ -539,7 +563,7 @@ describe("DiamondCutManager", () => {
     await expect(
       diamondCutManager
         .connect(signer_A)
-        .createBatchConfiguration(EQUITY_CONFIG_ID, facetConfigurations, false, { gasLimit: 60_000_000 }),
+        .createBatchConfiguration(EQUITY_CONFIG_ID, facetConfigurations, false, "0x", { gasLimit: 60_000_000 }),
     ).to.be.revertedWithCustomError(diamondCutManager, "DuplicatedFacetInConfiguration");
   });
 
@@ -553,7 +577,7 @@ describe("DiamondCutManager", () => {
     await expect(
       diamondCutManager
         .connect(signer_A)
-        .createConfiguration(TEST_CONFIG_IDS.BLACKLIST_TEST, facetConfigurations, { gasLimit: 60_000_000 }),
+        .createConfiguration(TEST_CONFIG_IDS.BLACKLIST_TEST, facetConfigurations, "0x", { gasLimit: 60_000_000 }),
     )
       .to.be.revertedWithCustomError(diamondCutManager, "SelectorBlacklisted")
       .withArgs(blackListedSelectors[0]);
@@ -569,7 +593,7 @@ describe("DiamondCutManager", () => {
       },
     ];
 
-    await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, firstBatchFacets, false);
+    await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, firstBatchFacets, false, "0x");
 
     const secondBatchFacets: IDiamondCutManager.FacetConfigurationStruct[] = [
       {
@@ -578,7 +602,7 @@ describe("DiamondCutManager", () => {
       },
     ];
 
-    await expect(diamondCutManager.connect(signer_A).createConfiguration(testConfigId, secondBatchFacets))
+    await expect(diamondCutManager.connect(signer_A).createConfiguration(testConfigId, secondBatchFacets, "0x"))
       .to.be.revertedWithCustomError(diamondCutManager, "OngoingBatchConfigurationNotPermitted")
       .withArgs(testConfigId);
   });
@@ -593,7 +617,7 @@ describe("DiamondCutManager", () => {
       },
     ];
 
-    await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, firstBatchFacets, false);
+    await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, firstBatchFacets, false, "0x");
 
     const secondBatchFacets: IDiamondCutManager.FacetConfigurationStruct[] = [
       {
@@ -602,7 +626,7 @@ describe("DiamondCutManager", () => {
       },
     ];
 
-    await expect(diamondCutManager.connect(signer_B).createConfiguration(testConfigId, secondBatchFacets))
+    await expect(diamondCutManager.connect(signer_B).createConfiguration(testConfigId, secondBatchFacets, "0x"))
       .to.be.revertedWithCustomError(diamondCutManager, "NotOwner")
       .withArgs(testConfigId, signer_B.address, signer_A.address);
   });
@@ -617,7 +641,7 @@ describe("DiamondCutManager", () => {
       },
     ];
 
-    await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, firstBatchFacets, false);
+    await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, firstBatchFacets, false, "0x");
 
     const secondBatchFacets: IDiamondCutManager.FacetConfigurationStruct[] = [
       {
@@ -626,12 +650,58 @@ describe("DiamondCutManager", () => {
       },
     ];
 
-    await expect(diamondCutManager.connect(signer_B).createBatchConfiguration(testConfigId, secondBatchFacets, true))
+    await expect(
+      diamondCutManager.connect(signer_B).createBatchConfiguration(testConfigId, secondBatchFacets, true, "0x"),
+    )
       .to.be.revertedWithCustomError(diamondCutManager, "NotOwner")
       .withArgs(testConfigId, signer_B.address, signer_A.address);
   });
 
+  it("GIVEN a resolver and an account without ROLE_CREATE_CONFIGURATION WHEN calling createConfiguration THEN fails with AccountHasNoRole", async () => {
+    const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000050";
+
+    const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] = [
+      {
+        id: equityFacetIdList[0],
+        version: 1,
+      },
+    ];
+
+    await expect(diamondCutManager.connect(signer_B).createConfiguration(testConfigId, facetConfigurations, "0x"))
+      .to.be.revertedWithCustomError(diamondCutManager, "AccountHasNoRole")
+      .withArgs(signer_B.address, ATS_ROLES.ROLE_CREATE_CONFIGURATION);
+  });
+
+  it("GIVEN a resolver and an account without ROLE_CREATE_CONFIGURATION WHEN calling createBatchConfiguration THEN fails with AccountHasNoRole", async () => {
+    const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000051";
+
+    const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] = [
+      {
+        id: equityFacetIdList[0],
+        version: 1,
+      },
+    ];
+
+    await expect(
+      diamondCutManager.connect(signer_B).createBatchConfiguration(testConfigId, facetConfigurations, false, "0x"),
+    )
+      .to.be.revertedWithCustomError(diamondCutManager, "AccountHasNoRole")
+      .withArgs(signer_B.address, ATS_ROLES.ROLE_CREATE_CONFIGURATION);
+  });
+
+  it("GIVEN a resolver and an account without ROLE_CREATE_CONFIGURATION WHEN calling cancelBatchConfiguration THEN fails with AccountHasNoRole", async () => {
+    const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000052";
+
+    await expect(diamondCutManager.connect(signer_B).cancelBatchConfiguration(testConfigId))
+      .to.be.revertedWithCustomError(diamondCutManager, "AccountHasNoRole")
+      .withArgs(signer_B.address, ATS_ROLES.ROLE_CREATE_CONFIGURATION);
+  });
+
   it.skip("GIVEN a resolver and a non admin user WHEN canceling a batch configuration THEN fails with AccountHasNoRole", async () => {
+    // Skipped: onlyOwner fires before onlyRole — signer_A creates the batch (becoming owner),
+    // so signer_B reverts with NotOwner before AccountHasNoRole is reached.
+    // The AccountHasNoRole path for cancelBatchConfiguration is covered by the test above,
+    // which calls with a fresh config ID so ownership is unset and onlyRole is reached.
     const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000011";
 
     const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] = [
@@ -641,11 +711,11 @@ describe("DiamondCutManager", () => {
       },
     ];
 
-    await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, facetConfigurations, false);
+    await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, facetConfigurations, false, "0x");
 
-    await expect(
-      diamondCutManager.connect(signer_B).cancelBatchConfiguration(testConfigId),
-    ).to.be.revertedWithCustomError(diamondCutManager, "AccountHasNoRole");
+    await expect(diamondCutManager.connect(signer_B).cancelBatchConfiguration(testConfigId))
+      .to.be.revertedWithCustomError(diamondCutManager, "AccountHasNoRole")
+      .withArgs(signer_B.address, ATS_ROLES.ROLE_CREATE_CONFIGURATION);
   });
 
   it("GIVEN a paused resolver WHEN canceling a batch configuration THEN fails with IsPaused", async () => {
@@ -658,7 +728,7 @@ describe("DiamondCutManager", () => {
       },
     ];
 
-    await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, facetConfigurations, false);
+    await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, facetConfigurations, false, "0x");
 
     await pause.connect(signer_B).pause();
 
@@ -677,7 +747,7 @@ describe("DiamondCutManager", () => {
       },
     ];
 
-    await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, facetConfigurations, false);
+    await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, facetConfigurations, false, "0x");
 
     await expect(diamondCutManager.connect(signer_B).cancelBatchConfiguration(testConfigId))
       .to.be.revertedWithCustomError(diamondCutManager, "NotOwner")
@@ -702,7 +772,22 @@ describe("DiamondCutManager", () => {
       },
     ];
 
-    await diamondCutManager.connect(signer_A).createConfiguration(testConfigId, firstVersionFacets);
+    const data = "0x6667584685468745684856456754485467548670";
+
+    await expect(diamondCutManager.connect(signer_A).createConfiguration(testConfigId, firstVersionFacets, data))
+      .to.emit(diamondCutManager, "DiamondConfigurationCreated")
+      .withArgs(
+        testConfigId,
+        (emitted: unknown) => {
+          assertObject(
+            emitted,
+            firstVersionFacets.map((f) => ({ id: f.id, version: BigInt(f.version) })),
+          );
+          return true;
+        },
+        1,
+        data,
+      );
 
     const version1 = Number(await diamondCutManager.getLatestVersionByConfiguration(testConfigId));
     expect(version1).to.equal(1);
@@ -717,7 +802,7 @@ describe("DiamondCutManager", () => {
       },
     ];
 
-    await diamondCutManager.connect(signer_A).createConfiguration(testConfigId, secondVersionFacets);
+    await diamondCutManager.connect(signer_A).createConfiguration(testConfigId, secondVersionFacets, "0x");
 
     const version2 = Number(await diamondCutManager.getLatestVersionByConfiguration(testConfigId));
     expect(version2).to.equal(2);
@@ -741,9 +826,9 @@ describe("DiamondCutManager", () => {
       },
     ];
 
-    await diamondCutManager.connect(signer_A).createConfiguration(testConfigId, firstVersionFacets);
+    await diamondCutManager.connect(signer_A).createConfiguration(testConfigId, firstVersionFacets, "0x");
 
-    await expect(diamondCutManager.connect(signer_B).createConfiguration(testConfigId, firstVersionFacets))
+    await expect(diamondCutManager.connect(signer_B).createConfiguration(testConfigId, firstVersionFacets, "0x"))
       .to.be.revertedWithCustomError(diamondCutManager, "NotOwner")
       .withArgs(testConfigId, signer_B.address, signer_A.address);
   });
@@ -758,9 +843,11 @@ describe("DiamondCutManager", () => {
       },
     ];
 
-    await diamondCutManager.connect(signer_A).createConfiguration(testConfigId, firstVersionFacets);
+    await diamondCutManager.connect(signer_A).createConfiguration(testConfigId, firstVersionFacets, "0x");
 
-    await expect(diamondCutManager.connect(signer_B).createBatchConfiguration(testConfigId, firstVersionFacets, true))
+    await expect(
+      diamondCutManager.connect(signer_B).createBatchConfiguration(testConfigId, firstVersionFacets, true, "0x"),
+    )
       .to.be.revertedWithCustomError(diamondCutManager, "NotOwner")
       .withArgs(testConfigId, signer_B.address, signer_A.address);
   });
@@ -829,7 +916,7 @@ describe("DiamondCutManager", () => {
   it("GIVEN a resolver WHEN creating a configuration with empty facet array THEN fails with EmptyFacetConfigurationNotPermitted", async () => {
     const emptyConfigId = "0x0000000000000000000000000000000000000000000000000000000000000040";
 
-    await expect(diamondCutManager.connect(signer_A).createConfiguration(emptyConfigId, []))
+    await expect(diamondCutManager.connect(signer_A).createConfiguration(emptyConfigId, [], "0x"))
       .to.be.revertedWithCustomError(diamondCutManager, "EmptyFacetConfigurationNotPermitted")
       .withArgs(emptyConfigId);
   });
@@ -837,7 +924,7 @@ describe("DiamondCutManager", () => {
   it("GIVEN a resolver WHEN finalising a batch configuration with no facets accumulated THEN fails with EmptyFacetConfigurationNotPermitted", async () => {
     const emptyBatchConfigId = "0x0000000000000000000000000000000000000000000000000000000000000041";
 
-    await expect(diamondCutManager.connect(signer_A).createBatchConfiguration(emptyBatchConfigId, [], true))
+    await expect(diamondCutManager.connect(signer_A).createBatchConfiguration(emptyBatchConfigId, [], true, "0x"))
       .to.be.revertedWithCustomError(diamondCutManager, "EmptyFacetConfigurationNotPermitted")
       .withArgs(emptyBatchConfigId);
   });
@@ -883,7 +970,8 @@ describe("DiamondCutManager", () => {
     // Expect the transaction to revert with SelectorAlreadyRegistered error
     // The error should contain: configurationId, version, facetId, selector
     const transferSelector = "0xa9059cbb"; // transfer(address,uint256).selector
-    await expect(testDiamondCutManager.createConfiguration(testConfigId, facetConfigurations))
+
+    await expect(testDiamondCutManager.createConfiguration(testConfigId, facetConfigurations, "0x"))
       .to.be.revertedWithCustomError(testDiamondCutManager, "SelectorAlreadyRegistered")
       .withArgs(testConfigId, 1, duplicateResolverKey, transferSelector);
   });

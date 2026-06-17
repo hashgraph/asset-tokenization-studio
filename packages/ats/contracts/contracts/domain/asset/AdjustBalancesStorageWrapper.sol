@@ -367,10 +367,7 @@ library AdjustBalancesStorageWrapper {
      */
     function getLabafByUserAndPartition(bytes32 _partition, address _account) internal view returns (uint256) {
         return
-            getLabafByUserAndPartitionIndex(
-                ERC1410StorageWrapper.erc1410BasicStorage().partitionToIndex[_account][_partition],
-                _account
-            );
+            getLabafByUserAndPartitionIndex(ERC1410StorageWrapper.partitionsToIndexes(_account, _partition), _account);
     }
 
     /**
@@ -674,6 +671,7 @@ library AdjustBalancesStorageWrapper {
      * @dev Delegates to `ScheduledTasksStorageWrapper`, which walks queued balance adjustments and
      *      composes their factors and decimal shifts.
      * @param _timestamp Timestamp up to which scheduled adjustments are accumulated.
+     * @param _includeDisabled Whether to include adjustments that have been disabled but not removed from the queue.
      * @return pendingAbaf_     Multiplicative ABAF aggregating every adjustment due by `_timestamp`.
      * @return pendingDecimals_ Net decimals delta produced by those adjustments.
      */
@@ -760,7 +758,7 @@ library AdjustBalancesStorageWrapper {
      *      accessor in this library. Equivalent to the standard OZ ERC-7201 pattern.
      * @return adjustBalancesStorage_ Storage reference to the namespaced struct.
      */
-    function adjustBalancesStorage() internal pure returns (AdjustBalancesStorage storage adjustBalancesStorage_) {
+    function adjustBalancesStorage() private pure returns (AdjustBalancesStorage storage adjustBalancesStorage_) {
         bytes32 position = STORAGE_LOCATION_ADJUST_BALANCES;
         // solhint-disable-next-line no-inline-assembly
         assembly {

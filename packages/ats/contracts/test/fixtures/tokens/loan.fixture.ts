@@ -226,7 +226,7 @@ export async function deployLoanTokenFixture({
   // Get BLR proxy address (use deployment data to avoid TypeScript type mismatch)
   const blrProxyAddress = infrastructure.deployment.infrastructure.blr.proxy;
 
-  const tx = await factory.deployProxy(blrProxyAddress, LOAN_CONFIG_ID, 1, rbacs);
+  const tx = await factory.deployProxy(blrProxyAddress, LOAN_CONFIG_ID, 1, rbacs, "0x");
   const receipt = await tx.wait();
   const proxyAddress = (await decodeEvent(factory, "ProxyDeployed", receipt)).proxyAddress;
 
@@ -261,7 +261,6 @@ export async function deployLoanTokenFixture({
       name: securityData.erc20MetadataInfo.name,
       symbol: securityData.erc20MetadataInfo.symbol,
       decimals: securityData.erc20MetadataInfo.decimals,
-      isin: securityData.erc20MetadataInfo.isin,
     },
     securityType: 1, // SecurityType.Equity (reuse for loan)
   });

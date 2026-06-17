@@ -34,6 +34,47 @@ struct ResolverProxyStorage {
  */
 library ResolverProxyStorageWrapper {
     /**
+     * @notice Initializes the resolver-proxy storage.
+     * @param _resolver The `BusinessLogicResolver` instance.
+     * @param _resolverProxyConfigurationId The configuration identifier.
+     * @param _version The configuration version.
+     */
+    function initResolverProxyStorage(
+        IBusinessLogicResolver _resolver,
+        bytes32 _resolverProxyConfigurationId,
+        uint256 _version
+    ) internal {
+        ResolverProxyStorage storage ds = resolverProxyStorage();
+        ds.resolver = _resolver;
+        ds.resolverProxyConfigurationId = _resolverProxyConfigurationId;
+        ds.version = _version;
+    }
+
+    /**
+     * @notice Updates the `BusinessLogicResolver` instance.
+     * @param _resolver The new resolver instance.
+     */
+    function setBusinessLogicResolver(IBusinessLogicResolver _resolver) internal {
+        resolverProxyStorage().resolver = _resolver;
+    }
+
+    /**
+     * @notice Updates the configuration identifier.
+     * @param _resolverProxyConfigurationId The new configuration identifier.
+     */
+    function setResolverProxyConfigurationId(bytes32 _resolverProxyConfigurationId) internal {
+        resolverProxyStorage().resolverProxyConfigurationId = _resolverProxyConfigurationId;
+    }
+
+    /**
+     * @notice Updates the configuration version.
+     * @param _version The new configuration version.
+     */
+    function setResolverProxyVersion(uint256 _version) internal {
+        resolverProxyStorage().version = _version;
+    }
+
+    /**
      * @notice Returns the `BusinessLogicResolver` contract that supplies the facet selectors.
      * @return The active resolver instance for this proxy.
      */
@@ -63,7 +104,7 @@ library ResolverProxyStorageWrapper {
      *      `STORAGE_LOCATION_RESOLVER_PROXY`.
      * @return ds Storage reference to the `ResolverProxyStorage` struct.
      */
-    function resolverProxyStorage() internal pure returns (ResolverProxyStorage storage ds) {
+    function resolverProxyStorage() private pure returns (ResolverProxyStorage storage ds) {
         bytes32 position = STORAGE_LOCATION_RESOLVER_PROXY;
         // solhint-disable-next-line no-inline-assembly
         assembly {
