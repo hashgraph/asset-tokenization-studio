@@ -37,17 +37,17 @@ import { ERC20VotesStorageWrapper } from "../../domain/asset/ERC20VotesStorageWr
 
 interface IMockDiamondCut {
     function forceNonOperational() external;
-    function forceFacetNotRegistered(bytes32 facetKey_) external;
-    function forceFacetReady(bytes32 facetKey_) external;
-    function forceFacetsReady(bytes32[] calldata facetKeys_) external;
+    function forceFacetNotRegistered(bytes32 _facetKey) external;
+    function forceFacetReady(bytes32 _facetKey) external;
+    function forceFacetsReady(bytes32[] calldata _facetKeys) external;
     function forceSetOperational() external;
-    function setMultiPartition(bool _multiPartition) external;
+    function setMultiPartition(bool _nreMultiPartition) external;
     function forceDeactivate() external;
-    function forceSecurityFlags(bool n) external;
-    function forceControllable(bool n) external;
-    function forceDecimals(uint8 d) external;
-    function forceErc20VotesActivated(bool n) external;
-    function forceWhitelist(bool n) external;
+    function forceSecurityFlags(bool _newSecurityFlags) external;
+    function forceControllable(bool _newIsControlable) external;
+    function forceDecimals(uint8 _newDecimals) external;
+    function forceErc20VotesActivated(bool _newActivate) external;
+    function forceWhitelist(bool _newWhitelist) external;
 }
 
 // `IStaticFunctionSelectors` is intentionally not listed: it is already pulled
@@ -69,36 +69,36 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
     }
 
     /// @notice Forces a facet's version status to 0 (not started) for testing.
-    /// @param facetKey_ The resolver key of the facet to reset.
-    function forceFacetNotRegistered(bytes32 facetKey_) external override {
+    /// @param _facetKey The resolver key of the facet to reset.
+    function forceFacetNotRegistered(bytes32 _facetKey) external override {
         uint256 v = ResolverProxyStorageWrapper
             .getBusinessLogicResolver()
             .getFacetVersionByConfigurationIdVersionAndFacetId(
                 ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
                 ResolverProxyStorageWrapper.getResolverProxyVersion(),
-                facetKey_
+                _facetKey
             );
-        InitializerStorageWrapper.setFacetStatusForVersion(facetKey_, v, 0);
-        InitializerStorageWrapper.setFacetLastVersionTo(facetKey_, 0);
+        InitializerStorageWrapper.setFacetStatusForVersion(_facetKey, v, 0);
+        InitializerStorageWrapper.setFacetLastVersionTo(_facetKey, 0);
     }
 
     /// @notice Forces a single facet to READY status (status=1) without running its initialiser.
     /// @dev Uses `InitializerStorageWrapper.setFacetToReady` which reads the current version from
     ///      the BLR and marks status=1 for that `(facetId, version)` pair.
-    /// @param facetKey_ The resolver key of the facet to mark ready.
-    function forceFacetReady(bytes32 facetKey_) external override {
-        InitializerStorageWrapper.setFacetToReady(facetKey_);
+    /// @param _facetKey The resolver key of the facet to mark ready.
+    function forceFacetReady(bytes32 _facetKey) external override {
+        InitializerStorageWrapper.setFacetToReady(_facetKey);
     }
 
     /// @notice Forces a batch of facets to READY status in one call.
     /// @dev Iterates over the supplied array and calls `setFacetToReady` for each entry.
     ///      Intended for the `deployAssetMock` workflow where all facets of a configuration
     ///      must be marked ready before `setOperationalStatus` can succeed.
-    /// @param facetKeys_ Array of resolver keys to mark ready.
-    function forceFacetsReady(bytes32[] calldata facetKeys_) external override {
-        uint256 len = facetKeys_.length;
+    /// @param _facetKeys Array of resolver keys to mark ready.
+    function forceFacetsReady(bytes32[] calldata _facetKeys) external override {
+        uint256 len = _facetKeys.length;
         for (uint256 i; i < len; ) {
-            InitializerStorageWrapper.setFacetToReady(facetKeys_[i]);
+            InitializerStorageWrapper.setFacetToReady(_facetKeys[i]);
             unchecked {
                 ++i;
             }
@@ -140,21 +140,21 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
     ///      would. On a freshly-snapshot-restored asset (all flags at EVM-default false), calling
     ///      `forceSecurityFlags(true)` is equivalent to having deployed with all four features
     ///      enabled, and `forceSecurityFlags(false)` restores the EVM-default state.
-    /// @param n `true` to enable all four security features, `false` to disable them.
-    function forceSecurityFlags(bool n) external override {
-        ERC1410StorageWrapper.initializeERC1410(n);
-        ControlListStorageWrapper.initializeControlList(n);
-        KycStorageWrapper.initializeInternalKyc(n);
-        ProtectedPartitionsStorageWrapper.initializeProtectedPartitions(n);
+    /// @param _newSecurityFlags `true` to enable all four security features, `false` to disable them.
+    function forceSecurityFlags(bool _newSecurityFlags) external override {
+        ERC1410StorageWrapper.initializeERC1410(_newSecurityFlags);
+        ControlListStorageWrapper.initializeControlList(_newSecurityFlags);
+        KycStorageWrapper.initializeInternalKyc(_newSecurityFlags);
+        ProtectedPartitionsStorageWrapper.initializeProtectedPartitions(_newSecurityFlags);
     }
 
     /// @notice Forces the ERC-1644 controllable flag for testing without running the facet
     ///         initialiser.
     /// @dev Calls `ERC1644StorageWrapper.initializeController` — the same storage path used by
     ///      the production `Controller.initializeController` facet.
-    /// @param n `true` to enable controllable transfers, `false` to disable them.
-    function forceControllable(bool n) external override {
-        ERC1644StorageWrapper.initializeController(n);
+    /// @param _newControllable `true` to enable controllable transfers, `false` to disable them.
+    function forceControllable(bool _newControllable) external override {
+        ERC1644StorageWrapper.initializeController(_newControllable);
     }
 
     /// @notice Forces the ERC-20 decimal count for testing without running the facet
@@ -164,18 +164,18 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
     ///      the production `CoreFacet.initializeERC20` uses via `ERC20StorageWrapper`.
     ///      Unlike `initializeERC20`, this does NOT trigger `ScheduledTasksOps` or
     ///      overwrite name/symbol, making it safe alongside snapshot scheduled-tasks tests.
-    /// @param d The decimal count to set (e.g. 6 for the standard equity token value).
-    function forceDecimals(uint8 d) external override {
-        ERC20StorageWrapper.setDecimals(d);
+    /// @param _newDecimals The decimal count to set (e.g. 6 for the standard equity token value).
+    function forceDecimals(uint8 _newDecimals) external override {
+        ERC20StorageWrapper.setDecimals(_newDecimals);
     }
 
     /// @notice Forces the ERC20Votes activation flag for testing without running the facet initialiser.
     /// @dev Delegates to ERC20VotesStorageWrapper.setActivate, which writes the activation flag through the
     ///      ERC20Votes storage struct (layout-independent). The production flag is set only at
     ///      initializeERC20Votes time with no runtime toggle, so this mirrors the deploy-time state directly.
-    /// @param n true to activate ERC20Votes, false to deactivate.
-    function forceErc20VotesActivated(bool n) external override {
-        ERC20VotesStorageWrapper.setActivate(n);
+    /// @param _newActivated true to activate ERC20Votes, false to deactivate.
+    function forceErc20VotesActivated(bool _newActivated) external override {
+        ERC20VotesStorageWrapper.setActivate(_newActivated);
     }
 
     /// @notice Forces the control-list type (whitelist vs blacklist) for testing without running the facet
@@ -183,8 +183,8 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
     /// @dev Delegates to ControlListStorageWrapper.initializeControlList, which sets only the control-list
     ///      type flag through the storage struct. The production flag is set once at initializeControlList
     ///      time with no runtime toggle, so this mirrors the deploy-time state.
-    function forceWhitelist(bool n) external override {
-        ControlListStorageWrapper.initializeControlList(n);
+    function forceWhitelist(bool _newWhiteList) external override {
+        ControlListStorageWrapper.initializeControlList(_newWhiteList);
     }
 
     function getStaticResolverKey() external pure returns (bytes32 staticResolverKey_) {
@@ -196,39 +196,41 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
     }
 
     function getStaticFunctionSelectors() external pure returns (bytes4[] memory staticFunctionSelectors_) {
-        staticFunctionSelectors_ = new bytes4[](31);
-        uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = this.initializeDiamondCut.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.forceNonOperational.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.forceFacetNotRegistered.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.forceFacetReady.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.forceFacetsReady.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.forceSetOperational.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setMultiPartition.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.forceDeactivate.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.forceSecurityFlags.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.forceControllable.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.forceDecimals.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.forceErc20VotesActivated.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.forceWhitelist.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.updateConfigVersion.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.updateConfig.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.updateResolver.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getConfigInfo.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacets.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetsLength.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetsByPage.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetSelectors.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetSelectorsLength.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetSelectorsByPage.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetIds.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetIdsByPage.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetAddresses.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetAddressesByPage.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetIdBySelector.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacet.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetAddress.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.supportsInterface.selector;
+        uint256 selectorsIndex = 31;
+        staticFunctionSelectors_ = new bytes4[](selectorsIndex);
+        unchecked {
+            staticFunctionSelectors_[--selectorsIndex] = this.initializeDiamondCut.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.forceNonOperational.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.forceFacetNotRegistered.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.forceFacetReady.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.forceFacetsReady.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.forceSetOperational.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.setMultiPartition.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.forceDeactivate.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.forceSecurityFlags.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.forceControllable.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.forceDecimals.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.forceErc20VotesActivated.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.forceWhitelist.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.updateConfigVersion.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.updateConfig.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.updateResolver.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.getConfigInfo.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.getFacets.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.getFacetsLength.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.getFacetsByPage.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.getFacetSelectors.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.getFacetSelectorsLength.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.getFacetSelectorsByPage.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.getFacetIds.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.getFacetIdsByPage.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.getFacetAddresses.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.getFacetAddressesByPage.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.getFacetIdBySelector.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.getFacet.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.getFacetAddress.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.supportsInterface.selector;
+        }
     }
 
     function getStaticInterfaceIds() external pure returns (bytes4[] memory staticInterfaceIds_) {
