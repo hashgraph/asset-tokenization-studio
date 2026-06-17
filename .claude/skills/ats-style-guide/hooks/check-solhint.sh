@@ -27,12 +27,16 @@ cd "$REPO" || exit 0
 OUTPUT=$(npx solhint --config packages/ats/contracts/solhint.config.js $CHANGED 2>&1)
 STATUS=$?
 
+# AUTOMATED ERROR conventions are enforced by solhint (built-ins such as interface-starts-with-i
+# / gas-custom-errors, plus solhint-plugin-ats for ATS-EVM-001 / ATS-NAME-005) and all surface in
+# the solhint run above — no interim greps needed here.
 # solhint exits non-zero only when ERROR-severity findings exist; warnings never block,
 # matching the conventions contract (WARNING rules are flagged but never gate).
 if [ "$STATUS" -ne 0 ]; then
   {
-    echo "ats-style-guide quality gate: solhint reports ERROR findings on the changed .sol files."
-    echo "Before finishing, include every finding below in the review report (Solhint section):"
+    echo "ats-style-guide quality gate: ERROR findings on the changed .sol files."
+    echo "Before finishing, include every finding below in the review report."
+    echo "--- Solhint ---"
     echo "$OUTPUT"
   } >&2
   exit 2

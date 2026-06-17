@@ -8,19 +8,11 @@ structs accessed through `…StorageWrapper` libraries. These rules protect the 
 
 ### ATS-EVM-001 — `msg.sender` used directly
 
-- Severity: ERROR
-- Enforcement: AUTOMATED
-- Pattern: `msg.sender` in any expression that is NOT inside `EvmAccessors.sol` itself and NOT
-  in a NatSpec comment.
-- Fix: replace with `EvmAccessors.getMsgSender()`.
+- Enforced by `solhint-plugin-ats/rules/no-direct-msg-sender.js`.
 
 ### ATS-EVM-002 — `block.timestamp` used directly
 
-- Severity: ERROR
-- Enforcement: AUTOMATED
-- Pattern: `block.timestamp` outside of NatSpec comments and outside
-  `TimeTravelStorageWrapper.sol` itself.
-- Fix: replace with `TimeTravelStorageWrapper.getBlockTimestamp()`.
+- Enforced by `solhint-plugin-ats/rules/no-direct-block-timestamp.js`.
 
 ## Facet structure
 
@@ -38,16 +30,13 @@ structs accessed through `…StorageWrapper` libraries. These rules protect the 
 
 ### ATS-SUFFIX-001 — `XxxFacet` contract does not inherit `IStaticFunctionSelectors`
 
-- Severity: ERROR
-- Enforcement: AUTOMATED
-- Pattern: `contract …Facet` declaration whose `is` list does not include
-  `IStaticFunctionSelectors`.
-- Fix: add `IStaticFunctionSelectors` to the inheritance list.
+- Enforced by `solhint-plugin-ats/rules/facet-implements-selectors.js`.
 
 ### ATS-SEL-001 — Ascending selector registration in `getStaticFunctionSelectors`
 
 - Severity: ERROR
-- Enforcement: AUTOMATED
+- Enforcement: MANUAL — the ascending-vs-descending structure needs code comprehension; the
+  `i++` variant is already caught generically by solhint `gas-increment-by-one` (ATS-GAS-001).
 - Pattern: inside a `getStaticFunctionSelectors` function body, an ascending counter such as
   `selectors[i++]`, `selectors[selectorIndex++]`, or any `i++`/`++i` in the `for` header rather
   than the descending `unchecked { r[--i] = ...; }` pattern.
@@ -74,12 +63,7 @@ structs accessed through `…StorageWrapper` libraries. These rules protect the 
 
 ### ATS-BOUND-001 — Forbidden import from `factory/ERC3643/`
 
-- Severity: ERROR
-- Enforcement: AUTOMATED
-- Pattern: an `import` statement in any file whose path contains `contracts/constants/`,
-  `contracts/domain/`, `contracts/facets/layer_1-2/`, or whose filename is `Factory.sol`, that
-  references `factory/ERC3643/`.
-- Fix: place shared types at a neutral location; the T-REX side re-exports or keeps its own copy.
+- Enforced by `solhint-plugin-ats/rules/no-erc3643-import.js`.
 
 ## Prohibited patterns
 
@@ -100,14 +84,11 @@ structs accessed through `…StorageWrapper` libraries. These rules protect the 
   for this purpose.
 - Fix: expose only the setter; have the external facet initializer call the setter directly.
 
-### ATS-ARCH-003 — Event emitted inside a StorageWrapper or Ops library
+### ATS-ARCH-003 — Event emitted inside a StorageWrapper or Ops library (retired)
 
-- Severity: ERROR
-- Enforcement: MANUAL
-- Pattern: an `emit` statement inside a `library` body.
-- Fix: move the emit to the outermost business-logic layer (the abstract contract of the
-  facet), unless the library function is called from multiple callers with no shared outer
-  layer. See [events.md](events.md) ATS-EVENT-006 for the full emit-site doctrine.
+- Merged into [events.md](events.md) **ATS-EVENT-006**, which owns the full emit-site doctrine
+  (emit from the facet by default; the four justifications for a lower-layer emit; the hard
+  no-duplication rule). Report library-body emits under ATS-EVENT-006 only — never both.
 
 ### ATS-ARCH-004 — `using X for Y` declared in a concrete facet or business-logic abstract
 
@@ -116,7 +97,7 @@ structs accessed through `…StorageWrapper` libraries. These rules protect the 
 - Pattern: a `using` statement inside a `contract` (not abstract) or an abstract in
   `facets/<name>/` that is not a `…Modifiers` file and not an infrastructure proxy contract.
 - Rationale: `using` is permitted only in `library …StorageWrapper`, `abstract contract
-  …Modifiers`, and infrastructure proxy contracts under `infrastructure/`.
+…Modifiers`, and infrastructure proxy contracts under `infrastructure/`.
 - Fix: move the `using` declaration to the appropriate StorageWrapper library or Modifiers
   abstract; have the facet layer call the library function directly.
 
@@ -156,11 +137,9 @@ uniform, guarded, observable, and registered with the Diamond resolver.
 ### Canonical initializer shape
 
 ```solidity
-function initializePause(
-    PauseInitData calldata _initData
-) external onlyNotPauseInitialized {
-    PauseStorageWrapper.setPaused(_initData.paused);
-    InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_PAUSE);
-    emit PauseInitialized(_initData.paused);
+function initializePause(PauseInitData calldata _initData) external onlyNotPauseInitialized {
+  PauseStorageWrapper.setPaused(_initData.paused);
+  InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_PAUSE);
+  emit PauseInitialized(_initData.paused);
 }
 ```

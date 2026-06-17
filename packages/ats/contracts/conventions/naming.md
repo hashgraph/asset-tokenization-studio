@@ -4,24 +4,16 @@ Prefix/suffix rules for identifiers and artifact types.
 
 ### ATS-NAME-001 — Function parameter missing `_` prefix
 
-- Severity: ERROR
-- Enforcement: AUTOMATED
-- Pattern: `external`, `public`, or `internal` function with a parameter name that does NOT
-  start with `_` (excluding `this`, unnamed params such as a bare `uint256`, and overridden
-  OpenZeppelin functions that must match parent signatures).
-- Fix: add the `_` prefix to the parameter name.
+- Enforced by `solhint-plugin-ats/rules/function-param-underscore.js`.
 
 ### ATS-NAME-002 — Named return variable missing `_` suffix
 
-- Severity: ERROR
-- Enforcement: AUTOMATED
-- Pattern: `returns (type name)` where `name` does NOT end with `_`.
-- Fix: add the `_` suffix.
+- Enforced by `solhint-plugin-ats/rules/named-return-underscore.js`.
 
 ### ATS-NAME-003 — `internal` library function with `_` prefix
 
 - Severity: ERROR
-- Enforcement: AUTOMATED
+- Enforcement: MANUAL
 - Pattern: inside a `library` body, a `function` with `internal` visibility whose name starts
   with `_`, unless the entire library consistently uses `_` on all its `internal` functions as
   an explicit bytecode-vs-DELEGATECALL signal.
@@ -33,25 +25,57 @@ Prefix/suffix rules for identifiers and artifact types.
 - Fix: remove the `_` prefix from all `internal` function names and update call sites, or adopt
   it consistently across all `internal` functions in the library.
 
-### ATS-IFACE-001 — Interface declared without `I` prefix
+### ATS-NAME-004 — Guard and predicate naming taxonomy
 
 - Severity: ERROR
-- Enforcement: AUTOMATED
-- Pattern: `interface` keyword followed by a name that does NOT start with `I` (e.g.
-  `interface Cap`, `interface AccessControl`).
-- Fix: rename to `IXxx` and update all references.
+- Enforcement: MANUAL
+- Pattern: a modifier, assertion helper, or predicate whose name does not match its construct in
+  the table below — most commonly a modifier prefixed with `check` (e.g. `checkValidHoldId`), an
+  assertion helper not prefixed with `_check`, or a `returns (bool)` predicate prefixed with
+  `only`/`check` instead of `is`/`has`.
+
+  | Construct                | Name                               | Reverts? | Example                                  |
+  | ------------------------ | ---------------------------------- | -------- | ---------------------------------------- |
+  | Access / state invariant | `onlyX`                            | yes      | `onlyOperational`, `onlyAdminRole`       |
+  | Input / precondition     | `onlyValidX` / `notX`              | yes      | `onlyValidHoldId`, `notZeroAddress`      |
+  | Assertion helper         | `_checkX` (private/internal, void) | yes      | `_checkValidVersion`                     |
+  | Non-reverting predicate  | `isX` / `hasX` (returns `bool`)    | no       | `isResolverProxyConfigurationRegistered` |
+
+- Rationale: the name must signal whether the construct reverts and how it is meant to be used.
+  Three binding rules follow from the table:
+  1. `check` is a verb — it appears **only** on `_check*` helpers, never as a modifier prefix
+     (enforced deterministically by [ATS-NAME-005](#ats-name-005--check-prefix-on-a-modifier)).
+  2. A modifier delegates to one or more `_check*` helpers and is named for the guaranteed
+     property (`onlyValidHoldId`), not for the act of checking (`checkValidHoldId`).
+  3. `valid` and `validate` are not interchangeable as a **modifier** prefix: the house form is
+     `onlyValid<Property>` (the dominant form, ~30 modifiers), never `validate<Property>`. The
+     three legacy exceptions — `validateConfigurationId`, `validateConfigurationVersion`,
+     `validateDates` — are standardised away by renaming to `onlyValid…` (e.g. `validateDates`
+     → `onlyValidDates`, which already exists elsewhere). `validate` stays a verb on helper
+     functions only, where the table's `_check*` form applies.
+- Fix: rename to the construct's pattern — modifier prefixes become `only*`/`not*` (never
+  `validate*`), the reverting assertion it delegates to becomes `_check*`, and a non-reverting
+  `bool` accessor becomes `is*`/`has*`.
+
+### ATS-NAME-005 — `check` prefix on a modifier
+
+- Enforced by `solhint-plugin-ats/rules/no-check-modifier.js`.
+
+### ATS-IFACE-001 — Interface declared without `I` prefix
+
+- Enforced by solhint built-in `interface-starts-with-i`.
 
 ## Artifact-type suffixes
 
 For reference when naming new files (violations of these surface through the rules above and
 through [architecture.md](architecture.md) / [storage.md](storage.md)):
 
-| Artifact                  | Naming pattern              | Example                      |
-| ------------------------- | --------------------------- | ---------------------------- |
-| Diamond facet wrapper     | `<Feature>Facet`            | `PauseFacet`                 |
-| Business-logic layer      | `<Feature>` (abstract)      | `Pause`                      |
-| Storage wrapper library   | `<Feature>StorageWrapper`   | `PauseStorageWrapper`        |
-| Storage struct            | `<Feature>DataStorage`      | `PauseDataStorage`           |
-| Writer interface          | `I<Feature>`                | `IPause`                     |
-| Shared types interface    | `I<Domain>Types`            | `IBondTypes`                 |
-| Modifiers abstract        | `<Feature>Modifiers`        | `PauseModifiers`             |
+| Artifact                | Naming pattern            | Example               |
+| ----------------------- | ------------------------- | --------------------- |
+| Diamond facet wrapper   | `<Feature>Facet`          | `PauseFacet`          |
+| Business-logic layer    | `<Feature>` (abstract)    | `Pause`               |
+| Storage wrapper library | `<Feature>StorageWrapper` | `PauseStorageWrapper` |
+| Storage struct          | `<Feature>DataStorage`    | `PauseDataStorage`    |
+| Writer interface        | `I<Feature>`              | `IPause`              |
+| Shared types interface  | `I<Domain>Types`          | `IBondTypes`          |
+| Modifiers abstract      | `<Feature>Modifiers`      | `PauseModifiers`      |

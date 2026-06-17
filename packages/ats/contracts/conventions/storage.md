@@ -4,15 +4,11 @@ All persistent state lives in ERC-7201 namespaced structs declared inside `…St
 libraries. Facets and business-logic abstracts never declare state variables
 (see [architecture.md](architecture.md) ATS-FACET-001).
 
+## Layout & annotation
+
 ### ATS-STORAGE-001 — Storage struct missing `@custom:storage-location erc7201:` annotation
 
-- Severity: ERROR
-- Enforcement: AUTOMATED
-- Pattern: a `struct` whose name ends in `DataStorage` (or `Storage` in legacy files) declared
-  in a `…StorageWrapper.sol` that is NOT immediately preceded by a NatSpec block containing
-  `@custom:storage-location erc7201:`.
-- Fix: add the annotation above the struct declaration, as the last tag inside the struct's
-  NatSpec block (see [code-quality.md](code-quality.md) § NatSpec for placement details).
+- Enforced by `solhint-plugin-ats/rules/storage-struct-erc7201.js`.
 
 ### ATS-STORAGE-002 — Storage struct missing 5-region layout
 
@@ -29,6 +25,8 @@ libraries. Facets and business-logic abstracts never declare state variables
   (append-only) evolution auditable.
 - Fix: reorganise fields into the 5 regions and add all five banner comments.
 
+## Naming
+
 ### ATS-STYLE-001 — Storage struct named `XxxStorage` instead of `XxxDataStorage`
 
 - Severity: WARNING
@@ -37,10 +35,8 @@ libraries. Facets and business-logic abstracts never declare state variables
   `…StorageWrapper` file.
 - Rationale: technical debt being phased out — flag only, do not auto-fix.
 
+## Accessors
+
 ### ATS-PRIV-001 — StorageWrapper accessor not `private`
 
-- Severity: ERROR
-- Enforcement: AUTOMATED
-- Pattern: in a `library …StorageWrapper`, a function whose name matches `*Storage()` and whose
-  visibility is `internal` instead of `private`.
-- Fix: change to `private`.
+- Enforced by `solhint-plugin-ats/rules/storage-accessor-private.js`.

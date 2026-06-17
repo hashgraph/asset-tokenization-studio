@@ -194,6 +194,7 @@
     "hardhat-dependency-compiler": "^1.2.1",
     "hardhat-gas-reporter": "^1.0.8",
     "sinon": "^21.0.1",
+    "solhint-plugin-ats": "file:./solhint-plugin-ats",
     "solidity-coverage": "^0.8.14",
     "tsc-alias": "^1.8.16",
     "tsconfig-paths": "^4.2.0",

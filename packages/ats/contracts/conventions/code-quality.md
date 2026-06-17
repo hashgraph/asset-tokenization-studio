@@ -6,19 +6,7 @@ Cross-cutting source-level conventions that apply to every `.sol` file regardles
 
 ### ATS-ERR-001 — `require()` with a string message
 
-- Severity: ERROR
-- Enforcement: AUTOMATED
-- Pattern: `require(` followed by a string literal argument.
-- Rationale: custom errors are cheaper than revert strings and carry typed context.
-- Fix: replace with a custom error and `revert`.
-
-  ```solidity
-  // Bad
-  require(_amount > 0, "Amount must be positive");
-
-  // Good
-  if (_amount == 0) revert ZeroAmount();
-  ```
+- Enforced by solhint built-in `gas-custom-errors`.
 
 ### ATS-TYPE-002 — Custom error outside the reverting facet's interface
 
@@ -33,10 +21,7 @@ Cross-cutting source-level conventions that apply to every `.sol` file regardles
 
 ### ATS-IMP-001 — Bare import (no named symbols)
 
-- Severity: ERROR
-- Enforcement: AUTOMATED
-- Pattern: `import "` or `import '` without `{`.
-- Fix: use named imports: `import { X } from "...";`.
+- Enforced by solhint built-in `no-global-import`.
 
 ### ATS-TYPE-001 — Type placement violation
 
@@ -49,44 +34,22 @@ Cross-cutting source-level conventions that apply to every `.sol` file regardles
   the facet's writer interface; shared types live in the domain's `I*Types.sol`.
 
 Related: events and errors follow the same single-vs-shared placement logic — see
-[events.md](events.md) ATS-EVENT-004/007 and ATS-TYPE-002 above. The ERC-3643 import boundary
+[events.md](events.md) ATS-EVENT-007 and ATS-TYPE-002 above. The ERC-3643 import boundary
 is in [architecture.md](architecture.md) ATS-BOUND-001.
 
 ## Gas patterns
 
-### ATS-GAS-001 — Post-increment `i++` in a loop counter context
+### ATS-GAS-001 — Post-increment `i++` instead of `++i`
 
-- Severity: ERROR
-- Enforcement: AUTOMATED
-- Pattern: `i++` or `j++` (any single-letter counter) inside a `for` or `while` body where the
-  return value of the expression is discarded.
-- Fix: use `++i` inside an `unchecked {}` block at the end of the loop body.
+- Enforced by solhint built-in `gas-increment-by-one`.
 
 ### ATS-GAS-002 — Loop without `unchecked` counter increment
 
-- Severity: ERROR
-- Enforcement: AUTOMATED
-- Pattern: a `for` loop whose increment is `++i` or `i++` and is NOT wrapped in `unchecked {}`.
-- Fix: move the counter increment to `unchecked { ++i; }` at the end of the body and remove it
-  from the `for` header.
-
-  ```solidity
-  // Good
-  for (uint256 i = 0; i < length; ) {
-      // ... body ...
-      unchecked {
-          ++i;
-      }
-  }
-  ```
+- Enforced by `solhint-plugin-ats/rules/loop-unchecked-increment.js`.
 
 ### ATS-FUNC-001 — `memory` parameter in an `external` function where `calldata` is possible
 
-- Severity: ERROR
-- Enforcement: AUTOMATED
-- Pattern: `external` function with a reference-type parameter declared as `[] memory` or
-  `struct … memory` (not a return variable).
-- Fix: change to `calldata`.
+- Enforced by `solhint-plugin-ats/rules/external-calldata-params.js`.
 
 Note: the descending `unchecked` selector-registration pattern for
 `getStaticFunctionSelectors` is also gas-motivated — see
@@ -117,14 +80,4 @@ every touched `.sol` file.
 
 ### ATS-LINT-001 — `solhint-disable` comment added
 
-- Severity: WARNING (always flag, never block)
-- Enforcement: AUTOMATED
-- Pattern: any line containing `// solhint-disable` (inline or block form).
-- Rationale: there are very few legitimate uses in this codebase. Known acceptable cases:
-  - `// solhint-disable-next-line no-inline-assembly` immediately before the
-    `assembly { s_.slot := position }` block inside a StorageWrapper accessor.
-
-  Outside these known cases, the disable comment is a smell — ask: _is there a refactor that
-  removes the need for it?_
-- Fix / review guidance: when reporting, include the exact disable directive and the
-  surrounding context (what rule is being suppressed and why).
+- Enforced by `solhint-plugin-ats/rules/no-solhint-disable.js`.
