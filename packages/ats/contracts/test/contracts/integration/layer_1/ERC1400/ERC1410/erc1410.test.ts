@@ -3489,7 +3489,7 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
       });
     });
 
-    describe.skip("ERC1410 Transfer Paths", async () => {
+    describe("ERC1410 Transfer Paths", async () => {
       beforeEach(async () => {
         await asset.setMultiPartition(true);
         await asset.grantRole(ATS_ROLES.ROLE_CLEARING, signer_A.address);
