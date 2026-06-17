@@ -28,6 +28,7 @@ import {
   type FacetMetadata,
 } from "../../../scripts";
 import { createAssetMockConfiguration } from "./assetMockConfiguration";
+import { ALL_ASSET_FACETS, buildFacetList } from "@scripts/domain";
 import { BusinessLogicResolver__factory, IMockFactory__factory, ProxyAdmin__factory } from "@contract-types";
 import type { IMockFactory, BusinessLogicResolver, ProxyAdmin } from "@contract-types";
 
@@ -78,27 +79,11 @@ export async function deploySystemWithNewBlrFullAsset(
     facetAddresses[facet.name] = facet.address;
   }
 
-  // 3. Build the dynamic facet union from all 7 asset-class deployment helpers
-  const allFacetNames = [
-    ...deployment.helpers.getEquityFacets(),
-    ...deployment.helpers.getBondFacets(),
-    ...deployment.helpers.getBondFixedRateFacets(),
-    ...deployment.helpers.getBondKpiLinkedRateFacets(),
-    ...deployment.helpers.getLoanFacets(),
-    ...deployment.helpers.getLoansPortfolioFacets(),
-    ...deployment.helpers.getDepositTokenFacets(),
-  ]
-    .map((f) => f.name)
-    .filter((name, idx, arr) => arr.indexOf(name) === idx)
-    .sort();
-
-  const diamondIdx = allFacetNames.indexOf("DiamondFacet");
-  if (diamondIdx >= 0) {
-    allFacetNames[diamondIdx] = "MockDiamondCut";
-  }
-  if (!allFacetNames.includes("EvmAccessorsFacet")) {
-    allFacetNames.push("EvmAccessorsFacet");
-  }
+  // 3. Resolve the full IAsset facet union from the compile-checked ALL_ASSET_FACETS
+  //    constant, then run it through buildFacetList — the same helper every production
+  //    config uses — which (in test mode) swaps DiamondFacet→MockDiamondCut and appends
+  //    the test-only EvmAccessorsFacet. No hardcoded facet names live here any more.
+  const allFacetNames = buildFacetList(ALL_ASSET_FACETS);
 
   // 4. Connect to BLR and create assetMock configuration
   const blrContract = BusinessLogicResolver__factory.connect(deployment.infrastructure.blr.proxy, signer);
