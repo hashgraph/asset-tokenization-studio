@@ -94,7 +94,6 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
     let asset: IAssetMock;
 
     const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
-
     let currentTimestamp = 0;
     let expirationTimestamp = 0;
 
