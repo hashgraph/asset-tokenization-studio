@@ -337,7 +337,7 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
       await asset.resetSystemTimestamp();
     });
 
-    describe.skip("Single Partition", async () => {
+    describe("Single Partition", async () => {
       beforeEach(async () => {
         await singlePartitionSetup();
       });
@@ -1066,7 +1066,9 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
         beforeEach(async () => {
           await asset.grantRole(ATS_ROLES.ROLE_INTERNAL_KYC_MANAGER, signer_A.address);
           await asset.activateInternalKyc();
-        });it("Given a non kyc account WHEN approveClearingOperationByPartition with operation type Transfer THEN transaction fails with InvalidKycStatus", async () => {
+        });
+
+        it("Given a non kyc account WHEN approveClearingOperationByPartition with operation type Transfer THEN transaction fails with InvalidKycStatus", async () => {
           const clearingOperationFromB = {
             ...clearingOperationFrom,
             from: signer_B.address,
@@ -1564,7 +1566,8 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
           await asset.connect(signer_A).clearingTransferByPartition(clearingOperation, _AMOUNT, signer_C.address);
 
           await asset.grantRole(ATS_ROLES.ROLE_INTERNAL_KYC_MANAGER, signer_A.address);
-          await asset.activateInternalKyc();// Revoke identity for signer_A
+          await asset.activateInternalKyc();
+          // Revoke identity for signer_A
           await asset.connect(signer_B).revokeKyc(signer_A.address);
 
           // Wait until expiration date
