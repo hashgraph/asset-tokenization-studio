@@ -2860,7 +2860,7 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
       });
     });
 
-    describe.skip("Common Modifiers", () => {
+    describe("Common Modifiers", () => {
       beforeEach(async () => {
         await singlePartitionSetup();
       });
