@@ -59,8 +59,11 @@
     "clean:deps": "node -e \"const fs=require('fs'); fs.rmSync('node_modules',{recursive:true,force:true})\"",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "lint": "npm run lint:sol && npm run lint:js",
-    "lint:fix": "npm run lint:sol:fix; npm run lint:js:fix",
+    "lint": "npm run lint:sol && npm run lint:js && npm run lint:ratchet",
+    "lint:fix": "npm run lint:sol:fix; npm run lint:js:fix; npm run lint:ratchet:update",
+    "lint:ratchet": "npm run generate:accessors:prod && betterer ci",
+    "lint:ratchet:update": "npm run generate:accessors:prod && betterer",
+    "lint:ratchet:merge": "betterer merge",
     "generate:accessors": "npx tsx scripts/tools/accessor-generator/index.ts",
     "generate:accessors:prod": "ATS_TEST_MODE=false npx tsx scripts/tools/accessor-generator/index.ts",
     "lint:sol": "npm run generate:accessors:prod && solhint --config solhint.config.js 'contracts/**/*.sol'",
@@ -166,6 +169,8 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@betterer/betterer": "5.4.0",
+    "@betterer/cli": "5.4.0",
     "@hashgraph/eslint-config": "*",
     "@hashgraph/sdk": "2.64.5",
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
