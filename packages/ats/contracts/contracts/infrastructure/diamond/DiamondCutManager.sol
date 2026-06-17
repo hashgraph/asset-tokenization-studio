@@ -319,12 +319,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         uint256 _version,
         bytes32 _facetId
     ) external view onlyValidConfigurationVersion(_configurationId, _version) returns (uint256 facetVersion_) {
-        facetVersion_ = _getFacetVersionByConfigurationIdVersionAndFacetId(
-            _diamondCutManagerStorage(),
-            _configurationId,
-            _version,
-            _facetId
-        );
+        facetVersion_ = _getFacetVersionByConfigurationIdVersionAndFacetId(_configurationId, _version, _facetId);
     }
 
     /**
