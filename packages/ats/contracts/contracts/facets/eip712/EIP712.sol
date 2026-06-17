@@ -27,9 +27,10 @@ abstract contract EIP712 is IEIP712, Modifiers {
         emit EIP712Initialized();
     }
 
+    /* solhint-disable func-name-mixedcase */
     /// @inheritdoc IEIP712
-    // solhint-disable-next-line func-name-mixedcase
     function DOMAIN_SEPARATOR() external view override returns (bytes32 domainSeparator_) {
         domainSeparator_ = ERC20PermitStorageWrapper.DOMAIN_SEPARATOR();
     }
+    /* solhint-enable func-name-mixedcase */
 }

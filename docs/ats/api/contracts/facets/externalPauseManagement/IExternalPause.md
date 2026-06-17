@@ -1,5 +1,7 @@
 # IExternalPause
 
+_Asset Tokenization Studio Team_
+
 > IExternalPause
 
 Minimal interface for querying an external pause contract.

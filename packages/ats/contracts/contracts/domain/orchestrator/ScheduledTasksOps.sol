@@ -5,6 +5,7 @@ import { PauseStorageWrapper } from "../core/PauseStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "../asset/ScheduledTasksStorageWrapper.sol";
 
 /// @title ScheduledTasksOps - Orchestrator for scheduled-task triggering
+/// @author Asset Tokenization Studio Team
 /// @notice Deployed once as a separate contract. Facets and storage wrappers call via
 /// DELEGATECALL, keeping their bytecode out of the 24 KB EIP-170 limit. The body of
 /// `ScheduledTasksStorageWrapper.triggerScheduledCrossOrderedTasks` (a fat loop) is inlined

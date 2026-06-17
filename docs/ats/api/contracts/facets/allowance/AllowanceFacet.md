@@ -1,5 +1,7 @@
 # AllowanceFacet
 
+_Asset Tokenization Studio Team_
+
 > AllowanceFacet
 
 Diamond facet for the Allowance domain. Registers 5 selectors that define the ERC-20 allowance surface (`initializeAllowance`, `approve`, `increaseAllowance`, `decreaseAllowance` and `allowance`).

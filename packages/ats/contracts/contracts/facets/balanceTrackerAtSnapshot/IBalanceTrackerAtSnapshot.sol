@@ -9,6 +9,7 @@ bytes32 constant RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT = 0x2c9af26b5891593b81
 
 /**
  * @title IBalanceTrackerAtSnapshot
+ * @author Asset Tokenization Studio Team
  * @notice Interface for querying snapshotted token balances and total supply across all partitions,
  *         resolved against a previously taken snapshot identifier.
  * @dev Reads are delegated to `SnapshotsStorageWrapper` and operate on the snapshot index recorded

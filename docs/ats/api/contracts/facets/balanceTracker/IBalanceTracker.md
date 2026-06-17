@@ -1,5 +1,7 @@
 # IBalanceTracker
 
+_Asset Tokenization Studio Team_
+
 > IBalanceTracker
 
 Interface for querying token balances and total supply across all partitions, with support for time-adjusted values that simulate pending balance adjustments.

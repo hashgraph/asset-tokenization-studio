@@ -244,9 +244,9 @@ _Fires exclusively from `initializeExternalKycLists` after the storage write suc
 
 #### Parameters
 
-| Name     | Type      | Description |
-| -------- | --------- | ----------- |
-| kycLists | address[] | undefined   |
+| Name     | Type      | Description                                                       |
+| -------- | --------- | ----------------------------------------------------------------- |
+| kycLists | address[] | Initial array of external KYC list contract addresses registered. |
 
 ### ExternalKycListsUpdated
 

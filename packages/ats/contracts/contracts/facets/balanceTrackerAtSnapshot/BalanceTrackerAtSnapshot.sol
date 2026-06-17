@@ -10,6 +10,7 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
 
 /**
  * @title BalanceTrackerAtSnapshot
+ * @author Asset Tokenization Studio Team
  * @notice Abstract implementation of `IBalanceTrackerAtSnapshot` providing snapshotted balance
  *         and total-supply queries indexed by a snapshot identifier.
  * @dev Delegates storage reads to `SnapshotsStorageWrapper`. Intended to be inherited by

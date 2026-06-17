@@ -10,6 +10,7 @@ import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunc
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 /**
  * @title BalanceTrackerByPartitionFacet
+ * @author Asset Tokenization Studio Team
  * @notice Diamond facet that exposes partition-scoped token balance and total supply queries
  *         through the `IBalanceTrackerByPartition` interface, registered under
  *         `RESOLVER_KEY_BALANCE_TRACKER_BY_PARTITION`.

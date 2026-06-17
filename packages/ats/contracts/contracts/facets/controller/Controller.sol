@@ -14,6 +14,7 @@ import { Modifiers } from "../../services/Modifiers.sol";
 
 /**
  * @title Controller
+ * @author Asset Tokenization Studio Team
  * @notice Implementation of the Controller domain. Delegates into the existing storage wrappers so
  *         semantics match `ERC1644` / `ERC3643Management` exactly.
  */

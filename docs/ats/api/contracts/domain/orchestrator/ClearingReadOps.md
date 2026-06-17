@@ -1,5 +1,7 @@
 # ClearingReadOps
 
+_Asset Tokenization Studio Team_
+
 > ClearingReadOps
 
 Clearing read operations library - deployed once and called via DELEGATECALL
@@ -28,14 +30,14 @@ function checkClearingExpirationTimestamp(IClearingTypes.ClearingOperationIdenti
 function checkClearingValidExpirationTimestamp(uint256 _expirationTimestamp, uint256 _blockTimestamp) external pure
 ```
 
-Validate that a clearing expiration timestamp is in the future
+Reverts when `_expirationTimestamp` is not strictly in the future relative to `_blockTimestamp`.
 
 #### Parameters
 
-| Name                  | Type    | Description |
-| --------------------- | ------- | ----------- |
-| \_expirationTimestamp | uint256 | undefined   |
-| \_blockTimestamp      | uint256 | undefined   |
+| Name                  | Type    | Description                                          |
+| --------------------- | ------- | ---------------------------------------------------- |
+| \_expirationTimestamp | uint256 | Expiration timestamp supplied by the caller.         |
+| \_blockTimestamp      | uint256 | Current block timestamp used as the reference point. |
 
 ### getClearedAmountForAdjustedAt
 
@@ -43,22 +45,22 @@ Validate that a clearing expiration timestamp is in the future
 function getClearedAmountForAdjustedAt(address _tokenHolder, uint256 _timestamp) external view returns (uint256)
 ```
 
-Get cleared amount for token holder adjusted at timestamp
+Returns the cleared amount for a token holder, scaled by the ABAF factor at the given timestamp.
 
-_Uses ABAF factor to adjust the cleared amount for balance adjustments_
+_Uses ABAF factor to adjust the cleared amount for balance adjustments._
 
 #### Parameters
 
-| Name          | Type    | Description |
-| ------------- | ------- | ----------- |
-| \_tokenHolder | address | undefined   |
-| \_timestamp   | uint256 | undefined   |
+| Name          | Type    | Description                                                |
+| ------------- | ------- | ---------------------------------------------------------- |
+| \_tokenHolder | address | Holder whose cleared amount is being queried.              |
+| \_timestamp   | uint256 | Reference timestamp for the adjustment-factor calculation. |
 
 #### Returns
 
-| Name | Type    | Description |
-| ---- | ------- | ----------- |
-| \_0  | uint256 | undefined   |
+| Name | Type    | Description                              |
+| ---- | ------- | ---------------------------------------- |
+| \_0  | uint256 | Adjusted cleared amount at `_timestamp`. |
 
 ### getClearedAmountForByPartitionAdjustedAt
 
@@ -66,23 +68,23 @@ _Uses ABAF factor to adjust the cleared amount for balance adjustments_
 function getClearedAmountForByPartitionAdjustedAt(bytes32 _partition, address _tokenHolder, uint256 _timestamp) external view returns (uint256)
 ```
 
-Get cleared amount by partition adjusted at timestamp
+Returns the cleared amount for a token holder on a specific partition, scaled by the ABAF factor at the given timestamp.
 
-_Uses ABAF factor to adjust the cleared amount for balance adjustments_
+_Uses ABAF factor to adjust the cleared amount for balance adjustments._
 
 #### Parameters
 
-| Name          | Type    | Description |
-| ------------- | ------- | ----------- |
-| \_partition   | bytes32 | undefined   |
-| \_tokenHolder | address | undefined   |
-| \_timestamp   | uint256 | undefined   |
+| Name          | Type    | Description                                                |
+| ------------- | ------- | ---------------------------------------------------------- |
+| \_partition   | bytes32 | Partition being queried.                                   |
+| \_tokenHolder | address | Holder whose partition cleared amount is being queried.    |
+| \_timestamp   | uint256 | Reference timestamp for the adjustment-factor calculation. |
 
 #### Returns
 
-| Name | Type    | Description |
-| ---- | ------- | ----------- |
-| \_0  | uint256 | undefined   |
+| Name | Type    | Description                                        |
+| ---- | ------- | -------------------------------------------------- |
+| \_0  | uint256 | Adjusted partition cleared amount at `_timestamp`. |
 
 ### getClearingHoldCreationForByPartitionAdjustedAt
 
@@ -90,24 +92,24 @@ _Uses ABAF factor to adjust the cleared amount for balance adjustments_
 function getClearingHoldCreationForByPartitionAdjustedAt(bytes32 _partition, address _tokenHolder, uint256 _clearingId, uint256 _timestamp) external view returns (struct IClearingTypes.ClearingHoldCreationData clearingHoldCreationData_)
 ```
 
-Get clearing hold creation data by partition adjusted at timestamp
+Returns clearing hold-creation data for a specific operation, with the stored amount scaled by the ABAF factor at the given timestamp.
 
-_Returns hold creation data with ABAF-adjusted amount_
+_Returns hold creation data with ABAF-adjusted amount._
 
 #### Parameters
 
-| Name          | Type    | Description |
-| ------------- | ------- | ----------- |
-| \_partition   | bytes32 | undefined   |
-| \_tokenHolder | address | undefined   |
-| \_clearingId  | uint256 | undefined   |
-| \_timestamp   | uint256 | undefined   |
+| Name          | Type    | Description                                                |
+| ------------- | ------- | ---------------------------------------------------------- |
+| \_partition   | bytes32 | Partition of the clearing operation.                       |
+| \_tokenHolder | address | Holder who initiated the clearing hold creation.           |
+| \_clearingId  | uint256 | Identifier of the clearing operation.                      |
+| \_timestamp   | uint256 | Reference timestamp for the adjustment-factor calculation. |
 
 #### Returns
 
-| Name                       | Type                                    | Description |
-| -------------------------- | --------------------------------------- | ----------- |
-| clearingHoldCreationData\_ | IClearingTypes.ClearingHoldCreationData | undefined   |
+| Name                       | Type                                    | Description                                                    |
+| -------------------------- | --------------------------------------- | -------------------------------------------------------------- |
+| clearingHoldCreationData\_ | IClearingTypes.ClearingHoldCreationData | Hold-creation record with the amount adjusted to `_timestamp`. |
 
 ### getClearingRedeemForByPartitionAdjustedAt
 
@@ -115,24 +117,24 @@ _Returns hold creation data with ABAF-adjusted amount_
 function getClearingRedeemForByPartitionAdjustedAt(bytes32 _partition, address _tokenHolder, uint256 _clearingId, uint256 _timestamp) external view returns (struct IClearingTypes.ClearingRedeemData clearingRedeemData_)
 ```
 
-Get clearing redeem data by partition adjusted at timestamp
+Returns clearing redeem data for a specific operation, with the stored amount scaled by the ABAF factor at the given timestamp.
 
-_Returns redeem data with ABAF-adjusted amount_
+_Returns redeem data with ABAF-adjusted amount._
 
 #### Parameters
 
-| Name          | Type    | Description |
-| ------------- | ------- | ----------- |
-| \_partition   | bytes32 | undefined   |
-| \_tokenHolder | address | undefined   |
-| \_clearingId  | uint256 | undefined   |
-| \_timestamp   | uint256 | undefined   |
+| Name          | Type    | Description                                                |
+| ------------- | ------- | ---------------------------------------------------------- |
+| \_partition   | bytes32 | Partition of the clearing operation.                       |
+| \_tokenHolder | address | Holder who initiated the clearing redeem.                  |
+| \_clearingId  | uint256 | Identifier of the clearing operation.                      |
+| \_timestamp   | uint256 | Reference timestamp for the adjustment-factor calculation. |
 
 #### Returns
 
-| Name                 | Type                              | Description |
-| -------------------- | --------------------------------- | ----------- |
-| clearingRedeemData\_ | IClearingTypes.ClearingRedeemData | undefined   |
+| Name                 | Type                              | Description                                             |
+| -------------------- | --------------------------------- | ------------------------------------------------------- |
+| clearingRedeemData\_ | IClearingTypes.ClearingRedeemData | Redeem record with the amount adjusted to `_timestamp`. |
 
 ### getClearingTransferForByPartitionAdjustedAt
 
@@ -140,24 +142,24 @@ _Returns redeem data with ABAF-adjusted amount_
 function getClearingTransferForByPartitionAdjustedAt(bytes32 _partition, address _tokenHolder, uint256 _clearingId, uint256 _timestamp) external view returns (struct IClearingTypes.ClearingTransferData clearingTransferData_)
 ```
 
-Get clearing transfer data by partition adjusted at timestamp
+Returns clearing transfer data for a specific operation, with the stored amount scaled by the ABAF factor at the given timestamp.
 
-_Returns transfer data with ABAF-adjusted amount_
+_Returns transfer data with ABAF-adjusted amount._
 
 #### Parameters
 
-| Name          | Type    | Description |
-| ------------- | ------- | ----------- |
-| \_partition   | bytes32 | undefined   |
-| \_tokenHolder | address | undefined   |
-| \_clearingId  | uint256 | undefined   |
-| \_timestamp   | uint256 | undefined   |
+| Name          | Type    | Description                                                |
+| ------------- | ------- | ---------------------------------------------------------- |
+| \_partition   | bytes32 | Partition of the clearing operation.                       |
+| \_tokenHolder | address | Holder who initiated the clearing transfer.                |
+| \_clearingId  | uint256 | Identifier of the clearing operation.                      |
+| \_timestamp   | uint256 | Reference timestamp for the adjustment-factor calculation. |
 
 #### Returns
 
-| Name                   | Type                                | Description |
-| ---------------------- | ----------------------------------- | ----------- |
-| clearingTransferData\_ | IClearingTypes.ClearingTransferData | undefined   |
+| Name                   | Type                                | Description                                               |
+| ---------------------- | ----------------------------------- | --------------------------------------------------------- |
+| clearingTransferData\_ | IClearingTypes.ClearingTransferData | Transfer record with the amount adjusted to `_timestamp`. |
 
 ## Errors
 

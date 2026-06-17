@@ -1,5 +1,7 @@
 # BalanceTrackerAdjusted
 
+_Asset Tokenization Studio Team_
+
 > BalanceTrackerAdjusted
 
 Abstract implementation of `IBalanceTrackerAdjusted` providing historical, timestamp-parameterised balance queries with non-triggered adjustment simulation.

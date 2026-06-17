@@ -16,10 +16,10 @@ _Initialises resolver-proxy storage at deployment and dispatches unknown selecto
 error FunctionNotFound(bytes4 _functionSelector)
 ```
 
-Thrown when no function exists for function called
+Thrown when no function exists for function called.
 
 #### Parameters
 
-| Name               | Type   | Description |
-| ------------------ | ------ | ----------- |
-| \_functionSelector | bytes4 | undefined   |
+| Name               | Type   | Description                                                   |
+| ------------------ | ------ | ------------------------------------------------------------- |
+| \_functionSelector | bytes4 | The four-byte selector that could not be resolved to a facet. |

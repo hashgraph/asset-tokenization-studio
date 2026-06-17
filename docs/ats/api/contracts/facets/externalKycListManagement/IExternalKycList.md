@@ -1,5 +1,7 @@
 # IExternalKycList
 
+_Asset Tokenization Studio Team_
+
 > IExternalKycList
 
 Minimal interface for querying an external KYC-list contract.

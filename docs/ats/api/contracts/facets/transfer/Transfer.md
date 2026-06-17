@@ -1,5 +1,7 @@
 # Transfer
 
+_Asset Tokenization Studio Team_
+
 > Transfer
 
 Implementation of the Transfer domain. Delegates into the existing storage wrappers so semantics match `ERC20` / `ERC1594` exactly.

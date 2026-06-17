@@ -1,5 +1,7 @@
 # HoldFacet
 
+_Asset Tokenization Studio Team_
+
 > HoldFacet
 
 Diamond facet exposing high-level hold read accessors.

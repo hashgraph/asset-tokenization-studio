@@ -74,15 +74,15 @@ _Called once during token deployment; reverts if the facet has already been regi
 function protectPartitions() external nonpayable returns (bool success_)
 ```
 
-Activates the protected partitions mode
+Activates the protected partitions mode.
 
-_Disables the ability to freely transfer tokens unless the sender has the requited role for the partition_
+_Disables free token transfers; callers must hold the required role for the partition._
 
 #### Returns
 
-| Name      | Type | Description |
-| --------- | ---- | ----------- |
-| success\_ | bool | undefined   |
+| Name      | Type | Description                                      |
+| --------- | ---- | ------------------------------------------------ |
+| success\_ | bool | True when activation succeeds without reverting. |
 
 ### unprotectPartitions
 
@@ -90,15 +90,15 @@ _Disables the ability to freely transfer tokens unless the sender has the requit
 function unprotectPartitions() external nonpayable returns (bool success_)
 ```
 
-Deactivates the protected partitions mode
+Deactivates the protected partitions mode.
 
-_Enables the ability to freely transfer tokens_
+_Re-enables free token transfers regardless of partition role._
 
 #### Returns
 
-| Name      | Type | Description |
-| --------- | ---- | ----------- |
-| success\_ | bool | undefined   |
+| Name      | Type | Description                                        |
+| --------- | ---- | -------------------------------------------------- |
+| success\_ | bool | True when deactivation succeeds without reverting. |
 
 ## Events
 

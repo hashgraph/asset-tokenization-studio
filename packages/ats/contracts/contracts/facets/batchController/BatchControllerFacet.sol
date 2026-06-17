@@ -7,6 +7,7 @@ import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunc
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 /**
  * @title BatchControllerFacet
+ * @author Asset Tokenization Studio Team
  * @notice Diamond facet exposing controller-only batch transfer operations.
  * @dev Registers the `batchForcedTransfer` selector. Inherits business logic from the
  *      `BatchController` abstract contract.

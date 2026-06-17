@@ -1,5 +1,7 @@
 # BalanceTrackerAdjustedFacet
 
+_Asset Tokenization Studio Team_
+
 > BalanceTrackerAdjustedFacet
 
 Diamond facet that exposes historical, timestamp-parameterised balance queries through the `IBalanceTrackerAdjusted` interface, registered under `RESOLVER_KEY_BALANCE_TRACKER_ADJUSTED`.

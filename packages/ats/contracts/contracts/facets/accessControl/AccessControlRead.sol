@@ -7,6 +7,7 @@ import { Modifiers } from "../../services/Modifiers.sol";
 
 /**
  * @title AccessControlRead
+ * @author Asset Tokenization Studio Team
  * @notice Read-only base for AccessControl and AccessControlOperational.
  *         Implements all view functions of IAccessControl. Write functions are
  *         implemented by subclasses with or without onlyOperational depending on

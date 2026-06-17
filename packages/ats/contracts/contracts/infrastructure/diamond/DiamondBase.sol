@@ -11,6 +11,7 @@ import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 
 /**
  * @title DiamondBase
+ * @author Asset Tokenization Studio Team
  * @notice Abstract base for the Diamond facet that combines DiamondCut + DiamondLoupe
  *         with initialisation support via `initializeDiamondCut`.
  * @dev Inherits from existing DiamondCut and DiamondLoupe abstracts and adds the

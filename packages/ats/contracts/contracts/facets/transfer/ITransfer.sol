@@ -6,6 +6,7 @@ bytes32 constant RESOLVER_KEY_TRANSFER = 0xdb0637d5ac2d3a8a460b63275e82a566d4b5a
 
 /**
  * @title ITransferFacet
+ * @author Asset Tokenization Studio Team
  * @notice Interface grouping all standard token transfer operations: ERC-20 style and
  *         ERC-1594 data-bearing style. Also owns the `Transfer` event and the
  *         `InsufficientBalance` error that were previously declared in `IERC20`.

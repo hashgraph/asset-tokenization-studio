@@ -3,6 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IStaticFunctionSelectors } from "./IStaticFunctionSelectors.sol";
 
+/// @title IDiamondLoupe
+/// @author Asset Tokenization Studio Team
+/// @notice Interface for inspecting the selectors, interface identifiers, and facet addresses
+///         registered in the Diamond proxy, with optional pagination for large registries.
 interface IDiamondLoupe is IStaticFunctionSelectors {
     struct Facet {
         bytes32 id;

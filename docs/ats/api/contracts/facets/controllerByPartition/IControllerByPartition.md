@@ -1,5 +1,7 @@
 # IControllerByPartition
 
+_Asset Tokenization Studio Team_
+
 > IControllerByPartition
 
 Interface for controller-initiated forced transfers and redemptions on a specific partition.

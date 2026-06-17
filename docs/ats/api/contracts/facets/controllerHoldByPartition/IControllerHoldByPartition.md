@@ -1,5 +1,7 @@
 # IControllerHoldByPartition
 
+_Asset Tokenization Studio Team_
+
 > IControllerHoldByPartition
 
 Interface for the controller-initiated hold creation operation on a specific partition.

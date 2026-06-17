@@ -1,24 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-/**
- * @title CoreModifiers
- * @notice Aggregator contract that re-exports all core domain modifiers
- * @dev This file provides a single import point for all core modifier contracts.
- *      Facets can inherit from this to gain access to all core modifiers, or
- *      import specific modifiers individually from their source files.
- *
- * Core Modifiers:
- * - AccessControlModifiers: Role-based access control validation
- * - CapModifiers: Cap initialization validation
- * - ControlListModifiers: Control list validation (onlyListedAllowed)
- * - DateValidationModifiers: Date validation
- * - PartitionModifiers: Partition protection validation
- * - PauseModifiers: Pause state validation (onlyUnpaused, onlyPaused)
- *
- * @author Asset Tokenization Studio Team
- */
-
 import { AccessControlModifiers } from "./AccessControlModifiers.sol";
 import { DefaultValuesModifiers } from "./DefaultValuesModifiers.sol";
 import { CapModifiers } from "./CapModifiers.sol";
@@ -32,6 +14,14 @@ import { PauseModifiers } from "./PauseModifiers.sol";
 import { DeactivateModifiers } from "./DeactivateModifiers.sol";
 import { InitializerModifiers } from "./InitializerModifiers.sol";
 
+/**
+ * @title CoreModifiers
+ * @author Asset Tokenization Studio Team
+ * @notice Aggregator that re-exports all core domain modifiers via inheritance.
+ * @dev Provides a single import point for all core modifier contracts. Facets can
+ *      inherit from this to access all core modifiers simultaneously, or import
+ *      individual modifier contracts directly.
+ */
 abstract contract CoreModifiers is
     AccessControlModifiers,
     DefaultValuesModifiers,

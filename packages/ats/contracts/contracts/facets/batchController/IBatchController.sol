@@ -6,6 +6,7 @@ bytes32 constant RESOLVER_KEY_BATCH_CONTROLLER = 0x535258ade68566dbac2304c09e172
 
 /**
  * @title IBatchController
+ * @author Asset Tokenization Studio Team
  * @notice Interface for controller-only batch transfer operations.
  * @dev Defines the write surface of the `BatchControllerFacet` diamond facet. The facet exposes
  *      privileged batch transfers that move tokens between arbitrary addresses and are gated on

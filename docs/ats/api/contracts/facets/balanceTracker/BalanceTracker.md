@@ -1,5 +1,7 @@
 # BalanceTracker
 
+_Asset Tokenization Studio Team_
+
 > BalanceTracker
 
 Abstract implementation of `IBalanceTracker` that consolidates token balance and total supply queries into a single, time-aware read layer.

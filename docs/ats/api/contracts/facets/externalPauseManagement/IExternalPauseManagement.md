@@ -179,9 +179,9 @@ _Fires exclusively from `initializeExternalPauses` after the storage write succe
 
 #### Parameters
 
-| Name   | Type      | Description |
-| ------ | --------- | ----------- |
-| pauses | address[] | undefined   |
+| Name   | Type      | Description                                                                      |
+| ------ | --------- | -------------------------------------------------------------------------------- |
+| pauses | address[] | The initial array of external pause contract addresses registered at deployment. |
 
 ### ExternalPausesUpdated
 

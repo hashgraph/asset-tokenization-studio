@@ -7,6 +7,7 @@ import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunc
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 /**
  * @title ControllerFacet
+ * @author Asset Tokenization Studio Team
  * @notice Diamond facet exposing ERC-1644 forced-transfer operations and ERC-3643 agent management.
  * @dev Registers nine selectors: initializeController, isControllable, controllerTransfer,
  *      controllerRedeem, finalizeControllable, forcedTransfer, addAgent, removeAgent, and isAgent.

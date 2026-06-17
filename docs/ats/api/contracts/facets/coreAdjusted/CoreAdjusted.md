@@ -1,5 +1,7 @@
 # CoreAdjusted
 
+_Asset Tokenization Studio Team_
+
 > CoreAdjusted
 
 Abstract implementation of the CoreAdjusted domain, providing time-adjusted decimal reads that account for pending scheduled balance adjustments (ABAFs).

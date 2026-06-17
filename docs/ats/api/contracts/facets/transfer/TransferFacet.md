@@ -1,5 +1,7 @@
 # TransferFacet
 
+_Asset Tokenization Studio Team_
+
 > TransferFacet
 
 Diamond facet exposing ERC-20 and ERC-1594 token transfer operations.

@@ -6,7 +6,8 @@ bytes32 constant RESOLVER_KEY_OPERATOR = 0x5c2062c6ba02b76ae0c3884d5c0fdd3416b20
 
 /**
  * @title IOperator
- * @notice Interface for operator management: query, authorize and revoke operators for all partitions.
+ * @author Asset Tokenization Studio Team
+ * @notice Interface for operator management: query, authorise and revoke operators for all partitions.
  */
 interface IOperator {
     /**

@@ -1,5 +1,7 @@
 # IBalanceTrackerAtSnapshot
 
+_Asset Tokenization Studio Team_
+
 > IBalanceTrackerAtSnapshot
 
 Interface for querying snapshotted token balances and total supply across all partitions, resolved against a previously taken snapshot identifier.

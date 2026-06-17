@@ -1,5 +1,7 @@
 # ScheduledTasksDispatchOps
 
+_Asset Tokenization Studio Team_
+
 > ScheduledTasksDispatchOps - External library for isolated scheduled task dispatch
 
 Deployed once as a separate contract. Called via DELEGATECALL. Handles only leaf-task business logic (snapshot, coupon, balance). A revert propagates to the caller, blocking the queue until an authorised caller force-cancels the task. Cross-ordered sub-task routing and all queue storage access live in ScheduledTasksStorageWrapper to avoid circular imports.

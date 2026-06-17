@@ -1,6 +1,10 @@
 # NominalValueAtSnapshotFacet
 
+_Asset Tokenization Studio Team_
+
 > NominalValueAtSnapshotFacet
+
+Diamond facet that exposes snapshotted nominal-value queries through the `INominalValueAtSnapshot` interface, registered under `RESOLVER_KEY_NOMINAL_VALUE_AT_SNAPSHOT`.
 
 ## Methods
 

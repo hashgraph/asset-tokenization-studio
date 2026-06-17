@@ -6,6 +6,7 @@ bytes32 constant RESOLVER_KEY_SECURITYHOLDERS = 0x744edd4f33c7d5e322286e40155d54
 
 /**
  * @title ISecurityHolders
+ * @author Asset Tokenization Studio Team
  * @notice Interface for security holder operations in the ERC1410 standard
  */
 interface ISecurityHolders {

@@ -1,5 +1,7 @@
 # TokenCoreOps
 
+_Asset Tokenization Studio Team_
+
 > TokenCoreOps - Orchestrator for core token operations
 
 Deployed once as a separate contract. Facets call via DELEGATECALL.
@@ -14,13 +16,15 @@ _Contains balance operations for ClearingOps to avoid inlining._
 function checkCompliance(address _from, address _to, bool _checkSender) external view
 ```
 
+Validates that a transfer between two parties satisfies compliance rules.
+
 #### Parameters
 
-| Name          | Type    | Description |
-| ------------- | ------- | ----------- |
-| \_from        | address | undefined   |
-| \_to          | address | undefined   |
-| \_checkSender | bool    | undefined   |
+| Name          | Type    | Description                                                             |
+| ------------- | ------- | ----------------------------------------------------------------------- |
+| \_from        | address | Address of the sender being checked.                                    |
+| \_to          | address | Address of the recipient being checked.                                 |
+| \_checkSender | bool    | When true, the compliance check also validates the sender&#39;s status. |
 
 ### checkIdentity
 
@@ -28,12 +32,14 @@ function checkCompliance(address _from, address _to, bool _checkSender) external
 function checkIdentity(address _from, address _to) external view
 ```
 
+Validates that both transfer parties hold a verified on-chain identity.
+
 #### Parameters
 
-| Name   | Type    | Description |
-| ------ | ------- | ----------- |
-| \_from | address | undefined   |
-| \_to   | address | undefined   |
+| Name   | Type    | Description                              |
+| ------ | ------- | ---------------------------------------- |
+| \_from | address | Address of the sender being verified.    |
+| \_to   | address | Address of the recipient being verified. |
 
 ## Events
 
