@@ -49,11 +49,6 @@ jobs:
       - name: Fetch changeset base branch (main)
         if: ${{ github.base_ref != 'main' }}
         run: |
-          # `npx changeset status` reads `baseBranch` from .changeset/config.json
-          # (currently "main") and resolves it locally via `getDivergedCommit`. The
-          # previous "Fetch base branch" step only fetches the PR base, so `main`
-          # is absent for PRs targeting `development` and the status command
-          # fails with "Failed to find where HEAD diverged from 'main'".
           git fetch origin main:main
 
       - name: Setup NodeJS Environment
