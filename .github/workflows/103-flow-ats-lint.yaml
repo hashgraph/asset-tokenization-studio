@@ -1,4 +1,4 @@
-name: "103: [FLOW] ATS Lint and Format"
+name: "103: [FLOW] ATS Format and Lint"
 
 on:
   pull_request:
@@ -11,6 +11,10 @@ on:
       - ".github/workflows/800-call-lint-format.yaml"
   workflow_dispatch:
 
+defaults:
+  run:
+    shell: bash
+
 permissions:
   contents: read
 
@@ -19,8 +23,54 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint-and-format:
-    name: lint-and-format
+  format-and-lint:
+    name: format-and-lint
     uses: ./.github/workflows/800-call-lint-format.yaml
     with:
       module: ats
+
+  # Solhint warning ratchet for packages/ats/contracts: the warning count may only
+  # stay equal or decrease, never increase. Two read-only checks (no push-back):
+  #   1. `betterer ci` — the committed .betterer.results matches the actual code.
+  #   2. check-ratchet-vs-base.ts — per-rule counts are not worse than the base
+  #      branch's (blocks an upward re-baseline that check 1 alone would accept).
+  # The baseline is maintained locally by the contracts `lint`/`lint:fix` scripts.
+  lint-ratchet:
+    name: lint-ratchet
+    runs-on: token-studio-linux-medium
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          # Need the base branch ref reachable so the base comparison can read
+          # its committed .betterer.results via `git show`.
+          fetch-depth: 0
+
+      - name: Setup NodeJS Environment
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      # betterer runs solhint, whose accessor generator imports @contract-types
+      # (TypeChain). npm ci does not build it (ignore-scripts skips prepare), so
+      # compile first to emit typechain-types/ before the ratchet check.
+      - name: Build TypeChain types
+        run: npm run compile --workspace=packages/ats/contracts
+
+      - name: Check baseline is honest (betterer ci)
+        run: npm run lint:ratchet --workspace=packages/ats/contracts
+
+      - name: Check baseline is not worse than base branch
+        run: npx tsx packages/ats/contracts/scripts/ci/check-ratchet-vs-base.ts "${{ github.base_ref }}"
