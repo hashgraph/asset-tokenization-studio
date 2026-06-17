@@ -1,5 +1,11 @@
 # IERC20Votes
 
+_Asset Tokenization Studio Team_
+
+> IERC20Votes
+
+Interface for the ERC-20 Votes extension that enables on-chain governance delegation and checkpoint-based vote tracking.
+
 ## Methods
 
 ### CLOCK_MODE
@@ -22,12 +28,14 @@ _Description of the clock_
 function checkpoints(address _account, uint256 _pos) external view returns (struct Checkpoints.Checkpoint)
 ```
 
+Returns the checkpoint at a given position for an account&#39;s vote history.
+
 #### Parameters
 
-| Name      | Type    | Description |
-| --------- | ------- | ----------- |
-| \_account | address | undefined   |
-| \_pos     | uint256 | undefined   |
+| Name      | Type    | Description                                               |
+| --------- | ------- | --------------------------------------------------------- |
+| \_account | address | Address whose checkpoint history is queried.              |
+| \_pos     | uint256 | Zero-based index into the account&#39;s checkpoint array. |
 
 #### Returns
 
@@ -55,13 +63,15 @@ _Clock used for flagging checkpoints. Can be overridden to implement timestamp b
 function delegate(address delegatee) external nonpayable
 ```
 
+Delegates the caller&#39;s voting power to `delegatee`.
+
 _Delegates votes from the sender to `delegatee`._
 
 #### Parameters
 
-| Name      | Type    | Description |
-| --------- | ------- | ----------- |
-| delegatee | address | undefined   |
+| Name      | Type    | Description                                              |
+| --------- | ------- | -------------------------------------------------------- |
+| delegatee | address | Address that will receive the caller&#39;s voting power. |
 
 ### delegates
 
@@ -69,19 +79,21 @@ _Delegates votes from the sender to `delegatee`._
 function delegates(address account) external view returns (address)
 ```
 
+Returns the delegate address that `account` has chosen.
+
 _Returns the delegate that `account` has chosen._
 
 #### Parameters
 
-| Name    | Type    | Description |
-| ------- | ------- | ----------- |
-| account | address | undefined   |
+| Name    | Type    | Description                               |
+| ------- | ------- | ----------------------------------------- |
+| account | address | Address whose chosen delegate is queried. |
 
 #### Returns
 
-| Name | Type    | Description |
-| ---- | ------- | ----------- |
-| \_0  | address | undefined   |
+| Name | Type    | Description                                  |
+| ---- | ------- | -------------------------------------------- |
+| \_0  | address | Address of the delegate chosen by `account`. |
 
 ### getPastTotalSupply
 
@@ -89,19 +101,21 @@ _Returns the delegate that `account` has chosen._
 function getPastTotalSupply(uint256 timepoint) external view returns (uint256)
 ```
 
+Returns the total vote supply available at a past `timepoint`.
+
 _Returns the total supply of votes available at a specific moment in the past. If the `clock()` is configured to use block numbers, this will return the value at the end of the corresponding block. NOTE: This value is the sum of all available votes, which is not necessarily the sum of all delegated votes. Votes that have not been delegated are still part of total supply, even though they would not participate in a vote._
 
 #### Parameters
 
-| Name      | Type    | Description |
-| --------- | ------- | ----------- |
-| timepoint | uint256 | undefined   |
+| Name      | Type    | Description                                                      |
+| --------- | ------- | ---------------------------------------------------------------- |
+| timepoint | uint256 | Block number or timestamp at which the total supply is resolved. |
 
 #### Returns
 
-| Name | Type    | Description |
-| ---- | ------- | ----------- |
-| \_0  | uint256 | undefined   |
+| Name | Type    | Description                       |
+| ---- | ------- | --------------------------------- |
+| \_0  | uint256 | Total vote supply at `timepoint`. |
 
 ### getPastVotes
 
@@ -109,20 +123,22 @@ _Returns the total supply of votes available at a specific moment in the past. I
 function getPastVotes(address account, uint256 timepoint) external view returns (uint256)
 ```
 
+Returns the vote weight of `account` at a past `timepoint`.
+
 _Returns the amount of votes that `account` had at a specific moment in the past. If the `clock()` is configured to use block numbers, this will return the value at the end of the corresponding block._
 
 #### Parameters
 
-| Name      | Type    | Description |
-| --------- | ------- | ----------- |
-| account   | address | undefined   |
-| timepoint | uint256 | undefined   |
+| Name      | Type    | Description                                                |
+| --------- | ------- | ---------------------------------------------------------- |
+| account   | address | Address whose historical vote weight is queried.           |
+| timepoint | uint256 | Block number or timestamp at which the weight is resolved. |
 
 #### Returns
 
-| Name | Type    | Description |
-| ---- | ------- | ----------- |
-| \_0  | uint256 | undefined   |
+| Name | Type    | Description                              |
+| ---- | ------- | ---------------------------------------- |
+| \_0  | uint256 | Vote weight of `account` at `timepoint`. |
 
 ### getVotes
 
@@ -130,19 +146,21 @@ _Returns the amount of votes that `account` had at a specific moment in the past
 function getVotes(address account) external view returns (uint256)
 ```
 
+Returns the current vote weight of `account`.
+
 _Returns the current amount of votes that `account` has._
 
 #### Parameters
 
-| Name    | Type    | Description |
-| ------- | ------- | ----------- |
-| account | address | undefined   |
+| Name    | Type    | Description                                   |
+| ------- | ------- | --------------------------------------------- |
+| account | address | Address whose current vote weight is queried. |
 
 #### Returns
 
-| Name | Type    | Description |
-| ---- | ------- | ----------- |
-| \_0  | uint256 | undefined   |
+| Name | Type    | Description                       |
+| ---- | ------- | --------------------------------- |
+| \_0  | uint256 | Current vote weight of `account`. |
 
 ### initializeERC20Votes
 
@@ -150,17 +168,21 @@ _Returns the current amount of votes that `account` has._
 function initializeERC20Votes(bool _activated) external nonpayable
 ```
 
+Initialises the ERC-20Votes capability on the token.
+
 #### Parameters
 
-| Name        | Type | Description |
-| ----------- | ---- | ----------- |
-| \_activated | bool | undefined   |
+| Name        | Type | Description                                                       |
+| ----------- | ---- | ----------------------------------------------------------------- |
+| \_activated | bool | Whether the voting feature should be active after initialisation. |
 
 ### isActivated
 
 ```solidity
 function isActivated() external view returns (bool)
 ```
+
+Returns whether the ERC-20Votes voting feature is currently active.
 
 #### Returns
 
@@ -174,11 +196,13 @@ function isActivated() external view returns (bool)
 function numCheckpoints(address _account) external view returns (uint256)
 ```
 
+Returns the total number of vote checkpoints recorded for an account.
+
 #### Parameters
 
-| Name      | Type    | Description |
-| --------- | ------- | ----------- |
-| \_account | address | undefined   |
+| Name      | Type    | Description                                |
+| --------- | ------- | ------------------------------------------ |
+| \_account | address | Address whose checkpoint count is queried. |
 
 #### Returns
 
@@ -232,9 +256,9 @@ _Fires exclusively from `initializeERC20Votes` after the storage write succeeds.
 
 #### Parameters
 
-| Name      | Type | Description |
-| --------- | ---- | ----------- |
-| activated | bool | undefined   |
+| Name      | Type | Description                                                     |
+| --------- | ---- | --------------------------------------------------------------- |
+| activated | bool | Whether the ERC-20Votes feature is active after initialisation. |
 
 ## Errors
 

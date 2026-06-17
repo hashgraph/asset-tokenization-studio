@@ -1,5 +1,7 @@
 # DiamondBase
 
+_Asset Tokenization Studio Team_
+
 > DiamondBase
 
 Abstract base for the Diamond facet that combines DiamondCut + DiamondLoupe with initialisation support via `initializeDiamondCut`.
@@ -14,15 +16,15 @@ _Inherits from existing DiamondCut and DiamondLoupe abstracts and adds the initi
 function getConfigInfo() external view returns (address resolver_, bytes32 configurationId_, uint256 version_)
 ```
 
-Returns the configuration used by the secuirity
+Returns the active resolver address, configuration identifier, and version.
 
 #### Returns
 
-| Name              | Type    | Description |
-| ----------------- | ------- | ----------- |
-| resolver\_        | address | undefined   |
-| configurationId\_ | bytes32 | undefined   |
-| version\_         | uint256 | undefined   |
+| Name              | Type    | Description                                     |
+| ----------------- | ------- | ----------------------------------------------- |
+| resolver\_        | address | Address of the current Business Logic Resolver. |
+| configurationId\_ | bytes32 | Identifier of the active configuration.         |
+| version\_         | uint256 | Version number of the active configuration.     |
 
 ### getFacet
 
@@ -349,16 +351,16 @@ _Returns true if this contract implements the interface defined by `interfaceId`
 function updateConfig(bytes32 _newConfigurationId, uint256 _newVersion) external nonpayable
 ```
 
-For the current BLR update its configuration\*
+For the current BLR, update its configuration identifier and version.
 
 _Requires `DEFAULT_ADMIN_ROLE` and validates the configuration before storing the new configuration identifier and pinned version._
 
 #### Parameters
 
-| Name                 | Type    | Description |
-| -------------------- | ------- | ----------- |
-| \_newConfigurationId | bytes32 | undefined   |
-| \_newVersion         | uint256 | undefined   |
+| Name                 | Type    | Description                                               |
+| -------------------- | ------- | --------------------------------------------------------- |
+| \_newConfigurationId | bytes32 | The new configuration identifier to apply.                |
+| \_newVersion         | uint256 | The version number associated with the new configuration. |
 
 ### updateConfigVersion
 
@@ -366,15 +368,15 @@ _Requires `DEFAULT_ADMIN_ROLE` and validates the configuration before storing th
 function updateConfigVersion(uint256 _newVersion) external nonpayable
 ```
 
-For the current BLR and configuration, update the used version
+For the current BLR and configuration, update the used version.
 
 _Requires `DEFAULT_ADMIN_ROLE` and preserves the active configuration identifier and resolver while updating only the pinned configuration version._
 
 #### Parameters
 
-| Name         | Type    | Description |
-| ------------ | ------- | ----------- |
-| \_newVersion | uint256 | undefined   |
+| Name         | Type    | Description                                                  |
+| ------------ | ------- | ------------------------------------------------------------ |
+| \_newVersion | uint256 | The new version number to set for the current configuration. |
 
 ### updateResolver
 
@@ -382,17 +384,17 @@ _Requires `DEFAULT_ADMIN_ROLE` and preserves the active configuration identifier
 function updateResolver(contract IBusinessLogicResolver _newResolver, bytes32 _newConfigurationId, uint256 _newVersion) external nonpayable
 ```
 
-Updates the BLR to a new one
+Replaces the Business Logic Resolver with a new one, setting configuration and version.
 
 _Requires `DEFAULT_ADMIN_ROLE` and validates the target configuration against the new resolver before replacing the resolver pointer, configuration identifier and version._
 
 #### Parameters
 
-| Name                 | Type                            | Description |
-| -------------------- | ------------------------------- | ----------- |
-| \_newResolver        | contract IBusinessLogicResolver | undefined   |
-| \_newConfigurationId | bytes32                         | undefined   |
-| \_newVersion         | uint256                         | undefined   |
+| Name                 | Type                            | Description                                                   |
+| -------------------- | ------------------------------- | ------------------------------------------------------------- |
+| \_newResolver        | contract IBusinessLogicResolver | The new BLR contract address to wire into the proxy.          |
+| \_newConfigurationId | bytes32                         | The configuration identifier to activate on the new resolver. |
+| \_newVersion         | uint256                         | The version number associated with the new configuration.     |
 
 ## Events
 

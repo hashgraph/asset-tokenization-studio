@@ -1,5 +1,11 @@
 # IStaticFunctionSelectors
 
+_Asset Tokenization Studio Team_
+
+> IStaticFunctionSelectors
+
+Interface that every Diamond facet must implement to expose its resolver key, function selectors, and interface identifiers for proxy registration.
+
 ## Methods
 
 ### getStaticFunctionSelectors

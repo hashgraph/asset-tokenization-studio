@@ -6,6 +6,10 @@ import { ICompliance } from "./externalInterfaces/ICompliance.sol";
 /// @custom:hash resolverKey Compliance
 bytes32 constant RESOLVER_KEY_COMPLIANCE = 0x0e30d654f46079d52767224a07d1fe1adc91d7edba6504f2f0adca0fca972180;
 
+/// @title IComplianceFacet
+/// @author Asset Tokenization Studio Team
+/// @notice Interface for the Compliance facet that wires an external compliance contract,
+///         provides transfer eligibility checks, and exposes the compliance contract address.
 interface IComplianceFacet {
     /**
      * @notice Emitted once when the compliance capability is initialised on a token.

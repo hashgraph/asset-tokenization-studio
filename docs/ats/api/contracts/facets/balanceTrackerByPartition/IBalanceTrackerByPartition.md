@@ -1,5 +1,7 @@
 # IBalanceTrackerByPartition
 
+_Asset Tokenization Studio Team_
+
 > IBalanceTrackerByPartition
 
 Interface for querying token balances and total supply scoped to a specific partition, with support for time-adjusted values that simulate pending balance adjustments.

@@ -1,5 +1,11 @@
 # ScheduledCrossOrderedTasksFacet
 
+_Asset Tokenization Studio Team_
+
+> ScheduledCrossOrderedTasksFacet
+
+Diamond facet exposing the scheduled cross-ordered task management interface, registered under `RESOLVER_KEY_SCHEDULED_TASKS`.
+
 ## Methods
 
 ### getScheduledCrossOrderedTasks

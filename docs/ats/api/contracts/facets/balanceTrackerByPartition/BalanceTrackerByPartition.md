@@ -1,5 +1,7 @@
 # BalanceTrackerByPartition
 
+_Asset Tokenization Studio Team_
+
 > BalanceTrackerByPartition
 
 Abstract implementation of `IBalanceTrackerByPartition` that consolidates partition-scoped token balance and total supply queries into a single, time-aware read layer.

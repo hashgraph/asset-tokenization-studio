@@ -1,5 +1,7 @@
 # ITransfer
 
+_Asset Tokenization Studio Team_
+
 > ITransferFacet
 
 Interface grouping all standard token transfer operations: ERC-20 style and ERC-1594 data-bearing style. Also owns the `Transfer` event and the `InsufficientBalance` error that were previously declared in `IERC20`.

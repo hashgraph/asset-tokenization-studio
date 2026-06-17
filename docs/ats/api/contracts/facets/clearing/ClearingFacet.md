@@ -366,9 +366,9 @@ _Fires exclusively from `initializeClearing` after the storage write succeeds._
 
 #### Parameters
 
-| Name           | Type | Description |
-| -------------- | ---- | ----------- |
-| clearingActive | bool | undefined   |
+| Name           | Type | Description                                            |
+| -------------- | ---- | ------------------------------------------------------ |
+| clearingActive | bool | Whether clearing was activated at initialisation time. |
 
 ### ClearingOperationApproved
 

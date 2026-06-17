@@ -5,6 +5,7 @@ import { ICommonErrors } from "../errors/ICommonErrors.sol";
 
 /**
  * @title ArrayValidation
+ * @author Asset Tokenization Studio Team
  * @notice Library for validating array consistency and detecting contradictory values
  * @dev Provides functions to check for duplicate keys with conflicting boolean values
  */

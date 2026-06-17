@@ -25,6 +25,10 @@ import {
     POW10_18
 } from "../../constants/values.sol";
 
+/// @title DecimalsLib
+/// @author Asset Tokenization Studio Team
+/// @notice Library for decimal-aware arithmetic: scaling amounts between precisions and
+///         computing powers of ten efficiently via a Yul switch lookup.
 library DecimalsLib {
     uint8 private constant MAX_DECIMALS = 77;
 

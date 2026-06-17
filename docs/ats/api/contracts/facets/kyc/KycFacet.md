@@ -1,5 +1,11 @@
 # KycFacet
 
+_Asset Tokenization Studio Team_
+
+> KycFacet
+
+Diamond facet that exposes KYC management operations through the `IKyc` interface, registered under `RESOLVER_KEY_KYC`.
+
 ## Methods
 
 ### activateInternalKyc
@@ -8,13 +14,13 @@
 function activateInternalKyc() external nonpayable returns (bool success_)
 ```
 
-_Activate Internal Kyc_
+Activates internal KYC enforcement for the token.
 
 #### Returns
 
-| Name      | Type | Description   |
-| --------- | ---- | ------------- |
-| success\_ | bool | true or false |
+| Name      | Type | Description                                    |
+| --------- | ---- | ---------------------------------------------- |
+| success\_ | bool | True when the call succeeds without reverting. |
 
 ### deactivateInternalKyc
 
@@ -22,13 +28,13 @@ _Activate Internal Kyc_
 function deactivateInternalKyc() external nonpayable returns (bool success_)
 ```
 
-_Deactivate Internal Kyc_
+Deactivates internal KYC enforcement for the token.
 
 #### Returns
 
-| Name      | Type | Description   |
-| --------- | ---- | ------------- |
-| success\_ | bool | true or false |
+| Name      | Type | Description                                    |
+| --------- | ---- | ---------------------------------------------- |
+| success\_ | bool | True when the call succeeds without reverting. |
 
 ### getKycAccountsCount
 
@@ -36,19 +42,19 @@ _Deactivate Internal Kyc_
 function getKycAccountsCount(enum IKyc.KycStatus _kycStatus) external view returns (uint256 kycAccountsCount_)
 ```
 
-_Get the count of accounts with a given Kyc status_
+Returns the number of accounts with a given KYC status.
 
 #### Parameters
 
-| Name        | Type                | Description            |
-| ----------- | ------------------- | ---------------------- |
-| \_kycStatus | enum IKyc.KycStatus | GRANTED or NOT_GRANTED |
+| Name        | Type                | Description                                      |
+| ----------- | ------------------- | ------------------------------------------------ |
+| \_kycStatus | enum IKyc.KycStatus | The status to filter by: GRANTED or NOT_GRANTED. |
 
 #### Returns
 
-| Name               | Type    | Description                                 |
-| ------------------ | ------- | ------------------------------------------- |
-| kycAccountsCount\_ | uint256 | count of accounts with the given Kyc status |
+| Name               | Type    | Description                                      |
+| ------------------ | ------- | ------------------------------------------------ |
+| kycAccountsCount\_ | uint256 | The count of accounts matching the given status. |
 
 ### getKycAccountsData
 
@@ -56,22 +62,22 @@ _Get the count of accounts with a given Kyc status_
 function getKycAccountsData(enum IKyc.KycStatus _kycStatus, uint256 _pageIndex, uint256 _pageLength) external view returns (address[] accounts_, struct IKyc.KycData[] kycData_)
 ```
 
-_Returns an array with the KYC data from accounts with a given KYC status_
+Returns a paginated list of accounts and their KYC data for a given KYC status.
 
 #### Parameters
 
-| Name         | Type                | Description                                   |
-| ------------ | ------------------- | --------------------------------------------- |
-| \_kycStatus  | enum IKyc.KycStatus | GRANTED or NOT_GRANTED                        |
-| \_pageIndex  | uint256             | members to skip : \_pageIndex \* \_pageLength |
-| \_pageLength | uint256             | number of members to return                   |
+| Name         | Type                | Description                                                      |
+| ------------ | ------------------- | ---------------------------------------------------------------- |
+| \_kycStatus  | enum IKyc.KycStatus | The status to filter by: GRANTED or NOT_GRANTED.                 |
+| \_pageIndex  | uint256             | Zero-based page index; skips `_pageIndex * _pageLength` entries. |
+| \_pageLength | uint256             | Maximum number of entries to return per page.                    |
 
 #### Returns
 
-| Name       | Type           | Description                                     |
-| ---------- | -------------- | ----------------------------------------------- |
-| accounts\_ | address[]      | The array containing the accounts               |
-| kycData\_  | IKyc.KycData[] | The array containing the data from the accounts |
+| Name       | Type           | Description                                                        |
+| ---------- | -------------- | ------------------------------------------------------------------ |
+| accounts\_ | address[]      | The accounts matching the given KYC status in the requested page.  |
+| kycData\_  | IKyc.KycData[] | The KYC data records corresponding to each account in `accounts_`. |
 
 ### getKycFor
 
@@ -79,19 +85,19 @@ _Returns an array with the KYC data from accounts with a given KYC status_
 function getKycFor(address _account) external view returns (struct IKyc.KycData kyc_)
 ```
 
-_Get all the info of the Kyc for an account_
+Returns all KYC metadata recorded for an account.
 
 #### Parameters
 
-| Name      | Type    | Description          |
-| --------- | ------- | -------------------- |
-| \_account | address | the account to check |
+| Name      | Type    | Description           |
+| --------- | ------- | --------------------- |
+| \_account | address | The account to query. |
 
 #### Returns
 
-| Name  | Type         | Description |
-| ----- | ------------ | ----------- |
-| kyc\_ | IKyc.KycData | kyc\_       |
+| Name  | Type         | Description                                 |
+| ----- | ------------ | ------------------------------------------- |
+| kyc\_ | IKyc.KycData | The full `KycData` struct for that account. |
 
 ### getKycStatusFor
 
@@ -99,19 +105,19 @@ _Get all the info of the Kyc for an account_
 function getKycStatusFor(address _account) external view returns (enum IKyc.KycStatus kycStatus_)
 ```
 
-_Get the status of the Kyc for an account_
+Returns the current KYC status for an account.
 
 #### Parameters
 
-| Name      | Type    | Description          |
-| --------- | ------- | -------------------- |
-| \_account | address | the account to check |
+| Name      | Type    | Description           |
+| --------- | ------- | --------------------- |
+| \_account | address | The account to check. |
 
 #### Returns
 
-| Name        | Type                | Description            |
-| ----------- | ------------------- | ---------------------- |
-| kycStatus\_ | enum IKyc.KycStatus | GRANTED or NOT_GRANTED |
+| Name        | Type                | Description             |
+| ----------- | ------------------- | ----------------------- |
+| kycStatus\_ | enum IKyc.KycStatus | GRANTED or NOT_GRANTED. |
 
 ### getStaticFunctionSelectors
 
@@ -161,23 +167,23 @@ Gets the static resolver key
 function grantKyc(address _account, string _vcId, uint256 _validFrom, uint256 _validTo, address _issuer) external nonpayable returns (bool success_)
 ```
 
-_Grant kyc to an address_
+Grants KYC to an account with the supplied verifiable-credential metadata.
 
 #### Parameters
 
-| Name        | Type    | Description                     |
-| ----------- | ------- | ------------------------------- |
-| \_account   | address | user whose Kyc is being granted |
-| \_vcId      | string  | credential Id                   |
-| \_validFrom | uint256 | start date of the Kyc           |
-| \_validTo   | uint256 | end date of the Kyc             |
-| \_issuer    | address | issurer of the Kyc              |
+| Name        | Type    | Description                                            |
+| ----------- | ------- | ------------------------------------------------------ |
+| \_account   | address | User whose KYC is being granted.                       |
+| \_vcId      | string  | Verifiable-credential identifier issued by the issuer. |
+| \_validFrom | uint256 | Start timestamp of the KYC validity period.            |
+| \_validTo   | uint256 | End timestamp of the KYC validity period.              |
+| \_issuer    | address | Address of the entity issuing the KYC.                 |
 
 #### Returns
 
-| Name      | Type | Description   |
-| --------- | ---- | ------------- |
-| success\_ | bool | true or false |
+| Name      | Type | Description                                     |
+| --------- | ---- | ----------------------------------------------- |
+| success\_ | bool | True when the grant succeeds without reverting. |
 
 ### initializeInternalKyc
 
@@ -185,7 +191,7 @@ _Grant kyc to an address_
 function initializeInternalKyc(bool _internalKycActivated) external nonpayable
 ```
 
-_Initialize Internal Kyc_
+Initialises the internal KYC capability on the token.
 
 #### Parameters
 
@@ -199,13 +205,13 @@ _Initialize Internal Kyc_
 function isInternalKycActivated() external view returns (bool)
 ```
 
-_Get the internal kyc flag_
+Returns whether internal KYC enforcement is currently active.
 
 #### Returns
 
-| Name | Type | Description                                |
-| ---- | ---- | ------------------------------------------ |
-| \_0  | bool | bool true if the internal kyc is activated |
+| Name | Type | Description                                         |
+| ---- | ---- | --------------------------------------------------- |
+| \_0  | bool | True if internal KYC is activated, false otherwise. |
 
 ### revokeKyc
 
@@ -213,19 +219,19 @@ _Get the internal kyc flag_
 function revokeKyc(address _account) external nonpayable returns (bool success_)
 ```
 
-_Revoke kyc to an address_
+Revokes the KYC previously granted to an account.
 
 #### Parameters
 
-| Name      | Type    | Description                     |
-| --------- | ------- | ------------------------------- |
-| \_account | address | user whose Kyc is being revoked |
+| Name      | Type    | Description                      |
+| --------- | ------- | -------------------------------- |
+| \_account | address | User whose KYC is being revoked. |
 
 #### Returns
 
-| Name      | Type | Description   |
-| --------- | ---- | ------------- |
-| success\_ | bool | true or false |
+| Name      | Type | Description                                          |
+| --------- | ---- | ---------------------------------------------------- |
+| success\_ | bool | True when the revocation succeeds without reverting. |
 
 ## Events
 
@@ -235,14 +241,14 @@ _Revoke kyc to an address_
 event InternalKycStatusUpdated(address indexed operator, bool activated)
 ```
 
-_Emitted when Internal Kyc is updated_
+Emitted when the internal KYC enforcement status is toggled.
 
 #### Parameters
 
-| Name               | Type    | Description                              |
-| ------------------ | ------- | ---------------------------------------- |
-| operator `indexed` | address | The address for which the Kyc is updated |
-| activated          | bool    | The status of the internal Kyc           |
+| Name               | Type    | Description                                   |
+| ------------------ | ------- | --------------------------------------------- |
+| operator `indexed` | address | The address that triggered the status update. |
+| activated          | bool    | The new activation state of the internal KYC. |
 
 ### KycGranted
 
@@ -250,14 +256,14 @@ _Emitted when Internal Kyc is updated_
 event KycGranted(address indexed account, address indexed issuer)
 ```
 
-_Emitted when a Kyc is granted_
+Emitted when KYC is granted to an account.
 
 #### Parameters
 
-| Name              | Type    | Description                              |
-| ----------------- | ------- | ---------------------------------------- |
-| account `indexed` | address | The address for which the Kyc is granted |
-| issuer `indexed`  | address | The address of the issuer of the Kyc     |
+| Name              | Type    | Description                               |
+| ----------------- | ------- | ----------------------------------------- |
+| account `indexed` | address | The address for which the KYC is granted. |
+| issuer `indexed`  | address | The address of the issuer of the KYC.     |
 
 ### KycInitialized
 
@@ -271,9 +277,9 @@ _Fires exclusively from `initializeInternalKyc` after the storage write succeeds
 
 #### Parameters
 
-| Name                 | Type | Description |
-| -------------------- | ---- | ----------- |
-| internalKycActivated | bool | undefined   |
+| Name                 | Type | Description                                                     |
+| -------------------- | ---- | --------------------------------------------------------------- |
+| internalKycActivated | bool | Whether internal KYC enforcement was enabled at initialisation. |
 
 ### KycRevoked
 
@@ -281,14 +287,14 @@ _Fires exclusively from `initializeInternalKyc` after the storage write succeeds
 event KycRevoked(address indexed account, address indexed issuer)
 ```
 
-_Emitted when a Kyc is revoked_
+Emitted when KYC is revoked from an account.
 
 #### Parameters
 
-| Name              | Type    | Description                              |
-| ----------------- | ------- | ---------------------------------------- |
-| account `indexed` | address | The address for which the Kyc is revoked |
-| issuer `indexed`  | address | The address of the issuer of the Kyc     |
+| Name              | Type    | Description                                 |
+| ----------------- | ------- | ------------------------------------------- |
+| account `indexed` | address | The address for which the KYC is revoked.   |
+| issuer `indexed`  | address | The address of the issuer revoking the KYC. |
 
 ## Errors
 

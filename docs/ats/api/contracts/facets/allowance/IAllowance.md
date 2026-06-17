@@ -1,5 +1,7 @@
 # IAllowance
 
+_Asset Tokenization Studio Team_
+
 > IAllowance
 
 Consolidated interface for the ERC-20 allowance domain: granting, reading and atomically adjusting spender allowances.

@@ -1,5 +1,7 @@
 # PauseRead
 
+_Asset Tokenization Studio Team_
+
 > PauseRead
 
 Read-only base for Pause and PauseOperational. Implements the paused() view function of IPause. Write functions are implemented by subclasses with or without onlyOperational depending on whether the consumer is a proxy facet or a direct-inheritance contract.

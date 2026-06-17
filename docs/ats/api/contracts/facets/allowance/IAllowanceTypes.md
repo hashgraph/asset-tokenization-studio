@@ -1,5 +1,7 @@
 # IAllowanceTypes
 
+_Asset Tokenization Studio Team_
+
 > IAllowanceTypes
 
 Events and errors emitted by the ERC-20 allowance surface.

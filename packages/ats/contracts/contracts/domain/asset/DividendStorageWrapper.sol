@@ -5,8 +5,7 @@ import { SNAPSHOT_RESULT_ID } from "../../constants/values.sol";
 import { CORPORATE_ACTION_TYPE_DIVIDEND, SCHEDULED_TASK_TYPE_SNAPSHOT } from "../../constants/dispatchTypes.sol";
 import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
-import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
-import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
+
 import { DecimalsLib } from "../../infrastructure/utils/DecimalsLib.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { IDividend } from "../../facets/dividend/IDividend.sol";
@@ -274,21 +273,6 @@ library DividendStorageWrapper {
         return ERC1410StorageWrapper.getTotalTokenHolders();
     }
 
-    /**
-     * @notice Internal helper to fetch an account's token balance and decimals at
-     *         a specific date, if that date has already passed.
-     * @dev If the given `date` is not yet reached, returns zeros and false.
-     *      Otherwise, if a snapshot ID is present, reads the balance and decimals
-     *      from that snapshot; otherwise reads from the adjusted ERC20/ERC3643
-     *      storage at the given date.
-     * @param date The reference timestamp to compare against the current
-     *             block timestamp
-     * @param snapshotId The snapshot identifier (zero means no snapshot)
-     * @param account The address to query
-     * @return balance_ The token balance of the account at the date (or zero)
-     * @return decimals_ The token decimals at the date (or zero)
-     * @return dateReached_ True if the date is in the past, false otherwise
-     */
     /**
      * @notice Performs the storage write that cancels a dividend corporate action.
      * @param corporateActionId The corporate-action identifier linked to the dividend.

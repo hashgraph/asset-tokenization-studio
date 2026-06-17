@@ -1,5 +1,7 @@
 # BalanceTrackerAtSnapshot
 
+_Asset Tokenization Studio Team_
+
 > BalanceTrackerAtSnapshot
 
 Abstract implementation of `IBalanceTrackerAtSnapshot` providing snapshotted balance and total-supply queries indexed by a snapshot identifier.

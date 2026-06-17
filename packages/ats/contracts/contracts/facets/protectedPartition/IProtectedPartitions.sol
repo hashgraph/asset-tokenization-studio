@@ -4,6 +4,12 @@ pragma solidity >=0.8.0 <0.9.0;
 /// @custom:hash resolverKey ProtectedPartitions
 bytes32 constant RESOLVER_KEY_PROTECTED_PARTITIONS = 0x895834530eae98f8a742fe98f3d528d3cce6c6a51af63b495414bdf391180dd7;
 
+/**
+ * @title IProtectedPartitions
+ * @author Asset Tokenization Studio Team
+ * @notice Interface for the protected-partitions capability, which restricts token transfers
+ *         to holders of the appropriate partition role when protection is active.
+ */
 interface IProtectedPartitions {
     /**
      * @notice Payload bundling the EIP-712 authorisation fields for a protected operation.
@@ -101,14 +107,16 @@ interface IProtectedPartitions {
     function initializeProtectedPartitions(bool _arePartitionsProtected) external returns (bool success_);
 
     /**
-     * @notice Activates the protected partitions mode
-     * @dev Disables the ability to freely transfer tokens unless the sender has the requited role for the partition
+     * @notice Activates the protected partitions mode.
+     * @dev Disables free token transfers; callers must hold the required role for the partition.
+     * @return success_ True when activation succeeds without reverting.
      */
     function protectPartitions() external returns (bool success_);
 
     /**
-     * @notice Deactivates the protected partitions mode
-     * @dev Enables the ability to freely transfer tokens
+     * @notice Deactivates the protected partitions mode.
+     * @dev Re-enables free token transfers regardless of partition role.
+     * @return success_ True when deactivation succeeds without reverting.
      */
     function unprotectPartitions() external returns (bool success_);
 

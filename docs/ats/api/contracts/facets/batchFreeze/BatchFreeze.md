@@ -1,5 +1,7 @@
 # BatchFreeze
 
+_Asset Tokenization Studio Team_
+
 > BatchFreeze
 
 Abstract implementation of `IBatchFreeze` that batch-freezes and batch-unfreezes addresses and partial token amounts in a single call.

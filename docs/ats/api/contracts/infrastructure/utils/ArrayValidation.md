@@ -1,5 +1,7 @@
 # ArrayValidation
 
+_Asset Tokenization Studio Team_
+
 > ArrayValidation
 
 Library for validating array consistency and detecting contradictory values

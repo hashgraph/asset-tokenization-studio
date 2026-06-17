@@ -16,12 +16,14 @@ _Intended for use as a facet. Initialisation is single-use per resolver key, whi
 function addProceedRecipient(address _proceedRecipient, bytes _data) external nonpayable
 ```
 
+Registers a new proceed recipient on the token.
+
 #### Parameters
 
-| Name               | Type    | Description |
-| ------------------ | ------- | ----------- |
-| \_proceedRecipient | address | undefined   |
-| \_data             | bytes   | undefined   |
+| Name               | Type    | Description                                         |
+| ------------------ | ------- | --------------------------------------------------- |
+| \_proceedRecipient | address | Address to add as a proceed recipient.              |
+| \_data             | bytes   | Arbitrary data to associate with the new recipient. |
 
 ### getProceedRecipientData
 
@@ -29,17 +31,19 @@ function addProceedRecipient(address _proceedRecipient, bytes _data) external no
 function getProceedRecipientData(address _proceedRecipient) external view returns (bytes)
 ```
 
+Returns the arbitrary data stored for a registered proceed recipient.
+
 #### Parameters
 
-| Name               | Type    | Description |
-| ------------------ | ------- | ----------- |
-| \_proceedRecipient | address | undefined   |
+| Name               | Type    | Description                                |
+| ------------------ | ------- | ------------------------------------------ |
+| \_proceedRecipient | address | Address of the proceed recipient to query. |
 
 #### Returns
 
-| Name | Type  | Description |
-| ---- | ----- | ----------- |
-| \_0  | bytes | undefined   |
+| Name | Type  | Description                                   |
+| ---- | ----- | --------------------------------------------- |
+| \_0  | bytes | Arbitrary data associated with the recipient. |
 
 ### getProceedRecipients
 
@@ -47,18 +51,20 @@ function getProceedRecipientData(address _proceedRecipient) external view return
 function getProceedRecipients(uint256 _pageIndex, uint256 _pageLength) external view returns (address[] proceedRecipients_)
 ```
 
+Returns a paginated slice of the registered proceed-recipient addresses.
+
 #### Parameters
 
-| Name         | Type    | Description |
-| ------------ | ------- | ----------- |
-| \_pageIndex  | uint256 | undefined   |
-| \_pageLength | uint256 | undefined   |
+| Name         | Type    | Description                                     |
+| ------------ | ------- | ----------------------------------------------- |
+| \_pageIndex  | uint256 | Zero-based index of the page to retrieve.       |
+| \_pageLength | uint256 | Maximum number of addresses to return per page. |
 
 #### Returns
 
-| Name                | Type      | Description |
-| ------------------- | --------- | ----------- |
-| proceedRecipients\_ | address[] | undefined   |
+| Name                | Type      | Description                                                  |
+| ------------------- | --------- | ------------------------------------------------------------ |
+| proceedRecipients\_ | address[] | Array of proceed-recipient addresses for the requested page. |
 
 ### getProceedRecipientsCount
 
@@ -66,11 +72,13 @@ function getProceedRecipients(uint256 _pageIndex, uint256 _pageLength) external 
 function getProceedRecipientsCount() external view returns (uint256)
 ```
 
+Returns the total number of registered proceed recipients.
+
 #### Returns
 
-| Name | Type    | Description |
-| ---- | ------- | ----------- |
-| \_0  | uint256 | undefined   |
+| Name | Type    | Description                                                          |
+| ---- | ------- | -------------------------------------------------------------------- |
+| \_0  | uint256 | Total count of proceed recipients currently registered on the token. |
 
 ### initializeProceedRecipients
 
@@ -78,14 +86,14 @@ function getProceedRecipientsCount() external view returns (uint256)
 function initializeProceedRecipients(address[] _proceedRecipients, bytes[] _data) external nonpayable
 ```
 
-Initializes the proceedRecipients contract with a list of initial proceedRecipients.
+Initialises the proceed-recipients capability with a seed list of recipients.
 
 #### Parameters
 
-| Name                | Type      | Description                                                       |
-| ------------------- | --------- | ----------------------------------------------------------------- |
-| \_proceedRecipients | address[] | An array of addresses representing the initial proceedRecipients. |
-| \_data              | bytes[]   | undefined                                                         |
+| Name                | Type      | Description                                                                  |
+| ------------------- | --------- | ---------------------------------------------------------------------------- |
+| \_proceedRecipients | address[] | Initial array of proceed-recipient addresses to register.                    |
+| \_data              | bytes[]   | Per-recipient arbitrary data, one entry per address in `_proceedRecipients`. |
 
 ### isProceedRecipient
 
@@ -93,17 +101,19 @@ Initializes the proceedRecipients contract with a list of initial proceedRecipie
 function isProceedRecipient(address _proceedRecipient) external view returns (bool)
 ```
 
+Returns whether the given address is a registered proceed recipient.
+
 #### Parameters
 
-| Name               | Type    | Description |
-| ------------------ | ------- | ----------- |
-| \_proceedRecipient | address | undefined   |
+| Name               | Type    | Description       |
+| ------------------ | ------- | ----------------- |
+| \_proceedRecipient | address | Address to check. |
 
 #### Returns
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| \_0  | bool | undefined   |
+| Name | Type | Description                                                             |
+| ---- | ---- | ----------------------------------------------------------------------- |
+| \_0  | bool | True if the address is a registered proceed recipient; false otherwise. |
 
 ### removeProceedRecipient
 
@@ -111,11 +121,13 @@ function isProceedRecipient(address _proceedRecipient) external view returns (bo
 function removeProceedRecipient(address _proceedRecipient) external nonpayable
 ```
 
+Removes an existing proceed recipient from the token.
+
 #### Parameters
 
-| Name               | Type    | Description |
-| ------------------ | ------- | ----------- |
-| \_proceedRecipient | address | undefined   |
+| Name               | Type    | Description                                       |
+| ------------------ | ------- | ------------------------------------------------- |
+| \_proceedRecipient | address | Address to remove from the proceed-recipient set. |
 
 ### updateProceedRecipientData
 
@@ -123,12 +135,14 @@ function removeProceedRecipient(address _proceedRecipient) external nonpayable
 function updateProceedRecipientData(address _proceedRecipient, bytes _data) external nonpayable
 ```
 
+Updates the arbitrary data stored for an existing proceed recipient.
+
 #### Parameters
 
-| Name               | Type    | Description |
-| ------------------ | ------- | ----------- |
-| \_proceedRecipient | address | undefined   |
-| \_data             | bytes   | undefined   |
+| Name               | Type    | Description                                            |
+| ------------------ | ------- | ------------------------------------------------------ |
+| \_proceedRecipient | address | Address of the recipient whose data should be updated. |
+| \_data             | bytes   | New arbitrary data to store for the recipient.         |
 
 ## Events
 
@@ -138,13 +152,15 @@ function updateProceedRecipientData(address _proceedRecipient, bytes _data) exte
 event ProceedRecipientAdded(address indexed operator, address indexed proceedRecipient, bytes data)
 ```
 
+Emitted when a new proceed recipient is added to the token.
+
 #### Parameters
 
-| Name                       | Type    | Description |
-| -------------------------- | ------- | ----------- |
-| operator `indexed`         | address | undefined   |
-| proceedRecipient `indexed` | address | undefined   |
-| data                       | bytes   | undefined   |
+| Name                       | Type    | Description                                       |
+| -------------------------- | ------- | ------------------------------------------------- |
+| operator `indexed`         | address | Address that executed the add operation.          |
+| proceedRecipient `indexed` | address | Address added as a proceed recipient.             |
+| data                       | bytes   | Arbitrary data associated with the new recipient. |
 
 ### ProceedRecipientDataUpdated
 
@@ -152,13 +168,15 @@ event ProceedRecipientAdded(address indexed operator, address indexed proceedRec
 event ProceedRecipientDataUpdated(address indexed operator, address indexed proceedRecipient, bytes newData)
 ```
 
+Emitted when the data associated with a proceed recipient is updated.
+
 #### Parameters
 
-| Name                       | Type    | Description |
-| -------------------------- | ------- | ----------- |
-| operator `indexed`         | address | undefined   |
-| proceedRecipient `indexed` | address | undefined   |
-| newData                    | bytes   | undefined   |
+| Name                       | Type    | Description                                  |
+| -------------------------- | ------- | -------------------------------------------- |
+| operator `indexed`         | address | Address that executed the update.            |
+| proceedRecipient `indexed` | address | Address whose data was updated.              |
+| newData                    | bytes   | New arbitrary data stored for the recipient. |
 
 ### ProceedRecipientRemoved
 
@@ -166,12 +184,14 @@ event ProceedRecipientDataUpdated(address indexed operator, address indexed proc
 event ProceedRecipientRemoved(address indexed operator, address indexed proceedRecipient)
 ```
 
+Emitted when an existing proceed recipient is removed from the token.
+
 #### Parameters
 
-| Name                       | Type    | Description |
-| -------------------------- | ------- | ----------- |
-| operator `indexed`         | address | undefined   |
-| proceedRecipient `indexed` | address | undefined   |
+| Name                       | Type    | Description                                     |
+| -------------------------- | ------- | ----------------------------------------------- |
+| operator `indexed`         | address | Address that executed the remove operation.     |
+| proceedRecipient `indexed` | address | Address removed from the proceed-recipient set. |
 
 ### ProceedRecipientsInitialized
 
@@ -185,10 +205,10 @@ _Fires exclusively from `initializeProceedRecipients` after the storage write su
 
 #### Parameters
 
-| Name              | Type      | Description |
-| ----------------- | --------- | ----------- |
-| proceedRecipients | address[] | undefined   |
-| data              | bytes[]   | undefined   |
+| Name              | Type      | Description                                                   |
+| ----------------- | --------- | ------------------------------------------------------------- |
+| proceedRecipients | address[] | Initial array of registered proceed-recipient addresses.      |
+| data              | bytes[]   | Arbitrary per-recipient data supplied at initialisation time. |
 
 ## Errors
 
@@ -275,11 +295,13 @@ _Enforced by `ExternalListManagementStorageWrapper.addExternalList` for the exte
 error ProceedRecipientAlreadyExists(address proceedRecipient)
 ```
 
+Thrown when attempting to add an address that is already registered as a proceed recipient.
+
 #### Parameters
 
-| Name             | Type    | Description |
-| ---------------- | ------- | ----------- |
-| proceedRecipient | address | undefined   |
+| Name             | Type    | Description                                                   |
+| ---------------- | ------- | ------------------------------------------------------------- |
+| proceedRecipient | address | The address that already exists in the proceed-recipient set. |
 
 ### ProceedRecipientNotFound
 
@@ -287,11 +309,13 @@ error ProceedRecipientAlreadyExists(address proceedRecipient)
 error ProceedRecipientNotFound(address proceedRecipient)
 ```
 
+Thrown when an operation targets an address that is not a registered proceed recipient.
+
 #### Parameters
 
-| Name             | Type    | Description |
-| ---------------- | ------- | ----------- |
-| proceedRecipient | address | undefined   |
+| Name             | Type    | Description                                                  |
+| ---------------- | ------- | ------------------------------------------------------------ |
+| proceedRecipient | address | The address that was not found in the proceed-recipient set. |
 
 ### WalletRecovered
 

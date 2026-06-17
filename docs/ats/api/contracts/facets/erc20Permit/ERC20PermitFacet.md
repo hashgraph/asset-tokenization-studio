@@ -1,5 +1,11 @@
 # ERC20PermitFacet
 
+_Asset Tokenization Studio Team_
+
+> ERC20PermitFacet
+
+Diamond facet exposing ERC-2612 permit-based gasless approval operations, registered under `RESOLVER_KEY_ERC20PERMIT`.
+
 ## Methods
 
 ### getStaticFunctionSelectors

@@ -5,8 +5,7 @@ import { SNAPSHOT_RESULT_ID } from "../../constants/values.sol";
 import { CORPORATE_ACTION_TYPE_VOTING_RIGHTS, SCHEDULED_TASK_TYPE_SNAPSHOT } from "../../constants/dispatchTypes.sol";
 import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
-import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
-import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
+
 import { IVoting } from "../../facets/voting/IVoting.sol";
 import { IVotingTypes } from "../../facets/voting/IVotingTypes.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
@@ -205,18 +204,6 @@ library VotingStorageWrapper {
         return ERC1410StorageWrapper.getTotalTokenHolders();
     }
 
-    /**
-     * @notice Resolves the account's snapshot balance and decimals when the record date is met.
-     * @dev Returns zeroed outputs and `dateReached_ == false` while the record date is in the
-     *      future. When a snapshot is bound, queries the snapshot store; otherwise reads the
-     *      adjusted ERC3643 balance and live ERC20 decimals at `date`.
-     * @param date       Record date being checked against the current block timestamp.
-     * @param snapshotId Snapshot identifier bound to the voting action (zero when none).
-     * @param account    Address whose balance is being projected.
-     * @return balance_     Account balance at the resolved point in time.
-     * @return decimals_    Token decimals at the resolved point in time.
-     * @return dateReached_ True when the record date has been reached.
-     */
     /**
      * @notice Performs the storage write that cancels a voting corporate action.
      * @param corporateActionId The corporate-action identifier linked to the voting.

@@ -3,6 +3,14 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 
+/**
+ * @title Checkpoints
+ * @author Asset Tokenization Studio Team
+ * @notice Utility library for binary-search lookups over a sorted checkpoint array.
+ * @dev Each checkpoint records a (timepoint, value) pair. `checkpointsLookup` finds the
+ *      latest entry whose `from` field does not exceed the queried timepoint, using a
+ *      hybrid square-root + binary-search strategy for gas efficiency on long arrays.
+ */
 library Checkpoints {
     struct Checkpoint {
         uint256 from;

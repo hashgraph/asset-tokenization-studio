@@ -1,5 +1,7 @@
 # BatchFreezeFacet
 
+_Asset Tokenization Studio Team_
+
 > BatchFreezeFacet
 
 Diamond facet that exposes batch freeze and unfreeze operations through the `IBatchFreeze` interface, registered under `RESOLVER_KEY_BATCH_FREEZE`.

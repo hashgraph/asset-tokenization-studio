@@ -221,9 +221,9 @@ _Fires exclusively from `initializeExternalControlLists` after the storage write
 
 #### Parameters
 
-| Name         | Type      | Description |
-| ------------ | --------- | ----------- |
-| controlLists | address[] | undefined   |
+| Name         | Type      | Description                                                               |
+| ------------ | --------- | ------------------------------------------------------------------------- |
+| controlLists | address[] | The initial array of external control list contract addresses registered. |
 
 ### ExternalControlListsUpdated
 

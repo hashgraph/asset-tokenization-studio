@@ -4,6 +4,10 @@ pragma solidity >=0.8.0 <0.9.0;
 /// @custom:hash resolverKey KpiLinkedRate
 bytes32 constant RESOLVER_KEY_KPI_LINKED_RATE = 0x47cd76ae576f0ec85f1abfc652d614750caefe22a465bef2c859f6cb32a89593;
 
+/// @title IKpiLinkedRate
+/// @author Asset Tokenization Studio Team
+/// @notice Interface for the KPI-linked rate facet that ties coupon rates to external
+///         performance indicators (KPIs) via configurable interest rate and impact data parameters.
 interface IKpiLinkedRate {
     /**
      * @notice Interest rate parameters for the KPI-linked coupon model.
@@ -51,6 +55,8 @@ interface IKpiLinkedRate {
 
     /// @notice Emitted once when the KpiLinkedRate capability is initialised on a token.
     /// @dev Fires exclusively from `initializeKpiLinkedRate` after the storage write succeeds.
+    /// @param interestRate The initial interest rate configuration written to storage.
+    /// @param impactData The initial impact data configuration written to storage.
     event KpiLinkedRateInitialized(InterestRate interestRate, ImpactData impactData);
 
     /// @notice Emitted when the KPI-linked interest rate configuration is updated.

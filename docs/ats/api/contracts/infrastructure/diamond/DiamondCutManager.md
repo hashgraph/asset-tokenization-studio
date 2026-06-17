@@ -127,13 +127,13 @@ function createConfiguration(bytes32 _configurationId, IDiamondCutManager.FacetC
 function getBusinessLogicCount() external view returns (uint256 businessLogicCount_)
 ```
 
-Returns the count of currently active business logics
+Returns the total number of business logic keys currently registered in the resolver.
 
 #### Returns
 
-| Name                 | Type    | Description |
-| -------------------- | ------- | ----------- |
-| businessLogicCount\_ | uint256 | undefined   |
+| Name                 | Type    | Description                                  |
+| -------------------- | ------- | -------------------------------------------- |
+| businessLogicCount\_ | uint256 | The count of registered business logic keys. |
 
 ### getBusinessLogicKeys
 
@@ -456,19 +456,19 @@ Returns the number of facets registered under a configuration version.
 function getLatestVersion(bytes32 _businessLogicKey) external view returns (uint256 latestVersion_)
 ```
 
-Returns the current latest version for all business logics
+Returns the latest registered version for the given business logic key.
 
 #### Parameters
 
-| Name               | Type    | Description |
-| ------------------ | ------- | ----------- |
-| \_businessLogicKey | bytes32 | undefined   |
+| Name               | Type    | Description                                              |
+| ------------------ | ------- | -------------------------------------------------------- |
+| \_businessLogicKey | bytes32 | The bytes32 key identifying the business logic to query. |
 
 #### Returns
 
-| Name            | Type    | Description |
-| --------------- | ------- | ----------- |
-| latestVersion\_ | uint256 | undefined   |
+| Name            | Type    | Description                                                        |
+| --------------- | ------- | ------------------------------------------------------------------ |
+| latestVersion\_ | uint256 | The latest registered version for that key; 0 if never registered. |
 
 ### getLatestVersionByConfiguration
 
@@ -668,20 +668,20 @@ Returns the list of selectors in the blacklist
 function getVersionStatus(bytes32 _businessLogicKey, uint256 _version) external view returns (enum IBusinessLogicResolver.VersionStatus status_)
 ```
 
-Returns the current status of a given version
+Returns the current status of a given version for a business logic key.
 
 #### Parameters
 
-| Name               | Type    | Description |
-| ------------------ | ------- | ----------- |
-| \_businessLogicKey | bytes32 | undefined   |
-| \_version          | uint256 | undefined   |
+| Name               | Type    | Description                                              |
+| ------------------ | ------- | -------------------------------------------------------- |
+| \_businessLogicKey | bytes32 | The bytes32 key identifying the business logic to query. |
+| \_version          | uint256 | The version number to inspect.                           |
 
 #### Returns
 
-| Name     | Type                                      | Description |
-| -------- | ----------------------------------------- | ----------- |
-| status\_ | enum IBusinessLogicResolver.VersionStatus | undefined   |
+| Name     | Type                                      | Description                                                             |
+| -------- | ----------------------------------------- | ----------------------------------------------------------------------- |
+| status\_ | enum IBusinessLogicResolver.VersionStatus | The `VersionStatus` (NONE, ACTIVATED, or DEACTIVATED) for that version. |
 
 ### grantRole
 
@@ -743,11 +743,13 @@ _Callable once; subsequent calls revert with `FacetAlreadyRegistered`. Requires 
 function initializeBusinessLogicResolver() external nonpayable returns (bool success_)
 ```
 
+Initialises the Business Logic Resolver storage. Must be called once before any registration operations; subsequent calls revert.
+
 #### Returns
 
-| Name      | Type | Description |
-| --------- | ---- | ----------- |
-| success\_ | bool | undefined   |
+| Name      | Type | Description                                          |
+| --------- | ---- | ---------------------------------------------------- |
+| success\_ | bool | True when initialisation succeeds without reverting. |
 
 ### initializePause
 
@@ -867,20 +869,20 @@ _Requires the token to be unpaused. No admin role required; acts on `msg.sender`
 function resolveBusinessLogicByVersion(bytes32 _businessLogicKey, uint256 _version) external view returns (address businessLogicAddress_)
 ```
 
-Returns a specific business logic version address
+Returns the implementation address for a specific version of a business logic.
 
 #### Parameters
 
 | Name               | Type    | Description                                               |
 | ------------------ | ------- | --------------------------------------------------------- |
-| \_businessLogicKey | bytes32 | key of the business logic. Business Logic must be active. |
-| \_version          | uint256 | the version                                               |
+| \_businessLogicKey | bytes32 | Key of the business logic. Business Logic must be active. |
+| \_version          | uint256 | The version number to resolve.                            |
 
 #### Returns
 
-| Name                   | Type    | Description |
-| ---------------------- | ------- | ----------- |
-| businessLogicAddress\_ | address | undefined   |
+| Name                   | Type    | Description                                            |
+| ---------------------- | ------- | ------------------------------------------------------ |
+| businessLogicAddress\_ | address | The implementation address registered at that version. |
 
 ### resolveLatestBusinessLogic
 
@@ -888,19 +890,19 @@ Returns a specific business logic version address
 function resolveLatestBusinessLogic(bytes32 _businessLogicKey) external view returns (address businessLogicAddress_)
 ```
 
-Returns the business logic address for the latest version
+Returns the business logic address for the latest version.
 
 #### Parameters
 
 | Name               | Type    | Description                                               |
 | ------------------ | ------- | --------------------------------------------------------- |
-| \_businessLogicKey | bytes32 | key of the business logic. Business Logic must be active. |
+| \_businessLogicKey | bytes32 | Key of the business logic. Business Logic must be active. |
 
 #### Returns
 
-| Name                   | Type    | Description |
-| ---------------------- | ------- | ----------- |
-| businessLogicAddress\_ | address | undefined   |
+| Name                   | Type    | Description                                                  |
+| ---------------------- | ------- | ------------------------------------------------------------ |
+| businessLogicAddress\_ | address | The implementation address registered at the latest version. |
 
 ### resolveResolverProxyCall
 
@@ -1317,11 +1319,13 @@ Thrown when attempting to revoke or renounce a role from an account that does no
 error BusinessLogicKeyDuplicated(bytes32 businessLogicKey)
 ```
 
+Thrown when two entries in a registration batch share the same business logic key.
+
 #### Parameters
 
-| Name             | Type    | Description |
-| ---------------- | ------- | ----------- |
-| businessLogicKey | bytes32 | undefined   |
+| Name             | Type    | Description                            |
+| ---------------- | ------- | -------------------------------------- |
+| businessLogicKey | bytes32 | The duplicated key found in the batch. |
 
 ### BusinessLogicKeyMismatch
 
@@ -1329,13 +1333,15 @@ error BusinessLogicKeyDuplicated(bytes32 businessLogicKey)
 error BusinessLogicKeyMismatch(address implementation, bytes32 actualKey, bytes32 expectedKey)
 ```
 
+Thrown when the key reported by the implementation contract differs from the expected key.
+
 #### Parameters
 
-| Name           | Type    | Description |
-| -------------- | ------- | ----------- |
-| implementation | address | undefined   |
-| actualKey      | bytes32 | undefined   |
-| expectedKey    | bytes32 | undefined   |
+| Name           | Type    | Description                                              |
+| -------------- | ------- | -------------------------------------------------------- |
+| implementation | address | Address of the implementation whose key was checked.     |
+| actualKey      | bytes32 | The resolver key returned by the implementation.         |
+| expectedKey    | bytes32 | The resolver key that was expected at registration time. |
 
 ### BusinessLogicVersionDoesNotExist
 
@@ -1343,11 +1349,13 @@ error BusinessLogicKeyMismatch(address implementation, bytes32 actualKey, bytes3
 error BusinessLogicVersionDoesNotExist(uint256 version)
 ```
 
+Thrown when the requested version has never been registered for any business logic key.
+
 #### Parameters
 
-| Name    | Type    | Description |
-| ------- | ------- | ----------- |
-| version | uint256 | undefined   |
+| Name    | Type    | Description                                             |
+| ------- | ------- | ------------------------------------------------------- |
+| version | uint256 | The version number that does not exist in the registry. |
 
 ### CannotRenounceSoleAdmin
 
@@ -1600,3 +1608,5 @@ Thrown when attempting to recover a wallet that has already been recovered.
 ```solidity
 error ZeroKeyNotValidForBusinessLogic()
 ```
+
+Thrown when a registration attempt uses the zero bytes32 value as the business logic key.

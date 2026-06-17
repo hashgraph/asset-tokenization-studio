@@ -5,6 +5,7 @@ import { ICommonErrors } from "../errors/ICommonErrors.sol";
 
 /**
  * @title Dates Validation
+ * @author Asset Tokenization Studio Team
  * @notice Utility library for dates validation
  */
 library DatesValidation {

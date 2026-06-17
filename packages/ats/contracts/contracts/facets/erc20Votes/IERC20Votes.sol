@@ -9,9 +9,14 @@ import { Checkpoints } from "../../infrastructure/utils/Checkpoints.sol";
 /// @custom:hash resolverKey Erc20votes
 bytes32 constant RESOLVER_KEY_ERC20VOTES = 0x9619bb38c76aac49afb1df75430aefc1314778fe926136a688bf3ae3b5f8c3b7;
 
+/// @title IERC20Votes
+/// @author Asset Tokenization Studio Team
+/// @notice Interface for the ERC-20 Votes extension that enables on-chain governance delegation
+///         and checkpoint-based vote tracking.
 interface IERC20Votes is IERC5805 {
     /// @notice Emitted once when the ERC-20Votes capability is initialised on a token.
     /// @dev Fires exclusively from `initializeERC20Votes` after the storage write succeeds.
+    /// @param activated Whether the ERC-20Votes feature is active after initialisation.
     event ERC20VotesInitialized(bool activated);
 
     /// @notice Emitted when an account changes their delegate
@@ -36,11 +41,19 @@ interface IERC20Votes is IERC5805 {
     /// @param currentClock The current clock value
     error FutureLookup(uint256 timepoint, uint256 currentClock);
 
+    /// @notice Initialises the ERC-20Votes capability on the token.
+    /// @param _activated Whether the voting feature should be active after initialisation.
     function initializeERC20Votes(bool _activated) external;
 
+    /// @notice Returns whether the ERC-20Votes voting feature is currently active.
     function isActivated() external view returns (bool);
 
+    /// @notice Returns the checkpoint at a given position for an account's vote history.
+    /// @param _account Address whose checkpoint history is queried.
+    /// @param _pos Zero-based index into the account's checkpoint array.
     function checkpoints(address _account, uint256 _pos) external view returns (Checkpoints.Checkpoint memory);
 
+    /// @notice Returns the total number of vote checkpoints recorded for an account.
+    /// @param _account Address whose checkpoint count is queried.
     function numCheckpoints(address _account) external view returns (uint256);
 }

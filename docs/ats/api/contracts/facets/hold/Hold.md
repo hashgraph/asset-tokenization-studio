@@ -1,5 +1,7 @@
 # Hold
 
+_Asset Tokenization Studio Team_
+
 > Hold
 
 Abstract implementation of high-level hold read operations.

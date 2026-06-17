@@ -1,5 +1,11 @@
 # IRevocationList
 
+_Asset Tokenization Studio Team_
+
+> IRevocationList
+
+Minimal interface for querying whether a verifiable credential issued to a subject has been revoked by its issuer.
+
 ## Methods
 
 ### revoked
