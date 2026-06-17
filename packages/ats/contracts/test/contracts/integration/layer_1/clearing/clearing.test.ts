@@ -3659,9 +3659,10 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
       });
     });
 
-    describe.skip("Multi Partition", async () => {
+    describe("Multi Partition", async () => {
       beforeEach(async () => {
         await multiPartitionSetup();
+        await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
       });
 
       describe("Create clearing with wrong input arguments", async () => {
@@ -3917,13 +3918,12 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
         };
 
         async function protectedClearingFixture() {
-          await multiPartitionSetup();
           await asset.grantRole(ATS_ROLES.ROLE_PROTECTED_PARTITIONS, signer_B.address);
           await asset.connect(signer_B).protectPartitions();
         }
 
         beforeEach(async () => {
-          protectedClearingFixture();
+          await protectedClearingFixture();
 
           const chainId = await network.provider.send("eth_chainId");
           domain = {
@@ -4914,7 +4914,8 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
             data: _DATA,
           });
 
-          // Recover signer_A's address to signer_B
+          // Recover signer_A's address (needs single-partition)
+          await asset.setMultiPartition(false);
           await asset.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
 
           const message = {
@@ -4942,7 +4943,8 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
             data: _DATA,
           });
 
-          // Recover signer_C's address to signer_D
+          // Recover signer_C's address (needs single-partition)
+          await asset.setMultiPartition(false);
           await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
 
           const message = {
@@ -4997,7 +4999,8 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
           const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
           await asset.grantRole(protectedPartitionRole, signer_B.address);
 
-          // Recover signer_A's address to signer_B
+          // Recover signer_A's address (needs single-partition)
+          await asset.setMultiPartition(false);
           await asset.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
 
           // Try to call - should hit onlyUnrecoveredAddress before signature validation
@@ -5016,7 +5019,8 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
             data: _DATA,
           });
 
-          // Recover signer_A's address to signer_B
+          // Recover signer_A's address (needs single-partition)
+          await asset.setMultiPartition(false);
           await asset.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
 
           const holdForClearing = {
@@ -5051,7 +5055,8 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
             data: _DATA,
           });
 
-          // Recover signer_C's address (the "to" address in hold) to signer_D
+          // Recover signer_C's address (needs single-partition)
+          await asset.setMultiPartition(false);
           await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
 
           const holdForClearing = {
