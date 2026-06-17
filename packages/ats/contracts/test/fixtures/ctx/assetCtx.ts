@@ -72,8 +72,9 @@ export interface AssetMockCtx extends InfraData {
  * MockFactory.deployAssetMock().
  *
  * This is a test-only e2e deploy path that skips per-facet initialisers and
- * force-readies every facet before marking the proxy operational.  The factory
- * retains DEFAULT_ADMIN_ROLE so per-suite test reconfiguration remains possible.
+ * force-readies every facet before marking the proxy operational. The caller
+ * (the test deployer) is granted DEFAULT_ADMIN_ROLE on the proxy so per-suite test
+ * reconfiguration remains possible.
  *
  * @param infra - Deployed ATS infrastructure context
  * @returns The deployed ResolverProxy (diamond) contract instance
@@ -118,66 +119,49 @@ export async function buildAssetMockCtx(base: InfraData & { diamond: ResolverPro
 }
 
 /**
+ * Sizes of the external mock pool — how many of each mock to pre-deploy alongside the asset.
+ * Sized to the largest count any single external-* suite registers at once; bump a value here
+ * if a suite needs more.
+ */
+const EXTERNAL_MOCK_POOL_SIZES = { whitelist: 3, blacklist: 3, kyc: 5, pause: 5 } as const;
+
+/** Deploy `count` instances from a typed mock factory, awaiting each deployment. */
+async function deployMocks<T>(
+  make: () => Promise<T & { waitForDeployment(): Promise<T> }>,
+  count: number,
+): Promise<T[]> {
+  return Promise.all(Array.from({ length: count }, async () => (await make()).waitForDeployment()));
+}
+
+/**
  * Deploy a pool of external mock contracts for use by external-control-list,
  * external-KYC-list, and external-pause suites. The mocks are stateless until
  * a suite registers and configures them on the shared asset at runtime.
  */
 async function deployExternalMockPool(deployer: InfraData["deployer"]): Promise<AssetMockCtx["externalMocks"]> {
-  const deployWhitelist = () => new MockedWhitelist__factory(deployer).deploy();
-  const deployBlacklist = () => new MockedBlacklist__factory(deployer).deploy();
-  const deployKyc = () => new MockedExternalKycList__factory(deployer).deploy();
-  const deployPause = () => new MockedExternalPause__factory(deployer).deploy();
-
-  const whitelist = await Promise.all([
-    (await deployWhitelist()).waitForDeployment(),
-    (await deployWhitelist()).waitForDeployment(),
-    (await deployWhitelist()).waitForDeployment(),
-  ]);
-  const blacklist = await Promise.all([
-    (await deployBlacklist()).waitForDeployment(),
-    (await deployBlacklist()).waitForDeployment(),
-    (await deployBlacklist()).waitForDeployment(),
-  ]);
-  const kyc = await Promise.all([
-    (await deployKyc()).waitForDeployment(),
-    (await deployKyc()).waitForDeployment(),
-    (await deployKyc()).waitForDeployment(),
-    (await deployKyc()).waitForDeployment(),
-    (await deployKyc()).waitForDeployment(),
-  ]);
-  const pause = await Promise.all([
-    (await deployPause()).waitForDeployment(),
-    (await deployPause()).waitForDeployment(),
-    (await deployPause()).waitForDeployment(),
-    (await deployPause()).waitForDeployment(),
-    (await deployPause()).waitForDeployment(),
+  const [whitelist, blacklist, kyc, pause] = await Promise.all([
+    deployMocks(() => new MockedWhitelist__factory(deployer).deploy(), EXTERNAL_MOCK_POOL_SIZES.whitelist),
+    deployMocks(() => new MockedBlacklist__factory(deployer).deploy(), EXTERNAL_MOCK_POOL_SIZES.blacklist),
+    deployMocks(() => new MockedExternalKycList__factory(deployer).deploy(), EXTERNAL_MOCK_POOL_SIZES.kyc),
+    deployMocks(() => new MockedExternalPause__factory(deployer).deploy(), EXTERNAL_MOCK_POOL_SIZES.pause),
   ]);
 
   return { whitelist, blacklist, kyc, pause } as AssetMockCtx["externalMocks"];
 }
 
 /**
- * Assert that every contract handle in the context points to the same proxy address.
+ * Assert that the `asset` handle is bound to the same proxy address as `diamond`.
  *
- * Throws with a descriptive message if any handle's `.target` differs from
- * `diamond.target`.
+ * Throws with a descriptive message if the two `.target`s diverge — a fast guard against a
+ * fixture wiring regression before any test runs.
  *
  * @param ctx - The AssetMockCtx to validate
  */
 export function assertHandlesBound(ctx: AssetMockCtx): void {
+  const assetTarget = ctx.asset.target as string;
   const diamondTarget = ctx.diamond.target as string;
-
-  const contractHandles: [string, object | undefined][] = [["asset", ctx.asset]];
-
-  for (const [name, handle] of contractHandles) {
-    if (handle && typeof handle === "object" && "target" in handle) {
-      const target = (handle as { target: string }).target;
-      if (typeof target === "string" && target !== diamondTarget) {
-        throw new Error(
-          `AssetMockCtx invariant violated: handle '${name}'.target=${target} != diamond.target=${diamondTarget}`,
-        );
-      }
-    }
+  if (assetTarget !== diamondTarget) {
+    throw new Error(`AssetMockCtx invariant violated: asset.target=${assetTarget} != diamond.target=${diamondTarget}`);
   }
 }
 
