@@ -47,6 +47,7 @@ interface IMockDiamondCut {
     function forceControllable(bool n) external;
     function forceDecimals(uint8 d) external;
     function forceErc20VotesActivated(bool n) external;
+    function forceWhitelist(bool n) external;
 }
 
 // `IStaticFunctionSelectors` is intentionally not listed: it is already pulled
@@ -177,6 +178,15 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
         ERC20VotesStorageWrapper.setActivate(n);
     }
 
+    /// @notice Forces the control-list type (whitelist vs blacklist) for testing without running the facet
+    ///         initialiser. true = whitelist mode, false = blacklist mode.
+    /// @dev Delegates to ControlListStorageWrapper.initializeControlList, which sets only the control-list
+    ///      type flag through the storage struct. The production flag is set once at initializeControlList
+    ///      time with no runtime toggle, so this mirrors the deploy-time state.
+    function forceWhitelist(bool n) external override {
+        ControlListStorageWrapper.initializeControlList(n);
+    }
+
     function getStaticResolverKey() external pure returns (bytes32 staticResolverKey_) {
         // Must return the production `RESOLVER_KEY_DIAMOND` so the BLR
         // registration matches the `atsRegistry.data.ts` entry. The internal
@@ -186,7 +196,7 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
     }
 
     function getStaticFunctionSelectors() external pure returns (bytes4[] memory staticFunctionSelectors_) {
-        staticFunctionSelectors_ = new bytes4[](30);
+        staticFunctionSelectors_ = new bytes4[](31);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this.initializeDiamondCut.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.forceNonOperational.selector;
@@ -200,6 +210,7 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
         staticFunctionSelectors_[selectorsIndex++] = this.forceControllable.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.forceDecimals.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.forceErc20VotesActivated.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.forceWhitelist.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.updateConfigVersion.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.updateConfig.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.updateResolver.selector;
