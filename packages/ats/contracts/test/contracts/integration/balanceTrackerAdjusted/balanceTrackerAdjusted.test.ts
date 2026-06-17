@@ -9,7 +9,6 @@ import { DEFAULT_PARTITION, executeRbac, grantKycToHolders } from "@test";
 import type { AssetMockCtx } from "@test";
 
 export function balanceTrackerAdjustedTests(getCtx: () => AssetMockCtx): void {
-  export function balanceTrackerAdjustedTests(getCtx: () => AssetMockCtx): void {
   describe("BalanceTrackerAdjusted Tests", () => {
     let signer_A: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
