@@ -362,9 +362,10 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
       await asset.resetSystemTimestamp();
     });
 
-    describe.skip("Single Partition", async () => {
+    describe("Single Partition", async () => {
       beforeEach(async () => {
         await asset.grantRole(ATS_ROLES.ROLE_CLEARING, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_CLEARING_VALIDATOR, signer_A.address);
         await asset.activateClearing();
         await executeRbac(asset, [
           { role: ATS_ROLES.ROLE_ISSUER, members: [signer_B.address] },
@@ -969,6 +970,11 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
       });
 
       describe("KYC", () => {
+        beforeEach(async () => {
+          await asset.grantRole(ATS_ROLES.ROLE_INTERNAL_KYC_MANAGER, signer_A.address);
+          await asset.activateInternalKyc();
+        });
+
         it("Given a non kyc account WHEN approveClearingOperationByPartition with operation type Transfer THEN transaction fails with InvalidKycStatus", async () => {
           const clearingOperationFromB = {
             ...clearingOperationFrom,
@@ -1374,6 +1380,8 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
         it("GIVEN a clearing transfer WHEN reclaimClearingOperationByPartition with unidentified account THEN transaction fails", async () => {
           await asset.connect(signer_A).clearingTransferByPartition(clearingOperation, _AMOUNT, signer_C.address);
 
+          await asset.grantRole(ATS_ROLES.ROLE_INTERNAL_KYC_MANAGER, signer_A.address);
+          await asset.activateInternalKyc();
           // Revoke identity for signer_A
           await asset.connect(signer_B).revokeKyc(signer_A.address);
 
@@ -2674,9 +2682,10 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
       });
     });
 
-    describe.skip("Common Modifiers", () => {
+    describe("Common Modifiers", () => {
       beforeEach(async () => {
         await asset.grantRole(ATS_ROLES.ROLE_CLEARING, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_CLEARING_VALIDATOR, signer_A.address);
         await asset.activateClearing();
         await executeRbac(asset, [
           { role: ATS_ROLES.ROLE_ISSUER, members: [signer_B.address] },
