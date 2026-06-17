@@ -166,7 +166,6 @@ export async function deployLoansPortfolioTokenFixture({
       name: securityData.erc20MetadataInfo.name,
       symbol: securityData.erc20MetadataInfo.symbol,
       decimals: securityData.erc20MetadataInfo.decimals,
-      isin: securityData.erc20MetadataInfo.isin,
     },
     securityType: 1, // SecurityType.Equity (reuse for loan portfolio)
   });

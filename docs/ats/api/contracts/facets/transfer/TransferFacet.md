@@ -305,3 +305,11 @@ Reverts when a transfer is attempted while partitions are protected and the call
 | ------- | ------- | ------------------------------------------------ |
 | account | address | The caller lacking the required role.            |
 | role    | bytes32 | The role that would have been needed to proceed. |
+
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.

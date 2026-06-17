@@ -36,6 +36,7 @@ abstract contract Loan is ILoan, Modifiers {
     }
 
     /// @inheritdoc ILoan
+    /// @dev Emits {LoanDetailsSet}.
     function setLoanDetails(
         LoanDetailsData calldata loanDetailsData_
     )
@@ -54,6 +55,7 @@ abstract contract Loan is ILoan, Modifiers {
         validateAddressNotZero(loanDetailsData_.loanBasicData.servicerAccount)
     {
         LoanStorageWrapper.setLoanDetails(loanDetailsData_);
+        emit ILoan.LoanDetailsSet(loanDetailsData_);
     }
 
     /// @inheritdoc ILoan

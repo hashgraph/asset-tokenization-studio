@@ -7,7 +7,7 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { CapStorageWrapper } from "../../domain/core/CapStorageWrapper.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
-import { IMint } from "../mint/IMint.sol";
+import { IMintTypes } from "../mint/IMintTypes.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
@@ -62,7 +62,7 @@ abstract contract BatchMint is IBatchMint, Modifiers {
         address sender = EvmAccessors.getMsgSender();
         for (uint256 i; i < length; ) {
             TokenCoreOps.issue(_toList[i], _amounts[i]);
-            emit IMint.Issued(sender, _toList[i], _amounts[i], "");
+            emit IMintTypes.Issued(sender, _toList[i], _amounts[i], "");
             unchecked {
                 ++i;
             }

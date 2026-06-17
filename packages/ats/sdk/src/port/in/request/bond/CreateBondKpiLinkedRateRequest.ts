@@ -13,7 +13,6 @@ import { InvalidValue } from "../error/InvalidValue";
 export default class CreateBondKpiLinkedRateRequest extends ValidatedRequest<CreateBondKpiLinkedRateRequest> {
   name: string;
   symbol: string;
-  isin: string;
   private _decimals: number;
   public get decimals(): number {
     return this._decimals;
@@ -88,7 +87,6 @@ export default class CreateBondKpiLinkedRateRequest extends ValidatedRequest<Cre
   constructor({
     name,
     symbol,
-    isin,
     decimals,
     isWhiteList,
     erc20VotesActivated,
@@ -134,7 +132,6 @@ export default class CreateBondKpiLinkedRateRequest extends ValidatedRequest<Cre
   }: {
     name: string;
     symbol: string;
-    isin: string;
     decimals: number | string;
     isWhiteList: boolean;
     erc20VotesActivated: boolean;
@@ -184,9 +181,6 @@ export default class CreateBondKpiLinkedRateRequest extends ValidatedRequest<Cre
       },
       symbol: (val) => {
         return Security.checkSymbol(val);
-      },
-      isin: (val) => {
-        return Security.checkISIN(val);
       },
       decimals: (val) => {
         return Security.checkInteger(val);
@@ -254,7 +248,6 @@ export default class CreateBondKpiLinkedRateRequest extends ValidatedRequest<Cre
     });
     this.name = name;
     this.symbol = symbol;
-    this.isin = isin;
     this.decimals = typeof decimals === "number" ? decimals : parseInt(decimals);
     this.isWhiteList = isWhiteList;
     this.erc20VotesActivated = erc20VotesActivated;

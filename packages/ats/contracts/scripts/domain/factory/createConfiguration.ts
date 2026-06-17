@@ -24,6 +24,7 @@ import {
 import { BusinessLogicResolver } from "@contract-types";
 import { FACTORY_CONFIG_ID } from "../constants";
 import { atsRegistry } from "../atsRegistry";
+import type { FacetName } from "../atsRegistry";
 import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
 
 /**
@@ -31,7 +32,7 @@ import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
  *
  * Factory is a single-facet ResolverProxy that handles token deployment.
  */
-const FACTORY_FACETS = ["FactoryFacet"] as const;
+export const FACTORY_FACETS: readonly FacetName[] = ["FactoryFacet"];
 
 /**
  * Create factory token configuration in BusinessLogicResolver.

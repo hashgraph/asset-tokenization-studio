@@ -39,28 +39,29 @@ contract LoansPortfolioFacet is LoansPortfolio, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](20);
-        staticFunctionSelectors_[selectorIndex++] = this.initializeLoansPortfolio.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.addHoldingsAsset.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.removeHoldingsAsset.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.notifyLoanHoldingsAssetUpdate.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.loansPortfolioWithdraw.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getLoansPortfolioData.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getHoldingsAssets.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getLoanHoldingsAssets.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getHoldingsAssetOwnership.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getNumberOfAssets.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getNumberOfLoans.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getNumberOfCash.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getNumberOfPerformingLoans.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getNumberOfNonPerformingLoans.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getNumberDefaultedLoans.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getSecuredLoansRatio.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getPerformingLoansRatio.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getNonPerformingLoansRatio.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getDefaultedLoansRatio.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getGeographicalExposure.selector;
+        uint256 selectorIndex = 19;
+        staticFunctionSelectors_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticFunctionSelectors_[--selectorIndex] = this.initializeLoansPortfolio.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.addHoldingsAsset.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.removeHoldingsAsset.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.notifyLoanHoldingsAssetUpdate.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.loansPortfolioWithdraw.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getLoansPortfolioData.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getHoldingsAssets.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getLoanHoldingsAssets.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getHoldingsAssetOwnership.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getNumberOfAssets.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getNumberOfLoans.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getNumberOfCash.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getNumberOfPerformingLoans.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getNumberOfNonPerformingLoans.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getNumberDefaultedLoans.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getSecuredLoansRatio.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getPerformingLoansRatio.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getNonPerformingLoansRatio.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getDefaultedLoansRatio.selector;
+        }
     }
 
     /// @inheritdoc IStaticFunctionSelectors

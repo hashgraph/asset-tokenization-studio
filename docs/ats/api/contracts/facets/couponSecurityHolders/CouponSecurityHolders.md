@@ -42,7 +42,7 @@ function getCouponsFor(uint256 _couponID, uint256 _pageIndex, uint256 _pageLengt
 
 Returns coupon information for every holder of a given coupon, paginated.
 
-_Internally resolves the holder page then retrieves per-holder coupon details. The two returned arrays share the same index: `couponFor_[i]` corresponds to `holders_[i]`._
+_Internally resolves the holder page then retrieves per-holder coupon details. The two returned arrays share the same index: `couponFor_[i]`corresponds to`holders*[i]`.*
 
 #### Parameters
 
@@ -251,6 +251,14 @@ _Replaces assertions for defensive handling of logically impossible states._
 | Name      | Type   | Description                                        |
 | --------- | ------ | -------------------------------------------------- |
 | \_errorId | bytes4 | Identifier of the unexpected validation condition. |
+
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.
 
 ### WrongIndexForAction
 

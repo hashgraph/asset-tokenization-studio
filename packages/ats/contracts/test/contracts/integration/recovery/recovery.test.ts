@@ -22,7 +22,6 @@ import {
 const name = "TEST";
 const symbol = "TAC";
 const decimals = 6;
-const isin = "US0231351067";
 const MAX_SUPPLY = 10000000;
 const EMPTY_VC_ID = EMPTY_STRING;
 
@@ -59,7 +58,7 @@ describe("Recovery Tests", () => {
             compliance: complianceMock.target as string,
             identityRegistry: identityRegistryMock.target as string,
             maxSupply: MAX_SUPPLY,
-            erc20MetadataInfo: { name, symbol, decimals, isin },
+            erc20MetadataInfo: { name, symbol, decimals },
           },
         },
         infrastructure,
@@ -694,6 +693,41 @@ describe("Recovery Tests", () => {
         await expect(
           asset.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO),
         ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+      });
+
+      // Recovery does not migrate or revoke the lost wallet's roles; the centralized
+      // checkRole / checkAnyRole guard makes a recovered wallet fail EVERY role-gated path,
+      // including paths that call the helpers directly instead of through `onlyRole`.
+      describe("Recovered wallets fail centralized role checks", () => {
+        it("GIVEN a recovered wallet still holding ROLE_PAUSER WHEN it calls pause (onlyRole) THEN reverts WalletRecovered", async () => {
+          await asset.grantRole(ATS_ROLES.ROLE_PAUSER, signer_D.address);
+          await asset.recoveryAddress(signer_D.address, signer_F.address, ADDRESS_ZERO);
+
+          // The role is NOT revoked — the wallet is blocked by the recovered-state guard, not by losing the role.
+          expect(await asset.hasRole(ATS_ROLES.ROLE_PAUSER, signer_D.address)).to.equal(true);
+          await expect(asset.connect(signer_D).pause()).to.be.revertedWithCustomError(asset, "WalletRecovered");
+        });
+
+        it("GIVEN a recovered wallet still holding ROLE_FREEZE_MANAGER WHEN it freezes (onlyFreezeRoles → checkAnyRole) THEN reverts WalletRecovered", async () => {
+          await asset.grantRole(ATS_ROLES.ROLE_FREEZE_MANAGER, signer_D.address);
+          await asset.recoveryAddress(signer_D.address, signer_F.address, ADDRESS_ZERO);
+
+          expect(await asset.hasRole(ATS_ROLES.ROLE_FREEZE_MANAGER, signer_D.address)).to.equal(true);
+          await expect(asset.connect(signer_D).freezePartialTokens(signer_E.address, 1)).to.be.revertedWithCustomError(
+            asset,
+            "WalletRecovered",
+          );
+        });
+
+        it("GIVEN a recovered wallet still holding DEFAULT_ADMIN_ROLE WHEN it calls applyRoles (direct checkRole) THEN reverts WalletRecovered", async () => {
+          await asset.grantRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, signer_D.address);
+          await asset.recoveryAddress(signer_D.address, signer_F.address, ADDRESS_ZERO);
+
+          expect(await asset.hasRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, signer_D.address)).to.equal(true);
+          await expect(
+            asset.connect(signer_D).applyRoles([ATS_ROLES.ROLE_LOCKER], [true], signer_E.address),
+          ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+        });
       });
     });
   });

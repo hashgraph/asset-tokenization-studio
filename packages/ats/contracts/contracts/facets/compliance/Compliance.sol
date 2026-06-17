@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ROLE_TREX_OWNER, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { IComplianceFacet, RESOLVER_KEY_COMPLIANCE } from "./IComplianceFacet.sol";
+import { IERC3643Types } from "../commonTypes/IERC3643Types.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { PauseStorageWrapper } from "../../domain/core/PauseStorageWrapper.sol";
 import { IPause } from "../pause/IPause.sol";
@@ -10,6 +11,7 @@ import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
 import { Eip1066 } from "../../constants/eip1066.sol";
 import { ICompliance } from "./externalInterfaces/ICompliance.sol";
+import { IERC3643Types } from "../commonTypes/IERC3643Types.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
@@ -31,15 +33,19 @@ abstract contract Compliance is IComplianceFacet, Modifiers {
     ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_COMPLIANCE) {
         ERC3643StorageWrapper.setCompliance(_compliance);
         InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_COMPLIANCE);
+        emit IERC3643Types.ComplianceAdded(_compliance);
         emit ComplianceInitialized(_compliance);
     }
 
     /// @inheritdoc IComplianceFacet
-    /// @dev Requires an operational, activated, unpaused token and `TREX_OWNER_ROLE`.
+    /// @dev Requires an operational, activated, unpaused token and `TREX_OWNER_ROLE`. Emits
+    ///      `ComplianceAdded` so off-chain observers can track which compliance contract was
+    ///      authoritative at any point in time.
     function setCompliance(
         address _compliance
     ) external override onlyOperational onlyActivated onlyUnpaused onlyRole(ROLE_TREX_OWNER) {
         ERC3643StorageWrapper.setCompliance(_compliance);
+        emit IERC3643Types.ComplianceAdded(_compliance);
     }
 
     /// @inheritdoc IComplianceFacet

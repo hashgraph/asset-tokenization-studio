@@ -235,3 +235,11 @@ _The reported sender is resolved through `EvmAccessors` for forwarding support._
 | --------- | ------- | ---------------------------------------------------- |
 | partition | bytes32 | Partition whose access requirement is not satisfied. |
 | sender    | address | Effective caller that lacks the required role.       |
+
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.

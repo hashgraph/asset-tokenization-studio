@@ -11,8 +11,8 @@
 //             `npm run ats:contracts:hashes:check` to keep generated hex
 //             aligned with the annotations).
 //
-// Scope: `contracts/` only — explicitly skips `contracts/factory/ERC3643/`
-// (mirror-generated) and any `test/` subdirectories.
+// Scope: `contracts/` only — explicitly skips dependency-compiler output and any
+// `test/` subdirectories.
 //
 // Architecture: TWO-PHASE.
 //   Phase 1 (collect) — scan every in-scope file, parse every annotation +
@@ -42,12 +42,7 @@ import {
 
 const ROOT = path.resolve(__dirname, "..", "..");
 const SCAN_GLOB = "contracts/**/*.sol";
-const EXCLUDES = [
-  "contracts/factory/ERC3643/**",
-  "contracts/hardhat-dependency-compiler/**",
-  "contracts/test/**",
-  "contracts/**/test/**",
-];
+const EXCLUDES = ["contracts/hardhat-dependency-compiler/**", "contracts/test/**", "contracts/**/test/**"];
 
 const ANNOTATION = /^\s*\/\/\/\s*@custom:hash\s+(\S+)\s+(\S+)\s*$/;
 const CONSTANT = /^(\s*bytes32\s+constant\s+(\w+)\s*=\s*)(0x[0-9a-fA-F]{64})(\s*;.*)$/;

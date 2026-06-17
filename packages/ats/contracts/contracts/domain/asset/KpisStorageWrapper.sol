@@ -48,7 +48,8 @@ library KpisStorageWrapper {
      * @notice Inserts a KPI data point at `date` for `project`, maintaining sort order.
      * @dev Reverts if the date is already a checkpoint for the project. Appends in O(1)
      *      when the date is strictly greater than the latest entry; otherwise shifts the
-     *      tail right to place the new entry in its sorted position. Emits `KpiDataAdded`.
+     *      tail right to place the new entry in its sorted position. The calling facet (`Kpis`)
+     *      emits `KpiDataAdded`.
      * @param date The KPI data timestamp (must be unique per project).
      * @param value The KPI data value.
      * @param project The project address the KPI belongs to.
@@ -66,7 +67,6 @@ library KpisStorageWrapper {
         // Fast path: append to end
         if (length == 0 || ckpt[latest].from < date) {
             ckpt.push(Checkpoints.Checkpoint({ from: date, value: value }));
-            emit IKpis.KpiDataAdded(project, date, value);
             return;
         }
         // Insert in sorted position: extend array, shift right, write new element
@@ -76,7 +76,6 @@ library KpisStorageWrapper {
                 uint256 prev = i - 1;
                 if (ckpt[prev].from <= date) {
                     ckpt[i] = Checkpoints.Checkpoint({ from: date, value: value });
-                    emit IKpis.KpiDataAdded(project, date, value);
                     return;
                 }
                 ckpt[i] = ckpt[prev];
@@ -84,7 +83,6 @@ library KpisStorageWrapper {
         }
         // Insert at position 0
         ckpt[0] = Checkpoints.Checkpoint({ from: date, value: value });
-        emit IKpis.KpiDataAdded(project, date, value);
     }
 
     /**
@@ -226,7 +224,7 @@ library KpisStorageWrapper {
      * @dev Uses inline assembly to load the ERC-7201 slot from a precomputed constant.
      * @return kpisDataStorage_ Storage pointer to `KpisDataStorage`.
      */
-    function kpisDataStorage() internal pure returns (KpisDataStorage storage kpisDataStorage_) {
+    function kpisDataStorage() private pure returns (KpisDataStorage storage kpisDataStorage_) {
         bytes32 position = STORAGE_LOCATION_KPIS;
         // solhint-disable-next-line no-inline-assembly
         assembly {

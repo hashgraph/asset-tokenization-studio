@@ -381,7 +381,7 @@ library CorporateActionsStorageWrapper {
      *      deterministic address based on STORAGE_LOCATION_CORPORATE_ACTION.
      * @return corporateActions_ The storage struct at the designated location.
      */
-    function corporateActionsStorage() internal pure returns (CorporateActionDataStorage storage corporateActions_) {
+    function corporateActionsStorage() private pure returns (CorporateActionDataStorage storage corporateActions_) {
         bytes32 position = STORAGE_LOCATION_CORPORATE_ACTION;
         // solhint-disable-next-line no-inline-assembly
         assembly {

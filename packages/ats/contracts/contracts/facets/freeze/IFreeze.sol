@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import { IFreezeTypes } from "./IFreezeTypes.sol";
+
 /// @custom:hash resolverKey Freeze
 bytes32 constant RESOLVER_KEY_FREEZE = 0xad51c3d79dbb37543854270a7bd1c7237cfa425b16cdf4dee9015c20917ced5a;
 
@@ -16,37 +18,12 @@ bytes32 constant RESOLVER_KEY_FREEZE = 0xad51c3d79dbb37543854270a7bd1c7237cfa425
  *      functions. Freezing tokens reduces the holder's liquid balance; unfreezing restores it
  *      and emits a `Transfer` event from `address(0)`.
  */
-interface IFreeze {
+interface IFreeze is IFreezeTypes {
     /**
      * @notice Emitted once when the freeze capability is initialised on a token.
      * @dev Fires exclusively from `initializeFreeze`.
      */
     event FreezeInitialized();
-
-    /**
-     * @notice Emitted when a specific amount of tokens is frozen for a wallet.
-     * @param account The wallet address whose tokens were frozen.
-     * @param amount The amount of tokens frozen.
-     * @param partition The partition from which tokens were frozen.
-     */
-    event TokensFrozen(address indexed account, uint256 amount, bytes32 partition);
-
-    /**
-     * @notice Emitted when a specific amount of previously frozen tokens is unfrozen for a
-     *         wallet.
-     * @param account The wallet address whose tokens were unfrozen.
-     * @param amount The amount of tokens unfrozen.
-     * @param partition The partition to which tokens were restored.
-     */
-    event TokensUnfrozen(address indexed account, uint256 amount, bytes32 partition);
-
-    /**
-     * @notice Emitted when a wallet's address-level frozen status changes.
-     * @param userAddress The wallet address whose freeze status was updated.
-     * @param isFrozen The new freeze status; `true` means frozen, `false` means unfrozen.
-     * @param owner Address of the agent who triggered the status change.
-     */
-    event AddressFrozen(address indexed userAddress, bool indexed isFrozen, address indexed owner);
 
     /**
      * @notice Reverts when a partial token freeze is attempted with a zero amount.

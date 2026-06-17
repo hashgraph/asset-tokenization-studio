@@ -239,19 +239,6 @@ exports[`DigitalSecuritiesList render correctly 1`] = `
                   <div
                     class="css-zvlevn"
                   >
-                    ISIN
-                  </div>
-                </div>
-              </th>
-              <th
-                class="css-1fegb7z"
-              >
-                <div
-                  class="css-1lekzkb"
-                >
-                  <div
-                    class="css-zvlevn"
-                  >
                     Address
                   </div>
                 </div>

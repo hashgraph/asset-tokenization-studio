@@ -353,6 +353,14 @@ Thrown when attempting to remove an address not present in the external control 
 | ----------- | ------- | ---------------------------------------------------- |
 | controlList | address | The unlisted external control list contract address. |
 
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.
+
 ### ZeroAddressNotAllowed
 
 ```solidity

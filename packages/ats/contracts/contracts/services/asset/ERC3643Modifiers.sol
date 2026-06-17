@@ -25,7 +25,7 @@ abstract contract ERC3643Modifiers {
      * @param _account The address to validate
      */
     modifier onlyUnrecoveredAddress(address _account) {
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_account);
+        ERC3643StorageWrapper.checkUnrecoveredAddress(_account);
         _;
     }
 

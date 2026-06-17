@@ -51,7 +51,6 @@ export function createMockSecurityData(overrides?: Partial<SecurityDataParams>):
       name: TEST_TOKEN_METADATA.NAME,
       symbol: TEST_TOKEN_METADATA.SYMBOL,
       decimals: TEST_TOKEN_METADATA.DECIMALS,
-      isin: TEST_TOKEN_METADATA.ISIN,
     },
     clearingActive: false,
     internalKycActivated: false,

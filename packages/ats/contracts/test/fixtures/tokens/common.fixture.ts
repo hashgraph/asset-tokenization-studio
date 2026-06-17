@@ -12,7 +12,6 @@ import {
 import { FactoryRegulationDataParams, Rbac, SecurityDataParams } from "@scripts/domain";
 import { IAsset, BusinessLogicResolver } from "@contract-types";
 import { MaxUint256, encodeBytes32String, parseUnits, ZeroAddress } from "ethers";
-import { isinGenerator } from "@thomaschaplin/isin-generator";
 
 export const MAX_UINT256 = MaxUint256;
 export const MAX_UINT8 = 255;
@@ -79,7 +78,6 @@ export function getSecurityData(
       name: params?.erc20MetadataInfo?.name ?? DEFAULT_SECURITY_PARAMS.name,
       symbol: params?.erc20MetadataInfo?.symbol ?? DEFAULT_SECURITY_PARAMS.symbol,
       decimals: params?.erc20MetadataInfo?.decimals ?? DEFAULT_SECURITY_PARAMS.decimals,
-      isin: params?.erc20MetadataInfo?.isin ?? isinGenerator(),
     },
     clearingActive: params?.clearingActive ?? DEFAULT_SECURITY_PARAMS.clearingActive,
     internalKycActivated: params?.internalKycActivated ?? DEFAULT_SECURITY_PARAMS.internalKycActivated,

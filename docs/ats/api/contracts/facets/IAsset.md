@@ -1410,9 +1410,9 @@ Returns the decimals simulating non-triggered decimal adjustments up until curre
 
 #### Returns
 
-| Name | Type  | Description |
-| ---- | ----- | ----------- |
-| \_0  | uint8 | undefined   |
+| Name | Type  | Description                                    |
+| ---- | ----- | ---------------------------------------------- |
+| \_0  | uint8 | The number of decimals used for token amounts. |
 
 ### decimalsAt
 
@@ -2488,9 +2488,9 @@ Returns the stored coupon rate type.
 
 #### Returns
 
-| Name | Type                        | Description                                                |
-| ---- | --------------------------- | ---------------------------------------------------------- |
-| \_0  | enum IInterestRate.RateType | The `RateType` value; defaults to `NONE` (0) if never set. |
+| Name | Type                        | Description           |
+| ---- | --------------------------- | --------------------- |
+| \_0  | enum IInterestRate.RateType | The `RateType` value. |
 
 ### getCouponsFor
 
@@ -2500,7 +2500,7 @@ function getCouponsFor(uint256 _couponID, uint256 _pageIndex, uint256 _pageLengt
 
 Returns coupon information for every holder of a given coupon, paginated.
 
-_Internally resolves the holder page then retrieves per-holder coupon details. The two returned arrays share the same index: `couponFor_[i]` corresponds to `holders_[i]`._
+_Internally resolves the holder page then retrieves per-holder coupon details. The two returned arrays share the same index: `couponFor_[i]`corresponds to`holders*[i]`.*
 
 #### Parameters
 
@@ -2735,9 +2735,9 @@ Returns the full metadata struct of the security token.
 
 #### Returns
 
-| Name | Type                | Description |
-| ---- | ------------------- | ----------- |
-| \_0  | ICore.ERC20Metadata | undefined   |
+| Name | Type                | Description                           |
+| ---- | ------------------- | ------------------------------------- |
+| \_0  | ICore.ERC20Metadata | The persisted `ERC20Metadata` bundle. |
 
 ### getExternalControlListsCount
 
@@ -3159,20 +3159,6 @@ Returns the total amount of tokens currently frozen for a wallet.
 | Name | Type    | Description                                                             |
 | ---- | ------- | ----------------------------------------------------------------------- |
 | \_0  | uint256 | The total frozen token amount for `_userAddress` across all partitions. |
-
-### getGeographicalExposure
-
-```solidity
-function getGeographicalExposure() external view returns (struct ILoansPortfolio.GeographicalExposureData[] geographicalExposure_)
-```
-
-Returns the geographical exposure aggregated by country.
-
-#### Returns
-
-| Name                   | Type                                       | Description                                                                                        |
-| ---------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------- |
-| geographicalExposure\_ | ILoansPortfolio.GeographicalExposureData[] | Array of `(country, count)` tuples covering every country present in the portfolio&#39;s holdings. |
 
 ### getHeldAmountFor
 
@@ -5628,7 +5614,7 @@ function initializeInterestRateType(enum IInterestRate.RateType rateType) extern
 
 Initializes the coupon rate type during asset deployment.
 
-_Intended to be called by the factory immediately after proxy creation. No role required — the factory is trusted at deploy time. Reverts with `InvalidRateType` if `rateType` is `NONE`._
+_Intended to be called by the factory immediately after proxy creation. No role required — the factory is trusted at deploy time._
 
 #### Parameters
 
@@ -6676,9 +6662,9 @@ Returns the name of the security token.
 
 #### Returns
 
-| Name | Type   | Description |
-| ---- | ------ | ----------- |
-| \_0  | string | undefined   |
+| Name | Type   | Description            |
+| ---- | ------ | ---------------------- |
+| \_0  | string | The token name string. |
 
 ### nominalValueAtSnapshot
 
@@ -7825,7 +7811,7 @@ function setCouponRateType(enum IInterestRate.RateType rateType) external nonpay
 
 Sets the coupon rate type discriminator for this asset.
 
-_Requires `ROLE_INTEREST_RATE_MANAGER`. Reverts with `InvalidRateType` if `rateType` is `NONE`._
+_Requires `ROLE_INTEREST_RATE_MANAGER`._
 
 #### Parameters
 
@@ -7993,9 +7979,9 @@ Updates the token name. Restricted to the TREX owner role.
 
 #### Parameters
 
-| Name   | Type   | Description |
-| ------ | ------ | ----------- |
-| \_name | string | undefined   |
+| Name   | Type   | Description                      |
+| ------ | ------ | -------------------------------- |
+| \_name | string | New name to assign to the token. |
 
 ### setNominalValue
 
@@ -8130,9 +8116,9 @@ Updates the token symbol. Restricted to the TREX owner role.
 
 #### Parameters
 
-| Name     | Type   | Description |
-| -------- | ------ | ----------- |
-| \_symbol | string | undefined   |
+| Name     | Type   | Description                        |
+| -------- | ------ | ---------------------------------- |
+| \_symbol | string | New symbol to assign to the token. |
 
 ### setVoting
 
@@ -8162,9 +8148,9 @@ Returns the symbol of the security token.
 
 #### Returns
 
-| Name | Type   | Description |
-| ---- | ------ | ----------- |
-| \_0  | string | undefined   |
+| Name | Type   | Description              |
+| ---- | ------ | ------------------------ |
+| \_0  | string | The token symbol string. |
 
 ### takeSnapshot
 
@@ -8735,9 +8721,9 @@ Returns the ERC3643 version string of the token.
 
 #### Returns
 
-| Name | Type   | Description |
-| ---- | ------ | ----------- |
-| \_0  | string | undefined   |
+| Name | Type   | Description                                    |
+| ---- | ------ | ---------------------------------------------- |
+| \_0  | string | The version string (e.g. `&quot;4.0.0&quot;`). |
 
 ## Events
 
@@ -8861,30 +8847,30 @@ Emitted when an immediate balance adjustment is applied.
 ### AgentAdded
 
 ```solidity
-event AgentAdded(address indexed _agent)
+event AgentAdded(address indexed agent)
 ```
 
 Emitted when an agent is granted transfer-management permissions.
 
 #### Parameters
 
-| Name              | Type    | Description                       |
-| ----------------- | ------- | --------------------------------- |
-| \_agent `indexed` | address | Address of the newly added agent. |
+| Name            | Type    | Description                       |
+| --------------- | ------- | --------------------------------- |
+| agent `indexed` | address | Address of the newly added agent. |
 
 ### AgentRemoved
 
 ```solidity
-event AgentRemoved(address indexed _agent)
+event AgentRemoved(address indexed agent)
 ```
 
 Emitted when an agent&#39;s transfer-management permissions are revoked.
 
 #### Parameters
 
-| Name              | Type    | Description                   |
-| ----------------- | ------- | ----------------------------- |
-| \_agent `indexed` | address | Address of the removed agent. |
+| Name            | Type    | Description                   |
+| --------------- | ------- | ----------------------------- |
+| agent `indexed` | address | Address of the removed agent. |
 
 ### AllowanceInitialized
 
@@ -9640,39 +9626,39 @@ _Fired inside `initializeController` once the facet is marked ready._
 ### ControllerRedemption
 
 ```solidity
-event ControllerRedemption(address _controller, address indexed _tokenHolder, uint256 _value, bytes _data, bytes _operatorData)
+event ControllerRedemption(address controller, address indexed tokenHolder, uint256 value, bytes data, bytes operatorData)
 ```
 
 Emitted when an authorised controller redeems (burns) tokens on behalf of a holder.
 
 #### Parameters
 
-| Name                    | Type    | Description                                                     |
-| ----------------------- | ------- | --------------------------------------------------------------- |
-| \_controller            | address | The address of the controller that initiated the redemption.    |
-| \_tokenHolder `indexed` | address | The account whose tokens are redeemed.                          |
-| \_value                 | uint256 | The amount of tokens redeemed.                                  |
-| \_data                  | bytes   | Optional data attached to the redemption for validation.        |
-| \_operatorData          | bytes   | Optional data attached by the controller for event attribution. |
+| Name                  | Type    | Description                                                     |
+| --------------------- | ------- | --------------------------------------------------------------- |
+| controller            | address | The address of the controller that initiated the redemption.    |
+| tokenHolder `indexed` | address | The account whose tokens are redeemed.                          |
+| value                 | uint256 | The amount of tokens redeemed.                                  |
+| data                  | bytes   | Optional data attached to the redemption for validation.        |
+| operatorData          | bytes   | Optional data attached by the controller for event attribution. |
 
 ### ControllerTransfer
 
 ```solidity
-event ControllerTransfer(address _controller, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)
+event ControllerTransfer(address controller, address indexed from, address indexed to, uint256 value, bytes data, bytes operatorData)
 ```
 
 Emitted when an authorised controller transfers tokens between two holders.
 
 #### Parameters
 
-| Name             | Type    | Description                                                     |
-| ---------------- | ------- | --------------------------------------------------------------- |
-| \_controller     | address | The address of the controller that initiated the transfer.      |
-| \_from `indexed` | address | The address tokens are transferred from.                        |
-| \_to `indexed`   | address | The address tokens are transferred to.                          |
-| \_value          | uint256 | The amount of tokens transferred.                               |
-| \_data           | bytes   | Optional data attached to the transfer for validation.          |
-| \_operatorData   | bytes   | Optional data attached by the controller for event attribution. |
+| Name           | Type    | Description                                                     |
+| -------------- | ------- | --------------------------------------------------------------- |
+| controller     | address | The address of the controller that initiated the transfer.      |
+| from `indexed` | address | The address tokens are transferred from.                        |
+| to `indexed`   | address | The address tokens are transferred to.                          |
+| value          | uint256 | The amount of tokens transferred.                               |
+| data           | bytes   | Optional data attached to the transfer for validation.          |
+| operatorData   | bytes   | Optional data attached by the controller for event attribution. |
 
 ### CoreAdjustedInitialized
 
@@ -9706,9 +9692,9 @@ _Fires exclusively from `initializeCore` after the storage write succeeds._
 
 #### Parameters
 
-| Name     | Type                | Description |
-| -------- | ------------------- | ----------- |
-| metadata | ICore.ERC20Metadata | undefined   |
+| Name     | Type                | Description                                                  |
+| -------- | ------------------- | ------------------------------------------------------------ |
+| metadata | ICore.ERC20Metadata | The full ERC-20 metadata bundle persisted at initialisation. |
 
 ### CorporateActionAdded
 
@@ -10489,19 +10475,19 @@ _Emitted when Internal Kyc is updated_
 ### Issued
 
 ```solidity
-event Issued(address indexed _operator, address indexed _to, uint256 _value, bytes _data)
+event Issued(address indexed operator, address indexed to, uint256 value, bytes data)
 ```
 
 Emitted when new tokens are issued to a holder.
 
 #### Parameters
 
-| Name                 | Type    | Description                                          |
-| -------------------- | ------- | ---------------------------------------------------- |
-| \_operator `indexed` | address | Account that invoked the issuance (issuer or agent). |
-| \_to `indexed`       | address | Recipient of the newly issued tokens.                |
-| \_value              | uint256 | Amount of tokens issued, denominated in base units.  |
-| \_data               | bytes   | Arbitrary payload forwarded alongside the issuance.  |
+| Name               | Type    | Description                                          |
+| ------------------ | ------- | ---------------------------------------------------- |
+| operator `indexed` | address | Account that invoked the issuance (issuer or agent). |
+| to `indexed`       | address | Recipient of the newly issued tokens.                |
+| value              | uint256 | Amount of tokens issued, denominated in base units.  |
+| data               | bytes   | Arbitrary payload forwarded alongside the issuance.  |
 
 ### IssuedByPartition
 
@@ -10666,9 +10652,9 @@ _Fires exclusively from `initializeLoansPortfolio` after the storage write succe
 
 #### Parameters
 
-| Name               | Type                                      | Description |
-| ------------------ | ----------------------------------------- | ----------- |
-| loansPortfolioData | ILoansPortfolio.LoansPortfolioDetailsData | undefined   |
+| Name               | Type                                      | Description                                              |
+| ------------------ | ----------------------------------------- | -------------------------------------------------------- |
+| loansPortfolioData | ILoansPortfolio.LoansPortfolioDetailsData | The portfolio configuration persisted at initialisation. |
 
 ### LoansPortfolioWithdrawn
 
@@ -10991,21 +10977,6 @@ Emitted by `setOperationalStatus` when every facet of the configuration version 
 | configurationId | bytes32 | Resolver-proxy configuration that became operational. |
 | version         | uint256 | Configuration version that became operational.        |
 
-### OperatorAuthorized
-
-```solidity
-event OperatorAuthorized(address indexed operator, address indexed tokenHolder)
-```
-
-Emitted when an operator is authorized by an account for all partitions of the account
-
-#### Parameters
-
-| Name                  | Type    | Description                               |
-| --------------------- | ------- | ----------------------------------------- |
-| operator `indexed`    | address | The account that changed their delegation |
-| tokenHolder `indexed` | address | The account who authorized the operator   |
-
 ### OperatorByPartitionInitialized
 
 ```solidity
@@ -11074,21 +11045,6 @@ event OperatorInitialized()
 Emitted once when the operator capability is initialised on a token.
 
 _Fires exclusively from `initializeOperator`._
-
-### OperatorRevoked
-
-```solidity
-event OperatorRevoked(address indexed operator, address indexed tokenHolder)
-```
-
-Emitted when an operator is revoked by an account for all partitions of the account
-
-#### Parameters
-
-| Name                  | Type    | Description                               |
-| --------------------- | ------- | ----------------------------------------- |
-| operator `indexed`    | address | The account that changed their delegation |
-| tokenHolder `indexed` | address | The account who revoked the operator      |
 
 ### PartitionTransferredAndLocked
 
@@ -11492,35 +11448,35 @@ _Fires exclusively from `initializeRecovery`._
 ### RecoverySuccess
 
 ```solidity
-event RecoverySuccess(address _lostWallet, address _newWallet, address _investorOnchainID)
+event RecoverySuccess(address lostWallet, address newWallet, address investorOnchainID)
 ```
 
 Emitted when a lost wallet is successfully recovered to a new address.
 
 #### Parameters
 
-| Name                | Type    | Description                                        |
-| ------------------- | ------- | -------------------------------------------------- |
-| \_lostWallet        | address | Address of the wallet that was lost.               |
-| \_newWallet         | address | Address of the replacement wallet.                 |
-| \_investorOnchainID | address | OnchainID of the investor performing the recovery. |
+| Name              | Type    | Description                                        |
+| ----------------- | ------- | -------------------------------------------------- |
+| lostWallet        | address | Address of the wallet that was lost.               |
+| newWallet         | address | Address of the replacement wallet.                 |
+| investorOnchainID | address | OnchainID of the investor performing the recovery. |
 
 ### Redeemed
 
 ```solidity
-event Redeemed(address indexed _operator, address indexed _from, uint256 _value, bytes _data)
+event Redeemed(address indexed operator, address indexed from, uint256 value, bytes data)
 ```
 
 Emitted when tokens are redeemed from a holder&#39;s balance.
 
 #### Parameters
 
-| Name                 | Type    | Description                                           |
-| -------------------- | ------- | ----------------------------------------------------- |
-| \_operator `indexed` | address | Account that executed the redemption.                 |
-| \_from `indexed`     | address | Address from which tokens were burnt.                 |
-| \_value              | uint256 | Amount of tokens redeemed, denominated in base units. |
-| \_data               | bytes   | Arbitrary payload forwarded alongside the redemption. |
+| Name               | Type    | Description                                           |
+| ------------------ | ------- | ----------------------------------------------------- |
+| operator `indexed` | address | Account that executed the redemption.                 |
+| from `indexed`     | address | Address from which tokens were burnt.                 |
+| value              | uint256 | Amount of tokens redeemed, denominated in base units. |
+| data               | bytes   | Arbitrary payload forwarded alongside the redemption. |
 
 ### RedeemedByPartition
 
@@ -12055,22 +12011,22 @@ _Fires exclusively from `initializeTransferAndLock`._
 ### TransferByPartition
 
 ```solidity
-event TransferByPartition(bytes32 indexed _fromPartition, address _operator, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)
+event TransferByPartition(bytes32 indexed fromPartition, address operator, address indexed from, address indexed to, uint256 value, bytes data, bytes operatorData)
 ```
 
 Emitted when tokens are transferred from one partition to another or within the same partition.
 
 #### Parameters
 
-| Name                      | Type    | Description                           |
-| ------------------------- | ------- | ------------------------------------- |
-| \_fromPartition `indexed` | bytes32 | Source partition.                     |
-| \_operator                | address | Address that initiated the transfer.  |
-| \_from `indexed`          | address | Token holder whose balance decreased. |
-| \_to `indexed`            | address | Recipient whose balance increased.    |
-| \_value                   | uint256 | Token quantity transferred.           |
-| \_data                    | bytes   | Caller-supplied data.                 |
-| \_operatorData            | bytes   | Operator-supplied data.               |
+| Name                    | Type    | Description                           |
+| ----------------------- | ------- | ------------------------------------- |
+| fromPartition `indexed` | bytes32 | Source partition.                     |
+| operator                | address | Address that initiated the transfer.  |
+| from `indexed`          | address | Token holder whose balance decreased. |
+| to `indexed`            | address | Recipient whose balance increased.    |
+| value                   | uint256 | Token quantity transferred.           |
+| data                    | bytes   | Caller-supplied data.                 |
+| operatorData            | bytes   | Operator-supplied data.               |
 
 ### TransferByPartitionInitialized
 
@@ -13274,22 +13230,6 @@ Thrown when an account does not hold or is not associated with the specified par
 | --------- | ------- | --------------------------------------------- |
 | account   | address | Address that was checked.                     |
 | partition | bytes32 | Partition that was not found for the account. |
-
-### InvalidRateType
-
-```solidity
-error InvalidRateType(enum IInterestRate.RateType rateType)
-```
-
-Reverts when `NONE` is passed as a rate type.
-
-_`NONE` is reserved as the uninitialized default; it must never be set explicitly._
-
-#### Parameters
-
-| Name     | Type                        | Description                                   |
-| -------- | --------------------------- | --------------------------------------------- |
-| rateType | enum IInterestRate.RateType | The invalid rate type supplied by the caller. |
 
 ### InvalidSender
 

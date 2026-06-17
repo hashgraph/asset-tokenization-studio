@@ -254,34 +254,6 @@ _The expected relationship between both dates is defined by the caller&#39;s val
 | firstDate  | uint256 | First date participating in the failed comparison.  |
 | secondDate | uint256 | Second date participating in the failed comparison. |
 
-### WrongISIN
-
-```solidity
-error WrongISIN(string isin)
-```
-
-Raised when the provided ISIN does not meet the expected format or length.
-
-#### Parameters
-
-| Name | Type   | Description              |
-| ---- | ------ | ------------------------ |
-| isin | string | The invalid ISIN string. |
-
-### WrongISINChecksum
-
-```solidity
-error WrongISINChecksum(string isin)
-```
-
-Raised when the ISIN checksum is invalid.
-
-#### Parameters
-
-| Name | Type   | Description              |
-| ---- | ------ | ------------------------ |
-| isin | string | The invalid ISIN string. |
-
 ### WrongTimestamp
 
 ```solidity

@@ -32,14 +32,4 @@ abstract contract InterestRateModifiers {
         InterestRateStorageWrapper.requireValidImpactData(_newImpactData);
         _;
     }
-
-    /**
-     * @notice Modifier that reverts when `NONE` is supplied as the rate type.
-     * @dev `NONE` is the zero-value default reserved for uninitialised assets.
-     * @param rateType The rate type to validate.
-     */
-    modifier onlyValidRateType(IInterestRate.RateType rateType) {
-        InterestRateStorageWrapper.checkValidRateType(rateType);
-        _;
-    }
 }

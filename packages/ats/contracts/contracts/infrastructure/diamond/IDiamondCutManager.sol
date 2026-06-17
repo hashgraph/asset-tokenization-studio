@@ -53,14 +53,14 @@ interface IDiamondCutManager {
      * @notice Emitted on every {createBatchConfiguration} call, including the final batch.
      * @param configurationId Configuration key being assembled.
      * @param facetConfigurations Facets appended in this batch.
-     * @param _isLastBatch True when this call finalises the configuration version.
+     * @param isLastBatch True when this call finalises the configuration version.
      * @param version Version number being assembled for this configuration.
      * @param data Additional data passed to the configuration.
      */
     event DiamondBatchConfigurationCreated(
         bytes32 configurationId,
         FacetConfiguration[] facetConfigurations,
-        bool _isLastBatch,
+        bool isLastBatch,
         uint256 version,
         bytes data
     );

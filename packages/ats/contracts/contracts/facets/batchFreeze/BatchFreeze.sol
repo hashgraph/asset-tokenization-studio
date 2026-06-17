@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IBatchFreeze, RESOLVER_KEY_BATCH_FREEZE } from "./IBatchFreeze.sol";
-import { IFreeze } from "../freeze/IFreeze.sol";
+import { IFreezeTypes } from "../freeze/IFreezeTypes.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
@@ -48,9 +48,9 @@ abstract contract BatchFreeze is IBatchFreeze, Modifiers {
         address sender = EvmAccessors.getMsgSender();
         for (uint256 i; i < length; ) {
             DefaultValueValidation.checkZeroAddress(_userAddresses[i]);
-            ERC3643StorageWrapper.requireUnrecoveredAddress(_userAddresses[i]);
+            ERC3643StorageWrapper.checkUnrecoveredAddress(_userAddresses[i]);
             ERC3643StorageWrapper.setAddressFrozen(_userAddresses[i], _freeze[i]);
-            emit IFreeze.AddressFrozen(_userAddresses[i], _freeze[i], sender);
+            emit IFreezeTypes.AddressFrozen(_userAddresses[i], _freeze[i], sender);
             unchecked {
                 ++i;
             }
@@ -74,9 +74,9 @@ abstract contract BatchFreeze is IBatchFreeze, Modifiers {
         uint256 length = _userAddresses.length;
         for (uint256 i; i < length; ) {
             DefaultValueValidation.checkZeroAddress(_userAddresses[i]);
-            ERC3643StorageWrapper.requireUnrecoveredAddress(_userAddresses[i]);
+            ERC3643StorageWrapper.checkUnrecoveredAddress(_userAddresses[i]);
             ERC3643StorageWrapper.freezeTokens(_userAddresses[i], _amounts[i]);
-            emit IFreeze.TokensFrozen(_userAddresses[i], _amounts[i], _DEFAULT_PARTITION);
+            emit IFreezeTypes.TokensFrozen(_userAddresses[i], _amounts[i], _DEFAULT_PARTITION);
             unchecked {
                 ++i;
             }
@@ -100,9 +100,9 @@ abstract contract BatchFreeze is IBatchFreeze, Modifiers {
         uint256 length = _userAddresses.length;
         for (uint256 i; i < length; ) {
             DefaultValueValidation.checkZeroAddress(_userAddresses[i]);
-            ERC3643StorageWrapper.requireUnrecoveredAddress(_userAddresses[i]);
+            ERC3643StorageWrapper.checkUnrecoveredAddress(_userAddresses[i]);
             ERC3643StorageWrapper.unfreezeTokens(_userAddresses[i], _amounts[i], 0);
-            emit IFreeze.TokensUnfrozen(_userAddresses[i], _amounts[i], _DEFAULT_PARTITION);
+            emit IFreezeTypes.TokensUnfrozen(_userAddresses[i], _amounts[i], _DEFAULT_PARTITION);
             unchecked {
                 ++i;
             }

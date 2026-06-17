@@ -319,6 +319,14 @@ Thrown when attempting to remove an address not present in the issuer list.
 | ------ | ------- | ---------------------------- |
 | issuer | address | The unlisted issuer address. |
 
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.
+
 ### ZeroAddressNotAllowed
 
 ```solidity

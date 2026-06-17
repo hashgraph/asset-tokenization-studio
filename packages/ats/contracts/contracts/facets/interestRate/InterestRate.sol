@@ -20,23 +20,17 @@ abstract contract InterestRate is IInterestRate, Modifiers {
     /// @inheritdoc IInterestRate
     function initializeInterestRateType(
         IInterestRate.RateType rateType
-    )
-        external
-        override
-        onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(RESOLVER_KEY_INTEREST_RATE)
-        onlyValidRateType(rateType)
-    {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_INTEREST_RATE) {
         InterestRateStorageWrapper.initializeCouponRateType(rateType);
         InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_INTEREST_RATE);
         emit IInterestRate.InterestRateTypeInitialized(rateType);
     }
 
     /// @inheritdoc IInterestRate
-    /// @dev Protected by `onlyRole(ROLE_INTEREST_RATE_MANAGER)` and `onlyValidRateType`.
+    /// @dev Protected by `onlyRole(ROLE_INTEREST_RATE_MANAGER)`.
     function setCouponRateType(
         IInterestRate.RateType rateType
-    ) external override onlyOperational onlyActivated onlyRole(ROLE_INTEREST_RATE_MANAGER) onlyValidRateType(rateType) {
+    ) external override onlyOperational onlyActivated onlyRole(ROLE_INTEREST_RATE_MANAGER) {
         // TODO: check if changing the rate type is allowed after existing coupons have been issued
         InterestRateStorageWrapper.setCouponRateType(rateType);
         emit CouponRateTypeSet(EvmAccessors.getMsgSender(), rateType);

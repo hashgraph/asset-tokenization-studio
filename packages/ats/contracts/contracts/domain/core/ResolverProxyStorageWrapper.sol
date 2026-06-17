@@ -31,7 +31,7 @@ struct ResolverProxyStorage {
  *      resolver, configuration identifier or version.
  */
 library ResolverProxyStorageWrapper {
-    function setResolver(IBusinessLogicResolver _resolver) internal {
+    function setBusinessLogicResolver(IBusinessLogicResolver _resolver) internal {
         resolverProxyStorage().resolver = _resolver;
     }
 
@@ -51,11 +51,32 @@ library ResolverProxyStorageWrapper {
     }
 
     /**
+     * @notice Initializes the resolver-proxy storage.
+     * @param _resolver The `BusinessLogicResolver` instance.
+     * @param _resolverProxyConfigurationV2 The V2 configuration struct.
+     */
+    function initResolverProxyStorage(
+        IBusinessLogicResolver _resolver,
+        IResolverProxy.ResolverProxyConfigurationV2 memory _resolverProxyConfigurationV2
+    ) internal {
+        setBusinessLogicResolver(_resolver);
+        setResolverProxyConfigurationV2(_resolverProxyConfigurationV2);
+    }
+
+    /**
      * @notice Returns the `BusinessLogicResolver` contract that supplies the facet selectors.
      * @return The active resolver instance for this proxy.
      */
     function getBusinessLogicResolver() internal view returns (IBusinessLogicResolver) {
         return resolverProxyStorage().resolver;
+    }
+
+    /**
+     * @notice Returns the proxy configuration.
+     * @return The proxy configuration.
+     */
+    function getProxyConfiguration() internal view returns (bytes memory) {
+        return resolverProxyStorage().resolverProxyConfiguration;
     }
 
     /**
@@ -103,20 +124,6 @@ library ResolverProxyStorageWrapper {
     }
 
     /**
-     * @notice Returns the storage pointer for the ResolverProxy namespace.
-     * @dev Resolves the ERC-7201 slot via inline assembly to obtain a struct reference at
-     *      `STORAGE_LOCATION_RESOLVER_PROXY`.
-     * @return ds Storage reference to the `ResolverProxyStorage` struct.
-     */
-    function resolverProxyStorage() internal pure returns (ResolverProxyStorage storage ds) {
-        bytes32 position = STORAGE_LOCATION_RESOLVER_PROXY;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            ds.slot := position
-        }
-    }
-
-    /**
      * @notice Decodes the version-tagged configuration envelope held in storage.
      * @dev The outer `ResolverProxyConfigurationGeneric` shape is fixed across versions, so this
      *      decode succeeds regardless of which payload version `content` carries.
@@ -136,5 +143,19 @@ library ResolverProxyStorageWrapper {
     function _decodeV2() private view returns (IResolverProxy.ResolverProxyConfigurationV2 memory v2) {
         IResolverProxy.ResolverProxyConfigurationGeneric memory generic = _decodeGeneric();
         v2 = abi.decode(generic.content, (IResolverProxy.ResolverProxyConfigurationV2));
+    }
+
+    /**
+     * @notice Returns the storage pointer for the ResolverProxy namespace.
+     * @dev Resolves the ERC-7201 slot via inline assembly to obtain a struct reference at
+     *      `STORAGE_LOCATION_RESOLVER_PROXY`.
+     * @return ds Storage reference to the `ResolverProxyStorage` struct.
+     */
+    function resolverProxyStorage() private pure returns (ResolverProxyStorage storage ds) {
+        bytes32 position = STORAGE_LOCATION_RESOLVER_PROXY;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            ds.slot := position
+        }
     }
 }

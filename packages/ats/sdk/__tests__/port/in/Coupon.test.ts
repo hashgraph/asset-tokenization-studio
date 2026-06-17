@@ -46,7 +46,6 @@ SDK.log = { level: "ERROR", transports: new LoggerTransports.Console() };
 const decimals = 0;
 const name = "TEST_SECURITY_TOKEN";
 const symbol = "TEST";
-const isin = "ABCDE123456Z";
 const currency = "0x455552";
 const TIME = 30;
 const numberOfUnits = "1000";
@@ -120,7 +119,6 @@ describe("🧪 Coupon test", () => {
     const requestST = new CreateBondRequest({
       name: name,
       symbol: symbol,
-      isin: isin,
       decimals: decimals,
       isWhiteList: false,
       erc20VotesActivated: false,

@@ -72,22 +72,21 @@ library CapStorageWrapper {
 
     /**
      * @notice Updates the supply cap for a specific partition.
-     * @dev Captures the previous partition cap, writes the new cap, and emits
-     *      `MaxSupplyByPartitionSet`. No zero-cap bypass for partition-level
-     *      constraints (unlike the global cap).
+     * @dev Captures and returns the previous partition cap, then writes the new cap. No
+     *      zero-cap bypass for partition-level constraints (unlike the global cap). The calling
+     *      facet (`CapByPartition`) emits `MaxSupplyByPartitionSet`.
      * @param _partition The partition identifier.
      * @param _maxSupply The new partition supply cap.
      * @param _timestamp The reference time for balance-adjustment factor lookup.
+     * @return previousMaxSupplyByPartition The partition cap (adjusted) prior to this call.
      */
-    function setMaxSupplyByPartition(bytes32 _partition, uint256 _maxSupply, uint256 _timestamp) internal {
-        uint256 previousMaxSupplyByPartition = getMaxSupplyByPartitionAdjustedAt(_partition, _timestamp);
+    function setMaxSupplyByPartition(
+        bytes32 _partition,
+        uint256 _maxSupply,
+        uint256 _timestamp
+    ) internal returns (uint256 previousMaxSupplyByPartition) {
+        previousMaxSupplyByPartition = getMaxSupplyByPartitionAdjustedAt(_partition, _timestamp);
         capStorage().maxSupplyByPartition[_partition] = _maxSupply;
-        emit ICap.MaxSupplyByPartitionSet(
-            EvmAccessors.getMsgSender(),
-            _partition,
-            _maxSupply,
-            previousMaxSupplyByPartition
-        );
     }
 
     /**
@@ -231,20 +230,6 @@ library CapStorageWrapper {
     }
 
     /**
-     * @notice Loads the cap storage struct from its ERC-7201 namespace slot.
-     * @dev Uses inline assembly to set the storage slot for the returned reference,
-     *      allowing access to the cap data at its designated storage location.
-     * @return cap_ A storage reference to `CapDataStorage` at the ERC-7201 slot.
-     */
-    function capStorage() internal pure returns (CapDataStorage storage cap_) {
-        bytes32 position = STORAGE_LOCATION_CAP;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            cap_.slot := position
-        }
-    }
-
-    /**
      * @notice Validates whether an amount complies with a supply cap constraint.
      * @dev Returns true if the cap is zero (uncapped) or the amount is at or
      *      below the cap.
@@ -254,5 +239,19 @@ library CapStorageWrapper {
      */
     function isCorrectMaxSupply(uint256 _amount, uint256 _maxSupply) internal pure returns (bool) {
         return (_maxSupply == 0) || (_amount <= _maxSupply);
+    }
+
+    /**
+     * @notice Loads the cap storage struct from its ERC-7201 namespace slot.
+     * @dev Uses inline assembly to set the storage slot for the returned reference,
+     *      allowing access to the cap data at its designated storage location.
+     * @return cap_ A storage reference to `CapDataStorage` at the ERC-7201 slot.
+     */
+    function capStorage() private pure returns (CapDataStorage storage cap_) {
+        bytes32 position = STORAGE_LOCATION_CAP;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            cap_.slot := position
+        }
     }
 }

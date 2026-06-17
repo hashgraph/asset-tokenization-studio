@@ -44,7 +44,6 @@ export interface FixedRateParams {
  *   name: 'My Bond',
  *   symbol: 'MBND',
  *   decimals: 18,
- *   isin: 'US0378331005',
  *   votingRight: true,
  *   // ... other params
  *   regulationType: RegulationType.REG_S,
@@ -99,7 +98,6 @@ export async function deployBondFixedRateFromFactory(
     erc20MetadataInfo: {
       name: securityDataParams.erc20MetadataInfo.name,
       symbol: securityDataParams.erc20MetadataInfo.symbol,
-      isin: securityDataParams.erc20MetadataInfo.isin,
       decimals: securityDataParams.erc20MetadataInfo.decimals,
     },
     clearingActive: securityDataParams.clearingActive,

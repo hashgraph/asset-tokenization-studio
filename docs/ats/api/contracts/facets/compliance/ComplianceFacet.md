@@ -141,7 +141,7 @@ function setCompliance(address _compliance) external nonpayable
 
 Sets the compliance contract address
 
-_Requires an operational, activated, unpaused token and `TREX_OWNER_ROLE`._
+_Requires an operational, activated, unpaused token and `TREX_OWNER_ROLE`. Emits `ComplianceAdded` so off-chain observers can track which compliance contract was authoritative at any point in time._
 
 #### Parameters
 
@@ -251,3 +251,11 @@ error NotAllowedInMultiPartitionMode()
 ```
 
 Thrown when a single-partition operation is attempted on a multi-partition token.
+
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.

@@ -199,7 +199,6 @@ export const GetTotalCouponHoldersRequestFixture = createFixture<GetTotalCouponH
 export const CreateBondRequestFixture = createFixture<CreateBondRequest>((request) => {
   request.name.faker((faker) => faker.company.name());
   request.symbol.faker((faker) => faker.string.alpha({ length: 3, casing: "upper" }));
-  request.isin.faker((faker) => `US${faker.string.numeric(9)}`);
   request.decimals.faker((faker) => faker.number.int({ min: 0, max: 18 }));
   request.isWhiteList.faker((faker) => faker.datatype.boolean());
   request.isControllable.faker((faker) => faker.datatype.boolean());

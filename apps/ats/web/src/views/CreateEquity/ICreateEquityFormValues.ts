@@ -4,7 +4,6 @@ export interface ICreateEquityFormValues {
   name: string;
   symbol: string;
   decimals: number;
-  isin: string;
   isControllable: boolean;
   isBlocklist: boolean;
   isApproval: boolean;

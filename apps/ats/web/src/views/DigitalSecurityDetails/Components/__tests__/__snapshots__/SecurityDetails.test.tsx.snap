@@ -65,22 +65,6 @@ exports[`SecurityDetails should render correctly 1`] = `
     </div>
     <div
       class="css-tvba8"
-      data-testid="definition-list-item-ISIN"
-      tabindex="0"
-    >
-      <p
-        class="chakra-text css-vbc1qe"
-      >
-        ISIN
-      </p>
-      <p
-        class="chakra-text css-uivqlt"
-      >
-        123456789102
-      </p>
-    </div>
-    <div
-      class="css-tvba8"
       data-testid="definition-list-item-ID"
       tabindex="0"
     >
@@ -209,24 +193,6 @@ exports[`SecurityDetails should show loading state: loading 1`] = `
         class="chakra-text css-vbc1qe"
       >
         Decimal
-      </p>
-      <div
-        class="chakra-skeleton__group css-1rr4qq7"
-      >
-        <div
-          class="chakra-skeleton css-5dkehc"
-        />
-      </div>
-    </div>
-    <div
-      class="css-tvba8"
-      data-testid="definition-list-item-ISIN"
-      tabindex="0"
-    >
-      <p
-        class="chakra-text css-vbc1qe"
-      >
-        ISIN
       </p>
       <div
         class="chakra-skeleton__group css-1rr4qq7"
@@ -377,22 +343,6 @@ exports[`SecurityDetails total supply should be formatted: loading 1`] = `
         class="chakra-text css-uivqlt"
       >
         18
-      </p>
-    </div>
-    <div
-      class="css-tvba8"
-      data-testid="definition-list-item-ISIN"
-      tabindex="0"
-    >
-      <p
-        class="chakra-text css-vbc1qe"
-      >
-        ISIN
-      </p>
-      <p
-        class="chakra-text css-uivqlt"
-      >
-        123456789102
       </p>
     </div>
     <div

@@ -47,7 +47,6 @@ import {
 } from "../facets/externalControlListManagement/IExternalControlListManagement.sol";
 import { IExternalKycListManagement } from "../facets/externalKycListManagement/IExternalKycListManagement.sol";
 import { IKyc } from "../facets/kyc/IKyc.sol";
-import { _validateISIN } from "./isinValidator.sol";
 import { IInterestRate } from "../facets/interestRate/IInterestRate.sol";
 import { IMaturity } from "../facets/maturity/IMaturity.sol";
 import { ICustomData } from "../facets/customData/ICustomData.sol";
@@ -162,16 +161,6 @@ abstract contract Factory is IFactory {
     }
 
     /**
-     * @notice Guarantees the provided ISIN satisfies the project validator.
-     * @dev Delegates to `_checkISIN`, which reverts when the identifier is malformed.
-     * @param isin International Securities Identification Number to validate.
-     */
-    modifier onlyValidISIN(string calldata isin) {
-        _checkISIN(isin);
-        _;
-    }
-
-    /**
      * @notice Guarantees the initial RBAC configuration includes at least one admin.
      * @dev Delegates to `_checkAdmins`, which reverts with `NoInitialAdmins` unless a non-zero
      *      `DEFAULT_ADMIN_ROLE` member exists in the supplied RBAC entries.
@@ -234,7 +223,7 @@ abstract contract Factory is IFactory {
 
     /**
      * @notice Deploys and initialises an equity security proxy.
-     * @dev Validates resolver, ISIN, admin RBAC and regulation data. Initialises equity,
+     * @dev Validates resolver, admin RBAC and regulation data. Initialises equity,
      *      security, nominal value, dividend, voting and common security facets, marks the
      *      proxy operational, renounces this factory's temporary admin role and emits
      *      `EquityDeployed`.
@@ -248,7 +237,6 @@ abstract contract Factory is IFactory {
     )
         external
         onlyValidResolver(_equityData.security.resolver)
-        onlyValidISIN(_equityData.security.erc20MetadataInfo.isin)
         onlyValidAdmins(_equityData.security.rbacs)
         onlyValidRegulation(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType)
         returns (address equityAddress_)
@@ -273,7 +261,7 @@ abstract contract Factory is IFactory {
 
     /**
      * @notice Deploys and initialises a variable-rate bond security proxy.
-     * @dev Validates resolver, ISIN, admin RBAC, regulation data and bond dates. Initialises
+     * @dev Validates resolver, admin RBAC, regulation data and bond dates. Initialises
      *      bond-specific and common facets, sets the rate type to standard, marks the proxy
      *      operational, renounces this factory's temporary admin role and emits `BondDeployed`.
      * @param _bondData Bond deployment data, including common security configuration.
@@ -286,7 +274,6 @@ abstract contract Factory is IFactory {
     )
         external
         onlyValidResolver(_bondData.security.resolver)
-        onlyValidISIN(_bondData.security.erc20MetadataInfo.isin)
         onlyValidAdmins(_bondData.security.rbacs)
         onlyValidRegulation(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType)
         onlyValidBondDates(_bondData.bondDetails.startingDate, _bondData.bondDetails.maturityDate)
@@ -317,7 +304,6 @@ abstract contract Factory is IFactory {
     )
         external
         onlyValidResolver(_depositTokenData.security.resolver)
-        onlyValidISIN(_depositTokenData.security.erc20MetadataInfo.isin)
         onlyValidAdmins(_depositTokenData.security.rbacs)
         onlyValidRegulation(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType)
         returns (address depositTokenAddress_)
@@ -854,16 +840,6 @@ abstract contract Factory is IFactory {
         if (address(resolver) == address(0)) {
             revert EmptyResolver(resolver);
         }
-    }
-
-    /**
-     * @notice Asserts that the provided ISIN satisfies the project validator.
-     * @dev Forwards to the `_validateISIN` free function, which reverts when the identifier is
-     *      malformed.
-     * @param isin International Securities Identification Number to validate.
-     */
-    function _checkISIN(string calldata isin) private pure {
-        _validateISIN(isin);
     }
 
     /**

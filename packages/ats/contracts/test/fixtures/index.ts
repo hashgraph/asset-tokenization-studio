@@ -66,13 +66,6 @@ export {
   type ResolverProxyFixtureResult,
 } from "./resolverProxy.fixture";
 
-// T-REX fixtures (legacy support)
-export {
-  deployIdentityProxy,
-  deployFullSuiteFixture,
-  deploySuiteWithModularCompliancesFixture,
-} from "./trex/fullSuite.fixture";
-
 // TUP upgrade fixtures
 export {
   deployTupUpgradeTestFixture,

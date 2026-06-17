@@ -177,7 +177,6 @@ describe("Equity Token Deployment", () => {
           name: "Custom Token",
           symbol: "CUST",
           decimals: 8,
-          isin: "XS1234567890",
         },
       });
       const params = createDeployEquityParams(mockFactory, { securityData });
@@ -191,7 +190,6 @@ describe("Equity Token Deployment", () => {
       expect(metadata.name).to.equal("Custom Token");
       expect(metadata.symbol).to.equal("CUST");
       expect(metadata.decimals).to.equal(8);
-      expect(metadata.isin).to.equal("XS1234567890");
     });
 
     it("should include external lists arrays", async () => {
