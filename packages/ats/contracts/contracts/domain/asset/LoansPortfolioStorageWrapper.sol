@@ -88,6 +88,18 @@ library LoansPortfolioStorageWrapper {
         s.distributionPolicy = _loansPortfolioDetails.distributionPolicy;
     }
 
+    /// @dev Test-support setter: writes ONLY the loans-portfolio config fields through the storage
+    ///      struct, with NO ScheduledTasksOps trigger or other side effects (used by MockDiamondCut's
+    ///      forceLoansPortfolioDetails to reproduce deploy-time config on the force-ready mega-mock).
+    function setLoansPortfolioDetails(
+        ILoansPortfolio.PortfolioType _portfolioType,
+        ILoansPortfolio.DistributionPolicy _distributionPolicy
+    ) internal {
+        LoansPortfolioDataStorage storage s = loansPortfolioStorage();
+        s.portfolioType = _portfolioType;
+        s.distributionPolicy = _distributionPolicy;
+    }
+
     /**
      * @notice Adds a holding asset (loan or cash) to the portfolio.
      * @dev Reverts if the asset already exists in the holdings set. If the asset type is LOAN,
