@@ -5211,7 +5211,7 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
       });
     });
 
-    describe.skip("Deactivated", () => {
+    describe("Deactivated", () => {
       beforeEach(async () => {
         await asset.forceDeactivate();
       });
@@ -5224,7 +5224,7 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
         await expect(asset.connect(signer_A).deactivateClearing()).to.be.revertedWithCustomError(asset, "Deactivated");
       });
     });
-    describe.skip("nonOperational", () => {
+    describe("nonOperational", () => {
       beforeEach(async () => {
         await asset.forceNonOperational();
       });
