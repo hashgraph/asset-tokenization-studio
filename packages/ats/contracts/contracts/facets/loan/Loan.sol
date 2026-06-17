@@ -6,7 +6,6 @@ import { ROLE_LOAN_MANAGER, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol
 import { LoanStorageWrapper } from "../../domain/asset/LoanStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title  Loan

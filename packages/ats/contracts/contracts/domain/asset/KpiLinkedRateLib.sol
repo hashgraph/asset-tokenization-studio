@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ICouponTypes } from "../../facets/coupon/ICouponTypes.sol";
-import { InterestRateStorageWrapper, KpiLinkedRateDataStorage } from "./InterestRateStorageWrapper.sol";
+import { InterestRateStorageWrapper } from "./InterestRateStorageWrapper.sol";
 import { KpisStorageWrapper } from "./KpisStorageWrapper.sol";
 import { ProceedRecipientsStorageWrapper } from "./ProceedRecipientsStorageWrapper.sol";
 import { CouponStorageWrapper } from "./coupon/CouponStorageWrapper.sol";

@@ -8,7 +8,6 @@ import {
 import { ROLE_LOCKER } from "../../constants/roles.sol";
 import { IERC1410Types } from "../commonTypes/IERC1410Types.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
-import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { LockStorageWrapper } from "../../domain/asset/LockStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";

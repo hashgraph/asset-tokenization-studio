@@ -63,7 +63,6 @@ library AccessControlStorageWrapper {
      * @param _account Account receiving the role.
      * @return success_ True when both directions of the index were updated.
      */
-    // solhint-disable-next-line ordering
     function grantRole(bytes32 _role, address _account) internal returns (bool success_) {
         RoleDataStorage storage roleDataStorage = rolesStorage();
         success_ =

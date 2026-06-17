@@ -59,7 +59,7 @@ abstract contract Kyc is IKyc, Modifiers {
     /// @inheritdoc IKyc
     function grantKyc(
         address _account,
-        string memory _vcId,
+        string calldata _vcId,
         uint256 _validFrom,
         uint256 _validTo,
         address _issuer

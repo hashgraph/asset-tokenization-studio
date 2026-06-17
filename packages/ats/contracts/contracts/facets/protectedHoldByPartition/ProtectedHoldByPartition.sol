@@ -38,7 +38,7 @@ abstract contract ProtectedHoldByPartition is IProtectedHoldByPartition, Modifie
     function protectedCreateHoldByPartition(
         bytes32 _partition,
         address _from,
-        IHoldTypes.ProtectedHold memory _protectedHold,
+        IHoldTypes.ProtectedHold calldata _protectedHold,
         bytes calldata _signature
     )
         external

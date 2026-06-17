@@ -16,8 +16,6 @@ import {
 import { IHoldTypes } from "../../facets/hold/IHoldTypes.sol";
 import { ThirdPartyType } from "../asset/types/ThirdPartyType.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
-import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
-import { CLEARING_HOLD_CREATION } from "../../constants/values.sol";
 
 /**
  * @title ClearingOps - Orchestrator for clearing creation operations

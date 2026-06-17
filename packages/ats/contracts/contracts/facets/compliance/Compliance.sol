@@ -11,7 +11,6 @@ import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
 import { Eip1066 } from "../../constants/eip1066.sol";
 import { ICompliance } from "./externalInterfaces/ICompliance.sol";
-import { IERC3643Types } from "../commonTypes/IERC3643Types.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
@@ -53,7 +52,7 @@ abstract contract Compliance is IComplianceFacet, Modifiers {
     function canTransfer(
         address _to,
         uint256 _value,
-        bytes memory _data
+        bytes calldata _data
     ) external view override onlyWithoutMultiPartition returns (bool, bytes1, bytes32) {
         if (PauseStorageWrapper.isPaused()) {
             return (false, Eip1066.PAUSED, IPause.IsPaused.selector);
@@ -75,7 +74,7 @@ abstract contract Compliance is IComplianceFacet, Modifiers {
         address _from,
         address _to,
         uint256 _value,
-        bytes memory _data
+        bytes calldata _data
     ) external view override onlyWithoutMultiPartition returns (bool, bytes1, bytes32) {
         if (PauseStorageWrapper.isPaused()) {
             return (false, Eip1066.PAUSED, IPause.IsPaused.selector);
