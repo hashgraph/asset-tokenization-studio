@@ -73,12 +73,12 @@ describe("updateResolverProxy* - Integration Tests", () => {
       expect(result.previousConfig).to.deep.include({
         resolver: blrAddress,
         configurationId: configId,
-        version: BLR_VERSIONS.FIRST,
+        configurationVersion: BLR_VERSIONS.FIRST,
       });
       expect(result.newConfig).to.deep.include({
         resolver: blrAddress,
         configurationId: configId,
-        version: BLR_VERSIONS.SECOND,
+        configurationVersion: BLR_VERSIONS.SECOND,
       });
     });
 

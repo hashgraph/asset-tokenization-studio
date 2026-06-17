@@ -112,7 +112,7 @@ describe("Equity Token Deployment", () => {
       expect(config.configurationId).to.equal(EQUITY_CONFIG_ID);
     });
 
-    it("should set version to 1", async () => {
+    it("should set configurationVersion to 1", async () => {
       const diamondAddress = TEST_ADDRESSES.VALID_3;
       const mockFactory = createMockFactory(TEST_FACTORY_EVENTS.EQUITY_DEPLOYED, diamondAddress);
       const params = createDeployEquityParams(mockFactory);
@@ -123,7 +123,7 @@ describe("Equity Token Deployment", () => {
       const callArgs = mockFactory.deployEquity.getCall(0).args[0];
       const config = callArgs.security.resolverProxyConfigurationV2;
 
-      expect(config.configVersion).to.equal(1);
+      expect(config.configurationVersion).to.equal(1);
     });
 
     it("should set replacementEnabled to true", async () => {
