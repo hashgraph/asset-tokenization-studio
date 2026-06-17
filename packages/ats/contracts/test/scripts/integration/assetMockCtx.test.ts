@@ -43,7 +43,8 @@ describe("AssetMock context fixture", () => {
   it("IAssetMock handles bound and forceNonOperational invocable", async () => {
     const ctx = await loadFixture(deployAssetMockCtx);
 
-    expect(await ctx.asset.getAddress()).to.equal(await ctx.asset.getAddress());
+    // asset handle is bound to the diamond proxy address
+    expect(await ctx.asset.getAddress()).to.equal(await ctx.diamond.getAddress());
 
     // forceNonOperational is now on IAssetMock (combined interface)
     await expect(ctx.asset.forceNonOperational()).to.not.be.reverted;
@@ -53,7 +54,6 @@ describe("AssetMock context fixture", () => {
     const ctx1 = await loadFixture(deployAssetMockCtx);
     const ctx2 = await loadFixture(deployAssetMockCtx);
 
-    expect(await ctx1.asset.getAddress()).to.equal(await ctx2.asset.getAddress());
     expect(await ctx1.asset.getAddress()).to.equal(await ctx2.asset.getAddress());
   });
 });
