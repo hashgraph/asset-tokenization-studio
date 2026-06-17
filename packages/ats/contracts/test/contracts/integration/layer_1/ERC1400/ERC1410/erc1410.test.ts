@@ -5088,7 +5088,7 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
       });
     });
 
-    describe.skip("initializePartitions", () => {
+    describe("initializePartitions", () => {
       it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializePartitions is called THEN AccountHasNoRole", async () => {
         await expect(asset.connect(signer_D).initializePartitions(true))
           .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
