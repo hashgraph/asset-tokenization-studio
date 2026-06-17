@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 /// @custom:hash resolverKey BalanceTrackerByPartition
 // solhint-disable-next-line max-line-length
 bytes32 constant RESOLVER_KEY_BALANCE_TRACKER_BY_PARTITION = 0x05d2477d09e6a1df45e3e51bd398af7a071f6f282255486cec19b8b5a403bbaf;
 
 /**
  * @title IBalanceTrackerByPartition
+ * @author Asset Tokenization Studio Team
  * @notice Interface for querying token balances and total supply scoped to a specific partition,
  *         with support for time-adjusted values that simulate pending balance adjustments.
  * @dev All read operations resolve the current block timestamp via `EvmAccessors`,

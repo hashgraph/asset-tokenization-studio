@@ -1,5 +1,7 @@
 # Controller
 
+_Asset Tokenization Studio Team_
+
 > Controller
 
 Implementation of the Controller domain. Delegates into the existing storage wrappers so semantics match `ERC1644` / `ERC3643Management` exactly.
@@ -12,15 +14,15 @@ Implementation of the Controller domain. Delegates into the existing storage wra
 function addAgent(address _agent) external nonpayable
 ```
 
-Gives an account the agent roleGranting an agent role allows the account to perform multiple ERC-1400 actions
+Gives an account the agent role.Granting an agent role allows the account to perform multiple ERC-1400 actions.
 
-_Can only be called by the role admin_
+_Can only be called by the role admin._
 
 #### Parameters
 
-| Name    | Type    | Description |
-| ------- | ------- | ----------- |
-| \_agent | address | undefined   |
+| Name    | Type    | Description                           |
+| ------- | ------- | ------------------------------------- |
+| \_agent | address | Address to be granted the agent role. |
 
 ### controllerRedeem
 
@@ -77,21 +79,23 @@ _Emits {FinalizedControllerFeature}._
 function forcedTransfer(address _from, address _to, uint256 _amount) external nonpayable returns (bool)
 ```
 
-_Performs a forced transfer of `_amount` tokens from `_from` to `_to`.This function should only be callable by an authorized entity. Returns `true` if the transfer was successful. Emits a ControllerTransfer event._
+Performs a forced transfer of `_amount` tokens from `_from` to `_to`.
+
+_This function should only be callable by an authorized entity. Returns `true` if the transfer was successful. Emits a ControllerTransfer event._
 
 #### Parameters
 
-| Name     | Type    | Description |
-| -------- | ------- | ----------- |
-| \_from   | address | undefined   |
-| \_to     | address | undefined   |
-| \_amount | uint256 | undefined   |
+| Name     | Type    | Description                              |
+| -------- | ------- | ---------------------------------------- |
+| \_from   | address | Address the tokens are transferred from. |
+| \_to     | address | Address the tokens are transferred to.   |
+| \_amount | uint256 | Amount of tokens to transfer.            |
 
 #### Returns
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| \_0  | bool | undefined   |
+| Name | Type | Description                          |
+| ---- | ---- | ------------------------------------ |
+| \_0  | bool | True if the transfer was successful. |
 
 ### initializeController
 
@@ -99,7 +103,9 @@ _Performs a forced transfer of `_amount` tokens from `_from` to `_to`.This funct
 function initializeController(bool _controllable) external nonpayable
 ```
 
-_Initial configuration_
+One-time initialiser that sets whether the token is controllable.
+
+_Initial configuration. Can only be called once._
 
 #### Parameters
 
@@ -113,19 +119,21 @@ _Initial configuration_
 function isAgent(address _agent) external view returns (bool)
 ```
 
-_Checks if an account has the agent role_
+Checks whether an account holds the agent role.
+
+_Checks if an account has the agent role._
 
 #### Parameters
 
-| Name    | Type    | Description |
-| ------- | ------- | ----------- |
-| \_agent | address | undefined   |
+| Name    | Type    | Description       |
+| ------- | ------- | ----------------- |
+| \_agent | address | Address to query. |
 
 #### Returns
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| \_0  | bool | undefined   |
+| Name | Type | Description                                             |
+| ---- | ---- | ------------------------------------------------------- |
+| \_0  | bool | True if `_agent` holds the agent role, false otherwise. |
 
 ### isControllable
 
@@ -147,15 +155,15 @@ In order to provide transparency over whether `controllerTransfer` / `controller
 function removeAgent(address _agent) external nonpayable
 ```
 
-Revokes an account the agent role
+Revokes the agent role from an account.
 
-_Can only be called by the role admin_
+_Can only be called by the role admin._
 
 #### Parameters
 
-| Name    | Type    | Description |
-| ------- | ------- | ----------- |
-| \_agent | address | undefined   |
+| Name    | Type    | Description                          |
+| ------- | ------- | ------------------------------------ |
+| \_agent | address | Address whose agent role is revoked. |
 
 ## Events
 
@@ -213,9 +221,9 @@ _Fired inside `initializeController` once the facet is marked ready._
 
 #### Parameters
 
-| Name         | Type | Description |
-| ------------ | ---- | ----------- |
-| controllable | bool | undefined   |
+| Name         | Type | Description                                       |
+| ------------ | ---- | ------------------------------------------------- |
+| controllable | bool | Whether the token was configured as controllable. |
 
 ### ControllerRedemption
 
@@ -264,9 +272,9 @@ Emitted when the controller feature is permanently disabled for a token.
 
 #### Parameters
 
-| Name     | Type    | Description |
-| -------- | ------- | ----------- |
-| operator | address | undefined   |
+| Name     | Type    | Description                                          |
+| -------- | ------- | ---------------------------------------------------- |
+| operator | address | Address of the caller who finalised controllability. |
 
 ### IdentityRegistryAdded
 

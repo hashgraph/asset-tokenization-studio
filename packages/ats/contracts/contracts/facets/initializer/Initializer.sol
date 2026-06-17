@@ -9,6 +9,9 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title Initializer
+ * @author Asset Tokenization Studio Team
+ * @notice Abstract implementation of `IInitializer` that manages facet readiness tracking
+ *         and the token's transition to operational status.
  */
 abstract contract Initializer is IInitializer, Modifiers {
     /// @inheritdoc IInitializer

@@ -1,5 +1,13 @@
 # ERC20VotesFacet
 
+_Asset Tokenization Studio Team_
+
+> ERC20VotesFacet
+
+Diamond facet that exposes ERC-20 voting-delegation and checkpoint query selectors.
+
+_Registers the full ERC-5805/ERC-6372/IVotes interface surface via `getStaticFunctionSelectors`. Inherits all business logic from `ERC20Votes`._
+
 ## Methods
 
 ### CLOCK_MODE
@@ -22,12 +30,14 @@ _Description of the clock_
 function checkpoints(address _account, uint256 _pos) external view returns (struct Checkpoints.Checkpoint)
 ```
 
+Returns the checkpoint at a given position for an account&#39;s vote history.
+
 #### Parameters
 
-| Name      | Type    | Description |
-| --------- | ------- | ----------- |
-| \_account | address | undefined   |
-| \_pos     | uint256 | undefined   |
+| Name      | Type    | Description                                               |
+| --------- | ------- | --------------------------------------------------------- |
+| \_account | address | Address whose checkpoint history is queried.              |
+| \_pos     | uint256 | Zero-based index into the account&#39;s checkpoint array. |
 
 #### Returns
 
@@ -55,6 +65,8 @@ _Clock used for flagging checkpoints. Can be overridden to implement timestamp b
 function delegate(address _delegatee) external nonpayable
 ```
 
+Delegates the caller&#39;s voting power to `delegatee`.
+
 _Requires the system to be operational, activated, and not paused._
 
 #### Parameters
@@ -69,6 +81,8 @@ _Requires the system to be operational, activated, and not paused._
 function delegates(address _account) external view returns (address)
 ```
 
+Returns the delegate address that `account` has chosen.
+
 _Returns the delegate that `account` has chosen._
 
 #### Parameters
@@ -79,15 +93,17 @@ _Returns the delegate that `account` has chosen._
 
 #### Returns
 
-| Name | Type    | Description |
-| ---- | ------- | ----------- |
-| \_0  | address | undefined   |
+| Name | Type    | Description                                  |
+| ---- | ------- | -------------------------------------------- |
+| \_0  | address | Address of the delegate chosen by `account`. |
 
 ### getPastTotalSupply
 
 ```solidity
 function getPastTotalSupply(uint256 _timepoint) external view returns (uint256)
 ```
+
+Returns the total vote supply available at a past `timepoint`.
 
 _Returns the total supply of votes available at a specific moment in the past. If the `clock()` is configured to use block numbers, this will return the value at the end of the corresponding block. NOTE: This value is the sum of all available votes, which is not necessarily the sum of all delegated votes. Votes that have not been delegated are still part of total supply, even though they would not participate in a vote._
 
@@ -99,15 +115,17 @@ _Returns the total supply of votes available at a specific moment in the past. I
 
 #### Returns
 
-| Name | Type    | Description |
-| ---- | ------- | ----------- |
-| \_0  | uint256 | undefined   |
+| Name | Type    | Description                       |
+| ---- | ------- | --------------------------------- |
+| \_0  | uint256 | Total vote supply at `timepoint`. |
 
 ### getPastVotes
 
 ```solidity
 function getPastVotes(address _account, uint256 _timepoint) external view returns (uint256)
 ```
+
+Returns the vote weight of `account` at a past `timepoint`.
 
 _Returns the amount of votes that `account` had at a specific moment in the past. If the `clock()` is configured to use block numbers, this will return the value at the end of the corresponding block._
 
@@ -120,9 +138,9 @@ _Returns the amount of votes that `account` had at a specific moment in the past
 
 #### Returns
 
-| Name | Type    | Description |
-| ---- | ------- | ----------- |
-| \_0  | uint256 | undefined   |
+| Name | Type    | Description                              |
+| ---- | ------- | ---------------------------------------- |
+| \_0  | uint256 | Vote weight of `account` at `timepoint`. |
 
 ### getStaticFunctionSelectors
 
@@ -172,6 +190,8 @@ Gets the static resolver key
 function getVotes(address _account) external view returns (uint256)
 ```
 
+Returns the current vote weight of `account`.
+
 _Returns the current amount of votes that `account` has._
 
 #### Parameters
@@ -182,9 +202,9 @@ _Returns the current amount of votes that `account` has._
 
 #### Returns
 
-| Name | Type    | Description |
-| ---- | ------- | ----------- |
-| \_0  | uint256 | undefined   |
+| Name | Type    | Description                       |
+| ---- | ------- | --------------------------------- |
+| \_0  | uint256 | Current vote weight of `account`. |
 
 ### initializeERC20Votes
 
@@ -192,13 +212,15 @@ _Returns the current amount of votes that `account` has._
 function initializeERC20Votes(bool _activated) external nonpayable
 ```
 
+Initialises the ERC-20Votes capability on the token.
+
 _Requires DEFAULT_ADMIN_ROLE and rejects repeated facet registration._
 
 #### Parameters
 
-| Name        | Type | Description |
-| ----------- | ---- | ----------- |
-| \_activated | bool | undefined   |
+| Name        | Type | Description                                                       |
+| ----------- | ---- | ----------------------------------------------------------------- |
+| \_activated | bool | Whether the voting feature should be active after initialisation. |
 
 ### isActivated
 
@@ -222,11 +244,13 @@ _Reads the activation flag from ERC20VotesStorageWrapper without mutating state.
 function numCheckpoints(address _account) external view returns (uint256)
 ```
 
+Returns the total number of vote checkpoints recorded for an account.
+
 #### Parameters
 
-| Name      | Type    | Description |
-| --------- | ------- | ----------- |
-| \_account | address | undefined   |
+| Name      | Type    | Description                                |
+| --------- | ------- | ------------------------------------------ |
+| \_account | address | Address whose checkpoint count is queried. |
 
 #### Returns
 
@@ -280,9 +304,9 @@ _Fires exclusively from `initializeERC20Votes` after the storage write succeeds.
 
 #### Parameters
 
-| Name      | Type | Description |
-| --------- | ---- | ----------- |
-| activated | bool | undefined   |
+| Name      | Type | Description                                                     |
+| --------- | ---- | --------------------------------------------------------------- |
+| activated | bool | Whether the ERC-20Votes feature is active after initialisation. |
 
 ## Errors
 

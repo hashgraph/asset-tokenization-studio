@@ -1,5 +1,7 @@
 # ICoreAtSnapshot
 
+_Asset Tokenization Studio Team_
+
 > ICoreAtSnapshot
 
 Interface for querying core token properties resolved against a previously taken snapshot identifier.

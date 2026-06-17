@@ -11,6 +11,7 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
 
 /**
  * @title BatchController
+ * @author Asset Tokenization Studio Team
  * @notice Abstract implementation of controller-only batch transfer operations.
  * @dev Shares the access-control/role semantics of `IERC1644.controllerTransfer`: the caller must
  *      hold either the controller or the agent role, the token must be controllable and operating

@@ -1,6 +1,10 @@
 # Initializer
 
+_Asset Tokenization Studio Team_
+
 > Initializer
+
+Abstract implementation of `IInitializer` that manages facet readiness tracking and the token&#39;s transition to operational status.
 
 ## Methods
 

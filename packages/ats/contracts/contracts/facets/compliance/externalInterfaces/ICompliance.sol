@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 /**
  * @title  ICompliance
+ * @author Asset Tokenization Studio Team
  * @notice Minimal adapter interface for querying and notifying an external compliance contract.
  * @dev    Implemented by third-party compliance modules whose address is registered on the
  *         token. The token calls these functions on every transfer, issuance, and redemption

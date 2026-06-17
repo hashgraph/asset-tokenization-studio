@@ -1,5 +1,7 @@
 # BalanceTrackerByPartitionFacet
 
+_Asset Tokenization Studio Team_
+
 > BalanceTrackerByPartitionFacet
 
 Diamond facet that exposes partition-scoped token balance and total supply queries through the `IBalanceTrackerByPartition` interface, registered under `RESOLVER_KEY_BALANCE_TRACKER_BY_PARTITION`.

@@ -60,7 +60,6 @@ interface IControlList {
      * @param _isWhiteList `true` to operate as a whitelist (only listed addresses allowed),
      *        `false` to operate as a blacklist (listed addresses blocked).
      */
-    // solhint-disable-next-line func-name-mixedcase
     function initializeControlList(bool _isWhiteList) external;
 
     /**

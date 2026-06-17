@@ -1,5 +1,13 @@
 # TransferAndLockFacet
 
+_Asset Tokenization Studio Team_
+
+> TransferAndLockFacet
+
+Diamond facet that wires the TransferAndLock capability to its resolver key.
+
+_Extends `TransferAndLockFacetBase` with the concrete resolver key and initialiser key bindings. All selector and interface registration is handled by the base contract._
+
 ## Methods
 
 ### getStaticFunctionSelectors
@@ -60,22 +68,22 @@ _Callable once; subsequent calls revert with `FacetAlreadyRegistered`. Requires 
 function transferAndLock(address _to, uint256 _amount, bytes _data, uint256 _expirationTimestamp) external nonpayable returns (uint256 lockId_)
 ```
 
-Transfers tokens to a specified address and locks them until the expiration timestamp using the default partition
+Transfers tokens to a specified address and locks them until the expiration timestamp using the default partition.
 
 #### Parameters
 
-| Name                  | Type    | Description                                                     |
-| --------------------- | ------- | --------------------------------------------------------------- |
-| \_to                  | address | The address to which tokens will be transferred and locked      |
-| \_amount              | uint256 | The amount of tokens to be transferred and locked               |
-| \_data                | bytes   | Additional data with no specified format, sent in call to `_to` |
-| \_expirationTimestamp | uint256 | The timestamp until which the tokens will be locked             |
+| Name                  | Type    | Description                                                          |
+| --------------------- | ------- | -------------------------------------------------------------------- |
+| \_to                  | address | The address to which tokens will be transferred and locked.          |
+| \_amount              | uint256 | The amount of tokens to be transferred and locked.                   |
+| \_data                | bytes   | Additional data with no specified format, sent in the call to `_to`. |
+| \_expirationTimestamp | uint256 | The timestamp until which the tokens will be locked.                 |
 
 #### Returns
 
-| Name     | Type    | Description |
-| -------- | ------- | ----------- |
-| lockId\_ | uint256 | undefined   |
+| Name     | Type    | Description                                                            |
+| -------- | ------- | ---------------------------------------------------------------------- |
+| lockId\_ | uint256 | The identifier assigned to the new hold created for the locked tokens. |
 
 ## Events
 

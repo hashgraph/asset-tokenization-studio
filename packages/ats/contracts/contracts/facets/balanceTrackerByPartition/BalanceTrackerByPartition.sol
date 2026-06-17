@@ -14,6 +14,7 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
 
 /**
  * @title BalanceTrackerByPartition
+ * @author Asset Tokenization Studio Team
  * @notice Abstract implementation of `IBalanceTrackerByPartition` that consolidates partition-scoped
  *         token balance and total supply queries into a single, time-aware read layer.
  * @dev Delegates all storage reads to `ERC1410StorageWrapper` and `ERC3643StorageWrapper`,

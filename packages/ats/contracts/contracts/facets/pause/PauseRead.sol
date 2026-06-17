@@ -7,6 +7,7 @@ import { Modifiers } from "../../services/Modifiers.sol";
 
 /**
  * @title PauseRead
+ * @author Asset Tokenization Studio Team
  * @notice Read-only base for Pause and PauseOperational.
  *         Implements the paused() view function of IPause. Write functions are
  *         implemented by subclasses with or without onlyOperational depending on

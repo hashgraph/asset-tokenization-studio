@@ -1,10 +1,10 @@
 # SecurityHoldersFacet
 
+_Asset Tokenization Studio Team_
+
 > SecurityHoldersFacet
 
-Facet for security holder operations
-
-_Registers function selectors for Diamond routing_
+Diamond facet that exposes security-holder operations through the `ISecurityHolders` interface, registered under `RESOLVER_KEY_SECURITYHOLDERS`.
 
 ## Methods
 

@@ -1,5 +1,7 @@
 # IExternalControlList
 
+_Asset Tokenization Studio Team_
+
 > IExternalControlList
 
 Minimal interface for querying an external control-list contract.

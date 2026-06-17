@@ -1,5 +1,7 @@
 # IBatchFreeze
 
+_Asset Tokenization Studio Team_
+
 > IBatchFreeze
 
 Interface for batch freezing and unfreezing addresses and partial tokens.

@@ -9,6 +9,7 @@ bytes32 constant RESOLVER_KEY_CONTROLLER_HOLD_BY_PARTITION = 0xc415f5239b26cab85
 
 /**
  * @title IControllerHoldByPartition
+ * @author Asset Tokenization Studio Team
  * @notice Interface for the controller-initiated hold creation operation on a specific partition.
  * @dev Exposes a single write method that allows an authorised controller to place a hold on
  *      any token holder's balance. The `ControllerHeldByPartition` event is inherited from

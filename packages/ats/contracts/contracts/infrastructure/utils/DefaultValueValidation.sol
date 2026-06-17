@@ -5,7 +5,8 @@ import { ICommonErrors } from "../errors/ICommonErrors.sol";
 
 /**
  * @title Default Value Validation
- * @notice Utility library for validating that values are not the Solidity default (zero)
+ * @author Asset Tokenization Studio Team
+ * @notice Utility library for validating that values are not the Solidity default (zero).
  */
 library DefaultValueValidation {
     /**

@@ -1,5 +1,11 @@
 # IComplianceFacet
 
+_Asset Tokenization Studio Team_
+
+> IComplianceFacet
+
+Interface for the Compliance facet that wires an external compliance contract, provides transfer eligibility checks, and exposes the compliance contract address.
+
 ## Methods
 
 ### canTransfer

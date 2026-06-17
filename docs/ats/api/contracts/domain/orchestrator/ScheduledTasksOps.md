@@ -1,5 +1,7 @@
 # ScheduledTasksOps
 
+_Asset Tokenization Studio Team_
+
 > ScheduledTasksOps - Orchestrator for scheduled-task triggering
 
 Deployed once as a separate contract. Facets and storage wrappers call via DELEGATECALL, keeping their bytecode out of the 24 KB EIP-170 limit. The body of `ScheduledTasksStorageWrapper.triggerScheduledCrossOrderedTasks` (a fat loop) is inlined here exactly once.

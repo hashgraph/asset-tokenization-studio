@@ -1,5 +1,7 @@
 # Core
 
+_Asset Tokenization Studio Team_
+
 > Core
 
 Implementation of the Core domain. Delegates into the existing storage wrappers so semantics match `ERC20` / `ERC3643Management` / `ERC3643Read` exactly during the transition period.

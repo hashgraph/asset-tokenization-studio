@@ -11,6 +11,7 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
 
 /**
  * @title Transfer
+ * @author Asset Tokenization Studio Team
  * @notice Implementation of the Transfer domain. Delegates into the existing storage wrappers so
  *         semantics match `ERC20` / `ERC1594` exactly.
  */

@@ -1,5 +1,7 @@
 # IBatchController
 
+_Asset Tokenization Studio Team_
+
 > IBatchController
 
 Interface for controller-only batch transfer operations.

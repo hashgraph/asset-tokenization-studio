@@ -1,8 +1,12 @@
 # VotingFacet
 
+_Asset Tokenization Studio Team_
+
 > VotingFacet
 
-Concrete implementation of voting rights management facet
+Diamond facet that exposes voting rights management selectors.
+
+_Inherits all business logic from the `Voting` abstract contract and registers selectors and interface IDs via `IStaticFunctionSelectors`._
 
 ## Methods
 

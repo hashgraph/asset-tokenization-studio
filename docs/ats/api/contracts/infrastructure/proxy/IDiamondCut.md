@@ -1,5 +1,11 @@
 # IDiamondCut
 
+_Asset Tokenization Studio Team_
+
+> IDiamondCut
+
+Interface for upgrading the Diamond proxy&#39;s Business Logic Resolver (BLR), configuration identifier, and version in a single or multi-step operation.
+
 ## Methods
 
 ### getConfigInfo
@@ -8,15 +14,15 @@
 function getConfigInfo() external view returns (address resolver_, bytes32 configurationId_, uint256 version_)
 ```
 
-Returns the configuration used by the secuirity
+Returns the active resolver address, configuration identifier, and version.
 
 #### Returns
 
-| Name              | Type    | Description |
-| ----------------- | ------- | ----------- |
-| resolver\_        | address | undefined   |
-| configurationId\_ | bytes32 | undefined   |
-| version\_         | uint256 | undefined   |
+| Name              | Type    | Description                                     |
+| ----------------- | ------- | ----------------------------------------------- |
+| resolver\_        | address | Address of the current Business Logic Resolver. |
+| configurationId\_ | bytes32 | Identifier of the active configuration.         |
+| version\_         | uint256 | Version number of the active configuration.     |
 
 ### getStaticFunctionSelectors
 
@@ -66,14 +72,14 @@ Gets the static resolver key
 function updateConfig(bytes32 _newConfigurationId, uint256 _newVersion) external nonpayable
 ```
 
-For the current BLR update its configuration\*
+For the current BLR, update its configuration identifier and version.
 
 #### Parameters
 
-| Name                 | Type    | Description |
-| -------------------- | ------- | ----------- |
-| \_newConfigurationId | bytes32 | undefined   |
-| \_newVersion         | uint256 | undefined   |
+| Name                 | Type    | Description                                               |
+| -------------------- | ------- | --------------------------------------------------------- |
+| \_newConfigurationId | bytes32 | The new configuration identifier to apply.                |
+| \_newVersion         | uint256 | The version number associated with the new configuration. |
 
 ### updateConfigVersion
 
@@ -81,13 +87,13 @@ For the current BLR update its configuration\*
 function updateConfigVersion(uint256 _newVersion) external nonpayable
 ```
 
-For the current BLR and configuration, update the used version
+For the current BLR and configuration, update the used version.
 
 #### Parameters
 
-| Name         | Type    | Description |
-| ------------ | ------- | ----------- |
-| \_newVersion | uint256 | undefined   |
+| Name         | Type    | Description                                                  |
+| ------------ | ------- | ------------------------------------------------------------ |
+| \_newVersion | uint256 | The new version number to set for the current configuration. |
 
 ### updateResolver
 
@@ -95,12 +101,12 @@ For the current BLR and configuration, update the used version
 function updateResolver(contract IBusinessLogicResolver _newResolver, bytes32 _newConfigurationId, uint256 _newVersion) external nonpayable
 ```
 
-Updates the BLR to a new one
+Replaces the Business Logic Resolver with a new one, setting configuration and version.
 
 #### Parameters
 
-| Name                 | Type                            | Description |
-| -------------------- | ------------------------------- | ----------- |
-| \_newResolver        | contract IBusinessLogicResolver | undefined   |
-| \_newConfigurationId | bytes32                         | undefined   |
-| \_newVersion         | uint256                         | undefined   |
+| Name                 | Type                            | Description                                                   |
+| -------------------- | ------------------------------- | ------------------------------------------------------------- |
+| \_newResolver        | contract IBusinessLogicResolver | The new BLR contract address to wire into the proxy.          |
+| \_newConfigurationId | bytes32                         | The configuration identifier to activate on the new resolver. |
+| \_newVersion         | uint256                         | The version number associated with the new configuration.     |

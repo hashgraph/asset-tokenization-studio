@@ -1,5 +1,7 @@
 # IDiamondFacet
 
+_Asset Tokenization Studio Team_
+
 > IDiamondFacet
 
 Interface for the Diamond facet initialisation function.

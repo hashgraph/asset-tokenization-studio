@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 /**
  * @title IAllowanceTypes
+ * @author Asset Tokenization Studio Team
  * @notice Events and errors emitted by the ERC-20 allowance surface.
  */
 interface IAllowanceTypes {
