@@ -1,6 +1,6 @@
 ---
 name: ats-style-guide
-description: "Trigger: /ats-style-guide. Review .sol files for ATS coding convention violations. Checks staged/unstaged changes; if none, asks for a commit hash or branch. Reports violations as a fichero:línea | motivo table."
+description: "Trigger: /ats-style-guide. Reviews changed .sol files against the ATS coding conventions. By default reviews staged changes; when nothing is staged it asks which branch to compare the current branch against (never assumes a base). An explicit <branch> <base> or commit hash may also be passed. Reports violations as a file:line | reason table."
 hooks:
   Stop:
     - hooks:
@@ -15,11 +15,12 @@ truth, shared with write-time tooling (`packages/ats/contracts/CLAUDE.md`). This
 defines the review procedure.
 
 **Quality gate (Stop hook).** While this skill is active, the Stop hook declared in the
-frontmatter (`hooks/check-solhint.sh`) re-runs solhint on the changed working-tree `.sol`
-files and blocks the turn (once) if ERROR findings exist that the report omitted. It is
-scoped to this skill only — it never gates unrelated sessions and must not be added to
-`settings.json`. STEP B below remains the primary source of the Solhint section; the hook is
-the deterministic backstop.
+frontmatter (`hooks/check-solhint.sh`) re-runs solhint on exactly the `.sol` files the review
+covered — it reads the diff STEP A writes (`${TMPDIR:-/tmp}/ats-style-review.diff`), so it
+backstops every mode (staged, branch, commit), then blocks the turn (once) if ERROR findings
+exist that the report omitted. It is scoped to this skill only — it never gates unrelated
+sessions and must not be added to `settings.json`. STEP B below remains the primary source of
+the Solhint section; the hook is the deterministic backstop.
 
 ## Orchestrator contract — HARD BOUNDARIES
 
@@ -43,29 +44,45 @@ it is structurally impossible for diff content to enter its context.
 
 ## Step 1 — Build the git command string (no tools)
 
-Choose the right command based on user input:
+Pick the command from the user input. **Never assume a base branch** — whenever a comparison
+base is needed and the user did not give one, ask for it (see "Asking for the base" below).
 
-**Default** (staged + unstaged, no user input):
-
-```
-REPO=$(git rev-parse --show-toplevel); { git -C "$REPO" diff HEAD --diff-filter=d -- '*.sol'; git -C "$REPO" diff --cached HEAD --diff-filter=d -- '*.sol'; }
-```
-
-**User provides `<branch> <base>`** (fork-point diff):
+**Default (no user input) — staged changes.** Review what is staged:
 
 ```
-REPO=$(git rev-parse --show-toplevel); git -C "$REPO" diff --diff-filter=d $(git -C "$REPO" merge-base <branch> <base>)...<branch> -- '*.sol'
+REPO=$(git rev-parse --show-toplevel); git -C "$REPO" diff --cached HEAD --diff-filter=d -- '*.sol'
 ```
 
-**User provides only a branch** — ask before building the command:
+Spawn the subagent for this run with `<ON_EMPTY>` = `⚠️ NOTHING_STAGED` (see Step 2). If the
+subagent returns `⚠️ NOTHING_STAGED`, nothing is staged → fall back to a branch comparison:
+**ask the user for the base** (do not assume one), then build the branch command below with
+`<branch>` = `HEAD` and `<base>` = their answer, and spawn again (this time `<ON_EMPTY>` =
+the no-changes message).
 
-> What is the base branch for `<branch>`? (e.g. `main`, `develop`, `feat/other-branch`)
+**Branch comparison** — `<branch> <base>` given by the user, or the no-staged fallback once the
+base is known (fork-point diff between the two):
+
+```
+REPO=$(git rev-parse --show-toplevel); git -C "$REPO" diff --diff-filter=d "$(git -C "$REPO" merge-base <branch> <base>)"...<branch> -- '*.sol'
+```
+
+**User provides only a branch (no base)** — ask for the base first, then use the branch command
+above.
 
 **User provides a commit hash**:
 
 ```
 REPO=$(git rev-parse --show-toplevel); git -C "$REPO" diff --diff-filter=d <hash>^..<hash> -- '*.sol'
 ```
+
+### Asking for the base
+
+When a base is required (the no-staged fallback, or a branch given without a base), ask the user
+**exactly** this and wait for the answer — never pick a default:
+
+> Against which branch should I compare? (e.g. `main`, `develop`)
+
+Use the answer verbatim as `<base>`.
 
 ---
 
@@ -75,11 +92,17 @@ Pass the **git command string** (built in Step 1).
 Do not pass diff content, file paths, line counts, or rule text — the subagent determines all
 of that.
 
-**Subagent instructions** (copy verbatim into the agent prompt, substituting `<GIT_CMD>`):
+Substitute two tokens into the instructions below:
+
+- `<GIT_CMD>` — the git command string built in Step 1.
+- `<ON_EMPTY>` — what the subagent returns when the filtered diff is empty: `⚠️ NOTHING_STAGED`
+  for the staged default run, otherwise `✅ No .sol changes found in packages/ats/contracts/contracts/.`
+
+**Subagent instructions** (copy verbatim into the agent prompt, with both tokens substituted):
 
 ---
 
-**STEP A — Build the diff.** Run the following command and pipe through the awk filter, saving to `/tmp/ats-style-review.diff`:
+**STEP A — Build the diff.** Run the following command and pipe through the awk filter, saving to `${TMPDIR:-/tmp}/ats-style-review.diff`:
 
 ```bash
 { <GIT_CMD>; } | awk '
@@ -89,23 +112,23 @@ of that.
                  (path !~ /\/test\/|\/artifacts\/|\/build\/|\/cache\/|\/typechain-types\//)
 }
 in_contracts { print }
-' > /tmp/ats-style-review.diff
+' > ${TMPDIR:-/tmp}/ats-style-review.diff
 ```
 
 Then check the line count:
 
 ```bash
-wc -l < /tmp/ats-style-review.diff
+wc -l < ${TMPDIR:-/tmp}/ats-style-review.diff
 ```
 
-- If **0 lines**: return exactly: `✅ No .sol changes found in packages/ats/contracts/contracts/.`
+- If **0 lines**: return exactly: `<ON_EMPTY>`
 - If **> 8000 lines**: return exactly: `⚠️ Diff too large (N lines). Narrow the scope.`
 - Otherwise: continue to STEP B.
 
 **STEP B — Run solhint on the changed files only.** Extract the file paths from the diff and lint only those:
 
 ```bash
-CHANGED=$(grep '^+++ b/' /tmp/ats-style-review.diff | sed 's|^+++ b/||')
+CHANGED=$(grep '^+++ b/' ${TMPDIR:-/tmp}/ats-style-review.diff | sed 's|^+++ b/||')
 cd $(git rev-parse --show-toplevel) && npx solhint --config packages/ats/contracts/solhint.config.js $CHANGED 2>&1
 ```
 
@@ -158,7 +181,7 @@ If the subagent returned a `LINTING` section, render it first:
 
 ```
 ### Solhint
-| Fichero:Línea | Motivo |
+| File:Line | Reason |
 |---|---|
 <LINTING rows>
 ```
@@ -167,12 +190,13 @@ Then render the manual review rows:
 
 ```
 ### Manual review
-| Fichero:Línea | Motivo |
+| File:Line | Reason |
 |---|---|
 <manual rows>
 ```
 
-If the subagent returns the ✅ or ⚠️ sentinel, relay it directly.
+If the subagent returns `⚠️ NOTHING_STAGED`, do NOT show it — it is an internal control signal:
+return to Step 1 (ask for the base, then re-spawn). Any other ✅/⚠️ sentinel is relayed directly.
 If both sections are empty, output:
 
-> ✅ No se encontraron violaciones en los ficheros revisados.
+> ✅ No convention violations found in the reviewed files.
