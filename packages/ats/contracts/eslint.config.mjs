@@ -5,10 +5,9 @@ import mochaPreset from "@hashgraph/eslint-config/mocha";
 export default [
   ...createBaseConfig(),
 
-  // Global ignores for generated files and the CommonJS solhint plugin (loaded via require()
-  // by solhint, so it cannot use ESM imports — exempt from the TS/ESM lint rules).
+  // Global ignores for generated files
   {
-    ignores: ["typechain-types/**/*", "build/**/*", "solhint-plugin-ats/**/*"],
+    ignores: ["typechain-types/**/*", "build/**/*"],
   },
 
   // All TS files run in Node (Hardhat)
@@ -27,6 +26,16 @@ export default [
     ignores: ["**/*.test.ts", "**/*.spec.ts", "test/**/*", "typechain-types/**/*", "build/**/*"],
     rules: {
       "@typescript-eslint/no-unused-expressions": "error",
+    },
+  },
+
+  // The solhint plugin is CommonJS (solhint loads it via require(), so it cannot use ESM
+  // imports). Keep linting it for real issues, but allow require()/CommonJS here.
+  {
+    files: ["solhint-plugin-ats/**/*.js"],
+    languageOptions: { sourceType: "commonjs" },
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
     },
   },
 ];
