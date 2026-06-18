@@ -71,14 +71,14 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
     /// @notice Forces a facet's version status to 0 (not started) for testing.
     /// @param _facetKey The resolver key of the facet to reset.
     function forceFacetNotRegistered(bytes32 _facetKey) external override {
-        uint256 v = ResolverProxyStorageWrapper
+        uint256 versionId = ResolverProxyStorageWrapper
             .getBusinessLogicResolver()
             .getFacetVersionByConfigurationIdVersionAndFacetId(
                 ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
                 ResolverProxyStorageWrapper.getResolverProxyVersion(),
                 _facetKey
             );
-        InitializerStorageWrapper.setFacetStatusForVersion(_facetKey, v, 0);
+        InitializerStorageWrapper.setFacetStatusForVersion(_facetKey, versionId, 0);
         InitializerStorageWrapper.setFacetLastVersionTo(_facetKey, 0);
     }
 
@@ -96,11 +96,11 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
     ///      must be marked ready before `setOperationalStatus` can succeed.
     /// @param _facetKeys Array of resolver keys to mark ready.
     function forceFacetsReady(bytes32[] calldata _facetKeys) external override {
-        uint256 len = _facetKeys.length;
-        for (uint256 i; i < len; ) {
-            InitializerStorageWrapper.setFacetToReady(_facetKeys[i]);
+        uint256 length = _facetKeys.length;
+        for (uint256 index; index < length; ) {
+            InitializerStorageWrapper.setFacetToReady(_facetKeys[index]);
             unchecked {
-                ++i;
+                ++index;
             }
         }
     }

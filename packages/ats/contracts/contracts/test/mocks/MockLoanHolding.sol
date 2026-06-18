@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import { ILoan } from "../../facets/loan/ILoan.sol";
+import { ITransferByPartition } from "../../facets/transferByPartition/ITransferByPartition.sol";
+
 /**
  * @title MockLoanHolding
  * @notice Configurable test stand-in for a loan holding asset that the
@@ -11,9 +14,6 @@ pragma solidity >=0.8.0 <0.9.0;
  *        fields the portfolio reads are configurable; all other struct
  *        members return their type defaults.
  */
-import { ILoan } from "../../facets/loan/ILoan.sol";
-import { ITransferByPartition } from "../../facets/transferByPartition/ITransferByPartition.sol";
-
 contract MockLoanHolding is ITransferByPartition {
     uint256 internal _totalCollateralValue;
     ILoan.PerformanceStatus internal _performanceStatus;
@@ -38,8 +38,6 @@ contract MockLoanHolding is ITransferByPartition {
     function setBalance(bytes32 _partition, address _holder, uint256 _amount) external {
         _balances[_partition][_holder] = _amount;
     }
-
-    // ─── ERP-1410 transfer-by-partition call surface ──────────────────
 
     /**
      * @notice Minimal transfer-by-partition stub for the LoansPortfolio withdraw path.
@@ -86,11 +84,11 @@ contract MockLoanHolding is ITransferByPartition {
      *         `loanPerformanceStatus.performanceStatus` carry the values set
      *         via `setLoanState`; all other struct members return zero / their
      *         type default, matching the portfolio's read pattern.
-     * @return d_ LoanDetailsData struct.
+     * @return loanDetailsData_ LoanDetailsData struct.
      */
-    function getLoanDetails() external view returns (ILoan.LoanDetailsData memory d_) {
-        d_.collateral.totalCollateralValue = _totalCollateralValue;
-        d_.loanPerformanceStatus.performanceStatus = _performanceStatus;
+    function getLoanDetails() external view returns (ILoan.LoanDetailsData memory loanDetailsData_) {
+        loanDetailsData_.collateral.totalCollateralValue = _totalCollateralValue;
+        loanDetailsData_.loanPerformanceStatus.performanceStatus = _performanceStatus;
     }
 
     /**
