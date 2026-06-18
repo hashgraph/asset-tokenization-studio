@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { InterestRateStorageWrapper } from "../../domain/asset/InterestRateStorageWrapper.sol";
 import { IKpiLinkedRate } from "../../facets/kpiLinkedRate/IKpiLinkedRate.sol";
+import { IInterestRate } from "../../facets/interestRate/IInterestRate.sol";
 
 /**
  * @title InterestRateModifiers
