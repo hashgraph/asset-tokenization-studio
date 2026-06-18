@@ -68,13 +68,13 @@ export function adjustBalancesFacetTests(getCtx: () => AssetMockCtx): void {
     });
 
     describe("Balance adjustments", () => {
-      it.skip("GIVEN an account without corporateActions role WHEN setScheduledBalanceAdjustment THEN transaction fails with AccountHasNoRole", async () => {
+      it("GIVEN an account without corporateActions role WHEN setScheduledBalanceAdjustment THEN transaction fails with AccountHasNoRole", async () => {
         await expect(
           asset.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData),
         ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
       });
 
-      it.skip("GIVEN a paused Token WHEN setScheduledBalanceAdjustment THEN transaction fails with IsPaused", async () => {
+      it("GIVEN a paused Token WHEN setScheduledBalanceAdjustment THEN transaction fails with IsPaused", async () => {
         await grantRoleAndPauseToken(asset, ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A, signer_B, signer_C.address);
 
         await expect(
@@ -82,7 +82,7 @@ export function adjustBalancesFacetTests(getCtx: () => AssetMockCtx): void {
         ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
-      it.skip("GIVEN an account with corporateActions role WHEN setScheduledBalanceAdjustment with invalid timestamp THEN transaction fails with WrongTimestamp", async () => {
+      it("GIVEN an account with corporateActions role WHEN setScheduledBalanceAdjustment with invalid timestamp THEN transaction fails with WrongTimestamp", async () => {
         const currentTimestamp = await asset.blockTimestamp();
         await asset.changeSystemTimestamp(currentTimestamp + 100n);
         await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
@@ -98,7 +98,7 @@ export function adjustBalancesFacetTests(getCtx: () => AssetMockCtx): void {
         ).to.be.revertedWithCustomError(asset, "WrongTimestamp");
       });
 
-      it.skip("GIVEN an account with corporateActions role WHEN setScheduledBalanceAdjustment with zero timestamp THEN transaction fails with InvalidTimestamp", async () => {
+      it("GIVEN an account with corporateActions role WHEN setScheduledBalanceAdjustment with zero timestamp THEN transaction fails with InvalidTimestamp", async () => {
         await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
         const zeroTimestampBalanceAdjustmentData = {
@@ -112,7 +112,7 @@ export function adjustBalancesFacetTests(getCtx: () => AssetMockCtx): void {
         ).to.be.revertedWithCustomError(asset, "InvalidTimestamp");
       });
 
-      it.skip("GIVEN an account with corporateActions role WHEN setScheduledBalanceAdjustment with invalid factor THEN transaction fails with FactorIsZero", async () => {
+      it("GIVEN an account with corporateActions role WHEN setScheduledBalanceAdjustment with invalid factor THEN transaction fails with FactorIsZero", async () => {
         await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
         const invalidBalanceAdjustmentData = {
@@ -126,7 +126,7 @@ export function adjustBalancesFacetTests(getCtx: () => AssetMockCtx): void {
         ).to.be.revertedWithCustomError(asset, "FactorIsZero");
       });
 
-      it.skip("GIVEN balance adjustment created WHEN trying to get balance adjustment with wrong ID type THEN transaction fails with WrongIndexForAction", async () => {
+      it("GIVEN balance adjustment created WHEN trying to get balance adjustment with wrong ID type THEN transaction fails with WrongIndexForAction", async () => {
         await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
         await asset.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
@@ -148,7 +148,7 @@ export function adjustBalancesFacetTests(getCtx: () => AssetMockCtx): void {
         );
       });
 
-      it.skip("GIVEN an account with corporateActions role WHEN setScheduledBalanceAdjustment THEN transaction succeeds", async () => {
+      it("GIVEN an account with corporateActions role WHEN setScheduledBalanceAdjustment THEN transaction succeeds", async () => {
         await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
         await expect(asset.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData))
@@ -173,7 +173,7 @@ export function adjustBalancesFacetTests(getCtx: () => AssetMockCtx): void {
       });
 
       describe("Cancel Scheduled Balance Adjustment", () => {
-        it.skip("GIVEN id is zero WHEN cancelScheduledBalanceAdjustment THEN reverts with WrongIndexForAction", async () => {
+        it("GIVEN id is zero WHEN cancelScheduledBalanceAdjustment THEN reverts with WrongIndexForAction", async () => {
           await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
           await expect(asset.connect(signer_C).cancelScheduledBalanceAdjustment(0)).to.be.revertedWithCustomError(
@@ -182,7 +182,7 @@ export function adjustBalancesFacetTests(getCtx: () => AssetMockCtx): void {
           );
         });
 
-        it.skip("GIVEN an account without corporateActions role WHEN cancelScheduledBalanceAdjustment THEN transaction fails with AccountHasNoRole", async () => {
+        it("GIVEN an account without corporateActions role WHEN cancelScheduledBalanceAdjustment THEN transaction fails with AccountHasNoRole", async () => {
           await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_B.address);
           await asset.connect(signer_B).setScheduledBalanceAdjustment(balanceAdjustmentData);
           await expect(asset.connect(signer_C).cancelScheduledBalanceAdjustment(1)).to.be.revertedWithCustomError(
@@ -191,7 +191,7 @@ export function adjustBalancesFacetTests(getCtx: () => AssetMockCtx): void {
           );
         });
 
-        it.skip("GIVEN a paused Token WHEN cancelScheduledBalanceAdjustment THEN transaction fails with IsPaused", async () => {
+        it("GIVEN a paused Token WHEN cancelScheduledBalanceAdjustment THEN transaction fails with IsPaused", async () => {
           await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_B.address);
           await asset.connect(signer_B).setScheduledBalanceAdjustment(balanceAdjustmentData);
           await asset.connect(signer_B).pause();
@@ -202,7 +202,7 @@ export function adjustBalancesFacetTests(getCtx: () => AssetMockCtx): void {
           );
         });
 
-        it.skip("GIVEN a balance adjustment already executed WHEN cancelScheduledBalanceAdjustment THEN transaction fails with BalanceAdjustmentAlreadyExecuted", async () => {
+        it("GIVEN a balance adjustment already executed WHEN cancelScheduledBalanceAdjustment THEN transaction fails with BalanceAdjustmentAlreadyExecuted", async () => {
           await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
           await asset.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
@@ -215,7 +215,7 @@ export function adjustBalancesFacetTests(getCtx: () => AssetMockCtx): void {
           );
         });
 
-        it.skip("GIVEN a balance adjustment not yet executed WHEN cancelScheduledBalanceAdjustment THEN transaction succeeds", async () => {
+        it("GIVEN a balance adjustment not yet executed WHEN cancelScheduledBalanceAdjustment THEN transaction succeeds", async () => {
           await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
           await asset.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
@@ -229,7 +229,7 @@ export function adjustBalancesFacetTests(getCtx: () => AssetMockCtx): void {
           expect(balanceAdjustment.decimals).to.equal(balanceAdjustmentDecimals);
         });
 
-        it.skip("GIVEN a non-existent balance adjustment WHEN cancelScheduledBalanceAdjustment THEN transaction fails", async () => {
+        it("GIVEN a non-existent balance adjustment WHEN cancelScheduledBalanceAdjustment THEN transaction fails", async () => {
           await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
           await expect(asset.connect(signer_C).cancelScheduledBalanceAdjustment(999)).to.be.revertedWithCustomError(
@@ -238,7 +238,7 @@ export function adjustBalancesFacetTests(getCtx: () => AssetMockCtx): void {
           );
         });
 
-        it.skip("GIVEN multiple balance adjustments WHEN cancelScheduledBalanceAdjustment on one THEN only that adjustment is cancelled", async () => {
+        it("GIVEN multiple balance adjustments WHEN cancelScheduledBalanceAdjustment on one THEN only that adjustment is cancelled", async () => {
           await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
           await asset.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
@@ -264,7 +264,7 @@ export function adjustBalancesFacetTests(getCtx: () => AssetMockCtx): void {
           expect(balanceAdjustment2.decimals).to.equal(3);
         });
 
-        it.skip("GIVEN a cancelled balance adjustment WHEN triggerScheduledCrossOrderedTasks is called THEN scheduled task executes but token balance remains unchanged", async () => {
+        it("GIVEN a cancelled balance adjustment WHEN triggerScheduledCrossOrderedTasks is called THEN scheduled task executes but token balance remains unchanged", async () => {
           await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
           await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
 
@@ -294,7 +294,7 @@ export function adjustBalancesFacetTests(getCtx: () => AssetMockCtx): void {
           expect(balanceAfterTrigger).to.equal(balanceBeforeAdjustment);
         });
 
-        it.skip("GIVEN a cancelled balance adjustment WHEN balanceOfAt after its execution date THEN returns unadjusted balance", async () => {
+        it("GIVEN a cancelled balance adjustment WHEN balanceOfAt after its execution date THEN returns unadjusted balance", async () => {
           await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
           await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
 
@@ -327,7 +327,7 @@ export function adjustBalancesFacetTests(getCtx: () => AssetMockCtx): void {
       });
 
       describe("Force Cancel Scheduled Balance Adjustment", () => {
-        it.skip("GIVEN account with ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelScheduledBalanceAdjustment before execution date THEN transaction succeeds and isDisabled is true", async () => {
+        it("GIVEN account with ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelScheduledBalanceAdjustment before execution date THEN transaction succeeds and isDisabled is true", async () => {
           await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
           await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C.address);
 
@@ -340,7 +340,7 @@ export function adjustBalancesFacetTests(getCtx: () => AssetMockCtx): void {
           expect(isDisabled).to.equal(true);
         });
 
-        it.skip("GIVEN account with ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelScheduledBalanceAdjustment after execution date THEN transaction succeeds bypassing date guard", async () => {
+        it("GIVEN account with ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelScheduledBalanceAdjustment after execution date THEN transaction succeeds bypassing date guard", async () => {
           await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
           await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C.address);
 
@@ -355,7 +355,7 @@ export function adjustBalancesFacetTests(getCtx: () => AssetMockCtx): void {
           expect(isDisabled).to.equal(true);
         });
 
-        it.skip("GIVEN account without ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelScheduledBalanceAdjustment THEN transaction fails with AccountHasNoRole", async () => {
+        it("GIVEN account without ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelScheduledBalanceAdjustment THEN transaction fails with AccountHasNoRole", async () => {
           await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_B.address);
 
           await asset.connect(signer_B).setScheduledBalanceAdjustment(balanceAdjustmentData);
@@ -366,7 +366,7 @@ export function adjustBalancesFacetTests(getCtx: () => AssetMockCtx): void {
           );
         });
 
-        it.skip("GIVEN paused token WHEN forceCancelScheduledBalanceAdjustment THEN transaction fails with IsPaused", async () => {
+        it("GIVEN paused token WHEN forceCancelScheduledBalanceAdjustment THEN transaction fails with IsPaused", async () => {
           await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_B.address);
           await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_B.address);
 
