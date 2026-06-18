@@ -552,6 +552,26 @@ Returns the pending owner of a configuration, if any.
 | -------------- | ------- | --------------------------------------------------------------------------------------------------- |
 | pendingOwner\_ | address | Address currently nominated to accept ownership, or the zero address when no transfer is in flight. |
 
+### getReplacementAddress
+
+```solidity
+function getReplacementAddress(address _oldAddress) external view returns (address replacementAddress_)
+```
+
+Returns the replacement address for a given address, or address(0) if none exists
+
+#### Parameters
+
+| Name         | Type    | Description |
+| ------------ | ------- | ----------- |
+| \_oldAddress | address | undefined   |
+
+#### Returns
+
+| Name                 | Type    | Description |
+| -------------------- | ------- | ----------- |
+| replacementAddress\_ | address | undefined   |
+
 ### getRoleCountFor
 
 ```solidity
@@ -826,6 +846,20 @@ function registerBusinessLogics(IBusinessLogicResolver.BusinessLogicRegistryData
 | ---------------- | -------------------------------------------------- | ----------- |
 | \_businessLogics | IBusinessLogicResolver.BusinessLogicRegistryData[] | undefined   |
 
+### removeReplacementAddress
+
+```solidity
+function removeReplacementAddress(address _oldAddress) external nonpayable
+```
+
+Removes the replacement address for a given address
+
+#### Parameters
+
+| Name         | Type    | Description                                     |
+| ------------ | ------- | ----------------------------------------------- |
+| \_oldAddress | address | the address for which to remove the replacement |
+
 ### removeSelectorsFromBlacklist
 
 ```solidity
@@ -903,6 +937,29 @@ Returns the business logic address for the latest version.
 | Name                   | Type    | Description                                                  |
 | ---------------------- | ------- | ------------------------------------------------------------ |
 | businessLogicAddress\_ | address | The implementation address registered at the latest version. |
+
+### resolveResolverProxyCall
+
+```solidity
+function resolveResolverProxyCall(bytes _resolverProxyConfiguration, bytes4 _selector) external view returns (address facetAddress_)
+```
+
+Resolves the facet address that implements a selector for a given configuration and version.
+
+_Used by resolver proxies during dispatch. Returns `address(0)` when no facet claims the selector._
+
+#### Parameters
+
+| Name                         | Type   | Description                        |
+| ---------------------------- | ------ | ---------------------------------- |
+| \_resolverProxyConfiguration | bytes  | Resolver proxy full configuration. |
+| \_selector                   | bytes4 | undefined                          |
+
+#### Returns
+
+| Name           | Type    | Description                                                                                                                        |
+| -------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| facetAddress\_ | address | Address of the facet that owns `_selector`, or `address(0)` if the selector is not registered for the given configuration/version. |
 
 ### resolveResolverProxyCall
 
@@ -1007,6 +1064,21 @@ _Requires `ROLE_PAUSER` and the token&#39;s internal flag to be set. Reverts wit
 | Name      | Type | Description                                               |
 | --------- | ---- | --------------------------------------------------------- |
 | success\_ | bool | True if the internal pause flag was successfully cleared. |
+
+### updateReplacementAddress
+
+```solidity
+function updateReplacementAddress(address _oldAddress, address _newAddress) external nonpayable
+```
+
+Updates the replacement address for a given address
+
+#### Parameters
+
+| Name         | Type    | Description                        |
+| ------------ | ------- | ---------------------------------- |
+| \_oldAddress | address | the address to be replaced         |
+| \_newAddress | address | the new address to replace it with |
 
 ## Events
 
@@ -1155,6 +1227,36 @@ Emitted when the token&#39;s internal pause flag is set to `true`.
 | ------------------ | ------- | ---------------------------------------------- |
 | operator `indexed` | address | Address of the caller who triggered the pause. |
 
+### ReplacementAddressRemoved
+
+```solidity
+event ReplacementAddressRemoved(address indexed oldAddress, address indexed newAddressRemoved)
+```
+
+Event emitted when a replacement address is removed
+
+#### Parameters
+
+| Name                        | Type    | Description                                         |
+| --------------------------- | ------- | --------------------------------------------------- |
+| oldAddress `indexed`        | address | address for which the replacement is being removed. |
+| newAddressRemoved `indexed` | address | removed replacement address.                        |
+
+### ReplacementAddressUpdated
+
+```solidity
+event ReplacementAddressUpdated(address indexed oldAddress, address indexed newAddress)
+```
+
+Event emitted when an old address is replaced with a new one
+
+#### Parameters
+
+| Name                 | Type    | Description                        |
+| -------------------- | ------- | ---------------------------------- |
+| oldAddress `indexed` | address | old address been replaced.         |
+| newAddress `indexed` | address | new address replacing the old one. |
+
 ### RoleGranted
 
 ```solidity
@@ -1295,6 +1397,12 @@ Thrown when attempting to revoke or renounce a role from an account that does no
 | ------- | ------- | ------------------------------------- |
 | role    | bytes32 | The role the account does not hold.   |
 | account | address | The account not assigned to the role. |
+
+### AddressZero
+
+```solidity
+error AddressZero()
+```
 
 ### BusinessLogicKeyDuplicated
 
@@ -1439,6 +1547,46 @@ Thrown when a configuration references a facet id that is not registered in the 
 | configurationId | bytes32 | Configuration being created or modified.    |
 | facetId         | bytes32 | Unknown facet id that triggered the revert. |
 
+### InvalidReplacedAddress
+
+```solidity
+error InvalidReplacedAddress(address replacedAddress)
+```
+
+Thrown when a replaced address is already been used as replacement of other addresses.
+
+#### Parameters
+
+| Name            | Type    | Description       |
+| --------------- | ------- | ----------------- |
+| replacedAddress | address | Replaced address. |
+
+### InvalidReplacementAddress
+
+```solidity
+error InvalidReplacementAddress(address replacementAddress)
+```
+
+Thrown when a replacement address is already been replaced.
+
+#### Parameters
+
+| Name               | Type    | Description                                                                             |
+| ------------------ | ------- | --------------------------------------------------------------------------------------- |
+| replacementAddress | address | Replacement address that is already been replaced and thus cannot replaced another one. |
+
+### InvalidResolverProxyConfiguration
+
+```solidity
+error InvalidResolverProxyConfiguration(bytes _resolverProxyConfiguration)
+```
+
+#### Parameters
+
+| Name                         | Type  | Description |
+| ---------------------------- | ----- | ----------- |
+| \_resolverProxyConfiguration | bytes | undefined   |
+
 ### IsPaused
 
 ```solidity
@@ -1561,6 +1709,18 @@ Thrown when attempting to register a selector that is globally blacklisted.
 | Name     | Type   | Description                          |
 | -------- | ------ | ------------------------------------ |
 | selector | bytes4 | Function selector that is forbidden. |
+
+### UnrecognizedResolverProxyVersion
+
+```solidity
+error UnrecognizedResolverProxyVersion(bytes8 _resolverProxyVersion)
+```
+
+#### Parameters
+
+| Name                   | Type   | Description |
+| ---------------------- | ------ | ----------- |
+| \_resolverProxyVersion | bytes8 | undefined   |
 
 ### VersionZero
 

@@ -21,3 +21,17 @@ Thrown when no function exists for function called.
 | Name               | Type   | Description                                                   |
 | ------------------ | ------ | ------------------------------------------------------------- |
 | \_functionSelector | bytes4 | The four-byte selector that could not be resolved to a facet. |
+
+### UnrecognizedResolverProxyConfigurationVersion
+
+```solidity
+error UnrecognizedResolverProxyConfigurationVersion(uint256 _resolverProxyConfigurationVersion)
+```
+
+Thrown when the stored configuration carries an unrecognized version tag
+
+#### Parameters
+
+| Name                                | Type    | Description |
+| ----------------------------------- | ------- | ----------- |
+| \_resolverProxyConfigurationVersion | uint256 | undefined   |
