@@ -824,32 +824,32 @@ Emitted when a configuration is created atomically via {createConfiguration}.
 ### ReplacementAddressRemoved
 
 ```solidity
-event ReplacementAddressRemoved(address indexed oldAddress, address indexed newAddressRemoved)
+event ReplacementAddressRemoved(address indexed replacedAddress, address indexed replacementAddressRemoved)
 ```
 
 Event emitted when a replacement address is removed
 
 #### Parameters
 
-| Name                        | Type    | Description                                         |
-| --------------------------- | ------- | --------------------------------------------------- |
-| oldAddress `indexed`        | address | address for which the replacement is being removed. |
-| newAddressRemoved `indexed` | address | removed replacement address.                        |
+| Name                                | Type    | Description                                         |
+| ----------------------------------- | ------- | --------------------------------------------------- |
+| replacedAddress `indexed`           | address | address for which the replacement is being removed. |
+| replacementAddressRemoved `indexed` | address | removed replacement address.                        |
 
 ### ReplacementAddressUpdated
 
 ```solidity
-event ReplacementAddressUpdated(address indexed oldAddress, address indexed newAddress)
+event ReplacementAddressUpdated(address indexed replacedAddress, address indexed replacementAddress)
 ```
 
 Event emitted when an old address is replaced with a new one
 
 #### Parameters
 
-| Name                 | Type    | Description                        |
-| -------------------- | ------- | ---------------------------------- |
-| oldAddress `indexed` | address | old address been replaced.         |
-| newAddress `indexed` | address | new address replacing the old one. |
+| Name                         | Type    | Description                        |
+| ---------------------------- | ------- | ---------------------------------- |
+| replacedAddress `indexed`    | address | old address been replaced.         |
+| replacementAddress `indexed` | address | new address replacing the old one. |
 
 ## Errors
 
