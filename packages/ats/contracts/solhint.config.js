@@ -85,5 +85,11 @@ module.exports = {
     "gas-indexed-events": "off",
 
     "use-natspec": "warn",
+
+    // Rules driven to zero and locked as errors so they can never regress. The
+    // remaining recommended warnings are governed by the betterer ratchet
+    // (.betterer.ts / .betterer.results) instead — see the contracts lint scripts.
+    "duplicated-imports": "error",
+    "gas-increment-by-one": "error",
   },
 };
