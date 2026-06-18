@@ -390,16 +390,16 @@ describe("BusinessLogicResolver", () => {
       expect(await businessLogicResolver.getSelectorsBlacklist(EQUITY_CONFIG_ID, 0, 100)).to.deep.equal([]);
     });
 
-    it("GIVEN address zero WHEN replacing it THEN transaction fails with AddressZero", async () => {
+    it("GIVEN address zero WHEN replacing it THEN transaction fails with ZeroAddressNotAllowed", async () => {
       await expect(
         businessLogicResolver.updateReplacementAddress(ADDRESS_ZERO, "0x0504030201050403020105040302010504030201"),
-      ).to.be.revertedWithCustomError(businessLogicResolver, "AddressZero");
+      ).to.be.revertedWithCustomError(businessLogicResolver, "ZeroAddressNotAllowed");
     });
 
-    it("GIVEN address zero WHEN using it to replace another one THEN transaction fails with AddressZero", async () => {
+    it("GIVEN address zero WHEN using it to replace another one THEN transaction fails with ZeroAddressNotAllowed", async () => {
       await expect(
         businessLogicResolver.updateReplacementAddress("0x0504030201050403020105040302010504030201", ADDRESS_ZERO),
-      ).to.be.revertedWithCustomError(businessLogicResolver, "AddressZero");
+      ).to.be.revertedWithCustomError(businessLogicResolver, "ZeroAddressNotAllowed");
     });
 
     it("GIVEN an address WHEN replacing it then removing itTHEN transactions success", async () => {

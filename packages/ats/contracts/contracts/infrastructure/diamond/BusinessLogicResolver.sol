@@ -67,27 +67,31 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
     }
 
     function updateReplacementAddress(
-        address _oldAddress,
-        address _newAddress
+        address _replacedAddress,
+        address _replacementAddress
     )
         external
         override
-        validateReplacedAddress(_oldAddress)
-        validateReplacementAddress(_newAddress)
+        validateAddressNotZero(_replacedAddress)
+        validateAddressNotZero(_replacementAddress)
+        onlyNotReplacement(_replacedAddress)
+        onlyNotReplaced(_replacementAddress)
         onlyRole(DEFAULT_ADMIN_ROLE)
         onlyUnpaused
     {
-        _updateReplacementAddress(_oldAddress, _newAddress);
-        emit ReplacementAddressUpdated(_oldAddress, _newAddress);
+        _updateReplacementAddress(_replacedAddress, _replacementAddress);
+        emit ReplacementAddressUpdated(_replacedAddress, _replacementAddress);
     }
 
-    function removeReplacementAddress(address _oldAddress) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyUnpaused {
-        address newAddressRemoved = _removeReplacementAddress(_oldAddress);
-        emit ReplacementAddressRemoved(_oldAddress, newAddressRemoved);
+    function removeReplacementAddress(
+        address _replacedAddress
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyUnpaused {
+        address replacementAddressRemoved = _removeReplacementAddress(_replacedAddress);
+        emit ReplacementAddressRemoved(_replacedAddress, replacementAddressRemoved);
     }
 
-    function getReplacementAddress(address _oldAddress) external view returns (address replacementAddress_) {
-        replacementAddress_ = _getReplacementAddress(_oldAddress);
+    function getReplacementAddress(address _replacedAddress) external view returns (address replacementAddress_) {
+        replacementAddress_ = _getReplacementAddress(_replacedAddress);
     }
 
     function getVersionStatus(

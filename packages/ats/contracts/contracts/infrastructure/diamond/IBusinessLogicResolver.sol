@@ -46,14 +46,14 @@ interface IBusinessLogicResolver is IDiamondCutManager {
     event BusinessLogicsRegistered(BusinessLogicRegistryData[] businessLogics, uint256[] newLatestVersions);
 
     /// @notice Event emitted when an old address is replaced with a new one
-    /// @param oldAddress old address been replaced.
-    /// @param newAddress new address replacing the old one.
-    event ReplacementAddressUpdated(address indexed oldAddress, address indexed newAddress);
+    /// @param replacedAddress old address been replaced.
+    /// @param replacementAddress new address replacing the old one.
+    event ReplacementAddressUpdated(address indexed replacedAddress, address indexed replacementAddress);
 
     /// @notice Event emitted when a replacement address is removed
-    /// @param oldAddress address for which the replacement is being removed.
-    /// @param newAddressRemoved removed replacement address.
-    event ReplacementAddressRemoved(address indexed oldAddress, address indexed newAddressRemoved);
+    /// @param replacedAddress address for which the replacement is being removed.
+    /// @param replacementAddressRemoved removed replacement address.
+    event ReplacementAddressRemoved(address indexed replacedAddress, address indexed replacementAddressRemoved);
 
     /// @notice Thrown when the requested version has never been registered for any business logic key.
     /// @param version The version number that does not exist in the registry.

@@ -83,13 +83,13 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
         _;
     }
 
-    modifier validateReplacementAddress(address _replacementAddress) {
-        _checkReplacementAddress(_replacementAddress);
+    modifier onlyNotReplaced(address _address) {
+        _checkNotReplaced(_address);
         _;
     }
 
-    modifier validateReplacedAddress(address _replacedAddress) {
-        _checkReplacedAddress(_replacedAddress);
+    modifier onlyNotReplacement(address _address) {
+        _checkNotReplacement(_address);
         _;
     }
 
@@ -379,31 +379,21 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
 
     /**
      * @notice Reverts when a replacement address is itself been replaced by another one.
-     * @param _replacementAddress The replacement address been replaced.
+     * @param _address The replacement address been replaced.
      */
-    function _checkReplacementAddress(address _replacementAddress) internal view {
-        _checkAddressZero(_replacementAddress);
-
-        if (_getReplacementAddress(_replacementAddress) != address(0)) {
-            revert InvalidReplacementAddress(_replacementAddress);
+    function _checkNotReplaced(address _address) internal view {
+        if (_getReplacementAddress(_address) != address(0)) {
+            revert InvalidReplacementAddress(_address);
         }
     }
 
     /**
      * @notice Reverts when a replaced address is itself replacing other addresses.
-     * @param _replacedAddress The replaced address been used as replacement.
+     * @param _address The replaced address been used as replacement.
      */
-    function _checkReplacedAddress(address _replacedAddress) internal view {
-        _checkAddressZero(_replacedAddress);
-
-        if (_isReplacementAddress(_replacedAddress) > 0) {
-            revert InvalidReplacedAddress(_replacedAddress);
-        }
-    }
-
-    function _checkAddressZero(address _address) internal pure {
-        if (_address == address(0)) {
-            revert AddressZero();
+    function _checkNotReplacement(address _address) internal view {
+        if (_isReplacementAddress(_address) > 0) {
+            revert InvalidReplacedAddress(_address);
         }
     }
 
