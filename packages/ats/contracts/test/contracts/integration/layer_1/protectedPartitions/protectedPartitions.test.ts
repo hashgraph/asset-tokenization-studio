@@ -377,7 +377,7 @@ export function protectedPartitionsTests(getCtx: () => AssetMockCtx): void {
         await grantKyc();
 
         domain.name = (await asset.getERC20Metadata()).info.name;
-        domain.version = (await asset.getConfigInfo()).version_.toString();
+        domain.version = (await asset.getConfigInfo()).configurationVersion_.toString();
         domain.chainId = await network.provider.send("eth_chainId");
         domain.verifyingContract = asset.target as string;
       });
