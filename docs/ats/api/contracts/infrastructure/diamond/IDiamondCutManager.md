@@ -410,6 +410,29 @@ Non-reverting variant of {checkResolverProxyConfigurationRegistered}.
 ### resolveResolverProxyCall
 
 ```solidity
+function resolveResolverProxyCall(bytes _resolverProxyConfiguration, bytes4 _selector) external view returns (address facetAddress_)
+```
+
+Resolves the facet address that implements a selector for a given configuration and version.
+
+_Used by resolver proxies during dispatch. Returns `address(0)` when no facet claims the selector._
+
+#### Parameters
+
+| Name                         | Type   | Description                        |
+| ---------------------------- | ------ | ---------------------------------- |
+| \_resolverProxyConfiguration | bytes  | Resolver proxy full configuration. |
+| \_selector                   | bytes4 | undefined                          |
+
+#### Returns
+
+| Name           | Type    | Description                                                                                                                        |
+| -------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| facetAddress\_ | address | Address of the facet that owns `_selector`, or `address(0)` if the selector is not registered for the given configuration/version. |
+
+### resolveResolverProxyCall
+
+```solidity
 function resolveResolverProxyCall(bytes32 _configurationId, uint256 _version, bytes4 _selector) external view returns (address facetAddress_)
 ```
 
@@ -560,6 +583,18 @@ Thrown when a configuration references a facet id that is not registered in the 
 | configurationId | bytes32 | Configuration being created or modified.    |
 | facetId         | bytes32 | Unknown facet id that triggered the revert. |
 
+### InvalidResolverProxyConfiguration
+
+```solidity
+error InvalidResolverProxyConfiguration(bytes _resolverProxyConfiguration)
+```
+
+#### Parameters
+
+| Name                         | Type  | Description |
+| ---------------------------- | ----- | ----------- |
+| \_resolverProxyConfiguration | bytes | undefined   |
+
 ### OngoingBatchConfigurationNotPermitted
 
 ```solidity
@@ -619,6 +654,18 @@ Thrown when attempting to register a selector that is globally blacklisted.
 | Name     | Type   | Description                          |
 | -------- | ------ | ------------------------------------ |
 | selector | bytes4 | Function selector that is forbidden. |
+
+### UnrecognizedResolverProxyVersion
+
+```solidity
+error UnrecognizedResolverProxyVersion(bytes8 _resolverProxyVersion)
+```
+
+#### Parameters
+
+| Name                   | Type   | Description |
+| ---------------------- | ------ | ----------- |
+| \_resolverProxyVersion | bytes8 | undefined   |
 
 ### VersionZero
 
