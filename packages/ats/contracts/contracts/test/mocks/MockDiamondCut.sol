@@ -32,8 +32,6 @@ import { KycStorageWrapper } from "../../domain/core/KycStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC20StorageWrapper } from "../../domain/asset/ERC20StorageWrapper.sol";
 import { ERC20VotesStorageWrapper } from "../../domain/asset/ERC20VotesStorageWrapper.sol";
-import { ILoansPortfolio } from "../../facets/loansPortfolio/ILoansPortfolio.sol";
-import { LoansPortfolioStorageWrapper } from "../../domain/asset/LoansPortfolioStorageWrapper.sol";
 
 /* solhint-disable */
 
@@ -209,18 +207,6 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
         ControlListStorageWrapper.initializeControlList(_newWhiteList);
     }
 
-    /// @notice Forces the loans-portfolio type and distribution policy for testing without running the facet
-    ///         initialiser. Writes ONLY the two config fields through LoansPortfolioStorageWrapper, with NO
-    ///         ScheduledTasksOps trigger or other side effects.
-    /// @param _portfolioType      Portfolio type (e.g. SECURED, UNSECURED).
-    /// @param _distributionPolicy Distribution policy (e.g. PRO_RATA).
-    function forceLoansPortfolioDetails(
-        ILoansPortfolio.PortfolioType _portfolioType,
-        ILoansPortfolio.DistributionPolicy _distributionPolicy
-    ) external override {
-        LoansPortfolioStorageWrapper.setLoansPortfolioDetails(_portfolioType, _distributionPolicy);
-    }
-
     function getStaticResolverKey() external pure returns (bytes32 staticResolverKey_) {
         // Must return the production `RESOLVER_KEY_DIAMOND` so the BLR
         // registration matches the `atsRegistry.data.ts` entry. The internal
@@ -230,7 +216,7 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
     }
 
     function getStaticFunctionSelectors() external pure returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorsIndex = 32;
+        uint256 selectorsIndex = 31;
         staticFunctionSelectors_ = new bytes4[](selectorsIndex);
         unchecked {
             staticFunctionSelectors_[--selectorsIndex] = this.initializeDiamondCut.selector;
@@ -246,7 +232,6 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
             staticFunctionSelectors_[--selectorsIndex] = this.forceDecimals.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.forceErc20VotesActivated.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.forceWhitelist.selector;
-            staticFunctionSelectors_[--selectorsIndex] = this.forceLoansPortfolioDetails.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.updateConfigVersion.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.updateConfig.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.updateResolver.selector;
