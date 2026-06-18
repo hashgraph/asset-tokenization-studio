@@ -66,6 +66,7 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
         _removeSelectorsFromBlacklist(_configurationId, _selectors);
     }
 
+    /// @inheritdoc IBusinessLogicResolver
     function updateReplacementAddress(
         address _replacedAddress,
         address _replacementAddress
@@ -83,6 +84,7 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
         emit ReplacementAddressUpdated(_replacedAddress, _replacementAddress);
     }
 
+    /// @inheritdoc IBusinessLogicResolver
     function removeReplacementAddress(
         address _replacedAddress
     ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyUnpaused {
@@ -90,10 +92,12 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
         emit ReplacementAddressRemoved(_replacedAddress, replacementAddressRemoved);
     }
 
+    /// @inheritdoc IBusinessLogicResolver
     function getReplacementAddress(address _replacedAddress) external view returns (address replacementAddress_) {
         replacementAddress_ = _getReplacementAddress(_replacedAddress);
     }
 
+    /// @inheritdoc IBusinessLogicResolver
     function getVersionStatus(
         bytes32 _businessLogicKey,
         uint256 _version

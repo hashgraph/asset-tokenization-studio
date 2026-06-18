@@ -137,8 +137,16 @@ interface IDiamondCutManager {
      */
     error SelectorAlreadyRegistered(bytes32 configurationId, uint256 version, bytes32 facetId, bytes4 selector);
 
+    /**
+     * @notice Thrown when the provided encoded proxy configuration does not respect the standard.
+     * @param _resolverProxyConfiguration wrong encoded proxy configuration.
+     */
     error InvalidResolverProxyConfiguration(bytes _resolverProxyConfiguration);
 
+    /**
+     * @notice Thrown when the provided proxy version does not match any BLR compatible standard.
+     * @param _resolverProxyVersion proxy version that is not compatible with the BLR.
+     */
     error UnrecognizedResolverProxyVersion(bytes8 _resolverProxyVersion);
 
     /**

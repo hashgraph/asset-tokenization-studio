@@ -111,6 +111,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         facetAddress_ = _resolveResolverProxyCallV2(_configurationId, _version, false, _selector);
     }
 
+    /// @inheritdoc IDiamondCutManager
     function resolveResolverProxyCall(
         bytes calldata _resolverProxyConfiguration,
         bytes4 _selector

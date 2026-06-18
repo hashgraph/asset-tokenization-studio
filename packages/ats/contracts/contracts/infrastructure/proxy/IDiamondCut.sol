@@ -24,6 +24,7 @@ interface IDiamondCut is IStaticFunctionSelectors {
 
     /**
      * @notice For the current BLR update its configuration
+     * @param _newReplacementEnabled The replacement enabled flag to set
      **/
     function updateReplacementEnabled(bool _newReplacementEnabled) external;
 

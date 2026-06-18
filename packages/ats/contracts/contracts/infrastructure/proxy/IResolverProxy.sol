@@ -8,11 +8,20 @@ pragma solidity >=0.8.0 <0.9.0;
  *         and the error thrown when an unknown function selector is called.
  */
 interface IResolverProxy {
+    /// @notice Version-tagged envelope wrapping the proxy's stored configuration payload.
+    /// @dev The outer shape is fixed across versions: `resolverProxyVersion` selects how `content`
+    ///      is decoded, allowing the configuration layout to evolve without breaking the storage slot.
+    /// @param resolverProxyVersion The eight-byte version tag identifying the payload schema (e.g. V2).
+    /// @param content The ABI-encoded version-specific configuration (e.g. `ResolverProxyConfigurationV2`).
     struct ResolverProxyConfigurationGeneric {
         bytes8 resolverProxyVersion;
         bytes content;
     }
 
+    /// @notice Version 2 configuration selecting the facet selectors served by the proxy.
+    /// @param configurationId The identifier of the configuration registered in the `BusinessLogicResolver`.
+    /// @param configurationVersion The pinned version of that configuration the proxy resolves against.
+    /// @param replacementEnabled Whether selector replacement is permitted for this configuration.
     struct ResolverProxyConfigurationV2 {
         bytes32 configurationId;
         uint256 configurationVersion;

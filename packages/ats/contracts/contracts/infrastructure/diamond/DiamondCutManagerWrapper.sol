@@ -282,6 +282,12 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         }
     }
 
+    /**
+     * @notice Generic method that resolves the facet address that handles a selector for a configuration version.
+     * @param _resolverProxyConfiguration encoded proxy configuration.
+     * @param _selector Function selector to resolve.
+     * @return facetAddress_ Facet address registered for the selector, or zero if absent.
+     */
     function _resolveResolverProxyCall(
         bytes calldata _resolverProxyConfiguration,
         bytes4 _selector

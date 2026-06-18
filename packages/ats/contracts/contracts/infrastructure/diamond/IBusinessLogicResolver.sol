@@ -83,7 +83,6 @@ interface IBusinessLogicResolver is IDiamondCutManager {
      * @param replacedAddress Replaced address.
      */
     error InvalidReplacedAddress(address replacedAddress);
-    error AddressZero();
 
     /**
      * @notice Initialises the Business Logic Resolver storage. Must be called once before any
