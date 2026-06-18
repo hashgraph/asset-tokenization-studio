@@ -40,6 +40,7 @@ const TEST_CONFIG_IDS = {
 };
 
 const RESOLVER_PROXY_VERSION_V2 = "0x0000000000000002"; // bytes8
+const PAUSE_SELECTOR = "0x8456cb59";
 
 describe("DiamondCutManager", () => {
   function createFacetConfigurations(ids: string[], versions: number[]): IDiamondCutManager.FacetConfigurationStruct[] {
@@ -140,7 +141,6 @@ describe("DiamondCutManager", () => {
     if (isPaused) {
       await pause.connect(signer_B).unpause();
     }
-    const pauseSelector = "0x8456cb59";
     const configIdsToCleanup = [
       EQUITY_CONFIG_ID,
       TEST_CONFIG_IDS.PAUSE_TEST,
@@ -150,7 +150,7 @@ describe("DiamondCutManager", () => {
 
     for (const configId of configIdsToCleanup) {
       try {
-        await businessLogicResolver.removeSelectorsFromBlacklist(configId, [pauseSelector]);
+        await businessLogicResolver.removeSelectorsFromBlacklist(configId, [PAUSE_SELECTOR]);
       } catch (_error) {
         // Ignore errors if selector wasn't blacklisted - contract may be in different state
       }
@@ -308,9 +308,16 @@ describe("DiamondCutManager", () => {
         selectorId,
       );
 
+      const facetAddressForSelectorLegacy = await diamondCutManager["resolveResolverProxyCall(bytes32,uint256,bytes4)"](
+        configId,
+        configVersion,
+        selectorId,
+      );
+
       expect(facetAddressForSelector).to.not.equal("0x0000000000000000000000000000000000000000");
       expect(id).to.equal(facet.id);
       expect(facetAddressForSelector).to.equal(facet.addr);
+      expect(facetAddressForSelector).to.equal(facetAddressForSelectorLegacy);
     }
   }
 
@@ -919,13 +926,46 @@ describe("DiamondCutManager", () => {
   });
 
   it("GIVEN an existing configuration WHEN resolving a call with version 0 THEN reverts with VersionZero", async () => {
-    const pauseSelector = "0x8456cb59";
-
     const resolverProxyConfiguration = buildBytes(RESOLVER_PROXY_VERSION_V2, EQUITY_CONFIG_ID, 0, false);
 
-    await expect(diamondCutManager.resolveResolverProxyCall(resolverProxyConfiguration, pauseSelector))
+    await expect(diamondCutManager.resolveResolverProxyCall(resolverProxyConfiguration, PAUSE_SELECTOR))
       .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
       .withArgs(EQUITY_CONFIG_ID);
+  });
+
+  it("GIVEN an existing configuration WHEN resolving a call with version 0 for legacy method THEN reverts with VersionZero", async () => {
+    await expect(
+      diamondCutManager["resolveResolverProxyCall(bytes32,uint256,bytes4)"](EQUITY_CONFIG_ID, 0, PAUSE_SELECTOR),
+    )
+      .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
+      .withArgs(EQUITY_CONFIG_ID);
+  });
+
+  it("GIVEN a wrong proxy configuration with a bytes that is not a multiple of 32 WHEN resolving a call THEN reverts with InvalidResolverProxyConfiguration", async () => {
+    const resolverProxyConfiguration = "0x01";
+
+    await expect(diamondCutManager.resolveResolverProxyCall(resolverProxyConfiguration, PAUSE_SELECTOR))
+      .to.be.revertedWithCustomError(diamondCutManager, "InvalidResolverProxyConfiguration")
+      .withArgs(resolverProxyConfiguration);
+  });
+
+  it("GIVEN a wrong proxy configuration with too few bytes WHEN resolving a call THEN reverts with InvalidResolverProxyConfiguration", async () => {
+    let resolverProxyConfiguration = buildBytes(RESOLVER_PROXY_VERSION_V2, EQUITY_CONFIG_ID, 0, false);
+    resolverProxyConfiguration = resolverProxyConfiguration.substring(0, resolverProxyConfiguration.length - 2);
+
+    await expect(diamondCutManager.resolveResolverProxyCall(resolverProxyConfiguration, PAUSE_SELECTOR))
+      .to.be.revertedWithCustomError(diamondCutManager, "InvalidResolverProxyConfiguration")
+      .withArgs(resolverProxyConfiguration);
+  });
+
+  it("GIVEN an unrecognized proxy version WHEN resolving a call THEN reverts with UnrecognizedResolverProxyVersion", async () => {
+    const WRONG_RESOLVER_PROXY_VERSION = "0xffffffffffffffff";
+
+    const resolverProxyConfiguration = buildBytes(WRONG_RESOLVER_PROXY_VERSION, EQUITY_CONFIG_ID, 0, false);
+
+    await expect(diamondCutManager.resolveResolverProxyCall(resolverProxyConfiguration, PAUSE_SELECTOR))
+      .to.be.revertedWithCustomError(diamondCutManager, "UnrecognizedResolverProxyVersion")
+      .withArgs(WRONG_RESOLVER_PROXY_VERSION);
   });
 
   it("GIVEN an existing configuration WHEN resolveSupportsInterface called with version 0 THEN reverts with VersionZero", async () => {
