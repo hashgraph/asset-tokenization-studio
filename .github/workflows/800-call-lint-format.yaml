@@ -26,8 +26,8 @@ permissions:
   contents: read
 
 jobs:
-  lint-and-format:
-    name: lint-and-format
+  format-and-lint:
+    name: format-and-lint
     runs-on: ${{ inputs.runs-on }}
     timeout-minutes: ${{ inputs.timeout-minutes }}
     steps:
