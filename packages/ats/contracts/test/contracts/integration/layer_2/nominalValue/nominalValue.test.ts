@@ -3,86 +3,77 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type IAsset, MockDiamondCut } from "@contract-types";
-import { deployBondTokenFixture } from "@test";
+import { IAssetMock } from "@contract-types";
 import { ATS_ROLES, RESOLVER_KEY_NOMINAL_VALUE } from "@scripts";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import type { AssetMockCtx } from "@test";
 
-describe("NominalValue Tests", () => {
-  let asset: IAsset;
-  let mockDiamondCut: MockDiamondCut;
-  let unknownSigner: HardhatEthersSigner;
+export function nominalValueTests(getCtx: () => AssetMockCtx): void {
+  describe("NominalValue Tests", () => {
+    let asset: IAssetMock;
+    let deployer: HardhatEthersSigner;
+    let unknownSigner: HardhatEthersSigner;
 
-  async function deployFixture() {
-    const base = await deployBondTokenFixture();
-    asset = await ethers.getContractAt("IAsset", base.diamond.target);
-    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", base.diamond.target);
-    const signers = await ethers.getSigners();
-    unknownSigner = signers[signers.length - 1];
-  }
-
-  beforeEach(async () => {
-    await loadFixture(deployFixture);
-  });
-
-  describe("initializeNominalValue", () => {
-    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeNominalValue THEN AccountHasNoRole", async () => {
-      await expect(asset.connect(unknownSigner).initializeNominalValue(1, 6, "0x000000"))
-        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
-        .withArgs(await unknownSigner.getAddress(), ATS_ROLES.DEFAULT_ADMIN_ROLE);
-    });
-
-    it("GIVEN already-initialised WHEN initializeNominalValue THEN FacetAlreadyRegistered", async () => {
-      await expect(asset.initializeNominalValue(1, 6, "0x000000"))
-        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(RESOLVER_KEY_NOMINAL_VALUE, 1);
-    });
-  });
-
-  describe("initializeNominalValue event", () => {
-    it("GIVEN fresh facet WHEN initializeNominalValue THEN emits NominalValueInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_NOMINAL_VALUE);
-      await expect(asset.initializeNominalValue(1, 6, "0x000000")).to.emit(asset, "NominalValueInitialized");
-    });
-  });
-
-  describe("nonOperational", () => {
     beforeEach(async () => {
-      await mockDiamondCut.forceNonOperational();
+      const ctx = getCtx();
+      asset = ctx.asset;
+      deployer = ctx.deployer;
+      const signers = await ethers.getSigners();
+      unknownSigner = signers[signers.length - 1];
     });
 
-    it("GIVEN non-operational asset WHEN setNominalValue THEN AssetNotOperational", async () => {
-      await expect(asset.setNominalValue(0, 0)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    describe("initializeNominalValue", () => {
+      it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeNominalValue THEN AccountHasNoRole", async () => {
+        await expect(asset.connect(unknownSigner).initializeNominalValue(1, 6, "0x000000"))
+          .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+          .withArgs(await unknownSigner.getAddress(), ATS_ROLES.DEFAULT_ADMIN_ROLE);
+      });
+
+      it("GIVEN already-initialised WHEN initializeNominalValue THEN FacetAlreadyRegistered", async () => {
+        await expect(asset.initializeNominalValue(1, 6, "0x000000"))
+          .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+          .withArgs(RESOLVER_KEY_NOMINAL_VALUE, 1);
+      });
     });
 
-    it("GIVEN non-operational asset WHEN setNominalValueCurrency THEN AssetNotOperational", async () => {
-      await expect(asset.setNominalValueCurrency("0x000000")).to.be.revertedWithCustomError(
-        asset,
-        "AssetNotOperational",
-      );
+    describe("initializeNominalValue event", () => {
+      it("GIVEN fresh facet WHEN initializeNominalValue THEN emits NominalValueInitialized", async () => {
+        await asset.forceFacetNotRegistered(RESOLVER_KEY_NOMINAL_VALUE);
+        await expect(asset.initializeNominalValue(1, 6, "0x000000")).to.emit(asset, "NominalValueInitialized");
+      });
+    });
+
+    describe("nonOperational", () => {
+      beforeEach(async () => {
+        await asset.forceNonOperational();
+      });
+
+      it("GIVEN non-operational asset WHEN setNominalValue THEN AssetNotOperational", async () => {
+        await expect(asset.setNominalValue(0, 0)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+      });
+
+      it("GIVEN non-operational asset WHEN setNominalValueCurrency THEN AssetNotOperational", async () => {
+        await expect(asset.setNominalValueCurrency("0x000000")).to.be.revertedWithCustomError(
+          asset,
+          "AssetNotOperational",
+        );
+      });
+    });
+
+    describe("Deactivated", () => {
+      beforeEach(async () => {
+        await asset.forceDeactivate();
+      });
+
+      it("GIVEN a deactivated asset WHEN setNominalValue THEN transaction fails with Deactivated", async () => {
+        await expect(asset.connect(deployer).setNominalValue(0, 0)).to.be.revertedWithCustomError(asset, "Deactivated");
+      });
+
+      it("GIVEN a deactivated asset WHEN setNominalValueCurrency THEN transaction fails with Deactivated", async () => {
+        await expect(asset.connect(deployer).setNominalValueCurrency("0x000000")).to.be.revertedWithCustomError(
+          asset,
+          "Deactivated",
+        );
+      });
     });
   });
-
-  describe("Deactivated", () => {
-    it("GIVEN a deactivated asset WHEN setNominalValue THEN transaction fails with Deactivated", async () => {
-      const base = await deployBondTokenFixture();
-      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
-      await deactivatedAsset.connect(base.deployer).deactivate();
-      await expect(deactivatedAsset.connect(base.deployer).setNominalValue(0, 0)).to.be.revertedWithCustomError(
-        deactivatedAsset,
-        "Deactivated",
-      );
-    });
-
-    it("GIVEN a deactivated asset WHEN setNominalValueCurrency THEN transaction fails with Deactivated", async () => {
-      const base = await deployBondTokenFixture();
-      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
-      await deactivatedAsset.connect(base.deployer).deactivate();
-      await expect(
-        deactivatedAsset.connect(base.deployer).setNominalValueCurrency("0x000000"),
-      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
-    });
-  });
-});
+}
