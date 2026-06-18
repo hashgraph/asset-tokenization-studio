@@ -6,6 +6,7 @@ import { ITransferByPartition } from "../../facets/transferByPartition/ITransfer
 
 /**
  * @title MockLoanHolding
+ * @author Asset Tokenization Studio Team
  * @notice Configurable test stand-in for a loan holding asset that the
  *         LoansPortfolio facet reads from at runtime.
  * @dev   Exposes exactly the two call surfaces the portfolio invokes:
