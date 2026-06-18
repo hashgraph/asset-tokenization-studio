@@ -7,13 +7,13 @@
  * can be registered in the BusinessLogicResolver without selector or
  * resolver-key collisions.
  *
- * @module test/scripts/integration/assetMockConfiguration
+ * @module test/contracts/integration/assetMock/assetMockConfiguration
  */
 
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployAtsInfrastructureFullAssetFixture } from "../../fixtures/deploy/fullAsset";
-import { ASSET_MOCK_CONFIG_ID, getAssetMockFacets } from "../../fixtures/deploy/assetMockConfiguration";
+import { deployAtsInfrastructureFullAssetFixture } from "../../../fixtures/deploy/fullAsset";
+import { ASSET_MOCK_CONFIG_ID, getAssetMockFacets } from "../../../fixtures/deploy/assetMockConfiguration";
 import { BusinessLogicResolver__factory } from "@contract-types";
 import { silenceScriptLogging } from "@test";
 

@@ -1,94 +1,83 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { expect } from "chai";
-import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import { IAssetMock } from "@contract-types";
+import type { AssetMockCtx } from "@test";
 import { ATS_ROLES, RESOLVER_KEY_CORE_ADJUSTED } from "@scripts";
-import { deployEquityTokenFixture, executeRbac } from "@test";
+import { executeRbac } from "@test";
 
 const decimals = 6;
 const decimalAdjustment = 2;
 const adjustmentTimestamp = 100_000;
 
-describe("CoreAdjusted Facet Tests", () => {
-  let diamond: ResolverProxy;
-  let signer_A: HardhatEthersSigner;
-  let signer_B: HardhatEthersSigner;
+export function coreAdjustedTests(getCtx: () => AssetMockCtx): void {
+  describe("CoreAdjusted Facet Tests", () => {
+    let signer_A: HardhatEthersSigner;
+    let signer_B: HardhatEthersSigner;
 
-  let asset: IAsset;
-  let mockDiamondCut: MockDiamondCut;
+    let asset: IAssetMock;
 
-  async function deployFixture() {
-    const base = await deployEquityTokenFixture({
-      equityDataParams: {
-        securityData: {
-          erc20MetadataInfo: { name: "TEST_CoreAdjusted", symbol: "TCA", decimals },
-        },
-      },
-    });
-    diamond = base.diamond;
-    signer_A = base.deployer;
-    signer_B = base.user1;
+    beforeEach(async () => {
+      const ctx = getCtx();
+      signer_A = ctx.deployer;
+      signer_B = ctx.user1;
+      asset = ctx.asset;
 
-    asset = await ethers.getContractAt("IAsset", diamond.target);
-    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
-    await executeRbac(asset, [
-      { role: ATS_ROLES.ROLE_CORPORATE_ACTION, members: [signer_A.address] },
-      { role: ATS_ROLES.ROLE_ADJUSTMENT_BALANCE, members: [signer_A.address] },
-    ]);
-  }
-
-  beforeEach(async () => {
-    await loadFixture(deployFixture);
-  });
-
-  describe("decimalsAt", () => {
-    it("GIVEN an initialized token WHEN decimalsAt is called with current timestamp THEN returns current decimals", async () => {
-      const currentTimestamp = await asset.blockTimestamp();
-
-      expect(await asset.decimalsAt(currentTimestamp)).to.equal(decimals);
+      await executeRbac(asset, [
+        { role: ATS_ROLES.ROLE_CORPORATE_ACTION, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_ADJUSTMENT_BALANCE, members: [signer_A.address] },
+      ]);
+      await asset.forceDecimals(decimals);
     });
 
-    it("GIVEN a token with a pending scheduled balance adjustment WHEN decimalsAt is called with a timestamp after the adjustment THEN returns adjusted decimals", async () => {
-      await asset.setScheduledBalanceAdjustment({
-        executionDate: adjustmentTimestamp,
-        factor: 100,
-        decimals: decimalAdjustment,
+    describe("decimalsAt", () => {
+      it("GIVEN an initialized token WHEN decimalsAt is called with current timestamp THEN returns current decimals", async () => {
+        const currentTimestamp = await asset.blockTimestamp();
+
+        expect(await asset.decimalsAt(currentTimestamp)).to.equal(decimals);
       });
 
-      expect(await asset.decimalsAt(adjustmentTimestamp + 1)).to.equal(decimals + decimalAdjustment);
-    });
+      it("GIVEN a token with a pending scheduled balance adjustment WHEN decimalsAt is called with a timestamp after the adjustment THEN returns adjusted decimals", async () => {
+        await asset.setScheduledBalanceAdjustment({
+          executionDate: adjustmentTimestamp,
+          factor: 100,
+          decimals: decimalAdjustment,
+        });
 
-    it("GIVEN a token with a pending scheduled balance adjustment WHEN decimalsAt is called with a timestamp before the adjustment THEN returns original decimals", async () => {
-      await asset.setScheduledBalanceAdjustment({
-        executionDate: adjustmentTimestamp,
-        factor: 100,
-        decimals: decimalAdjustment,
+        expect(await asset.decimalsAt(adjustmentTimestamp + 1)).to.equal(decimals + decimalAdjustment);
       });
 
-      expect(await asset.decimalsAt(adjustmentTimestamp - 1)).to.equal(decimals);
-    });
-  });
-  describe("initializeCoreAdjusted", () => {
-    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeCoreAdjusted is called THEN AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_B).initializeCoreAdjusted())
-        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
-        .withArgs(signer_B.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+      it("GIVEN a token with a pending scheduled balance adjustment WHEN decimalsAt is called with a timestamp before the adjustment THEN returns original decimals", async () => {
+        await asset.setScheduledBalanceAdjustment({
+          executionDate: adjustmentTimestamp,
+          factor: 100,
+          decimals: decimalAdjustment,
+        });
+
+        expect(await asset.decimalsAt(adjustmentTimestamp - 1)).to.equal(decimals);
+      });
     });
 
-    it("GIVEN already-initialised WHEN initializeCoreAdjusted is called again THEN FacetAlreadyRegistered", async () => {
-      await expect(asset.initializeCoreAdjusted())
-        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(RESOLVER_KEY_CORE_ADJUSTED, 1);
-    });
-  });
+    describe("initializeCoreAdjusted", () => {
+      it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeCoreAdjusted is called THEN AccountHasNoRole", async () => {
+        await expect(asset.connect(signer_B).initializeCoreAdjusted())
+          .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+          .withArgs(signer_B.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+      });
 
-  describe("initializeCoreAdjusted event", () => {
-    it("GIVEN a fresh deployment WHEN initializeCoreAdjusted is called THEN emits CoreAdjustedInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_CORE_ADJUSTED);
-      await expect(asset.initializeCoreAdjusted()).to.emit(asset, "CoreAdjustedInitialized");
+      it("GIVEN already-initialised WHEN initializeCoreAdjusted is called again THEN FacetAlreadyRegistered", async () => {
+        await expect(asset.initializeCoreAdjusted())
+          .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+          .withArgs(RESOLVER_KEY_CORE_ADJUSTED, 1);
+      });
+    });
+
+    describe("initializeCoreAdjusted event", () => {
+      it("GIVEN a fresh deployment WHEN initializeCoreAdjusted is called THEN emits CoreAdjustedInitialized", async () => {
+        await asset.forceFacetNotRegistered(RESOLVER_KEY_CORE_ADJUSTED);
+        await expect(asset.initializeCoreAdjusted()).to.emit(asset, "CoreAdjustedInitialized");
+      });
     });
   });
-});
+}

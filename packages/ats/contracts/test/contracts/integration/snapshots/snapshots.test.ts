@@ -288,6 +288,8 @@ export function snapshotsTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN an account with snapshot role WHEN takeSnapshot THEN scheduled tasks get executed succeeds", async () => {
         await asset.forceDecimals(6);
 
+        await asset.forceDecimals(6);
+
         await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_SNAPSHOT, signer_A.address);
         await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
         await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);

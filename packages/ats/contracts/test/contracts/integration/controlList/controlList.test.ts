@@ -46,6 +46,13 @@ export function controlListTests(getCtx: () => AssetMockCtx): void {
       );
     });
 
+    it("GIVEN an account without controlList role WHEN addToControlList THEN transaction fails with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_B).addToControlList(signer_C.address)).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeControlList is called THEN it reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_D).initializeControlList(true)).to.be.revertedWithCustomError(
         asset,
@@ -53,9 +60,20 @@ export function controlListTests(getCtx: () => AssetMockCtx): void {
       );
     });
 
+    it("GIVEN an already-initialised facet WHEN initializeControlList is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeControlList(true)).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+    });
+
     it("GIVEN a new deployment WHEN initializeControlList is called THEN it emits ControlListInitialized", async () => {
       await asset.forceFacetNotRegistered(RESOLVER_KEY_CONTROL_LIST);
       await expect(asset.initializeControlList(true)).to.emit(asset, "ControlListInitialized");
+    });
+
+    it("GIVEN an account without controlList role WHEN removeFromControlList THEN transaction fails with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_B).removeFromControlList(signer_C.address)).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
     });
 
     it("GIVEN a paused Token WHEN addToControlList THEN transaction fails with IsPaused", async () => {
