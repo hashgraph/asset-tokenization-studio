@@ -46,8 +46,6 @@ interface IMockDiamondCut {
     function forceSecurityFlags(bool _newSecurityFlags) external;
     function forceControllable(bool _newIsControlable) external;
     function forceDecimals(uint8 _newDecimals) external;
-    function forceErc20VotesActivated(bool _newActivate) external;
-    function forceWhitelist(bool _newWhitelist) external;
     function forceErc20VotesActivated(bool n) external;
     function forceWhitelist(bool n) external;
 }
@@ -169,24 +167,6 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
     /// @param _newDecimals The decimal count to set (e.g. 6 for the standard equity token value).
     function forceDecimals(uint8 _newDecimals) external override {
         ERC20StorageWrapper.setDecimals(_newDecimals);
-    }
-
-    /// @notice Forces the ERC20Votes activation flag for testing without running the facet initialiser.
-    /// @dev Delegates to ERC20VotesStorageWrapper.setActivate, which writes the activation flag through the
-    ///      ERC20Votes storage struct (layout-independent). The production flag is set only at
-    ///      initializeERC20Votes time with no runtime toggle, so this mirrors the deploy-time state directly.
-    /// @param _newActivated true to activate ERC20Votes, false to deactivate.
-    function forceErc20VotesActivated(bool _newActivated) external override {
-        ERC20VotesStorageWrapper.setActivate(_newActivated);
-    }
-
-    /// @notice Forces the control-list type (whitelist vs blacklist) for testing without running the facet
-    ///         initialiser. true = whitelist mode, false = blacklist mode.
-    /// @dev Delegates to ControlListStorageWrapper.initializeControlList, which sets only the control-list
-    ///      type flag through the storage struct. The production flag is set once at initializeControlList
-    ///      time with no runtime toggle, so this mirrors the deploy-time state.
-    function forceWhitelist(bool _newWhiteList) external override {
-        ControlListStorageWrapper.initializeControlList(_newWhiteList);
     }
 
     /// @notice Forces the ERC20Votes activation flag for testing without running the facet initialiser.
