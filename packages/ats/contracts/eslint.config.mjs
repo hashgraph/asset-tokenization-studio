@@ -5,9 +5,10 @@ import mochaPreset from "@hashgraph/eslint-config/mocha";
 export default [
   ...createBaseConfig(),
 
-  // Global ignores for generated files
+  // Global ignores for generated files and the CommonJS solhint plugin (loaded via require()
+  // by solhint, so it cannot use ESM imports — exempt from the TS/ESM lint rules).
   {
-    ignores: ["typechain-types/**/*", "build/**/*"],
+    ignores: ["typechain-types/**/*", "build/**/*", "solhint-plugin-ats/**/*"],
   },
 
   // All TS files run in Node (Hardhat)
