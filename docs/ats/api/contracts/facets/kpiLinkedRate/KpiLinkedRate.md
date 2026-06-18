@@ -119,10 +119,10 @@ _Fires exclusively from `initializeKpiLinkedRate` after the storage write succee
 
 #### Parameters
 
-| Name         | Type                        | Description |
-| ------------ | --------------------------- | ----------- |
-| interestRate | IKpiLinkedRate.InterestRate | undefined   |
-| impactData   | IKpiLinkedRate.ImpactData   | undefined   |
+| Name         | Type                        | Description                                                 |
+| ------------ | --------------------------- | ----------------------------------------------------------- |
+| interestRate | IKpiLinkedRate.InterestRate | The initial interest rate configuration written to storage. |
+| impactData   | IKpiLinkedRate.ImpactData   | The initial impact data configuration written to storage.   |
 
 ## Errors
 

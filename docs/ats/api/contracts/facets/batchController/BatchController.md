@@ -1,5 +1,7 @@
 # BatchController
 
+_Asset Tokenization Studio Team_
+
 > BatchController
 
 Abstract implementation of controller-only batch transfer operations.

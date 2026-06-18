@@ -1,5 +1,7 @@
 # ICoreAdjusted
 
+_Asset Tokenization Studio Team_
+
 > ICoreAdjusted
 
 Interface exposing time-adjusted ERC-20 decimal reads for the CoreAdjusted facet.

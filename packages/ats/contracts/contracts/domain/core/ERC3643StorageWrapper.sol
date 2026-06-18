@@ -14,7 +14,7 @@ import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableS
 import { AccessControlStorageWrapper } from "./AccessControlStorageWrapper.sol";
 import { ControlListStorageWrapper } from "./ControlListStorageWrapper.sol";
 import { ResolverProxyStorageWrapper } from "./ResolverProxyStorageWrapper.sol";
-import { ERC20StorageWrapper, ERC20Storage } from "../asset/ERC20StorageWrapper.sol";
+import { ERC20StorageWrapper } from "../asset/ERC20StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../asset/ERC1410StorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "../asset/SnapshotsStorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "../asset/AdjustBalancesStorageWrapper.sol";

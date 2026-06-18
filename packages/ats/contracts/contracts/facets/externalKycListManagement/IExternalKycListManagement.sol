@@ -22,6 +22,7 @@ interface IExternalKycListManagement {
     /**
      * @notice Emitted once when the external KYC list capability is initialised on a token.
      * @dev Fires exclusively from `initializeExternalKycLists` after the storage write succeeds.
+     * @param kycLists Initial array of external KYC list contract addresses registered.
      */
     event ExternalKycListInitialized(address[] kycLists);
 

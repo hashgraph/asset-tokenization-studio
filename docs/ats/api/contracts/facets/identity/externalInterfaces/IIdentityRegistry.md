@@ -1,5 +1,7 @@
 # IIdentityRegistry
 
+_Asset Tokenization Studio Team_
+
 > IIdentityRegistry
 
 Minimal adapter interface for querying an external ERC-3643 identity registry.

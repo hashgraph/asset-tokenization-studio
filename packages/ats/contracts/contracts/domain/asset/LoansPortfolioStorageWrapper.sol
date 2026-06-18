@@ -10,7 +10,6 @@ import { ITransferByPartition } from "../../facets/transferByPartition/ITransfer
 import { IBalanceTrackerByPartition } from "../../facets/balanceTrackerByPartition/IBalanceTrackerByPartition.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { ScheduledTasksOps } from "../orchestrator/ScheduledTasksOps.sol";
-import { CustomDataStorageWrapper } from "../core/CustomDataStorageWrapper.sol";
 
 /// @custom:hash storage LoansPortfolio
 bytes32 constant STORAGE_LOCATION_LOANS_PORTFOLIO = 0x5981f3997a6cf8235e2e8b5dd35e430c9a70b916501c3c7672c830ad91b0d400;

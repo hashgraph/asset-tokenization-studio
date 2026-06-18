@@ -8,6 +8,7 @@ bytes32 constant RESOLVER_KEY_ALLOWANCE = 0x329473cfbe06c7719b3c986b04b90a16a859
 
 /**
  * @title IAllowance
+ * @author Asset Tokenization Studio Team
  * @notice Consolidated interface for the ERC-20 allowance domain: granting, reading and
  *         atomically adjusting spender allowances.
  */

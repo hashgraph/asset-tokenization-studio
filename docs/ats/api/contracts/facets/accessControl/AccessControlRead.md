@@ -1,5 +1,7 @@
 # AccessControlRead
 
+_Asset Tokenization Studio Team_
+
 > AccessControlRead
 
 Read-only base for AccessControl and AccessControlOperational. Implements all view functions of IAccessControl. Write functions are implemented by subclasses with or without onlyOperational depending on whether the consumer is a proxy facet or a direct-inheritance contract.

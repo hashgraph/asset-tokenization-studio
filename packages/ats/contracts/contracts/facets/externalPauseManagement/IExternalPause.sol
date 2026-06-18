@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 /**
  * @title  IExternalPause
+ * @author Asset Tokenization Studio Team
  * @notice Minimal interface for querying an external pause contract.
  * @dev    Implemented by third-party pause controllers whose address is registered on the
  *         token. The token calls `isPaused` to check whether operations should be

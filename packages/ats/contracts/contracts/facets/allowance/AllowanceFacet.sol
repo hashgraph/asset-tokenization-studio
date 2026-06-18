@@ -7,6 +7,7 @@ import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunc
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 /**
  * @title AllowanceFacet
+ * @author Asset Tokenization Studio Team
  * @notice Diamond facet for the Allowance domain. Registers 5 selectors that define the
  *         ERC-20 allowance surface (`initializeAllowance`, `approve`, `increaseAllowance`,
  *         `decreaseAllowance` and `allowance`).

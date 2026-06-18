@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 /**
  * @title  IIdentityRegistry
+ * @author Asset Tokenization Studio Team
  * @notice Minimal adapter interface for querying an external ERC-3643 identity registry.
  * @dev    Implemented by third-party ONCHAINID-compatible registries whose address is
  *         registered on the token. The token calls `isVerified` before allowing a transfer

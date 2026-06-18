@@ -82,13 +82,13 @@ Activates the clearing functionality
 function activateInternalKyc() external nonpayable returns (bool success_)
 ```
 
-_Activate Internal Kyc_
+Activates internal KYC enforcement for the token.
 
 #### Returns
 
-| Name      | Type | Description   |
-| --------- | ---- | ------------- |
-| success\_ | bool | true or false |
+| Name      | Type | Description                                    |
+| --------- | ---- | ---------------------------------------------- |
+| success\_ | bool | True when the call succeeds without reverting. |
 
 ### addAgent
 
@@ -96,15 +96,15 @@ _Activate Internal Kyc_
 function addAgent(address _agent) external nonpayable
 ```
 
-Gives an account the agent roleGranting an agent role allows the account to perform multiple ERC-1400 actions
+Gives an account the agent role.Granting an agent role allows the account to perform multiple ERC-1400 actions.
 
-_Can only be called by the role admin_
+_Can only be called by the role admin._
 
 #### Parameters
 
-| Name    | Type    | Description |
-| ------- | ------- | ----------- |
-| \_agent | address | undefined   |
+| Name    | Type    | Description                           |
+| ------- | ------- | ------------------------------------- |
+| \_agent | address | Address to be granted the agent role. |
 
 ### addExternalControlList
 
@@ -236,12 +236,14 @@ _Reverts with `InvalidDate` if `_date` is outside the allowed window, or with `K
 function addProceedRecipient(address _proceedRecipient, bytes _data) external nonpayable
 ```
 
+Registers a new proceed recipient on the token.
+
 #### Parameters
 
-| Name               | Type    | Description |
-| ------------------ | ------- | ----------- |
-| \_proceedRecipient | address | undefined   |
-| \_data             | bytes   | undefined   |
+| Name               | Type    | Description                                         |
+| ------------------ | ------- | --------------------------------------------------- |
+| \_proceedRecipient | address | Address to add as a proceed recipient.              |
+| \_data             | bytes   | Arbitrary data to associate with the new recipient. |
 
 ### addToControlList
 
@@ -1006,12 +1008,14 @@ Overrides the timestamp returned by `EvmAccessors.getBlockTimestamp`.
 function checkpoints(address _account, uint256 _pos) external view returns (struct Checkpoints.Checkpoint)
 ```
 
+Returns the checkpoint at a given position for an account&#39;s vote history.
+
 #### Parameters
 
-| Name      | Type    | Description |
-| --------- | ------- | ----------- |
-| \_account | address | undefined   |
-| \_pos     | uint256 | undefined   |
+| Name      | Type    | Description                                               |
+| --------- | ------- | --------------------------------------------------------- |
+| \_account | address | Address whose checkpoint history is queried.              |
+| \_pos     | uint256 | Zero-based index into the account&#39;s checkpoint array. |
 
 #### Returns
 
@@ -1392,13 +1396,13 @@ Deactivates the clearing functionality
 function deactivateInternalKyc() external nonpayable returns (bool success_)
 ```
 
-_Deactivate Internal Kyc_
+Deactivates internal KYC enforcement for the token.
 
 #### Returns
 
-| Name      | Type | Description   |
-| --------- | ---- | ------------- |
-| success\_ | bool | true or false |
+| Name      | Type | Description                                    |
+| --------- | ---- | ---------------------------------------------- |
+| success\_ | bool | True when the call succeeds without reverting. |
 
 ### decimals
 
@@ -1485,13 +1489,15 @@ _Preferred alternative to {approve} as it avoids the read-modify-write allowance
 function delegate(address delegatee) external nonpayable
 ```
 
+Delegates the caller&#39;s voting power to `delegatee`.
+
 _Delegates votes from the sender to `delegatee`._
 
 #### Parameters
 
-| Name      | Type    | Description |
-| --------- | ------- | ----------- |
-| delegatee | address | undefined   |
+| Name      | Type    | Description                                              |
+| --------- | ------- | -------------------------------------------------------- |
+| delegatee | address | Address that will receive the caller&#39;s voting power. |
 
 ### delegates
 
@@ -1499,19 +1505,21 @@ _Delegates votes from the sender to `delegatee`._
 function delegates(address account) external view returns (address)
 ```
 
+Returns the delegate address that `account` has chosen.
+
 _Returns the delegate that `account` has chosen._
 
 #### Parameters
 
-| Name    | Type    | Description |
-| ------- | ------- | ----------- |
-| account | address | undefined   |
+| Name    | Type    | Description                               |
+| ------- | ------- | ----------------------------------------- |
+| account | address | Address whose chosen delegate is queried. |
 
 #### Returns
 
-| Name | Type    | Description |
-| ---- | ------- | ----------- |
-| \_0  | address | undefined   |
+| Name | Type    | Description                                  |
+| ---- | ------- | -------------------------------------------- |
+| \_0  | address | Address of the delegate chosen by `account`. |
 
 ### executeHoldByPartition
 
@@ -1678,21 +1686,23 @@ _Authorised path used to recover locked balances when the holder is unable to do
 function forcedTransfer(address _from, address _to, uint256 _amount) external nonpayable returns (bool)
 ```
 
-_Performs a forced transfer of `_amount` tokens from `_from` to `_to`.This function should only be callable by an authorized entity. Returns `true` if the transfer was successful. Emits a ControllerTransfer event._
+Performs a forced transfer of `_amount` tokens from `_from` to `_to`.
+
+_This function should only be callable by an authorized entity. Returns `true` if the transfer was successful. Emits a ControllerTransfer event._
 
 #### Parameters
 
-| Name     | Type    | Description |
-| -------- | ------- | ----------- |
-| \_from   | address | undefined   |
-| \_to     | address | undefined   |
-| \_amount | uint256 | undefined   |
+| Name     | Type    | Description                              |
+| -------- | ------- | ---------------------------------------- |
+| \_from   | address | Address the tokens are transferred from. |
+| \_to     | address | Address the tokens are transferred to.   |
+| \_amount | uint256 | Amount of tokens to transfer.            |
 
 #### Returns
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| \_0  | bool | undefined   |
+| Name | Type | Description                          |
+| ---- | ---- | ------------------------------------ |
+| \_0  | bool | True if the transfer was successful. |
 
 ### freezePartialTokens
 
@@ -2132,15 +2142,15 @@ Gets the ids of the clearings for a token holder by partition and clearing opera
 function getConfigInfo() external view returns (address resolver_, bytes32 configurationId_, uint256 version_)
 ```
 
-Returns the configuration used by the secuirity
+Returns the active resolver address, configuration identifier, and version.
 
 #### Returns
 
-| Name              | Type    | Description |
-| ----------------- | ------- | ----------- |
-| resolver\_        | address | undefined   |
-| configurationId\_ | bytes32 | undefined   |
-| version\_         | uint256 | undefined   |
+| Name              | Type    | Description                                     |
+| ----------------- | ------- | ----------------------------------------------- |
+| resolver\_        | address | Address of the current Business Logic Resolver. |
+| configurationId\_ | bytes32 | Identifier of the active configuration.         |
+| version\_         | uint256 | Version number of the active configuration.     |
 
 ### getControlListCount
 
@@ -3403,19 +3413,19 @@ Returns the current KPI-linked interest rate configuration.
 function getKycAccountsCount(enum IKyc.KycStatus _kycStatus) external view returns (uint256 kycAccountsCount_)
 ```
 
-_Get the count of accounts with a given Kyc status_
+Returns the number of accounts with a given KYC status.
 
 #### Parameters
 
-| Name        | Type                | Description            |
-| ----------- | ------------------- | ---------------------- |
-| \_kycStatus | enum IKyc.KycStatus | GRANTED or NOT_GRANTED |
+| Name        | Type                | Description                                      |
+| ----------- | ------------------- | ------------------------------------------------ |
+| \_kycStatus | enum IKyc.KycStatus | The status to filter by: GRANTED or NOT_GRANTED. |
 
 #### Returns
 
-| Name               | Type    | Description                                 |
-| ------------------ | ------- | ------------------------------------------- |
-| kycAccountsCount\_ | uint256 | count of accounts with the given Kyc status |
+| Name               | Type    | Description                                      |
+| ------------------ | ------- | ------------------------------------------------ |
+| kycAccountsCount\_ | uint256 | The count of accounts matching the given status. |
 
 ### getKycAccountsData
 
@@ -3423,22 +3433,22 @@ _Get the count of accounts with a given Kyc status_
 function getKycAccountsData(enum IKyc.KycStatus _kycStatus, uint256 _pageIndex, uint256 _pageLength) external view returns (address[] accounts_, struct IKyc.KycData[] kycData_)
 ```
 
-_Returns an array with the KYC data from accounts with a given KYC status_
+Returns a paginated list of accounts and their KYC data for a given KYC status.
 
 #### Parameters
 
-| Name         | Type                | Description                                   |
-| ------------ | ------------------- | --------------------------------------------- |
-| \_kycStatus  | enum IKyc.KycStatus | GRANTED or NOT_GRANTED                        |
-| \_pageIndex  | uint256             | members to skip : \_pageIndex \* \_pageLength |
-| \_pageLength | uint256             | number of members to return                   |
+| Name         | Type                | Description                                                      |
+| ------------ | ------------------- | ---------------------------------------------------------------- |
+| \_kycStatus  | enum IKyc.KycStatus | The status to filter by: GRANTED or NOT_GRANTED.                 |
+| \_pageIndex  | uint256             | Zero-based page index; skips `_pageIndex * _pageLength` entries. |
+| \_pageLength | uint256             | Maximum number of entries to return per page.                    |
 
 #### Returns
 
-| Name       | Type           | Description                                     |
-| ---------- | -------------- | ----------------------------------------------- |
-| accounts\_ | address[]      | The array containing the accounts               |
-| kycData\_  | IKyc.KycData[] | The array containing the data from the accounts |
+| Name       | Type           | Description                                                        |
+| ---------- | -------------- | ------------------------------------------------------------------ |
+| accounts\_ | address[]      | The accounts matching the given KYC status in the requested page.  |
+| kycData\_  | IKyc.KycData[] | The KYC data records corresponding to each account in `accounts_`. |
 
 ### getKycFor
 
@@ -3446,19 +3456,19 @@ _Returns an array with the KYC data from accounts with a given KYC status_
 function getKycFor(address _account) external view returns (struct IKyc.KycData kyc_)
 ```
 
-_Get all the info of the Kyc for an account_
+Returns all KYC metadata recorded for an account.
 
 #### Parameters
 
-| Name      | Type    | Description          |
-| --------- | ------- | -------------------- |
-| \_account | address | the account to check |
+| Name      | Type    | Description           |
+| --------- | ------- | --------------------- |
+| \_account | address | The account to query. |
 
 #### Returns
 
-| Name  | Type         | Description |
-| ----- | ------------ | ----------- |
-| kyc\_ | IKyc.KycData | kyc\_       |
+| Name  | Type         | Description                                 |
+| ----- | ------------ | ------------------------------------------- |
+| kyc\_ | IKyc.KycData | The full `KycData` struct for that account. |
 
 ### getKycStatus
 
@@ -3486,19 +3496,19 @@ Returns the KYC status of `account` as recorded in the external KYC list.
 function getKycStatusFor(address _account) external view returns (enum IKyc.KycStatus kycStatus_)
 ```
 
-_Get the status of the Kyc for an account_
+Returns the current KYC status for an account.
 
 #### Parameters
 
-| Name      | Type    | Description          |
-| --------- | ------- | -------------------- |
-| \_account | address | the account to check |
+| Name      | Type    | Description           |
+| --------- | ------- | --------------------- |
+| \_account | address | The account to check. |
 
 #### Returns
 
-| Name        | Type                | Description            |
-| ----------- | ------------------- | ---------------------- |
-| kycStatus\_ | enum IKyc.KycStatus | GRANTED or NOT_GRANTED |
+| Name        | Type                | Description             |
+| ----------- | ------------------- | ----------------------- |
+| kycStatus\_ | enum IKyc.KycStatus | GRANTED or NOT_GRANTED. |
 
 ### getLatestKpiData
 
@@ -4006,19 +4016,21 @@ _Encoding: `0` = not started, `1` = fully operational, `&gt;1` = resume facet in
 function getPastTotalSupply(uint256 timepoint) external view returns (uint256)
 ```
 
+Returns the total vote supply available at a past `timepoint`.
+
 _Returns the total supply of votes available at a specific moment in the past. If the `clock()` is configured to use block numbers, this will return the value at the end of the corresponding block. NOTE: This value is the sum of all available votes, which is not necessarily the sum of all delegated votes. Votes that have not been delegated are still part of total supply, even though they would not participate in a vote._
 
 #### Parameters
 
-| Name      | Type    | Description |
-| --------- | ------- | ----------- |
-| timepoint | uint256 | undefined   |
+| Name      | Type    | Description                                                      |
+| --------- | ------- | ---------------------------------------------------------------- |
+| timepoint | uint256 | Block number or timestamp at which the total supply is resolved. |
 
 #### Returns
 
-| Name | Type    | Description |
-| ---- | ------- | ----------- |
-| \_0  | uint256 | undefined   |
+| Name | Type    | Description                       |
+| ---- | ------- | --------------------------------- |
+| \_0  | uint256 | Total vote supply at `timepoint`. |
 
 ### getPastVotes
 
@@ -4026,20 +4038,22 @@ _Returns the total supply of votes available at a specific moment in the past. I
 function getPastVotes(address account, uint256 timepoint) external view returns (uint256)
 ```
 
+Returns the vote weight of `account` at a past `timepoint`.
+
 _Returns the amount of votes that `account` had at a specific moment in the past. If the `clock()` is configured to use block numbers, this will return the value at the end of the corresponding block._
 
 #### Parameters
 
-| Name      | Type    | Description |
-| --------- | ------- | ----------- |
-| account   | address | undefined   |
-| timepoint | uint256 | undefined   |
+| Name      | Type    | Description                                                |
+| --------- | ------- | ---------------------------------------------------------- |
+| account   | address | Address whose historical vote weight is queried.           |
+| timepoint | uint256 | Block number or timestamp at which the weight is resolved. |
 
 #### Returns
 
-| Name | Type    | Description |
-| ---- | ------- | ----------- |
-| \_0  | uint256 | undefined   |
+| Name | Type    | Description                              |
+| ---- | ------- | ---------------------------------------- |
+| \_0  | uint256 | Vote weight of `account` at `timepoint`. |
 
 ### getPendingBalanceAdjustmentCount
 
@@ -4104,17 +4118,19 @@ Returns the principal numerator and denominator for a given account.
 function getProceedRecipientData(address _proceedRecipient) external view returns (bytes)
 ```
 
+Returns the arbitrary data stored for a registered proceed recipient.
+
 #### Parameters
 
-| Name               | Type    | Description |
-| ------------------ | ------- | ----------- |
-| \_proceedRecipient | address | undefined   |
+| Name               | Type    | Description                                |
+| ------------------ | ------- | ------------------------------------------ |
+| \_proceedRecipient | address | Address of the proceed recipient to query. |
 
 #### Returns
 
-| Name | Type  | Description |
-| ---- | ----- | ----------- |
-| \_0  | bytes | undefined   |
+| Name | Type  | Description                                   |
+| ---- | ----- | --------------------------------------------- |
+| \_0  | bytes | Arbitrary data associated with the recipient. |
 
 ### getProceedRecipients
 
@@ -4122,18 +4138,20 @@ function getProceedRecipientData(address _proceedRecipient) external view return
 function getProceedRecipients(uint256 _pageIndex, uint256 _pageLength) external view returns (address[] proceedRecipients_)
 ```
 
+Returns a paginated slice of the registered proceed-recipient addresses.
+
 #### Parameters
 
-| Name         | Type    | Description |
-| ------------ | ------- | ----------- |
-| \_pageIndex  | uint256 | undefined   |
-| \_pageLength | uint256 | undefined   |
+| Name         | Type    | Description                                     |
+| ------------ | ------- | ----------------------------------------------- |
+| \_pageIndex  | uint256 | Zero-based index of the page to retrieve.       |
+| \_pageLength | uint256 | Maximum number of addresses to return per page. |
 
 #### Returns
 
-| Name                | Type      | Description |
-| ------------------- | --------- | ----------- |
-| proceedRecipients\_ | address[] | undefined   |
+| Name                | Type      | Description                                                  |
+| ------------------- | --------- | ------------------------------------------------------------ |
+| proceedRecipients\_ | address[] | Array of proceed-recipient addresses for the requested page. |
 
 ### getProceedRecipientsCount
 
@@ -4141,11 +4159,13 @@ function getProceedRecipients(uint256 _pageIndex, uint256 _pageLength) external 
 function getProceedRecipientsCount() external view returns (uint256)
 ```
 
+Returns the total number of registered proceed recipients.
+
 #### Returns
 
-| Name | Type    | Description |
-| ---- | ------- | ----------- |
-| \_0  | uint256 | undefined   |
+| Name | Type    | Description                                                          |
+| ---- | ------- | -------------------------------------------------------------------- |
+| \_0  | uint256 | Total count of proceed recipients currently registered on the token. |
 
 ### getRate
 
@@ -4709,19 +4729,21 @@ _Count is taken from the snapshot at the voting record date when one exists; fal
 function getVotes(address account) external view returns (uint256)
 ```
 
+Returns the current vote weight of `account`.
+
 _Returns the current amount of votes that `account` has._
 
 #### Parameters
 
-| Name    | Type    | Description |
-| ------- | ------- | ----------- |
-| account | address | undefined   |
+| Name    | Type    | Description                                   |
+| ------- | ------- | --------------------------------------------- |
+| account | address | Address whose current vote weight is queried. |
 
 #### Returns
 
-| Name | Type    | Description |
-| ---- | ------- | ----------- |
-| \_0  | uint256 | undefined   |
+| Name | Type    | Description                       |
+| ---- | ------- | --------------------------------- |
+| \_0  | uint256 | Current vote weight of `account`. |
 
 ### getVoting
 
@@ -4811,23 +4833,23 @@ _Resolved from the snapshot at the voting record date when one exists; falls bac
 function grantKyc(address _account, string _vcId, uint256 _validFrom, uint256 _validTo, address _issuer) external nonpayable returns (bool success_)
 ```
 
-_Grant kyc to an address_
+Grants KYC to an account with the supplied verifiable-credential metadata.
 
 #### Parameters
 
-| Name        | Type    | Description                     |
-| ----------- | ------- | ------------------------------- |
-| \_account   | address | user whose Kyc is being granted |
-| \_vcId      | string  | credential Id                   |
-| \_validFrom | uint256 | start date of the Kyc           |
-| \_validTo   | uint256 | end date of the Kyc             |
-| \_issuer    | address | issurer of the Kyc              |
+| Name        | Type    | Description                                            |
+| ----------- | ------- | ------------------------------------------------------ |
+| \_account   | address | User whose KYC is being granted.                       |
+| \_vcId      | string  | Verifiable-credential identifier issued by the issuer. |
+| \_validFrom | uint256 | Start timestamp of the KYC validity period.            |
+| \_validTo   | uint256 | End timestamp of the KYC validity period.              |
+| \_issuer    | address | Address of the entity issuing the KYC.                 |
 
 #### Returns
 
-| Name      | Type | Description   |
-| --------- | ---- | ------------- |
-| success\_ | bool | true or false |
+| Name      | Type | Description                                     |
+| --------- | ---- | ----------------------------------------------- |
+| success\_ | bool | True when the grant succeeds without reverting. |
 
 ### grantRole
 
@@ -5242,7 +5264,9 @@ _Can only be called once; subsequent calls revert via `onlyFacetNotRegistered`. 
 function initializeController(bool _isControllable) external nonpayable
 ```
 
-_Initial configuration_
+One-time initialiser that sets whether the token is controllable.
+
+_Initial configuration. Can only be called once._
 
 #### Parameters
 
@@ -5428,11 +5452,13 @@ _Restricted to `DEFAULT_ADMIN_ROLE` by the implementation. Callable once and exp
 function initializeERC20Votes(bool _activated) external nonpayable
 ```
 
+Initialises the ERC-20Votes capability on the token.
+
 #### Parameters
 
-| Name        | Type | Description |
-| ----------- | ---- | ----------- |
-| \_activated | bool | undefined   |
+| Name        | Type | Description                                                       |
+| ----------- | ---- | ----------------------------------------------------------------- |
+| \_activated | bool | Whether the voting feature should be active after initialisation. |
 
 ### initializeEvmAccessors
 
@@ -5628,13 +5654,13 @@ _Intended to be called by the factory immediately after proxy creation. No role 
 function initializeInternalKyc(bool _activateInternalKyc) external nonpayable
 ```
 
-_Initialize Internal Kyc_
+Initialises the internal KYC capability on the token.
 
 #### Parameters
 
-| Name                  | Type | Description |
-| --------------------- | ---- | ----------- |
-| \_activateInternalKyc | bool | undefined   |
+| Name                  | Type | Description                                             |
+| --------------------- | ---- | ------------------------------------------------------- |
+| \_activateInternalKyc | bool | Whether to enable internal KYC enforcement immediately. |
 
 ### initializeKpiLinkedRate
 
@@ -5889,14 +5915,14 @@ _Callable once; subsequent calls revert with `FacetAlreadyRegistered`. Requires 
 function initializeProceedRecipients(address[] _proceedRecipients, bytes[] _data) external nonpayable
 ```
 
-Initializes the proceedRecipients contract with a list of initial proceedRecipients.
+Initialises the proceed-recipients capability with a seed list of recipients.
 
 #### Parameters
 
-| Name                | Type      | Description                                                       |
-| ------------------- | --------- | ----------------------------------------------------------------- |
-| \_proceedRecipients | address[] | An array of addresses representing the initial proceedRecipients. |
-| \_data              | bytes[]   | undefined                                                         |
+| Name                | Type      | Description                                                                  |
+| ------------------- | --------- | ---------------------------------------------------------------------------- |
+| \_proceedRecipients | address[] | Initial array of proceed-recipient addresses to register.                    |
+| \_data              | bytes[]   | Per-recipient arbitrary data, one entry per address in `_proceedRecipients`. |
 
 ### initializeProtectedByPartition
 
@@ -6106,6 +6132,8 @@ _Callable once; subsequent calls revert with `FacetAlreadyRegistered`. Requires 
 function isActivated() external view returns (bool)
 ```
 
+Returns whether the ERC-20Votes voting feature is currently active.
+
 #### Returns
 
 | Name | Type | Description |
@@ -6138,19 +6166,21 @@ Returns whether a wallet address has been marked as recovered.
 function isAgent(address _agent) external view returns (bool)
 ```
 
-_Checks if an account has the agent role_
+Checks whether an account holds the agent role.
+
+_Checks if an account has the agent role._
 
 #### Parameters
 
-| Name    | Type    | Description |
-| ------- | ------- | ----------- |
-| \_agent | address | undefined   |
+| Name    | Type    | Description       |
+| ------- | ------- | ----------------- |
+| \_agent | address | Address to query. |
 
 #### Returns
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| \_0  | bool | undefined   |
+| Name | Type | Description                                             |
+| ---- | ---- | ------------------------------------------------------- |
+| \_0  | bool | True if `_agent` holds the agent role, false otherwise. |
 
 ### isAuthorized
 
@@ -6368,13 +6398,13 @@ _Returns raw set membership regardless of the whitelist/blacklist mode. An addre
 function isInternalKycActivated() external view returns (bool)
 ```
 
-_Get the internal kyc flag_
+Returns whether internal KYC enforcement is currently active.
 
 #### Returns
 
-| Name | Type | Description                                |
-| ---- | ---- | ------------------------------------------ |
-| \_0  | bool | bool true if the internal kyc is activated |
+| Name | Type | Description                                         |
+| ---- | ---- | --------------------------------------------------- |
+| \_0  | bool | True if internal KYC is activated, false otherwise. |
 
 ### isIssuable
 
@@ -6477,17 +6507,19 @@ _Returns `true` if `_operator` has been authorised for all partitions of `_token
 function isProceedRecipient(address _proceedRecipient) external view returns (bool)
 ```
 
+Returns whether the given address is a registered proceed recipient.
+
 #### Parameters
 
-| Name               | Type    | Description |
-| ------------------ | ------- | ----------- |
-| \_proceedRecipient | address | undefined   |
+| Name               | Type    | Description       |
+| ------------------ | ------- | ----------------- |
+| \_proceedRecipient | address | Address to check. |
 
 #### Returns
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| \_0  | bool | undefined   |
+| Name | Type | Description                                                             |
+| ---- | ---- | ----------------------------------------------------------------------- |
+| \_0  | bool | True if the address is a registered proceed recipient; false otherwise. |
 
 ### issue
 
@@ -6758,11 +6790,13 @@ _Pure notification path — does not mutate the underlying loan; merely emits `L
 function numCheckpoints(address _account) external view returns (uint256)
 ```
 
+Returns the total number of vote checkpoints recorded for an account.
+
 #### Parameters
 
-| Name      | Type    | Description |
-| --------- | ------- | ----------- |
-| \_account | address | undefined   |
+| Name      | Type    | Description                                |
+| --------- | ------- | ------------------------------------------ |
+| \_account | address | Address whose checkpoint count is queried. |
 
 #### Returns
 
@@ -7008,15 +7042,15 @@ _Validates the deadline, owner nonce, EIP-712 digest, and recovered signer befor
 function protectPartitions() external nonpayable returns (bool success_)
 ```
 
-Activates the protected partitions mode
+Activates the protected partitions mode.
 
-_Disables the ability to freely transfer tokens unless the sender has the requited role for the partition_
+_Disables free token transfers; callers must hold the required role for the partition._
 
 #### Returns
 
-| Name      | Type | Description |
-| --------- | ---- | ----------- |
-| success\_ | bool | undefined   |
+| Name      | Type | Description                                      |
+| --------- | ---- | ------------------------------------------------ |
+| success\_ | bool | True when activation succeeds without reverting. |
 
 ### protectedClearingCreateHoldByPartition
 
@@ -7359,15 +7393,15 @@ function releaseHoldByPartition(IHoldTypes.HoldIdentifier _holdIdentifier, uint2
 function removeAgent(address _agent) external nonpayable
 ```
 
-Revokes an account the agent role
+Revokes the agent role from an account.
 
-_Can only be called by the role admin_
+_Can only be called by the role admin._
 
 #### Parameters
 
-| Name    | Type    | Description |
-| ------- | ------- | ----------- |
-| \_agent | address | undefined   |
+| Name    | Type    | Description                          |
+| ------- | ------- | ------------------------------------ |
+| \_agent | address | Address whose agent role is revoked. |
 
 ### removeDocument
 
@@ -7519,11 +7553,13 @@ _Requires `ROLE_SSI_MANAGER` and the token to be unpaused. Reverts with `Unliste
 function removeProceedRecipient(address _proceedRecipient) external nonpayable
 ```
 
+Removes an existing proceed recipient from the token.
+
 #### Parameters
 
-| Name               | Type    | Description |
-| ------------------ | ------- | ----------- |
-| \_proceedRecipient | address | undefined   |
+| Name               | Type    | Description                                       |
+| ------------------ | ------- | ------------------------------------------------- |
+| \_proceedRecipient | address | Address to remove from the proceed-recipient set. |
 
 ### renounceRole
 
@@ -7585,19 +7621,19 @@ Clears the timestamp override, restoring `block.timestamp`.
 function revokeKyc(address _account) external nonpayable returns (bool success_)
 ```
 
-_Revoke kyc to an address_
+Revokes the KYC previously granted to an account.
 
 #### Parameters
 
-| Name      | Type    | Description                     |
-| --------- | ------- | ------------------------------- |
-| \_account | address | user whose Kyc is being revoked |
+| Name      | Type    | Description                      |
+| --------- | ------- | -------------------------------- |
+| \_account | address | User whose KYC is being revoked. |
 
 #### Returns
 
-| Name      | Type | Description   |
-| --------- | ---- | ------------- |
-| success\_ | bool | true or false |
+| Name      | Type | Description                                          |
+| --------- | ---- | ---------------------------------------------------- |
+| success\_ | bool | True when the revocation succeeds without reverting. |
 
 ### revokeOperator
 
@@ -8270,22 +8306,22 @@ Moves `amount` tokens from the caller to `to`.
 function transferAndLock(address _to, uint256 _amount, bytes _data, uint256 _expirationTimestamp) external nonpayable returns (uint256 lockId_)
 ```
 
-Transfers tokens to a specified address and locks them until the expiration timestamp using the default partition
+Transfers tokens to a specified address and locks them until the expiration timestamp using the default partition.
 
 #### Parameters
 
-| Name                  | Type    | Description                                                     |
-| --------------------- | ------- | --------------------------------------------------------------- |
-| \_to                  | address | The address to which tokens will be transferred and locked      |
-| \_amount              | uint256 | The amount of tokens to be transferred and locked               |
-| \_data                | bytes   | Additional data with no specified format, sent in call to `_to` |
-| \_expirationTimestamp | uint256 | The timestamp until which the tokens will be locked             |
+| Name                  | Type    | Description                                                          |
+| --------------------- | ------- | -------------------------------------------------------------------- |
+| \_to                  | address | The address to which tokens will be transferred and locked.          |
+| \_amount              | uint256 | The amount of tokens to be transferred and locked.                   |
+| \_data                | bytes   | Additional data with no specified format, sent in the call to `_to`. |
+| \_expirationTimestamp | uint256 | The timestamp until which the tokens will be locked.                 |
 
 #### Returns
 
-| Name     | Type    | Description |
-| -------- | ------- | ----------- |
-| lockId\_ | uint256 | undefined   |
+| Name     | Type    | Description                                                            |
+| -------- | ------- | ---------------------------------------------------------------------- |
+| lockId\_ | uint256 | The identifier assigned to the new hold created for the locked tokens. |
 
 ### transferAndLockByPartition
 
@@ -8487,15 +8523,15 @@ _Requires `ROLE_PAUSER` and the token&#39;s internal flag to be set. Reverts wit
 function unprotectPartitions() external nonpayable returns (bool success_)
 ```
 
-Deactivates the protected partitions mode
+Deactivates the protected partitions mode.
 
-_Enables the ability to freely transfer tokens_
+_Re-enables free token transfers regardless of partition role._
 
 #### Returns
 
-| Name      | Type | Description |
-| --------- | ---- | ----------- |
-| success\_ | bool | undefined   |
+| Name      | Type | Description                                        |
+| --------- | ---- | -------------------------------------------------- |
+| success\_ | bool | True when deactivation succeeds without reverting. |
 
 ### updateConfig
 
@@ -8503,14 +8539,14 @@ _Enables the ability to freely transfer tokens_
 function updateConfig(bytes32 _newConfigurationId, uint256 _newVersion) external nonpayable
 ```
 
-For the current BLR update its configuration\*
+For the current BLR, update its configuration identifier and version.
 
 #### Parameters
 
-| Name                 | Type    | Description |
-| -------------------- | ------- | ----------- |
-| \_newConfigurationId | bytes32 | undefined   |
-| \_newVersion         | uint256 | undefined   |
+| Name                 | Type    | Description                                               |
+| -------------------- | ------- | --------------------------------------------------------- |
+| \_newConfigurationId | bytes32 | The new configuration identifier to apply.                |
+| \_newVersion         | uint256 | The version number associated with the new configuration. |
 
 ### updateConfigVersion
 
@@ -8518,13 +8554,13 @@ For the current BLR update its configuration\*
 function updateConfigVersion(uint256 _newVersion) external nonpayable
 ```
 
-For the current BLR and configuration, update the used version
+For the current BLR and configuration, update the used version.
 
 #### Parameters
 
-| Name         | Type    | Description |
-| ------------ | ------- | ----------- |
-| \_newVersion | uint256 | undefined   |
+| Name         | Type    | Description                                                  |
+| ------------ | ------- | ------------------------------------------------------------ |
+| \_newVersion | uint256 | The new version number to set for the current configuration. |
 
 ### updateExternalControlLists
 
@@ -8688,12 +8724,14 @@ _Restricted to `DEFAULT_ADMIN_ROLE`. Emits `MaxInitializerFacetIndexUpdated`._
 function updateProceedRecipientData(address _proceedRecipient, bytes _data) external nonpayable
 ```
 
+Updates the arbitrary data stored for an existing proceed recipient.
+
 #### Parameters
 
-| Name               | Type    | Description |
-| ------------------ | ------- | ----------- |
-| \_proceedRecipient | address | undefined   |
-| \_data             | bytes   | undefined   |
+| Name               | Type    | Description                                            |
+| ------------------ | ------- | ------------------------------------------------------ |
+| \_proceedRecipient | address | Address of the recipient whose data should be updated. |
+| \_data             | bytes   | New arbitrary data to store for the recipient.         |
 
 ### updateResolver
 
@@ -8701,15 +8739,15 @@ function updateProceedRecipientData(address _proceedRecipient, bytes _data) exte
 function updateResolver(contract IBusinessLogicResolver _newResolver, bytes32 _newConfigurationId, uint256 _newVersion) external nonpayable
 ```
 
-Updates the BLR to a new one
+Replaces the Business Logic Resolver with a new one, setting configuration and version.
 
 #### Parameters
 
-| Name                 | Type                            | Description |
-| -------------------- | ------------------------------- | ----------- |
-| \_newResolver        | contract IBusinessLogicResolver | undefined   |
-| \_newConfigurationId | bytes32                         | undefined   |
-| \_newVersion         | uint256                         | undefined   |
+| Name                 | Type                            | Description                                                   |
+| -------------------- | ------------------------------- | ------------------------------------------------------------- |
+| \_newResolver        | contract IBusinessLogicResolver | The new BLR contract address to wire into the proxy.          |
+| \_newConfigurationId | bytes32                         | The configuration identifier to activate on the new resolver. |
+| \_newVersion         | uint256                         | The version number associated with the new configuration.     |
 
 ### version
 
@@ -9453,9 +9491,9 @@ _Fires exclusively from `initializeClearing` after the storage write succeeds._
 
 #### Parameters
 
-| Name           | Type | Description |
-| -------------- | ---- | ----------- |
-| clearingActive | bool | undefined   |
+| Name           | Type | Description                                            |
+| -------------- | ---- | ------------------------------------------------------ |
+| clearingActive | bool | Whether clearing was activated at initialisation time. |
 
 ### ClearingOperationApproved
 
@@ -9619,9 +9657,9 @@ _Fired inside `initializeController` once the facet is marked ready._
 
 #### Parameters
 
-| Name         | Type | Description |
-| ------------ | ---- | ----------- |
-| controllable | bool | undefined   |
+| Name         | Type | Description                                       |
+| ------------ | ---- | ------------------------------------------------- |
+| controllable | bool | Whether the token was configured as controllable. |
 
 ### ControllerRedemption
 
@@ -10040,9 +10078,9 @@ _Fires exclusively from `initializeERC20Votes` after the storage write succeeds.
 
 #### Parameters
 
-| Name      | Type | Description |
-| --------- | ---- | ----------- |
-| activated | bool | undefined   |
+| Name      | Type | Description                                                     |
+| --------- | ---- | --------------------------------------------------------------- |
+| activated | bool | Whether the ERC-20Votes feature is active after initialisation. |
 
 ### EvmAccessorsInitialized
 
@@ -10064,9 +10102,9 @@ _Fires exclusively from `initializeExternalControlLists` after the storage write
 
 #### Parameters
 
-| Name         | Type      | Description |
-| ------------ | --------- | ----------- |
-| controlLists | address[] | undefined   |
+| Name         | Type      | Description                                                               |
+| ------------ | --------- | ------------------------------------------------------------------------- |
+| controlLists | address[] | The initial array of external control list contract addresses registered. |
 
 ### ExternalControlListsUpdated
 
@@ -10096,9 +10134,9 @@ _Fires exclusively from `initializeExternalKycLists` after the storage write suc
 
 #### Parameters
 
-| Name     | Type      | Description |
-| -------- | --------- | ----------- |
-| kycLists | address[] | undefined   |
+| Name     | Type      | Description                                                       |
+| -------- | --------- | ----------------------------------------------------------------- |
+| kycLists | address[] | Initial array of external KYC list contract addresses registered. |
 
 ### ExternalKycListsUpdated
 
@@ -10128,9 +10166,9 @@ _Fires exclusively from `initializeExternalPauses` after the storage write succe
 
 #### Parameters
 
-| Name   | Type      | Description |
-| ------ | --------- | ----------- |
-| pauses | address[] | undefined   |
+| Name   | Type      | Description                                                                      |
+| ------ | --------- | -------------------------------------------------------------------------------- |
+| pauses | address[] | The initial array of external pause contract addresses registered at deployment. |
 
 ### ExternalPausesUpdated
 
@@ -10158,9 +10196,9 @@ Emitted when the controller feature is permanently disabled for a token.
 
 #### Parameters
 
-| Name     | Type    | Description |
-| -------- | ------- | ----------- |
-| operator | address | undefined   |
+| Name     | Type    | Description                                          |
+| -------- | ------- | ---------------------------------------------------- |
+| operator | address | Address of the caller who finalised controllability. |
 
 ### FixedRateInitialized
 
@@ -10463,14 +10501,14 @@ Emitted when the KPI-linked interest rate configuration is updated.
 event InternalKycStatusUpdated(address indexed operator, bool activated)
 ```
 
-_Emitted when Internal Kyc is updated_
+Emitted when the internal KYC enforcement status is toggled.
 
 #### Parameters
 
-| Name               | Type    | Description                              |
-| ------------------ | ------- | ---------------------------------------- |
-| operator `indexed` | address | The address for which the Kyc is updated |
-| activated          | bool    | The status of the internal Kyc           |
+| Name               | Type    | Description                                   |
+| ------------------ | ------- | --------------------------------------------- |
+| operator `indexed` | address | The address that triggered the status update. |
+| activated          | bool    | The new activation state of the internal KYC. |
 
 ### Issued
 
@@ -10535,10 +10573,10 @@ _Fires exclusively from `initializeKpiLinkedRate` after the storage write succee
 
 #### Parameters
 
-| Name         | Type                        | Description |
-| ------------ | --------------------------- | ----------- |
-| interestRate | IKpiLinkedRate.InterestRate | undefined   |
-| impactData   | IKpiLinkedRate.ImpactData   | undefined   |
+| Name         | Type                        | Description                                                 |
+| ------------ | --------------------------- | ----------------------------------------------------------- |
+| interestRate | IKpiLinkedRate.InterestRate | The initial interest rate configuration written to storage. |
+| impactData   | IKpiLinkedRate.ImpactData   | The initial impact data configuration written to storage.   |
 
 ### KpisInitialized
 
@@ -10556,14 +10594,14 @@ _Fires exclusively from `initializeKpis`._
 event KycGranted(address indexed account, address indexed issuer)
 ```
 
-_Emitted when a Kyc is granted_
+Emitted when KYC is granted to an account.
 
 #### Parameters
 
-| Name              | Type    | Description                              |
-| ----------------- | ------- | ---------------------------------------- |
-| account `indexed` | address | The address for which the Kyc is granted |
-| issuer `indexed`  | address | The address of the issuer of the Kyc     |
+| Name              | Type    | Description                               |
+| ----------------- | ------- | ----------------------------------------- |
+| account `indexed` | address | The address for which the KYC is granted. |
+| issuer `indexed`  | address | The address of the issuer of the KYC.     |
 
 ### KycInitialized
 
@@ -10577,9 +10615,9 @@ _Fires exclusively from `initializeInternalKyc` after the storage write succeeds
 
 #### Parameters
 
-| Name                 | Type | Description |
-| -------------------- | ---- | ----------- |
-| internalKycActivated | bool | undefined   |
+| Name                 | Type | Description                                                     |
+| -------------------- | ---- | --------------------------------------------------------------- |
+| internalKycActivated | bool | Whether internal KYC enforcement was enabled at initialisation. |
 
 ### KycRevoked
 
@@ -10587,14 +10625,14 @@ _Fires exclusively from `initializeInternalKyc` after the storage write succeeds
 event KycRevoked(address indexed account, address indexed issuer)
 ```
 
-_Emitted when a Kyc is revoked_
+Emitted when KYC is revoked from an account.
 
 #### Parameters
 
-| Name              | Type    | Description                              |
-| ----------------- | ------- | ---------------------------------------- |
-| account `indexed` | address | The address for which the Kyc is revoked |
-| issuer `indexed`  | address | The address of the issuer of the Kyc     |
+| Name              | Type    | Description                                 |
+| ----------------- | ------- | ------------------------------------------- |
+| account `indexed` | address | The address for which the KYC is revoked.   |
+| issuer `indexed`  | address | The address of the issuer revoking the KYC. |
 
 ### LoanDetailsSet
 
@@ -11150,13 +11188,15 @@ _Fires exclusively from `initializePrincipal`._
 event ProceedRecipientAdded(address indexed operator, address indexed proceedRecipient, bytes data)
 ```
 
+Emitted when a new proceed recipient is added to the token.
+
 #### Parameters
 
-| Name                       | Type    | Description |
-| -------------------------- | ------- | ----------- |
-| operator `indexed`         | address | undefined   |
-| proceedRecipient `indexed` | address | undefined   |
-| data                       | bytes   | undefined   |
+| Name                       | Type    | Description                                       |
+| -------------------------- | ------- | ------------------------------------------------- |
+| operator `indexed`         | address | Address that executed the add operation.          |
+| proceedRecipient `indexed` | address | Address added as a proceed recipient.             |
+| data                       | bytes   | Arbitrary data associated with the new recipient. |
 
 ### ProceedRecipientDataUpdated
 
@@ -11164,13 +11204,15 @@ event ProceedRecipientAdded(address indexed operator, address indexed proceedRec
 event ProceedRecipientDataUpdated(address indexed operator, address indexed proceedRecipient, bytes newData)
 ```
 
+Emitted when the data associated with a proceed recipient is updated.
+
 #### Parameters
 
-| Name                       | Type    | Description |
-| -------------------------- | ------- | ----------- |
-| operator `indexed`         | address | undefined   |
-| proceedRecipient `indexed` | address | undefined   |
-| newData                    | bytes   | undefined   |
+| Name                       | Type    | Description                                  |
+| -------------------------- | ------- | -------------------------------------------- |
+| operator `indexed`         | address | Address that executed the update.            |
+| proceedRecipient `indexed` | address | Address whose data was updated.              |
+| newData                    | bytes   | New arbitrary data stored for the recipient. |
 
 ### ProceedRecipientRemoved
 
@@ -11178,12 +11220,14 @@ event ProceedRecipientDataUpdated(address indexed operator, address indexed proc
 event ProceedRecipientRemoved(address indexed operator, address indexed proceedRecipient)
 ```
 
+Emitted when an existing proceed recipient is removed from the token.
+
 #### Parameters
 
-| Name                       | Type    | Description |
-| -------------------------- | ------- | ----------- |
-| operator `indexed`         | address | undefined   |
-| proceedRecipient `indexed` | address | undefined   |
+| Name                       | Type    | Description                                     |
+| -------------------------- | ------- | ----------------------------------------------- |
+| operator `indexed`         | address | Address that executed the remove operation.     |
+| proceedRecipient `indexed` | address | Address removed from the proceed-recipient set. |
 
 ### ProceedRecipientsInitialized
 
@@ -11197,10 +11241,10 @@ _Fires exclusively from `initializeProceedRecipients` after the storage write su
 
 #### Parameters
 
-| Name              | Type      | Description |
-| ----------------- | --------- | ----------- |
-| proceedRecipients | address[] | undefined   |
-| data              | bytes[]   | undefined   |
+| Name              | Type      | Description                                                   |
+| ----------------- | --------- | ------------------------------------------------------------- |
+| proceedRecipients | address[] | Initial array of registered proceed-recipient addresses.      |
+| data              | bytes[]   | Arbitrary per-recipient data supplied at initialisation time. |
 
 ### ProtectedByPartitionInitialized
 
@@ -13534,11 +13578,13 @@ Reverts when a protected-mode operation is attempted but partitions are not curr
 error ProceedRecipientAlreadyExists(address proceedRecipient)
 ```
 
+Thrown when attempting to add an address that is already registered as a proceed recipient.
+
 #### Parameters
 
-| Name             | Type    | Description |
-| ---------------- | ------- | ----------- |
-| proceedRecipient | address | undefined   |
+| Name             | Type    | Description                                                   |
+| ---------------- | ------- | ------------------------------------------------------------- |
+| proceedRecipient | address | The address that already exists in the proceed-recipient set. |
 
 ### ProceedRecipientNotFound
 
@@ -13546,11 +13592,13 @@ error ProceedRecipientAlreadyExists(address proceedRecipient)
 error ProceedRecipientNotFound(address proceedRecipient)
 ```
 
+Thrown when an operation targets an address that is not a registered proceed recipient.
+
 #### Parameters
 
-| Name             | Type    | Description |
-| ---------------- | ------- | ----------- |
-| proceedRecipient | address | undefined   |
+| Name             | Type    | Description                                                  |
+| ---------------- | ------- | ------------------------------------------------------------ |
+| proceedRecipient | address | The address that was not found in the proceed-recipient set. |
 
 ### ProtectedPartitionRoleRequired
 

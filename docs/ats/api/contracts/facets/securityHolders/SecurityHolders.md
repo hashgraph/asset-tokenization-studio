@@ -1,5 +1,7 @@
 # SecurityHolders
 
+_Asset Tokenization Studio Team_
+
 > SecurityHolders
 
 Abstract contract implementing token-holder enumeration queries for the Diamond-based token system.

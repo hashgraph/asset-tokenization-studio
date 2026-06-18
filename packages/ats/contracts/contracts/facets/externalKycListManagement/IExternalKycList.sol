@@ -5,6 +5,7 @@ import { IKyc } from "../kyc/IKyc.sol";
 
 /**
  * @title  IExternalKycList
+ * @author Asset Tokenization Studio Team
  * @notice Minimal interface for querying an external KYC-list contract.
  * @dev    Implemented by third-party KYC registries whose address is registered on the
  *         token. The token calls `getKycStatus` to verify whether an account has passed

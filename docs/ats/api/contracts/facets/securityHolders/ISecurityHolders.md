@@ -1,5 +1,7 @@
 # ISecurityHolders
 
+_Asset Tokenization Studio Team_
+
 > ISecurityHolders
 
 Interface for security holder operations in the ERC1410 standard

@@ -11,6 +11,7 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
 
 /**
  * @title Hold
+ * @author Asset Tokenization Studio Team
  * @notice Abstract implementation of high-level hold read operations.
  * @dev Exposes read accessors that do not depend on a specific partition and reads the current
  *      block timestamp through `EvmAccessors` so the returned values remain

@@ -6,11 +6,19 @@ import { ScheduledCrossOrderedTasks } from "./ScheduledCrossOrderedTasks.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 
+/**
+ * @title ScheduledCrossOrderedTasksFacet
+ * @author Asset Tokenization Studio Team
+ * @notice Diamond facet exposing the scheduled cross-ordered task management interface,
+ *         registered under `RESOLVER_KEY_SCHEDULED_TASKS`.
+ */
 contract ScheduledCrossOrderedTasksFacet is ScheduledCrossOrderedTasks, IStaticFunctionSelectors {
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = RESOLVER_KEY_SCHEDULED_TASKS;
     }
 
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
@@ -22,6 +30,7 @@ contract ScheduledCrossOrderedTasksFacet is ScheduledCrossOrderedTasks, IStaticF
             );
     }
 
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
         return Bytes4Builder.build(type(IScheduledCrossOrderedTasks).interfaceId);
     }

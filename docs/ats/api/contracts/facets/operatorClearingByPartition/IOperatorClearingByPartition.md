@@ -1,5 +1,7 @@
 # IOperatorClearingByPartition
 
+_Asset Tokenization Studio Team_
+
 > IOperatorClearingByPartition
 
 Interface for operator-initiated clearing operations: redeem and transfer by partition.

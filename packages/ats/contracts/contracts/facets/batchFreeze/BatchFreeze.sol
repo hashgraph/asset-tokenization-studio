@@ -6,7 +6,6 @@ import { IFreezeTypes } from "../freeze/IFreezeTypes.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
-import { ExternalListManagementStorageWrapper } from "../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { DefaultValueValidation } from "../../infrastructure/utils/DefaultValueValidation.sol";
@@ -14,6 +13,7 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
 
 /**
  * @title BatchFreeze
+ * @author Asset Tokenization Studio Team
  * @notice Abstract implementation of `IBatchFreeze` that batch-freezes and batch-unfreezes
  *         addresses and partial token amounts in a single call.
  * @dev Delegates all storage mutations to `ERC3643StorageWrapper`. Only works in

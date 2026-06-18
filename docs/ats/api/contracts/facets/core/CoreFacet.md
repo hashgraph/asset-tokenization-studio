@@ -1,5 +1,7 @@
 # CoreFacet
 
+_Asset Tokenization Studio Team_
+
 > CoreFacet
 
 Diamond facet for the Core domain. Registers the 8 selectors that define the base identity of the token (ERC20 metadata readers, ERC3643 name/symbol setters and version).

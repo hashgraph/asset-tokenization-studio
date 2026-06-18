@@ -20,6 +20,7 @@ interface IExternalPauseManagement {
     /**
      * @notice Emitted once when the external pause capability is initialised on a token.
      * @dev Fires exclusively from `initializeExternalPauses` after the storage write succeeds.
+     * @param pauses The initial array of external pause contract addresses registered at deployment.
      */
     event ExternalPauseInitialized(address[] pauses);
 

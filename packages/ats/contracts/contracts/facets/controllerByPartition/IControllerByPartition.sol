@@ -9,6 +9,7 @@ bytes32 constant RESOLVER_KEY_CONTROLLER_BY_PARTITION = 0xa75865ef65a8410651c7bf
 
 /**
  * @title IControllerByPartition
+ * @author Asset Tokenization Studio Team
  * @notice Interface for controller-initiated forced transfers and redemptions on a specific partition.
  * @dev Exposes two write methods that allow an authorised controller or agent to forcibly transfer
  *      or redeem tokens from any token holder's balance on a given partition. Both operations

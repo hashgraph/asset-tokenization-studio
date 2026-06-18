@@ -1,5 +1,7 @@
 # ICompliance
 
+_Asset Tokenization Studio Team_
+
 > ICompliance
 
 Minimal adapter interface for querying and notifying an external compliance contract.

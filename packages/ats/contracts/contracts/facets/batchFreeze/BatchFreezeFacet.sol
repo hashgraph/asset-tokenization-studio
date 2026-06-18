@@ -7,6 +7,7 @@ import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunc
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 /**
  * @title BatchFreezeFacet
+ * @author Asset Tokenization Studio Team
  * @notice Diamond facet that exposes batch freeze and unfreeze operations through the
  *         `IBatchFreeze` interface, registered under `RESOLVER_KEY_BATCH_FREEZE`.
  * @dev Inherits batch logic from `BatchFreeze` and satisfies the `IStaticFunctionSelectors`

@@ -140,7 +140,6 @@ import { IInitializer } from "./initializer/IInitializer.sol";
 /// @custom:hash resolverKey TransferAndLock
 bytes32 constant RESOLVER_KEY_TRANSFER_AND_LOCK = 0xe92a301947f21b973cb1007aeba48f2eecd916d05107b6355fc499b783b8f7d9;
 
-// solhint-disable no-empty-blocks
 /// @custom:hash resolverKey TransferAndLockKpiLinkedRate
 // solhint-disable-next-line max-line-length
 bytes32 constant RESOLVER_KEY_TRANSFER_AND_LOCK_KPI_LINKED_RATE = 0x2fbe9c91ad821641ca83a65f6399878b8419fd717379cd1abfac68f2c82940dd;

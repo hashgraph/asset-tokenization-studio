@@ -2,7 +2,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 /// @title IVotingTypes
-/// @notice Voting data structures for token voting mechanisms
+/// @author Asset Tokenization Studio Team
+/// @notice Voting data structures for token voting mechanisms.
 interface IVotingTypes {
     /// @notice Voting data structure
     struct Voting {

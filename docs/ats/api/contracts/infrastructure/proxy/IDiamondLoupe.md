@@ -1,5 +1,11 @@
 # IDiamondLoupe
 
+_Asset Tokenization Studio Team_
+
+> IDiamondLoupe
+
+Interface for inspecting the selectors, interface identifiers, and facet addresses registered in the Diamond proxy, with optional pagination for large registries.
+
 ## Methods
 
 ### getFacet

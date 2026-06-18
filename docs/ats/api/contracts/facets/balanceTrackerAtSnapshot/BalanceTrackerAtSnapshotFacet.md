@@ -1,5 +1,7 @@
 # BalanceTrackerAtSnapshotFacet
 
+_Asset Tokenization Studio Team_
+
 > BalanceTrackerAtSnapshotFacet
 
 Diamond facet that exposes snapshotted balance and total-supply queries through the `IBalanceTrackerAtSnapshot` interface, registered under `RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT`.

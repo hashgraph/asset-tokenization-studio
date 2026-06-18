@@ -7,6 +7,10 @@ import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunc
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 /**
  * @title NominalValueAtSnapshotFacet
+ * @author Asset Tokenization Studio Team
+ * @notice Diamond facet that exposes snapshotted nominal-value queries through the
+ *         `INominalValueAtSnapshot` interface, registered under
+ *         `RESOLVER_KEY_NOMINAL_VALUE_AT_SNAPSHOT`.
  */
 contract NominalValueAtSnapshotFacet is NominalValueAtSnapshot, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors

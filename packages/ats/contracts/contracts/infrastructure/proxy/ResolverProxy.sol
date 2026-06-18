@@ -43,13 +43,13 @@ contract ResolverProxy is ResolverProxyUnstructured {
      */
     receive() external payable {}
 
+    // solhint-disable-next-line no-complex-fallback
     /**
      * @notice Delegates calls to facet implementations.
      * @dev Reverts with `FunctionNotFound` when no facet is registered. Otherwise forwards all
      *      calldata and remaining gas using `delegatecall`, then bubbles returned data or revert
      *      data unchanged to the original caller.
      */
-    // solhint-disable-next-line no-complex-fallback
     fallback() external payable {
         // get facet from function selector
         address facet = _getFacetAddress(msg.sig);

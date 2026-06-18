@@ -74,31 +74,32 @@ jobs:
             echo "🔍 No bypass labels found. Changeset check required."
           fi
 
-      - name: Install dependencies
-        if: ${{ steps.bypass.outputs.bypass == 'false' }}
-        run: npm ci
-
-      - name: Check changeset status
-        if: ${{ steps.bypass.outputs.bypass == 'false' }}
+      - name: Detect changesets in this PR
+        id: detect
         env:
           BASE_BRANCH: ${{ github.base_ref }}
         run: |
-          echo "🔍 Checking for NEW changesets in this PR..."
-          echo "Comparing HEAD against base branch: ${BASE_BRANCH}"
+          # New or modified changeset files introduced by this PR (the author's own).
+          NEW_CHANGESETS=$(git diff "${BASE_BRANCH}...HEAD" --name-only --diff-filter=AM \
+            | { grep -E "^\.changeset/.*\.md$" || true; } | { grep -v "README.md" || true; })
+          NEW_COUNT=$(printf '%s\n' "${NEW_CHANGESETS}" | { grep -c "\.md$" || true; })
 
-          NEW_CHANGESETS=$(git diff "${BASE_BRANCH}...HEAD" --name-only --diff-filter=A | grep "^\.changeset/.*\.md$" | grep -v "README.md" || true)
-          NEW_CHANGESET_COUNT=$(echo "${NEW_CHANGESETS}" | grep -c "\.md$" || true)
+          # Any pending changeset files present in the tree (excluding README).
+          PENDING_COUNT=$(ls .changeset/*.md 2>/dev/null | { grep -v "README.md" || true; } | { grep -c "\.md$" || true; })
 
-          echo "Files changed in PR:"
-          git diff "${BASE_BRANCH}...HEAD" --name-only --diff-filter=A | head -10
-          echo ""
-          echo "NEW changeset files in this PR: ${NEW_CHANGESET_COUNT}"
+          echo "new_count=${NEW_COUNT}" >> "${GITHUB_OUTPUT}"
+          echo "pending_count=${PENDING_COUNT}" >> "${GITHUB_OUTPUT}"
+
+          echo "New/modified changesets in this PR: ${NEW_COUNT}"
           if [[ -n "${NEW_CHANGESETS}" ]]; then
-            echo "Found NEW changesets:"
             echo "${NEW_CHANGESETS}"
           fi
+          echo "Pending changeset files in tree: ${PENDING_COUNT}"
 
-          if [[ "${NEW_CHANGESET_COUNT}" -gt 0 ]]; then
+      - name: Require a changeset (waived by bypass labels)
+        if: ${{ steps.bypass.outputs.bypass == 'false' }}
+        run: |
+          if [[ "${{ steps.detect.outputs.new_count }}" -gt 0 ]]; then
             echo "✅ Changeset validation passed - found NEW changeset files in PR"
           else
             echo ""
@@ -121,12 +122,21 @@ jobs:
             echo "- chore: For build system or dependency updates"
             echo "- hotfix: For emergency fixes"
             echo ""
+            echo "Note: bypass labels waive the *requirement* to add a changeset, but any"
+            echo "changeset you DO include is still validated and lint-checked below."
+            echo ""
             echo "More info: https://github.com/changesets/changesets/blob/main/docs/intro-to-using-changesets.md"
             exit 1
           fi
 
-      - name: Validate changeset contents
-        if: ${{ steps.bypass.outputs.bypass == 'false' }}
+      - name: Install dependencies
+        # Needed for `changeset status`; runs whenever changesets exist, even under a bypass label.
+        if: ${{ steps.detect.outputs.pending_count != '0' }}
+        run: npm ci
+
+      - name: Validate changeset package names
+        # Runs whenever changesets exist (bypass or not) so a labelled PR cannot slip an invalid changeset through.
+        if: ${{ steps.detect.outputs.pending_count != '0' }}
         run: |
           echo "🔍 Validating that all pending changesets reference known workspace packages..."
           if ! npx changeset status; then
@@ -144,6 +154,17 @@ jobs:
             exit 1
           fi
           echo "✅ All pending changesets reference valid workspace packages"
+
+      - name: Lint changeset body formatting
+        # Runs whenever this PR adds/edits changesets (bypass or not) to keep generated changelogs clean.
+        if: ${{ steps.detect.outputs.new_count != '0' }}
+        env:
+          BASE_BRANCH: ${{ github.base_ref }}
+        run: |
+          mapfile -t FILES < <(git diff "${BASE_BRANCH}...HEAD" --name-only --diff-filter=AM \
+            | { grep -E "^\.changeset/.*\.md$" || true; } | { grep -v "README.md" || true; })
+          echo "Linting ${#FILES[@]} changeset file(s)..."
+          node .changeset/lint-changesets.mjs "${FILES[@]}"
 
       - name: Success summary
         if: ${{ always() }}

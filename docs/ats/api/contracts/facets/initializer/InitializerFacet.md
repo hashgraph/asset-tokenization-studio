@@ -1,6 +1,10 @@
 # InitializerFacet
 
+_Asset Tokenization Studio Team_
+
 > InitializerFacet
+
+Diamond facet that manages the per-facet initialisation registry and the operational status of the token, registered under `RESOLVER_KEY_INITIALIZER`.
 
 ## Methods
 

@@ -3,19 +3,15 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IDiamondCutManager } from "./IDiamondCutManager.sol";
 
 /**
- * @title Contracts Repository
- * @notice This contract is used to register and resolve Business Logics (aka contracts) addresses using
- *          a bytes32 as key.
- *
- *			All registered Business Logics must have the same number of versions, so that they have a common "latest"
- *			version and any previous version can be resolved for any existing Business Logic no matter when it was
- *			added to the register.
- *         The idea is that consumers should use Business Logics belonging to the same version since those are
- * 		considered fully compatible.
- *			Registering a business logic (register = update its latest version or add it to the registry) will increase the
- *			latest version for all Business Logics by 1.
+ * @title IBusinessLogicResolver
+ * @author Asset Tokenization Studio Team
+ * @notice Registry for resolving Business Logic (facet) addresses by a bytes32 key and version.
+ *         All registered Business Logics share a common version counter so consumers can safely
+ *         target a single version and know it is fully compatible across every registered key.
+ *         Registering or updating any Business Logic increments the shared latest version by 1.
  */
 interface IBusinessLogicResolver is IDiamondCutManager {
+    /// @notice Lifecycle state of a registered business logic version.
     enum VersionStatus {
         NONE,
         ACTIVATED,
@@ -34,6 +30,7 @@ interface IBusinessLogicResolver is IDiamondCutManager {
         VersionStatus status;
     }
 
+    /// @notice Pairs a version's status metadata with the implementation address registered for it.
     struct BusinessLogicVersion {
         VersionData versionData;
         address businessLogicAddress;
@@ -58,9 +55,21 @@ interface IBusinessLogicResolver is IDiamondCutManager {
     /// @param newAddressRemoved removed replacement address.
     event ReplacementAddressRemoved(address indexed oldAddress, address indexed newAddressRemoved);
 
+    /// @notice Thrown when the requested version has never been registered for any business logic key.
+    /// @param version The version number that does not exist in the registry.
     error BusinessLogicVersionDoesNotExist(uint256 version);
+
+    /// @notice Thrown when two entries in a registration batch share the same business logic key.
+    /// @param businessLogicKey The duplicated key found in the batch.
     error BusinessLogicKeyDuplicated(bytes32 businessLogicKey);
+
+    /// @notice Thrown when the key reported by the implementation contract differs from the expected key.
+    /// @param implementation Address of the implementation whose key was checked.
+    /// @param actualKey The resolver key returned by the implementation.
+    /// @param expectedKey The resolver key that was expected at registration time.
     error BusinessLogicKeyMismatch(address implementation, bytes32 actualKey, bytes32 expectedKey);
+
+    /// @notice Thrown when a registration attempt uses the zero bytes32 value as the business logic key.
     error ZeroKeyNotValidForBusinessLogic();
 
     /**
@@ -76,6 +85,11 @@ interface IBusinessLogicResolver is IDiamondCutManager {
     error InvalidReplacedAddress(address replacedAddress);
     error AddressZero();
 
+    /**
+     * @notice Initialises the Business Logic Resolver storage. Must be called once before any
+     *         registration operations; subsequent calls revert.
+     * @return success_ True when initialisation succeeds without reverting.
+     */
     function initializeBusinessLogicResolver() external returns (bool success_);
 
     /**
@@ -119,7 +133,10 @@ interface IBusinessLogicResolver is IDiamondCutManager {
     function getReplacementAddress(address _oldAddress) external view returns (address replacementAddress_);
 
     /**
-     * @notice Returns the current status of a given version
+     * @notice Returns the current status of a given version for a business logic key.
+     * @param _businessLogicKey The bytes32 key identifying the business logic to query.
+     * @param _version The version number to inspect.
+     * @return status_ The `VersionStatus` (NONE, ACTIVATED, or DEACTIVATED) for that version.
      */
     function getVersionStatus(
         bytes32 _businessLogicKey,
@@ -127,7 +144,9 @@ interface IBusinessLogicResolver is IDiamondCutManager {
     ) external view returns (VersionStatus status_);
 
     /**
-     * @notice Returns the current latest version for all business logics
+     * @notice Returns the latest registered version for the given business logic key.
+     * @param _businessLogicKey The bytes32 key identifying the business logic to query.
+     * @return latestVersion_ The latest registered version for that key; 0 if never registered.
      */
     function getLatestVersion(bytes32 _businessLogicKey) external view returns (uint256 latestVersion_);
 
@@ -145,17 +164,19 @@ interface IBusinessLogicResolver is IDiamondCutManager {
     ) external view returns (uint256[] memory latestVersions_);
 
     /**
-     * @notice Returns the business logic address for the latest version
-     * @param _businessLogicKey key of the business logic. Business Logic must be active.
+     * @notice Returns the business logic address for the latest version.
+     * @param _businessLogicKey Key of the business logic. Business Logic must be active.
+     * @return businessLogicAddress_ The implementation address registered at the latest version.
      */
     function resolveLatestBusinessLogic(
         bytes32 _businessLogicKey
     ) external view returns (address businessLogicAddress_);
 
     /**
-     * @notice Returns a specific business logic version address
-     * @param _businessLogicKey key of the business logic. Business Logic must be active.
-     * @param _version the version
+     * @notice Returns the implementation address for a specific version of a business logic.
+     * @param _businessLogicKey Key of the business logic. Business Logic must be active.
+     * @param _version The version number to resolve.
+     * @return businessLogicAddress_ The implementation address registered at that version.
      */
     function resolveBusinessLogicByVersion(
         bytes32 _businessLogicKey,
@@ -163,7 +184,8 @@ interface IBusinessLogicResolver is IDiamondCutManager {
     ) external view returns (address businessLogicAddress_);
 
     /**
-     * @notice Returns the count of currently active business logics
+     * @notice Returns the total number of business logic keys currently registered in the resolver.
+     * @return businessLogicCount_ The count of registered business logic keys.
      */
     function getBusinessLogicCount() external view returns (uint256 businessLogicCount_);
 

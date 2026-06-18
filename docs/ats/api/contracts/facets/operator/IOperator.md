@@ -1,8 +1,10 @@
 # IOperator
 
+_Asset Tokenization Studio Team_
+
 > IOperator
 
-Interface for operator management: query, authorize and revoke operators for all partitions.
+Interface for operator management: query, authorise and revoke operators for all partitions.
 
 ## Methods
 

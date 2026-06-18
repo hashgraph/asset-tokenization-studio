@@ -1,5 +1,7 @@
 # IBalanceTrackerAdjusted
 
+_Asset Tokenization Studio Team_
+
 > IBalanceTrackerAdjusted
 
 Interface for querying historical token balances at a specific timestamp, simulating non-triggered balance adjustments up to that point in time.

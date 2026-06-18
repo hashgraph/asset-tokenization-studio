@@ -1,182 +1,171 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { expect } from "chai";
-import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ATS_ROLES, EMPTY_STRING, ZERO, RESOLVER_KEY_LOCK_AT_SNAPSHOT } from "@scripts";
-import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
+import { IAssetMock } from "@contract-types";
+import { ATS_ROLES, RESOLVER_KEY_LOCK_AT_SNAPSHOT } from "@scripts";
+import { DEFAULT_PARTITION, PARTITION_ID_2, executeRbac, grantKycToHolders, MAX_UINT256 } from "@test";
+import type { AssetMockCtx } from "@test";
 
-const _PARTITION_ID_1 = "0x0000000000000000000000000000000000000000000000000000000000000001";
-const _PARTITION_ID_2 = "0x0000000000000000000000000000000000000000000000000000000000000002";
-const EMPTY_VC_ID = EMPTY_STRING;
 const amount = 1000;
 
-describe("LockAtSnapshot Tests", () => {
-  let diamond: ResolverProxy;
-  let signer_A: HardhatEthersSigner;
-  let signer_B: HardhatEthersSigner;
-  let signer_C: HardhatEthersSigner;
+export function lockAtSnapshotTests(getCtx: () => AssetMockCtx): void {
+  describe("LockAtSnapshot Tests", () => {
+    let signer_A: HardhatEthersSigner;
+    let signer_B: HardhatEthersSigner;
+    let signer_C: HardhatEthersSigner;
 
-  let asset: IAsset;
-  let mockDiamondCut: MockDiamondCut;
+    let asset: IAssetMock;
 
-  async function deployEquity() {
-    const base = await deployEquityTokenFixture({
-      equityDataParams: {
-        securityData: { isMultiPartition: true },
-      },
-    });
-    diamond = base.diamond;
-    signer_A = base.deployer;
-    signer_B = base.user1;
-    signer_C = base.user2;
+    beforeEach(async () => {
+      const ctx = getCtx();
+      asset = ctx.asset;
+      await asset.setMultiPartition(true);
 
-    asset = await ethers.getContractAt("IAsset", diamond.target);
-    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
+      signer_A = ctx.deployer;
+      signer_B = ctx.user1;
+      signer_C = ctx.user2;
 
-    await executeRbac(asset, [
-      { role: ATS_ROLES.ROLE_ISSUER, members: [signer_B.address] },
-      { role: ATS_ROLES.ROLE_LOCKER, members: [signer_B.address] },
-      { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
-      { role: ATS_ROLES.ROLE_SNAPSHOT, members: [signer_A.address] },
-      { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
-    ]);
+      await executeRbac(asset, [
+        { role: ATS_ROLES.ROLE_ISSUER, members: [signer_B.address] },
+        { role: ATS_ROLES.ROLE_LOCKER, members: [signer_B.address] },
+        { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+        { role: ATS_ROLES.ROLE_SNAPSHOT, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
+      ]);
 
-    await asset.connect(signer_A).addIssuer(signer_B.address);
-    await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
-    await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
-    await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_B.address);
-  }
-
-  beforeEach(async () => {
-    await loadFixture(deployEquity);
-  });
-
-  describe("lockedBalanceOfAtSnapshot", () => {
-    it("GIVEN snapshotId is 0 WHEN lockedBalanceOfAtSnapshot THEN reverts with SnapshotIdNull", async () => {
-      await expect(asset.lockedBalanceOfAtSnapshot(0, signer_A.address)).to.be.revertedWithCustomError(
-        asset,
-        "SnapshotIdNull",
-      );
+      await asset.connect(signer_A).addIssuer(signer_B.address);
+      await grantKycToHolders(asset, signer_B, [signer_A, signer_B, signer_C]);
     });
 
-    it("GIVEN no snapshot taken WHEN lockedBalanceOfAtSnapshot at id 1 THEN reverts with SnapshotIdDoesNotExists", async () => {
-      await expect(asset.lockedBalanceOfAtSnapshot(1, signer_A.address)).to.be.revertedWithCustomError(
-        asset,
-        "SnapshotIdDoesNotExists",
-      );
-    });
-
-    it("GIVEN a snapshot taken for a holder with no locks WHEN lockedBalanceOfAtSnapshot THEN returns zero", async () => {
-      await asset.connect(signer_B).issueByPartition({
-        partition: _PARTITION_ID_1,
-        tokenHolder: signer_A.address,
-        value: amount,
-        data: "0x",
+    describe("lockedBalanceOfAtSnapshot", () => {
+      it("GIVEN snapshotId is 0 WHEN lockedBalanceOfAtSnapshot THEN reverts with SnapshotIdNull", async () => {
+        await expect(asset.lockedBalanceOfAtSnapshot(0, signer_A.address)).to.be.revertedWithCustomError(
+          asset,
+          "SnapshotIdNull",
+        );
       });
 
-      await asset.connect(signer_A).takeSnapshot();
-
-      const balance = await asset.lockedBalanceOfAtSnapshot(1, signer_A.address);
-      expect(balance).to.equal(0);
-    });
-
-    it("GIVEN a lock exists at snapshot time WHEN lockedBalanceOfAtSnapshot THEN returns the exact locked amount", async () => {
-      const lockedAmount = 300;
-
-      await asset.connect(signer_B).issueByPartition({
-        partition: _PARTITION_ID_1,
-        tokenHolder: signer_A.address,
-        value: amount,
-        data: "0x",
+      it("GIVEN no snapshot taken WHEN lockedBalanceOfAtSnapshot at id 1 THEN reverts with SnapshotIdDoesNotExists", async () => {
+        await expect(asset.lockedBalanceOfAtSnapshot(1, signer_A.address)).to.be.revertedWithCustomError(
+          asset,
+          "SnapshotIdDoesNotExists",
+        );
       });
 
-      await asset.connect(signer_B).lockByPartition(_PARTITION_ID_1, lockedAmount, signer_A.address, MAX_UINT256);
+      it("GIVEN a snapshot taken for a holder with no locks WHEN lockedBalanceOfAtSnapshot THEN returns zero", async () => {
+        await asset.connect(signer_B).issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: amount,
+          data: "0x",
+        });
 
-      await asset.connect(signer_A).takeSnapshot();
+        await asset.connect(signer_A).takeSnapshot();
 
-      const balance = await asset.lockedBalanceOfAtSnapshot(1, signer_A.address);
-      expect(balance).to.equal(lockedAmount);
-    });
-
-    it("GIVEN two snapshots where locked amount differs WHEN lockedBalanceOfAtSnapshot at first snapshot THEN returns value recorded at first snapshot", async () => {
-      const lockedAmountFirst = 100;
-      const lockedAmountSecond = 250;
-
-      await asset.connect(signer_B).issueByPartition({
-        partition: _PARTITION_ID_1,
-        tokenHolder: signer_A.address,
-        value: amount,
-        data: "0x",
+        const balance = await asset.lockedBalanceOfAtSnapshot(1, signer_A.address);
+        expect(balance).to.equal(0);
       });
 
-      // snapshot 1: no locks yet
-      await asset.connect(signer_A).takeSnapshot();
+      it("GIVEN a lock exists at snapshot time WHEN lockedBalanceOfAtSnapshot THEN returns the exact locked amount", async () => {
+        const lockedAmount = 300;
 
-      await asset.connect(signer_B).lockByPartition(_PARTITION_ID_1, lockedAmountFirst, signer_A.address, MAX_UINT256);
+        await asset.connect(signer_B).issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: amount,
+          data: "0x",
+        });
 
-      // snapshot 2: first lock active
-      await asset.connect(signer_A).takeSnapshot();
+        await asset.connect(signer_B).lockByPartition(DEFAULT_PARTITION, lockedAmount, signer_A.address, MAX_UINT256);
 
-      await asset.connect(signer_B).lockByPartition(_PARTITION_ID_1, lockedAmountSecond, signer_A.address, MAX_UINT256);
+        await asset.connect(signer_A).takeSnapshot();
 
-      const balanceAtSnapshot1 = await asset.lockedBalanceOfAtSnapshot(1, signer_A.address);
-      const balanceAtSnapshot2 = await asset.lockedBalanceOfAtSnapshot(2, signer_A.address);
-
-      expect(balanceAtSnapshot1).to.equal(0);
-      expect(balanceAtSnapshot2).to.equal(lockedAmountFirst);
-    });
-
-    it("GIVEN two holders each with different locked amounts WHEN lockedBalanceOfAtSnapshot THEN returns each holder's individual locked amount independently", async () => {
-      const lockedAmountA = 200;
-      const lockedAmountC = 450;
-
-      await asset.connect(signer_B).issueByPartition({
-        partition: _PARTITION_ID_1,
-        tokenHolder: signer_A.address,
-        value: amount,
-        data: "0x",
-      });
-      await asset.connect(signer_B).issueByPartition({
-        partition: _PARTITION_ID_2,
-        tokenHolder: signer_C.address,
-        value: amount,
-        data: "0x",
+        const balance = await asset.lockedBalanceOfAtSnapshot(1, signer_A.address);
+        expect(balance).to.equal(lockedAmount);
       });
 
-      await asset.connect(signer_B).lockByPartition(_PARTITION_ID_1, lockedAmountA, signer_A.address, MAX_UINT256);
-      await asset.connect(signer_B).lockByPartition(_PARTITION_ID_2, lockedAmountC, signer_C.address, MAX_UINT256);
+      it("GIVEN two snapshots where locked amount differs WHEN lockedBalanceOfAtSnapshot at first snapshot THEN returns value recorded at first snapshot", async () => {
+        const lockedAmountFirst = 100;
+        const lockedAmountSecond = 250;
 
-      await asset.connect(signer_A).takeSnapshot();
+        await asset.connect(signer_B).issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: amount,
+          data: "0x",
+        });
 
-      const balanceA = await asset.lockedBalanceOfAtSnapshot(1, signer_A.address);
-      const balanceC = await asset.lockedBalanceOfAtSnapshot(1, signer_C.address);
+        // snapshot 1: no locks yet
+        await asset.connect(signer_A).takeSnapshot();
 
-      expect(balanceA).to.equal(lockedAmountA);
-      expect(balanceC).to.equal(lockedAmountC);
+        await asset
+          .connect(signer_B)
+          .lockByPartition(DEFAULT_PARTITION, lockedAmountFirst, signer_A.address, MAX_UINT256);
+
+        // snapshot 2: first lock active
+        await asset.connect(signer_A).takeSnapshot();
+
+        await asset
+          .connect(signer_B)
+          .lockByPartition(DEFAULT_PARTITION, lockedAmountSecond, signer_A.address, MAX_UINT256);
+
+        const balanceAtSnapshot1 = await asset.lockedBalanceOfAtSnapshot(1, signer_A.address);
+        const balanceAtSnapshot2 = await asset.lockedBalanceOfAtSnapshot(2, signer_A.address);
+
+        expect(balanceAtSnapshot1).to.equal(0);
+        expect(balanceAtSnapshot2).to.equal(lockedAmountFirst);
+      });
+
+      it("GIVEN two holders each with different locked amounts WHEN lockedBalanceOfAtSnapshot THEN returns each holder's individual locked amount independently", async () => {
+        const lockedAmountA = 200;
+        const lockedAmountC = 450;
+
+        await asset.connect(signer_B).issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: amount,
+          data: "0x",
+        });
+        await asset.connect(signer_B).issueByPartition({
+          partition: PARTITION_ID_2,
+          tokenHolder: signer_C.address,
+          value: amount,
+          data: "0x",
+        });
+
+        await asset.connect(signer_B).lockByPartition(DEFAULT_PARTITION, lockedAmountA, signer_A.address, MAX_UINT256);
+        await asset.connect(signer_B).lockByPartition(PARTITION_ID_2, lockedAmountC, signer_C.address, MAX_UINT256);
+
+        await asset.connect(signer_A).takeSnapshot();
+
+        const balanceA = await asset.lockedBalanceOfAtSnapshot(1, signer_A.address);
+        const balanceC = await asset.lockedBalanceOfAtSnapshot(1, signer_C.address);
+
+        expect(balanceA).to.equal(lockedAmountA);
+        expect(balanceC).to.equal(lockedAmountC);
+      });
     });
-  });
 
-  describe("initializeLockAtSnapshot", () => {
-    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeLockAtSnapshot is called THEN AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeLockAtSnapshot())
-        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
-        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    describe("initializeLockAtSnapshot", () => {
+      it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeLockAtSnapshot is called THEN AccountHasNoRole", async () => {
+        await expect(asset.connect(signer_C).initializeLockAtSnapshot())
+          .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+          .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+      });
+
+      it("GIVEN already-initialised WHEN initializeLockAtSnapshot is called again THEN FacetAlreadyRegistered", async () => {
+        await expect(asset.initializeLockAtSnapshot())
+          .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+          .withArgs(RESOLVER_KEY_LOCK_AT_SNAPSHOT, 1);
+      });
     });
 
-    it("GIVEN already-initialised WHEN initializeLockAtSnapshot is called again THEN FacetAlreadyRegistered", async () => {
-      await expect(asset.initializeLockAtSnapshot())
-        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(RESOLVER_KEY_LOCK_AT_SNAPSHOT, 1);
-    });
-  });
-
-  describe("initializeLockAtSnapshot event", () => {
-    it("GIVEN a fresh deployment WHEN initializeLockAtSnapshot is called THEN emits LockAtSnapshotInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_LOCK_AT_SNAPSHOT);
-      await expect(asset.initializeLockAtSnapshot()).to.emit(asset, "LockAtSnapshotInitialized");
+    describe("initializeLockAtSnapshot event", () => {
+      it("GIVEN a fresh deployment WHEN initializeLockAtSnapshot is called THEN emits LockAtSnapshotInitialized", async () => {
+        await asset.forceFacetNotRegistered(RESOLVER_KEY_LOCK_AT_SNAPSHOT);
+        await expect(asset.initializeLockAtSnapshot()).to.emit(asset, "LockAtSnapshotInitialized");
+      });
     });
   });
-});
+}

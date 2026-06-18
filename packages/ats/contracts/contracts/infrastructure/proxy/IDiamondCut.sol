@@ -4,15 +4,22 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IStaticFunctionSelectors } from "./IStaticFunctionSelectors.sol";
 import { IBusinessLogicResolver } from "../diamond/IBusinessLogicResolver.sol";
 
+/// @title IDiamondCut
+/// @author Asset Tokenization Studio Team
+/// @notice Interface for upgrading the Diamond proxy's Business Logic Resolver (BLR),
+///         configuration identifier, and version in a single or multi-step operation.
 interface IDiamondCut is IStaticFunctionSelectors {
     /**
-     * @notice For the current BLR and configuration, update the used version
+     * @notice For the current BLR and configuration, update the used version.
+     * @param _newVersion The new version number to set for the current configuration.
      */
     function updateConfigVersion(uint256 _newVersion) external;
 
     /**
-     * @notice For the current BLR update its configuration
-     **/
+     * @notice For the current BLR, update its configuration identifier and version.
+     * @param _newConfigurationId The new configuration identifier to apply.
+     * @param _newVersion The version number associated with the new configuration.
+     */
     function updateConfig(bytes32 _newConfigurationId, uint256 _newVersion) external;
 
     /**
@@ -21,7 +28,10 @@ interface IDiamondCut is IStaticFunctionSelectors {
     function updateReplacementEnabled(bool _newReplacementEnabled) external;
 
     /**
-     * @notice Updates the BLR to a new one
+     * @notice Replaces the Business Logic Resolver with a new one, setting configuration and version.
+     * @param _newResolver The new BLR contract address to wire into the proxy.
+     * @param _newConfigurationId The configuration identifier to activate on the new resolver.
+     * @param _newVersion The version number associated with the new configuration.
      */
     function updateResolver(
         IBusinessLogicResolver _newResolver,
@@ -31,7 +41,12 @@ interface IDiamondCut is IStaticFunctionSelectors {
     ) external;
 
     /**
-     * @notice Returns the configuration used by the secuirity
+     * @notice Returns the active resolver address, configuration identifier, and version.
+     * @return resolver_ Address of the current Business Logic Resolver.
+     * @return proxyVersion_ proxy version.
+     * @return configurationId_ Identifier of the active configuration.
+     * @return configurationVersion_ Version number of the active configuration.
+     * @return replacementEnabled_ Whether replacement is enabled.
      */
     function getConfigInfo()
         external

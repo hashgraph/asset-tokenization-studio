@@ -18,7 +18,7 @@
  */
 
 import { expect } from "chai";
-import { COMMON_TOKEN_FACETS, EXTENDED_TOKEN_FACETS, BOND_COMMON_FACETS } from "@scripts/domain";
+import { COMMON_TOKEN_FACETS, EXTENDED_TOKEN_FACETS, BOND_COMMON_FACETS, ALL_ASSET_FACETS } from "@scripts/domain";
 import { BOND_FACETS } from "../../../../scripts/domain/bond/createConfiguration";
 import { BOND_FIXED_RATE_FACETS } from "../../../../scripts/domain/bondFixedRate/createConfiguration";
 import { BOND_KPI_LINKED_RATE_FACETS } from "../../../../scripts/domain/bondKpiLinkedRate/createConfiguration";
@@ -74,5 +74,30 @@ describe("facetSets", () => {
         expect(hasDuplicates(list)).to.be.false;
       });
     }
+  });
+
+  describe("ALL_ASSET_FACETS", () => {
+    // The seven asset-class lists whose union the mega-asset (AssetMock) config registers.
+    // Factory and InitializeMock are deliberately excluded — they are not IAsset facets.
+    const assetClassLists = [
+      EQUITY_FACETS,
+      BOND_FACETS,
+      BOND_FIXED_RATE_FACETS,
+      BOND_KPI_LINKED_RATE_FACETS,
+      LOAN_FACETS,
+      LOANS_PORTFOLIO_FACETS,
+      DEPOSIT_TOKEN_FACETS,
+    ];
+
+    it("has no duplicates", () => {
+      expect(hasDuplicates(ALL_ASSET_FACETS)).to.be.false;
+    });
+
+    it("equals the deduplicated union of every asset-class facet list", () => {
+      // Guards against drift in either direction: a facet added to a per-class list but
+      // missing from ALL_ASSET_FACETS (or vice-versa) fails here, before any deployment.
+      const union = [...new Set(assetClassLists.flat())].sort();
+      expect([...ALL_ASSET_FACETS].sort()).to.deep.equal(union);
+    });
   });
 });

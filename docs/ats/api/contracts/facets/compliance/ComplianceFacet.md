@@ -1,5 +1,7 @@
 # ComplianceFacet
 
+_Asset Tokenization Studio Team_
+
 > ComplianceFacet
 
 Diamond facet exposing transfer-eligibility checks and compliance contract management.

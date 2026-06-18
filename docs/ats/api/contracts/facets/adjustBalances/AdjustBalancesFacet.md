@@ -1,5 +1,7 @@
 # AdjustBalancesFacet
 
+_Asset Tokenization Studio Team_
+
 > AdjustBalancesFacet
 
 Diamond facet that consolidates the 2 immediate balance-adjustment selectors under a single `RESOLVER_KEY_BALANCE_ADJUSTMENTS`.
