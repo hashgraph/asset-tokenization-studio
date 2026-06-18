@@ -557,16 +557,14 @@ Returns the pending owner of a configuration, if any.
 ### getReplacementAddress
 
 ```solidity
-function getReplacementAddress(address _oldAddress) external view returns (address replacementAddress_)
+function getReplacementAddress(address _replacedAddress) external view returns (address replacementAddress_)
 ```
-
-Returns the replacement address for a given address, or address(0) if none exists
 
 #### Parameters
 
-| Name         | Type    | Description |
-| ------------ | ------- | ----------- |
-| \_oldAddress | address | undefined   |
+| Name              | Type    | Description |
+| ----------------- | ------- | ----------- |
+| \_replacedAddress | address | undefined   |
 
 #### Returns
 
@@ -853,16 +851,14 @@ function registerBusinessLogics(IBusinessLogicResolver.BusinessLogicRegistryData
 ### removeReplacementAddress
 
 ```solidity
-function removeReplacementAddress(address _oldAddress) external nonpayable
+function removeReplacementAddress(address _replacedAddress) external nonpayable
 ```
-
-Removes the replacement address for a given address
 
 #### Parameters
 
-| Name         | Type    | Description                                     |
-| ------------ | ------- | ----------------------------------------------- |
-| \_oldAddress | address | the address for which to remove the replacement |
+| Name              | Type    | Description |
+| ----------------- | ------- | ----------- |
+| \_replacedAddress | address | undefined   |
 
 ### removeSelectorsFromBlacklist
 
@@ -1074,17 +1070,15 @@ _Requires `ROLE_PAUSER` and the token&#39;s internal flag to be set. Reverts wit
 ### updateReplacementAddress
 
 ```solidity
-function updateReplacementAddress(address _oldAddress, address _newAddress) external nonpayable
+function updateReplacementAddress(address _replacedAddress, address _replacementAddress) external nonpayable
 ```
-
-Updates the replacement address for a given address
 
 #### Parameters
 
-| Name         | Type    | Description                        |
-| ------------ | ------- | ---------------------------------- |
-| \_oldAddress | address | the address to be replaced         |
-| \_newAddress | address | the new address to replace it with |
+| Name                 | Type    | Description |
+| -------------------- | ------- | ----------- |
+| \_replacedAddress    | address | undefined   |
+| \_replacementAddress | address | undefined   |
 
 ## Events
 
@@ -1236,32 +1230,32 @@ Emitted when the token&#39;s internal pause flag is set to `true`.
 ### ReplacementAddressRemoved
 
 ```solidity
-event ReplacementAddressRemoved(address indexed oldAddress, address indexed newAddressRemoved)
+event ReplacementAddressRemoved(address indexed replacedAddress, address indexed replacementAddressRemoved)
 ```
 
 Event emitted when a replacement address is removed
 
 #### Parameters
 
-| Name                        | Type    | Description                                         |
-| --------------------------- | ------- | --------------------------------------------------- |
-| oldAddress `indexed`        | address | address for which the replacement is being removed. |
-| newAddressRemoved `indexed` | address | removed replacement address.                        |
+| Name                                | Type    | Description                                         |
+| ----------------------------------- | ------- | --------------------------------------------------- |
+| replacedAddress `indexed`           | address | address for which the replacement is being removed. |
+| replacementAddressRemoved `indexed` | address | removed replacement address.                        |
 
 ### ReplacementAddressUpdated
 
 ```solidity
-event ReplacementAddressUpdated(address indexed oldAddress, address indexed newAddress)
+event ReplacementAddressUpdated(address indexed replacedAddress, address indexed replacementAddress)
 ```
 
 Event emitted when an old address is replaced with a new one
 
 #### Parameters
 
-| Name                 | Type    | Description                        |
-| -------------------- | ------- | ---------------------------------- |
-| oldAddress `indexed` | address | old address been replaced.         |
-| newAddress `indexed` | address | new address replacing the old one. |
+| Name                         | Type    | Description                        |
+| ---------------------------- | ------- | ---------------------------------- |
+| replacedAddress `indexed`    | address | old address been replaced.         |
+| replacementAddress `indexed` | address | new address replacing the old one. |
 
 ### RoleGranted
 
