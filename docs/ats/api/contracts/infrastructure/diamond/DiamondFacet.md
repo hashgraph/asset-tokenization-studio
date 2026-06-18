@@ -390,13 +390,13 @@ _Requires `DEFAULT_ADMIN_ROLE` and preserves the active configuration identifier
 function updateReplacementEnabled(bool _newReplacementEnabled) external nonpayable
 ```
 
-For the current BLR update its configuration\*
+For the current BLR update its configuration
 
 #### Parameters
 
-| Name                    | Type | Description |
-| ----------------------- | ---- | ----------- |
-| \_newReplacementEnabled | bool | undefined   |
+| Name                    | Type | Description                           |
+| ----------------------- | ---- | ------------------------------------- |
+| \_newReplacementEnabled | bool | The replacement enabled flag to set\* |
 
 ### updateResolver
 

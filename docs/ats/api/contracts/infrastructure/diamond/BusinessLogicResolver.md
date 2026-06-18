@@ -560,6 +560,8 @@ Returns the pending owner of a configuration, if any.
 function getReplacementAddress(address _replacedAddress) external view returns (address replacementAddress_)
 ```
 
+Returns the replacement address for a given address, or address(0) if none exists
+
 #### Parameters
 
 | Name              | Type    | Description |
@@ -854,6 +856,8 @@ function registerBusinessLogics(IBusinessLogicResolver.BusinessLogicRegistryData
 function removeReplacementAddress(address _replacedAddress) external nonpayable
 ```
 
+Removes the replacement address for a given address
+
 #### Parameters
 
 | Name              | Type    | Description |
@@ -1072,6 +1076,8 @@ _Requires `ROLE_PAUSER` and the token&#39;s internal flag to be set. Reverts wit
 ```solidity
 function updateReplacementAddress(address _replacedAddress, address _replacementAddress) external nonpayable
 ```
+
+Updates the replacement address for a given address
 
 #### Parameters
 
@@ -1398,12 +1404,6 @@ Thrown when attempting to revoke or renounce a role from an account that does no
 | role    | bytes32 | The role the account does not hold.   |
 | account | address | The account not assigned to the role. |
 
-### AddressZero
-
-```solidity
-error AddressZero()
-```
-
 ### AlreadyInitialized
 
 ```solidity
@@ -1591,11 +1591,13 @@ Thrown when a replacement address is already been replaced.
 error InvalidResolverProxyConfiguration(bytes _resolverProxyConfiguration)
 ```
 
+Thrown when the provided encoded proxy configuration does not respect the standard.
+
 #### Parameters
 
-| Name                         | Type  | Description |
-| ---------------------------- | ----- | ----------- |
-| \_resolverProxyConfiguration | bytes | undefined   |
+| Name                         | Type  | Description                        |
+| ---------------------------- | ----- | ---------------------------------- |
+| \_resolverProxyConfiguration | bytes | wrong encoded proxy configuration. |
 
 ### IsPaused
 
@@ -1736,11 +1738,13 @@ _Reserved for interface compatibility or future extension points._
 error UnrecognizedResolverProxyVersion(bytes8 _resolverProxyVersion)
 ```
 
+Thrown when the provided proxy version does not match any BLR compatible standard.
+
 #### Parameters
 
-| Name                   | Type   | Description |
-| ---------------------- | ------ | ----------- |
-| \_resolverProxyVersion | bytes8 | undefined   |
+| Name                   | Type   | Description                                        |
+| ---------------------- | ------ | -------------------------------------------------- |
+| \_resolverProxyVersion | bytes8 | proxy version that is not compatible with the BLR. |
 
 ### VersionZero
 

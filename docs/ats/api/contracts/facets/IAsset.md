@@ -8741,13 +8741,13 @@ Updates the arbitrary data stored for an existing proceed recipient.
 function updateReplacementEnabled(bool _newReplacementEnabled) external nonpayable
 ```
 
-For the current BLR update its configuration\*
+For the current BLR update its configuration
 
 #### Parameters
 
-| Name                    | Type | Description |
-| ----------------------- | ---- | ----------- |
-| \_newReplacementEnabled | bool | undefined   |
+| Name                    | Type | Description                           |
+| ----------------------- | ---- | ------------------------------------- |
+| \_newReplacementEnabled | bool | The replacement enabled flag to set\* |
 
 ### updateResolver
 

@@ -1398,12 +1398,6 @@ Thrown when attempting to revoke or renounce a role from an account that does no
 | role    | bytes32 | The role the account does not hold.   |
 | account | address | The account not assigned to the role. |
 
-### AddressZero
-
-```solidity
-error AddressZero()
-```
-
 ### BusinessLogicKeyDuplicated
 
 ```solidity
@@ -1581,11 +1575,13 @@ Thrown when a replacement address is already been replaced.
 error InvalidResolverProxyConfiguration(bytes _resolverProxyConfiguration)
 ```
 
+Thrown when the provided encoded proxy configuration does not respect the standard.
+
 #### Parameters
 
-| Name                         | Type  | Description |
-| ---------------------------- | ----- | ----------- |
-| \_resolverProxyConfiguration | bytes | undefined   |
+| Name                         | Type  | Description                        |
+| ---------------------------- | ----- | ---------------------------------- |
+| \_resolverProxyConfiguration | bytes | wrong encoded proxy configuration. |
 
 ### IsPaused
 
@@ -1716,11 +1712,13 @@ Thrown when attempting to register a selector that is globally blacklisted.
 error UnrecognizedResolverProxyVersion(bytes8 _resolverProxyVersion)
 ```
 
+Thrown when the provided proxy version does not match any BLR compatible standard.
+
 #### Parameters
 
-| Name                   | Type   | Description |
-| ---------------------- | ------ | ----------- |
-| \_resolverProxyVersion | bytes8 | undefined   |
+| Name                   | Type   | Description                                        |
+| ---------------------- | ------ | -------------------------------------------------- |
+| \_resolverProxyVersion | bytes8 | proxy version that is not compatible with the BLR. |
 
 ### VersionZero
 
