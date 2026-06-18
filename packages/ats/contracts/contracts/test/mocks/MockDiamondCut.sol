@@ -19,6 +19,7 @@ import { DiamondLoupe } from "../../infrastructure/diamond/DiamondLoupe.sol";
 import { IDiamond, RESOLVER_KEY_DIAMOND } from "../../infrastructure/proxy/IDiamond.sol";
 import { IDiamondCut } from "../../infrastructure/proxy/IDiamondCut.sol";
 import { IDiamondLoupe } from "../../infrastructure/proxy/IDiamondLoupe.sol";
+import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import { InitializerModifiers } from "../../services/core/InitializerModifiers.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
@@ -35,112 +36,182 @@ import { ERC20VotesStorageWrapper } from "../../domain/asset/ERC20VotesStorageWr
 
 /* solhint-disable */
 
+/**
+ * @title Mock Diamond Cut Control Interface
+ * @notice Defines test-only controls for forcing diamond and facet operational states.
+ * @dev Exposes privileged mock hooks intended for test environments, not production use.
+ * @author Asset Tokenization Studio Team
+ */
 interface IMockDiamondCut {
+    /**
+     * @notice Forces the diamond into a non-operational state.
+     * @dev Mutates operational status and may cause operational guards to reject calls.
+     */
     function forceNonOperational() external;
+
+    /**
+     * @notice Forces a facet to be treated as not registered.
+     * @dev Mutates mock facet registration state for the supplied facet key.
+     * @param _facetKey Unique identifier of the facet whose registration is forced.
+     */
     function forceFacetNotRegistered(bytes32 _facetKey) external;
+
+    /**
+     * @notice Forces a facet to be treated as ready.
+     * @dev Mutates mock facet readiness state for the supplied facet key.
+     * @param _facetKey Unique identifier of the facet whose readiness is forced.
+     */
     function forceFacetReady(bytes32 _facetKey) external;
+
+    /**
+     * @notice Forces multiple facets to be treated as ready.
+     * @dev Mutates mock facet readiness state for each supplied facet key.
+     * @param _facetKeys Unique identifiers of the facets whose readiness is forced.
+     */
     function forceFacetsReady(bytes32[] calldata _facetKeys) external;
+
+    /**
+     * @notice Forces the diamond into an operational state.
+     * @dev Mutates operational status and may allow calls protected by operational guards.
+     */
     function forceSetOperational() external;
+
+    /**
+     * @notice Sets whether multi-partition behaviour is enabled in the mock state.
+     * @dev Mutates the mock partition configuration used by dependent test flows.
+     * @param _nreMultiPartition True to enable multi-partition behaviour, false otherwise.
+     */
     function setMultiPartition(bool _nreMultiPartition) external;
+
+    /**
+     * @notice Forces the diamond or token mock into a deactivated state.
+     * @dev Mutates activation state and may cause active-state guards to reject calls.
+     */
     function forceDeactivate() external;
+
+    /**
+     * @notice Forces the security flag state used by the mock.
+     * @dev Mutates security-related state consumed by tests exercising guarded paths.
+     * @param _newSecurityFlags New security flag value to apply.
+     */
     function forceSecurityFlags(bool _newSecurityFlags) external;
+
+    /**
+     * @notice Forces whether the mock is controllable.
+     * @dev Mutates controllability state used by control-related validations.
+     * @param _newIsControlable True to mark the mock as controllable, false otherwise.
+     */
     function forceControllable(bool _newIsControlable) external;
+
+    /**
+     * @notice Forces the decimal precision reported by the mock.
+     * @dev Mutates token metadata state and affects consumers relying on decimals.
+     * @param _newDecimals New decimal precision to expose.
+     */
     function forceDecimals(uint8 _newDecimals) external;
-    function forceErc20VotesActivated(bool _newActivate) external;
+
+    /**
+     * @notice Forces whether ERC20Votes-related behaviour is activated.
+     * @dev Mutates mock governance capability state for vote-related test scenarios.
+     * @param _newActivated True to activate ERC20Votes behaviour, false otherwise.
+     */
+    function forceErc20VotesActivated(bool _newActivated) external;
+
+    /**
+     * @notice Forces whether whitelist enforcement is enabled.
+     * @dev Mutates whitelist configuration used by tests covering restricted transfers.
+     * @param _newWhitelist True to enable whitelist behaviour, false otherwise.
+     */
     function forceWhitelist(bool _newWhitelist) external;
 }
 
-// `IStaticFunctionSelectors` is intentionally not listed: it is already pulled
-// in transitively by `IDiamondCut` and `IDiamondLoupe`, and re-declaring it
-// here would break C3 linearization. Mirrors `DiamondFacet`'s parent layout
-// with one test-only addition: `IMockDiamondCut` (for the mock controls).
+/**
+ * @title Mock Diamond Cut Facet
+ * @notice Provides diamond configuration operations and test-only state forcing helpers.
+ * @dev Extends the production diamond cut and loupe behaviour with mock controls that write
+ *      directly to facet, configuration, security, deactivation, and token feature storage.
+ *      These helpers are intended for tests and bypass normal initialisation and role flows.
+ * @author Hashgraph
+ */
 contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, InitializerModifiers, IMockDiamondCut {
+    /**
+     * @notice Marks the diamond cut facet as initialised for the active resolver key.
+     * @dev Requires the caller to hold the default admin role and the diamond facet not to
+     *      be registered already. Mutates initialiser storage and emits
+     *      `DiamondCutInitialized`.
+     */
     function initializeDiamondCut() external onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_DIAMOND) {
         InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_DIAMOND);
         emit DiamondCutInitialized();
     }
 
-    /// @notice Forces the asset to non-operational state for testing onlyOperational guards.
-    /// @dev Uses InitializerStorageWrapper.setConfigVersion to write 0 to the status slot.
+    /// @inheritdoc IMockDiamondCut
+    /// @dev Writes status `0` for the active resolver proxy configuration and version.
     function forceNonOperational() external override {
         bytes32 configId = ResolverProxyStorageWrapper.getResolverProxyConfigurationId();
         uint256 versionId = ResolverProxyStorageWrapper.getResolverProxyVersion();
         InitializerStorageWrapper.setConfigVersion(configId, versionId, 0);
     }
 
-    /// @notice Forces a facet's version status to 0 (not started) for testing.
-    /// @param _facetKey The resolver key of the facet to reset.
+    /// @inheritdoc IMockDiamondCut
+    /// @dev Resolves the current facet version through the business logic resolver and resets
+    ///      both its version status and last-version pointer.
     function forceFacetNotRegistered(bytes32 _facetKey) external override {
-        uint256 v = ResolverProxyStorageWrapper
+        uint256 versionId = ResolverProxyStorageWrapper
             .getBusinessLogicResolver()
             .getFacetVersionByConfigurationIdVersionAndFacetId(
                 ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
                 ResolverProxyStorageWrapper.getResolverProxyVersion(),
                 _facetKey
             );
-        InitializerStorageWrapper.setFacetStatusForVersion(_facetKey, v, 0);
+        InitializerStorageWrapper.setFacetStatusForVersion(_facetKey, versionId, 0);
         InitializerStorageWrapper.setFacetLastVersionTo(_facetKey, 0);
     }
 
-    /// @notice Forces a single facet to READY status (status=1) without running its initialiser.
-    /// @dev Uses `InitializerStorageWrapper.setFacetToReady` which reads the current version from
-    ///      the BLR and marks status=1 for that `(facetId, version)` pair.
-    /// @param _facetKey The resolver key of the facet to mark ready.
+    /// @inheritdoc IMockDiamondCut
+    /// @dev Marks the facet ready for the version resolved from the business logic resolver.
     function forceFacetReady(bytes32 _facetKey) external override {
         InitializerStorageWrapper.setFacetToReady(_facetKey);
     }
 
-    /// @notice Forces a batch of facets to READY status in one call.
-    /// @dev Iterates over the supplied array and calls `setFacetToReady` for each entry.
-    ///      Intended for the `deployAssetMock` workflow where all facets of a configuration
-    ///      must be marked ready before `setOperationalStatus` can succeed.
-    /// @param _facetKeys Array of resolver keys to mark ready.
+    /// @inheritdoc IMockDiamondCut
+    /// @dev Iterates over all supplied facet keys and marks each current facet version ready.
     function forceFacetsReady(bytes32[] calldata _facetKeys) external override {
-        uint256 len = _facetKeys.length;
-        for (uint256 i; i < len; ) {
-            InitializerStorageWrapper.setFacetToReady(_facetKeys[i]);
+        uint256 length = _facetKeys.length;
+        for (uint256 index; index < length; ) {
+            InitializerStorageWrapper.setFacetToReady(_facetKeys[index]);
             unchecked {
-                ++i;
+                ++index;
             }
         }
     }
 
-    /// @notice Marks the proxy's active configuration as operational without walking the
-    ///         facet list. All facets MUST already be in READY status before calling this.
-    /// @dev Bypasses the `InitializerStorageWrapper.setOperationalStatus` batch-walk logic
-    ///      (which requires `maxInitializerFacetIndex` to have been seeded on the proxy).
-    ///      Since `deployAssetMock` force-readies every facet before this call, direct
-    ///      status-setting is equivalent and avoids the index-seeding requirement.
+    /// @inheritdoc IMockDiamondCut
+    /// @dev Writes status `1` for the active resolver proxy configuration and version without
+    ///      walking the configured facet list. The caller is responsible for ensuring every
+    ///      required facet has already been marked ready.
     function forceSetOperational() external override {
         bytes32 configId = ResolverProxyStorageWrapper.getResolverProxyConfigurationId();
         uint256 versionId = ResolverProxyStorageWrapper.getResolverProxyVersion();
         InitializerStorageWrapper.setConfigVersion(configId, versionId, 1);
     }
 
-    /// @notice Sets the multi-partition mode flag for testing.
-    /// @dev Writes directly to `ERC1410BasicStorage.multiPartition` via the storage wrapper,
-    ///      the same path used by the production `PartitionsFacet.initializePartitions(bool)`.
-    ///      Call this in a migrated suite's `beforeEach` to enable partition-based behaviour
-    ///      without re-deploying the asset.
-    /// @param _multiPartition `true` to enable multi-partition mode, `false` for single-partition.
+    /// @inheritdoc IMockDiamondCut
+    /// @dev Writes the ERC-1410 multi-partition flag through the same storage wrapper used by
+    ///      the production partitions initialiser.
     function setMultiPartition(bool _multiPartition) external override {
         ERC1410StorageWrapper.initializeERC1410(_multiPartition);
     }
 
-    /// @notice Forces the asset into deactivated state for testing `Deactivated` guards.
-    /// @dev Uses `DeactivateStorageWrapper.deactivate()` — the same storage path as the
-    ///      production `Deactivate.deactivate()` facet, without requiring role grants.
+    /// @inheritdoc IMockDiamondCut
+    /// @dev Uses the production deactivation storage wrapper and bypasses role checks.
     function forceDeactivate() external override {
         DeactivateStorageWrapper.deactivate();
     }
 
-    /// @notice Sets all four security flags (multi-partition, whitelist, internal KYC, protected
-    ///         partitions) to a single value in one call.
-    /// @dev Each initialiser writes to the same storage slot that the production facet initialiser
-    ///      would. On a freshly-snapshot-restored asset (all flags at EVM-default false), calling
-    ///      `forceSecurityFlags(true)` is equivalent to having deployed with all four features
-    ///      enabled, and `forceSecurityFlags(false)` restores the EVM-default state.
-    /// @param _newSecurityFlags `true` to enable all four security features, `false` to disable them.
+    /// @inheritdoc IMockDiamondCut
+    /// @dev Sets ERC-1410 multi-partition, control-list mode, internal KYC, and protected
+    ///      partition flags to the same value through their production storage wrappers.
     function forceSecurityFlags(bool _newSecurityFlags) external override {
         ERC1410StorageWrapper.initializeERC1410(_newSecurityFlags);
         ControlListStorageWrapper.initializeControlList(_newSecurityFlags);
@@ -148,46 +219,37 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
         ProtectedPartitionsStorageWrapper.initializeProtectedPartitions(_newSecurityFlags);
     }
 
-    /// @notice Forces the ERC-1644 controllable flag for testing without running the facet
-    ///         initialiser.
-    /// @dev Calls `ERC1644StorageWrapper.initializeController` — the same storage path used by
-    ///      the production `Controller.initializeController` facet.
-    /// @param _newControllable `true` to enable controllable transfers, `false` to disable them.
+    /// @inheritdoc IMockDiamondCut
+    /// @dev Writes the ERC-1644 controller activation flag through the controller storage
+    ///      wrapper without invoking the production facet initialiser.
     function forceControllable(bool _newControllable) external override {
         ERC1644StorageWrapper.initializeController(_newControllable);
     }
 
-    /// @notice Forces the ERC-20 decimal count for testing without running the facet
-    ///         initialiser.
-    /// @dev Delegates to `ERC20StorageWrapper.setDecimals` which writes through the
-    ///      private `erc20Storage()` struct accessor — the same layout-independent path
-    ///      the production `CoreFacet.initializeERC20` uses via `ERC20StorageWrapper`.
-    ///      Unlike `initializeERC20`, this does NOT trigger `ScheduledTasksOps` or
-    ///      overwrite name/symbol, making it safe alongside snapshot scheduled-tasks tests.
-    /// @param _newDecimals The decimal count to set (e.g. 6 for the standard equity token value).
+    /// @inheritdoc IMockDiamondCut
+    /// @dev Updates only the ERC-20 decimal count and does not mutate token name, symbol, or
+    ///      scheduled-task state.
     function forceDecimals(uint8 _newDecimals) external override {
         ERC20StorageWrapper.setDecimals(_newDecimals);
     }
 
-    /// @notice Forces the ERC20Votes activation flag for testing without running the facet initialiser.
-    /// @dev Delegates to ERC20VotesStorageWrapper.setActivate, which writes the activation flag through the
-    ///      ERC20Votes storage struct (layout-independent). The production flag is set only at
-    ///      initializeERC20Votes time with no runtime toggle, so this mirrors the deploy-time state directly.
-    /// @param _newActivated true to activate ERC20Votes, false to deactivate.
+    /// @inheritdoc IMockDiamondCut
+    /// @dev Writes the ERC20Votes activation flag directly through the votes storage wrapper.
     function forceErc20VotesActivated(bool _newActivated) external override {
         ERC20VotesStorageWrapper.setActivate(_newActivated);
     }
 
-    /// @notice Forces the control-list type (whitelist vs blacklist) for testing without running the facet
-    ///         initialiser. true = whitelist mode, false = blacklist mode.
-    /// @dev Delegates to ControlListStorageWrapper.initializeControlList, which sets only the control-list
-    ///      type flag through the storage struct. The production flag is set once at initializeControlList
-    ///      time with no runtime toggle, so this mirrors the deploy-time state.
+    /// @inheritdoc IMockDiamondCut
+    /// @dev Writes the control-list type flag directly; `true` represents whitelist mode and
+    ///      `false` represents blacklist mode.
     function forceWhitelist(bool _newWhiteList) external override {
         ControlListStorageWrapper.initializeControlList(_newWhiteList);
     }
 
-    function getStaticResolverKey() external pure returns (bytes32 staticResolverKey_) {
+    /// @inheritdoc IStaticFunctionSelectors
+    /// @dev Returns the production diamond resolver key so registry lookups match the deployed
+    ///      diamond cut facet entry.
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         // Must return the production `RESOLVER_KEY_DIAMOND` so the BLR
         // registration matches the `atsRegistry.data.ts` entry. The internal
         // initializer uses `_MOCK_DIAMOND_CUT_RESOLVER_KEY` which is what
@@ -195,7 +257,10 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
         staticResolverKey_ = RESOLVER_KEY_DIAMOND;
     }
 
-    function getStaticFunctionSelectors() external pure returns (bytes4[] memory staticFunctionSelectors_) {
+    /// @inheritdoc IStaticFunctionSelectors
+    /// @dev Includes the mock helper selectors together with inherited diamond cut, loupe, and
+    ///      ERC-165 selectors expected to be registered for this test facet.
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorsIndex = 31;
         staticFunctionSelectors_ = new bytes4[](selectorsIndex);
         unchecked {
@@ -233,7 +298,9 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
         }
     }
 
-    function getStaticInterfaceIds() external pure returns (bytes4[] memory staticInterfaceIds_) {
+    /// @inheritdoc IStaticFunctionSelectors
+    /// @dev Advertises ERC-165 and the mock diamond cut interface for static registration.
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         return Bytes4Builder.build(type(IERC165).interfaceId, type(IMockDiamondCut).interfaceId);
     }
 }
