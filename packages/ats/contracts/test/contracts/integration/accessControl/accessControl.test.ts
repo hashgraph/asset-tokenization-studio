@@ -26,52 +26,52 @@ export function accessControlTests(getCtx: () => AssetMockCtx): void {
       await executeRbac(asset, [{ role: ATS_ROLES.ROLE_PAUSER, members: [ctx.user1.address] }]);
     });
 
-    it.only("GIVEN a deactivated asset WHEN grantRole THEN transaction fails with Deactivated", async () => {
+    it("GIVEN a deactivated asset WHEN grantRole THEN transaction fails with Deactivated", async () => {
       await asset.forceDeactivate();
       await expect(
         asset.connect(deployer).grantRole(ATS_ROLES.ROLE_PAUSER, unknownSigner.address),
       ).to.be.revertedWithCustomError(asset, "Deactivated");
     });
 
-    it.only("GIVEN an account without administrative role WHEN grantRole THEN transaction fails with AccountHasNoRole", async () => {
+    it("GIVEN an account without administrative role WHEN grantRole THEN transaction fails with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_C).grantRole(ATS_ROLES.ROLE_PAUSER, unknownSigner.address))
         .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
         .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
-    it.only("GIVEN a deactivated asset WHEN revokeRole THEN transaction fails with Deactivated", async () => {
+    it("GIVEN a deactivated asset WHEN revokeRole THEN transaction fails with Deactivated", async () => {
       await asset.forceDeactivate();
       await expect(
         asset.connect(deployer).revokeRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, unknownSigner.address),
       ).to.be.revertedWithCustomError(asset, "Deactivated");
     });
 
-    it.only("GIVEN an account without administrative role WHEN revokeRole THEN transaction fails with AccountHasNoRole", async () => {
+    it("GIVEN an account without administrative role WHEN revokeRole THEN transaction fails with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_C).revokeRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, unknownSigner.address))
         .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
         .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
-    it.only("GIVEN a deactivated asset WHEN applyRoles THEN transaction fails with Deactivated", async () => {
+    it("GIVEN a deactivated asset WHEN applyRoles THEN transaction fails with Deactivated", async () => {
       await asset.forceDeactivate();
       await expect(
         asset.connect(signer_C).applyRoles([ATS_ROLES.DEFAULT_ADMIN_ROLE], [true], unknownSigner.address),
       ).to.be.revertedWithCustomError(asset, "Deactivated");
     });
 
-    it.only("GIVEN an account without administrative role WHEN applyRoles THEN transaction fails with AccountHasNoRole", async () => {
+    it("GIVEN an account without administrative role WHEN applyRoles THEN transaction fails with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_C).applyRoles([ATS_ROLES.DEFAULT_ADMIN_ROLE], [true], unknownSigner.address))
         .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
         .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
-    it.only("GIVEN a list of roles and actives that is not equally long WHEN applyRoles THEN transaction fails with RolesAndActivesLengthMismatch", async () => {
+    it("GIVEN a list of roles and actives that is not equally long WHEN applyRoles THEN transaction fails with RolesAndActivesLengthMismatch", async () => {
       await expect(asset.connect(signer_C).applyRoles([ATS_ROLES.DEFAULT_ADMIN_ROLE], [], unknownSigner.address))
         .to.be.revertedWithCustomError(asset, "RolesAndActivesLengthMismatch")
         .withArgs(1, 0);
     });
 
-    it.only("GIVEN a list of contradictory roles (enable and disable) role WHEN applyRoles THEN transaction fails with ApplyRoleContradiction", async () => {
+    it("GIVEN a list of contradictory roles (enable and disable) role WHEN applyRoles THEN transaction fails with ApplyRoleContradiction", async () => {
       const Roles_1 = [
         ATS_ROLES.DEFAULT_ADMIN_ROLE,
         ATS_ROLES.ROLE_PAUSER,
@@ -96,7 +96,7 @@ export function accessControlTests(getCtx: () => AssetMockCtx): void {
         .withArgs(3, 6);
     });
 
-    it.only("GIVEN a paused Token WHEN grantRole THEN transaction fails with IsPaused", async () => {
+    it("GIVEN a paused Token WHEN grantRole THEN transaction fails with IsPaused", async () => {
       await asset.connect(signer_B).pause();
 
       await expect(
@@ -104,7 +104,7 @@ export function accessControlTests(getCtx: () => AssetMockCtx): void {
       ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
-    it.only("GIVEN a paused Token WHEN revokeRole THEN transaction fails with IsPaused", async () => {
+    it("GIVEN a paused Token WHEN revokeRole THEN transaction fails with IsPaused", async () => {
       await asset.connect(signer_B).pause();
 
       await expect(
@@ -112,7 +112,7 @@ export function accessControlTests(getCtx: () => AssetMockCtx): void {
       ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
-    it.only("GIVEN a deactivated asset WHEN renounceRole THEN transaction fails with Deactivated", async () => {
+    it("GIVEN a deactivated asset WHEN renounceRole THEN transaction fails with Deactivated", async () => {
       await asset.forceDeactivate();
       await expect(asset.connect(signer_C).renounceRole(ATS_ROLES.ROLE_PAUSER)).to.be.revertedWithCustomError(
         asset,
@@ -120,7 +120,7 @@ export function accessControlTests(getCtx: () => AssetMockCtx): void {
       );
     });
 
-    it.only("GIVEN a paused Token WHEN renounce THEN transaction fails with IsPaused", async () => {
+    it("GIVEN a paused Token WHEN renounce THEN transaction fails with IsPaused", async () => {
       // Pausing the token
       await asset.connect(signer_B).pause();
 
@@ -131,7 +131,7 @@ export function accessControlTests(getCtx: () => AssetMockCtx): void {
       );
     });
 
-    it.only("GIVEN an paused Token WHEN applyRoles THEN transaction fails with IsPaused", async () => {
+    it("GIVEN an paused Token WHEN applyRoles THEN transaction fails with IsPaused", async () => {
       // Pausing the token
       await asset.connect(signer_B).pause();
 
@@ -141,7 +141,7 @@ export function accessControlTests(getCtx: () => AssetMockCtx): void {
       ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
-    it.only("GIVEN an account with administrative role WHEN grantRole THEN transaction succeeds", async () => {
+    it("GIVEN an account with administrative role WHEN grantRole THEN transaction succeeds", async () => {
       // check that C does not have the role
       let check_C = await asset.hasRole(ATS_ROLES.ROLE_PAUSER, unknownSigner.address);
       expect(check_C).to.equal(false);
@@ -168,7 +168,7 @@ export function accessControlTests(getCtx: () => AssetMockCtx): void {
       expect(membersFor_Pause[1].toUpperCase()).to.equal(unknownSigner.address.toUpperCase());
     });
 
-    it.only("GIVEN an account with administrative role WHEN revokeRole THEN transaction succeeds", async () => {
+    it("GIVEN an account with administrative role WHEN revokeRole THEN transaction succeeds", async () => {
       // check that B has the role
       let check_B = await asset.hasRole(ATS_ROLES.ROLE_PAUSER, signer_B.address);
       expect(check_B).to.equal(true);
@@ -192,7 +192,7 @@ export function accessControlTests(getCtx: () => AssetMockCtx): void {
       expect(membersFor_Pause.length).to.equal(memberCountFor_Pause);
     });
 
-    it.only("GIVEN an account with pauser role WHEN renouncing the pauser role THEN transaction succeeds", async () => {
+    it("GIVEN an account with pauser role WHEN renouncing the pauser role THEN transaction succeeds", async () => {
       // check that B has the role
       let check_B = await asset.hasRole(ATS_ROLES.ROLE_PAUSER, signer_B.address);
       expect(check_B).to.equal(true);
@@ -216,7 +216,7 @@ export function accessControlTests(getCtx: () => AssetMockCtx): void {
       expect(membersFor_Pause.length).to.equal(memberCountFor_Pause);
     });
 
-    it.only("GIVEN an account with administrative role WHEN applyRoles THEN transaction succeeds", async () => {
+    it("GIVEN an account with administrative role WHEN applyRoles THEN transaction succeeds", async () => {
       // check that C does not have the role
       await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_PAUSER, signer_C.address);
 
@@ -256,7 +256,7 @@ export function accessControlTests(getCtx: () => AssetMockCtx): void {
       expect(membersFor_Default[1].toUpperCase()).to.equal(signer_C.address.toUpperCase());
     });
 
-    it.only("GIVEN an account with administrative role, if roles are duplicated but not contradictory WHEN applyRoles THEN transaction succeeds", async () => {
+    it("GIVEN an account with administrative role, if roles are duplicated but not contradictory WHEN applyRoles THEN transaction succeeds", async () => {
       // check that C does not have the role
       await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_PAUSER, signer_C.address);
 
