@@ -46,7 +46,7 @@ interface IMockDiamondCut {
     function forceSecurityFlags(bool _newSecurityFlags) external;
     function forceControllable(bool _newIsControlable) external;
     function forceDecimals(uint8 _newDecimals) external;
-    function forceErc20VotesActivated(bool n) external;
+    function forceErc20VotesActivated(bool _newActivated) external;
     function forceWhitelist(bool n) external;
 }
 

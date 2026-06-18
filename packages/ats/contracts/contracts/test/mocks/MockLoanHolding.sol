@@ -15,13 +15,9 @@ import { ILoan } from "../../facets/loan/ILoan.sol";
 import { ITransferByPartition } from "../../facets/transferByPartition/ITransferByPartition.sol";
 
 contract MockLoanHolding is ITransferByPartition {
-    // ─── Configurable state ───────────────────────────────────────────
-
     uint256 internal _totalCollateralValue;
     ILoan.PerformanceStatus internal _performanceStatus;
     mapping(bytes32 partition => mapping(address holder => uint256)) internal _balances;
-
-    // ─── Configurators (test-side) ────────────────────────────────────
 
     /**
      * @notice Sets the collateral value and performance classification.
@@ -83,8 +79,6 @@ contract MockLoanHolding is ITransferByPartition {
      *         to satisfy the interface.
      */
     function initializeTransferByPartition() external {}
-
-    // ─── Loan-portfolio call surfaces ─────────────────────────────────
 
     /**
      * @notice Returns the loan details with configurable fields populated.
