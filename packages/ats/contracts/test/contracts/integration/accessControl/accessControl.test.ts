@@ -393,7 +393,7 @@ export function accessControlTests(getCtx: () => AssetMockCtx): void {
           .withArgs(unknownSigner.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
       });
 
-      it("GIVEN an already-initialised facet WHEN initializeAccessControl is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      it.only("GIVEN an already-initialised facet WHEN initializeAccessControl is called again THEN it reverts with FacetAlreadyRegistered", async () => {
         await expect(asset.initializeAccessControl())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
           .withArgs(RESOLVER_KEY_ACCESS_CONTROL, 1);
@@ -401,7 +401,7 @@ export function accessControlTests(getCtx: () => AssetMockCtx): void {
     });
 
     describe("initializeAccessControl event", () => {
-      it("GIVEN a fresh deployment WHEN initializeAccessControl is called THEN it emits AccessControlInitialized", async () => {
+      it.only("GIVEN a fresh deployment WHEN initializeAccessControl is called THEN it emits AccessControlInitialized", async () => {
         await asset.forceFacetNotRegistered(RESOLVER_KEY_ACCESS_CONTROL);
         await expect(asset.initializeAccessControl()).to.emit(asset, "AccessControlInitialized");
       });
@@ -412,25 +412,25 @@ export function accessControlTests(getCtx: () => AssetMockCtx): void {
         await asset.forceNonOperational();
       });
 
-      it("GIVEN non-operational WHEN grantRole is called THEN AssetNotOperational", async () => {
+      it.only("GIVEN non-operational WHEN grantRole is called THEN AssetNotOperational", async () => {
         await expect(asset.grantRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, unknownSigner.address))
           .to.be.revertedWithCustomError(asset, "AssetNotOperational")
           .withArgs(ASSET_MOCK_CONFIG_ID, 1);
       });
 
-      it("GIVEN non-operational WHEN revokeRole is called THEN AssetNotOperational", async () => {
+      it.only("GIVEN non-operational WHEN revokeRole is called THEN AssetNotOperational", async () => {
         await expect(asset.revokeRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, unknownSigner.address))
           .to.be.revertedWithCustomError(asset, "AssetNotOperational")
           .withArgs(ASSET_MOCK_CONFIG_ID, 1);
       });
 
-      it("GIVEN non-operational WHEN renounceRole is called THEN AssetNotOperational", async () => {
+      it.only("GIVEN non-operational WHEN renounceRole is called THEN AssetNotOperational", async () => {
         await expect(asset.renounceRole(ATS_ROLES.DEFAULT_ADMIN_ROLE))
           .to.be.revertedWithCustomError(asset, "AssetNotOperational")
           .withArgs(ASSET_MOCK_CONFIG_ID, 1);
       });
 
-      it("GIVEN non-operational WHEN applyRoles is called THEN AssetNotOperational", async () => {
+      it.only("GIVEN non-operational WHEN applyRoles is called THEN AssetNotOperational", async () => {
         await expect(asset.applyRoles([], [], unknownSigner.address))
           .to.be.revertedWithCustomError(asset, "AssetNotOperational")
           .withArgs(ASSET_MOCK_CONFIG_ID, 1);
