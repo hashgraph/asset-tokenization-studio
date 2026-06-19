@@ -17,8 +17,6 @@ import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 import { DiamondCut } from "../../infrastructure/diamond/DiamondCut.sol";
 import { DiamondLoupe } from "../../infrastructure/diamond/DiamondLoupe.sol";
 import { IDiamond, RESOLVER_KEY_DIAMOND } from "../../infrastructure/proxy/IDiamond.sol";
-import { IDiamondCut } from "../../infrastructure/proxy/IDiamondCut.sol";
-import { IDiamondLoupe } from "../../infrastructure/proxy/IDiamondLoupe.sol";
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import { InitializerModifiers } from "../../services/core/InitializerModifiers.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";

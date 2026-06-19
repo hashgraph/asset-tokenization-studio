@@ -15,7 +15,6 @@ import { InterestRateStorageWrapper } from "../../domain/asset/InterestRateStora
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 import { IEvmAccessorsFacet } from "../testAccessors/IEvmAccessorsFacet.sol";
-import { IDiamondCutManager } from "../../infrastructure/diamond/IDiamondCutManager.sol";
 import { IMockDiamondCut } from "./MockDiamondCut.sol";
 import { ResolverProxy } from "../../infrastructure/proxy/ResolverProxy.sol";
 import { IResolverProxy } from "../../infrastructure/proxy/IResolverProxy.sol";

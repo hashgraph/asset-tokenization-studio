@@ -99,7 +99,7 @@ library ERC1410StorageWrapper {
      * @param multiPartition When `true`, partitions other than `_DEFAULT_PARTITION` are accepted.
      */
     function initializeERC1410(bool multiPartition) internal {
-        erc1410BasicStorage().multiPartition = multiPartition;
+        _erc1410BasicStorage().multiPartition = multiPartition;
     }
 
     /**
@@ -120,7 +120,7 @@ library ERC1410StorageWrapper {
             revert ITransfer.InsufficientBalance(from, fromBalance, value, partition);
         }
 
-        ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
+        ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
 
         uint256 index = erc1410Storage.partitionToIndex[from][partition] - 1;
 
@@ -143,7 +143,7 @@ library ERC1410StorageWrapper {
             revert IERC1410Types.InvalidPartition(from, partition);
         }
 
-        ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
+        ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
 
         erc1410Storage.partitions[from][erc1410Storage.partitionToIndex[from][partition] - 1].amount += value;
     }
@@ -163,10 +163,10 @@ library ERC1410StorageWrapper {
         SnapshotsStorageWrapper.updateTotalPartitionsSnapshot(account);
         AdjustBalancesStorageWrapper.pushLabafUserPartition(account, AdjustBalancesStorageWrapper.getAbaf());
 
-        ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
+        ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
 
         erc1410Storage.partitions[account].push(Partition(value, partition));
-        erc1410Storage.partitionToIndex[account][partition] = erc1410BasicStorage().partitions[account].length;
+        erc1410Storage.partitionToIndex[account][partition] = _erc1410BasicStorage().partitions[account].length;
     }
 
     /**
@@ -177,7 +177,7 @@ library ERC1410StorageWrapper {
      * @param oldTokenHolder Address whose index is transferred away.
      */
     function replaceTokenHolder(address newTokenHolder, address oldTokenHolder) internal {
-        ERC1410BasicStorage storage basicStorage = erc1410BasicStorage();
+        ERC1410BasicStorage storage basicStorage = _erc1410BasicStorage();
 
         uint256 index = basicStorage.tokenHolderIndex[oldTokenHolder];
         if (index == 0) revert IERC1410Types.TokenHolderNotFound(oldTokenHolder);
@@ -193,7 +193,7 @@ library ERC1410StorageWrapper {
      * @param tokenHolder Address being added to the holder set.
      */
     function addNewTokenHolder(address tokenHolder) internal {
-        ERC1410BasicStorage storage basicStorage = erc1410BasicStorage();
+        ERC1410BasicStorage storage basicStorage = _erc1410BasicStorage();
 
         unchecked {
             uint256 nextIndex = ++basicStorage.totalTokenHolders;
@@ -209,7 +209,7 @@ library ERC1410StorageWrapper {
      * @param tokenHolder Address being removed from the holder set.
      */
     function removeTokenHolder(address tokenHolder) internal {
-        ERC1410BasicStorage storage basicStorage = erc1410BasicStorage();
+        ERC1410BasicStorage storage basicStorage = _erc1410BasicStorage();
 
         uint256 lastIndex = basicStorage.totalTokenHolders;
         uint256 tokenHolderIndex = basicStorage.tokenHolderIndex[tokenHolder];
@@ -238,7 +238,7 @@ library ERC1410StorageWrapper {
      * @param operator Address being authorised to act for the caller.
      */
     function authorizeOperator(address operator) internal {
-        erc1410OperatorStorage().approvals[EvmAccessors.getMsgSender()][operator] = true;
+        _erc1410OperatorStorage().approvals[EvmAccessors.getMsgSender()][operator] = true;
     }
 
     /**
@@ -248,7 +248,7 @@ library ERC1410StorageWrapper {
      * @param operator Address whose cross-partition authorisation is removed.
      */
     function revokeOperator(address operator) internal {
-        erc1410OperatorStorage().approvals[EvmAccessors.getMsgSender()][operator] = false;
+        _erc1410OperatorStorage().approvals[EvmAccessors.getMsgSender()][operator] = false;
     }
 
     /**
@@ -260,7 +260,7 @@ library ERC1410StorageWrapper {
      * @param operator  Address being authorised on the partition.
      */
     function authorizeOperatorByPartition(bytes32 partition, address operator) internal {
-        erc1410OperatorStorage().partitionApprovals[EvmAccessors.getMsgSender()][partition][operator] = true;
+        _erc1410OperatorStorage().partitionApprovals[EvmAccessors.getMsgSender()][partition][operator] = true;
     }
 
     /**
@@ -272,7 +272,7 @@ library ERC1410StorageWrapper {
      * @param operator  Address whose partition-scoped authorisation is removed.
      */
     function revokeOperatorByPartition(bytes32 partition, address operator) internal {
-        erc1410OperatorStorage().partitionApprovals[EvmAccessors.getMsgSender()][partition][operator] = false;
+        _erc1410OperatorStorage().partitionApprovals[EvmAccessors.getMsgSender()][partition][operator] = false;
     }
 
     /**
@@ -665,7 +665,7 @@ library ERC1410StorageWrapper {
      * @param factor    Multiplicative adjustment factor.
      */
     function adjustTotalSupplyByPartition(bytes32 partition, uint256 factor) internal {
-        erc1410BasicStorage().totalSupplyByPartition[partition] *= factor;
+        _erc1410BasicStorage().totalSupplyByPartition[partition] *= factor;
     }
 
     /**
@@ -678,7 +678,7 @@ library ERC1410StorageWrapper {
      */
     function adjustTotalBalanceAndPartitionBalanceFor(bytes32 partition, address account) internal {
         uint256 abaf = AdjustBalancesStorageWrapper.getAbaf();
-        ERC1410BasicStorage storage basicStorage = erc1410BasicStorage();
+        ERC1410BasicStorage storage basicStorage = _erc1410BasicStorage();
         _adjustPartitionBalanceFor(basicStorage, abaf, partition, account);
         ERC20StorageWrapper.adjustTotalBalanceFor(abaf, account);
     }
@@ -711,7 +711,7 @@ library ERC1410StorageWrapper {
      * @param value     Amount to deduct from both ledgers.
      */
     function reduceTotalSupplyByPartition(bytes32 partition, uint256 value) internal {
-        erc1410BasicStorage().totalSupplyByPartition[partition] -= value;
+        _erc1410BasicStorage().totalSupplyByPartition[partition] -= value;
         ERC20StorageWrapper.reduceTotalSupply(value);
     }
 
@@ -723,7 +723,7 @@ library ERC1410StorageWrapper {
      * @param value     Amount to credit to both ledgers.
      */
     function increaseTotalSupplyByPartition(bytes32 partition, uint256 value) internal {
-        erc1410BasicStorage().totalSupplyByPartition[partition] += value;
+        _erc1410BasicStorage().totalSupplyByPartition[partition] += value;
         ERC20StorageWrapper.increaseTotalSupply(value);
     }
 
@@ -744,7 +744,7 @@ library ERC1410StorageWrapper {
      * @return Supply held by the partition.
      */
     function totalSupplyByPartition(bytes32 partition) internal view returns (uint256) {
-        return erc1410BasicStorage().totalSupplyByPartition[partition];
+        return _erc1410BasicStorage().totalSupplyByPartition[partition];
     }
 
     /**
@@ -801,7 +801,7 @@ library ERC1410StorageWrapper {
      */
     function balanceOfByPartition(bytes32 partition, address tokenHolder) internal view returns (uint256) {
         if (!validPartition(partition, tokenHolder)) return 0;
-        ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
+        ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
         return
             erc1410Storage.partitions[tokenHolder][erc1410Storage.partitionToIndex[tokenHolder][partition] - 1].amount;
     }
@@ -855,7 +855,7 @@ library ERC1410StorageWrapper {
      * @return partitionsList Dense list of partition identifiers held by the account.
      */
     function partitionsOf(address tokenHolder) internal view returns (bytes32[] memory partitionsList) {
-        ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
+        ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
         uint256 length = erc1410Storage.partitions[tokenHolder].length;
         partitionsList = new bytes32[](length);
         for (uint256 i; i < length; ) {
@@ -876,7 +876,7 @@ library ERC1410StorageWrapper {
      * @return The partition identifier stored at that slot.
      */
     function partitionAt(address holder, uint256 index) internal view returns (bytes32) {
-        return erc1410BasicStorage().partitions[holder][index].partition;
+        return _erc1410BasicStorage().partitions[holder][index].partition;
     }
 
     /**
@@ -887,7 +887,7 @@ library ERC1410StorageWrapper {
      * @return The number of partitions currently owned by the holder.
      */
     function partitionsLength(address holder) internal view returns (uint256) {
-        return erc1410BasicStorage().partitions[holder].length;
+        return _erc1410BasicStorage().partitions[holder].length;
     }
 
     /**
@@ -910,7 +910,7 @@ library ERC1410StorageWrapper {
      * @return `true` when the recipient already has an entry for the partition.
      */
     function validPartitionForReceiver(bytes32 partition, address to) internal view returns (bool) {
-        return erc1410BasicStorage().partitionToIndex[to][partition] != 0;
+        return _erc1410BasicStorage().partitionToIndex[to][partition] != 0;
     }
 
     /**
@@ -926,7 +926,7 @@ library ERC1410StorageWrapper {
         (uint256 start, uint256 end) = Pagination.getStartAndEnd(pageIndex, pageLength);
         uint256 size = Pagination.getSize(start, end, getTotalTokenHolders());
         holders_ = new address[](size);
-        ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
+        ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
         unchecked {
             for (uint256 i; i < size; ++i) holders_[i] = erc1410Storage.tokenHolders[++start];
         }
@@ -939,7 +939,7 @@ library ERC1410StorageWrapper {
      * @return Address stored at the index.
      */
     function getTokenHolder(uint256 index) internal view returns (address) {
-        return erc1410BasicStorage().tokenHolders[index];
+        return _erc1410BasicStorage().tokenHolders[index];
     }
 
     /**
@@ -948,7 +948,7 @@ library ERC1410StorageWrapper {
      * @return Number of holders in the dense directory.
      */
     function getTotalTokenHolders() internal view returns (uint256) {
-        return erc1410BasicStorage().totalTokenHolders;
+        return _erc1410BasicStorage().totalTokenHolders;
     }
 
     /**
@@ -958,7 +958,7 @@ library ERC1410StorageWrapper {
      * @return One-based directory index of the holder.
      */
     function getTokenHolderIndex(address tokenHolder) internal view returns (uint256) {
-        return erc1410BasicStorage().tokenHolderIndex[tokenHolder];
+        return _erc1410BasicStorage().tokenHolderIndex[tokenHolder];
     }
 
     /**
@@ -968,7 +968,7 @@ library ERC1410StorageWrapper {
      * @return `true` when multi-partition mode is active.
      */
     function isMultiPartition() internal view returns (bool) {
-        return erc1410BasicStorage().multiPartition;
+        return _erc1410BasicStorage().multiPartition;
     }
 
     /**
@@ -979,7 +979,7 @@ library ERC1410StorageWrapper {
      * @return `true` when the operator is globally authorised by the holder.
      */
     function isOperator(address operator, address tokenHolder) internal view returns (bool) {
-        return erc1410OperatorStorage().approvals[tokenHolder][operator];
+        return _erc1410OperatorStorage().approvals[tokenHolder][operator];
     }
 
     /**
@@ -995,7 +995,7 @@ library ERC1410StorageWrapper {
         address operator,
         address tokenHolder
     ) internal view returns (bool) {
-        return erc1410OperatorStorage().partitionApprovals[tokenHolder][partition][operator];
+        return _erc1410OperatorStorage().partitionApprovals[tokenHolder][partition][operator];
     }
 
     /**
@@ -1053,7 +1053,7 @@ library ERC1410StorageWrapper {
      * @return One-based index of the partition in the holder's array, or zero if absent.
      */
     function partitionsToIndexes(address holder, bytes32 partition) internal view returns (uint256) {
-        return erc1410BasicStorage().partitionToIndex[holder][partition];
+        return _erc1410BasicStorage().partitionToIndex[holder][partition];
     }
 
     /**
@@ -1130,7 +1130,7 @@ library ERC1410StorageWrapper {
      * @param index     Zero-based position of the partition entry in the holder's array.
      */
     function deletePartitionForHolder(address holder, bytes32 partition, uint256 index) private {
-        ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
+        ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
         uint256 lastIndex = erc1410Storage.partitions[holder].length - 1;
 
         SnapshotsStorageWrapper.updateTotalPartitionsSnapshot(holder);
@@ -1160,7 +1160,7 @@ library ERC1410StorageWrapper {
      *      every helper reads and writes the same persistent struct.
      * @return erc1410BasicStorage_ Storage pointer to the basic partition state.
      */
-    function erc1410BasicStorage() private pure returns (ERC1410BasicStorage storage erc1410BasicStorage_) {
+    function _erc1410BasicStorage() private pure returns (ERC1410BasicStorage storage erc1410BasicStorage_) {
         bytes32 position = STORAGE_LOCATION_ERC1410_BASIC;
         // solhint-disable-next-line no-inline-assembly
         assembly {
@@ -1174,7 +1174,7 @@ library ERC1410StorageWrapper {
      *      so every authorisation read/write addresses the same persistent struct.
      * @return erc1410OperatorStorage_ Storage pointer to the operator approval state.
      */
-    function erc1410OperatorStorage() private pure returns (ERC1410OperatorStorage storage erc1410OperatorStorage_) {
+    function _erc1410OperatorStorage() private pure returns (ERC1410OperatorStorage storage erc1410OperatorStorage_) {
         bytes32 position = STORAGE_LOCATION_ERC1410_OPERATOR;
         // solhint-disable-next-line no-inline-assembly
         assembly {

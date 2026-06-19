@@ -25,6 +25,18 @@ Prefix/suffix rules for identifiers and artifact types.
 - Fix: remove the `_` prefix from all `internal` function names and update call sites, or adopt
   it consistently across all `internal` functions in the library.
 
+### ATS-NAME-006 — `private` StorageWrapper accessor without `_` prefix
+
+- Enforced by `solhint-plugin-ats/rules/storage-accessor-underscore.js`.
+- Pattern: inside a `library …StorageWrapper`, the canonical `*Storage()` accessor (no parameters,
+  returns a `storage` reference) declared `private` whose name does not start with `_`.
+- Rationale: the complement of [ATS-NAME-003](#ats-name-003--internal-library-function-with-_-prefix).
+  `internal` library functions are the composable API and carry no `_`; the `private` slot accessor
+  is a hidden implementation detail, so the `_` prefix marks it as such and lets a reader tell the
+  two apart by name alone (`_capStorage()` is private; `capStorage()` would be API).
+- Fix: prefix the accessor name with `_` and update its in-library call sites (it is `private`, so
+  every call site lives in the same library).
+
 ### ATS-NAME-004 — Guard and predicate naming taxonomy
 
 - Severity: ERROR

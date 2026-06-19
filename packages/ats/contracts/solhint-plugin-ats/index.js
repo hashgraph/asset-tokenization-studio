@@ -17,10 +17,9 @@ module.exports = [
   require("./rules/named-return-underscore"), // ATS-NAME-002
   require("./rules/event-param-no-underscore"), // ATS-EVENT-002
   require("./rules/storage-accessor-private"), // ATS-PRIV-001
+  require("./rules/storage-accessor-underscore"), // ATS-NAME-006
   require("./rules/storage-struct-erc7201"), // ATS-STORAGE-001
-  require("./rules/facet-implements-selectors"), // ATS-SUFFIX-001
   require("./rules/no-erc3643-import"), // ATS-BOUND-001
-  require("./rules/external-calldata-params"), // ATS-FUNC-001
   require("./rules/loop-unchecked-increment"), // ATS-GAS-002
   require("./rules/no-solhint-disable"), // ATS-LINT-001
 ];

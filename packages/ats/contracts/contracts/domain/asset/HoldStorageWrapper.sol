@@ -172,7 +172,7 @@ library HoldStorageWrapper {
         address _from,
         uint256 _holdId
     ) internal {
-        holdStorage().holdThirdPartyByAccountPartitionAndId[_from][_partition][_holdId] = _thirdPartyAddress;
+        _holdStorage().holdThirdPartyByAccountPartitionAndId[_from][_partition][_holdId] = _thirdPartyAddress;
     }
 
     /**
@@ -185,7 +185,7 @@ library HoldStorageWrapper {
      * @param _amount      New total held amount; replaces the previous value unconditionally.
      */
     function setHeldAmountForByPartition(bytes32 _partition, address _tokenHolder, uint256 _amount) internal {
-        holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][_partition] = _amount;
+        _holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][_partition] = _amount;
     }
 
     /**
@@ -197,7 +197,7 @@ library HoldStorageWrapper {
      * @param _amount      New aggregate held amount; replaces the previous value unconditionally.
      */
     function setHeldAmountFor(address _tokenHolder, uint256 _amount) internal {
-        holdStorage().totalHeldAmountByAccount[_tokenHolder] = _amount;
+        _holdStorage().totalHeldAmountByAccount[_tokenHolder] = _amount;
     }
 
     /**
@@ -335,7 +335,7 @@ library HoldStorageWrapper {
         IHoldTypes.HoldIdentifier memory _holdIdentifier,
         uint256 _amount
     ) internal returns (uint256 newHoldBalance_) {
-        HoldDataStorage storage holdStorageRef = holdStorage();
+        HoldDataStorage storage holdStorageRef = _holdStorage();
 
         holdStorageRef.totalHeldAmountByAccount[_holdIdentifier.tokenHolder] -= _amount;
         holdStorageRef.totalHeldAmountByAccountAndPartition[_holdIdentifier.tokenHolder][
@@ -359,7 +359,7 @@ library HoldStorageWrapper {
      * @param _holdIdentifier The triple (partition, tokenHolder, holdId) identifying the hold.
      */
     function removeHold(IHoldTypes.HoldIdentifier memory _holdIdentifier) internal {
-        HoldDataStorage storage holdStorageRef = holdStorage();
+        HoldDataStorage storage holdStorageRef = _holdStorage();
 
         holdStorageRef.holdIdsByAccountAndPartition[_holdIdentifier.tokenHolder][_holdIdentifier.partition].remove(
             _holdIdentifier.holdId
@@ -424,7 +424,7 @@ library HoldStorageWrapper {
      * @param _abaf The ABAF value to record as the new last-applied factor.
      */
     function updateTotalHeldAmountAndLabaf(address _tokenHolder, uint256 _factor, uint256 _abaf) internal {
-        holdStorage().totalHeldAmountByAccount[_tokenHolder] *= _factor;
+        _holdStorage().totalHeldAmountByAccount[_tokenHolder] *= _factor;
         AdjustBalancesStorageWrapper.setTotalHeldLabaf(_tokenHolder, _abaf);
     }
 
@@ -443,7 +443,7 @@ library HoldStorageWrapper {
         uint256 _factor,
         uint256 _abaf
     ) internal {
-        holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][_partition] *= _factor;
+        _holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][_partition] *= _factor;
         AdjustBalancesStorageWrapper.setTotalHeldLabafByPartition(_partition, _tokenHolder, _abaf);
     }
 
@@ -498,7 +498,7 @@ library HoldStorageWrapper {
      * @param _factor The multiplier to apply to the stored amount.
      */
     function updateHoldAmountById(bytes32 _partition, uint256 _holdId, address _tokenHolder, uint256 _factor) internal {
-        holdStorage().holdsByAccountPartitionAndId[_tokenHolder][_partition][_holdId].hold.amount *= _factor;
+        _holdStorage().holdsByAccountPartitionAndId[_tokenHolder][_partition][_holdId].hold.amount *= _factor;
     }
 
     /**
@@ -621,7 +621,7 @@ library HoldStorageWrapper {
         IHoldTypes.HoldIdentifier memory _holdIdentifier
     ) internal view returns (IHoldTypes.HoldData memory) {
         return
-            holdStorage().holdsByAccountPartitionAndId[_holdIdentifier.tokenHolder][_holdIdentifier.partition][
+            _holdStorage().holdsByAccountPartitionAndId[_holdIdentifier.tokenHolder][_holdIdentifier.partition][
                 _holdIdentifier.holdId
             ];
     }
@@ -632,7 +632,7 @@ library HoldStorageWrapper {
      * @return amount_ The current aggregate held amount.
      */
     function getHeldAmountFor(address _tokenHolder) internal view returns (uint256) {
-        return holdStorage().totalHeldAmountByAccount[_tokenHolder];
+        return _holdStorage().totalHeldAmountByAccount[_tokenHolder];
     }
 
     /**
@@ -642,7 +642,7 @@ library HoldStorageWrapper {
      * @return amount_ The current per-partition held amount.
      */
     function getHeldAmountForByPartition(bytes32 _partition, address _tokenHolder) internal view returns (uint256) {
-        return holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][_partition];
+        return _holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][_partition];
     }
 
     /**
@@ -660,7 +660,8 @@ library HoldStorageWrapper {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (uint256[] memory) {
-        return holdStorage().holdIdsByAccountAndPartition[_tokenHolder][_partition].getFromSet(_pageIndex, _pageLength);
+        return
+            _holdStorage().holdIdsByAccountAndPartition[_tokenHolder][_partition].getFromSet(_pageIndex, _pageLength);
     }
 
     /**
@@ -675,7 +676,7 @@ library HoldStorageWrapper {
         address _tokenHolder,
         bytes32 _partition
     ) internal view returns (EnumerableSet.UintSet storage) {
-        return holdStorage().holdIdsByAccountAndPartition[_tokenHolder][_partition];
+        return _holdStorage().holdIdsByAccountAndPartition[_tokenHolder][_partition];
     }
 
     /**
@@ -776,9 +777,9 @@ library HoldStorageWrapper {
      */
     function getHoldThirdParty(IHoldTypes.HoldIdentifier memory _holdIdentifier) internal view returns (address) {
         return
-            holdStorage().holdThirdPartyByAccountPartitionAndId[_holdIdentifier.tokenHolder][_holdIdentifier.partition][
-                _holdIdentifier.holdId
-            ];
+            _holdStorage().holdThirdPartyByAccountPartitionAndId[_holdIdentifier.tokenHolder][
+                _holdIdentifier.partition
+            ][_holdIdentifier.holdId];
     }
 
     /**
@@ -788,7 +789,7 @@ library HoldStorageWrapper {
      * @return The count of stored hold ids.
      */
     function getHoldCountForByPartition(bytes32 _partition, address _tokenHolder) internal view returns (uint256) {
-        return holdStorage().holdIdsByAccountAndPartition[_tokenHolder][_partition].length();
+        return _holdStorage().holdIdsByAccountAndPartition[_tokenHolder][_partition].length();
     }
 
     /**
@@ -898,9 +899,9 @@ library HoldStorageWrapper {
         if (_thirdPartyType != ThirdPartyType.AUTHORIZED) return;
         ERC20StorageWrapper.increaseAllowedBalance(
             _holdIdentifier.tokenHolder,
-            holdStorage().holdThirdPartyByAccountPartitionAndId[_holdIdentifier.tokenHolder][_holdIdentifier.partition][
-                _holdIdentifier.holdId
-            ],
+            _holdStorage().holdThirdPartyByAccountPartitionAndId[_holdIdentifier.tokenHolder][
+                _holdIdentifier.partition
+            ][_holdIdentifier.holdId],
             _amount
         );
     }
@@ -937,7 +938,7 @@ library HoldStorageWrapper {
         ThirdPartyType _thirdPartyType,
         uint256 abaf
     ) private returns (uint256 holdId_) {
-        HoldDataStorage storage holdStorageRef = holdStorage();
+        HoldDataStorage storage holdStorageRef = _holdStorage();
 
         holdId_ = ++holdStorageRef.nextHoldIdByAccountAndPartition[_from][_partition];
 
@@ -1153,7 +1154,7 @@ library HoldStorageWrapper {
      *      inline assembly; the namespace is `security.token.standard.storage.Hold`.
      * @return hold_ A storage reference to the `HoldDataStorage` struct.
      */
-    function holdStorage() private pure returns (HoldDataStorage storage hold_) {
+    function _holdStorage() private pure returns (HoldDataStorage storage hold_) {
         bytes32 position = STORAGE_LOCATION_HOLD;
         // solhint-disable-next-line no-inline-assembly
         assembly {

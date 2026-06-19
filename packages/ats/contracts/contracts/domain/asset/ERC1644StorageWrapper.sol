@@ -37,7 +37,7 @@ library ERC1644StorageWrapper {
      * @param _controllable Whether the token is controllable at deployment time.
      */
     function initializeController(bool _controllable) internal {
-        erc1644Storage().isControllable = _controllable;
+        _erc1644Storage().isControllable = _controllable;
     }
 
     /**
@@ -46,7 +46,7 @@ library ERC1644StorageWrapper {
      *      re-enable. The caller (`Controller` facet) emits `FinalizedControllerFeature`.
      */
     function finalizeControllable() internal {
-        erc1644Storage().isControllable = false;
+        _erc1644Storage().isControllable = false;
     }
 
     /**
@@ -62,7 +62,7 @@ library ERC1644StorageWrapper {
      * @return `true` while the controllable feature is active.
      */
     function isControllable() internal view returns (bool) {
-        return erc1644Storage().isControllable;
+        return _erc1644Storage().isControllable;
     }
 
     /**
@@ -70,7 +70,7 @@ library ERC1644StorageWrapper {
      * @dev Resolves the dedicated EIP-2535 storage slot via inline assembly.
      * @return erc1644Storage_ Storage reference to the `ERC1644Storage` struct.
      */
-    function erc1644Storage() private pure returns (ERC1644Storage storage erc1644Storage_) {
+    function _erc1644Storage() private pure returns (ERC1644Storage storage erc1644Storage_) {
         bytes32 position = STORAGE_LOCATION_ERC1644;
         // solhint-disable-next-line no-inline-assembly
         assembly {

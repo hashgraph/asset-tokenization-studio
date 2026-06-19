@@ -30,7 +30,18 @@ structs accessed through `…StorageWrapper` libraries. These rules protect the 
 
 ### ATS-SUFFIX-001 — `XxxFacet` contract does not inherit `IStaticFunctionSelectors`
 
-- Enforced by `solhint-plugin-ats/rules/facet-implements-selectors.js`.
+- Severity: ERROR
+- Enforcement: MANUAL — `IStaticFunctionSelectors` is almost always reached transitively (via a
+  `XxxFacetBase`, or through an interface chain such as `IDiamond → IDiamondCut →
+IStaticFunctionSelectors`). Confirming that needs the cross-file inheritance graph, which solhint
+  cannot resolve (it lints one file at a time with no symbol table), so a syntactic rule produces
+  false positives on every facet that uses a base. Owned by the `/ats-style-guide` review subagent.
+- Pattern: a concrete (`contract`, not `abstract`/`interface`) `XxxFacet` whose inheritance chain —
+  direct or transitive — never reaches `IStaticFunctionSelectors`, so the Diamond cannot register
+  its selectors.
+- Fix: inherit `IStaticFunctionSelectors` directly, or extend a base (`XxxFacetBase`) / interface
+  that already does, and implement `getStaticResolverKey` / `getStaticFunctionSelectors` /
+  `getStaticInterfaceIds`.
 
 ### ATS-SEL-001 — Ascending selector registration in `getStaticFunctionSelectors`
 

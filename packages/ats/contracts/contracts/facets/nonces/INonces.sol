@@ -31,8 +31,8 @@ interface INonces {
 
     /**
      * @notice Returns the current nonce for `owner`.
-     * @param owner Address whose nonce is queried.
+     * @param _owner Address whose nonce is queried.
      * @return Current nonce value for `owner`.
      */
-    function nonces(address owner) external view returns (uint256);
+    function nonces(address _owner) external view returns (uint256);
 }

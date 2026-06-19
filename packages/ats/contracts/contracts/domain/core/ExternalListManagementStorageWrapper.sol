@@ -27,9 +27,11 @@ bytes32 constant STORAGE_LOCATION_KYC_MANAGEMENT = 0x44eb866201f22832539d7232090
  *          (STORAGE_LOCATION_PAUSE_MANAGEMENT in PauseStorageWrapper.sol)
  *        - erc7201:security.token.standard.storage.ProceedRecipients
  *          (STORAGE_LOCATION_PROCEED_RECIPIENTS in ProceedRecipientsStorageWrapper.sol)
- *      No single `@custom:storage-location` annotation is present because one line cannot
- *      capture the four-slot reuse and would mislead tooling into binding the struct to a
- *      single namespace; each slot is defined by its `STORAGE_LOCATION_*` constant instead.
+ *      A single real `@custom:storage-location` would mislead tooling into binding the struct to
+ *      one namespace, so the reuse is flagged with the `erc7201:multiple` sentinel below; the four
+ *      real bindings are the namespaces listed above, each defined by its `STORAGE_LOCATION_*`
+ *      constant.
+ * @custom:storage-location erc7201:multiple
  */
 struct ExternalListDataStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────

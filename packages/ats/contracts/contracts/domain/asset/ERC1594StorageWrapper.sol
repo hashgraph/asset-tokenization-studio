@@ -63,7 +63,7 @@ library ERC1594StorageWrapper {
      * called exactly once before any issue operations.
      */
     function initialize() internal {
-        ERC1594Storage storage ds = erc1594Storage();
+        ERC1594Storage storage ds = _erc1594Storage();
         ds.issuance = true;
     }
 
@@ -105,7 +105,7 @@ library ERC1594StorageWrapper {
      * @return `true` if the `issuance` flag is set, otherwise `false`.
      */
     function isIssuable() internal view returns (bool) {
-        return erc1594Storage().issuance;
+        return _erc1594Storage().issuance;
     }
 
     /**
@@ -674,7 +674,7 @@ library ERC1594StorageWrapper {
      * @dev Uses inline assembly to retrieve the storage pointer.
      * @return ds Storage reference to the `ERC1594Storage` struct.
      */
-    function erc1594Storage() private pure returns (ERC1594Storage storage ds) {
+    function _erc1594Storage() private pure returns (ERC1594Storage storage ds) {
         bytes32 position = STORAGE_LOCATION_ERC1594;
         // solhint-disable-next-line no-inline-assembly
         assembly {

@@ -51,12 +51,12 @@ abstract contract Ownership is IOwnership, Pause, OwnershipWrapper {
     }
 
     /// @inheritdoc IOwnership
-    function getOwner(bytes32 configId) external view returns (address owner_) {
-        return _getOwner(configId);
+    function getOwner(bytes32 _configId) external view returns (address owner_) {
+        return _getOwner(_configId);
     }
 
     /// @inheritdoc IOwnership
-    function getPendingOwner(bytes32 configId) external view returns (address pendingOwner_) {
-        return _getPendingOwner(configId);
+    function getPendingOwner(bytes32 _configId) external view returns (address pendingOwner_) {
+        return _getPendingOwner(_configId);
     }
 }

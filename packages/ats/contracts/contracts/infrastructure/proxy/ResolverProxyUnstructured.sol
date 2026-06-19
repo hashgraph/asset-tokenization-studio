@@ -79,9 +79,15 @@ abstract contract ResolverProxyUnstructured {
      * @param _rbacs Role assignments to grant.
      */
     function _assignRbacRoles(IResolverProxy.Rbac[] memory _rbacs) internal {
-        for (uint256 rbacIndex; rbacIndex < _rbacs.length; ++rbacIndex) {
-            for (uint256 memberIndex; memberIndex < _rbacs[rbacIndex].members.length; ++memberIndex) {
+        for (uint256 rbacIndex; rbacIndex < _rbacs.length; ) {
+            for (uint256 memberIndex; memberIndex < _rbacs[rbacIndex].members.length; ) {
                 AccessControlStorageWrapper.grantRole(_rbacs[rbacIndex].role, _rbacs[rbacIndex].members[memberIndex]);
+                unchecked {
+                    ++memberIndex;
+                }
+            }
+            unchecked {
+                ++rbacIndex;
             }
         }
     }
