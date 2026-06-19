@@ -39,7 +39,7 @@ debt live in the rule source and `solhint.config.js`; duplicating them here just
 | [events.md](events.md)             | Declaration, emit site, promotion, imports, indexing | ATS-EVENT-001..010                                                                                                                            |
 | [code-quality.md](code-quality.md) | Errors, imports & types, gas, NatSpec, linting       | ATS-ERR-001, ATS-TYPE-001/002, ATS-IMP-001, ATS-GAS-001/002, ATS-FUNC-001, ATS-NATSPEC-001, ATS-LINT-001                                      |
 | [storage.md](storage.md)           | ERC-7201 structs, layout, accessors                  | ATS-STORAGE-001/002, ATS-STYLE-001, ATS-PRIV-001                                                                                              |
-| [naming.md](naming.md)             | Identifier prefixes/suffixes, artifact types         | ATS-NAME-001..005, ATS-IFACE-001                                                                                                              |
+| [naming.md](naming.md)             | Identifier prefixes/suffixes, artifact types         | ATS-NAME-001..006, ATS-IFACE-001                                                                                                              |
 
 ## Where does a rule live?
 

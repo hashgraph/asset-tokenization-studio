@@ -9,10 +9,9 @@ libraries. Facets and business-logic abstracts never declare state variables
 ### ATS-STORAGE-001 — Storage struct missing `@custom:storage-location erc7201:` annotation
 
 - Enforced by `solhint-plugin-ats/rules/storage-struct-erc7201.js`.
-- A `…DataStorage` layout reused across several ERC-7201 namespaces (instantiated by a
-  slot-parameterised accessor, e.g. `externalListStorage(bytes32 _position)`) has no single real
-  namespace. Annotate it with the `@custom:storage-location erc7201:multiple` sentinel and list the
-  real bindings (one `STORAGE_LOCATION_*` constant per namespace) in the struct's `@dev` block.
+- Authoring note: a layout reused across several ERC-7201 namespaces has no single real namespace —
+  annotate it with the `@custom:storage-location erc7201:multiple` sentinel and list the real
+  bindings in the struct's `@dev` block.
 
 ### ATS-STORAGE-002 — Storage struct missing 5-region layout
 
@@ -44,7 +43,3 @@ libraries. Facets and business-logic abstracts never declare state variables
 ### ATS-PRIV-001 — StorageWrapper accessor not `private`
 
 - Enforced by `solhint-plugin-ats/rules/storage-accessor-private.js`.
-- Targets only the canonical accessor: a `*Storage` function taking no parameters and returning a
-  `storage` reference (the fixed-slot namespace accessor). Initialisers (which take parameters and
-  return nothing) and slot-parameterised accessors such as `fooStorage(bytes32 _position)` (reused
-  cross-library, so necessarily `internal`) are out of scope.

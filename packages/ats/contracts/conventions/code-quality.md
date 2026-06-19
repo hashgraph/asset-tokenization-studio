@@ -49,8 +49,7 @@ is in [architecture.md](architecture.md) ATS-BOUND-001.
 
 ### ATS-FUNC-001 — `memory` parameter in an `external` function where `calldata` is possible
 
-- Enforced by solhint built-in `gas-calldata-parameters`, which already flags a `memory` parameter
-  that is never mutated (so it could be `calldata`). A custom rule would only duplicate it.
+- Enforced by solhint built-in `gas-calldata-parameters`.
 
 Note: the descending `unchecked` selector-registration pattern for
 `getStaticFunctionSelectors` is also gas-motivated — see
