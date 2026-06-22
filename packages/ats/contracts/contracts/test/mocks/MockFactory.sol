@@ -9,7 +9,7 @@ import { IInitializer } from "../../facets/initializer/IInitializer.sol";
 import { IAccessControl } from "../../facets/accessControl/IAccessControl.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { FACTORY_OPERATIONAL_STATUS } from "../../constants/values.sol";
-import { IKpis } from "../../facets/kpi/IKpis.sol";
+import { IKpis } from "../../facets/kpis/IKpis.sol";
 import { IFixedRate } from "../../facets/fixedRate/IFixedRate.sol";
 import { IKpiLinkedRate } from "../../facets/kpiLinkedRate/IKpiLinkedRate.sol";
 import { InterestRateStorageWrapper } from "../../domain/asset/InterestRateStorageWrapper.sol";

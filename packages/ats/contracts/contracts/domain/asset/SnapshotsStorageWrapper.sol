@@ -3,8 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ArraysUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ArraysUpgradeable.sol";
 import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import { Snapshots, SnapshotsAddress, SnapshotsBytes32, HolderBalance } from "../../facets/snapshot/ISnapshots.sol";
-import { ISnapshotsTypes } from "../../facets/snapshot/ISnapshotsTypes.sol";
+import { Snapshots, SnapshotsAddress, SnapshotsBytes32, HolderBalance } from "../../facets/snapshots/ISnapshots.sol";
+import { ISnapshotsTypes } from "../../facets/snapshots/ISnapshotsTypes.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
