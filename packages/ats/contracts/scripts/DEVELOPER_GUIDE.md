@@ -752,20 +752,24 @@ Each environment maintains independent configuration versions.
 
 ---
 
-## Scenario 6: Upgrading TUP Proxy Implementations (BLR/Factory)
+## Scenario 6: Upgrading the BLR TUP Implementation
 
-**Use case:** Upgrade the implementation contracts for BLR (BusinessLogicResolver) or Factory proxies using the TransparentUpgradeableProxy (TUP) pattern.
+**Use case:** Upgrade the implementation contract for the BLR (BusinessLogicResolver) proxy using the TransparentUpgradeableProxy (TUP) pattern.
 
-**Important distinction:** This is different from `upgradeConfigurations` (Scenario 3), which upgrades ResolverProxy (Diamond pattern) token contracts. Use `upgradeTupProxies` only for BLR/Factory infrastructure upgrades.
+> **Only the BLR is a TUP.** The **Factory is a `ResolverProxy` (Diamond pattern), not a TUP** — it is deployed via `new ResolverProxy(blr, { configurationId: FACTORY_CONFIG_ID, ... })` and resolves its facets from the BLR like any token. Upgrade the Factory through the configuration/registry path (Scenario 3, `upgradeConfigurations`), **not** through `ProxyAdmin.upgrade()`. The `FACTORY_PROXY` / `DEPLOY_NEW_FACTORY_IMPL` env vars that still appear in the `upgradeTupProxies` CLI are **legacy and do not apply to the current Factory design** — do not use them.
+
+**Important distinction:** This is different from `upgradeConfigurations` (Scenario 3), which upgrades ResolverProxy (Diamond pattern) contracts — including token contracts **and the Factory**. Use `upgradeTupProxies` only for the BLR infrastructure upgrade.
 
 ### When to Use This Workflow
 
 **Use `upgradeTupProxies` when:**
 
-- Upgrading BLR implementation to a new version
-- Upgrading Factory implementation to a new version
-- Both BLR and Factory need to be upgraded simultaneously
+- Upgrading the BLR implementation to a new version
 - You have a tested implementation ready to deploy
+
+**Use `upgradeConfigurations` instead when:**
+
+- Upgrading the **Factory** (it is a ResolverProxy, not a TUP)
 
 **Use `upgradeConfigurations` instead when:**
 
@@ -777,12 +781,12 @@ Each environment maintains independent configuration versions.
 
 The ATS uses **two different proxy patterns**:
 
-| Feature               | TransparentUpgradeableProxy (TUP) | ResolverProxy (Diamond)   |
-| --------------------- | --------------------------------- | ------------------------- |
-| **Used for**          | BLR, Factory                      | Equity/Bond tokens        |
-| **Upgrade mechanism** | ProxyAdmin.upgrade()              | DiamondCutFacet delegates |
-| **What changes**      | Implementation address            | Facet registry pointer    |
-| **Who controls**      | ProxyAdmin contract               | DEFAULT_ADMIN_ROLE        |
+| Feature               | TransparentUpgradeableProxy (TUP) | ResolverProxy (Diamond)          |
+| --------------------- | --------------------------------- | -------------------------------- |
+| **Used for**          | BLR only                          | Equity/Bond tokens **+ Factory** |
+| **Upgrade mechanism** | ProxyAdmin.upgrade()              | DiamondCutFacet delegates        |
+| **What changes**      | Implementation address            | Facet registry pointer           |
+| **Who controls**      | ProxyAdmin contract               | DEFAULT_ADMIN_ROLE               |
 
 ### Pattern A: Deploy New Implementation and Upgrade
 
@@ -1275,7 +1279,7 @@ async function main() {
 - ✅ Facet registration in BLR
 - ✅ Equity configuration (version 1)
 - ✅ Bond configuration (version 1)
-- ✅ Factory contract with TransparentUpgradeableProxy
+- ✅ Factory contract as a `ResolverProxy` (parameterized with `FACTORY_CONFIG_ID` — resolves facets from the BLR; **not** a TUP)
 
 **Output File**: Saves `deployments/{network}/{network}-deployment-{timestamp}.json` with all addresses and Hedera contract IDs.
 
