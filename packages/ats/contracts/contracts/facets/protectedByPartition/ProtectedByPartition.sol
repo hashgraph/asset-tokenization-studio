@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IProtectedByPartition, RESOLVER_KEY_PROTECTED_BY_PARTITION } from "./IProtectedByPartition.sol";
-import { IProtectedPartitions } from "../protectedPartition/IProtectedPartitions.sol";
+import { IProtectedPartitions } from "../protectedPartitions/IProtectedPartitions.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
