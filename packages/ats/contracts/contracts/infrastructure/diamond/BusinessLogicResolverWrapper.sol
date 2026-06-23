@@ -218,7 +218,7 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
     function _updateReplacementAddress(address _oldAddress, address _newAddress) internal {
         BusinessLogicResolverDataStorage storage businessLogicResolverDataStorage = _businessLogicResolverStorage();
         businessLogicResolverDataStorage.replacementAddressMap[_oldAddress] = _newAddress;
-        businessLogicResolverDataStorage.replacementAddressCount[_newAddress]++;
+        ++businessLogicResolverDataStorage.replacementAddressCount[_newAddress];
     }
 
     /**
@@ -233,7 +233,7 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
         newAddressRemoved_ = businessLogicResolverDataStorage.replacementAddressMap[_oldAddress];
         if (newAddressRemoved_ == address(0)) return newAddressRemoved_;
         businessLogicResolverDataStorage.replacementAddressMap[_oldAddress] = address(0);
-        businessLogicResolverDataStorage.replacementAddressCount[newAddressRemoved_]--;
+        --businessLogicResolverDataStorage.replacementAddressCount[newAddressRemoved_];
     }
 
     /**
