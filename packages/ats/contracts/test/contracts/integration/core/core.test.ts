@@ -78,7 +78,7 @@ export function coreTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN an initialized token WHEN getERC20Metadata THEN returns the configured metadata", async () => {
         const metadata = await asset.getERC20Metadata();
         assertObject(metadata.info, { name, symbol, decimals });
-        expect(metadata.securityType).to.equal(SecurityType.EQUITY);
+        expect(metadata.securityType).to.equal(SecurityType.BOND_VARIABLE_RATE);
       });
 
       it("GIVEN an initialized token WHEN reading name, symbol, decimals THEN returns the configured values", async () => {

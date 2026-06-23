@@ -39,6 +39,7 @@ export const BOND_FACETS: readonly FacetName[] = [
   ...COMMON_TOKEN_FACETS,
   ...EXTENDED_TOKEN_FACETS,
   ...BOND_COMMON_FACETS,
+  "FixedRateFacet",
 ];
 
 /**
