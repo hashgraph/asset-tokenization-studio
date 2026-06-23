@@ -17,7 +17,7 @@ ERC-3643 (T-REX) compatibility, and the EIP-2535 Diamond pattern coordinated by 
 
 :::tip Where the code lives
 All contracts live in [`packages/ats/contracts`](https://github.com/hashgraph/asset-tokenization-studio/tree/main/packages/ats/contracts).
-This handbook documents the package as of contracts **v7.0.1**.
+This handbook documents the package as of contracts **v8.0.0**.
 :::
 
 ## Prerequisites
