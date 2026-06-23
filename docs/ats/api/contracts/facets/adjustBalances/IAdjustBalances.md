@@ -13,7 +13,7 @@ _Balance adjustments multiply every token holder&#39;s balance by `factor / 10^d
 ### adjustBalances
 
 ```solidity
-function adjustBalances(uint256 factor, uint8 decimals) external nonpayable returns (bool success_)
+function adjustBalances(uint256 _factor, uint8 _decimals) external nonpayable returns (bool success_)
 ```
 
 Applies a balance adjustment to all token holders immediately.
@@ -22,10 +22,10 @@ _Caller must hold `ROLE_ADJUSTMENT_BALANCE`. The token must not be paused and `f
 
 #### Parameters
 
-| Name     | Type    | Description                                                          |
-| -------- | ------- | -------------------------------------------------------------------- |
-| factor   | uint256 | Numerator of the multiplier; effective ratio = factor / 10^decimals. |
-| decimals | uint8   | Denominator exponent.                                                |
+| Name       | Type    | Description                                                          |
+| ---------- | ------- | -------------------------------------------------------------------- |
+| \_factor   | uint256 | Numerator of the multiplier; effective ratio = factor / 10^decimals. |
+| \_decimals | uint8   | Denominator exponent.                                                |
 
 #### Returns
 

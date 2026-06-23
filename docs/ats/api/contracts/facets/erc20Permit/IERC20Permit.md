@@ -23,7 +23,7 @@ _Restricted to `DEFAULT_ADMIN_ROLE` by the implementation. Callable once and exp
 ### permit
 
 ```solidity
-function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external nonpayable
+function permit(address _owner, address _spender, uint256 _value, uint256 _deadline, uint8 _v, bytes32 _r, bytes32 _s) external nonpayable
 ```
 
 Approves a spender using an owner&#39;s off-chain ERC-2612 signature.
@@ -32,15 +32,15 @@ _Validates the deadline, owner nonce, EIP-712 digest, and recovered signer befor
 
 #### Parameters
 
-| Name     | Type    | Description                                     |
-| -------- | ------- | ----------------------------------------------- |
-| owner    | address | Token holder granting the allowance.            |
-| spender  | address | Address authorised to spend `owner` tokens.     |
-| value    | uint256 | Allowance amount approved for `spender`.        |
-| deadline | uint256 | Last timestamp at which the signature is valid. |
-| v        | uint8   | Recovery identifier of the ECDSA signature.     |
-| r        | bytes32 | First 32-byte word of the ECDSA signature.      |
-| s        | bytes32 | Second 32-byte word of the ECDSA signature.     |
+| Name       | Type    | Description                                     |
+| ---------- | ------- | ----------------------------------------------- |
+| \_owner    | address | Token holder granting the allowance.            |
+| \_spender  | address | Address authorised to spend `owner` tokens.     |
+| \_value    | uint256 | Allowance amount approved for `spender`.        |
+| \_deadline | uint256 | Last timestamp at which the signature is valid. |
+| \_v        | uint8   | Recovery identifier of the ECDSA signature.     |
+| \_r        | bytes32 | First 32-byte word of the ECDSA signature.      |
+| \_s        | bytes32 | Second 32-byte word of the ECDSA signature.     |
 
 ## Events
 

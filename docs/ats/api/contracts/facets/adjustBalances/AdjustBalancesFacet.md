@@ -22,10 +22,10 @@ _Emits {AdjustmentBalanceSet}._
 
 #### Parameters
 
-| Name     | Type    | Description                                                          |
-| -------- | ------- | -------------------------------------------------------------------- |
-| factor   | uint256 | Numerator of the multiplier; effective ratio = factor / 10^decimals. |
-| decimals | uint8   | Denominator exponent.                                                |
+| Name     | Type    | Description |
+| -------- | ------- | ----------- |
+| factor   | uint256 | undefined   |
+| decimals | uint8   | undefined   |
 
 #### Returns
 

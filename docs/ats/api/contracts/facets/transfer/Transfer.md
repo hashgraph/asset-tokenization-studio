@@ -28,10 +28,10 @@ Moves `amount` tokens from the caller to `to`.
 
 #### Parameters
 
-| Name   | Type    | Description                   |
-| ------ | ------- | ----------------------------- |
-| to     | address | Recipient address.            |
-| amount | uint256 | Number of tokens to transfer. |
+| Name   | Type    | Description |
+| ------ | ------- | ----------- |
+| to     | address | undefined   |
+| amount | uint256 | undefined   |
 
 #### Returns
 
@@ -49,11 +49,11 @@ Moves `amount` tokens from `from` to `to` using the caller&#39;s allowance.
 
 #### Parameters
 
-| Name   | Type    | Description                   |
-| ------ | ------- | ----------------------------- |
-| from   | address | Source address.               |
-| to     | address | Destination address.          |
-| amount | uint256 | Number of tokens to transfer. |
+| Name   | Type    | Description |
+| ------ | ------- | ----------- |
+| from   | address | undefined   |
+| to     | address | undefined   |
+| amount | uint256 | undefined   |
 
 #### Returns
 
