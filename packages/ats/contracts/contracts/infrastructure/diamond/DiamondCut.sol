@@ -33,11 +33,18 @@ abstract contract DiamondCut is IDiamondCut, ResolverProxyUnstructured {
     /// @inheritdoc IDiamondCut
     /// @dev Requires `DEFAULT_ADMIN_ROLE` and preserves the active configuration identifier and
     ///      resolver while updating only the pinned configuration version.
-    function updateConfigVersion(uint256 _newVersion) external override onlyRole(DEFAULT_ADMIN_ROLE) {
-        ResolverProxyStorageWrapper.getBusinessLogicResolver().checkResolverProxyConfigurationRegistered(
+    function updateConfigVersion(
+        uint256 _newVersion
+    )
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRegisteredResolverProxyConfiguration(
+            ResolverProxyStorageWrapper.getBusinessLogicResolver(),
             ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
             _newVersion
-        );
+        )
+    {
         IResolverProxy.ResolverProxyConfigurationV2 memory v2 = ResolverProxyStorageWrapper
             .getResolverProxyConfigurationV2();
         v2.configurationVersion = _newVersion;
@@ -50,11 +57,16 @@ abstract contract DiamondCut is IDiamondCut, ResolverProxyUnstructured {
     function updateConfig(
         bytes32 _newConfigurationId,
         uint256 _newVersion
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
-        ResolverProxyStorageWrapper.getBusinessLogicResolver().checkResolverProxyConfigurationRegistered(
+    )
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRegisteredResolverProxyConfiguration(
+            ResolverProxyStorageWrapper.getBusinessLogicResolver(),
             _newConfigurationId,
             _newVersion
-        );
+        )
+    {
         IResolverProxy.ResolverProxyConfigurationV2 memory v2 = ResolverProxyStorageWrapper
             .getResolverProxyConfigurationV2();
         v2.configurationId = _newConfigurationId;
@@ -77,8 +89,12 @@ abstract contract DiamondCut is IDiamondCut, ResolverProxyUnstructured {
         bytes32 _newConfigurationId,
         uint256 _newVersion,
         bool _newReplacementEnabled
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
-        _newResolver.checkResolverProxyConfigurationRegistered(_newConfigurationId, _newVersion);
+    )
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRegisteredResolverProxyConfiguration(_newResolver, _newConfigurationId, _newVersion)
+    {
         ResolverProxyStorageWrapper.setBusinessLogicResolver(_newResolver);
         ResolverProxyStorageWrapper.setResolverProxyConfigurationV2(
             IResolverProxy.ResolverProxyConfigurationV2({

@@ -374,24 +374,6 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
     }
 
     /**
-     * @notice Reverts unless a resolver proxy configuration version is registered.
-     * @dev Version zero is not explicitly rejected here unless the configuration is inactive;
-     *      callers requiring explicit versions should use `validateConfigurationVersion`.
-     * @param _dcms Diamond cut manager storage reference.
-     * @param _configurationId Identifier of the configuration to validate.
-     * @param _version Version to validate against the latest active version.
-     */
-    function _checkResolverProxyConfigurationRegistered(
-        DiamondCutManagerStorage storage _dcms,
-        bytes32 _configurationId,
-        uint256 _version
-    ) internal view {
-        if (!_dcms.activeConfigurations[_configurationId] || _version > _dcms.latestVersion[_configurationId]) {
-            revert ResolverProxyConfigurationNoRegistered(_configurationId, _version);
-        }
-    }
-
-    /**
      * @notice Returns active configuration identifiers using pagination.
      * @param _dcms Diamond cut manager storage reference.
      * @param _pageIndex Page index used to derive the start offset.

@@ -21,6 +21,15 @@ import { AccessControlStorageWrapper, RoleDataStorage } from "../../domain/core/
 abstract contract ResolverProxyUnstructured {
     using AccessControlStorageWrapper for RoleDataStorage;
 
+    modifier onlyRegisteredResolverProxyConfiguration(
+        IBusinessLogicResolver _resolver,
+        bytes32 _configurationId,
+        uint256 _configurationVersion
+    ) {
+        _checkResolverProxyConfigurationRegistered(_resolver, _configurationId, _configurationVersion);
+        _;
+    }
+
     /**
      * @notice Initialises resolver-proxy storage and grants initial RBAC roles.
      * @dev Requires the resolver to recognise the configuration id and version before storage is
@@ -35,7 +44,8 @@ abstract contract ResolverProxyUnstructured {
         IResolverProxy.ResolverProxyConfigurationV2 memory _resolverProxyConfigurationV2,
         IResolverProxy.Rbac[] memory _rbacs
     ) internal {
-        _resolver.checkResolverProxyConfigurationRegistered(
+        _checkResolverProxyConfigurationRegistered(
+            _resolver,
             _resolverProxyConfigurationV2.configurationId,
             _resolverProxyConfigurationV2.configurationVersion
         );
@@ -229,5 +239,13 @@ abstract contract ResolverProxyUnstructured {
             ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion(),
             _interfaceId
         );
+    }
+
+    function _checkResolverProxyConfigurationRegistered(
+        IBusinessLogicResolver _resolver,
+        bytes32 _configurationId,
+        uint256 _configurationVersion
+    ) private {
+        _resolver.checkResolverProxyConfigurationRegistered(_configurationId, _configurationVersion);
     }
 }
