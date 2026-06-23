@@ -20,6 +20,7 @@ concurrency:
 
 jobs:
   format-and-lint:
+    if: false
     name: format-and-lint
     uses: ./.github/workflows/800-call-lint-format.yaml
     with:

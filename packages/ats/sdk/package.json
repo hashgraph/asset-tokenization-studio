@@ -1,7 +1,7 @@
 {
   "name": "@hashgraph/asset-tokenization-sdk",
   "description": "Asset Tokenization SDK for Hedera",
-  "version": "7.0.1",
+  "version": "8.0.0",
   "repository": "https://github.com/hashgraph/asset-tokenization-studio",
   "main": "./build/cjs/src/index.js",
   "module": "./build/esm/src/index.js",
@@ -59,7 +59,7 @@
   },
   "dependencies": {
     "@ethersproject/contracts": "^5.7.0",
-    "@hashgraph/asset-tokenization-contracts": "*",
+    "@hashgraph/asset-tokenization-contracts": "8.0.0",
     "@hashgraph/hedera-custodians-integration": "^1.4.1",
     "@hashgraph/hedera-wallet-connect": "2.1.2",
     "@hashgraph/sdk": "2.64.5",

@@ -1,8 +1,16 @@
 # @hashgraph/mass-payout-frontend
 
+## 1.1.3
+
+### Patch Changes
+
+- Updated dependencies
+
 ## 1.1.2
 
-## 1.1.1
+### Patch Changes
+
+- Updated dependencies
 
 ### Patch Changes
 
@@ -13,6 +21,10 @@
   - Fix `FileCreateTransaction` in SDK to use account's public key instead of empty keys
 
 ## 1.1.0
+
+### Patch Changes
+
+- Updated dependencies
 
 ## 1.0.1
 
