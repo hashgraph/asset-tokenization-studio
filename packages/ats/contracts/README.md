@@ -109,14 +109,14 @@ The Scripts README contains comprehensive information about:
 **Quick deployment commands:**
 
 ```bash
-# Deploy full system to Hardhat network (in-memory, fast)
-npm run deploy:hardhat -- --network hardhat
+# Deploy the full system to a local Hardhat node
+npm run deploy:local
 
 # Deploy to Hedera Testnet (requires .env configuration)
-npm run deploy:hardhat -- --network hedera-testnet
+npm run deploy:hedera:testnet
 
-# Standalone deployment (~3x faster startup)
-npm run deploy
+# Or via the Hardhat task
+npx hardhat deploy-system --network hedera-testnet
 ```
 
 ## Deployment Failures & Recovery
@@ -408,9 +408,8 @@ The ATS contracts implement a **4-layer hierarchical design** using the **Diamon
         │  ├─ Layer 2: Domain features
         │  └─ Layer 3: Jurisdiction-specific
         │
-        └─ 2 Configurations
-            ├─ Equity Config (43 facets)
-            └─ Bond Config (43 facets)
+        └─ Asset configurations (Equity, Bond + variants, Loan, Loans Portfolio, Deposit Token)
+            └─ each a versioned facet set composed from shared tiers (scripts/domain/facetSets.ts)
 ```
 
 ### Four-Layer Architecture
@@ -420,12 +419,12 @@ The ATS contracts implement a **4-layer hierarchical design** using the **Diamon
 - Data structures and storage management
 - Examples: `ERC1400StorageWrapper`, `KycStorageWrapper`, `CapStorageWrapper`
 - Storage isolation per feature for upgradeability
-- EIP-1967 storage pattern
+- ERC-7201 namespaced storage pattern
 
 **Layer 1: Core Business Logic**
 
 - ERC-1400/ERC-3643 base implementations
-- `Common.sol` provides shared logic for all facets
+- Shared modifiers via `services/Modifiers.sol` (aggregating `CoreModifiers` + `AssetModifiers`)
 - Access control, validation, and core operations
 - Domains: AccessControl, Freeze, Hold, ControlList, CorporateActions
 
@@ -550,11 +549,10 @@ For detailed instructions on adding or removing facets, see the **[Developer Gui
 
 # Reference Deployment (Hedera Testnet)
 
-> **Note**: These contracts were deployed for reference purposes and may not reflect the latest version. For up-to-date deployments, use the deployment scripts with the current codebase version (v1.17.0+). See [Scripts README](scripts/README.md) for deployment instructions.
+> **Note**: These contracts were deployed for reference purposes and may not reflect the latest version. For up-to-date addresses, see the latest record under [`deployments/`](deployments/) and the [Deployed addresses](../../../docs/ats/developer-guides/contracts/deployed-addresses.md) guide. To deploy with the current codebase, see the [Scripts README](scripts/README.md).
 
 - **Network:** Hedera Testnet
 - **Status:** Reference deployment (may be outdated)
-- **Last Known Update:** Prior to v1.17.0
 
 #### Contract Addresses
 

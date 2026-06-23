@@ -1,10 +1,10 @@
 ---
-id: adding-facets
-title: Tutorial - Adding a New Facet to ATS Contracts
-sidebar_label: Adding Facets
+id: adding-a-facet
+title: Adding a Facet
+sidebar_label: Adding a facet
 ---
 
-# Tutorial: Adding a New Facet to ATS Contracts
+# Adding a Facet
 
 This comprehensive guide walks you through creating and integrating a new facet into the Asset Tokenization Studio (ATS) smart contract system.
 
@@ -748,8 +748,10 @@ After implementing your facet:
 
 ## Related Documentation
 
-- [Deployment Tutorial](./deployment.md)
-- [Upgrade Configuration](./upgrading.md)
+- [Deployment](./deployment.md)
+- [Managing the BLR](./managing-the-blr.md)
+- [Creating an asset type](./creating-an-asset-type.md)
+- [Upgrading configurations](./upgrading-configurations.md)
 
 ## Support
 

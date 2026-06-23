@@ -184,4 +184,4 @@ After updating configuration, verify the changes:
 
 - [Deployed Addresses](../developer-guides/contracts/deployed-addresses.md) - Current resolver addresses
 - [Roles and Permissions](./roles-and-permissions.md) - Understanding role requirements
-- [Developer Guide: Upgrading](../developer-guides/contracts/upgrading.md) - Technical details on upgrades
+- [Developer Guide: Upgrading Configurations](../developer-guides/contracts/upgrading-configurations.md) - Technical details on upgrades

@@ -62,7 +62,7 @@ Create `.env` file:
 cp .env.example .env
 ```
 
-Edit `.env` with your private key and endpoints. See `packages/ats/contracts/.env.example` for all available variables, or the [Contract Deployment Guide](../developer-guides/contracts/deployment.md#2-configure-environment) for a minimal testnet example.
+Edit `.env` with your private key and endpoints. See `packages/ats/contracts/.env.example` for all available variables, or the [Contract Deployment Guide](../developer-guides/contracts/deployment.md#2-configure-the-environment) for a minimal testnet example.
 
 ### Deploy Contracts
 

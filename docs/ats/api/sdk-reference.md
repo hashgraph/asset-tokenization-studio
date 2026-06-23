@@ -714,4 +714,4 @@ You can view the complete implementation and parameter validation logic in the s
 
 - [SDK Integration Guide](../developer-guides/sdk-integration.md) - Getting started with the SDK
 - [User Guides](../user-guides/index.md) - Detailed operation guides
-- [Smart Contracts API](./contracts/index.md) - Contract interface reference
+- [Smart Contracts Handbook](../developer-guides/contracts/index.md) - Architecture & contract guides
