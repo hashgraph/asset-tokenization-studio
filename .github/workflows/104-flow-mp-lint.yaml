@@ -1,4 +1,4 @@
-name: "104: [FLOW] MP Lint and Format"
+name: "104: [FLOW] MP Format and Lint"
 
 on:
   pull_request:
@@ -19,8 +19,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint-and-format:
-    name: lint-and-format
+  format-and-lint:
+    name: format-and-lint
     uses: ./.github/workflows/800-call-lint-format.yaml
     with:
       module: mass-payout
