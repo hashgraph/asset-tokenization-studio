@@ -64,6 +64,13 @@ worked example:
 | `CapStorageWrapper.sol` | `domain/core/`   | The ERC-7201 storage struct and typed getters/setters for cap state.                                                 |
 | `CapModifiers.sol`      | `services/core/` | Reusable `onlyRole`-style guards for cap operations.                                                                 |
 
+**Why so many files?** The split is what makes facets independently upgradeable and collision-free:
+storage lives in an ERC-7201 **library** (so two facets never clash on a slot), guards live in shared
+**modifiers** (reused across facets), and the interface pins the ABI + resolver key. `Cap` is a
+_minimal_ feature (3 files in `facets/`); larger features are **composed from several facets** — a
+bond, for example, is `CouponFacet` + `MaturityFacet` + `InterestRateFacet` + … (there is no single
+"Bond" facet).
+
 ### The resolver key
 
 Each interface declares a file-scope resolver key — the `bytes32` the BLR uses to identify the

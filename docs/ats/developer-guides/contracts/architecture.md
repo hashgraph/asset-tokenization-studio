@@ -51,9 +51,17 @@ graph TB
     style Factory fill:#2D84EB,color:#fff
 ```
 
+> **Reading the diagram:** a call to a token hits its ResolverProxy, which asks the BLR which facet
+> serves that function (for the token's configuration + version), then runs the facet's code against
+> the token's own storage via `delegatecall`. The BLR and Factory are upgraded by the ProxyAdmin;
+> tokens are "upgraded" by pointing them at a newer configuration — never a redeploy.
+
 ## Two proxy patterns
 
-ATS deliberately uses **two different proxy mechanisms** for two different jobs. Confusing them is
+ATS deliberately uses **two different proxy mechanisms** for two different jobs. Why two? The
+infrastructure (BLR, Factory) is a small, stable codebase that upgrades as a whole — the simple TUP
+fits it. A token, by contrast, accrues many features that must be versioned and upgraded
+independently across thousands of tokens — exactly what the Diamond gives you. Confusing the two is
 the most common source of upgrade mistakes, so keep the distinction clear:
 
 |                        | **TransparentUpgradeableProxy (TUP)**                     | **ResolverProxy (Diamond)**                               |
@@ -131,13 +139,18 @@ class plus a generic one:
 - `deployEquity(EquityData, FactoryRegulationData)`
 - `deployBond(BondData, FactoryRegulationData)`
 - `deployDepositToken(DepositTokenData, FactoryRegulationData)`
-- `deployProxy(resolver, configKey, version, rbacs, data)` — the generic entry point used for any
-  configuration (including bond variants and loans); see [Deploying an asset proxy](./deploying-an-asset-proxy.md).
+- `deployProxy(resolver, configKey, version, rbacs, data)` — the **low-level** primitive: deploys a
+  bare, **uninitialised** ResolverProxy for any configuration (the caller then initialises the facets).
+  See [Deploying a token](./deploying-an-asset-proxy.md).
+
+The typed methods are the normal way to create a token: each deploys the proxy **and** runs all of
+its facet initialisers, applies regulation data, and marks the token operational. `deployProxy` does
+none of that — it just creates the bare proxy.
 
 :::note
-There is no separate `deployBondFixedRate` / `deployBondKpiLinkedRate` / `deployLoan` function. The
-bond variant (or loan) is selected by the **configuration ID** passed in
-`SecurityData.resolverProxyConfiguration.key`, not by a dedicated method.
+There is no separate `deployBondFixedRate` / `deployBondKpiLinkedRate` function. The bond **variant**
+is selected by the **configuration ID** in `SecurityData.resolverProxyConfiguration.key` and deployed
+through `deployBond`, not a dedicated method.
 :::
 
 Each deploy call creates a `ResolverProxy`, wires it to the BLR with the chosen configuration ID and

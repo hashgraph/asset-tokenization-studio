@@ -126,5 +126,5 @@ console.log(`Fund config v${v} with ${n} facets`);
 
 - [Adding a facet](./adding-a-facet.md) — build the custom logic a new asset needs.
 - [Managing the BLR](./managing-the-blr.md) — register facets and create configurations.
-- [Deploying an asset proxy](./deploying-an-asset-proxy.md) — deploy a token against the configuration.
+- [Deploying a token](./deploying-an-asset-proxy.md) — deploy a token against the configuration.
 - [Core concepts → Configurations](./core-concepts.md#configurations)

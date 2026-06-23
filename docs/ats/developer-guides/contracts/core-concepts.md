@@ -11,9 +11,11 @@ configurations, versioning, and roles. Skim it once; refer back as needed.
 
 ## Resolver keys
 
-A **resolver key** is the `bytes32` identifier the BLR uses to refer to a facet — the stable name a
-facet keeps across every version and every token. It's declared at file scope in the facet's
-interface and generated from an annotation rather than hand-written:
+**Why they exist:** the BLR needs to refer to a facet by a name that survives upgrades — when a facet
+is improved, its _address_ changes but callers shouldn't have to care. A **resolver key** is that
+stable `bytes32` name: it identifies a facet across every version and every token, while the BLR maps
+it to whatever address is current. It's declared at file scope in the facet's interface and generated
+from an annotation rather than hand-written:
 
 ```solidity
 /// @custom:hash resolverKey Cap

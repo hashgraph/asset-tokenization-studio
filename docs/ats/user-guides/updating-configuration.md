@@ -136,7 +136,7 @@ Configuration Version
 
 ## Requirements
 
-- **CONFIGURATOR_ROLE** permission
+- **ROLE_CREATE_CONFIGURATION** permission
 - Resolver ID must point to a valid deployed resolver contract
 - Configuration ID must exist in the resolver
 
@@ -173,11 +173,11 @@ After updating configuration, verify the changes:
 
 ### Insufficient Permissions
 
-**Error**: "Caller does not have CONFIGURATOR_ROLE"
+**Error**: "Caller does not have ROLE_CREATE_CONFIGURATION"
 
 **Solution**:
 
-- Verify you have CONFIGURATOR_ROLE assigned
+- Verify you have ROLE_CREATE_CONFIGURATION assigned
 - See [Roles and Permissions](./roles-and-permissions.md) for how to grant roles
 
 ## Related Resources

@@ -46,6 +46,11 @@ BLR_ADDRESS=0x4363684B8a679EaBA17701F421Ddf71D6870A011 \
 Provide the existing `BLR_ADDRESS` (see `.env.example` → upgrade-workflow section). The workflow
 deploys the requested pieces and wires them to that BLR.
 
+:::tip Finding your BLR address
+It's the `infrastructure.blr.proxy` field of the newest `deployments/<network>/newBlr-*.json`, and is
+also listed in [Deployed addresses](./deployed-addresses.md).
+:::
+
 ## Driving the workflows
 
 There are three ways to run a workflow; they share the same underlying operations.

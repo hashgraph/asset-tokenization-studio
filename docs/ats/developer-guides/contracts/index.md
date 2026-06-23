@@ -20,6 +20,40 @@ All contracts live in [`packages/ats/contracts`](https://github.com/hashgraph/as
 This handbook documents the package as of contracts **v7.0.1**.
 :::
 
+## Prerequisites
+
+You don't need any prior ATS knowledge — that's what this handbook is for. It assumes you're
+comfortable with **TypeScript/Node** and the command line. Solidity/EVM experience helps but isn't
+required to start; you'll pick it up from the worked examples. If any of the following are new, a
+short detour first will save you hours:
+
+- **Solidity & the EVM** — [Solidity docs](https://docs.soliditylang.org/), [Solidity by Example](https://solidity-by-example.org/)
+- **Hardhat** (the build/test/deploy tool used here) — [Hardhat docs](https://hardhat.org/docs)
+- **EIP-2535 "Diamond" pattern** (the core architecture) — [the EIP](https://eips.ethereum.org/EIPS/eip-2535)
+- **Hedera basics** (HBAR, accounts, HashScan, JSON-RPC) — [Hedera docs](https://docs.hedera.com/)
+
+New to the vocabulary (_facet_, _BLR_, _resolver key_, _configuration_, …)? Keep the
+**[Glossary](./glossary.md)** open in another tab as you read.
+
+## 5-minute local quickstart
+
+Prove the toolchain works end to end before diving into theory. From the **monorepo root**:
+
+```bash
+npm ci                        # install workspace dependencies
+npm run ats:contracts:build   # compile + generate types, registry, and hashes
+npm run ats:contracts:test    # run the test suite
+```
+
+Then deploy the whole system to a throwaway local Hardhat node:
+
+```bash
+cd packages/ats/contracts
+npm run deploy:newBlr:local:auto   # spins up a local node, deploys, tears it down
+```
+
+If those complete, your environment is ready — now follow the reading path below.
+
 ## New here? Read in this order
 
 If you've never seen this codebase, follow this path. Each page links onward to the next.
@@ -33,6 +67,22 @@ If you've never seen this codebase, follow this path. Each page links onward to 
 
 After that, branch into whatever you need: extending the system, operating it safely, or the reference tables.
 
+## What do you want to do?
+
+| I want to…                      | Start here                                                                                                              |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Understand how ATS works        | [Overview](./overview.md) → [Architecture](./architecture.md)                                                           |
+| Build & test locally            | [Getting started](./getting-started.md) → [Testing](./testing.md)                                                       |
+| Deploy the whole system         | [Deployment](./deployment.md)                                                                                           |
+| Create a token (any asset type) | [Deploying a token](./deploying-an-asset-proxy.md)                                                                      |
+| Add a new feature (facet)       | [Adding a facet](./adding-a-facet.md)                                                                                   |
+| Add a new asset type            | [Creating an asset type](./creating-an-asset-type.md)                                                                   |
+| Upgrade token logic             | [Upgrading configurations](./upgrading-configurations.md)                                                               |
+| Upgrade the BLR / Factory       | [Upgrading infrastructure](./upgrading-infrastructure.md)                                                               |
+| Resume a failed deployment      | [Checkpoints & recovery](./checkpoints-and-recovery.md)                                                                 |
+| Operate safely in production    | [Roles & permissions](./roles-and-permissions.md) · [Scheduled tasks & force-cancel](./scheduled-tasks-force-cancel.md) |
+| Look up a term                  | [Glossary](./glossary.md)                                                                                               |
+
 ## Section map
 
 ### 🧭 Understand
@@ -43,6 +93,7 @@ Build an accurate mental model before touching anything.
 - [Architecture](./architecture.md) — Diamond pattern, BLR, ResolverProxy, Factory, call/upgrade flows.
 - [Repository structure](./repository-structure.md) — the `contracts/` tree, facet anatomy, ERC-7201 storage.
 - [Core concepts](./core-concepts.md) — resolver keys, the 9 configurations, three-level versioning, roles.
+- [Glossary](./glossary.md) — one-line definitions of every term used in this handbook.
 
 ### 🛠️ Build & Test
 
@@ -69,7 +120,7 @@ Add new behaviour: facets, asset types, and the tooling that wires them in.
 - [Adding a facet](./adding-a-facet.md) — create and integrate a new feature module end to end.
 - [Creating an asset type](./creating-an-asset-type.md) — define a new configuration (e.g. Fund).
 - [Managing the BLR](./managing-the-blr.md) — register/upgrade facets and create configurations.
-- [Deploying an asset proxy](./deploying-an-asset-proxy.md) — the generic `deployProxy` entry point.
+- [Deploying a token](./deploying-an-asset-proxy.md) — create a token via the Factory, by asset type.
 - [Hash code generation](./hash-codegen.md) — how resolver-key and role hashes are generated and validated.
 - [Documenting contracts](./documenting-contracts.md) — the NatSpec house style.
 
@@ -90,8 +141,9 @@ Lookup material.
 
 ## Two sources of truth
 
-This handbook is the primary, navigable documentation. The contracts package also ships
-in-repo guides for developers working directly in the source tree — both are kept complete:
+**Start with this handbook** — it's the canonical, navigable onboarding narrative. The contracts
+package also ships in-repo guides that act as quick references for developers already working in the
+source tree; both are kept complete and in sync:
 
 - [`packages/ats/contracts/README.md`](https://github.com/hashgraph/asset-tokenization-studio/blob/main/packages/ats/contracts/README.md) — package overview.
 - [`scripts/README.md`](https://github.com/hashgraph/asset-tokenization-studio/blob/main/packages/ats/contracts/scripts/README.md) and [`scripts/DEVELOPER_GUIDE.md`](https://github.com/hashgraph/asset-tokenization-studio/blob/main/packages/ats/contracts/scripts/DEVELOPER_GUIDE.md) — deployment scripts reference.

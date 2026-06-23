@@ -48,6 +48,12 @@ From `packages/ats/contracts/`:
 The `test:scripts*` and coverage commands also have `:parallel` / `:coverage` variants — see
 `package.json` for the full list.
 
+:::tip First run
+After building, just run `npm test` (or `npm run ats:contracts:test` from the monorepo root) to
+verify everything passes. The `:coverage` / `:parallel` variants are mainly for CI — you don't need
+them locally.
+:::
+
 ## Testing deployment recovery
 
 The deployment scripts can inject failures so you can exercise the

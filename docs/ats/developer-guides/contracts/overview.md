@@ -9,6 +9,11 @@ sidebar_label: Overview
 What the ATS smart contracts are, which standards they implement, and what you can build with
 them. For _how_ the pieces fit together at runtime, continue to [Architecture](./architecture.md).
 
+:::tip New to the terminology?
+Terms like _facet_, _Diamond_, _BLR_, _resolver key_, or _configuration_ are defined in the
+[Glossary](./glossary.md) — keep it open in another tab as you read.
+:::
+
 ## What the ATS contracts do
 
 The Asset Tokenization Studio contracts are a modular, upgradeable system for issuing and managing

@@ -72,6 +72,7 @@ const sidebars: SidebarsConfig = {
                 "developer-guides/contracts/architecture",
                 "developer-guides/contracts/repository-structure",
                 "developer-guides/contracts/core-concepts",
+                "developer-guides/contracts/glossary",
               ],
             },
             {

@@ -388,6 +388,6 @@ The following summarizes the complete sequence executed during a fresh deploymen
 - [Deployment](./deployment.md) — where the BLR is first deployed and populated.
 - [Adding a facet](./adding-a-facet.md) — create a facet, then register it here.
 - [Creating an asset type](./creating-an-asset-type.md) — define a new configuration ID.
-- [Deploying an asset proxy](./deploying-an-asset-proxy.md) — deploy a token against a configuration.
+- [Deploying a token](./deploying-an-asset-proxy.md) — deploy a token against a configuration.
 - [Upgrading configurations](./upgrading-configurations.md) — roll out new configuration versions.
 - [Diamond Pattern (EIP-2535)](https://eips.ethereum.org/EIPS/eip-2535)

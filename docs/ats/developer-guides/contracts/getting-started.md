@@ -11,8 +11,22 @@ for [testing](./testing.md) and [deployment](./deployment.md).
 
 ## Prerequisites
 
-- **Node.js** ≥ 20.19.4 and **npm** ≥ 10.9.0 (the repo pins a version in `.nvmrc`).
+**Tooling**
+
+- **Node.js** ≥ 24.15.0 and **npm** ≥ 10.9.0 (the repo pins the version in `.nvmrc`).
 - A POSIX-like shell. All package commands below run from `packages/ats/contracts/` unless noted.
+
+**Assumed knowledge**
+
+You should be comfortable with TypeScript/Node and the command line. You don't need deep Solidity
+experience to build and test — you'll pick it up from the worked examples — but if these are new, a
+short detour first will save you time:
+
+- **Solidity & the EVM** — [Solidity docs](https://docs.soliditylang.org/) · [Solidity by Example](https://solidity-by-example.org/)
+- **Hardhat** (compile / test / deploy) — [Hardhat docs](https://hardhat.org/docs)
+- **EIP-2535 "Diamond"** (the architecture) — [the EIP](https://eips.ethereum.org/EIPS/eip-2535)
+
+Unfamiliar with a term? See the [Glossary](./glossary.md).
 
 ## Install
 

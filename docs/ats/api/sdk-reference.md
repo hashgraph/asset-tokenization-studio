@@ -66,7 +66,7 @@ Connect a wallet to the SDK.
 - `network: string` - Network environment
 - `mirrorNode: object` - Mirror node configuration
 - `rpcNode: object` - RPC node configuration
-- `wallet: SupportedWallets` - Wallet type (HASHPACK, BLADE, METAMASK, HWALLETCONNECT)
+- `wallet: SupportedWallets` - Wallet type. Use `HWALLETCONNECT` (HashPack & Blade now connect through Hedera WalletConnect 2.0) or `METAMASK`.
 - `hwcSettings?: object` - WalletConnect settings (optional)
 
 **Usage**:
@@ -78,7 +78,7 @@ const request = new ConnectRequest({
   network: "testnet",
   mirrorNode: { baseUrl: "...", apiKey: "", headerName: "" },
   rpcNode: { baseUrl: "...", apiKey: "", headerName: "" },
-  wallet: SupportedWallets.HASHPACK,
+  wallet: SupportedWallets.HWALLETCONNECT,
 });
 
 await Network.connect(request);
@@ -143,7 +143,7 @@ Get token balance for an account.
 
 **Parameters**:
 
-- `tokenId: string` - Token ID
+- `securityId: string` - Token (security) ID
 - `targetId: string` - Account ID
 
 **Usage**:
@@ -152,7 +152,7 @@ Get token balance for an account.
 import { Security, GetAccountBalanceRequest } from "@hashgraph/asset-tokenization-sdk";
 
 const request = new GetAccountBalanceRequest({
-  tokenId: "0.0.1234567",
+  securityId: "0.0.1234567",
   targetId: "0.0.7654321",
 });
 
@@ -171,7 +171,7 @@ Schedule a dividend distribution.
 **Parameters**:
 
 - `securityId: string` - Token ID
-- `amount: string` - Dividend amount per share
+- `amountPerUnitOfSecurity: string` - Dividend amount per unit of security held
 - `recordTimestamp: string` - Snapshot date timestamp
 - `executionTimestamp: string` - Execution date timestamp
 
@@ -182,7 +182,7 @@ import { Equity, SetDividendsRequest } from "@hashgraph/asset-tokenization-sdk";
 
 const request = new SetDividendsRequest({
   securityId: "0.0.1234567",
-  amount: "5.00",
+  amountPerUnitOfSecurity: "5.00",
   recordTimestamp: "1734825600",
   executionTimestamp: "1735430400",
 });
@@ -512,9 +512,9 @@ Grant KYC to an account using Verifiable Credentials.
 
 **Parameters**:
 
-- `tokenId: string` - Token ID
+- `securityId: string` - Token (security) ID
 - `targetId: string` - Account to grant KYC
-- `vcData: string` - Verifiable Credential data
+- `vcBase64: string` - Base64-encoded Verifiable Credential
 
 **Usage**:
 
@@ -522,9 +522,9 @@ Grant KYC to an account using Verifiable Credentials.
 import { Kyc, GrantKycRequest } from "@hashgraph/asset-tokenization-sdk";
 
 const request = new GrantKycRequest({
-  tokenId: "0.0.1234567",
+  securityId: "0.0.1234567",
   targetId: "0.0.7654321",
-  vcData: "verifiable_credential_data",
+  vcBase64: "<base64-encoded VC>",
 });
 
 const success = await Kyc.grantKyc(request);
@@ -538,7 +538,7 @@ Revoke KYC from an account.
 
 **Parameters**:
 
-- `tokenId: string` - Token ID
+- `securityId: string` - Token (security) ID
 - `targetId: string` - Account to revoke KYC
 
 ## SSI Management Operations
@@ -552,7 +552,7 @@ Add an account as a credential issuer.
 **Parameters**:
 
 - `securityId: string` - Token ID
-- `targetId: string` - Account to add as issuer
+- `issuerId: string` - Account to add as issuer
 
 **Usage**:
 
@@ -561,7 +561,7 @@ import { SsiManagement, AddIssuerRequest } from "@hashgraph/asset-tokenization-s
 
 const request = new AddIssuerRequest({
   securityId: "0.0.1234567",
-  targetId: "0.0.7654321",
+  issuerId: "0.0.7654321",
 });
 
 const success = await SsiManagement.addIssuer(request);
@@ -606,11 +606,11 @@ Create a hold on tokens.
 **Parameters**:
 
 - `securityId: string` - Token ID
-- `recipient: string` - Recipient account ID
-- `notary: string` - Notary account ID
+- `targetId: string` - Destination account once the hold is executed
+- `escrowId: string` - Escrow account that can release / execute the hold
 - `amount: string` - Amount to hold
-- `partition: string` - Partition identifier
-- `lockTime: string` - Lock time in seconds
+- `partitionId: string` - Partition identifier
+- `expirationDate: string` - Expiration timestamp
 
 ## Clearing Operations
 

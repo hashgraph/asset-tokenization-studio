@@ -18,7 +18,7 @@ Examples use **Hedera Testnet**. Swap the network suffix (`:hedera:mainnet`, `:h
 
 ## Prerequisites
 
-- **Node.js** ≥ 20.19.4 and **npm** ≥ 10.9.0 (see `.nvmrc`).
+- **Node.js** ≥ 24.15.0 and **npm** ≥ 10.9.0 (see `.nvmrc`).
 - A funded **Hedera account** on your target network.
   - Testnet: fund via the [Hedera Portal](https://portal.hedera.com/).
   - Mainnet: ensure adequate HBAR for the full deployment (hundreds of contract creations).
@@ -102,15 +102,19 @@ for local/testing networks only.)
 
 ## What gets deployed
 
-The workflow runs these phases in order, checkpointing after each:
+The workflow runs these phases in order, checkpointing after each (the facet phase dominates the
+wall-clock time):
 
-1. **ProxyAdmin** — owns and upgrades the infrastructure proxies.
-2. **Business Logic Resolver** — implementation + `TransparentUpgradeableProxy`, then initialised.
-3. **Orchestrator libraries** — shared logic libraries linked by the facets.
-4. **Facets** — every facet, deployed in batches.
-5. **Facet registration** — `registerBusinessLogics` records each facet in the BLR.
-6. **Configurations** — the asset configurations are created (Equity and the Bond variants).
-7. **Factory** — implementation + `TransparentUpgradeableProxy`, wired to the BLR.
+1. **ProxyAdmin** — owns and upgrades the infrastructure proxies. _(seconds)_
+2. **Business Logic Resolver** — implementation + `TransparentUpgradeableProxy`, then initialised. _(seconds)_
+3. **Orchestrator libraries** — shared logic libraries linked by the facets. _(seconds)_
+4. **Facets** — every facet, deployed in batches. _(the bulk — minutes; scales with `BATCH_SIZE`)_
+5. **Facet registration** — `registerBusinessLogics` records each facet in the BLR. _(tens of seconds)_
+6. **Configurations** — the asset configurations are created (Equity and the Bond variants). _(tens of seconds)_
+7. **Factory** — implementation + `TransparentUpgradeableProxy`, wired to the BLR. _(seconds)_
+
+A full testnet run typically takes **a few minutes**. If a phase fails or times out, **re-run the
+same command** — the [checkpoint system](./checkpoints-and-recovery.md) resumes from where it stopped.
 
 For the architecture behind these pieces, see [Architecture](./architecture.md).
 
