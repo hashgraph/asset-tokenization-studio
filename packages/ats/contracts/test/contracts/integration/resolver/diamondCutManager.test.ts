@@ -529,7 +529,7 @@ describe("DiamondCutManager", () => {
 
     // Cancel the incomplete batch configuration and verify event is emitted
     await expect(diamondCutManager.connect(signer_A).cancelBatchConfiguration(testConfigId))
-      .to.emit(diamondCutManager, "DiamondBatchConfigurationCanceled")
+      .to.emit(diamondCutManager, "DiamondBatchConfigurationCancelled")
       .withArgs(testConfigId, 1);
 
     // Verify all information is removed

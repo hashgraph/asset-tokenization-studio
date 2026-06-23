@@ -128,6 +128,8 @@ interface IBusinessLogicResolver is IDiamondCutManager {
 
     /**
      * @notice Returns the replacement address for a given address, or address(0) if none exists
+     * @param _oldAddress the address whose replacement is queried
+     * @return replacementAddress_ the replacement address, or address(0) if none exists
      */
     function getReplacementAddress(address _oldAddress) external view returns (address replacementAddress_);
 

@@ -204,7 +204,7 @@ abstract contract Factory is IFactory {
      */
     function deployProxy(
         IBusinessLogicResolver _resolver,
-        IResolverProxy.ResolverProxyConfigurationV2 memory _resolverProxyConfigurationV2,
+        IResolverProxy.ResolverProxyConfigurationV2 calldata _resolverProxyConfigurationV2,
         IResolverProxy.Rbac[] calldata _rbacs,
         bytes calldata _data
     ) external onlyValidResolver(_resolver) onlyValidAdmins(_rbacs) returns (address proxyAddress_) {

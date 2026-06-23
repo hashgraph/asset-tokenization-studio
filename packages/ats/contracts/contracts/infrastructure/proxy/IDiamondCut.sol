@@ -33,6 +33,7 @@ interface IDiamondCut is IStaticFunctionSelectors {
      * @param _newResolver The new BLR contract address to wire into the proxy.
      * @param _newConfigurationId The configuration identifier to activate on the new resolver.
      * @param _newVersion The version number associated with the new configuration.
+     * @param _newReplacementEnabled The replacement enabled flag to set.
      */
     function updateResolver(
         IBusinessLogicResolver _newResolver,

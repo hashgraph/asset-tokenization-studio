@@ -267,11 +267,8 @@ exports[`ats contracts solhint`] = {
       [35, 4, 1, "gas-indexed-events: GC: [voteId] on Event [VotingCancelled] could be Indexed", "177600"],
       [40, 4, 1, "gas-indexed-events: GC: [voteId] on Event [VotingForceCancelled] could be Indexed", "177600"]
     ],
-    "contracts/factory/IFactory.sol:4063378112": [
-      [115, 4, 1, "gas-struct-packing: GC: For [ EquityDetailsData ] struct, packing seems inefficient. Try rearranging to achieve 32bytes slots", "177622"]
-    ],
-    "contracts/infrastructure/diamond/IDiamondCutManager.sol:1721314983": [
-      [72, 4, 1, "gas-indexed-events: GC: [version] on Event [DiamondBatchConfigurationCanceled] could be Indexed", "177600"]
+    "contracts/factory/IFactory.sol:211428576": [
+      [105, 4, 1, "gas-struct-packing: GC: For [ EquityDetailsData ] struct, packing seems inefficient. Try rearranging to achieve 32bytes slots", "177622"]
     ],
     "contracts/infrastructure/diamond/IOwnership.sol:729129024": [
       [23, 4, 1, "gas-indexed-events: GC: [owner] on Event [OwnershipTransfered] could be Indexed", "177600"],
@@ -279,8 +276,8 @@ exports[`ats contracts solhint`] = {
       [33, 4, 1, "gas-indexed-events: GC: [previousOwner] on Event [OwnershipAccepted] could be Indexed", "177600"],
       [33, 4, 1, "gas-indexed-events: GC: [newOwner] on Event [OwnershipAccepted] could be Indexed", "177600"]
     ],
-    "contracts/infrastructure/proxy/ResolverProxy.sol:849945896": [
-      [54, 4, 1, "no-complex-fallback: Fallback function must be simple", "177603"]
+    "contracts/infrastructure/proxy/ResolverProxy.sol:3628079828": [
+      [52, 4, 1, "no-complex-fallback: Fallback function must be simple", "177603"]
     ],
     "contracts/infrastructure/utils/DecimalsLib.sol:1643088826": [
       [6, 4, 1, "no-unused-import: imported name POW10_0 is not used", "177653"],

@@ -74,6 +74,7 @@ abstract contract DiamondCut is IDiamondCut, ResolverProxyUnstructured {
         ResolverProxyStorageWrapper.setResolverProxyConfigurationV2(v2);
     }
 
+    /// @inheritdoc IDiamondCut
     function updateReplacementEnabled(bool _newReplacementEnabled) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         IResolverProxy.ResolverProxyConfigurationV2 memory v2 = ResolverProxyStorageWrapper
             .getResolverProxyConfigurationV2();
@@ -105,6 +106,7 @@ abstract contract DiamondCut is IDiamondCut, ResolverProxyUnstructured {
         );
     }
 
+    /// @inheritdoc IDiamondCut
     function getConfigInfo()
         external
         view

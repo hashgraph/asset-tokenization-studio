@@ -70,7 +70,7 @@ interface IDiamondCutManager {
      * @param configurationId Configuration key whose pending batch was cancelled.
      * @param version Version number that was being assembled and is now dropped.
      */
-    event DiamondBatchConfigurationCanceled(bytes32 indexed configurationId, uint256 version);
+    event DiamondBatchConfigurationCancelled(bytes32 indexed configurationId, uint256 indexed version);
 
     /// @notice Thrown when `bytes32(0)` is supplied as a configuration id, which is reserved.
     error DefaultValueForConfigurationIdNotPermitted();
@@ -191,7 +191,7 @@ interface IDiamondCutManager {
     /**
      * @notice Discards an in-progress batch configuration, dropping every facet appended so
      *         far for the pending version.
-     * @dev Emits {DiamondBatchConfigurationCanceled}. Has no effect once the version has
+     * @dev Emits {DiamondBatchConfigurationCancelled}. Has no effect once the version has
      *      been finalised via a `_isLastBatch = true` call.
      * @param _configurationId Configuration key whose pending batch should be cancelled.
      */
@@ -232,6 +232,7 @@ interface IDiamondCutManager {
      * @dev Used by resolver proxies during dispatch. Returns `address(0)` when no facet
      *      claims the selector.
      * @param _resolverProxyConfiguration Resolver proxy full configuration.
+     * @param _selector Function selector being dispatched.
      * @return facetAddress_ Address of the facet that owns `_selector`, or `address(0)` if
      *         the selector is not registered for the given configuration/version.
      */

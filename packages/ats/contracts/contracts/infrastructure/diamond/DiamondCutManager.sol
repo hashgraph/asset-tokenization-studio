@@ -99,7 +99,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         onlyRole(ROLE_CREATE_CONFIGURATION)
     {
         uint256 version = _cancelBatchConfiguration(_configurationId);
-        emit DiamondBatchConfigurationCanceled(_configurationId, version);
+        emit DiamondBatchConfigurationCancelled(_configurationId, version);
     }
 
     /// @inheritdoc IDiamondCutManager
