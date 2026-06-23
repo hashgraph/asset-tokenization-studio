@@ -76,6 +76,13 @@ export function controlListTests(getCtx: () => AssetMockCtx): void {
       );
     });
 
+    it("GIVEN an account without controlList role WHEN removeFromControlList THEN transaction fails with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_B).removeFromControlList(signer_C.address)).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
     it("GIVEN a paused Token WHEN addToControlList THEN transaction fails with IsPaused", async () => {
       await grantRoleAndPauseToken(asset, ATS_ROLES.ROLE_CONTROL_LIST, signer_A, signer_B, signer_C.address);
 
