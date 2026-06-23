@@ -18,7 +18,7 @@ function cancelBatchConfiguration(bytes32 _configurationId) external nonpayable
 
 Discards an in-progress batch configuration, dropping every facet appended so far for the pending version.
 
-_Emits {DiamondBatchConfigurationCanceled}. Has no effect once the version has been finalised via a `_isLastBatch = true` call._
+_Emits {DiamondBatchConfigurationCancelled}. Has no effect once the version has been finalised via a `_isLastBatch = true` call._
 
 #### Parameters
 
@@ -419,10 +419,10 @@ _Used by resolver proxies during dispatch. Returns `address(0)` when no facet cl
 
 #### Parameters
 
-| Name                         | Type   | Description                        |
-| ---------------------------- | ------ | ---------------------------------- |
-| \_resolverProxyConfiguration | bytes  | Resolver proxy full configuration. |
-| \_selector                   | bytes4 | undefined                          |
+| Name                         | Type   | Description                         |
+| ---------------------------- | ------ | ----------------------------------- |
+| \_resolverProxyConfiguration | bytes  | Resolver proxy full configuration.  |
+| \_selector                   | bytes4 | Function selector being dispatched. |
 
 #### Returns
 
@@ -480,10 +480,10 @@ _Powers ERC-165 lookups on resolver proxies._
 
 ## Events
 
-### DiamondBatchConfigurationCanceled
+### DiamondBatchConfigurationCancelled
 
 ```solidity
-event DiamondBatchConfigurationCanceled(bytes32 indexed configurationId, uint256 version)
+event DiamondBatchConfigurationCancelled(bytes32 indexed configurationId, uint256 indexed version)
 ```
 
 Emitted when an in-progress batch configuration is discarded.
@@ -493,7 +493,7 @@ Emitted when an in-progress batch configuration is discarded.
 | Name                      | Type    | Description                                                 |
 | ------------------------- | ------- | ----------------------------------------------------------- |
 | configurationId `indexed` | bytes32 | Configuration key whose pending batch was cancelled.        |
-| version                   | uint256 | Version number that was being assembled and is now dropped. |
+| version `indexed`         | uint256 | Version number that was being assembled and is now dropped. |
 
 ### DiamondBatchConfigurationCreated
 

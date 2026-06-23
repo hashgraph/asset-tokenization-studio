@@ -415,7 +415,7 @@ _Requires `DEFAULT_ADMIN_ROLE` and validates the target configuration against th
 | \_newResolver           | contract IBusinessLogicResolver | The new BLR contract address to wire into the proxy.          |
 | \_newConfigurationId    | bytes32                         | The configuration identifier to activate on the new resolver. |
 | \_newVersion            | uint256                         | The version number associated with the new configuration.     |
-| \_newReplacementEnabled | bool                            | undefined                                                     |
+| \_newReplacementEnabled | bool                            | The replacement enabled flag to set.                          |
 
 ## Events
 

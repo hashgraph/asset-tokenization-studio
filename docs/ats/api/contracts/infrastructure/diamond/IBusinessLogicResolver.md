@@ -31,7 +31,7 @@ function cancelBatchConfiguration(bytes32 _configurationId) external nonpayable
 
 Discards an in-progress batch configuration, dropping every facet appended so far for the pending version.
 
-_Emits {DiamondBatchConfigurationCanceled}. Has no effect once the version has been finalised via a `_isLastBatch = true` call._
+_Emits {DiamondBatchConfigurationCancelled}. Has no effect once the version has been finalised via a `_isLastBatch = true` call._
 
 #### Parameters
 
@@ -486,15 +486,15 @@ Returns the replacement address for a given address, or address(0) if none exist
 
 #### Parameters
 
-| Name         | Type    | Description |
-| ------------ | ------- | ----------- |
-| \_oldAddress | address | undefined   |
+| Name         | Type    | Description                              |
+| ------------ | ------- | ---------------------------------------- |
+| \_oldAddress | address | the address whose replacement is queried |
 
 #### Returns
 
-| Name                 | Type    | Description |
-| -------------------- | ------- | ----------- |
-| replacementAddress\_ | address | undefined   |
+| Name                 | Type    | Description                                           |
+| -------------------- | ------- | ----------------------------------------------------- |
+| replacementAddress\_ | address | the replacement address, or address(0) if none exists |
 
 ### getSelectorsBlacklist
 
@@ -668,10 +668,10 @@ _Used by resolver proxies during dispatch. Returns `address(0)` when no facet cl
 
 #### Parameters
 
-| Name                         | Type   | Description                        |
-| ---------------------------- | ------ | ---------------------------------- |
-| \_resolverProxyConfiguration | bytes  | Resolver proxy full configuration. |
-| \_selector                   | bytes4 | undefined                          |
+| Name                         | Type   | Description                         |
+| ---------------------------- | ------ | ----------------------------------- |
+| \_resolverProxyConfiguration | bytes  | Resolver proxy full configuration.  |
+| \_selector                   | bytes4 | Function selector being dispatched. |
 
 #### Returns
 
@@ -769,10 +769,10 @@ Event emitted when Business Logic(s) are registered (updated or added).
 | businessLogics    | IBusinessLogicResolver.BusinessLogicRegistryData[] | list of registered Business Logics.                                           |
 | newLatestVersions | uint256[]                                          | new latest version per registered key, in the same order as `businessLogics`. |
 
-### DiamondBatchConfigurationCanceled
+### DiamondBatchConfigurationCancelled
 
 ```solidity
-event DiamondBatchConfigurationCanceled(bytes32 indexed configurationId, uint256 version)
+event DiamondBatchConfigurationCancelled(bytes32 indexed configurationId, uint256 indexed version)
 ```
 
 Emitted when an in-progress batch configuration is discarded.
@@ -782,7 +782,7 @@ Emitted when an in-progress batch configuration is discarded.
 | Name                      | Type    | Description                                                 |
 | ------------------------- | ------- | ----------------------------------------------------------- |
 | configurationId `indexed` | bytes32 | Configuration key whose pending batch was cancelled.        |
-| version                   | uint256 | Version number that was being assembled and is now dropped. |
+| version `indexed`         | uint256 | Version number that was being assembled and is now dropped. |
 
 ### DiamondBatchConfigurationCreated
 
