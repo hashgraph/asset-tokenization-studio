@@ -48,7 +48,7 @@ struct BusinessLogicResolverDataStorage {
     mapping(bytes32 => EnumerableSetBytes4.Bytes4Set) selectorBlacklist;
     // ─── APPEND-ONLY ZONE BELOW ───
     mapping(address => address) replacementAddressMap;
-    mapping(address => uint256) isReplacementAddress;
+    mapping(address => uint256) replacementAddressCount;
 }
 
 /**
@@ -218,7 +218,7 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
     function _updateReplacementAddress(address _oldAddress, address _newAddress) internal {
         BusinessLogicResolverDataStorage storage businessLogicResolverDataStorage = _businessLogicResolverStorage();
         businessLogicResolverDataStorage.replacementAddressMap[_oldAddress] = _newAddress;
-        businessLogicResolverDataStorage.isReplacementAddress[_newAddress]++;
+        businessLogicResolverDataStorage.replacementAddressCount[_newAddress]++;
     }
 
     /**
@@ -233,7 +233,7 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
         newAddressRemoved_ = businessLogicResolverDataStorage.replacementAddressMap[_oldAddress];
         if (newAddressRemoved_ == address(0)) return newAddressRemoved_;
         businessLogicResolverDataStorage.replacementAddressMap[_oldAddress] = address(0);
-        businessLogicResolverDataStorage.isReplacementAddress[newAddressRemoved_]--;
+        businessLogicResolverDataStorage.replacementAddressCount[newAddressRemoved_]--;
     }
 
     /**
@@ -410,8 +410,8 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
      * @param _address Address to query.
      * @return The replacement reference count for `_address`.
      */
-    function _isReplacementAddress(address _address) internal view returns (uint256) {
-        return _businessLogicResolverStorage().isReplacementAddress[_address];
+    function _getReplacementAddressCount(address _address) internal view returns (uint256) {
+        return _businessLogicResolverStorage().replacementAddressCount[_address];
     }
 
     /**
@@ -429,7 +429,7 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
      * @param _address The replaced address been used as replacement.
      */
     function _checkNotReplacement(address _address) internal view {
-        if (_isReplacementAddress(_address) > 0) {
+        if (_getReplacementAddressCount(_address) > 0) {
             revert InvalidReplacedAddress(_address);
         }
     }
