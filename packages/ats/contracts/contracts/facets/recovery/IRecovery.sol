@@ -41,6 +41,6 @@ interface IRecovery is IERC3643Types {
 
     /// @notice Returns whether a wallet address has been marked as recovered.
     /// @param _wallet Address to query.
-    /// @return `true` if the address has previously been recovered via {recoveryAddress}.
+    /// @return True if the address has previously been recovered via {recoveryAddress}.
     function isAddressRecovered(address _wallet) external view returns (bool);
 }

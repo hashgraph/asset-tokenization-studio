@@ -150,6 +150,9 @@ library ClearingReadOps {
     // TIMESTAMP VALIDATION
 
     /// @notice Reverts unless the clearing operation's expiration state matches `_mustBeExpired`.
+    /// @dev    Delegates expiration logic to `ClearingStorageWrapper.requireExpirationTimestamp`,
+    ///         which reads the current block timestamp internally. `_blockTimestamp` is accepted
+    ///         for interface compatibility but is not used by this implementation.
     /// @param _clearingOperationIdentifier Identifier of the clearing operation to check.
     /// @param _mustBeExpired               When `true`, reverts unless the operation has already
     ///                                     expired; when `false`, reverts if it has expired.
