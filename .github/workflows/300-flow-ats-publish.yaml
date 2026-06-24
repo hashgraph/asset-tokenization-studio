@@ -51,7 +51,7 @@ jobs:
           node-version: 22.20.0
 
       - name: Setup JQ
-        uses: dcarbone/install-jq-action@b7ef57d46ece78760b4019dbc4080a1ba2a40b45 # v3.2.0
+        uses: step-security/install-jq-action@6eecb102befc9cde313a218816ce91a941c1684c # v3.2.1
         with:
           version: 1.7
 
@@ -117,7 +117,7 @@ jobs:
           node-version: 22.20.0
 
       - name: Setup JQ
-        uses: dcarbone/install-jq-action@b7ef57d46ece78760b4019dbc4080a1ba2a40b45 # v3.2.0
+        uses: step-security/install-jq-action@6eecb102befc9cde313a218816ce91a941c1684c # v3.2.1
         with:
           version: 1.7
 
