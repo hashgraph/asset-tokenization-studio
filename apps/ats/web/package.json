@@ -28,7 +28,7 @@
     "@chakra-ui/cli": "2.5.8",
     "@esbuild-plugins/node-globals-polyfill": "0.2.3",
     "@esbuild-plugins/node-modules-polyfill": "0.2.2",
-    "@rollup/plugin-commonjs": "28.0.6",
+    "@rollup/plugin-commonjs": "29.0.2",
     "@testing-library/jest-dom": "5.17.0",
     "@testing-library/react": "14.3.1",
     "@testing-library/user-event": "14.6.1",
