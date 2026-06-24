@@ -99,7 +99,7 @@ library ERC20VotesStorageWrapper {
      * @param to The account receiving tokens (or address(0) for burns).
      * @param amount The number of tokens transferred.
      */
-    function afterTokenTransfer(bytes32 /* partition */, address from, address to, uint256 amount) internal {
+    function afterTokenTransfer(bytes32, address from, address to, uint256 amount) internal {
         ERC20VotesStorage storage erc20VotesStorage = erc20VotesStorage_();
 
         if (!isActivated()) return;

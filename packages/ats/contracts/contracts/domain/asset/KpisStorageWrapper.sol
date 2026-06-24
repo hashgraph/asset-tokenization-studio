@@ -72,6 +72,7 @@ library KpisStorageWrapper {
         unchecked {
             for (uint256 i = length; i > 0; --i) {
                 uint256 prev = i - 1;
+                // solhint-disable-next-line gas-strict-inequalities
                 if (ckpt[prev].from <= date) {
                     ckpt[i] = Checkpoints.Checkpoint({ from: date, value: value });
                     return;
@@ -123,7 +124,7 @@ library KpisStorageWrapper {
         (uint256 checkpointFrom, uint256 value_) = kpisDataStorage().checkpointsByProject[project].checkpointsLookup(
             to
         );
-        if (checkpointFrom <= from) return (0, false);
+        if (checkpointFrom <= from) return (0, false); // solhint-disable-line gas-strict-inequalities
         return (value_, true);
     }
 

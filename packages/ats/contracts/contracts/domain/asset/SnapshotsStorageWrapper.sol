@@ -137,7 +137,7 @@ library SnapshotsStorageWrapper {
      */
     function updateSnapshotAddress(SnapshotsAddress storage snapshots, address currentValue) internal {
         uint256 currentId = getCurrentSnapshotId();
-        if (lastSnapshotId(snapshots.ids) >= currentId) return;
+        if (lastSnapshotId(snapshots.ids) >= currentId) return; // solhint-disable-line gas-strict-inequalities
         snapshots.ids.push(currentId);
         snapshots.values.push(currentValue);
     }
@@ -151,7 +151,7 @@ library SnapshotsStorageWrapper {
      */
     function updateSnapshotBytes32(SnapshotsBytes32 storage snapshots, bytes32 currentValue) internal {
         uint256 currentId = getCurrentSnapshotId();
-        if (lastSnapshotId(snapshots.ids) >= currentId) return;
+        if (lastSnapshotId(snapshots.ids) >= currentId) return; // solhint-disable-line gas-strict-inequalities
         snapshots.ids.push(currentId);
         snapshots.values.push(currentValue);
     }

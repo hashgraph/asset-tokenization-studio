@@ -435,7 +435,7 @@ library ScheduledTasksStorageWrapper {
                 pos
             );
 
-            if (scheduledTask.scheduledTimestamp >= _timestamp) break;
+            if (scheduledTask.scheduledTimestamp >= _timestamp) break; // solhint-disable-line gas-strict-inequalities
 
             bytes32 actionId = abi.decode(scheduledTask.data, (bytes32));
 

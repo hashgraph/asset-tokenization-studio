@@ -161,7 +161,6 @@ library AmortizationStorageWrapper {
             CORPORATE_ACTION_TYPE_AMORTIZATION,
             _amortizationID - 1
         );
-
         if (_amortizationStorage().disabledAmortizations[corporateActionId]) {
             revert IAmortization.AmortizationNotActive(corporateActionId, _amortizationID);
         }
