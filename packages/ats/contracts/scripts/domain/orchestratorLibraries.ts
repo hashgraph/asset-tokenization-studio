@@ -19,6 +19,7 @@
 import { Signer } from "ethers";
 import {
   GAS_LIMIT,
+  gasLimitOverride,
   hederaGasOverrides,
   info,
   retryTransaction,
@@ -328,7 +329,9 @@ export async function deployOrchestratorLibraries(
     });
 
   // Phase 1: ScheduledTasksDispatchOps and ClearingReadOps have no library dependencies.
-  const gasOverrides = { ...hederaGasOverrides(), gasLimit: GAS_LIMIT.high };
+  // gasLimitOverride (not a fixed gasLimit) so instrumented library deploys under solidity-coverage
+  // get the higher coverage limit — their bytecode grows past GAS_LIMIT.high when instrumented.
+  const gasOverrides = { ...hederaGasOverrides(), ...gasLimitOverride(GAS_LIMIT.high) };
   const scheduledTasksDispatchOpsAddr = await deployLib("ScheduledTasksDispatchOps", () =>
     new ScheduledTasksDispatchOps__factory(signer)
       .deploy(gasOverrides)

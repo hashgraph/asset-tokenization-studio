@@ -25,10 +25,11 @@ import { info, warn, debug } from "./logging";
  * Under solidity-coverage (`COVERAGE=true`), contracts are instrumented and grow
  * substantially, so we use a higher fixed limit instead of auto-estimation — the
  * auto-estimate is based on the unmodified bytecode and will be too low.
- * 30M sits well within the 300M blockGasLimit configured for coverage runs.
+ * 100M gives headroom for the heaviest instrumented deploy tx (the v8.0.0 system
+ * deploy exceeded the previous 30M) while staying well under the 300M coverage blockGasLimit.
  */
 export function gasLimitOverride(limit: number): { gasLimit: number } {
-  return { gasLimit: process.env.COVERAGE ? 30_000_000 : limit };
+  return { gasLimit: process.env.COVERAGE ? 100_000_000 : limit };
 }
 
 /**

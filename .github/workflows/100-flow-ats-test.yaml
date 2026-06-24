@@ -5,8 +5,7 @@ on:
     branches: [main]
   pull_request:
     paths:
-      - "packages/ats/**"
-      - "apps/ats/**"
+      - "packages/ats/contracts/**"
       - "package.json"
       - ".github/workflows/*ats*.yaml"
   workflow_dispatch:
@@ -20,34 +19,206 @@ permissions:
 
 jobs:
   test-ats:
-    name: testing
+    name: contracts scripts tests
     runs-on: token-studio-linux-large
     timeout-minutes: 45
     env:
       CONTRACT_SIZER_RUN_ON_COMPILE: "false"
       REPORT_GAS: "false"
-      CLIENT_PRIVATE_KEY_ECDSA_1: ${{ secrets.CLIENT_PRIVATE_KEY_ECDSA_1 }}
-      CLIENT_PUBLIC_KEY_ECDSA_1: ${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_1 }}
-      CLIENT_ACCOUNT_ID_ECDSA_1: "0.0.1328"
-      CLIENT_EVM_ADDRESS_ECDSA_1_CORRECT: "0x97C50bb12E1C6284cF2855cdba95c5D60AEE44CF"
-      CLIENT_EVM_ADDRESS_ECDSA_1: "0x0000000000000000000000000000000000000530"
-      CLIENT_PRIVATE_KEY_ECDSA_2: ${{ secrets.CLIENT_PRIVATE_KEY_ECDSA_2 }}
-      CLIENT_PUBLIC_KEY_ECDSA_2: ${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_2 }}
-      CLIENT_ACCOUNT_ID_ECDSA_2: "0.0.2168740"
-      CLIENT_EVM_ADDRESS_ECDSA_2: "0x00000000000000000000000000000000002117A4"
-      FACTORY_ADDRESS: "0.0.5480051"
-      RESOLVER_ADDRESS: "0.0.5479997"
-      FIREBLOCKS_HEDERA_ACCOUNT_ID: "0.0.2168740"
-      FIREBLOCKS_HEDERA_PUBLIC_KEY: ${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_2 }}
-      DFNS_HEDERA_ACCOUNT_ID: "0.0.2168740"
-      DFNS_WALLET_PUBLIC_KEY: ${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_2 }}
-      AWS_KMS_HEDERA_ACCOUNT_ID: "0.0.4394946"
-      AWS_KMS_HEDERA_PUBLIC_KEY: "302d300706052b8104000a03220003ee815bb9b5e53f5dbe7264a77e586127dfcb75da8c1246f5aa6ededdb13e6c21"
-      REACT_APP_MIRROR_NODE: "https://testnet.mirrornode.hedera.com/api/v1/"
-      REACT_APP_RPC_NODE: "https://testnet.hashio.io/api"
-      REACT_APP_RESOLVER: "0.0.5479997"
-      REACT_APP_FACTORY: "0.0.5480051"
-      REACT_APP_SHOW_DISCLAIMER: "true"
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Setup NodeJS Environment
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: "npm"
+
+      # Shared dependency cache across every job in this workflow (and matched by the other ATS
+      # workflows on the same key), so node_modules is restored instead of reinstalled. On a hit
+      # the install below is skipped entirely.
+      - name: Restore dependencies from cache
+        id: deps-cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: |
+            node_modules
+            */*/node_modules
+            */*/*/node_modules
+            ~/.npm
+          key: ${{ runner.os }}-deps-${{ hashFiles('package-lock.json') }}
+
+      # --ignore-scripts skips the contracts `prepare` hook (a *production* `hardhat compile`).
+      # Every job here recompiles in test/coverage mode anyway and regenerates the gitignored
+      # resolver registry as part of that compile, so the prepare compile is pure duplicated work.
+      - name: Install dependencies
+        if: steps.deps-cache.outputs.cache-hit != 'true'
+        run: npm ci --ignore-scripts
+
+      # Contracts integration tests run under coverage in the parallel `coverage-ats` matrix below
+      # (which doubles as their gate), so this job only runs the scripts/* suite that coverage does
+      # not exercise. SDK and web are deprecated and no longer tested here.
+      #
+      # The scripts suite deploys the system and exercises test-only facets (EvmAccessors,
+      # MockDiamondCut, …), so it needs a TEST-MODE compile — which also regenerates the test-mode
+      # resolver registry — before the run. `--force` is mandatory: without it Hardhat sees no
+      # source change and skips, leaving a registry with no key for EvmAccessorsFacet.
+      - name: Run contracts scripts tests
+        working-directory: packages/ats/contracts
+        env:
+          ATS_TEST_MODE: "true"
+        run: |
+          npm run compile:force
+          npm run test:scripts
+
+  # Contracts coverage is sharded across parallel runners: solidity-coverage re-instruments and
+  # recompiles per shard (unavoidable on Hardhat 2), but each shard runs on its own runner so the
+  # ~3 min compile overlaps instead of serializing. Each shard runs the mega-asset entry once for
+  # its `i % SHARD_TOTAL` slice plus a round-robined share of the standalone suites, computed by
+  # scripts/tools/coverage-shard/planShard.ts. Shards upload their lcov as artifacts; the
+  # merge-coverage job below combines them into a single report and uploads it once to Codecov.
+  coverage-ats:
+    name: coverage (shard ${{ matrix.shard }})
+    runs-on: token-studio-linux-large
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        # Keep this list's length equal to SHARD_TOTAL below (indices 0..N-1).
+        shard: [0, 1, 2, 3]
+    env:
+      CONTRACT_SIZER_RUN_ON_COMPILE: "false"
+      REPORT_GAS: "false"
+      SHARD_INDEX: ${{ matrix.shard }}
+      SHARD_TOTAL: "4"
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Setup NodeJS Environment
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: "npm"
+
+      - name: Restore dependencies from cache
+        id: deps-cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: |
+            node_modules
+            */*/node_modules
+            */*/*/node_modules
+            ~/.npm
+          key: ${{ runner.os }}-deps-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        if: steps.deps-cache.outputs.cache-hit != 'true'
+        run: npm ci --ignore-scripts
+
+      - name: Run contracts coverage shard
+        run: |
+          npm run test:coverage:shard --workspace=packages/ats/contracts 2>&1 | tee shard.log
+          # Record this shard's passing-test count (ANSI-stripped) for the merge-time reconciliation
+          # that proves the sharded runs executed every test — see the merge-coverage job.
+          sed -E 's/\x1b\[[0-9;]*m//g' shard.log | grep -oE '[0-9]+ passing' | head -1 | grep -oE '^[0-9]+' \
+            > packages/ats/contracts/coverage/shard-count.txt
+          echo "shard ${SHARD_INDEX} passing: $(cat packages/ats/contracts/coverage/shard-count.txt)"
+
+      - name: Upload coverage shard artifact
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: coverage-shard-${{ matrix.shard }}
+          path: |
+            packages/ats/contracts/coverage/lcov.info
+            packages/ats/contracts/coverage/shard-count.txt
+          if-no-files-found: error
+          retention-days: 1
+
+  # Sequential oracle for the trust check: run the integration suite in ONE pass and record its
+  # passing-test count. The merge job compares this against the sum of the coverage shards' counts to
+  # prove the sharding/balancing dropped no test. Integration-only (NOT the scripts suite, which the
+  # coverage shards don't run), and excludes the local-parallel `ats.shard.*` files. Runs in parallel
+  # with the coverage matrix, so it adds no critical-path time.
+  verify-test-count:
+    name: verify test count
+    runs-on: token-studio-linux-large
+    timeout-minutes: 45
+    env:
+      CONTRACT_SIZER_RUN_ON_COMPILE: "false"
+      REPORT_GAS: "false"
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Setup NodeJS Environment
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: "npm"
+
+      - name: Restore dependencies from cache
+        id: deps-cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: |
+            node_modules
+            */*/node_modules
+            */*/*/node_modules
+            ~/.npm
+          key: ${{ runner.os }}-deps-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        if: steps.deps-cache.outputs.cache-hit != 'true'
+        run: npm ci --ignore-scripts
+
+      - name: Run the integration suite sequentially (oracle)
+        working-directory: packages/ats/contracts
+        run: |
+          npm run test:integration 2>&1 | tee oracle.log
+          sed -E 's/\x1b\[[0-9;]*m//g' oracle.log | grep -oE '[0-9]+ passing' | head -1 | grep -oE '^[0-9]+' \
+            > oracle-count.txt
+          echo "sequential integration passing: $(cat oracle-count.txt)"
+
+      - name: Upload oracle count
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: oracle-count
+          path: packages/ats/contracts/oracle-count.txt
+          if-no-files-found: error
+          retention-days: 1
+
+  # Merge the per-shard lcov reports into a single report and upload it once to Codecov — matching
+  # the local `npm run test:coverage` single report, instead of uploading partial per-shard pieces.
+  # Also reconciles the sharded test count against the sequential oracle. Runs only when every shard
+  # and the oracle succeeded, so the merged report is complete.
+  merge-coverage:
+    name: merge coverage + upload
+    needs: [coverage-ats, verify-test-count]
+    runs-on: token-studio-linux-large
+    timeout-minutes: 15
+    env:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
     steps:
@@ -65,33 +236,58 @@ jobs:
           node-version-file: .nvmrc
           cache: "npm"
 
+      - name: Restore dependencies from cache
+        id: deps-cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: |
+            node_modules
+            */*/node_modules
+            */*/*/node_modules
+            ~/.npm
+          key: ${{ runner.os }}-deps-${{ hashFiles('package-lock.json') }}
+
       - name: Install dependencies
-        run: npm run ats:install
+        if: steps.deps-cache.outputs.cache-hit != 'true'
+        run: npm ci --ignore-scripts
 
-      # BBND-1766: `atsRegistry.generated.ts` is gitignored and regenerated
-      # by the contracts package's `prepare` script during `npm ci`. This
-      # step is the clean-checkout guard for that contract — if the file is
-      # missing after install, `prepare` regressed and every downstream
-      # build / test step would fail with a confusing module-not-found.
-      - name: Verify auto-generated registry produced by prepare hook
+      - name: Download all coverage shard artifacts
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          pattern: coverage-shard-*
+          path: coverage-shards
+
+      - name: Download sequential oracle count
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: oracle-count
+          path: oracle
+
+      # Trust check: the sum of the coverage shards' passing-test counts must equal the sequential
+      # single-pass count, proving the sharding/balancing ran every test (none dropped or doubled).
+      - name: Reconcile sharded vs sequential test count
         run: |
-          REGISTRY_PATH="packages/ats/contracts/scripts/domain/atsRegistry.generated.ts"
-          if [[ ! -f "${REGISTRY_PATH}" ]]; then
-            echo "::error::${REGISTRY_PATH} missing after npm ci. The contracts package's 'prepare' script (hardhat compile) likely regressed."
+          oracle=$(cat oracle/oracle-count.txt)
+          sharded=$(find coverage-shards -name shard-count.txt -exec cat {} + | awk '{s += $1} END {print s + 0}')
+          echo "sequential integration : ${oracle} passing"
+          echo "Σ coverage shards       : ${sharded} passing"
+          if [[ "${oracle}" != "${sharded}" ]]; then
+            echo "::error::Test-count mismatch — sequential ${oracle} vs sharded ${sharded}. A suite may be dropped or double-run by the sharding."
             exit 1
           fi
-          if ! grep -q "^export const FACET_REGISTRY" "${REGISTRY_PATH}"; then
-            echo "::error::${REGISTRY_PATH} missing FACET_REGISTRY export — generator produced a malformed file."
-            exit 1
-          fi
-          echo "✓ ${REGISTRY_PATH} auto-regenerated by prepare hook"
+          echo "✅ all tests accounted for (${oracle})"
 
-      - name: Build ATS packages
-        run: npm run ats:build
+      # Sum line/function/branch hits across the disjoint shards into one lcov, written to the same
+      # path a local single-run coverage produces, so the Codecov upload is identical to local. Uses
+      # the in-repo merger (preserves function coverage, which lcov-result-merger drops; no
+      # runtime-fetched dependency).
+      - name: Merge shard lcov reports
+        working-directory: packages/ats/contracts
+        run: npm run coverage:merge -- coverage/lcov.info "${GITHUB_WORKSPACE}/coverage-shards"
 
-      - name: Run ATS tests
-        run: npm run ats:test:ci
-
-      - name: Upload coverage report
-        if: ${{ !cancelled() && always() }}
+      - name: Upload merged coverage to Codecov
         uses: codecov/codecov-action@e28ff129e5465c2c0dcc6f003fc735cb6ae0c673 # v5.4.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: packages/ats/contracts/coverage/lcov.info
+          disable_search: true
