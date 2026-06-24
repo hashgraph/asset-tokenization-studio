@@ -475,24 +475,6 @@ Emitted when an amortization is created or updated for a security.
 | recordDate         | uint256 | Date at which token holder balances are snapshotted.  |
 | executionDate      | uint256 | Date at which the amortization payment is executed.   |
 
-### Approval
-
-```solidity
-event Approval(address indexed owner, address indexed spender, uint256 value)
-```
-
-Emitted when `owner` authorises `spender` to spend up to `value` tokens on their behalf, whether via {IAllowance.approve}, {IAllowance.increaseAllowance} or {IAllowance.decreaseAllowance}.
-
-_Mirrors the ERC-20 `Approval` event. `value` is the resulting, absolute allowance after the update — not the delta applied._
-
-#### Parameters
-
-| Name              | Type    | Description                                                        |
-| ----------------- | ------- | ------------------------------------------------------------------ |
-| owner `indexed`   | address | Address whose tokens may be spent.                                 |
-| spender `indexed` | address | Address authorised to spend on `owner`&#39;s behalf.               |
-| value             | uint256 | Allowance of `spender` over `owner`&#39;s tokens after the update. |
-
 ### Transfer
 
 ```solidity
@@ -684,21 +666,6 @@ Thrown when a transfer or redemption is attempted with insufficient partition ba
 | balance   | uint256 | The actual balance available.          |
 | value     | uint256 | The amount that was requested.         |
 | partition | bytes32 | The partition that was checked.        |
-
-### InsufficientHoldBalance
-
-```solidity
-error InsufficientHoldBalance(uint256 holdAmount, uint256 amount)
-```
-
-Reverts when the requested release amount exceeds the hold&#39;s remaining balance.
-
-#### Parameters
-
-| Name       | Type    | Description            |
-| ---------- | ------- | ---------------------- |
-| holdAmount | uint256 | The amount still held. |
-| amount     | uint256 | The amount requested.  |
 
 ### InvalidAmortizationHoldAmount
 

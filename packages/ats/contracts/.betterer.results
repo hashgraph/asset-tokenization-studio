@@ -5,11 +5,10 @@
 //
 exports[`ats contracts solhint`] = {
   value: `{
-    "contracts/domain/asset/AmortizationStorageWrapper.sol:2444797827": [
+    "contracts/domain/asset/AmortizationStorageWrapper.sol:2696188797": [
       [117, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
-      [155, 4, 1, "function-max-lines: Function body contains 53 lines but allowed no more than 50 lines", "177603"],
-      [403, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
-      [428, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"]
+      [399, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
+      [424, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"]
     ],
     "contracts/domain/asset/ClearingStorageWrapper.sol:657877060": [
       [720, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177632"]
@@ -19,32 +18,31 @@ exports[`ats contracts solhint`] = {
       [246, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
       [264, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"]
     ],
-    "contracts/domain/asset/ERC20VotesStorageWrapper.sol:1519984577": [
+    "contracts/domain/asset/ERC1594StorageWrapper.sol:1689167301": [
+      [169, 4, 1, "use-natspec: Mismatch in @param count for function \'canRedeemFromByPartition\'. Expected: 5, Found: 3", "177603"],
+      [242, 4, 1, "use-natspec: Mismatch in @param count for function \'canTransferFromByPartition\'. Expected: 6, Found: 4", "177603"]
+    ],
+    "contracts/domain/asset/ERC20VotesStorageWrapper.sol:1439876099": [
+      [101, 4, 1, "use-natspec: Mismatch in @param count for function \'afterTokenTransfer\'. Expected: 4, Found: 3", "177603"],
       [298, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177617"],
       [309, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177617"]
     ],
     "contracts/domain/asset/HoldStorageWrapper.sol:533726159": [
       [800, 15, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177632"]
     ],
-    "contracts/domain/asset/KpisStorageWrapper.sol:1085411112": [
-      [76, 20, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177606"],
-      [157, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177601"],
-      [179, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177606"]
+    "contracts/domain/asset/KpisStorageWrapper.sol:1344912392": [
+      [104, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177601"]
     ],
-    "contracts/domain/asset/LockStorageWrapper.sol:1857377066": [
+    "contracts/domain/asset/LockStorageWrapper.sol:2572777485": [
+      [239, 4, 1, "use-natspec: Mismatch in @param count for function \'updateLockedBalancesBeforeLock\'. Expected: 4, Found: 2", "177603"],
+      [257, 4, 1, "use-natspec: Mismatch in @param count for function \'updateLockedBalancesBeforeRelease\'. Expected: 3, Found: 2", "177603"],
       [327, 15, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177602"]
     ],
-    "contracts/domain/asset/MaturityDateStorageWrapper.sol:4271145073": [
-      [56, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"]
+    "contracts/domain/asset/ScheduledTasksStorageWrapper.sol:3874914318": [
+      [193, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"]
     ],
-    "contracts/domain/asset/ScheduledTasksStorageWrapper.sol:2827404587": [
-      [228, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"],
-      [472, 16, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177622"]
-    ],
-    "contracts/domain/asset/SnapshotsStorageWrapper.sol:3547134957": [
-      [139, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177609"],
-      [153, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177609"],
-      [1034, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"]
+    "contracts/domain/asset/SnapshotsStorageWrapper.sol:732035984": [
+      [1038, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"]
     ],
     "contracts/domain/asset/VotingStorageWrapper.sol:1130199794": [
       [58, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
@@ -57,13 +55,7 @@ exports[`ats contracts solhint`] = {
       [382, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
       [402, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177621"]
     ],
-    "contracts/domain/core/CapStorageWrapper.sol:2272932499": [
-      [240, 37, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"]
-    ],
-    "contracts/domain/core/CorporateActionsStorageWrapper.sol:1633069601": [
-      [147, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177602"]
-    ],
-    "contracts/domain/orchestrator/ClearingOps.sol:1768944660": [
+    "contracts/domain/orchestrator/ClearingOps.sol:1078388775": [
       [57, 4, 1, "function-max-lines: Function body contains 57 lines but allowed no more than 50 lines", "177603"],
       [57, 4, 1, "gas-calldata-parameters: GC: [_clearingOperation] argument on Function [clearingTransferCreation] could be [calldata] if it\'s not being updated", "177603"],
       [57, 4, 1, "gas-calldata-parameters: GC: [_operatorData] argument on Function [clearingTransferCreation] could be [calldata] if it\'s not being updated", "177603"],
@@ -71,9 +63,11 @@ exports[`ats contracts solhint`] = {
       [137, 4, 1, "gas-calldata-parameters: GC: [_clearingOperation] argument on Function [clearingRedeemCreation] could be [calldata] if it\'s not being updated", "177603"],
       [137, 4, 1, "gas-calldata-parameters: GC: [_operatorData] argument on Function [clearingRedeemCreation] could be [calldata] if it\'s not being updated", "177603"],
       [221, 4, 1, "function-max-lines: Function body contains 58 lines but allowed no more than 50 lines", "177603"],
-      [221, 4, 1, "gas-calldata-parameters: GC: [_clearingOperation] argument on Function [clearingHoldCreationCreation] could be [calldata] if it\'s not being updated", "177603"],
       [221, 4, 1, "gas-calldata-parameters: GC: [_operatorData] argument on Function [clearingHoldCreationCreation] could be [calldata] if it\'s not being updated", "177603"],
       [407, 4, 1, "function-max-lines: Function body contains 52 lines but allowed no more than 50 lines", "177603"]
+    ],
+    "contracts/domain/orchestrator/ClearingReadOps.sol:129972878": [
+      [158, 4, 1, "use-natspec: Mismatch in @param count for function \'checkClearingExpirationTimestamp\'. Expected: 3, Found: 2", "177603"]
     ],
     "contracts/domain/orchestrator/HoldOps.sol:2308870617": [
       [29, 4, 1, "gas-calldata-parameters: GC: [_hold] argument on Function [createHoldByPartition] could be [calldata] if it\'s not being updated", "177603"],
@@ -157,7 +151,7 @@ exports[`ats contracts solhint`] = {
     "contracts/facets/dividend/IDividendTypes.sol:2960222249": [
       [58, 4, 1, "gas-struct-packing: GC: For [ DividendFor ] struct, packing seems inefficient. Try rearranging to achieve 32bytes slots", "177622"]
     ],
-    "contracts/facets/erc20Votes/IERC20Votes.sol:1279752095": [
+    "contracts/facets/erc20Votes/IERC20Votes.sol:3630286460": [
       [19, 4, 1, "gas-indexed-events: GC: [activated] on Event [ERC20VotesInitialized] could be Indexed", "177600"],
       [31, 4, 1, "gas-indexed-events: GC: [previousBalance] on Event [DelegateVotesChanged] could be Indexed", "177600"],
       [31, 4, 1, "gas-indexed-events: GC: [newBalance] on Event [DelegateVotesChanged] could be Indexed", "177600"]
@@ -225,7 +219,7 @@ exports[`ats contracts solhint`] = {
       [36, 4, 1, "gas-indexed-events: GC: [nominalValue] on Event [NominalValueSet] could be Indexed", "177600"],
       [36, 4, 1, "gas-indexed-events: GC: [nominalValueDecimals] on Event [NominalValueSet] could be Indexed", "177600"]
     ],
-    "contracts/facets/partitions/IPartitions.sol:165312895": [
+    "contracts/facets/partitions/IPartitions.sol:2641262830": [
       [20, 4, 1, "gas-indexed-events: GC: [multiPartition] on Event [PartitionsInitialized] could be Indexed", "177600"]
     ],
     "contracts/facets/protectedClearingByPartition/IProtectedClearingByPartition.sol:2414024950": [
@@ -242,9 +236,6 @@ exports[`ats contracts solhint`] = {
       [45, 4, 1, "gas-indexed-events: GC: [decimals] on Event [ScheduledBalanceAdjustmentSet] could be Indexed", "177600"],
       [59, 4, 1, "gas-indexed-events: GC: [balanceAdjustmentId] on Event [ScheduledBalanceAdjustmentCancelled] could be Indexed", "177600"],
       [66, 4, 1, "gas-indexed-events: GC: [balanceAdjustmentId] on Event [ScheduledBalanceAdjustmentForceCancelled] could be Indexed", "177600"]
-    ],
-    "contracts/facets/scheduledBalanceAdjustment/ScheduledBalanceAdjustmentBase.sol:3351011126": [
-      [109, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177600"]
     ],
     "contracts/facets/scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol:1747555586": [
       [22, 4, 1, "gas-indexed-events: GC: [scheduledTimestamp] on Event [TaskExecutionFailed] could be Indexed", "177600"]

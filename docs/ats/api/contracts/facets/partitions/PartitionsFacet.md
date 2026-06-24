@@ -78,9 +78,9 @@ Indicates whether the token operates in multi-partition mode.
 
 #### Returns
 
-| Name | Type | Description                                                                                                                        |
-| ---- | ---- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| \_0  | bool | true : the token allows multiple partitions to be set and managed. false : the token contains only one partition, the default one. |
+| Name | Type | Description                                                                         |
+| ---- | ---- | ----------------------------------------------------------------------------------- |
+| \_0  | bool | True if the token allows multiple partitions to be set and managed; false otherwise |
 
 ### partitionsOf
 

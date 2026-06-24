@@ -1019,9 +1019,9 @@ Returns the checkpoint at a given position for an account&#39;s vote history.
 
 #### Returns
 
-| Name | Type                   | Description |
-| ---- | ---------------------- | ----------- |
-| \_0  | Checkpoints.Checkpoint | undefined   |
+| Name | Type                   | Description                                  |
+| ---- | ---------------------- | -------------------------------------------- |
+| \_0  | Checkpoints.Checkpoint | The checkpoint struct at the given position. |
 
 ### clearedBalanceOfAtSnapshot
 
@@ -6136,9 +6136,9 @@ Returns whether the ERC-20Votes voting feature is currently active.
 
 #### Returns
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| \_0  | bool | undefined   |
+| Name | Type | Description                                            |
+| ---- | ---- | ------------------------------------------------------ |
+| \_0  | bool | True if the voting feature is active, false otherwise. |
 
 ### isAddressRecovered
 
@@ -6156,9 +6156,9 @@ Returns whether a wallet address has been marked as recovered.
 
 #### Returns
 
-| Name | Type | Description                                                                |
-| ---- | ---- | -------------------------------------------------------------------------- |
-| \_0  | bool | `true` if the address has previously been recovered via {recoveryAddress}. |
+| Name | Type | Description                                                              |
+| ---- | ---- | ------------------------------------------------------------------------ |
+| \_0  | bool | True if the address has previously been recovered via {recoveryAddress}. |
 
 ### isAgent
 
@@ -6198,9 +6198,9 @@ Returns whether `account` is authorised according to the external control list.
 
 #### Returns
 
-| Name | Type | Description                                                    |
-| ---- | ---- | -------------------------------------------------------------- |
-| \_0  | bool | `true` if the account is on the allow-list; `false` otherwise. |
+| Name | Type | Description                                                |
+| ---- | ---- | ---------------------------------------------------------- |
+| \_0  | bool | True if the account is on the allow-list; false otherwise. |
 
 ### isCheckPointDate
 
@@ -6452,9 +6452,9 @@ Indicates whether the token operates in multi-partition mode.
 
 #### Returns
 
-| Name | Type | Description                                                                                                                        |
-| ---- | ---- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| \_0  | bool | true : the token allows multiple partitions to be set and managed. false : the token contains only one partition, the default one. |
+| Name | Type | Description                                                                         |
+| ---- | ---- | ----------------------------------------------------------------------------------- |
+| \_0  | bool | True if the token allows multiple partitions to be set and managed; false otherwise |
 
 ### isOperator
 
@@ -6800,9 +6800,9 @@ Returns the total number of vote checkpoints recorded for an account.
 
 #### Returns
 
-| Name | Type    | Description |
-| ---- | ------- | ----------- |
-| \_0  | uint256 | undefined   |
+| Name | Type    | Description                                       |
+| ---- | ------- | ------------------------------------------------- |
+| \_0  | uint256 | The number of checkpoints stored for the account. |
 
 ### onchainID
 

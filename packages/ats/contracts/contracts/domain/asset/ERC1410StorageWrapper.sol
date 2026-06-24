@@ -895,7 +895,7 @@ library ERC1410StorageWrapper {
      * @dev Delegates to `validPartitionForReceiver` since the membership test is symmetric.
      * @param partition Partition identifier being checked.
      * @param holder    Address being queried.
-     * @return `true` when the holder has an entry for the partition.
+     * @return True when the holder has an entry for the partition; false otherwise.
      */
     function validPartition(bytes32 partition, address holder) internal view returns (bool) {
         return validPartitionForReceiver(partition, holder);
@@ -907,7 +907,7 @@ library ERC1410StorageWrapper {
      *      the address.
      * @param partition Partition identifier being checked.
      * @param to        Recipient candidate being queried.
-     * @return `true` when the recipient already has an entry for the partition.
+     * @return True when the recipient already has an entry for the partition.
      */
     function validPartitionForReceiver(bytes32 partition, address to) internal view returns (bool) {
         return erc1410BasicStorage().partitionToIndex[to][partition] != 0;
@@ -965,7 +965,7 @@ library ERC1410StorageWrapper {
      * @notice Reports whether multi-partition mode is enabled on the token.
      * @dev Read from `ERC1410BasicStorage.multiPartition`; controls whether non-default partitions
      *      are accepted by `requireDefaultPartitionWithSinglePartition` and similar guards.
-     * @return `true` when multi-partition mode is active.
+     * @return True when multi-partition mode is active.
      */
     function isMultiPartition() internal view returns (bool) {
         return erc1410BasicStorage().multiPartition;
@@ -976,7 +976,7 @@ library ERC1410StorageWrapper {
      * @dev Reads the global approval flag from `ERC1410OperatorStorage.approvals`.
      * @param operator    Candidate operator address.
      * @param tokenHolder Holder whose approval set is checked.
-     * @return `true` when the operator is globally authorised by the holder.
+     * @return True when the operator is globally authorised by the holder.
      */
     function isOperator(address operator, address tokenHolder) internal view returns (bool) {
         return erc1410OperatorStorage().approvals[tokenHolder][operator];
@@ -988,7 +988,7 @@ library ERC1410StorageWrapper {
      * @param partition   Partition identifier being checked.
      * @param operator    Candidate operator address.
      * @param tokenHolder Holder whose approval set is checked.
-     * @return `true` when the operator is authorised on the partition.
+     * @return True when the operator is authorised on the partition.
      */
     function isOperatorForPartition(
         bytes32 partition,
@@ -1004,7 +1004,7 @@ library ERC1410StorageWrapper {
      * @param partition   Partition identifier driving the action.
      * @param operator    Candidate operator address.
      * @param tokenHolder Holder whose approval set is checked.
-     * @return `true` when either authorisation tier permits the operator.
+     * @return True when either authorisation tier permits the operator.
      */
     function isAuthorized(bytes32 partition, address operator, address tokenHolder) internal view returns (bool) {
         return isOperator(operator, tokenHolder) || isOperatorForPartition(partition, operator, tokenHolder);

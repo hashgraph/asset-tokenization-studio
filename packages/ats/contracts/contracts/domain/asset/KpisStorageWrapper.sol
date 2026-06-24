@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { KPI_KPIS_ADD_COUPON_DATE, KPI_KPIS_SET_MINDATE } from "../../constants/values.sol";
+import { KPI_KPIS_SET_MINDATE } from "../../constants/values.sol";
 import { IKpis } from "../../facets/kpis/IKpis.sol";
 import { Checkpoints } from "../../infrastructure/utils/Checkpoints.sol";
 import { CouponStorageWrapper } from "./coupon/CouponStorageWrapper.sol";
@@ -46,16 +46,14 @@ library KpisStorageWrapper {
 
     /**
      * @notice Inserts a KPI data point at `date` for `project`, maintaining sort order.
-     * @dev Reverts if the date is already a checkpoint for the project. Appends in O(1)
-     *      when the date is strictly greater than the latest entry; otherwise shifts the
-     *      tail right to place the new entry in its sorted position. The calling facet (`Kpis`)
-     *      emits `KpiDataAdded`.
+     * @dev Appends in O(1) when the date is strictly greater than the latest entry; otherwise
+     *      shifts the tail right to place the new entry in its sorted position. The calling
+     *      facet (`Kpis`) emits `KpiDataAdded`.
      * @param date The KPI data timestamp (must be unique per project).
      * @param value The KPI data value.
      * @param project The project address the KPI belongs to.
      */
     function addKpiData(uint256 date, uint256 value, address project) internal {
-        if (isCheckpointDate(date, project)) revert IKpis.KpiDataAlreadyExists(date);
         setCheckpointDate(date, project);
         Checkpoints.Checkpoint[] storage ckpt = kpisDataStorage().checkpointsByProject[project];
         uint256 length = ckpt.length;
@@ -74,6 +72,7 @@ library KpisStorageWrapper {
         unchecked {
             for (uint256 i = length; i > 0; --i) {
                 uint256 prev = i - 1;
+                // solhint-disable-next-line gas-strict-inequalities
                 if (ckpt[prev].from <= date) {
                     ckpt[i] = Checkpoints.Checkpoint({ from: date, value: value });
                     return;
@@ -83,58 +82,6 @@ library KpisStorageWrapper {
         }
         // Insert at position 0
         ckpt[0] = Checkpoints.Checkpoint({ from: date, value: value });
-    }
-
-    /**
-     * @notice Registers a coupon in the ordered list and advances `minDate` accordingly.
-     * @dev Delegates list maintenance to `CouponStorageWrapper`; asserts the coupon's
-     *      fixing date does not regress below the current `minDate`.
-     * @param couponID Identifier of the coupon being registered.
-     */
-    function addToCouponsOrderedList(uint256 couponID) internal {
-        CouponStorageWrapper.addToCouponsOrderedList(couponID);
-
-        (ICouponTypes.RegisteredCoupon memory registeredCoupon, , ) = CouponStorageWrapper.getCoupon(couponID);
-        uint256 lastFixingDate = registeredCoupon.coupon.fixingDate;
-
-        _checkUnexpectedError(lastFixingDate < kpisDataStorage().minDate, KPI_KPIS_ADD_COUPON_DATE);
-
-        setMinDate(lastFixingDate);
-    }
-
-    /**
-     * @notice Appends a checkpoint entry at the end of the given storage array.
-     * @param ckpt The storage array to push into.
-     * @param date The checkpoint's `from` timestamp.
-     * @param value The checkpoint value.
-     */
-    function pushKpiData(Checkpoints.Checkpoint[] storage ckpt, uint256 date, uint256 value) internal {
-        ckpt.push(Checkpoints.Checkpoint({ from: date, value: value }));
-    }
-
-    /**
-     * @notice Overwrites the checkpoint at `pos` with new date and value.
-     * @param ckpt The storage array to mutate.
-     * @param date New `from` timestamp.
-     * @param value New checkpoint value.
-     * @param pos Index of the entry to overwrite.
-     */
-    function overwriteKpiData(
-        Checkpoints.Checkpoint[] storage ckpt,
-        uint256 date,
-        uint256 value,
-        uint256 pos
-    ) internal {
-        ckpt[pos].from = date;
-        ckpt[pos].value = value;
-    }
-
-    /**
-     * @notice Updates the minimum allowed KPI date.
-     * @param date The new minimum date.
-     */
-    function setMinDate(uint256 date) internal {
-        kpisDataStorage().minDate = date;
     }
 
     /**
@@ -177,7 +124,7 @@ library KpisStorageWrapper {
         (uint256 checkpointFrom, uint256 value_) = kpisDataStorage().checkpointsByProject[project].checkpointsLookup(
             to
         );
-        if (checkpointFrom <= from) return (0, false);
+        if (checkpointFrom <= from) return (0, false); // solhint-disable-line gas-strict-inequalities
         return (value_, true);
     }
 

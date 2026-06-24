@@ -145,6 +145,7 @@ library CorporateActionsStorageWrapper {
      * @param _index The type-scoped index to validate.
      */
     function requireMatchingActionType(bytes32 _actionType, uint256 _index) internal view {
+        // solhint-disable-next-line gas-strict-inequalities
         if (getCorporateActionCountByType(_actionType) <= _index)
             revert ICorporateActions.WrongIndexForAction(_index, _actionType);
     }
