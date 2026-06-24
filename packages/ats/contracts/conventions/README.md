@@ -31,15 +31,44 @@ A rule already enforced by solhint (a built-in or a `solhint-plugin-ats` rule) c
 pointer to its enforcing rule** — no Pattern/Rationale/Fix. The behaviour, severity and current
 debt live in the rule source and `solhint.config.js`; duplicating them here just lets them drift.
 
+## File skeleton
+
+A new topic file follows this shape, so it reads like the existing set (the most structured
+example is [events.md](events.md)):
+
+```markdown
+# <Topic>
+
+<One or two lines: what this file governs; point to any related rule that lives elsewhere
+(e.g. "Initializer events (ATS-EVENT-005) live in architecture.md").>
+
+## <Concern>
+
+### ATS-XXX-NNN — short title
+
+- … (per Rule format above)
+
+## <Another concern>
+
+### ATS-XXX-NNN — short title
+
+- …
+```
+
+- Group rules under `##` concern headings — never leave a `###` rule directly beneath the `#`
+  title. A retired rule keeps its `###` stub next to the rule it was merged into.
+- Optionally close with reference tables (e.g. artifact-type suffixes) or, for a complex topic,
+  a "Review methodology" checklist.
+
 ## Rule index
 
-| File                               | Scope                                                | Rule IDs                                                                                                                                      |
-| ---------------------------------- | ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| [architecture.md](architecture.md) | Diamond/MAF layers, boundaries, initializers         | ATS-EVM-001/002, ATS-FACET-001, ATS-SUFFIX-001, ATS-SEL-001, ATS-STYLE-002, ATS-BOUND-001, ATS-ARCH-001..004, ATS-INIT-001/002, ATS-EVENT-005 |
-| [events.md](events.md)             | Declaration, emit site, promotion, imports, indexing | ATS-EVENT-001..010                                                                                                                            |
-| [code-quality.md](code-quality.md) | Errors, imports & types, gas, NatSpec, linting       | ATS-ERR-001, ATS-TYPE-001/002, ATS-IMP-001, ATS-GAS-001/002, ATS-FUNC-001, ATS-NATSPEC-001, ATS-LINT-001                                      |
-| [storage.md](storage.md)           | ERC-7201 structs, layout, accessors                  | ATS-STORAGE-001/002, ATS-STYLE-001, ATS-PRIV-001                                                                                              |
-| [naming.md](naming.md)             | Identifier prefixes/suffixes, artifact types         | ATS-NAME-001..006, ATS-IFACE-001                                                                                                              |
+| File                               | Scope                                                     | Rule IDs                                                                                                                                      |
+| ---------------------------------- | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| [architecture.md](architecture.md) | Diamond/MAF layers, boundaries, initializers              | ATS-EVM-001/002, ATS-FACET-001, ATS-SUFFIX-001, ATS-SEL-001, ATS-STYLE-002, ATS-BOUND-001, ATS-ARCH-001..004, ATS-INIT-001/002, ATS-EVENT-005 |
+| [events.md](events.md)             | Declaration, emit site, promotion, imports, indexing      | ATS-EVENT-001..010 (005 in architecture.md)                                                                                                   |
+| [code-quality.md](code-quality.md) | Errors, imports & types, gas, NatSpec, linting            | ATS-ERR-001, ATS-TYPE-001/002, ATS-IMP-001, ATS-GAS-001/002, ATS-FUNC-001, ATS-NATSPEC-001, ATS-LINT-001                                      |
+| [storage.md](storage.md)           | ERC-7201 structs, layout, accessors                       | ATS-STORAGE-001/002, ATS-STYLE-001, ATS-PRIV-001                                                                                              |
+| [naming.md](naming.md)             | Identifier prefixes/suffixes, cardinality, artifact types | ATS-NAME-001..008, ATS-IFACE-001                                                                                                              |
 
 ## Where does a rule live?
 

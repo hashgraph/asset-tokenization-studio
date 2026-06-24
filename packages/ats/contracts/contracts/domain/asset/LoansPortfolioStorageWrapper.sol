@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { DEFAULT_PARTITION } from "../../constants/values.sol";
 import { ILoan } from "../../facets/loan/ILoan.sol";
 import { IERC1410Types } from "../../facets/commonTypes/IERC1410Types.sol";
 import { ILoansPortfolio } from "../../facets/loansPortfolio/ILoansPortfolio.sol";
@@ -178,7 +178,7 @@ library LoansPortfolioStorageWrapper {
             to: _to,
             value: _amount
         });
-        ITransferByPartition(_assetAddress).transferByPartition(_DEFAULT_PARTITION, transferInfo, "");
+        ITransferByPartition(_assetAddress).transferByPartition(DEFAULT_PARTITION, transferInfo, "");
         success_ = true;
     }
 
@@ -328,7 +328,7 @@ library LoansPortfolioStorageWrapper {
 
     /**
      * @notice Returns a paginated list of holding asset addresses along with their token balances.
-     * @dev For each asset, retrieves the balance of the `_DEFAULT_PARTITION` partition held by this contract.
+     * @dev For each asset, retrieves the balance of the `DEFAULT_PARTITION` partition held by this contract.
      * @param _pageIndex Zero-based page index.
      * @param _pageLength Number of elements per page.
      * @return assets_ Array of asset addresses for the requested page.
@@ -343,7 +343,7 @@ library LoansPortfolioStorageWrapper {
         tokenBalances_ = new uint256[](arraySize);
         for (uint256 i; i < arraySize; ) {
             tokenBalances_[i] = IBalanceTrackerByPartition(assets_[i]).balanceOfByPartition(
-                _DEFAULT_PARTITION,
+                DEFAULT_PARTITION,
                 address(this)
             );
             unchecked {

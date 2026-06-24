@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ROLE_AGENT } from "../../constants/roles.sol";
-import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { DEFAULT_PARTITION } from "../../constants/values.sol";
 import { IERC3643Types } from "../../facets/commonTypes/IERC3643Types.sol";
 import { IFreeze } from "../../facets/freeze/IFreeze.sol";
 import { IAccessControl } from "../../facets/accessControl/IAccessControl.sol";
@@ -191,16 +191,16 @@ library ERC3643StorageWrapper {
     function freezeTokens(address _account, uint256 _amount) internal {
         checkNonZeroFreezeAmount(_amount);
 
-        ERC1410StorageWrapper.triggerAndSyncAll(_DEFAULT_PARTITION, _account, address(0));
-        updateTotalFreeze(_DEFAULT_PARTITION, _account);
-        SnapshotsStorageWrapper.updateAccountSnapshot(_account, _DEFAULT_PARTITION);
-        SnapshotsStorageWrapper.updateAccountFrozenBalancesSnapshot(_account, _DEFAULT_PARTITION);
+        ERC1410StorageWrapper.triggerAndSyncAll(DEFAULT_PARTITION, _account, address(0));
+        updateTotalFreeze(DEFAULT_PARTITION, _account);
+        SnapshotsStorageWrapper.updateAccountSnapshot(_account, DEFAULT_PARTITION);
+        SnapshotsStorageWrapper.updateAccountFrozenBalancesSnapshot(_account, DEFAULT_PARTITION);
 
         ERC3643Storage storage st = _erc3643Storage();
         st.frozenTokens[_account] += _amount;
-        st.frozenTokensByPartition[_account][_DEFAULT_PARTITION] += _amount;
+        st.frozenTokensByPartition[_account][DEFAULT_PARTITION] += _amount;
 
-        ERC1410StorageWrapper.reducePartitionOnly(_account, _amount, _DEFAULT_PARTITION);
+        ERC1410StorageWrapper.reducePartitionOnly(_account, _amount, DEFAULT_PARTITION);
         ERC20StorageWrapper.performTransfer(_account, address(0), _amount);
     }
 
@@ -217,19 +217,19 @@ library ERC3643StorageWrapper {
      *        the frozen balance against historical adjustments.
      */
     function unfreezeTokens(address _account, uint256 _amount, uint256 _timestamp) internal {
-        _checkUnfreezeAmount(_DEFAULT_PARTITION, _account, _amount, _timestamp);
-        ERC1410StorageWrapper.triggerAndSyncAll(_DEFAULT_PARTITION, _account, address(0));
-        updateTotalFreeze(_DEFAULT_PARTITION, _account);
-        SnapshotsStorageWrapper.updateAccountSnapshot(_account, _DEFAULT_PARTITION);
-        SnapshotsStorageWrapper.updateAccountFrozenBalancesSnapshot(_account, _DEFAULT_PARTITION);
+        _checkUnfreezeAmount(DEFAULT_PARTITION, _account, _amount, _timestamp);
+        ERC1410StorageWrapper.triggerAndSyncAll(DEFAULT_PARTITION, _account, address(0));
+        updateTotalFreeze(DEFAULT_PARTITION, _account);
+        SnapshotsStorageWrapper.updateAccountSnapshot(_account, DEFAULT_PARTITION);
+        SnapshotsStorageWrapper.updateAccountFrozenBalancesSnapshot(_account, DEFAULT_PARTITION);
 
         ERC3643Storage storage st = _erc3643Storage();
         st.frozenTokens[_account] -= _amount;
-        st.frozenTokensByPartition[_account][_DEFAULT_PARTITION] -= _amount;
+        st.frozenTokensByPartition[_account][DEFAULT_PARTITION] -= _amount;
 
-        _transferFrozenBalanceOnly(_DEFAULT_PARTITION, _account, _amount);
+        _transferFrozenBalanceOnly(DEFAULT_PARTITION, _account, _amount);
         ERC20StorageWrapper.performTransfer(address(0), _account, _amount);
-        ERC1410StorageWrapper.afterTokenTransfer(_DEFAULT_PARTITION, _account, _account, _amount);
+        ERC1410StorageWrapper.afterTokenTransfer(DEFAULT_PARTITION, _account, _account, _amount);
     }
 
     /**

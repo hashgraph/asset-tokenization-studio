@@ -10,7 +10,7 @@ import { IERC1410Types } from "../../facets/commonTypes/IERC1410Types.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
-import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { DEFAULT_PARTITION } from "../../constants/values.sol";
 import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
@@ -509,7 +509,7 @@ library LockStorageWrapper {
      * @return lockCount_ Cardinality of the default-partition lock-id set.
      */
     function getLockCountFor(address tokenHolder) internal view returns (uint256 lockCount_) {
-        lockCount_ = _lockStorage().lockIdsByAccountAndPartition[tokenHolder][_DEFAULT_PARTITION].length();
+        lockCount_ = _lockStorage().lockIdsByAccountAndPartition[tokenHolder][DEFAULT_PARTITION].length();
     }
 
     /**
@@ -525,7 +525,7 @@ library LockStorageWrapper {
         uint256 pageIndex,
         uint256 pageLength
     ) internal view returns (uint256[] memory locksId_) {
-        locksId_ = _lockStorage().lockIdsByAccountAndPartition[tokenHolder][_DEFAULT_PARTITION].getFromSet(
+        locksId_ = _lockStorage().lockIdsByAccountAndPartition[tokenHolder][DEFAULT_PARTITION].getFromSet(
             pageIndex,
             pageLength
         );

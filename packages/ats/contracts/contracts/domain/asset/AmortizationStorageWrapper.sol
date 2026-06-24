@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { SNAPSHOT_RESULT_ID, _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { SNAPSHOT_RESULT_ID, DEFAULT_PARTITION } from "../../constants/values.sol";
 import { CORPORATE_ACTION_TYPE_AMORTIZATION, SCHEDULED_TASK_TYPE_SNAPSHOT } from "../../constants/dispatchTypes.sol";
 import { IAmortization } from "../../facets/amortization/IAmortization.sol";
 import { IHoldTypes } from "../../facets/hold/IHoldTypes.sol";
@@ -172,7 +172,7 @@ library AmortizationStorageWrapper {
 
         if (existing.holdActive) {
             IHoldTypes.HoldIdentifier memory id_ = IHoldTypes.HoldIdentifier({
-                partition: _DEFAULT_PARTITION,
+                partition: DEFAULT_PARTITION,
                 tokenHolder: _tokenHolder,
                 holdId: existing.holdId
             });
@@ -190,7 +190,7 @@ library AmortizationStorageWrapper {
         });
 
         (bool success, uint256 newHoldId) = HoldStorageWrapper.createHoldByPartition(
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             _tokenHolder,
             hold,
             "",
@@ -236,7 +236,7 @@ library AmortizationStorageWrapper {
         }
 
         IHoldTypes.HoldIdentifier memory id_ = IHoldTypes.HoldIdentifier({
-            partition: _DEFAULT_PARTITION,
+            partition: DEFAULT_PARTITION,
             tokenHolder: _tokenHolder,
             holdId: holdInfo.holdId
         });
@@ -334,11 +334,7 @@ library AmortizationStorageWrapper {
         if (holdInfo.holdId == 0) return amortizationFor_;
 
         (amortizationFor_.tokenHeldAmount, , , , , , ) = HoldStorageWrapper.getHoldForByPartitionAdjustedAt(
-            IHoldTypes.HoldIdentifier({
-                partition: _DEFAULT_PARTITION,
-                tokenHolder: _account,
-                holdId: holdInfo.holdId
-            }),
+            IHoldTypes.HoldIdentifier({ partition: DEFAULT_PARTITION, tokenHolder: _account, holdId: holdInfo.holdId }),
             timestamp
         );
         amortizationFor_.decimalsHeld = ERC20StorageWrapper.decimalsAdjustedAt(timestamp);
@@ -557,7 +553,7 @@ library AmortizationStorageWrapper {
      * @return Always true on success; reverts otherwise.
      */
     function _releaseHold(address _tokenHolder, uint256 _holdId, uint256 _amount) private returns (bool) {
-        bytes32 partition = _DEFAULT_PARTITION;
+        bytes32 partition = DEFAULT_PARTITION;
         IHoldTypes.HoldIdentifier memory identifier = IHoldTypes.HoldIdentifier({
             partition: partition,
             tokenHolder: _tokenHolder,
@@ -614,7 +610,7 @@ library AmortizationStorageWrapper {
         uint256 _holdId,
         uint256 _timestamp
     ) private view returns (uint256 amount_) {
-        bytes32 partition = _DEFAULT_PARTITION;
+        bytes32 partition = DEFAULT_PARTITION;
 
         IHoldTypes.HoldIdentifier memory identifier = IHoldTypes.HoldIdentifier({
             partition: partition,

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _DEFAULT_PARTITION, KPI_ERC20_APPROVE_OWNER } from "../../constants/values.sol";
+import { DEFAULT_PARTITION, KPI_ERC20_APPROVE_OWNER } from "../../constants/values.sol";
 import { ICore } from "../../facets/core/ICore.sol";
 import { IFactory } from "../../factory/IFactory.sol";
 import { ITransfer } from "../../facets/transfer/ITransfer.sol";
@@ -213,7 +213,7 @@ library ERC20StorageWrapper {
      * @param spender Spender whose allowance checkpoint is updated.
      */
     function beforeAllowanceUpdate(address owner, address spender) internal {
-        ERC1410StorageWrapper.triggerAndSyncAll(_DEFAULT_PARTITION, owner, address(0));
+        ERC1410StorageWrapper.triggerAndSyncAll(DEFAULT_PARTITION, owner, address(0));
         updateAllowanceAndLabaf(owner, spender);
     }
 
@@ -254,7 +254,7 @@ library ERC20StorageWrapper {
             revert IAllowanceTypes.SpenderWithZeroAddress();
         }
 
-        ERC1410StorageWrapper.triggerAndSyncAll(_DEFAULT_PARTITION, owner, spender);
+        ERC1410StorageWrapper.triggerAndSyncAll(DEFAULT_PARTITION, owner, spender);
         _erc20Storage().allowed[owner][spender] = value;
         AdjustBalancesStorageWrapper.updateAllowanceLabaf(owner, spender, AdjustBalancesStorageWrapper.getAbaf());
         emit IAllowanceTypes.Approval(owner, spender, value);
@@ -320,7 +320,7 @@ library ERC20StorageWrapper {
         ERC1410StorageWrapper.transferByPartition(
             from,
             IERC1410Types.BasicTransferInfo(to, value),
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             "",
             spender,
             ""
@@ -342,7 +342,7 @@ library ERC20StorageWrapper {
         ERC1410StorageWrapper.transferByPartition(
             from,
             IERC1410Types.BasicTransferInfo(to, value),
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             "",
             address(0),
             ""
@@ -357,7 +357,7 @@ library ERC20StorageWrapper {
      * @param value Amount of tokens to mint.
      */
     function mint(address to, uint256 value) internal {
-        ERC1410StorageWrapper.issueByPartition(IERC1410Types.IssueData(_DEFAULT_PARTITION, to, value, ""));
+        ERC1410StorageWrapper.issueByPartition(IERC1410Types.IssueData(DEFAULT_PARTITION, to, value, ""));
     }
 
     /**
@@ -367,7 +367,7 @@ library ERC20StorageWrapper {
      * @param value Amount of tokens to burn.
      */
     function burn(address from, uint256 value) internal {
-        ERC1410StorageWrapper.redeemByPartition(_DEFAULT_PARTITION, from, address(0), value, "", "");
+        ERC1410StorageWrapper.redeemByPartition(DEFAULT_PARTITION, from, address(0), value, "", "");
     }
 
     /**

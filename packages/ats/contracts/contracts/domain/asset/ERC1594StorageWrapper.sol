@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
-import { ZERO_ADDRESS, EMPTY_BYTES, _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { ZERO_ADDRESS, EMPTY_BYTES, DEFAULT_PARTITION } from "../../constants/values.sol";
 import { IKyc } from "../../facets/kyc/IKyc.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { Eip1066 } from "../../constants/eip1066.sol";
@@ -600,7 +600,7 @@ library ERC1594StorageWrapper {
                 false,
                 Eip1066.INSUFFICIENT_FUNDS,
                 IAllowanceTypes.InsufficientAllowance.selector,
-                abi.encode(sender, from, currentAllowance, value, _DEFAULT_PARTITION)
+                abi.encode(sender, from, currentAllowance, value, DEFAULT_PARTITION)
             );
         }
         return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);

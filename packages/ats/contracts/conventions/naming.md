@@ -1,6 +1,10 @@
 # Naming Conventions
 
-Prefix/suffix rules for identifiers and artifact types.
+Naming rules for identifiers and artifact types: underscore affixes, the guard/predicate
+taxonomy, and cardinality (singular vs plural). Anything not covered here defaults to the
+official Solidity style guide (see [README](README.md)).
+
+## Identifier affixes & guard naming
 
 ### ATS-NAME-001 — Function parameter missing `_` prefix
 
@@ -69,6 +73,41 @@ Prefix/suffix rules for identifiers and artifact types.
 ### ATS-IFACE-001 — Interface declared without `I` prefix
 
 - Enforced by solhint built-in `interface-starts-with-i`.
+
+## Cardinality (singular vs plural)
+
+Not covered by the official Solidity style guide — it specifies casing but is silent on
+plurality. These two rules fill that gap: a name must reflect how many things it holds.
+
+### ATS-NAME-007 — Array identifier with a singular name (or scalar with a plural name)
+
+- Severity: ERROR
+- Enforcement: MANUAL — deterministic from the declared type (array vs not), so a future
+  `solhint-plugin-ats` rule can own it; until then the `/ats-style-guide` review checks it.
+- Pattern: a declaration whose type is a dynamic or fixed array (`T[]`, `T[N]`) — including an
+  array used as a `mapping` value or a struct field — carrying a grammatically singular name; or,
+  conversely, a scalar (a single value: `uint256`, `address`, `bool`, a struct, an enum) carrying
+  a plural name. `mapping` and `EnumerableSet` cardinality is judgment, not type — it falls to
+  [ATS-NAME-008](#ats-name-008--logical-collection-not-pluralised), not here.
+- Rationale: the type already states the cardinality; the name must agree with it so a reader can
+  tell a list from a single value without resolving the type.
+- Fix: pluralise the array name, or singularise the scalar name. Example: a
+  `mapping(address => uint256[]) labafUserPartition` field holds an array per key → rename to
+  `labafUserPartitions`.
+
+### ATS-NAME-008 — Logical collection not pluralised
+
+- Severity: WARNING
+- Enforcement: MANUAL — cardinality here is semantic, not derivable from the type, so it needs
+  code comprehension and stays a flag, never a block.
+- Pattern: an identifier denoting a logical collection that is not a syntactic array — a `mapping`
+  whose value is itself a collection, an `EnumerableSet`, or a getter returning several items —
+  named in the singular; or a single-valued qualifier named in the plural. A conventional
+  collection `mapping(address => uint256) balances` is correctly plural and is NOT flagged.
+- Rationale: plurality should track the logical quantity a name represents, not only its syntactic
+  type, so collections read as collections and qualifiers read as single.
+- Fix: name by logical cardinality. Example: in `mapping(address => mapping(address => uint256))
+labafsAllowances`, the `labafs` qualifier is a single LABAF context per entry → `labafAllowances`.
 
 ## Artifact-type suffixes
 

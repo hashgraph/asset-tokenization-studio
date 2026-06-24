@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IFreeze, RESOLVER_KEY_FREEZE } from "./IFreeze.sol";
-import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { DEFAULT_PARTITION } from "../../constants/values.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
@@ -68,7 +68,7 @@ abstract contract Freeze is IFreeze, Modifiers {
         onlyFreezeRoles(EvmAccessors.getMsgSender())
     {
         ERC3643StorageWrapper.freezeTokens(_userAddress, _amount);
-        emit TokensFrozen(_userAddress, _amount, _DEFAULT_PARTITION);
+        emit TokensFrozen(_userAddress, _amount, DEFAULT_PARTITION);
     }
 
     /// @inheritdoc IFreeze
@@ -87,7 +87,7 @@ abstract contract Freeze is IFreeze, Modifiers {
         onlyFreezeRoles(EvmAccessors.getMsgSender())
     {
         ERC3643StorageWrapper.unfreezeTokens(_userAddress, _amount, 0);
-        emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
+        emit TokensUnfrozen(_userAddress, _amount, DEFAULT_PARTITION);
     }
 
     /// @inheritdoc IFreeze

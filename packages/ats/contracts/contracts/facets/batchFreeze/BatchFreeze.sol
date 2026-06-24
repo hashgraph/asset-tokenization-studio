@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IBatchFreeze, RESOLVER_KEY_BATCH_FREEZE } from "./IBatchFreeze.sol";
 import { IFreezeTypes } from "../freeze/IFreezeTypes.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
-import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { DEFAULT_PARTITION } from "../../constants/values.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
@@ -76,7 +76,7 @@ abstract contract BatchFreeze is IBatchFreeze, Modifiers {
             DefaultValueValidation.checkZeroAddress(_userAddresses[i]);
             ERC3643StorageWrapper.checkUnrecoveredAddress(_userAddresses[i]);
             ERC3643StorageWrapper.freezeTokens(_userAddresses[i], _amounts[i]);
-            emit IFreezeTypes.TokensFrozen(_userAddresses[i], _amounts[i], _DEFAULT_PARTITION);
+            emit IFreezeTypes.TokensFrozen(_userAddresses[i], _amounts[i], DEFAULT_PARTITION);
             unchecked {
                 ++i;
             }
@@ -102,7 +102,7 @@ abstract contract BatchFreeze is IBatchFreeze, Modifiers {
             DefaultValueValidation.checkZeroAddress(_userAddresses[i]);
             ERC3643StorageWrapper.checkUnrecoveredAddress(_userAddresses[i]);
             ERC3643StorageWrapper.unfreezeTokens(_userAddresses[i], _amounts[i], 0);
-            emit IFreezeTypes.TokensUnfrozen(_userAddresses[i], _amounts[i], _DEFAULT_PARTITION);
+            emit IFreezeTypes.TokensUnfrozen(_userAddresses[i], _amounts[i], DEFAULT_PARTITION);
             unchecked {
                 ++i;
             }

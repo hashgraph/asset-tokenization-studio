@@ -19,7 +19,7 @@ import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsSt
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
 import { ScheduledTasksOps } from "../orchestrator/ScheduledTasksOps.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
-import { _DEFAULT_PARTITION, KPI_ERC1410_REMOVE_HOLDER } from "../../constants/values.sol";
+import { DEFAULT_PARTITION, KPI_ERC1410_REMOVE_HOLDER } from "../../constants/values.sol";
 import { _checkNonceAndDeadline } from "../../infrastructure/utils/EIP712.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 
@@ -96,7 +96,7 @@ library ERC1410StorageWrapper {
      * @notice Marks the ERC-1410 module as initialised and records whether multi-partition mode is on.
      * @dev Idempotency must be enforced by the caller via the matching `onlyNotERC1410Initialized`
      *      modifier; this helper sets both the mode flag and the lifecycle flag in the basic storage.
-     * @param multiPartition When `true`, partitions other than `_DEFAULT_PARTITION` are accepted.
+     * @param multiPartition When `true`, partitions other than `DEFAULT_PARTITION` are accepted.
      */
     function initializeERC1410(bool multiPartition) internal {
         _erc1410BasicStorage().multiPartition = multiPartition;
@@ -1034,12 +1034,12 @@ library ERC1410StorageWrapper {
 
     /**
      * @notice Reverts when the token runs in single-partition mode and `partition` is not the default.
-     * @dev Enforces that single-partition tokens only ever address `_DEFAULT_PARTITION`; multi-partition
+     * @dev Enforces that single-partition tokens only ever address `DEFAULT_PARTITION`; multi-partition
      *      tokens accept any partition.
      * @param partition Partition identifier supplied by the caller.
      */
     function requireDefaultPartitionWithSinglePartition(bytes32 partition) internal view {
-        if (!isMultiPartition() && partition != _DEFAULT_PARTITION)
+        if (!isMultiPartition() && partition != DEFAULT_PARTITION)
             revert IERC1410Types.PartitionNotAllowedInSinglePartitionMode(partition);
     }
 

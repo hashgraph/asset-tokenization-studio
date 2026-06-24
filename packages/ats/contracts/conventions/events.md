@@ -53,9 +53,7 @@ are `indexed`** (ATS-EVENT-010) — plus declaration hygiene (ATS-EVENT-002/009)
 - Severity: ERROR
 - Enforcement: MANUAL
 - Pattern: an `emit` in a lower layer (storage wrapper / `*Ops`) that is not covered by one of
-  the four valid justifications below. (Overlaps with
-  [architecture.md](architecture.md) ATS-ARCH-003 — report whichever fits the evidence best,
-  not both.)
+  the four valid justifications below.
 - Rationale: by default events are emitted from the facet. Lower-layer emissions are permitted
   ONLY when the emission point is shared by construction. The valid justifications are exactly:
   1. A multi-facet orchestrator emits the event.
