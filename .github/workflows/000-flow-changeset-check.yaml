@@ -42,7 +42,6 @@ jobs:
         run: |
           echo "Base branch: ${{ github.base_ref }}"
           git fetch origin ${{ github.base_ref }}:${{ github.base_ref }}
-          git fetch origin main:main
           git branch -a
 
       - name: Setup NodeJS Environment
