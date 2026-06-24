@@ -26,7 +26,7 @@ exports[`ats contracts solhint`] = {
     "contracts/domain/asset/HoldStorageWrapper.sol:533726159": [
       [800, 15, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177632"]
     ],
-    "contracts/domain/asset/KpisStorageWrapper.sol:821693499": [
+    "contracts/domain/asset/KpisStorageWrapper.sol:1085411112": [
       [76, 20, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177606"],
       [157, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177601"],
       [179, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177606"]
@@ -41,7 +41,7 @@ exports[`ats contracts solhint`] = {
       [228, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"],
       [472, 16, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177622"]
     ],
-    "contracts/domain/asset/SnapshotsStorageWrapper.sol:2021841773": [
+    "contracts/domain/asset/SnapshotsStorageWrapper.sol:3547134957": [
       [139, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177609"],
       [153, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177609"],
       [1034, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"]
@@ -80,7 +80,7 @@ exports[`ats contracts solhint`] = {
       [29, 4, 1, "gas-calldata-parameters: GC: [_operatorData] argument on Function [createHoldByPartition] could be [calldata] if it\'s not being updated", "177603"],
       [50, 4, 1, "gas-calldata-parameters: GC: [_protectedHold] argument on Function [protectedCreateHoldByPartition] could be [calldata] if it\'s not being updated", "177603"]
     ],
-    "contracts/domain/orchestrator/TokenCoreOps.sol:2677183411": [
+    "contracts/domain/orchestrator/TokenCoreOps.sol:895313088": [
       [33, 4, 1, "gas-calldata-parameters: GC: [_basicTransferInfo] argument on Function [transferByPartition] could be [calldata] if it\'s not being updated", "177603"],
       [33, 4, 1, "gas-calldata-parameters: GC: [_data] argument on Function [transferByPartition] could be [calldata] if it\'s not being updated", "177603"],
       [33, 4, 1, "gas-calldata-parameters: GC: [_operatorData] argument on Function [transferByPartition] could be [calldata] if it\'s not being updated", "177603"],
@@ -202,7 +202,7 @@ exports[`ats contracts solhint`] = {
       [46, 4, 1, "gas-indexed-events: GC: [sender] on Event [MaxInitializerFacetIndexUpdated] could be Indexed", "177600"],
       [46, 4, 1, "gas-indexed-events: GC: [newMaxInitializerFacetIndex] on Event [MaxInitializerFacetIndexUpdated] could be Indexed", "177600"]
     ],
-    "contracts/facets/kpi/IKpis.sol:4077278714": [
+    "contracts/facets/kpis/IKpis.sol:4077278714": [
       [28, 4, 1, "gas-indexed-events: GC: [date] on Event [KpiDataAdded] could be Indexed", "177600"],
       [28, 4, 1, "gas-indexed-events: GC: [value] on Event [KpiDataAdded] could be Indexed", "177600"]
     ],
@@ -233,7 +233,7 @@ exports[`ats contracts solhint`] = {
       [40, 4, 1, "gas-indexed-events: GC: [amount] on Event [ProtectedClearedRedeemByPartition] could be Indexed", "177600"],
       [40, 4, 1, "gas-indexed-events: GC: [expirationDate] on Event [ProtectedClearedRedeemByPartition] could be Indexed", "177600"]
     ],
-    "contracts/facets/protectedPartition/IProtectedPartitions.sol:3841096614": [
+    "contracts/facets/protectedPartitions/IProtectedPartitions.sol:3841096614": [
       [30, 4, 1, "gas-indexed-events: GC: [arePartitionsProtected] on Event [ProtectedPartitionsInitialized] could be Indexed", "177600"]
     ],
     "contracts/facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol:2865309541": [
@@ -246,10 +246,10 @@ exports[`ats contracts solhint`] = {
     "contracts/facets/scheduledBalanceAdjustment/ScheduledBalanceAdjustmentBase.sol:3351011126": [
       [109, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177600"]
     ],
-    "contracts/facets/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol:1747555586": [
+    "contracts/facets/scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol:1747555586": [
       [22, 4, 1, "gas-indexed-events: GC: [scheduledTimestamp] on Event [TaskExecutionFailed] could be Indexed", "177600"]
     ],
-    "contracts/facets/snapshot/ISnapshots.sol:4095973638": [
+    "contracts/facets/snapshots/ISnapshots.sol:4095973638": [
       [67, 4, 1, "gas-indexed-events: GC: [snapshotId] on Event [SnapshotTriggered] could be Indexed", "177600"]
     ],
     "contracts/facets/transfer/ITransfer.sol:1049729304": [

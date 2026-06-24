@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { KPI_KPIS_ADD_COUPON_DATE, KPI_KPIS_SET_MINDATE } from "../../constants/values.sol";
-import { IKpis } from "../../facets/kpi/IKpis.sol";
+import { IKpis } from "../../facets/kpis/IKpis.sol";
 import { Checkpoints } from "../../infrastructure/utils/Checkpoints.sol";
 import { CouponStorageWrapper } from "./coupon/CouponStorageWrapper.sol";
 import { ICouponTypes } from "../../facets/coupon/ICouponTypes.sol";
