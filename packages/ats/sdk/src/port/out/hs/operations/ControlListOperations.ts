@@ -2,8 +2,7 @@
 
 import { ContractId } from "@hiero-ledger/sdk";
 import {
-  ControlListFacet__factory,
-  ExternalControlListManagementFacet__factory,
+  IAsset__factory,
   MockedBlacklist__factory,
   MockedWhitelist__factory,
 } from "@hashgraph/asset-tokenization-contracts";
@@ -24,7 +23,7 @@ export class ControlListOperations {
     LogService.logTrace(`Adding account ${targetId.toString()} to a control list`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ControlListFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "addToControlList",
       [targetId.toString()],
       GAS.ADD_TO_CONTROL_LIST,
@@ -39,7 +38,7 @@ export class ControlListOperations {
     LogService.logTrace(`Removing account ${targetId.toString()} from a control list`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ControlListFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "removeFromControlList",
       [targetId.toString()],
       GAS.REMOVE_FROM_CONTROL_LIST,
@@ -55,7 +54,7 @@ export class ControlListOperations {
     LogService.logTrace(`Updating External Control Lists for security ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ExternalControlListManagementFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "updateExternalControlLists",
       [externalControlListsAddresses.map((address) => address.toString()), actives],
       GAS.UPDATE_EXTERNAL_CONTROL_LISTS,
@@ -70,7 +69,7 @@ export class ControlListOperations {
     LogService.logTrace(`Adding External Control Lists for security ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ExternalControlListManagementFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "addExternalControlList",
       [externalControlListAddress.toString()],
       GAS.ADD_EXTERNAL_CONTROL_LIST,
@@ -85,7 +84,7 @@ export class ControlListOperations {
     LogService.logTrace(`Removing External Control Lists for security ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ExternalControlListManagementFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "removeExternalControlList",
       [externalControlListAddress.toString()],
       GAS.REMOVE_EXTERNAL_CONTROL_LIST,

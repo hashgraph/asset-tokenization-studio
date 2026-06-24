@@ -9,7 +9,6 @@ import {
 import TransactionService from "@service/transaction/TransactionService";
 import { lazyInject } from "@core/decorator/LazyInjectDecorator";
 import EvmAddress from "@domain/context/contract/EvmAddress";
-import BigDecimal from "@domain/context/shared/BigDecimal";
 import AccountService from "@service/account/AccountService";
 import { SecurityRole } from "@domain/context/security/SecurityRole";
 import ValidationService from "@service/validation/ValidationService";

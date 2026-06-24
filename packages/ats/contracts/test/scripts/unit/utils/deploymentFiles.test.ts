@@ -106,23 +106,11 @@ describe("Deployment File Utilities", () => {
           },
         ],
       },
-      bondSustainabilityPerformanceTargetRate: {
-        configId: TEST_CONFIG_IDS.BOND_SPT,
-        version: 1,
-        facetCount: 43,
-        facets: [
-          {
-            facetName: "AccessControlFacet",
-            key: TEST_CONFIG_IDS.BOND_SPT,
-            address: TEST_ADDRESSES.VALID_2,
-          },
-        ],
-      },
     },
     summary: {
       totalContracts: 48,
       totalFacets: 1,
-      totalConfigurations: 5,
+      totalConfigurations: 4,
       deploymentTime: 5000,
       gasUsed: "0",
       success: true,
@@ -132,7 +120,10 @@ describe("Deployment File Utilities", () => {
       getBondFacets: () => [],
       getBondFixedRateFacets: () => [],
       getBondKpiLinkedRateFacets: () => [],
-      getBondSustainabilityPerformanceTargetRateFacets: () => [],
+      getLoanFacets: () => [],
+      getDepositTokenFacets: () => [],
+      getLoansPortfolioFacets: () => [],
+      getFactoryFacets: () => [],
     },
   });
 
@@ -245,9 +236,14 @@ describe("Deployment File Utilities", () => {
     });
 
     it("should throw error for missing file", async () => {
-      await expect(loadDeployment(TEST_NETWORK, TEST_WORKFLOW, "2025-01-01T00-00-00")).to.be.rejectedWith(
-        "Deployment file not found",
-      );
+      let threw = false;
+      try {
+        await loadDeployment(TEST_NETWORK, TEST_WORKFLOW, "2025-01-01T00-00-00");
+      } catch (err: unknown) {
+        threw = true;
+        expect((err as Error).message).to.include("Deployment file not found");
+      }
+      expect(threw).to.equal(true);
     });
 
     it("should throw error for invalid JSON", async () => {
@@ -263,9 +259,14 @@ describe("Deployment File Utilities", () => {
       await fs.writeFile(filepath, "{ invalid json content");
 
       try {
-        await expect(loadDeployment(TEST_NETWORK, TEST_WORKFLOW, invalidTimestamp)).to.be.rejectedWith(
-          "Failed to load deployment",
-        );
+        let threw = false;
+        try {
+          await loadDeployment(TEST_NETWORK, TEST_WORKFLOW, invalidTimestamp);
+        } catch (err: unknown) {
+          threw = true;
+          expect((err as Error).message).to.include("Failed to load deployment");
+        }
+        expect(threw).to.equal(true);
       } finally {
         await cleanupTestDeployment(invalidTimestamp);
       }

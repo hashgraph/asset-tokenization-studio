@@ -4,9 +4,9 @@ const TestType = {
   UNIT: "unit",
   INTEGRATION: "integration",
   E2E: "e2e",
-}
+};
 
-const MAX_WORKERS = process.env.MAX_WORKERS || 4
+const MAX_WORKERS = process.env.MAX_WORKERS || 4;
 
 const config = {
   moduleFileExtensions: ["js", "json", "ts"],
@@ -16,6 +16,7 @@ const config = {
     "@infrastructure(.*)$": "<rootDir>/src/infrastructure/$1",
     "@config(.*)$": "<rootDir>/src/config/$1",
     "@shared(.*)$": "<rootDir>/src/shared/$1",
+    "@utils(.*)$": "<rootDir>/src/utils/$1",
     "@test(.*)$": "<rootDir>/test/$1",
   },
   rootDir: ".",
@@ -37,14 +38,14 @@ const config = {
   coverageDirectory: "<rootDir>/coverage",
   testEnvironment: "node",
   moduleDirectories: ["node_modules", "<rootDir>"],
-}
+};
 
 function getConfigProjectBy(testType) {
   return {
     ...config,
     displayName: testType.toString(),
     testRegex: `test/${testType.toString()}/.*\\.spec\\.ts`,
-  }
+  };
 }
 
 module.exports = {
@@ -55,4 +56,4 @@ module.exports = {
     getConfigProjectBy(TestType.INTEGRATION),
   ],
   verbose: false,
-}
+};

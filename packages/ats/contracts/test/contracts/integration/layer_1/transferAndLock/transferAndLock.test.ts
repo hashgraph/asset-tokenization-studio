@@ -3,13 +3,12 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ZERO, EMPTY_STRING, ATS_ROLES } from "@scripts";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import { ZERO, EMPTY_STRING, ATS_ROLES, EQUITY_CONFIG_ID, RESOLVER_KEY_TRANSFER_AND_LOCK } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
+import { deployEquityTokenFixture, getDltTimestamp, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
 
-const _NON_DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000011";
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
 const _AMOUNT = 1000;
 const EMPTY_VC_ID = EMPTY_STRING;
@@ -22,6 +21,7 @@ describe("Transfer and lock Tests", () => {
   let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
   let currentTimestamp = 0;
@@ -30,23 +30,23 @@ describe("Transfer and lock Tests", () => {
   function set_initRbacs(): any[] {
     return [
       {
-        role: ATS_ROLES._ISSUER_ROLE,
+        role: ATS_ROLES.ROLE_ISSUER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._LOCKER_ROLE,
+        role: ATS_ROLES.ROLE_LOCKER,
         members: [signer_C.address],
       },
       {
-        role: ATS_ROLES._PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_D.address],
       },
       {
-        role: ATS_ROLES._KYC_ROLE,
+        role: ATS_ROLES.ROLE_KYC,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._SSI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_SSI_MANAGER,
         members: [signer_A.address],
       },
     ];
@@ -73,6 +73,7 @@ describe("Transfer and lock Tests", () => {
     signer_D = base.user4;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, set_initRbacs());
     await setFacets(asset);
   }
@@ -92,7 +93,7 @@ describe("Transfer and lock Tests", () => {
   }
 
   beforeEach(async () => {
-    currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
+    currentTimestamp = await getDltTimestamp();
     expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS;
   });
 
@@ -107,38 +108,20 @@ describe("Transfer and lock Tests", () => {
         await asset.connect(signer_D).pause();
       });
 
-      it("GIVEN a paused Token WHEN transferAndLockByPartition THEN transaction fails with TokenIsPaused", async () => {
-        // lockByPartition with data fails
-        await expect(
-          asset
-            .connect(signer_C)
-            .transferAndLockByPartition(_NON_DEFAULT_PARTITION, signer_B.address, _AMOUNT, "0x", currentTimestamp),
-        ).to.be.rejectedWith("TokenIsPaused");
-      });
-
-      it("GIVEN a paused Token WHEN transferAndLock THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN transferAndLock THEN transaction fails with IsPaused", async () => {
         // transfer from with data fails
         await expect(
           asset.connect(signer_C).transferAndLock(signer_B.address, _AMOUNT, "0x", currentTimestamp),
-        ).to.be.rejectedWith("TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
     });
 
     describe("AccessControl", () => {
-      it("GIVEN an account without LOCKER role WHEN transferAndLockByPartition THEN transaction fails with AccountHasNoRole", async () => {
-        // add to list fails
-        await expect(
-          asset
-            .connect(signer_D)
-            .transferAndLockByPartition(_NON_DEFAULT_PARTITION, signer_B.address, _AMOUNT, "0x", currentTimestamp),
-        ).to.be.rejectedWith("AccountHasNoRole");
-      });
-
       it("GIVEN an account without LOCKER role WHEN transferAndLock THEN transaction fails with AccountHasNoRole", async () => {
         // add to list fails
         await expect(
           asset.connect(signer_D).transferAndLock(signer_B.address, _AMOUNT, "0x", currentTimestamp),
-        ).to.be.rejectedWith("AccountHasNoRole");
+        ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
       });
     });
 
@@ -149,70 +132,6 @@ describe("Transfer and lock Tests", () => {
         ).to.be.revertedWithCustomError(asset, "NotAllowedInMultiPartitionMode");
       });
     });
-
-    describe("transferAndLockByPartition", () => {
-      it("GIVEN a expiration timestamp in past WHEN transferAndLockByPartition THEN transaction fails with WrongExpirationTimestamp", async () => {
-        await expect(
-          asset
-            .connect(signer_C)
-            .transferAndLockByPartition(
-              _NON_DEFAULT_PARTITION,
-              signer_B.address,
-              _AMOUNT,
-              "0x",
-              currentTimestamp - ONE_YEAR_IN_SECONDS,
-            ),
-        ).to.be.rejectedWith("WrongExpirationTimestamp");
-      });
-
-      it("GIVEN a non valid partition WHEN transferAndLockByPartition THEN transaction fails with InvalidPartition", async () => {
-        await expect(
-          asset
-            .connect(signer_C)
-            .transferAndLockByPartition(_NON_DEFAULT_PARTITION, signer_B.address, _AMOUNT, "0x", expirationTimestamp),
-        )
-          .to.be.revertedWithCustomError(asset, "InvalidPartition")
-          .withArgs(signer_C.address, _NON_DEFAULT_PARTITION);
-      });
-
-      it("GIVEN a valid partition WHEN transferAndLockByPartition with enough balance THEN transaction success", async () => {
-        await asset.connect(signer_B).issueByPartition({
-          partition: _NON_DEFAULT_PARTITION,
-          tokenHolder: signer_C.address,
-          value: _AMOUNT * 2,
-          data: "0x",
-        });
-
-        await expect(
-          asset
-            .connect(signer_C)
-            .transferAndLockByPartition(_NON_DEFAULT_PARTITION, signer_A.address, _AMOUNT, "0x", expirationTimestamp),
-        )
-          .to.emit(asset, "TransferByPartition")
-          .withArgs(_NON_DEFAULT_PARTITION, signer_C.address, signer_C.address, signer_A.address, _AMOUNT, "0x", "0x")
-          .to.emit(asset, "PartitionTransferredAndLocked")
-          .withArgs(_NON_DEFAULT_PARTITION, signer_C.address, signer_A.address, _AMOUNT, "0x", expirationTimestamp, 1);
-
-        expect(await asset.getLockedAmountForByPartition(_NON_DEFAULT_PARTITION, signer_A.address)).to.equal(_AMOUNT);
-        expect(await asset.getLockCountForByPartition(_NON_DEFAULT_PARTITION, signer_A.address)).to.equal(1);
-        expect(await asset.getLocksIdForByPartition(_NON_DEFAULT_PARTITION, signer_A.address, 0, 1)).to.deep.equal([
-          1n,
-        ]);
-        expect(await asset.getLockForByPartition(_NON_DEFAULT_PARTITION, signer_A.address, 1)).to.deep.equal([
-          _AMOUNT,
-          expirationTimestamp,
-        ]);
-
-        expect(await asset.getLockedAmountFor(signer_C.address)).to.equal(0);
-        expect(await asset.getLockCountFor(signer_C.address)).to.equal(0);
-        expect(await asset.getLocksIdFor(signer_C.address, 0, 1)).to.deep.equal([]);
-        expect(await asset.getLockFor(signer_C.address, 1)).to.deep.equal([0, 0]);
-
-        expect(await asset.balanceOfByPartition(_NON_DEFAULT_PARTITION, signer_C.address)).to.equal(_AMOUNT);
-        expect(await asset.balanceOfByPartition(_NON_DEFAULT_PARTITION, signer_A.address)).to.equal(0);
-        expect(await asset.totalSupplyByPartition(_NON_DEFAULT_PARTITION)).to.equal(_AMOUNT * 2);
-      });
-    });
   });
 
   describe("Multi-partition disabled", () => {
@@ -220,46 +139,7 @@ describe("Transfer and lock Tests", () => {
       await loadFixture(deploySecurityFixtureSinglePartition);
     });
 
-    describe("multi-partition transactions arent enabled", () => {
-      it("GIVEN a token with multi-partition disabled GIVEN transferAndLockByPartition with non-default partition THEN fails with PartitionNotAllowedInSinglePartitionMode", async () => {
-        await expect(
-          asset
-            .connect(signer_C)
-            .transferAndLockByPartition(_NON_DEFAULT_PARTITION, signer_A.address, _AMOUNT, "0x", currentTimestamp),
-        )
-          .to.be.revertedWithCustomError(asset, "PartitionNotAllowedInSinglePartitionMode")
-          .withArgs(_NON_DEFAULT_PARTITION);
-      });
-    });
-
     describe("transferAndLock", () => {
-      it("GIVEN a valid partition WHEN transferAndLockByPartition with enough balance THEN transaction success", async () => {
-        await asset.connect(signer_B).issueByPartition({
-          partition: _DEFAULT_PARTITION,
-          tokenHolder: signer_C.address,
-          value: _AMOUNT * 2,
-          data: "0x",
-        });
-
-        await expect(
-          asset
-            .connect(signer_C)
-            .transferAndLockByPartition(_DEFAULT_PARTITION, signer_A.address, _AMOUNT, "0x", expirationTimestamp),
-        )
-          .to.emit(asset, "TransferByPartition")
-          .withArgs(_DEFAULT_PARTITION, signer_C.address, signer_C.address, signer_A.address, _AMOUNT, "0x", "0x")
-          .to.emit(asset, "PartitionTransferredAndLocked")
-          .withArgs(_DEFAULT_PARTITION, signer_C.address, signer_A.address, _AMOUNT, "0x", expirationTimestamp, 1);
-      });
-
-      it("GIVEN a expiration timestamp in past WHEN transferAndLock THEN transaction fails with WrongExpirationTimestamp", async () => {
-        await expect(
-          asset
-            .connect(signer_C)
-            .transferAndLock(signer_A.address, _AMOUNT, "0x", currentTimestamp - ONE_YEAR_IN_SECONDS),
-        ).to.be.rejectedWith("WrongExpirationTimestamp");
-      });
-
       it("GIVEN a valid partition WHEN transferAndLock with enough balance THEN transaction success", async () => {
         await asset.connect(signer_B).issueByPartition({
           partition: _DEFAULT_PARTITION,
@@ -272,7 +152,9 @@ describe("Transfer and lock Tests", () => {
           .to.emit(asset, "TransferByPartition")
           .withArgs(_DEFAULT_PARTITION, signer_C.address, signer_C.address, signer_A.address, _AMOUNT, "0x", "0x")
           .to.emit(asset, "PartitionTransferredAndLocked")
-          .withArgs(_DEFAULT_PARTITION, signer_C.address, signer_A.address, _AMOUNT, "0x", expirationTimestamp, 1);
+          .withArgs(_DEFAULT_PARTITION, signer_C.address, signer_A.address, _AMOUNT, "0x", expirationTimestamp, 1)
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_C.address, signer_A.address, _AMOUNT);
 
         expect(await asset.getLockedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(_AMOUNT);
         expect(await asset.getLockCountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(1);
@@ -291,6 +173,51 @@ describe("Transfer and lock Tests", () => {
         expect(await asset.balanceOfByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(0);
         expect(await asset.totalSupplyByPartition(_DEFAULT_PARTITION)).to.equal(_AMOUNT * 2);
       });
+    });
+  });
+
+  describe("Deactivated", () => {
+    it("GIVEN a deactivated asset WHEN transferAndLock THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).transferAndLock(ethers.ZeroAddress, 0, "0x", 0),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("initializeTransferAndLock", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeTransferAndLock is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeTransferAndLock())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeTransferAndLock is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeTransferAndLock())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_TRANSFER_AND_LOCK, 1);
+    });
+  });
+
+  describe("initializeTransferAndLock event", () => {
+    it("GIVEN a fresh deployment WHEN initializeTransferAndLock is called THEN emits TransferAndLockInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_TRANSFER_AND_LOCK);
+      await expect(asset.initializeTransferAndLock()).to.emit(asset, "TransferAndLockInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational WHEN transferAndLock is called THEN AssetNotOperational", async () => {
+      await expect(asset.transferAndLock(ethers.ZeroAddress, 0n, "0x", 0n))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 });

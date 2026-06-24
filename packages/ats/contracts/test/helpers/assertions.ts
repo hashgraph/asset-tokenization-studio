@@ -2,11 +2,29 @@
 
 import { expect } from "chai";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function assertObject(actual: any, expected: any, path = ""): void {
-  Object.keys(expected).forEach((key) => {
-    const actualValue = actual[key];
-    const expectedValue = expected[key];
+/**
+ * Recursive structural assertion helper. Walks `expected` and asserts each
+ * key matches the corresponding key in `actual`. The inputs are typed as
+ * `unknown` because the helper is generic over any object shape — concrete
+ * values are narrowed at runtime via `typeof` / `Array.isArray` before they
+ * are dereferenced.
+ */
+export function assertObject(actual: unknown, expected: unknown, path = ""): void {
+  if (typeof expected !== "object" || expected === null) {
+    expect(actual).to.equal(expected, `Found error on ${path || "<root>"}`);
+    return;
+  }
+  if (typeof actual !== "object" || actual === null) {
+    expect(actual).to.equal(expected, `Found error on ${path || "<root>"}`);
+    return;
+  }
+
+  const expectedRecord = expected as Record<string, unknown>;
+  const actualRecord = actual as Record<string, unknown>;
+
+  Object.keys(expectedRecord).forEach((key) => {
+    const actualValue = actualRecord[key];
+    const expectedValue = expectedRecord[key];
 
     if (
       typeof actualValue === "object" &&
@@ -15,8 +33,7 @@ export function assertObject(actual: any, expected: any, path = ""): void {
       expectedValue !== null
     ) {
       if (Array.isArray(actualValue) && Array.isArray(expectedValue)) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        actualValue.forEach((item: any, index: number) => {
+        actualValue.forEach((item: unknown, index: number) => {
           assertObject(item, expectedValue[index], key);
         });
       } else {

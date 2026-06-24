@@ -41,7 +41,14 @@ import {
   saveDeploymentOutput,
   resolveCheckpointForResume,
 } from "@scripts/infrastructure";
-import { atsRegistry, createEquityConfiguration, createBondConfiguration } from "@scripts/domain";
+import {
+  atsRegistry,
+  createEquityConfiguration,
+  createBondConfiguration,
+  deployOrchestratorLibraries,
+  hasOrchestratorLibraryAddresses,
+  setOrchestratorLibraryAddresses,
+} from "@scripts/domain";
 import { BusinessLogicResolver__factory } from "@contract-types";
 
 // ============================================================================
@@ -377,6 +384,21 @@ async function deployFacetsPhase(ctx: UpgradePhaseContext): Promise<void> {
     return;
   }
 
+  // Deploy orchestrator libraries first (required for facet factory linking)
+  if (checkpoint.steps.libraries) {
+    const { deployedAt: _deployedAt, ...libAddrs } = checkpoint.steps.libraries;
+    setOrchestratorLibraryAddresses(libAddrs);
+    info("   Orchestrator libraries restored from checkpoint");
+  } else if (!hasOrchestratorLibraryAddresses()) {
+    info("   Deploying orchestrator libraries (required for facet linking)...");
+    const libEnableRetry = options.enableRetry ?? networkConfig.retryOptions.maxRetries > 0;
+    const libAddrs = await deployOrchestratorLibraries(signer, {
+      retryOptions: libEnableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
+    });
+    checkpoint.steps.libraries = { ...libAddrs, deployedAt: new Date().toISOString() };
+    await checkpointManager.saveCheckpoint(checkpoint);
+  }
+
   info("\n📦 Step 1/5: Deploying all facets...");
 
   let allFacets = registry.getAllFacets();
@@ -393,13 +415,18 @@ async function deployFacetsPhase(ctx: UpgradePhaseContext): Promise<void> {
   }
 
   // Create factories from registry
+  // When useTimeTravel=true, deploy TimeTravel variant facets instead of production ones
+  // Skip facets without factories (abstract contracts like LockFacet)
   const facetFactories: Record<string, ContractFactory> = {};
   for (const facet of allFacets) {
-    if (!facet.factory) {
-      throw new Error(`No factory found for facet: ${facet.name}`);
+    const selectedFactory = useTimeTravel && facet.timeTravelFactory ? facet.timeTravelFactory : facet.factory;
+
+    if (!selectedFactory) {
+      info(`   Skipping ${facet.name} (abstract contract, no factory)`);
+      continue;
     }
 
-    const factory = facet.factory(signer, useTimeTravel);
+    const factory = selectedFactory(signer) as ContractFactory;
     const contractName = factory.constructor.name.replace("__factory", "");
 
     // Skip if already deployed
@@ -580,8 +607,11 @@ async function registerFacetsPhase(ctx: UpgradePhaseContext): Promise<void> {
     `   Total facets to register: ${facetsToRegister.length} (${existingFacets.length} existing + ${newFacets.length} new)`,
   );
 
+  const upgradeNetworkConfig = getDeploymentConfig(ctx.network);
+  const upgradeEnableRetry = ctx.options.enableRetry ?? upgradeNetworkConfig.retryOptions.maxRetries > 0;
   const registerResult = await registerFacets(blrContract, {
     facets: facetsToRegister,
+    retryOptions: upgradeEnableRetry ? upgradeNetworkConfig.retryOptions : { maxRetries: 0 },
   });
 
   if (!registerResult.success) {
@@ -659,6 +689,7 @@ async function createOrResumeConfiguration(params: {
     configId: result.data.configurationId,
     version: result.data.version,
     facetCount: result.data.facetKeys.length,
+    facets: result.data.facetKeys,
     txHash: "",
   };
   checkpoint.currentStep = stepNumber;
@@ -687,6 +718,8 @@ async function createConfigurationsPhase(ctx: UpgradePhaseContext): Promise<{
   // CRITICAL FIX: Get confirmations from options or fall back to network config
   const networkConfig = getDeploymentConfig(network);
   const confirmations = options.confirmations ?? networkConfig.confirmations;
+  const cfgEnableRetry = options.enableRetry ?? networkConfig.retryOptions.maxRetries > 0;
+  const cfgRetryOptions = cfgEnableRetry ? networkConfig.retryOptions : { maxRetries: 0 };
 
   // Build facet addresses from checkpoint
   const facetAddresses: Record<string, string> = {};
@@ -716,6 +749,7 @@ async function createConfigurationsPhase(ctx: UpgradePhaseContext): Promise<{
           false, // partialBatchDeploy
           batchSize,
           confirmations,
+          cfgRetryOptions,
         ),
       logPrefix: "Creating Equity configuration",
     });
@@ -739,6 +773,7 @@ async function createConfigurationsPhase(ctx: UpgradePhaseContext): Promise<{
           false, // partialBatchDeploy
           batchSize,
           confirmations,
+          cfgRetryOptions,
         ),
       logPrefix: "Creating Bond configuration",
     });
@@ -911,18 +946,31 @@ async function buildOutput(
     return network.toLowerCase().includes("hedera") ? await fetchHederaContractId(network, address) : undefined;
   };
 
-  // Build facets array with contract IDs
-  const facets = await Promise.all(
-    Array.from(checkpoint.steps.facets?.entries() || []).map(async ([facetName, facetData]) => {
-      const facetAddress = facetData.address;
+  // Build facets array with contract IDs and registered versions
+  const facetEntries = Array.from(checkpoint.steps.facets?.entries() || []).map(([facetName, facetData]) => {
+    const baseName = facetName.replace(/TimeTravel$/, "");
+    let key = "";
+    try {
+      key = atsRegistry.getFacetDefinition(baseName)?.resolverKey?.value ?? "";
+    } catch {
+      // Facet not in registry — leave key empty
+    }
+    return { facetName, facetAddress: facetData.address, key };
+  });
 
-      return {
-        name: facetName,
-        address: facetAddress,
-        contractId: await getContractId(facetAddress),
-        key: "", // Key information not needed in output
-      };
-    }),
+  const blrForVersions = BusinessLogicResolver__factory.connect(blrAddress, ctx.signer);
+  const uniqueKeys = [...new Set(facetEntries.map((e) => e.key).filter((k) => k !== ""))];
+  const rawVersions = uniqueKeys.length > 0 ? await blrForVersions.getLatestVersions(uniqueKeys) : [];
+  const versionByKey = new Map(uniqueKeys.map((k, i) => [k, Number(rawVersions[i])]));
+
+  const facets = await Promise.all(
+    facetEntries.map(async ({ facetName, facetAddress, key }) => ({
+      name: facetName,
+      address: facetAddress,
+      contractId: await getContractId(facetAddress),
+      key,
+      version: versionByKey.get(key) ?? 0,
+    })),
   );
 
   const output: UpgradeConfigurationsOutput = {

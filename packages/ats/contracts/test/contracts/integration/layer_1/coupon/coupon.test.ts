@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { ResolverProxy, type IAsset } from "@contract-types";
+import { ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 import {
   DEFAULT_PARTITION,
   ATS_ROLES,
@@ -12,11 +12,22 @@ import {
   ZERO,
   EMPTY_HEX_BYTES,
   EMPTY_STRING,
+  BOND_FIXED_RATE_CONFIG_ID,
+  RESOLVER_KEY_COUPON,
 } from "@scripts";
-import { getDltTimestamp, grantRoleAndPauseToken } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployBondTokenFixture, deployBondKpiLinkedRateTokenFixture } from "@test";
-import { executeRbac, MAX_UINT256 } from "@test";
+import {
+  getDltTimestamp,
+  grantRoleAndPauseToken,
+  deployBondTokenFixture,
+  deployBondFixedRateTokenFixture,
+  executeRbac,
+  MAX_UINT256,
+  EVENT_NAMES,
+  TEST_COUPON,
+  TEST_BOND_FIXED_RATE,
+  expectExactlyOneEvent,
+} from "@test";
 
 const numberOfUnits = 1000;
 let startingDate = 0;
@@ -55,6 +66,7 @@ describe("Coupon Tests", () => {
   let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixture(isMultiPartition = false) {
     const base = await deployBondTokenFixture({
@@ -77,39 +89,39 @@ describe("Coupon Tests", () => {
     asset = await ethers.getContractAt("IAsset", diamond.target);
     await executeRbac(asset, [
       {
-        role: ATS_ROLES._FREEZE_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_FREEZE_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._KYC_ROLE,
+        role: ATS_ROLES.ROLE_KYC,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._MATURITY_REDEEMER_ROLE,
+        role: ATS_ROLES.ROLE_MATURITY_REDEEMER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._SSI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_SSI_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._CONTROL_LIST_ROLE,
+        role: ATS_ROLES.ROLE_CONTROL_LIST,
         members: [signer_D.address],
       },
       {
-        role: ATS_ROLES._CLEARING_ROLE,
+        role: ATS_ROLES.ROLE_CLEARING,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._PROTECTED_PARTITIONS_ROLE,
+        role: ATS_ROLES.ROLE_PROTECTED_PARTITIONS,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._AGENT_ROLE,
+        role: ATS_ROLES.ROLE_AGENT,
         members: [signer_A.address],
       },
     ]);
@@ -143,21 +155,25 @@ describe("Coupon Tests", () => {
       rateStatus: 1,
     };
     await loadFixture(deploySecurityFixture);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
   });
 
   it("GIVEN an account without corporateActions role WHEN setCoupon THEN transaction fails with AccountHasNoRole", async () => {
-    await expect(asset.connect(signer_C).setCoupon(couponData)).to.be.rejectedWith("AccountHasNoRole");
+    await expect(asset.connect(signer_C).setCoupon(couponData)).to.be.revertedWithCustomError(
+      asset,
+      "AccountHasNoRole",
+    );
   });
 
-  it("GIVEN a paused Token WHEN setCoupon THEN transaction fails with TokenIsPaused", async () => {
+  it("GIVEN a paused Token WHEN setCoupon THEN transaction fails with IsPaused", async () => {
     // Granting Role to account C and Pause
-    await grantRoleAndPauseToken(asset, asset, ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A, signer_B, signer_C.address);
+    await grantRoleAndPauseToken(asset, ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A, signer_B, signer_C.address);
 
-    await expect(asset.connect(signer_C).setCoupon(couponData)).to.be.rejectedWith("TokenIsPaused");
+    await expect(asset.connect(signer_C).setCoupon(couponData)).to.be.revertedWithCustomError(asset, "IsPaused");
   });
 
   it("GIVEN an account with corporateActions role WHEN setCoupon with wrong dates THEN transaction fails", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
     const wrongcouponData_1 = {
       recordDate: couponExecutionDateInSeconds.toString(),
       executionDate: couponRecordDateInSeconds.toString(),
@@ -192,7 +208,7 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN an account with corporateActions role WHEN setCoupon with period THEN period is stored correctly", async () => {
-    await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
     const customPeriod = 3 * 24 * 60 * 60; // 3 days in seconds
     const customStartDate = couponEndDateInSeconds - customPeriod;
@@ -230,7 +246,7 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN an account with corporateActions role WHEN setCoupon with period 0 THEN transaction succeeds", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
     const minValidPeriodCouponData = {
       recordDate: couponRecordDateInSeconds.toString(),
       executionDate: couponExecutionDateInSeconds.toString(),
@@ -257,10 +273,11 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN an account with corporateActions role WHEN setCoupon THEN transaction succeeds", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
-    await expect(asset.connect(signer_C).setCoupon(couponData))
-      .to.emit(asset, "CouponSet")
+    const tx = await asset.connect(signer_C).setCoupon(couponData);
+    await expect(tx)
+      .to.emit(asset, EVENT_NAMES.COUPON_SET)
       .withArgs("0x0000000000000000000000000000000000000000000000000000000000000001", 1, signer_C.address, [
         couponRecordDateInSeconds,
         couponExecutionDateInSeconds,
@@ -271,6 +288,8 @@ describe("Coupon Tests", () => {
         couponRateDecimals,
         couponRateStatus,
       ]);
+    const receipt = await tx.wait();
+    expectExactlyOneEvent(receipt!, asset, EVENT_NAMES.COUPON_SET);
 
     const listCount = await asset.getCouponCount();
     const [coupon, isDisabled] = await asset.getCoupon(1);
@@ -282,7 +301,7 @@ describe("Coupon Tests", () => {
 
     const [couponsFor, accounts] = await asset.getCouponsFor(1, 0, 10);
 
-    const couponsOrderedListTotal = await asset.getCouponsOrderedListTotal();
+    const couponsOrderedListTotal = await asset.getCouponsOrderedListTotal(false);
 
     expect(listCount).to.equal(1);
     expect(isDisabled).to.be.false;
@@ -327,9 +346,9 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN an account with corporateActions role WHEN setCoupon and lock THEN transaction succeeds", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES._LOCKER_ROLE, signer_C.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_LOCKER, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
 
     // issue and lock
     const TotalAmount = numberOfUnits;
@@ -358,7 +377,7 @@ describe("Coupon Tests", () => {
       ]);
 
     await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
-    await asset.connect(signer_A).revokeRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+    await asset.connect(signer_A).revokeRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
 
     const couponFor = await asset.getCouponFor(1, signer_A.address);
     const couponAmountFor = await asset.getCouponAmountFor(1, signer_A.address);
@@ -386,15 +405,16 @@ describe("Coupon Tests", () => {
     expect(couponHolders.length).to.equal(couponTotalHolders);
     expect([...couponHolders]).to.have.members([signer_A.address]);
     expect(couponAmountFor.recordDateReached).to.equal(couponFor.recordDateReached);
-    expect(couponAmountFor.numerator).to.equal(couponFor.tokenBalance * nominalValue * couponFor.coupon.rate * period);
+    const balanceNominalScaled = (couponFor.tokenBalance * nominalValue) / 10n ** nominalValueDecimals;
+    expect(couponAmountFor.numerator).to.equal(balanceNominalScaled * couponFor.coupon.rate * period);
     expect(couponAmountFor.denominator).to.equal(
-      10n ** (couponFor.decimals + nominalValueDecimals + couponFor.coupon.rateDecimals) * BigInt(YEAR_SECONDS),
+      10n ** (couponFor.decimals + couponFor.coupon.rateDecimals) * BigInt(YEAR_SECONDS),
     );
   });
 
   it("GIVEN an account with corporateActions role WHEN setCoupon and hold THEN transaction succeeds", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
 
     const TotalAmount = numberOfUnits;
     const HeldAmount = TotalAmount - 5;
@@ -430,7 +450,7 @@ describe("Coupon Tests", () => {
       ]);
 
     await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
-    await asset.connect(signer_A).revokeRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+    await asset.connect(signer_A).revokeRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
 
     const couponFor = await asset.getCouponFor(1, signer_A.address);
     const couponAmountFor = await asset.getCouponAmountFor(1, signer_A.address);
@@ -458,62 +478,17 @@ describe("Coupon Tests", () => {
     expect(couponHolders.length).to.equal(couponTotalHolders);
     expect([...couponHolders]).to.have.members([signer_A.address]);
     expect(couponAmountFor.recordDateReached).to.equal(couponFor.recordDateReached);
-    expect(couponAmountFor.numerator).to.equal(couponFor.tokenBalance * nominalValue * couponFor.coupon.rate * period);
+    const balanceNominalScaled = (couponFor.tokenBalance * nominalValue) / 10n ** nominalValueDecimals;
+    expect(couponAmountFor.numerator).to.equal(balanceNominalScaled * couponFor.coupon.rate * period);
     expect(couponAmountFor.denominator).to.equal(
-      10n ** (couponFor.decimals + nominalValueDecimals + couponFor.coupon.rateDecimals) * BigInt(YEAR_SECONDS),
+      10n ** (couponFor.decimals + couponFor.coupon.rateDecimals) * BigInt(YEAR_SECONDS),
     );
-  });
-
-  it("GIVEN an account with bondManager role WHEN setMaturityDate THEN transaction succeeds", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._BOND_MANAGER_ROLE, signer_C.address);
-    const maturityDateBefore = (await asset.getBondDetails()).maturityDate;
-    const newMaturityDate = maturityDateBefore + 86400n;
-
-    await expect(asset.connect(signer_C).updateMaturityDate(newMaturityDate))
-      .to.emit(asset, "MaturityDateUpdated")
-      .withArgs(asset.target, newMaturityDate, maturityDateBefore);
-    const maturityDateAfter = (await asset.getBondDetails()).maturityDate;
-    expect(maturityDateAfter).not.to.be.equal(maturityDateBefore);
-    expect(maturityDateAfter).to.be.equal(newMaturityDate);
-  });
-
-  it("GIVEN an account with bondManager role WHEN setMaturityDate to earlier date THEN transaction fails", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._BOND_MANAGER_ROLE, signer_C.address);
-    const maturityDateBefore = (await asset.getBondDetails()).maturityDate;
-    const dayBeforeCurrentMaturity = maturityDateBefore - 86400n;
-
-    await expect(asset.connect(signer_C).updateMaturityDate(dayBeforeCurrentMaturity)).to.be.revertedWithCustomError(
-      asset,
-      "BondMaturityDateWrong",
-    );
-    const maturityDateAfter = (await asset.getBondDetails()).maturityDate;
-    expect(maturityDateAfter).to.be.equal(maturityDateBefore);
-  });
-
-  it("GIVEN an account without bondManager role WHEN setMaturityDate THEN transaction fails with AccountHasNoRole", async () => {
-    const maturityDateBefore = (await asset.getBondDetails()).maturityDate;
-    const newMaturityDate = maturityDateBefore + 86400n;
-
-    await expect(asset.connect(signer_C).updateMaturityDate(newMaturityDate)).to.be.rejectedWith("AccountHasNoRole");
-    const maturityDateAfter = (await asset.getBondDetails()).maturityDate;
-    expect(maturityDateAfter).to.be.equal(maturityDateBefore);
-  });
-
-  it("GIVEN a paused Token WHEN setMaturityDate THEN transaction fails with TokenIsPaused", async () => {
-    await grantRoleAndPauseToken(asset, asset, ATS_ROLES._BOND_MANAGER_ROLE, signer_A, signer_B, signer_C.address);
-
-    const maturityDateBefore = (await asset.getBondDetails()).maturityDate;
-    const newMaturityDate = maturityDateBefore + 86400n;
-
-    await expect(asset.connect(signer_C).updateMaturityDate(newMaturityDate)).to.be.rejectedWith("TokenIsPaused");
-    const maturityDateAfter = (await asset.getBondDetails()).maturityDate;
-    expect(maturityDateAfter).to.be.equal(maturityDateBefore);
   });
 
   it("Given a coupon and account with normal, cleared, held, locked and frozen balance WHEN  getCouponFor THEN sum of balances is correct", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES._LOCKER_ROLE, signer_C.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_LOCKER, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
 
     const totalAmount = numberOfUnits;
     const lockedAmount = totalAmount / 5;
@@ -571,11 +546,10 @@ describe("Coupon Tests", () => {
     expect(couponAmountForBefore.denominator).to.equal(0);
 
     await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
-    await asset.revokeRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+    await asset.revokeRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
 
     const couponFor = await asset.getCouponFor(1, signer_A.address);
     const couponAmountForAfter = await asset.getCouponAmountFor(1, signer_A.address);
-    const bondDetails = await asset.getBondDetails();
     const period = couponFor.coupon.endDate - couponFor.coupon.startDate;
 
     const [couponsForList, accountsList] = await asset.getCouponsFor(1, 0, 10);
@@ -604,17 +578,17 @@ describe("Coupon Tests", () => {
     expect(couponFor.recordDateReached).to.equal(true);
     expect(couponFor.tokenBalance).to.equal(totalAmount); // normal+cleared+held+locked+frozen
     expect(couponAmountForAfter.recordDateReached).to.equal(couponFor.recordDateReached);
-    expect(couponAmountForAfter.numerator).to.equal(
-      couponFor.tokenBalance * bondDetails.nominalValue * couponFor.coupon.rate * period,
-    );
+    const nominalValue = await asset.getNominalValue();
+    const nominalValueDecimals = await asset.getNominalValueDecimals();
+    const balanceNominalScaled = (couponFor.tokenBalance * nominalValue) / 10n ** nominalValueDecimals;
+    expect(couponAmountForAfter.numerator).to.equal(balanceNominalScaled * couponFor.coupon.rate * period);
     expect(couponAmountForAfter.denominator).to.equal(
-      10n ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.coupon.rateDecimals) *
-        BigInt(YEAR_SECONDS),
+      10n ** (couponFor.decimals + couponFor.coupon.rateDecimals) * BigInt(YEAR_SECONDS),
     );
   });
 
   it("GIVEN an account with corporateActions role WHEN cancelling a coupon THEN transaction succeeds", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C);
 
     await asset.connect(signer_C).setCoupon(couponData);
 
@@ -628,7 +602,7 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN a coupon after execution date WHEN cancelCoupon THEN transaction fails with CorporateActionAlreadyExecuted", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C);
 
     await asset.connect(signer_C).setCoupon(couponData);
 
@@ -638,93 +612,113 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN a coupon after record date but before execution date WHEN cancelCoupon THEN transaction succeeds", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C);
 
     await asset.connect(signer_C).setCoupon(couponData);
 
     await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
 
-    await expect(asset.connect(signer_C).cancelCoupon(1))
-      .to.emit(asset, "CouponCancelled")
-      .withArgs(1, signer_C.address);
+    const tx = await asset.connect(signer_C).cancelCoupon(1);
+    await expect(tx).to.emit(asset, EVENT_NAMES.COUPON_CANCELLED).withArgs(1, signer_C.address);
+    const receipt = await tx.wait();
+    expectExactlyOneEvent(receipt!, asset, EVENT_NAMES.COUPON_CANCELLED);
   });
 
   it("GIVEN an account without corporateActions role WHEN cancelCoupon THEN transaction fails with AccountHasNoRole", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C);
 
     await asset.connect(signer_C).setCoupon(couponData);
 
-    await expect(asset.connect(signer_D).cancelCoupon(1)).to.be.rejectedWith("AccountHasNoRole");
+    await expect(asset.connect(signer_D).cancelCoupon(1)).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
   });
 
-  it("GIVEN a paused Token WHEN cancelCoupon THEN transaction fails with TokenIsPaused", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+  it("GIVEN a paused Token WHEN cancelCoupon THEN transaction fails with IsPaused", async () => {
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C);
 
     await asset.connect(signer_C).setCoupon(couponData);
 
     await asset.connect(signer_B).pause();
 
-    await expect(asset.connect(signer_C).cancelCoupon(1)).to.be.rejectedWith("TokenIsPaused");
+    await expect(asset.connect(signer_C).cancelCoupon(1)).to.be.revertedWithCustomError(asset, "IsPaused");
   });
 
   it("GIVEN no existing coupon WHEN cancelCoupon with invalid ID THEN transaction fails", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C);
 
     await expect(asset.connect(signer_C).cancelCoupon(999)).to.be.revertedWithCustomError(asset, "WrongIndexForAction");
   });
 
-  it("GIVEN a coupon with snapshot WHEN getCouponHolders is called THEN returns token holders from snapshot", async () => {
-    const TotalAmount = 1000;
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
-    await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+  describe("Force Cancel Coupon", () => {
+    it("GIVEN account with ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelCoupon before execution date THEN transaction succeeds and isDisabled is true", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C);
 
-    await asset.connect(signer_A).issueByPartition({
-      partition: DEFAULT_PARTITION,
-      tokenHolder: signer_A.address,
-      value: TotalAmount,
-      data: "0x",
+      await asset.connect(signer_C).setCoupon(couponData);
+
+      await expect(asset.connect(signer_C).forceCancelCoupon(1))
+        .to.emit(asset, "CouponForceCancelled")
+        .withArgs(1, signer_C.address);
+      const isDisabled = (await asset.getCoupon(1)).isDisabled_;
+      expect(isDisabled).to.equal(true);
     });
 
-    couponRecordDateInSeconds = (await getDltTimestamp()) + 1000;
-    couponExecutionDateInSeconds = (await getDltTimestamp()) + 2000;
+    it("GIVEN account with ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelCoupon after execution date THEN transaction succeeds bypassing date guard", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C);
 
-    const couponData = {
-      recordDate: couponRecordDateInSeconds.toString(),
-      executionDate: couponExecutionDateInSeconds.toString(),
-      rate: couponRate,
-      rateDecimals: couponRateDecimals,
-      startDate: couponStartDateInSeconds.toString(),
-      endDate: couponEndDateInSeconds.toString(),
-      fixingDate: couponFixingDateInSeconds.toString(),
-      rateStatus: couponRateStatus,
-    };
+      await asset.connect(signer_C).setCoupon(couponData);
 
-    await asset.connect(signer_A).setCoupon(couponData);
+      await asset.changeSystemTimestamp(couponExecutionDateInSeconds + 1);
 
-    await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
-
-    // Trigger scheduled tasks by performing an action
-    await asset.connect(signer_A).issueByPartition({
-      partition: DEFAULT_PARTITION,
-      tokenHolder: signer_B.address,
-      value: 500,
-      data: "0x",
+      await expect(asset.connect(signer_C).forceCancelCoupon(1))
+        .to.emit(asset, "CouponForceCancelled")
+        .withArgs(1, signer_C.address);
+      const isDisabled = (await asset.getCoupon(1)).isDisabled_;
+      expect(isDisabled).to.equal(true);
     });
 
-    const coupon = (await asset.getCoupon(1)).registeredCoupon_;
-    const couponTotalHolders = await asset.getTotalCouponHolders(1);
-    const couponHolders = await asset.getCouponHolders(1, 0, couponTotalHolders);
+    it("GIVEN account without ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelCoupon THEN transaction fails with AccountHasNoRole", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C);
 
-    expect(coupon.snapshotId).to.be.greaterThan(0); // Snapshot should have been taken
-    expect(couponTotalHolders).to.equal(1);
-    expect([...couponHolders]).to.have.members([signer_A.address]);
+      await asset.connect(signer_C).setCoupon(couponData);
+
+      await expect(asset.connect(signer_D).forceCancelCoupon(1)).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN paused token WHEN forceCancelCoupon THEN transaction fails with IsPaused", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C);
+
+      await asset.connect(signer_C).setCoupon(couponData);
+
+      await asset.connect(signer_B).pause();
+
+      await expect(asset.connect(signer_C).forceCancelCoupon(1)).to.be.revertedWithCustomError(asset, "IsPaused");
+    });
+
+    it("GIVEN no existing coupon WHEN forceCancelCoupon with invalid ID THEN transaction fails with WrongIndexForAction", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C);
+
+      await expect(asset.connect(signer_C).forceCancelCoupon(999)).to.be.revertedWithCustomError(
+        asset,
+        "WrongIndexForAction",
+      );
+    });
   });
 
-  it("GIVEN a coupon without snapshot WHEN getCouponFor is called after record date THEN uses current balance", async () => {
+  it("GIVEN a coupon without snapshot WHEN getCouponFor is called after record date THEN uses balance at record date", async () => {
     const TotalAmount = 1000;
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+    const Decimals = await asset.decimals();
+    const NominalValue = 2;
+    const NominalValueDecimals = 3;
+
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
+
+    await asset.connect(signer_A).setNominalValue(NominalValue, NominalValueDecimals);
 
     await asset.connect(signer_A).issueByPartition({
       partition: DEFAULT_PARTITION,
@@ -733,8 +727,8 @@ describe("Coupon Tests", () => {
       data: "0x",
     });
 
-    couponRecordDateInSeconds = (await getDltTimestamp()) + 1000;
-    couponExecutionDateInSeconds = (await getDltTimestamp()) + 2000;
+    couponRecordDateInSeconds = (await getDltTimestamp()) + 10000;
+    couponExecutionDateInSeconds = (await getDltTimestamp()) + 20000;
 
     const couponData = {
       recordDate: couponRecordDateInSeconds.toString(),
@@ -746,11 +740,17 @@ describe("Coupon Tests", () => {
       fixingDate: couponFixingDateInSeconds.toString(),
       rateStatus: couponRateStatus,
     };
+    const balanceAdjustmentData = {
+      executionDate: BigInt(couponData.recordDate) + 1n,
+      factor: 20,
+      decimals: 1,
+    };
 
     await asset.connect(signer_A).setCoupon(couponData);
+    await asset.connect(signer_A).setScheduledBalanceAdjustment(balanceAdjustmentData);
 
     // Time travel past record date but DON'T trigger snapshot
-    await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
+    await asset.changeSystemTimestamp(couponRecordDateInSeconds + 2);
 
     // Query couponFor without triggering snapshot - should use current balance path
     const couponFor = await asset.getCouponFor(1, signer_A.address);
@@ -759,11 +759,83 @@ describe("Coupon Tests", () => {
     expect(coupon.snapshotId).to.equal(0); // No snapshot taken
     expect(couponFor.recordDateReached).to.be.true;
     expect(couponFor.tokenBalance).to.equal(TotalAmount);
+    expect(couponFor.decimals).to.equal(Decimals);
+    expect(couponFor.nominalValue).to.equal(NominalValue);
+    expect(couponFor.nominalValueDecimals).to.equal(NominalValueDecimals);
     expect(couponFor.isDisabled).to.be.false;
+
+    await asset.connect(signer_A).setNominalValue(NominalValue + 1, NominalValueDecimals + 1);
+
+    const couponFor_2 = await asset.getCouponFor(1, signer_A.address);
+    expect(couponFor_2.nominalValue).to.equal(NominalValue);
+    expect(couponFor_2.nominalValueDecimals).to.equal(NominalValueDecimals);
+  });
+
+  it("GIVEN a coupon with a snapshot WHEN nominalValue changes after the snapshot THEN couponAmount uses snapshot-scale values", async () => {
+    const TotalAmount = 1000;
+    const NominalValue = 2;
+    const NominalValueDecimals = 3;
+
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
+
+    await asset.connect(signer_A).setNominalValue(NominalValue, NominalValueDecimals);
+
+    await asset.connect(signer_A).issueByPartition({
+      partition: DEFAULT_PARTITION,
+      tokenHolder: signer_A.address,
+      value: TotalAmount,
+      data: "0x",
+    });
+
+    couponRecordDateInSeconds = (await getDltTimestamp()) + 10000;
+    couponExecutionDateInSeconds = (await getDltTimestamp()) + 20000;
+
+    const localCouponData = {
+      recordDate: couponRecordDateInSeconds.toString(),
+      executionDate: couponExecutionDateInSeconds.toString(),
+      rate: couponRate,
+      rateDecimals: couponRateDecimals,
+      startDate: couponStartDateInSeconds.toString(),
+      endDate: couponEndDateInSeconds.toString(),
+      fixingDate: couponFixingDateInSeconds.toString(),
+      rateStatus: couponRateStatus,
+    };
+
+    await asset.connect(signer_A).setCoupon(localCouponData);
+
+    // Cross record date and process scheduled tasks to take the snapshot bound to the coupon.
+    await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
+    await asset.connect(signer_A).triggerPendingScheduledCrossOrderedTasks();
+
+    const registered = (await asset.getCoupon(1)).registeredCoupon_;
+    expect(registered.snapshotId).to.be.greaterThan(0);
+
+    // Change nominal value AFTER the snapshot — current scale now diverges from snapshot scale.
+    await asset.connect(signer_A).setNominalValue(NominalValue + 5, NominalValueDecimals + 2);
+
+    const couponFor = await asset.getCouponFor(1, signer_A.address);
+    const couponAmountFor = await asset.getCouponAmountFor(1, signer_A.address);
+    const period = couponFor.coupon.endDate - couponFor.coupon.startDate;
+
+    // Snapshot-scale metadata is preserved on the struct.
+    expect(couponFor.recordDateReached).to.equal(true);
+    expect(couponFor.nominalValue).to.equal(NominalValue);
+    expect(couponFor.nominalValueDecimals).to.equal(NominalValueDecimals);
+
+    // Numerator and denominator must use the snapshot-scale values returned in couponFor
+    // (NominalValue, NominalValueDecimals), not the current values just written above.
+    expect(couponAmountFor.recordDateReached).to.equal(true);
+    const balanceNominalScaled =
+      (couponFor.tokenBalance * couponFor.nominalValue) / 10n ** BigInt(NominalValueDecimals);
+    expect(couponAmountFor.numerator).to.equal(balanceNominalScaled * couponFor.coupon.rate * period);
+    expect(couponAmountFor.denominator).to.equal(
+      10n ** (couponFor.decimals + couponFor.coupon.rateDecimals) * BigInt(YEAR_SECONDS),
+    );
   });
 
   it("GIVEN a coupon WHEN getCoupon is called THEN decodes coupon data", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
     couponRecordDateInSeconds = (await getDltTimestamp()) + 1000;
     couponExecutionDateInSeconds = (await getDltTimestamp()) + 2000;
 
@@ -799,14 +871,10 @@ describe("Coupon Tests", () => {
       asset,
       "WrongIndexForAction",
     );
-    await expect(asset.getTotalCouponHolders(999)).to.be.revertedWithCustomError(asset, "WrongIndexForAction");
-    await expect(asset.getCouponHolders(999, 0, 10)).to.be.revertedWithCustomError(asset, "WrongIndexForAction");
-
-    await expect(asset.getCouponsFor(999, 0, 10)).to.be.revertedWithCustomError(asset, "WrongIndexForAction");
   });
 
   it("GIVEN invalid startDate > endDate WHEN setCoupon THEN transaction fails with WrongDates", async () => {
-    await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
     const currentTimestamp = await getDltTimestamp();
     const invalidCoupon = {
@@ -824,7 +892,7 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN invalid fixingDate > executionDate WHEN setCoupon THEN transaction fails with WrongDates", async () => {
-    await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
     const currentTimestamp = await getDltTimestamp();
     const invalidCoupon = {
       recordDate: currentTimestamp + TIME_PERIODS_S.DAY,
@@ -841,7 +909,7 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN fixingDate in the past WHEN setCoupon THEN transaction fails with WrongTimestamp", async () => {
-    await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
     const currentTimestamp = await getDltTimestamp();
     const invalidCoupon = {
       recordDate: currentTimestamp + TIME_PERIODS_S.DAY,
@@ -860,173 +928,303 @@ describe("Coupon Tests", () => {
     );
   });
 
-  it("GIVEN multiple coupons WHEN triggerScheduledCrossOrderedTasks is called after fixingDate THEN coupons are added to ordered list", async () => {
-    const kpiLinkedRateBase = await deployBondKpiLinkedRateTokenFixture({
-      bondDataParams: {
-        securityData: {
-          isMultiPartition: false,
-        },
-        bondDetails: {
-          startingDate: startingDate,
-          maturityDate: maturityDate,
-        },
-      },
-    });
-
-    const kpiDiamond = kpiLinkedRateBase.diamond;
-    const couponKpiLinkedRateFacet = await ethers.getContractAt(
-      "CouponKpiLinkedRateFacetTimeTravel",
-      kpiDiamond.target,
-      signer_A,
-    );
-    const accessControlKpi = await ethers.getContractAt("AccessControl", kpiDiamond.target, signer_A);
-    const scheduledTasksKpi = await ethers.getContractAt("ScheduledCrossOrderedTasks", kpiDiamond.target, signer_A);
-    const timeTravelKpi = await ethers.getContractAt("TimeTravelFacet", kpiDiamond.target, signer_A);
-
-    await accessControlKpi.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
-
-    const timestamp = await getDltTimestamp();
-
-    const coupon1 = {
-      recordDate: (timestamp + TIME_PERIODS_S.DAY).toString(),
-      executionDate: (timestamp + TIME_PERIODS_S.DAY * 2).toString(),
-      rate: 0,
-      rateDecimals: 0,
-      startDate: timestamp.toString(),
-      endDate: (timestamp + TIME_PERIODS_S.DAY).toString(),
-      fixingDate: (timestamp + TIME_PERIODS_S.DAY).toString(),
-      rateStatus: 0,
+  it("GIVEN endDate > maturityDate WHEN setCoupon THEN transaction fails with WrongDates", async () => {
+    await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+    const currentTimestamp = await getDltTimestamp();
+    const invalidCoupon = {
+      recordDate: currentTimestamp + TIME_PERIODS_S.DAY,
+      executionDate: currentTimestamp + TIME_PERIODS_S.DAY * 2,
+      rate: couponRate,
+      rateDecimals: couponRateDecimals,
+      startDate: currentTimestamp,
+      endDate: maturityDate + 1,
+      fixingDate: currentTimestamp + TIME_PERIODS_S.DAY,
+      rateStatus: couponRateStatus,
     };
-
-    const coupon2 = {
-      recordDate: (timestamp + TIME_PERIODS_S.DAY * 2).toString(),
-      executionDate: (timestamp + TIME_PERIODS_S.DAY * 3).toString(),
-      rate: 0,
-      rateDecimals: 0,
-      startDate: (timestamp + TIME_PERIODS_S.DAY).toString(),
-      endDate: (timestamp + TIME_PERIODS_S.DAY * 2).toString(),
-      fixingDate: (timestamp + TIME_PERIODS_S.DAY * 2).toString(),
-      rateStatus: 0,
-    };
-
-    await expect(couponKpiLinkedRateFacet.connect(signer_A).setCoupon(coupon1)).to.emit(
-      couponKpiLinkedRateFacet,
-      "CouponSet",
-    );
-
-    await expect(await couponKpiLinkedRateFacet.connect(signer_A).setCoupon(coupon2)).to.emit(
-      couponKpiLinkedRateFacet,
-      "CouponSet",
-    );
-
-    let orderedList = await couponKpiLinkedRateFacet.getCouponsOrderedList(0, 10);
-    expect(orderedList).to.be.an("array").with.lengthOf(0);
-
-    await timeTravelKpi.changeSystemTimestamp(timestamp + TIME_PERIODS_S.DAY + 1);
-
-    await scheduledTasksKpi.connect(signer_A).triggerScheduledCrossOrderedTasks(100);
-
-    orderedList = await couponKpiLinkedRateFacet.getCouponsOrderedList(0, 10);
-    expect(orderedList).to.be.an("array").with.lengthOf(1);
-    expect(orderedList[0]).to.equal(1); // couponId 1
-
-    await timeTravelKpi.changeSystemTimestamp(timestamp + TIME_PERIODS_S.DAY * 2 + 1);
-
-    await scheduledTasksKpi.connect(signer_A).triggerScheduledCrossOrderedTasks(100);
-
-    orderedList = await couponKpiLinkedRateFacet.getCouponsOrderedList(0, 10);
-    expect(orderedList).to.be.an("array").with.lengthOf(2);
-    expect(orderedList[0]).to.equal(1); // couponId 1
-    expect(orderedList[1]).to.equal(2); // couponId 2
-
-    // Verify getCouponFromOrderedListAt works correctly
-    const couponIdAtPos0 = await couponKpiLinkedRateFacet.getCouponFromOrderedListAt(0);
-    const couponIdAtPos1 = await couponKpiLinkedRateFacet.getCouponFromOrderedListAt(1);
-    expect(couponIdAtPos0).to.equal(1);
-    expect(couponIdAtPos1).to.equal(2);
-
-    // Verify getCouponsOrderedListTotal
-    const totalCouponsInOrderedList = await couponKpiLinkedRateFacet.getCouponsOrderedListTotal();
-    expect(totalCouponsInOrderedList).to.equal(2);
+    await expect(asset.connect(signer_C).setCoupon(invalidCoupon)).to.be.revertedWithCustomError(asset, "WrongDates");
   });
 
-  it("GIVEN deprecated coupons in bond storage AND new coupons in coupon storage WHEN getCouponFromOrderedListAt is called THEN it correctly routes to both storages with offset", async () => {
-    const kpiLinkedRateBase = await deployBondKpiLinkedRateTokenFixture({
-      bondDataParams: {
-        securityData: {
-          isMultiPartition: false,
-        },
-        bondDetails: {
-          startingDate: startingDate,
-          maturityDate: maturityDate,
-        },
-      },
-    });
-
-    const kpiDiamond = kpiLinkedRateBase.diamond;
-    const couponKpiLinkedRateFacet = await ethers.getContractAt(
-      "CouponKpiLinkedRateFacetTimeTravel",
-      kpiDiamond.target,
-      signer_A,
-    );
-    const accessControlKpi = await ethers.getContractAt("AccessControl", kpiDiamond.target, signer_A);
-    const scheduledTasksKpi = await ethers.getContractAt("ScheduledCrossOrderedTasks", kpiDiamond.target, signer_A);
-    const timeTravelKpi = await ethers.getContractAt("TimeTravelFacet", kpiDiamond.target, signer_A);
-
-    await accessControlKpi.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
-
-    const timestamp = await getDltTimestamp();
-
-    const coupon1 = {
-      recordDate: (timestamp + TIME_PERIODS_S.DAY).toString(),
-      executionDate: (timestamp + TIME_PERIODS_S.DAY * 2).toString(),
-      rate: 0,
-      rateDecimals: 0,
-      startDate: timestamp.toString(),
-      endDate: (timestamp + TIME_PERIODS_S.DAY).toString(),
-      fixingDate: (timestamp + TIME_PERIODS_S.DAY).toString(),
-      rateStatus: 0,
+  it("GIVEN endDate == maturityDate WHEN setCoupon THEN transaction succeeds", async () => {
+    await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+    const currentTimestamp = await getDltTimestamp();
+    const validCoupon = {
+      recordDate: currentTimestamp + TIME_PERIODS_S.DAY,
+      executionDate: currentTimestamp + TIME_PERIODS_S.DAY * 2,
+      rate: couponRate,
+      rateDecimals: couponRateDecimals,
+      startDate: currentTimestamp,
+      endDate: maturityDate,
+      fixingDate: currentTimestamp + TIME_PERIODS_S.DAY,
+      rateStatus: couponRateStatus,
     };
-
-    await expect(couponKpiLinkedRateFacet.connect(signer_A).setCoupon(coupon1)).to.emit(
-      couponKpiLinkedRateFacet,
-      "CouponSet",
-    );
-
-    // Trigger scheduled tasks to move coupon1 to ordered list
-    await timeTravelKpi.changeSystemTimestamp(timestamp + TIME_PERIODS_S.DAY + 1);
-    await scheduledTasksKpi.connect(signer_A).triggerScheduledCrossOrderedTasks(100);
-
-    // Add deprecated coupons to bond storage (simulating legacy data from before refactor)
-    // This must be done AFTER triggers complete to avoid errors when triggers try to process fake IDs
-    await timeTravelKpi.testOnlyAddDeprecatedCoupon(100);
-
-    // 1 deprecated (in bond storage) + 1 new (in coupon storage)
-    const totalCoupons = await couponKpiLinkedRateFacet.getCouponsOrderedListTotal();
-    expect(totalCoupons).to.equal(2);
-
-    const pos0 = await couponKpiLinkedRateFacet.getCouponFromOrderedListAt(0);
-    expect(pos0).to.equal(100); // from deprecated bond storage
-
-    const pos3 = await couponKpiLinkedRateFacet.getCouponFromOrderedListAt(1);
-    expect(pos3).to.equal(1); // first new coupon
-
-    const fullList = await couponKpiLinkedRateFacet.getCouponsOrderedList(0, 10);
-    expect(fullList).to.have.lengthOf(2);
-    expect(fullList[0]).to.equal(100); // deprecated
-    expect(fullList[1]).to.equal(1); // new storage
+    await expect(asset.connect(signer_C).setCoupon(validCoupon)).not.to.be.reverted;
   });
 
-  it("GIVEN empty ordered list WHEN getCouponFromOrderedListAt with _pos >= getCouponsOrderedListTotalAdjustedAt THEN returns 0", async () => {
-    const couponIdAtPos0 = await asset.getCouponFromOrderedListAt(0);
-    expect(couponIdAtPos0).to.equal(0);
+  it("GIVEN endDate < maturityDate WHEN setCoupon THEN transaction succeeds", async () => {
+    await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+    const currentTimestamp = await getDltTimestamp();
+    const validCoupon = {
+      recordDate: currentTimestamp + TIME_PERIODS_S.DAY,
+      executionDate: currentTimestamp + TIME_PERIODS_S.DAY * 2,
+      rate: couponRate,
+      rateDecimals: couponRateDecimals,
+      startDate: currentTimestamp,
+      endDate: maturityDate - TIME_PERIODS_S.DAY,
+      fixingDate: currentTimestamp + TIME_PERIODS_S.DAY,
+      rateStatus: couponRateStatus,
+    };
+    await expect(asset.connect(signer_C).setCoupon(validCoupon)).not.to.be.reverted;
+  });
 
-    // Test position 1 - should return 0 because list is empty
-    const couponIdAtPos1 = await asset.getCouponFromOrderedListAt(1);
-    expect(couponIdAtPos1).to.equal(0);
+  describe("overflow safety and precision invariants", () => {
+    it("GIVEN a coupon configuration WHEN getCouponAmountFor THEN the returned fraction equals the canonical balance·nominal·rate·period / (10^(d+nd+rd) · year) ratio", async () => {
+      // Ratio equivalence proof. The new (numerator, denominator) decomposition
+      // changes shape relative to  form, but the represented ratio must
+      // remain identical. Verified by BigInt cross-multiplication (a/b == c/d iff a·d == b·c).
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
+      await asset.connect(signer_A).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: numberOfUnits,
+        data: "0x",
+      });
 
-    // Test position 100 - should return 0 because list is empty
-    const couponIdAtPos100 = await asset.getCouponFromOrderedListAt(100);
-    expect(couponIdAtPos100).to.equal(0);
+      await asset.connect(signer_A).setCoupon(couponData);
+      await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
+
+      const couponAmountFor = await asset.getCouponAmountFor(1, signer_A.address);
+      const couponFor = await asset.getCouponFor(1, signer_A.address);
+      const nominalValue = await asset.getNominalValue();
+      const nominalValueDecimals = await asset.getNominalValueDecimals();
+      const period = couponFor.coupon.endDate - couponFor.coupon.startDate;
+
+      const canonicalNumerator = couponFor.tokenBalance * nominalValue * couponFor.coupon.rate * period;
+      const canonicalDenominator =
+        10n ** (couponFor.decimals + nominalValueDecimals + couponFor.coupon.rateDecimals) * BigInt(YEAR_SECONDS);
+
+      expect(couponAmountFor.numerator * canonicalDenominator).to.equal(
+        canonicalNumerator * couponAmountFor.denominator,
+      );
+    });
+
+    it("GIVEN a high-precision configuration that overflows the pre-fix balance·nominal·rate·period four-way product WHEN getCouponAmountFor THEN does not revert", async () => {
+      // Regression for the audit's overflow scenario. With high nominal and rate
+      // decimals the pre-fix four-way product exceeds uint256's ceiling (~1.16·10^77).
+      // The new path stages the multiplication through 512-bit mulDiv so the operation
+      // completes and returns a well-formed fraction.
+      const HIGH_NOMINAL_DECIMALS = 35;
+      const HIGH_RATE_DECIMALS = 35;
+      const NOMINAL = 10n ** BigInt(HIGH_NOMINAL_DECIMALS); // nominal_real = 1
+      const RATE = 5n * 10n ** BigInt(HIGH_RATE_DECIMALS - 2); // rate_real = 0.05 (5%)
+      const HOLDING = 10n ** 15n; // 10^15 raw — well within uint256
+
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
+      await asset.connect(signer_A).setNominalValue(NOMINAL, HIGH_NOMINAL_DECIMALS);
+      await asset.connect(signer_A).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: HOLDING,
+        data: "0x",
+      });
+
+      const localCouponData = {
+        ...couponData,
+        rate: RATE,
+        rateDecimals: HIGH_RATE_DECIMALS,
+      };
+      await asset.connect(signer_A).setCoupon(localCouponData);
+      await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
+
+      const couponFor = await asset.getCouponFor(1, signer_A.address);
+      const period = couponFor.coupon.endDate - couponFor.coupon.startDate;
+
+      // Self-document the overflow: prove the pre-fix four-way product would not fit in uint256.
+      const preFixProduct = couponFor.tokenBalance * NOMINAL * RATE * period;
+      expect(preFixProduct).to.be.greaterThan(2n ** 256n - 1n);
+
+      // Must not revert.
+      const couponAmountFor = await asset.getCouponAmountFor(1, signer_A.address);
+      expect(couponAmountFor.recordDateReached).to.equal(true);
+
+      // And the ratio must still equal the canonical formula (exact BigInt cross-multiplication).
+      const canonicalDenominator =
+        10n ** (couponFor.decimals + BigInt(HIGH_NOMINAL_DECIMALS) + BigInt(HIGH_RATE_DECIMALS)) * BigInt(YEAR_SECONDS);
+      expect(couponAmountFor.numerator * canonicalDenominator).to.equal(preFixProduct * couponAmountFor.denominator);
+    });
+
+    it("GIVEN decimals + rateDecimals >= 78 WHEN getCouponAmountFor after record date THEN reverts with ExponentOverflow", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
+      // default token decimals = 6; rateDecimals = 72 → totalDecimals = 78 == MAX_DECIMALS; 10^78 overflows uint256
+      await asset.connect(signer_A).setCoupon({ ...couponData, rateDecimals: 72 });
+      await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
+      await expect(asset.getCouponAmountFor(1, signer_A.address)).to.be.revertedWithCustomError(
+        asset,
+        "ExponentOverflow",
+      );
+    });
+
+    it("GIVEN decimals + rateDecimals in [70, 77] WHEN getCouponAmountFor after record date THEN reverts with GreaterThanMaxUint256", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
+      // default token decimals = 6; rateDecimals = 64 → totalDecimals = 70;
+      // pow10(70) × 365 days ≈ 3.15 × 10^77 > MAX_UINT256 ≈ 1.16 × 10^77:
+      // denominator multiplication overflows before ExponentOverflow (threshold 78) fires
+      await asset.connect(signer_A).setCoupon({ ...couponData, rateDecimals: 64 });
+      await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
+      await expect(asset.getCouponAmountFor(1, signer_A.address))
+        .to.be.revertedWithCustomError(asset, "GreaterThanMaxUint256")
+        .withArgs(BigInt(YEAR_SECONDS), 70);
+    });
+  });
+  describe("initializeCoupon", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeCoupon is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeCoupon())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeCoupon is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeCoupon())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_COUPON, 1);
+    });
+  });
+
+  describe("initializeCoupon event", () => {
+    it("GIVEN a fresh deployment WHEN initializeCoupon is called THEN emits CouponInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_COUPON);
+      await expect(asset.initializeCoupon()).to.emit(asset, "CouponInitialized");
+    });
+  });
+});
+
+describe("Coupon Fixed-Rate Variant Tests", () => {
+  let diamond: ResolverProxy;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
+  let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
+
+  async function deployFixedRateFixture() {
+    const base = await deployBondFixedRateTokenFixture({
+      bondDataParams: {
+        securityData: { isMultiPartition: false },
+        bondDetails: { startingDate, maturityDate },
+      },
+      fixedRateParams: { rate: TEST_BOND_FIXED_RATE.RATE, rateDecimals: TEST_BOND_FIXED_RATE.RATE_DECIMALS },
+    });
+    diamond = base.diamond;
+    signer_A = base.deployer;
+    signer_B = base.user1;
+    signer_C = base.user2;
+
+    asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
+    await executeRbac(asset, [
+      { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+    ]);
+    await asset.connect(signer_A).addIssuer(signer_A.address);
+    await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+  }
+
+  beforeEach(async () => {
+    const currentTimestamp = await getDltTimestamp();
+    couponRecordDateInSeconds = currentTimestamp + TEST_COUPON.TIMING.RECORD_OFFSET_S;
+    couponExecutionDateInSeconds = currentTimestamp + TEST_COUPON.TIMING.EXECUTION_OFFSET_S;
+    couponFixingDateInSeconds = currentTimestamp + TEST_COUPON.TIMING.EXECUTION_OFFSET_S;
+    couponEndDateInSeconds = couponFixingDateInSeconds - 1;
+    couponStartDateInSeconds = couponEndDateInSeconds - couponPeriod;
+    await loadFixture(deployFixedRateFixture);
+  });
+
+  it("GIVEN a fixed-rate bond WHEN setCoupon with PENDING rate THEN CouponSet emits with the resolved configured rate", async () => {
+    const pendingCoupon = {
+      recordDate: couponRecordDateInSeconds.toString(),
+      executionDate: couponExecutionDateInSeconds.toString(),
+      rate: 0,
+      rateDecimals: 0,
+      startDate: couponStartDateInSeconds.toString(),
+      endDate: couponEndDateInSeconds.toString(),
+      fixingDate: couponFixingDateInSeconds.toString(),
+      rateStatus: TEST_COUPON.RATE_STATUS.PENDING,
+    };
+
+    const tx = await asset.connect(signer_C).setCoupon(pendingCoupon);
+    await expect(tx)
+      .to.emit(asset, EVENT_NAMES.COUPON_SET)
+      .withArgs(TEST_COUPON.FIRST_CORPORATE_ACTION_ID, TEST_COUPON.FIRST_ID, signer_C.address, [
+        couponRecordDateInSeconds,
+        couponExecutionDateInSeconds,
+        couponStartDateInSeconds,
+        couponEndDateInSeconds,
+        couponFixingDateInSeconds,
+        TEST_BOND_FIXED_RATE.RATE,
+        TEST_BOND_FIXED_RATE.RATE_DECIMALS,
+        TEST_COUPON.RATE_STATUS.SET,
+      ]);
+    const receipt = await tx.wait();
+    expectExactlyOneEvent(receipt!, asset, EVENT_NAMES.COUPON_SET);
+  });
+
+  describe("Deactivated", () => {
+    it("GIVEN a deactivated asset WHEN setCoupon THEN transaction fails with Deactivated", async () => {
+      const base = await deployBondTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).setCoupon({
+          recordDate: 0,
+          executionDate: 0,
+          startDate: 0,
+          endDate: 0,
+          fixingDate: 0,
+          rate: 0,
+          rateDecimals: 0,
+          rateStatus: 0,
+        }),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN cancelCoupon THEN transaction fails with Deactivated", async () => {
+      const base = await deployBondTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(deactivatedAsset.connect(base.deployer).cancelCoupon(0)).to.be.revertedWithCustomError(
+        deactivatedAsset,
+        "Deactivated",
+      );
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setCoupon THEN reverts with AssetNotOperational", async () => {
+      const minimalCoupon = {
+        recordDate: 0,
+        executionDate: 0,
+        rate: 0,
+        rateDecimals: 0,
+        startDate: 0,
+        endDate: 0,
+        fixingDate: 0,
+        rateStatus: 0,
+      };
+      await expect(asset.setCoupon(minimalCoupon)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational WHEN cancelCoupon is called THEN AssetNotOperational", async () => {
+      await expect(asset.cancelCoupon(0n))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(BOND_FIXED_RATE_CONFIG_ID, 1);
+    });
   });
 });

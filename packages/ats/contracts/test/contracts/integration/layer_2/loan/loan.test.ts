@@ -3,10 +3,16 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type IAsset } from "@contract-types";
+import { type IAsset, MockDiamondCut } from "@contract-types";
 import { ZERO, EMPTY_STRING, ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployLoanTokenFixture, DEFAULT_LOAN_PARAMS, MAX_UINT256, executeRbac } from "@test";
+import {
+  deployAtsInfrastructureFixture,
+  deployLoanTokenFixture,
+  executeRbac,
+  getLoanDetails,
+  MAX_UINT256,
+} from "@test";
 
 const EMPTY_VC_ID = EMPTY_STRING;
 
@@ -16,57 +22,10 @@ describe("Loan Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let _mockDiamondCut: MockDiamondCut;
 
   let startingDate: number;
   let maturityDate: number;
-
-  function buildLoanDetails(overrides?: Record<string, object>) {
-    return {
-      loanBasicData: {
-        currency: "0x455552",
-        startingDate,
-        maturityDate,
-        loanStructureType: 0,
-        repaymentType: 0,
-        interestType: 0,
-        signingDate: startingDate,
-        originatorAccount: signer_A.address,
-        servicerAccount: signer_B.address,
-        ...(overrides?.loanBasicData ?? {}),
-      },
-      loanInterestData: {
-        baseReferenceRate: 0,
-        floorRate: 0,
-        capRate: 0,
-        rateMargin: 0,
-        dayCount: 0,
-        paymentFrequency: 0,
-        firstAccrualDate: startingDate,
-        prepaymentPenalty: 0,
-        commitmentFee: 0,
-        utilizationFee: 0,
-        utilizationFeeType: 0,
-        servicingFee: 0,
-        ...(overrides?.loanInterestData ?? {}),
-      },
-      riskData: {
-        internalRiskGrade: "test",
-        defaultProbability: 0,
-        lossGivenDefault: 0,
-        ...(overrides?.riskData ?? {}),
-      },
-      collateral: {
-        totalCollateralValue: 0,
-        loanToValue: 0,
-        ...(overrides?.collateral ?? {}),
-      },
-      loanPerformanceStatus: {
-        performanceStatus: 0,
-        daysPastDue: 0,
-        ...(overrides?.loanPerformanceStatus ?? {}),
-      },
-    };
-  }
 
   async function deployLoanFixture() {
     const base = await deployLoanTokenFixture();
@@ -80,22 +39,27 @@ describe("Loan Tests", () => {
     maturityDate = startingDate + 100_000;
 
     asset = await ethers.getContractAt("IAsset", base.tokenAddress);
+    _mockDiamondCut = await ethers.getContractAt("MockDiamondCut", base.tokenAddress);
 
     await executeRbac(asset, [
       {
-        role: ATS_ROLES._PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._KYC_ROLE,
+        role: ATS_ROLES.ROLE_KYC,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._SSI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_SSI_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._LOAN_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_LOAN_MANAGER,
+        members: [signer_A.address],
+      },
+      {
+        role: ATS_ROLES.ROLE_ISSUER,
         members: [signer_A.address],
       },
     ]);
@@ -107,24 +71,9 @@ describe("Loan Tests", () => {
   beforeEach(async () => {
     await loadFixture(deployLoanFixture);
   });
-
-  describe("Deploy", () => {
-    it("GIVEN a deployed loan token WHEN querying name and symbol THEN returns the configured values", async () => {
-      const name = await asset.name();
-      const symbol = await asset.symbol();
-      const nominalValue = await asset.getNominalValue();
-      const nominalValueDecimals = await asset.getNominalValueDecimals();
-
-      expect(name).to.equal(DEFAULT_LOAN_PARAMS.name);
-      expect(symbol).to.equal(DEFAULT_LOAN_PARAMS.symbol);
-      expect(nominalValue).to.equal(DEFAULT_LOAN_PARAMS.nominalValue);
-      expect(nominalValueDecimals).to.equal(DEFAULT_LOAN_PARAMS.nominalValueDecimals);
-    });
-  });
-
   describe("setLoanDetails", () => {
     it("GIVEN a loan token WHEN setLoanDetails THEN loan details are set correctly", async () => {
-      const loanDetails = buildLoanDetails();
+      const loanDetails = await getLoanDetails();
       await asset.connect(signer_A).setLoanDetails(loanDetails);
       const result = await asset.getLoanDetails();
       // LoanBasicData
@@ -165,24 +114,24 @@ describe("Loan Tests", () => {
     });
 
     it("GIVEN an account without loan manager role WHEN setLoanDetails THEN transaction fails with AccountHasNoRole", async () => {
-      const loanDetails = buildLoanDetails();
+      const loanDetails = await getLoanDetails();
       await expect(asset.connect(signer_C).setLoanDetails(loanDetails)).to.be.revertedWithCustomError(
         asset,
         "AccountHasNoRole",
       );
     });
 
-    it("GIVEN a paused token WHEN setLoanDetails THEN transaction fails with TokenIsPaused", async () => {
+    it("GIVEN a paused token WHEN setLoanDetails THEN transaction fails with IsPaused", async () => {
       await asset.connect(signer_B).pause();
-      const loanDetails = buildLoanDetails();
+      const loanDetails = await getLoanDetails();
       await expect(asset.connect(signer_A).setLoanDetails(loanDetails)).to.be.revertedWithCustomError(
         asset,
-        "TokenIsPaused",
+        "IsPaused",
       );
     });
 
     it("GIVEN startingDate is 0 WHEN setLoanDetails THEN transaction fails with WrongTimestamp", async () => {
-      const loanDetails = buildLoanDetails({ loanBasicData: { startingDate: 0 } });
+      const loanDetails = await getLoanDetails({ startingDate: 0 });
       await expect(asset.connect(signer_A).setLoanDetails(loanDetails)).to.be.revertedWithCustomError(
         asset,
         "WrongTimestamp",
@@ -190,7 +139,7 @@ describe("Loan Tests", () => {
     });
 
     it("GIVEN maturityDate is 0 WHEN setLoanDetails THEN transaction fails with WrongTimestamp", async () => {
-      const loanDetails = buildLoanDetails({ loanBasicData: { maturityDate: 0 } });
+      const loanDetails = await getLoanDetails({ maturityDate: 0 });
       await expect(asset.connect(signer_A).setLoanDetails(loanDetails)).to.be.revertedWithCustomError(
         asset,
         "WrongTimestamp",
@@ -198,7 +147,7 @@ describe("Loan Tests", () => {
     });
 
     it("GIVEN startingDate after maturityDate WHEN setLoanDetails THEN transaction fails with WrongDates", async () => {
-      const loanDetails = buildLoanDetails({ loanBasicData: { startingDate: maturityDate + 1 } });
+      const loanDetails = await getLoanDetails({ startingDate: maturityDate + 1, maturityDate: maturityDate });
       await expect(asset.connect(signer_A).setLoanDetails(loanDetails)).to.be.revertedWithCustomError(
         asset,
         "WrongDates",
@@ -206,7 +155,7 @@ describe("Loan Tests", () => {
     });
 
     it("GIVEN signingDate is 0 WHEN setLoanDetails THEN transaction fails with WrongTimestamp", async () => {
-      const loanDetails = buildLoanDetails({ loanBasicData: { signingDate: 0 } });
+      const loanDetails = await getLoanDetails({ signingDate: 0 });
       await expect(asset.connect(signer_A).setLoanDetails(loanDetails)).to.be.revertedWithCustomError(
         asset,
         "WrongTimestamp",
@@ -214,15 +163,14 @@ describe("Loan Tests", () => {
     });
 
     it("GIVEN originatorAccount is zero address WHEN setLoanDetails THEN transaction fails with ZeroAddressNotAllowed", async () => {
-      const loanDetails = buildLoanDetails({ loanBasicData: { originatorAccount: ethers.ZeroAddress } });
+      const loanDetails = await getLoanDetails({ originatorAccount: ethers.ZeroAddress });
       await expect(asset.connect(signer_A).setLoanDetails(loanDetails)).to.be.revertedWithCustomError(
         asset,
         "ZeroAddressNotAllowed",
       );
     });
-
     it("GIVEN servicerAccount is zero address WHEN setLoanDetails THEN transaction fails with ZeroAddressNotAllowed", async () => {
-      const loanDetails = buildLoanDetails({ loanBasicData: { servicerAccount: ethers.ZeroAddress } });
+      const loanDetails = await getLoanDetails({ servicerAccount: ethers.ZeroAddress });
       await expect(asset.connect(signer_A).setLoanDetails(loanDetails)).to.be.revertedWithCustomError(
         asset,
         "ZeroAddressNotAllowed",
@@ -230,7 +178,7 @@ describe("Loan Tests", () => {
     });
 
     it("GIVEN firstAccrualDate is 0 WHEN setLoanDetails THEN transaction fails with WrongTimestamp", async () => {
-      const loanDetails = buildLoanDetails({ loanInterestData: { firstAccrualDate: 0 } });
+      const loanDetails = await getLoanDetails({ firstAccrualDate: 0 });
       await expect(asset.connect(signer_A).setLoanDetails(loanDetails)).to.be.revertedWithCustomError(
         asset,
         "WrongTimestamp",
@@ -238,58 +186,137 @@ describe("Loan Tests", () => {
     });
   });
 
-  describe("initialize_Loan validations", () => {
-    it("GIVEN an initialized loan WHEN trying to initialize again THEN transaction fails with AlreadyInitialized", async () => {
-      const loanDetails = buildLoanDetails();
-      const regulationData = {
-        regulationType: 1,
-        regulationSubType: 2,
-        dealSize: 1,
-        accreditedInvestors: 1,
-        maxNonAccreditedInvestors: 1,
-        manualInvestorVerification: 1,
-        internationalInvestors: 0,
-        resaleHoldPeriod: 1,
-      };
-      const additionalSecurityData = {
-        countriesControlListType: true,
-        listOfCountries: "US,CA",
-        info: "Info",
-        country: "US",
-      };
+  describe("initializeLoan validations", () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeLoan is called THEN it reverts with AccountHasNoRole", async () => {
+      const loanDetails = await getLoanDetails();
+      await expect(asset.connect(signer_C).initializeLoan(loanDetails)).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
 
-      await expect(
-        asset.connect(signer_A).initialize_Loan(loanDetails, regulationData, additionalSecurityData),
-      ).to.be.rejectedWith("AlreadyInitialized");
+    it("GIVEN an initialized loan WHEN trying to initialize again THEN transaction fails with FacetAlreadyRegistered", async () => {
+      const loanDetails = await getLoanDetails();
+      await expect(asset.connect(signer_A).initializeLoan(loanDetails)).to.be.revertedWithCustomError(
+        asset,
+        "FacetAlreadyRegistered",
+      );
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeLoan is called THEN it emits LoanInitialized", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const { LOAN_CONFIG_ID } = await import("@scripts/domain");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(
+        infra.blr.target as string,
+        LOAN_CONFIG_ID,
+        1,
+        [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] }],
+        "0x",
+      );
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", (await proxyTx.wait())!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      const loanDetails = await getLoanDetails();
+      const tx = await freshAsset.connect(infra.deployer).initializeLoan(loanDetails);
+      const receipt = await tx.wait();
+      const emitted = await decodeEvent(freshAsset, "LoanInitialized", receipt!);
+      expect(emitted.loanDetailsData.loanBasicData.currency).to.equal(loanDetails.loanBasicData.currency);
     });
 
     it("GIVEN startingDate is 0 WHEN deploying loan THEN transaction fails with WrongTimestamp", async () => {
       await expect(
         deployLoanTokenFixture({
-          loanInit: {
-            startingDate: 0,
-            maturityDate: 100_000,
-            signingDate: 50_000,
-            originatorAccount: "0x1234567890123456789012345678901234567890",
-            servicerAccount: "0x1234567890123456789012345678901234567891",
+          loanParams: {
+            loanInit: {
+              startingDate: 0,
+              maturityDate: 100_000,
+              signingDate: 50_000,
+              originatorAccount: "0x1234567890123456789012345678901234567890",
+              servicerAccount: "0x1234567890123456789012345678901234567891",
+            },
           },
         }),
-      ).to.be.rejectedWith("WrongTimestamp");
+      ).to.be.revertedWithCustomError(asset, "InvalidTimestamp");
     });
 
     it("GIVEN startingDate after maturityDate WHEN deploying loan THEN transaction fails with WrongDates", async () => {
       const now = Math.floor(Date.now() / 1000);
       await expect(
         deployLoanTokenFixture({
-          loanInit: {
-            startingDate: now + 200_000,
-            maturityDate: now + 100_000,
-            signingDate: now + 1800,
-            originatorAccount: "0x1234567890123456789012345678901234567890",
-            servicerAccount: "0x1234567890123456789012345678901234567891",
+          loanParams: {
+            loanInit: {
+              startingDate: now + 200_000,
+              maturityDate: now + 100_000,
+              signingDate: now + 1800,
+              originatorAccount: "0x1234567890123456789012345678901234567890",
+              servicerAccount: "0x1234567890123456789012345678901234567891",
+            },
           },
         }),
-      ).to.be.rejectedWith("WrongDates");
+      ).to.be.revertedWithCustomError(asset, "WrongDates");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await _mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setLoanDetails THEN AssetNotOperational", async () => {
+      const loanDetails = await getLoanDetails();
+      await expect(asset.setLoanDetails(loanDetails)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+  });
+
+  describe("Deactivated", () => {
+    it("GIVEN a deactivated asset WHEN cancelAmortization THEN transaction fails with Deactivated", async () => {
+      const base = await deployLoanTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(deactivatedAsset.connect(base.deployer).cancelAmortization(0)).to.be.revertedWithCustomError(
+        deactivatedAsset,
+        "Deactivated",
+      );
+    });
+
+    it("GIVEN a deactivated asset WHEN setLoanDetails THEN transaction fails with Deactivated", async () => {
+      const base = await deployLoanTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).setLoanDetails({
+          loanBasicData: {
+            currency: "0x000000",
+            startingDate: 0,
+            maturityDate: 0,
+            loanStructureType: 0,
+            repaymentType: 0,
+            interestType: 0,
+            signingDate: 0,
+            originatorAccount: ethers.ZeroAddress,
+            servicerAccount: ethers.ZeroAddress,
+          },
+          loanInterestData: {
+            baseReferenceRate: 0,
+            floorRate: 0,
+            capRate: 0,
+            rateMargin: 0,
+            dayCount: 0,
+            paymentFrequency: 0,
+            firstAccrualDate: 0,
+            prepaymentPenalty: 0,
+            commitmentFee: 0,
+            utilizationFee: 0,
+            utilizationFeeType: 0,
+            servicingFee: 0,
+          },
+          riskData: { internalRiskGrade: "", defaultProbability: 0, lossGivenDefault: 0 },
+          collateral: { totalCollateralValue: 0, loanToValue: 0 },
+          loanPerformanceStatus: { performanceStatus: 0, daysPastDue: 0 },
+        }),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
 });

@@ -36,7 +36,7 @@ export class ProtectedTransferFromByPartitionCommandHandler implements ICommandH
     command: ProtectedTransferFromByPartitionCommand,
   ): Promise<ProtectedTransferFromByPartitionCommandResponse> {
     try {
-      const { securityId, partitionId, sourceId, targetId, amount, deadline, nounce, signature } = command;
+      const { securityId, partitionId, sourceId, targetId, amount, deadline, nonce, signature } = command;
 
       const handler = this.transactionService.getHandler();
       const account = this.accountService.getCurrentAccount();
@@ -65,7 +65,7 @@ export class ProtectedTransferFromByPartitionCommandHandler implements ICommandH
 
       await this.validationService.checkBalance(securityId, sourceId, amountBd);
 
-      await this.validationService.checkValidNounce(securityId, sourceId, nounce);
+      await this.validationService.checkValidNonce(securityId, sourceId, nonce);
 
       const res = await handler.protectedTransferFromByPartition(
         securityEvmAddress,
@@ -74,7 +74,7 @@ export class ProtectedTransferFromByPartitionCommandHandler implements ICommandH
         targetEvmAddress,
         amountBd,
         BigDecimal.fromString(deadline.substring(0, 10)),
-        BigDecimal.fromString(nounce.toString()),
+        BigDecimal.fromString(nonce.toString()),
         signature,
         securityId,
       );

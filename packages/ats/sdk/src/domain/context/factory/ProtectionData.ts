@@ -2,6 +2,6 @@
 
 export class ProtectionData {
   public deadline: bigint;
-  public nounce: bigint;
+  public nonce: bigint;
   public signature: string;
 }

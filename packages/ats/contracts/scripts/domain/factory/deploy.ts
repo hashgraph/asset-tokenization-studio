@@ -3,37 +3,38 @@
 /**
  * Factory deployment module.
  *
- * High-level module for deploying Factory contract with proxy and
- * initialization.
+ * Deploys the Factory entry point as a ResolverProxy parameterized with
+ * FACTORY_CONFIG_ID. The BLR config MUST be registered before calling this
+ * function — use createFactoryConfiguration() first.
+ *
+ * Off-chain callers continue to interact via the IFactory ABI on the returned
+ * proxy address. The proxy mechanism is transparent to consumers.
  *
  * @module domain/factory/deploy
  */
 
 import { Signer } from "ethers";
-import { Factory__factory, ProxyAdmin } from "@contract-types";
+import { ResolverProxy__factory } from "@contract-types";
+import { FACTORY_CONFIG_ID } from "@scripts/domain";
 import {
-  DeployProxyResult,
-  deployProxy,
   info,
   section,
   success,
   error as logError,
   GAS_LIMIT,
   hederaGasOverrides,
+  gasLimitOverride,
 } from "@scripts/infrastructure";
 
 /**
  * Options for deploying Factory.
  */
 export interface DeployFactoryOptions {
-  /** BLR address (required for Factory initialization) */
-  blrAddress?: string;
+  /** BLR address (required — FactoryProxy uses BLR for resolver dispatch) */
+  blrAddress: string;
 
-  /** Existing ProxyAdmin contract instance (optional, will deploy new one if not provided) */
-  existingProxyAdmin?: ProxyAdmin;
-
-  /** Whether to initialize after deployment */
-  initialize?: boolean;
+  /** Factory config version returned by createFactoryConfiguration() (required) */
+  factoryVersion: number;
 }
 
 /**
@@ -43,152 +44,83 @@ export interface DeployFactoryResult {
   /** Whether deployment succeeded */
   success: boolean;
 
-  /** Proxy deployment result */
-  proxyResult: DeployProxyResult;
-
-  /** Factory proxy address */
+  /** Factory proxy address (ResolverProxy instance) */
   factoryAddress: string;
 
-  /** Factory implementation address */
-  implementationAddress: string;
+  /** Implementation address, if tracked by the deployment */
+  implementationAddress?: string;
 
-  /** ProxyAdmin address */
-  proxyAdminAddress: string;
-
-  /** Whether Factory was initialized */
-  initialized: boolean;
-
-  /** Error message (only if success=false) */
   error?: string;
 }
 
 /**
- * Deploy Factory with proxy.
+ * Deploy Factory as a ResolverProxy.
  *
- * This module handles the complete deployment of Factory contract
- * including proxy setup and optional initialization.
+ * Constructs `new ResolverProxy(blrAddress, FACTORY_CONFIG_ID, factoryVersion, [])`.
+ * The FactoryProxy constructor validates that the config exists in BLR and reverts
+ * if it does not — ensuring deployment order is enforced at the EVM level.
+ *
+ * PREREQUISITE: createFactoryConfiguration() must be called before this function.
  *
  * @param signer - Ethers.js signer for deploying contracts
- * @param options - Deployment options
+ * @param options - Deployment options (blrAddress, factoryVersion, factoryFacetAddress required)
  * @returns Deployment result
  *
  * @example
  * ```typescript
- * import { ethers } from 'ethers'
+ * const configResult = await createFactoryConfiguration(blr, facetAddresses)
+ * const factoryVersion = configResult.data.version
  *
- * const signer = provider.getSigner()
  * const result = await deployFactory(signer, {
- *   blrAddress: '0x123...',
- *   initialize: true
+ *   blrAddress: '0xBLR...',
+ *   factoryVersion,
+ *   factoryFacetAddress: facetAddresses['FactoryFacet'],
  * })
- * console.log(`Factory deployed at ${result.factoryAddress}`)
+ * console.log(`Factory Proxy: ${result.factoryAddress}`)
+ * console.log(`Implementation: ${result.implementationAddress}`)
  * ```
  */
-export async function deployFactory(signer: Signer, options: DeployFactoryOptions = {}): Promise<DeployFactoryResult> {
-  const { existingProxyAdmin } = options;
+export async function deployFactory(signer: Signer, options: DeployFactoryOptions): Promise<DeployFactoryResult> {
+  const { blrAddress, factoryVersion } = options;
 
-  section("Deploying Factory");
+  if (!blrAddress) {
+    throw new Error("deployFactory: blrAddress is required");
+  }
+  if (!factoryVersion) {
+    throw new Error("deployFactory: factoryVersion is required");
+  }
+  section("Deploying Factory (ResolverProxy)");
 
   try {
-    // Deploy Factory with proxy
-    info("Deploying Factory implementation and proxy...");
+    info(`Deploying FactoryProxy with BLR=${blrAddress}, configId=${FACTORY_CONFIG_ID}, version=${factoryVersion}...`);
 
-    // Create factory for implementation deployment
-    const implementationFactory = new Factory__factory(signer);
-
-    const proxyResult = await deployProxy(signer, {
-      implementationFactory,
-      implementationArgs: [],
-      existingProxyAdmin,
-      initData: "0x", // Factory is stateless, no initialization needed
-      overrides: {
-        gasLimit: GAS_LIMIT.high,
+    const resolverProxyFactory = new ResolverProxy__factory(signer);
+    const factoryProxy = await resolverProxyFactory.deploy(
+      blrAddress,
+      FACTORY_CONFIG_ID,
+      factoryVersion,
+      [], // empty rbacs — Factory is permissionless in v1
+      {
+        ...gasLimitOverride(GAS_LIMIT.high),
         ...hederaGasOverrides(),
       },
-    });
+    );
+    await factoryProxy.waitForDeployment();
 
-    const factoryAddress = proxyResult.proxyAddress;
-    const implementationAddress = proxyResult.implementationAddress;
-    const adminAddress = proxyResult.proxyAdminAddress;
-
-    // Factory contract is stateless and doesn't require initialization
-    // The BLR address is passed as a parameter when deploying tokens
-    const initialized = false;
+    const factoryAddress = await factoryProxy.getAddress();
 
     success("Factory deployment complete");
-    info(`  Factory Proxy: ${factoryAddress}`);
-    info(`  Implementation: ${implementationAddress}`);
-    info(`  ProxyAdmin: ${adminAddress}`);
+    info(`  Factory Proxy:    ${factoryAddress}`);
+    info(`  Config ID:        ${FACTORY_CONFIG_ID}`);
+    info(`  Version:          ${factoryVersion}`);
 
     return {
       success: true,
-      proxyResult,
       factoryAddress,
-      implementationAddress,
-      proxyAdminAddress: adminAddress,
-      initialized,
     };
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err);
     logError(`Factory deployment failed: ${errorMessage}`);
-
     throw new Error(`Factory deployment failed: ${errorMessage}`);
   }
-}
-
-/**
- * Deploy Factory with existing ProxyAdmin.
- *
- * Convenience function for deploying Factory using an already deployed
- * ProxyAdmin (e.g., shared with BLR).
- *
- * @param signer - Ethers.js signer for deploying contracts
- * @param blrAddress - BLR address for initialization
- * @param existingProxyAdmin - Existing ProxyAdmin contract instance
- * @returns Deployment result
- *
- * @example
- * ```typescript
- * import { ethers } from 'ethers'
- * import { ProxyAdmin__factory } from '@contract-types'
- *
- * const signer = provider.getSigner()
- * const proxyAdmin = ProxyAdmin__factory.connect('0xProxyAdmin...', signer)
- * const result = await deployFactoryWithProxyAdmin(
- *   signer,
- *   '0xBLR...',
- *   proxyAdmin
- * )
- * ```
- */
-export async function deployFactoryWithProxyAdmin(
-  signer: Signer,
-  blrAddress: string,
-  existingProxyAdmin: ProxyAdmin,
-): Promise<DeployFactoryResult> {
-  return deployFactory(signer, {
-    blrAddress,
-    existingProxyAdmin,
-    initialize: true,
-  });
-}
-
-/**
- * Get Factory deployment summary.
- *
- * @param result - Deployment result
- * @returns Summary object
- */
-export function getFactoryDeploymentSummary(result: DeployFactoryResult): {
-  factoryAddress: string;
-  implementationAddress: string;
-  proxyAdminAddress: string;
-  initialized: boolean;
-} {
-  return {
-    factoryAddress: result.factoryAddress,
-    implementationAddress: result.implementationAddress,
-    proxyAdminAddress: result.proxyAdminAddress,
-    initialized: result.initialized,
-  };
 }

@@ -39,6 +39,15 @@ export interface DeployedContract {
 
   /** Deployment timestamp (ISO 8601) */
   deployedAt: string;
+
+  /**
+   * True when the deploy transaction was submitted but the receipt has not yet
+   * been confirmed. Set immediately after the tx hash is received; cleared once
+   * waitForDeployment / deployTx.wait() succeeds. A crash between those two
+   * points leaves this flag set, allowing resume to wait for the existing tx
+   * instead of redeploying.
+   */
+  pending?: boolean;
 }
 
 /**
@@ -53,6 +62,9 @@ export interface ConfigurationResult {
 
   /** Number of facets in configuration */
   facetCount: number;
+
+  /** Facet list — persisted so the output file is complete on resume */
+  facets?: Array<{ facetName: string; key: string; address: string }>;
 
   /** Transaction hash of configuration creation */
   txHash: string;
@@ -179,6 +191,22 @@ export interface DeploymentCheckpoint {
      */
     facets?: Map<string, DeployedContract>;
 
+    /**
+     * Orchestrator libraries deployment (step 2.5)
+     * Required for library-dependent facets like MintByPartitionFacet
+     */
+    libraries?: {
+      tokenCoreOps: string;
+      holdOps: string;
+      clearingOps: string;
+      clearingLifecycleOps: string;
+      clearingReadOps: string;
+      clearingProtectedOps: string;
+      scheduledTasksOps: string;
+      scheduledTasksDispatchOps: string;
+      deployedAt: string;
+    };
+
     /** Facets registered in BLR (step 3) */
     facetsRegistered?: boolean;
 
@@ -192,8 +220,26 @@ export interface DeploymentCheckpoint {
       bondFixedRate?: ConfigurationResult;
       /** Bond KpiLinked Rate configuration */
       bondKpiLinkedRate?: ConfigurationResult;
-      /** Bond Sustainability Performance Target Rate configuration */
-      bondSustainabilityPerformanceTargetRate?: ConfigurationResult;
+      /** Deposit Token configuration */
+      depositToken?: ConfigurationResult;
+      /** Loan configuration */
+      loan?: ConfigurationResult;
+      /** Loans Portfolio configuration */
+      loansPortfolio?: ConfigurationResult;
+      /** Factory configuration */
+      factory?: ConfigurationResult;
+      // TEST-ONLY: InitializeMock configuration (gated by `useTimeTravel`).
+      // Records every version minted for the same configId in a single
+      // workflow step — the workflow calls `createInitializeMockConfiguration`
+      // multiple times in a row to mint v1..vN.
+      initializeMock?: {
+        /** Configuration ID (bytes32) */
+        configId: string;
+        /** Number of facets in each configuration version */
+        facetCount: number;
+        /** Versions minted, in call order (e.g. [1, 2, 3, 4]) */
+        versions: number[];
+      };
     };
 
     /** Factory deployment (step 6) */
@@ -244,6 +290,10 @@ export interface DeploymentCheckpoint {
     partialBatchDeploy?: boolean;
     /** Number of facets per batch (default: DEFAULT_BATCH_SIZE) */
     batchSize?: number;
+    /** Submit facet deploys in parallel chunks (pipeline mode) */
+    parallelFacetDeployment?: boolean;
+    /** Max in-flight facet deploys when `parallelFacetDeployment` is on */
+    concurrency?: number;
 
     // existingBlr workflow options
     deployFacets?: boolean;

@@ -15,6 +15,7 @@ import ForceTransferRequest from "./security/operations/transfer/ForceTransferRe
 import GetAccountBalanceRequest from "./account/GetAccountBalanceRequest";
 import GetAccountInfoRequest from "./account/GetAccountInfoRequest";
 import PauseRequest from "./security/operations/pause/PauseRequest";
+import DeactivateRequest from "./security/operations/deactivate/DeactivateRequest";
 import ControlListRequest from "./security/operations/controlList/ControlListRequest";
 import GetControlListCountRequest from "./security/operations/controlList/GetControlListCountRequest";
 import GetControlListMembersRequest from "./security/operations/controlList/GetControlListMembersRequest";
@@ -59,17 +60,18 @@ import GetConfigInfoRequest from "./management/GetConfigInfoRequest";
 import UpdateConfigRequest from "./management/UpdateConfigRequest";
 import UpdateConfigVersionRequest from "./management/UpdateConfigVersionRequest";
 import UpdateResolverRequest from "./management/UpdateResolverRequest";
+import ResolveLatestConfigVersionRequest from "./management/ResolveLatestConfigVersionRequest";
 import UpdateMaturityDateRequest from "./bond/UpdateMaturityDateRequest";
 import SetScheduledBalanceAdjustmentRequest from "./equity/SetScheduledBalanceAdjustmentRequest";
 import GetScheduledBalanceAdjustmentRequest from "./equity/GetScheduledBalanceAdjustmentRequest";
-import GetScheduledBalanceAdjustmentCountRequest from "./equity/GetScheduledBalanceAdjustmentsCountRequest";
+import GetPendingBalanceAdjustmentCountRequest from "./equity/GetPendingBalanceAdjustmentsCountRequest";
 import GetAllScheduledBalanceAdjustmentsRequest from "./equity/GetAllScheduledBalanceAdjustmentst";
 import GetLastAggregatedBalanceAdjustmentFactorForRequest from "./equity/GetLastAggregatedBalanceAdjustmentFactorForRequest";
 import GetAggregatedBalanceAdjustmentFactorRequest from "./account/GetAggregatedBalanceAdjustmentFactorRequest";
 import GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest from "./equity/GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest";
 import ProtectedTransferFromByPartitionRequest from "./security/operations/transfer/ProtectedTransferFromByPartitionRequest";
 import ProtectedRedeemFromByPartitionRequest from "./security/operations/redeem/ProtectedRedeemFromByPartitionRequest";
-import GetNounceRequest from "./security/operations/protectedPartitions/GetNounceRequest";
+import GetNonceRequest from "./security/operations/protectedPartitions/GetNonceRequest";
 import PartitionsProtectedRequest from "./security/operations/protectedPartitions/PartitionsProtectedRequest";
 import CreateHoldByPartitionRequest from "./security/operations/hold/CreateHoldByPartition";
 import CreateHoldFromByPartitionRequest from "./security/operations/hold/CreateHoldFromByPartition";
@@ -153,10 +155,14 @@ import GrantKycMockRequest from "./security/externalKycLists/mock/GrantKycMockRe
 import RevokeKycMockRequest from "./security/externalKycLists/mock/RevokeKycMockRequest";
 import GetKycStatusMockRequest from "./security/externalKycLists/mock/GetKycStatusMockRequest";
 import SetNameRequest from "./security/operations/tokeMetadata/SetNameRequest";
+import SetCustomDataRequest from "./security/operations/customData/SetCustomDataRequest";
+import GetCustomDataRequest from "./security/operations/customData/GetCustomDataRequest";
 import SetSymbolRequest from "./security/operations/tokeMetadata/SetSymbolRequest";
 import SetNominalValueRequest from "./security/operations/nominalValue/SetNominalValueRequest";
+import SetNominalValueCurrencyRequest from "./security/operations/nominalValue/SetNominalValueCurrencyRequest";
 import GetNominalValueRequest from "./security/operations/nominalValue/GetNominalValueRequest";
 import GetNominalValueDecimalsRequest from "./security/operations/nominalValue/GetNominalValueDecimalsRequest";
+import GetNominalValueCurrencyRequest from "./security/operations/nominalValue/GetNominalValueCurrencyRequest";
 import SetAmortizationRequest from "./security/amortization/SetAmortizationRequest";
 import CancelAmortizationRequest from "./security/amortization/CancelAmortizationRequest";
 import SetAmortizationHoldRequest from "./security/amortization/SetAmortizationHoldRequest";
@@ -211,8 +217,6 @@ import GetTotalVotingHoldersRequest from "./equity/GetTotalVotingHoldersRequest"
 import GetVotingHoldersRequest from "./equity/GetVotingHoldersRequest";
 import GetSecurityHoldersRequest from "./security/GetSecurityHoldersRequest";
 import GetTotalSecurityHoldersRequest from "./security/GetTotalSecurityHoldersRequest";
-import CreateTrexSuiteEquityRequest from "./equity/CreateTrexSuiteEquityRequest";
-import CreateTrexSuiteBondRequest from "./bond/CreateTrexSuiteBondRequest";
 import AddProceedRecipientRequest from "./bond/AddProceedRecipientRequest";
 import RemoveProceedRecipientRequest from "./bond/RemoveProceedRecipientRequest";
 import UpdateProceedRecipientDataRequest from "./bond/UpdateProceedRecipientDataRequest";
@@ -287,6 +291,7 @@ export {
   GetAccountBalanceRequest,
   GetAccountInfoRequest,
   PauseRequest,
+  DeactivateRequest,
   GetControlListTypeRequest,
   InitializationRequest,
   ConnectRequest,
@@ -307,17 +312,18 @@ export {
   UpdateConfigVersionRequest,
   UpdateConfigRequest,
   GetConfigInfoRequest,
+  ResolveLatestConfigVersionRequest,
   UpdateMaturityDateRequest,
   SetScheduledBalanceAdjustmentRequest,
   GetScheduledBalanceAdjustmentRequest,
-  GetScheduledBalanceAdjustmentCountRequest,
+  GetPendingBalanceAdjustmentCountRequest,
   GetAllScheduledBalanceAdjustmentsRequest,
   GetLastAggregatedBalanceAdjustmentFactorForRequest,
   GetAggregatedBalanceAdjustmentFactorRequest,
   GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest,
   ProtectedTransferFromByPartitionRequest,
   ProtectedRedeemFromByPartitionRequest,
-  GetNounceRequest,
+  GetNonceRequest,
   PartitionsProtectedRequest,
   CreateHoldByPartitionRequest,
   CreateHoldFromByPartitionRequest,
@@ -403,6 +409,8 @@ export {
   RevokeKycMockRequest,
   GetKycStatusMockRequest,
   SetNameRequest,
+  SetCustomDataRequest,
+  GetCustomDataRequest,
   SetSymbolRequest,
   SetOnchainIDRequest,
   SetComplianceRequest,
@@ -439,8 +447,6 @@ export {
   GetTotalVotingHoldersRequest,
   GetSecurityHoldersRequest,
   GetTotalSecurityHoldersRequest,
-  CreateTrexSuiteBondRequest,
-  CreateTrexSuiteEquityRequest,
   AddProceedRecipientRequest,
   RemoveProceedRecipientRequest,
   UpdateProceedRecipientDataRequest,
@@ -468,8 +474,10 @@ export {
   CancelScheduledBalanceAdjustmentRequest,
   CancelVotingRequest,
   SetNominalValueRequest,
+  SetNominalValueCurrencyRequest,
   GetNominalValueRequest,
   GetNominalValueDecimalsRequest,
+  GetNominalValueCurrencyRequest,
   SetAmortizationRequest,
   CancelAmortizationRequest,
   SetAmortizationHoldRequest,

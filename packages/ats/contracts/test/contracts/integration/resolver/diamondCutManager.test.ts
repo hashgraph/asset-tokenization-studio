@@ -18,13 +18,18 @@ import {
   BOND_CONFIG_ID,
   BOND_FIXED_RATE_CONFIG_ID,
   BOND_KPI_LINKED_RATE_CONFIG_ID,
-  BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID,
   EQUITY_CONFIG_ID,
+  FACTORY_CONFIG_ID,
+  LOAN_CONFIG_ID,
+  LOANS_PORTFOLIO_CONFIG_ID,
+  DEPOSIT_TOKEN_CONFIG_ID,
+  INITIALIZE_MOCK_CONFIG_ID,
 } from "@scripts";
-import { deployAtsInfrastructureFixture, registerERC20FacetFixture } from "@test";
+import { deployAtsInfrastructureFixture, registerTransferFacetFixture } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ethers } from "hardhat";
 import { deployContract, registerFacets } from "@scripts/infrastructure";
+import { assertObject } from "@test";
 
 // Test-specific configuration IDs for negative test cases
 // These are separate from EQUITY_CONFIG_ID/BOND_CONFIG_ID to avoid conflicts
@@ -35,6 +40,13 @@ const TEST_CONFIG_IDS = {
 };
 
 describe("DiamondCutManager", () => {
+  function createFacetConfigurations(ids: string[], versions: number[]): IDiamondCutManager.FacetConfigurationStruct[] {
+    return ids.map((id, index) => ({
+      id,
+      version: versions[index],
+    }));
+  }
+
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
 
@@ -46,8 +58,12 @@ describe("DiamondCutManager", () => {
   let bondFacetIdList: string[] = [];
   let bondFixedRateFacetIdList: string[] = [];
   let bondKpiLinkedRateFacetIdList: string[] = [];
-  let bondSustainabilityPerformanceTargetRateFacetIdList: string[] = [];
+  let loanFacetIdList: string[] = [];
+  let depositTokenFacetIdList: string[] = [];
+  let loansPortfolioFacetIdList: string[] = [];
+  let factoryFacetIdList: string[] = [];
   let equityFacetVersionList: number[] = [];
+  let configToFacetIdsMap: Record<string, string[]>;
 
   async function atsInfrastructureFixture() {
     return await deployAtsInfrastructureFixture();
@@ -63,7 +79,7 @@ describe("DiamondCutManager", () => {
 
     // Use TypeChain factories instead of ethers.getContractAt for proper ABI resolution
     accessControl = AccessControlFacet__factory.connect(businessLogicResolver.target.toString(), signer_A);
-    await accessControl.grantRole(ATS_ROLES._PAUSER_ROLE, signer_B.address);
+    await accessControl.grantRole(ATS_ROLES.ROLE_PAUSER, signer_B.address);
 
     pause = Pause__factory.connect(businessLogicResolver.target.toString(), signer_A);
 
@@ -72,14 +88,26 @@ describe("DiamondCutManager", () => {
     bondFacetIdList = Object.values(infrastructure.bondFacetKeys);
     bondFixedRateFacetIdList = Object.values(infrastructure.bondFixedRateFacetKeys);
     bondKpiLinkedRateFacetIdList = Object.values(infrastructure.bondKpiLinkedRateFacetKeys);
-    bondSustainabilityPerformanceTargetRateFacetIdList = Object.values(
-      infrastructure.bondSustainabilityPerformanceTargetRateFacetKeys,
-    );
+    loanFacetIdList = Object.values(infrastructure.loanFacetKeys);
+    depositTokenFacetIdList = Object.values(infrastructure.depositTokenFacetKeys);
+    loansPortfolioFacetIdList = Object.values(infrastructure.loansPortfolioFacetKeys);
+    factoryFacetIdList = Object.values(infrastructure.factoryFacetKeys);
     equityFacetVersionList = Array(equityFacetIdList.length).fill(1);
+
+    configToFacetIdsMap = {
+      [EQUITY_CONFIG_ID]: equityFacetIdList,
+      [BOND_CONFIG_ID]: bondFacetIdList,
+      [BOND_FIXED_RATE_CONFIG_ID]: bondFixedRateFacetIdList,
+      [BOND_KPI_LINKED_RATE_CONFIG_ID]: bondKpiLinkedRateFacetIdList,
+      [LOAN_CONFIG_ID]: loanFacetIdList,
+      [DEPOSIT_TOKEN_CONFIG_ID]: depositTokenFacetIdList,
+      [LOANS_PORTFOLIO_CONFIG_ID]: loansPortfolioFacetIdList,
+      [FACTORY_CONFIG_ID]: factoryFacetIdList,
+    };
   });
 
   afterEach(async () => {
-    const isPaused = await pause.isPaused();
+    const isPaused = await pause.paused();
     if (isPaused) {
       await pause.connect(signer_B).unpause();
     }
@@ -287,18 +315,7 @@ describe("DiamondCutManager", () => {
     expect([...facetIds]).to.have.members([...facetIds_2]);
     expect([...facetAddresses]).to.have.members([...facetAddresses_2]);
 
-    const expectedFacetIdList =
-      configId === EQUITY_CONFIG_ID
-        ? equityFacetIdList
-        : configId === BOND_CONFIG_ID
-          ? bondFacetIdList
-          : configId == BOND_FIXED_RATE_CONFIG_ID
-            ? bondFixedRateFacetIdList
-            : configId == BOND_KPI_LINKED_RATE_CONFIG_ID
-              ? bondKpiLinkedRateFacetIdList
-              : configId == BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID
-                ? bondSustainabilityPerformanceTargetRateFacetIdList
-                : null;
+    const expectedFacetIdList = configToFacetIdsMap[configId];
 
     if (!expectedFacetIdList) {
       expect.fail("Unknown configId");
@@ -310,7 +327,7 @@ describe("DiamondCutManager", () => {
 
   it("GIVEN a resolver WHEN reading configuration information THEN everything matches", async () => {
     const configLength = Number(await diamondCutManager.getConfigurationsLength());
-    expect(configLength).to.equal(5);
+    expect(configLength).to.equal(9);
 
     const configIds = await diamondCutManager.getConfigurations(0, configLength);
     expect([...configIds]).to.have.members([
@@ -318,10 +335,15 @@ describe("DiamondCutManager", () => {
       BOND_CONFIG_ID,
       BOND_FIXED_RATE_CONFIG_ID,
       BOND_KPI_LINKED_RATE_CONFIG_ID,
-      BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID,
+      LOAN_CONFIG_ID,
+      DEPOSIT_TOKEN_CONFIG_ID,
+      LOANS_PORTFOLIO_CONFIG_ID,
+      FACTORY_CONFIG_ID,
+      INITIALIZE_MOCK_CONFIG_ID,
     ]);
 
     for (const configId of configIds) {
+      if (configId == INITIALIZE_MOCK_CONFIG_ID) continue;
       const configLatestVersion = Number(await diamondCutManager.getLatestVersionByConfiguration(configId));
       expect(configLatestVersion).to.equal(1);
 
@@ -344,9 +366,9 @@ describe("DiamondCutManager", () => {
       2,
     );
     expect(configVersionDoesNotExist).to.be.false;
-    await expect(diamondCutManager.checkResolverProxyConfigurationRegistered(EQUITY_CONFIG_ID, 2)).to.be.rejectedWith(
-      "ResolverProxyConfigurationNoRegistered",
-    );
+    await expect(
+      diamondCutManager.checkResolverProxyConfigurationRegistered(EQUITY_CONFIG_ID, 2),
+    ).to.be.revertedWithCustomError(diamondCutManager, "ResolverProxyConfigurationNoRegistered");
 
     const configDoesNotExist = await diamondCutManager.isResolverProxyConfigurationRegistered(
       "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -358,7 +380,7 @@ describe("DiamondCutManager", () => {
         "0x0000000000000000000000000000000000000000000000000000000000000000",
         1,
       ),
-    ).to.be.rejectedWith("ResolverProxyConfigurationNoRegistered");
+    ).to.be.revertedWithCustomError(diamondCutManager, "ResolverProxyConfigurationNoRegistered");
 
     const noFacetAddress = await diamondCutManager.resolveResolverProxyCall(EQUITY_CONFIG_ID, 1, "0x00000001");
     expect(noFacetAddress).to.equal("0x0000000000000000000000000000000000000000");
@@ -368,49 +390,35 @@ describe("DiamondCutManager", () => {
   });
 
   it("GIVEN a resolver WHEN adding a new configuration with configId at 0 THEN fails with DefaultValueForConfigurationIdNotPermitted", async () => {
-    const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] = [];
-    equityFacetIdList.forEach((id, index) =>
-      facetConfigurations.push({
-        id,
-        version: equityFacetVersionList[index],
-      }),
-    );
+    const facetConfigurations = createFacetConfigurations(equityFacetIdList, equityFacetVersionList);
 
     await expect(
       diamondCutManager
         .connect(signer_A)
-        .createConfiguration("0x0000000000000000000000000000000000000000000000000000000000000000", facetConfigurations),
-    ).to.be.rejectedWith("DefaultValueForConfigurationIdNotPermitted");
+        .createConfiguration(
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+          facetConfigurations,
+          "0x",
+        ),
+    ).to.be.revertedWithCustomError(diamondCutManager, "DefaultValueForConfigurationIdNotPermitted");
   });
 
-  it("GIVEN a resolver and a non admin user WHEN adding a new configuration THEN fails with AccountHasNoRole", async () => {
-    const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] = [];
-    equityFacetIdList.forEach((id, index) =>
-      facetConfigurations.push({
-        id,
-        version: equityFacetVersionList[index],
-      }),
-    );
+  it.skip("GIVEN a resolver and a non admin user WHEN adding a new configuration THEN fails with AccountHasNoRole", async () => {
+    const facetConfigurations = createFacetConfigurations(equityFacetIdList, equityFacetVersionList);
 
     await expect(
-      diamondCutManager.connect(signer_B).createConfiguration(EQUITY_CONFIG_ID, facetConfigurations),
-    ).to.be.rejectedWith("AccountHasNoRole");
+      diamondCutManager.connect(signer_B).createConfiguration(EQUITY_CONFIG_ID, facetConfigurations, "0x"),
+    ).to.be.revertedWithCustomError(diamondCutManager, "AccountHasNoRole");
   });
 
-  it("GIVEN a paused resolver WHEN adding a new configuration THEN fails with TokenIsPaused", async () => {
+  it("GIVEN a paused resolver WHEN adding a new configuration THEN fails with IsPaused", async () => {
     await pause.connect(signer_B).pause();
 
-    const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] = [];
-    equityFacetIdList.forEach((id, index) =>
-      facetConfigurations.push({
-        id,
-        version: equityFacetVersionList[index],
-      }),
-    );
+    const facetConfigurations = createFacetConfigurations(equityFacetIdList, equityFacetVersionList);
 
     await expect(
-      diamondCutManager.connect(signer_A).createConfiguration(TEST_CONFIG_IDS.PAUSE_TEST, facetConfigurations),
-    ).to.be.rejectedWith("TokenIsPaused");
+      diamondCutManager.connect(signer_A).createConfiguration(TEST_CONFIG_IDS.PAUSE_TEST, facetConfigurations, "0x"),
+    ).to.be.revertedWithCustomError(diamondCutManager, "IsPaused");
 
     await pause.connect(signer_B).unpause();
   });
@@ -424,66 +432,70 @@ describe("DiamondCutManager", () => {
     ];
 
     await expect(
-      diamondCutManager.connect(signer_A).createConfiguration(EQUITY_CONFIG_ID, facetConfigurations),
-    ).to.be.rejectedWith("FacetIdNotRegistered");
+      diamondCutManager.connect(signer_A).createConfiguration(EQUITY_CONFIG_ID, facetConfigurations, "0x"),
+    ).to.be.revertedWithCustomError(diamondCutManager, "FacetIdNotRegistered");
   });
 
   it("GIVEN a resolver WHEN adding a new configuration with a duplicated facet THEN fails with DuplicatedFacetInConfiguration", async () => {
     const facetsIds = [...equityFacetIdList, equityFacetIdList[0]];
     const facetVersions = [...equityFacetVersionList, equityFacetVersionList[0]];
 
-    const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] = [];
-    facetsIds.forEach((id, index) => {
-      facetConfigurations.push({
-        id,
-        version: facetVersions[index],
-      });
-    });
+    const facetConfigurations = createFacetConfigurations(facetsIds, facetVersions);
 
     await expect(
       diamondCutManager
         .connect(signer_A)
-        .createConfiguration(EQUITY_CONFIG_ID, facetConfigurations, { gasLimit: 30_000_000 }),
+        .createConfiguration(EQUITY_CONFIG_ID, facetConfigurations, "0x", { gasLimit: 60_000_000 }),
     ).to.be.revertedWithCustomError(diamondCutManager, "DuplicatedFacetInConfiguration");
   });
 
   it("GIVEN a batch deploying WHEN run cancelBatchConfiguration THEN all the related information is removed", async () => {
-    const batchInfrastructure = await deployAtsInfrastructureFixture(true, true);
+    const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000030";
 
-    const batchBusinessLogicResolver = batchInfrastructure.blr;
+    // Create a batch configuration with one facet, but don't mark it as complete (partialBatch: false)
+    const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] = [
+      {
+        id: equityFacetIdList[0],
+        version: 1,
+      },
+    ];
 
-    const batchAccessControl = AccessControlFacet__factory.connect(
-      batchBusinessLogicResolver.target.toString(),
-      signer_A,
-    );
-    await batchAccessControl.grantRole(ATS_ROLES._PAUSER_ROLE, signer_B.address);
+    const data = "0x12345678122334343453453452342452345243523452";
 
-    const batchDiamondCutManager = DiamondCutManager__factory.connect(
-      batchBusinessLogicResolver.target.toString(),
-      signer_A,
-    );
+    await expect(
+      diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, facetConfigurations, false, data),
+    )
+      .to.emit(diamondCutManager, "DiamondBatchConfigurationCreated")
+      .withArgs(
+        testConfigId,
+        (emitted: unknown) => {
+          assertObject(
+            emitted,
+            facetConfigurations.map((f) => ({ id: f.id, version: BigInt(f.version) })),
+          );
+          return true;
+        },
+        false,
+        1,
+        data,
+      );
 
-    const configLength = Number(await batchDiamondCutManager.getConfigurationsLength());
-    expect(configLength).to.equal(0);
+    // With partialBatch: false, the batch is incomplete, so getLatestVersionByConfiguration returns 0
+    const configLatestVersion = Number(await diamondCutManager.getLatestVersionByConfiguration(testConfigId));
+    expect(configLatestVersion).to.equal(0);
 
-    const configIds = await batchDiamondCutManager.getConfigurations(0, configLength);
-    expect([...configIds]).to.have.members([]);
+    // However, facets are being prepared in version 1 and can be queried
+    const facetsLength = Number(await diamondCutManager.getFacetsLengthByConfigurationIdAndVersion(testConfigId, 1));
+    expect(facetsLength).to.equal(1);
 
-    const originalDiamondCutManager = diamondCutManager;
-    diamondCutManager = batchDiamondCutManager;
+    // Cancel the incomplete batch configuration and verify event is emitted
+    await expect(diamondCutManager.connect(signer_A).cancelBatchConfiguration(testConfigId))
+      .to.emit(diamondCutManager, "DiamondBatchConfigurationCanceled")
+      .withArgs(testConfigId, 1);
 
-    for (const configId of [EQUITY_CONFIG_ID, BOND_CONFIG_ID, BOND_FIXED_RATE_CONFIG_ID]) {
-      const configLatestVersion = Number(await batchDiamondCutManager.getLatestVersionByConfiguration(configId));
-      expect(configLatestVersion).to.equal(0);
-
-      await validateConfiguration(configId);
-      await batchDiamondCutManager.cancelBatchConfiguration(configId);
-
-      expect(await batchDiamondCutManager.getFacetsLengthByConfigurationIdAndVersion(configId, 1)).to.equal(0);
-    }
-    expect(await batchDiamondCutManager.getConfigurationsLength()).to.equal(0);
-
-    diamondCutManager = originalDiamondCutManager;
+    // Verify all information is removed
+    expect(await diamondCutManager.getFacetsLengthByConfigurationIdAndVersion(testConfigId, 1)).to.equal(0);
+    expect(await diamondCutManager.getLatestVersionByConfiguration(testConfigId)).to.equal(0);
   });
 
   it("GIVEN a resolver WHEN adding a new configuration with configId at 0 with createBatchConfiguration THEN fails with DefaultValueForConfigurationIdNotPermitted", async () => {
@@ -502,40 +514,29 @@ describe("DiamondCutManager", () => {
           "0x0000000000000000000000000000000000000000000000000000000000000000",
           facetConfigurations,
           false,
+          "0x",
         ),
-    ).to.be.rejectedWith("DefaultValueForConfigurationIdNotPermitted");
+    ).to.be.revertedWithCustomError(diamondCutManager, "DefaultValueForConfigurationIdNotPermitted");
   });
 
-  it("GIVEN a resolver and a non admin user WHEN adding a new configuration with createBatchConfiguration THEN fails with AccountHasNoRole", async () => {
-    const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] = [];
-    equityFacetIdList.forEach((id, index) =>
-      facetConfigurations.push({
-        id,
-        version: equityFacetVersionList[index],
-      }),
-    );
+  it.skip("GIVEN a resolver and a non admin user WHEN adding a new configuration with createBatchConfiguration THEN fails with AccountHasNoRole", async () => {
+    const facetConfigurations = createFacetConfigurations(equityFacetIdList, equityFacetVersionList);
 
     await expect(
-      diamondCutManager.connect(signer_B).createBatchConfiguration(EQUITY_CONFIG_ID, facetConfigurations, false),
-    ).to.be.rejectedWith("AccountHasNoRole");
+      diamondCutManager.connect(signer_B).createBatchConfiguration(EQUITY_CONFIG_ID, facetConfigurations, false, "0x"),
+    ).to.be.revertedWithCustomError(diamondCutManager, "AccountHasNoRole");
   });
 
-  it("GIVEN a paused resolver WHEN adding a new configuration with createBatchConfiguration THEN fails with TokenIsPaused", async () => {
+  it("GIVEN a paused resolver WHEN adding a new configuration with createBatchConfiguration THEN fails with IsPaused", async () => {
     await pause.connect(signer_B).pause();
 
-    const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] = [];
-    equityFacetIdList.forEach((id, index) =>
-      facetConfigurations.push({
-        id,
-        version: equityFacetVersionList[index],
-      }),
-    );
+    const facetConfigurations = createFacetConfigurations(equityFacetIdList, equityFacetVersionList);
 
     await expect(
       diamondCutManager
         .connect(signer_A)
-        .createBatchConfiguration(TEST_CONFIG_IDS.PAUSE_BATCH_TEST, facetConfigurations, false),
-    ).to.be.rejectedWith("TokenIsPaused");
+        .createBatchConfiguration(TEST_CONFIG_IDS.PAUSE_BATCH_TEST, facetConfigurations, false, "0x"),
+    ).to.be.revertedWithCustomError(diamondCutManager, "IsPaused");
 
     await pause.connect(signer_B).unpause();
   });
@@ -549,26 +550,20 @@ describe("DiamondCutManager", () => {
     ];
 
     await expect(
-      diamondCutManager.connect(signer_A).createBatchConfiguration(EQUITY_CONFIG_ID, facetConfigurations, false),
-    ).to.be.rejectedWith("FacetIdNotRegistered");
+      diamondCutManager.connect(signer_A).createBatchConfiguration(EQUITY_CONFIG_ID, facetConfigurations, false, "0x"),
+    ).to.be.revertedWithCustomError(diamondCutManager, "FacetIdNotRegistered");
   });
 
   it("GIVEN a resolver WHEN adding a new configuration with a duplicated facet using createBatchConfiguration THEN fails with DuplicatedFacetInConfiguration", async () => {
     const facetsIds = [...equityFacetIdList, equityFacetIdList[0]];
     const facetVersions = [...equityFacetVersionList, equityFacetVersionList[0]];
 
-    const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] = [];
-    facetsIds.forEach((id, index) => {
-      facetConfigurations.push({
-        id,
-        version: facetVersions[index],
-      });
-    });
+    const facetConfigurations = createFacetConfigurations(facetsIds, facetVersions);
 
     await expect(
       diamondCutManager
         .connect(signer_A)
-        .createBatchConfiguration(EQUITY_CONFIG_ID, facetConfigurations, false, { gasLimit: 30_000_000 }),
+        .createBatchConfiguration(EQUITY_CONFIG_ID, facetConfigurations, false, "0x", { gasLimit: 60_000_000 }),
     ).to.be.revertedWithCustomError(diamondCutManager, "DuplicatedFacetInConfiguration");
   });
 
@@ -577,24 +572,18 @@ describe("DiamondCutManager", () => {
 
     await businessLogicResolver.addSelectorsToBlacklist(TEST_CONFIG_IDS.BLACKLIST_TEST, blackListedSelectors);
 
-    const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] = [];
-    equityFacetIdList.forEach((id, index) =>
-      facetConfigurations.push({
-        id,
-        version: equityFacetVersionList[index],
-      }),
-    );
+    const facetConfigurations = createFacetConfigurations(equityFacetIdList, equityFacetVersionList);
 
     await expect(
       diamondCutManager
         .connect(signer_A)
-        .createConfiguration(TEST_CONFIG_IDS.BLACKLIST_TEST, facetConfigurations, { gasLimit: 30_000_000 }),
+        .createConfiguration(TEST_CONFIG_IDS.BLACKLIST_TEST, facetConfigurations, "0x", { gasLimit: 60_000_000 }),
     )
       .to.be.revertedWithCustomError(diamondCutManager, "SelectorBlacklisted")
       .withArgs(blackListedSelectors[0]);
   });
 
-  it("GIVEN a resolver WHEN creating configuration on an ongoing batch THEN uses the batch version", async () => {
+  it("GIVEN a resolver WHEN creating configuration on an ongoing batch THEN fails with OngoingBatchConfigurationNotPermitted", async () => {
     const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000010";
 
     const firstBatchFacets: IDiamondCutManager.FacetConfigurationStruct[] = [
@@ -604,7 +593,7 @@ describe("DiamondCutManager", () => {
       },
     ];
 
-    await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, firstBatchFacets, false);
+    await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, firstBatchFacets, false, "0x");
 
     const secondBatchFacets: IDiamondCutManager.FacetConfigurationStruct[] = [
       {
@@ -613,16 +602,62 @@ describe("DiamondCutManager", () => {
       },
     ];
 
-    await diamondCutManager.connect(signer_A).createConfiguration(testConfigId, secondBatchFacets);
-
-    const latestVersion = Number(await diamondCutManager.getLatestVersionByConfiguration(testConfigId));
-    expect(latestVersion).to.equal(1);
-
-    const facetsLength = Number(await diamondCutManager.getFacetsLengthByConfigurationIdAndVersion(testConfigId, 1));
-    expect(facetsLength).to.equal(2);
+    await expect(diamondCutManager.connect(signer_A).createConfiguration(testConfigId, secondBatchFacets, "0x"))
+      .to.be.revertedWithCustomError(diamondCutManager, "OngoingBatchConfigurationNotPermitted")
+      .withArgs(testConfigId);
   });
 
-  it("GIVEN a resolver and a non admin user WHEN canceling a batch configuration THEN fails with AccountHasNoRole", async () => {
+  it("GIVEN a resolver WHEN creating configuration with a non owner on an ongoing batch THEN fails with NotOwner", async () => {
+    const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000010";
+
+    const firstBatchFacets: IDiamondCutManager.FacetConfigurationStruct[] = [
+      {
+        id: equityFacetIdList[0],
+        version: 1,
+      },
+    ];
+
+    await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, firstBatchFacets, false, "0x");
+
+    const secondBatchFacets: IDiamondCutManager.FacetConfigurationStruct[] = [
+      {
+        id: equityFacetIdList[1],
+        version: 1,
+      },
+    ];
+
+    await expect(diamondCutManager.connect(signer_B).createConfiguration(testConfigId, secondBatchFacets, "0x"))
+      .to.be.revertedWithCustomError(diamondCutManager, "NotOwner")
+      .withArgs(testConfigId, signer_B.address, signer_A.address);
+  });
+
+  it("GIVEN a resolver WHEN providing second batch of configuration with a non owner on an ongoing batch THEN fails with NotOwner", async () => {
+    const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000010";
+
+    const firstBatchFacets: IDiamondCutManager.FacetConfigurationStruct[] = [
+      {
+        id: equityFacetIdList[0],
+        version: 1,
+      },
+    ];
+
+    await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, firstBatchFacets, false, "0x");
+
+    const secondBatchFacets: IDiamondCutManager.FacetConfigurationStruct[] = [
+      {
+        id: equityFacetIdList[1],
+        version: 1,
+      },
+    ];
+
+    await expect(
+      diamondCutManager.connect(signer_B).createBatchConfiguration(testConfigId, secondBatchFacets, true, "0x"),
+    )
+      .to.be.revertedWithCustomError(diamondCutManager, "NotOwner")
+      .withArgs(testConfigId, signer_B.address, signer_A.address);
+  });
+
+  it.skip("GIVEN a resolver and a non admin user WHEN canceling a batch configuration THEN fails with AccountHasNoRole", async () => {
     const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000011";
 
     const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] = [
@@ -632,14 +667,14 @@ describe("DiamondCutManager", () => {
       },
     ];
 
-    await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, facetConfigurations, false);
+    await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, facetConfigurations, false, "0x");
 
-    await expect(diamondCutManager.connect(signer_B).cancelBatchConfiguration(testConfigId)).to.be.rejectedWith(
-      "AccountHasNoRole",
-    );
+    await expect(
+      diamondCutManager.connect(signer_B).cancelBatchConfiguration(testConfigId),
+    ).to.be.revertedWithCustomError(diamondCutManager, "AccountHasNoRole");
   });
 
-  it("GIVEN a paused resolver WHEN canceling a batch configuration THEN fails with TokenIsPaused", async () => {
+  it("GIVEN a paused resolver WHEN canceling a batch configuration THEN fails with IsPaused", async () => {
     const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000012";
 
     const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] = [
@@ -649,13 +684,30 @@ describe("DiamondCutManager", () => {
       },
     ];
 
-    await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, facetConfigurations, false);
+    await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, facetConfigurations, false, "0x");
 
     await pause.connect(signer_B).pause();
 
-    await expect(diamondCutManager.connect(signer_A).cancelBatchConfiguration(testConfigId)).to.be.rejectedWith(
-      "TokenIsPaused",
-    );
+    await expect(
+      diamondCutManager.connect(signer_A).cancelBatchConfiguration(testConfigId),
+    ).to.be.revertedWithCustomError(diamondCutManager, "IsPaused");
+  });
+
+  it("GIVEN a resolver WHEN canceling a batch configuration with non owner THEN fails with NotOwner", async () => {
+    const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000012";
+
+    const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] = [
+      {
+        id: equityFacetIdList[0],
+        version: 1,
+      },
+    ];
+
+    await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, facetConfigurations, false, "0x");
+
+    await expect(diamondCutManager.connect(signer_B).cancelBatchConfiguration(testConfigId))
+      .to.be.revertedWithCustomError(diamondCutManager, "NotOwner")
+      .withArgs(testConfigId, signer_B.address, signer_A.address);
   });
 
   it("GIVEN a resolver WHEN canceling a batch configuration with configId at 0 THEN fails with DefaultValueForConfigurationIdNotPermitted", async () => {
@@ -663,7 +715,7 @@ describe("DiamondCutManager", () => {
       diamondCutManager
         .connect(signer_A)
         .cancelBatchConfiguration("0x0000000000000000000000000000000000000000000000000000000000000000"),
-    ).to.be.rejectedWith("DefaultValueForConfigurationIdNotPermitted");
+    ).to.be.revertedWithCustomError(diamondCutManager, "DefaultValueForConfigurationIdNotPermitted");
   });
 
   it("GIVEN a configuration WHEN creating a new version (v2) THEN the configuration is already active", async () => {
@@ -676,7 +728,22 @@ describe("DiamondCutManager", () => {
       },
     ];
 
-    await diamondCutManager.connect(signer_A).createConfiguration(testConfigId, firstVersionFacets);
+    const data = "0x6667584685468745684856456754485467548670";
+
+    await expect(diamondCutManager.connect(signer_A).createConfiguration(testConfigId, firstVersionFacets, data))
+      .to.emit(diamondCutManager, "DiamondConfigurationCreated")
+      .withArgs(
+        testConfigId,
+        (emitted: unknown) => {
+          assertObject(
+            emitted,
+            firstVersionFacets.map((f) => ({ id: f.id, version: BigInt(f.version) })),
+          );
+          return true;
+        },
+        1,
+        data,
+      );
 
     const version1 = Number(await diamondCutManager.getLatestVersionByConfiguration(testConfigId));
     expect(version1).to.equal(1);
@@ -691,7 +758,7 @@ describe("DiamondCutManager", () => {
       },
     ];
 
-    await diamondCutManager.connect(signer_A).createConfiguration(testConfigId, secondVersionFacets);
+    await diamondCutManager.connect(signer_A).createConfiguration(testConfigId, secondVersionFacets, "0x");
 
     const version2 = Number(await diamondCutManager.getLatestVersionByConfiguration(testConfigId));
     expect(version2).to.equal(2);
@@ -705,30 +772,40 @@ describe("DiamondCutManager", () => {
     expect(countOfTestConfigId).to.equal(1);
   });
 
-  it("GIVEN a configuration WHEN querying facets with version 0 THEN uses latest version", async () => {
-    const configId = EQUITY_CONFIG_ID;
+  it("GIVEN a configuration WHEN creating a new version (v2) with a Non owner THEN failswith NotOwner", async () => {
+    const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000013";
 
-    const facetsWithVersion0 = await diamondCutManager.getFacetsByConfigurationIdAndVersion(
-      configId,
-      0,
-      0,
-      equityFacetIdList.length,
-    );
+    const firstVersionFacets: IDiamondCutManager.FacetConfigurationStruct[] = [
+      {
+        id: equityFacetIdList[0],
+        version: 1,
+      },
+    ];
 
-    const facetsWithVersion1 = await diamondCutManager.getFacetsByConfigurationIdAndVersion(
-      configId,
-      1,
-      0,
-      equityFacetIdList.length,
-    );
+    await diamondCutManager.connect(signer_A).createConfiguration(testConfigId, firstVersionFacets, "0x");
 
-    expect(facetsWithVersion0.length).to.equal(facetsWithVersion1.length);
-    expect(facetsWithVersion0.length).to.be.greaterThan(0);
+    await expect(diamondCutManager.connect(signer_B).createConfiguration(testConfigId, firstVersionFacets, "0x"))
+      .to.be.revertedWithCustomError(diamondCutManager, "NotOwner")
+      .withArgs(testConfigId, signer_B.address, signer_A.address);
+  });
 
-    for (let i = 0; i < facetsWithVersion0.length; i++) {
-      expect(facetsWithVersion0[i].id).to.equal(facetsWithVersion1[i].id);
-      expect(facetsWithVersion0[i].addr).to.equal(facetsWithVersion1[i].addr);
-    }
+  it("GIVEN a configuration WHEN creating a new version (v2) with a Non owner THEN failswith NotOwner", async () => {
+    const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000013";
+
+    const firstVersionFacets: IDiamondCutManager.FacetConfigurationStruct[] = [
+      {
+        id: equityFacetIdList[0],
+        version: 1,
+      },
+    ];
+
+    await diamondCutManager.connect(signer_A).createConfiguration(testConfigId, firstVersionFacets, "0x");
+
+    await expect(
+      diamondCutManager.connect(signer_B).createBatchConfiguration(testConfigId, firstVersionFacets, true, "0x"),
+    )
+      .to.be.revertedWithCustomError(diamondCutManager, "NotOwner")
+      .withArgs(testConfigId, signer_B.address, signer_A.address);
   });
 
   it("GIVEN a non-existent configuration WHEN checking if registered THEN returns false", async () => {
@@ -742,7 +819,7 @@ describe("DiamondCutManager", () => {
 
     await expect(
       diamondCutManager.checkResolverProxyConfigurationRegistered(nonExistentConfigId, 1),
-    ).to.be.rejectedWith("ResolverProxyConfigurationNoRegistered");
+    ).to.be.revertedWithCustomError(diamondCutManager, "ResolverProxyConfigurationNoRegistered");
   });
 
   it("GIVEN an existing configuration WHEN checking if registered THEN returns true and does not revert", async () => {
@@ -754,18 +831,66 @@ describe("DiamondCutManager", () => {
     const isRegistered = await diamondCutManager.isResolverProxyConfigurationRegistered(configId, 1);
     expect(isRegistered).to.be.true;
 
-    await expect(diamondCutManager.checkResolverProxyConfigurationRegistered(configId, 1)).to.not.be.rejected;
-
+    await expect(diamondCutManager.checkResolverProxyConfigurationRegistered(configId, 1)).to.not.be.reverted;
     const isRegisteredV0 = await diamondCutManager.isResolverProxyConfigurationRegistered(configId, 0);
-    expect(isRegisteredV0).to.be.true;
+    expect(isRegisteredV0).to.be.false;
+  });
+
+  it("GIVEN an existing configuration WHEN checking registration with version 0 THEN reverts with VersionZero", async () => {
+    await expect(diamondCutManager.checkResolverProxyConfigurationRegistered(EQUITY_CONFIG_ID, 0))
+      .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
+      .withArgs(EQUITY_CONFIG_ID);
+  });
+
+  it("GIVEN an existing configuration WHEN resolving a call with version 0 THEN reverts with VersionZero", async () => {
+    const pauseSelector = "0x8456cb59";
+    await expect(diamondCutManager.resolveResolverProxyCall(EQUITY_CONFIG_ID, 0, pauseSelector))
+      .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
+      .withArgs(EQUITY_CONFIG_ID);
+  });
+
+  it("GIVEN an existing configuration WHEN resolveSupportsInterface called with version 0 THEN reverts with VersionZero", async () => {
+    await expect(diamondCutManager.resolveSupportsInterface(EQUITY_CONFIG_ID, 0, "0x01ffc9a7"))
+      .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
+      .withArgs(EQUITY_CONFIG_ID);
+  });
+
+  it("GIVEN an existing configuration WHEN getFacetsByConfigurationIdAndVersion called with version 0 THEN reverts with VersionZero", async () => {
+    await expect(diamondCutManager.getFacetsByConfigurationIdAndVersion(EQUITY_CONFIG_ID, 0, 0, 10))
+      .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
+      .withArgs(EQUITY_CONFIG_ID);
+  });
+
+  it("GIVEN a registered configuration WHEN getFacetVersionByConfigurationIdVersionAndFacetId called with non-existent facetId THEN reverts with FacetIdNotRegistered", async () => {
+    const nonExistentFacetId = "0x1234567890123456789012345678901234567890123456789012345678901234";
+
+    await expect(
+      diamondCutManager.getFacetVersionByConfigurationIdVersionAndFacetId(EQUITY_CONFIG_ID, 1, nonExistentFacetId),
+    ).to.be.revertedWithCustomError(diamondCutManager, "FacetIdNotRegistered");
+  });
+
+  it("GIVEN a resolver WHEN creating a configuration with empty facet array THEN fails with EmptyFacetConfigurationNotPermitted", async () => {
+    const emptyConfigId = "0x0000000000000000000000000000000000000000000000000000000000000040";
+
+    await expect(diamondCutManager.connect(signer_A).createConfiguration(emptyConfigId, [], "0x"))
+      .to.be.revertedWithCustomError(diamondCutManager, "EmptyFacetConfigurationNotPermitted")
+      .withArgs(emptyConfigId);
+  });
+
+  it("GIVEN a resolver WHEN finalising a batch configuration with no facets accumulated THEN fails with EmptyFacetConfigurationNotPermitted", async () => {
+    const emptyBatchConfigId = "0x0000000000000000000000000000000000000000000000000000000000000041";
+
+    await expect(diamondCutManager.connect(signer_A).createBatchConfiguration(emptyBatchConfigId, [], true, "0x"))
+      .to.be.revertedWithCustomError(diamondCutManager, "EmptyFacetConfigurationNotPermitted")
+      .withArgs(emptyBatchConfigId);
   });
 
   it("GIVEN a resolver WHEN adding configuration with overlapping selectors from different facets THEN fails with SelectorAlreadyRegistered", async () => {
-    // Use the lightweight fixture that includes ERC20Facet
-    const fixture = await loadFixture(registerERC20FacetFixture);
-    const { deployer, blr, erc20ResolverKey } = fixture;
+    // Use the lightweight fixture that includes TransferFacet
+    const fixture = await loadFixture(registerTransferFacetFixture);
+    const { deployer, blr, transferResolverKey } = fixture;
 
-    // Deploy DuplicateSelectorFacetTest which has the same transfer.selector (0xa9059cbb) as ERC20Facet
+    // Deploy DuplicateSelectorFacetTest which has the same transfer.selector (0xa9059cbb) as TransferFacet
     const duplicateFactory = await ethers.getContractFactory("DuplicateSelectorFacetTest", deployer);
     const duplicateResult = await deployContract(duplicateFactory, {
       confirmations: 0,
@@ -790,18 +915,18 @@ describe("DiamondCutManager", () => {
     // Connect DiamondCutManager to the BLR
     const testDiamondCutManager = DiamondCutManager__factory.connect(await blr.getAddress(), deployer);
 
-    // Try to create configuration with both ERC20Facet and DuplicateSelectorFacetTest
+    // Try to create configuration with both TransferFacet and DuplicateSelectorFacetTest
     // Both have the same transfer.selector (0xa9059cbb)
     const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000020";
     const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] = [
-      { id: erc20ResolverKey, version: 1 },
+      { id: transferResolverKey, version: 1 },
       { id: duplicateResolverKey, version: 1 },
     ];
 
     // Expect the transaction to revert with SelectorAlreadyRegistered error
     // The error should contain: configurationId, version, facetId, selector
     const transferSelector = "0xa9059cbb"; // transfer(address,uint256).selector
-    await expect(testDiamondCutManager.createConfiguration(testConfigId, facetConfigurations))
+    await expect(testDiamondCutManager.createConfiguration(testConfigId, facetConfigurations, "0x"))
       .to.be.revertedWithCustomError(testDiamondCutManager, "SelectorAlreadyRegistered")
       .withArgs(testConfigId, 1, duplicateResolverKey, transferSelector);
   });

@@ -246,7 +246,6 @@ export const RegisteredAmortizationFixture = createFixture<RegisteredAmortizatio
 });
 
 export const AmortizationForFixture = createFixture<AmortizationFor>((props) => {
-  props.account.as(() => HederaIdPropsFixture.create().value);
   props.recordDate.faker((faker) => faker.number.int({ min: 1000000, max: 9999999 }));
   props.executionDate.faker((faker) => faker.number.int({ min: 1000000, max: 9999999 }));
   props.holdId.faker((faker) => faker.number.int({ min: 1, max: 999 }));

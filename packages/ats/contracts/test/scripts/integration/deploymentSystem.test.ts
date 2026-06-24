@@ -14,7 +14,7 @@
 
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import type { Signer } from "ethers";
+import type { Signer, ContractFactory } from "ethers";
 
 // Infrastructure layer
 import {
@@ -24,23 +24,24 @@ import {
   deployBlr,
   deployProxyAdmin,
   deployFacets,
+  validateAddress,
+  validateBytes32,
   getTimeTravelVariant,
   hasTimeTravelVariant,
   resolveContractName,
   getBaseContractName,
   isTimeTravelVariant,
-  validateAddress,
-  validateBytes32,
 } from "@scripts/infrastructure";
 
 // Domain layer
 import {
-  deployFactory,
   EQUITY_CONFIG_ID,
   BOND_CONFIG_ID,
   FACET_REGISTRY,
-  FACET_REGISTRY_COUNT,
+  getFacetRegistryCount,
   atsRegistry,
+  createFactoryConfiguration,
+  deployFactory,
 } from "@scripts/domain";
 
 // Test helpers
@@ -53,9 +54,9 @@ import {
   AccessControlFacetTimeTravel__factory,
   BusinessLogicResolver__factory,
   KycFacet__factory,
-  Factory__factory,
   PauseFacet__factory,
   ProxyAdmin,
+  FactoryFacet__factory,
 } from "@contract-types";
 
 describe("Phase 1 Deployment System - Integration Tests", () => {
@@ -72,7 +73,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
     it("should generate TimeTravel variant names correctly", () => {
       expect(getTimeTravelVariant("AccessControlFacet")).to.equal("AccessControlFacetTimeTravel");
       expect(getTimeTravelVariant("KycFacet")).to.equal("KycFacetTimeTravel");
-      expect(getTimeTravelVariant("ERC20Facet")).to.equal("ERC20FacetTimeTravel");
+      expect(getTimeTravelVariant("TransferFacet")).to.equal("TransferFacetTimeTravel");
     });
 
     it("should detect TimeTravel variant availability from registry", () => {
@@ -139,7 +140,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
       expect(FACET_REGISTRY).to.have.property("AccessControlFacet");
       expect(FACET_REGISTRY).to.have.property("KycFacet");
       expect(FACET_REGISTRY).to.have.property("PauseFacet");
-      expect(FACET_REGISTRY).to.have.property("ERC20Facet");
+      expect(FACET_REGISTRY).to.have.property("TransferFacet");
       expect(FACET_REGISTRY).to.have.property("ControlListFacet");
     });
 
@@ -157,7 +158,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
 
     it("should return all facets", () => {
       const allFacets = atsRegistry.getAllFacets();
-      expect(allFacets.length).to.equal(FACET_REGISTRY_COUNT);
+      expect(allFacets.length).to.equal(getFacetRegistryCount());
 
       // Verify each facet has required fields
       allFacets.forEach((facet) => {
@@ -245,7 +246,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
       });
 
       // Deploy second proxy reusing ProxyAdmin
-      const implementationFactory2 = new Factory__factory(deployer);
+      const implementationFactory2 = new FactoryFacet__factory(deployer);
       const result2 = await deployProxy(deployer, {
         implementationFactory: implementationFactory2,
         existingProxyAdmin: result1.proxyAdmin,
@@ -266,7 +267,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
 
       // Initialize BLR
       const blr = BusinessLogicResolver__factory.connect(blrResult.proxyAddress, deployer);
-      await blr.initialize_BusinessLogicResolver();
+      await blr.initializeBusinessLogicResolver();
 
       // Deploy facets
       const facet1Factory = new AccessControlFacet__factory(deployer);
@@ -306,7 +307,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
 
       // Initialize BLR
       const blr = BusinessLogicResolver__factory.connect(blrResult.proxyAddress, deployer);
-      await blr.initialize_BusinessLogicResolver();
+      await blr.initializeBusinessLogicResolver();
 
       const facetFactory = new PauseFacet__factory(deployer);
       const facetResult = await deployContract(facetFactory, {});
@@ -341,7 +342,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
       const blr = BusinessLogicResolver__factory.connect(result.blrAddress, deployer);
 
       // Should not revert when calling initialized functions
-      const version = await blr.getLatestVersion();
+      const version = await blr.getLatestVersion(atsRegistry.getFacetDefinition("PauseFacet")!.resolverKey!.value);
       expect(version).to.equal(BLR_VERSIONS.INITIAL);
     });
 
@@ -359,17 +360,37 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
       // First deploy BLR
       const blrResult = await deployBlr(deployer, {});
       expect(blrResult.success).to.be.true;
-
+      const blr = BusinessLogicResolver__factory.connect(blrResult.blrAddress, deployer);
+      const facets = await deployFacets(
+        {
+          FactoryFacet: new FactoryFacet__factory(deployer),
+        },
+        {
+          confirmations: 1,
+          enableRetry: false,
+        },
+      );
+      const factoryFacetAddress = facets.deployed.get("FactoryFacet")!.address!;
+      await registerFacets(blr, {
+        facets: [
+          {
+            name: "FactoryFacet",
+            address: factoryFacetAddress,
+            resolverKey: atsRegistry.getFacetDefinition("FactoryFacet")!.resolverKey!.value,
+          },
+        ],
+      });
+      await createFactoryConfiguration(blr, {
+        FactoryFacet: factoryFacetAddress,
+      });
       // Deploy Factory with BLR reference
       const factoryResult = await deployFactory(deployer, {
         blrAddress: blrResult.blrAddress,
-        existingProxyAdmin: blrResult.proxyResult.proxyAdmin,
+        factoryVersion: 1,
       });
 
       expect(factoryResult.success).to.be.true;
       expect(factoryResult.factoryAddress).to.match(/^0x[a-fA-F0-9]{40}$/);
-      expect(factoryResult.implementationAddress).to.match(/^0x[a-fA-F0-9]{40}$/);
-      expect(factoryResult.proxyAdminAddress).to.equal(blrResult.proxyAdminAddress);
 
       // Verify Factory deployment was successful (Factory doesn't have a getter for BLR address)
       expect(factoryResult.factoryAddress).to.not.equal(ethers.ZeroAddress);
@@ -412,7 +433,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
       expect(proxyAdminResult.success).to.be.true;
 
       // Step 2: Deploy facets
-      const facets: Array<{ name: string; factory: any }> = [
+      const facets: Array<{ name: string; factory: ContractFactory }> = [
         {
           name: "AccessControlFacet",
           factory: new AccessControlFacet__factory(deployer),
@@ -442,7 +463,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
 
       // Initialize BLR
       const blr = BusinessLogicResolver__factory.connect(blrResult.proxyAddress, deployer);
-      await blr.initialize_BusinessLogicResolver();
+      await blr.initializeBusinessLogicResolver();
 
       // Step 4: Register facets in BLR
       const facetsWithKeys = facets.map(({ name }) => ({
@@ -457,12 +478,49 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
       expect(registerResult.registered.length).to.equal(TEST_SIZES.TRIPLE);
 
       // Step 5: Deploy Factory
-      const factoryImplementationFactory = new Factory__factory(deployer);
+      const factoryImplementationFactory = new FactoryFacet__factory(deployer);
       const factoryResult = await deployProxy(deployer, {
         implementationFactory: factoryImplementationFactory,
         existingProxyAdmin: proxyAdminResult.contract as unknown as ProxyAdmin,
       });
       expect(factoryResult.proxyAddress).to.match(/^0x[a-fA-F0-9]{40}$/);
+    });
+
+    it("should handle deployment workflow with regular facets", async () => {
+      const facets = [
+        {
+          name: "AccessControlFacet",
+          factory: new AccessControlFacet__factory(deployer),
+        },
+        { name: "KycFacet", factory: new KycFacet__factory(deployer) },
+      ];
+      const facetResults: Record<string, string> = {};
+
+      for (const { name, factory } of facets) {
+        const result = await deployContract(factory, {});
+        expect(result.success).to.be.true;
+        facetResults[name] = result.address!;
+      }
+
+      const blrImplementationFactory = new BusinessLogicResolver__factory(deployer);
+      const blrResult = await deployProxy(deployer, {
+        implementationFactory: blrImplementationFactory,
+      });
+
+      const blr = BusinessLogicResolver__factory.connect(blrResult.proxyAddress, deployer);
+      await blr.initializeBusinessLogicResolver();
+
+      const facetsWithKeys = facets.map(({ name }) => ({
+        name,
+        address: facetResults[name],
+        resolverKey: atsRegistry.getFacetDefinition(name)!.resolverKey!.value,
+      }));
+      const registerResult = await registerFacets(blr, {
+        facets: facetsWithKeys,
+      });
+
+      expect(registerResult.success).to.be.true;
+      expect(registerResult.registered.length).to.equal(TEST_SIZES.DUAL);
     });
 
     it("should handle TimeTravel deployment workflow", async () => {
@@ -490,7 +548,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
 
       // Initialize BLR
       const blr = BusinessLogicResolver__factory.connect(blrResult.proxyAddress, deployer);
-      await blr.initialize_BusinessLogicResolver();
+      await blr.initializeBusinessLogicResolver();
 
       // Register TimeTravel facets (using base names as keys)
       const facetsWithKeys = facets.map(({ name }) => ({
@@ -522,7 +580,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
 
       // Initialize BLR
       const blr = BusinessLogicResolver__factory.connect(blrResult.proxyAddress, deployer);
-      await blr.initialize_BusinessLogicResolver();
+      await blr.initializeBusinessLogicResolver();
 
       const registerResult = await registerFacets(blr, {
         facets: [],

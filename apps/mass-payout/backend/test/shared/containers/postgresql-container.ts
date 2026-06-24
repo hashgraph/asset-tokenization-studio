@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { GenericContainer, StartedTestContainer } from "testcontainers"
-import process from "process"
-import { TypeOrmModuleOptions } from "@nestjs/typeorm"
+import { GenericContainer, StartedTestContainer } from "testcontainers";
+import process from "process";
+import { TypeOrmModuleOptions } from "@nestjs/typeorm";
 
 export class PostgreSqlContainer {
-  private static INTERNAL_PORT = 5432
-  private static DATABASE = process.env.POSTGRESQL_DB || "test"
-  private static USER = process.env.POSTGRESQL_USER || "test"
-  private static PASSWORD = process.env.POSTGRESQL_PASSWORD || "test"
-  private container: StartedTestContainer
+  private static INTERNAL_PORT = 5432;
+  private static DATABASE = process.env.POSTGRESQL_DB || "test";
+  private static USER = process.env.POSTGRESQL_USER || "test";
+  private static PASSWORD = process.env.POSTGRESQL_PASSWORD || "test";
+  private container: StartedTestContainer;
 
   static async create(): Promise<PostgreSqlContainer> {
-    const postgresqlContainer = new PostgreSqlContainer()
+    const postgresqlContainer = new PostgreSqlContainer();
 
     postgresqlContainer.container = await new GenericContainer("postgres")
       .withExposedPorts(this.INTERNAL_PORT)
@@ -21,9 +21,9 @@ export class PostgreSqlContainer {
         POSTGRES_USER: this.USER,
         POSTGRES_PASSWORD: this.PASSWORD,
       })
-      .start()
+      .start();
 
-    return postgresqlContainer
+    return postgresqlContainer;
   }
 
   public getConfig(): TypeOrmModuleOptions {
@@ -36,10 +36,10 @@ export class PostgreSqlContainer {
       synchronize: true,
       migrationsRun: false,
       logging: false,
-    }
+    };
   }
 
   async stop(): Promise<void> {
-    await this.container.stop()
+    await this.container.stop();
   }
 }

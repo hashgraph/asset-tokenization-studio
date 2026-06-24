@@ -39,13 +39,21 @@ interface IBusinessLogicResolver is IDiamondCutManager {
         address businessLogicAddress;
     }
 
+    /// @notice Emitted once when the BLR itself is initialised.
+    /// @dev Fires exclusively from `initializeBusinessLogicResolver` after the storage write succeeds.
+    event BusinessLogicResolverInitialized();
+
     /// @notice Event emitted when Business Logic(s) are registered (updated or added).
     /// @param businessLogics list of registered Business Logics.
-    /// @param newLatestVersion new latest version = previous latest version + 1.
-    event BusinessLogicsRegistered(BusinessLogicRegistryData[] businessLogics, uint256 newLatestVersion);
+    /// @param newLatestVersions new latest version per registered key, in the same order as `businessLogics`.
+    event BusinessLogicsRegistered(BusinessLogicRegistryData[] businessLogics, uint256[] newLatestVersions);
 
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_BusinessLogicResolver() external returns (bool success_);
+    error BusinessLogicVersionDoesNotExist(uint256 version);
+    error BusinessLogicKeyDuplicated(bytes32 businessLogicKey);
+    error BusinessLogicKeyMismatch(address implementation, bytes32 actualKey, bytes32 expectedKey);
+    error ZeroKeyNotValidForBusinessLogic();
+
+    function initializeBusinessLogicResolver() external returns (bool success_);
 
     /**
      * @notice Update existing business logics addresses or add new business logics to the register.
@@ -72,12 +80,28 @@ interface IBusinessLogicResolver is IDiamondCutManager {
     /**
      * @notice Returns the current status of a given version
      */
-    function getVersionStatus(uint256 _version) external view returns (VersionStatus status_);
+    function getVersionStatus(
+        bytes32 _businessLogicKey,
+        uint256 _version
+    ) external view returns (VersionStatus status_);
 
     /**
      * @notice Returns the current latest version for all business logics
      */
-    function getLatestVersion() external view returns (uint256 latestVersion_);
+    function getLatestVersion(bytes32 _businessLogicKey) external view returns (uint256 latestVersion_);
+
+    /**
+     * @notice Batched variant of `getLatestVersion` that resolves many keys in a single call.
+     * @dev Issued so off-chain consumers can avoid one `eth_call` per key — JSON-RPC relays
+     *      such as Hedera's enforce per-IP rate limits on `eth_call` and reject bursts.
+     *      Returns 0 for keys that have never been registered (same semantics as the scalar
+     *      variant).
+     * @param _businessLogicKeys keys of the business logics to query.
+     * @return latestVersions_ latest version per key, in the same order as `_businessLogicKeys`.
+     */
+    function getLatestVersions(
+        bytes32[] calldata _businessLogicKeys
+    ) external view returns (uint256[] memory latestVersions_);
 
     /**
      * @notice Returns the business logic address for the latest version

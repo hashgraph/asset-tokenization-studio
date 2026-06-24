@@ -47,15 +47,11 @@ task(
       erc1410ManagementFacet,
       erc1410IssuerFacet,
       erc1410TokenHolderFacet,
-      erc1594Facet,
-      erc1643Facet,
-      erc1644Facet,
+      documentationFacet,
+      controllerFacet,
       snapshotsFacet,
       diamondFacet,
       equityUsaFacet,
-      bondUsaFacet,
-      bondUsaRead,
-      scheduledSnapshotsFacet,
       scheduledBalanceAdjustmentsFacet,
       scheduledCrossOrderedTasksFacet,
       scheduledCouponListingFacet,
@@ -77,11 +73,11 @@ task(
       externalKycListManagementFacet,
       protectedPartitionsFacet,
       erc3643ManagementFacet,
-      erc3643OperationsFacet,
       erc3643ReadFacet,
-      erc3643BatchFacet,
       freezeFacet,
       erc20PermitFacet,
+      burnFacet,
+      mintFacet,
     } = await deployAtsFullInfrastructure(
       new DeployAtsFullInfrastructureCommand({
         signer: signer,
@@ -110,15 +106,11 @@ task(
       "ERC1410 Management Facet": erc1410ManagementFacet.address,
       "ERC1410 Issuer Facet": erc1410IssuerFacet.address,
       "ERC1410 TokenHolder Facet": erc1410TokenHolderFacet.address,
-      "ERC1594 Facet": erc1594Facet.address,
-      "ERC1643 Facet": erc1643Facet.address,
-      "ERC1644 Facet": erc1644Facet.address,
+      "Documentation Facet": documentationFacet.address,
+      "Controller Facet": controllerFacet.address,
       "Snapshots Facet": snapshotsFacet.address,
       "Diamond Facet": diamondFacet.address,
       "Equity Facet": equityUsaFacet.address,
-      "Bond Facet": bondUsaFacet.address,
-      BondRead: bondUsaRead.address,
-      "Scheduled Snapshots Facet": scheduledSnapshotsFacet.address,
       "Scheduled Balance Adjustments Facet": scheduledBalanceAdjustmentsFacet.address,
       "Scheduled Cross Ordered Tasks Facet": scheduledCrossOrderedTasksFacet.address,
       "Scheduled Coupon Listing Facet": scheduledCouponListingFacet.address,
@@ -140,11 +132,11 @@ task(
       "External Kyc List Management Facet": externalKycListManagementFacet.address,
       "Protected Partitions Facet": protectedPartitionsFacet.address,
       "ERC3643 Management Facet": erc3643ManagementFacet.address,
-      "ERC3643 Operations Facet": erc3643OperationsFacet.address,
       "ERC3643 Read Facet": erc3643ReadFacet.address,
-      "ERC3643 Batch Facet": erc3643BatchFacet.address,
       "Freeze Facet": freezeFacet.address,
       "ERC20Permit Facet": erc20PermitFacet.address,
+      "Burn Facet": burnFacet.address,
+      "Mint Facet": mintFacet.address,
     };
 
     const contractAddress = [];
@@ -226,7 +218,6 @@ task("deploy", "Deploy new contract")
   });
 
 task("deployTrexFactory", "Deploys ATS adapted TREX factory")
-  .addOptionalParam("atsFactory", "Address of the ATS factory", undefined, types.string)
   .addOptionalParam(
     "implementationAuthority",
     "Address of the implementation authority (defaults to zero address)",
@@ -243,14 +234,7 @@ task("deployTrexFactory", "Deploys ATS adapted TREX factory")
   )
   .addOptionalParam("signerPosition", "The index of the signer in the Hardhat signers array", undefined, types.int)
   .setAction(async (args: DeployTrexFactoryArgs, hre) => {
-    const {
-      deployContractWithLibraries,
-      DeployContractWithLibraryCommand,
-      deployContract,
-      DeployContractCommand,
-      addressListToHederaIdList,
-      ADDRESS_ZERO,
-    } = await import("@scripts");
+    const { deployContract, DeployContractCommand, addressListToHederaIdList, ADDRESS_ZERO } = await import("@scripts");
 
     const { signer }: GetSignerResult = await hre.run("getSigner", {
       privateKey: args.privateKey,
@@ -263,16 +247,6 @@ task("deployTrexFactory", "Deploys ATS adapted TREX factory")
 
     let implementationAuthority = args.implementationAuthority ?? ADDRESS_ZERO;
     let idFactory = args.idFactory ?? ADDRESS_ZERO;
-    const atsFactory =
-      args.atsFactory ??
-      (
-        await deployContract(
-          new DeployContractCommand({
-            name: "Factory",
-            signer,
-          }),
-        )
-      ).address;
 
     if (idFactory == ADDRESS_ZERO) {
       const identityImplementation = (
@@ -379,7 +353,6 @@ task("deployTrexFactory", "Deploys ATS adapted TREX factory")
       {
         implementationAuthority,
         idFactory,
-        atsFactory,
       },
       hre,
       {
@@ -391,12 +364,11 @@ task("deployTrexFactory", "Deploys ATS adapted TREX factory")
 
     console.log(`Signer: ${signer.address}`);
 
-    const result = await deployContractWithLibraries(
-      new DeployContractWithLibraryCommand({
+    const result = await deployContract(
+      new DeployContractCommand({
         name: `TREXFactoryAts`,
         signer,
-        args: [implementationAuthority, idFactory, atsFactory],
-        libraries: ["TREXBondDeploymentLib", "TREXEquityDeploymentLib"],
+        args: [implementationAuthority, idFactory],
       }),
     );
 

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.17;
 
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+
 /**
  * @title MockComplianceModule
  * @dev Mock implementation of IModule interface for testing compliance module functionality
@@ -41,8 +43,9 @@ contract MockComplianceModule {
      * @param _value configuration value to set
      */
     function setConfig(uint256 _value) external {
-        _complianceConfig[msg.sender] = _value;
-        emit ConfigSet(msg.sender, _value);
+        address sender = EvmAccessors.getMsgSender();
+        _complianceConfig[sender] = _value;
+        emit ConfigSet(sender, _value);
     }
 
     /**

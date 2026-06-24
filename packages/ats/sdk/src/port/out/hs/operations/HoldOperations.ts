@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ContractId } from "@hiero-ledger/sdk";
-import { HoldTokenHolderFacet__factory, HoldManagementFacet__factory } from "@hashgraph/asset-tokenization-contracts";
+import { IAsset__factory } from "@hashgraph/asset-tokenization-contracts";
 import { GAS } from "@core/Constants";
 import BigDecimal from "@domain/context/shared/BigDecimal";
 import EvmAddress from "@domain/context/contract/EvmAddress";
@@ -34,7 +34,7 @@ export class HoldOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      HoldTokenHolderFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "createHoldByPartition",
       [partitionId, hold],
       GAS.CREATE_HOLD,
@@ -63,7 +63,7 @@ export class HoldOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      HoldTokenHolderFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "createHoldFromByPartition",
       [partitionId, sourceId.toString(), hold, "0x"],
       GAS.CREATE_HOLD_FROM,
@@ -92,7 +92,7 @@ export class HoldOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      HoldManagementFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "controllerCreateHoldByPartition",
       [partitionId, sourceId.toString(), hold, "0x"],
       GAS.CONTROLLER_CREATE_HOLD,
@@ -129,7 +129,7 @@ export class HoldOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      HoldManagementFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "protectedCreateHoldByPartition",
       [partitionId, sourceId.toString(), protectedHold, signature],
       GAS.PROTECTED_CREATE_HOLD,
@@ -152,7 +152,7 @@ export class HoldOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      HoldTokenHolderFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "releaseHoldByPartition",
       [holdIdentifier, amount.toBigInt()],
       GAS.RELEASE_HOLD,
@@ -174,7 +174,7 @@ export class HoldOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      HoldTokenHolderFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "reclaimHoldByPartition",
       [holdIdentifier],
       GAS.RECLAIM_HOLD,
@@ -200,7 +200,7 @@ export class HoldOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      HoldTokenHolderFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "executeHoldByPartition",
       [holdIdentifier, targetId.toString(), amount.toBigInt()],
       GAS.EXECUTE_HOLD_BY_PARTITION,

@@ -3,8 +3,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { dateToUnixTimestamp, ATS_ROLES } from "@scripts";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import { dateToUnixTimestamp, ATS_ROLES, RESOLVER_KEY_SCHEDULED_BALANCE_ADJUSTMENT } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac } from "@test";
@@ -16,6 +16,7 @@ describe("Scheduled BalanceAdjustments Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixtureSinglePartition() {
     const base = await deployEquityTokenFixture();
@@ -25,10 +26,11 @@ describe("Scheduled BalanceAdjustments Tests", () => {
     signer_C = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
       {
-        role: ATS_ROLES._PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_B.address],
       },
     ]);
@@ -43,7 +45,7 @@ describe("Scheduled BalanceAdjustments Tests", () => {
   });
 
   it("GIVEN a token WHEN triggerBalanceAdjustments THEN transaction succeeds", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
     // set balanceAdjustment
     const balanceAdjustmentExecutionDateInSeconds_1 = dateToUnixTimestamp("2030-01-01T00:00:06Z");
@@ -77,8 +79,8 @@ describe("Scheduled BalanceAdjustments Tests", () => {
 
     // check schedled BalanceAdjustments
 
-    let scheduledBalanceAdjustmentCount = await asset.connect(signer_A).scheduledBalanceAdjustmentCount();
-    let scheduledBalanceAdjustments = await asset.connect(signer_A).getScheduledBalanceAdjustments(0, 100);
+    let scheduledBalanceAdjustmentCount = await asset.connect(signer_A).getPendingBalanceAdjustmentCount(false);
+    let scheduledBalanceAdjustments = await asset.connect(signer_A).getScheduledBalanceAdjustments(0, 100, false);
 
     expect(scheduledBalanceAdjustmentCount).to.equal(3);
     expect(scheduledBalanceAdjustments.length).to.equal(scheduledBalanceAdjustmentCount);
@@ -93,8 +95,8 @@ describe("Scheduled BalanceAdjustments Tests", () => {
     await asset.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_1 + 1);
     await asset.connect(signer_A).triggerPendingScheduledCrossOrderedTasks();
 
-    scheduledBalanceAdjustmentCount = await asset.connect(signer_A).scheduledBalanceAdjustmentCount();
-    scheduledBalanceAdjustments = await asset.connect(signer_A).getScheduledBalanceAdjustments(0, 100);
+    scheduledBalanceAdjustmentCount = await asset.connect(signer_A).getPendingBalanceAdjustmentCount(false);
+    scheduledBalanceAdjustments = await asset.connect(signer_A).getScheduledBalanceAdjustments(0, 100, false);
 
     expect(scheduledBalanceAdjustmentCount).to.equal(2);
     expect(scheduledBalanceAdjustments.length).to.equal(scheduledBalanceAdjustmentCount);
@@ -107,8 +109,8 @@ describe("Scheduled BalanceAdjustments Tests", () => {
     await asset.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_2 + 1);
     await asset.connect(signer_A).triggerScheduledCrossOrderedTasks(100);
 
-    scheduledBalanceAdjustmentCount = await asset.connect(signer_A).scheduledBalanceAdjustmentCount();
-    scheduledBalanceAdjustments = await asset.connect(signer_A).getScheduledBalanceAdjustments(0, 100);
+    scheduledBalanceAdjustmentCount = await asset.connect(signer_A).getPendingBalanceAdjustmentCount(false);
+    scheduledBalanceAdjustments = await asset.connect(signer_A).getScheduledBalanceAdjustments(0, 100, false);
 
     expect(scheduledBalanceAdjustmentCount).to.equal(1);
     expect(scheduledBalanceAdjustments.length).to.equal(scheduledBalanceAdjustmentCount);
@@ -119,10 +121,114 @@ describe("Scheduled BalanceAdjustments Tests", () => {
     await asset.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_3 + 1);
     await asset.connect(signer_A).triggerScheduledCrossOrderedTasks(0);
 
-    scheduledBalanceAdjustmentCount = await asset.connect(signer_A).scheduledBalanceAdjustmentCount();
-    scheduledBalanceAdjustments = await asset.connect(signer_A).getScheduledBalanceAdjustments(0, 100);
+    scheduledBalanceAdjustmentCount = await asset.connect(signer_A).getPendingBalanceAdjustmentCount(false);
+    scheduledBalanceAdjustments = await asset.connect(signer_A).getScheduledBalanceAdjustments(0, 100, false);
 
     expect(scheduledBalanceAdjustmentCount).to.equal(0);
     expect(scheduledBalanceAdjustments.length).to.equal(scheduledBalanceAdjustmentCount);
+  });
+
+  describe("getPendingBalanceAdjustmentCount / getScheduledBalanceAdjustments: _includeDisabled flag", () => {
+    it("GIVEN a cancelled balance adjustment WHEN getPendingBalanceAdjustmentCount(false) THEN returns 0 and (true) returns 1", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+
+      const executionDate = dateToUnixTimestamp("2030-01-01T00:00:06Z");
+      await asset.connect(signer_C).setScheduledBalanceAdjustment({
+        executionDate: executionDate.toString(),
+        factor: 1,
+        decimals: 2,
+      });
+
+      await asset.connect(signer_C).cancelScheduledBalanceAdjustment(1);
+
+      expect(await asset.getPendingBalanceAdjustmentCount(false)).to.equal(0);
+      expect(await asset.getPendingBalanceAdjustmentCount(true)).to.equal(1);
+    });
+
+    it("GIVEN a cancelled balance adjustment WHEN getScheduledBalanceAdjustments(false) THEN returns empty and (true) returns the task", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+
+      const executionDate = dateToUnixTimestamp("2030-01-01T00:00:06Z");
+      await asset.connect(signer_C).setScheduledBalanceAdjustment({
+        executionDate: executionDate.toString(),
+        factor: 1,
+        decimals: 2,
+      });
+
+      await asset.connect(signer_C).cancelScheduledBalanceAdjustment(1);
+
+      const excluded = await asset.getScheduledBalanceAdjustments(0, 100, false);
+      expect(excluded).to.have.lengthOf(0);
+
+      const included = await asset.getScheduledBalanceAdjustments(0, 100, true);
+      expect(included).to.have.lengthOf(1);
+      expect(included[0].scheduledTimestamp).to.equal(BigInt(executionDate));
+    });
+  });
+
+  describe("Deactivated", () => {
+    it("GIVEN a deactivated asset WHEN setScheduledBalanceAdjustment THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset
+          .connect(base.deployer)
+          .setScheduledBalanceAdjustment({ executionDate: 0, factor: 0, decimals: 0 }),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN cancelScheduledBalanceAdjustment THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).cancelScheduledBalanceAdjustment(0),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("initializeScheduledBalanceAdjustment", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeScheduledBalanceAdjustment is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeScheduledBalanceAdjustment())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeScheduledBalanceAdjustment is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeScheduledBalanceAdjustment())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_SCHEDULED_BALANCE_ADJUSTMENT, 1);
+    });
+  });
+
+  describe("initializeScheduledBalanceAdjustment event", () => {
+    it("GIVEN a fresh deployment WHEN initializeScheduledBalanceAdjustment is called THEN emits ScheduledBalanceAdjustmentInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_SCHEDULED_BALANCE_ADJUSTMENT);
+      await expect(asset.initializeScheduledBalanceAdjustment()).to.emit(
+        asset,
+        "ScheduledBalanceAdjustmentInitialized",
+      );
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setScheduledBalanceAdjustment THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.setScheduledBalanceAdjustment({ executionDate: 0, factor: 0, decimals: 0 }),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN cancelScheduledBalanceAdjustment THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.cancelScheduledBalanceAdjustment(0)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
   });
 });

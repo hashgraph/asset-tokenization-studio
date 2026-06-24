@@ -17,8 +17,13 @@
 
 import { ethers } from "hardhat";
 import { deploySystemWithNewBlr, configureLogger, LogLevel, DEFAULT_BATCH_SIZE } from "../../scripts";
-import { Factory__factory, BusinessLogicResolver__factory, ProxyAdmin__factory } from "@contract-types";
-import type { IFactory, BusinessLogicResolver, ProxyAdmin } from "@contract-types";
+import {
+  Factory__factory,
+  BusinessLogicResolver__factory,
+  ProxyAdmin__factory,
+  IMockFactory__factory,
+} from "@contract-types";
+import type { IFactory, IMockFactory, BusinessLogicResolver, ProxyAdmin } from "@contract-types";
 
 /**
  * Fixture: Deploy complete ATS infrastructure
@@ -52,7 +57,9 @@ export async function deployAtsInfrastructureFixture(
   });
 
   // Get typed contract instances using TypeChain factories
-  const factory = Factory__factory.connect(deployment.infrastructure.factory.proxy, deployer) as IFactory;
+  const factory = useTimeTravel
+    ? (IMockFactory__factory.connect(deployment.infrastructure.factory.proxy, deployer) as IMockFactory)
+    : (Factory__factory.connect(deployment.infrastructure.factory.proxy, deployer) as IFactory);
 
   const blr = BusinessLogicResolver__factory.connect(
     deployment.infrastructure.blr.proxy,
@@ -116,14 +123,33 @@ export async function deployAtsInfrastructureFixture(
       },
       {} as Record<string, string>,
     ),
-    bondSustainabilityPerformanceTargetRateFacetKeys: deployment.helpers
-      .getBondSustainabilityPerformanceTargetRateFacets()
-      .reduce(
-        (acc, f) => {
-          acc[f.name] = f.key;
-          return acc;
-        },
-        {} as Record<string, string>,
-      ),
+    loanFacetKeys: deployment.helpers.getLoanFacets().reduce(
+      (acc, f) => {
+        acc[f.name] = f.key;
+        return acc;
+      },
+      {} as Record<string, string>,
+    ),
+    depositTokenFacetKeys: deployment.helpers.getDepositTokenFacets().reduce(
+      (acc, f) => {
+        acc[f.name] = f.key;
+        return acc;
+      },
+      {} as Record<string, string>,
+    ),
+    loansPortfolioFacetKeys: deployment.helpers.getLoansPortfolioFacets().reduce(
+      (acc, f) => {
+        acc[f.name] = f.key;
+        return acc;
+      },
+      {} as Record<string, string>,
+    ),
+    factoryFacetKeys: deployment.helpers.getFactoryFacets().reduce(
+      (acc, f) => {
+        acc[f.name] = f.key;
+        return acc;
+      },
+      {} as Record<string, string>,
+    ),
   };
 }

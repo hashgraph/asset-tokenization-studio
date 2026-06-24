@@ -30,15 +30,21 @@ describe("Proceed Recipients fixing Date Interest RateTests", () => {
   };
 
   async function deploySecurityFixtureR() {
-    const base = await deployBondKpiLinkedRateTokenFixture();
+    const base = await deployBondKpiLinkedRateTokenFixture({
+      bondDataParams: {
+        bondDetails: {
+          maturityDate: dateToUnixTimestamp(`2031-01-01T00:00:00Z`),
+        },
+      },
+    });
 
     diamond = base.diamond;
     signer_A = base.deployer;
 
     asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
 
-    await asset.grantRole(ATS_ROLES._PROCEED_RECIPIENT_MANAGER_ROLE, signer_A.address);
-    await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
+    await asset.grantRole(ATS_ROLES.ROLE_PROCEED_RECIPIENT_MANAGER, signer_A.address);
+    await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
   }
 
   beforeEach(async () => {

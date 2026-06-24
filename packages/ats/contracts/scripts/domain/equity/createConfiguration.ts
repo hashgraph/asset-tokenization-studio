@@ -18,16 +18,19 @@ import {
   OperationResult,
   createBatchConfiguration,
   DEFAULT_BATCH_SIZE,
+  RetryOptions,
 } from "@scripts/infrastructure";
 import { BusinessLogicResolver } from "@contract-types";
 import { EQUITY_CONFIG_ID } from "../constants";
 import { atsRegistry } from "../atsRegistry";
+import { buildFacetList } from "../facetEnvironment";
+import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
 
 /**
- * Equity-specific facets list (47 facets total).
+ * Equity-specific facets list.
  *
  * This is an explicit positive list of all facets required for equity tokens.
- * Includes all common facets plus EquityUSAFacet.
+ * Includes all common facets plus VotingFacet, DividendFacet, and DividendSecurityHoldersFacet.
  *
  * Note: DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet functionality,
  * so we only include DiamondFacet to avoid selector collisions.
@@ -37,68 +40,105 @@ import { atsRegistry } from "../atsRegistry";
 const EQUITY_FACETS = [
   // Core Functionality (10 - DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet)
   "AccessControlFacet",
+  "AllowanceFacet",
   "CapFacet",
+  "CapByPartitionFacet",
   "ControlListFacet",
   "CorporateActionsFacet",
-  "DiamondFacet", // Combined: includes DiamondCutFacet + DiamondLoupeFacet functionality
-  "ERC20Facet",
+  "DiamondFacet",
+  "CoreFacet",
+  "TransferFacet",
+  "CoreAdjustedFacet",
+  "InitializerFacet",
+  "CustomDataFacet",
   "FreezeFacet",
+  "BatchFreezeFacet",
   "KycFacet",
   "PauseFacet",
+  "BalanceTrackerFacet",
+  "BalanceTrackerAdjustedFacet",
   "SnapshotsFacet",
-  "TotalBalanceFacet",
+  "SnapshotsByPartitionFacet",
+  "SecurityHoldersAtSnapshotFacet",
+  "HoldAtSnapshotFacet",
+  "LockAtSnapshotByPartitionFacet",
+  "FreezeAtSnapshotFacet",
+  "FreezeAtSnapshotByPartitionFacet",
+  "LockAtSnapshotFacet",
+  "CoreAtSnapshotFacet",
+  "BalanceTrackerByPartitionFacet",
+  "BalanceTrackerAtSnapshotFacet",
+  "BalanceTrackerAtSnapshotByPartitionFacet",
+  "ClearingAtSnapshotFacet",
+  "ClearingAtSnapshotByPartitionFacet",
+  "HoldAtSnapshotByPartitionFacet",
 
   // ERC Standards (13)
-  "ERC1410IssuerFacet",
-  "ERC1410ManagementFacet",
-  "ERC1410ReadFacet",
-  "ERC1410TokenHolderFacet",
-  "ERC1594Facet",
-  "ERC1643Facet",
-  "ERC1644Facet",
+  "MintByPartitionFacet",
+  "ProtectedByPartitionFacet",
+  "OperatorFacet",
+  "TransferByPartitionFacet",
+  "PartitionsFacet",
+  "OperatorByPartitionFacet",
+  "BurnByPartitionFacet",
+  "DocumentationFacet",
+  "ControllerFacet",
   "ERC20PermitFacet",
+  "EIP712Facet",
   "NoncesFacet",
+  "DeactivateFacet",
   "ERC20VotesFacet",
-  "ERC3643BatchFacet",
-  "ERC3643ManagementFacet",
-  "ERC3643OperationsFacet",
-  "ERC3643ReadFacet",
+  "BatchControllerFacet",
+  "BatchBurnFacet",
+  "BatchMintFacet",
+  "BatchTransferFacet",
+  "RecoveryFacet",
+  "IdentityFacet",
+  "ComplianceFacet",
+  "ComplianceByPartitionFacet",
+  "MintFacet",
+  "BurnFacet",
 
-  // Clearing & Settlement (8)
-  "ClearingActionsFacet",
-  "ClearingHoldCreationFacet",
-  "ClearingReadFacet",
-  "ClearingRedeemFacet",
-  "ClearingTransferFacet",
-  "HoldManagementFacet",
-  "HoldReadFacet",
-  "HoldTokenHolderFacet",
+  // Clearing & Settlement (7)
+  "ClearingByPartitionFacet",
+  "ProtectedClearingHoldByPartitionFacet",
+  "ClearingHoldByPartitionFacet",
+  "OperatorClearingHoldByPartitionFacet",
+  "ClearingFacet",
+  "OperatorClearingByPartitionFacet",
+  "ProtectedClearingByPartitionFacet",
+  "HoldFacet",
+  "OperatorHoldByPartitionFacet",
+  "ControllerHoldByPartitionFacet",
+  "ControllerByPartitionFacet",
+  "ProtectedHoldByPartitionFacet",
+  "HoldByPartitionFacet",
 
   // External Management (3)
   "ExternalControlListManagementFacet",
   "ExternalKycListManagementFacet",
   "ExternalPauseManagementFacet",
 
-  // Advanced Features (9)
+  // Advanced Features (12)
   "AdjustBalancesFacet",
+  "ScheduledBalanceAdjustmentFacet",
+  "DividendFacet",
+  "DividendSecurityHoldersFacet",
   "LockFacet",
+  "LockByPartitionFacet",
+  "NominalValueFacet",
+  "NominalValueAtSnapshotFacet",
   "ProtectedPartitionsFacet",
-  "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",
-  "ScheduledSnapshotsFacet",
+  "SecurityHoldersFacet",
   "SsiManagementFacet",
   "TransferAndLockFacet",
-
-  // Nominal Value (1)
-  "NominalValueFacet",
-
-  // Voting (1)
+  "TransferAndLockByPartitionFacet",
   "VotingFacet",
-  // Dividend (1)
-  "DividendFacet",
+  "VotingSecurityHoldersFacet",
 
-  // Jurisdiction-Specific (1)
-  "EquityUSAFacet",
+  "InterestRateFacet",
+  "ProceedRecipientsFacet",
 ] as const;
 
 /**
@@ -106,7 +146,7 @@ const EQUITY_FACETS = [
  *
  * Thin wrapper that calls the generic core operation with equity-specific data:
  * - Configuration ID: EQUITY_CONFIG_ID
- * - Facet list: EQUITY_FACETS (47 facets)
+ * - Facet list: EQUITY_FACETS (42 facets)
  *
  * All implementation logic is handled by the generic createConfiguration()
  * operation in core/operations/blrConfigurations.ts.
@@ -156,21 +196,16 @@ export async function createEquityConfiguration(
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
+  retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  // Get facet names based on time travel mode
-  // Include TimeTravelFacet when useTimeTravel=true to provide time manipulation functions
-  const baseFacets = useTimeTravel ? [...EQUITY_FACETS, "TimeTravelFacet"] : EQUITY_FACETS;
-
-  const facetNames = useTimeTravel
-    ? baseFacets.map((name) => (name === "TimeTravelFacet" || name.endsWith("TimeTravel") ? name : `${name}TimeTravel`))
-    : baseFacets;
+  const facetNames = buildFacetList(EQUITY_FACETS, useTimeTravel);
 
   // Build facet data with resolver keys from registry
   const facets = facetNames.map((name) => {
     // Strip "TimeTravel" suffix to get base name for registry lookup
     const baseName = name.replace(/TimeTravel$/, "");
 
-    const facetDef = atsRegistry.getFacetDefinition(baseName);
+    const facetDef = atsRegistry.getFacetDefinition(baseName) ?? getMockFacetDefinition(baseName);
     if (!facetDef?.resolverKey?.value) {
       throw new Error(`No resolver key found for facet: ${baseName}`);
     }
@@ -187,5 +222,6 @@ export async function createEquityConfiguration(
     partialBatchDeploy,
     batchSize,
     confirmations,
+    retryOptions,
   });
 }

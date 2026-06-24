@@ -4,7 +4,10 @@ import { UpdateConfigCommand } from "@command/management/updateConfig/updateConf
 import { UpdateConfigVersionCommand } from "@command/management/updateConfigVersion/updateConfigVersionCommand";
 import { UpdateResolverCommand } from "@command/management/updateResolver/updateResolverCommand";
 import ContractId from "@domain/context/contract/ContractId";
-import { UpdateConfigVersionRequest, UpdateConfigRequest, UpdateResolverRequest, GetConfigInfoRequest } from "src";
+import UpdateConfigVersionRequest from "@port/in/request/management/UpdateConfigVersionRequest";
+import UpdateConfigRequest from "@port/in/request/management/UpdateConfigRequest";
+import UpdateResolverRequest from "@port/in/request/management/UpdateResolverRequest";
+import GetConfigInfoRequest from "@port/in/request/management/GetConfigInfoRequest";
 import { createFixture } from "../config";
 import { HederaIdPropsFixture } from "../shared/DataFixture";
 

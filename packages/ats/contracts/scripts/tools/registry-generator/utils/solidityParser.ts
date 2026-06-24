@@ -30,8 +30,8 @@ const BASE_CLASSES_TO_EXCLUDE = new Set([
   "TransferAndLockStorageWrapper",
   "ERC20StorageWrapper",
   "CorporateActionStorageWrapper",
-  "BondStorageWrapper",
-  "EquityStorageWrapper",
+
+  "BalanceAdjustmentOps",
   "ComplianceStorageWrapper",
   "ScheduledTaskStorageWrapper",
 ]);
@@ -226,12 +226,11 @@ function parseContractDeclaration(line: string): string | null {
 /**
  * Extract role definitions from Solidity code.
  *
- * Matches patterns like:
- * - bytes32 public constant ROLE_NAME = 0x...;
- * - bytes32 constant _ROLE_NAME = keccak256("...");
+ * Matches the canonical naming convention introduced by BBND-1674:
+ * - bytes32 constant ROLE_<NAME> = 0x...;
  *
- * Supports both with and without underscore prefix (underscore is incorrectly
- * used in ATS for public constants - will be removed in future).
+ * Plus the OpenZeppelin-compatible whitelisted exception:
+ * - bytes32 constant DEFAULT_ADMIN_ROLE = 0x00;
  *
  * @param source - Solidity source code
  * @returns Array of role definitions with names and values
@@ -242,12 +241,14 @@ export function extractRoles(source: string): RoleDefinition[] {
 
   for (const line of lines) {
     // Quick check to avoid processing irrelevant lines
-    if (!line.includes("_ROLE") || !line.includes("bytes32") || !line.includes("constant")) {
+    if (!line.includes("bytes32") || !line.includes("constant")) {
+      continue;
+    }
+    if (!line.includes("ROLE_") && !line.includes("DEFAULT_ADMIN_ROLE")) {
       continue;
     }
 
-    // Parse using string operations to avoid ReDoS
-    const role = parseConstantDefinition(line, "_ROLE");
+    const role = parseConstantByPredicate(line, (name) => name.startsWith("ROLE_") || name === "DEFAULT_ADMIN_ROLE");
     if (role) {
       roles.push(role);
     }
@@ -258,9 +259,14 @@ export function extractRoles(source: string): RoleDefinition[] {
 
 /**
  * Parse a constant definition (role or resolver key) using string operations.
- * Matches: bytes32 [public] constant NAME = value;
+ * Matches: bytes32 [public] constant NAME = value; and returns the (name, value)
+ * pair only when `accept(name)` returns true. Replaces the legacy suffix-based
+ * `parseConstantDefinition` helper.
  */
-function parseConstantDefinition(line: string, suffix: string): { name: string; value: string } | null {
+function parseConstantByPredicate(
+  line: string,
+  accept: (name: string) => boolean,
+): { name: string; value: string } | null {
   const normalized = normalizeWhitespace(line.trim());
 
   // Must contain "bytes32 "
@@ -290,8 +296,7 @@ function parseConstantDefinition(line: string, suffix: string): { name: string; 
 
   const name = rest.slice(0, eqIdx).trim();
 
-  // Must end with the expected suffix
-  if (!name.endsWith(suffix)) {
+  if (!accept(name)) {
     return null;
   }
 
@@ -310,12 +315,8 @@ function parseConstantDefinition(line: string, suffix: string): { name: string; 
 /**
  * Extract resolver key definitions from Solidity code.
  *
- * Matches patterns like:
- * - bytes32 constant FACET_NAME_RESOLVER_KEY = 0x...;
- * - bytes32 constant _FACET_NAME_RESOLVER_KEY = 0x...; (legacy)
- *
- * Supports both with and without underscore prefix (underscore is incorrectly
- * used in ATS for public constants - will be removed in future).
+ * Matches the canonical naming convention introduced by BBND-1674:
+ * - bytes32 constant RESOLVER_KEY_<FACET> = 0x...;
  *
  * @param source - Solidity source code
  * @returns Array of resolver key definitions with names and values
@@ -325,13 +326,18 @@ export function extractResolverKeys(source: string): ResolverKeyDefinition[] {
   const lines = source.split("\n");
 
   for (const line of lines) {
-    // Quick check to avoid processing irrelevant lines
-    if (!line.includes("_RESOLVER_KEY") || !line.includes("bytes32") || !line.includes("constant")) {
+    if (!line.includes("RESOLVER_KEY") || !line.includes("bytes32") || !line.includes("constant")) {
       continue;
     }
 
-    // Parse using string operations to avoid ReDoS
-    const key = parseConstantDefinition(line, "_RESOLVER_KEY");
+    // Accept both the legacy `_<FACET>_RESOLVER_KEY` suffix style and the
+    // canonical `RESOLVER_KEY_<FACET>` prefix style during the BBND-1674
+    // transition. Once per-interface resolver keys land, the suffix variant
+    // disappears from the codebase.
+    const key = parseConstantByPredicate(
+      line,
+      (name) => name.startsWith("RESOLVER_KEY_") || name.endsWith("_RESOLVER_KEY"),
+    );
     if (key) {
       keys.push(key);
     }
@@ -404,13 +410,14 @@ function parseResolverKeyFromImports(source: string): string | null {
     // Extract content between braces
     const content = source.slice(braceStart + 1, braceEnd);
 
-    // Check if this import contains a resolver key
-    if (content.includes("_RESOLVER_KEY")) {
-      // Split by comma and find the resolver key
+    // Check if this import contains a resolver key. Accept both the canonical
+    // `RESOLVER_KEY_<NAME>` prefix style and the legacy `_<NAME>_RESOLVER_KEY`
+    // suffix style during the transition.
+    if (content.includes("RESOLVER_KEY")) {
       const parts = content.split(",");
       for (const part of parts) {
         const trimmed = part.trim();
-        if (trimmed.endsWith("_RESOLVER_KEY")) {
+        if (trimmed.startsWith("RESOLVER_KEY_") || trimmed.endsWith("_RESOLVER_KEY")) {
           return trimmed;
         }
       }
@@ -814,19 +821,12 @@ export function extractPublicMethods(source: string): MethodDefinition[] {
 
     // Avoid duplicates (overloaded functions)
     if (!seen.has(methodName)) {
-      // Extract full signature
-      const signature = extractFunctionSignature(source, methodName);
-      if (signature) {
-        const selector = calculateSelector(signature);
-        methods.push({ name: methodName, signature, selector });
-      } else {
-        // Fallback: signature extraction failed, use name-only
-        methods.push({
-          name: methodName,
-          signature: `${methodName}()`,
-          selector: calculateSelector(`${methodName}()`),
-        });
-      }
+      const canonical = extractFunctionSignature(source, methodName) ?? `${methodName}()`;
+      methods.push({
+        name: methodName,
+        signature: { full: canonical, canonical },
+        selector: calculateSelector(canonical),
+      });
       seen.add(methodName);
     }
   }
@@ -897,18 +897,12 @@ export function extractAllMethods(source: string): MethodDefinition[] {
 
     // Avoid duplicates (overloaded functions)
     if (!seen.has(methodName)) {
-      const signature = extractFunctionSignature(source, methodName);
-      if (signature) {
-        const selector = calculateSelector(signature);
-        methods.push({ name: methodName, signature, selector });
-      } else {
-        // Fallback if signature extraction fails
-        methods.push({
-          name: methodName,
-          signature: `${methodName}()`,
-          selector: calculateSelector(`${methodName}()`),
-        });
-      }
+      const canonical = extractFunctionSignature(source, methodName) ?? `${methodName}()`;
+      methods.push({
+        name: methodName,
+        signature: { full: canonical, canonical },
+        selector: calculateSelector(canonical),
+      });
       seen.add(methodName);
     }
   }
@@ -1234,18 +1228,12 @@ export function extractEvents(source: string): EventDefinition[] {
       continue;
     }
 
-    const signature = extractEventSignature(source, eventName);
-    if (signature) {
-      const topic0 = calculateTopic0(signature);
-      events.push({ name: eventName, signature, topic0 });
-    } else {
-      // Fallback if signature extraction fails
-      events.push({
-        name: eventName,
-        signature: `${eventName}()`,
-        topic0: calculateTopic0(`${eventName}()`),
-      });
-    }
+    const canonical = extractEventSignature(source, eventName) ?? `${eventName}()`;
+    events.push({
+      name: eventName,
+      signature: { full: canonical, canonical },
+      topic0: calculateTopic0(canonical),
+    });
     seen.add(eventName);
   }
 
@@ -1254,11 +1242,44 @@ export function extractEvents(source: string): EventDefinition[] {
 
 /**
  * Parse an event or error name from a line using string operations.
+ *
+ * Skips lines that are not declarations (e.g. `import { Foo } from "..../errors/Bar.sol";`
+ * which contains the substring "error" inside a path segment, not as a keyword).
+ * The keyword must be a standalone word — preceded by start-of-line or whitespace,
+ * and followed by whitespace before the identifier.
  */
 function parseEventOrErrorName(line: string, keyword: string): string | null {
-  const keywordIdx = line.indexOf(keyword);
-  if (keywordIdx === -1) {
+  // Skip import / pragma / using / contract / interface / library declaration lines
+  // — none of these declare events or errors and several of them contain the
+  //   substring "error" in paths or other identifiers.
+  const trimmed = line.trimStart();
+  if (
+    trimmed.startsWith("import ") ||
+    trimmed.startsWith("import{") ||
+    trimmed.startsWith("pragma ") ||
+    trimmed.startsWith("using ") ||
+    trimmed.startsWith("//")
+  ) {
     return null;
+  }
+
+  // Find a STANDALONE occurrence of the keyword: must be at start-of-line (after
+  // optional whitespace) OR preceded by whitespace, and followed by whitespace.
+  let keywordIdx = -1;
+  let searchFrom = 0;
+  for (;;) {
+    const idx = line.indexOf(keyword, searchFrom);
+    if (idx === -1) {
+      return null;
+    }
+    const before = idx === 0 ? " " : line[idx - 1];
+    const after = line[idx + keyword.length] ?? "";
+    const isStandalone = (before === " " || before === "\t") && (after === " " || after === "\t");
+    if (isStandalone) {
+      keywordIdx = idx;
+      break;
+    }
+    searchFrom = idx + 1;
   }
 
   // Skip keyword and whitespace
@@ -1403,18 +1424,12 @@ export function extractErrors(source: string): ErrorDefinition[] {
       continue;
     }
 
-    const signature = extractErrorSignature(source, errorName);
-    if (signature) {
-      const selector = calculateSelector(signature);
-      errors.push({ name: errorName, signature, selector });
-    } else {
-      // Fallback if signature extraction fails
-      errors.push({
-        name: errorName,
-        signature: `${errorName}()`,
-        selector: calculateSelector(`${errorName}()`),
-      });
-    }
+    const canonical = extractErrorSignature(source, errorName) ?? `${errorName}()`;
+    errors.push({
+      name: errorName,
+      signature: { full: canonical, canonical },
+      selector: calculateSelector(canonical),
+    });
     seen.add(errorName);
   }
 

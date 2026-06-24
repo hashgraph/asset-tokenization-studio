@@ -218,12 +218,13 @@ export const DigitalSecuritiesList = () => {
       enableSorting: false,
       cell: ({ getValue }) => {
         const address = getValue();
+        const network = process.env.REACT_APP_NETWORK ?? "testnet";
 
         return (
           <Button
             as={Link}
             target="_blank"
-            href={`https://hashscan.io/testnet/contract/${address}`} //TODO move to env file
+            href={`https://hashscan.io/${network}/contract/${address}`}
             variant="table"
             onClick={(e) => e.stopPropagation()}
           >

@@ -130,11 +130,11 @@ describe("ProtectedTransferFromByPartitionCommandHandler", () => {
           BigDecimal.fromString(command.amount, security.decimals),
         );
 
-        expect(validationServiceMock.checkValidNounce).toHaveBeenCalledTimes(1);
-        expect(validationServiceMock.checkValidNounce).toHaveBeenCalledWith(
+        expect(validationServiceMock.checkValidNonce).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkValidNonce).toHaveBeenCalledWith(
           command.securityId,
           command.sourceId,
-          command.nounce,
+          command.nonce,
         );
 
         expect(transactionServiceMock.getHandler().protectedTransferFromByPartition).toHaveBeenCalledTimes(1);
@@ -146,7 +146,7 @@ describe("ProtectedTransferFromByPartitionCommandHandler", () => {
           evmAddress,
           BigDecimal.fromString(command.amount, security.decimals),
           BigDecimal.fromString(command.deadline.substring(0, 10)),
-          BigDecimal.fromString(command.nounce.toString()),
+          BigDecimal.fromString(command.nonce.toString()),
           command.signature,
           command.securityId,
         );

@@ -103,7 +103,7 @@ export const isISINValid = (val: string) => {
 };
 
 export const isValidHederaId = (val: string) => {
-  const maskRegex = /^[0-9]\.[0-9]\.[0-9]{1,7}$/;
+  const maskRegex = /^[0-9]\.[0-9]\.[0-9]{1,9}$/;
   return maskRegex.test(val) || t("isValidHederaId");
 };
 
@@ -135,7 +135,7 @@ export const isValidCouponPeriod = (val: string) => {
 
     const validation = validateCouponPeriod(periodValue);
     return validation === true || validation;
-  } catch (error) {
+  } catch {
     return "Invalid coupon period";
   }
 };

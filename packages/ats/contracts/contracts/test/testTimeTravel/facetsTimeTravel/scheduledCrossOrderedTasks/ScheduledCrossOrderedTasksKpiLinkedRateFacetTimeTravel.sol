@@ -1,23 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-/* solhint-disable max-line-length */
+// solhint-disable max-line-length
+
 import {
     ScheduledCrossOrderedTasksKpiLinkedRateFacet
-} from "../../../../facets/layer_2/scheduledTask/scheduledCrossOrderedTask/kpiLinkedRate/ScheduledCrossOrderedTasksKpiLinkedRateFacet.sol";
-/* solhint-enable max-line-length */
-import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
+} from "../../../../facets/scheduledCrossOrderedTask/ScheduledCrossOrderedTasksKpiLinkedRateFacet.sol";
+import { TimeTravelProvider } from "../../timeTravel/TimeTravelProvider.sol";
 
 contract ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel is
     ScheduledCrossOrderedTasksKpiLinkedRateFacet,
-    TimeTravelStorageWrapper
-{
-    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockTimestamp();
-    }
-
-    function _blockNumber() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockNumber();
-    }
-}
+    TimeTravelProvider
+{}

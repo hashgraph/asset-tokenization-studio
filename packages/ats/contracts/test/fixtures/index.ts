@@ -13,21 +13,20 @@
 export { deployAtsInfrastructureFixture } from "./infrastructure.fixture";
 
 // Integration test fixtures (lighter weight)
-export {
-  deployBlrFixture,
-  registerCommonFacetsFixture,
-  registerERC20FacetFixture,
-  registerMigrationFacetFixture,
-} from "./integration.fixture";
+export { deployBlrFixture, registerCommonFacetsFixture, registerTransferFacetFixture } from "./integration.fixture";
 
 // TUP proxy fixtures (TransparentUpgradeableProxy testing)
 export { deployTupProxyFixture, deployTupProxyWithV2Fixture, TUP_VERSIONS } from "./tupProxy.fixture";
 export type { TupProxyFixtureResult } from "./tupProxy.fixture";
 
 // Token fixtures
-export { deployEquityTokenFixture, DEFAULT_EQUITY_PARAMS, getEquityDetails } from "./tokens/equity.fixture";
+export { deployEquityTokenFixture, DEFAULT_EQUITY_PARAMS, makeEquityDetailsData } from "./tokens/equity.fixture";
 
-export { deployBondTokenFixture, DEFAULT_BOND_PARAMS, getBondDetails } from "./tokens/bond.fixture";
+export {
+  deployBondTokenFixture,
+  DEFAULT_BOND_PARAMS,
+  makeBondDetailsData as getBondDetails,
+} from "./tokens/bond.fixture";
 
 export { deployBondFixedRateTokenFixture, DEFAULT_BOND_FIXED_RATE_PARAMS } from "./tokens/bondFixedRate.fixture";
 
@@ -36,20 +35,20 @@ export {
   DEFAULT_BOND_KPI_LINKED_RATE_PARAMS,
 } from "./tokens/bondKpiLinkedRate.fixture";
 
-export {
-  deployBondSustainabilityPerformanceTargetRateTokenFixture,
-  DEFAULT_BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_PARAMS,
-} from "./tokens/bondSustainabilityPerformanceTargetRate.fixture";
-
 // Loan token fixtures
-export { deployLoanTokenFixture, DEFAULT_LOAN_PARAMS } from "./tokens/loan.fixture";
+export { deployLoanTokenFixture, DEFAULT_LOAN_PARAMS, getLoanDetails } from "./tokens/loan.fixture";
 
 // Loan Portfolio token fixtures
-export { deployLoanPortfolioTokenFixture, DEFAULT_LOAN_PORTFOLIO_PARAMS } from "./tokens/loanPortfolio.fixture";
+export {
+  deployLoansPortfolioTokenFixture,
+  DEFAULT_LOANS_PORTFOLIO_PARAMS,
+  getLoansPortfolioDetails,
+} from "./tokens/loansPortfolio.fixture";
 
 // Common token utilities
 export {
   MAX_UINT256,
+  MAX_UINT8,
   TEST_PARTITIONS,
   TEST_AMOUNTS,
   executeRbac,
@@ -79,7 +78,6 @@ export {
   deployTupUpgradeTestFixture,
   deployTupInfrastructureOnlyFixture,
   deployBlrV2Implementation,
-  deployFactoryV2Implementation,
   createMockImplementation,
   type TupUpgradeTestFixture,
   type TupInfrastructureOnlyFixture,

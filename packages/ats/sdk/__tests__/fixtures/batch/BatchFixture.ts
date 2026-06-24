@@ -10,15 +10,13 @@ import { BatchFreezePartialTokensCommand } from "@command/security/operations/ba
 import { BatchMintCommand } from "@command/security/operations/batch/batchMint/BatchMintCommand";
 import { BatchSetAddressFrozenCommand } from "@command/security/operations/batch/batchSetAddressFrozen/BatchSetAddressFrozenCommand";
 import { BatchUnfreezePartialTokensCommand } from "@command/security/operations/batch/batchUnfreezePartialTokens/BatchUnfreezePartialTokensCommand";
-import {
-  BatchTransferRequest,
-  BatchForcedTransferRequest,
-  BatchMintRequest,
-  BatchBurnRequest,
-  BatchSetAddressFrozenRequest,
-  BatchFreezePartialTokensRequest,
-  BatchUnfreezePartialTokensRequest,
-} from "src";
+import BatchTransferRequest from "@port/in/request/security/operations/batch/BatchTransferRequest";
+import BatchForcedTransferRequest from "@port/in/request/security/operations/batch/BatchForcedTransferRequest";
+import BatchMintRequest from "@port/in/request/security/operations/batch/BatchMintRequest";
+import BatchBurnRequest from "@port/in/request/security/operations/batch/BatchBurnRequest";
+import BatchSetAddressFrozenRequest from "@port/in/request/security/operations/batch/BatchSetAddressFrozenRequest";
+import BatchFreezePartialTokensRequest from "@port/in/request/security/operations/batch/BatchFreezePartialTokensRequest";
+import BatchUnfreezePartialTokensRequest from "@port/in/request/security/operations/batch/BatchUnfreezePartialTokensRequest";
 
 export const BatchTransferRequestFixture = createFixture<BatchTransferRequest>((request) => {
   request.securityId.as(() => HederaIdPropsFixture.create().value);

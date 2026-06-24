@@ -184,7 +184,7 @@ export default class BigDecimal {
       if (value instanceof BigDecimal) return true;
       BigDecimal.fromString(value);
       return true;
-    } catch (err) {
+    } catch {
       return false;
     }
   }

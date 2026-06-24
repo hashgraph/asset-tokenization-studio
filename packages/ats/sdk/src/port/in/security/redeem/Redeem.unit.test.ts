@@ -260,7 +260,7 @@ describe("Redeem", () => {
           protectedRedeemFromByPartitionRequest.sourceId,
           protectedRedeemFromByPartitionRequest.amount,
           protectedRedeemFromByPartitionRequest.deadline,
-          protectedRedeemFromByPartitionRequest.nounce,
+          protectedRedeemFromByPartitionRequest.nonce,
           protectedRedeemFromByPartitionRequest.signature,
         ),
       );
@@ -287,7 +287,7 @@ describe("Redeem", () => {
           protectedRedeemFromByPartitionRequest.sourceId,
           protectedRedeemFromByPartitionRequest.amount,
           protectedRedeemFromByPartitionRequest.deadline,
-          protectedRedeemFromByPartitionRequest.nounce,
+          protectedRedeemFromByPartitionRequest.nonce,
           protectedRedeemFromByPartitionRequest.signature,
         ),
       );

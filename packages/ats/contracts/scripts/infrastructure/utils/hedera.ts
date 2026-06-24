@@ -111,6 +111,7 @@ export function isHederaNetwork(network: string): boolean {
     lowerNetwork.includes("hedera") ||
     lowerNetwork.includes("mainnet") ||
     lowerNetwork.includes("testnet") ||
-    lowerNetwork.includes("previewnet")
+    lowerNetwork.includes("previewnet") ||
+    lowerNetwork.includes("hashsphere")
   );
 }

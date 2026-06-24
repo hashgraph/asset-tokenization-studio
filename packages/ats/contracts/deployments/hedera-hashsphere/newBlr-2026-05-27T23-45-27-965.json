@@ -1,0 +1,1372 @@
+{
+  "network": "hedera-hashsphere",
+  "timestamp": "2026-05-27T23:45:24.163Z",
+  "deployer": "0x3769116404F4bcf7B6026fACD84A10e04b4772EE",
+  "infrastructure": {
+    "proxyAdmin": {
+      "address": "0x91c18E5BEc7c483e0Af090FaAdCB90c7E35a4901",
+      "contractId": "0.0.2337"
+    },
+    "blr": {
+      "implementation": "0x23c1f3B19197073ea2f3f2543072983cA82479Ed",
+      "implementationContractId": "0.0.2338",
+      "proxy": "0x27b8ce627115f78f3e611e37EF723D525fF6B3D9",
+      "proxyContractId": "0.0.2339"
+    },
+    "factory": {
+      "implementation": "0xc4606fe20c9ddd1c9d14A5D195672b0e50309206",
+      "implementationContractId": "0.0.2404",
+      "proxy": "0x5B33616282E2B5c6509135A8f4a63d277cB92565",
+      "proxyContractId": "0.0.2466"
+    }
+  },
+  "facets": [
+    {
+      "name": "AccessControlFacet",
+      "address": "0x09584Ef692d78f3ebEd6a4F3EdE6B33C030a7773",
+      "contractId": "0.0.2348",
+      "key": "0xccc2e755f9225e65f6c822a258c866fc0d57a124ad12c8928adf3ff875ffcd70",
+      "version": 1
+    },
+    {
+      "name": "AdjustBalancesFacet",
+      "address": "0xBa6826193cec672d3dBe98E1f0ca85fb41E9D60e",
+      "contractId": "0.0.2349",
+      "key": "0x0d52158578e1e30e77e2dd3caffc1aa31af5397866b92131f66858f01b2e8f01",
+      "version": 1
+    },
+    {
+      "name": "AllowanceFacet",
+      "address": "0x0A60d3066D71896612F13028261F74215Cb22F52",
+      "contractId": "0.0.2350",
+      "key": "0x329473cfbe06c7719b3c986b04b90a16a859b86307aad33eea0c3dfe87160ab7",
+      "version": 1
+    },
+    {
+      "name": "AmortizationFacet",
+      "address": "0x5B2CA00Dc726f418c5a2670ED0A315B78cE3259C",
+      "contractId": "0.0.2351",
+      "key": "0xc0d83d8b9295f78954b1c7c9648bec9775edf597a57f9f4110883e9ca2134739",
+      "version": 1
+    },
+    {
+      "name": "BalanceTrackerAdjustedFacet",
+      "address": "0xF9eAC1Bb86a874E20279Abc39BAba0Aab2ce8AE2",
+      "contractId": "0.0.2352",
+      "key": "0xde8fb5b2c9dd63c753422ecea8bad989281451fa65dff90dd686eff691b03805",
+      "version": 1
+    },
+    {
+      "name": "BalanceTrackerAtSnapshotByPartitionFacet",
+      "address": "0x1E4fc622F54C505BA9F6a694c0aA1756AF297f8b",
+      "contractId": "0.0.2353",
+      "key": "0x58443162e33b704d1fc5afb40e87bf81357231beefee616de557cc06fef3aba8",
+      "version": 1
+    },
+    {
+      "name": "BalanceTrackerAtSnapshotFacet",
+      "address": "0xF197b83Cf0A9ccfB92Aa1C9Ce429d5A0ef68A13d",
+      "contractId": "0.0.2354",
+      "key": "0x2c9af26b5891593b8184a58e38f6c52e42af55578543d14ab176abd1213e3013",
+      "version": 1
+    },
+    {
+      "name": "BalanceTrackerByPartitionFacet",
+      "address": "0x72A8886023716260fB8914C2eA0Ae53F43f1089c",
+      "contractId": "0.0.2355",
+      "key": "0x05d2477d09e6a1df45e3e51bd398af7a071f6f282255486cec19b8b5a403bbaf",
+      "version": 1
+    },
+    {
+      "name": "BalanceTrackerFacet",
+      "address": "0x3665e79711bF9b516FDc6d83769367e6891e61C8",
+      "contractId": "0.0.2356",
+      "key": "0xefbff5dcb4e5bf43bf472fd0646991b8b4731876498b2a4248f9aa9aee1a127b",
+      "version": 1
+    },
+    {
+      "name": "BatchBurnFacet",
+      "address": "0x3D253A48a23F07D06Ad921Cb6407fFc569d3A716",
+      "contractId": "0.0.2357",
+      "key": "0x60fbdebafe46599d2a6d6cbec0e554cfdf693e5eb001a783852bbbc82e5c9984",
+      "version": 1
+    },
+    {
+      "name": "BatchControllerFacet",
+      "address": "0x5332B0b2C1cbB6e214437FeC5978D15e8d22ff01",
+      "contractId": "0.0.2358",
+      "key": "0x535258ade68566dbac2304c09e172709e8b0ab3f78d2be54014d021ddb03ab58",
+      "version": 1
+    },
+    {
+      "name": "BatchFreezeFacet",
+      "address": "0x8394cde12a6912C8031c9ed1e4efEb516554B094",
+      "contractId": "0.0.2359",
+      "key": "0x6ddbb1869dce32d8e2c9bb2d23fad216723298560b6cceba67890d5a3efe0e5e",
+      "version": 1
+    },
+    {
+      "name": "BatchMintFacet",
+      "address": "0x5727954289030e28015B7D05CF22B09508622656",
+      "contractId": "0.0.2360",
+      "key": "0x7575e07f738065de9a6ba5370d7d18b79f7a0b885824780bf5c75784978e9530",
+      "version": 1
+    },
+    {
+      "name": "BatchTransferFacet",
+      "address": "0x6d9De61868911F8Fa945689b0bC2A468676e69Eb",
+      "contractId": "0.0.2361",
+      "key": "0x01e13672eac45bef2d8d3f1c56eaca6857103f3b72ec9ded3d1f30aa15747d05",
+      "version": 1
+    },
+    {
+      "name": "BondUSAFacet",
+      "address": "0x2A4A96E64B7Ef9486e819406D59Cb968657dEff4",
+      "contractId": "0.0.2362",
+      "key": "0xbc8b53a2f8803b138aac441fbeb6b767a51b66a5f4d735c3d15af67cc72b9daa",
+      "version": 1
+    },
+    {
+      "name": "BondUSAFixedRateFacet",
+      "address": "0x926E3686d674B195271d001da316C8b50396299d",
+      "contractId": "0.0.2363",
+      "key": "0xed82bfcb3081f78d7592451f5f09a9a1772cd71df1ab3a248f7c138f76b6b717",
+      "version": 1
+    },
+    {
+      "name": "BondUSAKpiLinkedRateFacet",
+      "address": "0xcD5b2D6351F9D3c3bC704A970F49ced07129eD40",
+      "contractId": "0.0.2364",
+      "key": "0x1628b61a8f980e7dd8de7d9abd073c894e26e4097e7f4d34c2e213c57e716e98",
+      "version": 1
+    },
+    {
+      "name": "BondUSAReadFacet",
+      "address": "0xc50CfBC451A6fAb18E0Dae4d37c96819ACDAE08b",
+      "contractId": "0.0.2365",
+      "key": "0xd9c3cc17a49d3ab289e489c0db3567f929bc463acd01dd1e37f8117aa48a1d74",
+      "version": 1
+    },
+    {
+      "name": "BondUSAReadFixedRateFacet",
+      "address": "0x92fC7D95855d7B5C579B0C91F1a4283397B72838",
+      "contractId": "0.0.2366",
+      "key": "0x022f5bb77103df6269ed7962189745c5fa816a3f85295ed85df8a5e4c662098f",
+      "version": 1
+    },
+    {
+      "name": "BondUSAReadKpiLinkedRateFacet",
+      "address": "0x73dCD3a618efB78C16Cc34D573F51e17B8086Ae4",
+      "contractId": "0.0.2367",
+      "key": "0xc823c70498ac1fa7fdafba568d2723060ed434d2ec52665adcf6ee1a619e4524",
+      "version": 1
+    },
+    {
+      "name": "BurnByPartitionFacet",
+      "address": "0x7fFc9aa4E6a568332f93edA19fe6AB9b7C4dA06f",
+      "contractId": "0.0.2368",
+      "key": "0x8d135078123ea705bd40f02ac0cd59ac08da08600b3510ba6150fe0e4a588684",
+      "version": 1
+    },
+    {
+      "name": "BurnFacet",
+      "address": "0x17F7a612C775d2B35D666e6f62993AE064493700",
+      "contractId": "0.0.2369",
+      "key": "0xa9ec330b49ea310aaeba8dae3ba4f2a0b94fd35fafb9d8d8afbb804b73d50ce2",
+      "version": 1
+    },
+    {
+      "name": "CapByPartitionFacet",
+      "address": "0x2A81F2713700004d898B63e613Cb47B341a5b07f",
+      "contractId": "0.0.2370",
+      "key": "0x0a9c473b0456240ebc327730dba40a495c5a639839b0c0b30a01db12373f7529",
+      "version": 1
+    },
+    {
+      "name": "CapFacet",
+      "address": "0xDc9B404fC63b01E1681ED2A7f652622a94A9955C",
+      "contractId": "0.0.2371",
+      "key": "0x88a28e7c45a3ce8d4ca60cd480c98e1b46feb84caec725cb0a6cf96b2c5143b5",
+      "version": 1
+    },
+    {
+      "name": "ClearingAtSnapshotByPartitionFacet",
+      "address": "0x080f0e10314F23547d8b526488f51e267Db2C267",
+      "contractId": "0.0.2372",
+      "key": "0xf55083b17a9ba346028d6a5c0772a7d913e0e90b4954f7a8b8e1912dcd383cbd",
+      "version": 1
+    },
+    {
+      "name": "ClearingAtSnapshotFacet",
+      "address": "0x2b62DCba1eB793eeB61e41BBEd831F837f2b7F46",
+      "contractId": "0.0.2373",
+      "key": "0xb65566db9291ca49b508408fe1ba503b28ea434b3f9bca05c3a0c4da031f9e86",
+      "version": 1
+    },
+    {
+      "name": "ClearingByPartitionFacet",
+      "address": "0xd7BD1BC782a7b46a128067772B586365A37Fd1B2",
+      "contractId": "0.0.2374",
+      "key": "0xb63156d6db31ae3207bca0dd4a8a45f227171367d85a3833a0d7a1622212c5ec",
+      "version": 1
+    },
+    {
+      "name": "ClearingFacet",
+      "address": "0xec5566b18130554a3F8a0DFfDBeCb352F0f5992f",
+      "contractId": "0.0.2375",
+      "key": "0xb101eca2006801ca94d6bc86288da88fc7f2ddf39849d3dd96fae75967a3d344",
+      "version": 1
+    },
+    {
+      "name": "ClearingHoldByPartitionFacet",
+      "address": "0x4084E0e50084ed43651869653cecc8E1360FDa9a",
+      "contractId": "0.0.2376",
+      "key": "0x027ca02a0a3de6d790cd3b5ff9c792b4bfc1649964d7737f5c4554992ca9b111",
+      "version": 1
+    },
+    {
+      "name": "ComplianceByPartitionFacet",
+      "address": "0xE8FDF583Ed4804a26C4885176364bfB952cf5a6E",
+      "contractId": "0.0.2377",
+      "key": "0xafad2096960379c99c5eae984f0f4ceddafa69c3e08352bcaf84e804ec4135b6",
+      "version": 1
+    },
+    {
+      "name": "ComplianceFacet",
+      "address": "0x8FF425E415D023F376c31986d673C6dcE89eE51E",
+      "contractId": "0.0.2378",
+      "key": "0x0e30d654f46079d52767224a07d1fe1adc91d7edba6504f2f0adca0fca972180",
+      "version": 1
+    },
+    {
+      "name": "ControllerByPartitionFacet",
+      "address": "0x7BFb7028A21c3D1aBB22c9cF44f41C269b932ae1",
+      "contractId": "0.0.2379",
+      "key": "0xa75865ef65a8410651c7bfebbfa9b89bd06e0bdf0dba55817ba1a6b49fdb1517",
+      "version": 1
+    },
+    {
+      "name": "ControllerFacet",
+      "address": "0x27a17A6f9e9eaC3E467f894E9dA07a07a5C805B9",
+      "contractId": "0.0.2380",
+      "key": "0xf020acbcf895b1f0961c02558f58e8e3f0a254c27f0e6287127ac2f43893df46",
+      "version": 1
+    },
+    {
+      "name": "ControllerHoldByPartitionFacet",
+      "address": "0xC80fFBDa771C6c303e3dFb7Dd368c9A3D03e5E9D",
+      "contractId": "0.0.2381",
+      "key": "0xc415f5239b26cab850bcaca08096196a95d9ea5bab0eed1a6e29ce81490efd33",
+      "version": 1
+    },
+    {
+      "name": "ControlListFacet",
+      "address": "0xe0E66204E3F4cA644aA921Ab7101221b67BD8F56",
+      "contractId": "0.0.2382",
+      "key": "0x7bbee58c68b6e19a08128d25f150956d20a69d1cc049afda563753771781ecc5",
+      "version": 1
+    },
+    {
+      "name": "CoreAdjustedFacet",
+      "address": "0xe910ecFb735bb12c5CE2c5f5cfA8CdFD00d5Bc05",
+      "contractId": "0.0.2383",
+      "key": "0xe190b52312c215f8e240bb53f0aa3e51e31b3005b7fcfb49c730ae523e675cfd",
+      "version": 1
+    },
+    {
+      "name": "CoreAtSnapshotFacet",
+      "address": "0x31E9b5f7b786660a4F6B9A57115fFc72b667666F",
+      "contractId": "0.0.2384",
+      "key": "0x9f1ab2bcf2a5668b07a2b26155b1c04f30721db434dff2f1e69a3a9b1dc0a039",
+      "version": 1
+    },
+    {
+      "name": "CoreFacet",
+      "address": "0xC6e9cBAb18397C40C60cbDDe7d2C39556231F540",
+      "contractId": "0.0.2385",
+      "key": "0xb54e0c9a42346a2760a44e59035a2b84a61d07bed66a2f24cffe3ca4bae1996f",
+      "version": 1
+    },
+    {
+      "name": "CorporateActionsFacet",
+      "address": "0xd99D7A5B607895C1000EC97B30B3EDDdACE7D1De",
+      "contractId": "0.0.2386",
+      "key": "0x4f091e1f288c10131ffc090469e611b913f1f54343e59e44405312d597897db2",
+      "version": 1
+    },
+    {
+      "name": "CouponFacet",
+      "address": "0xD7A95EC895278AA64341F1c40f7b02BA1744D5b3",
+      "contractId": "0.0.2387",
+      "key": "0xe292dde7a8154c59d06fe2333acc2b54d003262aadc39ee2c7b474e6e64add6b",
+      "version": 1
+    },
+    {
+      "name": "CouponListingFacet",
+      "address": "0x845b363E02E4dC9a925e157cD86a846e28BbcaFA",
+      "contractId": "0.0.2388",
+      "key": "0x91e4a085c95cddedc7143dae7647c320f59b0f0214ed0f49ab95d7cedb4db176",
+      "version": 1
+    },
+    {
+      "name": "CouponSecurityHoldersFacet",
+      "address": "0x7ACe676717a97958a479aE709a412b8ec3df3428",
+      "contractId": "0.0.2389",
+      "key": "0x8e5fc42839ddbceddb6022f61f5907a3849178cce5cfb82850a28e80140ac9a9",
+      "version": 1
+    },
+    {
+      "name": "DeactivateFacet",
+      "address": "0x875D9b9394a50999fA4c3Be28E9958F0334f1086",
+      "contractId": "0.0.2390",
+      "key": "0x13d8bdda80bdc4e1d1af80d2096fdf84affb60341d7b8f44392412162d3c3434",
+      "version": 1
+    },
+    {
+      "name": "DiamondFacet",
+      "address": "0x2268b57910F5513b9ca4F5143BAfc47a1f9D22d2",
+      "contractId": "0.0.2391",
+      "key": "0xd9202bb838fd8d0f2866f13141398cfb9fa74cbbbce7449c9158caffa9c509f4",
+      "version": 1
+    },
+    {
+      "name": "DividendFacet",
+      "address": "0xeeA9eFeEad6fDBfCC8d5445e2Be2141dF45fC649",
+      "contractId": "0.0.2392",
+      "key": "0xfcc58d1d55d14a1359461bb9cef220b267b9846b01d61bd27d97f7c10c28b445",
+      "version": 1
+    },
+    {
+      "name": "DividendSecurityHoldersFacet",
+      "address": "0xd3393958B34EC2a717f04854D091217E934C52ad",
+      "contractId": "0.0.2393",
+      "key": "0x1478127ed7121d4c1f51d4844183242705cd85c8948b44acb7756ecf98830402",
+      "version": 1
+    },
+    {
+      "name": "DocumentationFacet",
+      "address": "0xE33Bb4D86B09EdF2040262471fe24cD388939d72",
+      "contractId": "0.0.2394",
+      "key": "0x3ab155fb7c96aefcaa7d730782cb640e5acf33c329d90a706843ae88a03cf1fb",
+      "version": 1
+    },
+    {
+      "name": "EIP712Facet",
+      "address": "0x4f8D5d423956bA59edbEa37d894A88BA189cB8d0",
+      "contractId": "0.0.2395",
+      "key": "0xaa031e71d3d43f715d16d62c62d7573406d29acdf4c080143dab629e08a8402f",
+      "version": 1
+    },
+    {
+      "name": "EquityUSAFacet",
+      "address": "0xDeC97EB82cE4cE7037108251D7F42313EFB839fF",
+      "contractId": "0.0.2396",
+      "key": "0x32d1b4f5d593b1e786f1c491656e2db7e35a80754244b3c5e787a03db7fcef31",
+      "version": 1
+    },
+    {
+      "name": "ERC1410ManagementFacet",
+      "address": "0xed78fF2ee3e14d1e10b31Fb0c706CD7dAB7DC24E",
+      "contractId": "0.0.2397",
+      "key": "0xb4096d676324d7f4d32415a0a0810544a5dc12d6559dee91fb3c4b77cdde3392",
+      "version": 1
+    },
+    {
+      "name": "ERC20PermitFacet",
+      "address": "0xB035fC9d31A42A961946Ec8327aF5876B388b4ED",
+      "contractId": "0.0.2398",
+      "key": "0xb9b450cd33d22a14f4cc67bea5d1afefac1f0e7c5230fce1b942f751c37a9e6d",
+      "version": 1
+    },
+    {
+      "name": "ERC20VotesFacet",
+      "address": "0x3193Df454AF110C53CB8E677Eb7317Ec502241c6",
+      "contractId": "0.0.2399",
+      "key": "0x9619bb38c76aac49afb1df75430aefc1314778fe926136a688bf3ae3b5f8c3b7",
+      "version": 1
+    },
+    {
+      "name": "ERC3643ManagementFacet",
+      "address": "0x0c66a732f944c5867D119Ad11E0f00271270D0e1",
+      "contractId": "0.0.2400",
+      "key": "0x21a44f0c9eb38617ca4a06ead94c1424e63be7f8eefdb2773ca08796fbda508b",
+      "version": 1
+    },
+    {
+      "name": "ExternalControlListManagementFacet",
+      "address": "0x5d8e428Ae1Eb737AF1254185A31c370dD1a7D5a0",
+      "contractId": "0.0.2401",
+      "key": "0x1a8f526d3e49a86640ec4a268407478132e285f13c4efbe08c46324306fd6a04",
+      "version": 1
+    },
+    {
+      "name": "ExternalKycListManagementFacet",
+      "address": "0x7044C86804C6E8a036ccA50c75D2A711fAEf63A6",
+      "contractId": "0.0.2402",
+      "key": "0x519d262ce075401982a7a64c60caea0491af317c7b69b7869f8181e8d9cda124",
+      "version": 1
+    },
+    {
+      "name": "ExternalPauseManagementFacet",
+      "address": "0xB30FBf14d938651deE747a844C2DF9C03694735a",
+      "contractId": "0.0.2403",
+      "key": "0x7a8980089ef3860d6c0e831805ee28105e662952033ce76812e56e346d37bd7e",
+      "version": 1
+    },
+    {
+      "name": "FactoryFacet",
+      "address": "0xc4606fe20c9ddd1c9d14A5D195672b0e50309206",
+      "contractId": "0.0.2404",
+      "key": "0x9fc26269cc1cb994e66f269ed6b58a5bb0c344a134b9dabd342ac466d48f95c7",
+      "version": 1
+    },
+    {
+      "name": "FixedRateFacet",
+      "address": "0x76B9e0324E408aF8514eE43358D43B73D7469FDa",
+      "contractId": "0.0.2405",
+      "key": "0x82f13d957a7f7af45723926c5ca1a184f2d667df5221c37434ce37278a9af521",
+      "version": 1
+    },
+    {
+      "name": "FreezeAtSnapshotByPartitionFacet",
+      "address": "0xe64E094Bf5cE2Ff3354369A709779844BBD88C91",
+      "contractId": "0.0.2406",
+      "key": "0xac8fcbc19e12e099f6c6cff54357e28a589b49673267c81a18a965da1c7f4744",
+      "version": 1
+    },
+    {
+      "name": "FreezeAtSnapshotFacet",
+      "address": "0x783f8894c776806D7452b0389c93F07eA89dF269",
+      "contractId": "0.0.2407",
+      "key": "0x8ca462bf28ae4e7c5b77b86245cfff3caf7f6bdb6308a608cd9315feb2c28631",
+      "version": 1
+    },
+    {
+      "name": "FreezeFacet",
+      "address": "0x8136372a4ccb6ed367c6D8618c169a3972993223",
+      "contractId": "0.0.2408",
+      "key": "0xad51c3d79dbb37543854270a7bd1c7237cfa425b16cdf4dee9015c20917ced5a",
+      "version": 1
+    },
+    {
+      "name": "HoldAtSnapshotByPartitionFacet",
+      "address": "0x665A3679DE055FceaE5Af0BBC38552E7F9450f56",
+      "contractId": "0.0.2409",
+      "key": "0xe6aa6abeda5257bb9fda94cbd6583ff73bfc92f42edd2ace846ee45b3cf49f0f",
+      "version": 1
+    },
+    {
+      "name": "HoldAtSnapshotFacet",
+      "address": "0x71191b283f389E271C835E4E37001dBBEd7c6604",
+      "contractId": "0.0.2410",
+      "key": "0xe4ec7231213c656d430571c2b40cf204f87a626b5ccf0db85527f72470e54a9e",
+      "version": 1
+    },
+    {
+      "name": "HoldByPartitionFacet",
+      "address": "0x160ef09618FE6DFedefb8Fa02131451605DCE166",
+      "contractId": "0.0.2411",
+      "key": "0x3bd50b70b7e42003cb9761c133e88d776c27b53729b463a2d5bf6b36a2fce367",
+      "version": 1
+    },
+    {
+      "name": "HoldFacet",
+      "address": "0x533489eB4698Bcb72Bbc09145C92c056d7e397c9",
+      "contractId": "0.0.2412",
+      "key": "0x7c2ef14067e573a8580a580634bd7547099c4b82cd9f36610da317d77eacf1f1",
+      "version": 1
+    },
+    {
+      "name": "IdentityFacet",
+      "address": "0x5b7BE601661B29491573E6F2400937EBbbA31fc0",
+      "contractId": "0.0.2413",
+      "key": "0xbb0d93867bfe08218b429804914b1d345b2c899740c5dd110cb9c6141a01d36e",
+      "version": 1
+    },
+    {
+      "name": "InitializerFacet",
+      "address": "0x4a5F768826Cc21185bD7d28bE50bc1Ab9adCe81a",
+      "contractId": "0.0.2414",
+      "key": "0xe7caa2e00c841ed2a64c4c95e3981f3bfc29108599fad6e89b04f9483df0bf09",
+      "version": 1
+    },
+    {
+      "name": "InterestRateFacet",
+      "address": "0x5059EBBDD4637b03B1729f8bADB6BC43696de19A",
+      "contractId": "0.0.2415",
+      "key": "0xc09a5111a37fc8806e149b4a20c17a33a9487c6da8ee95f8a2b8ac31ea8dd2f3",
+      "version": 1
+    },
+    {
+      "name": "KpiLinkedRateFacet",
+      "address": "0xe633B46f1cb5d8fC99ea7f5A09cB068Bdb1c4C18",
+      "contractId": "0.0.2416",
+      "key": "0x47cd76ae576f0ec85f1abfc652d614750caefe22a465bef2c859f6cb32a89593",
+      "version": 1
+    },
+    {
+      "name": "KpisKpiLinkedRateFacet",
+      "address": "0x987188434D7CD37BaE46fCc4fDf6E518414201D0",
+      "contractId": "0.0.2417",
+      "key": "0x6dfae69cde3163283ec603bbf97fe39bd603be2a03296d6e2770ea8f463102fb",
+      "version": 1
+    },
+    {
+      "name": "KycFacet",
+      "address": "0x47104c50dBA4388eD2393Dbd69428a00E9358b15",
+      "contractId": "0.0.2418",
+      "key": "0xf7fc316b28304fa0b62b8849c3c91a901e72894380ecf746c2bc13e5656549cd",
+      "version": 1
+    },
+    {
+      "name": "LoanFacet",
+      "address": "0x9DF59a8Ea29D69868070C351Cc50b090B99CfE0d",
+      "contractId": "0.0.2419",
+      "key": "0x17c2126e932655e91a8e803b275de0a930c4b51a109b751567a95ee5d6bd6eba",
+      "version": 1
+    },
+    {
+      "name": "LoansPortfolioFacet",
+      "address": "0xBd4bc583A3D2deFcF914c657C621d91Fb8172F8C",
+      "contractId": "0.0.2420",
+      "key": "0x3f6ea14bbeaea82befb49409b874caf151715c6619ac1d26ba858039b7ece33e",
+      "version": 1
+    },
+    {
+      "name": "LockAtSnapshotByPartitionFacet",
+      "address": "0x0b479eE4E16Ac73dAbe433144117c50540bB0A94",
+      "contractId": "0.0.2421",
+      "key": "0x7740456ff352a04830411a3fdc359bd086a5d78fd7119bbb62a53c62c1911691",
+      "version": 1
+    },
+    {
+      "name": "LockAtSnapshotFacet",
+      "address": "0x509b3a6C2fCe91cd4BDA8A2440B2083b8D7c2229",
+      "contractId": "0.0.2422",
+      "key": "0x91e5d78963175418e7eb62ff74343d1349d9522d316525e922e145c770cc4d18",
+      "version": 1
+    },
+    {
+      "name": "LockByPartitionFacet",
+      "address": "0xeD284b38bBD21E5105cc00260c8350ddE31bc61d",
+      "contractId": "0.0.2423",
+      "key": "0x75c5c6d6dd253e4be43d8d1c25a4252f5f54ebdba6f6c99ed34cd03c0e4d5360",
+      "version": 1
+    },
+    {
+      "name": "LockFacet",
+      "address": "0x80CbE4667Eb21943d6d3CBbe9e325B4cC234bfE3",
+      "contractId": "0.0.2424",
+      "key": "0xc2e37f639e1d61db1015540583b9d71f8a33da6410aed2826c6caef1304ebd3a",
+      "version": 1
+    },
+    {
+      "name": "MaturityByPartitionFacet",
+      "address": "0xb19714b14031bdE8eE7Ac4c545883c9e2bfc5236",
+      "contractId": "0.0.2425",
+      "key": "0x561e299af2bd67a767eee76558f27470801a9cb97627131141cc55ceb734ccbb",
+      "version": 1
+    },
+    {
+      "name": "MaturityFacet",
+      "address": "0x3BaE301571d7ec398C8bf7D9d3B05863a0E6401F",
+      "contractId": "0.0.2426",
+      "key": "0x16825792debc7c17efd86bdf71500575f9ff5d4aa20e3a35031c583437a3ca82",
+      "version": 1
+    },
+    {
+      "name": "MetadataFacet",
+      "address": "0x85Bb32037e98860Ed9d611110806F4b31F68d7b5",
+      "contractId": "0.0.2427",
+      "key": "0x524fd484241fdce7c81d7872ddc2c45a3d44e664fcf855587839e9c68e481c9f",
+      "version": 1
+    },
+    {
+      "name": "MintByPartitionFacet",
+      "address": "0x1f01442869155b86087EddAB448c4DD8f823cFb7",
+      "contractId": "0.0.2428",
+      "key": "0x25ec74149ce0eadddeb82e668365e2e174db7431a04a80bada246f8f7887dadf",
+      "version": 1
+    },
+    {
+      "name": "MintFacet",
+      "address": "0xFED410D6070f3DDf543E89BF56b2079684d68c0C",
+      "contractId": "0.0.2429",
+      "key": "0x394ec838636f78e91b7dbb3e4ea567e07bbb3886ab70a66652c40be856ab9b7a",
+      "version": 1
+    },
+    {
+      "name": "NominalValueAtSnapshotFacet",
+      "address": "0xb88bF4E0c4a401C7107e61c343CCe02676B6997a",
+      "contractId": "0.0.2430",
+      "key": "0xca313777aee568dc14b1700e7be675b73932bbbc4e4f974a9f1321e6d653af74",
+      "version": 1
+    },
+    {
+      "name": "NominalValueFacet",
+      "address": "0xCd9fa534bdcC6a71577F6a0BD53e13157460B1E2",
+      "contractId": "0.0.2431",
+      "key": "0xfa54bc09a6a76763f17be0504e29b9c28edd15cdc3432c07f92c2b6962f2fbbe",
+      "version": 1
+    },
+    {
+      "name": "NoncesFacet",
+      "address": "0x9C80142fDbf8AB29d94ccbC2288ab99FBD9408Ac",
+      "contractId": "0.0.2432",
+      "key": "0xd1166cb96f266d69db4d4e49d81acaf5441b16bb11681f2b1b53dcf7e1bd3bf4",
+      "version": 1
+    },
+    {
+      "name": "OperatorByPartitionFacet",
+      "address": "0x21298449ECF93785207341Df270672F91bbe6ceB",
+      "contractId": "0.0.2433",
+      "key": "0xfd060cda1c9927203f3914aa0d5916e4c5971977dec4026418bc4fff6d25b277",
+      "version": 1
+    },
+    {
+      "name": "OperatorClearingByPartitionFacet",
+      "address": "0x98A0eE1E2863Ea6e5A59Df5ef055984eeA772b20",
+      "contractId": "0.0.2434",
+      "key": "0xaad3c9e6cb80e4d01b9e5f316a82f495c3d11d36f8d738b0c2e4bce2d3f6c01c",
+      "version": 1
+    },
+    {
+      "name": "OperatorClearingHoldByPartitionFacet",
+      "address": "0xa48f346362e01145512053Ce74323e3C9B86BA73",
+      "contractId": "0.0.2435",
+      "key": "0xab5e4afdccea84152256072fb9f39bf08d591a7666557783209dff003658d945",
+      "version": 1
+    },
+    {
+      "name": "OperatorFacet",
+      "address": "0xe37c66318258f6b1f6Ddd37171c9efF121F2dbAB",
+      "contractId": "0.0.2436",
+      "key": "0x5c2062c6ba02b76ae0c3884d5c0fdd3416b2012195a964efaa34e09b1fa31c95",
+      "version": 1
+    },
+    {
+      "name": "OperatorHoldByPartitionFacet",
+      "address": "0xd4779A463a80D06989858ba7a5E3ADb8E8A3dF32",
+      "contractId": "0.0.2437",
+      "key": "0x2ac9004b9c057e04ee677ec0dda4bf57f4de5a2d382d97b9557aafb2600f257f",
+      "version": 1
+    },
+    {
+      "name": "PartitionsFacet",
+      "address": "0x7dadcb322EC3426B4380Cc8987eDBe871F46F178",
+      "contractId": "0.0.2438",
+      "key": "0x9caef059931effa6169ed564cfd0d8dac03be612be61f4fc934e8554cfe1c53f",
+      "version": 1
+    },
+    {
+      "name": "PauseFacet",
+      "address": "0x39a56004666659557afAac10950a69b263ABD204",
+      "contractId": "0.0.2439",
+      "key": "0x472ad8280a7d90bcd8b7876cad2cd5a4a2d31c116563ace7a685aff94eae8928",
+      "version": 1
+    },
+    {
+      "name": "PrincipalFacet",
+      "address": "0x7dCbAa6F74208f3b3b6970F2b28d75f1982C17A8",
+      "contractId": "0.0.2440",
+      "key": "0xa3dc20804ebd6f2a06a7e8b8de31712f3d18a73b1963acfa1d25ed86907bd0e6",
+      "version": 1
+    },
+    {
+      "name": "ProceedRecipientsFacet",
+      "address": "0xA1ceef41Ed71366362694a37a7a8873D770DFe22",
+      "contractId": "0.0.2441",
+      "key": "0x63388aa198df5944c611b8fcbfd32945c57864f7125a5f95069040087d2b0bb7",
+      "version": 1
+    },
+    {
+      "name": "ProceedRecipientsKpiLinkedRateFacet",
+      "address": "0x3EaF8c5800AA503Eae34Af5d47c82BEA2FBe4A3A",
+      "contractId": "0.0.2442",
+      "key": "0x0e3f0300490c976e8984dcc9a9d086f30a32e8112eea1fd40457bd63404feb42",
+      "version": 1
+    },
+    {
+      "name": "ProtectedByPartitionFacet",
+      "address": "0x20791f73C842895099B7eB8183B5412387CFB5E6",
+      "contractId": "0.0.2443",
+      "key": "0x2f9cd983bc92f917e9c55a3f61b8984646d96980224f4712084967ea1d24d62f",
+      "version": 1
+    },
+    {
+      "name": "ProtectedClearingByPartitionFacet",
+      "address": "0x35A5e9f89f910859134cbAA73586073712A8f43F",
+      "contractId": "0.0.2444",
+      "key": "0x3cbb73b8ee5db791f9534af7a5c9fc09a4cf9adff327a05839f2673a3dc63aae",
+      "version": 1
+    },
+    {
+      "name": "ProtectedClearingHoldByPartitionFacet",
+      "address": "0xc13e3CF57eD23E569F732C32A1b68B99d43691c9",
+      "contractId": "0.0.2445",
+      "key": "0xc28474cfcf6b32464e9000d064b91827c6c37fd3e06dae932c9447c204c35cc1",
+      "version": 1
+    },
+    {
+      "name": "ProtectedHoldByPartitionFacet",
+      "address": "0x5d16709Bc82D9EcC58F76F2a5BC8b1e6b656A533",
+      "contractId": "0.0.2446",
+      "key": "0x5b77b995d3e53c3e46f114bbf37642ce3169369548c8135b8b11f5cebd3fb07b",
+      "version": 1
+    },
+    {
+      "name": "ProtectedPartitionsFacet",
+      "address": "0x5c3519c82BeA2Ab8567C2228e8e21c272d41E7ba",
+      "contractId": "0.0.2447",
+      "key": "0x895834530eae98f8a742fe98f3d528d3cce6c6a51af63b495414bdf391180dd7",
+      "version": 1
+    },
+    {
+      "name": "RecoveryFacet",
+      "address": "0x4B497Fc0aa61a9D3a6348a7d606DF28bF77e2Fc3",
+      "contractId": "0.0.2448",
+      "key": "0x087cb866f812745e77608e4eb4b359ae96b8a0ba2ef9fe8336488e479b72d92a",
+      "version": 1
+    },
+    {
+      "name": "ScheduledBalanceAdjustmentFacet",
+      "address": "0x381eF2B7e90417990D6A7d5fccE3eBBa2296d251",
+      "contractId": "0.0.2449",
+      "key": "0x90c7d769d18188f75b1092289e2465103d06f9c1195bf0ee4b2cf0844a5d6c96",
+      "version": 1
+    },
+    {
+      "name": "ScheduledCrossOrderedTasksFacet",
+      "address": "0xc6E7bE1B7FB142DBB45592f51Ef1b4a90c533f90",
+      "contractId": "0.0.2450",
+      "key": "0x53ea769a267213f8e35c975a0dba3d7d8d73163d53f804c2ac6ea37d6c47c082",
+      "version": 1
+    },
+    {
+      "name": "ScheduledCrossOrderedTasksKpiLinkedRateFacet",
+      "address": "0x6980647279144A17c4b919ccE744c6ACB5F36EBc",
+      "contractId": "0.0.2451",
+      "key": "0x93bfe3f155b9757d312214a75d3bcd8c8c84967e4a8cbaafdbdc40ea1ce2fd4c",
+      "version": 1
+    },
+    {
+      "name": "SecurityFacet",
+      "address": "0x4511F49C9fbC6CE28a369C2f4A7bFE7Fb143dD12",
+      "contractId": "0.0.2452",
+      "key": "0x4a0ea8dcc902efa355c705fe7211cb0da08f05ad9fc8888237dd67a8c4dc6f1a",
+      "version": 1
+    },
+    {
+      "name": "SecurityHoldersAtSnapshotFacet",
+      "address": "0x038b64F6Bce95c7970E9b347d62B2B5eFd4B2b1c",
+      "contractId": "0.0.2453",
+      "key": "0xf7707140407ccf0d6deaf72844217e3c1383270609a7a75e36def71a3c453b9e",
+      "version": 1
+    },
+    {
+      "name": "SecurityHoldersFacet",
+      "address": "0xc0704f3C27a668b6C08C8305f933D082fbda4c3C",
+      "contractId": "0.0.2454",
+      "key": "0x744edd4f33c7d5e322286e40155d549553e22329ac9503643bf36fc149504bc9",
+      "version": 1
+    },
+    {
+      "name": "SnapshotsByPartitionFacet",
+      "address": "0x007AbFA04bcc74Ef3A84a41EE4AB36a6f4442a6f",
+      "contractId": "0.0.2455",
+      "key": "0x37c825560f21710d66419d4eefeb45ae2dadf078b1db5593749d24a7d38465ee",
+      "version": 1
+    },
+    {
+      "name": "SnapshotsFacet",
+      "address": "0xA21EFA12Ce1Cc6Ca1BFA189A975E4fc7b41D93A8",
+      "contractId": "0.0.2456",
+      "key": "0xbc4e3ace00cf7d347ee7bf90737d3091c02f7d6607c195bf0d4b81e33644f0e1",
+      "version": 1
+    },
+    {
+      "name": "SsiManagementFacet",
+      "address": "0x9E64a47E2Ce18e884De5874c0142c441E28A7126",
+      "contractId": "0.0.2457",
+      "key": "0xba7dfd151d5ed77cbbf8b00c124c67331edf1e6959e7c0129dc73ee72a9c0016",
+      "version": 1
+    },
+    {
+      "name": "TransferAndLockByPartitionFacet",
+      "address": "0xD89D9AA1b0c015ED4f58bc062f2111c94e615Fd7",
+      "contractId": "0.0.2458",
+      "key": "0xb5ec128e8657ab00db44aa63e5aeded6689b18978072102b9ccb7788faf87a6e",
+      "version": 1
+    },
+    {
+      "name": "TransferAndLockFacet",
+      "address": "0x4CEAa069234D92433Acb08e547E36CB1Fa6930A5",
+      "contractId": "0.0.2459",
+      "key": "0xe92a301947f21b973cb1007aeba48f2eecd916d05107b6355fc499b783b8f7d9",
+      "version": 1
+    },
+    {
+      "name": "TransferAndLockFixedRateFacet",
+      "address": "0x0A83011282c6bA144aea81f754048264e86356B2",
+      "contractId": "0.0.2460",
+      "key": "0x0405063ec31286ce4abbe4db662da098f2cbd15f96d745680e850bd60181eae2",
+      "version": 1
+    },
+    {
+      "name": "TransferAndLockKpiLinkedRateFacet",
+      "address": "0x3fFcbcf8782616697C667FD9b0310E070BeE6E21",
+      "contractId": "0.0.2461",
+      "key": "0x2fbe9c91ad821641ca83a65f6399878b8419fd717379cd1abfac68f2c82940dd",
+      "version": 1
+    },
+    {
+      "name": "TransferByPartitionFacet",
+      "address": "0xf08C70A74f513E725fc5B05D27EeB5Db9532987d",
+      "contractId": "0.0.2462",
+      "key": "0xfb16c0ead8e476dfd6f2201a386b6a761b76e01aa6e21786c2d90f10036197d9",
+      "version": 1
+    },
+    {
+      "name": "TransferFacet",
+      "address": "0xC95e62FA5e5ee9c1ADeE4120DF85a9C581824174",
+      "contractId": "0.0.2463",
+      "key": "0xdb0637d5ac2d3a8a460b63275e82a566d4b5ac4b9d2d2938f70c6612970a4b64",
+      "version": 1
+    },
+    {
+      "name": "VotingFacet",
+      "address": "0x346f266f515b073126b2F6ed181D4f4893758ee7",
+      "contractId": "0.0.2464",
+      "key": "0x88b1621426a5ad16c2399cdc8a04b7da54bf8ddf04c60aeb2fe17ad903891b58",
+      "version": 1
+    },
+    {
+      "name": "VotingSecurityHoldersFacet",
+      "address": "0x3B367B808d71AadAe9f809E8cf99534a85aEd0F4",
+      "contractId": "0.0.2465",
+      "key": "0xff4e971334f234a2d839b58b2fef84241254942cef8940a4457d1eecb63882b9",
+      "version": 1
+    }
+  ],
+  "configurations": {
+    "equity": {
+      "configId": "",
+      "version": 0,
+      "facetCount": 0,
+      "facets": []
+    },
+    "bond": {
+      "configId": "0x0000000000000000000000000000000000000000000000000000000000000002",
+      "version": 1,
+      "facetCount": 97,
+      "facets": [
+        {
+          "facetName": "AccessControlFacet",
+          "key": "0xccc2e755f9225e65f6c822a258c866fc0d57a124ad12c8928adf3ff875ffcd70",
+          "address": "0x09584Ef692d78f3ebEd6a4F3EdE6B33C030a7773"
+        },
+        {
+          "facetName": "CapFacet",
+          "key": "0x88a28e7c45a3ce8d4ca60cd480c98e1b46feb84caec725cb0a6cf96b2c5143b5",
+          "address": "0xDc9B404fC63b01E1681ED2A7f652622a94A9955C"
+        },
+        {
+          "facetName": "CapByPartitionFacet",
+          "key": "0x0a9c473b0456240ebc327730dba40a495c5a639839b0c0b30a01db12373f7529",
+          "address": "0x2A81F2713700004d898B63e613Cb47B341a5b07f"
+        },
+        {
+          "facetName": "ControlListFacet",
+          "key": "0x7bbee58c68b6e19a08128d25f150956d20a69d1cc049afda563753771781ecc5",
+          "address": "0xe0E66204E3F4cA644aA921Ab7101221b67BD8F56"
+        },
+        {
+          "facetName": "CorporateActionsFacet",
+          "key": "0x4f091e1f288c10131ffc090469e611b913f1f54343e59e44405312d597897db2",
+          "address": "0xd99D7A5B607895C1000EC97B30B3EDDdACE7D1De"
+        },
+        {
+          "facetName": "DiamondFacet",
+          "key": "0xd9202bb838fd8d0f2866f13141398cfb9fa74cbbbce7449c9158caffa9c509f4",
+          "address": "0x2268b57910F5513b9ca4F5143BAfc47a1f9D22d2"
+        },
+        {
+          "facetName": "FreezeFacet",
+          "key": "0xad51c3d79dbb37543854270a7bd1c7237cfa425b16cdf4dee9015c20917ced5a",
+          "address": "0x8136372a4ccb6ed367c6D8618c169a3972993223"
+        },
+        {
+          "facetName": "BatchFreezeFacet",
+          "key": "0x6ddbb1869dce32d8e2c9bb2d23fad216723298560b6cceba67890d5a3efe0e5e",
+          "address": "0x8394cde12a6912C8031c9ed1e4efEb516554B094"
+        },
+        {
+          "facetName": "KycFacet",
+          "key": "0xf7fc316b28304fa0b62b8849c3c91a901e72894380ecf746c2bc13e5656549cd",
+          "address": "0x47104c50dBA4388eD2393Dbd69428a00E9358b15"
+        },
+        {
+          "facetName": "PauseFacet",
+          "key": "0x472ad8280a7d90bcd8b7876cad2cd5a4a2d31c116563ace7a685aff94eae8928",
+          "address": "0x39a56004666659557afAac10950a69b263ABD204"
+        },
+        {
+          "facetName": "SnapshotsFacet",
+          "key": "0xbc4e3ace00cf7d347ee7bf90737d3091c02f7d6607c195bf0d4b81e33644f0e1",
+          "address": "0xA21EFA12Ce1Cc6Ca1BFA189A975E4fc7b41D93A8"
+        },
+        {
+          "facetName": "SnapshotsByPartitionFacet",
+          "key": "0x37c825560f21710d66419d4eefeb45ae2dadf078b1db5593749d24a7d38465ee",
+          "address": "0x007AbFA04bcc74Ef3A84a41EE4AB36a6f4442a6f"
+        },
+        {
+          "facetName": "SecurityHoldersAtSnapshotFacet",
+          "key": "0xf7707140407ccf0d6deaf72844217e3c1383270609a7a75e36def71a3c453b9e",
+          "address": "0x038b64F6Bce95c7970E9b347d62B2B5eFd4B2b1c"
+        },
+        {
+          "facetName": "HoldAtSnapshotFacet",
+          "key": "0xe4ec7231213c656d430571c2b40cf204f87a626b5ccf0db85527f72470e54a9e",
+          "address": "0x71191b283f389E271C835E4E37001dBBEd7c6604"
+        },
+        {
+          "facetName": "LockAtSnapshotByPartitionFacet",
+          "key": "0x7740456ff352a04830411a3fdc359bd086a5d78fd7119bbb62a53c62c1911691",
+          "address": "0x0b479eE4E16Ac73dAbe433144117c50540bB0A94"
+        },
+        {
+          "facetName": "FreezeAtSnapshotFacet",
+          "key": "0x8ca462bf28ae4e7c5b77b86245cfff3caf7f6bdb6308a608cd9315feb2c28631",
+          "address": "0x783f8894c776806D7452b0389c93F07eA89dF269"
+        },
+        {
+          "facetName": "FreezeAtSnapshotByPartitionFacet",
+          "key": "0xac8fcbc19e12e099f6c6cff54357e28a589b49673267c81a18a965da1c7f4744",
+          "address": "0xe64E094Bf5cE2Ff3354369A709779844BBD88C91"
+        },
+        {
+          "facetName": "LockAtSnapshotFacet",
+          "key": "0x91e5d78963175418e7eb62ff74343d1349d9522d316525e922e145c770cc4d18",
+          "address": "0x509b3a6C2fCe91cd4BDA8A2440B2083b8D7c2229"
+        },
+        {
+          "facetName": "CoreAtSnapshotFacet",
+          "key": "0x9f1ab2bcf2a5668b07a2b26155b1c04f30721db434dff2f1e69a3a9b1dc0a039",
+          "address": "0x31E9b5f7b786660a4F6B9A57115fFc72b667666F"
+        },
+        {
+          "facetName": "BalanceTrackerFacet",
+          "key": "0xefbff5dcb4e5bf43bf472fd0646991b8b4731876498b2a4248f9aa9aee1a127b",
+          "address": "0x3665e79711bF9b516FDc6d83769367e6891e61C8"
+        },
+        {
+          "facetName": "BalanceTrackerAdjustedFacet",
+          "key": "0xde8fb5b2c9dd63c753422ecea8bad989281451fa65dff90dd686eff691b03805",
+          "address": "0xF9eAC1Bb86a874E20279Abc39BAba0Aab2ce8AE2"
+        },
+        {
+          "facetName": "BalanceTrackerByPartitionFacet",
+          "key": "0x05d2477d09e6a1df45e3e51bd398af7a071f6f282255486cec19b8b5a403bbaf",
+          "address": "0x72A8886023716260fB8914C2eA0Ae53F43f1089c"
+        },
+        {
+          "facetName": "BalanceTrackerAtSnapshotFacet",
+          "key": "0x2c9af26b5891593b8184a58e38f6c52e42af55578543d14ab176abd1213e3013",
+          "address": "0xF197b83Cf0A9ccfB92Aa1C9Ce429d5A0ef68A13d"
+        },
+        {
+          "facetName": "BalanceTrackerAtSnapshotByPartitionFacet",
+          "key": "0x58443162e33b704d1fc5afb40e87bf81357231beefee616de557cc06fef3aba8",
+          "address": "0x1E4fc622F54C505BA9F6a694c0aA1756AF297f8b"
+        },
+        {
+          "facetName": "ClearingAtSnapshotFacet",
+          "key": "0xb65566db9291ca49b508408fe1ba503b28ea434b3f9bca05c3a0c4da031f9e86",
+          "address": "0x2b62DCba1eB793eeB61e41BBEd831F837f2b7F46"
+        },
+        {
+          "facetName": "ClearingAtSnapshotByPartitionFacet",
+          "key": "0xf55083b17a9ba346028d6a5c0772a7d913e0e90b4954f7a8b8e1912dcd383cbd",
+          "address": "0x080f0e10314F23547d8b526488f51e267Db2C267"
+        },
+        {
+          "facetName": "HoldAtSnapshotByPartitionFacet",
+          "key": "0xe6aa6abeda5257bb9fda94cbd6583ff73bfc92f42edd2ace846ee45b3cf49f0f",
+          "address": "0x665A3679DE055FceaE5Af0BBC38552E7F9450f56"
+        },
+        {
+          "facetName": "CoreFacet",
+          "key": "0xb54e0c9a42346a2760a44e59035a2b84a61d07bed66a2f24cffe3ca4bae1996f",
+          "address": "0xC6e9cBAb18397C40C60cbDDe7d2C39556231F540"
+        },
+        {
+          "facetName": "AllowanceFacet",
+          "key": "0x329473cfbe06c7719b3c986b04b90a16a859b86307aad33eea0c3dfe87160ab7",
+          "address": "0x0A60d3066D71896612F13028261F74215Cb22F52"
+        },
+        {
+          "facetName": "CoreAdjustedFacet",
+          "key": "0xe190b52312c215f8e240bb53f0aa3e51e31b3005b7fcfb49c730ae523e675cfd",
+          "address": "0xe910ecFb735bb12c5CE2c5f5cfA8CdFD00d5Bc05"
+        },
+        {
+          "facetName": "MetadataFacet",
+          "key": "0x524fd484241fdce7c81d7872ddc2c45a3d44e664fcf855587839e9c68e481c9f",
+          "address": "0x85Bb32037e98860Ed9d611110806F4b31F68d7b5"
+        },
+        {
+          "facetName": "TransferFacet",
+          "key": "0xdb0637d5ac2d3a8a460b63275e82a566d4b5ac4b9d2d2938f70c6612970a4b64",
+          "address": "0xC95e62FA5e5ee9c1ADeE4120DF85a9C581824174"
+        },
+        {
+          "facetName": "MintByPartitionFacet",
+          "key": "0x25ec74149ce0eadddeb82e668365e2e174db7431a04a80bada246f8f7887dadf",
+          "address": "0x1f01442869155b86087EddAB448c4DD8f823cFb7"
+        },
+        {
+          "facetName": "ERC1410ManagementFacet",
+          "key": "0xb4096d676324d7f4d32415a0a0810544a5dc12d6559dee91fb3c4b77cdde3392",
+          "address": "0xed78fF2ee3e14d1e10b31Fb0c706CD7dAB7DC24E"
+        },
+        {
+          "facetName": "ProtectedByPartitionFacet",
+          "key": "0x2f9cd983bc92f917e9c55a3f61b8984646d96980224f4712084967ea1d24d62f",
+          "address": "0x20791f73C842895099B7eB8183B5412387CFB5E6"
+        },
+        {
+          "facetName": "OperatorFacet",
+          "key": "0x5c2062c6ba02b76ae0c3884d5c0fdd3416b2012195a964efaa34e09b1fa31c95",
+          "address": "0xe37c66318258f6b1f6Ddd37171c9efF121F2dbAB"
+        },
+        {
+          "facetName": "TransferByPartitionFacet",
+          "key": "0xfb16c0ead8e476dfd6f2201a386b6a761b76e01aa6e21786c2d90f10036197d9",
+          "address": "0xf08C70A74f513E725fc5B05D27EeB5Db9532987d"
+        },
+        {
+          "facetName": "PartitionsFacet",
+          "key": "0x9caef059931effa6169ed564cfd0d8dac03be612be61f4fc934e8554cfe1c53f",
+          "address": "0x7dadcb322EC3426B4380Cc8987eDBe871F46F178"
+        },
+        {
+          "facetName": "OperatorByPartitionFacet",
+          "key": "0xfd060cda1c9927203f3914aa0d5916e4c5971977dec4026418bc4fff6d25b277",
+          "address": "0x21298449ECF93785207341Df270672F91bbe6ceB"
+        },
+        {
+          "facetName": "BurnByPartitionFacet",
+          "key": "0x8d135078123ea705bd40f02ac0cd59ac08da08600b3510ba6150fe0e4a588684",
+          "address": "0x7fFc9aa4E6a568332f93edA19fe6AB9b7C4dA06f"
+        },
+        {
+          "facetName": "DocumentationFacet",
+          "key": "0x3ab155fb7c96aefcaa7d730782cb640e5acf33c329d90a706843ae88a03cf1fb",
+          "address": "0xE33Bb4D86B09EdF2040262471fe24cD388939d72"
+        },
+        {
+          "facetName": "ControllerFacet",
+          "key": "0xf020acbcf895b1f0961c02558f58e8e3f0a254c27f0e6287127ac2f43893df46",
+          "address": "0x27a17A6f9e9eaC3E467f894E9dA07a07a5C805B9"
+        },
+        {
+          "facetName": "ERC20PermitFacet",
+          "key": "0xb9b450cd33d22a14f4cc67bea5d1afefac1f0e7c5230fce1b942f751c37a9e6d",
+          "address": "0xB035fC9d31A42A961946Ec8327aF5876B388b4ED"
+        },
+        {
+          "facetName": "EIP712Facet",
+          "key": "0xaa031e71d3d43f715d16d62c62d7573406d29acdf4c080143dab629e08a8402f",
+          "address": "0x4f8D5d423956bA59edbEa37d894A88BA189cB8d0"
+        },
+        {
+          "facetName": "NoncesFacet",
+          "key": "0xd1166cb96f266d69db4d4e49d81acaf5441b16bb11681f2b1b53dcf7e1bd3bf4",
+          "address": "0x9C80142fDbf8AB29d94ccbC2288ab99FBD9408Ac"
+        },
+        {
+          "facetName": "DeactivateFacet",
+          "key": "0x13d8bdda80bdc4e1d1af80d2096fdf84affb60341d7b8f44392412162d3c3434",
+          "address": "0x875D9b9394a50999fA4c3Be28E9958F0334f1086"
+        },
+        {
+          "facetName": "ERC20VotesFacet",
+          "key": "0x9619bb38c76aac49afb1df75430aefc1314778fe926136a688bf3ae3b5f8c3b7",
+          "address": "0x3193Df454AF110C53CB8E677Eb7317Ec502241c6"
+        },
+        {
+          "facetName": "BatchControllerFacet",
+          "key": "0x535258ade68566dbac2304c09e172709e8b0ab3f78d2be54014d021ddb03ab58",
+          "address": "0x5332B0b2C1cbB6e214437FeC5978D15e8d22ff01"
+        },
+        {
+          "facetName": "BatchBurnFacet",
+          "key": "0x60fbdebafe46599d2a6d6cbec0e554cfdf693e5eb001a783852bbbc82e5c9984",
+          "address": "0x3D253A48a23F07D06Ad921Cb6407fFc569d3A716"
+        },
+        {
+          "facetName": "BatchMintFacet",
+          "key": "0x7575e07f738065de9a6ba5370d7d18b79f7a0b885824780bf5c75784978e9530",
+          "address": "0x5727954289030e28015B7D05CF22B09508622656"
+        },
+        {
+          "facetName": "BatchTransferFacet",
+          "key": "0x01e13672eac45bef2d8d3f1c56eaca6857103f3b72ec9ded3d1f30aa15747d05",
+          "address": "0x6d9De61868911F8Fa945689b0bC2A468676e69Eb"
+        },
+        {
+          "facetName": "ERC3643ManagementFacet",
+          "key": "0x21a44f0c9eb38617ca4a06ead94c1424e63be7f8eefdb2773ca08796fbda508b",
+          "address": "0x0c66a732f944c5867D119Ad11E0f00271270D0e1"
+        },
+        {
+          "facetName": "RecoveryFacet",
+          "key": "0x087cb866f812745e77608e4eb4b359ae96b8a0ba2ef9fe8336488e479b72d92a",
+          "address": "0x4B497Fc0aa61a9D3a6348a7d606DF28bF77e2Fc3"
+        },
+        {
+          "facetName": "IdentityFacet",
+          "key": "0xbb0d93867bfe08218b429804914b1d345b2c899740c5dd110cb9c6141a01d36e",
+          "address": "0x5b7BE601661B29491573E6F2400937EBbbA31fc0"
+        },
+        {
+          "facetName": "ComplianceFacet",
+          "key": "0x0e30d654f46079d52767224a07d1fe1adc91d7edba6504f2f0adca0fca972180",
+          "address": "0x8FF425E415D023F376c31986d673C6dcE89eE51E"
+        },
+        {
+          "facetName": "ComplianceByPartitionFacet",
+          "key": "0xafad2096960379c99c5eae984f0f4ceddafa69c3e08352bcaf84e804ec4135b6",
+          "address": "0xE8FDF583Ed4804a26C4885176364bfB952cf5a6E"
+        },
+        {
+          "facetName": "MintFacet",
+          "key": "0x394ec838636f78e91b7dbb3e4ea567e07bbb3886ab70a66652c40be856ab9b7a",
+          "address": "0xFED410D6070f3DDf543E89BF56b2079684d68c0C"
+        },
+        {
+          "facetName": "BurnFacet",
+          "key": "0xa9ec330b49ea310aaeba8dae3ba4f2a0b94fd35fafb9d8d8afbb804b73d50ce2",
+          "address": "0x17F7a612C775d2B35D666e6f62993AE064493700"
+        },
+        {
+          "facetName": "ClearingByPartitionFacet",
+          "key": "0xb63156d6db31ae3207bca0dd4a8a45f227171367d85a3833a0d7a1622212c5ec",
+          "address": "0xd7BD1BC782a7b46a128067772B586365A37Fd1B2"
+        },
+        {
+          "facetName": "ProtectedClearingHoldByPartitionFacet",
+          "key": "0xc28474cfcf6b32464e9000d064b91827c6c37fd3e06dae932c9447c204c35cc1",
+          "address": "0xc13e3CF57eD23E569F732C32A1b68B99d43691c9"
+        },
+        {
+          "facetName": "ClearingHoldByPartitionFacet",
+          "key": "0x027ca02a0a3de6d790cd3b5ff9c792b4bfc1649964d7737f5c4554992ca9b111",
+          "address": "0x4084E0e50084ed43651869653cecc8E1360FDa9a"
+        },
+        {
+          "facetName": "OperatorClearingHoldByPartitionFacet",
+          "key": "0xab5e4afdccea84152256072fb9f39bf08d591a7666557783209dff003658d945",
+          "address": "0xa48f346362e01145512053Ce74323e3C9B86BA73"
+        },
+        {
+          "facetName": "ClearingFacet",
+          "key": "0xb101eca2006801ca94d6bc86288da88fc7f2ddf39849d3dd96fae75967a3d344",
+          "address": "0xec5566b18130554a3F8a0DFfDBeCb352F0f5992f"
+        },
+        {
+          "facetName": "OperatorClearingByPartitionFacet",
+          "key": "0xaad3c9e6cb80e4d01b9e5f316a82f495c3d11d36f8d738b0c2e4bce2d3f6c01c",
+          "address": "0x98A0eE1E2863Ea6e5A59Df5ef055984eeA772b20"
+        },
+        {
+          "facetName": "ProtectedClearingByPartitionFacet",
+          "key": "0x3cbb73b8ee5db791f9534af7a5c9fc09a4cf9adff327a05839f2673a3dc63aae",
+          "address": "0x35A5e9f89f910859134cbAA73586073712A8f43F"
+        },
+        {
+          "facetName": "HoldFacet",
+          "key": "0x7c2ef14067e573a8580a580634bd7547099c4b82cd9f36610da317d77eacf1f1",
+          "address": "0x533489eB4698Bcb72Bbc09145C92c056d7e397c9"
+        },
+        {
+          "facetName": "OperatorHoldByPartitionFacet",
+          "key": "0x2ac9004b9c057e04ee677ec0dda4bf57f4de5a2d382d97b9557aafb2600f257f",
+          "address": "0xd4779A463a80D06989858ba7a5E3ADb8E8A3dF32"
+        },
+        {
+          "facetName": "ControllerHoldByPartitionFacet",
+          "key": "0xc415f5239b26cab850bcaca08096196a95d9ea5bab0eed1a6e29ce81490efd33",
+          "address": "0xC80fFBDa771C6c303e3dFb7Dd368c9A3D03e5E9D"
+        },
+        {
+          "facetName": "ControllerByPartitionFacet",
+          "key": "0xa75865ef65a8410651c7bfebbfa9b89bd06e0bdf0dba55817ba1a6b49fdb1517",
+          "address": "0x7BFb7028A21c3D1aBB22c9cF44f41C269b932ae1"
+        },
+        {
+          "facetName": "ProtectedHoldByPartitionFacet",
+          "key": "0x5b77b995d3e53c3e46f114bbf37642ce3169369548c8135b8b11f5cebd3fb07b",
+          "address": "0x5d16709Bc82D9EcC58F76F2a5BC8b1e6b656A533"
+        },
+        {
+          "facetName": "HoldByPartitionFacet",
+          "key": "0x3bd50b70b7e42003cb9761c133e88d776c27b53729b463a2d5bf6b36a2fce367",
+          "address": "0x160ef09618FE6DFedefb8Fa02131451605DCE166"
+        },
+        {
+          "facetName": "ExternalControlListManagementFacet",
+          "key": "0x1a8f526d3e49a86640ec4a268407478132e285f13c4efbe08c46324306fd6a04",
+          "address": "0x5d8e428Ae1Eb737AF1254185A31c370dD1a7D5a0"
+        },
+        {
+          "facetName": "ExternalKycListManagementFacet",
+          "key": "0x519d262ce075401982a7a64c60caea0491af317c7b69b7869f8181e8d9cda124",
+          "address": "0x7044C86804C6E8a036ccA50c75D2A711fAEf63A6"
+        },
+        {
+          "facetName": "ExternalPauseManagementFacet",
+          "key": "0x7a8980089ef3860d6c0e831805ee28105e662952033ce76812e56e346d37bd7e",
+          "address": "0xB30FBf14d938651deE747a844C2DF9C03694735a"
+        },
+        {
+          "facetName": "AdjustBalancesFacet",
+          "key": "0x0d52158578e1e30e77e2dd3caffc1aa31af5397866b92131f66858f01b2e8f01",
+          "address": "0xBa6826193cec672d3dBe98E1f0ca85fb41E9D60e"
+        },
+        {
+          "facetName": "ScheduledBalanceAdjustmentFacet",
+          "key": "0x90c7d769d18188f75b1092289e2465103d06f9c1195bf0ee4b2cf0844a5d6c96",
+          "address": "0x381eF2B7e90417990D6A7d5fccE3eBBa2296d251"
+        },
+        {
+          "facetName": "CouponFacet",
+          "key": "0xe292dde7a8154c59d06fe2333acc2b54d003262aadc39ee2c7b474e6e64add6b",
+          "address": "0xD7A95EC895278AA64341F1c40f7b02BA1744D5b3"
+        },
+        {
+          "facetName": "CouponSecurityHoldersFacet",
+          "key": "0x8e5fc42839ddbceddb6022f61f5907a3849178cce5cfb82850a28e80140ac9a9",
+          "address": "0x7ACe676717a97958a479aE709a412b8ec3df3428"
+        },
+        {
+          "facetName": "LockFacet",
+          "key": "0xc2e37f639e1d61db1015540583b9d71f8a33da6410aed2826c6caef1304ebd3a",
+          "address": "0x80CbE4667Eb21943d6d3CBbe9e325B4cC234bfE3"
+        },
+        {
+          "facetName": "LockByPartitionFacet",
+          "key": "0x75c5c6d6dd253e4be43d8d1c25a4252f5f54ebdba6f6c99ed34cd03c0e4d5360",
+          "address": "0xeD284b38bBD21E5105cc00260c8350ddE31bc61d"
+        },
+        {
+          "facetName": "MaturityFacet",
+          "key": "0x16825792debc7c17efd86bdf71500575f9ff5d4aa20e3a35031c583437a3ca82",
+          "address": "0x3BaE301571d7ec398C8bf7D9d3B05863a0E6401F"
+        },
+        {
+          "facetName": "NominalValueFacet",
+          "key": "0xfa54bc09a6a76763f17be0504e29b9c28edd15cdc3432c07f92c2b6962f2fbbe",
+          "address": "0xCd9fa534bdcC6a71577F6a0BD53e13157460B1E2"
+        },
+        {
+          "facetName": "NominalValueAtSnapshotFacet",
+          "key": "0xca313777aee568dc14b1700e7be675b73932bbbc4e4f974a9f1321e6d653af74",
+          "address": "0xb88bF4E0c4a401C7107e61c343CCe02676B6997a"
+        },
+        {
+          "facetName": "ProceedRecipientsFacet",
+          "key": "0x63388aa198df5944c611b8fcbfd32945c57864f7125a5f95069040087d2b0bb7",
+          "address": "0xA1ceef41Ed71366362694a37a7a8873D770DFe22"
+        },
+        {
+          "facetName": "ProtectedPartitionsFacet",
+          "key": "0x895834530eae98f8a742fe98f3d528d3cce6c6a51af63b495414bdf391180dd7",
+          "address": "0x5c3519c82BeA2Ab8567C2228e8e21c272d41E7ba"
+        },
+        {
+          "facetName": "ScheduledCrossOrderedTasksFacet",
+          "key": "0x53ea769a267213f8e35c975a0dba3d7d8d73163d53f804c2ac6ea37d6c47c082",
+          "address": "0xc6E7bE1B7FB142DBB45592f51Ef1b4a90c533f90"
+        },
+        {
+          "facetName": "SecurityHoldersFacet",
+          "key": "0x744edd4f33c7d5e322286e40155d549553e22329ac9503643bf36fc149504bc9",
+          "address": "0xc0704f3C27a668b6C08C8305f933D082fbda4c3C"
+        },
+        {
+          "facetName": "CouponListingFacet",
+          "key": "0x91e4a085c95cddedc7143dae7647c320f59b0f0214ed0f49ab95d7cedb4db176",
+          "address": "0x845b363E02E4dC9a925e157cD86a846e28BbcaFA"
+        },
+        {
+          "facetName": "SsiManagementFacet",
+          "key": "0xba7dfd151d5ed77cbbf8b00c124c67331edf1e6959e7c0129dc73ee72a9c0016",
+          "address": "0x9E64a47E2Ce18e884De5874c0142c441E28A7126"
+        },
+        {
+          "facetName": "TransferAndLockFacet",
+          "key": "0xe92a301947f21b973cb1007aeba48f2eecd916d05107b6355fc499b783b8f7d9",
+          "address": "0x4CEAa069234D92433Acb08e547E36CB1Fa6930A5"
+        },
+        {
+          "facetName": "TransferAndLockByPartitionFacet",
+          "key": "0xb5ec128e8657ab00db44aa63e5aeded6689b18978072102b9ccb7788faf87a6e",
+          "address": "0xD89D9AA1b0c015ED4f58bc062f2111c94e615Fd7"
+        },
+        {
+          "facetName": "InterestRateFacet",
+          "key": "0xc09a5111a37fc8806e149b4a20c17a33a9487c6da8ee95f8a2b8ac31ea8dd2f3",
+          "address": "0x5059EBBDD4637b03B1729f8bADB6BC43696de19A"
+        },
+        {
+          "facetName": "MaturityByPartitionFacet",
+          "key": "0x561e299af2bd67a767eee76558f27470801a9cb97627131141cc55ceb734ccbb",
+          "address": "0xb19714b14031bdE8eE7Ac4c545883c9e2bfc5236"
+        },
+        {
+          "facetName": "SecurityFacet",
+          "key": "0x4a0ea8dcc902efa355c705fe7211cb0da08f05ad9fc8888237dd67a8c4dc6f1a",
+          "address": "0x4511F49C9fbC6CE28a369C2f4A7bFE7Fb143dD12"
+        },
+        {
+          "facetName": "BondUSAFacet",
+          "key": "0xbc8b53a2f8803b138aac441fbeb6b767a51b66a5f4d735c3d15af67cc72b9daa",
+          "address": "0x2A4A96E64B7Ef9486e819406D59Cb968657dEff4"
+        },
+        {
+          "facetName": "BondUSAReadFacet",
+          "key": "0xd9c3cc17a49d3ab289e489c0db3567f929bc463acd01dd1e37f8117aa48a1d74",
+          "address": "0xc50CfBC451A6fAb18E0Dae4d37c96819ACDAE08b"
+        },
+        {
+          "facetName": "PrincipalFacet",
+          "key": "0xa3dc20804ebd6f2a06a7e8b8de31712f3d18a73b1963acfa1d25ed86907bd0e6",
+          "address": "0x7dCbAa6F74208f3b3b6970F2b28d75f1982C17A8"
+        }
+      ]
+    },
+    "bondFixedRate": {
+      "configId": "",
+      "version": 0,
+      "facetCount": 0,
+      "facets": []
+    },
+    "bondKpiLinkedRate": {
+      "configId": "",
+      "version": 0,
+      "facetCount": 0,
+      "facets": []
+    }
+  },
+  "summary": {
+    "totalContracts": 3,
+    "totalFacets": 118,
+    "totalConfigurations": 2,
+    "deploymentTime": 693339,
+    "gasUsed": "1456000000",
+    "success": true
+  },
+  "helpers": {}
+}

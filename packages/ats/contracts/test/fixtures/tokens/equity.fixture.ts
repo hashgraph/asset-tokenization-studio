@@ -10,12 +10,19 @@
  */
 
 import { deployAtsInfrastructureFixture } from "../infrastructure.fixture";
-import { deployEquityFromFactory, CURRENCIES, DeployEquityFromFactoryParams, DeepPartial } from "../../../scripts";
+import {
+  ATS_ROLES,
+  deployEquityFromFactory,
+  CURRENCIES,
+  DeployEquityFromFactoryParams,
+  DeepPartial,
+} from "../../../scripts";
 import {
   AccessControlFacet__factory,
   PauseFacet__factory,
   KycFacet__factory,
   ControlListFacet__factory,
+  IAsset__factory,
 } from "@contract-types";
 import { DividendRight, EquityDetailsDataParams, FactoryRegulationDataParams } from "@scripts/domain";
 import { getRegulationData, getSecurityData } from "./common.fixture";
@@ -39,7 +46,7 @@ export const DEFAULT_EQUITY_PARAMS = {
   nominalValueDecimals: 2,
 } as const;
 
-export function getEquityDetails(params?: DeepPartial<EquityDetailsDataParams>) {
+export function makeEquityDetailsData(params?: DeepPartial<EquityDetailsDataParams>) {
   return {
     votingRight: params?.votingRight ?? DEFAULT_EQUITY_PARAMS.votingRight,
     informationRight: params?.informationRight ?? DEFAULT_EQUITY_PARAMS.informationRight,
@@ -63,22 +70,25 @@ export function getEquityDetails(params?: DeepPartial<EquityDetailsDataParams>) 
  * @param tokenParams - Optional custom token parameters (merged with defaults)
  * @returns Infrastructure + deployed equity token + connected facets
  */
-//1893456035
 export async function deployEquityTokenFixture({
   equityDataParams,
   regulationTypeParams,
   useLoadFixture = true,
+  infrastructure: providedInfrastructure,
 }: {
   equityDataParams?: DeepPartial<DeployEquityFromFactoryParams>;
   regulationTypeParams?: DeepPartial<FactoryRegulationDataParams>;
   useLoadFixture?: boolean;
+  infrastructure?: Awaited<ReturnType<typeof deployAtsInfrastructureFixture>>;
 } = {}) {
-  const infrastructure = useLoadFixture
-    ? await loadFixture(deployAtsInfrastructureFixture)
-    : await deployAtsInfrastructureFixture();
+  // Reuse already-loaded infrastructure when provided to avoid nested loadFixture
+  // calls that would revert the chain and wipe previously-deployed sibling tokens.
+  const infrastructure =
+    providedInfrastructure ??
+    (useLoadFixture ? await loadFixture(deployAtsInfrastructureFixture) : await deployAtsInfrastructureFixture());
   const { factory, blr, deployer } = infrastructure;
   const securityData = getSecurityData(blr, equityDataParams?.securityData);
-  const equityDetails = getEquityDetails(equityDataParams?.equityDetails);
+  const equityDetails = makeEquityDetailsData(equityDataParams?.equityDetails);
   // Deploy equity token using factory helper
   const diamond = await deployEquityFromFactory(
     {
@@ -95,6 +105,9 @@ export async function deployEquityTokenFixture({
   const pauseFacet = PauseFacet__factory.connect(diamond.target as string, deployer);
   const kycFacet = KycFacet__factory.connect(diamond.target as string, deployer);
   const controlListFacet = ControlListFacet__factory.connect(diamond.target as string, deployer);
+  const asset = IAsset__factory.connect(diamond.target as string, deployer);
+
+  await accessControlFacet.grantRole(ATS_ROLES.ROLE_NOMINAL_VALUE, deployer.address);
 
   return {
     ...infrastructure,
@@ -108,5 +121,6 @@ export async function deployEquityTokenFixture({
     pauseFacet,
     kycFacet,
     controlListFacet,
+    asset,
   };
 }

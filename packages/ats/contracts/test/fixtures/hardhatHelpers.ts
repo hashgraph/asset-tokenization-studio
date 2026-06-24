@@ -5,17 +5,16 @@ import { Signer } from "ethers";
 import { ethers } from "hardhat";
 
 export async function grantRoleAndPauseToken(
-  accessControlFacet: IAsset,
-  pauseFacet: IAsset,
+  asset: IAsset,
   role: string,
   signerAccessControl: Signer,
   signerPause: Signer,
   accountToAssignRole: string,
 ) {
   // Granting Role to account
-  await accessControlFacet.connect(signerAccessControl).grantRole(role, accountToAssignRole);
+  await asset.connect(signerAccessControl).grantRole(role, accountToAssignRole);
   // Pausing the token
-  await pauseFacet.connect(signerPause).pause();
+  await asset.connect(signerPause).pause();
 }
 
 export async function getDltTimestamp(): Promise<number> {

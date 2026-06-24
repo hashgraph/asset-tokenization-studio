@@ -12,60 +12,30 @@
  * @see https://hardhat.org/hardhat-network-helpers/docs/reference#loadfixture
  */
 
-import { isinGenerator } from "@thomaschaplin/isin-generator";
 import { ethers } from "hardhat";
-import { ZeroAddress, ethers as ethersTypes } from "ethers";
+import { ZeroAddress } from "ethers";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture } from "../infrastructure.fixture";
-import { ATS_ROLES, createLoanConfiguration, LOAN_CONFIG_ID } from "@scripts/domain";
 import {
-  AccessControlFacet__factory,
-  CapFacet__factory,
-  ControlListFacet__factory,
-  CouponFacet__factory,
-  NominalValueFacet__factory,
-  ERC20Facet__factory,
-  ERC3643ManagementFacet__factory,
-  ERC20VotesFacet__factory,
-  ERC1644Facet__factory,
-  ERC1594Facet__factory,
-  ERC1410ManagementFacet__factory,
-  FreezeFacet__factory,
-  KycFacet__factory,
-  PauseFacet__factory,
-  ProtectedPartitionsFacet__factory,
-  ClearingActionsFacet__factory,
-  ExternalKycListManagementFacet__factory,
-  ExternalControlListManagementFacet__factory,
-  ExternalPauseManagementFacet__factory,
-  ProceedRecipientsFacet__factory,
-  TimeTravelFacet__factory,
-  Factory__factory,
-  Loan__factory,
-} from "@contract-types";
-
+  ATS_ROLES,
+  buildRegulationData,
+  createLoanConfiguration,
+  FactoryRegulationDataParams,
+  LOAN_CONFIG_ID,
+  SecurityDataParams,
+} from "@scripts/domain";
+import { IAsset__factory, IDiamondFacet__factory } from "@contract-types";
 import { decodeEvent } from "@scripts/infrastructure";
-import { DeepPartial } from "@scripts";
+import { DeepPartial, TIME_PERIODS_S } from "@scripts";
 import { getDltTimestamp } from "../hardhatHelpers";
+import { DEFAULT_BOND_PARAMS, executeRbac, getRegulationData, getSecurityData } from "@test";
 
 /**
  * Default loan token parameters for test fixtures.
  */
 export const DEFAULT_LOAN_PARAMS = {
-  name: "TESTLOAN",
-  symbol: "TLN",
-  isin: isinGenerator(),
-  decimals: 0,
-  maxSupply: ethers.MaxUint256,
-  isWhiteList: false,
-  isControllable: true,
-  arePartitionsProtected: false,
-  isMultiPartition: false,
-  clearingActive: false,
-  internalKycActivated: true,
   nominalValue: 100,
   nominalValueDecimals: 2,
-  erc20VotesActivated: false,
   // Loan-specific defaults
   currency: "0x555344", // USD
   loanStructureType: 1, // TERM_LOAN
@@ -89,6 +59,14 @@ export const DEFAULT_LOAN_PARAMS = {
   loanToValue: 0,
   performanceStatus: 0, // PERFORMING
   daysPastDue: 0,
+  originatorAccount: async () => {
+    const wallet = ethers.Wallet.createRandom();
+    return wallet.address;
+  },
+  servicerAccount: async () => {
+    const wallet = ethers.Wallet.createRandom();
+    return wallet.address;
+  },
   startingDate: async () => {
     return (await getDltTimestamp()) + 3600; // block.timestamp + 1 hour
   },
@@ -131,20 +109,62 @@ interface LoanInitData {
 }
 
 interface DeployLoanTokenFixtureParams {
-  name: string;
-  symbol: string;
-  isin: string;
-  decimals: number;
-  maxSupply: ethersTypes.BigNumberish;
-  isWhiteList: boolean;
-  isControllable: boolean;
-  arePartitionsProtected: boolean;
-  isMultiPartition: boolean;
-  clearingActive: boolean;
-  internalKycActivated: boolean;
-  nominalValueDecimals: number;
-  erc20VotesActivated: boolean;
+  nominalValue: 100;
+  nominalValueDecimals: 2;
   loanInit: LoanInitData;
+  securityDataParams: SecurityDataParams;
+}
+
+export async function getLoanDetails(params?: DeepPartial<LoanInitData>) {
+  const maturityDate =
+    params?.maturityDate ??
+    (params?.startingDate
+      ? params.startingDate + TIME_PERIODS_S.YEAR
+      : (await DEFAULT_BOND_PARAMS.startingDate()) + TIME_PERIODS_S.YEAR);
+  return {
+    collateral: {
+      loanToValue: params?.loanToValue ?? DEFAULT_LOAN_PARAMS.loanToValue,
+      totalCollateralValue: params?.totalCollateralValue ?? DEFAULT_LOAN_PARAMS.totalCollateralValue,
+    },
+    riskData: {
+      internalRiskGrade: params?.internalRiskGrade ?? DEFAULT_LOAN_PARAMS.internalRiskGrade,
+      defaultProbability: params?.defaultProbability ?? DEFAULT_LOAN_PARAMS.defaultProbability,
+      lossGivenDefault: params?.lossGivenDefault ?? DEFAULT_LOAN_PARAMS.lossGivenDefault,
+    },
+    loanBasicData: {
+      currency: params?.currency ?? DEFAULT_LOAN_PARAMS.currency,
+      startingDate: params?.startingDate ?? (await DEFAULT_LOAN_PARAMS.startingDate()),
+      maturityDate: maturityDate,
+      loanStructureType: params?.loanStructureType ?? DEFAULT_LOAN_PARAMS.loanStructureType,
+      repaymentType: params?.repaymentType ?? DEFAULT_LOAN_PARAMS.repaymentType,
+      interestType: params?.interestType ?? DEFAULT_LOAN_PARAMS.interestType,
+      originatorAccount: params?.originatorAccount ?? (await DEFAULT_LOAN_PARAMS.originatorAccount()),
+      servicerAccount: params?.servicerAccount ?? (await DEFAULT_LOAN_PARAMS.servicerAccount()),
+      signingDate:
+        params?.signingDate ??
+        (params?.startingDate ? params.startingDate - 1800 : await DEFAULT_LOAN_PARAMS.startingDate()),
+    },
+    loanInterestData: {
+      baseReferenceRate: params?.baseReferenceRate ?? DEFAULT_LOAN_PARAMS.baseReferenceRate,
+      floorRate: params?.floorRate ?? DEFAULT_LOAN_PARAMS.floorRate,
+      capRate: params?.capRate ?? DEFAULT_LOAN_PARAMS.capRate,
+      rateMargin: params?.rateMargin ?? DEFAULT_LOAN_PARAMS.rateMargin,
+      dayCount: params?.dayCount ?? DEFAULT_LOAN_PARAMS.dayCount,
+      paymentFrequency: params?.paymentFrequency ?? DEFAULT_LOAN_PARAMS.paymentFrequency,
+      firstAccrualDate:
+        params?.firstAccrualDate ??
+        (params?.startingDate ? params.startingDate : await DEFAULT_LOAN_PARAMS.startingDate()),
+      prepaymentPenalty: params?.prepaymentPenalty ?? DEFAULT_LOAN_PARAMS.prepaymentPenalty,
+      commitmentFee: params?.commitmentFee ?? DEFAULT_LOAN_PARAMS.commitmentFee,
+      utilizationFee: params?.utilizationFee ?? DEFAULT_LOAN_PARAMS.utilizationFee,
+      utilizationFeeType: params?.utilizationFeeType ?? DEFAULT_LOAN_PARAMS.utilizationFeeType,
+      servicingFee: params?.servicingFee ?? DEFAULT_LOAN_PARAMS.servicingFee,
+    },
+    loanPerformanceStatus: {
+      performanceStatus: params?.performanceStatus ?? DEFAULT_LOAN_PARAMS.performanceStatus,
+      daysPastDue: params?.daysPastDue ?? DEFAULT_LOAN_PARAMS.daysPastDue,
+    },
+  };
 }
 
 /**
@@ -159,17 +179,34 @@ interface DeployLoanTokenFixtureParams {
  * @param params - Optional custom loan token parameters
  * @returns Infrastructure + deployed loan token + connected facets
  */
-export async function deployLoanTokenFixture(params: DeepPartial<DeployLoanTokenFixtureParams> = {}) {
-  // Merge with defaults
-  const p = {
-    ...DEFAULT_LOAN_PARAMS,
-    ...params,
-  };
+export async function deployLoanTokenFixture({
+  loanParams,
+  regulationTypeParams,
+  useLoadFixture = true,
+  infrastructure: providedInfrastructure,
+}: {
+  loanParams?: DeepPartial<DeployLoanTokenFixtureParams>;
+  regulationTypeParams?: DeepPartial<FactoryRegulationDataParams>;
+  useLoadFixture?: boolean;
+  infrastructure?: Awaited<ReturnType<typeof deployAtsInfrastructureFixture>>;
+} = {}) {
+  // Reuse already-loaded infrastructure when provided to avoid nested loadFixture
+  // calls that would revert the chain and wipe previously-deployed sibling tokens.
+  const infrastructure =
+    providedInfrastructure ??
+    (useLoadFixture ? await loadFixture(deployAtsInfrastructureFixture) : await deployAtsInfrastructureFixture());
+  const { factory, blr, deployer } = infrastructure;
 
-  // Load base infrastructure (BLR + all facets deployed)
-  const infrastructure = await loadFixture(deployAtsInfrastructureFixture);
-  const { blr, deployer, factory } = infrastructure;
+  const securityData = getSecurityData(blr, {
+    ...loanParams?.securityDataParams,
+    resolverProxyConfiguration: {
+      key: LOAN_CONFIG_ID,
+      version: 1,
+    },
+  });
 
+  const loanDetails = await getLoanDetails(loanParams?.loanInit);
+  const regulationData = getRegulationData(regulationTypeParams);
   // Build facet addresses map from deployment.facets array
   const facetAddresses: Record<string, string> = {};
   for (const facet of infrastructure.deployment.facets) {
@@ -179,124 +216,156 @@ export async function deployLoanTokenFixture(params: DeepPartial<DeployLoanToken
   // Create Loan configuration in BLR (registers all 45 facets including AmortizationFacet)
   await createLoanConfiguration(blr, facetAddresses, true);
 
+  const version = 1;
+
   // Deploy TestFactory
 
   // Deploy ResolverProxy via TestFactory
-  const rbacs = [{ role: ATS_ROLES._DEFAULT_ADMIN_ROLE, members: [deployer.address] }];
+  const rbacs = [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [deployer.address] }];
 
   // Get BLR proxy address (use deployment data to avoid TypeScript type mismatch)
   const blrProxyAddress = infrastructure.deployment.infrastructure.blr.proxy;
 
-  const tx = await factory.deployProxy(blrProxyAddress, LOAN_CONFIG_ID, 1, rbacs);
+  const tx = await factory.deployProxy(blrProxyAddress, LOAN_CONFIG_ID, 1, rbacs, "0x");
   const receipt = await tx.wait();
   const proxyAddress = (await decodeEvent(factory, "ProxyDeployed", receipt)).proxyAddress;
 
-  // Connect commonly used facets to the proxy
-  const accessControlFacet = AccessControlFacet__factory.connect(proxyAddress, deployer);
-  const pauseFacet = PauseFacet__factory.connect(proxyAddress, deployer);
-  const kycFacet = KycFacet__factory.connect(proxyAddress, deployer);
-  const controlListFacet = ControlListFacet__factory.connect(proxyAddress, deployer);
-  const erc20Facet = ERC20Facet__factory.connect(proxyAddress, deployer);
-  const freezeFacet = FreezeFacet__factory.connect(proxyAddress, deployer);
-  const capFacet = CapFacet__factory.connect(proxyAddress, deployer);
-  const erc1644Facet = ERC1644Facet__factory.connect(proxyAddress, deployer);
-  const erc1594Facet = ERC1594Facet__factory.connect(proxyAddress, deployer);
-  const erc1410ManagementFacet = ERC1410ManagementFacet__factory.connect(proxyAddress, deployer);
-  const erc3643ManagementFacet = ERC3643ManagementFacet__factory.connect(proxyAddress, deployer);
-  const erc20VotesFacet = ERC20VotesFacet__factory.connect(proxyAddress, deployer);
-  const couponFacet = CouponFacet__factory.connect(proxyAddress, deployer);
-  const nominalValueFacet = NominalValueFacet__factory.connect(proxyAddress, deployer);
-  const protectedPartitionsFacet = ProtectedPartitionsFacet__factory.connect(proxyAddress, deployer);
-  const clearingActionsFacet = ClearingActionsFacet__factory.connect(proxyAddress, deployer);
-  const externalKycListManagementFacet = ExternalKycListManagementFacet__factory.connect(proxyAddress, deployer);
-  const externalControlListManagementFacet = ExternalControlListManagementFacet__factory.connect(
-    proxyAddress,
-    deployer,
-  );
-  const externalPauseManagementFacet = ExternalPauseManagementFacet__factory.connect(proxyAddress, deployer);
-  const proceedRecipientsFacet = ProceedRecipientsFacet__factory.connect(proxyAddress, deployer);
-  const timeTravelFacet = TimeTravelFacet__factory.connect(proxyAddress, deployer);
-  const loanFacet = Loan__factory.connect(proxyAddress, deployer);
+  // Connected facets (most commonly used)
+  const accessControlFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const pauseFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const kycFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const controlListFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const coreFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const freezeFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const capFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const controllerFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const mintFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const burnFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const erc1410ManagementFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const erc3643ManagementFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const erc20VotesFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const couponFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const nominalValueFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const protectedPartitionsFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const clearingFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const externalKycListManagementFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const externalControlListManagementFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const externalPauseManagementFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const proceedRecipientsFacet = IAsset__factory.connect(proxyAddress, deployer);
+  const timeTravelFacet = IAsset__factory.connect(proxyAddress, deployer);
 
-  await controlListFacet.initialize_ControlList(p.isWhiteList);
-  await erc1410ManagementFacet.initialize_ERC1410(p.isMultiPartition);
-  await erc1644Facet.initialize_ERC1644(p.isControllable);
-  await erc20Facet.initialize_ERC20({
-    info: { name: p.name, symbol: p.symbol, decimals: p.decimals, isin: p.isin },
+  await controlListFacet.initializeControlList(securityData.isWhiteList);
+  await controllerFacet.initializeController(securityData.isControllable);
+  await coreFacet.initializeCore({
+    info: {
+      name: securityData.erc20MetadataInfo.name,
+      symbol: securityData.erc20MetadataInfo.symbol,
+      decimals: securityData.erc20MetadataInfo.decimals,
+      isin: securityData.erc20MetadataInfo.isin,
+    },
     securityType: 1, // SecurityType.Equity (reuse for loan)
   });
-  await erc1594Facet.initialize_ERC1594();
-  await capFacet.initialize_Cap(p.maxSupply, []);
-  await protectedPartitionsFacet.initialize_ProtectedPartitions(p.arePartitionsProtected);
-  await clearingActionsFacet.initializeClearing(p.clearingActive);
-  await externalPauseManagementFacet.initialize_ExternalPauses([]);
-  await externalControlListManagementFacet.initialize_ExternalControlLists([]);
-  await kycFacet.initializeInternalKyc(p.internalKycActivated);
-  await externalKycListManagementFacet.initialize_ExternalKycLists([]);
-  await erc20VotesFacet.initialize_ERC20Votes(p.erc20VotesActivated);
-  await erc3643ManagementFacet.initialize_ERC3643(ZeroAddress, ZeroAddress);
-  await nominalValueFacet.initialize_NominalValue(p.nominalValue, p.nominalValueDecimals);
-  const li = p.loanInit;
-  const startingDate = li?.startingDate ?? (await DEFAULT_LOAN_PARAMS.startingDate());
-  const maturityDate = li?.maturityDate ?? startingDate + 100_000;
-  const signingDate = li?.signingDate ?? startingDate - 1800;
-  const loanDetailsData = {
-    loanBasicData: {
-      currency: li?.currency ?? DEFAULT_LOAN_PARAMS.currency,
-      startingDate,
-      maturityDate,
-      loanStructureType: li?.loanStructureType ?? DEFAULT_LOAN_PARAMS.loanStructureType,
-      repaymentType: li?.repaymentType ?? DEFAULT_LOAN_PARAMS.repaymentType,
-      interestType: li?.interestType ?? DEFAULT_LOAN_PARAMS.interestType,
-      signingDate,
-      originatorAccount: li?.originatorAccount ?? deployer.address,
-      servicerAccount: li?.servicerAccount ?? deployer.address,
-    },
-    loanInterestData: {
-      baseReferenceRate: li?.baseReferenceRate ?? DEFAULT_LOAN_PARAMS.baseReferenceRate,
-      floorRate: li?.floorRate ?? DEFAULT_LOAN_PARAMS.floorRate,
-      capRate: li?.capRate ?? DEFAULT_LOAN_PARAMS.capRate,
-      rateMargin: li?.rateMargin ?? DEFAULT_LOAN_PARAMS.rateMargin,
-      dayCount: li?.dayCount ?? DEFAULT_LOAN_PARAMS.dayCount,
-      paymentFrequency: li?.paymentFrequency ?? DEFAULT_LOAN_PARAMS.paymentFrequency,
-      firstAccrualDate: li?.firstAccrualDate ?? startingDate,
-      prepaymentPenalty: li?.prepaymentPenalty ?? DEFAULT_LOAN_PARAMS.prepaymentPenalty,
-      commitmentFee: li?.commitmentFee ?? DEFAULT_LOAN_PARAMS.commitmentFee,
-      utilizationFee: li?.utilizationFee ?? DEFAULT_LOAN_PARAMS.utilizationFee,
-      utilizationFeeType: li?.utilizationFeeType ?? DEFAULT_LOAN_PARAMS.utilizationFeeType,
-      servicingFee: li?.servicingFee ?? DEFAULT_LOAN_PARAMS.servicingFee,
-    },
-    riskData: {
-      internalRiskGrade: li?.internalRiskGrade ?? DEFAULT_LOAN_PARAMS.internalRiskGrade,
-      defaultProbability: li?.defaultProbability ?? DEFAULT_LOAN_PARAMS.defaultProbability,
-      lossGivenDefault: li?.lossGivenDefault ?? DEFAULT_LOAN_PARAMS.lossGivenDefault,
-    },
-    collateral: {
-      totalCollateralValue: li?.totalCollateralValue ?? DEFAULT_LOAN_PARAMS.totalCollateralValue,
-      loanToValue: li?.loanToValue ?? DEFAULT_LOAN_PARAMS.loanToValue,
-    },
-    loanPerformanceStatus: {
-      performanceStatus: li?.performanceStatus ?? DEFAULT_LOAN_PARAMS.performanceStatus,
-      daysPastDue: li?.daysPastDue ?? DEFAULT_LOAN_PARAMS.daysPastDue,
-    },
-  };
-  const regulationData = {
-    regulationType: 1,
-    regulationSubType: 0,
-    dealSize: 0,
-    accreditedInvestors: 1,
-    maxNonAccreditedInvestors: 0,
-    manualInvestorVerification: 1,
-    internationalInvestors: 1,
-    resaleHoldPeriod: 0,
-  };
-  const additionalSecurityData = {
-    countriesControlListType: true,
-    listOfCountries: "US",
-    info: "test",
-    country: "US",
-  };
-  await loanFacet.initialize_Loan(loanDetailsData, regulationData, additionalSecurityData);
+  await mintFacet.initializeERC1594();
+  await capFacet.initializeCap(securityData.maxSupply, []);
+  await protectedPartitionsFacet.initializeProtectedPartitions(securityData.arePartitionsProtected);
+  await clearingFacet.initializeClearing(securityData.clearingActive);
+  await externalPauseManagementFacet.initializeExternalPauses([]);
+  await externalControlListManagementFacet.initializeExternalControlLists([]);
+  await kycFacet.initializeInternalKyc(securityData.internalKycActivated);
+  await externalKycListManagementFacet.initializeExternalKycLists([]);
+  await erc20VotesFacet.initializeERC20Votes(securityData.erc20VotesActivated);
+  await nominalValueFacet.initializeNominalValue(
+    loanParams?.nominalValue ?? DEFAULT_LOAN_PARAMS.nominalValue,
+    loanParams?.nominalValueDecimals ?? DEFAULT_LOAN_PARAMS.nominalValueDecimals,
+    loanParams?.loanInit?.currency ?? DEFAULT_LOAN_PARAMS.currency,
+  );
+
+  const asset = IAsset__factory.connect(proxyAddress, deployer);
+
+  // Initialize remaining essential facets identified
+  await IDiamondFacet__factory.connect(proxyAddress, deployer).initializeDiamondCut();
+  await asset.initializeTransferAndLock();
+
+  await asset.initializeLoan(loanDetails);
+  await asset.initializeAccessControl();
+
+  // Call all other initializations provided by the user list that are present in IAsset
+  await asset.initializeAllowance();
+  await asset.initializeBurn();
+  await asset.initializeSecurityHolders();
+  await asset.initializeHold();
+  await asset.initializeBatchMint();
+  await asset.initializeBatchTransfer();
+  await asset.initializeBatchBurn();
+  await asset.initializeFreeze();
+  await asset.initializeBalanceTrackerAdjusted();
+  await asset.initializeFreezeAtSnapshot();
+  await asset.initializeClearingHoldByPartition();
+  await asset.initializeOperatorClearingByPartition();
+  await asset.initializeControllerHoldByPartition();
+  await asset.initializeProtectedHoldByPartition();
+  await asset.initializeRecovery();
+  await asset.initializeProtectedClearingByPartition();
+  await asset.initializeProtectedClearingHoldByPartition();
+  await asset.initializeBurnByPartition();
+  await asset.initializeNominalValueAtSnapshot();
+  await asset.initializeClearingAtSnapshot();
+  await asset.initializeControllerByPartition();
+  await asset.initializeBatchFreeze();
+  await asset.initializeClearingByPartition();
+  await asset.initializeSnapshotsByPartition();
+  await asset.initializeIdentity(ZeroAddress);
+  await asset.initializeSecurityHoldersAtSnapshot();
+  await asset.initializeFreezeAtSnapshotByPartition();
+  await asset.initializeProtectedByPartition();
+  await asset.initializeEIP712();
+  await asset.initializeDocumentation();
+  await asset.initializeTransferAndLockByPartition();
+  await asset.initializeHoldAtSnapshot();
+  await asset.initializeLock();
+  await asset.initializeOperatorClearingHoldByPartition();
+  await asset.initializeSnapshots();
+  await asset.initializeERC20Permit();
+  await asset.initializeLockAtSnapshotByPartition();
+  await asset.initializeOperator();
+  await asset.initializeTransfer();
+  await asset.initializeLockAtSnapshot();
+  await asset.initializeHoldAtSnapshotByPartition();
+  await asset.initializeBalanceTrackerAtSnapshotByPartition();
+  await asset.initializeCouponSecurityHolders();
+  await asset.initializeTransferByPartition();
+  await asset.initializeBalanceTrackerAtSnapshot();
+  await asset.initializePartitions(securityData.isMultiPartition);
+  await asset.initializeBalanceTrackerByPartition();
+  await asset.initializeSsiManagement();
+  await asset.initializeOperatorByPartition();
+  await asset.initializeAmortization();
+  await asset.initializeProceedRecipients([], []);
+  await asset.initializeScheduledCrossOrderedTasks();
+  await asset.initializeCorporateActions();
+  await asset.initializeMintByPartition();
+  await asset.initializeClearingAtSnapshotByPartition();
+  await asset.initializeBatchController();
+  await asset.initializeCoreAtSnapshot();
+  await asset.initializeComplianceByPartition();
+  await asset.initializeCoupon();
+  await asset.initializeLockByPartition();
+  await asset.initializeHoldByPartition();
+  await asset.initializeDeactivate();
+  await asset.initializeOperatorHoldByPartition();
+  await asset.initializeCoreAdjusted();
+  await asset.initializeCustomData();
+  await asset.initializeCompliance(ZeroAddress);
+  await asset.initializeCouponListing();
+  await asset.initializeCapByPartition();
+  await asset.initializePause();
+  await asset.initializeBalanceTracker();
+  await asset.initializeBalanceAdjustments();
+  await asset.initializeScheduledBalanceAdjustment();
+  await asset.initializeTimeTravel();
+
+  await asset.connect(deployer).initializeInitializer(150);
+  await asset.connect(deployer).setOperationalStatus();
 
   return {
     ...infrastructure,
@@ -312,18 +381,19 @@ export async function deployLoanTokenFixture(params: DeepPartial<DeployLoanToken
     pauseFacet,
     kycFacet,
     controlListFacet,
-    erc20Facet,
+    coreFacet,
     freezeFacet,
     capFacet,
-    erc1644Facet,
-    erc1594Facet,
+    controllerFacet,
+    mintFacet,
+    burnFacet,
     erc1410ManagementFacet,
     erc3643ManagementFacet,
     erc20VotesFacet,
     couponFacet,
     nominalValueFacet,
     protectedPartitionsFacet,
-    clearingActionsFacet,
+    clearingFacet,
     externalKycListManagementFacet,
     externalControlListManagementFacet,
     externalPauseManagementFacet,

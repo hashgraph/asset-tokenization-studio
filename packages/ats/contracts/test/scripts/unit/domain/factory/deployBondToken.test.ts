@@ -49,7 +49,7 @@ describe("Bond Token Deployment", () => {
       const callArgs = mockFactory.deployBond.getCall(0).args[0];
       const rbacs = callArgs.security.rbacs;
 
-      expect(rbacs[0].role).to.equal(ATS_ROLES._DEFAULT_ADMIN_ROLE);
+      expect(rbacs[0].role).to.equal(ATS_ROLES.DEFAULT_ADMIN_ROLE);
       expect(rbacs[0].members).to.include(adminAccount);
     });
 
@@ -57,8 +57,8 @@ describe("Bond Token Deployment", () => {
       const diamondAddress = TEST_ADDRESSES.VALID_3;
       const mockFactory = createMockFactory(TEST_FACTORY_EVENTS.BOND_DEPLOYED, diamondAddress);
       const additionalRbacs = [
-        { role: ATS_ROLES._PAUSER_ROLE, members: [TEST_ADDRESSES.VALID_4] },
-        { role: ATS_ROLES._CORPORATE_ACTION_ROLE, members: [TEST_ADDRESSES.VALID_5] },
+        { role: ATS_ROLES.ROLE_PAUSER, members: [TEST_ADDRESSES.VALID_4] },
+        { role: ATS_ROLES.ROLE_CORPORATE_ACTION, members: [TEST_ADDRESSES.VALID_5] },
       ];
       const securityData = createMockSecurityDataWithRbacs(additionalRbacs);
       const params = createDeployBondParams(mockFactory, { securityData });
@@ -69,11 +69,10 @@ describe("Bond Token Deployment", () => {
       const callArgs = mockFactory.deployBond.getCall(0).args[0];
       const rbacs = callArgs.security.rbacs;
 
-      expect(rbacs).to.have.length(4);
-      expect(rbacs[0].role).to.equal(ATS_ROLES._DEFAULT_ADMIN_ROLE);
-      expect(rbacs[1].role).to.equal(ATS_ROLES._NOMINAL_VALUE_ROLE);
-      expect(rbacs[2].role).to.equal(ATS_ROLES._PAUSER_ROLE);
-      expect(rbacs[3].role).to.equal(ATS_ROLES._CORPORATE_ACTION_ROLE);
+      expect(rbacs).to.have.length(3);
+      expect(rbacs[0].role).to.equal(ATS_ROLES.DEFAULT_ADMIN_ROLE);
+      expect(rbacs[1].role).to.equal(ATS_ROLES.ROLE_PAUSER);
+      expect(rbacs[2].role).to.equal(ATS_ROLES.ROLE_CORPORATE_ACTION);
     });
 
     it("should place admin role first in array", async () => {
@@ -89,7 +88,7 @@ describe("Bond Token Deployment", () => {
       const callArgs = mockFactory.deployBond.getCall(0).args[0];
       const rbacs = callArgs.security.rbacs;
 
-      expect(rbacs[0].role).to.equal(ATS_ROLES._DEFAULT_ADMIN_ROLE);
+      expect(rbacs[0].role).to.equal(ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
   });
 
@@ -364,9 +363,14 @@ describe("Bond Token Deployment", () => {
       const params = createDeployBondParams(mockFactory);
       const regulationData = createMockRegulationData();
 
-      await expect(deployBondFromFactory(params, regulationData)).to.be.rejectedWith(
-        'Event log for "BondDeployed" not found in transaction receipt',
-      );
+      let threw = false;
+      try {
+        await deployBondFromFactory(params, regulationData);
+      } catch (err: unknown) {
+        threw = true;
+        expect((err as Error).message).to.include("BondDeployed event not found");
+      }
+      expect(threw).to.equal(true);
     });
 
     it("should throw if BondDeployed event not found", async () => {
@@ -375,9 +379,14 @@ describe("Bond Token Deployment", () => {
       const params = createDeployBondParams(mockFactory);
       const regulationData = createMockRegulationData();
 
-      await expect(deployBondFromFactory(params, regulationData)).to.be.rejectedWith(
-        'Event log for "BondDeployed" not found in transaction receipt',
-      );
+      let threw = false;
+      try {
+        await deployBondFromFactory(params, regulationData);
+      } catch (err: unknown) {
+        threw = true;
+        expect((err as Error).message).to.include("BondDeployed event not found");
+      }
+      expect(threw).to.equal(true);
     });
 
     it("should throw if event has no args", async () => {
@@ -385,9 +394,14 @@ describe("Bond Token Deployment", () => {
       const params = createDeployBondParams(mockFactory);
       const regulationData = createMockRegulationData();
 
-      await expect(deployBondFromFactory(params, regulationData)).to.be.rejectedWith(
-        "Invalid diamond address from BondDeployed event",
-      );
+      let threw = false;
+      try {
+        await deployBondFromFactory(params, regulationData);
+      } catch (err: unknown) {
+        threw = true;
+        expect((err as Error).message).to.include("BondDeployed event not found");
+      }
+      expect(threw).to.equal(true);
     });
 
     it("should throw if diamondAddress is zero address", async () => {
@@ -395,7 +409,14 @@ describe("Bond Token Deployment", () => {
       const params = createDeployBondParams(mockFactory);
       const regulationData = createMockRegulationData();
 
-      await expect(deployBondFromFactory(params, regulationData)).to.be.rejectedWith("Invalid diamond address");
+      let threw = false;
+      try {
+        await deployBondFromFactory(params, regulationData);
+      } catch (err: unknown) {
+        threw = true;
+        expect((err as Error).message).to.include("Invalid diamond address");
+      }
+      expect(threw).to.equal(true);
     });
 
     it("should extract diamondProxyAddress from event args", async () => {

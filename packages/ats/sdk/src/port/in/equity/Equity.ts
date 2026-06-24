@@ -37,15 +37,13 @@ import SetScheduledBalanceAdjustmentRequest from "../request/equity/SetScheduled
 import GetScheduledBalanceAdjustmentRequest from "../request/equity/GetScheduledBalanceAdjustmentRequest";
 import ScheduledBalanceAdjustmentViewModel from "../response/ScheduledBalanceAdjustmentViewModel";
 import { GetScheduledBalanceAdjustmentQuery } from "@query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery";
-import GetScheduledBalanceAdjustmentCountRequest from "../request/equity/GetScheduledBalanceAdjustmentsCountRequest";
-import { GetScheduledBalanceAdjustmentCountQuery } from "@query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQuery";
+import GetPendingBalanceAdjustmentCountRequest from "../request/equity/GetPendingBalanceAdjustmentsCountRequest";
+import { GetPendingBalanceAdjustmentCountQuery } from "@query/equity/balanceAdjustments/getPendingBalanceAdjustmentCount/GetPendingBalanceAdjustmentsCountQuery";
 import { GetVotingHoldersQuery } from "@query/equity/votingRights/getVotingHolders/GetVotingHoldersQuery";
 import { GetTotalVotingHoldersQuery } from "@query/equity/votingRights/getTotalVotingHolders/GetTotalVotingHoldersQuery";
 import GetAllScheduledBalanceAdjustmentsRequest from "../request/equity/GetAllScheduledBalanceAdjustmentst";
 import GetVotingHoldersRequest from "../request/equity/GetVotingHoldersRequest";
 import GetTotalVotingHoldersRequest from "../request/equity/GetTotalVotingHoldersRequest";
-import CreateTrexSuiteEquityRequest from "../request/equity/CreateTrexSuiteEquityRequest";
-import { CreateTrexSuiteEquityCommand } from "@command/equity/createTrexSuite/CreateTrexSuiteEquityCommand";
 import CancelVotingRequest from "../request/equity/CancelVotingRequest";
 
 interface IEquityInPort {
@@ -62,7 +60,7 @@ interface IEquityInPort {
   setScheduledBalanceAdjustment(
     request: SetScheduledBalanceAdjustmentRequest,
   ): Promise<{ payload: number; transactionId: string }>;
-  getScheduledBalanceAdjustmentsCount(request: GetScheduledBalanceAdjustmentCountRequest): Promise<number>;
+  getPendingBalanceAdjustmentsCount(request: GetPendingBalanceAdjustmentCountRequest): Promise<number>;
   getScheduledBalanceAdjustment(
     request: GetScheduledBalanceAdjustmentRequest,
   ): Promise<ScheduledBalanceAdjustmentViewModel>;
@@ -71,10 +69,6 @@ interface IEquityInPort {
   ): Promise<ScheduledBalanceAdjustmentViewModel[]>;
   getVotingHolders(request: GetVotingHoldersRequest): Promise<string[]>;
   getTotalVotingHolders(request: GetTotalVotingHoldersRequest): Promise<number>;
-  createTrexSuite(request: CreateTrexSuiteEquityRequest): Promise<{
-    security: SecurityViewModel;
-    transactionId: string;
-  }>;
   cancelScheduledBalanceAdjustment(request: CancelScheduledBalanceAdjustmentRequest): Promise<{
     payload: boolean;
     transactionId: string;
@@ -87,91 +81,6 @@ class EquityInPort implements IEquityInPort {
     private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
     private readonly networkService: NetworkService = Injectable.resolve(NetworkService),
   ) {}
-
-  @LogError
-  async createTrexSuite(req: CreateTrexSuiteEquityRequest): Promise<{
-    security: SecurityViewModel;
-    transactionId: string;
-  }> {
-    ValidatedRequest.handleValidation("CreateTrexSuiteEquityRequest", req);
-    const { diamondOwnerAccount, externalPauses, externalControlLists, externalKycLists } = req;
-
-    const securityFactory = this.networkService.configuration.factoryAddress;
-    const resolver = this.networkService.configuration.resolverAddress;
-
-    const newSecurity: SecurityProps = {
-      name: req.name,
-      symbol: req.symbol,
-      isin: req.isin,
-      decimals: req.decimals,
-      isWhiteList: req.isWhiteList,
-      isControllable: req.isControllable,
-      arePartitionsProtected: req.arePartitionsProtected,
-      clearingActive: req.clearingActive,
-      internalKycActivated: req.internalKycActivated,
-      isMultiPartition: req.isMultiPartition,
-      maxSupply: BigDecimal.fromString(req.numberOfShares),
-      regulationType: CastRegulationType.fromNumber(req.regulationType),
-      regulationsubType: CastRegulationSubType.fromNumber(req.regulationSubType),
-      isCountryControlListWhiteList: req.isCountryControlListWhiteList,
-      countries: req.countries,
-      info: req.info,
-      erc20VotesActivated: req.erc20VotesActivated,
-    };
-
-    const createResponse = await this.commandBus.execute(
-      new CreateTrexSuiteEquityCommand(
-        req.salt,
-        req.owner,
-        req.irs,
-        req.onchainId,
-        req.irAgents,
-        req.tokenAgents,
-        req.compliancesModules,
-        req.complianceSettings,
-        req.claimTopics,
-        req.issuers,
-        req.issuerClaims,
-        newSecurity,
-        req.votingRight,
-        req.informationRight,
-        req.liquidationRight,
-        req.subscriptionRight,
-        req.conversionRight,
-        req.redemptionRight,
-        req.putRight,
-        CastDividendType.fromNumber(req.dividendRight),
-        req.currency,
-        req.nominalValue,
-        req.nominalValueDecimals,
-        new ContractId(securityFactory),
-        new ContractId(resolver),
-        req.configId,
-        req.configVersion,
-        diamondOwnerAccount,
-        externalPauses,
-        externalControlLists,
-        externalKycLists,
-        req.complianceId,
-        req.identityRegistryId,
-      ),
-    );
-
-    const securityCreated = createResponse.securityId.toString() !== ContractId.NULL.toString();
-
-    const res = securityCreated
-      ? (await this.queryBus.execute(new GetSecurityQuery(createResponse.securityId.toString()))).security
-      : {};
-
-    return {
-      security: securityCreated
-        ? {
-            ...res,
-          }
-        : {},
-      transactionId: createResponse.transactionId,
-    };
-  }
 
   @LogError
   async create(req: CreateEquityRequest): Promise<{ security: SecurityViewModel; transactionId: string }> {
@@ -194,8 +103,9 @@ class EquityInPort implements IEquityInPort {
       internalKycActivated: req.internalKycActivated,
       isMultiPartition: req.isMultiPartition,
       maxSupply: BigDecimal.fromString(req.numberOfShares),
-      regulationType: CastRegulationType.fromNumber(req.regulationType),
-      regulationsubType: CastRegulationSubType.fromNumber(req.regulationSubType),
+      regulationType: req.regulationType !== undefined ? CastRegulationType.fromNumber(req.regulationType) : undefined,
+      regulationsubType:
+        req.regulationSubType !== undefined ? CastRegulationSubType.fromNumber(req.regulationSubType) : undefined,
       isCountryControlListWhiteList: req.isCountryControlListWhiteList,
       countries: req.countries,
       info: req.info,
@@ -258,7 +168,8 @@ class EquityInPort implements IEquityInPort {
       conversionRight: res.equity.conversionRight,
       redemptionRight: res.equity.redemptionRight,
       putRight: res.equity.putRight,
-      dividendRight: CastDividendType.toNumber(res.equity.dividendRight),
+      dividendRight:
+        res.equity.dividendRight !== undefined ? CastDividendType.toNumber(res.equity.dividendRight) : undefined,
       currency: res.equity.currency,
       nominalValue: res.equity.nominalValue.toString(),
       nominalValueDecimals: res.equity.nominalValueDecimals,
@@ -376,15 +287,15 @@ class EquityInPort implements IEquityInPort {
   }
 
   @LogError
-  async getScheduledBalanceAdjustmentsCount(request: GetScheduledBalanceAdjustmentCountRequest): Promise<number> {
+  async getPendingBalanceAdjustmentsCount(request: GetPendingBalanceAdjustmentCountRequest): Promise<number> {
     const { securityId } = request;
-    ValidatedRequest.handleValidation("GetScheduledBalanceAdjustmentCountRequest", request);
+    ValidatedRequest.handleValidation("GetPendingBalanceAdjustmentCountRequest", request);
 
-    const getScheduledBalanceAdjustmentCountQueryResponse = await this.queryBus.execute(
-      new GetScheduledBalanceAdjustmentCountQuery(securityId),
+    const getPendingBalanceAdjustmentCountQueryResponse = await this.queryBus.execute(
+      new GetPendingBalanceAdjustmentCountQuery(securityId),
     );
 
-    return getScheduledBalanceAdjustmentCountQueryResponse.payload;
+    return getPendingBalanceAdjustmentCountQueryResponse.payload;
   }
 
   @LogError
@@ -393,7 +304,7 @@ class EquityInPort implements IEquityInPort {
   ): Promise<ScheduledBalanceAdjustmentViewModel[]> {
     ValidatedRequest.handleValidation("GetAllScheduledBalanceAdjustmentsRequest", request);
 
-    const count = await this.queryBus.execute(new GetScheduledBalanceAdjustmentCountQuery(request.securityId));
+    const count = await this.queryBus.execute(new GetPendingBalanceAdjustmentCountQuery(request.securityId));
 
     if (count.payload == 0) return [];
 

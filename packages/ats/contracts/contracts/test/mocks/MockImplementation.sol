@@ -17,7 +17,7 @@ contract MockImplementation {
     bool private _initialized;
 
     /**
-     * State variable to verify initialization.
+     * State variable to _verify initialization.
      */
     uint256 public initializedValue;
 
@@ -36,7 +36,7 @@ contract MockImplementation {
             revert AlreadyInitialized();
         }
         _initialized = true;
-        initializedValue = 100; // Set initial value to verify initialization occurred
+        initializedValue = 100; // Set initial value to _verify initialization occurred
     }
 
     /**
@@ -56,7 +56,7 @@ contract MockImplementation {
     }
 
     /**
-     * Simple function to verify contract is operational.
+     * Simple function to _verify contract is operational.
      * @return A test string
      */
     function greet() external pure returns (string memory) {

@@ -7,8 +7,10 @@ import {
   PauseFacet__factory,
   KycFacet__factory,
   ControlListFacet__factory,
+  IAsset__factory,
 } from "@contract-types";
 import {
+  ATS_ROLES,
   DeployBondFromFactoryParams,
   InterestRateParams,
   ImpactDataParams,
@@ -16,7 +18,7 @@ import {
 } from "@scripts/domain";
 import { FactoryRegulationDataParams } from "@scripts/domain";
 import { getRegulationData, getSecurityData } from "./common.fixture";
-import { getBondDetails } from "./bond.fixture";
+import { makeBondDetailsData } from "./bond.fixture";
 import { getDltTimestamp } from "@test";
 
 /**
@@ -61,13 +63,16 @@ export async function deployBondKpiLinkedRateTokenFixture({
   regulationTypeParams,
   interestRateParams,
   impactDataParams,
+  infrastructure: providedInfrastructure,
 }: {
   bondDataParams?: DeepPartial<DeployBondFromFactoryParams>;
   regulationTypeParams?: DeepPartial<FactoryRegulationDataParams>;
   interestRateParams?: DeepPartial<InterestRateParams>;
   impactDataParams?: DeepPartial<ImpactDataParams>;
+  infrastructure?: Awaited<ReturnType<typeof deployAtsInfrastructureFixture>>;
 } = {}) {
-  const infrastructure = await deployAtsInfrastructureFixture();
+  // Reuse already-loaded infrastructure when provided to avoid redeploying it for sibling tokens.
+  const infrastructure = providedInfrastructure ?? (await deployAtsInfrastructureFixture());
   const { factory, blr, deployer } = infrastructure;
 
   const securityData = getSecurityData(blr, {
@@ -78,7 +83,7 @@ export async function deployBondKpiLinkedRateTokenFixture({
       version: 1,
     },
   });
-  const bondDetails = await getBondDetails(bondDataParams?.bondDetails);
+  const bondDetails = await makeBondDetailsData(bondDataParams?.bondDetails);
   const interestRate = {
     maxRate: interestRateParams?.maxRate ?? 0,
     baseRate: interestRateParams?.baseRate ?? 0,
@@ -90,11 +95,12 @@ export async function deployBondKpiLinkedRateTokenFixture({
     rateDecimals: interestRateParams?.rateDecimals ?? 0,
   };
   const impactData = {
-    maxDeviationCap: impactDataParams?.maxDeviationCap ?? 0,
-    baseLine: impactDataParams?.baseLine ?? 0,
-    maxDeviationFloor: impactDataParams?.maxDeviationFloor ?? 0,
-    impactDataDecimals: impactDataParams?.impactDataDecimals ?? 0,
-    adjustmentPrecision: impactDataParams?.adjustmentPrecision ?? 0,
+    maxDeviationCap: impactDataParams?.maxDeviationCap ?? DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.maxDeviationCap,
+    baseLine: impactDataParams?.baseLine ?? DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.baseLine,
+    maxDeviationFloor: impactDataParams?.maxDeviationFloor ?? DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.maxDeviationFloor,
+    impactDataDecimals: impactDataParams?.impactDataDecimals ?? DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.impactDataDecimals,
+    adjustmentPrecision:
+      impactDataParams?.adjustmentPrecision ?? DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.adjustmentPrecision,
   };
 
   const diamond = await deployBondKpiLinkedRateFromFactory(
@@ -121,6 +127,7 @@ export async function deployBondKpiLinkedRateTokenFixture({
   const pauseFacet = PauseFacet__factory.connect(diamond.target as string, deployer);
   const kycFacet = KycFacet__factory.connect(diamond.target as string, deployer);
   const controlListFacet = ControlListFacet__factory.connect(diamond.target as string, deployer);
+  const asset = IAsset__factory.connect(diamond.target as string, deployer);
 
   return {
     ...infrastructure,
@@ -134,5 +141,6 @@ export async function deployBondKpiLinkedRateTokenFixture({
     pauseFacet,
     kycFacet,
     controlListFacet,
+    asset,
   };
 }

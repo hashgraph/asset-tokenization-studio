@@ -6,15 +6,15 @@ import {
   AssetLifeCycleCashFlowEvmAddressInvalidError,
   AssetLifeCycleCashFlowHederaAddressInvalidError,
   AssetNameMissingError,
-} from "@domain/errors/asset.error"
-import { AssetType } from "@domain/model/asset-type.enum"
-import { BaseEntity } from "@domain/model/base-entity"
-import { isNil } from "@nestjs/common/utils/shared.utils"
-import { LifeCycleCashFlowAddress } from "./life-cycle-cash-flow-address.value-object"
+} from "@domain/errors/asset.error";
+import { AssetType } from "@domain/model/asset-type.enum";
+import { BaseEntity } from "@domain/model/base-entity";
+import { isNil } from "@nestjs/common/utils/shared.utils";
+import { LifeCycleCashFlowAddress } from "./life-cycle-cash-flow-address.value-object";
 
 export class Asset extends BaseEntity {
-  private static readonly HEDERA_ADDRESS_REGEX = /^\d+\.\d+\.\d+$/
-  private static readonly EVM_ADDRESS_REGEX = /^0x[a-fA-F0-9]{40}$/
+  private static readonly HEDERA_ADDRESS_REGEX = /^\d+\.\d+\.\d+$/;
+  private static readonly EVM_ADDRESS_REGEX = /^0x[a-fA-F0-9]{40}$/;
 
   constructor(
     readonly id: string,
@@ -31,8 +31,8 @@ export class Asset extends BaseEntity {
     createdAt?: Date,
     updatedAt?: Date,
   ) {
-    super(id, createdAt, updatedAt)
-    this.validateFields()
+    super(id, createdAt, updatedAt);
+    this.validateFields();
   }
 
   copyWith(props: Partial<Asset>): Asset {
@@ -50,7 +50,7 @@ export class Asset extends BaseEntity {
       props.syncEnabled ?? this.syncEnabled,
       props.createdAt ?? this.createdAt,
       props.updatedAt ?? this.updatedAt,
-    )
+    );
   }
 
   static create(
@@ -75,7 +75,7 @@ export class Asset extends BaseEntity {
       undefined,
       isPaused,
       syncEnabled,
-    )
+    );
   }
 
   static createExisting(
@@ -107,7 +107,7 @@ export class Asset extends BaseEntity {
       syncEnabled,
       createdAt,
       updatedAt,
-    )
+    );
   }
 
   withLifeCycleCashFlow(lifeCycleCashFlowAddress: LifeCycleCashFlowAddress): Asset {
@@ -115,86 +115,86 @@ export class Asset extends BaseEntity {
       lifeCycleCashFlowHederaAddress: lifeCycleCashFlowAddress.hederaAddress,
       lifeCycleCashFlowEvmAddress: lifeCycleCashFlowAddress.evmAddress,
       updatedAt: new Date(),
-    })
+    });
   }
 
   withName(name: string): Asset {
     return this.copyWith({
       name,
       updatedAt: new Date(),
-    })
+    });
   }
 
   withType(type: AssetType): Asset {
     return this.copyWith({
       type,
       updatedAt: new Date(),
-    })
+    });
   }
 
   pause(): Asset {
     return this.copyWith({
       isPaused: true,
       updatedAt: new Date(),
-    })
+    });
   }
 
   unpause(): Asset {
     return this.copyWith({
       isPaused: false,
       updatedAt: new Date(),
-    })
+    });
   }
 
   enableSync(): Asset {
     return this.copyWith({
       syncEnabled: true,
       updatedAt: new Date(),
-    })
+    });
   }
 
   disableSync(): Asset {
     return this.copyWith({
       syncEnabled: false,
       updatedAt: new Date(),
-    })
+    });
   }
 
   private validateFields(): void {
-    this.validateName()
-    this.validateHederaTokenAddress()
-    this.validateEvmTokenAddress()
-    this.validateHederaLifeCycleCashFlowAddress()
-    this.validateEvmLifeCycleCashFlowAddress()
+    this.validateName();
+    this.validateHederaTokenAddress();
+    this.validateEvmTokenAddress();
+    this.validateHederaLifeCycleCashFlowAddress();
+    this.validateEvmLifeCycleCashFlowAddress();
   }
 
   private validateName(): void {
     if (isNil(this.name) || this.name.trim().length === 0) {
-      throw new AssetNameMissingError()
+      throw new AssetNameMissingError();
     }
   }
 
   private validateHederaTokenAddress(): void {
     if (isNil(this.hederaTokenAddress) || !Asset.HEDERA_ADDRESS_REGEX.test(this.hederaTokenAddress)) {
-      throw new AssetHederaTokenAddressInvalidError()
+      throw new AssetHederaTokenAddressInvalidError();
     }
   }
 
   private validateEvmTokenAddress(): void {
     if (isNil(this.evmTokenAddress) || !Asset.EVM_ADDRESS_REGEX.test(this.evmTokenAddress)) {
-      throw new AssetEvmTokenAddressInvalidError()
+      throw new AssetEvmTokenAddressInvalidError();
     }
   }
 
   private validateHederaLifeCycleCashFlowAddress(): void {
     if (this.lifeCycleCashFlowHederaAddress && !Asset.HEDERA_ADDRESS_REGEX.test(this.lifeCycleCashFlowHederaAddress)) {
-      throw new AssetLifeCycleCashFlowHederaAddressInvalidError()
+      throw new AssetLifeCycleCashFlowHederaAddressInvalidError();
     }
   }
 
   private validateEvmLifeCycleCashFlowAddress(): void {
     if (this.lifeCycleCashFlowEvmAddress && !Asset.EVM_ADDRESS_REGEX.test(this.lifeCycleCashFlowEvmAddress)) {
-      throw new AssetLifeCycleCashFlowEvmAddressInvalidError()
+      throw new AssetLifeCycleCashFlowEvmAddressInvalidError();
     }
   }
 }

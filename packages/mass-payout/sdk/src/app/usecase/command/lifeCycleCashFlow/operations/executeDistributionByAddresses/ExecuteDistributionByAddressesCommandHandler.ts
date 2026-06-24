@@ -14,6 +14,7 @@ import {
 import { ExecuteDistributionByAddressesCommandError } from "./error/ExecuteDistributionByAddressesCommandError";
 
 @CommandHandler(ExecuteDistributionByAddressesCommand)
+// eslint-disable-next-line max-len
 export class ExecuteDistributionByAddressesCommandHandler implements ICommandHandler<ExecuteDistributionByAddressesCommand> {
   constructor(
     private readonly transactionService: TransactionService,

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { ethers } from "ethers";
-import type { ResolverProxy } from "@contract-types";
+import { ethers, type EventLog, type Log } from "ethers";
+import type { IMockFactory, ResolverProxy } from "@contract-types";
 import { ResolverProxy__factory } from "@contract-types";
-import { GAS_LIMIT, decodeEvent } from "@scripts/infrastructure";
+import { GAS_LIMIT } from "@scripts/infrastructure";
 import {
   ATS_ROLES,
   BOND_KPI_LINKED_RATE_CONFIG_ID,
@@ -86,11 +86,7 @@ export async function deployBondKpiLinkedRateFromFactory(
   // Build RBAC array with admin
   const rbacs: Rbac[] = [
     {
-      role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
-      members: [adminAccount],
-    },
-    {
-      role: ATS_ROLES._NOMINAL_VALUE_ROLE,
+      role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
       members: [adminAccount],
     },
     ...securityDataParams.rbacs,
@@ -164,16 +160,27 @@ export async function deployBondKpiLinkedRateFromFactory(
   };
 
   // Deploy bond token via factory
-  const tx = await factory.deployBondKpiLinkedRate(bondKpiLinkedRateData, {
+  const tx = await (factory as IMockFactory).deployBondKpiLinkedRate(bondKpiLinkedRateData, {
     gasLimit: GAS_LIMIT.high,
   });
   const receipt = await tx.wait();
 
-  // Find BondKpiLinkedRateDeployed event to get diamond address
-  const { bondAddress: diamondAddress } = await decodeEvent(factory, "BondKpiLinkedRateDeployed", receipt);
+  // Find BondDeployed event to get diamond address
+  const event = receipt?.logs.find(
+    (log: Log) => "eventName" in log && (log as EventLog).eventName === "BondKpiLinkedRateDeployed",
+  ) as EventLog | undefined;
+  if (!event || !event.args) {
+    throw new Error(
+      `BondKpiLinkedRateDeployed event not found in deployment transaction. Events: ${JSON.stringify(
+        receipt?.logs.filter((log: Log) => "eventName" in log).map((e: Log) => (e as EventLog).eventName),
+      )}`,
+    );
+  }
+
+  const diamondAddress = event.args.diamondProxyAddress || event.args[1];
 
   if (!diamondAddress || diamondAddress === ethers.ZeroAddress) {
-    throw new Error(`Invalid diamond address from BondKpiLinkedRateDeployed event`);
+    throw new Error(`Invalid diamond address from event. Args: ${JSON.stringify(event.args)}`);
   }
 
   // Return diamond proxy as ResolverProxy contract

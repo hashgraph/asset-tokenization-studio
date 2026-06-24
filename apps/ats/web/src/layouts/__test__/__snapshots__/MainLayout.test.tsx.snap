@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`MainLayout if user is not connected should not render sidebar: connected 1`] = `
+exports[`MainLayout if user is connected should render sidebar: connected 1`] = `
 <DocumentFragment>
   <div
     class="css-18xahxz"

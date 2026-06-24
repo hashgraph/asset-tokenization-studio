@@ -10,7 +10,60 @@
  * @module registry-generator/core/generator
  */
 
+import * as fs from "fs";
+import * as path from "path";
 import type { ContractMetadata, MethodDefinition, EventDefinition, ErrorDefinition } from "../types";
+import { REVERSE_LIBRARY_KEYS } from "../../../domain/orchestratorLibraries";
+
+/**
+ * Reverse mapping from Hardhat linkReferences key format to short library name.
+ * Re-exports `REVERSE_LIBRARY_KEYS` from `scripts/domain/orchestratorLibraries.ts`
+ * so the generator and the deployment registry share a single source of truth
+ * for orchestrator library identities. Adding a new library only requires
+ * updating `LIBRARY_KEYS` in that module.
+ */
+const LINK_REF_TO_LIB_NAME: Record<string, string> = REVERSE_LIBRARY_KEYS;
+
+/**
+ * Read Hardhat artifact and extract library dependencies.
+ *
+ * Checks the artifact's `linkReferences` field to determine which orchestrator
+ * libraries a facet needs linked at deployment time.
+ *
+ * @param facetName - Contract name (e.g., "BondUSAFacet")
+ * @param sourceFile - Relative path to source file (e.g., "contracts/facets/regulation/bondUSA/variableRate/BondUSAFacet.sol")
+ * @returns Array of library short names (e.g., ["tokenCoreOps"]) or empty array
+ */
+function getLibraryDependencies(facetName: string, sourceFile: string): string[] {
+  const artifactPath = path.join("artifacts", "contracts", sourceFile, `${facetName}.json`);
+  try {
+    const artifact = JSON.parse(fs.readFileSync(artifactPath, "utf8"));
+    const linkRefs: Record<string, Record<string, unknown[]>> = artifact.linkReferences || {};
+    const libs: string[] = [];
+    for (const [filePath, refs] of Object.entries(linkRefs)) {
+      for (const libName of Object.keys(refs)) {
+        const key = `${filePath}:${libName}`;
+        const mapped = LINK_REF_TO_LIB_NAME[key];
+        if (mapped) {
+          libs.push(mapped);
+        }
+      }
+    }
+    return libs.sort();
+  } catch {
+    return [];
+  }
+}
+
+// Cache library dependencies to avoid re-reading artifacts
+const _libDepsCache = new Map<string, string[]>();
+
+function getCachedLibDeps(facetName: string, sourceFile: string): string[] {
+  if (!_libDepsCache.has(facetName)) {
+    _libDepsCache.set(facetName, getLibraryDependencies(facetName, sourceFile));
+  }
+  return _libDepsCache.get(facetName)!;
+}
 
 /**
  * Format methods array for registry output.
@@ -98,8 +151,15 @@ export function generateRegistry(
   const contractRegistry = generateContractRegistry(infrastructure);
   const storageWrapperRegistry = storageWrappers ? generateStorageWrapperRegistry(storageWrappers) : "";
   const mockRegistry = mocks && mocks.length > 0 ? generateMockRegistry(mocks) : "";
-  const constants = generateConstants(facets, infrastructure, allRoles);
 
+  /**
+   * @remarks
+   * The `ROLES` constant is intentionally emitted into a separate file via
+   * `generateRolesFile` (see BBND-1766). Keeping the heavy facet/contract
+   * registries decoupled from the small, audit-relevant `ROLES` map lets the
+   * roles file remain checked into git while the rest of this file is
+   * gitignored and regenerated on `prepare`.
+   */
   const registries = [header, facetRegistry, contractRegistry];
   if (storageWrapperRegistry) {
     registries.push(storageWrapperRegistry);
@@ -107,9 +167,64 @@ export function generateRegistry(
   if (mockRegistry) {
     registries.push(mockRegistry);
   }
-  registries.push(constants);
+
+  // ROLES are emitted by `generateRolesFile` below; do not append here.
+  void allRoles;
 
   return registries.join("\n\n") + "\n";
+}
+
+/**
+ * Generate the dedicated `atsRoles.generated.ts` file.
+ *
+ * @remarks
+ * Emits a standalone TypeScript module that exports only the deduplicated
+ * `ROLES` map (and the matching `TOTAL_ROLES` count). Kept in a separate file
+ * — and checked into git — so that:
+ *
+ * - The `scripts/domain/constants.ts` bootstrap import resolves on a fresh
+ *   clone, even when the (gitignored) heavy `atsRegistry.generated.ts` is not
+ *   yet generated. See BBND-1766 for the architectural rationale.
+ * - Role-hash changes are visible in PR diffs and audit trails. A ~50-line
+ *   roles file produces meaningful review noise; burying it inside a 14k-line
+ *   auto-generated blob does not.
+ *
+ * The body is produced by the same `generateConstants` helper used previously
+ * — only the wrapping file header is new — so role-name ordering and value
+ * formatting remain byte-identical to the legacy single-file output.
+ *
+ * @param facets - Array of facet metadata.
+ * @param infrastructure - Array of infrastructure contract metadata.
+ * @param allRoles - Optional pre-collected, deduplicated roles map.
+ * @returns Complete TypeScript source for the roles file (incl. file header).
+ */
+export function generateRolesFile(
+  facets: ContractMetadata[],
+  infrastructure: ContractMetadata[],
+  allRoles?: Map<string, string>,
+): string {
+  const body = generateConstants(facets, infrastructure, allRoles);
+
+  const header = `// SPDX-License-Identifier: Apache-2.0
+
+/**
+ * @file atsRoles.generated.ts
+ * @generated DO NOT EDIT MANUALLY - regenerated by \`npm run generate:registry\`.
+ *
+ * @remarks
+ * AUTO-GENERATED role hash registry. Split out of \`atsRegistry.generated.ts\`
+ * per BBND-1766 so this small, audit-relevant surface can stay checked into
+ * git while the heavy facet/contract registry is gitignored.
+ *
+ * To regenerate: \`npm run generate:registry\` (or any \`hardhat compile\`).
+ *
+ * Import from \`@scripts/domain\` instead of this file directly.
+ *
+ * @module domain/atsRoles.generated
+ */
+`;
+
+  return `${header}\n${body}\n`;
 }
 
 /**
@@ -135,34 +250,42 @@ function generateHeader(
 ): string {
   const mockLine = mockCount > 0 ? `\n * Mocks: ${mockCount}` : "";
 
-  // Sort facet names alphabetically for deterministic output
-  const sortedFacetNames = [...facets].map((f) => f.name).sort();
+  // Sort facet names alphabetically for deterministic output. Only deployable
+  // facets are imported; abstract contracts and interfaces have no factory
+  // reference in the generated body, so importing their __factory would leave
+  // an unused symbol that fails the no-unused-imports lint rule.
+  const sortedFacetNames = facets
+    .filter((f) => f.isDeployable)
+    .map((f) => f.name)
+    .sort();
 
   // Generate TypeChain factory imports (Prettier will format)
-  // Include both regular and TimeTravel variants where applicable
   const factoryImports: string[] = [];
   for (const name of sortedFacetNames) {
     factoryImports.push(`${name}__factory`);
-
-    // Check if this facet should have a TimeTravel variant
-    // (ends with 'Facet' and is not 'TimeTravelFacet')
-    if (name !== "TimeTravelFacet" && name.endsWith("Facet")) {
-      factoryImports.push(`${name}TimeTravel__factory`);
-    }
   }
 
-  // Include mock contract factory imports (only for deployable mocks)
+  // Include TimeTravel variant factory imports for facets that have them
+  const facetsWithTimeTravel = facets.filter((f) => f.hasTimeTravel && f.name !== "TimeTravelFacet");
+  const sortedTimeTravelNames = [...facetsWithTimeTravel].map((f) => `${f.name}TimeTravel`).sort();
+  for (const name of sortedTimeTravelNames) {
+    factoryImports.push(`${name}__factory`);
+  }
+
+  // Include mock contract factory imports (only deployable mocks)
   if (mocks && mocks.length > 0) {
-    const sortedMockNames = mocks
-      .filter((m) => m.isDeployable)
-      .map((m) => m.name)
-      .sort();
+    const deployableMocks = mocks.filter((m) => m.isDeployable);
+    const sortedMockNames = [...deployableMocks].map((m) => m.name).sort();
     for (const name of sortedMockNames) {
       factoryImports.push(`${name}__factory`);
     }
   }
 
   const factoryImportsStr = factoryImports.join(", ");
+
+  // Check if any facets have library dependencies
+  const hasAnyLibDeps = facets.some((f) => getCachedLibDeps(f.name, f.sourceFile).length > 0);
+  const libLinksImport = hasAnyLibDeps ? `\nimport { getLibLinks } from './orchestratorLibraries'` : "";
 
   return `// SPDX-License-Identifier: Apache-2.0
 
@@ -180,11 +303,11 @@ function generateHeader(
  * Facets: ${facetCount}
  * Infrastructure: ${infrastructureCount}${mockLine}
  *
- * @module domain/atsRegistry.data
+ * @module domain/atsRegistry.generated
  */
 
 import { FacetDefinition, ContractDefinition, StorageWrapperDefinition } from '${moduleName}'
-import { ${factoryImportsStr} } from '${typechainModuleName}'`;
+import { ${factoryImportsStr} } from '${typechainModuleName}'${libLinksImport}`;
 }
 
 /**
@@ -239,17 +362,38 @@ function generateFacetEntry(facet: ContractMetadata): string {
 
   const descriptionLine = facet.description ? `\n        description: '${facet.description}',` : "";
 
-  // Add TypeChain factory reference with TimeTravel support
-  // Check if facet should have TimeTravel variant (ends with 'Facet' and is not 'TimeTravelFacet')
-  const hasTimeTravel = facet.name !== "TimeTravelFacet" && facet.name.endsWith("Facet");
+  // Add TypeChain factory reference (only for deployable contracts)
+  // Abstract contracts (isDeployable: false) don't have constructors in their factories
+  let factoryLine: string;
+  let timeTravelFactoryLine: string;
 
-  // Prettier will format this properly
-  const factoryLine = hasTimeTravel
-    ? `\n        factory: (signer, useTimeTravel = false) => useTimeTravel ? new ${facet.name}TimeTravel__factory(signer) : new ${facet.name}__factory(signer),`
-    : `\n        factory: (signer) => new ${facet.name}__factory(signer),`;
+  if (!facet.isDeployable) {
+    // Abstract contracts - no factory constructor, only static methods
+    factoryLine = "";
+    timeTravelFactoryLine = "";
+  } else {
+    // Deployable contracts - generate factory code
+    const libDeps = getCachedLibDeps(facet.name, facet.sourceFile);
+    if (libDeps.length > 0) {
+      const libArgs = libDeps.map((l) => `"${l}"`).join(", ");
+      factoryLine = `\n        factory: (signer) => new ${facet.name}__factory(getLibLinks(${libArgs}) as any, signer),`;
+
+      timeTravelFactoryLine =
+        facet.hasTimeTravel && facet.name !== "TimeTravelFacet"
+          ? `\n        timeTravelFactory: (signer) => new ${facet.name}TimeTravel__factory(getLibLinks(${libArgs}) as any, signer),`
+          : "";
+    } else {
+      factoryLine = `\n        factory: (signer) => new ${facet.name}__factory(signer),`;
+
+      timeTravelFactoryLine =
+        facet.hasTimeTravel && facet.name !== "TimeTravelFacet"
+          ? `\n        timeTravelFactory: (signer) => new ${facet.name}TimeTravel__factory(signer),`
+          : "";
+    }
+  }
 
   return `    ${facet.name}: {
-        name: '${facet.name}',${descriptionLine}${resolverKeyLine}${rolesLine}${inheritanceLine}${methodsLine}${eventsLine}${errorsLine}${factoryLine}
+        name: '${facet.name}',${descriptionLine}${resolverKeyLine}${rolesLine}${inheritanceLine}${methodsLine}${eventsLine}${errorsLine}${factoryLine}${timeTravelFactoryLine}
     }`;
 }
 
@@ -406,8 +550,7 @@ function generateMockEntry(mock: ContractMetadata): string {
 
   const descriptionLine = mock.description ? `\n        description: '${mock.description}',` : "";
 
-  // Add TypeChain factory reference only for deployable mocks (non-empty bytecode + ABI)
-  // Non-deployable contracts (interfaces, internal-only) don't have TypeChain factories
+  // Add TypeChain factory reference (only for deployable mocks)
   const factoryLine = mock.isDeployable ? `\n        factory: (signer) => new ${mock.name}__factory(signer),` : "";
 
   return `    ${mock.name}: {

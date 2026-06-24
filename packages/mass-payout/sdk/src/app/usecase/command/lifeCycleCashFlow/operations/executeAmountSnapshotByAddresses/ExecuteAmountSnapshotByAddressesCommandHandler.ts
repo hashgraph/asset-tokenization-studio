@@ -14,6 +14,7 @@ import {
 import { ExecuteAmountSnapshotByAddressesCommandError } from "./error/ExecuteAmountSnapshotByAddressesCommandError";
 
 @CommandHandler(ExecuteAmountSnapshotByAddressesCommand)
+// eslint-disable-next-line max-len
 export class ExecuteAmountSnapshotByAddressesCommandHandler implements ICommandHandler<ExecuteAmountSnapshotByAddressesCommand> {
   constructor(
     private readonly transactionService: TransactionService,

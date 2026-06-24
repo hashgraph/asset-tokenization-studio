@@ -14,6 +14,7 @@ import {
 import { ExecutePercentageSnapshotByAddressesCommandError } from "./error/ExecutePercentageSnapshotByAddressesCommandError";
 
 @CommandHandler(ExecutePercentageSnapshotByAddressesCommand)
+// eslint-disable-next-line max-len
 export class ExecutePercentageSnapshotByAddressesCommandHandler implements ICommandHandler<ExecutePercentageSnapshotByAddressesCommand> {
   constructor(
     private readonly transactionService: TransactionService,

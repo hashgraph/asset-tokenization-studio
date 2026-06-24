@@ -46,7 +46,7 @@ describe("RedeemCommandHandler", () => {
       contractServiceMock,
     );
     const commandRaw = RedeemCommandFixture.create();
-    const { deadline, nounce, signature, partitionId, sourceId, ...commandFiltered } = commandRaw;
+    const { deadline, nonce, signature, partitionId, sourceId, ...commandFiltered } = commandRaw;
     command = commandFiltered;
   });
 

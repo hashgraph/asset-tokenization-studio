@@ -18,8 +18,9 @@ import {
   createBatchConfiguration,
   OperationResult,
   DEFAULT_BATCH_SIZE,
+  RetryOptions,
 } from "@scripts/infrastructure";
-import { BOND_KPI_LINKED_RATE_CONFIG_ID, atsRegistry } from "@scripts/domain";
+import { BOND_KPI_LINKED_RATE_CONFIG_ID, atsRegistry, buildFacetList, getMockFacetDefinition } from "@scripts/domain";
 import { BusinessLogicResolver } from "@contract-types";
 
 /**
@@ -35,73 +36,116 @@ import { BusinessLogicResolver } from "@contract-types";
  */
 const BOND_KPI_LINKED_RATE_FACETS = [
   // Core Functionality (10 - DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet)
-  "AccessControlKpiLinkedRateFacet",
-  "CapKpiLinkedRateFacet",
-  "ControlListKpiLinkedRateFacet",
-  "CorporateActionsKpiLinkedRateFacet",
+  "AccessControlFacet",
+  "AllowanceFacet",
+  "CapFacet",
+  "CapByPartitionFacet",
+  "ControlListFacet",
+  "CorporateActionsFacet",
   "DiamondFacet", // Combined: includes DiamondCutFacet + DiamondLoupeFacet functionality
-  "ERC20KpiLinkedRateFacet",
-  "FreezeKpiLinkedRateFacet",
-  "KycKpiLinkedRateFacet",
-  "PauseKpiLinkedRateFacet",
-  "SnapshotsKpiLinkedRateFacet",
-  "TotalBalanceKpiLinkedRateFacet",
+  "CoreFacet",
+  "TransferFacet",
+  "CoreAdjustedFacet",
+  "InitializerFacet", // Core initializer facet
+  "CustomDataFacet",
+  "FreezeFacet",
+  "BatchFreezeFacet",
+  "KycFacet",
+  "PauseFacet",
+  "BalanceTrackerFacet",
+  "BalanceTrackerAdjustedFacet",
+  "SnapshotsFacet",
+  "SnapshotsByPartitionFacet",
+  "SecurityHoldersAtSnapshotFacet",
+  "HoldAtSnapshotFacet",
+  "LockAtSnapshotByPartitionFacet",
+  "FreezeAtSnapshotFacet",
+  "FreezeAtSnapshotByPartitionFacet",
+  "LockAtSnapshotFacet",
+  "CoreAtSnapshotFacet",
+  "BalanceTrackerByPartitionFacet",
+  "BalanceTrackerAtSnapshotFacet",
+  "BalanceTrackerAtSnapshotByPartitionFacet",
+  "ClearingAtSnapshotFacet",
+  "ClearingAtSnapshotByPartitionFacet",
+  "HoldAtSnapshotByPartitionFacet",
 
   // ERC Standards
-  "ERC1410IssuerKpiLinkedRateFacet",
-  "ERC1410ManagementKpiLinkedRateFacet",
-  "ERC1410ReadKpiLinkedRateFacet",
-  "ERC1410TokenHolderKpiLinkedRateFacet",
-  "ERC1594KpiLinkedRateFacet",
-  "ERC1643KpiLinkedRateFacet",
-  "ERC1644KpiLinkedRateFacet",
-  "ERC20PermitKpiLinkedRateFacet",
-  "NoncesKpiLinkedRateFacet",
-  "ERC20VotesKpiLinkedRateFacet",
-  "ERC3643BatchKpiLinkedRateFacet",
-  "ERC3643ManagementKpiLinkedRateFacet",
-  "ERC3643OperationsKpiLinkedRateFacet",
-  "ERC3643ReadKpiLinkedRateFacet",
+  "MintByPartitionFacet",
+  "ProtectedByPartitionFacet",
+  "OperatorFacet",
+  "TransferByPartitionFacet",
+  "PartitionsFacet",
+  "OperatorByPartitionFacet",
+  "BurnByPartitionFacet",
+  "DocumentationFacet",
+  "ControllerFacet",
+  "ERC20PermitFacet",
+  "EIP712Facet",
+  "NoncesFacet",
+  "DeactivateFacet",
+  "ERC20VotesFacet",
+  "BatchControllerFacet",
+  "BatchBurnFacet",
+  "BatchMintFacet",
+  "BatchTransferFacet",
+  "RecoveryFacet",
+  "IdentityFacet",
+  "ComplianceFacet",
+  "ComplianceByPartitionFacet",
+  "MintFacet",
+  "BurnFacet",
 
   // Clearing & Settlement
-  "ClearingActionsKpiLinkedRateFacet",
-  "ClearingHoldCreationKpiLinkedRateFacet",
-  "ClearingReadKpiLinkedRateFacet",
-  "ClearingRedeemKpiLinkedRateFacet",
-  "ClearingTransferKpiLinkedRateFacet",
-  "HoldManagementKpiLinkedRateFacet",
-  "HoldReadKpiLinkedRateFacet",
-  "HoldTokenHolderKpiLinkedRateFacet",
+  "ClearingByPartitionFacet",
+  "ProtectedClearingHoldByPartitionFacet",
+  "ClearingHoldByPartitionFacet",
+  "OperatorClearingHoldByPartitionFacet",
+  "ClearingFacet",
+  "OperatorClearingByPartitionFacet",
+  "ProtectedClearingByPartitionFacet",
+  "HoldFacet",
+  "OperatorHoldByPartitionFacet",
+  "ControllerHoldByPartitionFacet",
+  "ControllerByPartitionFacet",
+  "ProtectedHoldByPartitionFacet",
+  "HoldByPartitionFacet",
 
   // External Management
-  "ExternalControlListManagementKpiLinkedRateFacet",
-  "ExternalKycListManagementKpiLinkedRateFacet",
-  "ExternalPauseManagementKpiLinkedRateFacet",
+  "ExternalControlListManagementFacet",
+  "ExternalKycListManagementFacet",
+  "ExternalPauseManagementFacet",
 
   // Advanced Features
-  "AdjustBalancesKpiLinkedRateFacet",
-  "LockKpiLinkedRateFacet",
-  "ProceedRecipientsKpiLinkedRateFacet",
-  "ProtectedPartitionsKpiLinkedRateFacet",
-  "ScheduledBalanceAdjustmentsKpiLinkedRateFacet",
-  "ScheduledCrossOrderedTasksKpiLinkedRateFacet",
-  "ScheduledCouponListingKpiLinkedRateFacet",
-  "ScheduledSnapshotsKpiLinkedRateFacet",
-  "SsiManagementKpiLinkedRateFacet",
-  "TransferAndLockKpiLinkedRateFacet",
-
-  "CouponKpiLinkedRateFacet",
-
-  //Interest Rate
-  "KpiLinkedRateFacet",
-  "KpisKpiLinkedRateFacet",
-
-  // Nominal Value (1)
+  "AdjustBalancesFacet",
+  "ScheduledBalanceAdjustmentFacet",
+  "LockFacet",
+  "LockByPartitionFacet",
+  "MaturityFacet",
   "NominalValueFacet",
+  "NominalValueAtSnapshotFacet",
+  "ProceedRecipientsKpiLinkedRateFacet", // rate-specific: triggers scheduled tasks
+  "ProtectedPartitionsFacet",
+  "ScheduledCrossOrderedTasksKpiLinkedRateFacet", // rate-specific: _onCouponListed override
+  "SecurityHoldersFacet",
+  "CouponListingFacet",
+  "SsiManagementFacet",
+  "TransferAndLockFacet",
+  "TransferAndLockByPartitionFacet",
 
-  // Jurisdiction-Specific
-  "BondUSAKpiLinkedRateFacet",
-  "BondUSAReadKpiLinkedRateFacet",
+  "CouponSecurityHoldersFacet",
+
+  // Interest Rate (rate-specific - keep variant names)
+  "CouponFacet",
+  "KpiLinkedRateFacet",
+  "KpisFacet",
+  "InterestRateFacet",
+
+  // Maturity By Partition
+  "MaturityByPartitionFacet",
+
+  // Jurisdiction-Specific (write facet and read facet are both rate-specific)
+  "PrincipalFacet",
 ] as const;
 
 /**
@@ -158,21 +202,16 @@ export async function createBondKpiLinkedRateConfiguration(
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
+  retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  // Get facet names based on time travel mode
-  // Include TimeTravelFacet when useTimeTravel=true to provide time manipulation functions
-  const baseFacets = useTimeTravel ? [...BOND_KPI_LINKED_RATE_FACETS, "TimeTravelFacet"] : BOND_KPI_LINKED_RATE_FACETS;
-
-  const facetNames = useTimeTravel
-    ? baseFacets.map((name) => (name === "TimeTravelFacet" || name.endsWith("TimeTravel") ? name : `${name}TimeTravel`))
-    : baseFacets;
+  const facetNames = buildFacetList(BOND_KPI_LINKED_RATE_FACETS, useTimeTravel);
 
   // Build facet data with resolver keys from registry
   const facets = facetNames.map((name) => {
     // Strip "TimeTravel" suffix to get base name for registry lookup
     const baseName = name.replace(/TimeTravel$/, "");
 
-    const facetDef = atsRegistry.getFacetDefinition(baseName);
+    const facetDef = atsRegistry.getFacetDefinition(baseName) ?? getMockFacetDefinition(baseName);
     if (!facetDef?.resolverKey?.value) {
       throw new Error(`No resolver key found for facet: ${baseName}`);
     }
@@ -189,5 +228,6 @@ export async function createBondKpiLinkedRateConfiguration(
     partialBatchDeploy,
     batchSize,
     confirmations,
+    retryOptions,
   });
 }

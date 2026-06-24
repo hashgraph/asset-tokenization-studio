@@ -24,11 +24,32 @@
  * ```
  */
 
-// Domain registry data (auto-generated)
-export * from "./atsRegistry.data";
+/**
+ * @remarks
+ * Domain registry data (auto-generated).
+ *
+ * BBND-1766 — bootstrap-safe access:
+ *
+ * - The heavy `atsRegistry.generated` (facet / contract / storage-wrapper
+ *   registries) is **never** re-exported directly from this barrel. Doing so
+ *   would trigger an eager `require` at module load, which would break
+ *   bootstrap on a fresh clone (the file is gitignored and only generated
+ *   by `prepare` / `hardhat compile`). Consumers reach the data exclusively
+ *   through the lazy helpers re-exported from `./atsRegistry`
+ *   (`getFacetDefinition`, `getAllFacets`, `FACET_REGISTRY`-proxy, etc.).
+ * - The small `atsRoles.generated` (role hashes) is checked into git, safe
+ *   to re-export eagerly, and surfaces the named `ROLES` constant.
+ */
+export * from "./atsRoles.generated";
 
 // Domain constants
 export * from "./constants";
+
+// Test-environment facet substitution
+export * from "./facetEnvironment";
+
+// Orchestrator library management
+export * from "./orchestratorLibraries";
 
 // Domain registry (ATS-specific contract registry helpers)
 export * from "./atsRegistry";
@@ -36,13 +57,16 @@ export * from "./atsRegistry";
 // Factory deployment and types
 export * from "./factory/deploy";
 export * from "./factory/types";
+export * from "./factory/createConfiguration";
 
 // Token deployment from factory
 export * from "./factory/deployEquityToken";
 export * from "./factory/deployBondToken";
 export * from "./factory/deployBondFixedRateToken";
 export * from "./factory/deployBondKpiLinkedRateToken";
-export * from "./factory/deployBondSustainabilityPerformanceTargetRateToken";
+export * from "./factory/deployLoanToken";
+export * from "./factory/deployLoansPortfolioToken";
+export * from "./factory/deployDepositToken";
 
 // Equity configuration
 export * from "./equity/createConfiguration";
@@ -56,11 +80,16 @@ export * from "./bondFixedRate/createConfiguration";
 // Bond Kpi Linked Rate configuration
 export * from "./bondKpiLinkedRate/createConfiguration";
 
-// Bond Sustainability Performance Target Rate configuration
-export * from "./bondSustainabilityPerformanceTargetRate/createConfiguration";
+// Deposit Token configuration
+export * from "./depositToken/createConfiguration";
 
 // Loan configuration
 export * from "./loan/createConfiguration";
 
-// Loan Portfolio configuration
+// Loans Portfolio configuration
 export * from "./loanPortfolio/createConfiguration";
+export * from "./loanPortfolio/types";
+
+// TEST-ONLY: InitializeMock domain — stub configuration used by initializer-versioning tests.
+export * from "./initializeMock/createConfiguration";
+export * from "./initializeMock/mockFacetsRegistry";

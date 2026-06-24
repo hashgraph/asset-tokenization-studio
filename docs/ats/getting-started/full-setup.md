@@ -98,6 +98,10 @@ Edit `.env` with your deployed contract IDs and endpoints. See `apps/ats/web/.en
 #### Network Configuration
 
 ```bash
+
+# Hedera Network
+REACT_APP_NETWORK=testnet
+
 # Hedera Mirror Node
 REACT_APP_MIRROR_NODE=https://testnet.mirrornode.hedera.com/api/v1/
 

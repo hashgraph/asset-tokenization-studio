@@ -63,11 +63,11 @@ export class SecurityInPortRedeem extends BaseSecurityInPort implements ISecurit
   async protectedRedeemFromByPartition(
     request: ProtectedRedeemFromByPartitionRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, amount, sourceId, partitionId, deadline, nounce, signature } = request;
+    const { securityId, amount, sourceId, partitionId, deadline, nonce, signature } = request;
     ValidatedRequest.handleValidation("ProtectedRedeemFromByPartitionRequest", request);
 
     return await this.commandBus.execute(
-      new ProtectedRedeemFromByPartitionCommand(securityId, partitionId, sourceId, amount, deadline, nounce, signature),
+      new ProtectedRedeemFromByPartitionCommand(securityId, partitionId, sourceId, amount, deadline, nonce, signature),
     );
   }
 }

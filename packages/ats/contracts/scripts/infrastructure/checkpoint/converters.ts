@@ -283,13 +283,7 @@ export function toDeployFactoryResult(
  * - `gasUsed` → included in return (parsed from string)
  *
  * **Missing Fields:**
- * - `facetKeys`: Empty array (details not persisted in checkpoint)
  * - `blockNumber`: 0 (not persisted)
- *
- * **TODO: Data Loss**
- * - Facet details (names, addresses) not persisted in ConfigurationResult
- * - This affects the complete facetKeys array, which is empty on resume
- * - Could enhance checkpoint structure to persist this data if needed
  *
  * @param configCheckpoint - Configuration checkpoint data
  * @returns OperationResult with full ConfigurationData
@@ -311,7 +305,7 @@ export function toConfigurationData(configCheckpoint: ConfigurationResult): Oper
     data: {
       configurationId: configCheckpoint.configId,
       version: configCheckpoint.version,
-      facetKeys: [], // TODO: Facet details not persisted in checkpoint - empty on resume
+      facetKeys: configCheckpoint.facets ?? [],
       transactionHash: configCheckpoint.txHash,
       blockNumber: 0, // TODO: Not persisted
     },
@@ -352,6 +346,7 @@ export function convertCheckpointFacets(
   const results = new Map<string, DeploymentResult>();
 
   checkpointFacets.forEach((deployed, facetName) => {
+    if (deployed.pending) return;
     results.set(facetName, toDeploymentResult(deployed));
   });
 

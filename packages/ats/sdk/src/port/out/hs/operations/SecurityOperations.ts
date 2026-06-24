@@ -1,18 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ContractId } from "@hiero-ledger/sdk";
-import { ethers } from "ethers";
-import {
-  BondUSAFacet__factory,
-  EquityUSAFacet__factory,
-  SnapshotsFacet__factory,
-  ScheduledCrossOrderedTasksFacet__factory,
-  Bond__factory,
-  ProceedRecipientsFacet__factory,
-  FixedRate__factory,
-  KpiLinkedRate__factory,
-  Kpis__factory,
-} from "@hashgraph/asset-tokenization-contracts";
+import { IAsset__factory } from "@hashgraph/asset-tokenization-contracts";
 import { GAS } from "@core/Constants";
 import BigDecimal from "@domain/context/shared/BigDecimal";
 import EvmAddress from "@domain/context/contract/EvmAddress";
@@ -50,7 +39,7 @@ export class SecurityOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      BondUSAFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "setCoupon",
       [coupon],
       GAS.SET_COUPON,
@@ -65,7 +54,7 @@ export class SecurityOperations {
 
     return this.executor.executeContractCall(
       securityId.toString(),
-      BondUSAFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "cancelCoupon",
       [couponId],
       GAS.CANCEL_COUPON,
@@ -83,7 +72,7 @@ export class SecurityOperations {
     );
     return this.executor.executeContractCall(
       securityId.toString(),
-      FixedRate__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "setRate",
       [rate, rateDecimals],
       GAS.SET_RATE,
@@ -105,7 +94,7 @@ export class SecurityOperations {
     LogService.logTrace(`Setting Interest Rate for security ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      KpiLinkedRate__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "setInterestRate",
       [
         {
@@ -135,7 +124,7 @@ export class SecurityOperations {
     LogService.logTrace(`Setting Impact Data for security ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      KpiLinkedRate__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "setImpactData",
       [
         {
@@ -162,7 +151,7 @@ export class SecurityOperations {
     );
     return this.executor.executeContractCall(
       securityId.toString(),
-      new ethers.Interface(Kpis__factory.abi as ethers.InterfaceAbi),
+      IAsset__factory.createInterface(),
       "addKpiData",
       [date, value, project.toString()],
       GAS.ADD_KPI_DATA,
@@ -177,7 +166,7 @@ export class SecurityOperations {
     LogService.logTrace(`Updating bond maturity date ${maturityDate} for security ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      new ethers.Interface(Bond__factory.abi as ethers.InterfaceAbi),
+      IAsset__factory.createInterface(),
       "updateMaturityDate",
       [maturityDate],
       GAS.UPDATE_MATURITY_DATE,
@@ -193,7 +182,7 @@ export class SecurityOperations {
     LogService.logTrace(`Adding proceedRecipient: ${proceedRecipient} to security: ${security}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ProceedRecipientsFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "addProceedRecipient",
       [proceedRecipient.toString(), data],
       GAS.ADD_PROCEED_RECIPIENT,
@@ -208,7 +197,7 @@ export class SecurityOperations {
     LogService.logTrace(`Removing proceedRecipient: ${proceedRecipient} from security: ${security}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ProceedRecipientsFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "removeProceedRecipient",
       [proceedRecipient.toString()],
       GAS.REMOVE_PROCEED_RECIPIENT,
@@ -224,7 +213,7 @@ export class SecurityOperations {
     LogService.logTrace(`Updating proceedRecipient: ${proceedRecipient} data in security: ${security}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ProceedRecipientsFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "updateProceedRecipientData",
       [proceedRecipient.toString(), data],
       GAS.UPDATE_PROCEED_RECIPIENT,
@@ -249,7 +238,7 @@ export class SecurityOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      EquityUSAFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "setDividend",
       [dividend],
       GAS.SET_DIVIDENDS,
@@ -263,7 +252,7 @@ export class SecurityOperations {
   ): Promise<TransactionResponse<any, Error>> {
     return this.executor.executeContractCall(
       securityId.toString(),
-      EquityUSAFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "cancelDividend",
       [dividendId],
       GAS.CANCEL_DIVIDEND,
@@ -282,7 +271,7 @@ export class SecurityOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      EquityUSAFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "setVoting",
       [voting],
       GAS.SET_VOTING_RIGHTS,
@@ -297,7 +286,7 @@ export class SecurityOperations {
 
     return this.executor.executeContractCall(
       securityId.toString(),
-      EquityUSAFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "cancelVoting",
       [votingId],
       GAS.CANCEL_VOTING,
@@ -321,7 +310,7 @@ export class SecurityOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      EquityUSAFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "setScheduledBalanceAdjustment",
       [scheduleBalanceAdjustment],
       GAS.SET_SCHEDULED_BALANCE_ADJUSTMENT,
@@ -335,7 +324,7 @@ export class SecurityOperations {
   ): Promise<TransactionResponse<any, Error>> {
     return this.executor.executeContractCall(
       securityId.toString(),
-      EquityUSAFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "cancelScheduledBalanceAdjustment",
       [balanceAdjustmentId],
       GAS.CANCEL_SCHEDULED_BALANCE_ADJUSTMENT,
@@ -346,7 +335,7 @@ export class SecurityOperations {
     LogService.logTrace(`Take snapshot of: ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      SnapshotsFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "takeSnapshot",
       [],
       GAS.TAKE_SNAPSHOT,
@@ -360,7 +349,7 @@ export class SecurityOperations {
     LogService.logTrace(`Triggering pending scheduled snapshots for ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ScheduledCrossOrderedTasksFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "triggerPendingScheduledCrossOrderedTasks",
       [],
       GAS.TRIGGER_PENDING_SCHEDULED_SNAPSHOTS,
@@ -375,7 +364,7 @@ export class SecurityOperations {
     LogService.logTrace(`Triggering up to ${max.toString()} pending scheduled snapshots for ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ScheduledCrossOrderedTasksFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "triggerScheduledCrossOrderedTasks",
       [max.toHexString()],
       GAS.TRIGGER_PENDING_SCHEDULED_SNAPSHOTS,

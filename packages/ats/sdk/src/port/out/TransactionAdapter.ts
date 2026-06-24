@@ -199,6 +199,7 @@ interface ITransactionAdapter {
   ): Promise<TransactionResponse>;
   pause(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
   unpause(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
+  deactivate(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
   takeSnapshot(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
   setDividend(
     security: EvmAddress,
@@ -324,7 +325,7 @@ interface ITransactionAdapter {
     targetId: EvmAddress,
     amount: BigDecimal,
     deadline: BigDecimal,
-    nounce: BigDecimal,
+    nonce: BigDecimal,
     signature: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
@@ -334,7 +335,7 @@ interface ITransactionAdapter {
     sourceId: EvmAddress,
     amount: BigDecimal,
     deadline: BigDecimal,
-    nounce: BigDecimal,
+    nonce: BigDecimal,
     signature: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
@@ -742,6 +743,7 @@ interface IExternalKycListsMockAdapter {
 interface ITokenMetadataTransactionAdapter {
   setName(security: EvmAddress, name: string, securityId?: ContractId | string): Promise<TransactionResponse>;
   setSymbol(security: EvmAddress, symbol: string, securityId: ContractId | string): Promise<TransactionResponse>;
+  setCustomData(security: EvmAddress, key: string, value: string[], securityId?: ContractId | string): Promise<TransactionResponse>;
   setOnchainID(
     security: EvmAddress,
     onchainID: EvmAddress,
@@ -882,6 +884,11 @@ interface INominalValueTransactionAdapter {
     security: EvmAddress,
     nominalValue: string,
     nominalValueDecimals: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  setNominalValueCurrency(
+    security: EvmAddress,
+    nominalValueCurrency: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
 }
@@ -1167,6 +1174,7 @@ export default abstract class TransactionAdapter
   ): Promise<TransactionResponse<any, Error>>;
   abstract pause(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse<any, Error>>;
   abstract unpause(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse<any, Error>>;
+  abstract deactivate(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse<any, Error>>;
   abstract takeSnapshot(
     security: EvmAddress,
     securityId?: ContractId | string,
@@ -1274,7 +1282,7 @@ export default abstract class TransactionAdapter
     targetId: EvmAddress,
     amount: BigDecimal,
     deadline: BigDecimal,
-    nounce: BigDecimal,
+    nonce: BigDecimal,
     signature: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
@@ -1284,7 +1292,7 @@ export default abstract class TransactionAdapter
     sourceId: EvmAddress,
     amount: BigDecimal,
     deadline: BigDecimal,
-    nounce: BigDecimal,
+    nonce: BigDecimal,
     signature: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
@@ -1642,6 +1650,12 @@ export default abstract class TransactionAdapter
     symbol: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
+  abstract setCustomData(
+    security: EvmAddress,
+    key: string,
+    value: string[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
   abstract setAddressFrozen(
     security: EvmAddress,
     status: boolean,
@@ -1747,62 +1761,6 @@ export default abstract class TransactionAdapter
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
 
-  abstract createTrexSuiteBond(
-    salt: string,
-    owner: string,
-    irs: string,
-    onchainId: string,
-    irAgents: string[],
-    tokenAgents: string[],
-    compliancesModules: string[],
-    complianceSettings: string[],
-    claimTopics: number[],
-    issuers: string[],
-    issuerClaims: number[][],
-    security: Security,
-    bondDetails: BondDetails,
-    factory: EvmAddress,
-    resolver: EvmAddress,
-    configId: string,
-    configVersion: number,
-    compliance: EvmAddress,
-    identityRegistryAddress: EvmAddress,
-    diamondOwnerAccount: EvmAddress,
-    proceedRecipients?: EvmAddress[],
-    proceedRecipientsData?: string[],
-    externalPauses?: EvmAddress[],
-    externalControlLists?: EvmAddress[],
-    externalKycLists?: EvmAddress[],
-    factoryId?: ContractId | string,
-  ): Promise<TransactionResponse>;
-
-  abstract createTrexSuiteEquity(
-    salt: string,
-    owner: string,
-    irs: string,
-    onchainId: string,
-    irAgents: string[],
-    tokenAgents: string[],
-    compliancesModules: string[],
-    complianceSettings: string[],
-    claimTopics: number[],
-    issuers: string[],
-    issuerClaims: number[][],
-    security: Security,
-    equityDetails: EquityDetails,
-    factory: EvmAddress,
-    resolver: EvmAddress,
-    configId: string,
-    configVersion: number,
-    compliance: EvmAddress,
-    identityRegistryAddress: EvmAddress,
-    diamondOwnerAccount: EvmAddress,
-    externalPauses?: EvmAddress[],
-    externalControlLists?: EvmAddress[],
-    externalKycLists?: EvmAddress[],
-    factoryId?: ContractId | string,
-  ): Promise<TransactionResponse>;
-
   abstract addProceedRecipient(
     security: EvmAddress,
     proceedRecipient: EvmAddress,
@@ -1841,18 +1799,24 @@ export default abstract class TransactionAdapter
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
 
-  abstract cancelScheduledBalanceAdjustment(
-    security: EvmAddress,
-    balanceAdjustmentId: number,
-    securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>>;
-
   abstract setNominalValue(
     security: EvmAddress,
     nominalValue: string,
     nominalValueDecimals: number,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
+
+  abstract setNominalValueCurrency(
+    security: EvmAddress,
+    nominalValueCurrency: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+
+  abstract cancelScheduledBalanceAdjustment(
+    security: EvmAddress,
+    balanceAdjustmentId: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>>;
 
   abstract setAmortization(
     security: EvmAddress,

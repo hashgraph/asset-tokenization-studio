@@ -3,16 +3,7 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import { FreezeFacet } from "../../../../facets/layer_1/freeze/standard/FreezeFacet.sol";
-import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
+import { FreezeFacet } from "../../../../facets/freeze/FreezeFacet.sol";
+import { TimeTravelProvider } from "../../timeTravel/TimeTravelProvider.sol";
 
-contract FreezeFacetTimeTravel is FreezeFacet, TimeTravelStorageWrapper {
-    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockTimestamp();
-    }
-
-    function _blockNumber() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockNumber();
-    }
-}
+contract FreezeFacetTimeTravel is FreezeFacet, TimeTravelProvider {}

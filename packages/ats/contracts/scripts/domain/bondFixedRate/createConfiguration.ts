@@ -18,89 +18,138 @@ import {
   createBatchConfiguration,
   OperationResult,
   DEFAULT_BATCH_SIZE,
+  RetryOptions,
 } from "@scripts/infrastructure";
-import { BOND_FIXED_RATE_CONFIG_ID, atsRegistry } from "@scripts/domain";
+import { BOND_FIXED_RATE_CONFIG_ID, atsRegistry, buildFacetList, getMockFacetDefinition } from "@scripts/domain";
 import { BusinessLogicResolver } from "@contract-types";
 
 /**
- * Bond-specific facets list (41 facets total).
+ * Bond Fixed Rate facets list.
  *
- * This is an explicit positive list of all facets required for bond tokens.
- * Includes all common facets plus BondUSAFacet (NOT EquityUSAFacet).
+ * Uses base facets plus FixedRate-specific facets.
+ * Base facets are shared across all bond configurations.
+ * FixedRate-specific facets handle interest rate calculations.
  *
- * Note: DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet functionality,
- * so we only include DiamondFacet to avoid selector collisions.
- *
- * Updated to match origin/develop feature parity (all facets registered).
  */
 const BOND_FIXED_RATE_FACETS = [
-  // Core Functionality (10 - DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet)
-  "AccessControlFixedRateFacet",
-  "CapFixedRateFacet",
-  "ControlListFixedRateFacet",
-  "CorporateActionsFixedRateFacet",
-  "DiamondFacet", // Combined: includes DiamondCutFacet + DiamondLoupeFacet functionality
-  "ERC20FixedRateFacet",
-  "FreezeFixedRateFacet",
-  "KycFixedRateFacet",
-  "PauseFixedRateFacet",
-  "SnapshotsFixedRateFacet",
-  "TotalBalanceFixedRateFacet",
+  // Core Functionality
+  "AccessControlFacet",
+  "CapFacet",
+  "CapByPartitionFacet",
+  "ControlListFacet",
+  "CorporateActionsFacet",
+  "DiamondFacet",
+  "FreezeFacet",
+  "BatchFreezeFacet",
+  "KycFacet",
+  "PauseFacet",
+  "BalanceTrackerFacet",
+  "BalanceTrackerAdjustedFacet",
+  "SnapshotsFacet",
+  "SnapshotsByPartitionFacet",
+  "SecurityHoldersAtSnapshotFacet",
+  "HoldAtSnapshotFacet",
+  "LockAtSnapshotByPartitionFacet",
+  "FreezeAtSnapshotFacet",
+  "FreezeAtSnapshotByPartitionFacet",
+  "LockAtSnapshotFacet",
+  "CoreAtSnapshotFacet",
+  "BalanceTrackerByPartitionFacet",
+  "BalanceTrackerAtSnapshotFacet",
+  "BalanceTrackerAtSnapshotByPartitionFacet",
+  "ClearingAtSnapshotFacet",
+  "ClearingAtSnapshotByPartitionFacet",
+  "HoldAtSnapshotByPartitionFacet",
+
+  // Core
+  "CoreFacet",
+
+  // Allowance
+  "AllowanceFacet",
+
+  // CoreAdjusted
+  "CoreAdjustedFacet",
+  "InitializerFacet", // Core initializer facet
+
+  //CustomData
+  "CustomDataFacet",
 
   // ERC Standards
-  "ERC1410IssuerFixedRateFacet",
-  "ERC1410ManagementFixedRateFacet",
-  "ERC1410ReadFixedRateFacet",
-  "ERC1410TokenHolderFixedRateFacet",
-  "ERC1594FixedRateFacet",
-  "ERC1643FixedRateFacet",
-  "ERC1644FixedRateFacet",
-  "ERC20PermitFixedRateFacet",
-  "NoncesFixedRateFacet",
-  "ERC20VotesFixedRateFacet",
-  "ERC3643BatchFixedRateFacet",
-  "ERC3643ManagementFixedRateFacet",
-  "ERC3643OperationsFixedRateFacet",
-  "ERC3643ReadFixedRateFacet",
+  "TransferFacet",
+  "MintByPartitionFacet",
+  "ProtectedByPartitionFacet",
+  "OperatorFacet",
+  "TransferByPartitionFacet",
+  "PartitionsFacet",
+  "OperatorByPartitionFacet",
+  "BurnByPartitionFacet",
+  "DocumentationFacet",
+  "ControllerFacet",
+  "ERC20PermitFacet",
+  "EIP712Facet",
+  "NoncesFacet",
+  "DeactivateFacet",
+  "ERC20VotesFacet",
+  "BatchControllerFacet",
+  "BatchBurnFacet",
+  "BatchMintFacet",
+  "BatchTransferFacet",
+  "RecoveryFacet",
+  "IdentityFacet",
+  "ComplianceFacet",
+  "ComplianceByPartitionFacet",
+  "MintFacet",
+  "BurnFacet",
 
   // Clearing & Settlement
-  "ClearingActionsFixedRateFacet",
-  "ClearingHoldCreationFixedRateFacet",
-  "ClearingReadFixedRateFacet",
-  "ClearingRedeemFixedRateFacet",
-  "ClearingTransferFixedRateFacet",
-  "HoldManagementFixedRateFacet",
-  "HoldReadFixedRateFacet",
-  "HoldTokenHolderFixedRateFacet",
+  "ClearingByPartitionFacet",
+  "ProtectedClearingHoldByPartitionFacet",
+  "ClearingHoldByPartitionFacet",
+  "OperatorClearingHoldByPartitionFacet",
+  "ClearingFacet",
+  "OperatorClearingByPartitionFacet",
+  "ProtectedClearingByPartitionFacet",
+  "HoldFacet",
+  "OperatorHoldByPartitionFacet",
+  "ControllerHoldByPartitionFacet",
+  "ControllerByPartitionFacet",
+  "ProtectedHoldByPartitionFacet",
+  "HoldByPartitionFacet",
 
   // External Management
-  "ExternalControlListManagementFixedRateFacet",
-  "ExternalKycListManagementFixedRateFacet",
-  "ExternalPauseManagementFixedRateFacet",
+  "ExternalControlListManagementFacet",
+  "ExternalKycListManagementFacet",
+  "ExternalPauseManagementFacet",
 
   // Advanced Features
-  "AdjustBalancesFixedRateFacet",
-  "LockFixedRateFacet",
-  "ProceedRecipientsFixedRateFacet",
-  "ProtectedPartitionsFixedRateFacet",
-  "ScheduledBalanceAdjustmentsFixedRateFacet",
-  "ScheduledCrossOrderedTasksFixedRateFacet",
-  "ScheduledCouponListingFixedRateFacet",
-  "ScheduledSnapshotsFixedRateFacet",
-  "SsiManagementFixedRateFacet",
-  "TransferAndLockFixedRateFacet",
-
-  "CouponFixedRateFacet",
-
-  //Interest Rate
-  "FixedRateFacet",
-
-  // Nominal Value (1)
+  "AdjustBalancesFacet",
+  "ScheduledBalanceAdjustmentFacet",
+  "LockFacet",
+  "LockByPartitionFacet",
+  "MaturityFacet",
   "NominalValueFacet",
+  "NominalValueAtSnapshotFacet",
+  "ProceedRecipientsFacet",
+  "ProtectedPartitionsFacet",
+  "ScheduledCrossOrderedTasksFacet",
+  "SecurityHoldersFacet",
+  "CouponListingFacet",
+  "SsiManagementFacet",
+  "TransferAndLockFacet",
+  "TransferAndLockByPartitionFacet",
+
+  "CouponSecurityHoldersFacet",
+
+  // Interest Rate (rate-specific)
+  "CouponFacet",
+  "FixedRateFacet",
+  "InterestRateFacet",
+
+  // Maturity By Partition
+  "MaturityByPartitionFacet",
 
   // Jurisdiction-Specific
-  "BondUSAFixedRateFacet",
-  "BondUSAReadFixedRateFacet",
+  "PrincipalFacet",
 ] as const;
 
 /**
@@ -157,21 +206,16 @@ export async function createBondFixedRateConfiguration(
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
+  retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  // Get facet names based on time travel mode
-  // Include TimeTravelFacet when useTimeTravel=true to provide time manipulation functions
-  const baseFacets = useTimeTravel ? [...BOND_FIXED_RATE_FACETS, "TimeTravelFacet"] : BOND_FIXED_RATE_FACETS;
-
-  const facetNames = useTimeTravel
-    ? baseFacets.map((name) => (name === "TimeTravelFacet" || name.endsWith("TimeTravel") ? name : `${name}TimeTravel`))
-    : baseFacets;
+  const facetNames = buildFacetList(BOND_FIXED_RATE_FACETS, useTimeTravel);
 
   // Build facet data with resolver keys from registry
   const facets = facetNames.map((name) => {
     // Strip "TimeTravel" suffix to get base name for registry lookup
     const baseName = name.replace(/TimeTravel$/, "");
 
-    const facetDef = atsRegistry.getFacetDefinition(baseName);
+    const facetDef = atsRegistry.getFacetDefinition(baseName) ?? getMockFacetDefinition(baseName);
     if (!facetDef?.resolverKey?.value) {
       throw new Error(`No resolver key found for facet: ${baseName}`);
     }
@@ -188,5 +232,6 @@ export async function createBondFixedRateConfiguration(
     partialBatchDeploy,
     batchSize,
     confirmations,
+    retryOptions,
   });
 }

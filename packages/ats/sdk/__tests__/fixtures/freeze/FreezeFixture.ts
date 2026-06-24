@@ -3,7 +3,9 @@
 import { FreezePartialTokensCommand } from "@command/security/operations/freeze/freezePartialTokens/FreezePartialTokensCommand";
 import { UnfreezePartialTokensCommand } from "@command/security/operations/freeze/unfreezePartialTokens/UnfreezePartialTokensCommand";
 import { GetFrozenPartialTokensQuery } from "@query/security/freeze/getFrozenPartialTokens/GetFrozenPartialTokensQuery";
-import { FreezePartialTokensRequest, UnfreezePartialTokensRequest, SetAddressFrozenRequest } from "src";
+import FreezePartialTokensRequest from "@port/in/request/security/operations/freeze/FreezePartialTokensRequest";
+import UnfreezePartialTokensRequest from "@port/in/request/security/operations/freeze/UnfreezePartialTokensRequest";
+import SetAddressFrozenRequest from "@port/in/request/security/operations/freeze/SetAddressFrozenRequest";
 import { createFixture } from "../config";
 import { HederaIdPropsFixture } from "../shared/DataFixture";
 import { SetAddressFrozenCommand } from "@command/security/operations/freeze/setAddressFrozen/SetAddressFrozenCommand";

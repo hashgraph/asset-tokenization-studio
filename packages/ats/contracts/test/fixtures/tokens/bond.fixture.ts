@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { deployAtsInfrastructureFixture } from "../infrastructure.fixture";
-import { CURRENCIES, DeepPartial, TIME_PERIODS_S, BOND_CONFIG_ID } from "../../../scripts";
+import { ATS_ROLES, CURRENCIES, DeepPartial, TIME_PERIODS_S, BOND_CONFIG_ID } from "../../../scripts";
 import {
   AccessControlFacet__factory,
   PauseFacet__factory,
   KycFacet__factory,
   ControlListFacet__factory,
+  IAsset__factory,
 } from "@contract-types";
 import { DeployBondFromFactoryParams, deployBondFromFactory } from "@scripts/domain";
 import { BondDetailsDataParams, FactoryRegulationDataParams } from "@scripts/domain";
@@ -29,7 +30,7 @@ export const DEFAULT_BOND_PARAMS = {
   },
 } as const;
 
-export async function getBondDetails(params?: DeepPartial<BondDetailsDataParams>) {
+export async function makeBondDetailsData(params?: DeepPartial<BondDetailsDataParams>) {
   const maturityDate =
     params?.maturityDate ??
     (params?.startingDate
@@ -57,14 +58,18 @@ export async function deployBondTokenFixture({
   bondDataParams,
   regulationTypeParams,
   useLoadFixture = true,
+  infrastructure: providedInfrastructure,
 }: {
   bondDataParams?: DeepPartial<DeployBondFromFactoryParams>;
   regulationTypeParams?: DeepPartial<FactoryRegulationDataParams>;
   useLoadFixture?: boolean;
+  infrastructure?: Awaited<ReturnType<typeof deployAtsInfrastructureFixture>>;
 } = {}) {
-  const infrastructure = useLoadFixture
-    ? await loadFixture(deployAtsInfrastructureFixture)
-    : await deployAtsInfrastructureFixture();
+  // Reuse already-loaded infrastructure when provided to avoid nested loadFixture
+  // calls that would revert the chain and wipe previously-deployed sibling tokens.
+  const infrastructure =
+    providedInfrastructure ??
+    (useLoadFixture ? await loadFixture(deployAtsInfrastructureFixture) : await deployAtsInfrastructureFixture());
   const { factory, blr, deployer } = infrastructure;
 
   const securityData = getSecurityData(blr, {
@@ -74,7 +79,7 @@ export async function deployBondTokenFixture({
       version: 1,
     },
   });
-  const bondDetails = await getBondDetails(bondDataParams?.bondDetails);
+  const bondDetails = await makeBondDetailsData(bondDataParams?.bondDetails);
 
   const diamond = await deployBondFromFactory(
     {
@@ -97,6 +102,9 @@ export async function deployBondTokenFixture({
   const pauseFacet = PauseFacet__factory.connect(diamond.target as string, deployer);
   const kycFacet = KycFacet__factory.connect(diamond.target as string, deployer);
   const controlListFacet = ControlListFacet__factory.connect(diamond.target as string, deployer);
+  const asset = IAsset__factory.connect(diamond.target as string, deployer);
+
+  await accessControlFacet.grantRole(ATS_ROLES.ROLE_NOMINAL_VALUE, deployer.address);
 
   return {
     ...infrastructure,
@@ -110,5 +118,6 @@ export async function deployBondTokenFixture({
     pauseFacet,
     kycFacet,
     controlListFacet,
+    asset,
   };
 }

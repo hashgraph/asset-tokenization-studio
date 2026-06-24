@@ -16,7 +16,7 @@
  */
 
 import { Signer, ContractFactory } from "ethers";
-import { ProxyAdmin__factory } from "@contract-types";
+import { ProxyAdmin__factory, IStaticFunctionSelectors__factory } from "@contract-types";
 import {
   deployFacets,
   registerFacets,
@@ -27,6 +27,8 @@ import {
   warn,
   error as logError,
   getDeploymentConfig,
+  DEFAULT_TRANSACTION_TIMEOUT,
+  retryTransaction,
   CheckpointManager,
   NullCheckpointManager,
   saveDeploymentOutput,
@@ -38,6 +40,7 @@ import {
   toConfigurationData,
   convertCheckpointFacets,
   resolveCheckpointForResume,
+  isSuccess,
 } from "@scripts/infrastructure";
 import {
   atsRegistry,
@@ -46,7 +49,11 @@ import {
   createBondConfiguration,
   createBondFixedRateConfiguration,
   createBondKpiLinkedRateConfiguration,
-  createBondSustainabilityPerformanceTargetRateConfiguration,
+  createDepositTokenConfiguration,
+  createFactoryConfiguration,
+  deployOrchestratorLibraries,
+  hasOrchestratorLibraryAddresses,
+  setOrchestratorLibraryAddresses,
 } from "@scripts/domain";
 
 import { BusinessLogicResolver__factory } from "@contract-types";
@@ -135,7 +142,17 @@ export interface DeploymentWithExistingBlrOutput {
         address: string;
       }>;
     };
-    bondSustainabilityPerformanceTargetRate: {
+    depositToken: {
+      configId: string;
+      version: number;
+      facetCount: number;
+      facets: Array<{
+        facetName: string;
+        key: string;
+        address: string;
+      }>;
+    };
+    factory: {
       configId: string;
       version: number;
       facetCount: number;
@@ -187,7 +204,7 @@ export interface DeploySystemWithExistingBlrOptions extends ResumeOptions {
   /** Existing ProxyAdmin address (optional, will deploy new one if not provided) */
   existingProxyAdminAddress?: string;
 
-  /** Number of confirmations to wait for each deployment (default: from network config) */
+  /** Number of confirmations for contract transactions */
   confirmations?: number;
 
   /** Enable retry mechanism for failed deployments (default: from network config) */
@@ -282,7 +299,7 @@ export async function deploySystemWithExistingBlr(
   info(`👤 Deployer: ${deployer}`);
   info(`🔷 BLR Address: ${blrAddress}`);
   info(`🔄 TimeTravel: ${useTimeTravel ? "Enabled" : "Disabled"}`);
-  info(`⏱️  Confirmations: ${confirmations}`);
+  info(`⏱️  Confirmations (deploy): ${confirmations}`);
   info(`🔁 Retry: ${enableRetry ? "Enabled" : "Disabled"}`);
   info(`✅ Verification: ${verifyDeployment ? "Enabled" : "Disabled"}`);
   info("═".repeat(60));
@@ -404,6 +421,44 @@ export async function deploySystemWithExistingBlr(
     const facetAddresses: Record<string, string> = {};
 
     if (shouldDeployFacets) {
+      // Resolve any pending facets left by a previous run that crashed between
+      // onTransactionSent and onFacetDeployed (i.e. during waitForDeployment).
+      if (checkpoint.steps.facets) {
+        const pendingEntries = [...checkpoint.steps.facets.entries()].filter(([, entry]) => entry.pending);
+        if (pendingEntries.length > 0) {
+          info(`\n⏳ Resolving ${pendingEntries.length} pending facet transaction(s) from previous run...`);
+          const provider = signer.provider;
+          if (!provider) throw new Error("Signer has no provider — cannot resolve pending facet transactions");
+          for (const [facetName, entry] of pendingEntries) {
+            info(`   Waiting for ${facetName} (tx: ${entry.txHash})...`);
+            try {
+              const receipt = await retryTransaction(
+                () => provider.waitForTransaction(entry.txHash, confirmations, DEFAULT_TRANSACTION_TIMEOUT * 3),
+                enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
+              );
+              if (receipt?.contractAddress) {
+                checkpoint.steps.facets.set(facetName, {
+                  address: receipt.contractAddress,
+                  txHash: entry.txHash,
+                  gasUsed: receipt.gasUsed.toString(),
+                  deployedAt: entry.deployedAt,
+                });
+                info(`   ✅ ${facetName} confirmed at ${receipt.contractAddress}`);
+              } else {
+                warn(`   ⚠ ${facetName} tx has no contract address (throttled?), will redeploy`);
+                checkpoint.steps.facets.delete(facetName);
+              }
+            } catch (pendingErr) {
+              warn(
+                `   ⚠ Could not confirm ${facetName}: ${pendingErr instanceof Error ? pendingErr.message : String(pendingErr)}, will redeploy`,
+              );
+              checkpoint.steps.facets.delete(facetName);
+            }
+            await checkpointManager.saveCheckpoint(checkpoint);
+          }
+        }
+      }
+
       if (checkpoint.steps.facets && checkpoint.currentStep >= 1) {
         info(`\n✓ Step 3/${totalSteps}: All facets already deployed (resuming)`);
         // Use converter to reconstruct facetsResult with proper DeploymentResult types
@@ -424,6 +479,21 @@ export async function deploySystemWithExistingBlr(
         info(`✅ Loaded ${facetsResult.deployed.size} facets from checkpoint`);
       } else {
         info(`\n📦 Step 3/${totalSteps}: Deploying all facets...`);
+
+        // Deploy orchestrator libraries first (required for facet factory linking)
+        if (checkpoint.steps.libraries) {
+          const { deployedAt: _deployedAt, ...libAddrs } = checkpoint.steps.libraries;
+          setOrchestratorLibraryAddresses(libAddrs);
+          info("   Orchestrator libraries restored from checkpoint");
+        } else if (!hasOrchestratorLibraryAddresses()) {
+          info("   Deploying orchestrator libraries (required for facet linking)...");
+          const libAddrs = await deployOrchestratorLibraries(signer, {
+            retryOptions: enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
+          });
+          checkpoint.steps.libraries = { ...libAddrs, deployedAt: new Date().toISOString() };
+          await checkpointManager.saveCheckpoint(checkpoint);
+        }
+
         let allFacets = atsRegistry.getAllFacets();
         info(`   Found ${allFacets.length} facets in registry`);
 
@@ -437,17 +507,25 @@ export async function deploySystemWithExistingBlr(
         }
 
         // Create factories from registry
+        // When useTimeTravel=true, deploy TimeTravel variant facets instead of production ones
+        // Skip facets without factories (abstract contracts like LockFacet)
         const facetFactories: Record<string, ContractFactory> = {};
         for (const facet of allFacets) {
-          if (!facet.factory) {
-            throw new Error(`No factory found for facet: ${facet.name}`);
+          // Select factory: TimeTravel variant when available and enabled, else production
+          const selectedFactory = useTimeTravel && facet.timeTravelFactory ? facet.timeTravelFactory : facet.factory;
+
+          if (!selectedFactory) {
+            info(`   Skipping ${facet.name} (abstract contract, no factory)`);
+            continue;
           }
 
-          const factory = facet.factory(signer, useTimeTravel);
+          // Get factory
+          const factory = selectedFactory(signer) as ContractFactory;
+          // Use the actual contract name from the factory
           const contractName = factory.constructor.name.replace("__factory", "");
 
-          // Skip if already deployed
-          if (checkpoint.steps.facets.has(contractName)) {
+          // Skip if already confirmed. Pending entries were resolved above.
+          if (checkpoint.steps.facets.has(contractName) && !checkpoint.steps.facets.get(contractName)!.pending) {
             info(`   ✓ ${contractName} already deployed (skipping)`);
             continue;
           }
@@ -463,6 +541,24 @@ export async function deploySystemWithExistingBlr(
             confirmations,
             enableRetry,
             verifyDeployment,
+            onTransactionSent: async (facetName, txHash) => {
+              checkpoint.steps.facets!.set(facetName, {
+                address: "",
+                txHash,
+                deployedAt: new Date().toISOString(),
+                pending: true,
+              });
+              await checkpointManager.saveCheckpoint(checkpoint);
+            },
+            onFacetDeployed: async (facetName, result) => {
+              checkpoint.steps.facets!.set(facetName, {
+                address: result.address!,
+                txHash: result.transactionHash || "",
+                gasUsed: result.gasUsed?.toString(),
+                deployedAt: new Date().toISOString(),
+              });
+              await checkpointManager.saveCheckpoint(checkpoint);
+            },
           });
 
           if (!facetsResult.success) {
@@ -546,6 +642,7 @@ export async function deploySystemWithExistingBlr(
 
         const registerResult = await registerFacets(blrContract, {
           facets: facetsToRegister,
+          retryOptions: enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
         });
 
         if (!registerResult.success) {
@@ -574,10 +671,7 @@ export async function deploySystemWithExistingBlr(
     let bondConfig: Awaited<ReturnType<typeof createBondConfiguration>> | undefined;
     let bondFixedRateConfig: Awaited<ReturnType<typeof createBondFixedRateConfiguration>> | undefined;
     let bondKpiLinkedRateConfig: Awaited<ReturnType<typeof createBondKpiLinkedRateConfiguration>> | undefined;
-    let bondSustainabilityPerformanceTargetRateConfig:
-      | Awaited<ReturnType<typeof createBondSustainabilityPerformanceTargetRateConfiguration>>
-      | undefined;
-
+    let depositTokenConfig: Awaited<ReturnType<typeof createDepositTokenConfiguration>> | undefined;
     if (shouldCreateConfigurations) {
       if (Object.keys(facetAddresses).length === 0) {
         info(`\n⚠️  Step 5/${totalSteps}: Skipping configurations (no facets deployed)...`);
@@ -586,7 +680,6 @@ export async function deploySystemWithExistingBlr(
           "Bond configuration",
           "Bond Fixed Rate configuration",
           "Bond Kpi Linked Rate configuration",
-          "Bond Sustainability Performance Target Rate configuration",
         );
       } else {
         // Get BLR contract instance
@@ -612,6 +705,7 @@ export async function deploySystemWithExistingBlr(
             false,
             batchSize,
             confirmations,
+            enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
           );
 
           if (!equityConfig.success) {
@@ -656,6 +750,7 @@ export async function deploySystemWithExistingBlr(
             false,
             batchSize,
             confirmations,
+            enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
           );
 
           if (!bondConfig.success) {
@@ -697,6 +792,7 @@ export async function deploySystemWithExistingBlr(
             false,
             batchSize,
             confirmations,
+            enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
           );
 
           if (!bondFixedRateConfig.success) {
@@ -740,6 +836,7 @@ export async function deploySystemWithExistingBlr(
             false,
             batchSize,
             confirmations,
+            enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
           );
 
           if (!bondKpiLinkedRateConfig.success) {
@@ -763,61 +860,46 @@ export async function deploySystemWithExistingBlr(
           await checkpointManager.saveCheckpoint(checkpoint);
         }
 
-        // Step 7: Create Bond Sustainability Performance Target Rate Configuration
-        if (checkpoint.steps.configurations?.bondSustainabilityPerformanceTargetRate && checkpoint.currentStep >= 7) {
-          info(
-            `\n✓ Step 8/${totalSteps}: Bond Sustainability Performance Target Rate configuration already created (resuming)`,
-          );
-          const bondSustainabilityPerformanceTargetRateConfigData =
-            checkpoint.steps.configurations.bondSustainabilityPerformanceTargetRate;
-          info(
-            `✅ Bond Sustainability Performance Target Rate Config ID: ${bondSustainabilityPerformanceTargetRateConfigData.configId}`,
-          );
-          info(
-            `✅ Bond Sustainability Performance Target Rate Version: ${bondSustainabilityPerformanceTargetRateConfigData.version}`,
-          );
-          info(
-            `✅ Bond Sustainability Performance Target Rate Facets: ${bondSustainabilityPerformanceTargetRateConfigData.facetCount}`,
-          );
+        // Step 7: Create Deposit Token Configuration
+        if (checkpoint.steps.configurations?.depositToken && checkpoint.currentStep >= 7) {
+          info(`\n✓ Step 8/${totalSteps}: Deposit Token configuration already created (resuming)`);
+          const depositTokenConfigData = checkpoint.steps.configurations.depositToken;
+          info(`✅ Deposit Token Config ID: ${depositTokenConfigData.configId}`);
+          info(`✅ Deposit Token Version: ${depositTokenConfigData.version}`);
+          info(`✅ Deposit Token Facets: ${depositTokenConfigData.facetCount}`);
 
-          // Use converter to reconstruct full ConfigurationData from checkpoint
-          bondSustainabilityPerformanceTargetRateConfig = toConfigurationData(
-            bondSustainabilityPerformanceTargetRateConfigData,
-          );
+          depositTokenConfig = toConfigurationData(depositTokenConfigData);
         } else {
-          info(`\n🏦 Step 8/${totalSteps}: Creating Bond Sustainability Performance Target Rate configuration...`);
+          info(`\n💵 Step 8/${totalSteps}: Creating Deposit Token configuration...`);
 
-          bondSustainabilityPerformanceTargetRateConfig =
-            await createBondSustainabilityPerformanceTargetRateConfiguration(
-              blrContract,
-              facetAddresses,
-              useTimeTravel,
-              false,
-              batchSize,
-              confirmations,
-            );
+          depositTokenConfig = await createDepositTokenConfiguration(
+            blrContract,
+            facetAddresses,
+            useTimeTravel,
+            false,
+            batchSize,
+            confirmations,
+            enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
+          );
 
-          if (!bondSustainabilityPerformanceTargetRateConfig.success) {
+          if (!depositTokenConfig.success) {
             throw new Error(
-              `Bond Sustainability Performance Target Rate config creation failed: ${bondSustainabilityPerformanceTargetRateConfig.error} - ${bondSustainabilityPerformanceTargetRateConfig.message}`,
+              `Deposit Token config creation failed: ${depositTokenConfig.error} - ${depositTokenConfig.message}`,
             );
           }
 
-          info(
-            `✅ Bond Sustainability Performance Target Rate Config ID: ${bondSustainabilityPerformanceTargetRateConfig.data.configurationId}`,
-          );
-          info(
-            `✅ Bond Sustainability Performance Target Rate Version: ${bondSustainabilityPerformanceTargetRateConfig.data.version}`,
-          );
-          info(
-            `✅ Bond Sustainability Performance Target Rate Facets: ${bondSustainabilityPerformanceTargetRateConfig.data.facetKeys.length}`,
-          );
+          info(`✅ Deposit Token Config ID: ${depositTokenConfig.data.configurationId}`);
+          info(`✅ Deposit Token Version: ${depositTokenConfig.data.version}`);
+          info(`✅ Deposit Token Facets: ${depositTokenConfig.data.facetKeys.length}`);
 
-          // Save checkpoint
-          checkpoint.steps.configurations!.bondSustainabilityPerformanceTargetRate = {
-            configId: bondSustainabilityPerformanceTargetRateConfig.data.configurationId,
-            version: bondSustainabilityPerformanceTargetRateConfig.data.version,
-            facetCount: bondSustainabilityPerformanceTargetRateConfig.data.facetKeys.length,
+          if (!checkpoint.steps.configurations) {
+            checkpoint.steps.configurations = {};
+          }
+          checkpoint.steps.configurations.depositToken = {
+            configId: depositTokenConfig.data.configurationId,
+            version: depositTokenConfig.data.version,
+            facetCount: depositTokenConfig.data.facetKeys.length,
+            facets: depositTokenConfig.data.facetKeys,
             txHash: "",
           };
           checkpoint.currentStep = 7;
@@ -831,65 +913,102 @@ export async function deploySystemWithExistingBlr(
         "Bond configuration",
         "Bond Fixed Rate configuration",
         "Bond KpiLinked Rate configuration",
-        "Bond Sustainability Performance Target Rate configuration",
+        "Deposit Token configuration",
       );
     }
 
-    // Step 5: Deploy Factory (optional - controlled by deployFactory flag)
+    // Step 5a: Create Factory configuration (MUST precede FactoryProxy construction)
+    let factoryConfig: Awaited<ReturnType<typeof createFactoryConfiguration>> | undefined;
+
+    if (shouldDeployFactory) {
+      const blrContractForFactory = BusinessLogicResolver__factory.connect(blrAddress, signer);
+
+      if (checkpoint.steps.configurations?.factory && checkpoint.currentStep >= 8) {
+        info(`\n✓ Step 9/${totalSteps}: Factory configuration already created (resuming)`);
+        const factoryConfigData = checkpoint.steps.configurations.factory;
+        info(`✅ Factory Config ID: ${factoryConfigData.configId}`);
+        info(`✅ Factory Version: ${factoryConfigData.version}`);
+        factoryConfig = toConfigurationData(checkpoint.steps.configurations.factory);
+      } else {
+        info(`\n🏭 Step 9/${totalSteps}: Creating Factory configuration...`);
+        factoryConfig = await createFactoryConfiguration(
+          blrContractForFactory,
+          facetAddresses,
+          useTimeTravel,
+          false,
+          batchSize,
+          confirmations,
+          enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
+        );
+
+        if (!factoryConfig.success) {
+          throw new Error(`Factory config creation failed: ${factoryConfig.error} - ${factoryConfig.message}`);
+        }
+
+        info(`✅ Factory Config ID: ${factoryConfig.data.configurationId}`);
+        info(`✅ Factory Version: ${factoryConfig.data.version}`);
+        info(`Registered FactoryConfig v${factoryConfig.data.version} before constructing FactoryProxy`);
+
+        if (!checkpoint.steps.configurations) {
+          checkpoint.steps.configurations = {};
+        }
+        checkpoint.steps.configurations.factory = {
+          configId: factoryConfig.data.configurationId,
+          version: factoryConfig.data.version,
+          facetCount: factoryConfig.data.facetKeys.length,
+          txHash: "",
+        };
+        checkpoint.currentStep = 8;
+        await checkpointManager.saveCheckpoint(checkpoint);
+      }
+    }
+
+    // Step 5b: Deploy Factory (optional - controlled by deployFactory flag)
     let factoryResult: Awaited<ReturnType<typeof deployFactory>> | undefined;
 
     if (shouldDeployFactory) {
-      if (checkpoint.steps.factory && checkpoint.currentStep >= 8) {
-        info(`\n✓ Step 9/${totalSteps}: Factory already deployed (resuming)`);
-        // Reconstruct DeployFactoryResult from checkpoint (with placeholder proxyResult)
-        const proxyAdminAddr = checkpoint.steps.proxyAdmin?.address || (proxyAdmin.target as string);
+      const factoryFacetAddress = facetAddresses["FactoryFacet"];
+      if (!factoryFacetAddress) {
+        throw new Error("deploySystemWithExistingBlr: factoryFacetAddress is required");
+      }
+      const factoryVersion = factoryConfig && isSuccess(factoryConfig) ? factoryConfig.data.version : 1;
+
+      if (checkpoint.steps.factory && checkpoint.currentStep >= 9) {
+        info(`\n✓ Step 10/${totalSteps}: Factory already deployed (resuming)`);
         factoryResult = {
           success: true,
-          proxyResult: {
-            implementation: { address: checkpoint.steps.factory.implementation } as any,
-            implementationAddress: checkpoint.steps.factory.implementation,
-            proxy: { address: checkpoint.steps.factory.proxy } as any,
-            proxyAddress: checkpoint.steps.factory.proxy,
-            proxyAdmin: { address: proxyAdminAddr } as any,
-            proxyAdminAddress: proxyAdminAddr,
-            receipts: {},
-          },
           factoryAddress: checkpoint.steps.factory.proxy,
-          implementationAddress: checkpoint.steps.factory.implementation,
-          proxyAdminAddress: proxyAdminAddr,
-          initialized: true, // Assume initialized if checkpoint exists
         };
         info(`✅ Factory Implementation: ${checkpoint.steps.factory.implementation}`);
         info(`✅ Factory Proxy: ${checkpoint.steps.factory.proxy}`);
       } else {
-        info(`\n🏭 Step 9/${totalSteps}: Deploying Factory...`);
+        info(`\n🏭 Step 10/${totalSteps}: Deploying Factory (ResolverProxy)...`);
         factoryResult = await deployFactory(signer, {
-          existingProxyAdmin: proxyAdmin,
+          blrAddress,
+          factoryVersion,
         });
 
         if (!factoryResult.success) {
           throw new Error(`Factory deployment failed: ${factoryResult.error}`);
         }
 
-        if (factoryResult) {
-          info(`✅ Factory Implementation: ${factoryResult.implementationAddress}`);
-          info(`✅ Factory Proxy: ${factoryResult.factoryAddress}`);
-        }
+        info(`✅ Factory Implementation: ${facetAddresses["FactoryFacet"]}`);
+        info(`✅ Factory Proxy: ${factoryResult.factoryAddress}`);
 
         // Save checkpoint
         checkpoint.steps.factory = {
           address: factoryResult.factoryAddress,
-          implementation: factoryResult.implementationAddress,
           proxy: factoryResult.factoryAddress,
+          implementation: facetAddresses["FactoryFacet"],
           txHash: "",
           deployedAt: new Date().toISOString(),
         };
-        checkpoint.currentStep = 8;
+        checkpoint.currentStep = 9;
         await checkpointManager.saveCheckpoint(checkpoint);
       }
     } else {
-      info(`\n🏭 Step 9/${totalSteps}: Skipping Factory deployment...`);
-      skippedSteps.push("Factory deployment");
+      info(`\n🏭 Step 9-10/${totalSteps}: Skipping Factory configuration and deployment...`);
+      skippedSteps.push("Factory configuration", "Factory deployment");
     }
 
     const endTime = Date.now();
@@ -920,8 +1039,8 @@ export async function deploySystemWithExistingBlr(
         },
         factory: factoryResult
           ? {
-              implementation: factoryResult.implementationAddress,
-              implementationContractId: await getContractId(factoryResult.implementationAddress),
+              implementation: facetAddresses["FactoryFacet"] || "Unknown (FactoryFacet address not found)",
+              implementationContractId: await getContractId(facetAddresses["FactoryFacet"]),
               proxy: factoryResult.factoryAddress,
               proxyContractId: await getContractId(factoryResult.factoryAddress),
             }
@@ -932,46 +1051,62 @@ export async function deploySystemWithExistingBlr(
       },
 
       facets: facetsResult
-        ? await Promise.all(
-            Array.from(facetsResult.deployed.entries()).map(async ([facetName, deploymentResult]) => {
-              const facetAddress = deploymentResult.address!;
+        ? await (async () => {
+            // Pass 1: resolve keys in parallel
+            const facetEntries = await Promise.all(
+              Array.from(facetsResult.deployed.entries()).map(async ([facetName, deploymentResult]) => {
+                const facetAddress = deploymentResult.address!;
 
-              // Find matching key from config
-              const equityFacet = equityConfig?.success
-                ? equityConfig.data.facetKeys.find((ef) => ef.address === facetAddress)
-                : undefined;
-              const bondFacet = bondConfig?.success
-                ? bondConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
-                : undefined;
-              const bondFixedRateFacet = bondFixedRateConfig?.success
-                ? bondFixedRateConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
-                : undefined;
-              const bondKpiLinkedRateFacet = bondKpiLinkedRateConfig?.success
-                ? bondKpiLinkedRateConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
-                : undefined;
-              const bondSustainabilityPerformanceTargetRateFacet =
-                bondSustainabilityPerformanceTargetRateConfig?.success
-                  ? bondSustainabilityPerformanceTargetRateConfig.data.facetKeys.find(
-                      (bf) => bf.address === facetAddress,
-                    )
+                // Find matching key from config
+                const equityFacet = equityConfig?.success
+                  ? equityConfig.data.facetKeys.find((ef) => ef.address === facetAddress)
+                  : undefined;
+                const bondFacet = bondConfig?.success
+                  ? bondConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
+                  : undefined;
+                const bondFixedRateFacet = bondFixedRateConfig?.success
+                  ? bondFixedRateConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
+                  : undefined;
+                const bondKpiLinkedRateFacet = bondKpiLinkedRateConfig?.success
+                  ? bondKpiLinkedRateConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
                   : undefined;
 
-              return {
-                name: facetName,
-                address: facetAddress,
-                contractId: await getContractId(facetAddress),
-                key:
+                const staticFunctionSelectors = IStaticFunctionSelectors__factory.connect(facetAddress, signer);
+                const key =
                   equityFacet?.key ||
                   bondFacet?.key ||
                   bondFixedRateFacet?.key ||
                   bondKpiLinkedRateFacet?.key ||
-                  bondSustainabilityPerformanceTargetRateFacet?.key ||
-                  "",
-              };
-            }),
-          )
+                  (await staticFunctionSelectors.getStaticResolverKey());
+
+                return { facetName, facetAddress, key };
+              }),
+            );
+
+            // Pass 2: single batch call for all known keys (skip empty keys — not in any config)
+            const blrForVersions = BusinessLogicResolver__factory.connect(blrAddress, signer);
+            const knownKeys = facetEntries.map((e) => e.key).filter((k) => k !== "");
+            const uniqueKeys = [...new Set(knownKeys)];
+            const rawVersions = uniqueKeys.length > 0 ? await blrForVersions.getLatestVersions(uniqueKeys) : [];
+            const versionByKey = new Map(uniqueKeys.map((k, i) => [k, Number(rawVersions[i])]));
+
+            // Pass 3: assemble final output with contractId (parallel) and version
+            return Promise.all(
+              facetEntries.map(async ({ facetName, facetAddress, key }) => ({
+                name: facetName,
+                address: facetAddress,
+                contractId: await getContractId(facetAddress),
+                key,
+                version: versionByKey.get(key) ?? undefined,
+              })),
+            );
+          })()
         : [],
 
+      // Configuration summary. `version: 0` entries below are placeholders
+      // emitted when the corresponding configuration was skipped or failed to
+      // create — they are display-only and never sent on-chain. Successful
+      // entries carry the real registered version (>= 1) from the BLR.
       configurations: {
         equity:
           equityConfig && equityConfig.success
@@ -1029,13 +1164,27 @@ export async function deploySystemWithExistingBlr(
                 facetCount: 0,
                 facets: [],
               },
-        bondSustainabilityPerformanceTargetRate:
-          bondSustainabilityPerformanceTargetRateConfig && bondSustainabilityPerformanceTargetRateConfig.success
+        depositToken:
+          depositTokenConfig && depositTokenConfig.success
             ? {
-                configId: bondSustainabilityPerformanceTargetRateConfig.data.configurationId,
-                version: bondSustainabilityPerformanceTargetRateConfig.data.version,
-                facetCount: bondSustainabilityPerformanceTargetRateConfig.data.facetKeys.length,
-                facets: bondSustainabilityPerformanceTargetRateConfig.data.facetKeys,
+                configId: depositTokenConfig.data.configurationId,
+                version: depositTokenConfig.data.version,
+                facetCount: depositTokenConfig.data.facetKeys.length,
+                facets: depositTokenConfig.data.facetKeys,
+              }
+            : {
+                configId: "N/A (Not created)",
+                version: 0,
+                facetCount: 0,
+                facets: [],
+              },
+        factory:
+          factoryConfig && factoryConfig.success
+            ? {
+                configId: factoryConfig.data.configurationId,
+                version: factoryConfig.data.version,
+                facetCount: factoryConfig.data.facetKeys.length,
+                facets: factoryConfig.data.facetKeys,
               }
             : {
                 configId: "N/A (Not created)",
@@ -1053,7 +1202,8 @@ export async function deploySystemWithExistingBlr(
           (bondConfig ? 1 : 0) +
           (bondFixedRateConfig ? 1 : 0) +
           (bondKpiLinkedRateConfig ? 1 : 0) +
-          (bondSustainabilityPerformanceTargetRateConfig ? 1 : 0),
+          (depositTokenConfig ? 1 : 0) +
+          (factoryConfig ? 1 : 0),
         deploymentTime: endTime - startTime,
         gasUsed: totalGasUsed.toString(),
         success: true,

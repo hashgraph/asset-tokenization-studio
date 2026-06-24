@@ -1,0 +1,71 @@
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity >=0.8.0 <0.9.0;
+
+import { IHoldTypes } from "../hold/IHoldTypes.sol";
+import { IClearingTypes } from "../clearing/IClearingTypes.sol";
+
+/// @custom:hash resolverKey OperatorClearingHoldbypartition
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_OPERATOR_CLEARING_HOLDBYPARTITION = 0xab5e4afdccea84152256072fb9f39bf08d591a7666557783209dff003658d945;
+
+/**
+ * @title IOperatorClearingHoldByPartition
+ * @author Asset Tokenization Studio Team
+ * @notice Interface for operator-initiated hold creation submitted through the clearing flow
+ *         on a specific token partition.
+ * @dev    The caller must be an authorised operator for the target partition of `_from`.
+ *         On approval of the queued clearing operation the hold is created via the clearing
+ *         orchestrator; the clearing expiration and the resulting hold expiration are
+ *         independent timestamps.
+ *         The event `ClearedOperatorHoldByPartition` is emitted at submission time;
+ *         `ClearingOperationApproved` (defined in `IClearingTypes`) is emitted on approval.
+ */
+interface IOperatorClearingHoldByPartition is IClearingTypes {
+    /**
+     * @notice Emitted once when the operator-clearing-hold-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeOperatorClearingHoldByPartition`.
+     */
+    event OperatorClearingHoldByPartitionInitialized();
+
+    /**
+     * @notice Emitted when an authorised operator schedules a hold creation through the clearing flow.
+     * @param operator Account that invoked the clearing hold creation (the operator).
+     * @param tokenHolder Address whose balance is being committed to the hold.
+     * @param partition Partition under which the hold is scheduled.
+     * @param clearingId Identifier assigned to the queued clearing operation.
+     * @param hold Hold parameters that will be created on approval.
+     * @param expirationDate Expiration of the clearing operation itself.
+     * @param data Arbitrary payload attached to the clearing operation.
+     * @param operatorData Operator-supplied payload accompanying the request.
+     */
+    event ClearedOperatorHoldByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        IHoldTypes.Hold hold,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
+
+    /**
+     * @notice Initialises the operator-clearing-hold-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeOperatorClearingHoldByPartition() external;
+
+    /**
+     * @notice Creates a hold for a clearing operation by partition from a third party.
+     * @dev Caller must be an authorised token holder operator.
+     * @param _clearingOperationFrom Details of the clearing operation.
+     * @param _hold Hold details.
+     * @return success_ True if the hold was created successfully.
+     * @return clearingId_ Unique identifier for the created clearing operation.
+     */
+    function operatorClearingCreateHoldByPartition(
+        IClearingTypes.ClearingOperationFrom calldata _clearingOperationFrom,
+        IHoldTypes.Hold calldata _hold
+    ) external returns (bool success_, uint256 clearingId_);
+}

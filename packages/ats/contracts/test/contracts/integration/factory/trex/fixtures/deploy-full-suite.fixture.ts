@@ -12,7 +12,7 @@ export async function deployIdentityProxy(implementationAuthority: string, manag
     signer,
   ).deploy(implementationAuthority, managementKey);
 
-  return ethers.getContractAt("Identity", await identity.getAddress(), signer);
+  return new ethers.Contract(await identity.getAddress(), OnchainID.contracts.Identity.abi, signer);
 }
 
 export async function deployFullSuiteFixture() {
@@ -139,7 +139,7 @@ export async function deployFullSuiteFixture() {
     aliceWallet.address,
     deployer,
   );
-  await aliceIdentity
+  await (aliceIdentity as any)
     .connect(aliceWallet)
     .addKey(ethers.keccak256(ethers.AbiCoder.defaultAbiCoder().encode(["address"], [aliceActionKey.address])), 2, 1);
   const bobIdentity = await deployIdentityProxy(
@@ -182,7 +182,7 @@ export async function deployFullSuiteFixture() {
     ),
   );
 
-  await aliceIdentity
+  await (aliceIdentity as any)
     .connect(aliceWallet)
     .addClaim(
       claimForAlice.topic,
@@ -212,7 +212,7 @@ export async function deployFullSuiteFixture() {
     ),
   );
 
-  await bobIdentity
+  await (bobIdentity as any)
     .connect(bobWallet)
     .addClaim(claimForBob.topic, claimForBob.scheme, claimForBob.issuer, claimForBob.signature, claimForBob.data, "");
 

@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { DiamondFacet } from "@contract-types";
-import { deployEquityTokenFixture } from "test/fixtures";
+import { deployEquityTokenFixture } from "@test/fixtures";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 describe("DiamondLoupeFacet", () => {
@@ -229,9 +229,7 @@ describe("DiamondLoupeFacet", () => {
     });
 
     it("GIVEN a resolver WHEN checking IAccessControl interface THEN returns true", async () => {
-      const diamondLoupeInterfaceId = "0xd1496c36"; // IAccessControl interface ID
-      const isSupported = await diamondLoupe.supportsInterface(diamondLoupeInterfaceId);
-
+      const isSupported = await diamondLoupe.supportsInterface("0x2fe9ac18");
       expect(isSupported).to.be.true;
     });
   });

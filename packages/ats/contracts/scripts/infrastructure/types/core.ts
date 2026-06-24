@@ -48,14 +48,23 @@ import type { WorkflowType } from "./checkpoint";
  * }
  * ```
  */
+export interface SolSignature {
+  /** Full Solidity declaration with keyword + parameter names + indexed flags
+   *  (e.g., "function grantRole(bytes32 role, address account)"). */
+  full: string;
+
+  /** Canonical selector form used by keccak256 (e.g., "grantRole(bytes32,address)"). */
+  canonical: string;
+}
+
 export interface MethodDefinition {
   /** Method name (e.g., "grantRole") */
   name: string;
 
-  /** Full canonical signature (e.g., "grantRole(bytes32,address)") */
-  signature: string;
+  /** Both signature representations — see {@link SolSignature}. */
+  signature: SolSignature;
 
-  /** 4-byte function selector (e.g., "0x2f2ff15d") - keccak256(signature).slice(0, 10) */
+  /** 4-byte function selector (e.g., "0x2f2ff15d") - keccak256(canonical).slice(0, 10) */
   selector: string;
 }
 
@@ -78,8 +87,8 @@ export interface EventDefinition {
   /** Event name (e.g., "RoleGranted") */
   name: string;
 
-  /** Full canonical signature (e.g., "RoleGranted(bytes32,address,address)") */
-  signature: string;
+  /** Both signature representations — see {@link SolSignature}. */
+  signature: SolSignature;
 
   /** Topic0 hash (full 32-byte keccak256) for event filtering (e.g., "0x2f8788117e7eff1d...") */
   topic0: string;
@@ -104,10 +113,10 @@ export interface ErrorDefinition {
   /** Error name (e.g., "InsufficientBalance") */
   name: string;
 
-  /** Full canonical signature (e.g., "InsufficientBalance(uint256,uint256)") */
-  signature: string;
+  /** Both signature representations — see {@link SolSignature}. */
+  signature: SolSignature;
 
-  /** 4-byte error selector (e.g., "0xcf479181") - keccak256(signature).slice(0, 10) */
+  /** 4-byte error selector (e.g., "0xcf479181") - keccak256(canonical).slice(0, 10) */
   selector: string;
 }
 
@@ -138,7 +147,7 @@ export interface FacetDefinition {
 
   /** Resolver key imported or defined by this facet */
   resolverKey?: {
-    /** Resolver key name (e.g., _ACCESS_CONTROL_RESOLVER_KEY) */
+    /** Resolver key name (e.g., _ACCESS_CONTROL) */
     name: string;
     /** Resolver key bytes32 value (e.g., 0x011768a41...) */
     value: string;
@@ -159,8 +168,23 @@ export interface FacetDefinition {
   /** Custom errors defined in this facet */
   errors?: ErrorDefinition[];
 
-  /** TypeChain factory constructor function for creating contract instances */
+  /**
+   * TypeChain factory constructor function for creating contract instances.
+   *
+   * For library-dependent facets (e.g., LockFacet), this assumes:
+   * 1. Libraries have been deployed via deployOrchestratorLibraries()
+   * 2. Addresses set via setOrchestratorLibraryAddresses()
+   * 3. Factory is called with: new XFacet__factory(getLibLinks('tokenCoreOps'), signer)
+   *
+   * The registry stores the factory reference; deployment code handles library linking.
+   */
   factory?: (signer: Signer, useTimeTravel?: boolean) => ContractFactory;
+
+  /**
+   * TypeChain factory for the TimeTravel variant of this facet (test-only).
+   * Same library linking assumptions as factory.
+   */
+  timeTravelFactory?: (signer: Signer) => unknown;
 }
 
 /**
@@ -662,6 +686,7 @@ export interface FacetMetadata {
   address: string;
   contractId?: string;
   key: string;
+  version?: number;
 }
 
 /**
@@ -738,7 +763,10 @@ export interface DeploymentOutputType {
     bond: ConfigurationMetadata;
     bondFixedRate: ConfigurationMetadata;
     bondKpiLinkedRate: ConfigurationMetadata;
-    bondSustainabilityPerformanceTargetRate: ConfigurationMetadata;
+    loan: ConfigurationMetadata;
+    loansPortfolio: ConfigurationMetadata;
+    depositToken: ConfigurationMetadata;
+    factory: ConfigurationMetadata;
   };
   summary: {
     totalContracts: number;
@@ -753,7 +781,10 @@ export interface DeploymentOutputType {
     getBondFacets(): FacetMetadata[];
     getBondFixedRateFacets(): FacetMetadata[];
     getBondKpiLinkedRateFacets(): FacetMetadata[];
-    getBondSustainabilityPerformanceTargetRateFacets(): FacetMetadata[];
+    getLoanFacets(): FacetMetadata[];
+    getDepositTokenFacets(): FacetMetadata[];
+    getLoansPortfolioFacets(): FacetMetadata[];
+    getFactoryFacets(): FacetMetadata[];
   };
 }
 

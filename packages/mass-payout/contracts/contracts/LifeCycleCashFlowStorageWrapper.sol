@@ -9,25 +9,19 @@ import {
 } from "@hashgraph/smart-contracts/contracts/system-contracts/hedera-token-service/HederaTokenService.sol";
 import { Pause } from "./core/Pause.sol";
 import { AccessControl } from "./core/AccessControl.sol";
-import { IERC20 } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_1/ERC1400/ERC20/IERC20.sol";
-import { IERC20 as OZ_IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { IAsset } from "@hashgraph/asset-tokenization-contracts/contracts/facets/IAsset.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import { ISnapshots } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_1/snapshot/ISnapshots.sol";
-import { IBond } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/bond/IBond.sol";
-import { IBondRead } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/bond/IBondRead.sol";
-import { ICoupon } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/coupon/ICoupon.sol";
-import { IDividend } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/dividend/IDividend.sol";
-import { ISecurity } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/security/ISecurity.sol";
 import { _PERCENTAGE_DECIMALS_SIZE } from "./constants/values.sol";
 import { _LIFECYCLE_CASH_FLOW_STORAGE_POSITION } from "./constants/storagePositions.sol";
 
 abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaTokenService, Pause, AccessControl {
-    using SafeERC20 for OZ_IERC20;
+    using SafeERC20 for IERC20;
 
     struct LifeCycleCashFlowStorage {
         address asset;
         ILifeCycleCashFlow.AssetType assetType;
-        OZ_IERC20 paymentToken;
+        IERC20 paymentToken;
         mapping(uint256 => mapping(address => bool)) paidAddressesByDistribution;
         mapping(uint256 => mapping(address => bool)) paidAddressesBySnapshot;
     }
@@ -119,7 +113,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal returns (address[] memory failed_, address[] memory succeeded_, uint256[] memory paidAmount_, bool) {
-        address[] memory holders = ISecurity(_bond).getSecurityHolders(_pageIndex, _pageLength);
+        address[] memory holders = IAsset(_bond).getSecurityHolders(_pageIndex, _pageLength);
 
         if (holders.length == 0) return (failed_, succeeded_, paidAmount_, false);
         (failed_, succeeded_, paidAmount_) = _executeBondCashOutByAddresses(_bond, holders);
@@ -247,7 +241,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      * @param amount The amount of USDC tokens to be transferred
      */
     function _transferPaymentToken(address _to, uint256 _amount) internal {
-        OZ_IERC20 paymentToken = _lifeCycleCashFlowStorage().paymentToken;
+        IERC20 paymentToken = _lifeCycleCashFlowStorage().paymentToken;
         if (paymentToken.balanceOf(address(this)) < _amount) {
             revert ILifeCycleCashFlow.NotEnoughBalance(_amount);
         }
@@ -263,7 +257,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      * @param newPaymentToken The new payment token
      */
     function _updatePaymentToken(address _newPaymentToken) internal {
-        _setPaymentToken(OZ_IERC20(_newPaymentToken));
+        _setPaymentToken(IERC20(_newPaymentToken));
         _associateToken(_newPaymentToken);
     }
 
@@ -290,7 +284,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      *
      * @param token The payment token to be set
      */
-    function _setPaymentToken(OZ_IERC20 token) internal {
+    function _setPaymentToken(IERC20 token) internal {
         _lifeCycleCashFlowStorage().paymentToken = token;
     }
 
@@ -333,10 +327,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
     function _getSnapshotAmountByAmount(
         ILifeCycleCashFlow.SnapshotAmountInfo memory amountInfo
     ) internal view returns (uint256) {
-        uint256 holderTokens = ISnapshots(amountInfo.asset).balanceOfAtSnapshot(
-            amountInfo.snapshotID,
-            amountInfo.holder
-        );
+        uint256 holderTokens = IAsset(amountInfo.asset).balanceOfAtSnapshot(amountInfo.snapshotID, amountInfo.holder);
         return ((amountInfo.amountOrPercentage * holderTokens) / amountInfo.totalSupplyAtSnapshot);
     }
 
@@ -353,10 +344,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
     function _getSnapshotAmountByPercentage(
         ILifeCycleCashFlow.SnapshotAmountInfo memory amountInfo
     ) internal view returns (uint256) {
-        uint256 holderTokens = ISnapshots(amountInfo.asset).balanceOfAtSnapshot(
-            amountInfo.snapshotID,
-            amountInfo.holder
-        );
+        uint256 holderTokens = IAsset(amountInfo.asset).balanceOfAtSnapshot(amountInfo.snapshotID, amountInfo.holder);
         return ((amountInfo.paymentTokenBalance * amountInfo.amountOrPercentage * holderTokens) /
             ((100 * 10 ** _PERCENTAGE_DECIMALS_SIZE) * amountInfo.totalSupplyAtSnapshot));
     }
@@ -366,7 +354,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      *
      * @return The payment token
      */
-    function _getPaymentToken() internal view returns (OZ_IERC20) {
+    function _getPaymentToken() internal view returns (IERC20) {
         return _lifeCycleCashFlowStorage().paymentToken;
     }
 
@@ -376,7 +364,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      * @return The payment token decimals
      */
     function _getPaymentTokenDecimals() internal view returns (uint8) {
-        return IERC20(address(_getPaymentToken())).decimals();
+        return IAsset(address(_getPaymentToken())).decimals();
     }
 
     /*
@@ -462,7 +450,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         failedAddresses_ = new address[](_holders.length);
         succeededAddresses_ = new address[](_holders.length);
         paidAmount_ = new uint256[](_holders.length);
-        OZ_IERC20 paymentToken = _lifeCycleCashFlowStorage().paymentToken;
+        IERC20 paymentToken = _lifeCycleCashFlowStorage().paymentToken;
         uint8 paymentTokenDecimals = _getPaymentTokenDecimals();
 
         uint256 failedIndex;
@@ -591,7 +579,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         failedAddresses_ = new address[](_holders.length);
         succeededAddresses_ = new address[](_holders.length);
         paidAmount_ = new uint256[](_holders.length);
-        OZ_IERC20 paymentToken = _lifeCycleCashFlowStorage().paymentToken;
+        IERC20 paymentToken = _lifeCycleCashFlowStorage().paymentToken;
         uint8 paymentTokenDecimals = _getPaymentTokenDecimals();
 
         uint256 failedIndex;
@@ -606,7 +594,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
                     ++failedIndex;
                 }
             } else {
-                IBond(_bond).fullRedeemAtMaturity(holder);
+                IAsset(_bond).fullRedeemAtMaturity(holder);
                 succeededAddresses_[succeededIndex] = holder;
                 paidAmount_[succeededIndex] = cashAmount;
                 unchecked {
@@ -634,7 +622,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         uint256 _distributionID,
         address _holder,
         uint256 _amount,
-        OZ_IERC20 _paymentToken
+        IERC20 _paymentToken
     ) private returns (bool) {
         if (_paymentToken.balanceOf(address(this)) < _amount) {
             return false;
@@ -667,7 +655,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         uint256 _snapshotID,
         address _holder,
         uint256 _amount,
-        OZ_IERC20 _paymentToken
+        IERC20 _paymentToken
     ) private returns (bool) {
         if (_paymentToken.balanceOf(address(this)) < _amount) {
             return false;
@@ -695,7 +683,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      *
      * @return True if the payment succeeded, false otherwise
      */
-    function _payHolderCashOut(address _holder, uint256 _amount, OZ_IERC20 _paymentToken) private returns (bool) {
+    function _payHolderCashOut(address _holder, uint256 _amount, IERC20 _paymentToken) private returns (bool) {
         if (_paymentToken.balanceOf(address(this)) < _amount) {
             return false;
         }
@@ -726,9 +714,9 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         uint256 _pageLength
     ) private view returns (address[] memory holders_) {
         if (_assetType == ILifeCycleCashFlow.AssetType.Equity) {
-            return IDividend(_asset).getDividendHolders(_distributionID, _pageIndex, _pageLength);
+            return IAsset(_asset).getDividendHolders(_distributionID, _pageIndex, _pageLength);
         } else {
-            return ICoupon(_asset).getCouponHolders(_distributionID, _pageIndex, _pageLength);
+            return IAsset(_asset).getCouponHolders(_distributionID, _pageIndex, _pageLength);
         }
     }
 
@@ -748,7 +736,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         uint256 _pageIndex,
         uint256 _pageLength
     ) private view returns (address[] memory) {
-        return ISnapshots(_asset).getTokenHoldersAtSnapshot(_snapshotID, _pageIndex, _pageLength);
+        return IAsset(_asset).getTokenHoldersAtSnapshot(_snapshotID, _pageIndex, _pageLength);
     }
 
     /*
@@ -779,7 +767,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      * @param bond The bond address
      */
     function _checkMaturityDate(address _bond) private view {
-        uint256 maturityDateInit = IBondRead(_bond).getBondDetails().maturityDate;
+        uint256 maturityDateInit = IAsset(_bond).getBondDetails().maturityDate;
         _checkPaymentDate(maturityDateInit, _blockTimestamp());
     }
 
@@ -791,7 +779,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      * @return The asset total supply
      */
     function _getTotalSupplyAtSnapshot(address _asset, uint256 _snapshotID) private view returns (uint256) {
-        return ISnapshots(_asset).totalSupplyAtSnapshot(_snapshotID);
+        return IAsset(_asset).totalSupplyAtSnapshot(_snapshotID);
     }
 
     /*
@@ -811,7 +799,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         address _holder,
         uint8 _paymentTokenDecimals
     ) private view returns (uint256 amount) {
-        ICoupon.CouponAmountFor memory couponAmountFor = ICoupon(_asset).getCouponAmountFor(_couponID, _holder);
+        IAsset.CouponAmountFor memory couponAmountFor = IAsset(_asset).getCouponAmountFor(_couponID, _holder);
         return (couponAmountFor.numerator * 10 ** _paymentTokenDecimals) / couponAmountFor.denominator;
     }
 
@@ -831,10 +819,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         address _holder,
         uint8 _paymentTokenDecimals
     ) private view returns (uint256) {
-        IDividend.DividendAmountFor memory dividendAmountFor = IDividend(_asset).getDividendAmountFor(
-            _dividendID,
-            _holder
-        );
+        IAsset.DividendAmountFor memory dividendAmountFor = IAsset(_asset).getDividendAmountFor(_dividendID, _holder);
         return (dividendAmountFor.numerator * 10 ** _paymentTokenDecimals) / dividendAmountFor.denominator;
     }
 
@@ -851,7 +836,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         address _holder,
         uint8 _paymentTokenDecimals
     ) private view returns (uint256) {
-        IBondRead.PrincipalFor memory principalFor = IBondRead(_asset).getPrincipalFor(_holder);
+        IAsset.PrincipalFor memory principalFor = IAsset(_asset).getPrincipalFor(_holder);
         return (principalFor.numerator * 10 ** _paymentTokenDecimals) / principalFor.denominator;
     }
 
@@ -865,12 +850,10 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      */
     function _getDistributionExecutionDate(address _asset, uint256 _distributionID) private view returns (uint256) {
         if (_lifeCycleCashFlowStorage().assetType == ILifeCycleCashFlow.AssetType.Equity) {
-            (IDividend.RegisteredDividend memory registeredDividend_, ) = IDividend(_asset).getDividend(
-                _distributionID
-            );
+            (IAsset.RegisteredDividend memory registeredDividend_, ) = IAsset(_asset).getDividend(_distributionID);
             return registeredDividend_.dividend.executionDate;
         } else {
-            (ICoupon.RegisteredCoupon memory registeredCoupon_, ) = ICoupon(_asset).getCoupon(_distributionID);
+            (IAsset.RegisteredCoupon memory registeredCoupon_, ) = IAsset(_asset).getCoupon(_distributionID);
             return registeredCoupon_.coupon.executionDate;
         }
     }

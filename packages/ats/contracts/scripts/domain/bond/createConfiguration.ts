@@ -18,61 +18,110 @@ import {
   createBatchConfiguration,
   OperationResult,
   DEFAULT_BATCH_SIZE,
+  RetryOptions,
 } from "@scripts/infrastructure";
 import { BOND_CONFIG_ID } from "../constants";
 import { atsRegistry } from "../atsRegistry";
+import { buildFacetList } from "../facetEnvironment";
+import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
 import { BusinessLogicResolver } from "@contract-types";
 
 /**
- * Bond-specific facets list (41 facets total).
+ * Bond Token Configuration
  *
- * This is an explicit positive list of all facets required for bond tokens.
+ * Defines the set of facets for Bond tokens.
  * Includes all common facets plus BondUSAFacet (NOT EquityUSAFacet).
  *
  * Note: DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet functionality,
  * so we only include DiamondFacet to avoid selector collisions.
  *
  * Updated to match origin/develop feature parity (all facets registered).
+ *
  */
 const BOND_FACETS = [
-  // Core Functionality (10 - DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet)
+  // Core Functionality
   "AccessControlFacet",
   "CapFacet",
+  "CapByPartitionFacet",
   "ControlListFacet",
   "CorporateActionsFacet",
   "DiamondFacet", // Combined: includes DiamondCutFacet + DiamondLoupeFacet functionality
-  "ERC20Facet",
   "FreezeFacet",
+  "BatchFreezeFacet",
   "KycFacet",
   "PauseFacet",
   "SnapshotsFacet",
-  "TotalBalanceFacet",
+  "SnapshotsByPartitionFacet",
+  "SecurityHoldersAtSnapshotFacet",
+  "HoldAtSnapshotFacet",
+  "LockAtSnapshotByPartitionFacet",
+  "FreezeAtSnapshotFacet",
+  "FreezeAtSnapshotByPartitionFacet",
+  "LockAtSnapshotFacet",
+  "CoreAtSnapshotFacet",
+  "BalanceTrackerFacet",
+  "BalanceTrackerAdjustedFacet",
+  "BalanceTrackerByPartitionFacet",
+  "BalanceTrackerAtSnapshotFacet",
+  "BalanceTrackerAtSnapshotByPartitionFacet",
+  "ClearingAtSnapshotFacet",
+  "ClearingAtSnapshotByPartitionFacet",
+  "HoldAtSnapshotByPartitionFacet",
+
+  // Core
+  "CoreFacet",
+
+  // Allowance
+  "AllowanceFacet",
+
+  // CoreAdjusted
+  "CoreAdjustedFacet",
+  "InitializerFacet", // Core initializer facet
+
+  //CustomData
+  "CustomDataFacet",
 
   // ERC Standards
-  "ERC1410IssuerFacet",
-  "ERC1410ManagementFacet",
-  "ERC1410ReadFacet",
-  "ERC1410TokenHolderFacet",
-  "ERC1594Facet",
-  "ERC1643Facet",
-  "ERC1644Facet",
+  "TransferFacet",
+  "MintByPartitionFacet",
+  "ProtectedByPartitionFacet",
+  "OperatorFacet",
+  "TransferByPartitionFacet",
+  "PartitionsFacet",
+  "OperatorByPartitionFacet",
+  "BurnByPartitionFacet",
+  "DocumentationFacet",
+  "ControllerFacet",
   "ERC20PermitFacet",
+  "EIP712Facet",
   "NoncesFacet",
+  "DeactivateFacet",
   "ERC20VotesFacet",
-  "ERC3643BatchFacet",
-  "ERC3643ManagementFacet",
-  "ERC3643OperationsFacet",
-  "ERC3643ReadFacet",
+  "BatchControllerFacet",
+  "BatchBurnFacet",
+  "BatchMintFacet",
+  "BatchTransferFacet",
+  "RecoveryFacet",
+  "IdentityFacet",
+  "ComplianceFacet",
+  "ComplianceByPartitionFacet",
+  "MintFacet",
+  "BurnFacet",
 
   // Clearing & Settlement
-  "ClearingActionsFacet",
-  "ClearingHoldCreationFacet",
-  "ClearingReadFacet",
-  "ClearingRedeemFacet",
-  "ClearingTransferFacet",
-  "HoldManagementFacet",
-  "HoldReadFacet",
-  "HoldTokenHolderFacet",
+  "ClearingByPartitionFacet",
+  "ProtectedClearingHoldByPartitionFacet",
+  "ClearingHoldByPartitionFacet",
+  "OperatorClearingHoldByPartitionFacet",
+  "ClearingFacet",
+  "OperatorClearingByPartitionFacet",
+  "ProtectedClearingByPartitionFacet",
+  "HoldFacet",
+  "OperatorHoldByPartitionFacet",
+  "ControllerHoldByPartitionFacet",
+  "ControllerByPartitionFacet",
+  "ProtectedHoldByPartitionFacet",
+  "HoldByPartitionFacet",
 
   // External Management
   "ExternalControlListManagementFacet",
@@ -81,22 +130,30 @@ const BOND_FACETS = [
 
   // Advanced Features
   "AdjustBalancesFacet",
+  "ScheduledBalanceAdjustmentFacet",
+  "CouponFacet",
+  "CouponSecurityHoldersFacet",
   "LockFacet",
+  "LockByPartitionFacet",
+  "MaturityFacet",
+  "NominalValueFacet",
+  "NominalValueAtSnapshotFacet",
   "ProceedRecipientsFacet",
   "ProtectedPartitionsFacet",
-  "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",
-  "ScheduledCouponListingFacet",
-  "ScheduledSnapshotsFacet",
+  "SecurityHoldersFacet",
+  "CouponListingFacet",
   "SsiManagementFacet",
   "TransferAndLockFacet",
+  "TransferAndLockByPartitionFacet",
+  "InterestRateFacet",
+  "FixedRateFacet",
 
-  "NominalValueFacet",
-  "CouponFacet",
+  // Maturity By Partition
+  "MaturityByPartitionFacet",
 
   // Jurisdiction-Specific
-  "BondUSAFacet",
-  "BondUSAReadFacet",
+  "PrincipalFacet",
 ] as const;
 
 /**
@@ -153,21 +210,16 @@ export async function createBondConfiguration(
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
+  retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  // Get facet names based on time travel mode
-  // Include TimeTravelFacet when useTimeTravel=true to provide time manipulation functions
-  const baseFacets = useTimeTravel ? [...BOND_FACETS, "TimeTravelFacet"] : BOND_FACETS;
-
-  const facetNames = useTimeTravel
-    ? baseFacets.map((name) => (name === "TimeTravelFacet" || name.endsWith("TimeTravel") ? name : `${name}TimeTravel`))
-    : baseFacets;
+  const facetNames = buildFacetList(BOND_FACETS, useTimeTravel);
 
   // Build facet data with resolver keys from registry
   const facets = facetNames.map((name) => {
     // Strip "TimeTravel" suffix to get base name for registry lookup
     const baseName = name.replace(/TimeTravel$/, "");
 
-    const facetDef = atsRegistry.getFacetDefinition(baseName);
+    const facetDef = atsRegistry.getFacetDefinition(baseName) ?? getMockFacetDefinition(baseName);
     if (!facetDef?.resolverKey?.value) {
       throw new Error(`No resolver key found for facet: ${baseName}`);
     }
@@ -184,5 +236,6 @@ export async function createBondConfiguration(
     partialBatchDeploy,
     batchSize,
     confirmations,
+    retryOptions,
   });
 }

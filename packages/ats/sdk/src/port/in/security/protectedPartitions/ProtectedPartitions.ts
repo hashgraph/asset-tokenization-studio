@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { LogError } from "@core/decorator/LogErrorDecorator";
-import { GetNounceRequest, PartitionsProtectedRequest } from "../../request";
+import { GetNonceRequest, PartitionsProtectedRequest } from "../../request";
 import ValidatedRequest from "@core/validation/ValidatedArgs";
 import { PartitionsProtectedQuery } from "@query/security/protectedPartitions/arePartitionsProtected/PartitionsProtectedQuery";
 import { ProtectPartitionsCommand } from "@command/security/operations/protectPartitions/ProtectPartitionsCommand";
 import { UnprotectPartitionsCommand } from "@command/security/operations/unprotectPartitions/UnprotectPartitionsCommand";
 import { BaseSecurityInPort } from "../BaseSecurityInPort";
-import { GetNounceQuery } from "@query/security/protectedPartitions/getNounce/GetNounceQuery";
+import { GetNonceQuery } from "@query/security/protectedPartitions/getNonce/GetNonceQuery";
 
 export interface ISecurityInPortProtectedPartitions {
   arePartitionsProtected(request: PartitionsProtectedRequest): Promise<boolean>;
   protectPartitions(request: PartitionsProtectedRequest): Promise<{ payload: boolean; transactionId: string }>;
   unprotectPartitions(request: PartitionsProtectedRequest): Promise<{ payload: boolean; transactionId: string }>;
-  getNounce(request: GetNounceRequest): Promise<number>;
+  getNonce(request: GetNonceRequest): Promise<number>;
 }
 
 export class SecurityInPortProtectedPartitions
@@ -44,9 +44,9 @@ export class SecurityInPortProtectedPartitions
   }
 
   @LogError
-  async getNounce(request: GetNounceRequest): Promise<number> {
-    ValidatedRequest.handleValidation("GetNounceRequest", request);
+  async getNonce(request: GetNonceRequest): Promise<number> {
+    ValidatedRequest.handleValidation("GetNonceRequest", request);
 
-    return (await this.queryBus.execute(new GetNounceQuery(request.securityId, request.targetId))).payload;
+    return (await this.queryBus.execute(new GetNonceQuery(request.securityId, request.targetId))).payload;
   }
 }

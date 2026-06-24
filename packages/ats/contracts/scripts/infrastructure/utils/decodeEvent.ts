@@ -1,18 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BaseContract, TransactionReceipt } from "ethers";
-import { TypedContractEvent } from "typechain-types/common";
+import { TypedContractEvent } from "@common-types";
 
 export type GetEventArguments<T extends BaseContract, TName extends keyof T["filters"]> =
-  T["filters"][TName] extends TypedContractEvent<
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    any,
-    infer TOutputObject
-  >
-    ? TOutputObject
-    : never;
+  T["filters"][TName] extends TypedContractEvent<any, any, infer TOutputObject> ? TOutputObject : never;
 
 export async function decodeEvent<T extends BaseContract, TEventName extends keyof T["filters"]>(
   contract: T,

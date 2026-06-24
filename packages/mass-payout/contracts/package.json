@@ -2,7 +2,7 @@
   "name": "@hashgraph/mass-payout-contracts",
   "main": "build/typechain-types/index.js",
   "types": "build/typechain-types/index.d.ts",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "Scheduler Payment Distribution Contracts",
   "author": "",
   "private": true,
@@ -34,6 +34,7 @@
     "bn.js": "5.2.1"
   },
   "devDependencies": {
+    "@hashgraph/asset-tokenization-contracts": "7.0.0",
     "@hashgraph/eslint-config": "*",
     "@hiero-ledger/sdk": "2.79.0",
     "@hashgraph/smart-contracts": "github:hashgraph/hedera-smart-contracts#v0.10.1",

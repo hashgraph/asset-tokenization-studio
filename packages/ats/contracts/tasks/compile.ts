@@ -9,8 +9,14 @@ import path from "path";
 
 task(
   TASK_COMPILE,
-  "Replace 'interface' with 'interfaces' in TypeChain generated files to avoid compilation errors",
+  "🛠  Compile, clone neutral interfaces into the ERC3643 subtree, patch the TypeChain " +
+    "'interface' keyword collision, and regenerate the contract registry.",
   async function (taskArguments, hre, runSuper) {
+    // Hash codegen MUST run before solc so the rewritten hex is folded as a
+    // compile-time constant. Running it after compile would emit the new hex
+    // but leave the bytecode pointing at the previous values.
+    await hre.run("generate-hashes", { silent: true });
+
     await runSuper(taskArguments);
 
     await hre.run("erc3643-clone-interfaces");
@@ -39,19 +45,38 @@ function patchTypeChainFiles(pattern: string) {
   });
 }
 
+function autoGenHeader(sourcePath: string): string {
+  return [
+    "// AUTO-GENERATED — DO NOT EDIT.",
+    `// Source: ${sourcePath}`,
+    "// Regenerated on every `npx hardhat compile` by the",
+    "// `erc3643-clone-interfaces` task in `tasks/compile.ts`.",
+    "// Edits to this file will be silently overwritten.",
+  ].join("\n");
+}
+
+function injectHeader(source: string, header: string): string {
+  // Insert the header immediately after the SPDX line if present, otherwise at the top.
+  const spdxMatch = source.match(/^(\/\/\s*SPDX-License-Identifier:[^\n]*\n)/);
+  if (spdxMatch) {
+    return source.replace(spdxMatch[0], `${spdxMatch[0]}${header}\n`);
+  }
+  return `${header}\n${source}`;
+}
+
 task("erc3643-clone-interfaces", async (_, hre) => {
-  interface DataSustitution {
+  interface DataSubstitution {
     original: string;
     removeImports?: boolean;
     changePragma?: boolean;
     removeHierarchy?: boolean;
   }
   const targetDir = hre.config.paths.sources + "/factory/ERC3643/interfaces";
-  const interfacesToClone: DataSustitution[] = [
+  const interfacesToClone: DataSubstitution[] = [
     { original: "IAccessControl" },
-    { original: "IBondRead" },
     {
       original: "IBusinessLogicResolver",
+      removeImports: false,
       removeHierarchy: false,
     },
     {
@@ -60,21 +85,18 @@ task("erc3643-clone-interfaces", async (_, hre) => {
     },
     {
       original: "IDiamondLoupe",
+      removeImports: false,
       removeHierarchy: false,
     },
-    { original: "IEquity" },
     { original: "IFactory", removeImports: false },
     { original: "IResolverProxy" },
     { original: "IStaticFunctionSelectors" },
-    {
-      original: "contracts/facets/layer_1/ERC1400/ERC20/IERC20.sol:IERC20",
-      removeImports: false,
-    },
+    { original: "ICore", removeImports: false },
     // Coupon Interest Rates interfaces
     { original: "IFixedRate" },
-    { original: "IKpiLinkedRate" },
+    { original: "IKpiLinkedRate", removeImports: false, removeHierarchy: false },
     {
-      original: "IScheduledCouponListing",
+      original: "ICouponListing",
       removeImports: false,
     },
   ];
@@ -90,7 +112,7 @@ task("erc3643-clone-interfaces", async (_, hre) => {
     { src: "constants/regulation", dst: "regulation" },
     { src: "constants/roles", dst: "roles" },
     {
-      src: "facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon",
+      src: "facets/scheduledTasksCommon/IScheduledTasksCommon",
       dst: "IScheduledTasksCommon",
     },
   ];
@@ -120,8 +142,8 @@ task("erc3643-clone-interfaces", async (_, hre) => {
     );
   }
 
-  await Promise.all(
-    normalized.map(async (i) => {
+  const interfaceResults = await Promise.all(
+    normalized.map(async (i): Promise<boolean> => {
       const originalArtifact = await hre.artifacts.readArtifact(i.original);
       let erc3643Artifact: Artifact | undefined;
       try {
@@ -136,7 +158,7 @@ task("erc3643-clone-interfaces", async (_, hre) => {
 
       if (!shouldGenerate) {
         console.log(`Did not generate ${i.original} because an up-to-date version already exists`);
-        return;
+        return false;
       }
 
       let source = fs.readFileSync(originalArtifact.sourceName, "utf8");
@@ -151,33 +173,54 @@ task("erc3643-clone-interfaces", async (_, hre) => {
         source = source.replace(/^pragma solidity\s+[^;]+;/m, "pragma solidity ^0.8.17;");
       }
 
-      // Rename interface/contract and remove inheritance in a single step
+      // Rename interface/contract; optionally preserve inheritance clause
       source = source.replace(
         new RegExp(`(contract|interface)\\s+${originalArtifact.contractName}\\b(\\s+is[^\\{]+)?`, "m"),
-        `$1 TRex${originalArtifact.contractName}`,
+        i.removeHierarchy ? `$1 TRex${originalArtifact.contractName}` : `$1 TRex${originalArtifact.contractName}$2`,
       );
 
       const targetPath = `${targetDir}/${originalArtifact.contractName}.sol`;
-      fs.writeFileSync(targetPath, source, "utf8");
+      const header = autoGenHeader(originalArtifact.sourceName);
+      fs.writeFileSync(targetPath, injectHeader(source, header), "utf8");
       console.log(`Generated: ${targetPath}`);
+      return true;
     }),
   );
+  let anyRegenerated = interfaceResults.some(Boolean);
 
   for (const c of constants) {
     const src = path.join(hre.config.paths.sources, `${c.src}.sol`);
     const dst = path.join(targetDir, `${c.dst}.sol`);
 
-    if (fs.existsSync(src)) {
-      let content = fs.readFileSync(src, "utf8");
-
-      content = content.replace(/^pragma solidity\s+[^;]+;/m, "pragma solidity ^0.8.17;");
-
-      fs.writeFileSync(dst, content, "utf8");
-      console.log(`Copied constant with updated pragma: ${dst}`);
-    } else {
-      console.warn(`Not found: ${src}`);
+    if (!fs.existsSync(src)) {
+      throw new Error(
+        `❌ erc3643-clone-interfaces: declared constant source not found: ${src}. ` +
+          "Remove the entry from `constants` or restore the file.",
+      );
     }
+
+    let content = fs.readFileSync(src, "utf8");
+    content = content.replace(/^pragma solidity\s+[^;]+;/m, "pragma solidity ^0.8.17;");
+    const header = autoGenHeader(`contracts/${c.src}.sol`);
+    const next = injectHeader(content, header);
+
+    // Skip write when the on-disk copy already matches — avoids touching mtimes
+    // and forces Prettier to revisit a file with no semantic delta.
+    if (fs.existsSync(dst) && fs.readFileSync(dst, "utf8") === next) {
+      console.log(`Constant up-to-date, skipped: ${dst}`);
+      continue;
+    }
+
+    fs.writeFileSync(dst, next, "utf8");
+    console.log(`Copied constant with updated pragma: ${dst}`);
+    anyRegenerated = true;
   }
+
+  if (!anyRegenerated) {
+    console.log("⏭  No ERC3643 interface or constant regenerated — skipping Prettier pass");
+    return;
+  }
+
   const { execWithErrorHandling } = await import("./utils/errorHandling");
 
   try {

@@ -108,12 +108,11 @@ describe("CreateEquityCommandHandler", () => {
         const resultPromise = handler.execute(commandWithNotConfigVersion);
 
         await expect(resultPromise).rejects.toMatchObject({
-          message: expect.stringContaining(
-            `An error occurred while creating the equity: Config Version not found in request`,
-          ),
+          message: expect.stringContaining("Config Version not found in request"),
           errorCode: ErrorCode.InvalidRequest,
         });
       });
+
       it("throws CreateEquityCommandError when command fails with uncaught error", async () => {
         const fakeError = new Error(errorMsg);
 

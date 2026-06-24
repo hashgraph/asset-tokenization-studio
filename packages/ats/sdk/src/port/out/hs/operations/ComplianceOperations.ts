@@ -1,14 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ContractId } from "@hiero-ledger/sdk";
-import { ethers } from "ethers";
-import {
-  KycFacet__factory,
-  SsiManagementFacet__factory,
-  ERC3643ManagementFacet__factory,
-  ExternalKycListManagementFacet__factory,
-  MockedExternalKycList__factory,
-} from "@hashgraph/asset-tokenization-contracts";
+import { IAsset__factory, MockedExternalKycList__factory } from "@hashgraph/asset-tokenization-contracts";
 import { GAS } from "@core/Constants";
 import BigDecimal from "@domain/context/shared/BigDecimal";
 import EvmAddress from "@domain/context/contract/EvmAddress";
@@ -33,7 +26,7 @@ export class ComplianceOperations {
     );
     return this.executor.executeContractCall(
       securityId.toString(),
-      KycFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "grantKyc",
       [targetId.toString(), vcBase64, validFrom.toBigInt(), validTo.toBigInt(), issuer.toString()],
       GAS.GRANT_KYC,
@@ -48,7 +41,7 @@ export class ComplianceOperations {
     LogService.logTrace(`Revoking KYC to address ${targetId.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      KycFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "revokeKyc",
       [targetId.toString()],
       GAS.REVOKE_KYC,
@@ -63,7 +56,7 @@ export class ComplianceOperations {
     LogService.logTrace(`Adding issuer ${issuer}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      SsiManagementFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "addIssuer",
       [issuer.toString()],
       GAS.ADD_ISSUER,
@@ -78,7 +71,7 @@ export class ComplianceOperations {
     LogService.logTrace(`Removing issuer ${issuer}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      SsiManagementFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "removeIssuer",
       [issuer.toString()],
       GAS.REMOVE_ISSUER,
@@ -93,7 +86,7 @@ export class ComplianceOperations {
     LogService.logTrace(`Setting revocation registry address ${revocationRegistry}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      SsiManagementFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "setRevocationRegistryAddress",
       [revocationRegistry.toString()],
       GAS.SET_REVOCATION_REGISTRY,
@@ -104,7 +97,7 @@ export class ComplianceOperations {
     LogService.logTrace(`Activate Internal Kyc to address ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      new ethers.Interface(["function activateInternalKyc()"]),
+      IAsset__factory.createInterface(),
       "activateInternalKyc",
       [],
       GAS.ACTIVATE_INTERNAL_KYC,
@@ -115,7 +108,7 @@ export class ComplianceOperations {
     LogService.logTrace(`Deactivate Internal Kyc to address ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      new ethers.Interface(["function deactivateInternalKyc()"]),
+      IAsset__factory.createInterface(),
       "deactivateInternalKyc",
       [],
       GAS.DEACTIVATE_INTERNAL_KYC,
@@ -130,7 +123,7 @@ export class ComplianceOperations {
     LogService.logTrace(`Setting onchainID to ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ERC3643ManagementFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "setOnchainID",
       [onchainID.toString()],
       GAS.SET_ONCHAIN_ID,
@@ -145,7 +138,7 @@ export class ComplianceOperations {
     LogService.logTrace(`Setting identity registry to ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ERC3643ManagementFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "setIdentityRegistry",
       [identityRegistry.toString()],
       GAS.SET_IDENTITY_REGISTRY,
@@ -160,7 +153,7 @@ export class ComplianceOperations {
     LogService.logTrace(`Setting compliance to ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ERC3643ManagementFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "setCompliance",
       [compliance.toString()],
       GAS.SET_COMPLIANCE,
@@ -176,7 +169,7 @@ export class ComplianceOperations {
     LogService.logTrace(`Updating External Kyc Lists for security ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ExternalKycListManagementFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "updateExternalKycLists",
       [externalKycListsAddresses.map((address) => address.toString()), actives],
       GAS.UPDATE_EXTERNAL_KYC_LISTS,
@@ -191,7 +184,7 @@ export class ComplianceOperations {
     LogService.logTrace(`Adding External kyc Lists for security ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ExternalKycListManagementFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "addExternalKycList",
       [externalKycListAddress.toString()],
       GAS.ADD_EXTERNAL_KYC_LIST,
@@ -206,7 +199,7 @@ export class ComplianceOperations {
     LogService.logTrace(`Removing External kyc Lists for security ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ExternalKycListManagementFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "removeExternalKycList",
       [externalKycListAddress.toString()],
       GAS.REMOVE_EXTERNAL_KYC_LIST,

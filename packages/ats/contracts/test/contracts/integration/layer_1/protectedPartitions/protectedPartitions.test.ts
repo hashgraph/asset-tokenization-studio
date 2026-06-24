@@ -3,17 +3,34 @@
 import { expect } from "chai";
 import { ethers, network } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset, ComplianceMock } from "@contract-types";
-import { DEFAULT_PARTITION, ZERO, EMPTY_STRING, ADDRESS_ZERO, ATS_ROLES } from "@scripts";
+import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
+import { type ResolverProxy, type IAsset, ComplianceMock, MockDiamondCut } from "@contract-types";
+import {
+  DEFAULT_PARTITION,
+  ZERO,
+  EMPTY_STRING,
+  ADDRESS_ZERO,
+  ATS_ROLES,
+  RESOLVER_KEY_PROTECTED_PARTITIONS,
+  RESOLVER_KEY_PROTECTED_BY_PARTITION,
+  RESOLVER_KEY_PROTECTED_CLEARING_BY_PARTITION,
+  RESOLVER_KEY_PROTECTED_CLEARING_HOLD_BY_PARTITION,
+} from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
+import {
+  deployAtsInfrastructureFixture,
+  deployEquityTokenFixture,
+  EVENT_NAMES,
+  MAX_UINT256,
+  expectExactlyOneEvent,
+} from "@test";
 import { executeRbac } from "@test";
 
 const amount = 1;
 
 const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
   ["bytes32", "bytes32"],
-  [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, DEFAULT_PARTITION],
+  [ATS_ROLES.ROLE_PROTECTED_PARTITIONS_PARTICIPANT, DEFAULT_PARTITION],
 );
 const packedDataWithoutPrefix = packedData.slice(2);
 
@@ -33,31 +50,11 @@ const transferType = {
     { name: "_to", type: "address" },
     { name: "_amount", type: "uint256" },
     { name: "_deadline", type: "uint256" },
-    { name: "_nounce", type: "uint256" },
+    { name: "_nonce", type: "uint256" },
   ],
 };
 
 const EMPTY_VC_ID = EMPTY_STRING;
-
-const holdType = {
-  Hold: [
-    { name: "amount", type: "uint256" },
-    { name: "expirationTimestamp", type: "uint256" },
-    { name: "escrow", type: "address" },
-    { name: "to", type: "address" },
-    { name: "data", type: "bytes" },
-  ],
-  ProtectedHold: [
-    { name: "hold", type: "Hold" },
-    { name: "deadline", type: "uint256" },
-    { name: "nonce", type: "uint256" },
-  ],
-  protectedCreateHoldByPartition: [
-    { name: "_partition", type: "bytes32" },
-    { name: "_from", type: "address" },
-    { name: "_protectedHold", type: "ProtectedHold" },
-  ],
-};
 
 const clearingTransferType = {
   ClearingOperation: [
@@ -152,12 +149,6 @@ interface HoldData {
   data: string;
 }
 
-interface ProtectedHoldData {
-  hold: HoldData;
-  deadline: bigint;
-  nonce: number;
-}
-
 interface ClearingOperationData {
   partition: string;
   expirationTimestamp: bigint;
@@ -188,7 +179,7 @@ describe("ProtectedPartitions Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
-  let protectedHold: ProtectedHoldData;
+  let mockDiamondCut: MockDiamondCut;
   let hold: HoldData;
   let clearingOperation: ClearingOperationData;
   let clearingOperationFrom: ClearingOperationFromData;
@@ -202,7 +193,7 @@ describe("ProtectedPartitions Tests", () => {
     issue_Amount: number,
     issue_Partition: string,
   ) {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._WILD_CARD_ROLE, wildCard_Account);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_WILD_CARD, wildCard_Account);
 
     await asset.connect(signer_B).issueByPartition({
       partition: issue_Partition,
@@ -245,50 +236,51 @@ describe("ProtectedPartitions Tests", () => {
   function set_initRbacs(): any[] {
     return [
       {
-        role: ATS_ROLES._PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._CONTROL_LIST_ROLE,
+        role: ATS_ROLES.ROLE_CONTROL_LIST,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._ISSUER_ROLE,
+        role: ATS_ROLES.ROLE_ISSUER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._PROTECTED_PARTITIONS_ROLE,
+        role: ATS_ROLES.ROLE_PROTECTED_PARTITIONS,
         members: [signer_B.address],
       },
       {
         role: ProtectedPartitionRole_1,
+        members: [signer_A.address, signer_B.address],
+      },
+      {
+        role: ATS_ROLES.ROLE_LOCKER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._LOCKER_ROLE,
+        role: ATS_ROLES.ROLE_KYC,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._KYC_ROLE,
-        members: [signer_B.address],
-      },
-      {
-        role: ATS_ROLES._SSI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_SSI_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._CLEARING_ROLE,
+        role: ATS_ROLES.ROLE_CLEARING,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._CLEARING_VALIDATOR_ROLE,
+        role: ATS_ROLES.ROLE_CLEARING_VALIDATOR,
         members: [signer_A.address],
       },
     ];
   }
 
   async function deploySecurityFixtureUnprotectedPartitions() {
-    const base = await deployEquityTokenFixture({ useLoadFixture: false });
+    const infrastructure = await loadFixture(deployAtsInfrastructureFixture);
+    const base = await deployEquityTokenFixture({ infrastructure });
     diamond_UnprotectedPartitions = base.diamond;
     signer_A = base.deployer;
     signer_B = base.user2;
@@ -300,6 +292,11 @@ describe("ProtectedPartitions Tests", () => {
   }
 
   async function deploySecurityFixtureProtectedPartitions() {
+    // Pre-load infra so the ComplianceMock deployed below persists through the
+    // equity fixture (passing `infrastructure` keeps it from calling loadFixture
+    // a second time, which would revert the chain and erase the mock).
+    const infrastructure = await loadFixture(deployAtsInfrastructureFixture);
+
     const ComplianceMockFactory = await ethers.getContractFactory("ComplianceMock", signer_A);
     const complianceMockInstance = await ComplianceMockFactory.deploy(true, false);
     await complianceMockInstance.waitForDeployment();
@@ -312,7 +309,7 @@ describe("ProtectedPartitions Tests", () => {
           compliance: complianceMockAddress,
         },
       },
-      useLoadFixture: false, // CRITICAL: avoid nested loadFixture that would erase ComplianceMock
+      infrastructure,
     });
 
     diamond_ProtectedPartitions = base.diamond;
@@ -323,6 +320,7 @@ describe("ProtectedPartitions Tests", () => {
     await executeRbac(asset, set_initRbacs());
 
     await setFacets(diamond_ProtectedPartitions.target as string, complianceMockAddress);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond_ProtectedPartitions.target);
   }
 
   beforeEach(async () => {
@@ -337,12 +335,6 @@ describe("ProtectedPartitions Tests", () => {
       escrow: signer_B.address,
       to: ADDRESS_ZERO,
       data: "0x1234",
-    };
-
-    protectedHold = {
-      hold: hold,
-      deadline: BigInt(MAX_UINT256.toString()),
-      nonce: 1,
     };
 
     basicTransferInfo = {
@@ -379,68 +371,25 @@ describe("ProtectedPartitions Tests", () => {
     };
   });
 
-  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-    await setProtected();
-    await expect(asset.initialize_ProtectedPartitions(true)).to.be.rejectedWith("AlreadyInitialized");
+  describe("initializeProtectedPartitions", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeProtectedPartitions is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeProtectedPartitions(true))
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeProtectedPartitions is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeProtectedPartitions(true)).to.be.revertedWithCustomError(
+        asset,
+        "FacetAlreadyRegistered",
+      );
+    });
   });
 
-  describe("Generic Hold check Tests", () => {
-    it("GIVEN a paused security WHEN performing a protected hold THEN transaction fails with Paused", async () => {
-      await setProtected();
-
-      await asset.connect(signer_B).pause();
-
-      await expect(
-        asset.protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
-    });
-
-    it("GIVEN a security with clearing active WHEN performing a protected hold THEN transaction fails with ClearingIsActivated", async () => {
-      await setProtected();
-
-      await asset.connect(signer_A).activateClearing();
-
-      await expect(
-        asset.protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
-      ).to.be.revertedWithCustomError(asset, "ClearingIsActivated");
-    });
-
-    it("GIVEN a account without the participant role WHEN performing a protected hold THEN transaction fails with AccountHasNoRole", async () => {
-      await setProtected();
-
-      await expect(
-        asset.protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
-      ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
-    });
-
-    it("GIVEN a zero address tokenHolder account WHEN performing a protected hold from it THEN transaction fails with ZeroAddressNotAllowed", async () => {
-      await setProtected();
-
-      await expect(
-        asset.protectedCreateHoldByPartition(DEFAULT_PARTITION, ADDRESS_ZERO, protectedHold, "0x1234"),
-      ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
-    });
-
-    it("GIVEN a zero address escrow account WHEN performing a protected hold from it THEN transaction fails with ZeroAddressNotAllowed", async () => {
-      await setProtected();
-
-      protectedHold.hold.escrow = ADDRESS_ZERO;
-
-      await expect(
-        asset.protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
-      ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
-    });
-
-    it("GIVEN a wrong expiration date WHEN performing a protected hold from it THEN transaction fails with WrongExpirationTimestamp", async () => {
-      await setProtected();
-
-      protectedHold.hold.expirationTimestamp = 1n;
-
-      await expect(
-        asset
-          .connect(signer_B)
-          .protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
-      ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
+  describe("initializeProtectedPartitions event", () => {
+    it("GIVEN a fresh deployment WHEN initializeProtectedPartitions is called THEN emits ProtectedPartitionsInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_PROTECTED_PARTITIONS);
+      await expect(asset.initializeProtectedPartitions(true)).to.emit(asset, "ProtectedPartitionsInitialized");
     });
   });
 
@@ -450,17 +399,17 @@ describe("ProtectedPartitions Tests", () => {
 
       await asset.connect(signer_B).pause();
 
-      await expect(asset.connect(signer_B).protectPartitions()).to.be.rejectedWith("TokenIsPaused");
+      await expect(asset.connect(signer_B).protectPartitions()).to.be.revertedWithCustomError(asset, "IsPaused");
 
-      await expect(asset.connect(signer_B).unprotectPartitions()).to.be.rejectedWith("TokenIsPaused");
+      await expect(asset.connect(signer_B).unprotectPartitions()).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN a account without the protected partition role WHEN protecting or unprotecting partitions THEN transaction fails with AccountHasNoRole", async () => {
       await setProtected();
 
-      await expect(asset.protectPartitions()).to.be.rejectedWith("AccountHasNoRole");
+      await expect(asset.protectPartitions()).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
 
-      await expect(asset.unprotectPartitions()).to.be.rejectedWith("AccountHasNoRole");
+      await expect(asset.unprotectPartitions()).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
   });
 
@@ -480,14 +429,6 @@ describe("ProtectedPartitions Tests", () => {
 
       const partitionsProtectedStatus = await asset.arePartitionsProtected();
       expect(partitionsProtectedStatus).to.be.true;
-    });
-
-    it("GIVEN an unprotected partitions equity WHEN performing a protected hold THEN transaction fails with PartitionsAreUnProtected", async () => {
-      await expect(
-        asset
-          .connect(signer_B)
-          .protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
-      ).to.be.rejectedWith("PartitionsAreUnProtected");
     });
   });
 
@@ -515,13 +456,14 @@ describe("ProtectedPartitions Tests", () => {
 
     describe("Transfer Tests", () => {
       it("GIVEN a protected token WHEN performing a ERC1410 transfer By partition THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
-        await expect(asset.transferByPartition(DEFAULT_PARTITION, basicTransferInfo, "0x1234")).to.be.rejectedWith(
-          "PartitionsAreProtectedAndNoRole",
-        );
+        await expect(
+          asset.transferByPartition(DEFAULT_PARTITION, basicTransferInfo, "0x1234"),
+        ).to.be.revertedWithCustomError(asset, "PartitionsAreProtectedAndNoRole");
       });
 
       it("GIVEN a protected token WHEN performing a ERC1594 transfer with Data THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
-        await expect(asset.transferWithData(signer_B.address, amount, "0x1234")).to.be.rejectedWith(
+        await expect(asset.transferWithData(signer_B.address, amount, "0x1234")).to.be.revertedWithCustomError(
+          asset,
           "PartitionsAreProtectedAndNoRole",
         );
       });
@@ -529,15 +471,19 @@ describe("ProtectedPartitions Tests", () => {
       it("GIVEN a protected token WHEN performing a ERC1594 transfer From with Data THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
         await expect(
           asset.transferFromWithData(signer_A.address, signer_B.address, amount, "0x1234"),
-        ).to.be.rejectedWith("PartitionsAreProtectedAndNoRole");
+        ).to.be.revertedWithCustomError(asset, "PartitionsAreProtectedAndNoRole");
       });
 
       it("GIVEN a protected token WHEN performing a ERC20 transfer THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
-        await expect(asset.transfer(signer_B.address, amount)).to.be.rejectedWith("PartitionsAreProtectedAndNoRole");
+        await expect(asset.transfer(signer_B.address, amount)).to.be.revertedWithCustomError(
+          asset,
+          "PartitionsAreProtectedAndNoRole",
+        );
       });
 
       it("GIVEN a protected token WHEN performing a ERC20 transfer From THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
-        await expect(asset.transferFrom(signer_A.address, signer_B.address, amount)).to.be.rejectedWith(
+        await expect(asset.transferFrom(signer_A.address, signer_B.address, amount)).to.be.revertedWithCustomError(
+          asset,
           "PartitionsAreProtectedAndNoRole",
         );
       });
@@ -547,13 +493,13 @@ describe("ProtectedPartitions Tests", () => {
           asset
             .connect(signer_B)
             .transferAndLockByPartition(DEFAULT_PARTITION, signer_B.address, amount, "0x1234", MAX_UINT256),
-        ).to.be.rejectedWith("PartitionsAreProtectedAndNoRole");
+        ).to.be.revertedWithCustomError(asset, "PartitionsAreProtectedAndNoRole");
       });
 
       it("GIVEN a protected token WHEN performing a transferAndLock THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
         await expect(
           asset.connect(signer_B).transferAndLock(signer_B.address, amount, "0x1234", MAX_UINT256),
-        ).to.be.rejectedWith("PartitionsAreProtectedAndNoRole");
+        ).to.be.revertedWithCustomError(asset, "PartitionsAreProtectedAndNoRole");
       });
 
       it("GIVEN a protected token and a WILD CARD account WHEN performing a ERC1410 transfer By partition THEN transaction succeeds", async () => {
@@ -614,6 +560,67 @@ describe("ProtectedPartitions Tests", () => {
         await asset.connect(signer_B).transferAndLock(signer_C.address, amount, "0x1234", MAX_UINT256);
       });
 
+      it("GIVEN a signed protected transfer with nonce > currentNonce+1 WHEN executed THEN reverts with WrongNonce (FIND-073)", async () => {
+        const deadline = MAX_UINT256;
+        const NONCE_GAP = 1000;
+        const signature = await signer_A.signTypedData(domain, transferType, {
+          _partition: DEFAULT_PARTITION,
+          _from: signer_A.address,
+          _to: signer_B.address,
+          _amount: amount,
+          _deadline: deadline,
+          _nonce: NONCE_GAP,
+        });
+        await asset.connect(signer_B).issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: amount,
+          data: "0x",
+        });
+        await expect(
+          asset
+            .connect(signer_B)
+            .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
+              deadline,
+              nonce: NONCE_GAP,
+              signature,
+            }),
+        ).to.be.revertedWithCustomError(asset, "WrongNonce");
+      });
+
+      it("GIVEN three pre-signed transfers with consecutive nonces WHEN executed in order THEN all succeed and nonce is 3 (FIND-073)", async () => {
+        const deadline = MAX_UINT256;
+        const signatures: string[] = [];
+        for (let n = 1; n <= 3; n++) {
+          signatures.push(
+            await signer_A.signTypedData(domain, transferType, {
+              _partition: DEFAULT_PARTITION,
+              _from: signer_A.address,
+              _to: signer_B.address,
+              _amount: amount,
+              _deadline: deadline,
+              _nonce: n,
+            }),
+          );
+        }
+        await asset.connect(signer_B).issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: 3 * amount,
+          data: "0x",
+        });
+        for (let n = 1; n <= 3; n++) {
+          await asset
+            .connect(signer_B)
+            .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
+              deadline,
+              nonce: n,
+              signature: signatures[n - 1],
+            });
+        }
+        expect(await asset.nonces(signer_A.address)).to.equal(3);
+      });
+
       it("GIVEN a correct signature WHEN performing a protected transfer THEN transaction succeeds", async () => {
         const deadline = MAX_UINT256;
 
@@ -623,7 +630,7 @@ describe("ProtectedPartitions Tests", () => {
           _to: signer_B.address,
           _amount: amount,
           _deadline: deadline,
-          _nounce: 1,
+          _nonce: 1,
         };
 
         /*const domainSeparator =
@@ -644,20 +651,30 @@ describe("ProtectedPartitions Tests", () => {
           data: "0x",
         });
 
-        await asset
+        const tx = asset
           .connect(signer_B)
           .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
             deadline: deadline,
-            nounce: 1,
+            nonce: 1,
             signature: signature,
           });
+        await expect(tx)
+          .to.emit(asset, EVENT_NAMES.PROTECTED_TRANSFERRED_BY_PARTITION)
+          .withArgs(signer_B.address, signer_A.address, signer_B.address, amount, DEFAULT_PARTITION, [
+            deadline,
+            1,
+            signature,
+          ]);
+        const receipt = await (await tx).wait();
+        expectExactlyOneEvent(receipt!, asset, EVENT_NAMES.PROTECTED_TRANSFERRED_BY_PARTITION);
       });
     });
 
     describe("Redeem Tests", () => {
       it("GIVEN a protected token WHEN performing a ERC1410 redeem By partition THEN transaction fails with PartitionsAreProtected", async () => {
-        await expect(asset.redeemByPartition(DEFAULT_PARTITION, amount, "0x1234")).to.be.rejectedWith(
-          "PartitionsAreProtected",
+        await expect(asset.redeemByPartition(DEFAULT_PARTITION, amount, "0x1234")).to.be.revertedWithCustomError(
+          asset,
+          "PartitionsAreProtectedAndNoRole",
         );
       });
 
@@ -668,27 +685,36 @@ describe("ProtectedPartitions Tests", () => {
           asset
             .connect(signer_C)
             .operatorRedeemByPartition(DEFAULT_PARTITION, signer_A.address, amount, "0x1234", "0x1234"),
-        ).to.be.rejectedWith("PartitionsAreProtected");
+        ).to.be.revertedWithCustomError(asset, "PartitionsAreProtectedAndNoRole");
       });
 
       it("GIVEN a protected token WHEN performing a ERC1594 redeem THEN transaction fails with PartitionsAreProtected", async () => {
-        await expect(asset.redeem(amount, "0x1234")).to.be.rejectedWith("PartitionsAreProtected");
+        await expect(asset.redeem(amount, "0x1234")).to.be.revertedWithCustomError(
+          asset,
+          "PartitionsAreProtectedAndNoRole",
+        );
       });
 
       it("GIVEN a protected token WHEN performing a ERC1594 redeem From with Data THEN transaction fails with PartitionsAreProtected", async () => {
-        await expect(asset.redeemFrom(signer_B.address, amount, "0x1234")).to.be.rejectedWith("PartitionsAreProtected");
+        await expect(asset.redeemFrom(signer_B.address, amount, "0x1234")).to.be.revertedWithCustomError(
+          asset,
+          "PartitionsAreProtectedAndNoRole",
+        );
       });
     });
 
     describe("Hold Tests", () => {
       it("GIVEN a protected token WHEN performing a createHoldByPartition THEN transaction fails with PartitionsAreProtected", async () => {
-        await expect(asset.createHoldByPartition(DEFAULT_PARTITION, hold)).to.be.rejectedWith("PartitionsAreProtected");
+        await expect(asset.createHoldByPartition(DEFAULT_PARTITION, hold)).to.be.revertedWithCustomError(
+          asset,
+          "PartitionsAreProtectedAndNoRole",
+        );
       });
 
       it("GIVEN a protected token WHEN performing a createHoldFromByPartition THEN transaction fails with PartitionsAreProtected", async () => {
         await expect(
           asset.connect(signer_B).createHoldFromByPartition(DEFAULT_PARTITION, signer_A.address, hold, "0x"),
-        ).to.be.rejectedWith("PartitionsAreProtected");
+        ).to.be.revertedWithCustomError(asset, "PartitionsAreProtectedAndNoRole");
       });
 
       it("GIVEN a protected token WHEN performing a operatorCreateHoldByPartition THEN transaction fails with PartitionsAreProtected", async () => {
@@ -696,82 +722,12 @@ describe("ProtectedPartitions Tests", () => {
 
         await expect(
           asset.connect(signer_B).operatorCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, hold, "0x"),
-        ).to.be.rejectedWith("PartitionsAreProtected");
+        ).to.be.revertedWithCustomError(asset, "PartitionsAreProtectedAndNoRole");
 
         await asset.connect(signer_A).revokeOperator(signer_B.address);
       });
-
-      it("GIVEN a wrong deadline WHEN performing a protected hold THEN transaction fails with ExpiredDeadline", async () => {
-        protectedHold.deadline = 1n;
-
-        await expect(
-          asset
-            .connect(signer_B)
-            .protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
-        ).to.be.rejectedWith("ExpiredDeadline");
-      });
-
-      it("GIVEN a wrong signature length WHEN performing a protected hold THEN transaction fails with WrongSignatureLength", async () => {
-        await expect(
-          asset
-            .connect(signer_B)
-            .protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x12"),
-        ).to.be.rejectedWith("WrongSignatureLength");
-      });
-
-      it("GIVEN a wrong signature WHEN performing a protected hold THEN transaction fails with WrongSignature", async () => {
-        await expect(
-          asset
-            .connect(signer_B)
-            .protectedCreateHoldByPartition(
-              DEFAULT_PARTITION,
-              signer_A.address,
-              protectedHold,
-              "0x0011223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344",
-            ),
-        ).to.be.rejectedWith("WrongSignature");
-      });
-
-      it("GIVEN a wrong nounce WHEN performing a protected hold THEN transaction fails with WrongNounce", async () => {
-        protectedHold.nonce = 0;
-
-        await expect(
-          asset
-            .connect(signer_B)
-            .protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
-        ).to.be.rejectedWith("WrongNounce");
-      });
-
-      it("GIVEN a correct signature WHEN performing a protected hold THEN transaction succeeds", async () => {
-        const message = {
-          _partition: DEFAULT_PARTITION,
-          _from: signer_A.address,
-          _protectedHold: protectedHold,
-        };
-
-        /*const domainSeparator =
-                    ethers.TypedDataEncoder.hashDomain(domain)
-                const messageHash = ethers.TypedDataEncoder.hash(
-                    domain,
-                    transferType,
-                    message
-                )*/
-
-        // Sign the message hash
-        const signature = await signer_A.signTypedData(domain, holdType, message);
-
-        await asset.connect(signer_B).issueByPartition({
-          partition: DEFAULT_PARTITION,
-          tokenHolder: signer_A.address,
-          value: protectedHold.hold.amount,
-          data: "0x",
-        });
-
-        await asset
-          .connect(signer_B)
-          .protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, signature);
-      });
     });
+
     describe("Clearing Tests", () => {
       beforeEach(async () => {
         await asset.connect(signer_A).activateClearing();
@@ -780,34 +736,34 @@ describe("ProtectedPartitions Tests", () => {
         // TRANSFERS
         await expect(
           asset.connect(signer_A).clearingTransferByPartition(clearingOperation, amount, signer_C.address),
-        ).to.be.rejectedWith("PartitionsAreProtected");
+        ).to.be.revertedWithCustomError(asset, "PartitionsAreProtectedAndNoRole");
         await expect(
           asset.connect(signer_B).clearingTransferFromByPartition(clearingOperationFrom, amount, signer_C.address),
-        ).to.be.rejectedWith("PartitionsAreProtected");
+        ).to.be.revertedWithCustomError(asset, "PartitionsAreProtectedAndNoRole");
         await asset.authorizeOperator(signer_B.address);
         await expect(
           asset.connect(signer_B).operatorClearingTransferByPartition(clearingOperationFrom, amount, signer_C.address),
-        ).to.be.rejectedWith("PartitionsAreProtected");
+        ).to.be.revertedWithCustomError(asset, "PartitionsAreProtectedAndNoRole");
         // CLEARING CREATE HOLD
-        await expect(asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold)).to.be.rejectedWith(
-          "PartitionsAreProtected",
-        );
+        await expect(
+          asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold),
+        ).to.be.revertedWithCustomError(asset, "PartitionsAreProtectedAndNoRole");
         await expect(
           asset.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom, hold),
-        ).to.be.rejectedWith("PartitionsAreProtected");
+        ).to.be.revertedWithCustomError(asset, "PartitionsAreProtectedAndNoRole");
         await expect(
           asset.connect(signer_B).operatorClearingCreateHoldByPartition(clearingOperationFrom, hold),
-        ).to.be.rejectedWith("PartitionsAreProtected");
+        ).to.be.revertedWithCustomError(asset, "PartitionsAreProtectedAndNoRole");
         // CLEARING REDEEM
-        await expect(asset.connect(signer_A).clearingRedeemByPartition(clearingOperation, amount)).to.be.rejectedWith(
-          "PartitionsAreProtected",
-        );
+        await expect(
+          asset.connect(signer_A).clearingRedeemByPartition(clearingOperation, amount),
+        ).to.be.revertedWithCustomError(asset, "PartitionsAreProtectedAndNoRole");
         await expect(
           asset.connect(signer_B).clearingRedeemFromByPartition(clearingOperationFrom, amount),
-        ).to.be.rejectedWith("PartitionsAreProtected");
+        ).to.be.revertedWithCustomError(asset, "PartitionsAreProtectedAndNoRole");
         await expect(
           asset.connect(signer_B).operatorClearingRedeemByPartition(clearingOperationFrom, amount),
-        ).to.be.rejectedWith("PartitionsAreProtected");
+        ).to.be.revertedWithCustomError(asset, "PartitionsAreProtectedAndNoRole");
       });
 
       it("GIVEN a wrong deadline WHEN performing a protected clearing THEN transaction fails with ExpiredDeadline", async () => {
@@ -817,15 +773,15 @@ describe("ProtectedPartitions Tests", () => {
           asset
             .connect(signer_B)
             .protectedClearingTransferByPartition(protectedClearingOperation, amount, signer_C.address, "0x1234"),
-        ).to.be.rejectedWith("ExpiredDeadline");
+        ).to.be.revertedWithCustomError(asset, "ExpiredDeadline");
         // HOLD
         await expect(
           asset.connect(signer_B).protectedClearingCreateHoldByPartition(protectedClearingOperation, hold, "0x1234"),
-        ).to.be.rejectedWith("ExpiredDeadline");
+        ).to.be.revertedWithCustomError(asset, "ExpiredDeadline");
         //REDEEM
         await expect(
           asset.connect(signer_B).protectedClearingRedeemByPartition(protectedClearingOperation, amount, "0x1234"),
-        ).to.be.rejectedWith("ExpiredDeadline");
+        ).to.be.revertedWithCustomError(asset, "ExpiredDeadline");
       });
 
       it("GIVEN a wrong signature length WHEN performing a protected clearing THEN transaction fails with WrongSignatureLength", async () => {
@@ -834,15 +790,15 @@ describe("ProtectedPartitions Tests", () => {
           asset
             .connect(signer_B)
             .protectedClearingTransferByPartition(protectedClearingOperation, amount, signer_C.address, "0x1234"),
-        ).to.be.rejectedWith("WrongSignatureLength");
+        ).to.be.revertedWithCustomError(asset, "WrongSignatureLength");
         // HOLD
         await expect(
           asset.connect(signer_B).protectedClearingCreateHoldByPartition(protectedClearingOperation, hold, "0x1234"),
-        ).to.be.rejectedWith("WrongSignatureLength");
+        ).to.be.revertedWithCustomError(asset, "WrongSignatureLength");
         //REDEEM
         await expect(
           asset.connect(signer_B).protectedClearingRedeemByPartition(protectedClearingOperation, amount, "0x1234"),
-        ).to.be.rejectedWith("WrongSignatureLength");
+        ).to.be.revertedWithCustomError(asset, "WrongSignatureLength");
       });
 
       it("GIVEN a wrong signature WHEN performing a protected clearing THEN transaction fails with WrongSignature", async () => {
@@ -856,7 +812,7 @@ describe("ProtectedPartitions Tests", () => {
               signer_C.address,
               "0x0011223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344",
             ),
-        ).to.be.rejectedWith("WrongSignature");
+        ).to.be.revertedWithCustomError(asset, "WrongSignature");
         // HOLD
         await expect(
           asset
@@ -866,7 +822,7 @@ describe("ProtectedPartitions Tests", () => {
               hold,
               "0x0011223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344",
             ),
-        ).to.be.rejectedWith("WrongSignature");
+        ).to.be.revertedWithCustomError(asset, "WrongSignature");
         //REDEEM
         await expect(
           asset
@@ -876,10 +832,51 @@ describe("ProtectedPartitions Tests", () => {
               amount,
               "0x0011223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344",
             ),
-        ).to.be.rejectedWith("WrongSignature");
+        ).to.be.revertedWithCustomError(asset, "WrongSignature");
       });
 
-      it("GIVEN a wrong nounce WHEN performing a protected clearing THEN transaction fails with WrongNounce", async () => {
+      it("GIVEN signed protected clearing ops with nonce > currentNonce+1 WHEN executed THEN revert with WrongNonce (FIND-073)", async () => {
+        const NONCE_GAP = 1000;
+        protectedClearingOperation.nonce = NONCE_GAP;
+
+        const signatureTransfer = await signer_A.signTypedData(domain, clearingTransferType, {
+          _protectedClearingOperation: protectedClearingOperation,
+          _amount: amount,
+          _to: signer_C.address,
+        });
+        await expect(
+          asset
+            .connect(signer_B)
+            .protectedClearingTransferByPartition(
+              protectedClearingOperation,
+              amount,
+              signer_C.address,
+              signatureTransfer,
+            ),
+        ).to.be.revertedWithCustomError(asset, "WrongNonce");
+
+        const signatureHold = await signer_A.signTypedData(domain, clearingCreateHoldType, {
+          _protectedClearingOperation: protectedClearingOperation,
+          _hold: hold,
+        });
+        await expect(
+          asset
+            .connect(signer_B)
+            .protectedClearingCreateHoldByPartition(protectedClearingOperation, hold, signatureHold),
+        ).to.be.revertedWithCustomError(asset, "WrongNonce");
+
+        const signatureRedeem = await signer_A.signTypedData(domain, clearingRedeemType, {
+          _protectedClearingOperation: protectedClearingOperation,
+          _amount: amount,
+        });
+        await expect(
+          asset
+            .connect(signer_B)
+            .protectedClearingRedeemByPartition(protectedClearingOperation, amount, signatureRedeem),
+        ).to.be.revertedWithCustomError(asset, "WrongNonce");
+      });
+
+      it("GIVEN a wrong nonce WHEN performing a protected clearing THEN transaction fails with WrongNonce", async () => {
         protectedClearingOperation.nonce = 0;
 
         //TRANSFER
@@ -887,15 +884,15 @@ describe("ProtectedPartitions Tests", () => {
           asset
             .connect(signer_B)
             .protectedClearingTransferByPartition(protectedClearingOperation, amount, signer_C.address, "0x1234"),
-        ).to.be.rejectedWith("WrongNounce");
+        ).to.be.revertedWithCustomError(asset, "WrongNonce");
         // HOLD
         await expect(
           asset.connect(signer_B).protectedClearingCreateHoldByPartition(protectedClearingOperation, hold, "0x1234"),
-        ).to.be.rejectedWith("WrongNounce");
+        ).to.be.revertedWithCustomError(asset, "WrongNonce");
         //REDEEM
         await expect(
           asset.connect(signer_B).protectedClearingRedeemByPartition(protectedClearingOperation, amount, "0x1234"),
-        ).to.be.rejectedWith("WrongNounce");
+        ).to.be.revertedWithCustomError(asset, "WrongNonce");
       });
 
       it("GIVEN a correct signature WHEN performing a protected clearing THEN transaction succeeds", async () => {
@@ -913,9 +910,24 @@ describe("ProtectedPartitions Tests", () => {
           value: amount,
           data: "0x",
         });
-        await asset
+        const tx = asset
           .connect(signer_B)
           .protectedClearingTransferByPartition(protectedClearingOperation, amount, signer_C.address, signature);
+        await expect(tx)
+          .to.emit(asset, EVENT_NAMES.PROTECTED_CLEARED_TRANSFER_BY_PARTITION)
+          .withArgs(
+            signer_B.address,
+            protectedClearingOperation.from,
+            signer_C.address,
+            protectedClearingOperation.clearingOperation.partition,
+            anyValue,
+            amount,
+            protectedClearingOperation.clearingOperation.expirationTimestamp,
+            protectedClearingOperation.clearingOperation.data,
+            "0x",
+          );
+        const receipt = await (await tx).wait();
+        expectExactlyOneEvent(receipt!, asset, EVENT_NAMES.PROTECTED_CLEARED_TRANSFER_BY_PARTITION);
         // HOLDS
         protectedClearingOperation.nonce = 2;
         const messageHold = {
@@ -930,9 +942,21 @@ describe("ProtectedPartitions Tests", () => {
           value: amount,
           data: "0x",
         });
-        await asset
+        const txHold = asset
           .connect(signer_B)
           .protectedClearingCreateHoldByPartition(protectedClearingOperation, hold, signatureHold);
+        await expect(txHold).to.emit(asset, EVENT_NAMES.PROTECTED_CLEARED_HOLD_BY_PARTITION).withArgs(
+          signer_B.address, // operator
+          protectedClearingOperation.from, // tokenHolder
+          protectedClearingOperation.clearingOperation.partition, // partition
+          anyValue, // clearingId (runtime)
+          [hold.amount, hold.expirationTimestamp, hold.escrow, hold.to, hold.data], // hold tuple
+          protectedClearingOperation.clearingOperation.expirationTimestamp, // expirationDate
+          protectedClearingOperation.clearingOperation.data, // data
+          "0x", // operatorData
+        );
+        const receiptHold = await (await txHold).wait();
+        expectExactlyOneEvent(receiptHold!, asset, EVENT_NAMES.PROTECTED_CLEARED_HOLD_BY_PARTITION);
         // REDEEMS
         protectedClearingOperation.nonce = 3;
         const messageRedeem = {
@@ -947,9 +971,23 @@ describe("ProtectedPartitions Tests", () => {
           value: amount,
           data: "0x",
         });
-        await asset
+        const txRedeem = asset
           .connect(signer_B)
           .protectedClearingRedeemByPartition(protectedClearingOperation, amount, signatureRedeem);
+        await expect(txRedeem)
+          .to.emit(asset, EVENT_NAMES.PROTECTED_CLEARED_REDEEM_BY_PARTITION)
+          .withArgs(
+            signer_B.address,
+            protectedClearingOperation.from,
+            protectedClearingOperation.clearingOperation.partition,
+            anyValue,
+            amount,
+            protectedClearingOperation.clearingOperation.expirationTimestamp,
+            protectedClearingOperation.clearingOperation.data,
+            "0x",
+          );
+        const receiptRedeem = await (await txRedeem).wait();
+        expectExactlyOneEvent(receiptRedeem!, asset, EVENT_NAMES.PROTECTED_CLEARED_REDEEM_BY_PARTITION);
       });
     });
 
@@ -970,9 +1008,24 @@ describe("ProtectedPartitions Tests", () => {
           value: amount,
           data: "0x",
         });
-        await asset
+        const tx = asset
           .connect(signer_B)
           .protectedClearingTransferByPartition(protectedClearingOperation, amount, signer_C.address, signature);
+        await expect(tx)
+          .to.emit(asset, EVENT_NAMES.PROTECTED_CLEARED_TRANSFER_BY_PARTITION)
+          .withArgs(
+            signer_B.address,
+            protectedClearingOperation.from,
+            signer_C.address,
+            protectedClearingOperation.clearingOperation.partition,
+            anyValue,
+            amount,
+            protectedClearingOperation.clearingOperation.expirationTimestamp,
+            protectedClearingOperation.clearingOperation.data,
+            "0x",
+          );
+        const receipt = await (await tx).wait();
+        expectExactlyOneEvent(receipt!, asset, EVENT_NAMES.PROTECTED_CLEARED_TRANSFER_BY_PARTITION);
         const clearingIdentifier = {
           partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
@@ -992,7 +1045,7 @@ describe("ProtectedPartitions Tests", () => {
           _to: signer_B.address,
           _amount: amount,
           _deadline: deadline,
-          _nounce: 1,
+          _nonce: 1,
         };
 
         const signature = await signer_A.signTypedData(domain, transferType, message);
@@ -1004,15 +1057,284 @@ describe("ProtectedPartitions Tests", () => {
           data: "0x",
         });
 
-        await asset
+        const tx = asset
           .connect(signer_B)
           .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
             deadline: deadline,
-            nounce: 1,
+            nonce: 1,
             signature: signature,
           });
+        await expect(tx)
+          .to.emit(asset, EVENT_NAMES.PROTECTED_TRANSFERRED_BY_PARTITION)
+          .withArgs(signer_B.address, signer_A.address, signer_B.address, amount, DEFAULT_PARTITION, [
+            deadline,
+            1,
+            signature,
+          ]);
+        const receipt = await (await tx).wait();
+        expectExactlyOneEvent(receipt!, asset, EVENT_NAMES.PROTECTED_TRANSFERRED_BY_PARTITION);
         expect(await complianceMock.transferredHit()).to.equal(1);
       });
+    });
+  });
+
+  describe("Deactivated", () => {
+    it("GIVEN a deactivated asset WHEN protectPartitions THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(deactivatedAsset.connect(base.deployer).protectPartitions()).to.be.revertedWithCustomError(
+        deactivatedAsset,
+        "Deactivated",
+      );
+    });
+
+    it("GIVEN a deactivated asset WHEN unprotectPartitions THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(deactivatedAsset.connect(base.deployer).unprotectPartitions()).to.be.revertedWithCustomError(
+        deactivatedAsset,
+        "Deactivated",
+      );
+    });
+
+    it("GIVEN a deactivated asset WHEN protectedTransferFromByPartition THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset
+          .connect(base.deployer)
+          .protectedTransferFromByPartition(ethers.ZeroHash, ethers.ZeroAddress, ethers.ZeroAddress, 0, {
+            deadline: 0,
+            nonce: 0,
+            signature: "0x",
+          }),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN protectedRedeemFromByPartition THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).protectedRedeemFromByPartition(ethers.ZeroHash, ethers.ZeroAddress, 0, {
+          deadline: 0,
+          nonce: 0,
+          signature: "0x",
+        }),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN protectedClearingRedeemByPartition THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).protectedClearingRedeemByPartition(
+          {
+            clearingOperation: { partition: ethers.ZeroHash, expirationTimestamp: 0, data: "0x" },
+            from: ethers.ZeroAddress,
+            deadline: 0,
+            nonce: 0,
+          },
+          0,
+          "0x",
+        ),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN protectedClearingTransferByPartition THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).protectedClearingTransferByPartition(
+          {
+            clearingOperation: { partition: ethers.ZeroHash, expirationTimestamp: 0, data: "0x" },
+            from: ethers.ZeroAddress,
+            deadline: 0,
+            nonce: 0,
+          },
+          0,
+          ethers.ZeroAddress,
+          "0x",
+        ),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN protectedClearingCreateHoldByPartition THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).protectedClearingCreateHoldByPartition(
+          {
+            clearingOperation: { partition: ethers.ZeroHash, expirationTimestamp: 0, data: "0x" },
+            from: ethers.ZeroAddress,
+            deadline: 0,
+            nonce: 0,
+          },
+          { amount: 0, expirationTimestamp: 0, escrow: ethers.ZeroAddress, to: ethers.ZeroAddress, data: "0x" },
+          "0x",
+        ),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN protectPartitions THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.protectPartitions()).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN unprotectPartitions THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.unprotectPartitions()).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN protectedTransferFromByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.protectedTransferFromByPartition(ethers.ZeroHash, ethers.ZeroAddress, ethers.ZeroAddress, 0, {
+          deadline: 0,
+          nonce: 0,
+          signature: "0x",
+        }),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN protectedRedeemFromByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.protectedRedeemFromByPartition(ethers.ZeroHash, ethers.ZeroAddress, 0, {
+          deadline: 0,
+          nonce: 0,
+          signature: "0x",
+        }),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN protectedClearingRedeemByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.protectedClearingRedeemByPartition(
+          {
+            clearingOperation: { partition: ethers.ZeroHash, expirationTimestamp: 0, data: "0x" },
+            from: ethers.ZeroAddress,
+            deadline: 0,
+            nonce: 0,
+          },
+          0,
+          "0x",
+        ),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN protectedClearingTransferByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.protectedClearingTransferByPartition(
+          {
+            clearingOperation: { partition: ethers.ZeroHash, expirationTimestamp: 0, data: "0x" },
+            from: ethers.ZeroAddress,
+            deadline: 0,
+            nonce: 0,
+          },
+          0,
+          ethers.ZeroAddress,
+          "0x",
+        ),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN protectedClearingCreateHoldByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.protectedClearingCreateHoldByPartition(
+          {
+            clearingOperation: { partition: ethers.ZeroHash, expirationTimestamp: 0, data: "0x" },
+            from: ethers.ZeroAddress,
+            deadline: 0,
+            nonce: 0,
+          },
+          { amount: 0, expirationTimestamp: 0, escrow: ethers.ZeroAddress, to: ethers.ZeroAddress, data: "0x" },
+          "0x",
+        ),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+  });
+
+  describe("initializeProtectedByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeProtectedByPartition THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeProtectedByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeProtectedByPartition THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeProtectedByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_PROTECTED_BY_PARTITION, 1);
+    });
+  });
+
+  describe("initializeProtectedByPartition event", () => {
+    it("GIVEN fresh facet WHEN initializeProtectedByPartition THEN emits ProtectedByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_PROTECTED_BY_PARTITION);
+      await expect(asset.initializeProtectedByPartition()).to.emit(asset, "ProtectedByPartitionInitialized");
+    });
+  });
+
+  describe("initializeProtectedClearingByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeProtectedClearingByPartition THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeProtectedClearingByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeProtectedClearingByPartition THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeProtectedClearingByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_PROTECTED_CLEARING_BY_PARTITION, 1);
+    });
+  });
+
+  describe("initializeProtectedClearingByPartition event", () => {
+    it("GIVEN fresh facet WHEN initializeProtectedClearingByPartition THEN emits ProtectedClearingByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_PROTECTED_CLEARING_BY_PARTITION);
+      await expect(asset.initializeProtectedClearingByPartition()).to.emit(
+        asset,
+        "ProtectedClearingByPartitionInitialized",
+      );
+    });
+  });
+
+  describe("initializeProtectedClearingHoldByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeProtectedClearingHoldByPartition THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeProtectedClearingHoldByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeProtectedClearingHoldByPartition THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeProtectedClearingHoldByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(RESOLVER_KEY_PROTECTED_CLEARING_HOLD_BY_PARTITION, 1);
+    });
+  });
+
+  describe("initializeProtectedClearingHoldByPartition event", () => {
+    it("GIVEN fresh facet WHEN initializeProtectedClearingHoldByPartition THEN emits ProtectedClearingHoldByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_PROTECTED_CLEARING_HOLD_BY_PARTITION);
+      await expect(asset.initializeProtectedClearingHoldByPartition()).to.emit(
+        asset,
+        "ProtectedClearingHoldByPartitionInitialized",
+      );
     });
   });
 });

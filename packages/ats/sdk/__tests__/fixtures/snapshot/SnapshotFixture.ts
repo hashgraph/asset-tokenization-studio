@@ -9,7 +9,7 @@ import { GetTotalTokenHoldersAtSnapshotQuery } from "@query/security/snapshot/ge
 import GetTokenHoldersAtSnapshotRequest from "@port/in/request/security/operations/snapshot/GetTokenHoldersAtSnapshotRequest";
 import GetTotalTokenHoldersAtSnapshotRequest from "@port/in/request/security/operations/snapshot/GetTotalTokenHoldersAtSnapshotRequest";
 import { BalancesOfAtSnapshotQuery } from "@query/security/snapshot/balancesOfAtSnapshot/BalancesOfAtSnapshotQuery";
-import { BalancesOfAtSnapshotRequest } from "src";
+import BalancesOfAtSnapshotRequest from "@port/in/request/snapshots/BalancesOfAtSnapshotRequest";
 
 export const TakeSnapshotCommandFixture = createFixture<TakeSnapshotCommand>((command) => {
   command.securityId.as(() => HederaIdPropsFixture.create().value);

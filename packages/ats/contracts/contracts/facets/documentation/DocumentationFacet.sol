@@ -1,0 +1,53 @@
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity >=0.8.0 <0.9.0;
+
+import { IDocumentation, RESOLVER_KEY_DOCUMENTATION } from "./IDocumentation.sol";
+import { Documentation } from "./Documentation.sol";
+import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
+/**
+ * @title DocumentationFacet
+ * @notice Diamond facet that exposes on-chain document management through the
+ *         `IDocumentation` interface, registered under `RESOLVER_KEY_DOCUMENTATION`.
+ * @dev Inherits document logic from `Documentation` and satisfies the
+ *      `IStaticFunctionSelectors` contract required by the Diamond proxy for
+ *      static selector registration. Exposes four selectors: `getDocument`,
+ *      `setDocument`, `removeDocument`, and `getAllDocuments`.
+ *      No library links are required for deployment.
+ * @author Hashgraph Asset Tokenization
+ */
+contract DocumentationFacet is Documentation, IStaticFunctionSelectors {
+    /**
+     * @notice Returns the resolver key used to register this facet in the Diamond proxy.
+     * @return staticResolverKey_ The `RESOLVER_KEY_DOCUMENTATION` constant.
+     */
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
+        staticResolverKey_ = RESOLVER_KEY_DOCUMENTATION;
+    }
+
+    /**
+     * @notice Returns the four function selectors exposed by this facet for Diamond
+     *         registration.
+     * @return staticFunctionSelectors_ Array containing selectors for `getDocument`,
+     *         `setDocument`, `removeDocument`, and `getAllDocuments`.
+     */
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                this.initializeDocumentation.selector,
+                this.getDocument.selector,
+                this.setDocument.selector,
+                this.removeDocument.selector,
+                this.getAllDocuments.selector
+            );
+    }
+
+    /**
+     * @notice Returns the interface IDs supported by this facet for ERC-165
+     *         introspection.
+     * @return staticInterfaceIds_ Array containing the `IDocumentation` interface ID.
+     */
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IDocumentation).interfaceId);
+    }
+}

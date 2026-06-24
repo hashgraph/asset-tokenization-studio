@@ -3,7 +3,6 @@
 import BigDecimal from "../shared/BigDecimal";
 
 export class AmortizationFor {
-  account: string;
   recordDate: number;
   executionDate: number;
   holdId: number;
@@ -19,7 +18,6 @@ export class AmortizationFor {
   nominalValueDecimals: number;
 
   constructor(
-    account: string,
     recordDate: number,
     executionDate: number,
     holdId: number,
@@ -34,7 +32,6 @@ export class AmortizationFor {
     nominalValue: BigDecimal,
     nominalValueDecimals: number,
   ) {
-    this.account = account;
     this.recordDate = recordDate;
     this.executionDate = executionDate;
     this.holdId = holdId;

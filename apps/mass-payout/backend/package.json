@@ -1,6 +1,6 @@
 {
   "name": "@hashgraph/mass-payout-backend",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "Scheduler Payment Distribution Service",
   "author": "",
   "private": true,
@@ -22,13 +22,13 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:unit": "jest --selectProjects unit",
     "test:integration": "jest --selectProjects integration",
-    "test:e2e": "jest --selectProjects e2e",
+    "test:e2e": "jest --selectProjects e2e --runInBand",
     "clean": "rimraf dist",
     "clean:deps": "rimraf node_modules"
   },
   "dependencies": {
     "@faker-js/faker": "9.8.0",
-    "@hashgraph/asset-tokenization-sdk": "*",
+    "@hashgraph/asset-tokenization-sdk": "8.0.0",
     "@hiero-ledger/sdk": "2.79.0",
     "@nestjs/cli": "10.3.2",
     "@nestjs/common": "10.4.22",

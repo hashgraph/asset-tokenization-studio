@@ -6,7 +6,6 @@ import { useUserStore } from "../../../store/userStore";
 import { User } from "../../../utils/constants";
 import { SecurityDetailsExtended } from "./SecurityDetailsExtended";
 import { HolderActionsButtons } from "./HolderActionsButtons";
-import { DetailsRegulations } from "./Details/components/DetailsRegulations";
 import { DetailsPermissions } from "./Details/components/DetailsPermissions";
 import { DetailsTotalSupply } from "./Details/components/DetailsTotalSupply";
 import { DetailsCurrentAvailableSupply } from "./Details/components/DetailsCurrentAvailableSupply";
@@ -64,12 +63,6 @@ export const Details = ({
             isFetchingSecurityDetails={isFetchingSecurityDetails}
             securityDetails={detailsResponse}
             equityDetailsResponse={equityDetailsResponse}
-          />
-
-          <DetailsRegulations
-            isLoadingSecurityDetails={isLoadingSecurityDetails}
-            isFetchingSecurityDetails={isFetchingSecurityDetails}
-            securityDetails={detailsResponse}
           />
 
           <DetailsBalanceAdjustment id={id} details={detailsResponse} />

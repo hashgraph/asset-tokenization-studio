@@ -543,12 +543,6 @@ export function createCompletedTestCheckpoint(overrides: Partial<DeploymentCheck
           facetCount: 47,
           txHash: "0xdef123",
         },
-        bondSustainabilityPerformanceTargetRate: {
-          configId: TEST_CONFIG_IDS.BOND_SPT,
-          version: 1,
-          facetCount: 47,
-          txHash: "0xghi456",
-        },
       },
       factory: {
         address: TEST_ADDRESSES.VALID_6,

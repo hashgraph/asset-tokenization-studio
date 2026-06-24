@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ContractId } from "@hiero-ledger/sdk";
-import { ethers } from "ethers";
-import { AccessControlFacet__factory, ERC1410TokenHolderFacet__factory } from "@hashgraph/asset-tokenization-contracts";
+import { IAsset__factory} from "@hashgraph/asset-tokenization-contracts";
 import { GAS } from "@core/Constants";
 import EvmAddress from "@domain/context/contract/EvmAddress";
 import TransactionResponse from "@domain/context/transaction/TransactionResponse";
@@ -22,7 +21,7 @@ export class RoleOperations {
     LogService.logTrace(`Granting role ${role.toString()} to account: ${targetId.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      new ethers.Interface(AccessControlFacet__factory.abi as ethers.InterfaceAbi),
+      IAsset__factory.createInterface(),
       "grantRole",
       [role, targetId.toString()],
       GAS.GRANT_ROLES,
@@ -40,7 +39,7 @@ export class RoleOperations {
     gas = gas > GAS.MAX_ROLES ? GAS.MAX_ROLES : gas;
     return this.executor.executeContractCall(
       securityId.toString(),
-      new ethers.Interface(AccessControlFacet__factory.abi as ethers.InterfaceAbi),
+      IAsset__factory.createInterface(),
       "applyRoles",
       [roles, actives, targetId.toString()],
       gas,
@@ -56,7 +55,7 @@ export class RoleOperations {
     LogService.logTrace(`Revoking role ${role.toString()} to account: ${targetId.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      new ethers.Interface(AccessControlFacet__factory.abi as ethers.InterfaceAbi),
+      IAsset__factory.createInterface(),
       "revokeRole",
       [role, targetId.toString()],
       GAS.GRANT_ROLES,
@@ -71,7 +70,7 @@ export class RoleOperations {
     LogService.logTrace(`Renounce role ${role.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      new ethers.Interface(AccessControlFacet__factory.abi as ethers.InterfaceAbi),
+      IAsset__factory.createInterface(),
       "renounceRole",
       [role],
       GAS.RENOUNCE_ROLES,
@@ -86,7 +85,7 @@ export class RoleOperations {
     LogService.logTrace(`authorizing operator: ${targetId.toString()} for security ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ERC1410TokenHolderFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "authorizeOperator",
       [targetId.toString()],
       GAS.AUTHORIZE_OPERATOR,
@@ -101,7 +100,7 @@ export class RoleOperations {
     LogService.logTrace(`revoking operator: ${targetId.toString()} for security ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ERC1410TokenHolderFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "revokeOperator",
       [targetId.toString()],
       GAS.REVOKE_OPERATOR,
@@ -119,7 +118,7 @@ export class RoleOperations {
     );
     return this.executor.executeContractCall(
       securityId.toString(),
-      ERC1410TokenHolderFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "authorizeOperatorByPartition",
       [partitionId, targetId.toString()],
       GAS.AUTHORIZE_OPERATOR,
@@ -137,7 +136,7 @@ export class RoleOperations {
     );
     return this.executor.executeContractCall(
       securityId.toString(),
-      ERC1410TokenHolderFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "revokeOperatorByPartition",
       [partitionId, targetId.toString()],
       GAS.REVOKE_OPERATOR,

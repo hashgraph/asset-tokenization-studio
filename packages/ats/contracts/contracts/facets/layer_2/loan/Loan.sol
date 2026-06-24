@@ -1,47 +1,61 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ILoan } from "./ILoan.sol";
-import { _LOAN_MANAGER_ROLE } from "../../../constants/roles.sol";
-import { Internals } from "../../../domain/Internals.sol";
-import { RegulationData, AdditionalSecurityData } from "../../../constants/regulation.sol";
+import { ILoan, RESOLVER_KEY_LOAN } from "./ILoan.sol";
+import { ROLE_LOAN_MANAGER, DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
+import { LoanStorageWrapper } from "../../../domain/asset/LoanStorageWrapper.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
-abstract contract Loan is ILoan, Internals {
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_Loan(
-        LoanDetailsData calldata _loanDetailsData,
-        RegulationData memory _regulationData,
-        AdditionalSecurityData calldata _additionalSecurityData
+/**
+ * @title Loan
+ * @notice Abstract contract implementing loan lifecycle operations
+ * @dev Provides loan creation, state management, interest accrual, and redemption
+ * @author Hashgraph
+ */
+abstract contract Loan is ILoan, Modifiers {
+    /// @inheritdoc ILoan
+    function initializeLoan(
+        LoanDetailsData calldata _loanDetailsData
     )
         external
         override
-        onlyUninitialized(_isLoanInitialized())
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_LOAN)
         onlyValidTimestamp(_loanDetailsData.loanBasicData.startingDate)
         validateDates(_loanDetailsData.loanBasicData.startingDate, _loanDetailsData.loanBasicData.maturityDate)
     {
-        _initialize_loan(_loanDetailsData);
-        _initializeSecurity(_regulationData, _additionalSecurityData);
+        LoanStorageWrapper.initializeLoan(_loanDetailsData);
+        // TODO: [LOAN-INTEGRATION] Security data should be initialised through TreasuryToken/deployment layer.
+        // SecurityStorageWrapper.initializeSecurity(_regulationData, _additionalSecurityData);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_LOAN);
+        emit ILoan.LoanInitialized(_loanDetailsData);
     }
 
+    /// @inheritdoc ILoan
     function setLoanDetails(
         LoanDetailsData calldata loanDetailsData_
     )
         external
         override
+        onlyOperational
+        onlyActivated
         onlyUnpaused
-        onlyRole(_LOAN_MANAGER_ROLE)
+        onlyRole(ROLE_LOAN_MANAGER)
         onlyValidTimestamp(loanDetailsData_.loanBasicData.startingDate)
         onlyValidTimestamp(loanDetailsData_.loanBasicData.maturityDate)
         onlyValidTimestamp(loanDetailsData_.loanBasicData.signingDate)
         onlyValidTimestamp(loanDetailsData_.loanInterestData.firstAccrualDate)
         validateDates(loanDetailsData_.loanBasicData.startingDate, loanDetailsData_.loanBasicData.maturityDate)
-        validateAddress(loanDetailsData_.loanBasicData.originatorAccount)
-        validateAddress(loanDetailsData_.loanBasicData.servicerAccount)
+        notZeroAddress(loanDetailsData_.loanBasicData.originatorAccount)
+        notZeroAddress(loanDetailsData_.loanBasicData.servicerAccount)
     {
-        _setLoanDetails(loanDetailsData_);
+        LoanStorageWrapper.setLoanDetails(loanDetailsData_);
     }
 
+    /// @inheritdoc ILoan
     function getLoanDetails() external view override returns (LoanDetailsData memory loanDetailsData_) {
-        return _getLoanDetails();
+        return LoanStorageWrapper.getLoanDetails();
     }
 }

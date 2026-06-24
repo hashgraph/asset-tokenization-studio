@@ -3,8 +3,7 @@
 /**
  * Unit tests for Bond variant deployments from Factory.
  *
- * Tests deployBondFixedRateFromFactory, deployBondKpiLinkedRateFromFactory,
- * and deployBondSustainabilityPerformanceTargetRateFromFactory functions.
+ * Tests deployBondFixedRateFromFactory and deployBondKpiLinkedRateFromFactory functions.
  *
  * Focuses on unique variant-specific logic since the base bond functionality
  * is already tested in deployBondToken.test.ts.
@@ -17,10 +16,8 @@ import sinon from "sinon";
 import {
   deployBondFixedRateFromFactory,
   deployBondKpiLinkedRateFromFactory,
-  deployBondSustainabilityPerformanceTargetRateFromFactory,
   BOND_FIXED_RATE_CONFIG_ID,
   BOND_KPI_LINKED_RATE_CONFIG_ID,
-  BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID,
 } from "@scripts/domain";
 import { TEST_ADDRESSES, TEST_FACTORY_EVENTS, TEST_INTEREST_RATES, TEST_IMPACT_DATA } from "@test";
 import {
@@ -32,9 +29,7 @@ import {
   createMockFactoryWithZeroAddress,
   createMockFixedRateParams,
   createMockInterestRateParams,
-  createMockInterestRateParamsSPT,
   createMockImpactDataParams,
-  createMockImpactDataParamsSPT,
 } from "./helpers/mockFactories";
 
 describe("Bond Variant Deployments", () => {
@@ -148,9 +143,14 @@ describe("Bond Variant Deployments", () => {
         const regulationData = createMockRegulationData();
         const fixedRateParams = createMockFixedRateParams();
 
-        await expect(deployBondFixedRateFromFactory(params, regulationData, fixedRateParams)).to.be.rejectedWith(
-          'Event log for "BondFixedRateDeployed" not found in transaction receipt',
-        );
+        let threw = false;
+        try {
+          await deployBondFixedRateFromFactory(params, regulationData, fixedRateParams);
+        } catch (err: unknown) {
+          threw = true;
+          expect((err as Error).message).to.include("BondFixedRateDeployed event not found");
+        }
+        expect(threw).to.equal(true);
       });
 
       it("should throw if event has no args", async () => {
@@ -159,9 +159,14 @@ describe("Bond Variant Deployments", () => {
         const regulationData = createMockRegulationData();
         const fixedRateParams = createMockFixedRateParams();
 
-        await expect(deployBondFixedRateFromFactory(params, regulationData, fixedRateParams)).to.be.rejectedWith(
-          "Invalid diamond address from BondFixedRateDeployed event",
-        );
+        let threw = false;
+        try {
+          await deployBondFixedRateFromFactory(params, regulationData, fixedRateParams);
+        } catch (err: unknown) {
+          threw = true;
+          expect((err as Error).message).to.include("BondFixedRateDeployed event not found");
+        }
+        expect(threw).to.equal(true);
       });
 
       it("should throw if diamondAddress is zero address", async () => {
@@ -170,9 +175,14 @@ describe("Bond Variant Deployments", () => {
         const regulationData = createMockRegulationData();
         const fixedRateParams = createMockFixedRateParams();
 
-        await expect(deployBondFixedRateFromFactory(params, regulationData, fixedRateParams)).to.be.rejectedWith(
-          "Invalid diamond address",
-        );
+        let threw = false;
+        try {
+          await deployBondFixedRateFromFactory(params, regulationData, fixedRateParams);
+        } catch (err: unknown) {
+          threw = true;
+          expect((err as Error).message).to.include("Invalid diamond address");
+        }
+        expect(threw).to.equal(true);
       });
     });
   });
@@ -289,9 +299,14 @@ describe("Bond Variant Deployments", () => {
         const interestRateParams = createMockInterestRateParams();
         const impactDataParams = createMockImpactDataParams();
 
-        await expect(
-          deployBondKpiLinkedRateFromFactory(params, regulationData, interestRateParams, impactDataParams),
-        ).to.be.rejectedWith('Event log for "BondKpiLinkedRateDeployed" not found in transaction receipt');
+        let threw = false;
+        try {
+          await deployBondKpiLinkedRateFromFactory(params, regulationData, interestRateParams, impactDataParams);
+        } catch (err: unknown) {
+          threw = true;
+          expect((err as Error).message).to.include("BondKpiLinkedRateDeployed event not found");
+        }
+        expect(threw).to.equal(true);
       });
 
       it("should throw if event has no args", async () => {
@@ -301,9 +316,14 @@ describe("Bond Variant Deployments", () => {
         const interestRateParams = createMockInterestRateParams();
         const impactDataParams = createMockImpactDataParams();
 
-        await expect(
-          deployBondKpiLinkedRateFromFactory(params, regulationData, interestRateParams, impactDataParams),
-        ).to.be.rejectedWith("Invalid diamond address from BondKpiLinkedRateDeployed event");
+        let threw = false;
+        try {
+          await deployBondKpiLinkedRateFromFactory(params, regulationData, interestRateParams, impactDataParams);
+        } catch (err: unknown) {
+          threw = true;
+          expect((err as Error).message).to.include("BondKpiLinkedRateDeployed event not found");
+        }
+        expect(threw).to.equal(true);
       });
 
       it("should throw if diamondAddress is zero address", async () => {
@@ -313,272 +333,14 @@ describe("Bond Variant Deployments", () => {
         const interestRateParams = createMockInterestRateParams();
         const impactDataParams = createMockImpactDataParams();
 
-        await expect(
-          deployBondKpiLinkedRateFromFactory(params, regulationData, interestRateParams, impactDataParams),
-        ).to.be.rejectedWith("Invalid diamond address");
-      });
-    });
-  });
-
-  // ============================================================================
-  // Bond Sustainability Performance Target Rate Tests
-  // ============================================================================
-
-  describe("deployBondSustainabilityPerformanceTargetRateFromFactory", () => {
-    describe("SPT interest rate params structure", () => {
-      it("should build SPT interest rate params", async () => {
-        const diamondAddress = TEST_ADDRESSES.VALID_3;
-        const mockFactory = createMockFactory(TEST_FACTORY_EVENTS.BOND_SPT_DEPLOYED, diamondAddress);
-        const params = createDeployBondParams(mockFactory);
-        const regulationData = createMockRegulationData();
-        const interestRateParams = createMockInterestRateParamsSPT();
-        const impactDataParams = [createMockImpactDataParamsSPT()];
-        const projects = [TEST_ADDRESSES.VALID_4];
-
-        await deployBondSustainabilityPerformanceTargetRateFromFactory(
-          params,
-          regulationData,
-          interestRateParams,
-          impactDataParams,
-          projects,
-        );
-
-        const callArgs = mockFactory.deployBondSustainabilityPerformanceTargetRate.getCall(0).args[0];
-
-        expect(callArgs.interestRate.baseRate).to.equal(TEST_INTEREST_RATES.BASE_RATE);
-        expect(callArgs.interestRate.startPeriod).to.equal(TEST_INTEREST_RATES.START_PERIOD);
-        expect(callArgs.interestRate.startRate).to.equal(TEST_INTEREST_RATES.START_RATE);
-        expect(callArgs.interestRate.rateDecimals).to.equal(TEST_INTEREST_RATES.RATE_DECIMALS);
-      });
-    });
-
-    describe("SPT impact data array", () => {
-      it("should handle impactData array correctly", async () => {
-        const diamondAddress = TEST_ADDRESSES.VALID_3;
-        const mockFactory = createMockFactory(TEST_FACTORY_EVENTS.BOND_SPT_DEPLOYED, diamondAddress);
-        const params = createDeployBondParams(mockFactory);
-        const regulationData = createMockRegulationData();
-        const interestRateParams = createMockInterestRateParamsSPT();
-        const impactDataParams = [
-          createMockImpactDataParamsSPT(),
-          { ...createMockImpactDataParamsSPT(), baseLine: 600 },
-        ];
-        const projects = [TEST_ADDRESSES.VALID_4, TEST_ADDRESSES.VALID_5];
-
-        await deployBondSustainabilityPerformanceTargetRateFromFactory(
-          params,
-          regulationData,
-          interestRateParams,
-          impactDataParams,
-          projects,
-        );
-
-        const callArgs = mockFactory.deployBondSustainabilityPerformanceTargetRate.getCall(0).args[0];
-
-        expect(callArgs.impactData).to.be.an("array");
-        expect(callArgs.impactData).to.have.length(2);
-        expect(callArgs.impactData[0].baseLine).to.equal(TEST_IMPACT_DATA.BASELINE);
-        expect(callArgs.impactData[1].baseLine).to.equal(600);
-      });
-
-      it("should handle empty impactData array", async () => {
-        const diamondAddress = TEST_ADDRESSES.VALID_3;
-        const mockFactory = createMockFactory(TEST_FACTORY_EVENTS.BOND_SPT_DEPLOYED, diamondAddress);
-        const params = createDeployBondParams(mockFactory);
-        const regulationData = createMockRegulationData();
-        const interestRateParams = createMockInterestRateParamsSPT();
-        const impactDataParams: ReturnType<typeof createMockImpactDataParamsSPT>[] = [];
-        const projects: string[] = [];
-
-        await deployBondSustainabilityPerformanceTargetRateFromFactory(
-          params,
-          regulationData,
-          interestRateParams,
-          impactDataParams,
-          projects,
-        );
-
-        const callArgs = mockFactory.deployBondSustainabilityPerformanceTargetRate.getCall(0).args[0];
-
-        expect(callArgs.impactData).to.deep.equal([]);
-      });
-    });
-
-    describe("projects array", () => {
-      it("should handle projects array correctly", async () => {
-        const diamondAddress = TEST_ADDRESSES.VALID_3;
-        const mockFactory = createMockFactory(TEST_FACTORY_EVENTS.BOND_SPT_DEPLOYED, diamondAddress);
-        const params = createDeployBondParams(mockFactory);
-        const regulationData = createMockRegulationData();
-        const interestRateParams = createMockInterestRateParamsSPT();
-        const impactDataParams = [createMockImpactDataParamsSPT()];
-        const projects = [TEST_ADDRESSES.VALID_4, TEST_ADDRESSES.VALID_5, TEST_ADDRESSES.VALID_6];
-
-        await deployBondSustainabilityPerformanceTargetRateFromFactory(
-          params,
-          regulationData,
-          interestRateParams,
-          impactDataParams,
-          projects,
-        );
-
-        const callArgs = mockFactory.deployBondSustainabilityPerformanceTargetRate.getCall(0).args[0];
-
-        expect(callArgs.projects).to.deep.equal(projects);
-      });
-
-      it("should handle empty projects array", async () => {
-        const diamondAddress = TEST_ADDRESSES.VALID_3;
-        const mockFactory = createMockFactory(TEST_FACTORY_EVENTS.BOND_SPT_DEPLOYED, diamondAddress);
-        const params = createDeployBondParams(mockFactory);
-        const regulationData = createMockRegulationData();
-        const interestRateParams = createMockInterestRateParamsSPT();
-        const impactDataParams: ReturnType<typeof createMockImpactDataParamsSPT>[] = [];
-        const projects: string[] = [];
-
-        await deployBondSustainabilityPerformanceTargetRateFromFactory(
-          params,
-          regulationData,
-          interestRateParams,
-          impactDataParams,
-          projects,
-        );
-
-        const callArgs = mockFactory.deployBondSustainabilityPerformanceTargetRate.getCall(0).args[0];
-
-        expect(callArgs.projects).to.deep.equal([]);
-      });
-    });
-
-    describe("resolver configuration", () => {
-      it("should use BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID", async () => {
-        const diamondAddress = TEST_ADDRESSES.VALID_3;
-        const mockFactory = createMockFactory(TEST_FACTORY_EVENTS.BOND_SPT_DEPLOYED, diamondAddress);
-        const params = createDeployBondParams(mockFactory);
-        const regulationData = createMockRegulationData();
-        const interestRateParams = createMockInterestRateParamsSPT();
-        const impactDataParams = [createMockImpactDataParamsSPT()];
-        const projects = [TEST_ADDRESSES.VALID_4];
-
-        await deployBondSustainabilityPerformanceTargetRateFromFactory(
-          params,
-          regulationData,
-          interestRateParams,
-          impactDataParams,
-          projects,
-        );
-
-        const callArgs = mockFactory.deployBondSustainabilityPerformanceTargetRate.getCall(0).args[0];
-        const config = callArgs.bondData.security.resolverProxyConfiguration;
-
-        expect(config.key).to.equal(BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID);
-      });
-    });
-
-    describe("factory call", () => {
-      it("should call factory.deployBondSustainabilityPerformanceTargetRate", async () => {
-        const diamondAddress = TEST_ADDRESSES.VALID_3;
-        const mockFactory = createMockFactory(TEST_FACTORY_EVENTS.BOND_SPT_DEPLOYED, diamondAddress);
-        const params = createDeployBondParams(mockFactory);
-        const regulationData = createMockRegulationData();
-        const interestRateParams = createMockInterestRateParamsSPT();
-        const impactDataParams = [createMockImpactDataParamsSPT()];
-        const projects = [TEST_ADDRESSES.VALID_4];
-
-        await deployBondSustainabilityPerformanceTargetRateFromFactory(
-          params,
-          regulationData,
-          interestRateParams,
-          impactDataParams,
-          projects,
-        );
-
-        expect(mockFactory.deployBondSustainabilityPerformanceTargetRate.calledOnce).to.be.true;
-        expect(mockFactory.deployBond.called).to.be.false;
-        expect(mockFactory.deployBondFixedRate.called).to.be.false;
-        expect(mockFactory.deployBondKpiLinkedRate.called).to.be.false;
-      });
-    });
-
-    describe("event parsing", () => {
-      it("should look for BondSustainabilityPerformanceTargetRateDeployed event", async () => {
-        const diamondAddress = TEST_ADDRESSES.VALID_3;
-        const mockFactory = createMockFactory(TEST_FACTORY_EVENTS.BOND_SPT_DEPLOYED, diamondAddress);
-        const params = createDeployBondParams(mockFactory);
-        const regulationData = createMockRegulationData();
-        const interestRateParams = createMockInterestRateParamsSPT();
-        const impactDataParams = [createMockImpactDataParamsSPT()];
-        const projects = [TEST_ADDRESSES.VALID_4];
-
-        const result = await deployBondSustainabilityPerformanceTargetRateFromFactory(
-          params,
-          regulationData,
-          interestRateParams,
-          impactDataParams,
-          projects,
-        );
-
-        expect(result.target).to.equal(diamondAddress);
-      });
-
-      it("should throw if BondSustainabilityPerformanceTargetRateDeployed event not found", async () => {
-        const diamondAddress = TEST_ADDRESSES.VALID_3;
-        const mockFactory = createMockFactoryWithWrongEvent(diamondAddress);
-        const params = createDeployBondParams(mockFactory);
-        const regulationData = createMockRegulationData();
-        const interestRateParams = createMockInterestRateParamsSPT();
-        const impactDataParams = [createMockImpactDataParamsSPT()];
-        const projects = [TEST_ADDRESSES.VALID_4];
-
-        await expect(
-          deployBondSustainabilityPerformanceTargetRateFromFactory(
-            params,
-            regulationData,
-            interestRateParams,
-            impactDataParams,
-            projects,
-          ),
-        ).to.be.rejectedWith(
-          'Event log for "BondSustainabilityPerformanceTargetRateDeployed" not found in transaction receipt',
-        );
-      });
-
-      it("should throw if event has no args", async () => {
-        const mockFactory = createMockFactoryWithNoArgs(TEST_FACTORY_EVENTS.BOND_SPT_DEPLOYED);
-        const params = createDeployBondParams(mockFactory);
-        const regulationData = createMockRegulationData();
-        const interestRateParams = createMockInterestRateParamsSPT();
-        const impactDataParams = [createMockImpactDataParamsSPT()];
-        const projects = [TEST_ADDRESSES.VALID_4];
-
-        await expect(
-          deployBondSustainabilityPerformanceTargetRateFromFactory(
-            params,
-            regulationData,
-            interestRateParams,
-            impactDataParams,
-            projects,
-          ),
-        ).to.be.rejectedWith("Invalid diamond address from BondSustainabilityPerformanceTargetRateDeployed event");
-      });
-
-      it("should throw if diamondAddress is zero address", async () => {
-        const mockFactory = createMockFactoryWithZeroAddress(TEST_FACTORY_EVENTS.BOND_SPT_DEPLOYED);
-        const params = createDeployBondParams(mockFactory);
-        const regulationData = createMockRegulationData();
-        const interestRateParams = createMockInterestRateParamsSPT();
-        const impactDataParams = [createMockImpactDataParamsSPT()];
-        const projects = [TEST_ADDRESSES.VALID_4];
-
-        await expect(
-          deployBondSustainabilityPerformanceTargetRateFromFactory(
-            params,
-            regulationData,
-            interestRateParams,
-            impactDataParams,
-            projects,
-          ),
-        ).to.be.rejectedWith("Invalid diamond address");
+        let threw = false;
+        try {
+          await deployBondKpiLinkedRateFromFactory(params, regulationData, interestRateParams, impactDataParams);
+        } catch (err: unknown) {
+          threw = true;
+          expect((err as Error).message).to.include("Invalid diamond address");
+        }
+        expect(threw).to.equal(true);
       });
     });
   });

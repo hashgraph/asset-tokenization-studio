@@ -12,7 +12,7 @@ export const RedeemCommandFixture = createFixture<ProtectedRedeemFromByPartition
   command.sourceId.as(() => HederaIdPropsFixture.create().value);
   command.partitionId.as(() => PartitionIdFixture.create().value);
   command.deadline.faker((faker) => faker.date.future().getTime().toString());
-  command.nounce.faker((faker) => faker.number.int({ min: 0, max: 1000 }).toString());
+  command.nonce.faker((faker) => faker.number.int({ min: 0, max: 1000 }).toString());
   command.signature.faker((faker) => faker.string.hexadecimal({ length: 64, prefix: "0x" }));
 });
 

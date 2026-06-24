@@ -19,6 +19,8 @@ export interface HardhatArtifact {
   bytecode: string;
   deployedBytecode: string;
   metadata?: string;
+  linkReferences?: Record<string, Record<string, { length: number; start: number }[]>>;
+  deployedLinkReferences?: Record<string, Record<string, { length: number; start: number }[]>>;
 }
 
 /**
@@ -57,29 +59,47 @@ export interface CategorizedContracts {
 }
 
 /**
- * Method definition with full signature and selector.
+ * Method definition with both signature representations and selector.
+ * See {@link SolSignature} for the meaning of `full` vs `canonical`.
  */
 export interface MethodDefinition {
   name: string;
-  signature: string;
+  signature: SolSignature;
   selector: string;
 }
 
 /**
- * Event definition with full signature and topic0 hash.
+ * Two representations of a Solidity signature:
+ * - `canonical`: the form used to compute selectors / topics
+ *   (e.g. `Transfer(address,address,uint256)`). This is what
+ *   `keccak256(toUtf8Bytes(canonical))` reproduces the selector from.
+ * - `full`: the human-readable Solidity declaration
+ *   (e.g. `event Transfer(address indexed from, address indexed to, uint256 value)`).
+ *   Includes the keyword, indexed flags, and parameter names when known.
+ *
+ * Source-walked extractors that cannot recover parameter names set `full`
+ * equal to `canonical` so consumers always have a usable string.
+ */
+export interface SolSignature {
+  full: string;
+  canonical: string;
+}
+
+/**
+ * Event definition with both signature representations and topic0 hash.
  */
 export interface EventDefinition {
   name: string;
-  signature: string;
+  signature: SolSignature;
   topic0: string;
 }
 
 /**
- * Error definition with full signature and selector.
+ * Error definition with both signature representations and selector.
  */
 export interface ErrorDefinition {
   name: string;
-  signature: string;
+  signature: SolSignature;
   selector: string;
 }
 
@@ -118,8 +138,8 @@ export interface ContractMetadata {
   inheritance: string[];
   solidityVersion: string | null;
   upgradeable: boolean;
-  /** Whether TypeChain generates a deployment factory (non-empty bytecode + non-empty ABI) */
   isDeployable: boolean;
+  requiresLibraries: boolean;
   description?: string;
 }
 
@@ -190,6 +210,7 @@ export interface RegistryStats {
  */
 export interface RegistryResult {
   code: string;
+  rolesCode: string;
   stats: RegistryStats;
   outputPath?: string;
   warnings: string[];

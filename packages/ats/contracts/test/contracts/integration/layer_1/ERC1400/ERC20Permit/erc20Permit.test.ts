@@ -3,8 +3,11 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ADDRESS_ZERO, ATS_ROLES } from "@scripts";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import { ADDRESS_ZERO, ATS_ROLES, EQUITY_CONFIG_ID } from "@scripts";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { decodeEvent } from "@scripts/infrastructure";
+import { deployAtsInfrastructureFixture } from "../../../../../fixtures/infrastructure.fixture";
 import { deployEquityTokenFixture, executeRbac, getDltTimestamp } from "@test";
 
 describe("ERC20Permit Tests", () => {
@@ -14,6 +17,7 @@ describe("ERC20Permit Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let _mockDiamondCut: MockDiamondCut;
 
   beforeEach(async () => {
     const base = await deployEquityTokenFixture();
@@ -23,33 +27,18 @@ describe("ERC20Permit Tests", () => {
     signer_C = base.user2;
 
     asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
+    _mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       {
-        role: ATS_ROLES._PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_A.address],
       },
     ]);
   });
 
   describe("Single Partition", () => {
-    describe("Domain Separator", () => {
-      it("GIVEN a deployed contract WHEN DOMAIN_SEPARATOR is called THEN the correct domain separator is returned", async () => {
-        const domainSeparator = await asset.DOMAIN_SEPARATOR();
-        const CONTRACT_NAME = (await asset.getERC20Metadata()).info.name;
-        const CONTRACT_VERSION = (await asset.getConfigInfo()).version_.toString();
-        const domain = {
-          name: CONTRACT_NAME,
-          version: CONTRACT_VERSION,
-          chainId: await ethers.provider.getNetwork().then((n) => n.chainId),
-          verifyingContract: diamond.target as string,
-        };
-        const domainHash = ethers.TypedDataEncoder.hashDomain(domain);
-        expect(domainSeparator).to.equal(domainHash);
-      });
-    });
-
     describe("permit", () => {
-      it("GIVEN a paused token WHEN permit is called THEN the transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused token WHEN permit is called THEN the transaction fails with IsPaused", async () => {
         await asset.pause();
 
         const expiry = (await getDltTimestamp()) + 3600;
@@ -64,7 +53,7 @@ describe("ERC20Permit Tests", () => {
             "0x0000000000000000000000000000000000000000000000000000000000000000",
             "0x0000000000000000000000000000000000000000000000000000000000000000",
           ),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
       it("GIVEN an owner address of zero WHEN permit is called THEN the transaction fails with ZeroAddressNotAllowed", async () => {
@@ -101,7 +90,7 @@ describe("ERC20Permit Tests", () => {
 
       it("GIVEN a blocked owner account WHEN permit is called THEN the transaction fails with AccountIsBlocked", async () => {
         // Blacklisting accounts
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CONTROL_LIST_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CONTROL_LIST, signer_A.address);
         await asset.connect(signer_A).addToControlList(signer_C.address);
 
         const expiry = (await getDltTimestamp()) + 3600;
@@ -120,7 +109,7 @@ describe("ERC20Permit Tests", () => {
       });
 
       it("GIVEN a blocked spender account WHEN permit is called THEN the transaction fails with AccountIsBlocked", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CONTROL_LIST_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CONTROL_LIST, signer_A.address);
         await asset.connect(signer_A).addToControlList(signer_C.address);
 
         const expiry = (await getDltTimestamp()) + 3600;
@@ -262,7 +251,7 @@ describe("ERC20Permit Tests", () => {
   describe("onlyUnrecoveredAddress modifier for permit", () => {
     it("GIVEN a recovered owner address WHEN calling permit THEN transaction fails with WalletRecovered", async () => {
       // Grant _AGENT_ROLE to recover address
-      await asset.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
 
       // Recover signer_B (owner) address
       await asset.recoveryAddress(signer_B.address, signer_C.address, ADDRESS_ZERO);
@@ -284,7 +273,7 @@ describe("ERC20Permit Tests", () => {
 
     it("GIVEN a recovered spender address WHEN calling permit THEN transaction fails with WalletRecovered", async () => {
       // Grant _AGENT_ROLE to recover address
-      await asset.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
 
       // Recover signer_C (spender) address
       await asset.recoveryAddress(signer_C.address, signer_B.address, ADDRESS_ZERO);
@@ -302,6 +291,88 @@ describe("ERC20Permit Tests", () => {
           "0x0000000000000000000000000000000000000000000000000000000000000000",
         ),
       ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+    });
+  });
+
+  describe("Deactivated", () => {
+    it("GIVEN a deactivated asset WHEN permit THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset
+          .connect(base.deployer)
+          .permit(ethers.ZeroAddress, ethers.ZeroAddress, 0, 0, 0, ethers.ZeroHash, ethers.ZeroHash),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("initializeERC20Permit", () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeERC20Permit is called THEN it reverts with AccountHasNoRole", async () => {
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(
+        infra.blr.target as string,
+        EQUITY_CONFIG_ID,
+        1,
+        [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] }],
+        "0x",
+      );
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(infra.user3).initializeERC20Permit()).to.be.revertedWithCustomError(
+        freshAsset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN an already-initialised facet WHEN initializeERC20Permit is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(
+        infra.blr.target as string,
+        EQUITY_CONFIG_ID,
+        1,
+        [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] }],
+        "0x",
+      );
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await freshAsset.connect(infra.deployer).initializeERC20Permit();
+      await expect(freshAsset.connect(infra.deployer).initializeERC20Permit()).to.be.revertedWithCustomError(
+        freshAsset,
+        "FacetAlreadyRegistered",
+      );
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeERC20Permit is called THEN it emits ERC20PermitInitialized", async () => {
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(
+        infra.blr.target as string,
+        EQUITY_CONFIG_ID,
+        1,
+        [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] }],
+        "0x",
+      );
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(infra.deployer).initializeERC20Permit()).to.emit(
+        freshAsset,
+        "ERC20PermitInitialized",
+      );
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await _mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN permit THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.permit(ethers.ZeroAddress, ethers.ZeroAddress, 0, 0, 0, ethers.ZeroHash, ethers.ZeroHash),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
   });
 });

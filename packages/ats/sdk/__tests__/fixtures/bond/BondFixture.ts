@@ -3,7 +3,6 @@
 import { CancelCouponCommand } from "@command/bond/coupon/cancel/CancelCouponCommand";
 import { SetCouponCommand } from "@command/bond/coupon/set/SetCouponCommand";
 import { CreateBondCommand } from "@command/bond/create/CreateBondCommand";
-import { CreateTrexSuiteBondCommand } from "@command/bond/createTrexSuite/CreateTrexSuiteBondCommand";
 import { FullRedeemAtMaturityCommand } from "@command/bond/fullRedeemAtMaturity/FullRedeemAtMaturityCommand";
 import { RedeemAtMaturityByPartitionCommand } from "@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand";
 import { UpdateMaturityDateCommand } from "@command/bond/updateMaturityDate/UpdateMaturityDateCommand";
@@ -49,13 +48,10 @@ import { GetCouponHoldersQuery } from "@query/bond/coupons/getCouponHolders/GetC
 import { GetTotalCouponHoldersQuery } from "@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery";
 import { GetBondDetailsQuery } from "@query/bond/get/getBondDetails/GetBondDetailsQuery";
 import { GetPrincipalForQuery } from "@query/bond/get/getPrincipalFor/GetPrincipalForQuery";
-import {
-  CreateTrexSuiteBondRequest,
-  GetProceedRecipientDataRequest,
-  GetProceedRecipientsCountRequest,
-  GetProceedRecipientsRequest,
-  IsProceedRecipientRequest,
-} from "src";
+import GetProceedRecipientDataRequest from "@port/in/request/bond/GetProceedRecipientDataRequest";
+import GetProceedRecipientsCountRequest from "@port/in/request/bond/GetProceedRecipientsCountRequest";
+import GetProceedRecipientsRequest from "@port/in/request/bond/GetProceedRecipientsRequest";
+import IsProceedRecipientRequest from "@port/in/request/bond/IsProceedRecipientRequest";
 import { createFixture } from "../config";
 import { ContractIdPropFixture, HederaIdPropsFixture, PartitionIdFixture } from "../shared/DataFixture";
 import { SecurityPropsFixture } from "../shared/SecurityFixture";
@@ -90,38 +86,6 @@ export const CreateBondCommandFixture = createFixture<CreateBondCommand>((comman
   command.proceedRecipientsData?.as(() => ["0x0000"]);
 });
 
-export const CreateTrexSuiteBondCommandFixture = createFixture<CreateTrexSuiteBondCommand>((command) => {
-  command.salt.faker((faker) => faker.string.alphanumeric({ length: 32 }));
-  command.owner.faker((faker) => faker.finance.accountName());
-  command.irs.faker((faker) => faker.finance.iban());
-  command.onchainId.faker((faker) => faker.finance.ethereumAddress());
-  command.irAgents.faker((faker) => [faker.finance.ethereumAddress()]);
-  command.tokenAgents.faker((faker) => [faker.finance.ethereumAddress()]);
-  command.compliancesModules.faker((faker) => [faker.string.alphanumeric({ length: 32 })]);
-  command.complianceSettings.faker((faker) => [faker.string.alphanumeric({ length: 32 })]);
-  command.claimTopics.faker((faker) => [faker.number.int({ min: 1, max: 10 })]);
-  command.issuers.faker((faker) => [faker.finance.ethereumAddress()]);
-  command.issuerClaims.faker((faker) => [faker.number.int({ min: 1, max: 10 })]);
-
-  command.security.fromFixture(SecurityPropsFixture);
-  command.currency.faker((faker) => faker.finance.currencyCode());
-  command.nominalValue.faker((faker) => faker.finance.amount({ min: 1, max: 10, dec: 2 }));
-  command.nominalValueDecimals.faker((faker) => faker.number.int({ min: 1, max: 5 }));
-  command.startingDate.faker((faker) => faker.date.recent().getTime().toString());
-  command.maturityDate.faker((faker) => faker.date.future({ years: 2 }).getTime().toString());
-  command.factory.as(() => new ContractId(ContractIdPropFixture.create().value));
-  command.resolver.as(() => new ContractId(ContractIdPropFixture.create().value));
-  command.configId.as(() => HederaIdPropsFixture.create().value);
-  command.configVersion.faker((faker) => faker.number.int({ min: 1, max: 5 }));
-  command.diamondOwnerAccount.as(() => HederaIdPropsFixture.create().value);
-  command.externalControlLists?.as(() => [HederaIdPropsFixture.create().value]);
-  command.externalKycLists?.as(() => [HederaIdPropsFixture.create().value]);
-  command.compliance?.as(() => HederaIdPropsFixture.create().value);
-  command.identityRegistry?.as(() => HederaIdPropsFixture.create().value);
-  command.proceedRecipientsIds?.faker((faker) => [faker.finance.ethereumAddress()]);
-  command.proceedRecipientsData?.faker((faker) => [faker.string.alphanumeric({ length: 32 })]);
-});
-
 export const UpdateMaturityDateCommandFixture = createFixture<UpdateMaturityDateCommand>((command) => {
   command.maturityDate.faker((faker) => faker.date.future().getTime().toString());
   command.securityId.as(() => HederaIdPropsFixture.create().value);
@@ -150,7 +114,7 @@ export const BondDetailsFixture = createFixture<BondDetails>((props) => {
   props.currency.faker((faker) => faker.finance.currencyCode());
   props.nominalValue.faker((faker) => faker.finance.amount({ min: 1, max: 10, dec: 2 }));
   props.nominalValueDecimals.faker((faker) => faker.number.int({ min: 1, max: 5 }));
-  props.startingDate.faker((faker) => faker.date.past());
+  props.startingDate?.faker((faker) => faker.date.past());
   props.maturityDate.faker((faker) => faker.date.recent());
 });
 
@@ -257,7 +221,7 @@ export const CreateBondRequestFixture = createFixture<CreateBondRequest>((reques
           ),
         ),
   );
-  request.isCountryControlListWhiteList.faker((faker) => faker.datatype.boolean());
+  request.isCountryControlListWhiteList?.faker((faker) => faker.datatype.boolean());
   request.countries?.faker((faker) =>
     faker.helpers
       .arrayElements(
@@ -266,7 +230,7 @@ export const CreateBondRequestFixture = createFixture<CreateBondRequest>((reques
       )
       .join(","),
   );
-  request.info.faker((faker) => faker.lorem.words());
+  request.info?.faker((faker) => faker.lorem.words());
   request.currency.faker((faker) => `0x${Buffer.from(faker.finance.currencyCode()).toString("hex")}`);
   request.nominalValue.faker((faker) => faker.finance.amount({ min: 1, max: 10, dec: 2 }));
   request.nominalValueDecimals.faker((faker) => faker.number.int({ min: 1, max: 5 }));
@@ -366,81 +330,6 @@ export const RedeemAtMaturityByPartitionRequestFixture = createFixture<RedeemAtM
 export const FullRedeemAtMaturityRequestFixture = createFixture<FullRedeemAtMaturityRequest>((request) => {
   request.securityId.as(() => HederaIdPropsFixture.create().value);
   request.sourceId.as(() => HederaIdPropsFixture.create().value);
-});
-
-export const CreateTrexSuiteBondRequestFixture = createFixture<CreateTrexSuiteBondRequest>((request) => {
-  request.salt.faker((faker) => faker.string.alphanumeric({ length: 32 }));
-  request.owner.faker((faker) => faker.finance.accountName());
-  request.irs.faker((faker) => faker.finance.iban());
-  request.onchainId.faker((faker) => faker.finance.ethereumAddress());
-  request.irAgents.faker((faker) => [faker.finance.ethereumAddress()]);
-  request.tokenAgents.faker((faker) => [faker.finance.ethereumAddress()]);
-  request.compliancesModules.faker((faker) => [faker.string.alphanumeric({ length: 32 })]);
-  request.complianceSettings.faker((faker) => [faker.string.alphanumeric({ length: 32 })]);
-  request.claimTopics.faker((faker) => [faker.number.int({ min: 1, max: 10 })]);
-  request.issuers.faker((faker) => [faker.finance.ethereumAddress()]);
-  request.issuerClaims.faker((faker) => [faker.number.int({ min: 1, max: 10 })]);
-  request.name.faker((faker) => faker.company.name());
-  request.symbol.faker((faker) => faker.string.alpha({ length: 3, casing: "upper" }));
-  request.isin.faker((faker) => `US${faker.string.numeric(9)}`);
-  request.decimals.faker((faker) => faker.number.int({ min: 0, max: 18 }));
-  request.isWhiteList.faker((faker) => faker.datatype.boolean());
-  request.isControllable.faker((faker) => faker.datatype.boolean());
-  request.arePartitionsProtected.faker((faker) => faker.datatype.boolean());
-  request.clearingActive.faker((faker) => faker.datatype.boolean());
-  request.internalKycActivated.faker((faker) => faker.datatype.boolean());
-  request.isMultiPartition.faker((faker) => faker.datatype.boolean());
-  request.numberOfUnits?.as(() => "0");
-  const regulationType = CastRegulationType.toNumber(
-    faker.helpers.arrayElement(Object.values(RegulationType).filter((type) => type !== RegulationType.NONE)),
-  );
-  request.regulationType?.as(() => regulationType);
-  request.regulationSubType?.faker((faker) =>
-    regulationType === CastRegulationType.toNumber(RegulationType.REG_S)
-      ? CastRegulationSubType.toNumber(RegulationSubType.NONE)
-      : CastRegulationSubType.toNumber(
-          faker.helpers.arrayElement(
-            Object.values(RegulationSubType).filter((subType) => subType !== RegulationSubType.NONE),
-          ),
-        ),
-  );
-  request.isCountryControlListWhiteList.faker((faker) => faker.datatype.boolean());
-  request.countries?.faker((faker) =>
-    faker.helpers
-      .arrayElements(
-        Array.from({ length: 5 }, () => faker.location.countryCode({ variant: "alpha-2" })),
-        { min: 1, max: 5 },
-      )
-      .join(","),
-  );
-  request.info.faker((faker) => faker.lorem.words());
-  request.currency.faker((faker) => `0x${Buffer.from(faker.finance.currencyCode()).toString("hex")}`);
-  request.nominalValue.faker((faker) => faker.finance.amount({ min: 1, max: 10, dec: 2 }));
-  request.nominalValueDecimals.faker((faker) => faker.number.int({ min: 1, max: 5 }));
-  let startingDate: Date;
-  request.startingDate.faker((faker) => {
-    startingDate = faker.date.recent();
-    return startingDate.getTime().toString();
-  });
-  let maturityDate: Date;
-  request.maturityDate.faker((faker) => {
-    maturityDate = faker.date.future({ years: 2 });
-    return maturityDate.getTime().toString();
-  });
-
-  request.configId.faker(
-    (faker) =>
-      `0x000000000000000000000000000000000000000000000000000000000000000${faker.number.int({ min: 1, max: 9 })}`,
-  );
-  request.configVersion.as(() => 1);
-  request.diamondOwnerAccount?.as(() => HederaIdPropsFixture.create().value);
-  request.proceedRecipientsIds?.faker((faker) => [faker.finance.ethereumAddress()]);
-  request.proceedRecipientsData?.faker((faker) => ["0x0000"]);
-  request.externalPauses?.as(() => [HederaIdPropsFixture.create().value]);
-  request.externalControlLists?.as(() => [HederaIdPropsFixture.create().value]);
-  request.externalKycLists?.as(() => [HederaIdPropsFixture.create().value]);
-  request.complianceId?.as(() => HederaIdPropsFixture.create().value);
-  request.identityRegistryId?.as(() => HederaIdPropsFixture.create().value);
 });
 
 export const AddProceedRecipientRequestFixture = createFixture<AddProceedRecipientRequest>((request) => {

@@ -8,6 +8,14 @@ export const TOKEN_CREATION_COST_HBAR = 80;
 export const EVM_ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 export const HEDERA_ZERO_ADDRESS = "0.0.0";
 export const HBAR_DECIMALS = 8;
+/**
+ * Minimum accepted value for a configuration version in resolver-backed entry points.
+ *
+ * The diamond cut manager rejects `version == 0` with the `VersionZero` custom error;
+ * callers that want the most recent registered version must read it first via
+ * `Management.resolveLatestConfigVersion` and pass the resolved number explicitly.
+ */
+export const MIN_CONFIG_VERSION = 1;
 export const GAS = {
   CREATE_EQUITY_ST: 15000000,
   CREATE_BOND_ST: 15000000,
@@ -24,6 +32,7 @@ export const GAS = {
   PROTECTED_REDEEM: 7000000,
   PAUSE: 15000000,
   UNPAUSE: 650000,
+  DEACTIVATE: 1000000,
   TAKE_SNAPSHOT: 2000000,
   DELETE: 650000,
   GRANT_ROLES: 2000000,
@@ -130,7 +139,9 @@ export const GAS = {
   CREATE_EXTERNAL_KYC_LIST_MOCK: 7000000,
   SET_NAME: 7000000,
   SET_SYMBOL: 7000000,
+  SET_CUSTOM_DATA: 7000000,
   SET_NOMINAL_VALUE: 7000000,
+  SET_NOMINAL_VALUE_CURRENCY: 7000000,
   FREEZE_PARTIAL_TOKENS: 7000000,
   UNFREEZE_PARTIAL_TOKENS: 7000000,
   SET_ADDRESS_FROZEN: 700000,
@@ -149,7 +160,6 @@ export const GAS = {
   REMOVE_AGENT: 7000000,
   REDEEM_AT_MATURITY_BY_PARTITION_GAS: 700000,
   FULL_REDEEM_AT_MATURITY_GAS: 700000,
-  TREX_CREATE_SUITE: 20000000,
   ADD_PROCEED_RECIPIENT: 7000000,
   REMOVE_PROCEED_RECIPIENT: 7000000,
   UPDATE_PROCEED_RECIPIENT: 7000000,
@@ -174,8 +184,9 @@ export const SET_COUPON_EVENT = "CouponSet";
 export const CANCEL_COUPON_EVENT = "CouponCancelled";
 export const CANCEL_VOTING_EVENT = "VotingCancelled";
 export const SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT = "ScheduledBalanceAdjustmentSet";
-export const CANCEL_SCHEDULED_BALANCE_ADJUSTMENT_EVENT = "ScheduledBalanceAdjustmentCancelled";
 export const NOMINAL_VALUE_SET_EVENT = "NominalValueSet";
+export const NOMINAL_VALUE_CURRENCY_SET_EVENT = "NominalValueCurrencySet";
+export const CANCEL_SCHEDULED_BALANCE_ADJUSTMENT_EVENT = "ScheduledBalanceAdjustmentCancelled";
 export const SET_AMORTIZATION_EVENT = "AmortizationSet";
 export const CANCEL_AMORTIZATION_EVENT = "AmortizationCancelled";
 export const SET_AMORTIZATION_HOLD_EVENT = "AmortizationHoldSet";

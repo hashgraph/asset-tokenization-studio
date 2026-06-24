@@ -15,16 +15,19 @@
 import {
   ConfigurationData,
   ConfigurationError,
-  createBatchConfiguration,
   OperationResult,
+  createBatchConfiguration,
   DEFAULT_BATCH_SIZE,
+  RetryOptions,
 } from "@scripts/infrastructure";
-import { LOAN_CONFIG_ID } from "../constants";
-import { atsRegistry } from "../atsRegistry";
 import { BusinessLogicResolver } from "@contract-types";
+import { LOAN_CONFIG_ID } from "../constants";
+import { buildFacetList } from "../facetEnvironment";
+import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
+import { atsRegistry } from "../atsRegistry";
 
 /**
- * Loan-specific facets list (45 facets total).
+ * Loan-specific facets list (46 facets total).
  *
  * This is an explicit positive list of all facets required for loan tokens.
  *
@@ -38,50 +41,84 @@ const LOAN_FACETS = [
   // Loan Functionality
   "LoanFacet",
   "CouponFacet",
+  "CouponSecurityHoldersFacet",
+  "CouponListingFacet",
   "NominalValueFacet",
+  "NominalValueAtSnapshotFacet",
   "AmortizationFacet",
   "ProceedRecipientsFacet",
 
   // Core Functionality
   "AccessControlFacet",
+  "BalanceTrackerFacet",
+  "BalanceTrackerAdjustedFacet",
+  "BalanceTrackerByPartitionFacet",
+  "BalanceTrackerAtSnapshotFacet",
+  "BalanceTrackerAtSnapshotByPartitionFacet",
+  "ClearingAtSnapshotFacet",
+  "ClearingAtSnapshotByPartitionFacet",
+  "HoldAtSnapshotByPartitionFacet",
   "CapFacet",
+  "CapByPartitionFacet",
   "ControlListFacet",
   "KycFacet",
   "SsiManagementFacet",
   "FreezeFacet",
+  "BatchFreezeFacet",
   "PauseFacet",
 
+  // Core
+  "CoreFacet",
+
+  // Allowance
+  "AllowanceFacet",
+
   // ERC Standards
-  "ERC20Facet",
+  "TransferFacet",
+  "CoreAdjustedFacet",
+  "InitializerFacet", // Core initializer facet
+  "CustomDataFacet",
   "ERC20PermitFacet",
+  "EIP712Facet",
   "ERC20VotesFacet",
-  "ERC1594Facet",
-  "ERC1643Facet",
-  "ERC1644Facet",
-  "ERC1410ReadFacet",
-  "ERC1410ManagementFacet",
-  "ERC1410IssuerFacet",
-  "ERC1410TokenHolderFacet",
-  "ERC3643ManagementFacet",
-  "ERC3643OperationsFacet",
-  "ERC3643ReadFacet",
-  "ERC3643BatchFacet",
+  "DocumentationFacet",
+  "ControllerFacet",
+  "OperatorFacet",
+  "ProtectedByPartitionFacet",
+  "MintByPartitionFacet",
+  "TransferByPartitionFacet",
+  "PartitionsFacet",
+  "OperatorByPartitionFacet",
+  "BurnByPartitionFacet",
+  "RecoveryFacet",
+  "IdentityFacet",
+  "BatchControllerFacet",
+  "BatchBurnFacet",
+  "BatchMintFacet",
+  "BatchTransferFacet",
+  "ComplianceFacet",
+  "ComplianceByPartitionFacet",
+  "MintFacet",
+  "BurnFacet",
 
   // Hold
-  "HoldReadFacet",
-  "HoldManagementFacet",
-  "HoldTokenHolderFacet",
+  "HoldFacet",
+  "OperatorHoldByPartitionFacet",
+  "ControllerHoldByPartitionFacet",
+  "ControllerByPartitionFacet",
+  "ProtectedHoldByPartitionFacet",
+  "HoldByPartitionFacet",
 
   // Clearing & Settlement
-  "ClearingTransferFacet",
-  "ClearingRedeemFacet",
-  "ClearingHoldCreationFacet",
-  "ClearingReadFacet",
-  "ClearingActionsFacet",
+  "OperatorClearingByPartitionFacet",
+  "ProtectedClearingByPartitionFacet",
+  "ProtectedClearingHoldByPartitionFacet",
+  "ClearingHoldByPartitionFacet",
+  "OperatorClearingHoldByPartitionFacet",
+  "ClearingFacet",
+  "ClearingByPartitionFacet",
 
   // Scheduled Tasks
-  "ScheduledSnapshotsFacet",
-  "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",
 
   // External Management
@@ -89,15 +126,30 @@ const LOAN_FACETS = [
   "ExternalControlListManagementFacet",
   "ExternalKycListManagementFacet",
 
+  // Deactivate
+  "DeactivateFacet",
+
   // Diamond
   "DiamondFacet",
 
   // Advanced Features
   "SnapshotsFacet",
+  "SnapshotsByPartitionFacet",
+  "SecurityHoldersAtSnapshotFacet",
+  "HoldAtSnapshotFacet",
+  "LockAtSnapshotByPartitionFacet",
+  "FreezeAtSnapshotFacet",
+  "FreezeAtSnapshotByPartitionFacet",
+  "LockAtSnapshotFacet",
+  "CoreAtSnapshotFacet",
   "CorporateActionsFacet",
+  "SecurityHoldersFacet",
   "TransferAndLockFacet",
+  "TransferAndLockByPartitionFacet",
   "LockFacet",
+  "LockByPartitionFacet",
   "AdjustBalancesFacet",
+  "ScheduledBalanceAdjustmentFacet",
   "ProtectedPartitionsFacet",
 ] as const;
 
@@ -106,7 +158,7 @@ const LOAN_FACETS = [
  *
  * Thin wrapper that calls the generic core operation with loan-specific data:
  * - Configuration ID: LOAN_CONFIG_ID
- * - Facet list: LOAN_FACETS (44 facets)
+ * - Facet list: LOAN_FACETS (46 facets)
  *
  * All implementation logic is handled by the generic createConfiguration()
  * operation in core/operations/blrConfigurations.ts.
@@ -155,16 +207,13 @@ export async function createLoanConfiguration(
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
+  retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  // Build facet data with resolver keys from registry
-  const baseFacets = useTimeTravel ? [...LOAN_FACETS, "TimeTravelFacet"] : LOAN_FACETS;
-  const facetNames = useTimeTravel
-    ? baseFacets.map((name) => (name === "TimeTravelFacet" || name.endsWith("TimeTravel") ? name : `${name}TimeTravel`))
-    : baseFacets;
+  const facetNames = buildFacetList(LOAN_FACETS, useTimeTravel);
 
   const facets = facetNames.map((name) => {
     const baseName = name.replace(/TimeTravel$/, "");
-    const facetDef = atsRegistry.getFacetDefinition(baseName);
+    const facetDef = atsRegistry.getFacetDefinition(baseName) ?? getMockFacetDefinition(baseName);
     if (!facetDef?.resolverKey?.value) {
       throw new Error(`No resolver key found for facet: ${baseName}`);
     }
@@ -181,5 +230,6 @@ export async function createLoanConfiguration(
     partialBatchDeploy,
     batchSize,
     confirmations,
+    retryOptions,
   });
 }

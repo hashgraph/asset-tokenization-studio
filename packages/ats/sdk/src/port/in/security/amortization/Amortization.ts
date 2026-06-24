@@ -256,7 +256,6 @@ class AmortizationInPort implements IAmortizationInPort {
 
 function _mapAmortizationFor(af: AmortizationFor): AmortizationForViewModel {
   return {
-    account: af.account,
     recordDate: new Date(af.recordDate * ONE_THOUSAND),
     executionDate: new Date(af.executionDate * ONE_THOUSAND),
     holdId: af.holdId,

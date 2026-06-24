@@ -93,7 +93,7 @@ export interface CombineRegistriesOptions {
  * ```
  */
 // Function overloads
-// eslint-disable-next-line no-redeclare
+
 export function combineRegistries(...registries: RegistryProvider[]): RegistryProvider;
 // eslint-disable-next-line no-redeclare
 export function combineRegistries(...args: [...RegistryProvider[], CombineRegistriesOptions]): RegistryProvider;

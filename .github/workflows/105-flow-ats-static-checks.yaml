@@ -1,0 +1,124 @@
+name: "105: [FLOW] ATS Static Checks"
+
+on:
+  pull_request:
+    paths:
+      - "packages/ats/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/105-flow-ats-static-checks.yaml"
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-checks:
+    name: static-checks
+    runs-on: token-studio-linux-medium
+    timeout-minutes: 15
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Setup NodeJS Environment
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Hash codegen — no drift, no duplicates, no shape violations
+        run: npm run ats:contracts:hashes:check
+
+      - name: Fetch base ref for stability check
+        if: github.event_name == 'pull_request'
+        run: git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+
+      - name: Hash stability — pre-existing hashes unchanged
+        if: github.event_name == 'pull_request'
+        run: |
+          npm run ats:contracts:hashes:stability -- \
+            --base "origin/${{ github.base_ref }}" --soft
+
+      - name: Label PR if hash-bearing files changed
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          # Step A — fetch the full PR file list via the paginated API. `gh pr
+          # diff --name-only` returns HTTP 406 on PRs with >300 files, and the
+          # workflow checkout is shallow so a local merge-base diff isn't
+          # viable either.
+          # NB: we explicitly DO NOT chain `|| true` here — the API call must
+          # fail loudly. The previous version silently swallowed a 406 and
+          # produced a false-green "no contracts touched" log line.
+          all_files=$(gh api --paginate "repos/${REPO}/pulls/${PR_NUMBER}/files" --jq '.[].filename')
+          if [[ -z "${all_files}" ]]; then
+            echo "::error::PR ${PR_NUMBER} file list came back empty — API call may have failed silently."
+            exit 1
+          fi
+
+          # Step B — narrow to in-scope files. `grep` exits 1 when no match,
+          # which is a LEGITIMATE skip, not a script error; catch it explicitly
+          # so we can distinguish that case from an upstream failure.
+          set +e
+          changed=$(echo "${all_files}" \
+            | grep -E '^(packages/ats/contracts/.*\.sol|packages/ats/contracts/scripts/codegen/.*)$')
+          grep_rc=$?
+          set -e
+          if [[ ${grep_rc} -gt 1 ]]; then
+            echo "::error::grep failed with rc=${grep_rc} while filtering changed files."
+            exit 1
+          fi
+          if [[ -z "${changed}" ]]; then
+            echo "No contracts or codegen files touched — skipping label."
+            exit 0
+          fi
+
+          # Step C — decide whether to label. Touching anything under
+          # scripts/codegen counts; otherwise grep the DIFF (not the file
+          # contents) for hash-bearing line changes vs the base ref.
+          # Containment-grep false-positives any .sol file that merely
+          # declares a hash constant — and ~25% of .sol files do, so an
+          # unrelated NatSpec/event edit was triggering the label.
+          # `git diff -G <re>` matches files where an added/removed line
+          # hits the regex, which is what we actually want. Diff the whole
+          # range with rename detection (-M) so a pure file move stays a
+          # rename and produces no hit; a new-path-only pathspec would hide
+          # the old path, defeat rename pairing, and flag every moved
+          # hash-bearing line. Filter the hits to the in-scope file set.
+          hash_re='@custom:hash|bytes32[[:space:]]+constant[[:space:]]+[A-Z_]+[[:space:]]*=[[:space:]]*0x[0-9a-fA-F]{64}'
+          hash_hits=$(git diff --name-only -M "origin/${{ github.base_ref }}" HEAD -G "${hash_re}" 2>/dev/null \
+            | grep -E '^(packages/ats/contracts/.*\.sol|packages/ats/contracts/scripts/codegen/.*)$' || true)
+          if echo "${changed}" | grep -qE 'scripts/codegen/' \
+             || [[ -n "${hash_hits}" ]]; then
+            echo "Hash-bearing changes detected — applying 'hash-change' label."
+            # Use the REST Labels API directly. `gh pr edit --add-label` works
+            # but its underlying GraphQL query touches the deprecated
+            # `repository.pullRequest.projectCards` field, which makes the gh
+            # CLI exit 1 even when the label is applied successfully.
+            gh api -X POST "repos/${REPO}/issues/${PR_NUMBER}/labels" \
+              -f 'labels[]=hash-change' >/dev/null
+          else
+            echo "No hash-bearing changes detected."
+          fi

@@ -75,6 +75,7 @@ import {
   UpdateResolverRequest,
   UpdateConfigRequest,
   GetConfigInfoRequest,
+  ResolveLatestConfigVersionRequest,
   ConfigInfoViewModel,
   UpdateMaturityDateRequest,
   SetScheduledBalanceAdjustmentRequest,
@@ -192,7 +193,7 @@ import {
 
 export class SDKService {
   static initData?: InitializationData = undefined;
-  static testnetNetwork = "testnet";
+  static testnetNetwork = process.env.REACT_APP_NETWORK ?? "testnet";
   static testnetMirrorNode = {
     baseUrl: process.env.REACT_APP_MIRROR_NODE ?? "",
     apiKey: "",
@@ -733,6 +734,11 @@ export class SDKService {
   // MANAGEMENT ////////////////////////////////////////////
   public static async getConfigInfo(req: GetConfigInfoRequest): Promise<ConfigInfoViewModel> {
     return await Management.getConfigInfo(req);
+  }
+
+  public static async resolveLatestConfigVersion(req: ResolveLatestConfigVersionRequest): Promise<number> {
+    const response = await Management.resolveLatestConfigVersion(req);
+    return response.payload;
   }
 
   public static async updateSecurityConfigVersion(req: UpdateConfigVersionRequest): Promise<boolean> {

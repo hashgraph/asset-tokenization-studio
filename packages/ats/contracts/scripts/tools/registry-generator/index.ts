@@ -35,7 +35,7 @@ function parseArgs(): CliOptions {
 
   return {
     dryRun: args.includes("--dry-run"),
-    output: hasOutput ? args[outputIndex + 1] : "scripts/domain/atsRegistry.data.ts",
+    output: hasOutput ? args[outputIndex + 1] : "scripts/domain/atsRegistry.generated.ts",
     verbose: args.includes("--verbose") || args.includes("-v"),
     facetsOnly: args.includes("--facets-only"),
     useCache: args.includes("--use-cache") || args.includes("--cache"),
@@ -72,7 +72,7 @@ async function main(): Promise<void> {
       cacheDir: process.cwd(),
       excludePaths: [
         "**/test/**",
-        "!**/test/testTimeTravel/**",
+        "!**/test/timeTravel/**",
         "**/tests/**",
         "**/mocks/**",
         "**/mock/**",

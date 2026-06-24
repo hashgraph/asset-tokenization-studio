@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { InvalidDataError } from "./shared/invalid-data.error"
+import { InvalidDataError } from "./shared/invalid-data.error";
 
 export class InvalidPayoutSubtypeError extends InvalidDataError {
   constructor(message: string) {
-    super(message)
-    this.name = InvalidPayoutSubtypeError.name
+    super(message);
+    this.name = InvalidPayoutSubtypeError.name;
   }
 }

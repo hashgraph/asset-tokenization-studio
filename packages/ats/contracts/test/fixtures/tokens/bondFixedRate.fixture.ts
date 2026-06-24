@@ -7,11 +7,17 @@ import {
   PauseFacet__factory,
   KycFacet__factory,
   ControlListFacet__factory,
+  IAsset__factory,
 } from "@contract-types";
-import { DeployBondFromFactoryParams, FixedRateParams, deployBondFixedRateFromFactory } from "@scripts/domain";
+import {
+  ATS_ROLES,
+  DeployBondFromFactoryParams,
+  FixedRateParams,
+  deployBondFixedRateFromFactory,
+} from "@scripts/domain";
 import { FactoryRegulationDataParams } from "@scripts/domain";
 import { getRegulationData, getSecurityData } from "./common.fixture";
-import { getBondDetails } from "./bond.fixture";
+import { makeBondDetailsData } from "./bond.fixture";
 import { getDltTimestamp } from "@test";
 
 /**
@@ -44,12 +50,15 @@ export async function deployBondFixedRateTokenFixture({
   bondDataParams,
   regulationTypeParams,
   fixedRateParams,
+  infrastructure: providedInfrastructure,
 }: {
   bondDataParams?: DeepPartial<DeployBondFromFactoryParams>;
   regulationTypeParams?: DeepPartial<FactoryRegulationDataParams>;
   fixedRateParams?: DeepPartial<FixedRateParams>;
+  infrastructure?: Awaited<ReturnType<typeof deployAtsInfrastructureFixture>>;
 } = {}) {
-  const infrastructure = await deployAtsInfrastructureFixture();
+  // Reuse already-loaded infrastructure when provided to avoid redeploying it for sibling tokens.
+  const infrastructure = providedInfrastructure ?? (await deployAtsInfrastructureFixture());
   const { factory, blr, deployer } = infrastructure;
 
   const securityData = getSecurityData(blr, {
@@ -59,7 +68,7 @@ export async function deployBondFixedRateTokenFixture({
       version: 1,
     },
   });
-  const bondDetails = await getBondDetails(bondDataParams?.bondDetails);
+  const bondDetails = await makeBondDetailsData(bondDataParams?.bondDetails);
 
   const diamond = await deployBondFixedRateFromFactory(
     {
@@ -87,6 +96,7 @@ export async function deployBondFixedRateTokenFixture({
   const pauseFacet = PauseFacet__factory.connect(diamond.target as string, deployer);
   const kycFacet = KycFacet__factory.connect(diamond.target as string, deployer);
   const controlListFacet = ControlListFacet__factory.connect(diamond.target as string, deployer);
+  const asset = IAsset__factory.connect(diamond.target as string, deployer);
 
   return {
     ...infrastructure,
@@ -100,5 +110,6 @@ export async function deployBondFixedRateTokenFixture({
     pauseFacet,
     kycFacet,
     controlListFacet,
+    asset,
   };
 }

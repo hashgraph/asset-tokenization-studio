@@ -135,12 +135,22 @@ asset-tokenization-studio.iml
 
 # AI files
 .kiro/
-.claude/
-.agents/
+.claude/*
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/solidity-natspec/
+.opencode/
 CLAUDE.md
-GEMINI.md
 AGENTS.md
-packages/ats/contracts/AGENTS.md
-packages/ats/sdk/AGENTS.md
+
 .tasks/
+
+# Auto-generated MCP server context (added automatically)
+.mcp-server-context.md
+
+# Engram AI agent memory
+.engram/
+
+# Added by code-review-graph
+.code-review-graph/
 .atl/

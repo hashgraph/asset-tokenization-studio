@@ -4,7 +4,7 @@ import { ProtectPartitionsCommandHandler } from "@command/security/operations/pr
 import { TOKENS } from "../Tokens";
 import { UnprotectPartitionsCommandHandler } from "@command/security/operations/unprotectPartitions/UnprotectPartitionsCommandHandler";
 import { PartitionsProtectedQueryHandler } from "@query/security/protectedPartitions/arePartitionsProtected/PartitionsProtectedQueryHandler";
-import { GetNounceQueryHandler } from "@query/security/protectedPartitions/getNounce/GetNounceQueryHandler";
+import { GetNonceQueryHandler } from "@query/security/protectedPartitions/getNonce/GetNonceQueryHandler";
 
 export const COMMAND_HANDLERS_PROTECTED = [
   {
@@ -24,6 +24,6 @@ export const QUERY_HANDLERS_PROTECTED = [
   },
   {
     token: TOKENS.QUERY_HANDLER,
-    useClass: GetNounceQueryHandler,
+    useClass: GetNonceQueryHandler,
   },
 ];

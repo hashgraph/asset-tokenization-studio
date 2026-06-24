@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { ethers } from "ethers";
+import { ethers, type EventLog } from "ethers";
 import type { IFactory, ResolverProxy } from "@contract-types";
 import { ResolverProxy__factory } from "@contract-types";
-import { GAS_LIMIT, decodeEvent } from "@scripts/infrastructure";
+import { GAS_LIMIT } from "@scripts/infrastructure";
 import { ATS_ROLES, EQUITY_CONFIG_ID } from "../constants";
 import { EquityDetailsDataParams, FactoryRegulationDataParams, Rbac, SecurityDataParams } from "./types";
 
@@ -64,11 +64,7 @@ export async function deployEquityFromFactory(
   // Build RBAC array with admin
   const rbacs: Rbac[] = [
     {
-      role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
-      members: [adminAccount],
-    },
-    {
-      role: ATS_ROLES._NOMINAL_VALUE_ROLE,
+      role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
       members: [adminAccount],
     },
     ...securityDataParams.rbacs,
@@ -145,10 +141,21 @@ export async function deployEquityFromFactory(
   const receipt = await tx.wait();
 
   // Find EquityDeployed event to get diamond address
-  const { equityAddress: diamondAddress } = await decodeEvent(factory, "EquityDeployed", receipt);
+  const event = receipt?.logs.find((log) => "eventName" in log && (log as EventLog).eventName === "EquityDeployed") as
+    | EventLog
+    | undefined;
+  if (!event || !event.args) {
+    throw new Error(
+      `EquityDeployed event not found in deployment transaction. Events: ${JSON.stringify(
+        receipt?.logs.filter((log) => "eventName" in log).map((e) => (e as EventLog).eventName),
+      )}`,
+    );
+  }
+
+  const diamondAddress = event.args.diamondProxyAddress || event.args[1];
 
   if (!diamondAddress || diamondAddress === ethers.ZeroAddress) {
-    throw new Error(`Invalid diamond address from EquityDeployed event`);
+    throw new Error(`Invalid diamond address from event. Args: ${JSON.stringify(event.args)}`);
   }
 
   // Return diamond proxy as ResolverProxy contract

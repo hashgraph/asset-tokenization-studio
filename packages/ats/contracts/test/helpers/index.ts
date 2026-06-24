@@ -13,3 +13,5 @@ export * from "./checkpointTestHelpers";
 export * from "./testSetup";
 export * from "./globalSetup";
 export * from "./assertions";
+export * from "./errors";
+export * from "./eventAssertions";

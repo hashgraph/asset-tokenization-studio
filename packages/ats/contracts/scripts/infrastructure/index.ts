@@ -93,7 +93,6 @@ export {
   RETRY_DELAY,
   DEFAULT_BATCH_SIZE,
   GAS_LIMIT,
-  LATEST_VERSION,
   DEFAULT_PARTITION,
   INFRASTRUCTURE_CONTRACT_NAMES,
   PROXY_CONTRACTS,
@@ -233,11 +232,13 @@ export {
 export {
   waitForTransaction,
   hederaGasOverrides,
+  gasLimitOverride,
   extractRevertReason,
   getGasPrice,
   estimateGasLimit,
   formatGasUsage,
   retryTransaction,
+  withNonceReset,
   isNonceTooLowError,
   isGasError,
   isNetworkError,
@@ -281,10 +282,8 @@ export {
 export { fetchHederaContractId, getMirrorNodeUrl, isHederaNetwork } from "./utils/hedera";
 
 export { getSelector } from "./utils/selector";
-
 export { decodeEvent } from "./utils/decodeEvent";
-export type { GetEventArguments } from "./utils/decodeEvent";
-
+export { decodeCustomError } from "./utils/decodeCustomError";
 export { dateToUnixTimestamp, generateTimestamp } from "./utils/time";
 
 export { withRetry, withRetryFn, DEFAULT_RETRYABLE_ERRORS } from "./utils/retry";

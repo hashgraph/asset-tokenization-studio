@@ -1,18 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    ProceedRecipientsFacet
-} from "../../../../facets/layer_2/proceedRecipient/standard/ProceedRecipientsFacet.sol";
-import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
+import { ProceedRecipientsFacet } from "../../../../facets/proceedRecipient/ProceedRecipientsFacet.sol";
+import { TimeTravelProvider } from "../../timeTravel/TimeTravelProvider.sol";
 
-contract ProceedRecipientsFacetTimeTravel is ProceedRecipientsFacet, TimeTravelStorageWrapper {
-    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockTimestamp();
-    }
-
-    function _blockNumber() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockNumber();
-    }
+contract ProceedRecipientsFacetTimeTravel is ProceedRecipientsFacet, TimeTravelProvider {
+    // solhint-disable-next-line no-empty-blocks
 }

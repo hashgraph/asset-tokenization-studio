@@ -15,6 +15,7 @@ import { MaxUint256, encodeBytes32String, parseUnits, ZeroAddress } from "ethers
 import { isinGenerator } from "@thomaschaplin/isin-generator";
 
 export const MAX_UINT256 = MaxUint256;
+export const MAX_UINT8 = 255;
 
 export const TEST_PARTITIONS = {
   DEFAULT: encodeBytes32String("default"),
@@ -29,13 +30,13 @@ export const TEST_AMOUNTS = {
   LARGE: parseUnits("10000", 6),
 } as const;
 
-export async function executeRbac(accessControlFacet: IAsset, rbac: Rbac[]) {
+export async function executeRbac(asset: IAsset, rbac: Rbac[]) {
   await Promise.all(
     rbac.map(async (r) => {
       const roleHash = ATS_ROLES[r.role as AtsRoleName] || (r.role as AtsRoleHash);
       await Promise.all(
         r.members.map(async (m) => {
-          return accessControlFacet.grantRole(roleHash, m);
+          return asset.grantRole(roleHash, m);
         }),
       );
     }),

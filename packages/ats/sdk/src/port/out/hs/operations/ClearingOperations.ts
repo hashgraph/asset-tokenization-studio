@@ -1,13 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ContractId } from "@hiero-ledger/sdk";
-import { ethers } from "ethers";
-import {
-  ClearingTransferFacet__factory,
-  ClearingRedeemFacet__factory,
-  ClearingHoldCreationFacet__factory,
-  ClearingActionsFacet__factory,
-} from "@hashgraph/asset-tokenization-contracts";
+import { IAsset__factory } from "@hashgraph/asset-tokenization-contracts";
 import { GAS } from "@core/Constants";
 import BigDecimal from "@domain/context/shared/BigDecimal";
 import EvmAddress from "@domain/context/contract/EvmAddress";
@@ -31,7 +25,7 @@ export class ClearingOperations {
     LogService.logTrace(`Activate Clearing to address ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      new ethers.Interface(["function activateClearing()"]),
+      IAsset__factory.createInterface(),
       "activateClearing",
       [],
       GAS.ACTIVATE_CLEARING,
@@ -42,7 +36,7 @@ export class ClearingOperations {
     LogService.logTrace(`Deactivate Clearing to address ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      new ethers.Interface(["function deactivateClearing()"]),
+      IAsset__factory.createInterface(),
       "deactivateClearing",
       [],
       GAS.DEACTIVATE_CLEARING,
@@ -65,7 +59,7 @@ export class ClearingOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      ClearingTransferFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "clearingTransferByPartition",
       [clearingOperation, amount.toBigInt(), targetId.toString()],
       GAS.CLEARING_TRANSFER_BY_PARTITION,
@@ -93,7 +87,7 @@ export class ClearingOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      ClearingTransferFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "clearingTransferFromByPartition",
       [clearingOperationFrom, amount.toBigInt(), targetId.toString()],
       GAS.CLEARING_TRANSFER_FROM_BY_PARTITION,
@@ -125,7 +119,7 @@ export class ClearingOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      ClearingTransferFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "protectedClearingTransferByPartition",
       [protectedClearingOperation, amount.toBigInt(), targetId.toString(), signature],
       GAS.PROTECTED_CLEARING_TRANSFER_BY_PARTITION,
@@ -149,7 +143,7 @@ export class ClearingOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      ClearingActionsFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "approveClearingOperationByPartition",
       [clearingOperationIdentifier],
       GAS.APPROVE_CLEARING_TRANSFER_BY_PARTITION,
@@ -173,7 +167,7 @@ export class ClearingOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      ClearingActionsFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "cancelClearingOperationByPartition",
       [clearingOperationIdentifier],
       GAS.CANCEL_CLEARING_TRANSFER_BY_PARTITION,
@@ -197,7 +191,7 @@ export class ClearingOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      ClearingActionsFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "reclaimClearingOperationByPartition",
       [clearingOperationIdentifier],
       GAS.RECLAIM_CLEARING_TRANSFER_BY_PARTITION,
@@ -219,7 +213,7 @@ export class ClearingOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      ClearingRedeemFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "clearingRedeemByPartition",
       [clearingOperation, amount.toBigInt()],
       GAS.CLEARING_REDEEM_BY_PARTITION,
@@ -246,7 +240,7 @@ export class ClearingOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      ClearingRedeemFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "clearingRedeemFromByPartition",
       [clearingOperationFrom, amount.toBigInt()],
       GAS.CLEARING_REDEEM_FROM_BY_PARTITION,
@@ -277,7 +271,7 @@ export class ClearingOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      ClearingRedeemFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "protectedClearingRedeemByPartition",
       [protectedClearingOperation, amount.toBigInt(), signature],
       GAS.PROTECTED_CLEARING_REDEEM_BY_PARTITION,
@@ -309,7 +303,7 @@ export class ClearingOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      ClearingHoldCreationFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "clearingCreateHoldByPartition",
       [clearingOperation, hold],
       GAS.CLEARING_CREATE_HOLD_BY_PARTITION,
@@ -346,7 +340,7 @@ export class ClearingOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      ClearingHoldCreationFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "clearingCreateHoldFromByPartition",
       [clearingOperationFrom, hold],
       GAS.CLEARING_CREATE_HOLD_FROM_BY_PARTITION,
@@ -387,7 +381,7 @@ export class ClearingOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      ClearingHoldCreationFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "protectedClearingCreateHoldByPartition",
       [protectedClearingOperation, hold, signature],
       GAS.PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION,
@@ -424,7 +418,7 @@ export class ClearingOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      ClearingHoldCreationFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "operatorClearingCreateHoldByPartition",
       [clearingOperationFrom, hold],
       GAS.OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION,
@@ -451,7 +445,7 @@ export class ClearingOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      ClearingRedeemFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "operatorClearingRedeemByPartition",
       [clearingOperationFrom, amount.toBigInt()],
       GAS.OPERATOR_CLEARING_REDEEM_BY_PARTITION,
@@ -479,7 +473,7 @@ export class ClearingOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      ClearingTransferFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "operatorClearingTransferByPartition",
       [clearingOperationFrom, amount.toBigInt(), targetId.toString()],
       GAS.OPERATOR_CLEARING_TRANSFER_BY_PARTITION,

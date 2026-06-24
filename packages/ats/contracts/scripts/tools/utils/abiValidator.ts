@@ -83,11 +83,11 @@ export function extractMethodsFromABI(abi: any[]): MethodDefinition[] {
   const functions = iface.fragments.filter((f): f is ethers.FunctionFragment => f.type === "function");
   for (const item of functions) {
     if (!STATIC_METHODS_TO_EXCLUDE.has(item.name)) {
-      const name = item.name;
-      const signature = item.format("full");
-      const selector = item.selector;
-
-      methods.push({ name, signature, selector });
+      methods.push({
+        name: item.name,
+        signature: { full: item.format("full"), canonical: item.format("sighash") },
+        selector: item.selector,
+      });
     }
   }
 
@@ -110,9 +110,11 @@ export function extractMethodsFromABI(abi: any[]): MethodDefinition[] {
 export function validateAndMerge(abiMethods: Map<string, { signature: string; selector: string }>): MethodDefinition[] {
   const result: MethodDefinition[] = [];
   for (const [name, abiMethod] of abiMethods.entries()) {
+    // The Map carries the canonical signature only; mirror it into `full`
+    // so callers always have a usable string.
     result.push({
       name,
-      signature: abiMethod.signature,
+      signature: { full: abiMethod.signature, canonical: abiMethod.signature },
       selector: abiMethod.selector,
     });
   }

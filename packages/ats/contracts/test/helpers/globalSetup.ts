@@ -2,6 +2,7 @@
 
 // Direct import to avoid barrel's typechain eager-loading in parallel workers
 import { configureLogger, LogLevel } from "../../scripts/infrastructure/utils/logging";
+import "./chai-matchers";
 
 export const mochaHooks = {
   beforeAll(): void {

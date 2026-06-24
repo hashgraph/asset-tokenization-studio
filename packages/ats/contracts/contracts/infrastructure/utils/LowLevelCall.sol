@@ -17,7 +17,7 @@ library LowLevelCall {
 
         // solhint-disable-next-line avoid-low-level-calls
         (bool success, bytes memory returndata) = _target.call(_data);
-        return _verifyCallResultFromTarget(success, returndata, _errorSelector);
+        return verifyCallResultFromTarget(success, returndata, _errorSelector);
     }
 
     function functionStaticCall(
@@ -31,7 +31,7 @@ library LowLevelCall {
 
         // solhint-disable-next-line avoid-low-level-calls
         (bool success, bytes memory returndata) = _target.staticcall(_data);
-        return _verifyCallResultFromTarget(success, returndata, _errorSelector);
+        return verifyCallResultFromTarget(success, returndata, _errorSelector);
     }
 
     function revertWithData(bytes4 _reasonCode, bytes memory _details) internal pure {
@@ -45,7 +45,7 @@ library LowLevelCall {
     }
 
     // solhint-disable-next-line private-vars-leading-underscore
-    function _verifyCallResultFromTarget(
+    function verifyCallResultFromTarget(
         bool _success,
         bytes memory _returndata,
         bytes4 _errorSelector

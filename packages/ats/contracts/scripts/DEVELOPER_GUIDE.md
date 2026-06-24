@@ -195,7 +195,7 @@ If you added a **new facet contract** (not just adding existing facet to configu
 npm run generate:registry
 ```
 
-This updates [domain/atsRegistry.data.ts](domain/atsRegistry.data.ts) with:
+This updates [domain/atsRegistry.generated.ts](domain/atsRegistry.generated.ts) with:
 
 - Facet metadata (methods, events, errors)
 - Resolver keys (from contract constants)
@@ -394,12 +394,13 @@ const FUND_FACETS = [
   // ERC Standards (choose what you need)
   "ERC1410IssuerFacet",
   "ERC1410ReadFacet",
-  "ERC1594Facet",
+  "MintFacet",
+  "BurnFacet",
   "ERC20PermitFacet",
 
   // Compliance (if needed)
-  "ERC3643ManagementFacet",
-  "ERC3643OperationsFacet",
+  "ComplianceFacet",
+  "IdentityFacet",
   "ERC3643ReadFacet",
 
   // Fund-Specific (your custom facets)
@@ -1353,14 +1354,14 @@ const output = await deploySystemWithNewBlr(signer, "hedera-testnet", {
 
 The registry system **automatically extracts metadata** from Solidity contracts and generates TypeScript definitions. This ensures resolver keys, function selectors, and contract metadata stay in sync with actual contracts.
 
-**Generated File**: [domain/atsRegistry.data.ts](domain/atsRegistry.data.ts) (auto-generated, don't edit)
+**Generated File**: [domain/atsRegistry.generated.ts](domain/atsRegistry.generated.ts) (auto-generated, don't edit)
 
 **What's Extracted**:
 
 - Function signatures and selectors
 - Event signatures and topics
 - Custom error definitions
-- Resolver keys (from `constants/resolverKeys.sol`)
+- Resolver keys (file-scope `RESOLVER_KEY_<NAME>` constant inside each `I<Feature>.sol`)
 - Role constants (from `constants/roles.sol`)
 - Inheritance chains
 - NatSpec documentation
@@ -1372,7 +1373,7 @@ Regenerate the registry when:
 - ✅ You **add a new facet contract** to the codebase
 - ✅ You **modify function signatures** in existing facets
 - ✅ You **add/remove events or errors** in facets
-- ✅ You **change resolver keys** in `constants/resolverKeys.sol`
+- ✅ You **change a resolver key** declared at file scope in an `I<Feature>.sol`
 - ❌ NOT needed when just changing configuration facet lists
 
 ### How to Regenerate
@@ -1386,7 +1387,7 @@ npm run generate:registry
 
 1. Scans all Solidity files in [contracts/](../contracts/)
 2. Extracts metadata using [MetadataExtractor](tools/scanner/metadataExtractor.ts)
-3. Generates TypeScript registry at [domain/atsRegistry.data.ts](domain/atsRegistry.data.ts)
+3. Generates TypeScript registry at [domain/atsRegistry.generated.ts](domain/atsRegistry.generated.ts)
 4. Creates helper functions via [registryFactory](infrastructure/registryFactory.ts)
 
 **Output Example**:
@@ -1398,8 +1399,8 @@ export const FACET_REGISTRY = {
     layer: 1,
     category: "core",
     resolverKey: {
-      name: "_ACCESS_CONTROL_RESOLVER_KEY",
-      value: "0x011768a41cb4fe76...",
+      name: "RESOLVER_KEY_ACCESS_CONTROL",
+      value: "0xccc2e755f9225e65...",
     },
     methods: [
       {
@@ -1443,7 +1444,7 @@ const allFacets = getAllFacets();
 console.log(`Total facets: ${allFacets.length}`);
 
 // Access roles
-console.log(ROLES._PAUSER_ROLE); // bytes32 value from contracts
+console.log(ROLES.ROLE_PAUSER); // bytes32 value from contracts
 ```
 
 ### Registry in Operations
@@ -1653,7 +1654,7 @@ See [`types/core.ts:9-30`](infrastructure/types/core.ts#L9-L30) for detailed gui
 npm run generate:registry
 ```
 
-**Verify**: Check that `NewFacet` appears in [domain/atsRegistry.data.ts](domain/atsRegistry.data.ts)
+**Verify**: Check that `NewFacet` appears in [domain/atsRegistry.generated.ts](domain/atsRegistry.generated.ts)
 
 ---
 
@@ -1675,16 +1676,18 @@ This generates TypeChain types in `build/typechain/`.
 
 **Error**: `Facet AccessControlFacet found in registry but missing resolverKey.value.`
 
-**Cause**: The facet exists but doesn't have a resolver key defined in `constants/resolverKeys.sol`.
+**Cause**: The facet exists but doesn't have a file-scope `RESOLVER_KEY_<FEATURE>` constant declared inside its `I<Feature>.sol` interface file.
 
 **Solution**:
 
-1. Check if resolver key exists in [contracts/constants/resolverKeys.sol](../contracts/constants/resolverKeys.sol)
-2. If missing, add it:
+1. Check the facet's `I<Feature>.sol` for a file-scope constant:
    ```solidity
-   bytes32 constant _NEW_FACET_RESOLVER_KEY = keccak256("NewFacet resolver key");
+   /// @custom:hash resolverKey <PascalName>
+   bytes32 constant RESOLVER_KEY_<FEATURE> = 0x0000000000000000000000000000000000000000000000000000000000000000;
    ```
-3. Regenerate registry: `npm run generate:registry`
+2. If missing, add it with a placeholder hex (any 32-byte value). The hex is rewritten by codegen.
+3. Run `npm run -w packages/ats/contracts generate:hashes` (or rely on the post-compile hook in `npx hardhat compile`) to populate the canonical hex from `asset.tokenization.standard.resolverKey.<PascalName>`.
+4. Regenerate the contract registry: `npm run generate:registry`.
 
 ---
 
@@ -1752,7 +1755,7 @@ await createFundConfiguration(
    ```bash
    npm run generate:registry
    ```
-4. Verify timestamp at top of [domain/atsRegistry.data.ts](domain/atsRegistry.data.ts)
+4. Verify timestamp at top of [domain/atsRegistry.generated.ts](domain/atsRegistry.generated.ts)
 
 ---
 

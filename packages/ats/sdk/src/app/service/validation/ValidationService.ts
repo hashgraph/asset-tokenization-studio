@@ -25,8 +25,8 @@ import { CanTransferByPartitionQuery } from "@query/security/canTransferByPartit
 import { Security } from "@domain/context/security/Security";
 import CheckNums from "@core/checks/numbers/CheckNums";
 import { getProtectedPartitionRole } from "@domain/context/security/SecurityRole";
-import { GetNounceQuery } from "@query/security/protectedPartitions/getNounce/GetNounceQuery";
-import { NounceAlreadyUsed } from "@domain/context/security/error/operations/NounceAlreadyUsed";
+import { GetNonceQuery } from "@query/security/protectedPartitions/getNonce/GetNonceQuery";
+import { NonceAlreadyUsed } from "@domain/context/security/error/operations/NonceAlreadyUsed";
 import { IsInControlListQuery } from "@query/account/controlList/IsInControlListQuery";
 import { AccountNotInControlList } from "@domain/context/security/error/operations/AccountNotInControlList";
 import { AccountAlreadyInControlList } from "@domain/context/security/error/operations/AccountAlreadyInControlList";
@@ -63,8 +63,6 @@ import { GetBondDetailsQuery } from "@query/bond/get/getBondDetails/GetBondDetai
 import { OperationNotAllowed } from "@domain/context/security/error/operations/OperationNotAllowed";
 import { IsInternalKycActivatedQuery } from "@query/security/kyc/isInternalKycActivated/IsInternalKycActivatedQuery";
 import { IsExternallyGrantedQuery } from "@query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery";
-import { GetTokenBySaltQuery } from "@query/factory/trex/getTokenBySalt/GetTokenBySaltQuery";
-import { InvalidTrexTokenSalt } from "@domain/context/factory/error/InvalidTrexTokenSalt";
 import { IsProceedRecipientQuery } from "@query/security/proceedRecipient/isProceedRecipient/IsProceedRecipientQuery";
 import { AccountIsNotProceedRecipient } from "@domain/context/security/error/operations/AccountIsNotProceedRecipient";
 import { AccountIsProceedRecipient } from "@domain/context/security/error/operations/AccountIsProceedRecipient";
@@ -249,12 +247,12 @@ export default class ValidationService extends Service {
     await this.checkRole(protectedPartitionRole, accountId, securityId);
   }
 
-  async checkValidNounce(securityId: string, targetId: string, nounce: number): Promise<void> {
+  async checkValidNonce(securityId: string, targetId: string, nonce: number): Promise<void> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
-    const nextNounce = (await this.queryBus.execute(new GetNounceQuery(securityId, targetId))).payload;
+    const nextNonce = (await this.queryBus.execute(new GetNonceQuery(securityId, targetId))).payload;
 
-    if (nounce <= nextNounce) {
-      throw new NounceAlreadyUsed(nounce);
+    if (nonce <= nextNonce) {
+      throw new NonceAlreadyUsed(nonce);
     }
   }
 
@@ -362,15 +360,6 @@ export default class ValidationService extends Service {
 
     if (parseInt(maturityDate) <= bondDetails.maturityDate) {
       throw new OperationNotAllowed("The maturity date cannot be earlier or equal than the current one");
-    }
-  }
-
-  async checkTrexTokenSaltExists(factory: string, salt: string): Promise<void> {
-    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
-    const exists = (await this.queryBus.execute(new GetTokenBySaltQuery(factory, salt))).token;
-
-    if (!exists) {
-      throw new InvalidTrexTokenSalt(salt);
     }
   }
 

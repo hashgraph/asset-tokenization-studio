@@ -49,7 +49,7 @@ describe("Equity Token Deployment", () => {
       const callArgs = mockFactory.deployEquity.getCall(0).args[0];
       const rbacs = callArgs.security.rbacs;
 
-      expect(rbacs[0].role).to.equal(ATS_ROLES._DEFAULT_ADMIN_ROLE);
+      expect(rbacs[0].role).to.equal(ATS_ROLES.DEFAULT_ADMIN_ROLE);
       expect(rbacs[0].members).to.include(adminAccount);
     });
 
@@ -57,8 +57,8 @@ describe("Equity Token Deployment", () => {
       const diamondAddress = TEST_ADDRESSES.VALID_3;
       const mockFactory = createMockFactory(TEST_FACTORY_EVENTS.EQUITY_DEPLOYED, diamondAddress);
       const additionalRbacs = [
-        { role: ATS_ROLES._PAUSER_ROLE, members: [TEST_ADDRESSES.VALID_4] },
-        { role: ATS_ROLES._CONTROLLER_ROLE, members: [TEST_ADDRESSES.VALID_5] },
+        { role: ATS_ROLES.ROLE_PAUSER, members: [TEST_ADDRESSES.VALID_4] },
+        { role: ATS_ROLES.ROLE_CONTROLLER, members: [TEST_ADDRESSES.VALID_5] },
       ];
       const securityData = createMockSecurityDataWithRbacs(additionalRbacs);
       const params = createDeployEquityParams(mockFactory, { securityData });
@@ -69,12 +69,11 @@ describe("Equity Token Deployment", () => {
       const callArgs = mockFactory.deployEquity.getCall(0).args[0];
       const rbacs = callArgs.security.rbacs;
 
-      // Admin + nominal value roles should be first, then additional roles
-      expect(rbacs).to.have.length(4);
-      expect(rbacs[0].role).to.equal(ATS_ROLES._DEFAULT_ADMIN_ROLE);
-      expect(rbacs[1].role).to.equal(ATS_ROLES._NOMINAL_VALUE_ROLE);
-      expect(rbacs[2].role).to.equal(ATS_ROLES._PAUSER_ROLE);
-      expect(rbacs[3].role).to.equal(ATS_ROLES._CONTROLLER_ROLE);
+      // Admin role should be first, then additional roles
+      expect(rbacs).to.have.length(3);
+      expect(rbacs[0].role).to.equal(ATS_ROLES.DEFAULT_ADMIN_ROLE);
+      expect(rbacs[1].role).to.equal(ATS_ROLES.ROLE_PAUSER);
+      expect(rbacs[2].role).to.equal(ATS_ROLES.ROLE_CONTROLLER);
     });
 
     it("should place admin role first in array", async () => {
@@ -90,7 +89,7 @@ describe("Equity Token Deployment", () => {
       const callArgs = mockFactory.deployEquity.getCall(0).args[0];
       const rbacs = callArgs.security.rbacs;
 
-      expect(rbacs[0].role).to.equal(ATS_ROLES._DEFAULT_ADMIN_ROLE);
+      expect(rbacs[0].role).to.equal(ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
   });
 
@@ -405,9 +404,14 @@ describe("Equity Token Deployment", () => {
       const params = createDeployEquityParams(mockFactory);
       const regulationData = createMockRegulationData();
 
-      await expect(deployEquityFromFactory(params, regulationData)).to.be.rejectedWith(
-        'Event log for "EquityDeployed" not found in transaction receipt',
-      );
+      let threw = false;
+      try {
+        await deployEquityFromFactory(params, regulationData);
+      } catch (err: unknown) {
+        threw = true;
+        expect((err as Error).message).to.include("EquityDeployed event not found");
+      }
+      expect(threw).to.equal(true);
     });
 
     it("should throw if event has no args", async () => {
@@ -415,9 +419,14 @@ describe("Equity Token Deployment", () => {
       const params = createDeployEquityParams(mockFactory);
       const regulationData = createMockRegulationData();
 
-      await expect(deployEquityFromFactory(params, regulationData)).to.be.rejectedWith(
-        "Invalid diamond address from EquityDeployed event",
-      );
+      let threw = false;
+      try {
+        await deployEquityFromFactory(params, regulationData);
+      } catch (err: unknown) {
+        threw = true;
+        expect((err as Error).message).to.include("EquityDeployed event not found");
+      }
+      expect(threw).to.equal(true);
     });
 
     it("should throw if diamondAddress is zero address", async () => {
@@ -425,7 +434,14 @@ describe("Equity Token Deployment", () => {
       const params = createDeployEquityParams(mockFactory);
       const regulationData = createMockRegulationData();
 
-      await expect(deployEquityFromFactory(params, regulationData)).to.be.rejectedWith("Invalid diamond address");
+      let threw = false;
+      try {
+        await deployEquityFromFactory(params, regulationData);
+      } catch (err: unknown) {
+        threw = true;
+        expect((err as Error).message).to.include("Invalid diamond address");
+      }
+      expect(threw).to.equal(true);
     });
 
     it("should extract diamondProxyAddress from event args", async () => {

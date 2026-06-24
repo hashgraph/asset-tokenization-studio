@@ -25,17 +25,23 @@ import {
   registerFacets,
   createBatchConfiguration,
   deployFacets,
-  LATEST_VERSION,
 } from "@scripts/infrastructure";
 
 // Domain layer - ATS-specific business logic
-import { EQUITY_CONFIG_ID, atsRegistry } from "@scripts/domain";
+import {
+  EQUITY_CONFIG_ID,
+  atsRegistry,
+  deployOrchestratorLibraries,
+  getFacetLibraryLinks,
+  hasOrchestratorLibraryAddresses,
+} from "@scripts/domain";
 
 // Test helpers
 import { TEST_SIZES, silenceScriptLogging } from "@test";
 
 // Contract types
 import {
+  BusinessLogicResolver,
   BusinessLogicResolver__factory,
   AccessControlFacet__factory,
   KycFacet__factory,
@@ -47,12 +53,19 @@ import {
 describe("External Facet Extensibility - Integration Tests", () => {
   let deployer: Signer;
   let blrAddress: string;
-  let blrContract: any;
+  let blrContract: BusinessLogicResolver;
 
   before(silenceScriptLogging);
 
   beforeEach(async () => {
     [deployer] = await ethers.getSigners();
+
+    // FreezeFacet (used by some tests below) inlines a path that DELEGATECALLs into
+    // ScheduledTasksOps, so the orchestrator libraries must be deployed before any
+    // facet factory is constructed.
+    if (!hasOrchestratorLibraryAddresses()) {
+      await deployOrchestratorLibraries(deployer);
+    }
 
     // Deploy BLR for all tests
     const blrImplementationFactory = new BusinessLogicResolver__factory(deployer);
@@ -65,7 +78,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
 
     // Initialize BLR
     blrContract = BusinessLogicResolver__factory.connect(blrResult.proxyAddress, deployer);
-    await blrContract.initialize_BusinessLogicResolver();
+    await blrContract.initializeBusinessLogicResolver();
   });
 
   describe("External Facet Registration", () => {
@@ -170,7 +183,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
       // For testing, we use a registry facet to verify the code path works
       const result = await deployFacets(
         {
-          FreezeFacet: new FreezeFacet__factory(deployer),
+          FreezeFacet: new FreezeFacet__factory(getFacetLibraryLinks("FreezeFacet") as any, deployer),
         },
         {
           confirmations: 0, // No confirmations needed for Hardhat
@@ -192,7 +205,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
           AccessControlFacet: new AccessControlFacet__factory(deployer),
           KycFacet: new KycFacet__factory(deployer),
           PauseFacet: new PauseFacet__factory(deployer),
-          FreezeFacet: new FreezeFacet__factory(deployer),
+          FreezeFacet: new FreezeFacet__factory(getFacetLibraryLinks("FreezeFacet") as any, deployer),
         },
         {
           confirmations: 0, // No confirmations needed for Hardhat
@@ -326,7 +339,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
       const pauseFactory = new PauseFacet__factory(deployer);
       const pauseResult = await deployContract(pauseFactory, {});
 
-      const freezeFactory = new FreezeFacet__factory(deployer);
+      const freezeFactory = new FreezeFacet__factory(getFacetLibraryLinks("FreezeFacet") as any, deployer);
       const freezeResult = await deployContract(freezeFactory, {});
 
       // Register external facets
@@ -555,9 +568,8 @@ describe("External Facet Extensibility - Integration Tests", () => {
     });
   });
 
-  describe("LATEST_VERSION Auto-Updating Proxies", () => {
-    it("should deploy proxy with LATEST_VERSION (version: 0)", async () => {
-      // Deploy and register facet
+  describe("Explicit configuration version pinning", () => {
+    it("rejects version 0 with an explicit guard error", async () => {
       const accessControlFactory = new AccessControlFacet__factory(deployer);
       const accessControlResult = await deployContract(accessControlFactory, {});
 
@@ -571,8 +583,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
         ],
       });
 
-      // Create configuration
-      const configId = ethers.encodeBytes32String("TEST_CONFIG");
+      const configId = ethers.encodeBytes32String("TEST_CONFIG_REJECT_ZERO");
       await createBatchConfiguration(blrContract, {
         configurationId: configId,
         facets: [
@@ -584,21 +595,17 @@ describe("External Facet Extensibility - Integration Tests", () => {
         ],
       });
 
-      // Deploy proxy with explicit version: 0
-      const result = await deployResolverProxy(deployer, {
-        blrAddress,
-        configurationId: configId,
-        version: LATEST_VERSION,
-        rbac: [],
-      });
-
-      expect(result.success).to.be.true;
-      expect(result.proxyAddress).to.exist;
-      expect(result.version).to.equal(LATEST_VERSION);
+      await expect(
+        deployResolverProxy(deployer, {
+          blrAddress,
+          configurationId: configId,
+          version: 0,
+          rbac: [],
+        }),
+      ).to.be.rejectedWith(/'version' must be an integer >= 1/);
     });
 
-    it("should deploy proxy with default version (undefined = LATEST_VERSION)", async () => {
-      // Deploy and register facet
+    it("resolves the latest registered version explicitly and pins it", async () => {
       const kycFactory = new KycFacet__factory(deployer);
       const kycResult = await deployContract(kycFactory, {});
 
@@ -612,8 +619,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
         ],
       });
 
-      // Create configuration
-      const configId = ethers.encodeBytes32String("DEFAULT_TEST");
+      const configId = ethers.encodeBytes32String("EXPLICIT_LATEST_TEST");
       await createBatchConfiguration(blrContract, {
         configurationId: configId,
         facets: [
@@ -625,18 +631,20 @@ describe("External Facet Extensibility - Integration Tests", () => {
         ],
       });
 
-      // Deploy proxy WITHOUT specifying version (should default to LATEST_VERSION)
+      const latestRaw = await blrContract.getLatestVersionByConfiguration(configId);
+      const latest = Number(latestRaw);
+      expect(latest).to.be.greaterThan(0);
+
       const result = await deployResolverProxy(deployer, {
         blrAddress,
         configurationId: configId,
-        // version not specified - should default to LATEST_VERSION
+        version: latest,
         rbac: [],
       });
 
       expect(result.success).to.be.true;
       expect(result.proxyAddress).to.exist;
-      // Should have used the default LATEST_VERSION
-      expect(result.version).to.equal(LATEST_VERSION);
+      expect(result.version).to.equal(latest);
     });
   });
 

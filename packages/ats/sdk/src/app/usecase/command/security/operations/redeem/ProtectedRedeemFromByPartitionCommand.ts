@@ -17,7 +17,7 @@ export class ProtectedRedeemFromByPartitionCommand extends Command<ProtectedRede
     public readonly sourceId: string,
     public readonly amount: string,
     public readonly deadline: string,
-    public readonly nounce: number,
+    public readonly nonce: number,
     public readonly signature: string,
   ) {
     super();

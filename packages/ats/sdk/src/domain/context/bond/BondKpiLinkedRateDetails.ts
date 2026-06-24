@@ -5,12 +5,14 @@ import BigDecimal from "../shared/BigDecimal";
 import { SecurityDate } from "../shared/SecurityDate";
 import { ImpactData } from "./ImpactData";
 import { InterestRate } from "./InterestRate";
+import { OptionalField } from "@core/decorator/OptionalDecorator";
 
 export class BondKpiLinkedRateDetails extends ValidatedDomain<BondKpiLinkedRateDetails> {
   currency: string;
   nominalValue: BigDecimal;
   nominalValueDecimals: number;
-  startingDate: number;
+  @OptionalField()
+  startingDate?: number;
   maturityDate: number;
   interestRate: InterestRate;
   impactData: ImpactData;
@@ -19,7 +21,7 @@ export class BondKpiLinkedRateDetails extends ValidatedDomain<BondKpiLinkedRateD
     currency: string,
     nominalValue: BigDecimal,
     nominalValueDecimals: number,
-    startingDate: number,
+    startingDate: number | undefined,
     maturityDate: number,
     interestRate: InterestRate,
     impactData: ImpactData,

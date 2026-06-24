@@ -127,40 +127,54 @@ interface IRewards {
 
 ### Step 2: Create Storage Wrapper (if needed)
 
-If your facet requires custom storage, create a storage wrapper in Layer 0.
+If your facet requires custom storage, create a storage wrapper under
+`contracts/domain/{asset,core}/`. The storage struct lives at **file scope**
+(not inside any contract or interface), carries an ERC-7201
+`@custom:storage-location` annotation, and follows the 5-region layout:
+**R1 Lifecycle (bool flags)** → **R2 Packed scalars (uint8, bytes3, address, enum)**
+→ **R3 Single-slot scalars (uint256, bytes32, string)** → **R4 Aggregates
+(mapping, array, EnumerableSet, checkpoint arrays)** → **APPEND-ONLY ZONE**.
+New fields go below the marker — the boundary is greppable and audit-visible.
+All four region banners are **always present, in canonical order, even when a region has no
+fields** — the empty banners are scaffolding that fixes each field's insertion point and the
+region numbering. Never renumber a region when its only field is removed; leave the empty
+banner in place.
 
-**File**: `contracts/layer_0/rewards/RewardsStorageWrapper.sol`
+**File**: `contracts/domain/asset/rewards/RewardsStorageWrapper.sol`
 
 ```solidity
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.23;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity >=0.8.0 <0.9.0;
 
-import { IRewardsStorageWrapper } from "../layer_2/interfaces/rewards/IRewardsStorageWrapper.sol";
+import { IRewardsStorageWrapper } from "./IRewardsStorageWrapper.sol";
+
+/// @custom:hash storage Rewards
+bytes32 constant STORAGE_LOCATION_REWARDS = 0x0000000000000000000000000000000000000000000000000000000000000000;
+
+/// @custom:storage-location erc7201:security.token.standard.storage.Rewards
+struct RewardsDataStorage {
+  // ─── R1 Lifecycle (bool flags) ───────────────────────────
+  bool initialized;
+  // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+  // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+  uint256 totalDistributed;
+  // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
+  mapping(address => uint256) totalRewards;
+  mapping(address => uint256) lastDistribution;
+  // ─── APPEND-ONLY ZONE BELOW ───
+}
 
 /**
  * @title RewardsStorageWrapper
  * @notice Storage management for rewards functionality
  */
 abstract contract RewardsStorageWrapper is IRewardsStorageWrapper {
-  // Storage position constant (unique bytes32)
-  bytes32 private constant _REWARDS_STORAGE_POSITION = keccak256("security.token.standard.rewards.storage");
-
   /**
-   * @notice Storage structure for rewards data
-   */
-  struct RewardsDataStorage {
-    bool initialized;
-    mapping(address => uint256) totalRewards;
-    mapping(address => uint256) lastDistribution;
-    uint256 totalDistributed;
-  }
-
-  /**
-   * @notice Access rewards storage via assembly (EIP-1967 pattern)
+   * @notice Access rewards storage at the ERC-7201 namespace slot.
    * @return rewardsData_ Storage pointer
    */
   function _rewardsStorage() internal pure returns (RewardsDataStorage storage rewardsData_) {
-    bytes32 position = _REWARDS_STORAGE_POSITION;
+    bytes32 position = STORAGE_LOCATION_REWARDS;
     assembly {
       rewardsData_.slot := position
     }
@@ -187,11 +201,11 @@ abstract contract RewardsStorageWrapper is IRewardsStorageWrapper {
 
 ### Step 3: Define Storage Events/Errors Interface
 
-**File**: `contracts/layer_2/interfaces/rewards/IRewardsStorageWrapper.sol`
+**File**: `contracts/domain/asset/rewards/IRewardsStorageWrapper.sol`
 
 ```solidity
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.23;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity >=0.8.0 <0.9.0;
 
 /**
  * @title IRewardsStorageWrapper
@@ -217,36 +231,53 @@ interface IRewardsStorageWrapper {
 
 ### Step 4: Define Resolver Key
 
-Add a unique resolver key constant for your facet.
+Declare the resolver key as a **file-scope constant** at the top of the facet's
+interface file (`I<Feature>.sol`). The annotation `/// @custom:hash resolverKey
+<PascalName>` tells the codegen which formula to apply; the hex literal is a
+placeholder that `npm run generate:hashes` (or the post-compile hook in
+`hardhat compile`) rewrites to the canonical value.
 
-**File**: `contracts/layer_2/constants/resolverKeys.sol`
+**File**: `contracts/layer_2/rewards/IRewards.sol`
 
 ```solidity
-// Add to existing file
-bytes32 constant _REWARDS_RESOLVER_KEY = keccak256("security.token.standard.rewards.resolverKey");
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity >=0.8.0 <0.9.0;
+
+/// @custom:hash resolverKey Rewards
+bytes32 constant RESOLVER_KEY_REWARDS = 0x0000000000000000000000000000000000000000000000000000000000000000;
+
+interface IRewards {
+  // ... function declarations ...
+}
 ```
+
+The canonical hex is derived from `keccak256("asset.tokenization.standard.resolverKey.Rewards")`.
+Do not hand-edit the hex; the CI gate `npm run check:hashes` will fail on drift.
 
 ### Step 5: Define Storage Position
 
-Add storage position constant if using custom storage.
-
-**File**: `contracts/layer_2/constants/storagePositions.sol`
-
-```solidity
-// Add to existing file
-bytes32 constant _REWARDS_STORAGE_POSITION = keccak256("security.token.standard.rewards.storage");
-```
+Already handled in Step 2 — the file-scope `STORAGE_LOCATION_REWARDS` constant
+sits above the storage wrapper contract and uses the
+`/// @custom:hash storage Rewards` annotation. The codegen applies the
+[ERC-7201](https://eips.ethereum.org/EIPS/eip-7201) derivation
+`keccak256(abi.encode(uint256(keccak256("asset.tokenization.standard.storage.Rewards")) - 1)) & ~bytes32(uint256(0xff))`
+to produce the canonical hex.
 
 ### Step 6: Define Roles (if needed)
 
-Add role constants if your facet requires specific access control.
+Roles stay in the central `contracts/constants/roles.sol` (they are
+cross-cutting, unlike per-facet resolver keys and storage locations). Use the
+canonical naming and the `/// @custom:hash role <PascalName>` annotation.
 
-**File**: `contracts/layer_2/constants/roles.sol`
+**File**: `contracts/constants/roles.sol`
 
 ```solidity
-// Add to existing file
-bytes32 constant _REWARDS_DISTRIBUTOR_ROLE = keccak256("REWARDS_DISTRIBUTOR_ROLE");
+// Append to existing file
+/// @custom:hash role RewardsDistributor
+bytes32 constant ROLE_REWARDS_DISTRIBUTOR = 0x0000000000000000000000000000000000000000000000000000000000000000;
 ```
+
+The canonical hex is `keccak256("asset.tokenization.standard.role.RewardsDistributor")`.
 
 ### Step 7: Create Business Logic Contract
 
@@ -288,7 +319,7 @@ abstract contract Rewards is IRewards, Common {
     external
     override
     onlyUnpaused
-    onlyRole(_REWARDS_DISTRIBUTOR_ROLE)
+    onlyRole(ROLE_REWARDS_DISTRIBUTOR)
     validateAddress(_tokenHolder)
     returns (bool success_)
   {
@@ -344,7 +375,7 @@ contract RewardsFacet is Rewards, IStaticFunctionSelectors {
    * @return Unique bytes32 resolver key
    */
   function getStaticResolverKey() external pure override returns (bytes32) {
-    return _REWARDS_RESOLVER_KEY;
+    return RESOLVER_KEY_REWARDS;
   }
 
   /**
@@ -396,7 +427,7 @@ Add your facet to the deployment registry.
 
 ```typescript
 import { RewardsFacet__factory } from "../../typechain-types";
-import { _REWARDS_RESOLVER_KEY } from "./constants";
+import { RESOLVER_KEY_REWARDS } from "./constants";
 
 // Add to FACET_FACTORIES
 export const FACET_FACTORIES = {
@@ -523,7 +554,7 @@ describe("RewardsFacet", function () {
   describe("Metadata", function () {
     it("should return correct resolver key", async function () {
       const key = await rewardsFacet.getStaticResolverKey();
-      expect(key).to.equal(_REWARDS_RESOLVER_KEY);
+      expect(key).to.equal(RESOLVER_KEY_REWARDS);
     });
 
     it("should return function selectors", async function () {
@@ -599,17 +630,17 @@ const tx = await factory.createEquityToken(
 
 ### Naming Conventions
 
-| Element                 | Convention                      | Example                     |
-| ----------------------- | ------------------------------- | --------------------------- |
-| Business logic contract | PascalCase                      | `Rewards`, `Staking`        |
-| Facet wrapper           | PascalCase + "Facet"            | `RewardsFacet`              |
-| Interface               | I + ContractName                | `IRewards`                  |
-| Storage wrapper         | ContractName + "StorageWrapper" | `RewardsStorageWrapper`     |
-| Storage interface       | I + StorageWrapper              | `IRewardsStorageWrapper`    |
-| Resolver key            | \_FEATURE_RESOLVER_KEY          | `_REWARDS_RESOLVER_KEY`     |
-| Storage position        | \_FEATURE_STORAGE_POSITION      | `_REWARDS_STORAGE_POSITION` |
-| Role                    | \_ROLE_NAME_ROLE                | `_REWARDS_DISTRIBUTOR_ROLE` |
-| Initialization          | initialize_FeatureName          | `initialize_Rewards`        |
+| Element                 | Convention                      | Example                    |
+| ----------------------- | ------------------------------- | -------------------------- |
+| Business logic contract | PascalCase                      | `Rewards`, `Staking`       |
+| Facet wrapper           | PascalCase + "Facet"            | `RewardsFacet`             |
+| Interface               | I + ContractName                | `IRewards`                 |
+| Storage wrapper         | ContractName + "StorageWrapper" | `RewardsStorageWrapper`    |
+| Storage interface       | I + StorageWrapper              | `IRewardsStorageWrapper`   |
+| Resolver key            | RESOLVER_KEY_FEATURE            | `RESOLVER_KEY_REWARDS`     |
+| Storage position        | STORAGE_LOCATION_FEATURE        | `STORAGE_LOCATION_REWARDS` |
+| Role                    | ROLE_NAME                       | `ROLE_REWARDS_DISTRIBUTOR` |
+| Initialization          | initializeFeatureName           | `initializeRewards`        |
 
 ### Storage Management
 
@@ -620,7 +651,7 @@ const tx = await factory.createEquityToken(
 
 ### Access Control
 
-1. **Use role-based modifiers**: `onlyRole(_REWARDS_DISTRIBUTOR_ROLE)`
+1. **Use role-based modifiers**: `onlyRole(ROLE_REWARDS_DISTRIBUTOR)`
 2. **Add pause support**: `onlyUnpaused` modifier
 3. **Validate addresses**: `validateAddress(_tokenHolder)`
 4. **Check KYC status**: Verify compliance for sensitive operations
