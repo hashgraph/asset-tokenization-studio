@@ -95,6 +95,18 @@ export function hasOrchestratorLibraryAddresses(): boolean {
 }
 
 /**
+ * Reset orchestrator library addresses to the unset state.
+ *
+ * Intended for test isolation: a suite that seeds placeholder addresses (e.g. to
+ * construct facet factories without a real deployment) must reset afterwards, so a
+ * later deployment re-links the actually-deployed libraries instead of inheriting
+ * the placeholders through this module-level singleton.
+ */
+export function resetOrchestratorLibraryAddresses(): void {
+  _addresses = undefined;
+}
+
+/**
  * Determine which orchestrator libraries a facet requires for TypeChain linking.
  *
  * Returns an array of library names that must be linked when deploying the facet.
