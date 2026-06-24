@@ -74,12 +74,10 @@ abstract contract ResolverProxyUnstructured {
      * @return facetsLength_ Number of facets registered for the active configuration version.
      */
     function _getFacetsLength() internal view returns (uint256 facetsLength_) {
+        (bytes32 configId, uint256 versionId) = ResolverProxyStorageWrapper.getResolverProxyConfigurationIdAndVersion();
         facetsLength_ = ResolverProxyStorageWrapper
             .getBusinessLogicResolver()
-            .getFacetsLengthByConfigurationIdAndVersion(
-                ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
-                ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion()
-            );
+            .getFacetsLengthByConfigurationIdAndVersion(configId, versionId);
     }
 
     /**
@@ -94,9 +92,11 @@ abstract contract ResolverProxyUnstructured {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (IDiamondLoupe.Facet[] memory facets_) {
+        (bytes32 configId, uint256 versionId) = ResolverProxyStorageWrapper.getResolverProxyConfigurationIdAndVersion();
+
         facets_ = ResolverProxyStorageWrapper.getBusinessLogicResolver().getFacetsByConfigurationIdAndVersion(
-            ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
-            ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion(),
+            configId,
+            versionId,
             _pageIndex,
             _pageLength
         );
@@ -110,13 +110,11 @@ abstract contract ResolverProxyUnstructured {
      * @return facetSelectorsLength_ Number of selectors registered for the facet.
      */
     function _getFacetSelectorsLength(bytes32 _facetId) internal view returns (uint256 facetSelectorsLength_) {
+        (bytes32 configId, uint256 versionId) = ResolverProxyStorageWrapper.getResolverProxyConfigurationIdAndVersion();
+
         facetSelectorsLength_ = ResolverProxyStorageWrapper
             .getBusinessLogicResolver()
-            .getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(
-                ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
-                ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion(),
-                _facetId
-            );
+            .getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(configId, versionId, _facetId);
     }
 
     /**
@@ -133,11 +131,13 @@ abstract contract ResolverProxyUnstructured {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (bytes4[] memory facetSelectors_) {
+        (bytes32 configId, uint256 versionId) = ResolverProxyStorageWrapper.getResolverProxyConfigurationIdAndVersion();
+
         facetSelectors_ = ResolverProxyStorageWrapper
             .getBusinessLogicResolver()
             .getFacetSelectorsByConfigurationIdVersionAndFacetId(
-                ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
-                ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion(),
+                configId,
+                versionId,
                 _facetId,
                 _pageIndex,
                 _pageLength
@@ -153,9 +153,11 @@ abstract contract ResolverProxyUnstructured {
      * @return facetIds_ Page of facet identifiers.
      */
     function _getFacetIds(uint256 _pageIndex, uint256 _pageLength) internal view returns (bytes32[] memory facetIds_) {
+        (bytes32 configId, uint256 versionId) = ResolverProxyStorageWrapper.getResolverProxyConfigurationIdAndVersion();
+
         facetIds_ = ResolverProxyStorageWrapper.getBusinessLogicResolver().getFacetIdsByConfigurationIdAndVersion(
-            ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
-            ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion(),
+            configId,
+            versionId,
             _pageIndex,
             _pageLength
         );
@@ -173,14 +175,11 @@ abstract contract ResolverProxyUnstructured {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory facetAddresses_) {
+        (bytes32 configId, uint256 versionId) = ResolverProxyStorageWrapper.getResolverProxyConfigurationIdAndVersion();
+
         facetAddresses_ = ResolverProxyStorageWrapper
             .getBusinessLogicResolver()
-            .getFacetAddressesByConfigurationIdAndVersion(
-                ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
-                ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion(),
-                _pageIndex,
-                _pageLength
-            );
+            .getFacetAddressesByConfigurationIdAndVersion(configId, versionId, _pageIndex, _pageLength);
     }
 
     /**
@@ -191,9 +190,11 @@ abstract contract ResolverProxyUnstructured {
      * @return facetId_ Facet identifier associated with the selector.
      */
     function _getFacetIdBySelector(bytes4 _selector) internal view returns (bytes32 facetId_) {
+        (bytes32 configId, uint256 versionId) = ResolverProxyStorageWrapper.getResolverProxyConfigurationIdAndVersion();
+
         facetId_ = ResolverProxyStorageWrapper.getBusinessLogicResolver().getFacetIdByConfigurationIdVersionAndSelector(
-            ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
-            ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion(),
+            configId,
+            versionId,
             _selector
         );
     }
@@ -205,9 +206,11 @@ abstract contract ResolverProxyUnstructured {
      * @return facet_ Facet metadata registered for the identifier.
      */
     function _getFacet(bytes32 _facetId) internal view returns (IDiamondLoupe.Facet memory facet_) {
+        (bytes32 configId, uint256 versionId) = ResolverProxyStorageWrapper.getResolverProxyConfigurationIdAndVersion();
+
         facet_ = ResolverProxyStorageWrapper.getBusinessLogicResolver().getFacetByConfigurationIdVersionAndFacetId(
-            ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
-            ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion(),
+            configId,
+            versionId,
             _facetId
         );
     }
@@ -234,9 +237,11 @@ abstract contract ResolverProxyUnstructured {
      * @return isSupported_ True when the active configuration supports the interface.
      */
     function _supportsInterface(bytes4 _interfaceId) internal view returns (bool isSupported_) {
+        (bytes32 configId, uint256 versionId) = ResolverProxyStorageWrapper.getResolverProxyConfigurationIdAndVersion();
+
         isSupported_ = ResolverProxyStorageWrapper.getBusinessLogicResolver().resolveSupportsInterface(
-            ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
-            ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion(),
+            configId,
+            versionId,
             _interfaceId
         );
     }

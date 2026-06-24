@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IBusinessLogicResolver } from "../../infrastructure/diamond/IBusinessLogicResolver.sol";
 import { IResolverProxy } from "../../infrastructure/proxy/IResolverProxy.sol";
 import { RESOLVER_PROXY_VERSION_V2 } from "../../constants/values.sol";
+import { IDiamondCutManager } from "../../infrastructure/diamond/IDiamondCutManager.sol";
 
 /// @custom:hash storage ResolverProxy
 bytes32 constant STORAGE_LOCATION_RESOLVER_PROXY = 0x688a1184cf65cae3790aef0eb6006209aa488bc22d1dd13eb263813b07a39300;
@@ -90,9 +91,26 @@ library ResolverProxyStorageWrapper {
     /**
      * @notice Returns the configuration identifier selecting the facet set served by the proxy.
      * @return The configured `bytes32` identifier.
+     * @return The version `uint256` identifier.
+     */
+    function getResolverProxyConfigurationIdAndVersion() internal view returns (bytes32, uint256) {
+        bytes8 resolverProxyVersion = getResolverProxyVersion();
+        if (resolverProxyVersion == RESOLVER_PROXY_VERSION_V2) {
+            IResolverProxy.ResolverProxyConfigurationV2
+                memory resolverProxyConfigurationV2 = getResolverProxyConfigurationV2();
+            return (resolverProxyConfigurationV2.configurationId, resolverProxyConfigurationV2.configurationVersion);
+        }
+        revert IDiamondCutManager.UnrecognizedResolverProxyVersion(resolverProxyVersion);
+    }
+
+    /**
+     * @notice Returns the configuration identifier selecting the facet set served by the proxy.
+     * @return The configured `bytes32` identifier.
      */
     function getResolverProxyConfigurationId() internal view returns (bytes32) {
-        return _decodeV2().configurationId;
+        bytes8 resolverProxyVersion = getResolverProxyVersion();
+        if (resolverProxyVersion == RESOLVER_PROXY_VERSION_V2) return getResolverProxyConfigurationV2().configurationId;
+        revert IDiamondCutManager.UnrecognizedResolverProxyVersion(resolverProxyVersion);
     }
 
     /**
@@ -100,7 +118,10 @@ library ResolverProxyStorageWrapper {
      * @return The configuration version.
      */
     function getResolverProxyConfigurationVersion() internal view returns (uint256) {
-        return _decodeV2().configurationVersion;
+        bytes8 resolverProxyVersion = getResolverProxyVersion();
+        if (resolverProxyVersion == RESOLVER_PROXY_VERSION_V2)
+            return getResolverProxyConfigurationV2().configurationVersion;
+        revert IDiamondCutManager.UnrecognizedResolverProxyVersion(resolverProxyVersion);
     }
 
     /**
@@ -108,7 +129,10 @@ library ResolverProxyStorageWrapper {
      * @return The replacement enabled flag.
      */
     function getResolverProxyReplacementEnabled() internal view returns (bool) {
-        return _decodeV2().replacementEnabled;
+        bytes8 resolverProxyVersion = getResolverProxyVersion();
+        if (resolverProxyVersion == RESOLVER_PROXY_VERSION_V2)
+            return getResolverProxyConfigurationV2().replacementEnabled;
+        revert IDiamondCutManager.UnrecognizedResolverProxyVersion(resolverProxyVersion);
     }
 
     /**
@@ -120,7 +144,8 @@ library ResolverProxyStorageWrapper {
         view
         returns (IResolverProxy.ResolverProxyConfigurationV2 memory)
     {
-        return _decodeV2();
+        IResolverProxy.ResolverProxyConfigurationGeneric memory generic = _decodeGeneric();
+        return abi.decode(generic.content, (IResolverProxy.ResolverProxyConfigurationV2));
     }
 
     /**
@@ -134,15 +159,6 @@ library ResolverProxyStorageWrapper {
             resolverProxyStorage().resolverProxyConfiguration,
             (IResolverProxy.ResolverProxyConfigurationGeneric)
         );
-    }
-
-    /**
-     * @notice Decodes the V2 payload carried inside the configuration envelope.
-     * @return v2 The decoded V2 configuration.
-     */
-    function _decodeV2() private view returns (IResolverProxy.ResolverProxyConfigurationV2 memory v2) {
-        IResolverProxy.ResolverProxyConfigurationGeneric memory generic = _decodeGeneric();
-        v2 = abi.decode(generic.content, (IResolverProxy.ResolverProxyConfigurationV2));
     }
 
     /**

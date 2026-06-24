@@ -403,6 +403,8 @@ library ERC3643StorageWrapper {
      * @return versionJson_ JSON-encoded version descriptor.
      */
     function version() internal view returns (string memory versionJson_) {
+        (bytes32 configId, uint256 versionId) = ResolverProxyStorageWrapper.getResolverProxyConfigurationIdAndVersion();
+
         return
             string(
                 abi.encodePacked(
@@ -412,10 +414,10 @@ library ERC3643StorageWrapper {
                     Strings.toHexString(uint160(address(ResolverProxyStorageWrapper.getBusinessLogicResolver())), 20),
                     '", ',
                     '"Config ID": "',
-                    Strings.toHexString(uint256(ResolverProxyStorageWrapper.getResolverProxyConfigurationId()), 32),
+                    Strings.toHexString(uint256(configId), 32),
                     '", ',
                     '"Version": "',
-                    Strings.toString(ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion()),
+                    Strings.toString(versionId),
                     '"',
                     "}"
                     // solhint-enable quotes
