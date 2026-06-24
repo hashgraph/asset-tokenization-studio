@@ -144,8 +144,7 @@ library AmortizationStorageWrapper {
      * @dev When an active hold already exists for the same `(amortization, holder)` pair,
      *      that hold is released first and the total adjusted accordingly. A new hold is
      *      then created on the default partition with the contract itself as escrow.
-     *      Reverts with {AmortizationNotActive} if the amortization has been disabled or
-     *      {AmortizationHoldFailed} if the hold creation does not succeed. The calling facet
+     *      Reverts with {AmortizationNotActive} if the amortization has been disabled. The calling facet
      *      (`Amortization`) emits {AmortizationHoldSet}.
      * @param _amortizationID The one-based identifier of the amortization.
      * @param _tokenHolder The holder against whom the hold is taken.
@@ -189,15 +188,13 @@ library AmortizationStorageWrapper {
             data: ""
         });
 
-        (bool success, uint256 newHoldId) = HoldStorageWrapper.createHoldByPartition(
+        (, uint256 newHoldId) = HoldStorageWrapper.createHoldByPartition(
             _DEFAULT_PARTITION,
             _tokenHolder,
             hold,
             "",
             ThirdPartyType.CONTROLLER
         );
-
-        if (!success) revert IAmortization.AmortizationHoldFailed(corporateActionId, _amortizationID);
 
         s.amortizationHolds[corporateActionId][_tokenHolder] = AmortizationHoldInfo({
             holdId: newHoldId,
@@ -545,48 +542,25 @@ library AmortizationStorageWrapper {
     }
 
     /**
-     * @notice Releases (in part or in full) a hold by writing directly to hold storage.
-     * @dev Avoids the calldata-to-memory conversion of the standard hold release path.
-     *      Reverts with {InsufficientHoldBalance} if the recorded hold amount is smaller
-     *      than the requested release. Restores allowance when the hold's third-party
-     *      type is `AUTHORIZED`, removes the LABAF entry and emits the standard transfer
-     *      events to keep observers in sync.
+     * @notice Fully removes an amortization hold by writing directly to hold storage.
+     * @dev Removes the LABAF entry and emits the standard transfer events to keep
+     *      observers in sync.
      * @param _tokenHolder The holder whose hold is being released.
      * @param _holdId The hold identifier on the default partition.
-     * @param _amount The amount to release; equal to the hold amount triggers full removal.
+     * @param _amount The amount to release.
      * @return Always true on success; reverts otherwise.
      */
     function _releaseHold(address _tokenHolder, uint256 _holdId, uint256 _amount) private returns (bool) {
-        bytes32 partition = _DEFAULT_PARTITION;
         IHoldTypes.HoldIdentifier memory identifier = IHoldTypes.HoldIdentifier({
-            partition: partition,
+            partition: _DEFAULT_PARTITION,
             tokenHolder: _tokenHolder,
             holdId: _holdId
         });
 
-        uint256 holdAmount = HoldStorageWrapper.getHold(identifier).hold.amount;
-        if (holdAmount < _amount) {
-            revert IHoldTypes.InsufficientHoldBalance(holdAmount, _amount);
-        }
-
-        // Restore allowance before any deletion so the third-party record is still readable
-        if (HoldStorageWrapper.getHold(identifier).thirdPartyType == ThirdPartyType.AUTHORIZED) {
-            address thirdParty = HoldStorageWrapper.getHoldThirdParty(identifier);
-            if (thirdParty != address(0)) {
-                ERC20StorageWrapper.increaseAllowedBalance(_tokenHolder, thirdParty, _amount);
-            }
-        }
-
-        if (_amount == holdAmount) {
-            // Full removal: clears id set, hold record, third-party record, and LABAF entry
-            HoldStorageWrapper.removeHold(identifier);
-        } else {
-            // Partial release: decrements hold.amount and both held-amount counters in storage
-            HoldStorageWrapper.decreaseHeldAmount(identifier, _amount);
-        }
+        HoldStorageWrapper.removeHold(identifier);
 
         emit IERC1410Types.TransferByPartition(
-            partition,
+            _DEFAULT_PARTITION,
             EvmAccessors.getMsgSender(),
             address(0),
             _tokenHolder,
@@ -597,39 +571,6 @@ library AmortizationStorageWrapper {
         emit ITransfer.Transfer(address(0), _tokenHolder, _amount);
 
         return true;
-    }
-
-    /**
-     * @notice Returns the adjusted hold amount for a holder at the given timestamp.
-     * @dev Reads the hold's base amount and multiplies by the ABAF/LABAF factor evaluated
-     *      at `_timestamp`. Used to render hold balances consistent with balance-adjustment
-     *      history.
-     * @param _tokenHolder The holder whose hold is being queried.
-     * @param _holdId The hold identifier on the default partition.
-     * @param _timestamp The reference timestamp.
-     * @return amount_ The hold amount scaled by the adjustment factor at `_timestamp`.
-     */
-    function _getHoldAdjustedAt(
-        address _tokenHolder,
-        uint256 _holdId,
-        uint256 _timestamp
-    ) private view returns (uint256 amount_) {
-        bytes32 partition = _DEFAULT_PARTITION;
-
-        IHoldTypes.HoldIdentifier memory identifier = IHoldTypes.HoldIdentifier({
-            partition: partition,
-            tokenHolder: _tokenHolder,
-            holdId: _holdId
-        });
-
-        // Get base amount
-        amount_ = HoldStorageWrapper.getHold(identifier).hold.amount;
-
-        // Apply adjustment factor for timestamp
-        uint256 abafAdjusted = AdjustBalancesStorageWrapper.getAbafAdjustedAt(_timestamp);
-        uint256 holdLabaf = AdjustBalancesStorageWrapper.getHoldLabafById(partition, _tokenHolder, _holdId);
-
-        amount_ = amount_ * AdjustBalancesStorageWrapper.calculateFactor(abafAdjusted, holdLabaf);
     }
 
     /**
