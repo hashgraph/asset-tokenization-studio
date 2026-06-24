@@ -305,6 +305,20 @@ Raised when the caller is not the pending owner of the configuration.
 | sender       | address | Caller that attempted to accept ownership.                  |
 | pendingOwner | address | Address currently nominated as pending owner of `configId`. |
 
+### UnrecognizedResolverProxyVersion
+
+```solidity
+error UnrecognizedResolverProxyVersion(bytes8 _resolverProxyVersion)
+```
+
+Thrown when the provided proxy version does not match any BLR compatible standard.
+
+#### Parameters
+
+| Name                   | Type   | Description                                        |
+| ---------------------- | ------ | -------------------------------------------------- |
+| \_resolverProxyVersion | bytes8 | proxy version that is not compatible with the BLR. |
+
 ### WalletRecovered
 
 ```solidity

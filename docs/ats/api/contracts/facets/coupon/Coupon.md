@@ -448,6 +448,20 @@ _Replaces assertions for defensive handling of logically impossible states._
 | --------- | ------ | -------------------------------------------------- |
 | \_errorId | bytes4 | Identifier of the unexpected validation condition. |
 
+### UnrecognizedResolverProxyVersion
+
+```solidity
+error UnrecognizedResolverProxyVersion(bytes8 _resolverProxyVersion)
+```
+
+Thrown when the provided proxy version does not match any BLR compatible standard.
+
+#### Parameters
+
+| Name                   | Type   | Description                                        |
+| ---------------------- | ------ | -------------------------------------------------- |
+| \_resolverProxyVersion | bytes8 | proxy version that is not compatible with the BLR. |
+
 ### WalletRecovered
 
 ```solidity

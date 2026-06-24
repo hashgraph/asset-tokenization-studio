@@ -181,6 +181,20 @@ Thrown when a proposed new partition cap is below the partition&#39;s current ad
 | maxSupply   | uint256 | The proposed new maximum supply for the partition.             |
 | totalSupply | uint256 | The current adjusted total supply for the partition.           |
 
+### UnrecognizedResolverProxyVersion
+
+```solidity
+error UnrecognizedResolverProxyVersion(bytes8 _resolverProxyVersion)
+```
+
+Thrown when the provided proxy version does not match any BLR compatible standard.
+
+#### Parameters
+
+| Name                   | Type   | Description                                        |
+| ---------------------- | ------ | -------------------------------------------------- |
+| \_resolverProxyVersion | bytes8 | proxy version that is not compatible with the BLR. |
+
 ### WalletRecovered
 
 ```solidity

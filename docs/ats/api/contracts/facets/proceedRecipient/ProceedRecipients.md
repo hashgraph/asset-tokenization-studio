@@ -317,6 +317,20 @@ Thrown when an operation targets an address that is not a registered proceed rec
 | ---------------- | ------- | ------------------------------------------------------------ |
 | proceedRecipient | address | The address that was not found in the proceed-recipient set. |
 
+### UnrecognizedResolverProxyVersion
+
+```solidity
+error UnrecognizedResolverProxyVersion(bytes8 _resolverProxyVersion)
+```
+
+Thrown when the provided proxy version does not match any BLR compatible standard.
+
+#### Parameters
+
+| Name                   | Type   | Description                                        |
+| ---------------------- | ------ | -------------------------------------------------- |
+| \_resolverProxyVersion | bytes8 | proxy version that is not compatible with the BLR. |
+
 ### WalletRecovered
 
 ```solidity
