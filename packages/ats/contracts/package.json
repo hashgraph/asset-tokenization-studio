@@ -70,6 +70,7 @@
     "lint:sol:fix": "npm run generate:accessors:prod && solhint --config solhint.config.js 'contracts/**/*.sol' --fix",
     "lint:js": "eslint . --cache",
     "lint:js:fix": "eslint . --fix",
+    "ai-checks": "bash scripts/run-ai-checks.sh",
     "generate:registry": "npx tsx scripts/tools/registry-generator/index.ts",
     "generate:registry:cached": "npx tsx scripts/tools/registry-generator/index.ts --use-cache",
     "hashes:generate": "npx tsx scripts/codegen/applyHashGen.ts --write",

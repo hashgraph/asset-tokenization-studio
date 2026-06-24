@@ -4,19 +4,71 @@ This guide provides practical, step-by-step instructions for the most common dev
 
 ## Table of Contents
 
-1. [Architecture Overview](#architecture-overview)
-2. [Quick Start - Using the CLI](#quick-start---using-the-cli)
-3. [Scenario 1: Add/Remove Facet from Existing Asset](#scenario-1-addremove-facet-from-existing-asset)
-4. [Scenario 2: Create New Asset Type (Configuration ID)](#scenario-2-create-new-asset-type-configuration-id)
-5. [Scenario 3: Upgrading Facet Implementations](#scenario-3-upgrading-facet-implementations)
-6. [Scenario 4: Selective Configuration Upgrades](#scenario-4-selective-configuration-upgrades)
-7. [Scenario 5: Multi-Environment Rollout](#scenario-5-multi-environment-rollout)
-8. [Scenario 6: Upgrading TUP Proxy Implementations (BLR/Factory)](#scenario-6-upgrading-tup-proxy-implementations-blrfactory)
-9. [Scenario 7: Recovering from Failed Deployment](#scenario-7-recovering-from-failed-deployment)
-10. [Complete Deployment Workflows](#complete-deployment-workflows)
-11. [Registry System](#registry-system)
-12. [Advanced Topics](#advanced-topics)
-13. [Troubleshooting](#troubleshooting)
+1. [Validation & AI Tools](#validation--ai-tools)
+2. [Architecture Overview](#architecture-overview)
+3. [Quick Start - Using the CLI](#quick-start---using-the-cli)
+4. [Scenario 1: Add/Remove Facet from Existing Asset](#scenario-1-addremove-facet-from-existing-asset)
+5. [Scenario 2: Create New Asset Type (Configuration ID)](#scenario-2-create-new-asset-type-configuration-id)
+6. [Scenario 3: Upgrading Facet Implementations](#scenario-3-upgrading-facet-implementations)
+7. [Scenario 4: Selective Configuration Upgrades](#scenario-4-selective-configuration-upgrades)
+8. [Scenario 5: Multi-Environment Rollout](#scenario-5-multi-environment-rollout)
+9. [Scenario 6: Upgrading TUP Proxy Implementations (BLR/Factory)](#scenario-6-upgrading-tup-proxy-implementations-blrfactory)
+10. [Scenario 7: Recovering from Failed Deployment](#scenario-7-recovering-from-failed-deployment)
+11. [Complete Deployment Workflows](#complete-deployment-workflows)
+12. [Registry System](#registry-system)
+13. [Advanced Topics](#advanced-topics)
+14. [Troubleshooting](#troubleshooting)
+
+---
+
+## Validation & AI Tools
+
+### `run-ai-checks.sh` — unified validation script
+
+The script at `scripts/run-ai-checks.sh` runs the full validation pipeline (format → lint → compile → test → coverage) and produces a structured log optimised for AI-assisted diagnosis.
+
+**Available from the repo — no installation required:**
+
+```bash
+# Full run
+npm run ai-checks
+
+# With flags
+bash scripts/run-ai-checks.sh --skip-test
+bash scripts/run-ai-checks.sh --test-grep "Cap"
+bash scripts/run-ai-checks.sh --skip-format --skip-lint
+bash scripts/run-ai-checks.sh --test-file test/unit/cap.test.ts
+```
+
+**Common flags:**
+
+| Flag                    | Effect                               |
+| ----------------------- | ------------------------------------ |
+| `--skip-format`         | Skip Prettier                        |
+| `--skip-lint`           | Skip solhint + ESLint                |
+| `--skip-compile`        | Skip Hardhat compile                 |
+| `--skip-test`           | Skip tests and coverage              |
+| `--skip-coverage`       | Run tests but skip coverage          |
+| `--test-grep <pattern>` | Run only tests matching pattern      |
+| `--test-file <path>`    | Run a single test file               |
+| `--test-full`           | Show full test output (not filtered) |
+| `--coverage-min <n>`    | Fail if statement coverage < n%      |
+
+The script writes output to `.ai-logs/ai-run.log`. All logs, archives, metrics and baselines
+live under `.ai-logs/` — nothing is written to the package root. Read `.ai-logs/ai-run.log`
+to diagnose failures; do not re-run individual `npm` commands before checking it.
+
+### `/validate` — Claude Code command
+
+If you use [Claude Code](https://docs.anthropic.com/en/docs/claude-code), the `/validate` command wraps the script directly from the chat interface:
+
+```
+/validate
+/validate --skip-test
+/validate --test-grep "Cap"
+```
+
+Claude will run the script, read `ai-run.log`, and report errors, warnings, test results, and coverage in a structured summary.
 
 ---
 
