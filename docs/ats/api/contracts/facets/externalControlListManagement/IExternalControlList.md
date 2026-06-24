@@ -26,6 +26,6 @@ Returns whether `account` is authorised according to the external control list.
 
 #### Returns
 
-| Name | Type | Description                                                    |
-| ---- | ---- | -------------------------------------------------------------- |
-| \_0  | bool | `true` if the account is on the allow-list; `false` otherwise. |
+| Name | Type | Description                                                |
+| ---- | ---- | ---------------------------------------------------------- |
+| \_0  | bool | True if the account is on the allow-list; false otherwise. |

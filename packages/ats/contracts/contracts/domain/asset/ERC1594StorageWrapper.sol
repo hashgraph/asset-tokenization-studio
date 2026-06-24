@@ -103,7 +103,7 @@ library ERC1594StorageWrapper {
 
     /**
      * @notice Returns whether token issuance is currently enabled.
-     * @return `true` if the `issuance` flag is set, otherwise `false`.
+     * @return True if the `issuance` flag is set, otherwise false.
      */
     function isIssuable() internal view returns (bool) {
         return erc1594Storage().issuance;
@@ -246,8 +246,8 @@ library ERC1594StorageWrapper {
         address to,
         bytes32 partition,
         uint256 value,
-        bytes memory /*_data*/,
-        bytes memory /*_operatorData*/
+        bytes memory /* _data */,
+        bytes memory /* _operatorData */
     ) internal view returns (bool canTransfer, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
         (canTransfer, statusCode, reasonCode, details) = _genericChecks();
         if (!canTransfer) return (canTransfer, statusCode, reasonCode, details);

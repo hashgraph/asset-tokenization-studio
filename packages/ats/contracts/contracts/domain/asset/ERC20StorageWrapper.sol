@@ -245,7 +245,7 @@ library ERC20StorageWrapper {
      * @param owner   Address granting the allowance. Must not be the zero address.
      * @param spender Address permitted to spend `value` tokens on behalf of `owner`.
      * @param value   Allowance amount to set.
-     * @return `true` unconditionally on success; reverts on failure.
+     * @return True unconditionally on success; reverts on failure.
      */
     function approve(address owner, address spender, uint256 value) internal returns (bool) {
         _checkUnexpectedError(owner == address(0), KPI_ERC20_APPROVE_OWNER);
@@ -269,7 +269,7 @@ library ERC20StorageWrapper {
      *      emits an `Approval` event.
      * @param spender    Address whose allowance is increased.
      * @param addedValue Amount to add to the existing allowance.
-     * @return `true` unconditionally on success; reverts on failure.
+     * @return True unconditionally on success; reverts on failure.
      */
     function increaseAllowance(address spender, uint256 addedValue) internal returns (bool) {
         if (spender == address(0)) {
@@ -289,7 +289,7 @@ library ERC20StorageWrapper {
      *      allowance. Reverts via `decreaseAllowedBalance` if allowance is insufficient.
      * @param spender         Address whose allowance is decreased.
      * @param subtractedValue Amount to subtract from the existing allowance.
-     * @return `true` unconditionally on success; reverts on failure.
+     * @return True unconditionally on success; reverts on failure.
      */
     function decreaseAllowance(address spender, uint256 subtractedValue) internal returns (bool) {
         if (spender == address(0)) {
@@ -313,7 +313,7 @@ library ERC20StorageWrapper {
      * @param from    Source account whose balance is debited.
      * @param to      Destination account whose balance is credited.
      * @param value   Amount of tokens to transfer.
-     * @return `true` unconditionally on success; reverts on failure.
+     * @return True unconditionally on success; reverts on failure.
      */
     function transferFrom(address spender, address from, address to, uint256 value) internal returns (bool) {
         decreaseAllowedBalance(from, spender, value);
@@ -336,7 +336,7 @@ library ERC20StorageWrapper {
      * @param from  Source account.
      * @param to    Destination account.
      * @param value Amount of tokens to transfer.
-     * @return `true` unconditionally on success; reverts on failure.
+     * @return True unconditionally on success; reverts on failure.
      */
     function transfer(address from, address to, uint256 value) internal returns (bool) {
         ERC1410StorageWrapper.transferByPartition(

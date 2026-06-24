@@ -20,6 +20,6 @@ Returns whether the external pause controller currently signals a paused state.
 
 #### Returns
 
-| Name | Type | Description                                                           |
-| ---- | ---- | --------------------------------------------------------------------- |
-| \_0  | bool | `true` if the token should treat itself as paused; `false` otherwise. |
+| Name | Type | Description                                                       |
+| ---- | ---- | ----------------------------------------------------------------- |
+| \_0  | bool | True if the token should treat itself as paused; false otherwise. |

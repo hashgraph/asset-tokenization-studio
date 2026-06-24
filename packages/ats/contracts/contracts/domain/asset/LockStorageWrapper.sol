@@ -234,14 +234,14 @@ library LockStorageWrapper {
      *      second (`amount`) and fourth (`expirationTimestamp`) arguments are deliberately unused;
      *      they exist only to keep the helper signature-compatible with the locking pipeline's
      *      call-site.
-     * @param partition Partition being mutated.
-     * @param tokenHolder Holder whose snapshots are being refreshed.
+     * @param partition           Partition being mutated.
+     * @param tokenHolder         Holder whose snapshots are being refreshed.
      */
     function updateLockedBalancesBeforeLock(
         bytes32 partition,
-        uint256 /*amount*/,
+        uint256 /* amount */,
         address tokenHolder,
-        uint256 /*expirationTimestamp*/
+        uint256 /* expirationTimestamp */
     ) internal {
         SnapshotsStorageWrapper.updateAccountSnapshot(tokenHolder, partition);
         SnapshotsStorageWrapper.updateAccountLockedBalancesSnapshot(tokenHolder, partition);
@@ -252,10 +252,10 @@ library LockStorageWrapper {
      * @dev Mirror of `updateLockedBalancesBeforeLock`. The second (`lockId`) argument is
      *      deliberately unused; it exists only to keep the helper signature-compatible with
      *      the release pipeline's call-site.
-     * @param partition Partition being mutated.
+     * @param partition   Partition being mutated.
      * @param tokenHolder Holder whose snapshots are being refreshed.
      */
-    function updateLockedBalancesBeforeRelease(bytes32 partition, uint256 /*lockId*/, address tokenHolder) internal {
+    function updateLockedBalancesBeforeRelease(bytes32 partition, uint256 /* lockId */, address tokenHolder) internal {
         SnapshotsStorageWrapper.updateAccountSnapshot(tokenHolder, partition);
         SnapshotsStorageWrapper.updateAccountLockedBalancesSnapshot(tokenHolder, partition);
     }
@@ -318,7 +318,7 @@ library LockStorageWrapper {
      * @param partition Partition the lock belongs to.
      * @param tokenHolder Holder that owns the lock.
      * @param lockId Identifier of the lock being inspected.
-     * @return `true` if the lock can be released, `false` otherwise.
+     * @return True if the lock has expired and can be released, false otherwise.
      */
     function isLockedExpirationTimestamp(
         bytes32 partition,
@@ -336,7 +336,7 @@ library LockStorageWrapper {
      * @param partition Partition the lock would belong to.
      * @param tokenHolder Holder that would own the lock.
      * @param lockId Identifier being checked.
-     * @return `true` when the lock exists; `false` otherwise.
+     * @return True if the lock id exists for the given holder and partition, false otherwise.
      */
     function isLockIdValid(bytes32 partition, address tokenHolder, uint256 lockId) internal view returns (bool) {
         return lockStorage().lockIdsByAccountAndPartition[tokenHolder][partition].contains(lockId);

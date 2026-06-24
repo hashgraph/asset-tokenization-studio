@@ -107,6 +107,7 @@ abstract contract ScheduledBalanceAdjustmentBase {
         bytes32 corporateActionId,
         uint256 balanceAdjustmentId
     ) internal view {
+        // solhint-disable-next-line gas-strict-inequalities
         if (executionDate <= TimeTravelStorageWrapper.getBlockTimestamp()) {
             revert IScheduledBalanceAdjustment.BalanceAdjustmentAlreadyExecuted(corporateActionId, balanceAdjustmentId);
         }

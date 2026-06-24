@@ -109,9 +109,7 @@ library ScheduledTasksStorageWrapper {
             ScheduledTasksLib.popScheduledTask(_scheduledTasks);
 
             bytes32 subTaskType = ScheduledTasksDispatchOps.execute(callbackType, currentScheduledTask);
-            if (subTaskType != bytes32(0)) {
-                _triggerOneSubTask(subTaskType, currentBlockTimestamp);
-            }
+            _triggerOneSubTask(subTaskType, currentBlockTimestamp);
 
             unchecked {
                 ++processed_;
@@ -132,17 +130,6 @@ library ScheduledTasksStorageWrapper {
     }
 
     /**
-     * @notice Executes due scheduled snapshot tasks.
-     * @dev Uses the `snapshot` callback type and may update snapshot-related corporate
-     *      action results through the dispatch layer.
-     * @param _max Maximum number of snapshot tasks to process; zero means all due tasks.
-     * @return Number of snapshot tasks removed from the queue.
-     */
-    function triggerScheduledSnapshots(uint256 _max) internal returns (uint256) {
-        return triggerScheduledTasks(scheduledSnapshotStorage(), bytes32("snapshot"), _max);
-    }
-
-    /**
      * @notice Adds a coupon listing task to the scheduled coupon listing queue.
      * @dev The action identifier is ABI-encoded as task data and later resolved through
      *      corporate action storage by the dispatch layer.
@@ -158,17 +145,6 @@ library ScheduledTasksStorageWrapper {
     }
 
     /**
-     * @notice Executes due scheduled coupon listing tasks.
-     * @dev Uses the `coupon` callback type. Dispatch may add coupons to the ordered list
-     *      and update corporate action results.
-     * @param _max Maximum number of coupon listing tasks to process; zero means all due tasks.
-     * @return Number of coupon listing tasks removed from the queue.
-     */
-    function triggerScheduledCouponListing(uint256 _max) internal returns (uint256) {
-        return triggerScheduledTasks(scheduledCouponListingStorage(), bytes32("coupon"), _max);
-    }
-
-    /**
      * @notice Adds a balance adjustment task to the scheduled balance adjustment queue.
      * @dev The action identifier is ABI-encoded as task data and later used to load the
      *      balance adjustment parameters from corporate action storage.
@@ -181,17 +157,6 @@ library ScheduledTasksStorageWrapper {
             _newScheduledTimestamp,
             abi.encode(_actionId)
         );
-    }
-
-    /**
-     * @notice Executes due scheduled balance adjustment tasks.
-     * @dev Uses the `balance` callback type. Dispatch may mutate balances according to the
-     *      stored adjustment factor and decimals.
-     * @param _max Maximum number of adjustment tasks to process; zero means all due tasks.
-     * @return Number of balance adjustment tasks removed from the queue.
-     */
-    function triggerScheduledBalanceAdjustments(uint256 _max) internal returns (uint256) {
-        return triggerScheduledTasks(scheduledBalanceAdjustmentStorage(), bytes32("balance"), _max);
     }
 
     /**
@@ -470,7 +435,7 @@ library ScheduledTasksStorageWrapper {
                 pos
             );
 
-            if (scheduledTask.scheduledTimestamp >= _timestamp) break;
+            if (scheduledTask.scheduledTimestamp >= _timestamp) break; // solhint-disable-line gas-strict-inequalities
 
             bytes32 actionId = abi.decode(scheduledTask.data, (bytes32));
 

@@ -239,7 +239,7 @@ library CapStorageWrapper {
      * @return True if the amount is compliant with the cap; false otherwise.
      */
     function isCorrectMaxSupply(uint256 _amount, uint256 _maxSupply) internal pure returns (bool) {
-        return (_maxSupply == 0) || (_amount <= _maxSupply);
+        return (_maxSupply == 0) || (_amount <= _maxSupply); // solhint-disable-line gas-strict-inequalities
     }
 
     /**
