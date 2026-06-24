@@ -5,8 +5,8 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock, Kpis__factory } from "@contract-types";
 import type { Kpis } from "@contract-types";
-import { ATS_ROLES, dateToUnixTimestamp, RESOLVER_KEY_KPIS } from "@scripts";
-import { executeRbac } from "@test";
+import { ATS_ROLES, dateToUnixTimestamp, RESOLVER_KEY_KPIS, TIME_PERIODS_S } from "@scripts";
+import { executeRbac, getDltTimestamp } from "@test";
 import { ASSET_MOCK_CONFIG_ID } from "../../../../../fixtures/deploy/assetMockConfiguration";
 import type { AssetMockCtx } from "@test";
 
@@ -199,6 +199,36 @@ export function kpiLatestTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN a contract WHEN getMinDate is called THEN returns the minimum date", async () => {
         const minDate = await kpis.getMinDate();
         expect(minDate).to.be.equal(0);
+      });
+
+      describe("GIVEN a KPI-linked coupon past its fixing date", () => {
+        beforeEach(async () => {
+          await asset.grantRole(ATS_ROLES.ROLE_INTEREST_RATE_MANAGER, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
+        });
+
+        it("WHEN getMinDate is called THEN returns the coupon fixing date", async () => {
+          await asset.connect(signer_A).setCouponRateType(2);
+
+          const currentTimestamp = await getDltTimestamp();
+          const fixingDate = currentTimestamp + TIME_PERIODS_S.DAY;
+
+          await asset.connect(signer_A).setCoupon({
+            recordDate: fixingDate.toString(),
+            executionDate: (fixingDate + TIME_PERIODS_S.DAY).toString(),
+            rate: 0,
+            rateDecimals: 0,
+            startDate: currentTimestamp.toString(),
+            endDate: fixingDate.toString(),
+            fixingDate: fixingDate.toString(),
+            rateStatus: 0,
+          });
+
+          await asset.changeSystemTimestamp(fixingDate + 1);
+
+          const minDate = await kpis.getMinDate();
+          expect(minDate).to.be.equal(fixingDate);
+        });
       });
     });
 
