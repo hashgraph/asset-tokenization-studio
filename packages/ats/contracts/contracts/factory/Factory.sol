@@ -34,13 +34,13 @@ import { IClearingByPartition } from "../facets/clearingByPartition/IClearingByP
 import { IClearingHoldByPartition } from "../facets/clearingHoldByPartition/IClearingHoldByPartition.sol";
 import { IERC20Permit } from "../facets/erc20Permit/IERC20Permit.sol";
 import { IIdentity } from "../facets/identity/IIdentity.sol";
-import { IScheduledCrossOrderedTasks } from "../facets/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
-import { ISnapshots } from "../facets/snapshot/ISnapshots.sol";
-import { IProceedRecipients } from "../facets/proceedRecipient/IProceedRecipients.sol";
+import { IScheduledCrossOrderedTasks } from "../facets/scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol";
+import { ISnapshots } from "../facets/snapshots/ISnapshots.sol";
+import { IProceedRecipients } from "../facets/proceedRecipients/IProceedRecipients.sol";
 
 import { INominalValue } from "../facets/nominalValue/INominalValue.sol";
 import { ScheduledTasksStorageWrapper } from "../domain/asset/ScheduledTasksStorageWrapper.sol";
-import { IProtectedPartitions } from "../facets/protectedPartition/IProtectedPartitions.sol";
+import { IProtectedPartitions } from "../facets/protectedPartitions/IProtectedPartitions.sol";
 import { IExternalPauseManagement } from "../facets/externalPauseManagement/IExternalPauseManagement.sol";
 import {
     IExternalControlListManagement
@@ -129,6 +129,7 @@ import { ITransferAndLockByPartition } from "../facets/transferAndLockByPartitio
 import { ITransferByPartition } from "../facets/transferByPartition/ITransferByPartition.sol";
 import { IVoting } from "../facets/voting/IVoting.sol";
 import { IVotingSecurityHolders } from "../facets/votingSecurityHolders/IVotingSecurityHolders.sol";
+import { IFixedRate } from "../facets/fixedRate/IFixedRate.sol";
 
 /**
  * @title Factory
@@ -274,6 +275,7 @@ abstract contract Factory is IFactory {
     {
         bondAddress_ = _deployBond(_bondData, SecurityType.BondVariableRate);
         IInterestRate(bondAddress_).initializeInterestRateType(IInterestRate.RateType.STANDARD);
+        IFixedRate(bondAddress_).initializeFixedRate(IFixedRate.FixedRateData({ rate: 0, rateDecimals: 0 }));
         (bool isOperational_, ) = IInitializer(bondAddress_).setOperationalStatus();
         _checkUnexpectedError(!isOperational_, FACTORY_OPERATIONAL_STATUS);
         IAccessControl(bondAddress_).renounceRole(DEFAULT_ADMIN_ROLE);

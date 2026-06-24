@@ -70,7 +70,7 @@ jobs:
         run: npm run compile --workspace=packages/ats/contracts
 
       - name: Check baseline is honest (betterer ci)
-        run: npm run lint:ratchet --workspace=packages/ats/contracts
+        run: npm run lint:ratchet:ci --workspace=packages/ats/contracts
 
       - name: Check baseline is not worse than base branch
         run: npx tsx packages/ats/contracts/scripts/ci/check-ratchet-vs-base.ts "${{ github.base_ref }}"

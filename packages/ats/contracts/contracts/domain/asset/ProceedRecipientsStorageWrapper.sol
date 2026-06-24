@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IProceedRecipients } from "../../facets/proceedRecipient/IProceedRecipients.sol";
+import { IProceedRecipients } from "../../facets/proceedRecipients/IProceedRecipients.sol";
 import { ExternalListManagementStorageWrapper } from "../core/ExternalListManagementStorageWrapper.sol";
 import { DefaultValueValidation } from "../../infrastructure/utils/DefaultValueValidation.sol";
 

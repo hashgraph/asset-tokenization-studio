@@ -1,5 +1,99 @@
 # @hashgraph/asset-tokenization-sdk
 
+## 8.0.0
+
+### Major Changes
+
+- ffeb27e: Normalise every keccak-derived `bytes32` constant across the ATS contracts package.
+
+  Identifiers and keccak inputs now follow a single mechanical rule: generic family first, specific name second. Canonical prefix is `asset.tokenization.standard.` (was `security.token.standard.`).
+  - Roles: `<NAME>_ROLE` becomes `ROLE_<NAME>` (e.g. `BOND_MANAGER_ROLE` -> `ROLE_BOND_MANAGER`). `DEFAULT_ADMIN_ROLE = 0x00` keeps its OpenZeppelin-compatible shape.
+  - Resolver keys: legacy `_<NAME>_RESOLVER_KEY` constants in `constants/resolverKeys.sol` move to file scope inside each `I<Feature>.sol` as `RESOLVER_KEY_<NAME>`. The central file is deleted.
+  - Storage locations: legacy `_<NAME>_STORAGE_POSITION` constants in `constants/storagePositions.sol` move into the matching `*StorageWrapper.sol` as `STORAGE_LOCATION_<NAME>`. The slot values now derive from the ERC-7201 formula `keccak256(abi.encode(uint256(keccak256(<id>)) - 1)) & ~bytes32(uint256(0xff))`. The central file is deleted.
+  - Corporate-action and scheduled-task type ids move to a new `constants/dispatchTypes.sol`. EIP-712 typehashes move to a new `constants/eip712.sol` and stay as foldable `keccak256("typedef")` literals.
+
+  A new TypeScript codegen (`scripts/codegen/hashGen.ts` + `applyHashGen.ts`) is the single source of truth for the hex values. Annotate any new `bytes32 constant` with `/// @custom:hash <kind> <PascalArg>` and run `npm run ats:contracts:hashes:generate`. CI gate `hashes:check` (in `105-flow-ats-static-checks.yaml`) blocks any drift between annotation and hex, plus duplicate `(kind, arg)` annotations, duplicate identifiers, hash-shaped constants missing an annotation, and non-canonical PascalCase args.
+
+  Breaking changes for downstream consumers:
+  - Every on-chain role hash changes value. Role grants on existing deployed assets are invalid.
+  - Every namespaced storage slot changes value (ERC-7201 derivation). Existing deployed proxies would read from the wrong slots.
+  - Every resolver key changes value. BLR configurations must be rebuilt.
+  - Every corporate-action and scheduled-task type id changes value.
+  - EIP-712 typehashes are unchanged — same typedef text, solc folding identical.
+  - SDK `SecurityRole` enum keeps its member names; only the hex literals are updated.
+
+  Incidental fix: `LOAN_CORPORATE_ACTION_TYPE` was a hand-rolled value, not a real keccak. Codegen now emits the correct `CORPORATE_ACTION_TYPE_LOAN` hash.
+
+### Minor Changes
+
+- 3703219: Implemented all methods from the AmortizationFacet in the SDK.
+- 8b4258b: Add `nominalValueCurrency` (ISO 4217 `bytes3`) to the `NominalValue` facet. Extends `initializeNominalValue` to accept the currency and adds `setNominalValueCurrency` / `getNominalValueCurrency` external functions, plus the matching SDK command, query, request DTOs, and adapter wiring. Factory forwards `bondDetails.currency` / `equityDetails.currency` on new deploys. Renames `initialize_NominalValue` to `initializeNominalValue` (camelCase, drops the solhint disable). [BBND-1730]
+- 24ee150: Require explicit non-zero configuration versions across the SDK and expose a
+  helper for resolving the latest registered version.
+  - Adds `Management.resolveLatestConfigVersion({ resolverAddress, configurationId })`,
+    backed by `ResolveLatestConfigVersionQuery` and a new
+    `RPCQueryAdapter.getLatestVersionByConfiguration(resolverAddress, configurationId)`
+    call into the diamond cut manager.
+  - Tightens validation on every request that carries a `configVersion`
+    (`CreateEquityRequest`, `CreateBondRequest`, `CreateBondFixedRateRequest`,
+    `CreateBondKpiLinkedRateRequest`, `CreateTrexSuiteEquityRequest`,
+    `CreateTrexSuiteBondRequest`, `UpdateConfigVersionRequest`,
+    `UpdateConfigRequest`, `UpdateResolverRequest`) to reject values below
+    `MIN_CONFIG_VERSION` (1), surfaced via a new shared constant in
+    `@core/Constants`.
+  - Updates `CreateEquity` / `CreateBond` / `CreateBondFixedRate` /
+    `CreateBondKpiLinkedRate` / `CreateTrexSuiteEquity` / `CreateTrexSuiteBond`
+    command handlers to reject both `undefined` and `< 1` with a message
+    pointing callers at the new resolver query.
+
+  Migration: callers that previously relied on `configVersion: 0` to track the
+  latest configuration must now call
+  `Management.resolveLatestConfigVersion(...)` first and pass the resolved
+  number explicitly. Pairs with the contract-side
+  `VersionZero(configurationId)` revert introduced in the contracts PR.
+
+- 33ae16a: Added `deactivate` command and `isDeactivated` query to the SDK.
+
+  The `deactivate` command triggers the irreversible deactivation of a security token, requiring the caller to hold `DEACTIVATE_ROLE` and the token to be unpaused. The `isDeactivated` query reads the current deactivation state of a security. Both operations are exposed through the `Security` port via the new `SecurityInPortDeactivation` mixin.
+
+- 63e3f5c: Use IAsset in SDK for every SC call and change actionTypeId* and actionTypeIndex* to actionIdByType\_ in CorporateActions
+- 206b234: Added `setMetadata` command and `getMetadata` query to the SDK, enabling callers to write and read arbitrary key/value metadata on a security token.
+- f76e0de: rename isPaused to paused fucntion in Pause Facet and rename Pause events and errors without Token word
+- 96f0781: Remove the permissionless T-REX suite deployment surface from the factory and SDK.
+
+  Contracts: removed `deployTREXSuiteAtsEquity` and `deployTREXSuiteAtsBond` from `TREXFactory`, along with the `TokenDetailsAts` struct and associated imports. Deleted the now-unreachable deployment libraries: `TREXEquityDeploymentLib`, `TREXBondDeploymentLib`, `core/TREXBaseDeploymentLib`, and `core/SecurityDeploymentLib`. Updated `Configuration.ts` (empty `LIBRARY_NAMES`) and the deployment task so `TREXFactoryAts` is deployed without external libraries. Removed the write-only `atsFactory` storage, its `setAtsFactory` setter, and the constructor's `_atsFactory` argument. The factory contract itself, its remaining setters, `recoverContractOwnership`, and `getToken` are preserved.
+
+  SDK: removed the `createTrexSuite` feature end-to-end — bond/equity commands, handlers, requests, the `getTokenBySalt` query, the `TRexFactory` domain context, the `InvalidTrexTokenSalt` error, and `InjectableTrexFactory`. Cleaned up the transaction/query adapters (HS and RPC), `TransactionAdapter`, `ValidationService` (`checkTrexTokenSaltExists`), `TransactionService`, the handlers registry, and the `TREX_CREATE_SUITE` gas constant.
+
+- e407034: Add nominal value support to the SDK: new commands and queries wrapping the NominalValueFacet so dapp consumers can set and read nominal values on equity and bond tokens. Contracts-side facet already shipped in contracts 6.0.0 (commit 8b538ed).
+
+### Patch Changes
+
+- 6ea0fb0: Retire four classes of deprecated storage from the contracts package and ship the long-term resolution of the deferred Tier 4 cleanup.
+
+  Storage retirements: the orphaned ERC20Permit storage slot and its struct; the bond/equity nominal-value migration shim and its test facet; the ERC1410-to-ERC20 totalSupply/balances migration shim and its test facet; and the trailing deprecated name/version/nonces fields on ProtectedPartitions and ERC20Votes. Re-slots BondDataStorage, EquityDataStorage, ERC1410BasicStorage, and ERC20VotesStorage — greenfield deployment required.
+
+  ScheduledTasksOps orchestrator: new external library following the same pattern as HoldOps and TokenCoreOps. Nine production callers (KpiLinkedRate, ProceedRecipients facets, ERC1410StorageWrapper, ERC20VotesStorageWrapper, NominalValueStorageWrapper) now DELEGATECALL into the standalone library instead of the legacy self-CALL helper, saving roughly 2000 gas per invocation. Removes callTriggerPendingScheduledCrossOrderedTasks from ScheduledTasksStorageWrapper. Pause-guard preserved at the orchestrator boundary so Burn / Transfer / ERC1594 / BurnByPartition facets keep their cascading IsPaused revert semantics.
+
+- 545cab0: Fix HederaWalletConnect reconnection and disconnect flow
+  - Upgrade `@reown/appkit` (and related packages) from 1.8.10 to 1.8.19 to resolve SVG rendering errors in the modal and the `adapterType` undefined crash when creating AppKit after a disconnect
+  - Add a 500 ms wait after AppKit is first created so that its background `initialize()` task (which calls `unSyncExistingConnection → ModalController.close`) completes before the pairing modal is opened — this prevents the modal from being immediately closed on the first connect attempt
+  - Wrap `createAppKit` in a try/catch that clears all adapter singletons on failure so that a subsequent connect attempt retries from a clean state instead of hitting `NotInitialized`
+  - Replace the inline `reset() + window.location.reload()` in the Header disconnect button with a proper call to `SDKService.disconnectWallet()` (via `useSDKDisconnectFromMetamask`) so the WalletConnect session is cleanly terminated and navigation back to the landing page is handled by the router, without a full page reload
+  - Remove leftover debug `console.log` from the `walletDisconnect` event handler
+
+- f2979e5: - Add `BalanceTrackerFacet` with `balanceOf` and `totalSupply` methods, consolidating balance-read logic into a dedicated facet with `_BALANCE_TRACKER_RESOLVER_KEY`.
+  - Remove `balanceOf` and `totalSupply` from `ERC1410ReadFacet`.
+  - SDK `RPCQueryAdapter` updated to call `balanceOf` and `totalSupply` via `IAsset`.
+- 308289b: Split a new Burn Facet. ERC3643OperationsFacet is empty so is deleted
+- f2979e5: - Add `DocumentationFacet` with `setDocument`, `removeDocument`, `getDocument` and `getAllDocuments`, registering document-management selectors under the new `_DOCUMENTATION_RESOLVER_KEY`.
+  - Remove `ERC1643Facet`, `ERC1643`, `IERC1643`, `ERC1643FacetTimeTravel`, `_ERC1643_RESOLVER_KEY` and `_ERC1643_STORAGE_POSITION`.
+  - `IAsset` updated to inherit `IDocumentation` instead of `IERC1643`; selectors and ABI are unchanged.
+  - SDK adapters (`RPCQueryAdapter`, `RPCTransactionAdapter`, `SecurityMetadataOperations`) updated to connect via `IAsset__factory` instead of `ERC1643Facet__factory`.
+- 841a069: Migrated all voting operations in the SDK from `Equity__factory` to the new `VotingFacet__factory`, aligning with the contract refactor that split voting logic into a dedicated `VotingFacet`. Updated mass-payout contracts to import `IVoting` for voting structs/methods and `ICoupon` for coupon holders, and updated the backend adapter and tests to use `CouponToken` instead of `BondToken` for `getAllCoupons` and `getTotalCouponHolders`.
+- Updated dependencies:
+  - @hashgraph/asset-tokenization-contracts@8.0.0
+
 ## 7.0.0
 
 ### Major Changes
@@ -21,15 +115,7 @@
   - Remove leftover debug `console.log` from the `walletDisconnect` event handler
 
 - a166566: Migrated all voting operations in the SDK from `Equity__factory` to the new `VotingFacet__factory`, aligning with the contract refactor that split voting logic into a dedicated `VotingFacet`. Updated mass-payout contracts to import `IVoting` for voting structs/methods and `ICoupon` for coupon holders, and updated the backend adapter and tests to use `CouponToken` instead of `BondToken` for `getAllCoupons` and `getTotalCouponHolders`.
-- Updated dependencies [9d8d309]
-- Updated dependencies [be18d8d]
-- Updated dependencies [052272a]
-- Updated dependencies [c7d4744]
-- Updated dependencies [0fe41df]
-- Updated dependencies [2502ada]
-- Updated dependencies [777e272]
-- Updated dependencies [6fe8bc2]
-- Updated dependencies [add9335]
+- Updated dependencies:
   - @hashgraph/asset-tokenization-contracts@7.0.0
 
 ## 6.0.0
@@ -62,11 +148,7 @@
   - Grant \_KPI_MANAGER_ROLE to bond creator in createBond mock to enable addKpiData tests
 
 - 3048bbf: Enable docusarus documentation deployments with Netlify and fix ats web deployment build
-- Updated dependencies [2e5fdcf]
-- Updated dependencies [9d56586]
-- Updated dependencies [f809d77]
-- Updated dependencies [5e58601]
-- Updated dependencies [8b538ed]
+- Updated dependencies:
   - @hashgraph/asset-tokenization-contracts@6.0.0
 
 ## 5.0.0
@@ -95,7 +177,7 @@
   - Add register() and createBond() mocks to DFNS, Fireblocks, and AWSKMS custodial adapter mocks
   - Grant \_KPI_MANAGER_ROLE to bond creator in createBond mock to enable addKpiData tests
 
-- Updated dependencies [f809d77]
+- Updated dependencies:
   - @hashgraph/asset-tokenization-contracts@5.0.0
 
 ## 4.3.0
@@ -112,72 +194,41 @@
 
 ### Patch Changes
 
-- Updated dependencies [5de99bd]
+- Updated dependencies:
   - @hashgraph/asset-tokenization-contracts@4.3.0
 
 ## 4.2.0
 
 ### Minor Changes
 
-- c5b2a50: Add support for multiple bond types (Variable Rate, Fixed Rate, KPI Linked, SPT)
-
-  This release introduces comprehensive support for multiple bond asset types across the Asset Tokenization Studio:
-
-  **Breaking Changes:**
-  - Refactored Solidity contracts to check for Equity type instead of Bond type, as Bond is no longer a single type but a family of types (Variable Rate, Fixed Rate, KPI Linked Rate, SPT Rate)
-  - Updated asset type filtering logic to use enum values (BOND_VARIABLE_RATE, BOND_FIXED_RATE, BOND_KPI_LINKED_RATE, BOND_SPT_RATE, EQUITY) instead of display strings
-
-  **Contract Changes:**
-  - Updated LifeCycleCashFlowStorageWrapper.sol to invert AssetType checks: now validates if asset is Equity (special case) with bond types as the default behavior
-  - Added comprehensive test coverage for all bond types in lifecycle cash flow tests
-
-  **SDK Changes:**
-  - Extended asset type system to support four distinct bond types plus equity
-  - Maintained backward compatibility for existing integrations
-
-  This is a **minor** version bump as it adds new functionality (multiple bond types) while maintaining backward compatibility through the enum-based approach.
-
+- c5b2a50: Add support for multiple bond types (Variable Rate, Fixed Rate, KPI Linked, SPT). Refactored Solidity contracts to check for Equity type instead of Bond type, as Bond is no longer a single type but a family of types (BOND_VARIABLE_RATE, BOND_FIXED_RATE, BOND_KPI_LINKED_RATE, BOND_SPT_RATE, EQUITY). Updated LifeCycleCashFlowStorageWrapper.sol to invert AssetType checks: now validates if asset is Equity (special case) with bond types as the default behaviour. Extended asset type system in the SDK to support four distinct bond types plus equity; backward compatibility maintained through the enum-based approach.
 - 2a26b41: Migrate from ether 5 to ether 6
 
 ### Patch Changes
 
-- Updated dependencies [35fde1c]
-- Updated dependencies [33e8046]
-- Updated dependencies [04e7366]
-- Updated dependencies [c81bab9]
-- Updated dependencies [e378e82]
-- Updated dependencies [ad45d49]
-- Updated dependencies [c5b2a50]
-- Updated dependencies [a942765]
-- Updated dependencies [fe7032f]
-- Updated dependencies [2a26b41]
+- Updated dependencies:
   - @hashgraph/asset-tokenization-contracts@4.2.0
 
 ## 4.1.1
 
 ### Patch Changes
 
-- Updated dependencies
+- Updated dependencies:
   - @hashgraph/asset-tokenization-contracts@4.1.1
 
 ## 4.1.0
 
 ### Patch Changes
 
-- 8ffc87f: Fixed all linting issues and applied code formatting across the codebase. Updated license headers in all source files to use standardized SPDX format (`// SPDX-License-Identifier: Apache-2.0`). Added automated license header validation script (`check-license.js`) that runs during pre-commit to ensure all `.sol`, `.ts`, and `.tsx` files include the required SPDX license identifier.
-- Updated dependencies [60f35fc]
-- Updated dependencies [5f579dc]
-- Updated dependencies [f1bac7a]
-- Updated dependencies [8ffc87f]
-- Updated dependencies [bde618b]
+- 8ffc87f: Fixed all linting issues and applied code formatting across the codebase. Updated license headers in all source files to use standardised SPDX format (`// SPDX-License-Identifier: Apache-2.0`). Added automated license header validation script (`check-license.js`) that runs during pre-commit to ensure all `.sol`, `.ts`, and `.tsx` files include the required SPDX license identifier.
+- Updated dependencies:
   - @hashgraph/asset-tokenization-contracts@4.1.0
 
 ## 4.0.1
 
 ### Patch Changes
 
-- Updated dependencies [171b22b]
-- Updated dependencies [d1552c7]
+- Updated dependencies:
   - @hashgraph/asset-tokenization-contracts@4.0.1
 
 ## 4.0.0
@@ -189,7 +240,7 @@
 
 ### Minor Changes
 
-- 902fea1: Added Docusaurus and project documentation, renamed the MP package organization, and added a Claude documentation command.
+- 902fea1: Added Docusaurus and project documentation, renamed the MP package organisation, and added a Claude documentation command.
 - 8f7487a: EIP712 standard fixed. Now single name (ERC20 token name) and version (BLR version number) used for all facets methods. Nonce facet created to centralized to nonce per user management.
 - cbcc1db: Protected Transfer and Lock methods removed from smart contracts and sdk.
 
@@ -197,32 +248,14 @@
 
 - 650874b: Set `collectCoverage` to `false` by default and enable it only in CI
 - c10a8ee: Replaced the Hashgraph SDK with the Hiero Ledger SDK
-- Updated dependencies [3ba32c9]
-- Updated dependencies [2d5495e]
-- Updated dependencies [902fea1]
-- Updated dependencies [1f51771]
-- Updated dependencies [dff883d]
-- Updated dependencies [b802e88]
-- Updated dependencies [6950d41]
-- Updated dependencies [7f92cd7]
-- Updated dependencies [8f7487a]
-- Updated dependencies [c10a8ee]
-- Updated dependencies [1ecd8ee]
-- Updated dependencies [fa07c70]
-- Updated dependencies [c7ff16f]
-- Updated dependencies [cbcc1db]
+- Updated dependencies:
   - @hashgraph/asset-tokenization-contracts@4.0.0
 
 ## 3.1.0
 
 ### Patch Changes
 
-- Updated dependencies [1f51771]
-- Updated dependencies [b802e88]
-- Updated dependencies [7f92cd7]
-- Updated dependencies [1ecd8ee]
-- Updated dependencies [fa07c70]
-- Updated dependencies [c7ff16f]
+- Updated dependencies:
   - @hashgraph/asset-tokenization-contracts@3.1.0
 
 ## 3.0.0
@@ -233,20 +266,9 @@
 
 ### Patch Changes
 
-- e0a3f03: fix: CI workflow improvements for reliable releases
-  1. **Fixed --ignore pattern in ats.release.yml**: Changed from non-existent
-     `@hashgraph/mass-payout*` to correct `@mass-payout/*` package namespace
-  2. **Simplified publish trigger in ats.publish.yml**: Changed from
-     `release: published` to `push.tags` for automatic publishing on tag push
-     (no need to manually create GitHub release)
-  3. **Removed recursive publish scripts**: Removed `"publish": "npm publish"`
-     from contracts and SDK package.json files that caused npm to recursively
-     call itself during publish lifecycle, resulting in 403 errors in CI
-
+- e0a3f03: fix: CI workflow improvements for reliable releases — fixed `--ignore` pattern in `ats.release.yml` (changed from non-existent `@hashgraph/mass-payout*` to correct `@mass-payout/*`); simplified publish trigger in `ats.publish.yml` to `push.tags` for automatic publishing on tag push; removed recursive `"publish": "npm publish"` scripts from contracts and SDK `package.json` files that caused 403 errors in CI.
 - e0a3f03: Add a checkbox in force redeem view to redeem every tokens if the maturity date has arrived
-- Updated dependencies [e0a3f03]
-- Updated dependencies [e0a3f03]
-- Updated dependencies [e0a3f03]
+- Updated dependencies:
   - @hashgraph/asset-tokenization-contracts@3.0.0
 
 ## 2.0.0
@@ -267,16 +289,7 @@
 
 ### Patch Changes
 
-- Updated dependencies [c62eb6e]
-- Updated dependencies [c62eb6e]
-- Updated dependencies [c62eb6e]
-- Updated dependencies [c62eb6e]
-- Updated dependencies [c62eb6e]
-- Updated dependencies [c62eb6e]
-- Updated dependencies [c62eb6e]
-- Updated dependencies [c62eb6e]
-- Updated dependencies [c62eb6e]
-- Updated dependencies [c62eb6e]
+- Updated dependencies:
   - @hashgraph/asset-tokenization-contracts@2.0.0
 
 ## 1.17.1
@@ -289,40 +302,16 @@
 
 ### Minor Changes
 
-- a36b1c8: Integrate Changesets for version management and implement enterprise-grade release workflow
-
-  #### Changesets Integration
-  - Add Changesets configuration with fixed versioning for ATS packages (contracts, SDK, dapp)
-  - Configure develop-branch strategy as base for version management
-  - Add comprehensive changeset management scripts: create, version, publish, status, snapshot
-  - Implement automated semantic versioning and changelog generation
-  - Add @changesets/cli dependency for modern monorepo version management
-
-  #### Enterprise Release Workflow
-  - Implement new ats.publish.yml workflow focused exclusively on contracts and SDK packages
-  - Add manual trigger with dry-run capability for safe testing before actual releases
-  - Configure parallel execution of contracts and SDK publishing jobs for improved performance
-  - Support automatic triggers on version tags, release branches, and GitHub releases
-  - Add changeset validation workflow to enforce one changeset per PR requirement
-  - Include bypass labels for non-feature changes (no-changeset, docs-only, hotfix, chore)
-
-  #### Repository Configuration
-  - Update .gitignore to properly track .github/ workflows while excluding build artifacts
-  - Remove deprecated all.publish.yml workflow in favor of focused ATS publishing
-  - Update package.json with complete changeset workflow scripts and release commands
-  - Enhance documentation with new version management workflow and enterprise practices
-
-  #### Benefits
-  - **Modern Version Management**: Semantic versioning with automated changelog generation
-  - **Enterprise Compliance**: Manual release control with proper audit trails
-  - **Parallel Publishing**: Improved CI/CD performance with independent job execution
-  - **Developer Experience**: Simplified workflow with comprehensive documentation
-  - **Quality Assurance**: Mandatory changeset validation ensures all changes are documented
-
-  This establishes a production-ready, enterprise-grade release management system that follows modern monorepo practices while maintaining backward compatibility with existing development workflows.
+- a36b1c8: Integrate Changesets for version management and implement enterprise-grade release workflow.
+  - Add Changesets configuration with fixed versioning for ATS packages (contracts, SDK, dapp) and develop-branch strategy as base
+  - Add changeset management scripts: create, version, publish, status, snapshot; add `@changesets/cli` dependency
+  - Implement `ats.publish.yml` workflow with manual dry-run trigger, parallel contracts/SDK publishing jobs, and support for version tags, release branches, and GitHub releases
+  - Add changeset validation workflow enforcing one changeset per PR; bypass labels: `no-changeset`, `docs-only`, `hotfix`, `chore`
+  - Update `.gitignore` to track `.github/` workflows while excluding build artefacts; remove deprecated `all.publish.yml`
+  - Update `package.json` with complete changeset workflow scripts and release commands
 
 ### Patch Changes
 
-- Updated dependencies
+- Updated dependencies:
   - @hashgraph/asset-tokenization-contracts@1.17.0
 - Replace proceedRecipientIds for proceedRecipientsIds
