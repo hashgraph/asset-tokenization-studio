@@ -301,7 +301,7 @@ library AccessControlStorageWrapper {
     /**
      * @notice Returns `true` when `_role` is `DEFAULT_ADMIN_ROLE` and only one member holds it.
      * @param _role The role to inspect.
-     * @return `true` if the caller would be the sole admin after renouncing.
+     * @return True if the caller would be the sole admin after renouncing.
      */
     function _isSoleAdmin(bytes32 _role) private view returns (bool) {
         return _role == DEFAULT_ADMIN_ROLE && rolesStorage().roles[_role].roleMembers.length() == 1;

@@ -26,6 +26,6 @@ Returns whether `_userAddress` has a verified identity in the registry.
 
 #### Returns
 
-| Name | Type | Description                                           |
-| ---- | ---- | ----------------------------------------------------- |
-| \_0  | bool | `true` if the address is verified; `false` otherwise. |
+| Name | Type | Description                                       |
+| ---- | ---- | ------------------------------------------------- |
+| \_0  | bool | True if the address is verified, false otherwise. |

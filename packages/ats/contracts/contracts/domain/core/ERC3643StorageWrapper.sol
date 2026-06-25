@@ -389,7 +389,7 @@ library ERC3643StorageWrapper {
     /**
      * @notice Reports whether the supplied wallet has been recovered.
      * @param _sender Wallet whose recovery flag is being read.
-     * @return `true` if the wallet has been recovered.
+     * @return Ttrue if the wallet has been recovered.
      */
     function isRecovered(address _sender) internal view returns (bool) {
         return erc3643Storage().addressRecovered[_sender];

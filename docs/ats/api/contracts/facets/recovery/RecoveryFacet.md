@@ -78,9 +78,9 @@ Returns whether a wallet address has been marked as recovered.
 
 #### Returns
 
-| Name | Type | Description                                                                |
-| ---- | ---- | -------------------------------------------------------------------------- |
-| \_0  | bool | `true` if the address has previously been recovered via {recoveryAddress}. |
+| Name | Type | Description                                                              |
+| ---- | ---- | ------------------------------------------------------------------------ |
+| \_0  | bool | True if the address has previously been recovered via {recoveryAddress}. |
 
 ### recoveryAddress
 

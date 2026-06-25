@@ -28,9 +28,9 @@ Checks whether a transfer between two addresses is permitted.
 
 #### Returns
 
-| Name | Type | Description                                           |
-| ---- | ---- | ----------------------------------------------------- |
-| \_0  | bool | `true` if the transfer is allowed; `false` otherwise. |
+| Name | Type | Description                                       |
+| ---- | ---- | ------------------------------------------------- |
+| \_0  | bool | True if the transfer is allowed; false otherwise. |
 
 ### created
 
