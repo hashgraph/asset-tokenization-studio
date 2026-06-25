@@ -4,7 +4,7 @@ _Asset Tokenization Studio Team_
 
 > Factory Interface
 
-Interface for deploying tokenised securities (equity, bonds, loans) through a centralised factory that configures resolver proxies, business-logic resolvers, and role-based access control.
+Interface for deploying tokenised securities (equity, bonds, deposit tokens) through a centralised factory that configures resolver proxies, business-logic resolvers, and role-based access control.
 
 ## Methods
 
