@@ -118,6 +118,28 @@ function normalizeRoleValue(value: string): string {
 }
 
 /**
+ * Derive the camelCase dot-access alias for a facet name.
+ *
+ * Strips the trailing `Facet` suffix and camelCases the remainder, collapsing
+ * acronym runs (e.g. `ERC20VotesFacet` -> `erc20Votes`, `EIP712Facet` ->
+ * `eip712`, `AccessControlFacet` -> `accessControl`). The aliases are the keys
+ * of the generated `FACET_KEYS` map and, transitively, of the `FACETS` /
+ * `RESOLVER_KEYS` accessors in `scripts/domain/atsRegistry.ts`.
+ *
+ * @param name - Facet contract name (e.g. `"AccessControlFacet"`).
+ * @returns camelCase alias (e.g. `"accessControl"`).
+ */
+function toFacetKey(name: string): string {
+  const base = name.replace(/Facet$/, "");
+  const tokens = base.match(/[A-Z]+(?=[A-Z][a-z])|[A-Z]?[a-z]+[0-9]*|[A-Z]+[0-9]*|[0-9]+/g) ?? [base];
+  return tokens
+    .map((token, index) =>
+      index === 0 ? token.toLowerCase() : token.charAt(0).toUpperCase() + token.slice(1).toLowerCase(),
+    )
+    .join("");
+}
+
+/**
  * Generate complete registry TypeScript code.
  *
  * @param facets - Array of facet metadata
@@ -149,6 +171,7 @@ export function generateRegistry(
   );
   const facetRegistry = generateFacetRegistry(facets);
   const facetNameUnion = generateFacetNameUnion(facets);
+  const facetKeysMap = generateFacetKeysMap(facets);
   const contractRegistry = generateContractRegistry(infrastructure);
   const storageWrapperRegistry = storageWrappers ? generateStorageWrapperRegistry(storageWrappers) : "";
   const mockRegistry = mocks && mocks.length > 0 ? generateMockRegistry(mocks) : "";
@@ -161,7 +184,7 @@ export function generateRegistry(
    * roles file remain checked into git while the rest of this file is
    * gitignored and regenerated on `prepare`.
    */
-  const registries = [header, facetRegistry, facetNameUnion, contractRegistry];
+  const registries = [header, facetRegistry, facetNameUnion, facetKeysMap, contractRegistry];
   if (storageWrapperRegistry) {
     registries.push(storageWrapperRegistry);
   }
@@ -359,6 +382,34 @@ function generateFacetNameUnion(facets: ContractMetadata[]): string {
  */
 export type FacetName =
 ${body}`;
+}
+
+/**
+ * Generate the `FACET_KEYS` map: camelCase alias -> facet contract name.
+ *
+ * Sorted by facet name for deterministic output. `as const` preserves the
+ * literal keys and values so consumers can derive `keyof typeof FACET_KEYS`
+ * (the camelCase alias union) and so each value narrows to its `FacetName`.
+ * `scripts/domain/atsRegistry.ts` builds the `FACETS` and `RESOLVER_KEYS`
+ * dot-access accessors on top of this map.
+ *
+ * @param facets - Array of facet metadata
+ * @returns TypeScript code for the FACET_KEYS constant
+ */
+function generateFacetKeysMap(facets: ContractMetadata[]): string {
+  const sortedNames = [...facets].map((f) => f.name).sort((a, b) => a.localeCompare(b));
+
+  const entries = sortedNames.map((name) => `    ${toFacetKey(name)}: '${name}',`).join("\n");
+
+  return `/**
+ * Map of camelCase facet alias to facet contract name.
+ *
+ * Drives the \`FACETS\` and \`RESOLVER_KEYS\` dot-access accessors in
+ * \`scripts/domain/atsRegistry.ts\`; \`keyof typeof FACET_KEYS\` is the alias union.
+ */
+export const FACET_KEYS = {
+${entries}
+} as const`;
 }
 
 /**
