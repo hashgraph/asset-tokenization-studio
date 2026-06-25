@@ -63,6 +63,8 @@ import type {
   FACET_REGISTRY as FACET_REGISTRY_TYPE,
   INFRASTRUCTURE_CONTRACTS as INFRASTRUCTURE_CONTRACTS_TYPE,
   STORAGE_WRAPPER_REGISTRY as STORAGE_WRAPPER_REGISTRY_TYPE,
+  FACET_KEYS as FACET_KEYS_TYPE,
+  FacetName,
 } from "./atsRegistry.generated";
 
 /**
@@ -75,7 +77,13 @@ import type {
  * `import type` above, it never resolves `./atsRegistry.generated`, so module
  * load stays bootstrap-safe.
  */
-export type { FacetName } from "./atsRegistry.generated";
+export type { FacetName };
+
+/**
+ * Union of every camelCase facet alias (keys of the generated `FACET_KEYS`
+ * map). Drives the `FACETS` / `RESOLVER_KEYS` dot-access accessors below.
+ */
+export type FacetKey = keyof typeof FACET_KEYS_TYPE;
 import type {
   FacetDefinition,
   ContractDefinition,
@@ -184,6 +192,88 @@ export const STORAGE_WRAPPER_REGISTRY: typeof STORAGE_WRAPPER_REGISTRY_TYPE = la
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   () => require("./atsRegistry.generated").STORAGE_WRAPPER_REGISTRY,
 );
+
+/**
+ * Memoised camelCase-alias -> facet-definition map backing {@link FACETS}.
+ *
+ * @remarks
+ * Built once on first access from the lazily-required `FACET_KEYS` map; the
+ * `require` is bootstrap-safe for the same reason as `getHelpers()` above.
+ */
+let _facets: Record<FacetKey, FacetDefinition> | undefined;
+function buildFacets(): Record<FacetKey, FacetDefinition> {
+  if (!_facets) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const keys = require("./atsRegistry.generated").FACET_KEYS as Record<FacetKey, FacetName>;
+    const facets = {} as Record<FacetKey, FacetDefinition>;
+    for (const alias of Object.keys(keys) as FacetKey[]) {
+      const definition = getFacetDefinition(keys[alias]);
+      if (definition) {
+        facets[alias] = definition;
+      }
+    }
+    _facets = facets;
+  }
+  return _facets;
+}
+
+/**
+ * Memoised camelCase-alias -> resolver-key bytes32 map backing
+ * {@link RESOLVER_KEYS}. Only aliases whose facet declares a resolver key are
+ * present.
+ */
+let _resolverKeys: Record<FacetKey, string> | undefined;
+function buildResolverKeys(): Record<FacetKey, string> {
+  if (!_resolverKeys) {
+    const resolverKeys = {} as Record<FacetKey, string>;
+    for (const [alias, definition] of Object.entries(buildFacets()) as [FacetKey, FacetDefinition][]) {
+      if (definition.resolverKey) {
+        resolverKeys[alias] = definition.resolverKey.value;
+      }
+    }
+    _resolverKeys = resolverKeys;
+  }
+  return _resolverKeys;
+}
+
+/**
+ * Typed dot-access registry of facet definitions, keyed by camelCase alias.
+ *
+ * @remarks
+ * `FACETS.accessControl` returns the `AccessControlFacet` definition, exposing
+ * `.resolverKey`, `.factory`, `.methods`, etc. Lazy proxy — bootstrap-safe.
+ */
+export const FACETS: Record<FacetKey, FacetDefinition> = lazyRecordProxy(() => buildFacets());
+
+/**
+ * Typed dot-access registry of resolver-key bytes32 values, keyed by camelCase
+ * alias.
+ *
+ * @remarks
+ * `RESOLVER_KEYS.accessControl` returns the resolver key for
+ * `AccessControlFacet`. Sourced from the facet definitions (single source of
+ * truth) rather than hand-maintained constants. Lazy proxy — bootstrap-safe.
+ */
+export const RESOLVER_KEYS: Record<FacetKey, string> = lazyRecordProxy(() => buildResolverKeys());
+
+/**
+ * Resolve a facet's resolver-key bytes32 by facet name.
+ *
+ * @remarks
+ * For dynamic lookups where the facet name is not statically known. Prefer the
+ * `RESOLVER_KEYS.<alias>` accessor for static references.
+ *
+ * @param facetName - Facet name (e.g. `"AccessControlFacet"`).
+ * @returns The resolver-key bytes32 value.
+ * @throws When the facet is unknown or declares no resolver key.
+ */
+export function getResolverKey(facetName: FacetName): string {
+  const definition = getFacetDefinition(facetName);
+  if (!definition?.resolverKey) {
+    throw new Error(`No resolver key registered for facet "${facetName}"`);
+  }
+  return definition.resolverKey.value;
+}
 
 /**
  * Get a facet definition by name.
