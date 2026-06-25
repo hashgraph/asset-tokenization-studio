@@ -13,7 +13,7 @@ Quick start guide to run the Asset Tokenization Studio web application.
 
 ## Prerequisites
 
-- **Node.js**: v20.19.4 or newer
+- **Node.js**: v24.15.0 or newer (see `.nvmrc`)
 - **npm**: v10.9.0 or newer
 - **Hedera Account**: Testnet or mainnet account with HBAR
 - **Hedera Wallet**:

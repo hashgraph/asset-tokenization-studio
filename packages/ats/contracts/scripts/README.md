@@ -759,7 +759,6 @@ Use `CHECKPOINT_TEST_FAIL_AT` to simulate failures at specific points during dep
 - `bond` - After Bond configuration created
 - `bondFixedRate` - After Bond Fixed Rate configuration created
 - `bondKpiLinkedRate` - After Bond KPI Linked Rate configuration created
-- `bondSustainabilityPerformanceTargetRate` - After Bond Sustainability configuration created
 - `factory` - After Factory deployment
 
 #### Examples
@@ -973,7 +972,7 @@ Upgrade TUP proxies when:
 **Pattern A: Deploy and upgrade new implementation**
 
 ```bash
-export PROXY_ADMIN=0x...          # ProxyAdmin contract address
+export PROXY_ADMIN_ADDRESS=0x...          # ProxyAdmin contract address
 export BLR_PROXY=0x...            # BLR proxy to upgrade
 export DEPLOY_NEW_BLR_IMPL=true   # Deploy new implementation
 
@@ -983,7 +982,7 @@ npm run upgrade:tup:hedera:testnet
 **Pattern B: Upgrade to existing implementation**
 
 ```bash
-export PROXY_ADMIN=0x...
+export PROXY_ADMIN_ADDRESS=0x...
 export BLR_PROXY=0x...
 export BLR_IMPLEMENTATION=0x...   # Address of pre-deployed implementation
 
@@ -1024,7 +1023,7 @@ npm run upgrade:tup:hedera:testnet
 
 | Variable                  | Required | Purpose                                 |
 | ------------------------- | -------- | --------------------------------------- |
-| `PROXY_ADMIN`             | Yes      | ProxyAdmin contract address             |
+| `PROXY_ADMIN_ADDRESS`     | Yes      | ProxyAdmin contract address             |
 | `BLR_PROXY`               | No\*     | BLR proxy address to upgrade            |
 | `FACTORY_PROXY`           | No\*     | Factory proxy address to upgrade        |
 | `DEPLOY_NEW_BLR_IMPL`     | No\*\*   | Deploy new BLR implementation           |
@@ -1097,7 +1096,7 @@ Progress is tracked in `deployments/{network}/.checkpoints/` and automatically c
 
 **"ProxyAdmin address is required"**
 
-- Set `PROXY_ADMIN` environment variable
+- Set `PROXY_ADMIN_ADDRESS` environment variable
 - Get address from initial deployment output
 
 **"BLR proxy specified but no implementation provided"**
@@ -1202,9 +1201,11 @@ scripts/
 │ └── deploySystemWithExistingBlr.ts
 │
 ├── cli/ # Command-line entry points
-│ ├── deploy.ts # Main deployment CLI
-│ ├── upgrade.ts # Configuration upgrade CLI
-│ └── upgradeTup.ts # TUP proxy upgrade CLI
+│ ├── deploySystemWithNewBlr.ts # Deploy full system (new BLR)
+│ ├── deploySystemWithExistingBlr.ts # Deploy against an existing BLR
+│ ├── upgradeConfigurations.ts # Configuration upgrade CLI
+│ ├── upgradeTupProxies.ts # TUP (BLR/Factory) upgrade CLI
+│ └── checkpoint.ts # Checkpoint management CLI
 │
 ├── tools/ # Code generation tools
 │ ├── registry-generator/ # Standalone registry generator (fast, no TypeChain deps)
