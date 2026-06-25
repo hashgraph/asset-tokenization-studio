@@ -44,12 +44,6 @@ packages/ats/contracts/
 └── test/                 # Contract and script tests
 ```
 
-:::note Empty `layer_*` folders
-You'll still see empty `contracts/layer_0`, `contracts/layer_1`, and `contracts/facets/layer_2`
-directories. These are remnants of the pre-refactor layout; the layers are now **logical only**
-(see [below](#logical-layers)) and the folders carry no code.
-:::
-
 ## Anatomy of a facet
 
 A feature is never a single file. It's a small set of collaborating files spread across

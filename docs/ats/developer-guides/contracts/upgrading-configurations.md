@@ -23,17 +23,18 @@ Recall the [three-level versioning](./core-concepts.md#versioning):
 2. `registerBusinessLogics` in the BLR — this bumps the **shared latest version** so all facets stay
    mutually consistent.
 3. Create a **new configuration version** for the asset type, referencing the new facets.
-4. Move tokens onto the new version (pinned), or let auto-update tokens pick it up.
+4. Move each token you want onto the new version with an explicit `updateConfigVersion` transaction
+   (called by the token's `DEFAULT_ADMIN_ROLE`).
 
 No token is ever redeployed — a token's proxy bytecode never changes. Only the configuration version
 it resolves against changes.
 
-### Resolution modes
+### How tokens move between versions
 
-- **Pinned (recommended for production):** a token is fixed to a specific configuration version and
-  only moves on an explicit transaction. Predictable and auditable.
-- **Auto-update (dev/testing):** a token tracks the latest version and adopts new versions on the
-  next call.
+A token is always **pinned** to a specific configuration version — there is **no** automatic tracking
+of the latest. To move a token, its `DEFAULT_ADMIN_ROLE` calls `updateConfigVersion` (or
+`updateConfig` / `updateResolver`) on the token. These are instant, single-transaction operations
+with no on-chain timelock, so the controlling account should be a multisig.
 
 ## Running an upgrade
 
@@ -99,9 +100,8 @@ await blr.getLatestVersion("<resolver key>"); // should reflect the new version
 
 ## Rollback
 
-Because previous configuration versions remain registered, rollback is "move pinned tokens back to
-the previous version" rather than a redeploy. For auto-update tokens, registering a corrected
-version forward is usually preferable to moving the latest pointer backwards. Always validate on
+Because previous configuration versions remain registered, rollback is "move the affected tokens back
+to the previous version" (via `updateConfigVersion`) rather than a redeploy. Always validate on
 testnet before touching production.
 
 ## Pre-upgrade checklist

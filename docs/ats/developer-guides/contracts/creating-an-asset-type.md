@@ -6,9 +6,11 @@ sidebar_label: Creating an asset type
 
 # Creating an Asset Type
 
-How to define a brand-new asset type — a new **configuration** (e.g. a Fund) with its own
-configuration ID and facet set. This builds on [Adding a facet](./adding-a-facet.md) (for any
-custom logic) and [Managing the BLR](./managing-the-blr.md) (for the on-chain registration).
+How to define a brand-new **configuration** — what this guide also calls an _asset type_ (e.g. a
+Fund): a `configurationId` with its own facet set. ("Asset type" and "configuration" refer to the
+same thing here; the on-chain object is a _configuration_.) This builds on
+[Adding a facet](./adding-a-facet.md) (for any custom logic) and
+[Managing the BLR](./managing-the-blr.md) (for the on-chain registration).
 
 :::info Two kinds of "new asset type"
 

@@ -108,17 +108,18 @@ BLR global version (latestVersion)        ← bumped on ANY facet registration
 3. **Configuration versions** — each configuration ID has its **own** version history; a config
    version references a coherent set of facets.
 
-### Resolution modes
+### How a token moves between versions
 
-A token (`ResolverProxy`) resolves against a configuration in one of two modes:
+A token (`ResolverProxy`) is always **pinned** to a specific `(configuration ID, version)` — there is
+no automatic tracking of the "latest" version. Moving a token to a newer version is an explicit
+transaction the token's `DEFAULT_ADMIN_ROLE` calls on the token itself: `updateConfigVersion` (new
+version of the same configuration), `updateConfig` (switch configuration + version), or
+`updateResolver` (point at a different BLR). These take effect in a single transaction with no
+on-chain timelock — hence the admin should be a multisig.
 
-- **Pinned version (recommended for production).** The token is fixed to a specific configuration
-  version. Upgrades require an explicit transaction to move it — predictable and auditable.
-- **Auto-update (development/testing).** The token tracks the latest configuration version, so it
-  picks up new versions automatically on the next call.
-
-Upgrading is therefore: register new facets → create a new configuration version → move (or let)
-tokens onto it. No token is ever redeployed. See [Upgrading configurations](./upgrading-configurations.md).
+Upgrading is therefore: register new facets → create a new configuration version → call
+`updateConfigVersion` on each token you want to move. No token is ever redeployed. See
+[Upgrading configurations](./upgrading-configurations.md).
 
 ## Roles
 

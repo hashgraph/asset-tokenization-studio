@@ -184,6 +184,5 @@ See [Upgrading infrastructure](./upgrading-infrastructure.md).
 
 The contracts are organised by _responsibility_, not by deep folder nesting. Conceptually there are
 four logical layers — storage wrappers, core standards, domain features, and jurisdiction-specific
-behaviour — but on disk the facets sit in flat folders. (The old `layer_0…layer_3` directories were
-flattened in the refactor and now exist only as empty remnants.) The next page,
+behaviour — but on disk the facets sit in flat folders organised by feature. The next page,
 [Repository structure](./repository-structure.md), shows exactly where everything lives.

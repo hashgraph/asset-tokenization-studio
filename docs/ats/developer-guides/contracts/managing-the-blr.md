@@ -118,7 +118,7 @@ function createConfiguration(
 
 **Requirements:**
 
-- Caller must have `DEFAULT_ADMIN_ROLE`.
+- Caller must hold `ROLE_CREATE_CONFIGURATION` **and** be the **owner** of `_configurationId` (the first account to create a configuration becomes its owner via `onlyOwner` — only that owner can add versions).
 - `_configurationId` must not be `bytes32(0)`.
 - Every `id` in `_facetConfigurations` must reference a registered `businessLogicKey`.
 - No duplicate facet IDs within the same configuration.
@@ -196,6 +196,11 @@ console.log("Batch configuration cancelled.");
 ### Upgrade a configuration to a new version
 
 Upgrading a configuration follows the same process as creating one. When `createConfiguration` or `createBatchConfiguration` is called with a `_configurationId` that already has registered versions, the BLR creates a new version rather than overwriting the existing one.
+
+> **Only the configuration's owner can upgrade it.** `DiamondCutManager` gates these calls with
+> `onlyOwner(configurationId)` + `onlyRole(ROLE_CREATE_CONFIGURATION)`: the account that first created
+> the configuration owns it, and only that owner (holding `ROLE_CREATE_CONFIGURATION`) can add new
+> versions.
 
 ```typescript
 // Existing Equity config is at version 1.
