@@ -89,54 +89,6 @@ describe("Deployment File Utilities", () => {
           },
         ],
       },
-      bondFixedRate: {
-        configId: TEST_CONFIG_IDS.BOND_FIXED_RATE,
-        version: 1,
-        facetCount: 43,
-        facets: [
-          {
-            facetName: "AccessControlFacet",
-            key: TEST_CONFIG_IDS.BOND_FIXED_RATE,
-            address: TEST_ADDRESSES.VALID_2,
-          },
-        ],
-      },
-      bondKpiLinkedRate: {
-        configId: TEST_CONFIG_IDS.BOND_KPI_LINKED,
-        version: 1,
-        facetCount: 43,
-        facets: [
-          {
-            facetName: "AccessControlFacet",
-            key: TEST_CONFIG_IDS.BOND_KPI_LINKED,
-            address: TEST_ADDRESSES.VALID_2,
-          },
-        ],
-      },
-      loan: {
-        configId: TEST_BYTES32.ALL_FS,
-        version: 1,
-        facetCount: 43,
-        facets: [
-          {
-            facetName: "AccessControlFacet",
-            key: TEST_BYTES32.ALL_FS,
-            address: TEST_ADDRESSES.VALID_2,
-          },
-        ],
-      },
-      loansPortfolio: {
-        configId: TEST_BYTES32.ALL_FS,
-        version: 1,
-        facetCount: 43,
-        facets: [
-          {
-            facetName: "AccessControlFacet",
-            key: TEST_BYTES32.ALL_FS,
-            address: TEST_ADDRESSES.VALID_2,
-          },
-        ],
-      },
       depositToken: {
         configId: TEST_BYTES32.ALL_FS,
         version: 1,
@@ -173,11 +125,7 @@ describe("Deployment File Utilities", () => {
     helpers: {
       getEquityFacets: () => [],
       getBondFacets: () => [],
-      getBondFixedRateFacets: () => [],
-      getBondKpiLinkedRateFacets: () => [],
-      getLoanFacets: () => [],
       getDepositTokenFacets: () => [],
-      getLoansPortfolioFacets: () => [],
       getFactoryFacets: () => [],
     },
   });

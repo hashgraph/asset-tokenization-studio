@@ -33,45 +33,12 @@ export const EQUITY_CONFIG_ID = "0x000000000000000000000000000000000000000000000
 export const BOND_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000002";
 
 /**
- * Bond Fixed Rate configuration ID.
- *
- * bytes32(uint256(3)) = 0x00...03
- * Used by BusinessLogicResolver to identify bond fixed rate facet configuration.
- */
-export const BOND_FIXED_RATE_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000003";
-
-/**
- * Bond Kpi Linked Rate configuration ID.
- *
- * bytes32(uint256(4)) = 0x00...04
- * Used by BusinessLogicResolver to identify bond kpi linked rate facet configuration.
- */
-export const BOND_KPI_LINKED_RATE_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000004";
-
-/**
  * Deposit Token configuration ID.
  *
  * bytes32(uint256(5)) = 0x00...05
  * Used by BusinessLogicResolver to identify deposit token facet configuration.
  */
 export const DEPOSIT_TOKEN_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000005";
-
-/**
- * Loan configuration ID.
- *
- * bytes32(uint256(6)) = 0x00...06
- * Used by BusinessLogicResolver to identify loan facet configuration.
- */
-export const LOAN_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000006";
-
-/**
- * Loans Portfolio configuration ID.
- *
- * bytes32(uint256(7)) = 0x00...07
- * Used by BusinessLogicResolver to identify loans portfolio facet configuration.
- */
-export const LOANS_PORTFOLIO_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000007";
-export const LOANS_PORTFOLIO = "0x3f6ea14bbeaea82befb49409b874caf151715c6619ac1d26ba858039b7ece33e";
 
 /**
  * Factory configuration ID.

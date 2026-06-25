@@ -198,12 +198,6 @@ export const TEST_CONFIG_IDS = {
   /** Bond configuration ID */
   BOND: "0x0000000000000000000000000000000000000000000000000000000000000002",
 
-  /** Bond Fixed Rate configuration ID */
-  BOND_FIXED_RATE: "0x0000000000000000000000000000000000000000000000000000000000000003",
-
-  /** Bond KPI Linked Rate configuration ID */
-  BOND_KPI_LINKED: "0x0000000000000000000000000000000000000000000000000000000000000004",
-
   /** Bond Sustainability Performance Target Rate configuration ID */
   BOND_SPT: "0x0000000000000000000000000000000000000000000000000000000000000005",
 
@@ -450,12 +444,9 @@ export const TEST_STEPS_NEW_BLR = {
   REGISTER_FACETS: 3,
   EQUITY_CONFIG: 4,
   BOND_CONFIG: 5,
-  BOND_FIXED_RATE_CONFIG: 6,
-  BOND_KPI_LINKED_CONFIG: 7,
-  LOAN_CONFIG: 8,
-  LOANS_PORTFOLIO_CONFIG: 9,
-  FACTORY: 10,
-  INITIALIZE_MOCK_CONFIG: 11,
+  DEPOSIT_TOKEN_CONFIG: 6,
+  FACTORY: 7,
+  INITIALIZE_MOCK_CONFIG: 8,
 } as const;
 
 /**
@@ -467,12 +458,9 @@ export const TEST_STEPS_EXISTING_BLR = {
   REGISTER_FACETS: 2,
   EQUITY_CONFIG: 3,
   BOND_CONFIG: 4,
-  BOND_FIXED_RATE_CONFIG: 5,
-  BOND_KPI_LINKED_CONFIG: 6,
-  DEPOSIT_TOKEN_CONFIG: 7,
-  LOAN_CONFIG: 8,
-  LOANS_PORTFOLIO_CONFIG: 9,
-  FACTORY: 11,
+  DEPOSIT_TOKEN_CONFIG: 5,
+  FACTORY_CONFIG: 6,
+  FACTORY: 7,
 } as const;
 
 // ============================================================================
@@ -1024,12 +1012,6 @@ export const TEST_FACTORY_EVENTS = {
   /** Bond deployed event */
   BOND_DEPLOYED: "BondDeployed",
 
-  /** Bond Fixed Rate deployed event */
-  BOND_FIXED_RATE_DEPLOYED: "BondFixedRateDeployed",
-
-  /** Bond KPI Linked Rate deployed event */
-  BOND_KPI_LINKED_RATE_DEPLOYED: "BondKpiLinkedRateDeployed",
-
   /** Unknown event (for negative tests) */
   UNKNOWN: "UnknownEvent",
 } as const;
@@ -1256,8 +1238,7 @@ export const TEST_COUPON = {
  * Default fixed-rate bond fixture parameters mirrored as test-side expectations.
  *
  * Kept in sync with `DEFAULT_BOND_FIXED_RATE_PARAMS` in `test/fixtures/tokens/bondFixedRate.fixture.ts`.
- * Tests using `deployBondFixedRateTokenFixture` with default `fixedRateParams` should
- * assert against these values.
+ * The FixedRate / InterestRate facet suites assert observed rate values against these.
  */
 export const TEST_BOND_FIXED_RATE = {
   RATE: 50,

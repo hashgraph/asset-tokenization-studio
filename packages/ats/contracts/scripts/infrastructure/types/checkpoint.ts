@@ -210,22 +210,14 @@ export interface DeploymentCheckpoint {
     /** Facets registered in BLR (step 3) */
     facetsRegistered?: boolean;
 
-    /** Configurations (steps 4-5) */
+    /** Configurations (steps 4-6) */
     configurations?: {
       /** Equity configuration */
       equity?: ConfigurationResult;
       /** Bond configuration */
       bond?: ConfigurationResult;
-      /** Bond Fixed Rate configuration */
-      bondFixedRate?: ConfigurationResult;
-      /** Bond KpiLinked Rate configuration */
-      bondKpiLinkedRate?: ConfigurationResult;
       /** Deposit Token configuration */
       depositToken?: ConfigurationResult;
-      /** Loan configuration */
-      loan?: ConfigurationResult;
-      /** Loans Portfolio configuration */
-      loansPortfolio?: ConfigurationResult;
       /** Factory configuration */
       factory?: ConfigurationResult;
       // TEST-ONLY: InitializeMock configuration. Records every version minted

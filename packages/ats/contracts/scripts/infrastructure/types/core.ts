@@ -754,10 +754,6 @@ export interface DeploymentOutputType {
   configurations: {
     equity: ConfigurationMetadata;
     bond: ConfigurationMetadata;
-    bondFixedRate: ConfigurationMetadata;
-    bondKpiLinkedRate: ConfigurationMetadata;
-    loan: ConfigurationMetadata;
-    loansPortfolio: ConfigurationMetadata;
     depositToken: ConfigurationMetadata;
     factory: ConfigurationMetadata;
   };
@@ -772,11 +768,7 @@ export interface DeploymentOutputType {
   helpers: {
     getEquityFacets(): FacetMetadata[];
     getBondFacets(): FacetMetadata[];
-    getBondFixedRateFacets(): FacetMetadata[];
-    getBondKpiLinkedRateFacets(): FacetMetadata[];
-    getLoanFacets(): FacetMetadata[];
     getDepositTokenFacets(): FacetMetadata[];
-    getLoansPortfolioFacets(): FacetMetadata[];
     getFactoryFacets(): FacetMetadata[];
   };
 }

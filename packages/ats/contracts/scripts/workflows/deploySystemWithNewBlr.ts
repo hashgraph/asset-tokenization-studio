@@ -54,11 +54,7 @@ import {
   deployFactory,
   createEquityConfiguration,
   createBondConfiguration,
-  createBondFixedRateConfiguration,
-  createBondKpiLinkedRateConfiguration,
   createDepositTokenConfiguration,
-  createLoanConfiguration,
-  createLoansPortfolioConfiguration,
   createFactoryConfiguration,
   deployOrchestratorLibraries,
   hasOrchestratorLibraryAddresses,
@@ -104,8 +100,7 @@ export interface DeploySystemWithNewBlrOptions extends ResumeOptions {
 
   /**
    * When true, only the Bond configuration is created.
-   * Equity, Bond Fixed Rate, Bond KPI Linked Rate, Bond Sustainability Performance Target Rate,
-   * Loan, and Loans Portfolio configurations are skipped.
+   * Equity and Deposit Token configurations are skipped.
    * Factory configuration and deployment are unaffected.
    */
   deployOnlyBondConfig?: boolean;
@@ -210,7 +205,7 @@ export async function deploySystemWithNewBlr(
   info(`⏱️  Confirmations (deploy): ${confirmations}`);
   info(`🔁 Retry: ${enableRetry ? "Enabled" : "Disabled"}`);
   info(`✅ Verification: ${verifyDeployment ? "Enabled" : "Disabled"}`);
-  if (deployOnlyBondConfig) info(`⚡ Mode: Bond-only (Equity, Bond variants, Loan, LoansPortfolio skipped)`);
+  if (deployOnlyBondConfig) info(`⚡ Mode: Bond-only (Equity and Deposit Token skipped)`);
   if (parallelFacetDeployment) {
     info(`⚡ Parallel facet deployment: concurrency=${concurrency} (retries off, checkpoint skipped)`);
   }
@@ -751,233 +746,11 @@ export async function deploySystemWithNewBlr(
       throw new Error(createTestFailureMessage("step", "bond"));
     }
 
-    // Step 6: Create Bond Fixed Rate configuration
-    let bondFixedRateConfig: Awaited<ReturnType<typeof createBondFixedRateConfiguration>>;
-
-    if (checkpoint.steps.configurations?.bondFixedRate && checkpoint.currentStep >= 6) {
-      info(`\n✓ Step 7/${totalSteps}: Bond FixedRate configuration already created (resuming)`);
-      const bondFixedRateConfigData = checkpoint.steps.configurations.bondFixedRate;
-      info(`✅ Bond FixedRate Config ID: ${bondFixedRateConfigData.configId}`);
-      info(`✅ Bond FixedRate Version: ${bondFixedRateConfigData.version}`);
-      info(`✅ Bond FixedRate Facets: ${bondFixedRateConfigData.facetCount}`);
-
-      // Use converter to reconstruct full ConfigurationData from checkpoint
-      bondFixedRateConfig = toConfigurationData(bondFixedRateConfigData);
-    } else if (deployOnlyBondConfig) {
-      info(`\n⏭️  Step 7/${totalSteps}: Bond FixedRate configuration skipped (deployOnlyBondConfig)`);
-      bondFixedRateConfig = err("SKIPPED", "Skipped by deployOnlyBondConfig");
-      checkpoint.currentStep = 6;
-      await checkpointManager.saveCheckpoint(checkpoint);
-    } else {
-      info(`\n🏦 Step 7/${totalSteps}: Creating Bond FixedRate configuration...`);
-
-      bondFixedRateConfig = await createBondFixedRateConfiguration(
-        blrContract,
-        facetAddresses,
-        partialBatchDeploy,
-        batchSize,
-        confirmations,
-        enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
-      );
-
-      if (!bondFixedRateConfig.success) {
-        throw new Error(
-          `Bond FixedRate config creation failed: ${bondFixedRateConfig.error} - ${bondFixedRateConfig.message}`,
-        );
-      }
-
-      info(`✅ Bond FixedRate Config ID: ${bondFixedRateConfig.data.configurationId}`);
-      info(`✅ Bond FixedRate Version: ${bondFixedRateConfig.data.version}`);
-      info(`✅ Bond FixedRate Facets: ${bondFixedRateConfig.data.facetKeys.length}`);
-
-      // Save checkpoint
-      checkpoint.steps.configurations!.bondFixedRate = {
-        configId: bondFixedRateConfig.data.configurationId,
-        version: bondFixedRateConfig.data.version,
-        facetCount: bondFixedRateConfig.data.facetKeys.length,
-        facets: bondFixedRateConfig.data.facetKeys,
-        txHash: "", // createBondFixedRateConfiguration doesn't return tx hash currently
-      };
-      checkpoint.currentStep = 6;
-      await checkpointManager.saveCheckpoint(checkpoint);
-    }
-
-    // Testing hook: Step-level failure injection for checkpoint testing
-    if (shouldFailAtStep("bondFixedRate")) {
-      throw new Error(createTestFailureMessage("step", "bondFixedRate"));
-    }
-
-    // Step 7: Create Bond KpiLinked Rate configuration
-    let bondKpiLinkedRateConfig: Awaited<ReturnType<typeof createBondKpiLinkedRateConfiguration>>;
-
-    if (checkpoint.steps.configurations?.bondKpiLinkedRate && checkpoint.currentStep >= 7) {
-      info(`\n✓ Step 8/${totalSteps}: Bond KpiLinkedRate configuration already created (resuming)`);
-      const bondKpiLinkedRateConfigData = checkpoint.steps.configurations.bondKpiLinkedRate;
-      info(`✅ Bond KpiLinkedRate Config ID: ${bondKpiLinkedRateConfigData.configId}`);
-      info(`✅ Bond KpiLinkedRate Version: ${bondKpiLinkedRateConfigData.version}`);
-      info(`✅ Bond KpiLinkedRate Facets: ${bondKpiLinkedRateConfigData.facetCount}`);
-
-      // Use converter to reconstruct full ConfigurationData from checkpoint
-      bondKpiLinkedRateConfig = toConfigurationData(bondKpiLinkedRateConfigData);
-    } else if (deployOnlyBondConfig) {
-      info(`\n⏭️  Step 8/${totalSteps}: Bond KpiLinkedRate configuration skipped (deployOnlyBondConfig)`);
-      bondKpiLinkedRateConfig = err("SKIPPED", "Skipped by deployOnlyBondConfig");
-      checkpoint.currentStep = 7;
-      await checkpointManager.saveCheckpoint(checkpoint);
-    } else {
-      info(`\n🏦 Step 8/${totalSteps}: Creating Bond KpiLinkedRate configuration...`);
-
-      bondKpiLinkedRateConfig = await createBondKpiLinkedRateConfiguration(
-        blrContract,
-        facetAddresses,
-        partialBatchDeploy,
-        batchSize,
-        confirmations,
-        enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
-      );
-
-      if (!bondKpiLinkedRateConfig.success) {
-        throw new Error(
-          `Bond KpiLinkedRate config creation failed: ${bondKpiLinkedRateConfig.error} - ${bondKpiLinkedRateConfig.message}`,
-        );
-      }
-
-      info(`✅ Bond KpiLinkedRate Config ID: ${bondKpiLinkedRateConfig.data.configurationId}`);
-      info(`✅ Bond KpiLinkedRate Version: ${bondKpiLinkedRateConfig.data.version}`);
-      info(`✅ Bond KpiLinkedRate Facets: ${bondKpiLinkedRateConfig.data.facetKeys.length}`);
-
-      // Save checkpoint
-      checkpoint.steps.configurations!.bondKpiLinkedRate = {
-        configId: bondKpiLinkedRateConfig.data.configurationId,
-        version: bondKpiLinkedRateConfig.data.version,
-        facetCount: bondKpiLinkedRateConfig.data.facetKeys.length,
-        facets: bondKpiLinkedRateConfig.data.facetKeys,
-        txHash: "", // createBondKpiLinkedRateConfiguration doesn't return tx hash currently
-      };
-      checkpoint.currentStep = 7;
-      await checkpointManager.saveCheckpoint(checkpoint);
-    }
-
-    // Testing hook: Step-level failure injection for checkpoint testing
-    if (shouldFailAtStep("bondKpiLinkedRate")) {
-      throw new Error(createTestFailureMessage("step", "bondKpiLinkedRate"));
-    }
-
-    // Step 8: Create Loan configuration
-    let loanConfig: Awaited<ReturnType<typeof createLoanConfiguration>>;
-
-    if (checkpoint.steps.configurations?.loan && checkpoint.currentStep >= 8) {
-      info(`\n✓ Step 9/${totalSteps}: Loan configuration already created (resuming)`);
-      const loanConfigData = checkpoint.steps.configurations.loan;
-      info(`✅ Loan Config ID: ${loanConfigData.configId}`);
-      info(`✅ Loan Version: ${loanConfigData.version}`);
-      info(`✅ Loan Facets: ${loanConfigData.facetCount}`);
-
-      loanConfig = toConfigurationData(loanConfigData);
-    } else if (deployOnlyBondConfig) {
-      info(`\n⏭️  Step 10/${totalSteps}: Loan configuration skipped (deployOnlyBondConfig)`);
-      loanConfig = err("SKIPPED", "Skipped by deployOnlyBondConfig");
-      checkpoint.currentStep = 9;
-      await checkpointManager.saveCheckpoint(checkpoint);
-    } else {
-      info(`\n📄 Step 9/${totalSteps}: Creating Loan configuration...`);
-
-      loanConfig = await createLoanConfiguration(
-        blrContract,
-        facetAddresses,
-        partialBatchDeploy,
-        batchSize,
-        confirmations,
-        enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
-      );
-
-      if (!loanConfig.success) {
-        throw new Error(`Loan config creation failed: ${loanConfig.error} - ${loanConfig.message}`);
-      }
-
-      info(`✅ Loan Config ID: ${loanConfig.data.configurationId}`);
-      info(`✅ Loan Version: ${loanConfig.data.version}`);
-      info(`✅ Loan Facets: ${loanConfig.data.facetKeys.length}`);
-
-      if (!checkpoint.steps.configurations) {
-        checkpoint.steps.configurations = {};
-      }
-      checkpoint.steps.configurations.loan = {
-        configId: loanConfig.data.configurationId,
-        version: loanConfig.data.version,
-        facetCount: loanConfig.data.facetKeys.length,
-        facets: loanConfig.data.facetKeys,
-        txHash: "",
-      };
-      checkpoint.currentStep = 8;
-      await checkpointManager.saveCheckpoint(checkpoint);
-    }
-
-    if (shouldFailAtStep("loan")) {
-      throw new Error(createTestFailureMessage("step", "loan"));
-    }
-
-    // Step 9: Create Loans Portfolio configuration
-    let loansPortfolioConfig: Awaited<ReturnType<typeof createLoansPortfolioConfiguration>>;
-
-    if (checkpoint.steps.configurations?.loansPortfolio && checkpoint.currentStep >= 9) {
-      info(`\n✓ Step 10/${totalSteps}: Loans Portfolio configuration already created (resuming)`);
-      const loansPortfolioConfigData = checkpoint.steps.configurations.loansPortfolio;
-      info(`✅ Loans Portfolio Config ID: ${loansPortfolioConfigData.configId}`);
-      info(`✅ Loans Portfolio Version: ${loansPortfolioConfigData.version}`);
-      info(`✅ Loans Portfolio Facets: ${loansPortfolioConfigData.facetCount}`);
-
-      loansPortfolioConfig = toConfigurationData(loansPortfolioConfigData);
-    } else if (deployOnlyBondConfig) {
-      info(`\n⏭️  Step 11/${totalSteps}: Loans Portfolio configuration skipped (deployOnlyBondConfig)`);
-      loansPortfolioConfig = err("SKIPPED", "Skipped by deployOnlyBondConfig");
-      checkpoint.currentStep = 10;
-      await checkpointManager.saveCheckpoint(checkpoint);
-    } else {
-      info(`\n📄 Step 10/${totalSteps}: Creating Loans Portfolio configuration...`);
-
-      loansPortfolioConfig = await createLoansPortfolioConfiguration(
-        blrContract,
-        facetAddresses,
-        partialBatchDeploy,
-        batchSize,
-        confirmations,
-        enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
-      );
-
-      if (!loansPortfolioConfig.success) {
-        throw new Error(
-          `Loans Portfolio config creation failed: ${loansPortfolioConfig.error} - ${loansPortfolioConfig.message}`,
-        );
-      }
-
-      info(`✅ Loans Portfolio Config ID: ${loansPortfolioConfig.data.configurationId}`);
-      info(`✅ Loans Portfolio Version: ${loansPortfolioConfig.data.version}`);
-      info(`✅ Loans Portfolio Facets: ${loansPortfolioConfig.data.facetKeys.length}`);
-
-      if (!checkpoint.steps.configurations) {
-        checkpoint.steps.configurations = {};
-      }
-      checkpoint.steps.configurations.loansPortfolio = {
-        configId: loansPortfolioConfig.data.configurationId,
-        version: loansPortfolioConfig.data.version,
-        facetCount: loansPortfolioConfig.data.facetKeys.length,
-        facets: loansPortfolioConfig.data.facetKeys,
-        txHash: "",
-      };
-      checkpoint.currentStep = 9;
-      await checkpointManager.saveCheckpoint(checkpoint);
-    }
-
-    if (shouldFailAtStep("loansPortfolio")) {
-      throw new Error(createTestFailureMessage("step", "loansPortfolio"));
-    }
-
-    // Step 10: Create Deposit Token configuration
+    // Step 6: Create Deposit Token configuration
     let depositTokenConfig: Awaited<ReturnType<typeof createDepositTokenConfiguration>>;
 
-    if (checkpoint.steps.configurations?.depositToken && checkpoint.currentStep >= 10) {
-      info(`\n✓ Step 11/${totalSteps}: Deposit Token configuration already created (resuming)`);
+    if (checkpoint.steps.configurations?.depositToken && checkpoint.currentStep >= 6) {
+      info(`\n✓ Step 7/${totalSteps}: Deposit Token configuration already created (resuming)`);
       const depositTokenConfigData = checkpoint.steps.configurations.depositToken;
       info(`✅ Deposit Token Config ID: ${depositTokenConfigData.configId}`);
       info(`✅ Deposit Token Version: ${depositTokenConfigData.version}`);
@@ -985,12 +758,12 @@ export async function deploySystemWithNewBlr(
 
       depositTokenConfig = toConfigurationData(depositTokenConfigData);
     } else if (deployOnlyBondConfig) {
-      info(`\n⏭️  Step 11/${totalSteps}: Deposit Token configuration skipped (deployOnlyBondConfig)`);
+      info(`\n⏭️  Step 7/${totalSteps}: Deposit Token configuration skipped (deployOnlyBondConfig)`);
       depositTokenConfig = err("SKIPPED", "Skipped by deployOnlyBondConfig");
-      checkpoint.currentStep = 10;
+      checkpoint.currentStep = 6;
       await checkpointManager.saveCheckpoint(checkpoint);
     } else {
-      info(`\n💵 Step 11/${totalSteps}: Creating Deposit Token configuration...`);
+      info(`\n💵 Step 7/${totalSteps}: Creating Deposit Token configuration...`);
 
       depositTokenConfig = await createDepositTokenConfiguration(
         blrContract,
@@ -1021,7 +794,7 @@ export async function deploySystemWithNewBlr(
         facets: depositTokenConfig.data.facetKeys,
         txHash: "",
       };
-      checkpoint.currentStep = 10;
+      checkpoint.currentStep = 6;
       await checkpointManager.saveCheckpoint(checkpoint);
     }
 
@@ -1074,15 +847,15 @@ export async function deploySystemWithNewBlr(
     const MOCK_FACET_TARGET_VERSIONS = 3;
     const MOCK_FACET_NAMES_TO_MULTIPLY = ["MockFacet1", "MockFacet2", "MockFacet3"] as const;
 
-    if (checkpoint.steps.configurations?.initializeMock && checkpoint.currentStep >= 11) {
-      info(`\n✓ Step 12/${totalSteps}: InitializeMock configurations already created (resuming)`);
+    if (checkpoint.steps.configurations?.initializeMock && checkpoint.currentStep >= 7) {
+      info(`\n✓ Step 8/${totalSteps}: InitializeMock configurations already created (resuming)`);
       const data = checkpoint.steps.configurations.initializeMock;
       initializeMockVersions = data.versions;
       info(`✅ InitializeMock Config ID: ${data.configId}`);
       info(`✅ InitializeMock Versions: [${data.versions.join(", ")}]`);
       info(`✅ InitializeMock Facets: ${data.facetCount}`);
     } else if (isTestMode()) {
-      info(`\n🧪 Step 12/${totalSteps}: Creating InitializeMock domain (3 MockFacet versions + 2 configIds)...`);
+      info(`\n🧪 Step 8/${totalSteps}: Creating InitializeMock domain (3 MockFacet versions + 2 configIds)...`);
 
       // TEST-ONLY: bring each MockFacet's BLR version count up to 3 by
       // deploying and registering additional copies. Query current versions
@@ -1181,13 +954,13 @@ export async function deploySystemWithNewBlr(
         facetCount: lastFacetCount,
         versions: initializeMockVersions,
       };
-      checkpoint.currentStep = 11;
+      checkpoint.currentStep = 7;
       await checkpointManager.saveCheckpoint(checkpoint);
     } else {
       // TEST-ONLY: still advance currentStep so Factory's index stays stable
       // when not running in test mode.
-      info(`\n⏭️  Step 12/${totalSteps}: InitializeMock skipped (ATS_TEST_MODE disabled)`);
-      checkpoint.currentStep = 11;
+      info(`\n⏭️  Step 8/${totalSteps}: InitializeMock skipped (ATS_TEST_MODE disabled)`);
+      checkpoint.currentStep = 7;
       await checkpointManager.saveCheckpoint(checkpoint);
     }
 
@@ -1196,18 +969,18 @@ export async function deploySystemWithNewBlr(
       throw new Error(createTestFailureMessage("step", "initializeMock"));
     }
 
-    // Step 11: Create Factory configuration (MUST precede FactoryProxy construction)
+    // Step 8: Create Factory configuration (MUST precede FactoryProxy construction)
     let factoryConfig: Awaited<ReturnType<typeof createFactoryConfiguration>>;
 
-    if (checkpoint.steps.configurations?.factory && checkpoint.currentStep >= 10) {
-      info(`\n✓ Step 11/${totalSteps}: Factory configuration already created (resuming)`);
+    if (checkpoint.steps.configurations?.factory && checkpoint.currentStep >= 8) {
+      info(`\n✓ Step 9/${totalSteps}: Factory configuration already created (resuming)`);
       const factoryConfigData = checkpoint.steps.configurations.factory;
       info(`✅ Factory Config ID: ${factoryConfigData.configId}`);
       info(`✅ Factory Version: ${factoryConfigData.version}`);
       info(`✅ Factory Facets: ${factoryConfigData.facetCount}`);
       factoryConfig = toConfigurationData(factoryConfigData);
     } else {
-      info(`\n🏭 Step 11/${totalSteps}: Creating Factory configuration...`);
+      info(`\n🏭 Step 9/${totalSteps}: Creating Factory configuration...`);
       factoryConfig = await createFactoryConfiguration(
         blrContract,
         facetAddresses,
@@ -1236,7 +1009,7 @@ export async function deploySystemWithNewBlr(
         facets: factoryConfig.data.facetKeys,
         txHash: "",
       };
-      checkpoint.currentStep = 10;
+      checkpoint.currentStep = 8;
       await checkpointManager.saveCheckpoint(checkpoint);
     }
 
@@ -1244,13 +1017,13 @@ export async function deploySystemWithNewBlr(
       throw new Error(createTestFailureMessage("step", "factoryConfig"));
     }
 
-    // Step 11: Deploy Factory as ResolverProxy
+    // Step 9: Deploy Factory as ResolverProxy
     let factoryResult: Awaited<ReturnType<typeof deployFactory>>;
     const factoryFacetAddress = facetAddresses["FactoryFacet"];
     const factoryVersion = factoryConfig && isSuccess(factoryConfig) ? factoryConfig.data.version : 1;
 
-    if (checkpoint.steps.factory && checkpoint.currentStep >= 11) {
-      info(`\n✓ Step 12/${totalSteps}: Factory already deployed (resuming)`);
+    if (checkpoint.steps.factory && checkpoint.currentStep >= 9) {
+      info(`\n✓ Step 9/${totalSteps}: Factory already deployed (resuming)`);
       factoryResult = {
         success: true,
         factoryAddress: checkpoint.steps.factory.proxy,
@@ -1258,7 +1031,7 @@ export async function deploySystemWithNewBlr(
       info(`✅ Factory Implementation: ${checkpoint.steps.factory.implementation}`);
       info(`✅ Factory Proxy: ${checkpoint.steps.factory.proxy}`);
     } else {
-      info(`\n🏭 Step 12/${totalSteps}: Deploying Factory (ResolverProxy)...`);
+      info(`\n🏭 Step 9/${totalSteps}: Deploying Factory (ResolverProxy)...`);
       factoryResult = await deployFactory(signer, {
         blrAddress: blrResult.blrAddress,
         factoryVersion,
@@ -1279,7 +1052,7 @@ export async function deploySystemWithNewBlr(
         txHash: "",
         deployedAt: new Date().toISOString(),
       };
-      checkpoint.currentStep = 11;
+      checkpoint.currentStep = 9;
       await checkpointManager.saveCheckpoint(checkpoint);
     }
 
@@ -1330,19 +1103,8 @@ export async function deploySystemWithNewBlr(
             const bondFacet = isSuccess(bondConfig)
               ? bondConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
               : undefined;
-            const bondFixedRateFacet = isSuccess(bondFixedRateConfig)
-              ? bondFixedRateConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
-              : undefined;
-            const bondKpiLinkedRateFacet = isSuccess(bondKpiLinkedRateConfig)
-              ? bondKpiLinkedRateConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
-              : undefined;
             const staticFunctionSelectors = IStaticFunctionSelectors__factory.connect(facetAddress, signer);
-            const key =
-              equityFacet?.key ||
-              bondFacet?.key ||
-              bondFixedRateFacet?.key ||
-              bondKpiLinkedRateFacet?.key ||
-              (await staticFunctionSelectors.getStaticResolverKey());
+            const key = equityFacet?.key || bondFacet?.key || (await staticFunctionSelectors.getStaticResolverKey());
 
             return { facetName, facetAddress, key };
           }),
@@ -1396,58 +1158,6 @@ export async function deploySystemWithNewBlr(
               facetCount: 0,
               facets: [],
             },
-        bondFixedRate: isSuccess(bondFixedRateConfig)
-          ? {
-              configId: bondFixedRateConfig.data.configurationId,
-              version: bondFixedRateConfig.data.version,
-              facetCount: bondFixedRateConfig.data.facetKeys.length,
-              facets: bondFixedRateConfig.data.facetKeys,
-            }
-          : {
-              configId: "",
-              version: 0,
-              facetCount: 0,
-              facets: [],
-            },
-        bondKpiLinkedRate: isSuccess(bondKpiLinkedRateConfig)
-          ? {
-              configId: bondKpiLinkedRateConfig.data.configurationId,
-              version: bondKpiLinkedRateConfig.data.version,
-              facetCount: bondKpiLinkedRateConfig.data.facetKeys.length,
-              facets: bondKpiLinkedRateConfig.data.facetKeys,
-            }
-          : {
-              configId: "",
-              version: 0,
-              facetCount: 0,
-              facets: [],
-            },
-        loan: isSuccess(loanConfig)
-          ? {
-              configId: loanConfig.data.configurationId,
-              version: loanConfig.data.version,
-              facetCount: loanConfig.data.facetKeys.length,
-              facets: loanConfig.data.facetKeys,
-            }
-          : {
-              configId: "",
-              version: 0,
-              facetCount: 0,
-              facets: [],
-            },
-        loansPortfolio: isSuccess(loansPortfolioConfig)
-          ? {
-              configId: loansPortfolioConfig.data.configurationId,
-              version: loansPortfolioConfig.data.version,
-              facetCount: loansPortfolioConfig.data.facetKeys.length,
-              facets: loansPortfolioConfig.data.facetKeys,
-            }
-          : {
-              configId: "",
-              version: 0,
-              facetCount: 0,
-              facets: [],
-            },
         depositToken: isSuccess(depositTokenConfig)
           ? {
               configId: depositTokenConfig.data.configurationId,
@@ -1479,8 +1189,8 @@ export async function deploySystemWithNewBlr(
       summary: {
         totalContracts: 3, // ProxyAdmin, BLR, Factory
         totalFacets: facetsResult.deployed.size,
-        // Bond + Factory (bond-only) or Equity + Bond + BondFixedRate + BondKpiLinkedRate + Loan + LoansPortfolio + DepositToken + Factory
-        totalConfigurations: deployOnlyBondConfig ? 2 : 8,
+        // Bond + Factory (bond-only) or Equity + Bond + DepositToken + Factory
+        totalConfigurations: deployOnlyBondConfig ? 2 : 4,
         deploymentTime: Date.now() - startTime,
         gasUsed: totalGasUsed.toString(),
         success: true,
@@ -1488,56 +1198,24 @@ export async function deploySystemWithNewBlr(
 
       helpers: {
         getEquityFacets() {
-          // Use type guard to safely access .data property
           if (!isSuccess(equityConfig)) return [];
           const equityKeys = new Set(equityConfig.data.facetKeys.map((f) => f.key));
           const filtered = output.facets.filter((facet) => equityKeys.has(facet.key));
           return Array.from(new Map(filtered.map((f) => [f.key, f])).values());
         },
         getBondFacets() {
-          // Use type guard to safely access .data property
           if (!isSuccess(bondConfig)) return [];
           const bondKeys = new Set(bondConfig.data.facetKeys.map((f) => f.key));
           const filtered = output.facets.filter((facet) => bondKeys.has(facet.key));
           return Array.from(new Map(filtered.map((f) => [f.key, f])).values());
         },
-        getBondFixedRateFacets() {
-          // Use type guard to safely access .data property
-          if (!isSuccess(bondFixedRateConfig)) return [];
-          const bondFixedRateKeys = new Set(bondFixedRateConfig.data.facetKeys.map((f) => f.key));
-          const filtered = output.facets.filter((facet) => bondFixedRateKeys.has(facet.key));
-          return Array.from(new Map(filtered.map((f) => [f.key, f])).values());
-        },
-        getBondKpiLinkedRateFacets() {
-          // Use type guard to safely access .data property
-          if (!isSuccess(bondKpiLinkedRateConfig)) return [];
-          const bondKpiLinkedRateKeys = new Set(bondKpiLinkedRateConfig.data.facetKeys.map((f) => f.key));
-          const filtered = output.facets.filter((facet) => bondKpiLinkedRateKeys.has(facet.key));
-          return Array.from(new Map(filtered.map((f) => [f.key, f])).values());
-        },
-        getLoanFacets() {
-          // Use type guard to safely access .data property
-          if (!isSuccess(loanConfig)) return [];
-          const loanKeys = new Set(loanConfig.data.facetKeys.map((f) => f.key));
-          const filtered = output.facets.filter((facet) => loanKeys.has(facet.key));
-          return Array.from(new Map(filtered.map((f) => [f.key, f])).values());
-        },
         getDepositTokenFacets() {
-          // Use type guard to safely access .data property
           if (!isSuccess(depositTokenConfig)) return [];
           const depositTokenKeys = new Set(depositTokenConfig.data.facetKeys.map((f) => f.key));
           const filtered = output.facets.filter((facet) => depositTokenKeys.has(facet.key));
           return Array.from(new Map(filtered.map((f) => [f.key, f])).values());
         },
-        getLoansPortfolioFacets() {
-          // Use type guard to safely access .data property
-          if (!isSuccess(loansPortfolioConfig)) return [];
-          const loansPortfolioKeys = new Set(loansPortfolioConfig.data.facetKeys.map((f) => f.key));
-          const filtered = output.facets.filter((facet) => loansPortfolioKeys.has(facet.key));
-          return Array.from(new Map(filtered.map((f) => [f.key, f])).values());
-        },
         getFactoryFacets() {
-          // Use type guard to safely access .data property
           if (!isSuccess(factoryConfig)) return [];
           const factoryKeys = new Set(factoryConfig.data.facetKeys.map((f) => f.key));
           const filtered = output.facets.filter((facet) => factoryKeys.has(facet.key));

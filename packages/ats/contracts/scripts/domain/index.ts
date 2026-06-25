@@ -65,10 +65,6 @@ export * from "./factory/createConfiguration";
 // Token deployment from factory
 export * from "./factory/deployEquityToken";
 export * from "./factory/deployBondToken";
-export * from "./factory/deployBondFixedRateToken";
-export * from "./factory/deployBondKpiLinkedRateToken";
-export * from "./factory/deployLoanToken";
-export * from "./factory/deployLoansPortfolioToken";
 export * from "./factory/deployDepositToken";
 
 // Equity configuration
@@ -77,20 +73,11 @@ export * from "./equity/createConfiguration";
 // Bond Variable Rate configuration
 export * from "./bond/createConfiguration";
 
-// Bond Fixed Rate configuration
-export * from "./bondFixedRate/createConfiguration";
-
-// Bond Kpi Linked Rate configuration
-export * from "./bondKpiLinkedRate/createConfiguration";
-
 // Deposit Token configuration
 export * from "./depositToken/createConfiguration";
 
-// Loan configuration
-export * from "./loan/createConfiguration";
-
-// Loans Portfolio configuration
-export * from "./loanPortfolio/createConfiguration";
+// Loans-portfolio domain types (HoldingsAssetType) — retained for the LoansPortfolio facet
+// suite even though the asset type is no longer deployed through the factory (BBND-1882).
 export * from "./loanPortfolio/types";
 
 // TEST-ONLY: InitializeMock domain — stub configuration used by initializer-versioning tests.

@@ -32,9 +32,8 @@ export function proceedRecipientsTests(getCtx: () => AssetMockCtx): void {
       asset = ctx.asset;
       signer_A = ctx.deployer;
 
-      // The mega-mock starts in EVM-default state (maturityDate = 0, STANDARD rate type).
-      // The legacy fixture deployed via deployBondKpiLinkedRateTokenFixture which set
-      // KPI_LINKED rate type and a future maturityDate at deploy time.
+      // The mega-mock starts in EVM-default state (maturityDate = 0, STANDARD rate type), so the
+      // KPI_LINKED rate type and a future maturityDate are configured here at test time.
       await executeRbac(asset, [
         { role: ATS_ROLES.ROLE_MATURITY_MANAGER, members: [signer_A.address] },
         { role: ATS_ROLES.ROLE_PROCEED_RECIPIENT_MANAGER, members: [signer_A.address] },
