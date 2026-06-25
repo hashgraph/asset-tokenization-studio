@@ -39,9 +39,9 @@ Returns the checkpoint at a given position for an account&#39;s vote history.
 
 #### Returns
 
-| Name | Type                   | Description |
-| ---- | ---------------------- | ----------- |
-| \_0  | Checkpoints.Checkpoint | undefined   |
+| Name | Type                   | Description                                  |
+| ---- | ---------------------- | -------------------------------------------- |
+| \_0  | Checkpoints.Checkpoint | The checkpoint struct at the given position. |
 
 ### clock
 
@@ -186,9 +186,9 @@ Returns whether the ERC-20Votes voting feature is currently active.
 
 #### Returns
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| \_0  | bool | undefined   |
+| Name | Type | Description                                            |
+| ---- | ---- | ------------------------------------------------------ |
+| \_0  | bool | True if the voting feature is active, false otherwise. |
 
 ### numCheckpoints
 
@@ -206,9 +206,9 @@ Returns the total number of vote checkpoints recorded for an account.
 
 #### Returns
 
-| Name | Type    | Description |
-| ---- | ------- | ----------- |
-| \_0  | uint256 | undefined   |
+| Name | Type    | Description                                       |
+| ---- | ------- | ------------------------------------------------- |
+| \_0  | uint256 | The number of checkpoints stored for the account. |
 
 ## Events
 

@@ -40,7 +40,7 @@ interface ICompliance {
      * @param _from   Address sending the tokens.
      * @param _to     Address receiving the tokens.
      * @param _amount Token quantity to transfer.
-     * @return `true` if the transfer is allowed; `false` otherwise.
+     * @return True if the transfer is allowed; false otherwise.
      */
     function canTransfer(address _from, address _to, uint256 _amount) external view returns (bool);
 }

@@ -228,7 +228,7 @@ library ClearingOps {
      * therefore knowingly waived here.
      */
     function clearingHoldCreationCreation(
-        IClearingTypes.ClearingOperation memory _clearingOperation,
+        IClearingTypes.ClearingOperation calldata _clearingOperation,
         address _from,
         IHoldTypes.Hold calldata _hold,
         bytes memory _operatorData,

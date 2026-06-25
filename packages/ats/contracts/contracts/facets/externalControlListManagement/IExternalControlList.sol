@@ -13,7 +13,7 @@ interface IExternalControlList {
     /**
      * @notice Returns whether `account` is authorised according to the external control list.
      * @param _account Address to check.
-     * @return `true` if the account is on the allow-list; `false` otherwise.
+     * @return True if the account is on the allow-list; false otherwise.
      */
     function isAuthorized(address _account) external view returns (bool);
 }

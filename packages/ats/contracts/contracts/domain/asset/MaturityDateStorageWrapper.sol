@@ -55,6 +55,7 @@ library MaturityDateStorageWrapper {
      * @param _maturityDate Proposed maturity timestamp (Unix epoch, seconds).
      */
     function checkValidMaturityDate(uint256 _maturityDate) internal view {
+        // solhint-disable-next-line gas-strict-inequalities
         if (_maturityDate <= EvmAccessors.getBlockTimestamp()) {
             revert IMaturity.MaturityDateInvalid();
         }
