@@ -12,7 +12,7 @@ pragma solidity >=0.8.0 <0.9.0;
 interface IExternalPause {
     /**
      * @notice Returns whether the external pause controller currently signals a paused state.
-     * @return `true` if the token should treat itself as paused; `false` otherwise.
+     * @return True if the token should treat itself as paused; false otherwise.
      */
     function isPaused() external view returns (bool);
 }

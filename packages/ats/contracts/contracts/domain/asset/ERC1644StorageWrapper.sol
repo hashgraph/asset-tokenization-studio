@@ -59,7 +59,7 @@ library ERC1644StorageWrapper {
 
     /**
      * @notice Returns whether the token is currently controllable.
-     * @return `true` while the controllable feature is active.
+     * @return True while the controllable feature is active.
      */
     function isControllable() internal view returns (bool) {
         return erc1644Storage().isControllable;

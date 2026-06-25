@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { HolderBalance } from "../snapshot/ISnapshots.sol";
+import { HolderBalance } from "../snapshots/ISnapshots.sol";
 
 /// @custom:hash resolverKey BalanceTrackerAtSnapshot
 // solhint-disable-next-line max-line-length

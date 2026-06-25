@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ROLE_PROTECTED_PARTITIONS_PARTICIPANT } from "../../constants/roles.sol";
-import { IProtectedPartitions } from "../../facets/protectedPartition/IProtectedPartitions.sol";
+import { IProtectedPartitions } from "../../facets/protectedPartitions/IProtectedPartitions.sol";
 import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 import { IClearingTypes } from "../../facets/clearing/IClearingTypes.sol";
 import { IHoldTypes } from "../../facets/hold/IHoldTypes.sol";

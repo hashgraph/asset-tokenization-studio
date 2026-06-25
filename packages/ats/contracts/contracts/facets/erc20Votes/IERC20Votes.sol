@@ -46,14 +46,17 @@ interface IERC20Votes is IERC5805 {
     function initializeERC20Votes(bool _activated) external;
 
     /// @notice Returns whether the ERC-20Votes voting feature is currently active.
+    /// @return True if the voting feature is active, false otherwise.
     function isActivated() external view returns (bool);
 
     /// @notice Returns the checkpoint at a given position for an account's vote history.
     /// @param _account Address whose checkpoint history is queried.
     /// @param _pos Zero-based index into the account's checkpoint array.
+    /// @return The checkpoint struct at the given position.
     function checkpoints(address _account, uint256 _pos) external view returns (Checkpoints.Checkpoint memory);
 
     /// @notice Returns the total number of vote checkpoints recorded for an account.
     /// @param _account Address whose checkpoint count is queried.
+    /// @return The number of checkpoints stored for the account.
     function numCheckpoints(address _account) external view returns (uint256);
 }

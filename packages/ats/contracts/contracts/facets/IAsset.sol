@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 // Layer 1 — Core
-import { IScheduledCrossOrderedTasks } from "./scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
+import { IScheduledCrossOrderedTasks } from "./scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol";
 import { IAccessControl } from "./accessControl/IAccessControl.sol";
 import { IAdjustBalances } from "./adjustBalances/IAdjustBalances.sol";
 import { IAmortization } from "./amortization/IAmortization.sol";
@@ -65,9 +65,9 @@ import { ITransferAndLockByPartition } from "./transferAndLockByPartition/ITrans
 import { ICoupon } from "./coupon/ICoupon.sol";
 import { IDividend } from "./dividend/IDividend.sol";
 import { IDividendSecurityHolders } from "./dividendSecurityHolders/IDividendSecurityHolders.sol";
-import { IKpis } from "./kpi/IKpis.sol";
-import { IProtectedPartitions } from "./protectedPartition/IProtectedPartitions.sol";
-import { IProceedRecipients } from "./proceedRecipient/IProceedRecipients.sol";
+import { IKpis } from "./kpis/IKpis.sol";
+import { IProtectedPartitions } from "./protectedPartitions/IProtectedPartitions.sol";
+import { IProceedRecipients } from "./proceedRecipients/IProceedRecipients.sol";
 import { ICap } from "./cap/ICap.sol";
 import { ICapByPartition } from "./capByPartition/ICapByPartition.sol";
 import { INonces } from "./nonces/INonces.sol";
@@ -92,7 +92,7 @@ import { ILock } from "./lock/ILock.sol";
 import { ILockByPartition } from "./lockByPartition/ILockByPartition.sol";
 import { IFreeze } from "./freeze/IFreeze.sol";
 import { IBatchFreeze } from "./batchFreeze/IBatchFreeze.sol";
-import { ISnapshots } from "./snapshot/ISnapshots.sol";
+import { ISnapshots } from "./snapshots/ISnapshots.sol";
 import { ISnapshotsByPartition } from "./snapshotsByPartition/ISnapshotsByPartition.sol";
 import { ISecurityHoldersAtSnapshot } from "./securityHoldersAtSnapshot/ISecurityHoldersAtSnapshot.sol";
 import { IFreezeAtSnapshot } from "./freezeAtSnapshot/IFreezeAtSnapshot.sol";

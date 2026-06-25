@@ -3,8 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ArraysUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ArraysUpgradeable.sol";
 import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import { Snapshots, SnapshotsAddress, SnapshotsBytes32, HolderBalance } from "../../facets/snapshot/ISnapshots.sol";
-import { ISnapshotsTypes } from "../../facets/snapshot/ISnapshotsTypes.sol";
+import { Snapshots, SnapshotsAddress, SnapshotsBytes32, HolderBalance } from "../../facets/snapshots/ISnapshots.sol";
+import { ISnapshotsTypes } from "../../facets/snapshots/ISnapshotsTypes.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
@@ -137,7 +137,7 @@ library SnapshotsStorageWrapper {
      */
     function updateSnapshotAddress(SnapshotsAddress storage snapshots, address currentValue) internal {
         uint256 currentId = getCurrentSnapshotId();
-        if (lastSnapshotId(snapshots.ids) >= currentId) return;
+        if (lastSnapshotId(snapshots.ids) >= currentId) return; // solhint-disable-line gas-strict-inequalities
         snapshots.ids.push(currentId);
         snapshots.values.push(currentValue);
     }
@@ -151,7 +151,7 @@ library SnapshotsStorageWrapper {
      */
     function updateSnapshotBytes32(SnapshotsBytes32 storage snapshots, bytes32 currentValue) internal {
         uint256 currentId = getCurrentSnapshotId();
-        if (lastSnapshotId(snapshots.ids) >= currentId) return;
+        if (lastSnapshotId(snapshots.ids) >= currentId) return; // solhint-disable-line gas-strict-inequalities
         snapshots.ids.push(currentId);
         snapshots.values.push(currentValue);
     }
@@ -935,7 +935,8 @@ library SnapshotsStorageWrapper {
      *      before any recorded entry. Reverts via {indexFor} for invalid ids.
      * @param snapshotId The snapshot identifier to resolve.
      * @param snapshots  The numeric snapshot history to read.
-     * @return           Tuple of (found-flag, value).
+     * @return           True if a record exists for the given snapshot id, false otherwise.
+     * @return           The recorded uint256 value, or 0 if no record exists.
      */
     function valueAt(uint256 snapshotId, Snapshots storage snapshots) internal view returns (bool, uint256) {
         (bool found, uint256 index) = indexFor(snapshotId, snapshots.ids);
@@ -948,7 +949,8 @@ library SnapshotsStorageWrapper {
      *      Reverts via {indexFor} for invalid ids.
      * @param snapshotId The snapshot identifier to resolve.
      * @param snapshots  The address-typed snapshot history to read.
-     * @return           Tuple of (found-flag, address-value).
+     * @return           True if a record exists for the given snapshot id, false otherwise.
+     * @return           The recorded address value, or address(0) if no record exists.
      */
     function addressValueAt(
         uint256 snapshotId,
@@ -964,7 +966,8 @@ library SnapshotsStorageWrapper {
      *      Reverts via {indexFor} for invalid ids.
      * @param snapshotId The snapshot identifier to resolve.
      * @param snapshots  The `bytes32`-typed snapshot history to read.
-     * @return           Tuple of (found-flag, `bytes32`-value).
+     * @return           True if a record exists for the given snapshot id, false otherwise.
+     * @return           The recorded bytes32 value, or bytes32(0) if no record exists.
      */
     function bytes32ValueAt(
         uint256 snapshotId,
@@ -983,7 +986,8 @@ library SnapshotsStorageWrapper {
      *      than the most recent snapshot.
      * @param snapshotId The snapshot identifier to resolve.
      * @param ids        The ascending list of recorded snapshot ids.
-     * @return           Tuple of (found-flag, array-index).
+     * @return           True if the snapshot id is found in the list, false otherwise.
+     * @return           The array index holding the value for the snapshot id, or 0 if not found.
      */
     function indexFor(uint256 snapshotId, uint256[] storage ids) internal view returns (bool, uint256) {
         if (snapshotId == 0) {

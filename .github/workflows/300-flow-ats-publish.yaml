@@ -197,7 +197,7 @@ jobs:
       - name: Publish npm packages
         run: |
           echo "::group::Set publish parameters"
-            PUBLISH_ARGS="--access=public"
+            PUBLISH_ARGS="--access=public --no-provenance"
             if [[ "${{ inputs.dry-run-enabled }}" == "true" ]]; then
               PUBLISH_ARGS="${PUBLISH_ARGS} --dry-run"
             fi

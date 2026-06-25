@@ -13,7 +13,7 @@ interface IIdentityRegistry {
     /**
      * @notice Returns whether `_userAddress` has a verified identity in the registry.
      * @param _userAddress Address to check.
-     * @return `true` if the address is verified; `false` otherwise.
+     * @return True if the address is verified, false otherwise.
      */
     function isVerified(address _userAddress) external view returns (bool);
 }
