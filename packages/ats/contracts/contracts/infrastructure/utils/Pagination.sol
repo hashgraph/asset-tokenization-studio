@@ -89,9 +89,11 @@ library Pagination {
     }
 
     function getSize(uint256 _start, uint256 _end, uint256 _listCount) internal pure returns (uint256) {
+        // solhint-disable-next-line gas-strict-inequalities
         if (_start >= _end) {
             return 0;
         }
+        // solhint-disable-next-line gas-strict-inequalities
         if (_start >= _listCount) {
             return 0;
         }

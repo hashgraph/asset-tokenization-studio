@@ -18,9 +18,9 @@ exports[`ats contracts solhint`] = {
       [246, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
       [264, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"]
     ],
-    "contracts/domain/asset/ERC20VotesStorageWrapper.sol:1439876099": [
-      [298, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177617"],
-      [309, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177617"]
+    "contracts/domain/asset/ERC20VotesStorageWrapper.sol:1755450486": [
+      [300, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177617"],
+      [311, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177617"]
     ],
     "contracts/domain/asset/HoldStorageWrapper.sol:2799269957": [
       [801, 15, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177632"]
@@ -28,8 +28,8 @@ exports[`ats contracts solhint`] = {
     "contracts/domain/asset/KpisStorageWrapper.sol:3109432168": [
       [104, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177601"]
     ],
-    "contracts/domain/asset/LockStorageWrapper.sol:2572777485": [
-      [327, 15, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177602"]
+    "contracts/domain/asset/LockStorageWrapper.sol:2957748329": [
+      [333, 15, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177602"]
     ],
     "contracts/domain/asset/ScheduledTasksStorageWrapper.sol:3979218817": [
       [194, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"]
@@ -37,10 +37,9 @@ exports[`ats contracts solhint`] = {
     "contracts/domain/asset/SnapshotsStorageWrapper.sol:732035984": [
       [1038, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"]
     ],
-    "contracts/domain/asset/VotingStorageWrapper.sol:1130199794": [
-      [58, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
-      [179, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
-      [197, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"]
+    "contracts/domain/asset/VotingStorageWrapper.sol:1699818420": [
+      [180, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
+      [198, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"]
     ],
     "contracts/domain/asset/coupon/CouponStorageWrapper.sol:1759522121": [
       [94, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
@@ -116,13 +115,6 @@ exports[`ats contracts solhint`] = {
       [24, 4, 1, "no-unused-import: imported name POW10_18 is not used", "177653"],
       [78, 4, 1, "function-max-lines: Function body contains 70 lines but allowed no more than 50 lines", "177603"],
       [79, 8, 1, "no-inline-assembly: Avoid to use inline assembly. It is acceptable only in rare cases", "177604"]
-    ],
-    "contracts/infrastructure/utils/EIP712.sol:1875754770": [
-      [205, 11, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"]
-    ],
-    "contracts/infrastructure/utils/Pagination.sol:2797670531": [
-      [91, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"],
-      [94, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"]
     ]
   }`
 };
