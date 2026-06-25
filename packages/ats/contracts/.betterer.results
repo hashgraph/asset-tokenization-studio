@@ -18,12 +18,7 @@ exports[`ats contracts solhint`] = {
       [246, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
       [264, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"]
     ],
-    "contracts/domain/asset/ERC1594StorageWrapper.sol:1689167301": [
-      [169, 4, 1, "use-natspec: Mismatch in @param count for function \'canRedeemFromByPartition\'. Expected: 5, Found: 3", "177603"],
-      [242, 4, 1, "use-natspec: Mismatch in @param count for function \'canTransferFromByPartition\'. Expected: 6, Found: 4", "177603"]
-    ],
     "contracts/domain/asset/ERC20VotesStorageWrapper.sol:1439876099": [
-      [101, 4, 1, "use-natspec: Mismatch in @param count for function \'afterTokenTransfer\'. Expected: 4, Found: 3", "177603"],
       [298, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177617"],
       [309, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177617"]
     ],
@@ -34,8 +29,6 @@ exports[`ats contracts solhint`] = {
       [104, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177601"]
     ],
     "contracts/domain/asset/LockStorageWrapper.sol:2572777485": [
-      [239, 4, 1, "use-natspec: Mismatch in @param count for function \'updateLockedBalancesBeforeLock\'. Expected: 4, Found: 2", "177603"],
-      [257, 4, 1, "use-natspec: Mismatch in @param count for function \'updateLockedBalancesBeforeRelease\'. Expected: 3, Found: 2", "177603"],
       [327, 15, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177602"]
     ],
     "contracts/domain/asset/ScheduledTasksStorageWrapper.sol:3874914318": [
@@ -65,9 +58,6 @@ exports[`ats contracts solhint`] = {
       [221, 4, 1, "function-max-lines: Function body contains 58 lines but allowed no more than 50 lines", "177603"],
       [221, 4, 1, "gas-calldata-parameters: GC: [_operatorData] argument on Function [clearingHoldCreationCreation] could be [calldata] if it\'s not being updated", "177603"],
       [407, 4, 1, "function-max-lines: Function body contains 52 lines but allowed no more than 50 lines", "177603"]
-    ],
-    "contracts/domain/orchestrator/ClearingReadOps.sol:129972878": [
-      [158, 4, 1, "use-natspec: Mismatch in @param count for function \'checkClearingExpirationTimestamp\'. Expected: 3, Found: 2", "177603"]
     ],
     "contracts/domain/orchestrator/HoldOps.sol:2308870617": [
       [29, 4, 1, "gas-calldata-parameters: GC: [_hold] argument on Function [createHoldByPartition] could be [calldata] if it\'s not being updated", "177603"],
