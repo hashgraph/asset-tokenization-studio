@@ -330,27 +330,20 @@ export class DistributionEntity {
 
 ## Migrations
 
-The backend uses TypeORM migrations for schema management.
+The backend currently relies on **TypeORM `synchronize`** to create and update tables automatically
+from the entity definitions — there are **no formal migrations yet**, and therefore no
+`typeorm:migration:*` npm scripts. Schema management is configured in
+[`src/config/postgres.module.ts`](https://github.com/hashgraph/asset-tokenization-studio/blob/main/apps/mass-payout/backend/src/config/postgres.module.ts):
 
-### Creating Migrations
-
-```bash
-# Generate migration from entity changes
-npm run typeorm:migration:generate -- -n MigrationName
-
-# Create empty migration
-npm run typeorm:migration:create -- -n MigrationName
+```typescript
+synchronize: true,    // dev: auto-create/update tables from the entities
+migrationsRun: false, // migrations are not enabled yet
+// migrations: ["dist/src/migrations/*{.ts,.js}"], // reserved for when formal migrations land
 ```
 
-### Running Migrations
-
-```bash
-# Run pending migrations
-npm run typeorm:migration:run
-
-# Revert last migration
-npm run typeorm:migration:revert
-```
+> Formal migrations are planned (the `migrations` / `migrationsRun` options are reserved). Until then,
+> schema changes are picked up automatically from the entities in dev — do **not** rely on
+> `synchronize: true` in production.
 
 ### Example Migration
 
@@ -438,44 +431,37 @@ export class DistributionRepository {
 
 ```bash
 # PostgreSQL connection
-DATABASE_HOST=localhost
-DATABASE_PORT=5432
-DATABASE_USER=postgres
-DATABASE_PASSWORD=postgres
-DATABASE_NAME=mass_payout
+POSTGRESQL_HOST=localhost
+POSTGRESQL_PORT=5432
+POSTGRESQL_USER=postgres
+POSTGRESQL_PASSWORD=postgres
+POSTGRESQL_DB=postgres
 ```
 
-**TypeORM Configuration**: `apps/mass-payout/backend/ormconfig.ts`
+**TypeORM configuration**: `apps/mass-payout/backend/src/config/postgres.module.ts`
 
 ```typescript
-export default {
+{
   type: "postgres",
-  host: process.env.DATABASE_HOST,
-  port: parseInt(process.env.DATABASE_PORT, 10),
-  username: process.env.DATABASE_USER,
-  password: process.env.DATABASE_PASSWORD,
-  database: process.env.DATABASE_NAME,
-  entities: ["src/**/*.entity.ts"],
-  migrations: ["src/infrastructure/persistence/migrations/*.ts"],
-  synchronize: false, // Use migrations in production
-  logging: process.env.NODE_ENV === "development",
-};
+  host: configService.get(ConfigKeys.POSTGRESQL_HOST),
+  port: configService.get(ConfigKeys.POSTGRESQL_PORT),
+  username: configService.get(ConfigKeys.POSTGRESQL_USER),
+  password: configService.get(ConfigKeys.POSTGRESQL_PASSWORD),
+  database: configService.get(ConfigKeys.POSTGRESQL_DB),
+  synchronize: true,    // dev: auto-create tables from the entities
+  migrationsRun: false, // formal migrations not enabled yet
+  autoLoadEntities: true,
+}
 ```
 
 ## Best Practices
 
-### Use Migrations
+### Evolve the schema via entities
 
-Always use migrations for schema changes:
-
-```bash
-# 1. Modify entity
-# 2. Generate migration
-npm run typeorm:migration:generate -- -n AddPaymentTokenToAsset
-# 3. Review generated migration
-# 4. Run migration
-npm run typeorm:migration:run
-```
+The schema is currently derived from the TypeORM entities (`synchronize: true`). To change it, update
+the relevant `*.persistence.ts` entity and restart the backend in dev — the tables are adjusted
+automatically. (When formal migrations are introduced, schema changes will instead go through
+migration files.)
 
 ### Transaction Management
 
@@ -534,16 +520,15 @@ async findAll(page: number, limit: number): Promise<[Distribution[], number]> {
 - Check credentials in `.env`
 - Ensure database exists: `CREATE DATABASE mass_payout;`
 
-### Migration Failed
+### Schema Out of Sync
 
-**Problem**: Migration execution fails
+**Problem**: Tables don't match the entities
 
 **Solutions**:
 
-- Check migration SQL for errors
-- Verify database state matches expected
-- Revert last migration: `npm run typeorm:migration:revert`
-- Fix and regenerate migration
+- In dev, restart the backend — `synchronize: true` re-applies the entity schema
+- Check the entity definitions (`*.persistence.ts`) match the expected columns
+- If the local database is in a bad state, drop and recreate it (`docker-compose down -v` then `up`)
 
 ### Slow Queries
 
