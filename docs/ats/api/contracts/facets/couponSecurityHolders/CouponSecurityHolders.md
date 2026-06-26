@@ -42,7 +42,7 @@ function getCouponsFor(uint256 _couponID, uint256 _pageIndex, uint256 _pageLengt
 
 Returns coupon information for every holder of a given coupon, paginated.
 
-_Internally resolves the holder page then retrieves per-holder coupon details. The two returned arrays share the same index: `couponFor_[i]` corresponds to `holders_[i]`._
+_Internally resolves the holder page then retrieves per-holder coupon details. The two returned arrays share the same index: `couponFor_[i]`corresponds to`holders*[i]`.*
 
 #### Parameters
 
@@ -251,6 +251,20 @@ _Replaces assertions for defensive handling of logically impossible states._
 | Name      | Type   | Description                                        |
 | --------- | ------ | -------------------------------------------------- |
 | \_errorId | bytes4 | Identifier of the unexpected validation condition. |
+
+### UnrecognizedResolverProxyVersion
+
+```solidity
+error UnrecognizedResolverProxyVersion(bytes8 _resolverProxyVersion)
+```
+
+Thrown when the provided proxy version does not match any BLR compatible standard.
+
+#### Parameters
+
+| Name                   | Type   | Description                                        |
+| ---------------------- | ------ | -------------------------------------------------- |
+| \_resolverProxyVersion | bytes8 | proxy version that is not compatible with the BLR. |
 
 ### WalletRecovered
 

@@ -144,7 +144,7 @@ export function erc20PermitTests(getCtx: () => AssetMockCtx): void {
           const nonce = await asset.nonces(signer_A.address);
           const expiry = (await getDltTimestamp()) + 3600;
           const name = (await asset.getERC20Metadata()).info.name;
-          const version = (await asset.getConfigInfo()).version_.toString();
+          const version = (await asset.getConfigInfo()).configurationVersion_.toString();
           const verifyingContract = await asset.getAddress();
 
           const domain = {
@@ -184,7 +184,7 @@ export function erc20PermitTests(getCtx: () => AssetMockCtx): void {
           const nonce = await asset.nonces(signer_A.address);
           const expiry = (await getDltTimestamp()) + 3600;
           const name = (await asset.getERC20Metadata()).info.name;
-          const version = (await asset.getConfigInfo()).version_.toString();
+          const version = (await asset.getConfigInfo()).configurationVersion_.toString();
           const verifyingContract = await asset.getAddress();
 
           const domain = {

@@ -319,6 +319,20 @@ Thrown when attempting to remove an address not present in the issuer list.
 | ------ | ------- | ---------------------------- |
 | issuer | address | The unlisted issuer address. |
 
+### UnrecognizedResolverProxyVersion
+
+```solidity
+error UnrecognizedResolverProxyVersion(bytes8 _resolverProxyVersion)
+```
+
+Thrown when the provided proxy version does not match any BLR compatible standard.
+
+#### Parameters
+
+| Name                   | Type   | Description                                        |
+| ---------------------- | ------ | -------------------------------------------------- |
+| \_resolverProxyVersion | bytes8 | proxy version that is not compatible with the BLR. |
+
 ### WalletRecovered
 
 ```solidity

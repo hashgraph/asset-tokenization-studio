@@ -131,7 +131,7 @@ export function burnByPartitionTests(getCtx: () => AssetMockCtx): void {
           const verifyingContract = await asset.getAddress();
           const domain = {
             name: (await asset.getERC20Metadata()).info.name,
-            version: (await asset.getConfigInfo()).version_.toString(),
+            version: (await asset.getConfigInfo()).configurationVersion_.toString(),
             chainId: await network.provider.send("eth_chainId"),
             verifyingContract,
           };

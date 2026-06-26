@@ -103,9 +103,10 @@ export async function deployLoansPortfolioTokenFixture({
     (useLoadFixture ? await loadFixture(deployAtsInfrastructureFixture) : await deployAtsInfrastructureFixture());
   const { factory, blr, deployer } = infrastructure;
   const securityData = getSecurityData(blr, {
-    resolverProxyConfiguration: {
-      key: LOANS_PORTFOLIO_CONFIG_ID,
-      version: 1,
+    resolverProxyConfigurationV2: {
+      configurationId: LOANS_PORTFOLIO_CONFIG_ID,
+      configurationVersion: 1,
+      replacementEnabled: true,
     },
   });
 
@@ -124,7 +125,12 @@ export async function deployLoansPortfolioTokenFixture({
 
   const blrProxyAddress = infrastructure.deployment.infrastructure.blr.proxy;
 
-  const tx = await factory.deployProxy(blrProxyAddress, LOANS_PORTFOLIO_CONFIG_ID, 1, rbacs, "0x");
+  const tx = await factory.deployProxy(
+    blrProxyAddress,
+    { configurationId: LOANS_PORTFOLIO_CONFIG_ID, configurationVersion: 1, replacementEnabled: false },
+    rbacs,
+    "0x",
+  );
   const receipt = await tx.wait();
   const proxyAddress = (await decodeEvent(factory, "ProxyDeployed", receipt)).proxyAddress;
 

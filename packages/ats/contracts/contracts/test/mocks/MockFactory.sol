@@ -228,7 +228,13 @@ abstract contract MockFactory is Factory, IMockFactory {
         // 2. Deploy a bare ResolverProxy against ASSET_MOCK_CONFIG_ID, version 1.
         //    Mirrors Factory._deploySecurityProxy but creates the proxy directly
         //    without the SecurityData indirection (no ISIN, regulation, etc.).
-        ResolverProxy proxy = new ResolverProxy(resolver_, _ASSET_MOCK_CONFIG_ID, 1, rbacs);
+        IResolverProxy.ResolverProxyConfigurationV2 memory resolverProxyConfig = IResolverProxy
+            .ResolverProxyConfigurationV2({
+                configurationId: _ASSET_MOCK_CONFIG_ID,
+                configurationVersion: 1,
+                replacementEnabled: false
+            });
+        ResolverProxy proxy = new ResolverProxy(resolver_, resolverProxyConfig, rbacs);
         assetAddress_ = address(proxy);
 
         // 3. Read the full facet list from the BLR for the AssetMock config

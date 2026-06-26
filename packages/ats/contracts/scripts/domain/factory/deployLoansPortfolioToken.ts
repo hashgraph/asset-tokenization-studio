@@ -56,9 +56,10 @@ export async function deployLoansPortfolioFromFactory(
   ];
 
   // Build resolver proxy configuration
-  const resolverProxyConfiguration = {
-    key: EQUITY_CONFIG_ID,
-    version: 1,
+  const resolverProxyConfigurationV2 = {
+    configurationId: EQUITY_CONFIG_ID,
+    configurationVersion: 1,
+    replacementEnabled: true,
   };
 
   // Build security data structure
@@ -66,7 +67,7 @@ export async function deployLoansPortfolioFromFactory(
     arePartitionsProtected: securityDataParams.arePartitionsProtected,
     isMultiPartition: securityDataParams.isMultiPartition,
     resolver: securityDataParams.resolver,
-    resolverProxyConfiguration,
+    resolverProxyConfigurationV2,
     rbacs,
     isControllable: securityDataParams.isControllable,
     isWhiteList: securityDataParams.isWhiteList,
@@ -87,16 +88,9 @@ export async function deployLoansPortfolioFromFactory(
   };
 
   // Deploy loans portfolio token via factory using deployProxy (generic proxy deployer)
-  const tx = await factory.deployProxy(
-    securityData.resolver,
-    resolverProxyConfiguration.key,
-    resolverProxyConfiguration.version,
-    rbacs,
-    "0x",
-    {
-      gasLimit: GAS_LIMIT.high,
-    },
-  );
+  const tx = await factory.deployProxy(securityData.resolver, resolverProxyConfigurationV2, rbacs, "0x", {
+    gasLimit: GAS_LIMIT.high,
+  });
   const receipt = await tx.wait();
 
   // Find ProxyDeployed event to get diamond address

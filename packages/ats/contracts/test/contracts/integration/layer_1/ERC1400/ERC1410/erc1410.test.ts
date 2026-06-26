@@ -3489,7 +3489,7 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
         it("GIVEN valid signature WHEN protectedTransferFromByPartition THEN transaction succeeds and emits Transfer", async () => {
           const domainSeparator = {
             name: (await asset.getERC20Metadata()).info.name,
-            version: (await asset.getConfigInfo()).version_.toString(),
+            version: (await asset.getConfigInfo()).configurationVersion_.toString(),
             chainId: await network.provider.send("eth_chainId"),
             verifyingContract: asset.target as string,
           };
@@ -3898,7 +3898,7 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
 
           // Prepare EIP-712 domain
           const name = (await asset.getERC20Metadata()).info.name;
-          const version = (await asset.getConfigInfo()).version_.toString();
+          const version = (await asset.getConfigInfo()).configurationVersion_.toString();
           const chainId = await network.provider.send("eth_chainId");
 
           const domain = {
@@ -3988,7 +3988,7 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
 
           // Prepare EIP-712 domain
           const name = (await asset.getERC20Metadata()).info.name;
-          const version = (await asset.getConfigInfo()).version_.toString();
+          const version = (await asset.getConfigInfo()).configurationVersion_.toString();
           const chainId = await network.provider.send("eth_chainId");
 
           const domain = {
@@ -4084,7 +4084,7 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
 
           // Prepare EIP-712 domain
           const name = (await asset.getERC20Metadata()).info.name;
-          const version = (await asset.getConfigInfo()).version_.toString();
+          const version = (await asset.getConfigInfo()).configurationVersion_.toString();
           const chainId = await network.provider.send("eth_chainId");
 
           const domain = {

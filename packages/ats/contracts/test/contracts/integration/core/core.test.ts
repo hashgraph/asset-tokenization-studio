@@ -90,7 +90,7 @@ export function coreTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN an initialized token WHEN reading version THEN returns a JSON string matching the BLR config", async () => {
         const json = await asset.version();
         const parsed = JSON.parse(json);
-        const [configResolver, configId, configVersion] = await asset.getConfigInfo();
+        const [configResolver, , configId, configVersion] = await asset.getConfigInfo();
 
         expect(parsed["Resolver"].toLowerCase()).to.equal(configResolver.toLowerCase());
         expect(parsed["Config ID"].toLowerCase()).to.equal(configId.toLowerCase());

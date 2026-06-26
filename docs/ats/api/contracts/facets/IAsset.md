@@ -2139,18 +2139,20 @@ Gets the ids of the clearings for a token holder by partition and clearing opera
 ### getConfigInfo
 
 ```solidity
-function getConfigInfo() external view returns (address resolver_, bytes32 configurationId_, uint256 version_)
+function getConfigInfo() external view returns (address resolver_, bytes8 proxyVersion_, bytes32 configurationId_, uint256 configurationVersion_, bool replacementEnabled_)
 ```
 
 Returns the active resolver address, configuration identifier, and version.
 
 #### Returns
 
-| Name              | Type    | Description                                     |
-| ----------------- | ------- | ----------------------------------------------- |
-| resolver\_        | address | Address of the current Business Logic Resolver. |
-| configurationId\_ | bytes32 | Identifier of the active configuration.         |
-| version\_         | uint256 | Version number of the active configuration.     |
+| Name                   | Type    | Description                                     |
+| ---------------------- | ------- | ----------------------------------------------- |
+| resolver\_             | address | Address of the current Business Logic Resolver. |
+| proxyVersion\_         | bytes8  | proxy version.                                  |
+| configurationId\_      | bytes32 | Identifier of the active configuration.         |
+| configurationVersion\_ | uint256 | Version number of the active configuration.     |
+| replacementEnabled\_   | bool    | Whether replacement is enabled.                 |
 
 ### getControlListCount
 
@@ -8747,21 +8749,36 @@ Updates the arbitrary data stored for an existing proceed recipient.
 | \_proceedRecipient | address | Address of the recipient whose data should be updated. |
 | \_data             | bytes   | New arbitrary data to store for the recipient.         |
 
+### updateReplacementEnabled
+
+```solidity
+function updateReplacementEnabled(bool _newReplacementEnabled) external nonpayable
+```
+
+For the current BLR update its configuration
+
+#### Parameters
+
+| Name                    | Type | Description                           |
+| ----------------------- | ---- | ------------------------------------- |
+| \_newReplacementEnabled | bool | The replacement enabled flag to set\* |
+
 ### updateResolver
 
 ```solidity
-function updateResolver(contract IBusinessLogicResolver _newResolver, bytes32 _newConfigurationId, uint256 _newVersion) external nonpayable
+function updateResolver(contract IBusinessLogicResolver _newResolver, bytes32 _newConfigurationId, uint256 _newVersion, bool _newReplacementEnabled) external nonpayable
 ```
 
 Replaces the Business Logic Resolver with a new one, setting configuration and version.
 
 #### Parameters
 
-| Name                 | Type                            | Description                                                   |
-| -------------------- | ------------------------------- | ------------------------------------------------------------- |
-| \_newResolver        | contract IBusinessLogicResolver | The new BLR contract address to wire into the proxy.          |
-| \_newConfigurationId | bytes32                         | The configuration identifier to activate on the new resolver. |
-| \_newVersion         | uint256                         | The version number associated with the new configuration.     |
+| Name                    | Type                            | Description                                                   |
+| ----------------------- | ------------------------------- | ------------------------------------------------------------- |
+| \_newResolver           | contract IBusinessLogicResolver | The new BLR contract address to wire into the proxy.          |
+| \_newConfigurationId    | bytes32                         | The configuration identifier to activate on the new resolver. |
+| \_newVersion            | uint256                         | The version number associated with the new configuration.     |
+| \_newReplacementEnabled | bool                            | The replacement enabled flag to set.                          |
 
 ### version
 

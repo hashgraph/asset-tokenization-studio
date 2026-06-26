@@ -99,7 +99,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         onlyRole(ROLE_CREATE_CONFIGURATION)
     {
         uint256 version = _cancelBatchConfiguration(_configurationId);
-        emit DiamondBatchConfigurationCanceled(_configurationId, version);
+        emit DiamondBatchConfigurationCancelled(_configurationId, version);
     }
 
     /// @inheritdoc IDiamondCutManager
@@ -108,7 +108,15 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         uint256 _version,
         bytes4 _selector
     ) external view override onlyValidConfigurationVersion(_configurationId, _version) returns (address facetAddress_) {
-        facetAddress_ = _resolveResolverProxyCall(_configurationId, _version, _selector);
+        facetAddress_ = _resolveResolverProxyCallV2(_configurationId, _version, false, _selector);
+    }
+
+    /// @inheritdoc IDiamondCutManager
+    function resolveResolverProxyCall(
+        bytes calldata _resolverProxyConfiguration,
+        bytes4 _selector
+    ) external view override returns (address facetAddress_) {
+        facetAddress_ = _resolveResolverProxyCall(_resolverProxyConfiguration, _selector);
     }
 
     /// @inheritdoc IDiamondCutManager

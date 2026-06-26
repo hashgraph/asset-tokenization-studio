@@ -60,9 +60,10 @@ export function createMockSecurityData(overrides?: Partial<SecurityDataParams>):
     externalKycLists: [],
     compliance: TEST_ADDRESSES.ZERO,
     identityRegistry: TEST_ADDRESSES.ZERO,
-    resolverProxyConfiguration: {
-      key: TEST_CONFIG_IDS.EQUITY,
-      version: 1,
+    resolverProxyConfigurationV2: {
+      configurationId: TEST_CONFIG_IDS.EQUITY,
+      configurationVersion: 1,
+      replacementEnabled: true,
     },
     rbacs: [],
     ...overrides,

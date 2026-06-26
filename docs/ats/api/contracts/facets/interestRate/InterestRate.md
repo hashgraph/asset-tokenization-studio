@@ -144,21 +144,19 @@ Raised when an initialiser tries to register a facet that already has a non-zero
 | facetId     | bytes32 | Identifier of the offending facet.                             |
 | lastVersion | uint256 | Last version recorded for that facet at the time of the check. |
 
-### InvalidRateType
+### UnrecognizedResolverProxyVersion
 
 ```solidity
-error InvalidRateType(enum IInterestRate.RateType rateType)
+error UnrecognizedResolverProxyVersion(bytes8 _resolverProxyVersion)
 ```
 
-Reverts when `NONE` is passed as a rate type.
-
-_`NONE` is reserved as the uninitialized default; it must never be set explicitly._
+Thrown when the provided proxy version does not match any BLR compatible standard.
 
 #### Parameters
 
-| Name     | Type                        | Description                                   |
-| -------- | --------------------------- | --------------------------------------------- |
-| rateType | enum IInterestRate.RateType | The invalid rate type supplied by the caller. |
+| Name                   | Type   | Description                                        |
+| ---------------------- | ------ | -------------------------------------------------- |
+| \_resolverProxyVersion | bytes8 | proxy version that is not compatible with the BLR. |
 
 ### WalletRecovered
 

@@ -67,6 +67,37 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
     }
 
     /// @inheritdoc IBusinessLogicResolver
+    function updateReplacementAddress(
+        address _replacedAddress,
+        address _replacementAddress
+    )
+        external
+        override
+        validateAddressNotZero(_replacedAddress)
+        validateAddressNotZero(_replacementAddress)
+        onlyNotReplacement(_replacedAddress)
+        onlyNotReplaced(_replacementAddress)
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyUnpaused
+    {
+        _updateReplacementAddress(_replacedAddress, _replacementAddress);
+        emit ReplacementAddressUpdated(_replacedAddress, _replacementAddress);
+    }
+
+    /// @inheritdoc IBusinessLogicResolver
+    function removeReplacementAddress(
+        address _replacedAddress
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyUnpaused {
+        address replacementAddressRemoved = _removeReplacementAddress(_replacedAddress);
+        emit ReplacementAddressRemoved(_replacedAddress, replacementAddressRemoved);
+    }
+
+    /// @inheritdoc IBusinessLogicResolver
+    function getReplacementAddress(address _replacedAddress) external view returns (address replacementAddress_) {
+        replacementAddress_ = _getReplacementAddress(_replacedAddress);
+    }
+
+    /// @inheritdoc IBusinessLogicResolver
     function getVersionStatus(
         bytes32 _businessLogicKey,
         uint256 _version
