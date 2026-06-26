@@ -19,6 +19,7 @@
 import { Signer } from "ethers";
 import {
   GAS_LIMIT,
+  gasLimitOverride,
   hederaGasOverrides,
   info,
   retryTransaction,
@@ -92,6 +93,18 @@ export function getOrchestratorLibraryAddresses(): OrchestratorLibraryAddresses 
  */
 export function hasOrchestratorLibraryAddresses(): boolean {
   return _addresses !== undefined;
+}
+
+/**
+ * Reset orchestrator library addresses to the unset state.
+ *
+ * Intended for test isolation: a suite that seeds placeholder addresses (e.g. to
+ * construct facet factories without a real deployment) must reset afterwards, so a
+ * later deployment re-links the actually-deployed libraries instead of inheriting
+ * the placeholders through this module-level singleton.
+ */
+export function resetOrchestratorLibraryAddresses(): void {
+  _addresses = undefined;
 }
 
 /**
@@ -316,7 +329,9 @@ export async function deployOrchestratorLibraries(
     });
 
   // Phase 1: ScheduledTasksDispatchOps and ClearingReadOps have no library dependencies.
-  const gasOverrides = { ...hederaGasOverrides(), gasLimit: GAS_LIMIT.high };
+  // gasLimitOverride (not a fixed gasLimit) so instrumented library deploys under solidity-coverage
+  // get the higher coverage limit — their bytecode grows past GAS_LIMIT.high when instrumented.
+  const gasOverrides = { ...hederaGasOverrides(), ...gasLimitOverride(GAS_LIMIT.high) };
   const scheduledTasksDispatchOpsAddr = await deployLib("ScheduledTasksDispatchOps", () =>
     new ScheduledTasksDispatchOps__factory(signer)
       .deploy(gasOverrides)

@@ -72,13 +72,27 @@ function findCustomErrorInReceipt(
   return { found: false, reason: "Could not extract selector" };
 }
 
-function patchRevertedWithCustomError(): void {
+let patchInitialized = false;
+
+/**
+ * Patch the hardhat-chai-matchers `revertedWithCustomError` to fall back to KNOWN_ERRORS
+ * when a custom error is not in the contract's own ABI (happens during multi-facet deploys
+ * where the final proxy's ABI may be partial). Safe to call multiple times; subsequent calls
+ * are no-ops (initialization flag).
+ */
+export function initCustomChaiMatchers(): void {
+  if (patchInitialized) {
+    return;
+  }
+
   const originalMethod = (chai.Assertion.prototype as any).revertedWithCustomError;
 
   if (!originalMethod) {
-    console.warn("[chai-matchers] revertedWithCustomError not found");
+    // Method doesn't exist yet (hardhat-chai-matchers not loaded); will be retried on next call
     return;
   }
+
+  patchInitialized = true;
 
   (chai.Assertion.prototype as any).revertedWithCustomError = function (
     contract: ExtendedContract,
@@ -121,14 +135,13 @@ function patchRevertedWithCustomError(): void {
   };
 }
 
-export function initCustomChaiMatchers(): void {
-  patchRevertedWithCustomError();
-}
-
+// Attempt to initialize in Node.js on import; may be a no-op if hardhat-chai-matchers
+// isn't loaded yet. In mocha --parallel, the shard runner will call initCustomChaiMatchers()
+// again in a `before` hook to ensure initialization after all dependencies are loaded.
 if (typeof window === "undefined") {
   try {
     initCustomChaiMatchers();
   } catch (error) {
-    console.warn("[chai-matchers] Failed to initialize:", error);
+    console.debug("[chai-matchers] Deferred initialization:", (error as Error).message);
   }
 }

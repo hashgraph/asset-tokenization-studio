@@ -31,6 +31,7 @@ import {
   isLibraryDependentFacet,
   hasOrchestratorLibraryAddresses,
   setOrchestratorLibraryAddresses,
+  resetOrchestratorLibraryAddresses,
 } from "@scripts/domain";
 
 describe("atsRegistry.generated - Factory Functions", () => {
@@ -38,6 +39,10 @@ describe("atsRegistry.generated - Factory Functions", () => {
 
   // Cache signer to avoid repeated Hardhat network bootstrap (saves ~4+ seconds)
   let signer: Awaited<ReturnType<typeof ethers.getSigners>>[0];
+
+  // Tracks whether THIS suite seeded the placeholder library addresses, so the
+  // after-hook only clears state it actually introduced.
+  let didSeedLibAddresses = false;
 
   before(async () => {
     [signer] = await ethers.getSigners();
@@ -60,6 +65,18 @@ describe("atsRegistry.generated - Factory Functions", () => {
         scheduledTasksOps: zero,
         scheduledTasksDispatchOps: zero,
       });
+      didSeedLibAddresses = true;
+    }
+  });
+
+  // Reset the module singleton if we seeded it, so a later integration deployment
+  // in the same process re-links the real orchestrator libraries rather than
+  // inheriting these zero placeholders (which would make token init delegatecall a
+  // no-code address and revert). Without this, running the scripts suite on its own
+  // poisons upgradeConfigurations' proxy-update deployments.
+  after(() => {
+    if (didSeedLibAddresses) {
+      resetOrchestratorLibraryAddresses();
     }
   });
 

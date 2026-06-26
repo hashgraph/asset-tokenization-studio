@@ -75,6 +75,12 @@ export { ACCESSORS } from "./accessor-generator/manifest";
 export type { AccessorDefinition } from "./accessor-generator/manifest";
 
 // ============================================================================
+// Coverage Shard Merge
+// ============================================================================
+
+export { mergeLcovReports } from "./coverage-shard/mergeLcov";
+
+// ============================================================================
 // Contract Scanner
 // ============================================================================
 
