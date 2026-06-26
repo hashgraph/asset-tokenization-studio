@@ -47,11 +47,14 @@ ATS uses role-based access control (RBAC) to manage permissions for security tok
 - **Can do**: Distribute dividends (equity), process coupon payments (bonds), create snapshots
 - **Use cases**: Quarterly dividends, bond coupons, special distributions
 
-### ROLE_BOND_MANAGER
+### ROLE_MATURITY_MANAGER
 
-- **Purpose**: Manage bond-specific operations
-- **Can do**: Execute coupon payments, process maturity redemption, manage bond lifecycle
-- **Use cases**: Bond interest payments, principal repayment at maturity
+- **Purpose**: Configure a bond's maturity
+- **Can do**: Set and update the maturity date and related bond lifecycle parameters
+- **Use cases**: Bond setup, maturity scheduling
+
+> Bonds have no single "bond manager" role — coupon payments use `ROLE_CORPORATE_ACTION`, interest
+> rates `ROLE_INTEREST_RATE_MANAGER`, and redemption `ROLE_MATURITY_REDEEMER` (below).
 
 ### ROLE_MATURITY_REDEEMER
 
@@ -73,7 +76,7 @@ ATS uses role-based access control (RBAC) to manage permissions for security tok
 - **Can do**: Add/remove external KYC lists, link to token, query status
 - **Use cases**: Third-party KYC providers, shared investor lists
 
-### INTERNAL_ROLE_KYC_MANAGER
+### ROLE_INTERNAL_KYC_MANAGER
 
 - **Purpose**: Control internal KYC system
 - **Can do**: Enable/disable internal KYC validation flag
@@ -252,7 +255,7 @@ ROLE_CORPORATE_ACTION + ROLE_SNAPSHOT
 **Bond Administrator**:
 
 ```
-ROLE_BOND_MANAGER + ROLE_MATURITY_REDEEMER + ROLE_CORPORATE_ACTION
+ROLE_MATURITY_MANAGER + ROLE_MATURITY_REDEEMER + ROLE_CORPORATE_ACTION
 ```
 
 **External List Manager**:

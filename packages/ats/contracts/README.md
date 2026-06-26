@@ -21,6 +21,8 @@
 
 The contracts module contains the code of all Solidity smart contracts deployed on Hedera. This package is part of the Asset Tokenization Studio monorepo.
 
+> **New to ATS?** Start with the **[Smart Contracts Handbook](../../../docs/ats/developer-guides/contracts/index.md)** — the canonical, guided onboarding (concepts → architecture → build → deploy → extend), with a glossary and a 5-minute local quickstart. This README and the [`scripts/`](scripts/) guides are quick references for developers already working in the source tree.
+
 **Standards:**
 
 - ERC-1400 for security tokens
@@ -109,14 +111,14 @@ The Scripts README contains comprehensive information about:
 **Quick deployment commands:**
 
 ```bash
-# Deploy full system to Hardhat network (in-memory, fast)
-npm run deploy:hardhat -- --network hardhat
+# Deploy the full system to a local Hardhat node
+npm run deploy:local
 
 # Deploy to Hedera Testnet (requires .env configuration)
-npm run deploy:hardhat -- --network hedera-testnet
+npm run deploy:hedera:testnet
 
-# Standalone deployment (~3x faster startup)
-npm run deploy
+# Or via the Hardhat task
+npx hardhat deploy-system --network hedera-testnet
 ```
 
 ## Deployment Failures & Recovery
@@ -324,7 +326,7 @@ For complete API documentation, see the [Scripts README](scripts/README.md).
 
 The tests are organized into two main categories:
 
-- **Contract Tests** (`test/contracts/`) - Unit tests for Solidity smart contracts
+- **Contract Tests** (`test/contracts/`) - Integration tests for the Solidity smart contracts
 - **Scripts Tests** (`test/scripts/`) - Unit and integration tests for TypeScript deployment scripts
 
 ## Test Structure
@@ -332,12 +334,13 @@ The tests are organized into two main categories:
 ```
 test/
 ├── contracts/
-│   ├── unit/        # Contract unit tests (npm test, test:parallel, coverage)
-│   └── demo/        # Demo tests (test:demo - explicit only)
+│   └── integration/ # Solidity contract tests (npm test)
 │
-└── scripts/
-    ├── unit/        # Script unit tests (utilities, infrastructure)
-    └── integration/ # Script integration tests (deployment, registry operations)
+├── scripts/
+│   ├── unit/        # Script unit tests (utilities, infrastructure)
+│   └── integration/ # Script integration tests (deployment, registry operations)
+├── fixtures/        # Shared test fixtures (ctx, deploy, tokens)
+└── helpers/         # Shared test helpers
 ```
 
 ## Running tests
@@ -352,30 +355,26 @@ npm run ats:contracts:test
 
 ```bash
 cd packages/ats/contracts
-npm test                    # Runs contract unit tests only
-npm run test:parallel       # Runs contract unit tests in parallel
-npm run test:scripts        # Runs all script tests
+npm test                    # Contract integration tests + all script tests
+npm run test:parallel       # The same set, in parallel
+npm run test:scripts        # All deployment-script tests
 ```
 
 ### Available test commands:
 
 ```bash
-# Contract Tests
-npm test                           # Contract unit tests only
-npm run test:parallel              # Contract unit tests (parallel execution)
-npm run test:coverage              # Contract test coverage
-npm run test:coverage:layer1       # Layer 1 coverage
-npm run test:factory               # Factory tests
-npm run test:resolver              # Resolver tests
+# Contract tests
+npm test                           # Contract integration tests + all script tests
+npm run test:parallel              # The same set, in parallel
+npm run test:contracts             # All contract tests via Hardhat
+npm run test:coverage              # Contract coverage (test/contracts/integration)
+npm run test:factory               # Factory test suite
+npm run test:resolver              # BusinessLogicResolver test suite
 
-# Script Tests
-npm run test:scripts               # All script tests
-npm run test:scripts:unit          # Script unit tests (utilities, infrastructure)
-npm run test:scripts:integration   # Script integration tests (deployment, registry)
-
-# Demo Tests (explicit only, not included in npm test)
-npm run test:demo                  # Demo tests
-npm run test:demo:hedera           # Hedera-specific demo tests
+# Script tests
+npm run test:scripts               # All deployment-script tests
+npm run test:scripts:unit          # Script unit tests (no network)
+npm run test:scripts:integration   # Script integration tests
 ```
 
 ## Architecture
@@ -402,15 +401,14 @@ The ATS contracts implement a **4-layer hierarchical design** using the **Diamon
         │  ├─ Configuration management
         │  └─ Resolver key → address mapping
         │
-        ├─ 46+ Facets (Layers 0-3)
+        ├─ ~100 Facets (logical layers 0-3)
         │  ├─ Layer 0: Storage wrappers
         │  ├─ Layer 1: Core business logic
         │  ├─ Layer 2: Domain features
         │  └─ Layer 3: Jurisdiction-specific
         │
-        └─ 2 Configurations
-            ├─ Equity Config (43 facets)
-            └─ Bond Config (43 facets)
+        └─ Asset configurations (Equity, Bond + variants, Loan, Loans Portfolio, Deposit Token)
+            └─ each a versioned facet set composed from shared tiers (scripts/domain/facetSets.ts)
 ```
 
 ### Four-Layer Architecture
@@ -420,28 +418,27 @@ The ATS contracts implement a **4-layer hierarchical design** using the **Diamon
 - Data structures and storage management
 - Examples: `ERC1400StorageWrapper`, `KycStorageWrapper`, `CapStorageWrapper`
 - Storage isolation per feature for upgradeability
-- EIP-1967 storage pattern
+- ERC-7201 namespaced storage pattern
 
 **Layer 1: Core Business Logic**
 
 - ERC-1400/ERC-3643 base implementations
-- `Common.sol` provides shared logic for all facets
+- Shared modifiers via `services/Modifiers.sol` (aggregating `CoreModifiers` + `AssetModifiers`)
 - Access control, validation, and core operations
 - Domains: AccessControl, Freeze, Hold, ControlList, CorporateActions
 
 **Layer 2: Domain-Specific Features (Facets)**
 
-- **Bond**: Coupon payments, maturity redemption (`Bond.sol`, `BondRead.sol`)
-- **Equity**: Dividends, voting, balance adjustments (`Equity.sol`)
+- **Bond**: composed from `CouponFacet`, `MaturityFacet`, `InterestRateFacet`, `PrincipalFacet`, … (no single `Bond` facet)
+- **Equity**: composed from `DividendFacet`, `VotingFacet`, `AdjustBalancesFacet`, … (no single `Equity` facet)
 - **Scheduled Tasks**: Snapshots, balance adjustments, cross-ordered tasks
 - **Proceed Recipients**: Payment distribution logic
 - Each facet is independently upgradeable
 
 **Layer 3: Jurisdiction-Specific Implementations**
 
-- USA-specific features: `bondUSA/`, `equityUSA/`
-- Specialized compliance rules per jurisdiction
-- Extends Layer 2 features with regulatory requirements
+- Jurisdiction/regulation data driven by `constants/regulation.sol`
+- Specialised compliance rules applied per security at deployment via `FactoryRegulationData`
 
 ### Key Components
 
@@ -461,34 +458,25 @@ The ATS contracts implement a **4-layer hierarchical design** using the **Diamon
 
 ### Core Facet Categories
 
-**ERC1400 Token Standard Facets:**
+Facets are composed into each asset configuration from shared, compile-checked tiers defined in
+[`scripts/domain/facetSets.ts`](scripts/domain/facetSets.ts). Each facet lives in its own folder
+under `contracts/facets/<feature>/` as `I<Feature>.sol` + `<Feature>.sol` + `<Feature>Facet.sol`.
 
-- `ERC1410ManagementFacet`: Token partition management
-- `ERC1410ReadFacet`: Read-only token state queries
-- `ERC1410TokenHolderFacet`: Token holder operations
-- `ERC20Facet`: ERC20 compatibility layer
-- `MintFacet`: Security token issuance
-- `BurnFacet`: Security token redemption
-- `ERC1644Facet`: Controller operations for forced transfers
+- **`COMMON_TOKEN_FACETS`** — present in every token: `AccessControlFacet`, `TransferFacet` /
+  `TransferByPartitionFacet`, `MintFacet` / `BurnFacet`, `CapFacet`, `ControlListFacet`,
+  `PauseFacet`, `FreezeFacet`, `HoldFacet` / `HoldByPartitionFacet`, `ClearingFacet` /
+  `ClearingByPartitionFacet`, `PartitionsFacet`, `ControllerFacet`, `CoreFacet`, …
+- **`EXTENDED_TOKEN_FACETS`** — every token except deposit token: snapshots, compliance/KYC
+  (`ComplianceFacet`, `KycFacet`, `IdentityFacet`), locks, protected variants, scheduled tasks,
+  `ERC20PermitFacet`, `ERC20VotesFacet`, `SsiManagementFacet`, …
+- **`BOND_COMMON_FACETS`** — the three bond variants: `CouponFacet`, `MaturityFacet`,
+  `InterestRateFacet`, `PrincipalFacet`, `ProceedRecipientsFacet`, …
+- **`ASSET_TYPE_FACETS`** — per-class additions: `DividendFacet`, `VotingFacet`, `FixedRateFacet`,
+  `KpiLinkedRateFacet`, `AmortizationFacet`, `LoanFacet`, `LoansPortfolioFacet`, …
 
-**ERC3643 (T-REX) Compliance Facets:**
-
-- `ERC3643ManagementFacet`: Core operations (mint, burn, forced transfers)
-- `ERC3643OperationsFacet`: Transfer and compliance operations
-- `ERC3643ReadFacet`: State queries
-- `ERC3643BatchFacet`: Gas-efficient bulk operations
-- `FreezeFacet`: Partial and full address freezing
-
-**Hold & Clearing Facets:**
-
-- `HoldManagementFacet`: Hold creation and management
-- `HoldReadFacet`: Hold state queries
-- `HoldTokenHolderFacet`: Token holder hold operations
-- `ClearingHoldCreationFacet`: Clearing-specific holds
-- `ClearingTransferFacet`: Clearing transfers
-- `ClearingRedeemFacet`: Clearing redemptions
-- `ClearingActionsFacet`: Operation approvals
-- `ClearingReadFacet`: State queries
+ERC-3643 (T-REX) compatibility is provided across facets such as `IdentityFacet`, `ComplianceFacet`,
+`FreezeFacet`, `ControllerFacet`, `RecoveryFacet`, and the batch facets — see the
+[ERC-3643 Compatibility](#erc-3643-compatibility) table above.
 
 ### Design Patterns
 
@@ -532,17 +520,16 @@ The platform implements a comprehensive role-based access control system:
 
 #### Operational Roles
 
-- **Agent**: Can perform mint, burn, and forced transfer operations
-- **Freeze Manager**: Can freeze/unfreeze tokens and addresses
-- **Controller**: Can execute controller transfers and redemptions
-- **Minter**: Can mint new tokens (legacy role, use Agent for ERC3643)
-- **Locker**: Can lock tokens for specified periods
-- **Control List Manager**: Manages whitelist/blacklist entries
-- **KYC Manager**: Manages KYC status for investors
-- **SSI Manager**: Manages self-sovereign identity configurations
-- **Pause Manager**: Can pause/unpause token operations
-- **Snapshot Manager**: Can create token balance snapshots
-- **Corporate Actions Manager**: Can execute dividends, voting rights, etc.
+- **Agent** (`ROLE_AGENT`) / **Issuer** (`ROLE_ISSUER`): mint, burn, forced transfers, issuance
+- **Freeze Manager** (`ROLE_FREEZE_MANAGER`): freeze/unfreeze accounts and partial balances
+- **Controller** (`ROLE_CONTROLLER`): controller (forced) transfers and redemptions
+- **Locker** (`ROLE_LOCKER`): lock tokens for specified periods
+- **Cap** (`ROLE_CAP`): manage the supply cap
+- **Control List Manager** (`ROLE_CONTROL_LIST_MANAGER`) / **KYC Manager** (`ROLE_KYC_MANAGER`): allow/deny lists and KYC status
+- **SSI Manager** (`ROLE_SSI_MANAGER`): self-sovereign identity configuration
+- **Pause Manager** (`ROLE_PAUSE_MANAGER`) / **Pauser** (`ROLE_PAUSER`): pause/unpause operations
+- **Snapshot** (`ROLE_SNAPSHOT`): create balance snapshots
+- **Corporate Action** (`ROLE_CORPORATE_ACTION`): dividends, voting, coupons — plus `ROLE_CORPORATE_ACTION_FORCE_CANCEL` for the high-risk force-cancel
 
 ### Adding a new facet
 
@@ -550,71 +537,42 @@ For detailed instructions on adding or removing facets, see the **[Developer Gui
 
 # Reference Deployment (Hedera Testnet)
 
-> **Note**: These contracts were deployed for reference purposes and may not reflect the latest version. For up-to-date deployments, use the deployment scripts with the current codebase version (v1.17.0+). See [Scripts README](scripts/README.md) for deployment instructions.
+> **Note**: These contracts were deployed for reference purposes and may not reflect the latest version. For up-to-date addresses, see the latest record under [`deployments/`](deployments/) and the [Deployed addresses](../../../docs/ats/developer-guides/contracts/deployed-addresses.md) guide. To deploy with the current codebase, see the [Scripts README](scripts/README.md).
 
 - **Network:** Hedera Testnet
 - **Status:** Reference deployment (may be outdated)
-- **Last Known Update:** Prior to v1.17.0
 
 #### Contract Addresses
 
-- ProxyAdmin: 0xE5ebB0990c841857fe43D6e0A8375F2991b265c0
-- BLR Proxy: 0xE13eFc5f5d8252958cA787a1F6665C63Fbd02A48
-- Factory Proxy: 0x0BC59c70933DA04C8556259BB8E78AbF7db4dC22
+Latest recorded testnet deployment (`deployments/hedera-testnet/newBlr-2026-02-05T12-21-16.json`):
 
-# 🔐 Role Definitions by Layer
+- ProxyAdmin: 0x5309a85c1fac0344c82B4a71640b18028b2D9Ba8 (0.0.7782752)
+- BLR Proxy: 0x4363684B8a679EaBA17701F421Ddf71D6870A011 (0.0.7782757)
+- Factory Proxy: 0xCEdDa6D199AEB2391739E39d014177beb5157FA0 (0.0.7838301)
 
-This project follows a layered smart contract architecture with role-based access control using `AccessControl`. Roles are defined in three distinct layers to separate responsibilities and permissions.
+# 🔐 Roles
 
----
+Access control uses OpenZeppelin `AccessControl`. Every role is a `bytes32` constant named
+`ROLE_<UPPER_SNAKE>`, defined in [`contracts/constants/roles.sol`](contracts/constants/roles.sol)
+and derived as `keccak256("asset.tokenization.standard.role.<PascalName>")`. The hex values are
+generated from a `/// @custom:hash role <PascalName>` annotation (`npm run hashes:generate`) — do
+**not** hand-edit them. The one exception is `DEFAULT_ADMIN_ROLE = 0x00` (kept OpenZeppelin-compatible).
 
-## 🟦 Layer 0:
+> `DEFAULT_ADMIN_ROLE` also authorises the instant Diamond operations (`updateResolver`,
+> `updateConfig`, `updateConfigVersion`) — hold it in a multisig/governance contract, never an EOA.
 
-```solidity
-bytes32 constant _DEFAULT_ADMIN_ROLE = 0x00;
-bytes32 constant _CONTROL_LIST_ROLE = 0xca537e1c88c9f52dc5692c96c482841c3bea25aafc5f3bfe96f645b5f800cac3;
-bytes32 constant _CORPORATE_ACTION_ROLE = 0x8a139eeb747b9809192ae3de1b88acfd2568c15241a5c4f85db0443a536d77d6;
-bytes32 constant _ISSUER_ROLE = 0x4be32e8849414d19186807008dabd451c1d87dae5f8e22f32f5ce94d486da842;
-bytes32 constant _DOCUMENTER_ROLE = 0x83ace103a76d3729b4ba1350ad27522bbcda9a1a589d1e5091f443e76abccf41;
-bytes32 constant _CONTROLLER_ROLE = 0xa72964c08512ad29f46841ce735cff038789243c2b506a89163cc99f76d06c0f;
-bytes32 constant _PAUSER_ROLE = 0x6f65556918c1422809d0d567462eafeb371be30159d74b38ac958dc58864faeb;
-bytes32 constant _CAP_ROLE = 0xb60cac52541732a1020ce6841bc7449e99ed73090af03b50911c75d631476571;
-bytes32 constant _SNAPSHOT_ROLE = 0x3fbb44760c0954eea3f6cb9f1f210568f5ae959dcbbef66e72f749dbaa7cc2da;
-bytes32 constant _LOCKER_ROLE = 0xd8aa8c6f92fe8ac3f3c0f88216e25f7c08b3a6c374b4452a04d200c29786ce88;
-bytes32 constant _BOND_MANAGER_ROLE = 0x8e99f55d84328dd46dd7790df91f368b44ea448d246199c88b97896b3f83f65d;
-bytes32 constant _PROTECTED_PARTITIONS_ROLE = 0x8e359333991af626d1f6087d9bc57221ef1207a053860aaa78b7609c2c8f96b6;
-bytes32 constant _PROTECTED_PARTITIONS_PARTICIPANT_ROLE = 0xdaba153046c65d49da6a7597abc24374aa681e3eee7004426ca6185b3927a3f5;
-bytes32 constant _WILD_CARD_ROLE = 0x96658f163b67573bbf1e3f9e9330b199b3ac2f6ec0139ea95f622e20a5df2f46;
-bytes32 constant _AGENT_ROLE = 0xc4aed0454da9bde6defa5baf93bb49d4690626fc243d138104e12d1def783ea6;
-```
-
-## 🟨 Layer 1:
-
-```solidity
-bytes32 constant _DEFAULT_ADMIN_ROLE = 0x00;
-bytes32 constant _SSI_MANAGER_ROLE = 0x0995a089e16ba792fdf9ec5a4235cba5445a9fb250d6e96224c586678b81ebd0;
-bytes32 constant _KYC_ROLE = 0x6fbd421e041603fa367357d79ffc3b2f9fd37a6fc4eec661aa5537a9ae75f93d;
-bytes32 constant _CLEARING_ROLE = 0x2292383e7bb988fb281e5195ab88da11e62fec74cf43e8685cff613d6b906450;
-bytes32 constant _CLEARING_VALIDATOR_ROLE = 0x7b688898673e16c47810f5da9ce1262a3d7d022dfe27c8ff9305371cd435c619;
-bytes32 constant _PAUSE_MANAGER_ROLE = 0xbc36fbd776e95c4811506a63b650c876b4159cb152d827a5f717968b67c69b84;
-bytes32 constant _CONTROL_LIST_MANAGER_ROLE = 0x0e625647b832ec7d4146c12550c31c065b71e0a698095568fd8320dd2aa72e75;
-bytes32 constant _KYC_MANAGER_ROLE = 0x8ebae577938c1afa7fb3dc7b06459c79c86ffd2ac9805b6da92ee4cbbf080449;
-bytes32 constant _INTERNAL_KYC_MANAGER_ROLE = 0x3916c5c9e68488134c2ee70660332559707c133d0a295a25971da4085441522e;
-bytes32 constant _FREEZE_MANAGER_ROLE = 0xd0e5294c1fc630933e135c5b668c5d577576754d33964d700bbbcdbfd7e1361b;
-bytes32 constant _MATURITY_REDEEMER_ROLE = 0xa0d696902e9ed231892dc96649f0c62b808a1cb9dd1269e78e0adc1cc4b8358c;
-```
-
-## 🟩 Layer 2:
-
-```solidity
-bytes32 constant _ADJUSTMENT_BALANCE_ROLE = 0x6d0d63b623e69df3a6ea8aebd01f360a0250a880cbc44f7f10c49726a80a78a9;
-```
-
----
-
-## 🧩 Notes:
-
-- All roles are `bytes32` constants derived using: `keccak256("security.token.standard.role.<roleName>")` _(replace `<roleName>` with the actual role string)_
+The full catalogue is the single source of truth in `roles.sol` — e.g. `ROLE_AGENT`, `ROLE_ISSUER`,
+`ROLE_CAP`, `ROLE_KYC` / `ROLE_KYC_MANAGER` / `ROLE_INTERNAL_KYC_MANAGER`, `ROLE_CONTROL_LIST` /
+`ROLE_CONTROL_LIST_MANAGER`, `ROLE_FREEZE_MANAGER`, `ROLE_LOCKER`, `ROLE_PAUSER` /
+`ROLE_PAUSE_MANAGER`, `ROLE_CLEARING` / `ROLE_CLEARING_VALIDATOR`, `ROLE_CORPORATE_ACTION` /
+`ROLE_CORPORATE_ACTION_FORCE_CANCEL`, `ROLE_SNAPSHOT`, `ROLE_ADJUSTMENT_BALANCE`,
+`ROLE_MATURITY_MANAGER` / `ROLE_MATURITY_REDEEMER`, `ROLE_INTEREST_RATE_MANAGER`, `ROLE_KPI_MANAGER`,
+`ROLE_AMORTIZATION`, `ROLE_NOMINAL_VALUE`, `ROLE_PROCEED_RECIPIENT_MANAGER`, `ROLE_LOAN_MANAGER` /
+`ROLE_LOANS_PORTFOLIO_MANAGER`, `ROLE_SSI_MANAGER`, `ROLE_DOCUMENTER`, `ROLE_CONTROLLER`,
+`ROLE_PROTECTED_PARTITIONS` (+ `ROLE_PROTECTED_PARTITIONS_PARTICIPANT`), `ROLE_DEACTIVATE`,
+`ROLE_CUSTOM_DATA_MANAGER`, `ROLE_CREATE_CONFIGURATION`, `ROLE_TREX_OWNER`, `ROLE_WILD_CARD`.
+The generated `bytes32` values are also exported for scripts in `scripts/domain/atsRoles.generated.ts`.
+See the [Roles & permissions guide](../../../docs/ats/developer-guides/contracts/roles-and-permissions.md).
 
 ---
 

@@ -294,7 +294,7 @@ npm run doc
 This command:
 
 1. Extracts NatSpec comments from all contracts
-2. Generates markdown files in `/docs/references/api/ats-contracts/`
+2. Generates markdown files in `docs/ats/api/contracts/`
 3. Organizes documentation by contract hierarchy
 
 ### Configuration
@@ -304,7 +304,7 @@ The documentation generator is configured in `hardhat.config.ts`:
 ```typescript
 dodoc: {
   runOnCompile: false,         // Don't auto-generate on every compile
-  outputDir: "../../../docs/references/api/ats-contracts",
+  outputDir: "../../../docs/ats/api/contracts",
   freshOutput: true,           // Clear old docs before generating
   include: ["contracts"],      // Include all contracts
   exclude: [
@@ -319,8 +319,8 @@ dodoc: {
 
 After generation, the documentation is available at:
 
-- **Local**: `http://localhost:3000/docs/references/api`
-- **Production**: `https://hashgraph.github.io/asset-tokenization-studio/docs/references/api`
+- **Local**: `http://localhost:3000/ats/api` — under "API Documentation → Smart Contracts"
+- **Production**: the same "API Documentation → Smart Contracts" section of the published docs site
 
 ## Documentation Workflow
 
@@ -340,7 +340,7 @@ After generation, the documentation is available at:
 
 2. **Check for warnings** - fix any NatSpec syntax errors
 
-3. **Review generated output** in `/docs/references/api/`
+3. **Review generated output** in `docs/ats/api/contracts/`
 
 ### In Pull Requests
 
