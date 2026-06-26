@@ -235,13 +235,17 @@ library LockStorageWrapper {
      *      they exist only to keep the helper signature-compatible with the locking pipeline's
      *      call-site.
      * @param partition           Partition being mutated.
+     * @param amount              Quantity to lock (unused; accepted for call-site compatibility).
      * @param tokenHolder         Holder whose snapshots are being refreshed.
+     * @param expirationTimestamp Expiration timestamp (unused; accepted for call-site compatibility).
      */
     function updateLockedBalancesBeforeLock(
         bytes32 partition,
-        uint256 /* amount */,
+        // solhint-disable-next-line no-unused-vars
+        uint256 amount,
         address tokenHolder,
-        uint256 /* expirationTimestamp */
+        // solhint-disable-next-line no-unused-vars
+        uint256 expirationTimestamp
     ) internal {
         SnapshotsStorageWrapper.updateAccountSnapshot(tokenHolder, partition);
         SnapshotsStorageWrapper.updateAccountLockedBalancesSnapshot(tokenHolder, partition);
@@ -253,9 +257,11 @@ library LockStorageWrapper {
      *      deliberately unused; it exists only to keep the helper signature-compatible with
      *      the release pipeline's call-site.
      * @param partition   Partition being mutated.
+     * @param lockId      Lock identifier (unused; accepted for call-site compatibility).
      * @param tokenHolder Holder whose snapshots are being refreshed.
      */
-    function updateLockedBalancesBeforeRelease(bytes32 partition, uint256 /* lockId */, address tokenHolder) internal {
+    // solhint-disable-next-line no-unused-vars
+    function updateLockedBalancesBeforeRelease(bytes32 partition, uint256 lockId, address tokenHolder) internal {
         SnapshotsStorageWrapper.updateAccountSnapshot(tokenHolder, partition);
         SnapshotsStorageWrapper.updateAccountLockedBalancesSnapshot(tokenHolder, partition);
     }

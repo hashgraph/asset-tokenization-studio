@@ -96,11 +96,13 @@ library ERC20VotesStorageWrapper {
      * @dev Dispatches to specialised branches: mint (from = 0), burn (to = 0), or standard
      *      transfer. Updates total supply and account checkpoints, then moves voting power
      *      from source delegate to destination delegate.
+     * @param partition Partition whose balances are being adjusted (unused by this implementation).
      * @param from The account sending tokens (or address(0) for mints).
      * @param to The account receiving tokens (or address(0) for burns).
      * @param amount The number of tokens transferred.
      */
-    function afterTokenTransfer(bytes32, address from, address to, uint256 amount) internal {
+    // solhint-disable-next-line no-unused-vars
+    function afterTokenTransfer(bytes32 partition, address from, address to, uint256 amount) internal {
         ERC20VotesStorage storage erc20VotesStorage = erc20VotesStorage_();
 
         if (!isActivated()) return;

@@ -102,6 +102,19 @@ export function lockTests(getCtx: () => AssetMockCtx): void {
             "IsPaused",
           );
         });
+
+        it("GIVEN a paused Token WHEN forceReleaseByPartition THEN transaction fails with IsPaused", async () => {
+          const lockFacet = await ethers.getContractAt("LockFacet", await asset.getAddress());
+          await expect(
+            lockFacet.connect(signer_C).forceReleaseByPartition(_DEFAULT_PARTITION, 1, signer_A.address),
+          ).to.be.revertedWithCustomError(lockFacet, "IsPaused");
+        });
+
+        it("GIVEN a paused Token WHEN updateLockExpiration THEN transaction fails with IsPaused", async () => {
+          await expect(
+            asset.connect(signer_C).updateLockExpiration(signer_A.address, 1, expirationTimestamp),
+          ).to.be.revertedWithCustomError(asset, "IsPaused");
+        });
       });
 
       describe("AccessControl", () => {
@@ -124,6 +137,12 @@ export function lockTests(getCtx: () => AssetMockCtx): void {
             asset,
             "NotAllowedInMultiPartitionMode",
           );
+        });
+
+        it("GIVEN a token with multi-partition enabled WHEN updateLockExpiration THEN fails with NotAllowedInMultiPartitionMode", async () => {
+          await expect(
+            asset.connect(signer_C).updateLockExpiration(signer_A.address, 1, expirationTimestamp),
+          ).to.be.revertedWithCustomError(asset, "NotAllowedInMultiPartitionMode");
         });
       });
     });
@@ -258,6 +277,12 @@ export function lockTests(getCtx: () => AssetMockCtx): void {
           lockFacet.connect(signer_A).forceReleaseByPartition(ethers.ZeroHash, 0, ethers.ZeroAddress),
         ).to.be.revertedWithCustomError(lockFacet, "Deactivated");
       });
+
+      it("GIVEN a deactivated asset WHEN updateLockExpiration THEN transaction fails with Deactivated", async () => {
+        await expect(
+          asset.connect(signer_A).updateLockExpiration(signer_A.address, 1, expirationTimestamp),
+        ).to.be.revertedWithCustomError(asset, "Deactivated");
+      });
     });
 
     describe("initializeLock", () => {
@@ -295,6 +320,119 @@ export function lockTests(getCtx: () => AssetMockCtx): void {
 
       it("GIVEN non-operational WHEN release is called THEN AssetNotOperational", async () => {
         await expect(asset.release(0n, ethers.ZeroAddress)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+      });
+
+      it("GIVEN non-operational WHEN forceReleaseByPartition is called THEN AssetNotOperational", async () => {
+        const lockFacet = await ethers.getContractAt("LockFacet", await asset.getAddress());
+        await expect(
+          lockFacet.forceReleaseByPartition(_DEFAULT_PARTITION, 1, signer_A.address),
+        ).to.be.revertedWithCustomError(lockFacet, "AssetNotOperational");
+      });
+    });
+
+    describe("forceReleaseByPartition", () => {
+      let lockFacet: Awaited<ReturnType<typeof ethers.getContractAt>>;
+
+      beforeEach(async () => {
+        lockFacet = await ethers.getContractAt("LockFacet", await asset.getAddress());
+
+        await asset.connect(signer_B).issueByPartition({
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: _AMOUNT * 2,
+          data: "0x",
+        });
+        await asset.connect(signer_C).lock(_AMOUNT, signer_A.address, expirationTimestamp);
+      });
+
+      it("GIVEN a caller with ROLE_LOCKER WHEN forceReleaseByPartition THEN succeeds and emits LockByPartitionReleased", async () => {
+        await expect(lockFacet.connect(signer_C).forceReleaseByPartition(_DEFAULT_PARTITION, 1, signer_A.address))
+          .to.emit(lockFacet, "LockByPartitionReleased")
+          .withArgs(signer_C.address, signer_A.address, _DEFAULT_PARTITION, 1);
+      });
+
+      it("GIVEN a caller with ROLE_CONTROLLER WHEN forceReleaseByPartition THEN succeeds", async () => {
+        await asset.grantRole(ATS_ROLES.ROLE_CONTROLLER, signer_B.address);
+        await expect(lockFacet.connect(signer_B).forceReleaseByPartition(_DEFAULT_PARTITION, 1, signer_A.address))
+          .to.emit(lockFacet, "LockByPartitionReleased")
+          .withArgs(signer_B.address, signer_A.address, _DEFAULT_PARTITION, 1);
+      });
+
+      it("GIVEN a caller without ROLE_LOCKER or ROLE_CONTROLLER WHEN forceReleaseByPartition THEN fails with AccountHasNoRoles", async () => {
+        await expect(
+          lockFacet.connect(unknownSigner).forceReleaseByPartition(_DEFAULT_PARTITION, 1, signer_A.address),
+        ).to.be.revertedWithCustomError(lockFacet, "AccountHasNoRoles");
+      });
+
+      it("GIVEN a non-default partition in single-partition mode WHEN forceReleaseByPartition THEN fails with PartitionNotAllowedInSinglePartitionMode", async () => {
+        await expect(
+          lockFacet.connect(signer_C).forceReleaseByPartition(_NON_DEFAULT_PARTITION, 1, signer_A.address),
+        ).to.be.revertedWithCustomError(lockFacet, "PartitionNotAllowedInSinglePartitionMode");
+      });
+    });
+
+    describe("updateLockExpiration", () => {
+      beforeEach(async () => {
+        await asset.connect(signer_B).issueByPartition({
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: _AMOUNT,
+          data: "0x",
+        });
+        await asset.connect(signer_C).lock(_AMOUNT, signer_A.address, expirationTimestamp);
+      });
+
+      it("GIVEN a caller with ROLE_LOCKER WHEN updateLockExpiration THEN succeeds and emits LockExpirationUpdated", async () => {
+        const newExpiration = expirationTimestamp + ONE_YEAR_IN_SECONDS;
+        await expect(asset.connect(signer_C).updateLockExpiration(signer_A.address, 1, newExpiration))
+          .to.emit(asset, "LockExpirationUpdated")
+          .withArgs(signer_C.address, signer_A.address, _DEFAULT_PARTITION, 1, expirationTimestamp, newExpiration);
+      });
+
+      it("GIVEN a caller without ROLE_LOCKER WHEN updateLockExpiration THEN fails with AccountHasNoRole", async () => {
+        await expect(asset.connect(unknownSigner).updateLockExpiration(signer_A.address, 1, expirationTimestamp))
+          .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+          .withArgs(unknownSigner.address, ATS_ROLES.ROLE_LOCKER);
+      });
+
+      it("GIVEN an invalid lockId WHEN updateLockExpiration THEN fails with WrongLockId", async () => {
+        await expect(
+          asset.connect(signer_C).updateLockExpiration(signer_A.address, 999, expirationTimestamp),
+        ).to.be.revertedWithCustomError(asset, "WrongLockId");
+      });
+
+      it("GIVEN a past expiration timestamp WHEN updateLockExpiration THEN fails with WrongExpirationTimestamp", async () => {
+        await expect(
+          asset.connect(signer_C).updateLockExpiration(signer_A.address, 1, currentTimestamp - ONE_YEAR_IN_SECONDS),
+        ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
+      });
+    });
+
+    describe("getLockByPartition", () => {
+      beforeEach(async () => {
+        await asset.connect(signer_B).issueByPartition({
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: _AMOUNT,
+          data: "0x",
+        });
+        await asset.connect(signer_C).lock(_AMOUNT, signer_A.address, expirationTimestamp);
+      });
+
+      it("GIVEN an existing lock WHEN token holder calls getLockByPartition THEN returns LockData", async () => {
+        const lockFacet = await ethers.getContractAt("LockFacet", await asset.getAddress());
+        const lockData = await lockFacet.connect(signer_A).getLockByPartition(_DEFAULT_PARTITION, 1);
+        expect(lockData.id).to.equal(1n);
+        expect(lockData.amount).to.equal(_AMOUNT);
+        expect(lockData.expirationTimestamp).to.equal(expirationTimestamp);
+      });
+
+      it("GIVEN a non-existent lockId WHEN getLockByPartition THEN returns zeroed LockData", async () => {
+        const lockFacet = await ethers.getContractAt("LockFacet", await asset.getAddress());
+        const lockData = await lockFacet.connect(signer_A).getLockByPartition(_DEFAULT_PARTITION, 999);
+        expect(lockData.id).to.equal(0n);
+        expect(lockData.amount).to.equal(0n);
+        expect(lockData.expirationTimestamp).to.equal(0n);
       });
     });
   });

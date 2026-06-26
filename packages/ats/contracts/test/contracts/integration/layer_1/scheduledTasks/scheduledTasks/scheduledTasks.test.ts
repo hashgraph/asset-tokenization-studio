@@ -491,5 +491,84 @@ export function scheduledTasksTests(getCtx: () => AssetMockCtx): void {
         );
       });
     });
+
+    describe("_triggerOneSubTask coverage", () => {
+      it("GIVEN a cross-ordered task with an unknown sub-task type WHEN triggered THEN it completes without error", async () => {
+        const currentTimestamp = await getDltTimestamp();
+        const taskTimestamp = currentTimestamp + TIME_PERIODS_S.DAY;
+
+        await asset.forceAddCrossOrderedTask(taskTimestamp, ethers.ZeroHash);
+
+        expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(1);
+
+        await asset.changeSystemTimestamp(taskTimestamp + 1);
+
+        await asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks();
+
+        expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(0);
+      });
+
+      it("GIVEN a cross-ordered balance-adjustment task with an empty sub-queue WHEN triggered THEN it completes without error", async () => {
+        const currentTimestamp = await getDltTimestamp();
+        const taskTimestamp = currentTimestamp + TIME_PERIODS_S.DAY;
+
+        await asset.forceAddCrossOrderedTask(taskTimestamp, ATS_TASK.BALANCE_ADJUSTMENT);
+
+        expect((await asset.getScheduledBalanceAdjustments(0, 10, true)).length).to.equal(0);
+
+        await asset.changeSystemTimestamp(taskTimestamp + 1);
+
+        await asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks();
+
+        expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(0);
+      });
+
+      it("GIVEN a cross-ordered task whose balance-adjustment sub-task is not yet due WHEN triggered THEN sub-task remains in queue", async () => {
+        const currentTimestamp = await getDltTimestamp();
+        const crossOrderedTimestamp = currentTimestamp + TIME_PERIODS_S.DAY;
+        const subTaskTimestamp = crossOrderedTimestamp + TIME_PERIODS_S.DAY;
+
+        await asset.forceAddCrossOrderedTask(crossOrderedTimestamp, ATS_TASK.BALANCE_ADJUSTMENT);
+        await asset.forceAddRawBalanceAdjustmentSubTask(subTaskTimestamp);
+
+        expect((await asset.getScheduledBalanceAdjustments(0, 10, true)).length).to.equal(1);
+
+        await asset.changeSystemTimestamp(crossOrderedTimestamp + 1);
+
+        await asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks();
+
+        expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(0);
+        expect((await asset.getScheduledBalanceAdjustments(0, 10, true)).length).to.equal(1);
+      });
+
+      it("GIVEN a KPI-linked coupon WHEN triggered at fixing date THEN coupon listing sub-task is successfully processed", async () => {
+        await asset.connect(deployer).setCouponRateType(2);
+
+        const currentTimestamp = await getDltTimestamp();
+        const fixingDate = currentTimestamp + TIME_PERIODS_S.DAY;
+
+        await asset.connect(deployer).setCoupon({
+          recordDate: fixingDate.toString(),
+          executionDate: (fixingDate + TIME_PERIODS_S.DAY).toString(),
+          rate: 0,
+          rateDecimals: 0,
+          startDate: currentTimestamp.toString(),
+          endDate: fixingDate.toString(),
+          fixingDate: fixingDate.toString(),
+          rateStatus: 0,
+        });
+
+        const couponListingBefore = await asset.scheduledCouponListingCount(true);
+
+        expect(couponListingBefore).to.be.gt(0);
+
+        await asset.changeSystemTimestamp(fixingDate + 1);
+
+        await asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks();
+
+        expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(0);
+        expect(await asset.scheduledCouponListingCount(true)).to.be.lt(couponListingBefore);
+      });
+    });
   });
 }
