@@ -15,7 +15,7 @@ import {
   EMPTY_HEX_BYTES,
   dateToUnixTimestamp,
   EIP1066_CODES,
-  RESOLVER_KEY_RECOVERY,
+  RESOLVER_KEYS,
 } from "@scripts";
 import { ASSET_MOCK_CONFIG_ID } from "../../../fixtures/deploy/assetMockConfiguration";
 
@@ -771,13 +771,13 @@ export function recoveryTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeRecovery is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeRecovery())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_RECOVERY, 1);
+          .withArgs(RESOLVER_KEYS.recovery, 1);
       });
     });
 
     describe("initializeRecovery event", () => {
       it("GIVEN a fresh deployment WHEN initializeRecovery is called THEN emits RecoveryInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_RECOVERY);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.recovery);
         await expect(asset.initializeRecovery()).to.emit(asset, "RecoveryInitialized");
       });
     });

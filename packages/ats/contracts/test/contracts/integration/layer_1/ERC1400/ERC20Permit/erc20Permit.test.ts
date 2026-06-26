@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
-import { ADDRESS_ZERO, ATS_ROLES, RESOLVER_KEY_ERC20PERMIT } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import { executeRbac, getDltTimestamp } from "@test";
 
 export function erc20PermitTests(getCtx: () => AssetMockCtx): void {
@@ -309,7 +309,7 @@ export function erc20PermitTests(getCtx: () => AssetMockCtx): void {
 
     describe("initializeERC20Permit event", () => {
       it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeERC20Permit is called THEN it emits ERC20PermitInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_ERC20PERMIT);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.erc20Permit);
         await expect(asset.initializeERC20Permit()).to.emit(asset, "ERC20PermitInitialized");
       });
     });

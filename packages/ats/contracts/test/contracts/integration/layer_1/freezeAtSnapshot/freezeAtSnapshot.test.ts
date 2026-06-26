@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { ZERO, EMPTY_STRING, ATS_ROLES, DEFAULT_PARTITION, RESOLVER_KEY_FREEZE_AT_SNAPSHOT } from "@scripts";
+import { ZERO, EMPTY_STRING, ATS_ROLES, DEFAULT_PARTITION, RESOLVER_KEYS } from "@scripts";
 import { MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
 import type { AssetMockCtx } from "@test";
@@ -139,13 +139,13 @@ export function freezeAtSnapshotTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeFreezeAtSnapshot is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeFreezeAtSnapshot())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_FREEZE_AT_SNAPSHOT, 1);
+          .withArgs(RESOLVER_KEYS.freezeAtSnapshot, 1);
       });
     });
 
     describe("initializeFreezeAtSnapshot event", () => {
       it("GIVEN a fresh deployment WHEN initializeFreezeAtSnapshot is called THEN emits FreezeAtSnapshotInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_FREEZE_AT_SNAPSHOT);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.freezeAtSnapshot);
         await expect(asset.initializeFreezeAtSnapshot()).to.emit(asset, "FreezeAtSnapshotInitialized");
       });
     });

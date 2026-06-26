@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock, MockedWhitelist, MockedBlacklist } from "@contract-types";
 import type { AssetMockCtx } from "@test";
-import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, GAS_LIMIT, RESOLVER_KEY_EXTERNAL_CONTROL_LIST } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, GAS_LIMIT, RESOLVER_KEYS } from "@scripts";
 
 export function externalControlListTests(getCtx: () => AssetMockCtx): void {
   describe("ExternalControlList Management Tests", () => {
@@ -317,7 +317,7 @@ export function externalControlListTests(getCtx: () => AssetMockCtx): void {
 
     describe("initializeExternalControlLists event", () => {
       it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeExternalControlLists is called THEN it emits ExternalControlListInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_EXTERNAL_CONTROL_LIST);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.externalControlListManagement);
         await expect(asset.initializeExternalControlLists([initMock1.target as string])).to.emit(
           asset,
           "ExternalControlListInitialized",

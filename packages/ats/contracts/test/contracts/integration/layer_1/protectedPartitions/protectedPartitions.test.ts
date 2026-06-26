@@ -6,17 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { IAssetMock, ComplianceMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
-import {
-  DEFAULT_PARTITION,
-  ZERO,
-  EMPTY_STRING,
-  ADDRESS_ZERO,
-  ATS_ROLES,
-  RESOLVER_KEY_PROTECTED_PARTITIONS,
-  RESOLVER_KEY_PROTECTED_BY_PARTITION,
-  RESOLVER_KEY_PROTECTED_CLEARING_BY_PARTITION,
-  RESOLVER_KEY_PROTECTED_CLEARING_HOLD_BY_PARTITION,
-} from "@scripts";
+import { DEFAULT_PARTITION, ZERO, EMPTY_STRING, ADDRESS_ZERO, ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import { EVENT_NAMES, MAX_UINT256, expectExactlyOneEvent } from "@test";
 import { executeRbac } from "@test";
 
@@ -315,7 +305,7 @@ export function protectedPartitionsTests(getCtx: () => AssetMockCtx): void {
 
     describe("initializeProtectedPartitions event", () => {
       it("GIVEN a fresh deployment WHEN initializeProtectedPartitions is called THEN emits ProtectedPartitionsInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_PROTECTED_PARTITIONS);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.protectedPartitions);
         await expect(asset.initializeProtectedPartitions(true)).to.emit(asset, "ProtectedPartitionsInitialized");
       });
     });
@@ -1192,13 +1182,13 @@ export function protectedPartitionsTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeProtectedByPartition THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeProtectedByPartition())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_PROTECTED_BY_PARTITION, 1);
+          .withArgs(RESOLVER_KEYS.protectedByPartition, 1);
       });
     });
 
     describe("initializeProtectedByPartition event", () => {
       it("GIVEN fresh facet WHEN initializeProtectedByPartition THEN emits ProtectedByPartitionInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_PROTECTED_BY_PARTITION);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.protectedByPartition);
         await expect(asset.initializeProtectedByPartition()).to.emit(asset, "ProtectedByPartitionInitialized");
       });
     });
@@ -1213,13 +1203,13 @@ export function protectedPartitionsTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeProtectedClearingByPartition THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeProtectedClearingByPartition())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_PROTECTED_CLEARING_BY_PARTITION, 1);
+          .withArgs(RESOLVER_KEYS.protectedClearingByPartition, 1);
       });
     });
 
     describe("initializeProtectedClearingByPartition event", () => {
       it("GIVEN fresh facet WHEN initializeProtectedClearingByPartition THEN emits ProtectedClearingByPartitionInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_PROTECTED_CLEARING_BY_PARTITION);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.protectedClearingByPartition);
         await expect(asset.initializeProtectedClearingByPartition()).to.emit(
           asset,
           "ProtectedClearingByPartitionInitialized",
@@ -1237,13 +1227,13 @@ export function protectedPartitionsTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeProtectedClearingHoldByPartition THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeProtectedClearingHoldByPartition())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_PROTECTED_CLEARING_HOLD_BY_PARTITION, 1);
+          .withArgs(RESOLVER_KEYS.protectedClearingHoldByPartition, 1);
       });
     });
 
     describe("initializeProtectedClearingHoldByPartition event", () => {
       it("GIVEN fresh facet WHEN initializeProtectedClearingHoldByPartition THEN emits ProtectedClearingHoldByPartitionInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_PROTECTED_CLEARING_HOLD_BY_PARTITION);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.protectedClearingHoldByPartition);
         await expect(asset.initializeProtectedClearingHoldByPartition()).to.emit(
           asset,
           "ProtectedClearingHoldByPartitionInitialized",

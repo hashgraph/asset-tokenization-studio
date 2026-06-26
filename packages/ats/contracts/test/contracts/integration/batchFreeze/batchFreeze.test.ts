@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
-import { ATS_ROLES, EMPTY_STRING, ZERO, ADDRESS_ZERO, RESOLVER_KEY_BATCH_FREEZE } from "@scripts";
+import { ATS_ROLES, EMPTY_STRING, ZERO, ADDRESS_ZERO, RESOLVER_KEYS } from "@scripts";
 
 const AMOUNT = 1000;
 const EMPTY_VC_ID = EMPTY_STRING;
@@ -350,13 +350,13 @@ export function batchFreezeTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeBatchFreeze is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeBatchFreeze())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_BATCH_FREEZE, 1);
+          .withArgs(RESOLVER_KEYS.batchFreeze, 1);
       });
     });
 
     describe("initializeBatchFreeze event", () => {
       it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeBatchFreeze is called THEN emits BatchFreezeInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_BATCH_FREEZE);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.batchFreeze);
         await expect(asset.initializeBatchFreeze()).to.emit(asset, "BatchFreezeInitialized");
       });
     });

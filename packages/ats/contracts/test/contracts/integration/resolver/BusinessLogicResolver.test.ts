@@ -20,7 +20,7 @@ import {
   KycFacet__factory,
   LockFacet,
 } from "@contract-types";
-import { EQUITY_CONFIG_ID, ATS_ROLES, ADDRESS_ZERO } from "@scripts";
+import { ATS_ROLES, ADDRESS_ZERO, CONFIG_IDS } from "@scripts";
 import { deployOrchestratorLibraries, getFacetLibraryLinks, hasOrchestratorLibraryAddresses } from "@scripts/domain";
 import { deployAtsInfrastructureFixture } from "@test";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
@@ -119,13 +119,13 @@ describe("BusinessLogicResolver", () => {
 
     it("GIVEN a paused contract WHEN addSelectorsToBlacklist is called THEN transaction fails with IsPaused", async () => {
       await expect(
-        businessLogicResolver.addSelectorsToBlacklist(EQUITY_CONFIG_ID, ["0x8456cb59"]),
+        businessLogicResolver.addSelectorsToBlacklist(CONFIG_IDS.equity, ["0x8456cb59"]),
       ).to.be.revertedWithCustomError(businessLogicResolver, "IsPaused");
     });
 
     it("GIVEN a paused contract WHEN removeSelectorsFromBlacklist is called THEN transaction fails with IsPaused", async () => {
       await expect(
-        businessLogicResolver.removeSelectorsFromBlacklist(EQUITY_CONFIG_ID, ["0x8456cb59"]),
+        businessLogicResolver.removeSelectorsFromBlacklist(CONFIG_IDS.equity, ["0x8456cb59"]),
       ).to.be.revertedWithCustomError(businessLogicResolver, "IsPaused");
     });
 
@@ -157,7 +157,7 @@ describe("BusinessLogicResolver", () => {
       const blackListedSelectors = ["0x8456cb59"]; // pause() selector
 
       await expect(
-        businessLogicResolver.connect(signer_C).addSelectorsToBlacklist(EQUITY_CONFIG_ID, blackListedSelectors),
+        businessLogicResolver.connect(signer_C).addSelectorsToBlacklist(CONFIG_IDS.equity, blackListedSelectors),
       ).to.be.revertedWithCustomError(businessLogicResolver, "AccountHasNoRole");
     });
 
@@ -165,7 +165,7 @@ describe("BusinessLogicResolver", () => {
       const blackListedSelectors = ["0x8456cb59"]; // pause() selector
 
       await expect(
-        businessLogicResolver.connect(signer_C).removeSelectorsFromBlacklist(EQUITY_CONFIG_ID, blackListedSelectors),
+        businessLogicResolver.connect(signer_C).removeSelectorsFromBlacklist(CONFIG_IDS.equity, blackListedSelectors),
       ).to.be.revertedWithCustomError(businessLogicResolver, "AccountHasNoRole");
     });
 
@@ -362,27 +362,27 @@ describe("BusinessLogicResolver", () => {
     it("GIVEN a configuration add a selector to the blacklist THEN queries respond with correct values", async () => {
       const blackListedSelectors = ["0x8456cb59"]; // pause() selector
 
-      await businessLogicResolver.addSelectorsToBlacklist(EQUITY_CONFIG_ID, blackListedSelectors);
+      await businessLogicResolver.addSelectorsToBlacklist(CONFIG_IDS.equity, blackListedSelectors);
 
-      expect(await businessLogicResolver.getSelectorsBlacklist(EQUITY_CONFIG_ID, 0, 100)).to.deep.equal(
+      expect(await businessLogicResolver.getSelectorsBlacklist(CONFIG_IDS.equity, 0, 100)).to.deep.equal(
         blackListedSelectors,
       );
 
-      await businessLogicResolver.removeSelectorsFromBlacklist(EQUITY_CONFIG_ID, blackListedSelectors);
-      expect(await businessLogicResolver.getSelectorsBlacklist(EQUITY_CONFIG_ID, 0, 100)).to.deep.equal([]);
+      await businessLogicResolver.removeSelectorsFromBlacklist(CONFIG_IDS.equity, blackListedSelectors);
+      expect(await businessLogicResolver.getSelectorsBlacklist(CONFIG_IDS.equity, 0, 100)).to.deep.equal([]);
     });
 
     it("GIVEN a selector already in blacklist WHEN adding it again THEN it should not be duplicated", async () => {
       const blackListedSelectors = ["0x8456cb59"]; // pause() selector
 
-      await businessLogicResolver.addSelectorsToBlacklist(EQUITY_CONFIG_ID, blackListedSelectors);
-      expect(await businessLogicResolver.getSelectorsBlacklist(EQUITY_CONFIG_ID, 0, 100)).to.deep.equal(
+      await businessLogicResolver.addSelectorsToBlacklist(CONFIG_IDS.equity, blackListedSelectors);
+      expect(await businessLogicResolver.getSelectorsBlacklist(CONFIG_IDS.equity, 0, 100)).to.deep.equal(
         blackListedSelectors,
       );
 
       // Add the same selector again
-      await businessLogicResolver.addSelectorsToBlacklist(EQUITY_CONFIG_ID, blackListedSelectors);
-      expect(await businessLogicResolver.getSelectorsBlacklist(EQUITY_CONFIG_ID, 0, 100)).to.deep.equal(
+      await businessLogicResolver.addSelectorsToBlacklist(CONFIG_IDS.equity, blackListedSelectors);
+      expect(await businessLogicResolver.getSelectorsBlacklist(CONFIG_IDS.equity, 0, 100)).to.deep.equal(
         blackListedSelectors,
       );
     });
@@ -391,8 +391,8 @@ describe("BusinessLogicResolver", () => {
       const blackListedSelectors = ["0x8456cb59"]; // pause() selector
 
       // Remove a selector that doesn't exist
-      await businessLogicResolver.removeSelectorsFromBlacklist(EQUITY_CONFIG_ID, blackListedSelectors);
-      expect(await businessLogicResolver.getSelectorsBlacklist(EQUITY_CONFIG_ID, 0, 100)).to.deep.equal([]);
+      await businessLogicResolver.removeSelectorsFromBlacklist(CONFIG_IDS.equity, blackListedSelectors);
+      expect(await businessLogicResolver.getSelectorsBlacklist(CONFIG_IDS.equity, 0, 100)).to.deep.equal([]);
     });
 
     it("GIVEN address zero WHEN replacing it THEN transaction fails with ZeroAddressNotAllowed", async () => {
@@ -460,7 +460,7 @@ describe("BusinessLogicResolver", () => {
         beforeEach(async () => {
           const infra = await loadFixture(deployAtsInfrastructureFixture);
           helper = await new AccessControlTestHelper__factory(infra.deployer).deploy();
-          await helper.setupResolverProxy(await infra.blr.getAddress(), EQUITY_CONFIG_ID, 1);
+          await helper.setupResolverProxy(await infra.blr.getAddress(), CONFIG_IDS.equity, 1);
           await helper.grantAdminRole(infra.deployer.address);
         });
 
@@ -602,7 +602,7 @@ describe("BusinessLogicResolver", () => {
         beforeEach(async () => {
           const infra = await loadFixture(deployAtsInfrastructureFixture);
           helper = await new PauseTestHelper__factory(infra.deployer).deploy();
-          await helper.setupResolverProxy(await infra.blr.getAddress(), EQUITY_CONFIG_ID, 1);
+          await helper.setupResolverProxy(await infra.blr.getAddress(), CONFIG_IDS.equity, 1);
           await helper.grantAdminRole(infra.deployer.address);
         });
 

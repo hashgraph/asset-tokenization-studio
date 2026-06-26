@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
-import { ATS_ROLES, DEFAULT_PARTITION, EIP1066_CODES, EMPTY_STRING, ZERO, RESOLVER_KEY_TRANSFER } from "@scripts";
+import { ATS_ROLES, DEFAULT_PARTITION, EIP1066_CODES, EMPTY_STRING, ZERO, RESOLVER_KEYS } from "@scripts";
 import { executeRbac, MAX_UINT256 } from "@test";
 import { ASSET_MOCK_CONFIG_ID } from "../../../fixtures/deploy/assetMockConfiguration";
 
@@ -477,13 +477,13 @@ export function transferTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeTransfer is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeTransfer())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_TRANSFER, 1);
+          .withArgs(RESOLVER_KEYS.transfer, 1);
       });
     });
 
     describe("initializeTransfer event", () => {
       it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeTransfer is called THEN emits TransferInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_TRANSFER);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.transfer);
         await expect(asset.initializeTransfer()).to.emit(asset, "TransferInitialized");
       });
     });

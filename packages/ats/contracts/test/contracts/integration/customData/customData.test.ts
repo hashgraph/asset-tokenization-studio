@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { ATS_ROLES, RESOLVER_KEY_CUSTOM_DATA } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import { executeRbac } from "@test";
 import type { AssetMockCtx } from "@test";
 
@@ -135,13 +135,13 @@ export function customDataTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeCustomData is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeCustomData([]))
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_CUSTOM_DATA, 1);
+          .withArgs(RESOLVER_KEYS.customData, 1);
       });
     });
 
     describe("initializeCustomData event", () => {
       it("GIVEN a fresh deployment WHEN initializeCustomData is called THEN emits CustomDataInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_CUSTOM_DATA);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.customData);
         await expect(asset.initializeCustomData([])).to.emit(asset, "CustomDataInitialized").withArgs([]);
       });
     });

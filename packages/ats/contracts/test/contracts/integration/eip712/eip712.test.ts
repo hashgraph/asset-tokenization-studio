@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock, type MockEIP712 } from "@contract-types";
 import type { AssetMockCtx } from "@test";
-import { ATS_ROLES, RESOLVER_KEY_EIP712 } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 
 export function eip712Tests(getCtx: () => AssetMockCtx): void {
   describe("EIP712 Tests", () => {
@@ -82,13 +82,13 @@ export function eip712Tests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeEIP712 is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeEIP712())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_EIP712, 1);
+          .withArgs(RESOLVER_KEYS.eip712, 1);
       });
     });
 
     describe("initializeEIP712 event", () => {
       it("GIVEN a fresh deployment WHEN initializeEIP712 is called THEN emits EIP712Initialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_EIP712);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.eip712);
         await expect(asset.initializeEIP712()).to.emit(asset, "EIP712Initialized");
       });
     });

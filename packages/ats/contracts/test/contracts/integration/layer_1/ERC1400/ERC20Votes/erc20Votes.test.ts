@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
-import { RESOLVER_KEY_ERC20VOTES } from "@scripts";
+import { RESOLVER_KEYS } from "@scripts";
 import { executeRbac } from "@test";
 import { ATS_ROLES, DEFAULT_PARTITION } from "@scripts";
 
@@ -86,7 +86,7 @@ export function erc20VotesTests(getCtx: () => AssetMockCtx): void {
 
     describe("initializeERC20Votes event", () => {
       it("GIVEN a fresh deployment WHEN initializeERC20Votes is called THEN emits ERC20VotesInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_ERC20VOTES);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.erc20Votes);
         await expect(asset.initializeERC20Votes(true)).to.emit(asset, "ERC20VotesInitialized");
       });
     });

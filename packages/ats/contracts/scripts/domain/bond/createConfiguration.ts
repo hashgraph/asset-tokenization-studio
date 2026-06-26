@@ -20,7 +20,7 @@ import {
   DEFAULT_BATCH_SIZE,
   RetryOptions,
 } from "@scripts/infrastructure";
-import { BOND_CONFIG_ID } from "../constants";
+import { CONFIG_IDS } from "../constants";
 import { atsRegistry } from "../atsRegistry";
 import type { FacetName } from "../atsRegistry";
 import { buildFacetList } from "../facetEnvironment";
@@ -157,7 +157,7 @@ export const BOND_FACETS: readonly FacetName[] = [
  * Create bond token configuration in BusinessLogicResolver.
  *
  * Thin wrapper that calls the generic core operation with bond-specific data:
- * - Configuration ID: BOND_CONFIG_ID
+ * - Configuration ID: CONFIG_IDS.bond
  * - Facet list: BOND_FACETS
  *
  * All implementation logic is handled by the generic createConfiguration()
@@ -227,7 +227,7 @@ export async function createBondConfiguration(
   });
 
   return createBatchConfiguration(blrContract, {
-    configurationId: BOND_CONFIG_ID,
+    configurationId: CONFIG_IDS.bond,
     facets,
     partialBatchDeploy,
     batchSize,

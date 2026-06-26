@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { ATS_ROLES, RESOLVER_KEY_CORE_AT_SNAPSHOT } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import { executeRbac, grantKycToHolders, DEFAULT_PARTITION } from "@test";
 import type { AssetMockCtx } from "@test";
 
@@ -76,13 +76,13 @@ export function coreAtSnapshotTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeCoreAtSnapshot is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeCoreAtSnapshot())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_CORE_AT_SNAPSHOT, 1);
+          .withArgs(RESOLVER_KEYS.coreAtSnapshot, 1);
       });
     });
 
     describe("initializeCoreAtSnapshot event", () => {
       it("GIVEN a fresh deployment WHEN initializeCoreAtSnapshot is called THEN emits CoreAtSnapshotInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_CORE_AT_SNAPSHOT);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.coreAtSnapshot);
         await expect(asset.initializeCoreAtSnapshot()).to.emit(asset, "CoreAtSnapshotInitialized");
       });
     });

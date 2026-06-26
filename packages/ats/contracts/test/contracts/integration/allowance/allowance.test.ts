@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
-import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO, RESOLVER_KEY_ALLOWANCE } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO, RESOLVER_KEYS } from "@scripts";
 import { ASSET_MOCK_CONFIG_ID } from "../../../fixtures/deploy/assetMockConfiguration";
 import { executeRbac, MAX_UINT256 } from "@test";
 
@@ -354,13 +354,13 @@ export function allowanceTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeAllowance is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeAllowance())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_ALLOWANCE, 1);
+          .withArgs(RESOLVER_KEYS.allowance, 1);
       });
     });
 
     describe("initializeAllowance event", () => {
       it("GIVEN a fresh deployment WHEN initializeAllowance is called THEN emits AllowanceInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_ALLOWANCE);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.allowance);
         await expect(asset.initializeAllowance()).to.emit(asset, "AllowanceInitialized");
       });
     });

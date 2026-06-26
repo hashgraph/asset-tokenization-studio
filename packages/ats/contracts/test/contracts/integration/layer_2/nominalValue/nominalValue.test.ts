@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { ATS_ROLES, RESOLVER_KEY_NOMINAL_VALUE } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import { executeRbac } from "@test";
 import type { AssetMockCtx } from "@test";
 
@@ -32,13 +32,13 @@ export function nominalValueTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeNominalValue THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeNominalValue(1, 6, "0x000000"))
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_NOMINAL_VALUE, 1);
+          .withArgs(RESOLVER_KEYS.nominalValue, 1);
       });
     });
 
     describe("initializeNominalValue event", () => {
       it("GIVEN fresh facet WHEN initializeNominalValue THEN emits NominalValueInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_NOMINAL_VALUE);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.nominalValue);
         await expect(asset.initializeNominalValue(1, 6, "0x000000")).to.emit(asset, "NominalValueInitialized");
       });
     });

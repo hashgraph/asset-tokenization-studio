@@ -11,7 +11,7 @@ import {
   ADDRESS_ZERO,
   ZERO,
   EMPTY_STRING,
-  RESOLVER_KEY_MATURITY,
+  RESOLVER_KEYS,
 } from "@scripts";
 import { grantRoleAndPauseToken, executeRbac, MAX_UINT256, getDltTimestamp } from "@test";
 import type { AssetMockCtx } from "@test";
@@ -312,13 +312,13 @@ export function maturityTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeMaturity is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeMaturity(mockMaturityDate))
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_MATURITY, 1);
+          .withArgs(RESOLVER_KEYS.maturity, 1);
       });
     });
 
     describe("initializeMaturity event", () => {
       it("GIVEN a fresh deployment WHEN initializeMaturity is called THEN emits MaturityInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_MATURITY);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.maturity);
         await expect(asset.initializeMaturity(maturityDate + TIME_PERIODS_S.MONTH)).to.emit(
           asset,
           "MaturityInitialized",

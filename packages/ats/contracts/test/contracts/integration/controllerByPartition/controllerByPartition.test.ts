@@ -6,14 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
-import {
-  DEFAULT_PARTITION,
-  EMPTY_STRING,
-  ZERO,
-  EMPTY_HEX_BYTES,
-  ATS_ROLES,
-  RESOLVER_KEY_CONTROLLER_BY_PARTITION,
-} from "@scripts";
+import { DEFAULT_PARTITION, EMPTY_STRING, ZERO, EMPTY_HEX_BYTES, ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 
 const _WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
 const _AMOUNT = 1000;
@@ -321,13 +314,13 @@ export function controllerByPartitionTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeControllerByPartition is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeControllerByPartition())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_CONTROLLER_BY_PARTITION, 1);
+          .withArgs(RESOLVER_KEYS.controllerByPartition, 1);
       });
     });
 
     describe("initializeControllerByPartition event", () => {
       it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeControllerByPartition is called THEN emits ControllerByPartitionInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_CONTROLLER_BY_PARTITION);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.controllerByPartition);
         await expect(asset.initializeControllerByPartition()).to.emit(asset, "ControllerByPartitionInitialized");
       });
     });

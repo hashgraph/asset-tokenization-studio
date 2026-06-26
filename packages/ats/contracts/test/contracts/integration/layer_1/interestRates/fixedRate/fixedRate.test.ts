@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { ATS_ROLES, RESOLVER_KEY_FIXED_RATE } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import { TEST_BOND_FIXED_RATE, executeRbac } from "@test";
 import type { AssetMockCtx } from "@test";
 
@@ -48,7 +48,7 @@ export function fixedRateTests(getCtx: () => AssetMockCtx): void {
 
     describe("initializeFixedRate event", () => {
       it("GIVEN a fresh deployment WHEN initializeFixedRate is called THEN emits FixedRateInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_FIXED_RATE);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.fixedRate);
         await expect(asset.initializeFixedRate({ rate: 1, rateDecimals: 0 })).to.emit(asset, "FixedRateInitialized");
       });
     });

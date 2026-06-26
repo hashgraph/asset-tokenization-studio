@@ -18,8 +18,7 @@ import {
 import { BusinessLogicResolver } from "@contract-types";
 import { atsRegistry } from "../atsRegistry";
 import type { FacetName } from "../atsRegistry";
-import { INITIALIZE_MOCK_CONFIG_ID } from "../constants";
-import { getMockFacetDefinition } from "./mockFacetsRegistry";
+import { getMockFacetDefinition, INITIALIZE_MOCK_CONFIG_ID } from "./mockFacetsRegistry";
 import type { MockFacetName } from "./mockFacetsRegistry";
 
 // TEST-ONLY: facet set for the InitializeMock domain — the real InitializerFacet

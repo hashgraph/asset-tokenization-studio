@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
-import { ZERO, EMPTY_STRING, ADDRESS_ZERO, dateToUnixTimestamp, ATS_ROLES, RESOLVER_KEY_SNAPSHOTS } from "@scripts";
+import { ZERO, EMPTY_STRING, ADDRESS_ZERO, dateToUnixTimestamp, ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import { DEFAULT_PARTITION, PARTITION_ID_2, grantRoleAndPauseToken, MAX_UINT256, executeRbac } from "@test";
 
 const amount = 1000;
@@ -693,7 +693,7 @@ export function snapshotsTests(getCtx: () => AssetMockCtx): void {
       });
 
       it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeSnapshots is called THEN it emits SnapshotsInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_SNAPSHOTS);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.snapshots);
         await expect(asset.initializeSnapshots()).to.emit(asset, "SnapshotsInitialized");
       });
     });

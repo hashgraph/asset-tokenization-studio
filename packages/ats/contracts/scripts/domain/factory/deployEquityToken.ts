@@ -4,7 +4,7 @@ import { ethers, type EventLog } from "ethers";
 import type { IFactory, ResolverProxy } from "@contract-types";
 import { ResolverProxy__factory } from "@contract-types";
 import { GAS_LIMIT } from "@scripts/infrastructure";
-import { ATS_ROLES, EQUITY_CONFIG_ID } from "../constants";
+import { ATS_ROLES, CONFIG_IDS } from "../constants";
 import { EquityDetailsDataParams, FactoryRegulationDataParams, Rbac, SecurityDataParams } from "./types";
 
 // ============================================================================
@@ -71,7 +71,7 @@ export async function deployEquityFromFactory(
 
   // Build resolver proxy configuration
   const resolverProxyConfigurationV2 = {
-    configurationId: EQUITY_CONFIG_ID,
+    configurationId: CONFIG_IDS.equity,
     configurationVersion: 1,
     replacementEnabled: true,
   };

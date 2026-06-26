@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
-import { ATS_ROLES, EMPTY_HEX_BYTES, EMPTY_STRING, RESOLVER_KEY_PARTITIONS, ZERO } from "@scripts";
+import { ATS_ROLES, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO, RESOLVER_KEYS } from "@scripts";
 import { executeRbac, MAX_UINT256 } from "@test";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
@@ -96,13 +96,13 @@ export function partitionsTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializePartitions THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializePartitions(false))
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_PARTITIONS, 1);
+          .withArgs(RESOLVER_KEYS.partitions, 1);
       });
     });
 
     describe("initializePartitions event", () => {
       it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializePartitions THEN emits PartitionsInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_PARTITIONS);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.partitions);
         await expect(asset.initializePartitions(false)).to.emit(asset, "PartitionsInitialized");
       });
     });

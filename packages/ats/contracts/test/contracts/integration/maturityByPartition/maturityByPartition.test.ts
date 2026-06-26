@@ -11,7 +11,7 @@ import {
   ADDRESS_ZERO,
   ZERO,
   EMPTY_STRING,
-  RESOLVER_KEY_MATURITY_BY_PARTITION,
+  RESOLVER_KEYS,
 } from "@scripts";
 import { getDltTimestamp, grantRoleAndPauseToken, executeRbac, MAX_UINT256 } from "@test";
 import type { AssetMockCtx } from "@test";
@@ -232,13 +232,13 @@ export function maturityByPartitionTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeMaturityByPartition is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeMaturityByPartition())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_MATURITY_BY_PARTITION, 1);
+          .withArgs(RESOLVER_KEYS.maturityByPartition, 1);
       });
     });
 
     describe("initializeMaturityByPartition event", () => {
       it("GIVEN a fresh deployment WHEN initializeMaturityByPartition is called THEN emits MaturityByPartitionInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_MATURITY_BY_PARTITION);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.maturityByPartition);
         await expect(asset.initializeMaturityByPartition()).to.emit(asset, "MaturityByPartitionInitialized");
       });
     });

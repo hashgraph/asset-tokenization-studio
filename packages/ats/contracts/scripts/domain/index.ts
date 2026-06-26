@@ -12,8 +12,8 @@
  * ```typescript
  * // Import from domain layer
  * import {
- *   EQUITY_CONFIG_ID,
- *   BOND_CONFIG_ID,
+ *   CONFIG_IDS.equity,
+ *   CONFIG_IDS.bond,
  *   deployFactory,
  *   createEquityConfiguration,
  *   createBondConfiguration,

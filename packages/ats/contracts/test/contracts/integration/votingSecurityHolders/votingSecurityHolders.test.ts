@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { DEFAULT_PARTITION, ATS_ROLES, ZERO, EMPTY_STRING, RESOLVER_KEY_VOTING_SECURITY_HOLDERS } from "@scripts";
+import { DEFAULT_PARTITION, ATS_ROLES, ZERO, EMPTY_STRING, RESOLVER_KEYS } from "@scripts";
 import { executeRbac, grantKycToHolders, MAX_UINT256 } from "@test";
 import type { AssetMockCtx } from "@test";
 
@@ -145,13 +145,13 @@ export function votingSecurityHoldersTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeVotingSecurityHolders THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeVotingSecurityHolders())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_VOTING_SECURITY_HOLDERS, 1);
+          .withArgs(RESOLVER_KEYS.votingSecurityHolders, 1);
       });
     });
 
     describe("initializeVotingSecurityHolders event", () => {
       it("GIVEN fresh facet WHEN initializeVotingSecurityHolders THEN emits VotingSecurityHoldersInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_VOTING_SECURITY_HOLDERS);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.votingSecurityHolders);
         await expect(asset.initializeVotingSecurityHolders()).to.emit(asset, "VotingSecurityHoldersInitialized");
       });
     });

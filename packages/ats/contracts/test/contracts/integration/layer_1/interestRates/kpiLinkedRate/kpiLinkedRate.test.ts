@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock, KpiLinkedRate__factory, Kpis__factory } from "@contract-types";
 import type { KpiLinkedRate, Kpis } from "@contract-types";
-import { ATS_ROLES, RESOLVER_KEY_KPI_LINKED_RATE, TIME_PERIODS_S } from "@scripts";
+import { ATS_ROLES, TIME_PERIODS_S, RESOLVER_KEYS } from "@scripts";
 import { TEST_BOND_KPI_LINKED_RATE, executeRbac, getDltTimestamp } from "@test";
 import type { AssetMockCtx } from "@test";
 
@@ -105,7 +105,7 @@ export function kpiLinkedRateTests(getCtx: () => AssetMockCtx): void {
 
     describe("initializeKpiLinkedRate event", () => {
       it("GIVEN a fresh deployment WHEN initializeKpiLinkedRate is called THEN emits KpiLinkedRateInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_KPI_LINKED_RATE);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.kpiLinkedRate);
         await expect(
           kpiRate.initializeKpiLinkedRate(
             {

@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES, RESOLVER_KEY_OPERATOR_BY_PARTITION } from "@scripts";
+import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES, RESOLVER_KEYS } from "@scripts";
 import { executeRbac, grantKycToHolders } from "@test";
 import type { AssetMockCtx } from "@test";
 
@@ -331,13 +331,13 @@ export function operatorByPartitionTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeOperatorByPartition is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeOperatorByPartition())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_OPERATOR_BY_PARTITION, 1);
+          .withArgs(RESOLVER_KEYS.operatorByPartition, 1);
       });
     });
 
     describe("initializeOperatorByPartition event", () => {
       it("GIVEN a fresh deployment WHEN initializeOperatorByPartition is called THEN emits OperatorByPartitionInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_OPERATOR_BY_PARTITION);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.operatorByPartition);
         await expect(asset.initializeOperatorByPartition()).to.emit(asset, "OperatorByPartitionInitialized");
       });
     });

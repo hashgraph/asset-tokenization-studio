@@ -7,9 +7,15 @@ import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
 import { grantRoleAndPauseToken } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
-import { EMPTY_STRING, ZERO, DEFAULT_PARTITION, ATS_ROLES, ADDRESS_ZERO, EMPTY_HEX_BYTES } from "@scripts";
-
-const RESOLVER_KEY_CONTROLLER = "0xf020acbcf895b1f0961c02558f58e8e3f0a254c27f0e6287127ac2f43893df46";
+import {
+  EMPTY_STRING,
+  ZERO,
+  DEFAULT_PARTITION,
+  ATS_ROLES,
+  ADDRESS_ZERO,
+  EMPTY_HEX_BYTES,
+  RESOLVER_KEYS,
+} from "@scripts";
 
 const amount = 1;
 const data = "0x1234";
@@ -67,7 +73,7 @@ export function controllerTests(getCtx: () => AssetMockCtx): void {
         });
 
         it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeController is called THEN ControllerInitialized event is emitted", async () => {
-          await asset.forceFacetNotRegistered(RESOLVER_KEY_CONTROLLER);
+          await asset.forceFacetNotRegistered(RESOLVER_KEYS.controller);
           await expect(asset.initializeController(false)).to.emit(asset, "ControllerInitialized").withArgs(false);
         });
       });

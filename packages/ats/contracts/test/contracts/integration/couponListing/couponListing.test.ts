@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock, IAssetMock__factory } from "@contract-types";
-import { ATS_ROLES, TIME_PERIODS_S, RESOLVER_KEY_COUPON_LISTING } from "@scripts";
+import { ATS_ROLES, TIME_PERIODS_S, RESOLVER_KEYS } from "@scripts";
 import { getDltTimestamp } from "@test";
 import type { AssetMockCtx } from "@test";
 
@@ -412,13 +412,13 @@ export function couponListingTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeCouponListing is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeCouponListing())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_COUPON_LISTING, 1);
+          .withArgs(RESOLVER_KEYS.couponListing, 1);
       });
     });
 
     describe("initializeCouponListing event", () => {
       it("GIVEN a fresh deployment WHEN initializeCouponListing is called THEN emits CouponListingInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_COUPON_LISTING);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.couponListing);
         await expect(asset.initializeCouponListing()).to.emit(asset, "CouponListingInitialized");
       });
     });

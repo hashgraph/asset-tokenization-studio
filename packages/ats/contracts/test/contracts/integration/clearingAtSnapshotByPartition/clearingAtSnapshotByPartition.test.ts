@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
-import { ZERO, EMPTY_STRING, ATS_ROLES, RESOLVER_KEY_CLEARING_AT_SNAPSHOT_BY_PARTITION } from "@scripts";
+import { ZERO, EMPTY_STRING, ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import { executeRbac, MAX_UINT256 } from "@test";
 import { ASSET_MOCK_CONFIG_ID } from "../../../fixtures/deploy/assetMockConfiguration";
 
@@ -173,13 +173,13 @@ export function clearingAtSnapshotByPartitionTests(getCtx: () => AssetMockCtx): 
       it("GIVEN already-initialised WHEN initializeClearingAtSnapshotByPartition THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeClearingAtSnapshotByPartition())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_CLEARING_AT_SNAPSHOT_BY_PARTITION, 1);
+          .withArgs(RESOLVER_KEYS.clearingAtSnapshotByPartition, 1);
       });
     });
 
     describe("initializeClearingAtSnapshotByPartition event", () => {
       it("GIVEN fresh facet WHEN initializeClearingAtSnapshotByPartition THEN emits ClearingAtSnapshotByPartitionInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_CLEARING_AT_SNAPSHOT_BY_PARTITION);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.clearingAtSnapshotByPartition);
         await expect(asset.initializeClearingAtSnapshotByPartition()).to.emit(
           asset,
           "ClearingAtSnapshotByPartitionInitialized",

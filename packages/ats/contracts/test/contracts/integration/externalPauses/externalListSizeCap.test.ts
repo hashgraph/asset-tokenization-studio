@@ -5,13 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
-import {
-  ATS_ROLES,
-  GAS_LIMIT,
-  RESOLVER_KEY_EXTERNAL_CONTROL_LIST,
-  RESOLVER_KEY_EXTERNAL_KYC_LIST,
-  RESOLVER_KEY_EXTERNAL_PAUSE,
-} from "@scripts";
+import { ATS_ROLES, GAS_LIMIT, RESOLVER_KEYS } from "@scripts";
 
 const MAX_EXTERNAL_LIST_SIZE = 10;
 
@@ -66,7 +60,7 @@ export function externalListSizeCapTests(getCtx: () => AssetMockCtx): void {
 
       it("GIVEN initialisation with more than MAX entries THEN it reverts with MaxExternalListSizeReached", async () => {
         const mocks = await deployMockAddresses("MockedExternalPause", MAX_EXTERNAL_LIST_SIZE + 1);
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_EXTERNAL_PAUSE);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.externalPauseManagement);
         await expect(asset.initializeExternalPauses(mocks)).to.be.revertedWithCustomError(
           asset,
           "MaxExternalListSizeReached",
@@ -96,7 +90,7 @@ export function externalListSizeCapTests(getCtx: () => AssetMockCtx): void {
 
       it("GIVEN initialisation with more than MAX entries THEN it reverts with MaxExternalListSizeReached", async () => {
         const mocks = await deployMockAddresses("MockedWhitelist", MAX_EXTERNAL_LIST_SIZE + 1);
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_EXTERNAL_CONTROL_LIST);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.externalControlListManagement);
         await expect(asset.initializeExternalControlLists(mocks)).to.be.revertedWithCustomError(
           asset,
           "MaxExternalListSizeReached",
@@ -126,7 +120,7 @@ export function externalListSizeCapTests(getCtx: () => AssetMockCtx): void {
 
       it("GIVEN initialisation with more than MAX entries THEN it reverts with MaxExternalListSizeReached", async () => {
         const mocks = await deployMockAddresses("MockedExternalKycList", MAX_EXTERNAL_LIST_SIZE + 1);
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_EXTERNAL_KYC_LIST);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.externalKycListManagement);
         await expect(asset.initializeExternalKycLists(mocks)).to.be.revertedWithCustomError(
           asset,
           "MaxExternalListSizeReached",

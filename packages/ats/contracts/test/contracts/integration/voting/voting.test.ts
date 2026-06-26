@@ -1,6 +1,6 @@
 import { IAssetMock } from "@contract-types";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { ATS_ROLES, DEFAULT_PARTITION, RESOLVER_KEY_VOTING } from "@scripts";
+import { ATS_ROLES, DEFAULT_PARTITION, RESOLVER_KEYS } from "@scripts";
 import { ASSET_MOCK_CONFIG_ID } from "../../../fixtures/deploy/assetMockConfiguration";
 import { executeRbac, grantKycToHolders, grantRoleAndPauseToken } from "@test";
 import { expect } from "chai";
@@ -394,13 +394,13 @@ export function votingTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeVoting is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeVoting())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_VOTING, 1);
+          .withArgs(RESOLVER_KEYS.voting, 1);
       });
     });
 
     describe("initializeVoting event", () => {
       it("GIVEN a fresh deployment WHEN initializeVoting is called THEN emits VotingInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_VOTING);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.voting);
         await expect(asset.initializeVoting()).to.emit(asset, "VotingInitialized");
       });
     });

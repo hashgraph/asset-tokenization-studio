@@ -16,6 +16,7 @@ import { deployAtsInfrastructureFullAssetFixture } from "../../../fixtures/deplo
 import { ASSET_MOCK_CONFIG_ID, getAssetMockFacets } from "../../../fixtures/deploy/assetMockConfiguration";
 import { BusinessLogicResolver__factory } from "@contract-types";
 import { silenceScriptLogging } from "@test";
+import { RESOLVER_KEYS } from "@scripts";
 
 describe("AssetMock BLR Configuration - Integration Tests", () => {
   before(silenceScriptLogging);
@@ -52,13 +53,11 @@ describe("AssetMock BLR Configuration - Integration Tests", () => {
     expect(Number(facetCount)).to.equal(expectedFacets.length);
   });
 
-  it("should register MockDiamondCut under RESOLVER_KEY_DIAMOND", async () => {
-    // GIVEN the full ATS infrastructure with AssetMock config and the
-    // known RESOLVER_KEY_DIAMOND value (the bytes32 used in the BLR registry)
-    const RESOLVER_KEY_DIAMOND = "0xd9202bb838fd8d0f2866f13141398cfb9fa74cbbbce7449c9158caffa9c509f4";
+  it("should register MockDiamondCut under the diamond resolver key", async () => {
+    // GIVEN the full ATS infrastructure with the AssetMock config registered
 
     // WHEN we query the BLR's latest version for the diamond resolver key
-    const diamondVersion = (await ctx.blr.getLatestVersions([RESOLVER_KEY_DIAMOND]))[0];
+    const diamondVersion = (await ctx.blr.getLatestVersions([RESOLVER_KEYS.diamond]))[0];
 
     // THEN the diamond facet (MockDiamondCut) has been registered (version >= 1)
     expect(Number(diamondVersion)).to.be.greaterThanOrEqual(1);

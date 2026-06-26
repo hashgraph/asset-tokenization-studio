@@ -4,7 +4,7 @@ import { ethers, type EventLog } from "ethers";
 import type { IFactory, IMockFactory, ResolverProxy } from "@contract-types";
 import { ResolverProxy__factory } from "@contract-types";
 import { GAS_LIMIT } from "@scripts/infrastructure";
-import { ATS_ROLES, BOND_CONFIG_ID } from "../constants";
+import { ATS_ROLES, CONFIG_IDS } from "../constants";
 import { BondDetailsDataParams, FactoryRegulationDataParams, Rbac, SecurityDataParams } from "./types";
 
 // ============================================================================
@@ -80,7 +80,7 @@ export async function deployBondFromFactory(
 
   // Build resolver proxy configuration
   const resolverProxyConfigurationV2 = {
-    configurationId: BOND_CONFIG_ID,
+    configurationId: CONFIG_IDS.bond,
     configurationVersion: 1,
     replacementEnabled: true,
   };

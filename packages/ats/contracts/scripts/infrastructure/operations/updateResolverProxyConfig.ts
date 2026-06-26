@@ -250,7 +250,7 @@ export async function updateResolverProxyVersion(
  * const result = await updateResolverProxyConfig(
  *   signer,
  *   '0x123...',            // proxy address
- *   BOND_CONFIG_ID,        // new config ID
+ *   CONFIG_IDS.bond,        // new config ID
  *   2,                     // new version
  *   { confirmations: 0 }
  * )
@@ -302,7 +302,7 @@ export async function updateResolverProxyConfig(
  *   signer,
  *   '0x123...',            // proxy address
  *   '0xNewBLR...',         // new BLR address
- *   EQUITY_CONFIG_ID,      // new config ID
+ *   CONFIG_IDS.equity,      // new config ID
  *   1,                     // new version
  *   { confirmations: 0 }
  * )

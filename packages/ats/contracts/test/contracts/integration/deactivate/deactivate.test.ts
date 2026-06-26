@@ -2,7 +2,7 @@
 
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { ATS_ROLES, RESOLVER_KEY_DEACTIVATE } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import { grantRoleAndPauseToken } from "@test";
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
@@ -81,13 +81,13 @@ export function deactivateTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeDeactivate is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeDeactivate())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_DEACTIVATE, 1);
+          .withArgs(RESOLVER_KEYS.deactivate, 1);
       });
     });
 
     describe("initializeDeactivate event", () => {
       it("GIVEN a fresh deployment WHEN initializeDeactivate is called THEN emits DeactivateInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_DEACTIVATE);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.deactivate);
         await expect(asset.initializeDeactivate()).to.emit(asset, "DeactivateInitialized");
       });
     });

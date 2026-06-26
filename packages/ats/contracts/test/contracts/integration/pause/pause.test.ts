@@ -2,7 +2,7 @@
 
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { GAS_LIMIT, ATS_ROLES, RESOLVER_KEY_PAUSE } from "@scripts";
+import { GAS_LIMIT, ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import { grantRoleAndPauseToken } from "@test";
 import { IAssetMock, MockedExternalPause } from "@contract-types";
 import { ethers } from "hardhat";
@@ -126,13 +126,13 @@ export function pauseTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializePause is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializePause())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_PAUSE, 1);
+          .withArgs(RESOLVER_KEYS.pause, 1);
       });
     });
 
     describe("initializePause event", () => {
       it("GIVEN a fresh deployment WHEN initializePause is called THEN emits PauseInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_PAUSE);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.pause);
         await expect(asset.initializePause()).to.emit(asset, "PauseInitialized");
       });
     });

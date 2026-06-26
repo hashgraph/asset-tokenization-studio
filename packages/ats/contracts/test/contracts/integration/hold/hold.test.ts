@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
 import { DEFAULT_PARTITION, PARTITION_ID_2, executeRbac, MAX_UINT256 } from "@test";
-import { ADDRESS_ZERO, ATS_ROLES, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO, RESOLVER_KEY_HOLD } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO, RESOLVER_KEYS } from "@scripts";
 
 const _AMOUNT = 1000;
 const _DATA = "0x1234";
@@ -221,13 +221,13 @@ export function holdTests(getCtx: () => AssetMockCtx): void {
         it("GIVEN already-initialised WHEN initializeHold is called again THEN FacetAlreadyRegistered", async () => {
           await expect(asset.initializeHold())
             .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-            .withArgs(RESOLVER_KEY_HOLD, 1);
+            .withArgs(RESOLVER_KEYS.hold, 1);
         });
       });
 
       describe("initializeHold event", () => {
         it("GIVEN a fresh deployment WHEN initializeHold is called THEN emits HoldInitialized", async () => {
-          await asset.forceFacetNotRegistered(RESOLVER_KEY_HOLD);
+          await asset.forceFacetNotRegistered(RESOLVER_KEYS.hold);
           await expect(asset.initializeHold()).to.emit(asset, "HoldInitialized");
         });
       });

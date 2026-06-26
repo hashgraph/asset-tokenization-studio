@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { dateToUnixTimestamp, ATS_ROLES, RESOLVER_KEY_SCHEDULED_BALANCE_ADJUSTMENT } from "@scripts";
+import { dateToUnixTimestamp, ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import { executeRbac } from "@test";
 import type { AssetMockCtx } from "@test";
 
@@ -186,13 +186,13 @@ export function scheduledBalanceAdjustmentsTests(getCtx: () => AssetMockCtx): vo
       it("GIVEN already-initialised WHEN initializeScheduledBalanceAdjustment is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeScheduledBalanceAdjustment())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_SCHEDULED_BALANCE_ADJUSTMENT, 1);
+          .withArgs(RESOLVER_KEYS.scheduledBalanceAdjustment, 1);
       });
     });
 
     describe("initializeScheduledBalanceAdjustment event", () => {
       it("GIVEN a fresh deployment WHEN initializeScheduledBalanceAdjustment is called THEN emits ScheduledBalanceAdjustmentInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_SCHEDULED_BALANCE_ADJUSTMENT);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.scheduledBalanceAdjustment);
         await expect(asset.initializeScheduledBalanceAdjustment()).to.emit(
           asset,
           "ScheduledBalanceAdjustmentInitialized",

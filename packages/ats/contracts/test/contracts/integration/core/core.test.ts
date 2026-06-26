@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
-import { ATS_ROLES, RESOLVER_KEY_CORE } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import { SecurityType } from "@scripts/domain";
 import { assertObject, executeRbac } from "@test";
 
@@ -64,7 +64,7 @@ export function coreTests(getCtx: () => AssetMockCtx): void {
 
     describe("initializeCore event", () => {
       it("GIVEN a fresh deployment WHEN initializeCore is called THEN emits CoreInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_CORE);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.core);
         await expect(
           asset.initializeCore({
             info: { name, symbol, decimals },

@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { ZERO, EMPTY_STRING, ATS_ROLES, RESOLVER_KEY_LOAN } from "@scripts";
+import { ZERO, EMPTY_STRING, ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import { executeRbac, MAX_UINT256 } from "@test";
 import type { AssetMockCtx } from "@test";
 import { getLoanDetails } from "./loanData";
@@ -175,13 +175,13 @@ export function loanTests(getCtx: () => AssetMockCtx): void {
 
       it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeLoan is called THEN it emits LoanInitialized", async () => {
         const loanDetails = await getLoanDetails();
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_LOAN);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.loan);
         await expect(asset.connect(signer_A).initializeLoan(loanDetails)).to.emit(asset, "LoanInitialized");
       });
 
       it("GIVEN startingDate is 0 WHEN deploying loan THEN transaction fails with InvalidTimestamp", async () => {
         const loanDetails = await getLoanDetails({ startingDate: 0 });
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_LOAN);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.loan);
         await expect(asset.connect(signer_A).initializeLoan(loanDetails)).to.be.revertedWithCustomError(
           asset,
           "InvalidTimestamp",
@@ -191,7 +191,7 @@ export function loanTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN startingDate after maturityDate WHEN deploying loan THEN transaction fails with WrongDates", async () => {
         const now = Math.floor(Date.now() / 1000);
         const loanDetails = await getLoanDetails({ startingDate: now + 200_000, maturityDate: now + 100_000 });
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_LOAN);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.loan);
         await expect(asset.connect(signer_A).initializeLoan(loanDetails)).to.be.revertedWithCustomError(
           asset,
           "WrongDates",

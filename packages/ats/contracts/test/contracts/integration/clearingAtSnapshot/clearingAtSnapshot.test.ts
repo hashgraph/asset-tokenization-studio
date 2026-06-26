@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
-import { ZERO, EMPTY_STRING, ATS_ROLES, ADDRESS_ZERO, RESOLVER_KEY_CLEARING_AT_SNAPSHOT } from "@scripts";
+import { ZERO, EMPTY_STRING, ATS_ROLES, ADDRESS_ZERO, RESOLVER_KEYS } from "@scripts";
 import { MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
 
@@ -179,13 +179,13 @@ export function clearingAtSnapshotTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeClearingAtSnapshot THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeClearingAtSnapshot())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_CLEARING_AT_SNAPSHOT, 1);
+          .withArgs(RESOLVER_KEYS.clearingAtSnapshot, 1);
       });
     });
 
     describe("initializeClearingAtSnapshot event", () => {
       it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeClearingAtSnapshot THEN emits ClearingAtSnapshotInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_CLEARING_AT_SNAPSHOT);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.clearingAtSnapshot);
         await expect(asset.initializeClearingAtSnapshot()).to.emit(asset, "ClearingAtSnapshotInitialized");
       });
     });

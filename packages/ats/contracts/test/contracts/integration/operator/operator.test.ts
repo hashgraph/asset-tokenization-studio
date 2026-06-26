@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { ATS_ROLES, RESOLVER_KEY_OPERATOR } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import { executeRbac, grantKycToHolders } from "@test";
 import type { AssetMockCtx } from "@test";
 
@@ -136,13 +136,13 @@ export function operatorTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeOperator is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeOperator())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_OPERATOR, 1);
+          .withArgs(RESOLVER_KEYS.operator, 1);
       });
     });
 
     describe("initializeOperator event", () => {
       it("GIVEN a fresh deployment WHEN initializeOperator is called THEN emits OperatorInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_OPERATOR);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.operator);
         await expect(asset.initializeOperator()).to.emit(asset, "OperatorInitialized");
       });
     });

@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
-import { RESOLVER_KEY_TRANSFER_BY_PARTITION } from "@scripts";
+import { RESOLVER_KEYS } from "@scripts";
 import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
 import { executeRbac, MAX_UINT256 } from "@test";
 import { ASSET_MOCK_CONFIG_ID } from "../../../fixtures/deploy/assetMockConfiguration";
@@ -147,13 +147,13 @@ export function transferByPartitionTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeTransferByPartition is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeTransferByPartition())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_TRANSFER_BY_PARTITION, 1);
+          .withArgs(RESOLVER_KEYS.transferByPartition, 1);
       });
     });
 
     describe("initializeTransferByPartition event", () => {
       it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeTransferByPartition is called THEN emits TransferByPartitionInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_TRANSFER_BY_PARTITION);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.transferByPartition);
         await expect(asset.initializeTransferByPartition()).to.emit(asset, "TransferByPartitionInitialized");
       });
     });

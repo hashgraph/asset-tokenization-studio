@@ -12,7 +12,7 @@ import {
   EMPTY_HEX_BYTES,
   ADDRESS_ZERO,
   DEFAULT_PARTITION,
-  RESOLVER_KEY_OPERATOR_HOLD_BY_PARTITION,
+  RESOLVER_KEYS,
 } from "@scripts";
 import { IAssetMock } from "@contract-types";
 import { ASSET_MOCK_CONFIG_ID } from "../../../fixtures/deploy/assetMockConfiguration";
@@ -409,13 +409,13 @@ export function operatorHoldByPartitionTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeOperatorHoldByPartition is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeOperatorHoldByPartition())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_OPERATOR_HOLD_BY_PARTITION, 1);
+          .withArgs(RESOLVER_KEYS.operatorHoldByPartition, 1);
       });
     });
 
     describe("initializeOperatorHoldByPartition event", () => {
       it("GIVEN a fresh deployment WHEN initializeOperatorHoldByPartition is called THEN emits OperatorHoldByPartitionInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_OPERATOR_HOLD_BY_PARTITION);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.operatorHoldByPartition);
         await expect(asset.initializeOperatorHoldByPartition()).to.emit(asset, "OperatorHoldByPartitionInitialized");
       });
     });
@@ -434,13 +434,13 @@ export function operatorHoldByPartitionTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeOperatorHoldByPartition is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeOperatorHoldByPartition())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_OPERATOR_HOLD_BY_PARTITION, 1);
+          .withArgs(RESOLVER_KEYS.operatorHoldByPartition, 1);
       });
     });
 
     describe("initializeOperatorHoldByPartition event", () => {
       it("GIVEN a fresh deployment WHEN initializeOperatorHoldByPartition is called THEN emits OperatorHoldByPartitionInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_OPERATOR_HOLD_BY_PARTITION);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.operatorHoldByPartition);
         await expect(asset.initializeOperatorHoldByPartition()).to.emit(asset, "OperatorHoldByPartitionInitialized");
       });
     });

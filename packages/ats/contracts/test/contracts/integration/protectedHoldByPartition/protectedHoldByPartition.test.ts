@@ -5,14 +5,7 @@ import { ethers, network } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import type { AssetMockCtx } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
-import {
-  DEFAULT_PARTITION,
-  EMPTY_STRING,
-  ZERO,
-  ADDRESS_ZERO,
-  ATS_ROLES,
-  RESOLVER_KEY_PROTECTED_HOLD_BY_PARTITION,
-} from "@scripts";
+import { DEFAULT_PARTITION, EMPTY_STRING, ZERO, ADDRESS_ZERO, ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import { IAssetMock } from "@contract-types";
 import { ASSET_MOCK_CONFIG_ID } from "../../../fixtures/deploy/assetMockConfiguration";
 
@@ -620,13 +613,13 @@ export function protectedHoldByPartitionTests(getCtx: () => AssetMockCtx): void 
       it("GIVEN already-initialised WHEN initializeProtectedHoldByPartition is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeProtectedHoldByPartition())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_PROTECTED_HOLD_BY_PARTITION, 1);
+          .withArgs(RESOLVER_KEYS.protectedHoldByPartition, 1);
       });
     });
 
     describe("initializeProtectedHoldByPartition event", () => {
       it("GIVEN a fresh deployment WHEN initializeProtectedHoldByPartition is called THEN emits ProtectedHoldByPartitionInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_PROTECTED_HOLD_BY_PARTITION);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.protectedHoldByPartition);
         await expect(asset.initializeProtectedHoldByPartition()).to.emit(asset, "ProtectedHoldByPartitionInitialized");
       });
     });
@@ -645,13 +638,13 @@ export function protectedHoldByPartitionTests(getCtx: () => AssetMockCtx): void 
       it("GIVEN already-initialised WHEN initializeProtectedHoldByPartition is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeProtectedHoldByPartition())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_PROTECTED_HOLD_BY_PARTITION, 1);
+          .withArgs(RESOLVER_KEYS.protectedHoldByPartition, 1);
       });
     });
 
     describe("initializeProtectedHoldByPartition event", () => {
       it("GIVEN a fresh deployment WHEN initializeProtectedHoldByPartition is called THEN emits ProtectedHoldByPartitionInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_PROTECTED_HOLD_BY_PARTITION);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.protectedHoldByPartition);
         await expect(asset.initializeProtectedHoldByPartition()).to.emit(asset, "ProtectedHoldByPartitionInitialized");
       });
     });

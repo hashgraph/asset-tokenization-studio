@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
-import { DEFAULT_PARTITION, ZERO, EMPTY_STRING, ATS_ROLES, RESOLVER_KEY_CAP_BY_PARTITION } from "@scripts";
+import { DEFAULT_PARTITION, ZERO, EMPTY_STRING, ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import { MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
 
@@ -126,13 +126,13 @@ export function capByPartitionTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeCapByPartition is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeCapByPartition())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_CAP_BY_PARTITION, 1);
+          .withArgs(RESOLVER_KEYS.capByPartition, 1);
       });
     });
 
     describe("initializeCapByPartition event", () => {
       it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeCapByPartition is called THEN emits CapByPartitionInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_CAP_BY_PARTITION);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.capByPartition);
         await expect(asset.initializeCapByPartition()).to.emit(asset, "CapByPartitionInitialized");
       });
     });

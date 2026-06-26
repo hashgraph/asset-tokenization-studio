@@ -11,8 +11,8 @@ import {
   dateToUnixTimestamp,
   EMPTY_HEX_BYTES,
   EMPTY_STRING,
-  RESOLVER_KEY_PARTITIONS,
   ZERO,
+  RESOLVER_KEYS,
 } from "@scripts";
 import { executeRbac, MAX_UINT256 } from "@test";
 
@@ -5103,7 +5103,7 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
 
       describe("initializePartitions event", () => {
         it("GIVEN a fresh deployment WHEN initializePartitions is called THEN emits PartitionsInitialized", async () => {
-          await asset.forceFacetNotRegistered(RESOLVER_KEY_PARTITIONS);
+          await asset.forceFacetNotRegistered(RESOLVER_KEYS.partitions);
           await expect(asset.initializePartitions(true)).to.emit(asset, "PartitionsInitialized");
         });
       });

@@ -11,7 +11,7 @@ import {
   ZERO,
   EMPTY_HEX_BYTES,
   EMPTY_STRING,
-  RESOLVER_KEY_COUPON,
+  RESOLVER_KEYS,
 } from "@scripts";
 import {
   getDltTimestamp,
@@ -1089,13 +1089,13 @@ export function couponTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeCoupon is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeCoupon())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_COUPON, 1);
+          .withArgs(RESOLVER_KEYS.coupon, 1);
       });
     });
 
     describe("initializeCoupon event", () => {
       it("GIVEN a fresh deployment WHEN initializeCoupon is called THEN emits CouponInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_COUPON);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.coupon);
         await expect(asset.initializeCoupon()).to.emit(asset, "CouponInitialized");
       });
     });

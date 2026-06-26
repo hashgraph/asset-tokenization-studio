@@ -6,14 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
-import {
-  ATS_ROLES,
-  DEFAULT_PARTITION,
-  EMPTY_HEX_BYTES,
-  EMPTY_STRING,
-  ZERO,
-  RESOLVER_KEY_MINT_BY_PARTITION,
-} from "@scripts";
+import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO, RESOLVER_KEYS } from "@scripts";
 
 const AMOUNT = 1000;
 const DATA = "0x1234";
@@ -373,7 +366,7 @@ export function mintByPartitionTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeMintByPartition is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeMintByPartition())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_MINT_BY_PARTITION, 1);
+          .withArgs(RESOLVER_KEYS.mintByPartition, 1);
       });
     });
 
@@ -385,7 +378,7 @@ export function mintByPartitionTests(getCtx: () => AssetMockCtx): void {
       });
 
       it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeMintByPartition is called THEN emits MintByPartitionInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_MINT_BY_PARTITION);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.mintByPartition);
         await expect(asset.initializeMintByPartition()).to.emit(asset, "MintByPartitionInitialized");
       });
     });

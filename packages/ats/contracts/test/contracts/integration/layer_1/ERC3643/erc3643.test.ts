@@ -14,8 +14,7 @@ import {
   ADDRESS_ZERO,
   EMPTY_HEX_BYTES,
   dateToUnixTimestamp,
-  RESOLVER_KEY_COMPLIANCE,
-  RESOLVER_KEY_IDENTITY,
+  RESOLVER_KEYS,
 } from "@scripts";
 const name = "TEST";
 const symbol = "TAC";
@@ -165,7 +164,7 @@ export function erc3643Tests(getCtx: () => AssetMockCtx): void {
 
       describe("initializeCompliance / initializeIdentity events", () => {
         it("GIVEN a fresh deployment WHEN initializeCompliance is called THEN emits ComplianceInitialized", async () => {
-          await asset.forceFacetNotRegistered(RESOLVER_KEY_COMPLIANCE);
+          await asset.forceFacetNotRegistered(RESOLVER_KEYS.compliance);
           await expect(asset.initializeCompliance(complianceMock.target as string)).to.emit(
             asset,
             "ComplianceInitialized",
@@ -173,7 +172,7 @@ export function erc3643Tests(getCtx: () => AssetMockCtx): void {
         });
 
         it("GIVEN a fresh deployment WHEN initializeIdentity is called THEN emits IdentityInitialized", async () => {
-          await asset.forceFacetNotRegistered(RESOLVER_KEY_IDENTITY);
+          await asset.forceFacetNotRegistered(RESOLVER_KEYS.identity);
           await expect(asset.initializeIdentity(identityRegistryMock.target as string)).to.emit(
             asset,
             "IdentityInitialized",
