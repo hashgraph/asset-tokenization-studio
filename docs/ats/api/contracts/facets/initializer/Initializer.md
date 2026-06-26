@@ -279,6 +279,20 @@ Raised by `checkFacetNotReady` when a facet is already marked ready for the reso
 | facetId   | bytes32 | Identifier of the facet already flagged as ready. |
 | versionId | uint256 | Version for which the facet is already ready.     |
 
+### UnrecognizedResolverProxyVersion
+
+```solidity
+error UnrecognizedResolverProxyVersion(bytes8 _resolverProxyVersion)
+```
+
+Thrown when the provided proxy version does not match any BLR compatible standard.
+
+#### Parameters
+
+| Name                   | Type   | Description                                        |
+| ---------------------- | ------ | -------------------------------------------------- |
+| \_resolverProxyVersion | bytes8 | proxy version that is not compatible with the BLR. |
+
 ### WalletRecovered
 
 ```solidity

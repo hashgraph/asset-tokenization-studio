@@ -178,8 +178,11 @@ export async function deployResolverProxy(
     info("Deploying ResolverProxy contract...");
     const resolverProxy = await ResolverProxyFactory.deploy(
       blrAddress,
-      configurationId,
-      version,
+      {
+        configurationId,
+        configurationVersion: version,
+        replacementEnabled: false,
+      },
       rbac,
       overrides as any,
     );

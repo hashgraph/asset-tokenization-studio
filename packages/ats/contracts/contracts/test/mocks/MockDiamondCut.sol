@@ -146,8 +146,8 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
     /// @inheritdoc IMockDiamondCut
     /// @dev Writes status `0` for the active resolver proxy configuration and version.
     function forceNonOperational() external override {
-        bytes32 configId = ResolverProxyStorageWrapper.getResolverProxyConfigurationId();
-        uint256 versionId = ResolverProxyStorageWrapper.getResolverProxyVersion();
+        (bytes32 configId, uint256 versionId) = ResolverProxyStorageWrapper.getResolverProxyConfigurationIdAndVersion();
+
         InitializerStorageWrapper.setConfigVersion(configId, versionId, 0);
     }
 
@@ -155,14 +155,12 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
     /// @dev Resolves the current facet version through the business logic resolver and resets
     ///      both its version status and last-version pointer.
     function forceFacetNotRegistered(bytes32 _facetKey) external override {
-        uint256 versionId = ResolverProxyStorageWrapper
+        (bytes32 configId, uint256 versionId) = ResolverProxyStorageWrapper.getResolverProxyConfigurationIdAndVersion();
+
+        uint256 facetVersionId = ResolverProxyStorageWrapper
             .getBusinessLogicResolver()
-            .getFacetVersionByConfigurationIdVersionAndFacetId(
-                ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
-                ResolverProxyStorageWrapper.getResolverProxyVersion(),
-                _facetKey
-            );
-        InitializerStorageWrapper.setFacetStatusForVersion(_facetKey, versionId, 0);
+            .getFacetVersionByConfigurationIdVersionAndFacetId(configId, versionId, _facetKey);
+        InitializerStorageWrapper.setFacetStatusForVersion(_facetKey, facetVersionId, 0);
         InitializerStorageWrapper.setFacetLastVersionTo(_facetKey, 0);
     }
 
@@ -189,8 +187,8 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
     ///      walking the configured facet list. The caller is responsible for ensuring every
     ///      required facet has already been marked ready.
     function forceSetOperational() external override {
-        bytes32 configId = ResolverProxyStorageWrapper.getResolverProxyConfigurationId();
-        uint256 versionId = ResolverProxyStorageWrapper.getResolverProxyVersion();
+        (bytes32 configId, uint256 versionId) = ResolverProxyStorageWrapper.getResolverProxyConfigurationIdAndVersion();
+
         InitializerStorageWrapper.setConfigVersion(configId, versionId, 1);
     }
 

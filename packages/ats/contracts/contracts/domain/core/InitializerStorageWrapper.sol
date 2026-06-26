@@ -81,8 +81,7 @@ library InitializerStorageWrapper {
         internal
         returns (bool isOperational_, uint256 lastFacetIndex_, bytes32 configId_, uint256 versionId_)
     {
-        configId_ = ResolverProxyStorageWrapper.getResolverProxyConfigurationId();
-        versionId_ = ResolverProxyStorageWrapper.getResolverProxyVersion();
+        (configId_, versionId_) = ResolverProxyStorageWrapper.getResolverProxyConfigurationIdAndVersion();
 
         uint256 operationStatus = getOperationalStatus(configId_, versionId_);
 
@@ -190,10 +189,10 @@ library InitializerStorageWrapper {
      *      check to `isConfigVersionOperational`. Reverts with `IInitializer.AssetNotOperational`.
      */
     function checkOperational() internal view {
-        isConfigVersionOperational(
-            ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
-            ResolverProxyStorageWrapper.getResolverProxyVersion()
-        );
+        bytes32 configId;
+        uint256 versionId;
+        (configId, versionId) = ResolverProxyStorageWrapper.getResolverProxyConfigurationIdAndVersion();
+        isConfigVersionOperational(configId, versionId);
     }
 
     /**
@@ -313,10 +312,12 @@ library InitializerStorageWrapper {
      * @return version_ Current version of the facet within the active configuration.
      */
     function currentFacetVersion(bytes32 _facetId) internal view returns (uint256 version_) {
+        (bytes32 configId, uint256 versionId) = ResolverProxyStorageWrapper.getResolverProxyConfigurationIdAndVersion();
+
         return
             ResolverProxyStorageWrapper.getBusinessLogicResolver().getFacetVersionByConfigurationIdVersionAndFacetId(
-                ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
-                ResolverProxyStorageWrapper.getResolverProxyVersion(),
+                configId,
+                versionId,
                 _facetId
             );
     }

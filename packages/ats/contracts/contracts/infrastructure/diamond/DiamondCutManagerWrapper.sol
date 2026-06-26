@@ -8,6 +8,8 @@ import { IStaticFunctionSelectors } from "../proxy/IStaticFunctionSelectors.sol"
 import { IDiamondLoupe } from "../proxy/IDiamondLoupe.sol";
 import { Ownership } from "./Ownership.sol";
 import { EvmAccessors } from "../utils/EvmAccessors.sol";
+import { IResolverProxy } from "../../infrastructure/proxy/IResolverProxy.sol";
+import { RESOLVER_PROXY_VERSION_V2, RESOLVER_PROXY_CONFIGURATION_MINIMUM_LENGTH } from "../../constants/values.sol";
 
 /**
  * @dev Must remain stable across upgrades to preserve the diamond storage layout.
@@ -257,19 +259,66 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
 
     /**
      * @notice Resolves the facet address that handles a selector for a configuration version.
-     * @param _dcms Diamond cut manager storage reference.
      * @param _configurationId Identifier of the configuration to query.
      * @param _version Configuration version to query.
+     * @param _replacementEnabled Flag indicating whether selector replacement is enabled for the resolver proxy.
+     * @param _selector Function selector to resolve.
+     * @return facetAddress_ Facet address registered for the selector, or zero if absent.
+     */
+    function _resolveResolverProxyCallV2(
+        bytes32 _configurationId,
+        uint256 _version,
+        bool _replacementEnabled,
+        bytes4 _selector
+    ) internal view returns (address facetAddress_) {
+        facetAddress_ = _diamondCutManagerStorage().facetAddress[
+            _buildHashSelector(_configurationId, _version, _selector)
+        ];
+        if (_replacementEnabled) {
+            address replacementAddress = _getReplacementAddress(facetAddress_);
+            if (replacementAddress != address(0)) {
+                facetAddress_ = replacementAddress;
+            }
+        }
+    }
+
+    /**
+     * @notice Generic method that resolves the facet address that handles a selector for a configuration version.
+     * @param _resolverProxyConfiguration encoded proxy configuration.
      * @param _selector Function selector to resolve.
      * @return facetAddress_ Facet address registered for the selector, or zero if absent.
      */
     function _resolveResolverProxyCall(
-        DiamondCutManagerStorage storage _dcms,
-        bytes32 _configurationId,
-        uint256 _version,
+        bytes calldata _resolverProxyConfiguration,
         bytes4 _selector
     ) internal view returns (address facetAddress_) {
-        facetAddress_ = _dcms.facetAddress[_buildHashSelector(_configurationId, _version, _selector)];
+        if (
+            _resolverProxyConfiguration.length < RESOLVER_PROXY_CONFIGURATION_MINIMUM_LENGTH ||
+            _resolverProxyConfiguration.length % 32 != 0
+        ) revert InvalidResolverProxyConfiguration(_resolverProxyConfiguration);
+
+        IResolverProxy.ResolverProxyConfigurationGeneric memory configuration = abi.decode(
+            _resolverProxyConfiguration,
+            (IResolverProxy.ResolverProxyConfigurationGeneric)
+        );
+
+        if (configuration.resolverProxyVersion == RESOLVER_PROXY_VERSION_V2) {
+            IResolverProxy.ResolverProxyConfigurationV2 memory configurationV2 = abi.decode(
+                configuration.content,
+                (IResolverProxy.ResolverProxyConfigurationV2)
+            );
+
+            _checkExplicitVersion(configurationV2.configurationId, configurationV2.configurationVersion);
+
+            facetAddress_ = _resolveResolverProxyCallV2(
+                configurationV2.configurationId,
+                configurationV2.configurationVersion,
+                configurationV2.replacementEnabled,
+                _selector
+            );
+            return facetAddress_;
+        }
+        revert UnrecognizedResolverProxyVersion(configuration.resolverProxyVersion);
     }
 
     /**
@@ -322,24 +371,6 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
             _version == 0 ||
             !_dcms.activeConfigurations[_configurationId] ||
             _version > _dcms.latestVersion[_configurationId];
-    }
-
-    /**
-     * @notice Reverts unless a resolver proxy configuration version is registered.
-     * @dev Version zero is not explicitly rejected here unless the configuration is inactive;
-     *      callers requiring explicit versions should use `onlyValidConfigurationVersion`.
-     * @param _dcms Diamond cut manager storage reference.
-     * @param _configurationId Identifier of the configuration to validate.
-     * @param _version Version to validate against the latest active version.
-     */
-    function _checkResolverProxyConfigurationRegistered(
-        DiamondCutManagerStorage storage _dcms,
-        bytes32 _configurationId,
-        uint256 _version
-    ) internal view {
-        if (!_dcms.activeConfigurations[_configurationId] || _version > _dcms.latestVersion[_configurationId]) {
-            revert ResolverProxyConfigurationNoRegistered(_configurationId, _version);
-        }
     }
 
     /**

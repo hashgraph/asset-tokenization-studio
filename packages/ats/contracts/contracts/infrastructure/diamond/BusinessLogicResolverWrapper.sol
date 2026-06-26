@@ -47,6 +47,8 @@ struct BusinessLogicResolverDataStorage {
     mapping(bytes32 facetIdAndVersion => IBusinessLogicResolver.VersionStatus status) statusByFacetIdAndVersion;
     mapping(bytes32 => EnumerableSetBytes4.Bytes4Set) selectorBlacklist;
     // ─── APPEND-ONLY ZONE BELOW ───
+    mapping(address => address) replacementAddressMap;
+    mapping(address => uint256) replacementAddressCount;
 }
 
 /**
@@ -78,6 +80,26 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
         IBusinessLogicResolver.BusinessLogicRegistryData[] calldata _businessLogicsRegistryDatas
     ) {
         _checkValidKeysAndAddresses(_businessLogicsRegistryDatas);
+        _;
+    }
+
+    /**
+     * @notice Restricts execution to addresses that have not themselves been replaced.
+     * @dev Reverts via `_checkNotReplaced` when `_address` already maps to a replacement.
+     * @param _address Address whose non-replaced status is validated.
+     */
+    modifier onlyNotReplaced(address _address) {
+        _checkNotReplaced(_address);
+        _;
+    }
+
+    /**
+     * @notice Restricts execution to addresses that are not registered as a replacement.
+     * @dev Reverts via `_checkNotReplacement` when `_address` is in use as a replacement.
+     * @param _address Address whose non-replacement status is validated.
+     */
+    modifier onlyNotReplacement(address _address) {
+        _checkNotReplacement(_address);
         _;
     }
 
@@ -184,6 +206,34 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
                 ++index;
             }
         }
+    }
+
+    /**
+     * @notice Registers `_newAddress` as the replacement for `_oldAddress`.
+     * @dev Maps `_oldAddress` to `_newAddress` and increments the replacement reference count for
+     *      `_newAddress`.
+     * @param _oldAddress Address being replaced.
+     * @param _newAddress Address that supersedes `_oldAddress`.
+     */
+    function _updateReplacementAddress(address _oldAddress, address _newAddress) internal {
+        BusinessLogicResolverDataStorage storage businessLogicResolverDataStorage = _businessLogicResolverStorage();
+        businessLogicResolverDataStorage.replacementAddressMap[_oldAddress] = _newAddress;
+        ++businessLogicResolverDataStorage.replacementAddressCount[_newAddress];
+    }
+
+    /**
+     * @notice Clears the replacement registered for `_oldAddress`.
+     * @dev Resets the mapping to the zero address and decrements the replacement reference count for
+     *      the removed address. No-ops and returns the zero address when no replacement exists.
+     * @param _oldAddress Address whose replacement is removed.
+     * @return newAddressRemoved_ The replacement address that was cleared, or the zero address if none.
+     */
+    function _removeReplacementAddress(address _oldAddress) internal returns (address newAddressRemoved_) {
+        BusinessLogicResolverDataStorage storage businessLogicResolverDataStorage = _businessLogicResolverStorage();
+        newAddressRemoved_ = businessLogicResolverDataStorage.replacementAddressMap[_oldAddress];
+        if (newAddressRemoved_ == address(0)) return newAddressRemoved_;
+        businessLogicResolverDataStorage.replacementAddressMap[_oldAddress] = address(0);
+        --businessLogicResolverDataStorage.replacementAddressCount[newAddressRemoved_];
     }
 
     /**
@@ -341,6 +391,47 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
      */
     function _isInitialized() internal view returns (bool) {
         return _businessLogicResolverStorage().initialized;
+    }
+
+    /**
+     * @notice Returns the replacement registered for an address.
+     * @dev Returns the zero address when `_address` has not been replaced.
+     * @param _address Address to query.
+     * @return The replacement address mapped to `_address`, or the zero address if none.
+     */
+    function _getReplacementAddress(address _address) internal view returns (address) {
+        return _businessLogicResolverStorage().replacementAddressMap[_address];
+    }
+
+    /**
+     * @notice Returns how many times an address is registered as a replacement.
+     * @dev A non-zero count means `_address` is currently in use as a replacement for one or more
+     *      addresses.
+     * @param _address Address to query.
+     * @return The replacement reference count for `_address`.
+     */
+    function _getReplacementAddressCount(address _address) internal view returns (uint256) {
+        return _businessLogicResolverStorage().replacementAddressCount[_address];
+    }
+
+    /**
+     * @notice Reverts when a replacement address is itself been replaced by another one.
+     * @param _address The replacement address been replaced.
+     */
+    function _checkNotReplaced(address _address) internal view {
+        if (_getReplacementAddress(_address) != address(0)) {
+            revert InvalidReplacementAddress(_address);
+        }
+    }
+
+    /**
+     * @notice Reverts when a replaced address is itself replacing other addresses.
+     * @param _address The replaced address been used as replacement.
+     */
+    function _checkNotReplacement(address _address) internal view {
+        if (_getReplacementAddressCount(_address) > 0) {
+            revert InvalidReplacedAddress(_address);
+        }
     }
 
     /**

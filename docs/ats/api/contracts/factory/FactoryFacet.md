@@ -70,18 +70,17 @@ function deployEquity(IFactory.EquityData _equityData, FactoryRegulationData _fa
 ### deployProxy
 
 ```solidity
-function deployProxy(contract IBusinessLogicResolver _resolver, bytes32 _configKey, uint256 _version, IResolverProxy.Rbac[] _rbacs, bytes _data) external nonpayable returns (address proxyAddress_)
+function deployProxy(contract IBusinessLogicResolver _resolver, IResolverProxy.ResolverProxyConfigurationV2 _resolverProxyConfigurationV2, IResolverProxy.Rbac[] _rbacs, bytes _data) external nonpayable returns (address proxyAddress_)
 ```
 
 #### Parameters
 
-| Name        | Type                            | Description |
-| ----------- | ------------------------------- | ----------- |
-| \_resolver  | contract IBusinessLogicResolver | undefined   |
-| \_configKey | bytes32                         | undefined   |
-| \_version   | uint256                         | undefined   |
-| \_rbacs     | IResolverProxy.Rbac[]           | undefined   |
-| \_data      | bytes                           | undefined   |
+| Name                           | Type                                        | Description |
+| ------------------------------ | ------------------------------------------- | ----------- |
+| \_resolver                     | contract IBusinessLogicResolver             | undefined   |
+| \_resolverProxyConfigurationV2 | IResolverProxy.ResolverProxyConfigurationV2 | undefined   |
+| \_rbacs                        | IResolverProxy.Rbac[]                       | undefined   |
+| \_data                         | bytes                                       | undefined   |
 
 #### Returns
 

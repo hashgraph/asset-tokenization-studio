@@ -157,7 +157,7 @@ library ProtectedPartitionsStorageWrapper {
                 ),
                 _protectionData.signature,
                 _name,
-                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
+                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion()),
                 EvmAccessors.getChainId(),
                 address(this)
             );
@@ -205,7 +205,7 @@ library ProtectedPartitionsStorageWrapper {
                 _getMessageHashRedeem(_partition, _from, _amount, _protectionData.deadline, _protectionData.nonce),
                 _protectionData.signature,
                 _name,
-                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
+                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion()),
                 EvmAccessors.getChainId(),
                 address(this)
             );
@@ -253,7 +253,7 @@ library ProtectedPartitionsStorageWrapper {
                 _getMessageHashCreateHold(_partition, _from, _protectedHold),
                 _signature,
                 _name,
-                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
+                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion()),
                 EvmAccessors.getChainId(),
                 address(this)
             );
@@ -300,7 +300,7 @@ library ProtectedPartitionsStorageWrapper {
                 _getMessageHashClearingCreateHold(_protectedClearingOperation, _hold),
                 _signature,
                 _name,
-                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
+                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion()),
                 EvmAccessors.getChainId(),
                 address(this)
             );
@@ -351,7 +351,7 @@ library ProtectedPartitionsStorageWrapper {
                 _getMessageHashClearingTransfer(_protectedClearingOperation, _to, _amount),
                 _signature,
                 _name,
-                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
+                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion()),
                 EvmAccessors.getChainId(),
                 address(this)
             );
@@ -398,7 +398,7 @@ library ProtectedPartitionsStorageWrapper {
                 _getMessageHashClearingRedeem(_protectedClearingOperation, _amount),
                 _signature,
                 _name,
-                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
+                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion()),
                 EvmAccessors.getChainId(),
                 address(this)
             );

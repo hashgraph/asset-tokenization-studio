@@ -8,6 +8,7 @@ import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
 import { ResolverProxyStorageWrapper } from "../../domain/core/ResolverProxyStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { IResolverProxy } from "../proxy/IResolverProxy.sol";
 
 /**
  * @title Diamond Cut
@@ -32,12 +33,22 @@ abstract contract DiamondCut is IDiamondCut, ResolverProxyUnstructured {
     /// @inheritdoc IDiamondCut
     /// @dev Requires `DEFAULT_ADMIN_ROLE` and preserves the active configuration identifier and
     ///      resolver while updating only the pinned configuration version.
-    function updateConfigVersion(uint256 _newVersion) external override onlyRole(DEFAULT_ADMIN_ROLE) {
-        ResolverProxyStorageWrapper.getBusinessLogicResolver().checkResolverProxyConfigurationRegistered(
+    function updateConfigVersion(
+        uint256 _newVersion
+    )
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRegisteredResolverProxyConfiguration(
+            ResolverProxyStorageWrapper.getBusinessLogicResolver(),
             ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
             _newVersion
-        );
-        _updateVersion(_newVersion);
+        )
+    {
+        IResolverProxy.ResolverProxyConfigurationV2 memory v2 = ResolverProxyStorageWrapper
+            .getResolverProxyConfigurationV2();
+        v2.configurationVersion = _newVersion;
+        ResolverProxyStorageWrapper.setResolverProxyConfigurationV2(v2);
     }
 
     /// @inheritdoc IDiamondCut
@@ -46,13 +57,29 @@ abstract contract DiamondCut is IDiamondCut, ResolverProxyUnstructured {
     function updateConfig(
         bytes32 _newConfigurationId,
         uint256 _newVersion
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
-        ResolverProxyStorageWrapper.getBusinessLogicResolver().checkResolverProxyConfigurationRegistered(
+    )
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRegisteredResolverProxyConfiguration(
+            ResolverProxyStorageWrapper.getBusinessLogicResolver(),
             _newConfigurationId,
             _newVersion
-        );
-        _updateConfigId(_newConfigurationId);
-        _updateVersion(_newVersion);
+        )
+    {
+        IResolverProxy.ResolverProxyConfigurationV2 memory v2 = ResolverProxyStorageWrapper
+            .getResolverProxyConfigurationV2();
+        v2.configurationId = _newConfigurationId;
+        v2.configurationVersion = _newVersion;
+        ResolverProxyStorageWrapper.setResolverProxyConfigurationV2(v2);
+    }
+
+    /// @inheritdoc IDiamondCut
+    function updateReplacementEnabled(bool _newReplacementEnabled) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+        IResolverProxy.ResolverProxyConfigurationV2 memory v2 = ResolverProxyStorageWrapper
+            .getResolverProxyConfigurationV2();
+        v2.replacementEnabled = _newReplacementEnabled;
+        ResolverProxyStorageWrapper.setResolverProxyConfigurationV2(v2);
     }
 
     /// @inheritdoc IDiamondCut
@@ -61,25 +88,42 @@ abstract contract DiamondCut is IDiamondCut, ResolverProxyUnstructured {
     function updateResolver(
         IBusinessLogicResolver _newResolver,
         bytes32 _newConfigurationId,
-        uint256 _newVersion
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
-        _newResolver.checkResolverProxyConfigurationRegistered(_newConfigurationId, _newVersion);
-        _updateResolver(_newResolver);
-        _updateConfigId(_newConfigurationId);
-        _updateVersion(_newVersion);
+        uint256 _newVersion,
+        bool _newReplacementEnabled
+    )
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRegisteredResolverProxyConfiguration(_newResolver, _newConfigurationId, _newVersion)
+    {
+        ResolverProxyStorageWrapper.setBusinessLogicResolver(_newResolver);
+        ResolverProxyStorageWrapper.setResolverProxyConfigurationV2(
+            IResolverProxy.ResolverProxyConfigurationV2({
+                configurationId: _newConfigurationId,
+                configurationVersion: _newVersion,
+                replacementEnabled: _newReplacementEnabled
+            })
+        );
     }
 
     /// @inheritdoc IDiamondCut
     function getConfigInfo()
         external
         view
-        override
-        returns (address resolver_, bytes32 configurationId_, uint256 version_)
+        returns (
+            address resolver_,
+            bytes8 proxyVersion_,
+            bytes32 configurationId_,
+            uint256 configurationVersion_,
+            bool replacementEnabled_
+        )
     {
         return (
             address(ResolverProxyStorageWrapper.getBusinessLogicResolver()),
+            ResolverProxyStorageWrapper.getResolverProxyVersion(),
             ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
-            ResolverProxyStorageWrapper.getResolverProxyVersion()
+            ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion(),
+            ResolverProxyStorageWrapper.getResolverProxyReplacementEnabled()
         );
     }
 }

@@ -18,7 +18,7 @@ function cancelBatchConfiguration(bytes32 _configurationId) external nonpayable
 
 Discards an in-progress batch configuration, dropping every facet appended so far for the pending version.
 
-_Emits {DiamondBatchConfigurationCanceled}. Has no effect once the version has been finalised via a `_isLastBatch = true` call._
+_Emits {DiamondBatchConfigurationCancelled}. Has no effect once the version has been finalised via a `_isLastBatch = true` call._
 
 #### Parameters
 
@@ -410,6 +410,29 @@ Non-reverting variant of {checkResolverProxyConfigurationRegistered}.
 ### resolveResolverProxyCall
 
 ```solidity
+function resolveResolverProxyCall(bytes _resolverProxyConfiguration, bytes4 _selector) external view returns (address facetAddress_)
+```
+
+Resolves the facet address that implements a selector for a given configuration and version.
+
+_Used by resolver proxies during dispatch. Returns `address(0)` when no facet claims the selector._
+
+#### Parameters
+
+| Name                         | Type   | Description                         |
+| ---------------------------- | ------ | ----------------------------------- |
+| \_resolverProxyConfiguration | bytes  | Resolver proxy full configuration.  |
+| \_selector                   | bytes4 | Function selector being dispatched. |
+
+#### Returns
+
+| Name           | Type    | Description                                                                                                                        |
+| -------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| facetAddress\_ | address | Address of the facet that owns `_selector`, or `address(0)` if the selector is not registered for the given configuration/version. |
+
+### resolveResolverProxyCall
+
+```solidity
 function resolveResolverProxyCall(bytes32 _configurationId, uint256 _version, bytes4 _selector) external view returns (address facetAddress_)
 ```
 
@@ -457,10 +480,10 @@ _Powers ERC-165 lookups on resolver proxies._
 
 ## Events
 
-### DiamondBatchConfigurationCanceled
+### DiamondBatchConfigurationCancelled
 
 ```solidity
-event DiamondBatchConfigurationCanceled(bytes32 indexed configurationId, uint256 version)
+event DiamondBatchConfigurationCancelled(bytes32 indexed configurationId, uint256 indexed version)
 ```
 
 Emitted when an in-progress batch configuration is discarded.
@@ -470,7 +493,7 @@ Emitted when an in-progress batch configuration is discarded.
 | Name                      | Type    | Description                                                 |
 | ------------------------- | ------- | ----------------------------------------------------------- |
 | configurationId `indexed` | bytes32 | Configuration key whose pending batch was cancelled.        |
-| version                   | uint256 | Version number that was being assembled and is now dropped. |
+| version `indexed`         | uint256 | Version number that was being assembled and is now dropped. |
 
 ### DiamondBatchConfigurationCreated
 
@@ -560,6 +583,20 @@ Thrown when a configuration references a facet id that is not registered in the 
 | configurationId | bytes32 | Configuration being created or modified.    |
 | facetId         | bytes32 | Unknown facet id that triggered the revert. |
 
+### InvalidResolverProxyConfiguration
+
+```solidity
+error InvalidResolverProxyConfiguration(bytes _resolverProxyConfiguration)
+```
+
+Thrown when the provided encoded proxy configuration does not respect the standard.
+
+#### Parameters
+
+| Name                         | Type  | Description                        |
+| ---------------------------- | ----- | ---------------------------------- |
+| \_resolverProxyConfiguration | bytes | wrong encoded proxy configuration. |
+
 ### OngoingBatchConfigurationNotPermitted
 
 ```solidity
@@ -619,6 +656,20 @@ Thrown when attempting to register a selector that is globally blacklisted.
 | Name     | Type   | Description                          |
 | -------- | ------ | ------------------------------------ |
 | selector | bytes4 | Function selector that is forbidden. |
+
+### UnrecognizedResolverProxyVersion
+
+```solidity
+error UnrecognizedResolverProxyVersion(bytes8 _resolverProxyVersion)
+```
+
+Thrown when the provided proxy version does not match any BLR compatible standard.
+
+#### Parameters
+
+| Name                   | Type   | Description                                        |
+| ---------------------- | ------ | -------------------------------------------------- |
+| \_resolverProxyVersion | bytes8 | proxy version that is not compatible with the BLR. |
 
 ### VersionZero
 

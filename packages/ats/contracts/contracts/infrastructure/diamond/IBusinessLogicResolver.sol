@@ -45,6 +45,16 @@ interface IBusinessLogicResolver is IDiamondCutManager {
     /// @param newLatestVersions new latest version per registered key, in the same order as `businessLogics`.
     event BusinessLogicsRegistered(BusinessLogicRegistryData[] businessLogics, uint256[] newLatestVersions);
 
+    /// @notice Event emitted when an old address is replaced with a new one
+    /// @param replacedAddress old address been replaced.
+    /// @param replacementAddress new address replacing the old one.
+    event ReplacementAddressUpdated(address indexed replacedAddress, address indexed replacementAddress);
+
+    /// @notice Event emitted when a replacement address is removed
+    /// @param replacedAddress address for which the replacement is being removed.
+    /// @param replacementAddressRemoved removed replacement address.
+    event ReplacementAddressRemoved(address indexed replacedAddress, address indexed replacementAddressRemoved);
+
     /// @notice Thrown when the requested version has never been registered for any business logic key.
     /// @param version The version number that does not exist in the registry.
     error BusinessLogicVersionDoesNotExist(uint256 version);
@@ -61,6 +71,18 @@ interface IBusinessLogicResolver is IDiamondCutManager {
 
     /// @notice Thrown when a registration attempt uses the zero bytes32 value as the business logic key.
     error ZeroKeyNotValidForBusinessLogic();
+
+    /**
+     * @notice Thrown when a replacement address is already been replaced.
+     * @param replacementAddress Replacement address that is already been replaced and thus cannot replaced another one.
+     */
+    error InvalidReplacementAddress(address replacementAddress);
+
+    /**
+     * @notice Thrown when a replaced address is already been used as replacement of other addresses.
+     * @param replacedAddress Replaced address.
+     */
+    error InvalidReplacedAddress(address replacedAddress);
 
     /**
      * @notice Initialises the Business Logic Resolver storage. Must be called once before any
@@ -90,6 +112,26 @@ interface IBusinessLogicResolver is IDiamondCutManager {
      * @param _selectors list of selectors to be removed from the blacklist
      */
     function removeSelectorsFromBlacklist(bytes32 _configurationId, bytes4[] calldata _selectors) external;
+
+    /**
+     * @notice Updates the replacement address for a given address
+     * @param _oldAddress the address to be replaced
+     * @param _newAddress the new address to replace it with
+     */
+    function updateReplacementAddress(address _oldAddress, address _newAddress) external;
+
+    /**
+     * @notice Removes the replacement address for a given address
+     * @param _oldAddress the address for which to remove the replacement
+     */
+    function removeReplacementAddress(address _oldAddress) external;
+
+    /**
+     * @notice Returns the replacement address for a given address, or address(0) if none exists
+     * @param _oldAddress the address whose replacement is queried
+     * @return replacementAddress_ the replacement address, or address(0) if none exists
+     */
+    function getReplacementAddress(address _oldAddress) external view returns (address replacementAddress_);
 
     /**
      * @notice Returns the current status of a given version for a business logic key.

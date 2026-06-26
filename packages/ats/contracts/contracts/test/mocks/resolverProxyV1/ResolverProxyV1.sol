@@ -1,0 +1,74 @@
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity >=0.8.0 <0.9.0;
+
+/******************************************************************************\
+* Author: Nick Mudge <nick@perfectabstractions.com>, Twitter/Github: @mudgen
+* EIP-2535 ResolverProxys
+*
+* Implementation of a resolverProxy.
+/******************************************************************************/
+
+import { ResolverProxyUnstructuredV1 } from "./ResolverProxyUnstructuredV1.sol";
+import { IResolverProxyV1 } from "./IResolverProxyV1.sol";
+import { IBusinessLogicResolverV1 } from "./IBusinessLogicResolverV1.sol";
+import { ResolverProxyStorageWrapperV1 } from "./ResolverProxyStorageWrapperV1.sol";
+
+contract ResolverProxyV1 is ResolverProxyUnstructuredV1 {
+    /**
+     * @notice Deploys and initialises the resolver proxy with its resolver configuration and roles.
+     * @dev Validates that the requested configuration is registered before storing proxy
+     *      configuration data and assigning RBAC roles. The constructor is payable to support
+     *      prefunding during deployment.
+     * @param _resolver Business-logic resolver used to resolve selectors to facet addresses.
+     * @param _resolverProxyConfigurationId Configuration identifier served by this proxy.
+     * @param _version Configuration version pinned for selector resolution.
+     * @param _rbac Role assignments granted during initialisation.
+     */
+    constructor(
+        IBusinessLogicResolverV1 _resolver,
+        bytes32 _resolverProxyConfigurationId,
+        uint256 _version,
+        IResolverProxyV1.Rbac[] memory _rbac
+    ) payable {
+        _initialize(_resolver, _resolverProxyConfigurationId, _version, _rbac);
+    }
+
+    /**
+     * @notice Accepts native token transfers sent directly to the proxy.
+     * @dev Does not mutate proxy configuration or delegate execution.
+     */
+    receive() external payable {}
+
+    // solhint-disable-next-line no-complex-fallback
+    /**
+     * @notice Delegates calls to facet implementations.
+     * @dev Reverts with `FunctionNotFound` when no facet is registered. Otherwise forwards all
+     *      calldata and remaining gas using `delegatecall`, then bubbles returned data or revert
+     *      data unchanged to the original caller.
+     */
+    fallback() external payable {
+        // get facet from function selector
+        address facet = _getFacetAddress(msg.sig);
+        if (facet == address(0)) {
+            revert IResolverProxyV1.FunctionNotFound(msg.sig);
+        }
+        // Execute external function from facet using delegatecall and return any value.
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            // copy function selector and any arguments
+            calldatacopy(0, 0, calldatasize())
+            // execute function call using the facet
+            let result := delegatecall(gas(), facet, 0, calldatasize(), 0, 0)
+            // get any return value
+            returndatacopy(0, 0, returndatasize())
+            // return any return value or error back to the caller
+            switch result
+            case 0 {
+                revert(0, returndatasize())
+            }
+            default {
+                return(0, returndatasize())
+            }
+        }
+    }
+}

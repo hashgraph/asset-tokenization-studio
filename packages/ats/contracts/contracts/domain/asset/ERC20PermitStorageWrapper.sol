@@ -80,7 +80,7 @@ library ERC20PermitStorageWrapper {
         return
             _getDomainHash(
                 ERC20StorageWrapper.getName(),
-                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
+                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion()),
                 EvmAccessors.getChainId(),
                 address(this)
             );

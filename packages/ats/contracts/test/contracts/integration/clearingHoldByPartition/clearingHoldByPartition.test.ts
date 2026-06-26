@@ -595,7 +595,7 @@ export function clearingHoldByPartitionTests(getCtx: () => AssetMockCtx): void {
 
           // EIP-712 domain
           const name = (await asset.getERC20Metadata()).info.name;
-          const version = (await asset.getConfigInfo()).version_.toString();
+          const version = (await asset.getConfigInfo()).configurationVersion_.toString();
           const chainId = await network.provider.send("eth_chainId");
 
           const domain = {

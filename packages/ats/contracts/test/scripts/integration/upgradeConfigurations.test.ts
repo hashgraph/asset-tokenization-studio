@@ -133,7 +133,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
 
       // Verify initial version
       const configBefore = await getResolverProxyConfigInfo(deployer, equityTokenAddress);
-      expect(configBefore.version).to.equal(1);
+      expect(configBefore.configurationVersion).to.equal(1);
 
       const result = await upgradeConfigurations(deployer, "hardhat", {
         blrAddress,
@@ -155,7 +155,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
 
       // Verify version was updated on-chain
       const configAfter = await getResolverProxyConfigInfo(deployer, equityTokenAddress);
-      expect(configAfter.version).to.equal(2);
+      expect(configAfter.configurationVersion).to.equal(2);
     });
 
     it("should update multiple proxies successfully", async () => {
@@ -180,8 +180,8 @@ describe("upgradeConfigurations - Integration Tests", () => {
       // Verify both proxies were updated
       const equityConfig = await getResolverProxyConfigInfo(deployer, equityTokenAddress);
       const bondConfig = await getResolverProxyConfigInfo(deployer, bondTokenAddress);
-      expect(equityConfig.version).to.equal(2);
-      expect(bondConfig.version).to.equal(2);
+      expect(equityConfig.configurationVersion).to.equal(2);
+      expect(bondConfig.configurationVersion).to.equal(2);
     });
 
     it("should continue on partial proxy update failures", async () => {

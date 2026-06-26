@@ -26,17 +26,15 @@ contract ResolverProxy is ResolverProxyUnstructured {
      *      configuration data and assigning RBAC roles. The constructor is payable to support
      *      prefunding during deployment.
      * @param _resolver Business-logic resolver used to resolve selectors to facet addresses.
-     * @param _resolverProxyConfigurationId Configuration identifier served by this proxy.
-     * @param _version Configuration version pinned for selector resolution.
+     * @param _resolverProxyConfigurationV2 Full V2 configuration served by this proxy.
      * @param _rbac Role assignments granted during initialisation.
      */
     constructor(
         IBusinessLogicResolver _resolver,
-        bytes32 _resolverProxyConfigurationId,
-        uint256 _version,
+        IResolverProxy.ResolverProxyConfigurationV2 memory _resolverProxyConfigurationV2,
         IResolverProxy.Rbac[] memory _rbac
     ) payable {
-        _initialize(_resolver, _resolverProxyConfigurationId, _version, _rbac);
+        _initialize(_resolver, _resolverProxyConfigurationV2, _rbac);
     }
 
     /**

@@ -63,9 +63,10 @@ export async function deployBondFixedRateTokenFixture({
 
   const securityData = getSecurityData(blr, {
     ...bondDataParams?.securityData,
-    resolverProxyConfiguration: {
-      key: BOND_FIXED_RATE_CONFIG_ID,
-      version: 1,
+    resolverProxyConfigurationV2: {
+      configurationId: BOND_FIXED_RATE_CONFIG_ID,
+      configurationVersion: 1,
+      replacementEnabled: true,
     },
   });
   const bondDetails = await makeBondDetailsData(bondDataParams?.bondDetails);

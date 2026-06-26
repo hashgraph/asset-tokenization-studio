@@ -244,6 +244,20 @@ Thrown when a proposed new global cap is below the current adjusted total supply
 | maxSupply   | uint256 | The proposed new maximum supply.                   |
 | totalSupply | uint256 | The current adjusted total supply that exceeds it. |
 
+### UnrecognizedResolverProxyVersion
+
+```solidity
+error UnrecognizedResolverProxyVersion(bytes8 _resolverProxyVersion)
+```
+
+Thrown when the provided proxy version does not match any BLR compatible standard.
+
+#### Parameters
+
+| Name                   | Type   | Description                                        |
+| ---------------------- | ------ | -------------------------------------------------- |
+| \_resolverProxyVersion | bytes8 | proxy version that is not compatible with the BLR. |
+
 ### WalletRecovered
 
 ```solidity
