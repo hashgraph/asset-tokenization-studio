@@ -489,7 +489,7 @@ abstract contract Factory is IFactory {
         );
         ICap(_securityAddress).initializeCap(_securityData.maxSupply, new ICap.PartitionCap[](0));
         ICapByPartition(_securityAddress).initializeCapByPartition();
-        ICustomData(_securityAddress).initializeCustomData();
+        ICustomData(_securityAddress).initializeCustomData(new ICustomData.CustomDataEntry[](0));
         IDocumentation(_securityAddress).initializeDocumentation();
 
         IPartitions(_securityAddress).initializePartitions(_securityData.isMultiPartition);
@@ -637,7 +637,7 @@ abstract contract Factory is IFactory {
         // configure core adjusted
         ICoreAdjusted(_securityAddress).initializeCoreAdjusted();
         // configure custom data
-        ICustomData(_securityAddress).initializeCustomData();
+        ICustomData(_securityAddress).initializeCustomData(new ICustomData.CustomDataEntry[](0));
         // configure freeze
         IFreeze(_securityAddress).initializeFreeze();
         // configure batch freeze
