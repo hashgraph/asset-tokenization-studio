@@ -52,6 +52,13 @@ A git worktree per shard gives each an isolated working tree (the same isolation
 `node_modules` is symlinked, not reinstalled. Shard lcovs have worktree-absolute `SF:` paths, so they are
 normalised to package-relative before merging (otherwise the merge can't union them).
 
+Each worktree is created at HEAD and then **overlaid with your working tree**, so local parallel coverage
+measures uncommitted work — matching serial `npm run test:coverage` — rather than only committed code. The
+overlay is a `git diff HEAD --binary` patch (tracked edits, deletions, renames) plus the untracked,
+non-`.gitignore`d files from `git ls-files --others --exclude-standard` (so a brand-new test file is included,
+while artifacts and the generated registry are not). A clean tree overlays nothing, so the run is identical to
+a committed one. No flag to set — for committed-only, `git stash` first.
+
 ## Why an in-repo lcov merger (not `lcov` / `lcov-result-merger`)
 
 - `lcov-result-merger` (npm) silently **drops function coverage**.
