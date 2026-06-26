@@ -56,6 +56,7 @@ library VotingStorageWrapper {
     function cancelVoting(uint256 voteId) internal returns (bool success_) {
         (IVoting.RegisteredVoting memory registeredVoting, bytes32 corporateActionId, ) = getVoting(voteId);
 
+        // solhint-disable-next-line gas-strict-inequalities
         if (registeredVoting.voting.recordDate <= EvmAccessors.getBlockTimestamp()) {
             revert IVoting.VotingAlreadyRecorded(corporateActionId, voteId);
         }

@@ -31,6 +31,8 @@ import { KycStorageWrapper } from "../../domain/core/KycStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC20StorageWrapper } from "../../domain/asset/ERC20StorageWrapper.sol";
 import { ERC20VotesStorageWrapper } from "../../domain/asset/ERC20VotesStorageWrapper.sol";
+import { ScheduledTasksStorageWrapper } from "../../domain/asset/ScheduledTasksStorageWrapper.sol";
+import { ScheduledTasksLib } from "../../facets/scheduledTasksLib/ScheduledTasksLib.sol";
 
 /* solhint-disable */
 
@@ -121,6 +123,27 @@ interface IMockDiamondCut {
      * @param _newWhitelist True to enable whitelist behaviour, false otherwise.
      */
     function forceWhitelist(bool _newWhitelist) external;
+
+    /**
+     * @notice Adds a cross-ordered scheduled task directly to storage.
+     * @dev Bypasses normal task creation flows; intended for coverage of scheduled-task branches.
+     * @param timestamp Scheduled execution timestamp for the task.
+     * @param taskType The sub-task type encoded into the cross-ordered task data.
+     */
+    function forceAddCrossOrderedTask(uint256 timestamp, bytes32 taskType) external;
+
+    /**
+     * @notice Pops the most recent balance-adjustment sub-task from its queue.
+     * @dev Removes the tail entry from the balance-adjustment storage queue.
+     */
+    function forcePopBalanceAdjustmentSubTask() external;
+
+    /**
+     * @notice Adds a raw balance-adjustment sub-task with an arbitrary timestamp.
+     * @dev Writes directly to balance-adjustment storage; data encodes `bytes32(0)`.
+     * @param timestamp Scheduled execution timestamp for the sub-task.
+     */
+    function forceAddRawBalanceAdjustmentSubTask(uint256 timestamp) external;
 }
 
 /**
@@ -242,6 +265,32 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
         ControlListStorageWrapper.initializeControlList(_newWhiteList);
     }
 
+    /// @inheritdoc IMockDiamondCut
+    /// @dev Encodes the task type and inserts it into cross-ordered task storage via the lib.
+    function forceAddCrossOrderedTask(uint256 timestamp, bytes32 taskType) external override {
+        ScheduledTasksLib.addScheduledTask(
+            ScheduledTasksStorageWrapper.scheduledCrossOrderedTaskStorage(),
+            timestamp,
+            abi.encode(taskType)
+        );
+    }
+
+    /// @inheritdoc IMockDiamondCut
+    /// @dev Removes the tail entry from balance-adjustment storage via the lib.
+    function forcePopBalanceAdjustmentSubTask() external override {
+        ScheduledTasksLib.popScheduledTask(ScheduledTasksStorageWrapper.scheduledBalanceAdjustmentStorage());
+    }
+
+    /// @inheritdoc IMockDiamondCut
+    /// @dev Inserts a balance-adjustment sub-task with `bytes32(0)` data at the given timestamp.
+    function forceAddRawBalanceAdjustmentSubTask(uint256 timestamp) external override {
+        ScheduledTasksLib.addScheduledTask(
+            ScheduledTasksStorageWrapper.scheduledBalanceAdjustmentStorage(),
+            timestamp,
+            abi.encode(bytes32(0))
+        );
+    }
+
     /// @inheritdoc IStaticFunctionSelectors
     /// @dev Returns the production diamond resolver key so registry lookups match the deployed
     ///      diamond cut facet entry.
@@ -257,7 +306,7 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
     /// @dev Includes the mock helper selectors together with inherited diamond cut, loupe, and
     ///      ERC-165 selectors expected to be registered for this test facet.
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorsIndex = 31;
+        uint256 selectorsIndex = 34;
         staticFunctionSelectors_ = new bytes4[](selectorsIndex);
         unchecked {
             staticFunctionSelectors_[--selectorsIndex] = this.initializeDiamondCut.selector;
@@ -273,6 +322,9 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
             staticFunctionSelectors_[--selectorsIndex] = this.forceDecimals.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.forceErc20VotesActivated.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.forceWhitelist.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.forceAddCrossOrderedTask.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.forcePopBalanceAdjustmentSubTask.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.forceAddRawBalanceAdjustmentSubTask.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.updateConfigVersion.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.updateConfig.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.updateResolver.selector;

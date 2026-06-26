@@ -2,10 +2,10 @@
 
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { IAssetMock, KpiLinkedRate__factory } from "@contract-types";
-import type { KpiLinkedRate } from "@contract-types";
-import { ATS_ROLES, RESOLVER_KEY_KPI_LINKED_RATE } from "@scripts";
-import { DEFAULT_BOND_KPI_LINKED_RATE_PARAMS, executeRbac } from "@test";
+import { IAssetMock, KpiLinkedRate__factory, Kpis__factory } from "@contract-types";
+import type { KpiLinkedRate, Kpis } from "@contract-types";
+import { ATS_ROLES, RESOLVER_KEY_KPI_LINKED_RATE, TIME_PERIODS_S } from "@scripts";
+import { DEFAULT_BOND_KPI_LINKED_RATE_PARAMS, executeRbac, getDltTimestamp } from "@test";
 import type { AssetMockCtx } from "@test";
 
 export function kpiLinkedRateTests(getCtx: () => AssetMockCtx): void {
@@ -489,6 +489,209 @@ export function kpiLinkedRateTests(getCtx: () => AssetMockCtx): void {
             rateDecimals: 0,
           }),
         ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+      });
+    });
+
+    describe("Rate Calculation", () => {
+      let kpis: Kpis;
+
+      beforeEach(async () => {
+        await executeRbac(asset, [
+          { role: ATS_ROLES.ROLE_CORPORATE_ACTION, members: [signer_A.address] },
+          { role: ATS_ROLES.ROLE_PROCEED_RECIPIENT_MANAGER, members: [signer_A.address] },
+          { role: ATS_ROLES.ROLE_KPI_MANAGER, members: [signer_A.address] },
+        ]);
+        kpis = Kpis__factory.connect(kpiRate.target as string, signer_A);
+      });
+
+      it("GIVEN fixingDate before startPeriod WHEN getCoupon THEN returns startRate", async () => {
+        const currentTimestamp = await getDltTimestamp();
+        const fixingDate = currentTimestamp + TIME_PERIODS_S.DAY;
+        await kpiRate.setKpiLinkedRateInterestRate({
+          maxRate: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.maxRate,
+          baseRate: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.baseRate,
+          minRate: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.minRate,
+          startPeriod: fixingDate + 1,
+          startRate: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.startRate,
+          missedPenalty: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.missedPenalty,
+          reportPeriod: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.reportPeriod,
+          rateDecimals: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.rateDecimals,
+        });
+        await asset.connect(signer_A).setCoupon({
+          recordDate: fixingDate.toString(),
+          executionDate: (fixingDate + TIME_PERIODS_S.DAY).toString(),
+          rate: 0,
+          rateDecimals: 0,
+          startDate: currentTimestamp.toString(),
+          endDate: fixingDate.toString(),
+          fixingDate: fixingDate.toString(),
+          rateStatus: 0,
+        });
+        await asset.changeSystemTimestamp(fixingDate + 2);
+        const [registeredCoupon] = await asset.getCoupon(1);
+        expect(registeredCoupon.coupon.rate).to.equal(DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.startRate);
+        expect(registeredCoupon.coupon.rateDecimals).to.equal(DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.rateDecimals);
+      });
+
+      it("GIVEN no KPI report and baseRate+missedPenalty exceeds maxRate WHEN getCoupon THEN rate is capped at maxRate", async () => {
+        const maxRate = 100;
+        await kpiRate.setKpiLinkedRateInterestRate({
+          maxRate: maxRate,
+          baseRate: 95,
+          minRate: 50,
+          startPeriod: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.startPeriod,
+          startRate: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.startRate,
+          missedPenalty: 10,
+          reportPeriod: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.reportPeriod,
+          rateDecimals: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.rateDecimals,
+        });
+        const currentTimestamp = await getDltTimestamp();
+        const fixingDate = currentTimestamp + TIME_PERIODS_S.DAY;
+        await asset.connect(signer_A).setCoupon({
+          recordDate: fixingDate.toString(),
+          executionDate: (fixingDate + TIME_PERIODS_S.DAY).toString(),
+          rate: 0,
+          rateDecimals: 0,
+          startDate: currentTimestamp.toString(),
+          endDate: fixingDate.toString(),
+          fixingDate: fixingDate.toString(),
+          rateStatus: 0,
+        });
+        await asset.changeSystemTimestamp(fixingDate + 1);
+        const [registeredCoupon] = await asset.getCoupon(1);
+        // baseRate(95) + missedPenalty(10) = 105 > maxRate(100) → capped to maxRate
+        expect(registeredCoupon.coupon.rate).to.equal(maxRate);
+      });
+
+      it("GIVEN reportPeriod larger than fixingDate WHEN getCoupon THEN windowStart equals fixingDate and no report found", async () => {
+        await kpiRate.setKpiLinkedRateInterestRate({
+          maxRate: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.maxRate,
+          baseRate: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.baseRate,
+          minRate: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.minRate,
+          startPeriod: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.startPeriod,
+          startRate: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.startRate,
+          missedPenalty: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.missedPenalty,
+          reportPeriod: 4000000000n, // exceeds any realistic fixingDate → windowStart = fixingDate
+          rateDecimals: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.rateDecimals,
+        });
+        const currentTimestamp = await getDltTimestamp();
+        const fixingDate = currentTimestamp + TIME_PERIODS_S.DAY;
+        await asset.connect(signer_A).setCoupon({
+          recordDate: fixingDate.toString(),
+          executionDate: (fixingDate + TIME_PERIODS_S.DAY).toString(),
+          rate: 0,
+          rateDecimals: 0,
+          startDate: currentTimestamp.toString(),
+          endDate: fixingDate.toString(),
+          fixingDate: fixingDate.toString(),
+          rateStatus: 0,
+        });
+        await asset.changeSystemTimestamp(fixingDate + 1);
+        const [registeredCoupon] = await asset.getCoupon(1);
+        // empty window → no report → baseRate(75) + missedPenalty(10) = 85
+        expect(registeredCoupon.coupon.rate).to.equal(
+          DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.baseRate + DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.missedPenalty,
+        );
+      });
+
+      describe("GIVEN a proceed recipient with KPI data in the report window", () => {
+        beforeEach(async () => {
+          await asset.connect(signer_A).addProceedRecipient(signer_A.address, "0x");
+        });
+
+        it("GIVEN impactData below baseLine WHEN getCoupon THEN returns interpolated decreased rate", async () => {
+          const currentTimestamp = await getDltTimestamp();
+          const fixingDate = currentTimestamp + TIME_PERIODS_S.DAY;
+          await asset.connect(signer_A).setCoupon({
+            recordDate: fixingDate.toString(),
+            executionDate: (fixingDate + TIME_PERIODS_S.DAY).toString(),
+            rate: 0,
+            rateDecimals: 0,
+            startDate: currentTimestamp.toString(),
+            endDate: fixingDate.toString(),
+            fixingDate: fixingDate.toString(),
+            rateStatus: 0,
+          });
+          const kpiDate = fixingDate - DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.reportPeriod + 1;
+          await asset.changeSystemTimestamp(kpiDate);
+          // impactData=600 in (maxDeviationFloor=500, baseLine=750):
+          //   impactDeltaRate = (100*(750-600))/(750-500) = 60 → rate = 75 - (25*60/100) = 60
+          await kpis.addKpiData(kpiDate, 600, signer_A.address);
+          await asset.changeSystemTimestamp(fixingDate + 1);
+          const [registeredCoupon] = await asset.getCoupon(1);
+          expect(registeredCoupon.coupon.rate).to.equal(60n);
+        });
+
+        it("GIVEN impactData at or above baseLine WHEN getCoupon THEN returns interpolated increased rate", async () => {
+          const currentTimestamp = await getDltTimestamp();
+          const fixingDate = currentTimestamp + TIME_PERIODS_S.DAY;
+          await asset.connect(signer_A).setCoupon({
+            recordDate: fixingDate.toString(),
+            executionDate: (fixingDate + TIME_PERIODS_S.DAY).toString(),
+            rate: 0,
+            rateDecimals: 0,
+            startDate: currentTimestamp.toString(),
+            endDate: fixingDate.toString(),
+            fixingDate: fixingDate.toString(),
+            rateStatus: 0,
+          });
+          const kpiDate = fixingDate - DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.reportPeriod + 1;
+          await asset.changeSystemTimestamp(kpiDate);
+          // impactData=850 in (baseLine=750, maxDeviationCap=1000):
+          //   impactDeltaRate = (100*(850-750))/(1000-750) = 40 → rate = 75 + (25*40/100) = 85
+          await kpis.addKpiData(kpiDate, 850, signer_A.address);
+          await asset.changeSystemTimestamp(fixingDate + 1);
+          const [registeredCoupon] = await asset.getCoupon(1);
+          expect(registeredCoupon.coupon.rate).to.equal(85n);
+        });
+
+        it("GIVEN impactData below maxDeviationFloor WHEN getCoupon THEN impactDeltaRate is capped and rate equals minRate", async () => {
+          const currentTimestamp = await getDltTimestamp();
+          const fixingDate = currentTimestamp + TIME_PERIODS_S.DAY;
+          await asset.connect(signer_A).setCoupon({
+            recordDate: fixingDate.toString(),
+            executionDate: (fixingDate + TIME_PERIODS_S.DAY).toString(),
+            rate: 0,
+            rateDecimals: 0,
+            startDate: currentTimestamp.toString(),
+            endDate: fixingDate.toString(),
+            fixingDate: fixingDate.toString(),
+            rateStatus: 0,
+          });
+          const kpiDate = fixingDate - DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.reportPeriod + 1;
+          await asset.changeSystemTimestamp(kpiDate);
+          // impactData=400 < maxDeviationFloor=500:
+          //   impactDeltaRate = (100*(750-400))/(750-500) = 140 > factor(100) → capped to 100
+          //   rate = 75 - (25*100/100) = 50 = minRate
+          await kpis.addKpiData(kpiDate, 400, signer_A.address);
+          await asset.changeSystemTimestamp(fixingDate + 1);
+          const [registeredCoupon] = await asset.getCoupon(1);
+          expect(registeredCoupon.coupon.rate).to.equal(DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.minRate);
+        });
+
+        it("GIVEN impactData above maxDeviationCap WHEN getCoupon THEN impactDeltaRate is capped and rate equals maxRate", async () => {
+          const currentTimestamp = await getDltTimestamp();
+          const fixingDate = currentTimestamp + TIME_PERIODS_S.DAY;
+          await asset.connect(signer_A).setCoupon({
+            recordDate: fixingDate.toString(),
+            executionDate: (fixingDate + TIME_PERIODS_S.DAY).toString(),
+            rate: 0,
+            rateDecimals: 0,
+            startDate: currentTimestamp.toString(),
+            endDate: fixingDate.toString(),
+            fixingDate: fixingDate.toString(),
+            rateStatus: 0,
+          });
+          const kpiDate = fixingDate - DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.reportPeriod + 1;
+          await asset.changeSystemTimestamp(kpiDate);
+          // impactData=1200 > maxDeviationCap=1000:
+          //   impactDeltaRate = (100*(1200-750))/(1000-750) = 180 > factor(100) → capped to 100
+          //   rate = 75 + (25*100/100) = 100 = maxRate
+          await kpis.addKpiData(kpiDate, 1200, signer_A.address);
+          await asset.changeSystemTimestamp(fixingDate + 1);
+          const [registeredCoupon] = await asset.getCoupon(1);
+          expect(registeredCoupon.coupon.rate).to.equal(DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.maxRate);
+        });
       });
     });
   });

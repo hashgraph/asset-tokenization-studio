@@ -77,8 +77,8 @@ export function couponTests(getCtx: () => AssetMockCtx): void {
       startingDate = currentTimestamp + TIME_PERIODS_S.DAY;
       maturityDate = startingDate + numberOfCoupons * frequency;
 
-      couponRecordDateInSeconds = currentTimestamp + 400;
-      couponExecutionDateInSeconds = currentTimestamp + 1200;
+      couponRecordDateInSeconds = currentTimestamp + TIME_PERIODS_S.DAY;
+      couponExecutionDateInSeconds = currentTimestamp + TIME_PERIODS_S.DAY + 1000;
       couponFixingDateInSeconds = currentTimestamp + 1200;
       couponEndDateInSeconds = couponFixingDateInSeconds - 1;
       couponStartDateInSeconds = couponEndDateInSeconds - couponPeriod;

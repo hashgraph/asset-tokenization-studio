@@ -18,9 +18,9 @@ exports[`ats contracts solhint`] = {
       [246, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
       [264, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"]
     ],
-    "contracts/domain/asset/ERC20VotesStorageWrapper.sol:1439876099": [
-      [298, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177617"],
-      [309, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177617"]
+    "contracts/domain/asset/ERC20VotesStorageWrapper.sol:1755450486": [
+      [300, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177617"],
+      [311, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177617"]
     ],
     "contracts/domain/asset/HoldStorageWrapper.sol:2799269957": [
       [801, 15, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177632"]
@@ -28,8 +28,8 @@ exports[`ats contracts solhint`] = {
     "contracts/domain/asset/KpisStorageWrapper.sol:3109432168": [
       [104, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177601"]
     ],
-    "contracts/domain/asset/LockStorageWrapper.sol:1273129357": [
-      [327, 15, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177602"]
+    "contracts/domain/asset/LockStorageWrapper.sol:2957748329": [
+      [333, 15, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177602"]
     ],
     "contracts/domain/asset/ScheduledTasksStorageWrapper.sol:3979218817": [
       [194, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"]
@@ -37,10 +37,9 @@ exports[`ats contracts solhint`] = {
     "contracts/domain/asset/SnapshotsStorageWrapper.sol:732035984": [
       [1038, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"]
     ],
-    "contracts/domain/asset/VotingStorageWrapper.sol:1130199794": [
-      [58, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
-      [179, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
-      [197, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"]
+    "contracts/domain/asset/VotingStorageWrapper.sol:1699818420": [
+      [180, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
+      [198, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"]
     ],
     "contracts/domain/asset/coupon/CouponStorageWrapper.sol:1759522121": [
       [94, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
@@ -48,14 +47,36 @@ exports[`ats contracts solhint`] = {
       [382, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
       [402, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177621"]
     ],
-    "contracts/domain/orchestrator/ClearingOps.sol:3707322407": [
-      [61, 4, 1, "function-max-lines: Function body contains 57 lines but allowed no more than 50 lines", "177603"],
-      [61, 4, 1, "gas-calldata-parameters: GC: [_clearingOperation] argument on Function [clearingTransferCreation] could be [calldata] if it\'s not being updated", "177603"],
-      [61, 4, 1, "gas-calldata-parameters: GC: [_operatorData] argument on Function [clearingTransferCreation] could be [calldata] if it\'s not being updated", "177603"],
-      [141, 4, 1, "function-max-lines: Function body contains 66 lines but allowed no more than 50 lines", "177603"],
-      [229, 4, 1, "function-max-lines: Function body contains 58 lines but allowed no more than 50 lines", "177603"],
-      [229, 4, 1, "gas-calldata-parameters: GC: [_operatorData] argument on Function [clearingHoldCreationCreation] could be [calldata] if it\'s not being updated", "177603"],
-      [415, 4, 1, "function-max-lines: Function body contains 52 lines but allowed no more than 50 lines", "177603"]
+    "contracts/domain/orchestrator/ClearingOps.sol:1078388775": [
+      [57, 4, 1, "function-max-lines: Function body contains 57 lines but allowed no more than 50 lines", "177603"],
+      [57, 4, 1, "gas-calldata-parameters: GC: [_clearingOperation] argument on Function [clearingTransferCreation] could be [calldata] if it\'s not being updated", "177603"],
+      [57, 4, 1, "gas-calldata-parameters: GC: [_operatorData] argument on Function [clearingTransferCreation] could be [calldata] if it\'s not being updated", "177603"],
+      [137, 4, 1, "function-max-lines: Function body contains 66 lines but allowed no more than 50 lines", "177603"],
+      [137, 4, 1, "gas-calldata-parameters: GC: [_clearingOperation] argument on Function [clearingRedeemCreation] could be [calldata] if it\'s not being updated", "177603"],
+      [137, 4, 1, "gas-calldata-parameters: GC: [_operatorData] argument on Function [clearingRedeemCreation] could be [calldata] if it\'s not being updated", "177603"],
+      [221, 4, 1, "function-max-lines: Function body contains 58 lines but allowed no more than 50 lines", "177603"],
+      [221, 4, 1, "gas-calldata-parameters: GC: [_operatorData] argument on Function [clearingHoldCreationCreation] could be [calldata] if it\'s not being updated", "177603"],
+      [407, 4, 1, "function-max-lines: Function body contains 52 lines but allowed no more than 50 lines", "177603"]
+    ],
+    "contracts/domain/orchestrator/HoldOps.sol:2308870617": [
+      [29, 4, 1, "gas-calldata-parameters: GC: [_hold] argument on Function [createHoldByPartition] could be [calldata] if it\'s not being updated", "177603"],
+      [29, 4, 1, "gas-calldata-parameters: GC: [_operatorData] argument on Function [createHoldByPartition] could be [calldata] if it\'s not being updated", "177603"],
+      [50, 4, 1, "gas-calldata-parameters: GC: [_protectedHold] argument on Function [protectedCreateHoldByPartition] could be [calldata] if it\'s not being updated", "177603"]
+    ],
+    "contracts/domain/orchestrator/TokenCoreOps.sol:895313088": [
+      [33, 4, 1, "gas-calldata-parameters: GC: [_basicTransferInfo] argument on Function [transferByPartition] could be [calldata] if it\'s not being updated", "177603"],
+      [33, 4, 1, "gas-calldata-parameters: GC: [_data] argument on Function [transferByPartition] could be [calldata] if it\'s not being updated", "177603"],
+      [33, 4, 1, "gas-calldata-parameters: GC: [_operatorData] argument on Function [transferByPartition] could be [calldata] if it\'s not being updated", "177603"],
+      [80, 4, 1, "gas-calldata-parameters: GC: [_issueData] argument on Function [issueByPartition] could be [calldata] if it\'s not being updated", "177603"],
+      [91, 4, 1, "gas-calldata-parameters: GC: [_data] argument on Function [redeemByPartition] could be [calldata] if it\'s not being updated", "177603"],
+      [91, 4, 1, "gas-calldata-parameters: GC: [_operatorData] argument on Function [redeemByPartition] could be [calldata] if it\'s not being updated", "177603"]
+    ],
+    "contracts/facets/adjustBalances/IAdjustBalances.sol:226845225": [
+      [21, 4, 1, "gas-indexed-events: GC: [factor] on Event [AdjustmentBalanceSet] could be Indexed", "177600"],
+      [21, 4, 1, "gas-indexed-events: GC: [decimals] on Event [AdjustmentBalanceSet] could be Indexed", "177600"]
+    ],
+    "contracts/facets/allowance/IAllowanceTypes.sol:2947429804": [
+      [19, 4, 1, "gas-indexed-events: GC: [value] on Event [Approval] could be Indexed", "177600"]
     ],
     "contracts/facets/amortization/IAmortization.sol:75918106": [
       [32, 4, 1, "gas-struct-packing: GC: For [ AmortizationFor ] struct, packing seems inefficient. Try rearranging to achieve 32bytes slots", "177622"]
@@ -94,13 +115,6 @@ exports[`ats contracts solhint`] = {
       [24, 4, 1, "no-unused-import: imported name POW10_18 is not used", "177653"],
       [78, 4, 1, "function-max-lines: Function body contains 70 lines but allowed no more than 50 lines", "177603"],
       [79, 8, 1, "no-inline-assembly: Avoid to use inline assembly. It is acceptable only in rare cases", "177604"]
-    ],
-    "contracts/infrastructure/utils/EIP712.sol:1875754770": [
-      [205, 11, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"]
-    ],
-    "contracts/infrastructure/utils/Pagination.sol:2797670531": [
-      [91, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"],
-      [94, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"]
     ]
   }`
 };
