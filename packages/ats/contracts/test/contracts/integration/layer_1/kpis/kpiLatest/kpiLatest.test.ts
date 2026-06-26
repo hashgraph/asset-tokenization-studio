@@ -208,7 +208,7 @@ export function kpiLatestTests(getCtx: () => AssetMockCtx): void {
         });
 
         it("WHEN getMinDate is called THEN returns the coupon fixing date", async () => {
-          await asset.connect(signer_A).setCouponRateType(2);
+          await asset.connect(signer_A).setCouponRateType(3);
 
           const currentTimestamp = await getDltTimestamp();
           const fixingDate = currentTimestamp + TIME_PERIODS_S.DAY;

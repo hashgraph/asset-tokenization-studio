@@ -5,6 +5,7 @@ import { AccessControl } from "../../facets/accessControl/AccessControl.sol";
 import { ResolverProxyStorageWrapper } from "../../domain/core/ResolverProxyStorageWrapper.sol";
 import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
 import { IBusinessLogicResolver } from "../../infrastructure/diamond/IBusinessLogicResolver.sol";
+import { IResolverProxy } from "../../infrastructure/proxy/IResolverProxy.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 
 /* solhint-disable */
@@ -15,9 +16,14 @@ import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
  */
 contract AccessControlTestHelper is AccessControl {
     function setupResolverProxy(address _blr, bytes32 _configId, uint256 _version) external {
-        ResolverProxyStorageWrapper.setBusinessLogicResolver(IBusinessLogicResolver(_blr));
-        ResolverProxyStorageWrapper.setResolverProxyConfigurationId(_configId);
-        ResolverProxyStorageWrapper.setResolverProxyVersion(_version);
+        ResolverProxyStorageWrapper.initResolverProxyStorage(
+            IBusinessLogicResolver(_blr),
+            IResolverProxy.ResolverProxyConfigurationV2({
+                configurationId: _configId,
+                configurationVersion: _version,
+                replacementEnabled: false
+            })
+        );
     }
 
     function grantAdminRole(address _account) external {

@@ -10,7 +10,7 @@ import type { AssetMockCtx } from "@test";
 
 export function kpiLinkedRateTests(getCtx: () => AssetMockCtx): void {
   describe("Kpi Linked Rate Tests", () => {
-    const KPI_INTEREST_RATE_TYPE = 2;
+    const KPI_INTEREST_RATE_TYPE = 3;
 
     let asset: IAssetMock;
     let kpiRate: KpiLinkedRate;

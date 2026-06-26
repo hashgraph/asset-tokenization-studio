@@ -542,7 +542,7 @@ export function scheduledTasksTests(getCtx: () => AssetMockCtx): void {
       });
 
       it("GIVEN a KPI-linked coupon WHEN triggered at fixing date THEN coupon listing sub-task is successfully processed", async () => {
-        await asset.connect(deployer).setCouponRateType(2);
+        await asset.connect(deployer).setCouponRateType(3);
 
         const currentTimestamp = await getDltTimestamp();
         const fixingDate = currentTimestamp + TIME_PERIODS_S.DAY;
