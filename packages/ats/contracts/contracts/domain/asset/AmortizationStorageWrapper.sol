@@ -546,9 +546,8 @@ library AmortizationStorageWrapper {
      * @return Always true on success; reverts otherwise.
      */
     function _releaseHold(address _tokenHolder, uint256 _holdId, uint256 _amount) private returns (bool) {
-        bytes32 partition = DEFAULT_PARTITION;
         IHoldTypes.HoldIdentifier memory identifier = IHoldTypes.HoldIdentifier({
-            partition: _DEFAULT_PARTITION,
+            partition: DEFAULT_PARTITION,
             tokenHolder: _tokenHolder,
             holdId: _holdId
         });
@@ -556,7 +555,7 @@ library AmortizationStorageWrapper {
         HoldStorageWrapper.removeHold(identifier);
 
         emit IERC1410Types.TransferByPartition(
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             EvmAccessors.getMsgSender(),
             address(0),
             _tokenHolder,
