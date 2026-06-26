@@ -21,7 +21,7 @@ import {
   RetryOptions,
 } from "@scripts/infrastructure";
 import { BusinessLogicResolver } from "@contract-types";
-import { EQUITY_CONFIG_ID } from "../constants";
+import { CONFIG_IDS } from "../constants";
 import { atsRegistry } from "../atsRegistry";
 import type { FacetName } from "../atsRegistry";
 import { buildFacetList } from "../facetEnvironment";
@@ -51,7 +51,7 @@ export const EQUITY_FACETS: readonly FacetName[] = [
  * Create equity token configuration in BusinessLogicResolver.
  *
  * Thin wrapper that calls the generic core operation with equity-specific data:
- * - Configuration ID: EQUITY_CONFIG_ID
+ * - Configuration ID: CONFIG_IDS.equity
  * - Facet list: EQUITY_FACETS
  *
  * All implementation logic is handled by the generic createConfiguration()
@@ -118,7 +118,7 @@ export async function createEquityConfiguration(
   });
 
   return createBatchConfiguration(blrContract, {
-    configurationId: EQUITY_CONFIG_ID,
+    configurationId: CONFIG_IDS.equity,
     facets,
     partialBatchDeploy,
     batchSize,

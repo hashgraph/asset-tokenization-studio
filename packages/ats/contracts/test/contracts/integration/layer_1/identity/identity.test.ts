@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { ComplianceMock, IdentityRegistryMock, IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
-import { ADDRESS_ZERO, ATS_ROLES, RESOLVER_KEY_IDENTITY } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import { executeRbac } from "@test";
 
 const name = "TEST";
@@ -141,13 +141,13 @@ export function identityTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeIdentity THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeIdentity(ADDRESS_ZERO))
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_IDENTITY, 1);
+          .withArgs(RESOLVER_KEYS.identity, 1);
       });
     });
 
     describe("initializeIdentity event", () => {
       it("GIVEN fresh facet WHEN initializeIdentity THEN emits IdentityInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_IDENTITY);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.identity);
         await expect(asset.initializeIdentity(ADDRESS_ZERO)).to.emit(asset, "IdentityInitialized");
       });
     });

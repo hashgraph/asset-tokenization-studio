@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { ATS_ROLES, dateToUnixTimestamp, RESOLVER_KEY_BALANCE_TRACKER_ADJUSTED } from "@scripts";
+import { ATS_ROLES, dateToUnixTimestamp, RESOLVER_KEYS } from "@scripts";
 import { DEFAULT_PARTITION, executeRbac, grantKycToHolders } from "@test";
 import type { AssetMockCtx } from "@test";
 
@@ -165,13 +165,13 @@ export function balanceTrackerAdjustedTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeBalanceTrackerAdjusted is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeBalanceTrackerAdjusted())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_BALANCE_TRACKER_ADJUSTED, 1);
+          .withArgs(RESOLVER_KEYS.balanceTrackerAdjusted, 1);
       });
     });
 
     describe("initializeBalanceTrackerAdjusted event", () => {
       it("GIVEN a fresh deployment WHEN initializeBalanceTrackerAdjusted is called THEN emits BalanceTrackerAdjustedInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_BALANCE_TRACKER_ADJUSTED);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.balanceTrackerAdjusted);
         await expect(asset.initializeBalanceTrackerAdjusted()).to.emit(asset, "BalanceTrackerAdjustedInitialized");
       });
     });

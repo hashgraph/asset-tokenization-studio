@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
-import { RESOLVER_KEY_HOLD_BY_PARTITION } from "@scripts";
+import { RESOLVER_KEYS } from "@scripts";
 import { executeRbac, MAX_UINT256 } from "@test";
 import {
   EMPTY_STRING,
@@ -1384,13 +1384,13 @@ export function holdByPartitionTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeHoldByPartition is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeHoldByPartition())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_HOLD_BY_PARTITION, 1);
+          .withArgs(RESOLVER_KEYS.holdByPartition, 1);
       });
     });
 
     describe("initializeHoldByPartition event", () => {
       it("GIVEN a fresh deployment WHEN initializeHoldByPartition is called THEN emits HoldByPartitionInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_HOLD_BY_PARTITION);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.holdByPartition);
         await expect(asset.initializeHoldByPartition()).to.emit(asset, "HoldByPartitionInitialized");
       });
     });

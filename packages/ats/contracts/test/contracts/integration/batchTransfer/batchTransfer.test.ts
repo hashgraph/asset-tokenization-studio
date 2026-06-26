@@ -7,7 +7,7 @@ import { ComplianceMock, IdentityRegistryMock, IAssetMock } from "@contract-type
 import type { AssetMockCtx } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
 import { ASSET_MOCK_CONFIG_ID } from "../../../fixtures/deploy/assetMockConfiguration";
-import { ATS_ROLES, EMPTY_STRING, ZERO, ADDRESS_ZERO, RESOLVER_KEY_BATCH_TRANSFER } from "@scripts";
+import { ATS_ROLES, EMPTY_STRING, ZERO, ADDRESS_ZERO, RESOLVER_KEYS } from "@scripts";
 
 const AMOUNT = 1000;
 const EMPTY_VC_ID = EMPTY_STRING;
@@ -285,13 +285,13 @@ export function batchTransferTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeBatchTransfer is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeBatchTransfer())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_BATCH_TRANSFER, 1);
+          .withArgs(RESOLVER_KEYS.batchTransfer, 1);
       });
     });
 
     describe("initializeBatchTransfer event", () => {
       it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeBatchTransfer is called THEN emits BatchTransferInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_BATCH_TRANSFER);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.batchTransfer);
         await expect(asset.initializeBatchTransfer()).to.emit(asset, "BatchTransferInitialized");
       });
     });

@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { ATS_ROLES, RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT_BY_PARTITION } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import { DEFAULT_PARTITION, PARTITION_ID_2, executeRbac, grantKycToHolders } from "@test";
 import type { AssetMockCtx } from "@test";
 
@@ -145,13 +145,13 @@ export function balanceTrackerAtSnapshotByPartitionTests(getCtx: () => AssetMock
       it("GIVEN already-initialised WHEN initializeBalanceTrackerAtSnapshotByPartition is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeBalanceTrackerAtSnapshotByPartition())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT_BY_PARTITION, 1);
+          .withArgs(RESOLVER_KEYS.balanceTrackerAtSnapshotByPartition, 1);
       });
     });
 
     describe("initializeBalanceTrackerAtSnapshotByPartition event", () => {
       it("GIVEN a fresh deployment WHEN initializeBalanceTrackerAtSnapshotByPartition is called THEN emits BalanceTrackerAtSnapshotByPartitionInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT_BY_PARTITION);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.balanceTrackerAtSnapshotByPartition);
         await expect(asset.initializeBalanceTrackerAtSnapshotByPartition()).to.emit(
           asset,
           "BalanceTrackerAtSnapshotByPartitionInitialized",

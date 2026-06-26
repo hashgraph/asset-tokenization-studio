@@ -16,15 +16,7 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture } from "@test";
 import { getRegulationData, getSecurityData } from "@test";
 import { makeEquityDetailsData } from "@test";
-import {
-  RegulationType,
-  RegulationSubType,
-  ADDRESS_ZERO,
-  EQUITY_CONFIG_ID,
-  ATS_ROLES,
-  BOND_CONFIG_ID,
-  DEPOSIT_TOKEN_CONFIG_ID,
-} from "@scripts";
+import { RegulationType, RegulationSubType, ADDRESS_ZERO, ATS_ROLES, CONFIG_IDS } from "@scripts";
 import { Rbac, SecurityType } from "@scripts/domain";
 import { decodeEvent } from "@scripts/infrastructure";
 import { getBondDetails } from "@test";
@@ -101,7 +93,7 @@ describe("Factory Tests", () => {
         };
         equityData.security.resolver = ADDRESS_ZERO;
         equityData.security.resolverProxyConfigurationV2 = {
-          configurationId: EQUITY_CONFIG_ID,
+          configurationId: CONFIG_IDS.equity,
           configurationVersion: 1,
           replacementEnabled: true,
         };
@@ -123,7 +115,7 @@ describe("Factory Tests", () => {
         };
         bondData.security.resolver = ADDRESS_ZERO;
         bondData.security.resolverProxyConfigurationV2 = {
-          configurationId: BOND_CONFIG_ID,
+          configurationId: CONFIG_IDS.bond,
           configurationVersion: 1,
           replacementEnabled: true,
         };
@@ -142,7 +134,7 @@ describe("Factory Tests", () => {
           equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfigurationV2 = {
-          configurationId: EQUITY_CONFIG_ID,
+          configurationId: CONFIG_IDS.equity,
           configurationVersion: 1,
           replacementEnabled: true,
         };
@@ -167,7 +159,7 @@ describe("Factory Tests", () => {
           equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfigurationV2 = {
-          configurationId: EQUITY_CONFIG_ID,
+          configurationId: CONFIG_IDS.equity,
           configurationVersion: 1,
           replacementEnabled: true,
         };
@@ -195,7 +187,7 @@ describe("Factory Tests", () => {
           proceedRecipientsData: [],
         };
         bondData.security.resolverProxyConfigurationV2 = {
-          configurationId: BOND_CONFIG_ID,
+          configurationId: CONFIG_IDS.bond,
           configurationVersion: 1,
           replacementEnabled: true,
         };
@@ -221,7 +213,7 @@ describe("Factory Tests", () => {
           equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfigurationV2 = {
-          configurationId: EQUITY_CONFIG_ID,
+          configurationId: CONFIG_IDS.equity,
           configurationVersion: 1,
           replacementEnabled: true,
         };
@@ -247,7 +239,7 @@ describe("Factory Tests", () => {
           equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfigurationV2 = {
-          configurationId: EQUITY_CONFIG_ID,
+          configurationId: CONFIG_IDS.equity,
           configurationVersion: 1,
           replacementEnabled: true,
         };
@@ -276,7 +268,7 @@ describe("Factory Tests", () => {
           proceedRecipientsData: [],
         };
         bondData.security.resolverProxyConfigurationV2 = {
-          configurationId: BOND_CONFIG_ID,
+          configurationId: CONFIG_IDS.bond,
           configurationVersion: 1,
           replacementEnabled: true,
         };
@@ -294,7 +286,7 @@ describe("Factory Tests", () => {
           equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfigurationV2 = {
-          configurationId: EQUITY_CONFIG_ID,
+          configurationId: CONFIG_IDS.equity,
           configurationVersion: 1,
           replacementEnabled: true,
         };
@@ -319,7 +311,7 @@ describe("Factory Tests", () => {
           proceedRecipientsData: [],
         };
         bondData.security.resolverProxyConfigurationV2 = {
-          configurationId: BOND_CONFIG_ID,
+          configurationId: CONFIG_IDS.bond,
           configurationVersion: 1,
           replacementEnabled: true,
         };
@@ -342,7 +334,7 @@ describe("Factory Tests", () => {
           equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfigurationV2 = {
-          configurationId: EQUITY_CONFIG_ID,
+          configurationId: CONFIG_IDS.equity,
           configurationVersion: 1,
           replacementEnabled: true,
         };
@@ -365,7 +357,7 @@ describe("Factory Tests", () => {
           equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfigurationV2 = {
-          configurationId: EQUITY_CONFIG_ID,
+          configurationId: CONFIG_IDS.equity,
           configurationVersion: 1,
           replacementEnabled: true,
         };
@@ -388,7 +380,7 @@ describe("Factory Tests", () => {
           proceedRecipientsData: [],
         };
         bondData.security.resolverProxyConfigurationV2 = {
-          configurationId: BOND_CONFIG_ID,
+          configurationId: CONFIG_IDS.bond,
           configurationVersion: 1,
           replacementEnabled: true,
         };
@@ -406,7 +398,7 @@ describe("Factory Tests", () => {
   describe("Generic Proxy tests", () => {
     it("GIVEN an empty Resolver WHEN deploying a new resolverProxy THEN transaction fails", async () => {
       const resolverProxyConfigurationV2 = {
-        configurationId: EQUITY_CONFIG_ID,
+        configurationId: CONFIG_IDS.equity,
         configurationVersion: 1,
         replacementEnabled: true,
       };
@@ -417,7 +409,7 @@ describe("Factory Tests", () => {
 
     it("GIVEN no admin WHEN deploying a new resolverProxy THEN transaction fails", async () => {
       const resolverProxyConfigurationV2 = {
-        configurationId: EQUITY_CONFIG_ID,
+        configurationId: CONFIG_IDS.equity,
         configurationVersion: 1,
         replacementEnabled: true,
       };
@@ -429,7 +421,7 @@ describe("Factory Tests", () => {
     it("GIVEN the proper information WHEN deploying a new resolverProxy THEN transaction succeeds", async () => {
       const originalData = "0x1234567812345678";
       const resolverProxyConfigurationV2 = {
-        configurationId: EQUITY_CONFIG_ID,
+        configurationId: CONFIG_IDS.equity,
         configurationVersion: 1,
         replacementEnabled: true,
       };
@@ -455,7 +447,7 @@ describe("Factory Tests", () => {
       expect(proxyAddress).not.to.equal(ADDRESS_ZERO);
       expect(proxyAddress).to.equal(expectedProxyAddress);
       expect(resolver).to.equal(businessLogicResolver);
-      expect(configKey).to.equal(EQUITY_CONFIG_ID);
+      expect(configKey).to.equal(CONFIG_IDS.equity);
       expect(version).to.equal(1);
       expect(rbac.length).to.equal(init_rbacs.length);
       expect(data).to.equal(originalData);
@@ -476,7 +468,7 @@ describe("Factory Tests", () => {
         equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfigurationV2 = {
-        configurationId: EQUITY_CONFIG_ID,
+        configurationId: CONFIG_IDS.equity,
         configurationVersion: 1,
         replacementEnabled: true,
       };
@@ -496,7 +488,7 @@ describe("Factory Tests", () => {
         equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfigurationV2 = {
-        configurationId: EQUITY_CONFIG_ID,
+        configurationId: CONFIG_IDS.equity,
         configurationVersion: 1,
         replacementEnabled: true,
       };
@@ -517,7 +509,7 @@ describe("Factory Tests", () => {
         equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfigurationV2 = {
-        configurationId: EQUITY_CONFIG_ID,
+        configurationId: CONFIG_IDS.equity,
         configurationVersion: 1,
         replacementEnabled: true,
       };
@@ -545,7 +537,7 @@ describe("Factory Tests", () => {
         equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfigurationV2 = {
-        configurationId: EQUITY_CONFIG_ID,
+        configurationId: CONFIG_IDS.equity,
         configurationVersion: 1,
         replacementEnabled: true,
       };
@@ -573,7 +565,7 @@ describe("Factory Tests", () => {
         equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfigurationV2 = {
-        configurationId: EQUITY_CONFIG_ID,
+        configurationId: CONFIG_IDS.equity,
         configurationVersion: 1,
         replacementEnabled: true,
       };
@@ -633,7 +625,7 @@ describe("Factory Tests", () => {
         proceedRecipientsData: [],
       };
       bondData.security.resolverProxyConfigurationV2 = {
-        configurationId: BOND_CONFIG_ID,
+        configurationId: CONFIG_IDS.bond,
         configurationVersion: 1,
         replacementEnabled: true,
       };
@@ -655,7 +647,7 @@ describe("Factory Tests", () => {
         proceedRecipientsData: [],
       };
       bondData.security.resolverProxyConfigurationV2 = {
-        configurationId: BOND_CONFIG_ID,
+        configurationId: CONFIG_IDS.bond,
         configurationVersion: 1,
         replacementEnabled: true,
       };
@@ -680,7 +672,7 @@ describe("Factory Tests", () => {
         proceedRecipientsData: [],
       };
       bondData.security.resolverProxyConfigurationV2 = {
-        configurationId: BOND_CONFIG_ID,
+        configurationId: CONFIG_IDS.bond,
         configurationVersion: 1,
         replacementEnabled: true,
       };
@@ -712,7 +704,7 @@ describe("Factory Tests", () => {
         proceedRecipientsData: [],
       };
       bondData.security.resolverProxyConfigurationV2 = {
-        configurationId: BOND_CONFIG_ID,
+        configurationId: CONFIG_IDS.bond,
         configurationVersion: 1,
         replacementEnabled: true,
       };
@@ -780,7 +772,7 @@ describe("Factory Tests", () => {
         proceedRecipientsData: [],
       };
       bondData.security.resolverProxyConfigurationV2 = {
-        configurationId: BOND_CONFIG_ID,
+        configurationId: CONFIG_IDS.bond,
         configurationVersion: 1,
         replacementEnabled: true,
       };
@@ -810,7 +802,7 @@ describe("Factory Tests", () => {
         proceedRecipientsData: [],
       };
       bondData.security.resolverProxyConfigurationV2 = {
-        configurationId: BOND_CONFIG_ID,
+        configurationId: CONFIG_IDS.bond,
         configurationVersion: 1,
         replacementEnabled: true,
       };
@@ -838,7 +830,7 @@ describe("Factory Tests", () => {
       return {
         security: getSecurityData(businessLogicResolver, {
           rbacs: init_rbacs,
-          resolverProxyConfigurationV2: { configurationId: DEPOSIT_TOKEN_CONFIG_ID, configurationVersion: 1 },
+          resolverProxyConfigurationV2: { configurationId: CONFIG_IDS.depositToken, configurationVersion: 1 },
         }),
       };
     }
@@ -966,7 +958,7 @@ describe("Factory Tests", () => {
         equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfigurationV2 = {
-        configurationId: EQUITY_CONFIG_ID,
+        configurationId: CONFIG_IDS.equity,
         configurationVersion: 1,
         replacementEnabled: true,
       };
@@ -994,7 +986,7 @@ describe("Factory Tests", () => {
         equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfigurationV2 = {
-        configurationId: EQUITY_CONFIG_ID,
+        configurationId: CONFIG_IDS.equity,
         configurationVersion: 1,
         replacementEnabled: true,
       };
@@ -1026,7 +1018,7 @@ describe("Factory Tests", () => {
         equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfigurationV2 = {
-        configurationId: EQUITY_CONFIG_ID,
+        configurationId: CONFIG_IDS.equity,
         configurationVersion: 1,
         replacementEnabled: true,
       };
@@ -1054,7 +1046,7 @@ describe("Factory Tests", () => {
         equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfigurationV2 = {
-        configurationId: EQUITY_CONFIG_ID,
+        configurationId: CONFIG_IDS.equity,
         configurationVersion: 1,
         replacementEnabled: true,
       };
@@ -1089,7 +1081,7 @@ describe("Factory Tests", () => {
         proceedRecipientsData: [],
       };
       bondData.security.resolverProxyConfigurationV2 = {
-        configurationId: BOND_CONFIG_ID,
+        configurationId: CONFIG_IDS.bond,
         configurationVersion: 1,
         replacementEnabled: true,
       };

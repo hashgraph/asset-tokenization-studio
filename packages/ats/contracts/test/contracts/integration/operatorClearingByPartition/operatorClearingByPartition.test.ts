@@ -6,14 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import type { AssetMockCtx } from "@test";
 
 import { IAssetMock } from "@contract-types";
-import {
-  ADDRESS_ZERO,
-  ATS_ROLES,
-  EMPTY_HEX_BYTES,
-  EMPTY_STRING,
-  RESOLVER_KEY_OPERATOR_CLEARING_BY_PARTITION,
-  ZERO,
-} from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO, RESOLVER_KEYS } from "@scripts";
 import { executeRbac, MAX_UINT256 } from "@test";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
@@ -321,13 +314,13 @@ export function operatorClearingByPartitionTests(getCtx: () => AssetMockCtx): vo
       it("GIVEN already-initialised WHEN initializeOperatorClearingByPartition is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeOperatorClearingByPartition())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_OPERATOR_CLEARING_BY_PARTITION, 1);
+          .withArgs(RESOLVER_KEYS.operatorClearingByPartition, 1);
       });
     });
 
     describe("initializeOperatorClearingByPartition event", () => {
       it("GIVEN a fresh deployment WHEN initializeOperatorClearingByPartition is called THEN emits OperatorClearingByPartitionInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_OPERATOR_CLEARING_BY_PARTITION);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.operatorClearingByPartition);
         await expect(asset.initializeOperatorClearingByPartition()).to.emit(
           asset,
           "OperatorClearingByPartitionInitialized",

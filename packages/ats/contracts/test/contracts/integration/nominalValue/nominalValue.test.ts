@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
-import { RESOLVER_KEY_NOMINAL_VALUE } from "@scripts";
+import { RESOLVER_KEYS } from "@scripts";
 
 export function nominalValueTests(getCtx: () => AssetMockCtx): void {
   describe("NominalValue Init Tests", () => {
@@ -31,7 +31,7 @@ export function nominalValueTests(getCtx: () => AssetMockCtx): void {
     });
 
     it("GIVEN a new deployment WHEN initializeNominalValue is called THEN it emits NominalValueInitialized", async () => {
-      await asset.forceFacetNotRegistered(RESOLVER_KEY_NOMINAL_VALUE);
+      await asset.forceFacetNotRegistered(RESOLVER_KEYS.nominalValue);
       await expect(asset.initializeNominalValue(100, 2, "0x455552"))
         .to.emit(asset, "NominalValueInitialized")
         .withArgs(100, 2, "0x455552");

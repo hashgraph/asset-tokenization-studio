@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { ATS_ROLES, RESOLVER_KEY_HOLD_AT_SNAPSHOT } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import { DEFAULT_PARTITION, PARTITION_ID_2, executeRbac, grantKycToHolders, MAX_UINT256 } from "@test";
 import type { AssetMockCtx } from "@test";
 
@@ -182,13 +182,13 @@ export function holdAtSnapshotTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeHoldAtSnapshot is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeHoldAtSnapshot())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_HOLD_AT_SNAPSHOT, 1);
+          .withArgs(RESOLVER_KEYS.holdAtSnapshot, 1);
       });
     });
 
     describe("initializeHoldAtSnapshot event", () => {
       it("GIVEN a fresh deployment WHEN initializeHoldAtSnapshot is called THEN emits HoldAtSnapshotInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_HOLD_AT_SNAPSHOT);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.holdAtSnapshot);
         await expect(asset.initializeHoldAtSnapshot()).to.emit(asset, "HoldAtSnapshotInitialized");
       });
     });

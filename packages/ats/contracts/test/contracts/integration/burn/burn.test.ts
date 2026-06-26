@@ -7,7 +7,7 @@ import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
 import { ASSET_MOCK_CONFIG_ID } from "../../../fixtures/deploy/assetMockConfiguration";
-import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO, RESOLVER_KEY_BURN } from "@scripts";
+import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO, RESOLVER_KEYS } from "@scripts";
 
 const AMOUNT = 1000;
 const BALANCE_OF_C_ORIGINAL = 2 * AMOUNT;
@@ -363,13 +363,13 @@ export function burnTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeBurn is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeBurn())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_BURN, 1);
+          .withArgs(RESOLVER_KEYS.burn, 1);
       });
     });
 
     describe("initializeBurn event", () => {
       it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeBurn is called THEN emits BurnInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_BURN);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.burn);
         await expect(asset.initializeBurn()).to.emit(asset, "BurnInitialized");
       });
     });

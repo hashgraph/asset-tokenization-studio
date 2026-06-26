@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { ATS_ROLES, RESOLVER_KEY_INTEREST_RATE } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import { TEST_BOND_FIXED_RATE, executeRbac } from "@test";
 import type { AssetMockCtx } from "@test";
 
@@ -48,7 +48,7 @@ export function interestRateFacetTests(getCtx: () => AssetMockCtx): void {
 
     describe("initializeInterestRateType event", () => {
       it("GIVEN a fresh deployment WHEN initializeInterestRateType is called THEN emits InterestRateTypeInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_INTEREST_RATE);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.interestRate);
         await expect(asset.initializeInterestRateType(RateType.FIXED))
           .to.emit(asset, "InterestRateTypeInitialized")
           .withArgs(RateType.FIXED);

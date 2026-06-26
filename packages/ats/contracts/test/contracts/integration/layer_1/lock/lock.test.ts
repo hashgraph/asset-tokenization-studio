@@ -7,7 +7,7 @@ import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
 
-import { EMPTY_STRING, ATS_ROLES, ZERO, RESOLVER_KEY_LOCK } from "@scripts";
+import { EMPTY_STRING, ATS_ROLES, ZERO, RESOLVER_KEYS } from "@scripts";
 import { Rbac } from "@scripts/domain";
 
 const _NON_DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000011";
@@ -295,13 +295,13 @@ export function lockTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeLock is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeLock())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_LOCK, 1);
+          .withArgs(RESOLVER_KEYS.lock, 1);
       });
     });
 
     describe("initializeLock event", () => {
       it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeLock is called THEN emits LockInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_LOCK);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.lock);
         await expect(asset.initializeLock()).to.emit(asset, "LockInitialized");
       });
     });

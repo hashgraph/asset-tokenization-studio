@@ -12,7 +12,7 @@
 
 import { expect } from "chai";
 import sinon from "sinon";
-import { deployBondFromFactory, ATS_ROLES, BOND_CONFIG_ID } from "@scripts/domain";
+import { deployBondFromFactory, ATS_ROLES, CONFIG_IDS } from "@scripts/domain";
 import { TEST_ADDRESSES, TEST_FACTORY_EVENTS, TEST_TOKEN_METADATA } from "@test";
 import {
   createMockFactory,
@@ -97,7 +97,7 @@ describe("Bond Token Deployment", () => {
   // ============================================================================
 
   describe("resolverProxyConfiguration", () => {
-    it("should use BOND_CONFIG_ID (not EQUITY_CONFIG_ID)", async () => {
+    it("should use CONFIG_IDS.bond (not CONFIG_IDS.equity)", async () => {
       const diamondAddress = TEST_ADDRESSES.VALID_3;
       const mockFactory = createMockFactory(TEST_FACTORY_EVENTS.BOND_DEPLOYED, diamondAddress);
       const params = createDeployBondParams(mockFactory);
@@ -108,7 +108,7 @@ describe("Bond Token Deployment", () => {
       const callArgs = mockFactory.deployBond.getCall(0).args[0];
       const config = callArgs.security.resolverProxyConfigurationV2;
 
-      expect(config.configurationId).to.equal(BOND_CONFIG_ID);
+      expect(config.configurationId).to.equal(CONFIG_IDS.bond);
     });
 
     it("should set configurationVersion to 1", async () => {

@@ -12,7 +12,7 @@ import {
   EMPTY_HEX_BYTES,
   ADDRESS_ZERO,
   ATS_ROLES,
-  RESOLVER_KEY_CONTROLLER_HOLD_BY_PARTITION,
+  RESOLVER_KEYS,
 } from "@scripts";
 import { IAssetMock } from "@contract-types";
 import { ASSET_MOCK_CONFIG_ID } from "../../../fixtures/deploy/assetMockConfiguration";
@@ -344,13 +344,13 @@ export function controllerHoldByPartitionTests(getCtx: () => AssetMockCtx): void
       it("GIVEN already-initialised WHEN initializeControllerHoldByPartition is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeControllerHoldByPartition())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_CONTROLLER_HOLD_BY_PARTITION, 1);
+          .withArgs(RESOLVER_KEYS.controllerHoldByPartition, 1);
       });
     });
 
     describe("initializeControllerHoldByPartition event", () => {
       it("GIVEN a fresh deployment WHEN initializeControllerHoldByPartition is called THEN emits ControllerHoldByPartitionInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_CONTROLLER_HOLD_BY_PARTITION);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.controllerHoldByPartition);
         await expect(asset.initializeControllerHoldByPartition()).to.emit(
           asset,
           "ControllerHoldByPartitionInitialized",

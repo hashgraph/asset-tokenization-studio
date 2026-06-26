@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
-import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO, RESOLVER_KEY_MINT } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO, RESOLVER_KEYS } from "@scripts";
 
 const AMOUNT = 1000;
 const DATA = "0x1234";
@@ -45,7 +45,7 @@ export function mintTests(getCtx: () => AssetMockCtx): void {
 
     describe("initializeERC1594 event", () => {
       it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeERC1594 is called THEN emits ERC1594Initialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_MINT);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.mint);
         await expect(asset.initializeERC1594()).to.emit(asset, "ERC1594Initialized");
       });
     });
@@ -87,7 +87,7 @@ export function mintTests(getCtx: () => AssetMockCtx): void {
       });
 
       it("GIVEN a fresh token WHEN isIssuable THEN returns true", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_MINT);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.mint);
         await asset.initializeERC1594();
         expect(await asset.isIssuable()).to.be.true;
       });

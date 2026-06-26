@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock, IAmortization__factory } from "@contract-types";
 import type { IAmortization } from "@contract-types";
-import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES, RESOLVER_KEY_AMORTIZATION } from "@scripts";
+import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES, RESOLVER_KEYS } from "@scripts";
 import { getDltTimestamp } from "@test";
 import { DEFAULT_SECURITY_PARAMS } from "@test/fixtures/tokens/common.fixture";
 import { ASSET_MOCK_CONFIG_ID } from "../../../../fixtures/deploy/assetMockConfiguration";
@@ -1550,13 +1550,13 @@ export function amortizationTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeAmortization is called again THEN FacetAlreadyRegistered", async () => {
         await expect(amort.initializeAmortization())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_AMORTIZATION, 1);
+          .withArgs(RESOLVER_KEYS.amortization, 1);
       });
     });
 
     describe("initializeAmortization event", () => {
       it("GIVEN a fresh deployment WHEN initializeAmortization is called THEN emits AmortizationInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_AMORTIZATION);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.amortization);
         await expect(amort.initializeAmortization()).to.emit(asset, "AmortizationInitialized");
       });
     });

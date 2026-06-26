@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { ATS_ROLES, RESOLVER_KEY_ACCESS_CONTROL } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import { ASSET_MOCK_CONFIG_ID } from "../../../fixtures/deploy/assetMockConfiguration";
 import { executeRbac } from "@test";
 import type { AssetMockCtx } from "@test";
@@ -396,13 +396,13 @@ export function accessControlTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN an already-initialised facet WHEN initializeAccessControl is called again THEN it reverts with FacetAlreadyRegistered", async () => {
         await expect(asset.initializeAccessControl())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_ACCESS_CONTROL, 1);
+          .withArgs(RESOLVER_KEYS.accessControl, 1);
       });
     });
 
     describe("initializeAccessControl event", () => {
       it("GIVEN a fresh deployment WHEN initializeAccessControl is called THEN it emits AccessControlInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_ACCESS_CONTROL);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.accessControl);
         await expect(asset.initializeAccessControl()).to.emit(asset, "AccessControlInitialized");
       });
     });

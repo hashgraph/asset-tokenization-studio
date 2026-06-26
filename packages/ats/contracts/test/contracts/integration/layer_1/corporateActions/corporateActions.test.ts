@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { ATS_ROLES, ATS_CORPORATE_ACTION, RESOLVER_KEY_CORPORATE_ACTIONS } from "@scripts";
+import { ATS_ROLES, ATS_CORPORATE_ACTION, RESOLVER_KEYS } from "@scripts";
 import { executeRbac } from "@test";
 import type { AssetMockCtx } from "@test";
 
@@ -125,13 +125,13 @@ export function corporateActionsTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeCorporateActions is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeCorporateActions())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_CORPORATE_ACTIONS, 1);
+          .withArgs(RESOLVER_KEYS.corporateActions, 1);
       });
     });
 
     describe("initializeCorporateActions event", () => {
       it("GIVEN a fresh deployment WHEN initializeCorporateActions is called THEN emits CorporateActionsInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_CORPORATE_ACTIONS);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.corporateActions);
         await expect(asset.initializeCorporateActions()).to.emit(asset, "CorporateActionsInitialized");
       });
     });

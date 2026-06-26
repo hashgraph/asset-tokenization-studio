@@ -22,7 +22,7 @@ import {
   isTestMode,
 } from "@scripts/infrastructure";
 import { BusinessLogicResolver } from "@contract-types";
-import { FACTORY_CONFIG_ID } from "../constants";
+import { CONFIG_IDS } from "../constants";
 import { atsRegistry } from "../atsRegistry";
 import type { FacetName } from "../atsRegistry";
 import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
@@ -38,7 +38,7 @@ export const FACTORY_FACETS: readonly FacetName[] = ["FactoryFacet"];
  * Create factory token configuration in BusinessLogicResolver.
  *
  * Thin wrapper that calls the generic core operation with factory-specific data:
- * - Configuration ID: FACTORY_CONFIG_ID
+ * - Configuration ID: CONFIG_IDS.factory
  * - Facet list: FACTORY_FACETS (1 facet)
  *
  * All implementation logic is handled by the generic createBatchConfiguration()
@@ -105,7 +105,7 @@ export async function createFactoryConfiguration(
   });
 
   return createBatchConfiguration(blrContract, {
-    configurationId: FACTORY_CONFIG_ID,
+    configurationId: CONFIG_IDS.factory,
     facets,
     partialBatchDeploy,
     batchSize,

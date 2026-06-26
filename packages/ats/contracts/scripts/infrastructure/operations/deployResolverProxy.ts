@@ -125,16 +125,16 @@ export interface DeployResolverProxyResult {
  * // Pinned proxy (production)
  * const prodProxy = await deployResolverProxy(signer, {
  *     blrAddress: '0x123...',
- *     configurationId: EQUITY_CONFIG_ID,
+ *     configurationId: CONFIG_IDS.equity,
  *     version: 1, // Pin to specific version (>= 1)
  *     rbac: [],
  * })
  *
  * // Resolve "latest" explicitly when needed
  * const blr = DiamondCutManager__factory.connect(blrAddress, signer)
- * const latest = await blr.getLatestVersionByConfiguration(EQUITY_CONFIG_ID)
+ * const latest = await blr.getLatestVersionByConfiguration(CONFIG_IDS.equity)
  * const proxy = await deployResolverProxy(signer, {
- *     blrAddress, configurationId: EQUITY_CONFIG_ID, version: Number(latest), rbac: [],
+ *     blrAddress, configurationId: CONFIG_IDS.equity, version: Number(latest), rbac: [],
  * })
  * ```
  */

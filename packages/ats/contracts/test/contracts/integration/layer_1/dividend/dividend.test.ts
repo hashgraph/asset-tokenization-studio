@@ -12,7 +12,7 @@ import {
   EMPTY_HEX_BYTES,
   dateToUnixTimestamp,
   EMPTY_STRING,
-  RESOLVER_KEY_DIVIDEND,
+  RESOLVER_KEYS,
 } from "@scripts";
 import { MAX_UINT256, executeRbac } from "@test";
 import { grantRoleAndPauseToken } from "../../../../fixtures/hardhatHelpers";
@@ -774,13 +774,13 @@ export function dividendTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeDividend is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeDividend())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_DIVIDEND, 1);
+          .withArgs(RESOLVER_KEYS.dividend, 1);
       });
     });
 
     describe("initializeDividend event", () => {
       it("GIVEN a fresh deployment WHEN initializeDividend is called THEN emits DividendInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_DIVIDEND);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.dividend);
         await expect(asset.initializeDividend()).to.emit(asset, "DividendInitialized");
       });
     });

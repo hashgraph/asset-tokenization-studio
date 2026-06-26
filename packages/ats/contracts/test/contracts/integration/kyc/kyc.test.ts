@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { ATS_ROLES, EMPTY_STRING, RESOLVER_KEY_KYC, ZERO } from "@scripts";
+import { ATS_ROLES, EMPTY_STRING, ZERO, RESOLVER_KEYS } from "@scripts";
 import { executeRbac, MAX_UINT256 } from "@test";
 import type { AssetMockCtx } from "@test";
 
@@ -31,7 +31,7 @@ export function kycTests(getCtx: () => AssetMockCtx): void {
     });
 
     it("GIVEN a new deployment WHEN initializeInternalKyc is called THEN it emits KycInitialized", async () => {
-      await asset.forceFacetNotRegistered(RESOLVER_KEY_KYC);
+      await asset.forceFacetNotRegistered(RESOLVER_KEYS.kyc);
       await expect(asset.initializeInternalKyc(true)).to.emit(asset, "KycInitialized").withArgs(true);
     });
 

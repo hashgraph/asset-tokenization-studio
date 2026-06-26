@@ -13,7 +13,7 @@ import {
   ATS_ROLES,
   ZERO,
   dateToUnixTimestamp,
-  RESOLVER_KEY_LOCK_BY_PARTITION,
+  RESOLVER_KEYS,
 } from "@scripts";
 import { Rbac } from "@scripts/domain";
 
@@ -796,13 +796,13 @@ export function lockByPartitionTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeLockByPartition is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeLockByPartition())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_LOCK_BY_PARTITION, 1);
+          .withArgs(RESOLVER_KEYS.lockByPartition, 1);
       });
     });
 
     describe("initializeLockByPartition event", () => {
       it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeLockByPartition is called THEN emits LockByPartitionInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_LOCK_BY_PARTITION);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.lockByPartition);
         await expect(asset.initializeLockByPartition()).to.emit(asset, "LockByPartitionInitialized");
       });
     });

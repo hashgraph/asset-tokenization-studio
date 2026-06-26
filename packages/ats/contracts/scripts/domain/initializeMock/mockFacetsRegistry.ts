@@ -7,6 +7,7 @@
 // needed for deployment + registration + configuration of the InitializeMock
 // domain.
 
+import { toBeHex } from "ethers";
 import type { FacetDefinition } from "@scripts/infrastructure";
 import {
   MockDiamondCut__factory,
@@ -15,6 +16,13 @@ import {
   MockFacet3__factory,
   MockFactoryFacet__factory,
 } from "@contract-types";
+
+// TEST-ONLY: BLR configuration ID for the InitializeMock domain, bytes32(uint256(9)).
+// Lives with the mock domain rather than the production `CONFIG_IDS` so test-only
+// concerns stay out of the central deploy constants. Consumed by the InitializeMock
+// `createConfiguration`, the test-gated Step 12 of `deploySystemWithNewBlr`, and the
+// initializer-versioning tests.
+export const INITIALIZE_MOCK_CONFIG_ID = toBeHex(9, 32);
 
 // Resolver keys mirror the `bytes32("...")` literals declared in the mock
 // contracts. Solidity right-pads short string-to-bytes32 conversions with

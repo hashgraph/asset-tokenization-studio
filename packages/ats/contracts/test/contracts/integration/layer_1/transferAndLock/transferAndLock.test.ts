@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
-import { ZERO, EMPTY_STRING, ATS_ROLES, ADDRESS_ZERO, RESOLVER_KEY_TRANSFER_AND_LOCK } from "@scripts";
+import { ZERO, EMPTY_STRING, ATS_ROLES, ADDRESS_ZERO, RESOLVER_KEYS } from "@scripts";
 import { getDltTimestamp, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
 
@@ -168,13 +168,13 @@ export function transferAndLockTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeTransferAndLock is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeTransferAndLock())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_TRANSFER_AND_LOCK, 1);
+          .withArgs(RESOLVER_KEYS.transferAndLock, 1);
       });
     });
 
     describe("initializeTransferAndLock event", () => {
       it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeTransferAndLock is called THEN emits TransferAndLockInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_TRANSFER_AND_LOCK);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.transferAndLock);
         await expect(asset.initializeTransferAndLock()).to.emit(asset, "TransferAndLockInitialized");
       });
     });

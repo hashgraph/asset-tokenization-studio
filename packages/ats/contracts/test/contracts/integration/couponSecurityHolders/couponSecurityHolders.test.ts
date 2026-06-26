@@ -3,14 +3,7 @@
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import {
-  DEFAULT_PARTITION,
-  ATS_ROLES,
-  TIME_PERIODS_S,
-  ZERO,
-  EMPTY_STRING,
-  RESOLVER_KEY_COUPON_SECURITY_HOLDERS,
-} from "@scripts";
+import { DEFAULT_PARTITION, ATS_ROLES, TIME_PERIODS_S, ZERO, EMPTY_STRING, RESOLVER_KEYS } from "@scripts";
 import { getDltTimestamp, executeRbac, MAX_UINT256 } from "@test";
 import type { AssetMockCtx } from "@test";
 
@@ -205,13 +198,13 @@ export function couponSecurityHoldersTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeCouponSecurityHolders is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeCouponSecurityHolders())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_COUPON_SECURITY_HOLDERS, 1);
+          .withArgs(RESOLVER_KEYS.couponSecurityHolders, 1);
       });
     });
 
     describe("initializeCouponSecurityHolders event", () => {
       it("GIVEN a fresh deployment WHEN initializeCouponSecurityHolders is called THEN emits CouponSecurityHoldersInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_COUPON_SECURITY_HOLDERS);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.couponSecurityHolders);
         await expect(asset.initializeCouponSecurityHolders()).to.emit(asset, "CouponSecurityHoldersInitialized");
       });
     });

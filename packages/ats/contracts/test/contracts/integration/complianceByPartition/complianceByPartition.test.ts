@@ -6,15 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
-import {
-  ADDRESS_ZERO,
-  ATS_ROLES,
-  EIP1066_CODES,
-  EMPTY_HEX_BYTES,
-  EMPTY_STRING,
-  ZERO,
-  RESOLVER_KEY_COMPLIANCE_BY_PARTITION,
-} from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, EIP1066_CODES, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO, RESOLVER_KEYS } from "@scripts";
 import { getSelector } from "@scripts/infrastructure";
 
 const _PARTITION_ID_1 = "0x0000000000000000000000000000000000000000000000000000000000000001";
@@ -323,13 +315,13 @@ export function complianceByPartitionTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeComplianceByPartition is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeComplianceByPartition())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_COMPLIANCE_BY_PARTITION, 1);
+          .withArgs(RESOLVER_KEYS.complianceByPartition, 1);
       });
     });
 
     describe("initializeComplianceByPartition event", () => {
       it("GIVEN a fresh deployment WHEN initializeComplianceByPartition is called THEN emits ComplianceByPartitionInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_COMPLIANCE_BY_PARTITION);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.complianceByPartition);
         await expect(asset.initializeComplianceByPartition()).to.emit(asset, "ComplianceByPartitionInitialized");
       });
     });

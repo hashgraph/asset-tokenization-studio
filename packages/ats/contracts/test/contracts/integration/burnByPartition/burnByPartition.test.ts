@@ -5,14 +5,7 @@ import { ethers, network } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
-import {
-  ATS_ROLES,
-  DEFAULT_PARTITION,
-  EMPTY_HEX_BYTES,
-  EMPTY_STRING,
-  ZERO,
-  RESOLVER_KEY_BURN_BY_PARTITION,
-} from "@scripts";
+import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO, RESOLVER_KEYS } from "@scripts";
 import { EVENT_NAMES, executeRbac, expectExactlyOneEvent, MAX_UINT256 } from "@test";
 
 const AMOUNT = 1000;
@@ -355,7 +348,7 @@ export function burnByPartitionTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeBurnByPartition is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeBurnByPartition())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_BURN_BY_PARTITION, 1);
+          .withArgs(RESOLVER_KEYS.burnByPartition, 1);
       });
     });
 
@@ -367,7 +360,7 @@ export function burnByPartitionTests(getCtx: () => AssetMockCtx): void {
       });
 
       it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeBurnByPartition is called THEN emits BurnByPartitionInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_BURN_BY_PARTITION);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.burnByPartition);
         await expect(asset.initializeBurnByPartition()).to.emit(asset, "BurnByPartitionInitialized");
       });
     });

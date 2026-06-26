@@ -7,7 +7,7 @@ import { type ResolverProxy, IAssetMock } from "@contract-types";
 import { grantRoleAndPauseToken } from "../../../../common";
 import { executeRbac } from "@test";
 import type { AssetMockCtx } from "@test";
-import { ATS_ROLES, RESOLVER_KEY_DOCUMENTATION } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 
 const documentName_1 = "0x000000000000000000000000000000000000000000000000000000000000aa23";
 const documentName_2 = "0x000000000000000000000000000000000000000000000000000000000000bb23";
@@ -239,13 +239,13 @@ export function documentationTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeDocumentation is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeDocumentation())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_DOCUMENTATION, 1);
+          .withArgs(RESOLVER_KEYS.documentation, 1);
       });
     });
 
     describe("initializeDocumentation event", () => {
       it("GIVEN a fresh deployment WHEN initializeDocumentation is called THEN emits DocumentationInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_DOCUMENTATION);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.documentation);
         await expect(asset.initializeDocumentation()).to.emit(asset, "DocumentationInitialized");
       });
     });

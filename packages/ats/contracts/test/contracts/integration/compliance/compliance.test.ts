@@ -13,7 +13,7 @@ import {
   EMPTY_STRING,
   ZERO,
   dateToUnixTimestamp,
-  RESOLVER_KEY_COMPLIANCE,
+  RESOLVER_KEYS,
 } from "@scripts";
 import { getSelector } from "@scripts/infrastructure";
 
@@ -649,13 +649,13 @@ export function complianceTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeCompliance is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeCompliance(ethers.ZeroAddress))
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_COMPLIANCE, 1);
+          .withArgs(RESOLVER_KEYS.compliance, 1);
       });
     });
 
     describe("initializeCompliance event", () => {
       it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeCompliance is called THEN emits ComplianceInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_COMPLIANCE);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.compliance);
         await expect(asset.initializeCompliance(ethers.ZeroAddress)).to.emit(asset, "ComplianceInitialized");
       });
     });

@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { ATS_ROLES, RESOLVER_KEY_LOCK_AT_SNAPSHOT_BY_PARTITION } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import { DEFAULT_PARTITION, PARTITION_ID_2, executeRbac, grantKycToHolders, MAX_UINT256 } from "@test";
 import type { AssetMockCtx } from "@test";
 
@@ -179,13 +179,13 @@ export function lockAtSnapshotByPartitionTests(getCtx: () => AssetMockCtx): void
       it("GIVEN already-initialised WHEN initializeLockAtSnapshotByPartition is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeLockAtSnapshotByPartition())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_LOCK_AT_SNAPSHOT_BY_PARTITION, 1);
+          .withArgs(RESOLVER_KEYS.lockAtSnapshotByPartition, 1);
       });
     });
 
     describe("initializeLockAtSnapshotByPartition event", () => {
       it("GIVEN a fresh deployment WHEN initializeLockAtSnapshotByPartition is called THEN emits LockAtSnapshotByPartitionInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_LOCK_AT_SNAPSHOT_BY_PARTITION);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.lockAtSnapshotByPartition);
         await expect(asset.initializeLockAtSnapshotByPartition()).to.emit(
           asset,
           "LockAtSnapshotByPartitionInitialized",

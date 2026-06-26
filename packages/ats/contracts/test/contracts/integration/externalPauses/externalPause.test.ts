@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock, MockedExternalPause } from "@contract-types";
 import type { AssetMockCtx } from "@test";
-import { ADDRESS_ZERO, ATS_ROLES, GAS_LIMIT, RESOLVER_KEY_EXTERNAL_PAUSE } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, GAS_LIMIT, RESOLVER_KEYS } from "@scripts";
 
 export function externalPauseTests(getCtx: () => AssetMockCtx): void {
   describe("ExternalPause Tests", () => {
@@ -393,7 +393,7 @@ export function externalPauseTests(getCtx: () => AssetMockCtx): void {
 
     describe("initializeExternalPauses event", () => {
       it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeExternalPauses is called THEN it emits ExternalPauseInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_EXTERNAL_PAUSE);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.externalPauseManagement);
         await expect(asset.initializeExternalPauses([])).to.emit(asset, "ExternalPauseInitialized");
       });
     });

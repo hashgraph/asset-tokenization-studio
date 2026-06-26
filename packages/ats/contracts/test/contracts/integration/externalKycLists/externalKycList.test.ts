@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock, MockedExternalKycList } from "@contract-types";
 import type { AssetMockCtx } from "@test";
-import { ADDRESS_ZERO, ATS_ROLES, GAS_LIMIT, RESOLVER_KEY_EXTERNAL_KYC_LIST } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, GAS_LIMIT, RESOLVER_KEYS } from "@scripts";
 
 export function externalKycListTests(getCtx: () => AssetMockCtx): void {
   describe("ExternalKycList Management Tests", () => {
@@ -403,7 +403,7 @@ export function externalKycListTests(getCtx: () => AssetMockCtx): void {
 
     describe("initializeExternalKycLists event", () => {
       it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeExternalKycLists is called THEN it emits ExternalKycListInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_EXTERNAL_KYC_LIST);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.externalKycListManagement);
         await expect(asset.initializeExternalKycLists([initMock1.target as string])).to.emit(
           asset,
           "ExternalKycListInitialized",

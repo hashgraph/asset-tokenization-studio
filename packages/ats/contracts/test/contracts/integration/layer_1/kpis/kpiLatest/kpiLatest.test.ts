@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock, Kpis__factory } from "@contract-types";
 import type { Kpis } from "@contract-types";
-import { ATS_ROLES, dateToUnixTimestamp, RESOLVER_KEY_KPIS, TIME_PERIODS_S } from "@scripts";
+import { ATS_ROLES, dateToUnixTimestamp, TIME_PERIODS_S, RESOLVER_KEYS } from "@scripts";
 import { executeRbac, getDltTimestamp } from "@test";
 import { ASSET_MOCK_CONFIG_ID } from "../../../../../fixtures/deploy/assetMockConfiguration";
 import type { AssetMockCtx } from "@test";
@@ -293,7 +293,7 @@ export function kpiLatestTests(getCtx: () => AssetMockCtx): void {
 
     describe("initializeKpis event", () => {
       it("GIVEN a fresh deployment WHEN initializeKpis is called THEN emits KpisInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_KPIS);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.kpis);
         await expect(kpis.initializeKpis()).to.emit(asset, "KpisInitialized");
       });
     });

@@ -13,14 +13,8 @@ import {
   AccessControlFacet__factory,
   Pause__factory,
 } from "@contract-types";
-import {
-  ATS_ROLES,
-  BOND_CONFIG_ID,
-  EQUITY_CONFIG_ID,
-  FACTORY_CONFIG_ID,
-  DEPOSIT_TOKEN_CONFIG_ID,
-  INITIALIZE_MOCK_CONFIG_ID,
-} from "@scripts";
+import { ATS_ROLES, CONFIG_IDS } from "@scripts";
+import { INITIALIZE_MOCK_CONFIG_ID } from "@scripts/domain";
 import { deployAtsInfrastructureFixture, registerTransferFacetFixture } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ethers } from "hardhat";
@@ -28,7 +22,7 @@ import { deployContract, registerFacets } from "@scripts/infrastructure";
 import { assertObject } from "@test";
 
 // Test-specific configuration IDs for negative test cases
-// These are separate from EQUITY_CONFIG_ID/BOND_CONFIG_ID to avoid conflicts
+// These are separate from CONFIG_IDS.equity/CONFIG_IDS.bond to avoid conflicts
 const TEST_CONFIG_IDS = {
   PAUSE_TEST: "0x0000000000000000000000000000000000000000000000000000000000000004",
   PAUSE_BATCH_TEST: "0x0000000000000000000000000000000000000000000000000000000000000005",
@@ -113,10 +107,10 @@ describe("DiamondCutManager", () => {
     equityFacetVersionList = Array(equityFacetIdList.length).fill(1);
 
     configToFacetIdsMap = {
-      [EQUITY_CONFIG_ID]: equityFacetIdList,
-      [BOND_CONFIG_ID]: bondFacetIdList,
-      [DEPOSIT_TOKEN_CONFIG_ID]: depositTokenFacetIdList,
-      [FACTORY_CONFIG_ID]: factoryFacetIdList,
+      [CONFIG_IDS.equity]: equityFacetIdList,
+      [CONFIG_IDS.bond]: bondFacetIdList,
+      [CONFIG_IDS.depositToken]: depositTokenFacetIdList,
+      [CONFIG_IDS.factory]: factoryFacetIdList,
     };
   });
 
@@ -126,7 +120,7 @@ describe("DiamondCutManager", () => {
       await pause.connect(signer_B).unpause();
     }
     const configIdsToCleanup = [
-      EQUITY_CONFIG_ID,
+      CONFIG_IDS.equity,
       TEST_CONFIG_IDS.PAUSE_TEST,
       TEST_CONFIG_IDS.PAUSE_BATCH_TEST,
       TEST_CONFIG_IDS.BLACKLIST_TEST,
@@ -352,10 +346,10 @@ describe("DiamondCutManager", () => {
 
     const configIds = await diamondCutManager.getConfigurations(0, configLength);
     expect([...configIds]).to.have.members([
-      EQUITY_CONFIG_ID,
-      BOND_CONFIG_ID,
-      DEPOSIT_TOKEN_CONFIG_ID,
-      FACTORY_CONFIG_ID,
+      CONFIG_IDS.equity,
+      CONFIG_IDS.bond,
+      CONFIG_IDS.depositToken,
+      CONFIG_IDS.factory,
       INITIALIZE_MOCK_CONFIG_ID,
     ]);
 
@@ -370,7 +364,7 @@ describe("DiamondCutManager", () => {
 
   it("GIVEN a resolver WHEN resolving calls THEN success", async () => {
     const facets = await diamondCutManager.getFacetsByConfigurationIdAndVersion(
-      EQUITY_CONFIG_ID,
+      CONFIG_IDS.equity,
       1,
       0,
       equityFacetIdList.length,
@@ -379,12 +373,12 @@ describe("DiamondCutManager", () => {
     expect(facets.length).to.be.greaterThan(0);
 
     const configVersionDoesNotExist = await diamondCutManager.isResolverProxyConfigurationRegistered(
-      EQUITY_CONFIG_ID,
+      CONFIG_IDS.equity,
       2,
     );
     expect(configVersionDoesNotExist).to.be.false;
     await expect(
-      diamondCutManager.checkResolverProxyConfigurationRegistered(EQUITY_CONFIG_ID, 2),
+      diamondCutManager.checkResolverProxyConfigurationRegistered(CONFIG_IDS.equity, 2),
     ).to.be.revertedWithCustomError(diamondCutManager, "ResolverProxyConfigurationNoRegistered");
 
     const configDoesNotExist = await diamondCutManager.isResolverProxyConfigurationRegistered(
@@ -399,12 +393,12 @@ describe("DiamondCutManager", () => {
       ),
     ).to.be.revertedWithCustomError(diamondCutManager, "ResolverProxyConfigurationNoRegistered");
 
-    const resolverProxyConfiguration = buildBytes(RESOLVER_PROXY_VERSION_V2, EQUITY_CONFIG_ID, 1, false);
+    const resolverProxyConfiguration = buildBytes(RESOLVER_PROXY_VERSION_V2, CONFIG_IDS.equity, 1, false);
 
     const noFacetAddress = await diamondCutManager.resolveResolverProxyCall(resolverProxyConfiguration, "0x00000001");
     expect(noFacetAddress).to.equal("0x0000000000000000000000000000000000000000");
 
-    const interfaceDoesnotExist = await diamondCutManager.resolveSupportsInterface(EQUITY_CONFIG_ID, 1, "0x00000001");
+    const interfaceDoesnotExist = await diamondCutManager.resolveSupportsInterface(CONFIG_IDS.equity, 1, "0x00000001");
     expect(interfaceDoesnotExist).to.equal(false);
   });
 
@@ -426,7 +420,7 @@ describe("DiamondCutManager", () => {
     const facetConfigurations = createFacetConfigurations(equityFacetIdList, equityFacetVersionList);
 
     await expect(
-      diamondCutManager.connect(signer_B).createConfiguration(EQUITY_CONFIG_ID, facetConfigurations, "0x"),
+      diamondCutManager.connect(signer_B).createConfiguration(CONFIG_IDS.equity, facetConfigurations, "0x"),
     ).to.be.revertedWithCustomError(diamondCutManager, "AccountHasNoRole");
   });
 
@@ -451,7 +445,7 @@ describe("DiamondCutManager", () => {
     ];
 
     await expect(
-      diamondCutManager.connect(signer_A).createConfiguration(EQUITY_CONFIG_ID, facetConfigurations, "0x"),
+      diamondCutManager.connect(signer_A).createConfiguration(CONFIG_IDS.equity, facetConfigurations, "0x"),
     ).to.be.revertedWithCustomError(diamondCutManager, "FacetIdNotRegistered");
   });
 
@@ -464,7 +458,7 @@ describe("DiamondCutManager", () => {
     await expect(
       diamondCutManager
         .connect(signer_A)
-        .createConfiguration(EQUITY_CONFIG_ID, facetConfigurations, "0x", { gasLimit: 60_000_000 }),
+        .createConfiguration(CONFIG_IDS.equity, facetConfigurations, "0x", { gasLimit: 60_000_000 }),
     ).to.be.revertedWithCustomError(diamondCutManager, "DuplicatedFacetInConfiguration");
   });
 
@@ -542,7 +536,7 @@ describe("DiamondCutManager", () => {
     const facetConfigurations = createFacetConfigurations(equityFacetIdList, equityFacetVersionList);
 
     await expect(
-      diamondCutManager.connect(signer_B).createBatchConfiguration(EQUITY_CONFIG_ID, facetConfigurations, false, "0x"),
+      diamondCutManager.connect(signer_B).createBatchConfiguration(CONFIG_IDS.equity, facetConfigurations, false, "0x"),
     ).to.be.revertedWithCustomError(diamondCutManager, "AccountHasNoRole");
   });
 
@@ -569,7 +563,7 @@ describe("DiamondCutManager", () => {
     ];
 
     await expect(
-      diamondCutManager.connect(signer_A).createBatchConfiguration(EQUITY_CONFIG_ID, facetConfigurations, false, "0x"),
+      diamondCutManager.connect(signer_A).createBatchConfiguration(CONFIG_IDS.equity, facetConfigurations, false, "0x"),
     ).to.be.revertedWithCustomError(diamondCutManager, "FacetIdNotRegistered");
   });
 
@@ -582,7 +576,7 @@ describe("DiamondCutManager", () => {
     await expect(
       diamondCutManager
         .connect(signer_A)
-        .createBatchConfiguration(EQUITY_CONFIG_ID, facetConfigurations, false, "0x", { gasLimit: 60_000_000 }),
+        .createBatchConfiguration(CONFIG_IDS.equity, facetConfigurations, false, "0x", { gasLimit: 60_000_000 }),
     ).to.be.revertedWithCustomError(diamondCutManager, "DuplicatedFacetInConfiguration");
   });
 
@@ -886,7 +880,7 @@ describe("DiamondCutManager", () => {
   });
 
   it("GIVEN an existing configuration WHEN checking if registered THEN returns true and does not revert", async () => {
-    const configId = EQUITY_CONFIG_ID;
+    const configId = CONFIG_IDS.equity;
 
     const latestVersion = Number(await diamondCutManager.getLatestVersionByConfiguration(configId));
     expect(latestVersion).to.equal(1);
@@ -900,25 +894,25 @@ describe("DiamondCutManager", () => {
   });
 
   it("GIVEN an existing configuration WHEN checking registration with version 0 THEN reverts with VersionZero", async () => {
-    await expect(diamondCutManager.checkResolverProxyConfigurationRegistered(EQUITY_CONFIG_ID, 0))
+    await expect(diamondCutManager.checkResolverProxyConfigurationRegistered(CONFIG_IDS.equity, 0))
       .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
-      .withArgs(EQUITY_CONFIG_ID);
+      .withArgs(CONFIG_IDS.equity);
   });
 
   it("GIVEN an existing configuration WHEN resolving a call with version 0 THEN reverts with VersionZero", async () => {
-    const resolverProxyConfiguration = buildBytes(RESOLVER_PROXY_VERSION_V2, EQUITY_CONFIG_ID, 0, false);
+    const resolverProxyConfiguration = buildBytes(RESOLVER_PROXY_VERSION_V2, CONFIG_IDS.equity, 0, false);
 
     await expect(diamondCutManager.resolveResolverProxyCall(resolverProxyConfiguration, PAUSE_SELECTOR))
       .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
-      .withArgs(EQUITY_CONFIG_ID);
+      .withArgs(CONFIG_IDS.equity);
   });
 
   it("GIVEN an existing configuration WHEN resolving a call with version 0 for legacy method THEN reverts with VersionZero", async () => {
     await expect(
-      diamondCutManager["resolveResolverProxyCall(bytes32,uint256,bytes4)"](EQUITY_CONFIG_ID, 0, PAUSE_SELECTOR),
+      diamondCutManager["resolveResolverProxyCall(bytes32,uint256,bytes4)"](CONFIG_IDS.equity, 0, PAUSE_SELECTOR),
     )
       .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
-      .withArgs(EQUITY_CONFIG_ID);
+      .withArgs(CONFIG_IDS.equity);
   });
 
   it("GIVEN a wrong proxy configuration with a bytes that is not a multiple of 32 WHEN resolving a call THEN reverts with InvalidResolverProxyConfiguration", async () => {
@@ -930,7 +924,7 @@ describe("DiamondCutManager", () => {
   });
 
   it("GIVEN a wrong proxy configuration with too few bytes WHEN resolving a call THEN reverts with InvalidResolverProxyConfiguration", async () => {
-    let resolverProxyConfiguration = buildBytes(RESOLVER_PROXY_VERSION_V2, EQUITY_CONFIG_ID, 0, false);
+    let resolverProxyConfiguration = buildBytes(RESOLVER_PROXY_VERSION_V2, CONFIG_IDS.equity, 0, false);
     resolverProxyConfiguration = resolverProxyConfiguration.substring(0, resolverProxyConfiguration.length - 2);
 
     await expect(diamondCutManager.resolveResolverProxyCall(resolverProxyConfiguration, PAUSE_SELECTOR))
@@ -941,7 +935,7 @@ describe("DiamondCutManager", () => {
   it("GIVEN an unrecognized proxy version WHEN resolving a call THEN reverts with UnrecognizedResolverProxyVersion", async () => {
     const WRONG_RESOLVER_PROXY_VERSION = "0xffffffffffffffff";
 
-    const resolverProxyConfiguration = buildBytes(WRONG_RESOLVER_PROXY_VERSION, EQUITY_CONFIG_ID, 0, false);
+    const resolverProxyConfiguration = buildBytes(WRONG_RESOLVER_PROXY_VERSION, CONFIG_IDS.equity, 0, false);
 
     await expect(diamondCutManager.resolveResolverProxyCall(resolverProxyConfiguration, PAUSE_SELECTOR))
       .to.be.revertedWithCustomError(diamondCutManager, "UnrecognizedResolverProxyVersion")
@@ -949,22 +943,22 @@ describe("DiamondCutManager", () => {
   });
 
   it("GIVEN an existing configuration WHEN resolveSupportsInterface called with version 0 THEN reverts with VersionZero", async () => {
-    await expect(diamondCutManager.resolveSupportsInterface(EQUITY_CONFIG_ID, 0, "0x01ffc9a7"))
+    await expect(diamondCutManager.resolveSupportsInterface(CONFIG_IDS.equity, 0, "0x01ffc9a7"))
       .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
-      .withArgs(EQUITY_CONFIG_ID);
+      .withArgs(CONFIG_IDS.equity);
   });
 
   it("GIVEN an existing configuration WHEN getFacetsByConfigurationIdAndVersion called with version 0 THEN reverts with VersionZero", async () => {
-    await expect(diamondCutManager.getFacetsByConfigurationIdAndVersion(EQUITY_CONFIG_ID, 0, 0, 10))
+    await expect(diamondCutManager.getFacetsByConfigurationIdAndVersion(CONFIG_IDS.equity, 0, 0, 10))
       .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
-      .withArgs(EQUITY_CONFIG_ID);
+      .withArgs(CONFIG_IDS.equity);
   });
 
   it("GIVEN a registered configuration WHEN getFacetVersionByConfigurationIdVersionAndFacetId called with non-existent facetId THEN reverts with FacetIdNotRegistered", async () => {
     const nonExistentFacetId = "0x1234567890123456789012345678901234567890123456789012345678901234";
 
     await expect(
-      diamondCutManager.getFacetVersionByConfigurationIdVersionAndFacetId(EQUITY_CONFIG_ID, 1, nonExistentFacetId),
+      diamondCutManager.getFacetVersionByConfigurationIdVersionAndFacetId(CONFIG_IDS.equity, 1, nonExistentFacetId),
     ).to.be.revertedWithCustomError(diamondCutManager, "FacetIdNotRegistered");
   });
 

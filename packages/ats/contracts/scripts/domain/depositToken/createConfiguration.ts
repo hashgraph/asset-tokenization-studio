@@ -20,7 +20,7 @@ import {
   RetryOptions,
 } from "@scripts/infrastructure";
 import { BusinessLogicResolver } from "@contract-types";
-import { DEPOSIT_TOKEN_CONFIG_ID } from "../constants";
+import { CONFIG_IDS } from "../constants";
 import { buildFacetList } from "../facetEnvironment";
 import { COMMON_TOKEN_FACETS } from "../facetSets";
 import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
@@ -42,7 +42,7 @@ export const DEPOSIT_TOKEN_FACETS: readonly FacetName[] = [...COMMON_TOKEN_FACET
  *
  * Thin wrapper that calls the generic core operation with deposit-token-specific
  * data:
- * - Configuration ID: DEPOSIT_TOKEN_CONFIG_ID
+ * - Configuration ID: CONFIG_IDS.depositToken
  * - Facet list: DEPOSIT_TOKEN_FACETS
  *
  * @param blrContract - BusinessLogicResolver contract instance
@@ -76,7 +76,7 @@ export async function createDepositTokenConfiguration(
   });
 
   return createBatchConfiguration(blrContract, {
-    configurationId: DEPOSIT_TOKEN_CONFIG_ID,
+    configurationId: CONFIG_IDS.depositToken,
     facets,
     partialBatchDeploy,
     batchSize,

@@ -30,13 +30,12 @@ import {
 
 // Domain layer
 import {
-  EQUITY_CONFIG_ID,
-  BOND_CONFIG_ID,
   FACET_REGISTRY,
   getFacetRegistryCount,
   atsRegistry,
   createFactoryConfiguration,
   deployFactory,
+  CONFIG_IDS,
 } from "@scripts/domain";
 
 // Test helpers
@@ -81,8 +80,8 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
     });
 
     it("should validate bytes32 values", () => {
-      expect(() => validateBytes32(EQUITY_CONFIG_ID, "config ID")).to.not.throw();
-      expect(() => validateBytes32(BOND_CONFIG_ID, "config ID")).to.not.throw();
+      expect(() => validateBytes32(CONFIG_IDS.equity, "config ID")).to.not.throw();
+      expect(() => validateBytes32(CONFIG_IDS.bond, "config ID")).to.not.throw();
     });
 
     it("should reject invalid bytes32 values", () => {

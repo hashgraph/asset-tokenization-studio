@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock, ISnapshotsByPartition__factory, ISnapshotsByPartition } from "@contract-types";
-import { ZERO, EMPTY_STRING, ATS_ROLES, RESOLVER_KEY_SNAPSHOTS_BY_PARTITION } from "@scripts";
+import { ZERO, EMPTY_STRING, ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import { DEFAULT_PARTITION, PARTITION_ID_2, PARTITION_ID_3, executeRbac, MAX_UINT256 } from "@test";
 import type { AssetMockCtx } from "@test";
 
@@ -290,13 +290,13 @@ export function snapshotsByPartitionTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeSnapshotsByPartition is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeSnapshotsByPartition())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_SNAPSHOTS_BY_PARTITION, 1);
+          .withArgs(RESOLVER_KEYS.snapshotsByPartition, 1);
       });
     });
 
     describe("initializeSnapshotsByPartition event", () => {
       it("GIVEN a fresh deployment WHEN initializeSnapshotsByPartition is called THEN emits SnapshotsByPartitionInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_SNAPSHOTS_BY_PARTITION);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.snapshotsByPartition);
         await expect(asset.initializeSnapshotsByPartition()).to.emit(asset, "SnapshotsByPartitionInitialized");
       });
     });

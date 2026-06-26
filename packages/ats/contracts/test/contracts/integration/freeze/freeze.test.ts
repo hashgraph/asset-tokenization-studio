@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
-import { ADDRESS_ZERO, ATS_ROLES, RESOLVER_KEY_FREEZE } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 
 export function freezeTests(getCtx: () => AssetMockCtx): void {
   describe("Freeze Tests", () => {
@@ -28,13 +28,13 @@ export function freezeTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeFreeze is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeFreeze())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_FREEZE, 1);
+          .withArgs(RESOLVER_KEYS.freeze, 1);
       });
     });
 
     describe("initializeFreeze event", () => {
       it("GIVEN a fresh deployment WHEN initializeFreeze is called THEN emits FreezeInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_FREEZE);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.freeze);
         await expect(asset.initializeFreeze()).to.emit(asset, "FreezeInitialized");
       });
     });

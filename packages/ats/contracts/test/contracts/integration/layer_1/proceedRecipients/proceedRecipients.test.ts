@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { ATS_ROLES, ADDRESS_ZERO, RESOLVER_KEY_PROCEED_RECIPIENTS, GAS_LIMIT } from "@scripts";
+import { ATS_ROLES, ADDRESS_ZERO, GAS_LIMIT, RESOLVER_KEYS } from "@scripts";
 import type { AssetMockCtx } from "@test";
 
 const PROCEED_RECIPIENT_1 = "0x1234567890123456789012345678901234567890";
@@ -46,7 +46,7 @@ export function proceedRecipientsTests(getCtx: () => AssetMockCtx): void {
 
     describe("initializeProceedRecipients event", () => {
       it("GIVEN a fresh deployment WHEN initializeProceedRecipients is called THEN emits ProceedRecipientsInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_PROCEED_RECIPIENTS);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.proceedRecipients);
         await expect(asset.initializeProceedRecipients([PROCEED_RECIPIENT_1], [PROCEED_RECIPIENT_1_DATA])).to.emit(
           asset,
           "ProceedRecipientsInitialized",

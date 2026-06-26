@@ -5,15 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
-import {
-  ZERO,
-  EMPTY_STRING,
-  dateToUnixTimestamp,
-  ATS_ROLES,
-  ATS_TASK,
-  TIME_PERIODS_S,
-  RESOLVER_KEY_SCHEDULED_TASKS,
-} from "@scripts";
+import { ZERO, EMPTY_STRING, dateToUnixTimestamp, ATS_ROLES, ATS_TASK, TIME_PERIODS_S, RESOLVER_KEYS } from "@scripts";
 import { getOrchestratorLibraryAddresses } from "@scripts/domain";
 import { takeSnapshot } from "@nomicfoundation/hardhat-network-helpers";
 import { executeRbac, getDltTimestamp, MAX_UINT256 } from "@test";
@@ -249,7 +241,7 @@ export function scheduledTasksTests(getCtx: () => AssetMockCtx): void {
       });
 
       it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeScheduledCrossOrderedTasks is called THEN it emits ScheduledCrossOrderedTasksInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_SCHEDULED_TASKS);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.scheduledCrossOrderedTasks);
         await expect(asset.connect(signer_A).initializeScheduledCrossOrderedTasks()).to.emit(
           asset,
           "ScheduledCrossOrderedTasksInitialized",

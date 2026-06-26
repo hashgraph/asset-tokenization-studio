@@ -6,14 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
-import {
-  ADDRESS_ZERO,
-  ATS_ROLES,
-  EMPTY_HEX_BYTES,
-  EMPTY_STRING,
-  ZERO,
-  RESOLVER_KEY_CLEARING_HOLDBYPARTITION,
-} from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO, RESOLVER_KEYS } from "@scripts";
 import { executeRbac, MAX_UINT256 } from "@test";
 import { ASSET_MOCK_CONFIG_ID } from "../../../fixtures/deploy/assetMockConfiguration";
 
@@ -688,13 +681,13 @@ export function clearingHoldByPartitionTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeClearingHoldByPartition is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeClearingHoldByPartition())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_CLEARING_HOLDBYPARTITION, 1);
+          .withArgs(RESOLVER_KEYS.clearingHoldByPartition, 1);
       });
     });
 
     describe("initializeClearingHoldByPartition event", () => {
       it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeClearingHoldByPartition is called THEN emits ClearingHoldByPartitionInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_CLEARING_HOLDBYPARTITION);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.clearingHoldByPartition);
         await expect(asset.initializeClearingHoldByPartition()).to.emit(asset, "ClearingHoldByPartitionInitialized");
       });
     });

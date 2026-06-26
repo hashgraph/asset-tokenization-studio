@@ -12,7 +12,7 @@
 
 import { expect } from "chai";
 import sinon from "sinon";
-import { deployEquityFromFactory, ATS_ROLES, EQUITY_CONFIG_ID } from "@scripts/domain";
+import { deployEquityFromFactory, ATS_ROLES, CONFIG_IDS } from "@scripts/domain";
 import { TEST_ADDRESSES, TEST_FACTORY_EVENTS, TEST_TOKEN_METADATA } from "@test";
 import {
   createMockFactory,
@@ -98,7 +98,7 @@ describe("Equity Token Deployment", () => {
   // ============================================================================
 
   describe("resolverProxyConfiguration", () => {
-    it("should use EQUITY_CONFIG_ID", async () => {
+    it("should use CONFIG_IDS.equity", async () => {
       const diamondAddress = TEST_ADDRESSES.VALID_3;
       const mockFactory = createMockFactory(TEST_FACTORY_EVENTS.EQUITY_DEPLOYED, diamondAddress);
       const params = createDeployEquityParams(mockFactory);
@@ -109,7 +109,7 @@ describe("Equity Token Deployment", () => {
       const callArgs = mockFactory.deployEquity.getCall(0).args[0];
       const config = callArgs.security.resolverProxyConfigurationV2;
 
-      expect(config.configurationId).to.equal(EQUITY_CONFIG_ID);
+      expect(config.configurationId).to.equal(CONFIG_IDS.equity);
     });
 
     it("should set configurationVersion to 1", async () => {

@@ -11,8 +11,8 @@ import {
   dateToUnixTimestamp,
   EMPTY_HEX_BYTES,
   EMPTY_STRING,
-  RESOLVER_KEY_CLEARING,
   ZERO,
+  RESOLVER_KEYS,
 } from "@scripts";
 import { executeRbac, MAX_UINT256 } from "@test";
 
@@ -2984,7 +2984,7 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
         });
 
         it("GIVEN a fresh deployment WHEN initializeClearing is called THEN emits ClearingInitialized", async () => {
-          await asset.forceFacetNotRegistered(RESOLVER_KEY_CLEARING);
+          await asset.forceFacetNotRegistered(RESOLVER_KEYS.clearing);
           await expect(asset.initializeClearing(true)).to.emit(asset, "ClearingInitialized");
         });
       });

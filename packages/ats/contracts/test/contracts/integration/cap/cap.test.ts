@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
-import { ZERO, EMPTY_STRING, dateToUnixTimestamp, ATS_ROLES, RESOLVER_KEY_CAP } from "@scripts";
+import { ZERO, EMPTY_STRING, dateToUnixTimestamp, ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import { MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
 
@@ -52,7 +52,7 @@ export function capTests(getCtx: () => AssetMockCtx): void {
     });
 
     it("GIVEN setting 0 to max supply WHEN trying to initialize THEN transaction fails", async () => {
-      await asset.forceFacetNotRegistered(RESOLVER_KEY_CAP);
+      await asset.forceFacetNotRegistered(RESOLVER_KEYS.cap);
       await expect(asset.initializeCap(0, [])).to.be.revertedWithCustomError(asset, "NewMaxSupplyCannotBeZero");
     });
 
@@ -70,7 +70,7 @@ export function capTests(getCtx: () => AssetMockCtx): void {
 
     describe("initializeCap event", () => {
       it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeCap is called THEN emits CapInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_CAP);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.cap);
         await expect(asset.initializeCap(5, [])).to.emit(asset, "CapInitialized");
       });
     });

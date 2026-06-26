@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
-import { ATS_ROLES, RESOLVER_KEY_CORE_ADJUSTED } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import { executeRbac } from "@test";
 
 const decimals = 6;
@@ -69,13 +69,13 @@ export function coreAdjustedTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeCoreAdjusted is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeCoreAdjusted())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_CORE_ADJUSTED, 1);
+          .withArgs(RESOLVER_KEYS.coreAdjusted, 1);
       });
     });
 
     describe("initializeCoreAdjusted event", () => {
       it("GIVEN a fresh deployment WHEN initializeCoreAdjusted is called THEN emits CoreAdjustedInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_CORE_ADJUSTED);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.coreAdjusted);
         await expect(asset.initializeCoreAdjusted()).to.emit(asset, "CoreAdjustedInitialized");
       });
     });

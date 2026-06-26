@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { ATS_ROLES, RESOLVER_KEY_TRANSFER_AND_LOCK_BY_PARTITION } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import { ASSET_MOCK_CONFIG_ID } from "../../../fixtures/deploy/assetMockConfiguration";
 import { executeRbac, getDltTimestamp, grantKycToHolders, NON_DEFAULT_PARTITION, DEFAULT_PARTITION } from "@test";
 import type { AssetMockCtx } from "@test";
@@ -221,13 +221,13 @@ export function transferAndLockByPartitionTests(getCtx: () => AssetMockCtx): voi
       it("GIVEN already-initialised WHEN initializeTransferAndLockByPartition is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeTransferAndLockByPartition())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_TRANSFER_AND_LOCK_BY_PARTITION, 1);
+          .withArgs(RESOLVER_KEYS.transferAndLockByPartition, 1);
       });
     });
 
     describe("initializeTransferAndLockByPartition event", () => {
       it("GIVEN a fresh deployment WHEN initializeTransferAndLockByPartition is called THEN emits TransferAndLockByPartitionInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_TRANSFER_AND_LOCK_BY_PARTITION);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.transferAndLockByPartition);
         await expect(asset.initializeTransferAndLockByPartition()).to.emit(
           asset,
           "TransferAndLockByPartitionInitialized",

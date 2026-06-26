@@ -198,9 +198,6 @@ export const TEST_CONFIG_IDS = {
   /** Bond configuration ID */
   BOND: "0x0000000000000000000000000000000000000000000000000000000000000002",
 
-  /** Bond Sustainability Performance Target Rate configuration ID */
-  BOND_SPT: "0x0000000000000000000000000000000000000000000000000000000000000005",
-
   // Alternative IDs for testing config updates
   /** Alternative configuration ID (for testing config updates) */
   ALTERNATIVE: "0x00000000000000000000000000000000000000000000000000000000000000bb",

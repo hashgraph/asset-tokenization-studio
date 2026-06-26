@@ -4,15 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock, MockedT3RevocationRegistry, RevertingRevocationRegistry } from "@contract-types";
-import {
-  ATS_ROLES,
-  DEFAULT_PARTITION,
-  EMPTY_HEX_BYTES,
-  EMPTY_STRING,
-  ZERO,
-  RESOLVER_KEY_KYC,
-  RESOLVER_KEY_SSI_MANAGEMENT,
-} from "@scripts";
+import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO, RESOLVER_KEYS } from "@scripts";
 import { executeRbac, MAX_UINT256 } from "@test";
 import type { AssetMockCtx } from "@test";
 
@@ -184,7 +176,7 @@ export function ssiTests(getCtx: () => AssetMockCtx): void {
           { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
         ]);
 
-        await equityAsset.forceFacetNotRegistered(RESOLVER_KEY_KYC);
+        await equityAsset.forceFacetNotRegistered(RESOLVER_KEYS.kyc);
         await equityAsset.initializeInternalKyc(true);
         await equityAsset.addIssuer(signer_A.address);
         await equityAsset.grantKyc(signer_B.address, VC_ID, ZERO, MAX_UINT256, signer_A.address);
@@ -258,13 +250,13 @@ export function ssiTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeSsiManagement THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeSsiManagement())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_SSI_MANAGEMENT, 1);
+          .withArgs(RESOLVER_KEYS.ssiManagement, 1);
       });
     });
 
     describe("initializeSsiManagement event", () => {
       it("GIVEN fresh facet WHEN initializeSsiManagement THEN emits SsiManagementInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_SSI_MANAGEMENT);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.ssiManagement);
         await expect(asset.initializeSsiManagement()).to.emit(asset, "SsiManagementInitialized");
       });
     });

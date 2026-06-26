@@ -2,7 +2,7 @@
 
 import { expect } from "chai";
 import { IAssetMock } from "@contract-types";
-import { ADDRESS_ZERO, ATS_ROLES, RESOLVER_KEY_CONTROL_LIST } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import { grantRoleAndPauseToken, executeRbac } from "@test";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import type { AssetMockCtx } from "@test";
@@ -65,7 +65,7 @@ export function controlListTests(getCtx: () => AssetMockCtx): void {
     });
 
     it("GIVEN a new deployment WHEN initializeControlList is called THEN it emits ControlListInitialized", async () => {
-      await asset.forceFacetNotRegistered(RESOLVER_KEY_CONTROL_LIST);
+      await asset.forceFacetNotRegistered(RESOLVER_KEYS.controlList);
       await expect(asset.initializeControlList(true)).to.emit(asset, "ControlListInitialized");
     });
 

@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { ATS_ROLES, RESOLVER_KEY_NOMINAL_VALUE_AT_SNAPSHOT } from "@scripts";
+import { ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import type { AssetMockCtx } from "@test";
 
 export function nominalValueAtSnapshotTests(getCtx: () => AssetMockCtx): void {
@@ -29,13 +29,13 @@ export function nominalValueAtSnapshotTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeNominalValueAtSnapshot THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeNominalValueAtSnapshot())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_NOMINAL_VALUE_AT_SNAPSHOT, 1);
+          .withArgs(RESOLVER_KEYS.nominalValueAtSnapshot, 1);
       });
     });
 
     describe("initializeNominalValueAtSnapshot event", () => {
       it("GIVEN fresh facet WHEN initializeNominalValueAtSnapshot THEN emits NominalValueAtSnapshotInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_NOMINAL_VALUE_AT_SNAPSHOT);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.nominalValueAtSnapshot);
         await expect(asset.initializeNominalValueAtSnapshot()).to.emit(asset, "NominalValueAtSnapshotInitialized");
       });
     });

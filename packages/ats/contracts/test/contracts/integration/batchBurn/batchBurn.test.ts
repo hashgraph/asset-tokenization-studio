@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
-import { ATS_ROLES, EMPTY_STRING, ZERO, RESOLVER_KEY_BATCH_BURN } from "@scripts";
+import { ATS_ROLES, EMPTY_STRING, ZERO, RESOLVER_KEYS } from "@scripts";
 
 const AMOUNT = 1000;
 const MAX_SUPPLY = 10000000;
@@ -163,13 +163,13 @@ export function batchBurnTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN already-initialised WHEN initializeBatchBurn is called again THEN FacetAlreadyRegistered", async () => {
         await expect(asset.initializeBatchBurn())
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEY_BATCH_BURN, 1);
+          .withArgs(RESOLVER_KEYS.batchBurn, 1);
       });
     });
 
     describe("initializeBatchBurn event", () => {
       it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeBatchBurn is called THEN emits BatchBurnInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEY_BATCH_BURN);
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.batchBurn);
         await expect(asset.initializeBatchBurn()).to.emit(asset, "BatchBurnInitialized");
       });
     });

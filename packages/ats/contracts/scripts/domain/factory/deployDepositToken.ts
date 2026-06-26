@@ -4,7 +4,7 @@ import { ethers, type EventLog } from "ethers";
 import type { IFactory, ResolverProxy } from "@contract-types";
 import { ResolverProxy__factory } from "@contract-types";
 import { GAS_LIMIT } from "@scripts/infrastructure";
-import { ATS_ROLES, DEPOSIT_TOKEN_CONFIG_ID } from "../constants";
+import { ATS_ROLES, CONFIG_IDS } from "../constants";
 import { FactoryRegulationDataParams, Rbac, SecurityDataParams } from "./types";
 
 // ============================================================================
@@ -34,7 +34,7 @@ export interface DeployDepositTokenFromFactoryParams {
  *
  * This function constructs the required data structures and calls the factory's
  * `deployDepositToken` method to create a new deposit token with a diamond
- * proxy bound to `DEPOSIT_TOKEN_CONFIG_ID`.
+ * proxy bound to `CONFIG_IDS.depositToken`.
  *
  * Recommended defaults for `securityDataParams` on a cash token:
  * - `clearingActive: false` — the hold verbs require `onlyClearingDisabled`.
@@ -63,7 +63,7 @@ export async function deployDepositTokenFromFactory(
 
   // Build resolver proxy configuration
   const resolverProxyConfigurationV2 = {
-    configurationId: DEPOSIT_TOKEN_CONFIG_ID,
+    configurationId: CONFIG_IDS.depositToken,
     configurationVersion: 1,
     replacementEnabled: true,
   };
