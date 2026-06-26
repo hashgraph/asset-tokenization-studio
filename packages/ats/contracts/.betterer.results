@@ -32,7 +32,9 @@ exports[`ats contracts solhint`] = {
       [333, 15, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177602"]
     ],
     "contracts/domain/asset/ScheduledTasksStorageWrapper.sol:3509877729": [
-      [194, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"]
+      [194, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"],
+      [482, 4, 1, "ats/storage-accessor-private: ATS-PRIV-001: StorageWrapper accessor \'_scheduledBalanceAdjustmentStorage\' must be \'private\', not \'internal\'.", "177603"],
+      [499, 4, 1, "ats/storage-accessor-private: ATS-PRIV-001: StorageWrapper accessor \'_scheduledCrossOrderedTaskStorage\' must be \'private\', not \'internal\'.", "177603"]
     ],
     "contracts/domain/asset/SnapshotsStorageWrapper.sol:732035984": [
       [1038, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"]
