@@ -11,17 +11,17 @@ Minimal interface for querying whether a verifiable credential issued to a subje
 ### revoked
 
 ```solidity
-function revoked(address subject, string vcId) external view returns (bool)
+function revoked(address _subject, string _vcId) external view returns (bool)
 ```
 
 Checks if the VC granted by an issuer to a subject has been revoked.
 
 #### Parameters
 
-| Name    | Type    | Description                                                   |
-| ------- | ------- | ------------------------------------------------------------- |
-| subject | address | The address of the subject whose credential is being queried. |
-| vcId    | string  | The identifier of the verifiable credential to check.         |
+| Name      | Type    | Description                                                   |
+| --------- | ------- | ------------------------------------------------------------- |
+| \_subject | address | The address of the subject whose credential is being queried. |
+| \_vcId    | string  | The identifier of the verifiable credential to check.         |
 
 #### Returns
 
