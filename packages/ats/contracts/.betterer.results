@@ -66,10 +66,6 @@ exports[`ats contracts solhint`] = {
     "contracts/facets/dividend/IDividendTypes.sol:2960222249": [
       [58, 4, 1, "gas-struct-packing: GC: For [ DividendFor ] struct, packing seems inefficient. Try rearranging to achieve 32bytes slots", "177622"]
     ],
-    "contracts/facets/kyc/IRevocationList.sol:4003426551": [
-      [16, 21, 1, "ats/function-param-underscore: ATS-NAME-001: function parameter \'subject\' must start with \'_\'.", "177604"],
-      [16, 38, 1, "ats/function-param-underscore: ATS-NAME-001: function parameter \'vcId\' must start with \'_\'.", "177622"]
-    ],
     "contracts/factory/IFactory.sol:3326367667": [
       [115, 4, 1, "gas-struct-packing: GC: For [ EquityDetailsData ] struct, packing seems inefficient. Try rearranging to achieve 32bytes slots", "177622"]
     ],
