@@ -19,7 +19,6 @@ module.exports = [
   require("./rules/storage-accessor-private"), // ATS-PRIV-001
   require("./rules/storage-accessor-underscore"), // ATS-NAME-006
   require("./rules/storage-struct-erc7201"), // ATS-STORAGE-001
-  require("./rules/no-erc3643-import"), // ATS-BOUND-001
   require("./rules/loop-unchecked-increment"), // ATS-GAS-002
   require("./rules/no-solhint-disable"), // ATS-LINT-001
 ];

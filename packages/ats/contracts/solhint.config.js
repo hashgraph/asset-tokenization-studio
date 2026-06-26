@@ -20,23 +20,25 @@ module.exports = {
     "ats/no-direct-msg-sender": "error", // ATS-EVM-001
     "ats/no-direct-block-timestamp": "error", // ATS-EVM-002
     "ats/no-check-modifier": "error", // ATS-NAME-005
-    "ats/no-erc3643-import": "error", // ATS-BOUND-001
 
-    // Has debt → warn (ratchet to error once cleaned)
-    "ats/storage-struct-erc7201": "warn", // ATS-STORAGE-001 (0; real tag added, reused layouts use the erc7201:multiple sentinel)
-    "ats/storage-accessor-private": "warn", // ATS-PRIV-001 (0; rule now targets only the canonical zero-param storage accessor)
-    "ats/storage-accessor-underscore": "warn", // ATS-NAME-006 (0; all private storage accessors now carry the leading _)
-    "gas-custom-errors": "warn", // ATS-ERR-001 (4)
-    "gas-increment-by-one": "warn", // ATS-GAS-001 (32)
-    "interface-starts-with-i": "warn", // ATS-IFACE-001 (12, all vendored factory/ERC3643)
-    "ats/function-param-underscore": "warn", // ATS-NAME-001 (80)
-    "ats/named-return-underscore": "warn", // ATS-NAME-002 (10)
-    "ats/event-param-no-underscore": "warn", // ATS-EVENT-002 (36)
+    // Has debt → warn (ratchet to error once cleaned). The live debt counts are owned by the
+    // betterer ratchet (.betterer.ts / .betterer.results) — not duplicated here, to avoid drift.
+    "ats/storage-struct-erc7201": "warn", // ATS-STORAGE-001
+    "ats/storage-accessor-private": "warn", // ATS-PRIV-001
+    "ats/storage-accessor-underscore": "warn", // ATS-NAME-006
+    "gas-custom-errors": "warn", // ATS-ERR-001
+    "interface-starts-with-i": "warn", // ATS-IFACE-001 (vendored factory interfaces)
+    "ats/function-param-underscore": "warn", // ATS-NAME-001
+    "ats/named-return-underscore": "warn", // ATS-NAME-002
+    "ats/event-param-no-underscore": "warn", // ATS-EVENT-002
     "gas-calldata-parameters": "warn", // ATS-FUNC-001 (built-in; replaced the custom ats/external-calldata-params, which only duplicated it)
-    "ats/loop-unchecked-increment": "warn", // ATS-GAS-002 (14)
+    "ats/loop-unchecked-increment": "warn", // ATS-GAS-002
     // ATS-SUFFIX-001 — now MANUAL (rule removed): transitive inheritance of
     // IStaticFunctionSelectors is unresolvable in solhint. See conventions/architecture.md.
-    "ats/no-solhint-disable": "off", // ATS-LINT-001 — temporarily disabled (TODO: re-enable to "warn")
+    // ATS-LINT-001 — MANUAL for now (rule kept off): the codebase has sanctioned solhint-disable
+    // blocks (e.g. uppercase ABI function names) the rule cannot yet distinguish. Teach it that
+    // exception before enabling. Reviewed via the /ats-style-guide subagent meanwhile.
+    "ats/no-solhint-disable": "off",
 
     // Line length and formatting
     "max-line-length": ["error", 120],

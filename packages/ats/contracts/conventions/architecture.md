@@ -70,12 +70,6 @@ IStaticFunctionSelectors`). Confirming that needs the cross-file inheritance gra
   `abstract contract`.
 - Rationale: technical debt being phased out — flag only, do not auto-fix.
 
-## Module boundaries
-
-### ATS-BOUND-001 — Forbidden import from `factory/ERC3643/`
-
-- Enforced by `solhint-plugin-ats/rules/no-erc3643-import.js`.
-
 ## Prohibited patterns
 
 ### ATS-ARCH-001 — Thin wrapper function

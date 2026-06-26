@@ -22,7 +22,7 @@ class NoDirectMsgSenderChecker extends BaseChecker {
   }
 
   MemberAccess(node) {
-    if (this.fileName.endsWith("EvmAccessors.sol")) return;
+    if (this.fileName.split(/[\\/]/).pop() === "EvmAccessors.sol") return;
     if (node.expression && node.expression.name === "msg" && node.memberName === "sender") {
       this.error(node, "ATS-EVM-001: use EvmAccessors.getMsgSender() instead of msg.sender.");
     }

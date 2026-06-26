@@ -34,8 +34,7 @@ Cross-cutting source-level conventions that apply to every `.sol` file regardles
   the facet's writer interface; shared types live in the domain's `I*Types.sol`.
 
 Related: events and errors follow the same single-vs-shared placement logic — see
-[events.md](events.md) ATS-EVENT-007 and ATS-TYPE-002 above. The ERC-3643 import boundary
-is in [architecture.md](architecture.md) ATS-BOUND-001.
+[events.md](events.md) ATS-EVENT-007 and ATS-TYPE-002 above.
 
 ## Gas patterns
 
@@ -80,4 +79,12 @@ every touched `.sol` file.
 
 ### ATS-LINT-001 — `solhint-disable` comment added
 
-- Enforced by `solhint-plugin-ats/rules/no-solhint-disable.js`.
+- Severity: ERROR
+- Enforcement: MANUAL (reviewed via the `/ats-style-guide` subagent).
+- A `solhint-plugin-ats/rules/no-solhint-disable.js` rule exists but is kept **off** in
+  `solhint.config.js`: the codebase has sanctioned `solhint-disable` blocks (e.g. uppercase ABI
+  function names) the rule cannot yet distinguish. Teach it that exception before enabling.
+- Pattern: a `// solhint-disable` / `// solhint-disable-next-line` comment added to suppress a
+  rule rather than fixing the underlying issue.
+- Fix: resolve the lint finding instead of suppressing it; reserve disables for the documented
+  exceptions.

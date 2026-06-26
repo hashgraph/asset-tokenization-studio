@@ -21,7 +21,9 @@ class NoCheckModifierChecker extends BaseChecker {
   }
 
   ModifierDefinition(node) {
-    if (/^check/.test(node.name)) {
+    // Anchor to the `check` verb followed by a word boundary (`checkFoo`, bare `check`) so
+    // noun-prefixed names like `checkpointActive`/`checkedOnly` are not false-positives.
+    if (/^check([A-Z]|$)/.test(node.name)) {
       this.error(
         node,
         `ATS-NAME-005: modifier '${node.name}' must not start with 'check'; rename to 'only*'/'not*' and keep 'check' on the '_check*' helper.`,
