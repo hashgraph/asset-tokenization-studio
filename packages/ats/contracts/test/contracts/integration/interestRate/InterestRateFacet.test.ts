@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import { ATS_ROLES, RESOLVER_KEY_INTEREST_RATE } from "@scripts";
-import { DEFAULT_BOND_FIXED_RATE_PARAMS, executeRbac } from "@test";
+import { TEST_BOND_FIXED_RATE, executeRbac } from "@test";
 import type { AssetMockCtx } from "@test";
 
 enum RateType {
@@ -28,9 +28,7 @@ export function interestRateFacetTests(getCtx: () => AssetMockCtx): void {
       await executeRbac(asset, [{ role: ATS_ROLES.ROLE_INTEREST_RATE_MANAGER, members: [admin.address] }]);
 
       await asset.connect(admin).setCouponRateType(RateType.FIXED);
-      await asset
-        .connect(admin)
-        .setRate(DEFAULT_BOND_FIXED_RATE_PARAMS.rate, DEFAULT_BOND_FIXED_RATE_PARAMS.rateDecimals);
+      await asset.connect(admin).setRate(TEST_BOND_FIXED_RATE.RATE, TEST_BOND_FIXED_RATE.RATE_DECIMALS);
     });
 
     describe("initializeInterestRateType", () => {

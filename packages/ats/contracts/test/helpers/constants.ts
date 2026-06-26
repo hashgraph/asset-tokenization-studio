@@ -1235,14 +1235,35 @@ export const TEST_COUPON = {
 } as const;
 
 /**
- * Default fixed-rate bond fixture parameters mirrored as test-side expectations.
+ * Fixed-rate bond test values (coupon rate + decimals).
  *
- * Kept in sync with `DEFAULT_BOND_FIXED_RATE_PARAMS` in `test/fixtures/tokens/bondFixedRate.fixture.ts`.
- * The FixedRate / InterestRate facet suites assert observed rate values against these.
+ * Consumed by the coupon, fixed-rate and interest-rate facet suites, which exercise the
+ * FixedRate facet on the shared AssetMock mega-asset.
  */
 export const TEST_BOND_FIXED_RATE = {
   RATE: 50,
   RATE_DECIMALS: 1,
+} as const;
+
+/**
+ * KPI-linked-rate bond test values — the InterestRate + ImpactData inputs the KpiLinkedRate
+ * suite feeds to `initializeKpiLinkedRate` on the shared AssetMock mega-asset. Field names mirror
+ * the on-chain `IKpiLinkedRate.InterestRate` / `IKpiLinkedRate.ImpactData` structs.
+ */
+export const TEST_BOND_KPI_LINKED_RATE = {
+  maxRate: 100,
+  baseRate: 75,
+  minRate: 50,
+  startPeriod: 1000,
+  startRate: 60,
+  missedPenalty: 10,
+  reportPeriod: 2000,
+  rateDecimals: 1,
+  maxDeviationCap: 1000,
+  baseLine: 750,
+  maxDeviationFloor: 500,
+  impactDataDecimals: 2,
+  adjustmentPrecision: 2,
 } as const;
 
 // ============================================================================

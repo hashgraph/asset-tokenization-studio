@@ -9,6 +9,7 @@ import { IMockDiamondCut } from "./MockDiamondCut.sol";
 import { ResolverProxy } from "../../infrastructure/proxy/ResolverProxy.sol";
 import { IResolverProxy } from "../../infrastructure/proxy/IResolverProxy.sol";
 import { IBusinessLogicResolver } from "../../infrastructure/diamond/IBusinessLogicResolver.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title Mock Factory
@@ -37,9 +38,10 @@ interface IMockFactory is IFactory {
  */
 abstract contract MockFactory is Factory, IMockFactory {
     /// @notice Resolver configuration ID that registers the full IAsset facet union.
-    /// @dev All asset-class facet sets (equity, bond, depositToken) with DiamondFacet swapped
-    ///      for MockDiamondCut and EvmAccessorsFacet appended. Created by the TypeScript-side
-    ///      `createAssetMockConfiguration` at infrastructure deploy time.
+    /// @dev Every asset-class facet set, deduplicated (it remains the complete union even though
+    ///      only equity, bond and depositToken are deployable through the factory), with
+    ///      DiamondFacet swapped for MockDiamondCut and EvmAccessorsFacet appended. Created by the
+    ///      TypeScript-side `createAssetMockConfiguration` at infrastructure deploy time.
     ///      Value: 0x000000000000000000000000000000000000000000000000000000000000000a
     bytes32 private constant _ASSET_MOCK_CONFIG_ID = 0x000000000000000000000000000000000000000000000000000000000000000a;
 
