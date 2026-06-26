@@ -13,7 +13,7 @@ _Inherits nothing — both methods return primitive types only, so no shared div
 ### getDividendHolders
 
 ```solidity
-function getDividendHolders(uint256 dividendId, uint256 pageIndex, uint256 pageLength) external view returns (address[] holders_)
+function getDividendHolders(uint256 _dividendId, uint256 _pageIndex, uint256 _pageLength) external view returns (address[] holders_)
 ```
 
 Returns the page of holder addresses eligible for a given dividend.
@@ -22,11 +22,11 @@ _Reverts via the `onlyMatchingActionType` modifier when `dividendId` does not re
 
 #### Parameters
 
-| Name       | Type    | Description                                                                |
-| ---------- | ------- | -------------------------------------------------------------------------- |
-| dividendId | uint256 | One-indexed dividend identifier within the dividend corporate action type. |
-| pageIndex  | uint256 | Zero-based index of the page to retrieve.                                  |
-| pageLength | uint256 | Maximum number of holders returned in the page.                            |
+| Name         | Type    | Description                                                                |
+| ------------ | ------- | -------------------------------------------------------------------------- |
+| \_dividendId | uint256 | One-indexed dividend identifier within the dividend corporate action type. |
+| \_pageIndex  | uint256 | Zero-based index of the page to retrieve.                                  |
+| \_pageLength | uint256 | Maximum number of holders returned in the page.                            |
 
 #### Returns
 
@@ -37,7 +37,7 @@ _Reverts via the `onlyMatchingActionType` modifier when `dividendId` does not re
 ### getTotalDividendHolders
 
 ```solidity
-function getTotalDividendHolders(uint256 dividendId) external view returns (uint256)
+function getTotalDividendHolders(uint256 _dividendId) external view returns (uint256)
 ```
 
 Returns the total number of holders eligible for a given dividend.
@@ -46,9 +46,9 @@ _Reverts via the `onlyMatchingActionType` modifier when `dividendId` does not re
 
 #### Parameters
 
-| Name       | Type    | Description                                                                |
-| ---------- | ------- | -------------------------------------------------------------------------- |
-| dividendId | uint256 | One-indexed dividend identifier within the dividend corporate action type. |
+| Name         | Type    | Description                                                                |
+| ------------ | ------- | -------------------------------------------------------------------------- |
+| \_dividendId | uint256 | One-indexed dividend identifier within the dividend corporate action type. |
 
 #### Returns
 

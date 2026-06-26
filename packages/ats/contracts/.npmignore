@@ -58,6 +58,9 @@ slither.config.json
 # Documentation
 docs/
 README.md
+conventions/
+CLAUDE.md
+AGENTS.md
 
 # Misc
 *.log

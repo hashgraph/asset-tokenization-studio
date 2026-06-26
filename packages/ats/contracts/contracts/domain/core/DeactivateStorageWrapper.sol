@@ -41,7 +41,7 @@ library DeactivateStorageWrapper {
      *      `onlyActivated`).
      */
     function deactivate() internal {
-        deactivateStorage().deactivated = true;
+        _deactivateStorage().deactivated = true;
     }
 
     /**
@@ -49,7 +49,7 @@ library DeactivateStorageWrapper {
      * @return True if the token has been deactivated, false otherwise.
      */
     function isDeactivated() internal view returns (bool) {
-        return deactivateStorage().deactivated;
+        return _deactivateStorage().deactivated;
     }
 
     /**
@@ -68,7 +68,7 @@ library DeactivateStorageWrapper {
      *      returned reference is the entry point for read/write helpers in this library.
      * @return deactivate_ Storage reference to the `DeactivateDataStorage` struct.
      */
-    function deactivateStorage() private pure returns (DeactivateDataStorage storage deactivate_) {
+    function _deactivateStorage() private pure returns (DeactivateDataStorage storage deactivate_) {
         bytes32 position = STORAGE_LOCATION_DEACTIVATE;
         // solhint-disable-next-line no-inline-assembly
         assembly {

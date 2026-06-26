@@ -56,7 +56,7 @@ const HASH_SHAPED_ALLOWLIST: ReadonlySet<string> = new Set([
   "DEFAULT_ADMIN_ROLE",
   // Project sentinel: bytes32 integer "1" used as the default ERC1410 partition
   // identifier. Hash-shaped only because it's a 32-byte left-padded literal.
-  "_DEFAULT_PARTITION",
+  "DEFAULT_PARTITION",
 ]);
 
 // Suffix-based allowlist — applied AFTER the bare-name allowlist above.

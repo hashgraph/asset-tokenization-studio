@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { DEFAULT_PARTITION } from "../../constants/values.sol";
 import { ROLE_LOCKER } from "../../constants/roles.sol";
 import { ITransferAndLock } from "./ITransferAndLock.sol";
 import { IERC1410Types } from "../commonTypes/IERC1410Types.sol";
@@ -53,20 +53,20 @@ abstract contract TransferAndLock is ITransferAndLock, Modifiers {
         TokenCoreOps.transferByPartition(
             EvmAccessors.getMsgSender(),
             IERC1410Types.BasicTransferInfo(_to, _amount),
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             _data,
             EvmAccessors.getMsgSender(),
             ""
         );
         lockId_ = LockStorageWrapper.lockByPartition(
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             _amount,
             _to,
             _expirationTimestamp,
             EvmAccessors.getMsgSender()
         );
         emit PartitionTransferredAndLocked(
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             EvmAccessors.getMsgSender(),
             _to,
             _amount,

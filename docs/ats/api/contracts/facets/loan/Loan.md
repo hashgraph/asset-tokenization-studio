@@ -6,7 +6,7 @@ _Asset Tokenization Studio Team_
 
 Abstract implementation of `ILoan`.
 
-_Delegates all storage reads and writes to `LoanStorageWrapper`. Access guards are enforced via `Modifiers`; date validation uses `onlyValidTimestamp` and `validateDates`._
+_Delegates all storage reads and writes to `LoanStorageWrapper`. Access guards are enforced via `Modifiers`; date validation uses `onlyValidTimestamp` and `onlyValidDates`._
 
 ## Methods
 
@@ -152,20 +152,6 @@ error IsPaused()
 ```
 
 Thrown when an operation that requires the token to be unpaused is attempted while the token is paused (own flag or any external pause contract).
-
-### UnrecognizedResolverProxyVersion
-
-```solidity
-error UnrecognizedResolverProxyVersion(bytes8 _resolverProxyVersion)
-```
-
-Thrown when the provided proxy version does not match any BLR compatible standard.
-
-#### Parameters
-
-| Name                   | Type   | Description                                        |
-| ---------------------- | ------ | -------------------------------------------------- |
-| \_resolverProxyVersion | bytes8 | proxy version that is not compatible with the BLR. |
 
 ### WalletRecovered
 

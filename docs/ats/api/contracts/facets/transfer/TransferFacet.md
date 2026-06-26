@@ -72,10 +72,10 @@ Moves `amount` tokens from the caller to `to`.
 
 #### Parameters
 
-| Name   | Type    | Description                   |
-| ------ | ------- | ----------------------------- |
-| to     | address | Recipient address.            |
-| amount | uint256 | Number of tokens to transfer. |
+| Name   | Type    | Description |
+| ------ | ------- | ----------- |
+| to     | address | undefined   |
+| amount | uint256 | undefined   |
 
 #### Returns
 
@@ -93,11 +93,11 @@ Moves `amount` tokens from `from` to `to` using the caller&#39;s allowance.
 
 #### Parameters
 
-| Name   | Type    | Description                   |
-| ------ | ------- | ----------------------------- |
-| from   | address | Source address.               |
-| to     | address | Destination address.          |
-| amount | uint256 | Number of tokens to transfer. |
+| Name   | Type    | Description |
+| ------ | ------- | ----------- |
+| from   | address | undefined   |
+| to     | address | undefined   |
+| amount | uint256 | undefined   |
 
 #### Returns
 
@@ -307,20 +307,6 @@ Reverts when a transfer is attempted while partitions are protected and the call
 | ------- | ------- | ------------------------------------------------ |
 | account | address | The caller lacking the required role.            |
 | role    | bytes32 | The role that would have been needed to proceed. |
-
-### UnrecognizedResolverProxyVersion
-
-```solidity
-error UnrecognizedResolverProxyVersion(bytes8 _resolverProxyVersion)
-```
-
-Thrown when the provided proxy version does not match any BLR compatible standard.
-
-#### Parameters
-
-| Name                   | Type   | Description                                        |
-| ---------------------- | ------ | -------------------------------------------------- |
-| \_resolverProxyVersion | bytes8 | proxy version that is not compatible with the BLR. |
 
 ### WalletRecovered
 

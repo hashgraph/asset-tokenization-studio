@@ -5,7 +5,7 @@ import { ROLE_LOCKER, ROLE_CONTROLLER } from "../../constants/roles.sol";
 import { ILock, RESOLVER_KEY_LOCK } from "./ILock.sol";
 import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
 import { LockStorageWrapper } from "../../domain/asset/LockStorageWrapper.sol";
-import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { DEFAULT_PARTITION } from "../../constants/values.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
@@ -55,7 +55,7 @@ abstract contract Lock is ILock, Modifiers {
         returns (uint256 lockId_)
     {
         lockId_ = LockStorageWrapper.lockByPartition(
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             _amount,
             _tokenHolder,
             _expirationTimestamp,
@@ -64,7 +64,7 @@ abstract contract Lock is ILock, Modifiers {
         emit LockedByPartition(
             EvmAccessors.getMsgSender(),
             _tokenHolder,
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             lockId_,
             _amount,
             _expirationTimestamp
@@ -88,17 +88,17 @@ abstract contract Lock is ILock, Modifiers {
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyUnrecoveredAddress(_tokenHolder)
-        onlyWithValidLockId(_DEFAULT_PARTITION, _tokenHolder, _lockId)
-        onlyWithLockedExpirationTimestamp(_DEFAULT_PARTITION, _tokenHolder, _lockId)
+        onlyWithValidLockId(DEFAULT_PARTITION, _tokenHolder, _lockId)
+        onlyWithLockedExpirationTimestamp(DEFAULT_PARTITION, _tokenHolder, _lockId)
         returns (bool success_)
     {
         success_ = LockStorageWrapper.releaseByPartition(
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             _lockId,
             _tokenHolder,
             EvmAccessors.getMsgSender()
         );
-        emit LockByPartitionReleased(EvmAccessors.getMsgSender(), _tokenHolder, _DEFAULT_PARTITION, _lockId);
+        emit LockByPartitionReleased(EvmAccessors.getMsgSender(), _tokenHolder, DEFAULT_PARTITION, _lockId);
     }
 
     /**
@@ -158,12 +158,12 @@ abstract contract Lock is ILock, Modifiers {
         onlyUnpaused
         onlyRole(ROLE_LOCKER)
         onlyWithoutMultiPartition
-        onlyWithValidLockId(_DEFAULT_PARTITION, _tokenHolder, _lockId)
+        onlyWithValidLockId(DEFAULT_PARTITION, _tokenHolder, _lockId)
         onlyValidExpirationTimestamp(_newExpirationTimestamp)
         returns (bool success_)
     {
         uint256 oldExpirationTimestamp = LockStorageWrapper.updateLockExpiration(
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             _tokenHolder,
             _lockId,
             _newExpirationTimestamp
@@ -171,7 +171,7 @@ abstract contract Lock is ILock, Modifiers {
         emit LockExpirationUpdated(
             EvmAccessors.getMsgSender(),
             _tokenHolder,
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             _lockId,
             oldExpirationTimestamp,
             _newExpirationTimestamp
@@ -201,7 +201,7 @@ abstract contract Lock is ILock, Modifiers {
      */
     function getLockedAmountFor(address _tokenHolder) external view override returns (uint256 amount_) {
         amount_ = LockStorageWrapper.getLockedAmountForByPartitionAdjustedAt(
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             _tokenHolder,
             EvmAccessors.getBlockTimestamp()
         );
@@ -231,7 +231,7 @@ abstract contract Lock is ILock, Modifiers {
         uint256 _lockId
     ) external view override returns (uint256 amount_, uint256 expirationTimestamp_) {
         (amount_, expirationTimestamp_) = LockStorageWrapper.getLockForByPartitionAdjustedAt(
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             _tokenHolder,
             _lockId,
             EvmAccessors.getBlockTimestamp()

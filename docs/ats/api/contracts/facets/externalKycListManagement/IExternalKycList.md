@@ -13,16 +13,16 @@ _Implemented by third-party KYC registries whose address is registered on the to
 ### getKycStatus
 
 ```solidity
-function getKycStatus(address account) external view returns (enum IKyc.KycStatus)
+function getKycStatus(address _account) external view returns (enum IKyc.KycStatus)
 ```
 
 Returns the KYC status of `account` as recorded in the external KYC list.
 
 #### Parameters
 
-| Name    | Type    | Description       |
-| ------- | ------- | ----------------- |
-| account | address | Address to check. |
+| Name      | Type    | Description       |
+| --------- | ------- | ----------------- |
+| \_account | address | Address to check. |
 
 #### Returns
 

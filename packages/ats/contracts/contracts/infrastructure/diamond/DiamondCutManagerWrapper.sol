@@ -84,7 +84,7 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
      * @param _configurationId Identifier of the configuration being validated.
      * @param _version Configuration version that must be non-zero.
      */
-    modifier validateConfigurationVersion(bytes32 _configurationId, uint256 _version) {
+    modifier onlyValidConfigurationVersion(bytes32 _configurationId, uint256 _version) {
         _checkExplicitVersion(_configurationId, _version);
         _;
     }
@@ -897,13 +897,13 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
     /**
      * @notice Returns the diamond-cut manager storage reference.
      * @dev Resolves the ERC-7201 storage namespace through inline assembly.
-     * @return ds Storage pointer for the diamond-cut manager state.
+     * @return ds_ Storage pointer for the diamond-cut manager state.
      */
-    function _diamondCutManagerStorage() private pure returns (DiamondCutManagerStorage storage ds) {
+    function _diamondCutManagerStorage() private pure returns (DiamondCutManagerStorage storage ds_) {
         bytes32 position = STORAGE_LOCATION_DIAMOND_CUT_MANAGER;
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            ds.slot := position
+            ds_.slot := position
         }
     }
 

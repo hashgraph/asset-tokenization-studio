@@ -36,9 +36,9 @@ _Intended to be called by the factory immediately after proxy creation. No role 
 
 #### Parameters
 
-| Name     | Type                        | Description                                                 |
-| -------- | --------------------------- | ----------------------------------------------------------- |
-| rateType | enum IInterestRate.RateType | The `RateType` to persist (STANDARD, FIXED, or KPI_LINKED). |
+| Name     | Type                        | Description |
+| -------- | --------------------------- | ----------- |
+| rateType | enum IInterestRate.RateType | undefined   |
 
 ### setCouponRateType
 
@@ -52,9 +52,9 @@ _Protected by `onlyRole(ROLE_INTEREST_RATE_MANAGER)`._
 
 #### Parameters
 
-| Name     | Type                        | Description                                                 |
-| -------- | --------------------------- | ----------------------------------------------------------- |
-| rateType | enum IInterestRate.RateType | The `RateType` to persist (STANDARD, FIXED, or KPI_LINKED). |
+| Name     | Type                        | Description |
+| -------- | --------------------------- | ----------- |
+| rateType | enum IInterestRate.RateType | undefined   |
 
 ## Events
 
@@ -143,20 +143,6 @@ Raised when an initialiser tries to register a facet that already has a non-zero
 | ----------- | ------- | -------------------------------------------------------------- |
 | facetId     | bytes32 | Identifier of the offending facet.                             |
 | lastVersion | uint256 | Last version recorded for that facet at the time of the check. |
-
-### UnrecognizedResolverProxyVersion
-
-```solidity
-error UnrecognizedResolverProxyVersion(bytes8 _resolverProxyVersion)
-```
-
-Thrown when the provided proxy version does not match any BLR compatible standard.
-
-#### Parameters
-
-| Name                   | Type   | Description                                        |
-| ---------------------- | ------ | -------------------------------------------------- |
-| \_resolverProxyVersion | bytes8 | proxy version that is not compatible with the BLR. |
 
 ### WalletRecovered
 

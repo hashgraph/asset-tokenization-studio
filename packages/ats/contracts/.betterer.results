@@ -5,12 +5,12 @@
 //
 exports[`ats contracts solhint`] = {
   value: `{
-    "contracts/domain/asset/AmortizationStorageWrapper.sol:2696188797": [
+    "contracts/domain/asset/AmortizationStorageWrapper.sol:3599700578": [
       [117, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
-      [399, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
-      [424, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"]
+      [395, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
+      [420, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"]
     ],
-    "contracts/domain/asset/ClearingStorageWrapper.sol:657877060": [
+    "contracts/domain/asset/ClearingStorageWrapper.sol:240867812": [
       [720, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177632"]
     ],
     "contracts/domain/asset/DividendStorageWrapper.sol:1104421331": [
@@ -22,17 +22,17 @@ exports[`ats contracts solhint`] = {
       [298, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177617"],
       [309, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177617"]
     ],
-    "contracts/domain/asset/HoldStorageWrapper.sol:533726159": [
-      [800, 15, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177632"]
+    "contracts/domain/asset/HoldStorageWrapper.sol:2799269957": [
+      [801, 15, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177632"]
     ],
-    "contracts/domain/asset/KpisStorageWrapper.sol:1344912392": [
+    "contracts/domain/asset/KpisStorageWrapper.sol:3109432168": [
       [104, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177601"]
     ],
-    "contracts/domain/asset/LockStorageWrapper.sol:2572777485": [
+    "contracts/domain/asset/LockStorageWrapper.sol:1273129357": [
       [327, 15, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177602"]
     ],
-    "contracts/domain/asset/ScheduledTasksStorageWrapper.sol:3874914318": [
-      [193, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"]
+    "contracts/domain/asset/ScheduledTasksStorageWrapper.sol:3979218817": [
+      [194, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"]
     ],
     "contracts/domain/asset/SnapshotsStorageWrapper.sol:732035984": [
       [1038, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"]
@@ -48,219 +48,31 @@ exports[`ats contracts solhint`] = {
       [382, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
       [402, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177621"]
     ],
-    "contracts/domain/orchestrator/ClearingOps.sol:1078388775": [
-      [57, 4, 1, "function-max-lines: Function body contains 57 lines but allowed no more than 50 lines", "177603"],
-      [57, 4, 1, "gas-calldata-parameters: GC: [_clearingOperation] argument on Function [clearingTransferCreation] could be [calldata] if it\'s not being updated", "177603"],
-      [57, 4, 1, "gas-calldata-parameters: GC: [_operatorData] argument on Function [clearingTransferCreation] could be [calldata] if it\'s not being updated", "177603"],
-      [137, 4, 1, "function-max-lines: Function body contains 66 lines but allowed no more than 50 lines", "177603"],
-      [137, 4, 1, "gas-calldata-parameters: GC: [_clearingOperation] argument on Function [clearingRedeemCreation] could be [calldata] if it\'s not being updated", "177603"],
-      [137, 4, 1, "gas-calldata-parameters: GC: [_operatorData] argument on Function [clearingRedeemCreation] could be [calldata] if it\'s not being updated", "177603"],
-      [221, 4, 1, "function-max-lines: Function body contains 58 lines but allowed no more than 50 lines", "177603"],
-      [221, 4, 1, "gas-calldata-parameters: GC: [_operatorData] argument on Function [clearingHoldCreationCreation] could be [calldata] if it\'s not being updated", "177603"],
-      [407, 4, 1, "function-max-lines: Function body contains 52 lines but allowed no more than 50 lines", "177603"]
-    ],
-    "contracts/domain/orchestrator/HoldOps.sol:2308870617": [
-      [29, 4, 1, "gas-calldata-parameters: GC: [_hold] argument on Function [createHoldByPartition] could be [calldata] if it\'s not being updated", "177603"],
-      [29, 4, 1, "gas-calldata-parameters: GC: [_operatorData] argument on Function [createHoldByPartition] could be [calldata] if it\'s not being updated", "177603"],
-      [50, 4, 1, "gas-calldata-parameters: GC: [_protectedHold] argument on Function [protectedCreateHoldByPartition] could be [calldata] if it\'s not being updated", "177603"]
-    ],
-    "contracts/domain/orchestrator/TokenCoreOps.sol:895313088": [
-      [33, 4, 1, "gas-calldata-parameters: GC: [_basicTransferInfo] argument on Function [transferByPartition] could be [calldata] if it\'s not being updated", "177603"],
-      [33, 4, 1, "gas-calldata-parameters: GC: [_data] argument on Function [transferByPartition] could be [calldata] if it\'s not being updated", "177603"],
-      [33, 4, 1, "gas-calldata-parameters: GC: [_operatorData] argument on Function [transferByPartition] could be [calldata] if it\'s not being updated", "177603"],
-      [80, 4, 1, "gas-calldata-parameters: GC: [_issueData] argument on Function [issueByPartition] could be [calldata] if it\'s not being updated", "177603"],
-      [91, 4, 1, "gas-calldata-parameters: GC: [_data] argument on Function [redeemByPartition] could be [calldata] if it\'s not being updated", "177603"],
-      [91, 4, 1, "gas-calldata-parameters: GC: [_operatorData] argument on Function [redeemByPartition] could be [calldata] if it\'s not being updated", "177603"]
-    ],
-    "contracts/facets/adjustBalances/IAdjustBalances.sol:226845225": [
-      [21, 4, 1, "gas-indexed-events: GC: [factor] on Event [AdjustmentBalanceSet] could be Indexed", "177600"],
-      [21, 4, 1, "gas-indexed-events: GC: [decimals] on Event [AdjustmentBalanceSet] could be Indexed", "177600"]
-    ],
-    "contracts/facets/allowance/IAllowanceTypes.sol:2947429804": [
-      [19, 4, 1, "gas-indexed-events: GC: [value] on Event [Approval] could be Indexed", "177600"]
+    "contracts/domain/orchestrator/ClearingOps.sol:3707322407": [
+      [61, 4, 1, "function-max-lines: Function body contains 57 lines but allowed no more than 50 lines", "177603"],
+      [61, 4, 1, "gas-calldata-parameters: GC: [_clearingOperation] argument on Function [clearingTransferCreation] could be [calldata] if it\'s not being updated", "177603"],
+      [61, 4, 1, "gas-calldata-parameters: GC: [_operatorData] argument on Function [clearingTransferCreation] could be [calldata] if it\'s not being updated", "177603"],
+      [141, 4, 1, "function-max-lines: Function body contains 66 lines but allowed no more than 50 lines", "177603"],
+      [229, 4, 1, "function-max-lines: Function body contains 58 lines but allowed no more than 50 lines", "177603"],
+      [229, 4, 1, "gas-calldata-parameters: GC: [_operatorData] argument on Function [clearingHoldCreationCreation] could be [calldata] if it\'s not being updated", "177603"],
+      [415, 4, 1, "function-max-lines: Function body contains 52 lines but allowed no more than 50 lines", "177603"]
     ],
     "contracts/facets/amortization/IAmortization.sol:75918106": [
-      [32, 4, 1, "gas-struct-packing: GC: For [ AmortizationFor ] struct, packing seems inefficient. Try rearranging to achieve 32bytes slots", "177622"],
-      [59, 4, 1, "gas-indexed-events: GC: [amortizationId] on Event [AmortizationSet] could be Indexed", "177600"],
-      [59, 4, 1, "gas-indexed-events: GC: [recordDate] on Event [AmortizationSet] could be Indexed", "177600"],
-      [59, 4, 1, "gas-indexed-events: GC: [executionDate] on Event [AmortizationSet] could be Indexed", "177600"],
-      [72, 4, 1, "gas-indexed-events: GC: [amortizationId] on Event [AmortizationCancelled] could be Indexed", "177600"],
-      [79, 4, 1, "gas-indexed-events: GC: [amortizationId] on Event [AmortizationForceCancelled] could be Indexed", "177600"]
-    ],
-    "contracts/facets/burn/IBurn.sol:3689975541": [
-      [27, 4, 1, "gas-indexed-events: GC: [value] on Event [Redeemed] could be Indexed", "177600"]
-    ],
-    "contracts/facets/cap/ICap.sol:277456862": [
-      [44, 4, 1, "gas-indexed-events: GC: [newMaxSupply] on Event [MaxSupplySet] could be Indexed", "177600"],
-      [44, 4, 1, "gas-indexed-events: GC: [previousMaxSupply] on Event [MaxSupplySet] could be Indexed", "177600"],
-      [53, 4, 1, "gas-indexed-events: GC: [newMaxSupply] on Event [MaxSupplyByPartitionSet] could be Indexed", "177600"],
-      [53, 4, 1, "gas-indexed-events: GC: [previousMaxSupply] on Event [MaxSupplyByPartitionSet] could be Indexed", "177600"]
-    ],
-    "contracts/facets/clearing/IClearing.sol:405778800": [
-      [24, 4, 1, "gas-indexed-events: GC: [clearingActive] on Event [ClearingInitialized] could be Indexed", "177600"]
-    ],
-    "contracts/facets/clearing/IClearingTypes.sol:3182196712": [
-      [215, 4, 1, "gas-indexed-events: GC: [clearingId] on Event [ClearedRedeemByPartition] could be Indexed", "177600"],
-      [215, 4, 1, "gas-indexed-events: GC: [amount] on Event [ClearedRedeemByPartition] could be Indexed", "177600"],
-      [215, 4, 1, "gas-indexed-events: GC: [expirationDate] on Event [ClearedRedeemByPartition] could be Indexed", "177600"],
-      [239, 4, 1, "gas-indexed-events: GC: [clearingId] on Event [ClearedRedeemFromByPartition] could be Indexed", "177600"],
-      [239, 4, 1, "gas-indexed-events: GC: [amount] on Event [ClearedRedeemFromByPartition] could be Indexed", "177600"],
-      [239, 4, 1, "gas-indexed-events: GC: [expirationDate] on Event [ClearedRedeemFromByPartition] could be Indexed", "177600"],
-      [262, 4, 1, "gas-indexed-events: GC: [clearingId] on Event [ClearedOperatorRedeemByPartition] could be Indexed", "177600"],
-      [262, 4, 1, "gas-indexed-events: GC: [amount] on Event [ClearedOperatorRedeemByPartition] could be Indexed", "177600"],
-      [262, 4, 1, "gas-indexed-events: GC: [expirationDate] on Event [ClearedOperatorRedeemByPartition] could be Indexed", "177600"]
-    ],
-    "contracts/facets/commonTypes/IERC3643Types.sol:1353093213": [
-      [52, 4, 1, "gas-indexed-events: GC: [lostWallet] on Event [RecoverySuccess] could be Indexed", "177600"],
-      [52, 4, 1, "gas-indexed-events: GC: [newWallet] on Event [RecoverySuccess] could be Indexed", "177600"],
-      [52, 4, 1, "gas-indexed-events: GC: [investorOnchainID] on Event [RecoverySuccess] could be Indexed", "177600"]
-    ],
-    "contracts/facets/compliance/IComplianceFacet.sol:3337960929": [
-      [18, 4, 1, "gas-indexed-events: GC: [compliance] on Event [ComplianceInitialized] could be Indexed", "177600"]
-    ],
-    "contracts/facets/controlList/IControlList.sol:589439686": [
-      [25, 4, 1, "gas-indexed-events: GC: [isWhiteList] on Event [ControlListInitialized] could be Indexed", "177600"]
-    ],
-    "contracts/facets/controller/IController.sol:3504905174": [
-      [22, 4, 1, "gas-indexed-events: GC: [controllable] on Event [ControllerInitialized] could be Indexed", "177600"],
-      [28, 4, 1, "gas-indexed-events: GC: [operator] on Event [FinalizedControllerFeature] could be Indexed", "177600"]
-    ],
-    "contracts/facets/controller/IControllerTypes.sol:262187541": [
-      [24, 4, 1, "gas-indexed-events: GC: [controller] on Event [ControllerTransfer] could be Indexed", "177600"],
-      [24, 4, 1, "gas-indexed-events: GC: [value] on Event [ControllerTransfer] could be Indexed", "177600"],
-      [41, 4, 1, "gas-indexed-events: GC: [controller] on Event [ControllerRedemption] could be Indexed", "177600"],
-      [41, 4, 1, "gas-indexed-events: GC: [value] on Event [ControllerRedemption] could be Indexed", "177600"]
+      [32, 4, 1, "gas-struct-packing: GC: For [ AmortizationFor ] struct, packing seems inefficient. Try rearranging to achieve 32bytes slots", "177622"]
     ],
     "contracts/facets/coupon/ICouponTypes.sol:430258162": [
       [74, 4, 1, "gas-struct-packing: GC: For [ CouponFor ] struct, packing seems inefficient. Try rearranging to achieve 32bytes slots", "177622"]
     ],
-    "contracts/facets/dividend/IDividend.sol:3712337435": [
-      [55, 4, 1, "gas-indexed-events: GC: [dividendId] on Event [DividendCancelled] could be Indexed", "177600"],
-      [62, 4, 1, "gas-indexed-events: GC: [dividendId] on Event [DividendForceCancelled] could be Indexed", "177600"]
-    ],
     "contracts/facets/dividend/IDividendTypes.sol:2960222249": [
       [58, 4, 1, "gas-struct-packing: GC: For [ DividendFor ] struct, packing seems inefficient. Try rearranging to achieve 32bytes slots", "177622"]
-    ],
-    "contracts/facets/erc20Votes/IERC20Votes.sol:3630286460": [
-      [19, 4, 1, "gas-indexed-events: GC: [activated] on Event [ERC20VotesInitialized] could be Indexed", "177600"],
-      [31, 4, 1, "gas-indexed-events: GC: [previousBalance] on Event [DelegateVotesChanged] could be Indexed", "177600"],
-      [31, 4, 1, "gas-indexed-events: GC: [newBalance] on Event [DelegateVotesChanged] could be Indexed", "177600"]
-    ],
-    "contracts/facets/externalControlListManagement/IExternalControlListManagement.sol:711531881": [
-      [41, 4, 1, "gas-indexed-events: GC: [controlList] on Event [AddedToExternalControlLists] could be Indexed", "177600"],
-      [48, 4, 1, "gas-indexed-events: GC: [controlList] on Event [RemovedFromExternalControlLists] could be Indexed", "177600"]
-    ],
-    "contracts/facets/externalKycListManagement/IExternalKycListManagement.sol:2007994945": [
-      [42, 4, 1, "gas-indexed-events: GC: [kycList] on Event [AddedToExternalKycLists] could be Indexed", "177600"],
-      [49, 4, 1, "gas-indexed-events: GC: [kycList] on Event [RemovedFromExternalKycLists] could be Indexed", "177600"]
-    ],
-    "contracts/facets/externalPauseManagement/IExternalPauseManagement.sol:4183814973": [
-      [40, 4, 1, "gas-indexed-events: GC: [pause] on Event [AddedToExternalPauses] could be Indexed", "177600"],
-      [47, 4, 1, "gas-indexed-events: GC: [pause] on Event [RemovedFromExternalPauses] could be Indexed", "177600"]
-    ],
-    "contracts/facets/fixedRate/IFixedRate.sol:1312599660": [
-      [39, 4, 1, "gas-indexed-events: GC: [newRate] on Event [RateUpdated] could be Indexed", "177600"],
-      [39, 4, 1, "gas-indexed-events: GC: [newRateDecimals] on Event [RateUpdated] could be Indexed", "177600"]
-    ],
-    "contracts/facets/freeze/IFreezeTypes.sol:1488340237": [
-      [20, 4, 1, "gas-indexed-events: GC: [amount] on Event [TokensFrozen] could be Indexed", "177600"],
-      [29, 4, 1, "gas-indexed-events: GC: [amount] on Event [TokensUnfrozen] could be Indexed", "177600"]
-    ],
-    "contracts/facets/hold/IHoldTypes.sol:2038004094": [
-      [131, 4, 1, "gas-indexed-events: GC: [holdId] on Event [HoldByPartitionExecuted] could be Indexed", "177600"],
-      [131, 4, 1, "gas-indexed-events: GC: [amount] on Event [HoldByPartitionExecuted] could be Indexed", "177600"],
-      [131, 4, 1, "gas-indexed-events: GC: [to] on Event [HoldByPartitionExecuted] could be Indexed", "177600"],
-      [146, 4, 1, "gas-indexed-events: GC: [holdId] on Event [HoldByPartitionReleased] could be Indexed", "177600"],
-      [146, 4, 1, "gas-indexed-events: GC: [amount] on Event [HoldByPartitionReleased] could be Indexed", "177600"]
-    ],
-    "contracts/facets/identity/IIdentity.sol:3212629228": [
-      [24, 4, 1, "gas-indexed-events: GC: [identityRegistry] on Event [IdentityInitialized] could be Indexed", "177600"]
-    ],
-    "contracts/facets/initializer/IInitializer.sol:3290905615": [
-      [19, 4, 1, "gas-indexed-events: GC: [maxInitializerFacetIndex] on Event [InitializerInitialized] could be Indexed", "177600"],
-      [29, 4, 1, "gas-indexed-events: GC: [sender] on Event [OperationalStatusPartialSet] could be Indexed", "177600"],
-      [29, 4, 1, "gas-indexed-events: GC: [version] on Event [OperationalStatusPartialSet] could be Indexed", "177600"],
-      [29, 4, 1, "gas-indexed-events: GC: [lastIndex] on Event [OperationalStatusPartialSet] could be Indexed", "177600"],
-      [38, 4, 1, "gas-indexed-events: GC: [sender] on Event [OperationalStatusSet] could be Indexed", "177600"],
-      [38, 4, 1, "gas-indexed-events: GC: [version] on Event [OperationalStatusSet] could be Indexed", "177600"],
-      [46, 4, 1, "gas-indexed-events: GC: [sender] on Event [MaxInitializerFacetIndexUpdated] could be Indexed", "177600"],
-      [46, 4, 1, "gas-indexed-events: GC: [newMaxInitializerFacetIndex] on Event [MaxInitializerFacetIndexUpdated] could be Indexed", "177600"]
-    ],
-    "contracts/facets/kpis/IKpis.sol:4077278714": [
-      [28, 4, 1, "gas-indexed-events: GC: [date] on Event [KpiDataAdded] could be Indexed", "177600"],
-      [28, 4, 1, "gas-indexed-events: GC: [value] on Event [KpiDataAdded] could be Indexed", "177600"]
-    ],
-    "contracts/facets/kyc/IKyc.sol:2653056954": [
-      [31, 4, 1, "gas-indexed-events: GC: [internalKycActivated] on Event [KycInitialized] could be Indexed", "177600"],
-      [45, 4, 1, "gas-indexed-events: GC: [activated] on Event [InternalKycStatusUpdated] could be Indexed", "177600"]
-    ],
-    "contracts/facets/loansPortfolio/ILoansPortfolio.sol:2743224819": [
-      [80, 4, 1, "gas-indexed-events: GC: [loanHoldingsAsset] on Event [LoanHoldingsAssetUpdated] could be Indexed", "177600"],
-      [88, 4, 1, "gas-indexed-events: GC: [assetAddress] on Event [LoansPortfolioWithdrawn] could be Indexed", "177600"],
-      [88, 4, 1, "gas-indexed-events: GC: [to] on Event [LoansPortfolioWithdrawn] could be Indexed", "177600"],
-      [88, 4, 1, "gas-indexed-events: GC: [amount] on Event [LoansPortfolioWithdrawn] could be Indexed", "177600"]
-    ],
-    "contracts/facets/mint/IMintTypes.sol:789955124": [
-      [20, 4, 1, "gas-indexed-events: GC: [value] on Event [Issued] could be Indexed", "177600"]
-    ],
-    "contracts/facets/nominalValue/INominalValue.sol:2003584758": [
-      [27, 4, 1, "gas-indexed-events: GC: [nominalValue] on Event [NominalValueInitialized] could be Indexed", "177600"],
-      [27, 4, 1, "gas-indexed-events: GC: [nominalValueDecimals] on Event [NominalValueInitialized] could be Indexed", "177600"],
-      [36, 4, 1, "gas-indexed-events: GC: [nominalValue] on Event [NominalValueSet] could be Indexed", "177600"],
-      [36, 4, 1, "gas-indexed-events: GC: [nominalValueDecimals] on Event [NominalValueSet] could be Indexed", "177600"]
-    ],
-    "contracts/facets/partitions/IPartitions.sol:2641262830": [
-      [20, 4, 1, "gas-indexed-events: GC: [multiPartition] on Event [PartitionsInitialized] could be Indexed", "177600"]
-    ],
-    "contracts/facets/protectedClearingByPartition/IProtectedClearingByPartition.sol:2414024950": [
-      [40, 4, 1, "gas-indexed-events: GC: [clearingId] on Event [ProtectedClearedRedeemByPartition] could be Indexed", "177600"],
-      [40, 4, 1, "gas-indexed-events: GC: [amount] on Event [ProtectedClearedRedeemByPartition] could be Indexed", "177600"],
-      [40, 4, 1, "gas-indexed-events: GC: [expirationDate] on Event [ProtectedClearedRedeemByPartition] could be Indexed", "177600"]
-    ],
-    "contracts/facets/protectedPartitions/IProtectedPartitions.sol:3841096614": [
-      [30, 4, 1, "gas-indexed-events: GC: [arePartitionsProtected] on Event [ProtectedPartitionsInitialized] could be Indexed", "177600"]
-    ],
-    "contracts/facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol:2865309541": [
-      [45, 4, 1, "gas-indexed-events: GC: [balanceAdjustmentId] on Event [ScheduledBalanceAdjustmentSet] could be Indexed", "177600"],
-      [45, 4, 1, "gas-indexed-events: GC: [factor] on Event [ScheduledBalanceAdjustmentSet] could be Indexed", "177600"],
-      [45, 4, 1, "gas-indexed-events: GC: [decimals] on Event [ScheduledBalanceAdjustmentSet] could be Indexed", "177600"],
-      [59, 4, 1, "gas-indexed-events: GC: [balanceAdjustmentId] on Event [ScheduledBalanceAdjustmentCancelled] could be Indexed", "177600"],
-      [66, 4, 1, "gas-indexed-events: GC: [balanceAdjustmentId] on Event [ScheduledBalanceAdjustmentForceCancelled] could be Indexed", "177600"]
-    ],
-    "contracts/facets/scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol:1747555586": [
-      [22, 4, 1, "gas-indexed-events: GC: [scheduledTimestamp] on Event [TaskExecutionFailed] could be Indexed", "177600"]
-    ],
-    "contracts/facets/snapshots/ISnapshots.sol:4095973638": [
-      [67, 4, 1, "gas-indexed-events: GC: [snapshotId] on Event [SnapshotTriggered] could be Indexed", "177600"]
-    ],
-    "contracts/facets/transfer/ITransfer.sol:1049729304": [
-      [27, 4, 1, "gas-indexed-events: GC: [amount] on Event [TransferWithData] could be Indexed", "177600"],
-      [51, 4, 1, "gas-indexed-events: GC: [value] on Event [Transfer] could be Indexed", "177600"]
-    ],
-    "contracts/facets/transferAndLock/ITransferAndLockTypes.sol:1208796755": [
-      [23, 4, 1, "gas-indexed-events: GC: [to] on Event [PartitionTransferredAndLocked] could be Indexed", "177600"],
-      [23, 4, 1, "gas-indexed-events: GC: [value] on Event [PartitionTransferredAndLocked] could be Indexed", "177600"],
-      [23, 4, 1, "gas-indexed-events: GC: [expirationTimestamp] on Event [PartitionTransferredAndLocked] could be Indexed", "177600"],
-      [23, 4, 1, "gas-indexed-events: GC: [lockId] on Event [PartitionTransferredAndLocked] could be Indexed", "177600"]
-    ],
-    "contracts/facets/voting/IVoting.sol:2900349042": [
-      [24, 4, 1, "gas-indexed-events: GC: [voteId] on Event [VotingSet] could be Indexed", "177600"],
-      [35, 4, 1, "gas-indexed-events: GC: [voteId] on Event [VotingCancelled] could be Indexed", "177600"],
-      [40, 4, 1, "gas-indexed-events: GC: [voteId] on Event [VotingForceCancelled] could be Indexed", "177600"]
     ],
     "contracts/factory/IFactory.sol:647350752": [
       [105, 4, 1, "gas-struct-packing: GC: For [ EquityDetailsData ] struct, packing seems inefficient. Try rearranging to achieve 32bytes slots", "177622"]
     ],
-    "contracts/infrastructure/diamond/IOwnership.sol:729129024": [
-      [23, 4, 1, "gas-indexed-events: GC: [owner] on Event [OwnershipTransfered] could be Indexed", "177600"],
-      [23, 4, 1, "gas-indexed-events: GC: [pendingOwner] on Event [OwnershipTransfered] could be Indexed", "177600"],
-      [33, 4, 1, "gas-indexed-events: GC: [previousOwner] on Event [OwnershipAccepted] could be Indexed", "177600"],
-      [33, 4, 1, "gas-indexed-events: GC: [newOwner] on Event [OwnershipAccepted] could be Indexed", "177600"]
-    ],
     "contracts/infrastructure/proxy/ResolverProxy.sol:3628079828": [
       [52, 4, 1, "no-complex-fallback: Fallback function must be simple", "177603"]
     ],
-    "contracts/infrastructure/utils/DecimalsLib.sol:1643088826": [
+    "contracts/infrastructure/utils/DecimalsLib.sol:1687496794": [
       [6, 4, 1, "no-unused-import: imported name POW10_0 is not used", "177653"],
       [7, 4, 1, "no-unused-import: imported name POW10_1 is not used", "177653"],
       [8, 4, 1, "no-unused-import: imported name POW10_2 is not used", "177653"],
@@ -286,9 +98,9 @@ exports[`ats contracts solhint`] = {
     "contracts/infrastructure/utils/EIP712.sol:1875754770": [
       [205, 11, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"]
     ],
-    "contracts/infrastructure/utils/Pagination.sol:813892419": [
-      [79, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"],
-      [82, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"]
+    "contracts/infrastructure/utils/Pagination.sol:2797670531": [
+      [91, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"],
+      [94, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"]
     ]
   }`
 };

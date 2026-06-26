@@ -25,7 +25,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
      *      ambiguous reads or writes against configuration storage.
      * @param _configurationId Identifier of the diamond configuration to validate.
      */
-    modifier validateConfigurationId(bytes32 _configurationId) {
+    modifier onlyValidConfigurationId(bytes32 _configurationId) {
         _checkConfigurationId(_configurationId);
         _;
     }
@@ -51,7 +51,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
     )
         external
         override
-        validateConfigurationId(_configurationId)
+        onlyValidConfigurationId(_configurationId)
         onlyUnpaused
         onlyOwner(_configurationId)
         onlyRole(ROLE_CREATE_CONFIGURATION)
@@ -73,7 +73,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
     )
         external
         override
-        validateConfigurationId(_configurationId)
+        onlyValidConfigurationId(_configurationId)
         onlyUnpaused
         onlyOwner(_configurationId)
         onlyRole(ROLE_CREATE_CONFIGURATION)
@@ -93,7 +93,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
     )
         external
         override
-        validateConfigurationId(_configurationId)
+        onlyValidConfigurationId(_configurationId)
         onlyUnpaused
         onlyOwner(_configurationId)
         onlyRole(ROLE_CREATE_CONFIGURATION)
@@ -107,7 +107,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         bytes32 _configurationId,
         uint256 _version,
         bytes4 _selector
-    ) external view override validateConfigurationVersion(_configurationId, _version) returns (address facetAddress_) {
+    ) external view override onlyValidConfigurationVersion(_configurationId, _version) returns (address facetAddress_) {
         facetAddress_ = _resolveResolverProxyCallV2(_configurationId, _version, false, _selector);
     }
 
@@ -124,7 +124,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         bytes32 _configurationId,
         uint256 _version,
         bytes4 _interfaceId
-    ) external view override validateConfigurationVersion(_configurationId, _version) returns (bool exists_) {
+    ) external view override onlyValidConfigurationVersion(_configurationId, _version) returns (bool exists_) {
         exists_ = _resolveSupportsInterface(_configurationId, _version, _interfaceId);
     }
 
@@ -140,7 +140,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
     function checkResolverProxyConfigurationRegistered(
         bytes32 _configurationId,
         uint256 _version
-    ) external view override validateConfigurationVersion(_configurationId, _version) {
+    ) external view override onlyValidConfigurationVersion(_configurationId, _version) {
         _checkResolverProxyConfigurationRegistered(_configurationId, _version);
     }
 
@@ -168,7 +168,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
     function getFacetsLengthByConfigurationIdAndVersion(
         bytes32 _configurationId,
         uint256 _version
-    ) external view override validateConfigurationVersion(_configurationId, _version) returns (uint256 facetsLength_) {
+    ) external view override onlyValidConfigurationVersion(_configurationId, _version) returns (uint256 facetsLength_) {
         facetsLength_ = _getFacetsLengthByConfigurationIdAndVersion(_configurationId, _version);
     }
 
@@ -182,7 +182,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         external
         view
         override
-        validateConfigurationVersion(_configurationId, _version)
+        onlyValidConfigurationVersion(_configurationId, _version)
         returns (IDiamondLoupe.Facet[] memory facets_)
     {
         facets_ = _getFacetsByConfigurationIdAndVersion(_configurationId, _version, _pageIndex, _pageLength);
@@ -197,7 +197,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         external
         view
         override
-        validateConfigurationVersion(_configurationId, _version)
+        onlyValidConfigurationVersion(_configurationId, _version)
         returns (uint256 facetSelectorsLength_)
     {
         facetSelectorsLength_ = _getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(
@@ -218,7 +218,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         external
         view
         override
-        validateConfigurationVersion(_configurationId, _version)
+        onlyValidConfigurationVersion(_configurationId, _version)
         returns (bytes4[] memory facetSelectors_)
     {
         facetSelectors_ = _getFacetSelectorsByConfigurationIdVersionAndFacetId(
@@ -240,7 +240,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         external
         view
         override
-        validateConfigurationVersion(_configurationId, _version)
+        onlyValidConfigurationVersion(_configurationId, _version)
         returns (bytes32[] memory facetIds_)
     {
         facetIds_ = _getFacetIdsByConfigurationIdAndVersion(_configurationId, _version, _pageIndex, _pageLength);
@@ -256,7 +256,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         external
         view
         override
-        validateConfigurationVersion(_configurationId, _version)
+        onlyValidConfigurationVersion(_configurationId, _version)
         returns (FacetConfiguration[] memory facetConfigurations_)
     {
         facetConfigurations_ = _getFacetConfigurationsByConfigurationIdAndVersion(
@@ -277,7 +277,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         external
         view
         override
-        validateConfigurationVersion(_configurationId, _version)
+        onlyValidConfigurationVersion(_configurationId, _version)
         returns (address[] memory facetAddresses_)
     {
         facetAddresses_ = _getFacetAddressesByConfigurationIdAndVersion(
@@ -293,7 +293,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         bytes32 _configurationId,
         uint256 _version,
         bytes4 _selector
-    ) external view override validateConfigurationVersion(_configurationId, _version) returns (bytes32 facetId_) {
+    ) external view override onlyValidConfigurationVersion(_configurationId, _version) returns (bytes32 facetId_) {
         facetId_ = _getFacetIdByConfigurationIdVersionAndSelector(_configurationId, _version, _selector);
     }
 
@@ -306,7 +306,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         external
         view
         override
-        validateConfigurationVersion(_configurationId, _version)
+        onlyValidConfigurationVersion(_configurationId, _version)
         returns (IDiamondLoupe.Facet memory facet_)
     {
         facet_ = _getFacetByConfigurationIdVersionAndFacetId(_configurationId, _version, _facetId);
@@ -317,7 +317,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         bytes32 _configurationId,
         uint256 _version,
         bytes32 _facetId
-    ) external view override validateConfigurationVersion(_configurationId, _version) returns (address facetAddress_) {
+    ) external view override onlyValidConfigurationVersion(_configurationId, _version) returns (address facetAddress_) {
         facetAddress_ = _getFacetAddressByConfigurationIdVersionAndFacetId(_configurationId, _version, _facetId);
     }
 
@@ -326,7 +326,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         bytes32 _configurationId,
         uint256 _version,
         bytes32 _facetId
-    ) external view override validateConfigurationVersion(_configurationId, _version) returns (uint256 facetVersion_) {
+    ) external view onlyValidConfigurationVersion(_configurationId, _version) returns (uint256 facetVersion_) {
         facetVersion_ = _getFacetVersionByConfigurationIdVersionAndFacetId(_configurationId, _version, _facetId);
     }
 

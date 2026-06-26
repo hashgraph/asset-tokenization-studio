@@ -22,10 +22,10 @@ _Reads the allowance at the current time-travel-adjusted block timestamp so snap
 
 #### Parameters
 
-| Name    | Type    | Description                                          |
-| ------- | ------- | ---------------------------------------------------- |
-| owner   | address | Address that granted the allowance.                  |
-| spender | address | Address authorised to spend on `owner`&#39;s behalf. |
+| Name    | Type    | Description |
+| ------- | ------- | ----------- |
+| owner   | address | undefined   |
+| spender | address | undefined   |
 
 #### Returns
 
@@ -45,10 +45,10 @@ _Requires the token to be operational, activated, unpaused, and not configured f
 
 #### Parameters
 
-| Name    | Type    | Description                                             |
-| ------- | ------- | ------------------------------------------------------- |
-| spender | address | Address authorised to spend on the caller&#39;s behalf. |
-| value   | uint256 | Absolute allowance amount to grant.                     |
+| Name    | Type    | Description |
+| ------- | ------- | ----------- |
+| spender | address | undefined   |
+| value   | uint256 | undefined   |
 
 #### Returns
 
@@ -68,10 +68,10 @@ _Requires the token to be operational, activated, unpaused, and not configured f
 
 #### Parameters
 
-| Name            | Type    | Description                                    |
-| --------------- | ------- | ---------------------------------------------- |
-| spender         | address | Address whose allowance is being decreased.    |
-| subtractedValue | uint256 | Amount subtracted from the existing allowance. |
+| Name            | Type    | Description |
+| --------------- | ------- | ----------- |
+| spender         | address | undefined   |
+| subtractedValue | uint256 | undefined   |
 
 #### Returns
 
@@ -91,10 +91,10 @@ _Requires the token to be operational, activated, unpaused, and not configured f
 
 #### Parameters
 
-| Name       | Type    | Description                                 |
-| ---------- | ------- | ------------------------------------------- |
-| spender    | address | Address whose allowance is being increased. |
-| addedValue | uint256 | Amount added to the existing allowance.     |
+| Name       | Type    | Description |
+| ---------- | ------- | ----------- |
+| spender    | address | undefined   |
+| addedValue | uint256 | undefined   |
 
 #### Returns
 
@@ -237,20 +237,6 @@ error SpenderWithZeroAddress()
 ```
 
 Reverts when the zero address is supplied as `spender` in an allowance update.
-
-### UnrecognizedResolverProxyVersion
-
-```solidity
-error UnrecognizedResolverProxyVersion(bytes8 _resolverProxyVersion)
-```
-
-Thrown when the provided proxy version does not match any BLR compatible standard.
-
-#### Parameters
-
-| Name                   | Type   | Description                                        |
-| ---------------------- | ------ | -------------------------------------------------- |
-| \_resolverProxyVersion | bytes8 | proxy version that is not compatible with the BLR. |
 
 ### WalletRecovered
 

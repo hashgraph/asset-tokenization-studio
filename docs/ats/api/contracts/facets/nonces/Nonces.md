@@ -23,16 +23,16 @@ _Callable once; subsequent calls revert with `FacetAlreadyRegistered`. Requires 
 ### nonces
 
 ```solidity
-function nonces(address owner) external view returns (uint256)
+function nonces(address _owner) external view returns (uint256)
 ```
 
 Returns the current nonce for `owner`.
 
 #### Parameters
 
-| Name  | Type    | Description                     |
-| ----- | ------- | ------------------------------- |
-| owner | address | Address whose nonce is queried. |
+| Name    | Type    | Description                     |
+| ------- | ------- | ------------------------------- |
+| \_owner | address | Address whose nonce is queried. |
 
 #### Returns
 
@@ -83,20 +83,6 @@ Raised when an initialiser tries to register a facet that already has a non-zero
 | ----------- | ------- | -------------------------------------------------------------- |
 | facetId     | bytes32 | Identifier of the offending facet.                             |
 | lastVersion | uint256 | Last version recorded for that facet at the time of the check. |
-
-### UnrecognizedResolverProxyVersion
-
-```solidity
-error UnrecognizedResolverProxyVersion(bytes8 _resolverProxyVersion)
-```
-
-Thrown when the provided proxy version does not match any BLR compatible standard.
-
-#### Parameters
-
-| Name                   | Type   | Description                                        |
-| ---------------------- | ------ | -------------------------------------------------- |
-| \_resolverProxyVersion | bytes8 | proxy version that is not compatible with the BLR. |
 
 ### WalletRecovered
 

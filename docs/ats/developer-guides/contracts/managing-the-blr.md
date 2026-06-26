@@ -1,12 +1,12 @@
 ---
-id: business-logic-registry
-title: Tutorial - Managing the Business Logic Registry
-sidebar_label: Business Logic Registry
+id: managing-the-blr
+title: Managing the Business Logic Resolver
+sidebar_label: Managing the BLR
 ---
 
-# Tutorial: Managing the Business Logic Registry
+# Managing the Business Logic Resolver
 
-This guide covers how to register new facets (Business Logics) and create or update configurations in the **Business Logic Registry (BLR)** — the central component that powers the Diamond Pattern in ATS.
+This guide covers how to register new facets (Business Logics) and create or update configurations in the **Business Logic Resolver (BLR)** — the central component that powers the Diamond Pattern in ATS. For the concepts behind it, see [Core concepts](./core-concepts.md) and [Architecture](./architecture.md#the-business-logic-resolver-blr).
 
 ## Table of Contents
 
@@ -30,7 +30,7 @@ This guide covers how to register new facets (Business Logics) and create or upd
 
 The **Business Logic Registry (BLR)** is the on-chain registry that glues together the Diamond Pattern in ATS. It holds two responsibilities:
 
-1. **Business Logic registry** — Keeps a versioned mapping of resolver keys to facet implementation addresses. Each facet has its own independent version history.
+1. **Business Logic registry** — Keeps a versioned mapping of resolver keys to facet implementation addresses. All facets share a single global version counter: registering or updating **any** facet increments the shared latest version by 1, so a given version is a consistent snapshot across every registered key.
 2. **Configuration management** — Maintains named sets of facets (_configurations_) that define the full interface of a token type (Equity, Bond, Loan, etc.). Each configuration has its own independent version history.
 
 Together, these two responsibilities allow the system to upgrade facets and configurations without redeploying existing tokens.
@@ -61,7 +61,7 @@ Together, these two responsibilities allow the system to upgrade facets and conf
 
 ### Business Logics (Facets)
 
-In the BLR, facets are referred to as _Business Logics_. Each one is identified by a `bytes32` key (the _businessLogicKey_), which is a `keccak256` hash that remains constant across versions and maintains its own independent version history. A new facet version is created every time `registerBusinessLogics` is called for an existing `businessLogicKey`.
+In the BLR, facets are referred to as _Business Logics_. Each one is identified by a `bytes32` key (the _businessLogicKey_, the [resolver key](./core-concepts.md#resolver-keys)), a `keccak256` hash that remains constant across versions. There is a single **shared** version counter for the whole registry: every `registerBusinessLogics` call increments it by 1, and the keys included in that call take the new version. Keys not included keep their previous version. This guarantees that everything registered up to a given version is mutually compatible.
 
 ### Configurations
 
@@ -87,9 +87,9 @@ function registerBusinessLogics(BusinessLogicRegistryData[] calldata _businessLo
 **Requirements:**
 
 - Caller must have `DEFAULT_ADMIN_ROLE` on the BLR.
-- `businessLogicKey` must match the `resolverKey()` returned by the facet contract itself — the BLR validates this on registration.
-- Registering increments the facet's `latestVersion` by 1.
-- Facet implementations must have already been deployed at the addresses indicated in `businessLogicAddress`
+- `businessLogicKey` must match the resolver key returned by the facet contract itself (`getStaticResolverKey()`) — the BLR validates this and reverts with `BusinessLogicKeyMismatch` otherwise.
+- Registering increments the BLR's **shared** latest version by 1; the facets in the call take that new version.
+- Facet implementations must already be deployed at the addresses given in `businessLogicAddress`.
 
 ### Upgrade a facet to a new version
 
@@ -109,12 +109,16 @@ struct FacetConfiguration {
   uint256 version; // The specific facet version to include
 }
 
-function createConfiguration(bytes32 _configurationId, FacetConfiguration[] calldata _facetConfigurations) external;
+function createConfiguration(
+  bytes32 _configurationId,
+  FacetConfiguration[] calldata _facetConfigurations,
+  bytes calldata _data
+) external;
 ```
 
 **Requirements:**
 
-- Caller must have `DEFAULT_ADMIN_ROLE`.
+- Caller must hold `ROLE_CREATE_CONFIGURATION` **and** be the **owner** of `_configurationId` (the first account to create a configuration becomes its owner via `onlyOwner` — only that owner can add versions).
 - `_configurationId` must not be `bytes32(0)`.
 - Every `id` in `_facetConfigurations` must reference a registered `businessLogicKey`.
 - No duplicate facet IDs within the same configuration.
@@ -131,7 +135,7 @@ const facetConfigurations = [
   // ... all facets for the Equity token type
 ];
 
-const tx = await blr.createConfiguration(EQUITY_CONFIG_ID, facetConfigurations);
+const tx = await blr.createConfiguration(EQUITY_CONFIG_ID, facetConfigurations, "0x");
 await tx.wait();
 
 const version = await blr.getLatestVersionByConfiguration(EQUITY_CONFIG_ID);
@@ -146,7 +150,8 @@ ATS configurations typically include 40+ facets, which may exceed a single trans
 function createBatchConfiguration(
   bytes32 _configurationId,
   FacetConfiguration[] calldata _facetConfigurations,
-  bool _isLastBatch
+  bool _isLastBatch,
+  bytes calldata _data
 ) external;
 ```
 
@@ -164,7 +169,7 @@ for (let i = 0; i < allFacets.length; i += FACETS_PER_BATCH) {
   const batch = allFacets.slice(i, i + FACETS_PER_BATCH);
   const isLastBatch = i + FACETS_PER_BATCH >= allFacets.length;
 
-  const tx = await blr.createBatchConfiguration(EQUITY_CONFIG_ID, batch, isLastBatch);
+  const tx = await blr.createBatchConfiguration(EQUITY_CONFIG_ID, batch, isLastBatch, "0x");
   await tx.wait();
 
   console.log(`Batch ${Math.floor(i / FACETS_PER_BATCH) + 1} submitted. Last: ${isLastBatch}`);
@@ -192,6 +197,11 @@ console.log("Batch configuration cancelled.");
 
 Upgrading a configuration follows the same process as creating one. When `createConfiguration` or `createBatchConfiguration` is called with a `_configurationId` that already has registered versions, the BLR creates a new version rather than overwriting the existing one.
 
+> **Only the configuration's owner can upgrade it.** `DiamondCutManager` gates these calls with
+> `onlyOwner(configurationId)` + `onlyRole(ROLE_CREATE_CONFIGURATION)`: the account that first created
+> the configuration owns it, and only that owner (holding `ROLE_CREATE_CONFIGURATION`) can add new
+> versions.
+
 ```typescript
 // Existing Equity config is at version 1.
 // Calling createConfiguration again creates version 2.
@@ -201,7 +211,7 @@ const updatedFacets = [
   // ...
 ];
 
-const tx = await blr.createConfiguration(EQUITY_CONFIG_ID, updatedFacets);
+const tx = await blr.createConfiguration(EQUITY_CONFIG_ID, updatedFacets, "0x");
 await tx.wait();
 
 const newVersion = await blr.getLatestVersionByConfiguration(EQUITY_CONFIG_ID);
@@ -285,7 +295,7 @@ console.log("Selector blacklisted:", selector);
 Emitted when `registerBusinessLogics` completes successfully.
 
 ```solidity
-event BusinessLogicsRegistered(BusinessLogicRegistryData[] businessLogics, uint256 newLatestVersion);
+event BusinessLogicsRegistered(BusinessLogicRegistryData[] businessLogics, uint256[] newLatestVersions);
 ```
 
 ### `DiamondConfigurationCreated`
@@ -293,7 +303,12 @@ event BusinessLogicsRegistered(BusinessLogicRegistryData[] businessLogics, uint2
 Emitted when a full configuration is created or a new version is committed via `createConfiguration`.
 
 ```solidity
-event DiamondConfigurationCreated(bytes32 configurationId, FacetConfiguration[] facetConfigurations, uint256 version);
+event DiamondConfigurationCreated(
+  bytes32 configurationId,
+  FacetConfiguration[] facetConfigurations,
+  uint256 version,
+  bytes data
+);
 ```
 
 ### `DiamondBatchConfigurationCreated`
@@ -305,7 +320,8 @@ event DiamondBatchConfigurationCreated(
   bytes32 configurationId,
   FacetConfiguration[] facetConfigurations,
   bool isLastBatch,
-  uint256 version
+  uint256 version,
+  bytes data
 );
 ```
 
@@ -314,7 +330,7 @@ event DiamondBatchConfigurationCreated(
 Emitted when an in-progress batch deployment is aborted.
 
 ```solidity
-event DiamondBatchConfigurationCanceled(bytes32 configurationId);
+event DiamondBatchConfigurationCanceled(bytes32 indexed configurationId, uint256 version);
 ```
 
 ## Errors Reference
@@ -330,14 +346,14 @@ event DiamondBatchConfigurationCanceled(bytes32 configurationId);
 
 ### Configuration errors
 
-| Error                                                                                            | Description                                                                                   |
-| ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
-| `DefaultValueForConfigurationIdNotPermitted()`                                                   | `bytes32(0)` is not a valid `configurationId`.                                                |
-| `FacetIdNotRegistered(bytes32 configId, bytes32 facetId)`                                        | A facet referenced in the configuration has not been registered in the BLR.                   |
-| `DuplicatedFacetInConfiguration(bytes32 facetId)`                                                | The same facet appears more than once in a single configuration.                              |
-| `ResolverProxyConfigurationNoRegistered(bytes32 configId, uint256 version)`                      | The requested configuration version does not exist.                                           |
-| `SelectorBlacklisted(bytes4 selector)`                                                           | A function selector in the facet is on the blacklist for this configuration.                  |
-| `SelectorAlreadyRegistered(bytes32 configId, uint256 version, bytes32 facetId, bytes4 selector)` | A function selector is already mapped to a different facet in the same configuration version. |
+| Error                                                                                                   | Description                                                                                   |
+| ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `DefaultValueForConfigurationIdNotPermitted()`                                                          | `bytes32(0)` is not a valid `configurationId`.                                                |
+| `FacetIdNotRegistered(bytes32 configurationId, bytes32 facetId)`                                        | A facet referenced in the configuration has not been registered in the BLR.                   |
+| `DuplicatedFacetInConfiguration(bytes32 facetId)`                                                       | The same facet appears more than once in a single configuration.                              |
+| `ResolverProxyConfigurationNoRegistered(bytes32 resolverProxyConfigurationId, uint256 version)`         | The requested configuration version does not exist.                                           |
+| `SelectorBlacklisted(bytes4 selector)`                                                                  | A function selector in the facet is on the blacklist for this configuration.                  |
+| `SelectorAlreadyRegistered(bytes32 configurationId, uint256 version, bytes32 facetId, bytes4 selector)` | A function selector is already mapped to a different facet in the same configuration version. |
 
 ## Script Examples
 
@@ -361,8 +377,8 @@ The following summarizes the complete sequence executed during a fresh deploymen
 1. Deploy ProxyAdmin
 2. Deploy BLR (proxy + implementation)
 3. Initialize BLR  →  grants DEFAULT_ADMIN_ROLE to deployer
-4. Deploy all facets  →  46 facet addresses
-5. registerBusinessLogics(all facets)  →  latestVersion = 1
+4. Deploy all facets
+5. registerBusinessLogics(all facets)  →  shared latestVersion = 1
 6. createBatchConfiguration(EQUITY_CONFIG_ID, ...)  →  Equity v1
 7. createBatchConfiguration(BOND_CONFIG_ID, ...)    →  Bond v1
 8. createBatchConfiguration(LOAN_CONFIG_ID, ...)    →  Loan v1
@@ -373,8 +389,10 @@ The following summarizes the complete sequence executed during a fresh deploymen
 
 ## Related Documentation
 
-- [Contract Overview](./overview.md)
-- [Deployment Tutorial](./deployment.md)
-- [Adding a New Facet](./adding-facets.md)
-- [Upgrading ATS Contracts](./upgrading.md)
+- [Core concepts](./core-concepts.md) — resolver keys, configurations, versioning.
+- [Deployment](./deployment.md) — where the BLR is first deployed and populated.
+- [Adding a facet](./adding-a-facet.md) — create a facet, then register it here.
+- [Creating an asset type](./creating-an-asset-type.md) — define a new configuration ID.
+- [Deploying a token](./deploying-an-asset-proxy.md) — deploy a token against a configuration.
+- [Upgrading configurations](./upgrading-configurations.md) — roll out new configuration versions.
 - [Diamond Pattern (EIP-2535)](https://eips.ethereum.org/EIPS/eip-2535)

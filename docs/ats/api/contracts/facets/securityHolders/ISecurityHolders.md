@@ -11,7 +11,7 @@ Interface for security holder operations in the ERC1410 standard
 ### getSecurityHolders
 
 ```solidity
-function getSecurityHolders(uint256 _pageIndex, uint256 _pageLength) external view returns (address[] holders)
+function getSecurityHolders(uint256 _pageIndex, uint256 _pageLength) external view returns (address[] holders_)
 ```
 
 Gets the security holders (paginated)
@@ -25,23 +25,23 @@ Gets the security holders (paginated)
 
 #### Returns
 
-| Name    | Type      | Description                        |
-| ------- | --------- | ---------------------------------- |
-| holders | address[] | Array of security holder addresses |
+| Name      | Type      | Description                        |
+| --------- | --------- | ---------------------------------- |
+| holders\_ | address[] | Array of security holder addresses |
 
 ### getTotalSecurityHolders
 
 ```solidity
-function getTotalSecurityHolders() external view returns (uint256 count)
+function getTotalSecurityHolders() external view returns (uint256 count_)
 ```
 
 Gets the total number of security holders
 
 #### Returns
 
-| Name  | Type    | Description                      |
-| ----- | ------- | -------------------------------- |
-| count | uint256 | Total number of security holders |
+| Name    | Type    | Description                      |
+| ------- | ------- | -------------------------------- |
+| count\_ | uint256 | Total number of security holders |
 
 ### initializeSecurityHolders
 

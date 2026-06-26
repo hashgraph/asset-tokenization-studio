@@ -58,7 +58,7 @@ library ProtectedPartitionsStorageWrapper {
      * @return success_ Always `true`; preserves the facet's API contract.
      */
     function initializeProtectedPartitions(bool _protectPartitions) internal returns (bool success_) {
-        protectedPartitionsStorage().arePartitionsProtected = _protectPartitions;
+        _protectedPartitionsStorage().arePartitionsProtected = _protectPartitions;
         success_ = true;
     }
 
@@ -69,7 +69,7 @@ library ProtectedPartitionsStorageWrapper {
      * @param _protected New value of the partition-protection flag.
      */
     function setProtectedPartitions(bool _protected) internal {
-        protectedPartitionsStorage().arePartitionsProtected = _protected;
+        _protectedPartitionsStorage().arePartitionsProtected = _protected;
     }
 
     /**
@@ -85,7 +85,7 @@ library ProtectedPartitionsStorageWrapper {
      * @return True when the protection flag is set.
      */
     function arePartitionsProtected() internal view returns (bool) {
-        return protectedPartitionsStorage().arePartitionsProtected;
+        return _protectedPartitionsStorage().arePartitionsProtected;
     }
 
     /**
@@ -432,8 +432,8 @@ library ProtectedPartitionsStorageWrapper {
      * @return protectedPartitions_ Storage reference to the
      * `ProtectedPartitionsDataStorage` struct.
      */
-    function protectedPartitionsStorage()
-        internal
+    function _protectedPartitionsStorage()
+        private
         pure
         returns (ProtectedPartitionsDataStorage storage protectedPartitions_)
     {

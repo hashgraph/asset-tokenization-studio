@@ -76,6 +76,12 @@ npm run lint:fix
 npm run format
 ```
 
+**Solidity contracts (ATS):** changes under `packages/ats/contracts` must follow the project's
+Solidity coding conventions in
+[`packages/ats/contracts/conventions`](packages/ats/contracts/conventions/README.md). The
+deterministic subset is enforced automatically by solhint (`solhint-plugin-ats`) at pre-commit;
+the rest is reviewed via the `/ats-style-guide` skill.
+
 ## Branch Naming
 
 Create descriptive branches:

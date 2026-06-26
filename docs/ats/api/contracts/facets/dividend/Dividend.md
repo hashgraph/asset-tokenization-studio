@@ -22,9 +22,9 @@ _Restricted to `ROLE_CORPORATE_ACTION`; gated by `onlyUnpaused` and `onlyMatchin
 
 #### Parameters
 
-| Name       | Type    | Description                                       |
-| ---------- | ------- | ------------------------------------------------- |
-| dividendId | uint256 | One-indexed identifier of the dividend to cancel. |
+| Name       | Type    | Description |
+| ---------- | ------- | ----------- |
+| dividendId | uint256 | undefined   |
 
 #### Returns
 
@@ -44,9 +44,9 @@ _Restricted to `ROLE_CORPORATE_ACTION_FORCE_CANCEL`; gated by `onlyUnpaused` and
 
 #### Parameters
 
-| Name       | Type    | Description                                             |
-| ---------- | ------- | ------------------------------------------------------- |
-| dividendId | uint256 | One-indexed identifier of the dividend to force-cancel. |
+| Name       | Type    | Description |
+| ---------- | ------- | ----------- |
+| dividendId | uint256 | undefined   |
 
 #### Returns
 
@@ -66,9 +66,9 @@ _Reverts via `onlyMatchingActionType` if `dividendId` does not match the dividen
 
 #### Parameters
 
-| Name       | Type    | Description                      |
-| ---------- | ------- | -------------------------------- |
-| dividendId | uint256 | One-indexed dividend identifier. |
+| Name       | Type    | Description |
+| ---------- | ------- | ----------- |
+| dividendId | uint256 | undefined   |
 
 #### Returns
 
@@ -89,10 +89,10 @@ _Reverts via `onlyMatchingActionType` if `dividendId` does not match the dividen
 
 #### Parameters
 
-| Name       | Type    | Description                      |
-| ---------- | ------- | -------------------------------- |
-| dividendId | uint256 | One-indexed dividend identifier. |
-| account    | address | Holder address to query.         |
+| Name       | Type    | Description |
+| ---------- | ------- | ----------- |
+| dividendId | uint256 | undefined   |
+| account    | address | undefined   |
 
 #### Returns
 
@@ -112,10 +112,10 @@ _Reverts via `onlyMatchingActionType` if `dividendId` does not match the dividen
 
 #### Parameters
 
-| Name       | Type    | Description                      |
-| ---------- | ------- | -------------------------------- |
-| dividendId | uint256 | One-indexed dividend identifier. |
-| account    | address | Holder address to query.         |
+| Name       | Type    | Description |
+| ---------- | ------- | ----------- |
+| dividendId | uint256 | undefined   |
+| account    | address | undefined   |
 
 #### Returns
 
@@ -378,20 +378,6 @@ _Replaces assertions for defensive handling of logically impossible states._
 | Name      | Type   | Description                                        |
 | --------- | ------ | -------------------------------------------------- |
 | \_errorId | bytes4 | Identifier of the unexpected validation condition. |
-
-### UnrecognizedResolverProxyVersion
-
-```solidity
-error UnrecognizedResolverProxyVersion(bytes8 _resolverProxyVersion)
-```
-
-Thrown when the provided proxy version does not match any BLR compatible standard.
-
-#### Parameters
-
-| Name                   | Type   | Description                                        |
-| ---------------------- | ------ | -------------------------------------------------- |
-| \_resolverProxyVersion | bytes8 | proxy version that is not compatible with the BLR. |
 
 ### WalletRecovered
 

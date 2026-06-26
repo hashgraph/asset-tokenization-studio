@@ -22,11 +22,11 @@ _Reverts through `onlyMatchingActionType` if `dividendId` does not match the div
 
 #### Parameters
 
-| Name       | Type    | Description                                                                |
-| ---------- | ------- | -------------------------------------------------------------------------- |
-| dividendId | uint256 | One-indexed dividend identifier within the dividend corporate action type. |
-| pageIndex  | uint256 | Zero-based index of the page to retrieve.                                  |
-| pageLength | uint256 | Maximum number of holders returned in the page.                            |
+| Name       | Type    | Description |
+| ---------- | ------- | ----------- |
+| dividendId | uint256 | undefined   |
+| pageIndex  | uint256 | undefined   |
+| pageLength | uint256 | undefined   |
 
 #### Returns
 
@@ -46,9 +46,9 @@ _Reverts through `onlyMatchingActionType` if `dividendId` does not match the div
 
 #### Parameters
 
-| Name       | Type    | Description                                                                |
-| ---------- | ------- | -------------------------------------------------------------------------- |
-| dividendId | uint256 | One-indexed dividend identifier within the dividend corporate action type. |
+| Name       | Type    | Description |
+| ---------- | ------- | ----------- |
+| dividendId | uint256 | undefined   |
 
 #### Returns
 
@@ -131,20 +131,6 @@ error SnapshotIdNull()
 ```
 
 Thrown when a snapshot identifier of zero is supplied; zero is reserved and never assigned to a valid snapshot.
-
-### UnrecognizedResolverProxyVersion
-
-```solidity
-error UnrecognizedResolverProxyVersion(bytes8 _resolverProxyVersion)
-```
-
-Thrown when the provided proxy version does not match any BLR compatible standard.
-
-#### Parameters
-
-| Name                   | Type   | Description                                        |
-| ---------------------- | ------ | -------------------------------------------------- |
-| \_resolverProxyVersion | bytes8 | proxy version that is not compatible with the BLR. |
 
 ### WalletRecovered
 

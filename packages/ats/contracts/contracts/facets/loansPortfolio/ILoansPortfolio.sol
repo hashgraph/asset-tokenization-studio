@@ -119,14 +119,14 @@ interface ILoansPortfolio {
      * @param _holdingsAsset Descriptor of the asset being added.
      * @return success_ True when the asset was newly registered.
      */
-    function addHoldingsAsset(HoldingsAsset memory _holdingsAsset) external returns (bool success_);
+    function addHoldingsAsset(HoldingsAsset calldata _holdingsAsset) external returns (bool success_);
 
     /**
      * @notice Removes a previously registered holdings asset.
      * @param _holdingsAsset Descriptor of the asset being removed.
      * @return success_ True when the asset was effectively removed.
      */
-    function removeHoldingsAsset(HoldingsAsset memory _holdingsAsset) external returns (bool success_);
+    function removeHoldingsAsset(HoldingsAsset calldata _holdingsAsset) external returns (bool success_);
 
     /**
      * @notice Broadcasts that the loan holdings asset's state has changed off-portfolio.

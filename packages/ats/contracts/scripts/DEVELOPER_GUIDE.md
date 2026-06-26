@@ -47,7 +47,7 @@ import { deployFacets } from "@scripts/infrastructure";
 
 const [signer] = await ethers.getSigners(); // From Hardhat
 // or
-const signer = new ethers.Walet(privateKey, provider); // Standalone
+const signer = new ethers.Wallet(privateKey, provider); // Standalone
 
 const result = await deployFacets(signer, {
   facetNames: ["AccessControlFacet"],
@@ -289,12 +289,12 @@ Check that the configuration was created successfully:
 
 ```typescript
 // Get latest configuration version
-const version = await blr.getConfigurationVersion(EQUITY_CONFIG_ID);
+const version = await blr.getLatestVersionByConfiguration(EQUITY_CONFIG_ID);
 console.log(`Latest equity config version: ${version}`);
 
-// Verify facet is in configuration
-const configData = await blr.getConfiguration(EQUITY_CONFIG_ID, version);
-console.log(`Facets in config: ${configData.facetIds.length}`);
+// Verify the facets in the configuration
+const facetCount = await blr.getFacetsLengthByConfigurationIdAndVersion(EQUITY_CONFIG_ID, version);
+console.log(`Facets in config: ${facetCount}`);
 ```
 
 ### Removing a Facet
@@ -328,18 +328,19 @@ Add your new configuration ID to [domain/constants.ts](domain/constants.ts#L15-L
 /**
  * Fund configuration ID.
  *
- * bytes32(uint256(3)) = 0x00...03
+ * bytes32(uint256(10)) = 0x00...0a
+ * (IDs 1-7 are existing asset types, 8 = FACTORY, 9 = INITIALIZE_MOCK.)
  * Used by BusinessLogicResolver to identify fund facet configuration.
  */
-export const FUND_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000003";
+export const FUND_CONFIG_ID = "0x000000000000000000000000000000000000000000000000000000000000000a";
 ```
 
 **Naming Convention**: Use sequential numeric IDs:
 
-- `0x00...01` = Equity (existing)
-- `0x00...02` = Bond (existing)
-- `0x00...03` = Fund (your new asset)
-- `0x00...04` = Next asset
+- `0x00...01` = Equity, `0x00...02` = Bond, `0x00...03` = Bond Fixed Rate, `0x00...04` = Bond KPI Linked Rate (existing)
+- `0x00...05` = Deposit Token, `0x00...06` = Loan, `0x00...07` = Loans Portfolio (existing)
+- `0x00...08` = Factory, `0x00...09` = InitializeMock (reserved)
+- `0x00...0a` = Fund (your new asset — next free id)
 
 **Why bytes32(N)?** Efficient storage, sequential allocation, easy to verify in hex format.
 
@@ -464,8 +465,8 @@ Add 'deployFundToken.ts' factory to [domain/factory](domain/factory/deployFundTo
 
 Add new asset to
 
-- [domain/workflows/deploySystemWithExistingBlr](domain/factory/workflows/deploySystemWithExistingBlr.ts):
-- [domain/workflows/deploySystemWithNewBlr](domain/factory/workflows/deploySystemWithNewBlr.ts):
+- [workflows/deploySystemWithExistingBlr](workflows/deploySystemWithExistingBlr.ts):
+- [workflows/deploySystemWithNewBlr](workflows/deploySystemWithNewBlr.ts):
 
 ### Step 6: Add to checkpoint scripts
 
@@ -594,17 +595,10 @@ output.configurations.fund = {
 Verify your new asset configuration:
 
 ```typescript
-// Get configuration version
-const version = await blr.getConfigurationVersion(FUND_CONFIG_ID);
-console.log(`Fund config version: ${version}`);
-
-// Get configuration data
-const config = await blr.getConfiguration(FUND_CONFIG_ID, version);
-console.log(`Facets in fund config: ${config.facetIds.length}`);
-
-// Verify specific facet
-const hasFundManagement = config.facetIds.includes(ethers.utils.id("FundManagementFacet"));
-console.log(`Has FundManagementFacet: ${hasFundManagement}`);
+// Get configuration version and facet count
+const version = await blr.getLatestVersionByConfiguration(FUND_CONFIG_ID);
+const facetCount = await blr.getFacetsLengthByConfigurationIdAndVersion(FUND_CONFIG_ID, version);
+console.log(`Fund config v${version} with ${facetCount} facets`);
 ```
 
 ### Quick Reference: File Checklist
@@ -621,7 +615,7 @@ When creating a new asset, touch these files:
 - [ ] `workflows/deploySystemWithNewBlr.ts` - Add to deployment workflow
 - [ ] `tests/fixtures/tokens/fund.fixture.ts`
 - [ ] `tests/fixtures/index.ts`
-- [ ] `contracts/facets/layer_3/equityUSA/EquityUSAFacet.sol` - Implement custom facets (if needed)
+- [ ] `contracts/facets/<feature>/` - Implement any custom facets (if needed)
 - [ ] `workflows/deployCompleteSystem.ts` - Add to deployment workflow (optional)
 
 ---
@@ -655,15 +649,11 @@ import { ethers } from "ethers";
 
 const factory = Factory__factory.connect("0xfactory...", signer);
 
-// Deploy test equity token using v2
-const tx = await factory.deployEquity(
-  { configId: "0x01", version: 2 }, // ← Use v2
-  "Test Token",
-  "TEST",
-  {
-    /* other params */
-  },
-);
+// Deploy a test equity token pinned to config version 2.
+// deployEquity takes structured data: EquityData (whose
+// security.resolverProxyConfiguration holds { key: EQUITY_CONFIG_ID, version: 2 })
+// and FactoryRegulationData.
+const tx = await factory.deployEquity(equityData, factoryRegulationData);
 ```
 
 ### Step 3: Update Production Tokens
@@ -774,7 +764,7 @@ Deploy a new implementation contract and upgrade the proxy in one workflow:
 
 ```bash
 # ProxyAdmin contract address (manages proxies)
-export PROXY_ADMIN=0x1234567890123456789012345678901234567890
+export PROXY_ADMIN_ADDRESS=0x1234567890123456789012345678901234567890
 
 # BLR proxy to upgrade
 export BLR_PROXY=0xabcdefabcdefabcdefabcdefabcdefabcdefabcd
@@ -818,7 +808,7 @@ Upgrade to an implementation that was deployed separately (useful for tested imp
 
 ```bash
 # ProxyAdmin contract address
-export PROXY_ADMIN=0x1234567890123456789012345678901234567890
+export PROXY_ADMIN_ADDRESS=0x1234567890123456789012345678901234567890
 
 # BLR proxy to upgrade
 export BLR_PROXY=0xabcdefabcdefabcdefabcdefabcdefabcdefabcd
@@ -845,7 +835,7 @@ Upgrade both infrastructure proxies simultaneously:
 
 ```bash
 # Both proxies and implementations
-export PROXY_ADMIN=0x1234567890123456789012345678901234567890
+export PROXY_ADMIN_ADDRESS=0x1234567890123456789012345678901234567890
 export BLR_PROXY=0xabcdefabcdefabcdefabcdefabcdefabcdefabcd
 export FACTORY_PROXY=0xfedcbafedcbafedcbafedcbafedcbafedcbafeda
 
@@ -862,19 +852,19 @@ Use the same workflow across networks with different ProxyAdmin and proxy addres
 
 ```bash
 # Testnet
-export PROXY_ADMIN=0xTestnetProxyAdmin...
+export PROXY_ADMIN_ADDRESS=0xTestnetProxyAdmin...
 export BLR_PROXY=0xTestnetBLRProxy...
 export DEPLOY_NEW_BLR_IMPL=true
 npm run upgrade:tup:testnet
 
 # After testing, previewnet
-export PROXY_ADMIN=0xPreviewnetProxyAdmin...
+export PROXY_ADMIN_ADDRESS=0xPreviewnetProxyAdmin...
 export BLR_PROXY=0xPreviewnetBLRProxy...
 export DEPLOY_NEW_BLR_IMPL=true
 npm run upgrade:tup:previewnet
 
 # Finally, mainnet
-export PROXY_ADMIN=0xMainnetProxyAdmin...
+export PROXY_ADMIN_ADDRESS=0xMainnetProxyAdmin...
 export BLR_PROXY=0xMainnetBLRProxy...
 export DEPLOY_NEW_BLR_IMPL=true
 npm run upgrade:tup:mainnet
@@ -893,7 +883,7 @@ npm run upgrade:tup:previewnet
 npm run upgrade:tup:mainnet
 
 # Custom options (advanced)
-npx ts-node scripts/cli/upgradeTup.ts --help
+npx tsx scripts/cli/upgradeTupProxies.ts --help
 ```
 
 ### Resumable Upgrades (Checkpoints)
@@ -932,12 +922,12 @@ Upgrade progress is tracked in `deployments/{network}/.checkpoints/` directory a
 
 #### "ProxyAdmin address is required"
 
-**Cause:** `PROXY_ADMIN` environment variable not set.
+**Cause:** `PROXY_ADMIN_ADDRESS` environment variable not set.
 
 **Solution:**
 
 ```bash
-export PROXY_ADMIN=0x...  # Get address from deployment output
+export PROXY_ADMIN_ADDRESS=0x...  # Get address from deployment output
 npm run upgrade:tup:testnet
 ```
 
@@ -990,16 +980,16 @@ npm run upgrade:tup:testnet
 
 ### Environment Variables Reference
 
-| Variable                     | Required | Example    | Purpose                           |
-| ---------------------------- | -------- | ---------- | --------------------------------- |
-| `PROXY_ADMIN`                | Yes      | `0x123...` | ProxyAdmin contract address       |
-| `BLR_PROXY`                  | No\*     | `0x456...` | BLR proxy address to upgrade      |
-| `FACTORY_PROXY`              | No\*     | `0x789...` | Factory proxy address to upgrade  |
-| `DEPLOY_NEW_BLR_IMPL`        | No\*\*   | `true`     | Deploy new BLR implementation     |
-| `DEPLOY_NEW_FACTORY_IMPL`    | No\*\*   | `true`     | Deploy new Factory implementation |
-| `BLR_IMPLEMENTATION`         | No\*\*   | `0xabc...` | Existing BLR implementation       |
-| `FACTORY_IMPLEMENTATION`     | No\*\*   | `0xdef...` | Existing Factory implementation   |
-| `HEDERA_TESTNET_PRIVATE_KEY` | Yes      | `0x...`    | Private key for transactions      |
+| Variable                       | Required | Example    | Purpose                           |
+| ------------------------------ | -------- | ---------- | --------------------------------- |
+| `PROXY_ADMIN_ADDRESS`          | Yes      | `0x123...` | ProxyAdmin contract address       |
+| `BLR_PROXY`                    | No\*     | `0x456...` | BLR proxy address to upgrade      |
+| `FACTORY_PROXY`                | No\*     | `0x789...` | Factory proxy address to upgrade  |
+| `DEPLOY_NEW_BLR_IMPL`          | No\*\*   | `true`     | Deploy new BLR implementation     |
+| `DEPLOY_NEW_FACTORY_IMPL`      | No\*\*   | `true`     | Deploy new Factory implementation |
+| `BLR_IMPLEMENTATION`           | No\*\*   | `0xabc...` | Existing BLR implementation       |
+| `FACTORY_IMPLEMENTATION`       | No\*\*   | `0xdef...` | Existing Factory implementation   |
+| `HEDERA_TESTNET_PRIVATE_KEY_0` | Yes      | `0x...`    | Private key for transactions      |
 
 \*At least one proxy address required
 \*\*For each proxy, either deploy new OR provide existing implementation
@@ -1133,14 +1123,13 @@ Resume from this failed checkpoint? [Y/n]: Y
 [INFO] Clearing failure status from checkpoint.
 [INFO] Resuming from step 3...
 
-Step 3/10: Deploy Facets... ✅
-Step 4/10: Register Facets... ✅
-Step 5/10: Create Equity Config... ✅
-Step 6/10: Create Bond Config... ✅
-Step 7/10: Create Bond Fixed Rate Config... ✅
-Step 8/10: Create Bond KPI Linked Rate Config... ✅
-Step 9/10: Create Bond SPT Rate Config... ✅
-Step 10/10: Deploy Factory... ✅
+Step 3/9: Deploy Facets... ✅
+Step 4/9: Register Facets... ✅
+Step 5/9: Create Equity Config... ✅
+Step 6/9: Create Bond Config... ✅
+Step 7/9: Create Bond Fixed Rate Config... ✅
+Step 8/9: Create Bond KPI Linked Rate Config... ✅
+Step 9/9: Deploy Factory... ✅
 
 [SUCCESS] Deployment completed!
 ```
@@ -1535,12 +1524,12 @@ Downstream projects can generate their own registries for custom facets:
 
 ```bash
 # In your project
-npm install @ats/contracts
+npm install @hashgraph/asset-tokenization-contracts
 
-# Generate your registry
-npx ts-node node_modules/@ats/contracts/scripts/tools/generateRegistry.ts \
+# Generate your registry (run the registry generator with tsx)
+npx tsx node_modules/@hashgraph/asset-tokenization-contracts/scripts/tools/registry-generator/index.ts \
   --contracts ./contracts \
-  --output ./src/myRegistry.data.ts
+  --output ./src/myRegistry.generated.ts
 ```
 
 This enables you to maintain a separate registry for your custom facets while using ATS's base registry for standard facets.
@@ -1666,7 +1655,7 @@ This generates TypeChain types in `build/typechain/`.
    bytes32 constant RESOLVER_KEY_<FEATURE> = 0x0000000000000000000000000000000000000000000000000000000000000000;
    ```
 2. If missing, add it with a placeholder hex (any 32-byte value). The hex is rewritten by codegen.
-3. Run `npm run -w packages/ats/contracts generate:hashes` (or rely on the post-compile hook in `npx hardhat compile`) to populate the canonical hex from `asset.tokenization.standard.resolverKey.<PascalName>`.
+3. Run `npm run -w packages/ats/contracts hashes:generate` (or rely on the post-compile hook in `npx hardhat compile`) to populate the canonical hex from `asset.tokenization.standard.resolverKey.<PascalName>`.
 4. Regenerate the contract registry: `npm run generate:registry`.
 
 ---

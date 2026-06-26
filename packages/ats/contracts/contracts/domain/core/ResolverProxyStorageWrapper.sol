@@ -32,25 +32,6 @@ struct ResolverProxyStorage {
  *      resolver, configuration identifier or version.
  */
 library ResolverProxyStorageWrapper {
-    function setBusinessLogicResolver(IBusinessLogicResolver _resolver) internal {
-        resolverProxyStorage().resolver = _resolver;
-    }
-
-    /**
-     * @notice Stores a V2 configuration payload as a version-tagged envelope.
-     * @dev Serialises `_v2` into the generic envelope (`RESOLVER_PROXY_VERSION_V2` + ABI-encoded
-     *      payload) and writes it to the single `bytes` slot consumed by `resolveResolverProxyCall`.
-     * @param _v2 The V2 configuration to persist.
-     */
-    function setResolverProxyConfigurationV2(IResolverProxy.ResolverProxyConfigurationV2 memory _v2) internal {
-        resolverProxyStorage().resolverProxyConfiguration = abi.encode(
-            IResolverProxy.ResolverProxyConfigurationGeneric({
-                resolverProxyVersion: RESOLVER_PROXY_VERSION_V2,
-                content: abi.encode(_v2)
-            })
-        );
-    }
-
     /**
      * @notice Initializes the resolver-proxy storage.
      * @param _resolver The `BusinessLogicResolver` instance.
@@ -64,12 +45,31 @@ library ResolverProxyStorageWrapper {
         setResolverProxyConfigurationV2(_resolverProxyConfigurationV2);
     }
 
+    function setBusinessLogicResolver(IBusinessLogicResolver _resolver) internal {
+        _resolverProxyStorage().resolver = _resolver;
+    }
+
+    /**
+     * @notice Stores a V2 configuration payload as a version-tagged envelope.
+     * @dev Serialises `_v2` into the generic envelope (`RESOLVER_PROXY_VERSION_V2` + ABI-encoded
+     *      payload) and writes it to the single `bytes` slot consumed by `resolveResolverProxyCall`.
+     * @param _v2 The V2 configuration to persist.
+     */
+    function setResolverProxyConfigurationV2(IResolverProxy.ResolverProxyConfigurationV2 memory _v2) internal {
+        _resolverProxyStorage().resolverProxyConfiguration = abi.encode(
+            IResolverProxy.ResolverProxyConfigurationGeneric({
+                resolverProxyVersion: RESOLVER_PROXY_VERSION_V2,
+                content: abi.encode(_v2)
+            })
+        );
+    }
+
     /**
      * @notice Returns the `BusinessLogicResolver` contract that supplies the facet selectors.
      * @return The active resolver instance for this proxy.
      */
     function getBusinessLogicResolver() internal view returns (IBusinessLogicResolver) {
-        return resolverProxyStorage().resolver;
+        return _resolverProxyStorage().resolver;
     }
 
     /**
@@ -77,7 +77,7 @@ library ResolverProxyStorageWrapper {
      * @return The proxy configuration.
      */
     function getProxyConfiguration() internal view returns (bytes memory) {
-        return resolverProxyStorage().resolverProxyConfiguration;
+        return _resolverProxyStorage().resolverProxyConfiguration;
     }
 
     /**
@@ -156,7 +156,7 @@ library ResolverProxyStorageWrapper {
      */
     function _decodeGeneric() private view returns (IResolverProxy.ResolverProxyConfigurationGeneric memory generic) {
         generic = abi.decode(
-            resolverProxyStorage().resolverProxyConfiguration,
+            _resolverProxyStorage().resolverProxyConfiguration,
             (IResolverProxy.ResolverProxyConfigurationGeneric)
         );
     }
@@ -167,7 +167,7 @@ library ResolverProxyStorageWrapper {
      *      `STORAGE_LOCATION_RESOLVER_PROXY`.
      * @return ds Storage reference to the `ResolverProxyStorage` struct.
      */
-    function resolverProxyStorage() private pure returns (ResolverProxyStorage storage ds) {
+    function _resolverProxyStorage() private pure returns (ResolverProxyStorage storage ds) {
         bytes32 position = STORAGE_LOCATION_RESOLVER_PROXY;
         // solhint-disable-next-line no-inline-assembly
         assembly {

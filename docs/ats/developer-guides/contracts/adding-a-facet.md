@@ -1,10 +1,10 @@
 ---
-id: adding-facets
-title: Tutorial - Adding a New Facet to ATS Contracts
-sidebar_label: Adding Facets
+id: adding-a-facet
+title: Adding a Facet
+sidebar_label: Adding a facet
 ---
 
-# Tutorial: Adding a New Facet to ATS Contracts
+# Adding a Facet
 
 This comprehensive guide walks you through creating and integrating a new facet into the Asset Tokenization Studio (ATS) smart contract system.
 
@@ -128,6 +128,18 @@ interface IRewards {
 }
 ```
 
+#### Type placement
+
+| Usage                                   | Where to declare                                           |
+| --------------------------------------- | ---------------------------------------------------------- |
+| `struct` / `enum` used by **1 facet**   | Inline on that facet's interface (`IFeature.sol`)          |
+| `struct` / `enum` used by **2+ facets** | Shared `I<Domain>Types.sol`                                |
+| `event`                                 | Writer interface (`IFeature.sol`) — never on `I*Types.sol` |
+| `error` (single facet)                  | Writer interface of the facet that reverts with it         |
+| `error` (cross-domain)                  | `ICommonErrors.sol`                                        |
+
+A facet interface inherits a types interface **only if it uses at least one symbol from it**.
+
 ### Step 2: Create Storage Wrapper (if needed)
 
 If your facet requires custom storage, create a storage wrapper under
@@ -138,18 +150,35 @@ If your facet requires custom storage, create a storage wrapper under
 → **R3 Single-slot scalars (uint256, bytes32, string)** → **R4 Aggregates
 (mapping, array, EnumerableSet, checkpoint arrays)** → **APPEND-ONLY ZONE**.
 New fields go below the marker — the boundary is greppable and audit-visible.
-All four region banners are **always present, in canonical order, even when a region has no
+All five region banners are **always present, in canonical order, even when a region has no
 fields** — the empty banners are scaffolding that fixes each field's insertion point and the
 region numbering. Never renumber a region when its only field is removed; leave the empty
 banner in place.
+
+Every storage struct must follow the 5-region layout. All five region banner comments are **always present**, even when a region has no fields:
+
+```solidity
+struct CapDataStorage {
+  // ─── R1 Lifecycle ──────────────────────────────────────────
+  bool isInitialized;
+  // ─── R2 Packed scalars ─────────────────────────────────────
+
+  // ─── R3 Single-slot scalars ────────────────────────────────
+  uint256 maxSupply;
+
+  // ─── R4 Aggregates ─────────────────────────────────────────
+
+  // ─── APPEND-ONLY ZONE ──────────────────────────────────────
+  // New fields must be added below this line.
+  // Reordering fields above this marker requires a major version bump and clean redeploy.
+}
+```
 
 **File**: `contracts/domain/asset/RewardsStorageWrapper.sol`
 
 ```solidity
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
-
-import { IRewardsStorageWrapper } from "./IRewardsStorageWrapper.sol";
 
 /// @custom:hash storage Rewards
 bytes32 constant STORAGE_LOCATION_REWARDS = 0x0000000000000000000000000000000000000000000000000000000000000000;
@@ -168,33 +197,29 @@ struct RewardsDataStorage {
 }
 
 /**
- * @title RewardsStorageWrapper
- * @notice Storage management for rewards functionality
+ * @title Rewards Storage Wrapper
+ * @notice Library for managing rewards storage operations.
+ * @dev Storage wrappers are **libraries** (never abstract contracts) with `internal` functions.
+ *      Facets import the library and call it statically — e.g. `RewardsStorageWrapper.addRewards(...)`
+ *      — rather than inheriting it.
  */
-abstract contract RewardsStorageWrapper is IRewardsStorageWrapper {
-  /**
-   * @notice Access rewards storage at the ERC-7201 namespace slot.
-   * @return rewardsData_ Storage pointer
-   */
-  function _rewardsStorage() internal pure returns (RewardsDataStorage storage rewardsData_) {
+library RewardsStorageWrapper {
+  /// @notice Access rewards storage at the ERC-7201 namespace slot.
+  function rewardsStorage() internal pure returns (RewardsDataStorage storage rewardsData_) {
     bytes32 position = STORAGE_LOCATION_REWARDS;
     assembly {
       rewardsData_.slot := position
     }
   }
 
-  /**
-   * @notice Get total rewards for holder
-   */
-  function _getTotalRewards(address _tokenHolder) internal view returns (uint256) {
-    return _rewardsStorage().totalRewards[_tokenHolder];
+  /// @notice Get total rewards for a holder.
+  function getTotalRewards(address _tokenHolder) internal view returns (uint256) {
+    return rewardsStorage().totalRewards[_tokenHolder];
   }
 
-  /**
-   * @notice Add rewards to holder's balance
-   */
-  function _addRewards(address _tokenHolder, uint256 _amount) internal {
-    RewardsDataStorage storage rs = _rewardsStorage();
+  /// @notice Add rewards to a holder's balance.
+  function addRewards(address _tokenHolder, uint256 _amount) internal {
+    RewardsDataStorage storage rs = rewardsStorage();
     rs.totalRewards[_tokenHolder] += _amount;
     rs.totalDistributed += _amount;
     rs.lastDistribution[_tokenHolder] = block.timestamp;
@@ -202,34 +227,20 @@ abstract contract RewardsStorageWrapper is IRewardsStorageWrapper {
 }
 ```
 
-### Step 3: Define Storage Events/Errors Interface
+### Step 3: Declare Events and Errors
 
-**File**: `contracts/domain/asset/IRewardsStorageWrapper.sol`
+Events and errors live in the facet's **interface** file `I<Feature>.sol` (next to the function
+declarations and the resolver key from Step 4) — there is no separate storage-wrapper interface.
+
+**File**: `contracts/facets/rewards/IRewards.sol`
 
 ```solidity
-// SPDX-License-Identifier: Apache-2.0
-pragma solidity >=0.8.0 <0.9.0;
+// Declared inside the `IRewards` interface (see Step 4):
+event RewardsInitialized(address indexed operator);
+event RewardDistributed(address indexed tokenHolder, uint256 amount, uint256 timestamp);
 
-/**
- * @title IRewardsStorageWrapper
- * @notice Events and errors for rewards storage
- */
-interface IRewardsStorageWrapper {
-  /**
-   * @notice Emitted when rewards feature is initialized
-   */
-  event RewardsInitialized(address indexed operator);
-
-  /**
-   * @notice Error when reward amount is zero
-   */
-  error RewardAmountIsZero();
-
-  /**
-   * @notice Error when rewards already initialized
-   */
-  error RewardsAlreadyInitialized();
-}
+error RewardAmountIsZero();
+error RewardsAlreadyInitialized();
 ```
 
 ### Step 4: Define Resolver Key
@@ -255,12 +266,12 @@ interface IRewards {
 ```
 
 The canonical hex is derived from `keccak256("asset.tokenization.standard.resolverKey.Rewards")`.
-Do not hand-edit the hex; the CI gate `npm run check:hashes` will fail on drift.
+Do not hand-edit the hex; the CI gate `npm run hashes:check` will fail on drift.
 
 ### Step 5: Define Storage Position
 
 Already handled in Step 2 — the file-scope `STORAGE_LOCATION_REWARDS` constant
-sits above the storage wrapper contract and uses the
+sits above the storage wrapper library and uses the
 `/// @custom:hash storage Rewards` annotation. The codegen applies the
 [ERC-7201](https://eips.ethereum.org/EIPS/eip-7201) derivation
 `keccak256(abi.encode(uint256(keccak256("asset.tokenization.standard.storage.Rewards")) - 1)) & ~bytes32(uint256(0xff))`
@@ -289,67 +300,48 @@ Implement the core facet logic.
 **File**: `contracts/facets/rewards/Rewards.sol`
 
 ```solidity
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.23;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity >=0.8.0 <0.9.0;
 
-import { IRewards } from "./IRewards.sol";
+import { IRewards, RESOLVER_KEY_REWARDS } from "./IRewards.sol";
+import { ROLE_REWARDS_DISTRIBUTOR, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
+import { RewardsStorageWrapper } from "../../domain/asset/RewardsStorageWrapper.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title Rewards
- * @notice Business logic for token holder rewards
+ * @author Asset Tokenization Studio Team
+ * @notice Business logic for token-holder rewards. Implements `IRewards` and reads/writes its
+ *         state through the `RewardsStorageWrapper` library (it does not inherit the wrapper).
+ *         Intended to be inherited exclusively by `RewardsFacet`.
  */
 abstract contract Rewards is IRewards, Modifiers {
-  /**
-   * @notice Initialize rewards functionality
-   * @dev Can only be called once
-   */
-  function initialize_Rewards() external override onlyUninitialized(_rewardsStorage().initialized) {
-    _rewardsStorage().initialized = true;
-    emit RewardsInitialized(_msgSender());
+  /// @inheritdoc IRewards
+  function initializeRewards()
+    external
+    override
+    onlyRole(DEFAULT_ADMIN_ROLE)
+    onlyFacetNotRegistered(RESOLVER_KEY_REWARDS)
+  {
+    InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_REWARDS);
+    emit IRewards.RewardsInitialized(msg.sender);
   }
 
-  /**
-   * @notice Distribute rewards to token holder
-   * @param _tokenHolder Address receiving rewards
-   * @param _amount Reward amount
-   * @return success_ True if distribution succeeded
-   */
+  /// @inheritdoc IRewards
   function distributeReward(
     address _tokenHolder,
     uint256 _amount
-  )
-    external
-    override
-    onlyUnpaused
-    onlyRole(ROLE_REWARDS_DISTRIBUTOR)
-    validateAddress(_tokenHolder)
-    returns (bool success_)
-  {
-    if (_amount == 0) revert RewardAmountIsZero();
-
-    // Verify holder is KYC approved
-    if (_getKycStatus(_tokenHolder) != IKyc.KycStatus.GRANTED) {
-      revert InvalidKycStatus();
-    }
-
-    // Add rewards to holder's balance
-    _addRewards(_tokenHolder, _amount);
-
-    emit RewardDistributed(_tokenHolder, _amount, block.timestamp);
-
+  ) external override onlyRole(ROLE_REWARDS_DISTRIBUTOR) returns (bool success_) {
+    if (_amount == 0) revert IRewards.RewardAmountIsZero();
+    RewardsStorageWrapper.addRewards(_tokenHolder, _amount);
+    emit IRewards.RewardDistributed(_tokenHolder, _amount, block.timestamp);
     success_ = true;
   }
 
-  /**
-   * @notice Get total rewards earned by holder
-   * @param _tokenHolder Address to query
-   * @return totalRewards_ Total rewards earned
-   */
-  function getRewards(
-    address _tokenHolder
-  ) external view override validateAddress(_tokenHolder) returns (uint256 totalRewards_) {
-    totalRewards_ = _getTotalRewards(_tokenHolder);
+  /// @inheritdoc IRewards
+  function getRewards(address _tokenHolder) external view override returns (uint256 totalRewards_) {
+    totalRewards_ = RewardsStorageWrapper.getTotalRewards(_tokenHolder);
   }
 }
 ```
@@ -387,7 +379,7 @@ contract RewardsFacet is Rewards, IStaticFunctionSelectors {
    */
   function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
     bytes4[] memory selectors = new bytes4[](3);
-    selectors[0] = this.initialize_Rewards.selector;
+    selectors[0] = this.initializeRewards.selector;
     selectors[1] = this.distributeReward.selector;
     selectors[2] = this.getRewards.selector;
     return selectors;
@@ -402,6 +394,31 @@ contract RewardsFacet is Rewards, IStaticFunctionSelectors {
     ids[0] = type(IRewards).interfaceId;
     return ids;
   }
+}
+```
+
+#### `getStaticFunctionSelectors` — descending `unchecked` pattern
+
+**Use the descending `unchecked` pattern — the ascending form is prohibited.**
+
+```solidity
+// ✅ descending — mandatory for new/modified facets
+function getStaticFunctionSelectors() external pure override returns (bytes4[] memory r) {
+    uint256 i = 3;
+    r = new bytes4[](i);
+    unchecked {
+        r[--i] = this.getRewards.selector;
+        r[--i] = this.distributeReward.selector;
+        r[--i] = this.initialize_Rewards.selector;
+    }
+}
+
+// ❌ ascending — forbidden
+function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+    bytes4[] memory selectors = new bytes4[](3);
+    uint256 i = 0;
+    selectors[i++] = this.initialize_Rewards.selector;
+    ...
 }
 ```
 
@@ -508,20 +525,20 @@ describe("RewardsFacet", function () {
 
   describe("Initialization", function () {
     it("should initialize rewards functionality", async function () {
-      await expect(rewardsFacet.initialize_Rewards())
+      await expect(rewardsFacet.initializeRewards())
         .to.emit(rewardsFacet, "RewardsInitialized")
         .withArgs(owner.address);
     });
 
     it("should reject double initialization", async function () {
-      await rewardsFacet.initialize_Rewards();
-      await expect(rewardsFacet.initialize_Rewards()).to.be.revertedWithCustomError(rewardsFacet, "AlreadyInitialized");
+      await rewardsFacet.initializeRewards();
+      await expect(rewardsFacet.initializeRewards()).to.be.revertedWithCustomError(rewardsFacet, "AlreadyInitialized");
     });
   });
 
   describe("Reward Distribution", function () {
     beforeEach(async function () {
-      await rewardsFacet.initialize_Rewards();
+      await rewardsFacet.initializeRewards();
     });
 
     it("should distribute rewards to token holder", async function () {
@@ -615,15 +632,29 @@ await registerFacets(blr, facetsToRegister);
 Deploy a token using the updated configuration:
 
 ```typescript
-// Configuration already includes RewardsFacet
-const tx = await factory.createEquityToken(
-  configId,
-  version, // Use latest version with new facet
-  initData,
-);
+// The configuration version now includes RewardsFacet; deploy a token against it.
+const version = await blr.getLatestVersionByConfiguration(EQUITY_CONFIG_ID);
+const tx = await factory.deployProxy(BLR_PROXY, EQUITY_CONFIG_ID, version, rbacs, "0x");
 ```
 
+:::note Where this fits in the deployment lifecycle
+You don't redeploy the whole system to add a facet to an **existing** deployment. The sequence is:
+deploy the new facet → register it in the BLR (`registerBusinessLogics`) → create a **new
+configuration version** that includes it → new tokens use that version (existing tokens are moved to
+it explicitly, or auto-update). During a **fresh** system deploy, facets are deployed and registered
+_before_ configurations are created — see
+[Deployment → what gets deployed](./deployment.md#what-gets-deployed) and
+[Upgrading configurations](./upgrading-configurations.md).
+:::
+
 ## Best Practices
+
+### ERC-3643 import boundary
+
+**Hard rule.** Files under `contracts/constants/`, `contracts/domain/`, `contracts/facets/layer_1-2/`,
+and `contracts/factory/Factory.sol` must **never** import from `contracts/factory/ERC3643/`.
+When types need to be shared, the canonical definition lives at the neutral location;
+the T-REX side re-exports or keeps an isolated copy.
 
 ### Naming Conventions
 
@@ -633,11 +664,17 @@ const tx = await factory.createEquityToken(
 | Facet wrapper           | PascalCase + "Facet"            | `RewardsFacet`             |
 | Interface               | I + ContractName                | `IRewards`                 |
 | Storage wrapper         | ContractName + "StorageWrapper" | `RewardsStorageWrapper`    |
-| Storage interface       | I + StorageWrapper              | `IRewardsStorageWrapper`   |
 | Resolver key            | RESOLVER_KEY_FEATURE            | `RESOLVER_KEY_REWARDS`     |
 | Storage position        | STORAGE_LOCATION_FEATURE        | `STORAGE_LOCATION_REWARDS` |
 | Role                    | ROLE_NAME                       | `ROLE_REWARDS_DISTRIBUTOR` |
 | Initialization          | initializeFeatureName           | `initializeRewards`        |
+
+#### Library `internal` functions — `_` prefix convention
+
+**Library `internal` functions — no `_` prefix by default.**
+These functions are inlined into the calling contract's bytecode at compile time and form the library's composable API, always called as `LibraryName.fn()`. Using `_` would imply they are hidden implementation details when they are not.
+
+**Optional exception — explicit call-type annotation:** In libraries that mix `internal` (inlined, bytecode-composed) and `external` (DELEGATECALL) functions, a team may adopt `_` on all `internal` functions as a visual signal distinguishing bytecode composition from DELEGATECALL dispatch. If adopted, apply it consistently across the entire library — never mixed.
 
 ### Storage Management
 
@@ -653,6 +690,28 @@ const tx = await factory.createEquityToken(
 3. **Validate addresses**: `validateAddress(_tokenHolder)`
 4. **Check KYC status**: Verify compliance for sensitive operations
 
+#### Initializer modifier — `onlyNot<Feature>Initialized`
+
+Every initializer MUST apply an `onlyNot<Feature>Initialized` modifier — never an inline `_checkNotInitialized(...)` call buried in the function body:
+
+```solidity
+// ✅
+function initializeCap(uint256 _maxSupply)
+    external
+    override
+    onlyRole(DEFAULT_ADMIN_ROLE)
+    onlyFacetNotRegistered(RESOLVER_KEY_CAP)
+    onlyNotCapInitialized
+    onlyValidMaxSupply(_maxSupply)
+{ ... }
+
+// ❌
+function initializeCap(uint256 _maxSupply) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+    _checkNotInitialized(RESOLVER_KEY_CAP);
+    ...
+}
+```
+
 ### Gas Optimization
 
 1. **Separate read/write operations**: Consider split facets (like Bond/BondRead)
@@ -666,11 +725,45 @@ const tx = await factory.createEquityToken(
 2. **Descriptive error names**: `RewardAmountIsZero` vs `InvalidAmount`
 3. **Document error conditions**: Add NatSpec comments
 
+### No `solhint-disable` comments
+
+`// solhint-disable` comments (inline or block form) must not be introduced without justification. The only known acceptable use is the `no-inline-assembly` suppression immediately before the `assembly { s_.slot := position }` block inside a StorageWrapper accessor:
+
+```solidity
+// solhint-disable-next-line no-inline-assembly
+assembly {
+    s_.slot := position
+}
+```
+
+Every other occurrence is a signal to refactor — ask: _Is there a change to the code that removes the need for this suppression?_
+
 ### Event Emission
 
 1. **Emit events for state changes**: Required for off-chain tracking
 2. **Include indexed parameters**: For efficient filtering
 3. **Use descriptive event names**: `RewardDistributed` vs `Distributed`
+
+#### Event parameter names — no `_` prefix
+
+Event parameters use clean names — **no `_` prefix**.
+
+```solidity
+event Paused(address indexed operator); // ✅
+event Paused(address indexed _operator); // ❌
+```
+
+This applies to the `event` declaration and its `@param` NatSpec tags. The ABI/topic hash depends on event name and parameter types only — never on parameter names — so renaming is non-breaking. Follows the same convention as OpenZeppelin (`Transfer(address indexed from, ...)`), even where the source EIP uses underscores.
+
+**Out of scope:** function parameters keep the project convention — `_input` for inputs, `output_` for named returns.
+
+#### Emission location — exceptions
+
+Events should be emitted at the outermost business-logic layer. **Exceptions — the emit may stay in the domain layer when:**
+
+- The emit lives in a low-level helper reached from several callers, the orchestrator (`*Ops`), or another wrapper — moving it would duplicate or drop the event.
+- The emit is conditional on internal state the facet does not have.
+- The event reconstructs internal storage state, or is a **synthetic** ledger event (e.g. a `Transfer` / `TransferByPartition` to/from `address(0)` mirroring a hold or lock). These are bookkeeping details of the domain representation and belong with it.
 
 ## Examples
 
@@ -748,8 +841,10 @@ After implementing your facet:
 
 ## Related Documentation
 
-- [Deployment Tutorial](./deployment.md)
-- [Upgrade Configuration](./upgrading.md)
+- [Deployment](./deployment.md)
+- [Managing the BLR](./managing-the-blr.md)
+- [Creating an asset type](./creating-an-asset-type.md)
+- [Upgrading configurations](./upgrading-configurations.md)
 
 ## Support
 

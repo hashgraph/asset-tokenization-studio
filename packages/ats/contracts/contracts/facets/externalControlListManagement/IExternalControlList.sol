@@ -12,8 +12,8 @@ pragma solidity >=0.8.0 <0.9.0;
 interface IExternalControlList {
     /**
      * @notice Returns whether `account` is authorised according to the external control list.
-     * @param account Address to check.
+     * @param _account Address to check.
      * @return True if the account is on the allow-list; false otherwise.
      */
-    function isAuthorized(address account) external view returns (bool);
+    function isAuthorized(address _account) external view returns (bool);
 }

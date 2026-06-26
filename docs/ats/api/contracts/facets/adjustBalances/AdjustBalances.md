@@ -22,10 +22,10 @@ _Emits {AdjustmentBalanceSet}._
 
 #### Parameters
 
-| Name     | Type    | Description                                                          |
-| -------- | ------- | -------------------------------------------------------------------- |
-| factor   | uint256 | Numerator of the multiplier; effective ratio = factor / 10^decimals. |
-| decimals | uint8   | Denominator exponent.                                                |
+| Name     | Type    | Description |
+| -------- | ------- | ----------- |
+| factor   | uint256 | undefined   |
+| decimals | uint8   | undefined   |
 
 #### Returns
 
@@ -183,20 +183,6 @@ error TotalSupplyOverflow()
 ```
 
 Reverts when the proposed factor would overflow the projected total supply.
-
-### UnrecognizedResolverProxyVersion
-
-```solidity
-error UnrecognizedResolverProxyVersion(bytes8 _resolverProxyVersion)
-```
-
-Thrown when the provided proxy version does not match any BLR compatible standard.
-
-#### Parameters
-
-| Name                   | Type   | Description                                        |
-| ---------------------- | ------ | -------------------------------------------------- |
-| \_resolverProxyVersion | bytes8 | proxy version that is not compatible with the BLR. |
 
 ### WalletRecovered
 

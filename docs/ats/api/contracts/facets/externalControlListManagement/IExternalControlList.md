@@ -13,16 +13,16 @@ _Implemented by third-party access-control contracts whose address is registered
 ### isAuthorized
 
 ```solidity
-function isAuthorized(address account) external view returns (bool)
+function isAuthorized(address _account) external view returns (bool)
 ```
 
 Returns whether `account` is authorised according to the external control list.
 
 #### Parameters
 
-| Name    | Type    | Description       |
-| ------- | ------- | ----------------- |
-| account | address | Address to check. |
+| Name      | Type    | Description       |
+| --------- | ------- | ----------------- |
+| \_account | address | Address to check. |
 
 #### Returns
 

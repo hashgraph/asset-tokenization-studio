@@ -29,16 +29,16 @@ _Gated by {onlyUnpaused} and {onlyConfigurationPendingOwner}: only the nominated
 ### getOwner
 
 ```solidity
-function getOwner(bytes32 configId) external view returns (address owner_)
+function getOwner(bytes32 _configId) external view returns (address owner_)
 ```
 
 Returns the current owner of a configuration.
 
 #### Parameters
 
-| Name     | Type    | Description             |
-| -------- | ------- | ----------------------- |
-| configId | bytes32 | Configuration to query. |
+| Name       | Type    | Description             |
+| ---------- | ------- | ----------------------- |
+| \_configId | bytes32 | Configuration to query. |
 
 #### Returns
 
@@ -49,16 +49,16 @@ Returns the current owner of a configuration.
 ### getPendingOwner
 
 ```solidity
-function getPendingOwner(bytes32 configId) external view returns (address pendingOwner_)
+function getPendingOwner(bytes32 _configId) external view returns (address pendingOwner_)
 ```
 
 Returns the pending owner of a configuration, if any.
 
 #### Parameters
 
-| Name     | Type    | Description             |
-| -------- | ------- | ----------------------- |
-| configId | bytes32 | Configuration to query. |
+| Name       | Type    | Description             |
+| ---------- | ------- | ----------------------- |
+| \_configId | bytes32 | Configuration to query. |
 
 #### Returns
 
@@ -304,20 +304,6 @@ Raised when the caller is not the pending owner of the configuration.
 | configId     | bytes32 | Configuration whose pending handover was targeted.          |
 | sender       | address | Caller that attempted to accept ownership.                  |
 | pendingOwner | address | Address currently nominated as pending owner of `configId`. |
-
-### UnrecognizedResolverProxyVersion
-
-```solidity
-error UnrecognizedResolverProxyVersion(bytes8 _resolverProxyVersion)
-```
-
-Thrown when the provided proxy version does not match any BLR compatible standard.
-
-#### Parameters
-
-| Name                   | Type   | Description                                        |
-| ---------------------- | ------ | -------------------------------------------------- |
-| \_resolverProxyVersion | bytes8 | proxy version that is not compatible with the BLR. |
 
 ### WalletRecovered
 

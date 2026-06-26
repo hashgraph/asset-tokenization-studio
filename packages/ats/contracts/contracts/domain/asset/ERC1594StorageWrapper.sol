@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
-import { ZERO_ADDRESS, EMPTY_BYTES, _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { ZERO_ADDRESS, EMPTY_BYTES, DEFAULT_PARTITION } from "../../constants/values.sol";
 import { IKyc } from "../../facets/kyc/IKyc.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { Eip1066 } from "../../constants/eip1066.sol";
@@ -63,7 +63,7 @@ library ERC1594StorageWrapper {
      * called exactly once before any issue operations.
      */
     function initialize() internal {
-        ERC1594Storage storage ds = erc1594Storage();
+        ERC1594Storage storage ds = _erc1594Storage();
         ds.issuance = true;
     }
 
@@ -105,7 +105,7 @@ library ERC1594StorageWrapper {
      * @return True if the `issuance` flag is set, otherwise false.
      */
     function isIssuable() internal view returns (bool) {
-        return erc1594Storage().issuance;
+        return _erc1594Storage().issuance;
     }
 
     /**
@@ -600,7 +600,7 @@ library ERC1594StorageWrapper {
                 false,
                 Eip1066.INSUFFICIENT_FUNDS,
                 IAllowanceTypes.InsufficientAllowance.selector,
-                abi.encode(sender, from, currentAllowance, value, _DEFAULT_PARTITION)
+                abi.encode(sender, from, currentAllowance, value, DEFAULT_PARTITION)
             );
         }
         return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
@@ -674,7 +674,7 @@ library ERC1594StorageWrapper {
      * @dev Uses inline assembly to retrieve the storage pointer.
      * @return ds Storage reference to the `ERC1594Storage` struct.
      */
-    function erc1594Storage() private pure returns (ERC1594Storage storage ds) {
+    function _erc1594Storage() private pure returns (ERC1594Storage storage ds) {
         bytes32 position = STORAGE_LOCATION_ERC1594;
         // solhint-disable-next-line no-inline-assembly
         assembly {
