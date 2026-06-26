@@ -5,96 +5,58 @@
 //
 exports[`ats contracts solhint`] = {
   value: `{
-    "contracts/domain/asset/AmortizationStorageWrapper.sol:3599700578": [
-      [117, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
-      [395, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
-      [420, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"]
-    ],
-    "contracts/domain/asset/ClearingStorageWrapper.sol:240867812": [
-      [720, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177632"]
-    ],
-    "contracts/domain/asset/DividendStorageWrapper.sol:1104421331": [
-      [68, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
-      [246, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
-      [264, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"]
-    ],
-    "contracts/domain/asset/ERC20VotesStorageWrapper.sol:1755450486": [
-      [300, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177617"],
-      [311, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177617"]
-    ],
-    "contracts/domain/asset/HoldStorageWrapper.sol:2799269957": [
-      [801, 15, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177632"]
-    ],
-    "contracts/domain/asset/KpisStorageWrapper.sol:3109432168": [
-      [104, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177601"]
-    ],
-    "contracts/domain/asset/LockStorageWrapper.sol:4065266281": [
-      [333, 15, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177602"]
-    ],
-    "contracts/domain/asset/ScheduledTasksStorageWrapper.sol:3509877729": [
-      [194, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"],
-      [482, 4, 1, "ats/storage-accessor-private: ATS-PRIV-001: StorageWrapper accessor \'_scheduledBalanceAdjustmentStorage\' must be \'private\', not \'internal\'.", "177603"],
-      [499, 4, 1, "ats/storage-accessor-private: ATS-PRIV-001: StorageWrapper accessor \'_scheduledCrossOrderedTaskStorage\' must be \'private\', not \'internal\'.", "177603"]
-    ],
-    "contracts/domain/asset/SnapshotsStorageWrapper.sol:732035984": [
-      [1038, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177658"]
-    ],
-    "contracts/domain/asset/VotingStorageWrapper.sol:1699818420": [
-      [180, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
-      [198, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"]
-    ],
-    "contracts/domain/asset/coupon/CouponStorageWrapper.sol:1759522121": [
-      [94, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
-      [362, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
-      [382, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177623"],
-      [402, 12, 1, "gas-strict-inequalities: GC: Non strict inequality found. Try converting to a strict one", "177621"]
-    ],
-    "contracts/domain/orchestrator/ClearingOps.sol:3707322407": [
-      [61, 4, 1, "function-max-lines: Function body contains 57 lines but allowed no more than 50 lines", "177603"],
-      [61, 4, 1, "gas-calldata-parameters: GC: [_clearingOperation] argument on Function [clearingTransferCreation] could be [calldata] if it\'s not being updated", "177603"],
-      [61, 4, 1, "gas-calldata-parameters: GC: [_operatorData] argument on Function [clearingTransferCreation] could be [calldata] if it\'s not being updated", "177603"],
-      [141, 4, 1, "function-max-lines: Function body contains 66 lines but allowed no more than 50 lines", "177603"],
-      [229, 4, 1, "function-max-lines: Function body contains 58 lines but allowed no more than 50 lines", "177603"],
-      [229, 4, 1, "gas-calldata-parameters: GC: [_operatorData] argument on Function [clearingHoldCreationCreation] could be [calldata] if it\'s not being updated", "177603"],
-      [415, 4, 1, "function-max-lines: Function body contains 52 lines but allowed no more than 50 lines", "177603"]
-    ],
-    "contracts/facets/amortization/IAmortization.sol:75918106": [
-      [32, 4, 1, "gas-struct-packing: GC: For [ AmortizationFor ] struct, packing seems inefficient. Try rearranging to achieve 32bytes slots", "177622"]
-    ],
-    "contracts/facets/coupon/ICouponTypes.sol:430258162": [
-      [74, 4, 1, "gas-struct-packing: GC: For [ CouponFor ] struct, packing seems inefficient. Try rearranging to achieve 32bytes slots", "177622"]
-    ],
-    "contracts/facets/dividend/IDividendTypes.sol:2960222249": [
-      [58, 4, 1, "gas-struct-packing: GC: For [ DividendFor ] struct, packing seems inefficient. Try rearranging to achieve 32bytes slots", "177622"]
-    ],
-    "contracts/factory/IFactory.sol:2734389583": [
-      [111, 4, 1, "gas-struct-packing: GC: For [ EquityDetailsData ] struct, packing seems inefficient. Try rearranging to achieve 32bytes slots", "177622"]
-    ],
-    "contracts/infrastructure/proxy/ResolverProxy.sol:3628079828": [
-      [52, 4, 1, "no-complex-fallback: Fallback function must be simple", "177603"]
-    ],
-    "contracts/infrastructure/utils/DecimalsLib.sol:1687496794": [
-      [6, 4, 1, "no-unused-import: imported name POW10_0 is not used", "177653"],
-      [7, 4, 1, "no-unused-import: imported name POW10_1 is not used", "177653"],
-      [8, 4, 1, "no-unused-import: imported name POW10_2 is not used", "177653"],
-      [9, 4, 1, "no-unused-import: imported name POW10_3 is not used", "177653"],
-      [10, 4, 1, "no-unused-import: imported name POW10_4 is not used", "177653"],
-      [11, 4, 1, "no-unused-import: imported name POW10_5 is not used", "177653"],
-      [12, 4, 1, "no-unused-import: imported name POW10_6 is not used", "177653"],
-      [13, 4, 1, "no-unused-import: imported name POW10_7 is not used", "177653"],
-      [14, 4, 1, "no-unused-import: imported name POW10_8 is not used", "177653"],
-      [15, 4, 1, "no-unused-import: imported name POW10_9 is not used", "177653"],
-      [16, 4, 1, "no-unused-import: imported name POW10_10 is not used", "177653"],
-      [17, 4, 1, "no-unused-import: imported name POW10_11 is not used", "177653"],
-      [18, 4, 1, "no-unused-import: imported name POW10_12 is not used", "177653"],
-      [19, 4, 1, "no-unused-import: imported name POW10_13 is not used", "177653"],
-      [20, 4, 1, "no-unused-import: imported name POW10_14 is not used", "177653"],
-      [21, 4, 1, "no-unused-import: imported name POW10_15 is not used", "177653"],
-      [22, 4, 1, "no-unused-import: imported name POW10_16 is not used", "177653"],
-      [23, 4, 1, "no-unused-import: imported name POW10_17 is not used", "177653"],
-      [24, 4, 1, "no-unused-import: imported name POW10_18 is not used", "177653"],
-      [78, 4, 1, "function-max-lines: Function body contains 70 lines but allowed no more than 50 lines", "177603"],
-      [79, 8, 1, "no-inline-assembly: Avoid to use inline assembly. It is acceptable only in rare cases", "177604"]
-    ]
-  }`
+  "contracts/domain/asset/AmortizationStorageWrapper.sol": {
+    "gas-strict-inequalities": 3
+  },
+  "contracts/domain/asset/ClearingStorageWrapper.sol": {
+    "gas-strict-inequalities": 1
+  },
+  "contracts/domain/asset/DividendStorageWrapper.sol": {
+    "gas-strict-inequalities": 3
+  },
+  "contracts/domain/asset/ERC20VotesStorageWrapper.sol": {
+    "gas-strict-inequalities": 2
+  },
+  "contracts/domain/asset/HoldStorageWrapper.sol": {
+    "gas-strict-inequalities": 1
+  },
+  "contracts/domain/asset/KpisStorageWrapper.sol": {
+    "gas-strict-inequalities": 1
+  },
+  "contracts/domain/asset/LockStorageWrapper.sol": {
+    "gas-strict-inequalities": 1
+  },
+  "contracts/domain/asset/ScheduledTasksStorageWrapper.sol": {
+    "ats/storage-accessor-private": 2,
+    "gas-strict-inequalities": 1
+  },
+  "contracts/domain/asset/SnapshotsStorageWrapper.sol": {
+    "gas-strict-inequalities": 1
+  },
+  "contracts/domain/asset/VotingStorageWrapper.sol": {
+    "gas-strict-inequalities": 2
+  },
+  "contracts/domain/asset/coupon/CouponStorageWrapper.sol": {
+    "gas-strict-inequalities": 4
+  },
+  "contracts/domain/orchestrator/ClearingOps.sol": {
+    "function-max-lines": 4,
+    "gas-calldata-parameters": 3
+  },
+  "contracts/facets/amortization/IAmortization.sol": {
+    "gas-struct-packing": 1
+  },
+  "contracts/facets/coupon/ICouponTypes.sol": { "gas-struct-packing": 1 },
+  "contracts/facets/dividend/IDividendTypes.sol": { "gas-struct-packing": 1 },
+  "contracts/factory/IFactory.sol": { "gas-struct-packing": 1 },
+  "contracts/infrastructure/proxy/ResolverProxy.sol": {
+    "no-complex-fallback": 1
+  },
+  "contracts/infrastructure/utils/DecimalsLib.sol": {
+    "function-max-lines": 1,
+    "no-inline-assembly": 1,
+    "no-unused-import": 19
+  }
+}
+`
 };

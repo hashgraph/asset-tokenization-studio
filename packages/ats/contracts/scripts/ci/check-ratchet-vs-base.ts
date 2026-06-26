@@ -15,8 +15,11 @@ import { readFileSync } from "node:fs";
 const RESULTS_PATH = "packages/ats/contracts/.betterer.results";
 const baseRef = process.argv[2] || "develop";
 
-// A serialised betterer file issue: [line, column, length, message, hash].
+// A serialised betterer file issue from the legacy per-issue format:
+// [line, column, length, message, hash].
 type SerialisedIssue = [number, number, number, string, string];
+// New format: file path -> ruleId -> warning count.
+type RuleCounts = Record<string, number>;
 type BettererResultsModule = Record<string, { value: string }>;
 
 /**
@@ -26,6 +29,11 @@ type BettererResultsModule = Record<string, { value: string }>;
  * template literal (`exports[name] = { value: `...` }`), so backslash escapes
  * (e.g. `it\'s`) only resolve once JS evaluates it. We evaluate the module the
  * same way betterer does, then JSON.parse each test's value.
+ *
+ * Two on-disk shapes are tolerated during the migration to per-rule counts:
+ *   - new: `{ "<file>": { "<ruleId>": <count> } }`
+ *   - legacy: `{ "<file>": [[line, col, len, "<ruleId>: <msg>", hash], ...] }`
+ * The base branch may still carry the legacy shape until it adopts the new one.
  */
 function parseResults(source: string): Map<string, number> {
   const counts = new Map<string, number>(); // ruleId -> count
@@ -33,14 +41,20 @@ function parseResults(source: string): Map<string, number> {
   // eslint-disable-next-line no-new-func
   new Function("exports", source)(exportsObject);
   for (const entry of Object.values(exportsObject)) {
-    const byFile = JSON.parse(entry.value) as Record<string, SerialisedIssue[]>;
-    for (const issues of Object.values(byFile)) {
-      for (const issue of issues) {
-        const message = issue[3] ?? "";
-        // Issues are recorded as `"<ruleId>: <message>"` by `.betterer.ts`; the
-        // ruleId is the text before the first colon (solhint ruleIds have none).
-        const ruleId = message.slice(0, message.indexOf(":")) || "unknown";
-        counts.set(ruleId, (counts.get(ruleId) ?? 0) + 1);
+    const byFile = JSON.parse(entry.value) as Record<string, RuleCounts | SerialisedIssue[]>;
+    for (const fileResult of Object.values(byFile)) {
+      if (Array.isArray(fileResult)) {
+        // Legacy per-issue format: one entry per warning, ruleId before the colon.
+        for (const issue of fileResult) {
+          const message = issue[3] ?? "";
+          const ruleId = message.slice(0, message.indexOf(":")) || "unknown";
+          counts.set(ruleId, (counts.get(ruleId) ?? 0) + 1);
+        }
+      } else {
+        // New per-rule count format.
+        for (const [ruleId, count] of Object.entries(fileResult)) {
+          counts.set(ruleId, (counts.get(ruleId) ?? 0) + count);
+        }
       }
     }
   }

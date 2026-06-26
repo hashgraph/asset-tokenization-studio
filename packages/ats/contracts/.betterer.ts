@@ -1,14 +1,19 @@
 // SPDX-License-Identifier: Apache-2.0
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 
-import { BettererFileTest } from "@betterer/betterer";
+import { BettererTest } from "@betterer/betterer";
 
-// Solhint warning ratchet for the ATS contracts package. Snapshots every
-// solhint *warning* into `.betterer.results` so CI can guarantee the count
-// only ever stays equal or decreases (enforced by the `lint-ratchet` job in
-// `103-flow-ats-lint.yaml`). Errors are excluded — they already hard-fail `lint:sol`.
+// Solhint warning ratchet for the ATS contracts package. Snapshots solhint
+// *warning* counts per file and per rule into `.betterer.results` so CI can
+// guarantee the count only ever stays equal or decreases (enforced by the
+// `lint-ratchet` job in `103-flow-ats-lint.yaml`). Errors are excluded — they
+// already hard-fail `lint:sol`.
+//
+// The baseline records only a count per (file, rule), never line/column or
+// per-issue hashes: it changes solely when a file's warning count for a rule
+// changes, not when unrelated edits shift a warned line. That keeps the
+// committed file stable and merge-conflict resistant. On a conflict, do not
+// hand-edit it — regenerate with `npm run ats:contracts:lint:fix`.
 
 const CONTRACTS_GLOB = "contracts/**/*.sol";
 const SOLHINT_CONFIG = "solhint.config.js";
@@ -47,33 +52,58 @@ function runSolhint(): SolhintMessage[] {
   return start === -1 ? [] : (JSON.parse(stdout.slice(start)) as SolhintMessage[]);
 }
 
-const test = new BettererFileTest(async (_filePaths, fileTestResult) => {
+// Repo-relative file path -> solhint ruleId -> warning count.
+type WarningCounts = Record<string, Record<string, number>>;
+
+function countWarnings(): WarningCounts {
   const warnings = runSolhint().filter((m) => m.severity === "Warning" && !GENERATED_EXCLUDE.test(m.filePath));
 
-  const byFile = new Map<string, SolhintMessage[]>();
+  const raw: WarningCounts = {};
   for (const warning of warnings) {
-    const absolutePath = resolve(process.cwd(), warning.filePath);
-    const bucket = byFile.get(absolutePath);
-    if (bucket) {
-      bucket.push(warning);
-    } else {
-      byFile.set(absolutePath, [warning]);
-    }
+    const byRule = (raw[warning.filePath] ??= {});
+    byRule[warning.ruleId] = (byRule[warning.ruleId] ?? 0) + 1;
   }
 
-  for (const [absolutePath, fileWarnings] of byFile) {
-    const file = fileTestResult.addFile(absolutePath, readFileSync(absolutePath, "utf8"));
-    for (const warning of fileWarnings) {
-      // 0-indexed line/column; the message embeds the ruleId so a swap of one
-      // rule's warning for another's changes the issue hash and is caught.
-      file.addIssue(
-        Math.max(0, warning.line - 1),
-        Math.max(0, warning.column - 1),
-        1,
-        `${warning.ruleId}: ${warning.message}`,
-      );
+  // Deterministic key order so the serialised file is stable across solhint
+  // runs regardless of the order solhint reports findings in.
+  const sorted: WarningCounts = {};
+  for (const filePath of Object.keys(raw).sort()) {
+    const byRule = raw[filePath];
+    sorted[filePath] = {};
+    for (const ruleId of Object.keys(byRule).sort()) {
+      sorted[filePath][ruleId] = byRule[ruleId];
     }
   }
+  return sorted;
+}
+
+// Ratchet constraint: the result is `worse` if any (file, rule) count grows,
+// `better` if some count shrinks and none grows, otherwise `same`. The return
+// values match `@betterer/constraints`' `BettererConstraintResult` string enum,
+// so they are returned as literals without pulling in that package.
+function ratchet(result: WarningCounts, expected: WarningCounts): "better" | "same" | "worse" {
+  let decreased = false;
+  for (const filePath of new Set([...Object.keys(result), ...Object.keys(expected)])) {
+    const current = result[filePath] ?? {};
+    const previous = expected[filePath] ?? {};
+    for (const ruleId of new Set([...Object.keys(current), ...Object.keys(previous)])) {
+      const currentCount = current[ruleId] ?? 0;
+      const previousCount = previous[ruleId] ?? 0;
+      if (currentCount > previousCount) {
+        return "worse";
+      }
+      if (currentCount < previousCount) {
+        decreased = true;
+      }
+    }
+  }
+  return decreased ? "better" : "same";
+}
+
+const test = new BettererTest({
+  test: async (): Promise<WarningCounts> => countWarnings(),
+  constraint: async (result: WarningCounts, expected: WarningCounts) => ratchet(result, expected),
+  goal: async (result: WarningCounts) => Object.keys(result).length === 0,
 });
 
 export default {
