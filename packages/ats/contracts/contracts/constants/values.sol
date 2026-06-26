@@ -32,34 +32,6 @@ bytes32 constant DEFAULT_PARTITION = 0x00000000000000000000000000000000000000000
 uint256 constant SNAPSHOT_RESULT_ID = 0;
 uint256 constant COUPON_LISTING_RESULT_ID = 1;
 
-// TODO: remove — these transfer/operation error-status IDs are unused across the codebase.
-bytes1 constant IS_PAUSED_ERROR_ID = 0x40;
-bytes1 constant OPERATOR_ACCOUNT_BLOCKED_ERROR_ID = 0x41;
-bytes1 constant FROM_ACCOUNT_BLOCKED_ERROR_ID = 0x42;
-bytes1 constant TO_ACCOUNT_BLOCKED_ERROR_ID = 0x43;
-bytes1 constant FROM_ACCOUNT_NULL_ERROR_ID = 0x44;
-bytes1 constant TO_ACCOUNT_NULL_ERROR_ID = 0x45;
-bytes1 constant NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID = 0x46;
-bytes1 constant IS_NOT_OPERATOR_ERROR_ID = 0x47;
-bytes1 constant WRONG_PARTITION_ERROR_ID = 0x48;
-bytes1 constant ALLOWANCE_REACHED_ERROR_ID = 0x49;
-bytes1 constant FROM_ACCOUNT_KYC_ERROR_ID = 0x50;
-bytes1 constant TO_ACCOUNT_KYC_ERROR_ID = 0x51;
-bytes1 constant CLEARING_ACTIVE_ERROR_ID = 0x52;
-bytes1 constant ADDRESS_RECOVERED_OPERATOR_ERROR_ID = 0x53;
-bytes1 constant ADDRESS_RECOVERED_FROM_ERROR_ID = 0x54;
-bytes1 constant ADDRESS_RECOVERED_TO_ERROR_ID = 0x55;
-
-// TODO: remove — unused across the codebase.
-bytes1 constant SUCCESS = 0x00;
-
-// TODO: remove — these number-to-string conversion helpers are unused across the codebase.
-uint8 constant TEN = 10;
-uint8 constant UINT_WITH_ONE_DIGIT = 9;
-uint8 constant ASCII_9 = 57;
-uint8 constant ASCII_7 = 55;
-uint8 constant ASCII_0 = 48;
-
 /// @dev ID for CorporateActionsStorageWrapper.addCorporateAction()
 bytes4 constant KPI_CA_ADD_ACTION = 0x00000001;
 
