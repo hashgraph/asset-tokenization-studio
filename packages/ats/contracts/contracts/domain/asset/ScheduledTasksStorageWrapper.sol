@@ -476,6 +476,40 @@ library ScheduledTasksStorageWrapper {
     }
 
     /**
+     * @notice Returns the storage pointer for scheduled balance adjustment tasks.
+     * @dev Uses the fixed unstructured storage slot reserved for balance adjustment tasks.
+     * @return scheduledBalanceAdjustments_ Storage reference for the adjustment task queue.
+     */
+    function _scheduledBalanceAdjustmentStorage()
+        internal
+        pure
+        returns (ScheduledTasksDataStorage storage scheduledBalanceAdjustments_)
+    {
+        bytes32 position = STORAGE_LOCATION_SCHEDULED_BALANCE_ADJUSTMENTS;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            scheduledBalanceAdjustments_.slot := position
+        }
+    }
+
+    /**
+     * @notice Returns the storage pointer for scheduled cross-ordered tasks.
+     * @dev Uses the fixed unstructured storage slot reserved for cross-ordered tasks.
+     * @return scheduledCrossOrderedTasks_ Storage reference for the cross-ordered task queue.
+     */
+    function _scheduledCrossOrderedTaskStorage()
+        internal
+        pure
+        returns (ScheduledTasksDataStorage storage scheduledCrossOrderedTasks_)
+    {
+        bytes32 position = STORAGE_LOCATION_SCHEDULED_CROSS_ORDERED_TASKS;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            scheduledCrossOrderedTasks_.slot := position
+        }
+    }
+
+    /**
      * @notice Triggers one due sub-task for a recognised cross-ordered task type.
      * @dev Returns silently for unknown task types, empty queues or sub-tasks that are not due.
      *      Pops the sub-task before dispatch; a failed execution reverts the entire call.
@@ -574,40 +608,6 @@ library ScheduledTasksStorageWrapper {
         // solhint-disable-next-line no-inline-assembly
         assembly {
             scheduledCouponListing_.slot := position
-        }
-    }
-
-    /**
-     * @notice Returns the storage pointer for scheduled balance adjustment tasks.
-     * @dev Uses the fixed unstructured storage slot reserved for balance adjustment tasks.
-     * @return scheduledBalanceAdjustments_ Storage reference for the adjustment task queue.
-     */
-    function _scheduledBalanceAdjustmentStorage()
-        private
-        pure
-        returns (ScheduledTasksDataStorage storage scheduledBalanceAdjustments_)
-    {
-        bytes32 position = STORAGE_LOCATION_SCHEDULED_BALANCE_ADJUSTMENTS;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            scheduledBalanceAdjustments_.slot := position
-        }
-    }
-
-    /**
-     * @notice Returns the storage pointer for scheduled cross-ordered tasks.
-     * @dev Uses the fixed unstructured storage slot reserved for cross-ordered tasks.
-     * @return scheduledCrossOrderedTasks_ Storage reference for the cross-ordered task queue.
-     */
-    function _scheduledCrossOrderedTaskStorage()
-        private
-        pure
-        returns (ScheduledTasksDataStorage storage scheduledCrossOrderedTasks_)
-    {
-        bytes32 position = STORAGE_LOCATION_SCHEDULED_CROSS_ORDERED_TASKS;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            scheduledCrossOrderedTasks_.slot := position
         }
     }
 

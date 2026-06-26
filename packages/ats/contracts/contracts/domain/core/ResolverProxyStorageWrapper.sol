@@ -65,6 +65,32 @@ library ResolverProxyStorageWrapper {
     }
 
     /**
+     * @notice Overwrites the configuration identifier in the stored V2 configuration.
+     * @dev Read-modify-write over the encoded V2 envelope: decodes the current configuration,
+     *      replaces `configurationId`, and re-persists it. Reverts if no V2 configuration is set.
+     * @param _configId The new configuration identifier.
+     */
+    function setResolverProxyConfigurationId(bytes32 _configId) internal {
+        IResolverProxy.ResolverProxyConfigurationV2
+            memory resolverProxyConfigurationV2 = getResolverProxyConfigurationV2();
+        resolverProxyConfigurationV2.configurationId = _configId;
+        setResolverProxyConfigurationV2(resolverProxyConfigurationV2);
+    }
+
+    /**
+     * @notice Overwrites the configuration version in the stored V2 configuration.
+     * @dev Read-modify-write over the encoded V2 envelope: decodes the current configuration,
+     *      replaces `configurationVersion`, and re-persists it. Reverts if no V2 configuration is set.
+     * @param _version The new configuration version.
+     */
+    function setResolverProxyVersion(uint256 _version) internal {
+        IResolverProxy.ResolverProxyConfigurationV2
+            memory resolverProxyConfigurationV2 = getResolverProxyConfigurationV2();
+        resolverProxyConfigurationV2.configurationVersion = _version;
+        setResolverProxyConfigurationV2(resolverProxyConfigurationV2);
+    }
+
+    /**
      * @notice Returns the `BusinessLogicResolver` contract that supplies the facet selectors.
      * @return The active resolver instance for this proxy.
      */
