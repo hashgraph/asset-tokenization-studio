@@ -269,7 +269,7 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
     /// @dev Encodes the task type and inserts it into cross-ordered task storage via the lib.
     function forceAddCrossOrderedTask(uint256 timestamp, bytes32 taskType) external override {
         ScheduledTasksLib.addScheduledTask(
-            ScheduledTasksStorageWrapper.scheduledCrossOrderedTaskStorage(),
+            ScheduledTasksStorageWrapper._scheduledCrossOrderedTaskStorage(),
             timestamp,
             abi.encode(taskType)
         );
@@ -278,14 +278,14 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
     /// @inheritdoc IMockDiamondCut
     /// @dev Removes the tail entry from balance-adjustment storage via the lib.
     function forcePopBalanceAdjustmentSubTask() external override {
-        ScheduledTasksLib.popScheduledTask(ScheduledTasksStorageWrapper.scheduledBalanceAdjustmentStorage());
+        ScheduledTasksLib.popScheduledTask(ScheduledTasksStorageWrapper._scheduledBalanceAdjustmentStorage());
     }
 
     /// @inheritdoc IMockDiamondCut
     /// @dev Inserts a balance-adjustment sub-task with `bytes32(0)` data at the given timestamp.
     function forceAddRawBalanceAdjustmentSubTask(uint256 timestamp) external override {
         ScheduledTasksLib.addScheduledTask(
-            ScheduledTasksStorageWrapper.scheduledBalanceAdjustmentStorage(),
+            ScheduledTasksStorageWrapper._scheduledBalanceAdjustmentStorage(),
             timestamp,
             abi.encode(bytes32(0))
         );
