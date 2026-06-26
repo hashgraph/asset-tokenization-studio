@@ -22,9 +22,9 @@ _Restricted to `ROLE_CORPORATE_ACTION`; gated by `onlyUnpaused` and `onlyMatchin
 
 #### Parameters
 
-| Name       | Type    | Description                                       |
-| ---------- | ------- | ------------------------------------------------- |
-| dividendId | uint256 | One-indexed identifier of the dividend to cancel. |
+| Name       | Type    | Description |
+| ---------- | ------- | ----------- |
+| dividendId | uint256 | undefined   |
 
 #### Returns
 
@@ -44,9 +44,9 @@ _Restricted to `ROLE_CORPORATE_ACTION_FORCE_CANCEL`; gated by `onlyUnpaused` and
 
 #### Parameters
 
-| Name       | Type    | Description                                             |
-| ---------- | ------- | ------------------------------------------------------- |
-| dividendId | uint256 | One-indexed identifier of the dividend to force-cancel. |
+| Name       | Type    | Description |
+| ---------- | ------- | ----------- |
+| dividendId | uint256 | undefined   |
 
 #### Returns
 
@@ -66,9 +66,9 @@ _Reverts via `onlyMatchingActionType` if `dividendId` does not match the dividen
 
 #### Parameters
 
-| Name       | Type    | Description                      |
-| ---------- | ------- | -------------------------------- |
-| dividendId | uint256 | One-indexed dividend identifier. |
+| Name       | Type    | Description |
+| ---------- | ------- | ----------- |
+| dividendId | uint256 | undefined   |
 
 #### Returns
 
@@ -89,10 +89,10 @@ _Reverts via `onlyMatchingActionType` if `dividendId` does not match the dividen
 
 #### Parameters
 
-| Name       | Type    | Description                      |
-| ---------- | ------- | -------------------------------- |
-| dividendId | uint256 | One-indexed dividend identifier. |
-| account    | address | Holder address to query.         |
+| Name       | Type    | Description |
+| ---------- | ------- | ----------- |
+| dividendId | uint256 | undefined   |
+| account    | address | undefined   |
 
 #### Returns
 
@@ -112,10 +112,10 @@ _Reverts via `onlyMatchingActionType` if `dividendId` does not match the dividen
 
 #### Parameters
 
-| Name       | Type    | Description                      |
-| ---------- | ------- | -------------------------------- |
-| dividendId | uint256 | One-indexed dividend identifier. |
-| account    | address | Holder address to query.         |
+| Name       | Type    | Description |
+| ---------- | ------- | ----------- |
+| dividendId | uint256 | undefined   |
+| account    | address | undefined   |
 
 #### Returns
 

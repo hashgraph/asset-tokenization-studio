@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ILoan } from "../../facets/loan/ILoan.sol";
 import { ITransferByPartition } from "../../facets/transferByPartition/ITransferByPartition.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title MockLoanHolding
@@ -22,12 +23,12 @@ contract MockLoanHolding is ITransferByPartition {
 
     /**
      * @notice Sets the collateral value and performance classification.
-     * @param totalCollateralValue_ Total collateral backing the loan.
-     * @param performanceStatus_    Current repayment performance category.
+     * @param _newTotalCollateralValue Total collateral backing the loan.
+     * @param _newPerformanceStatus    Current repayment performance category.
      */
-    function setLoanState(uint256 totalCollateralValue_, ILoan.PerformanceStatus performanceStatus_) external {
-        _totalCollateralValue = totalCollateralValue_;
-        _performanceStatus = performanceStatus_;
+    function setLoanState(uint256 _newTotalCollateralValue, ILoan.PerformanceStatus _newPerformanceStatus) external {
+        _totalCollateralValue = _newTotalCollateralValue;
+        _performanceStatus = _newPerformanceStatus;
     }
 
     /**
@@ -56,7 +57,7 @@ contract MockLoanHolding is ITransferByPartition {
         BasicTransferInfo calldata _basicTransferInfo,
         bytes calldata _data
     ) external returns (bytes32) {
-        address from = msg.sender;
+        address from = EvmAccessors.getMsgSender();
         address to = _basicTransferInfo.to;
         uint256 value = _basicTransferInfo.value;
 

@@ -13,7 +13,7 @@ _Inherits `IDividendTypes` for the shared struct tier (`Dividend`, `RegisteredDi
 ### cancelDividend
 
 ```solidity
-function cancelDividend(uint256 dividendId) external nonpayable returns (bool success_)
+function cancelDividend(uint256 _dividendId) external nonpayable returns (bool success_)
 ```
 
 Cancels a previously scheduled dividend before its execution date is reached.
@@ -22,9 +22,9 @@ _Restricted to `ROLE_CORPORATE_ACTION` and gated by the unpaused state. Reverts 
 
 #### Parameters
 
-| Name       | Type    | Description                                       |
-| ---------- | ------- | ------------------------------------------------- |
-| dividendId | uint256 | One-indexed identifier of the dividend to cancel. |
+| Name         | Type    | Description                                       |
+| ------------ | ------- | ------------------------------------------------- |
+| \_dividendId | uint256 | One-indexed identifier of the dividend to cancel. |
 
 #### Returns
 
@@ -35,7 +35,7 @@ _Restricted to `ROLE_CORPORATE_ACTION` and gated by the unpaused state. Reverts 
 ### forceCancelDividend
 
 ```solidity
-function forceCancelDividend(uint256 dividendId) external nonpayable returns (bool success_)
+function forceCancelDividend(uint256 _dividendId) external nonpayable returns (bool success_)
 ```
 
 Force-cancels a dividend regardless of its execution date.
@@ -44,9 +44,9 @@ _Restricted to `ROLE_CORPORATE_ACTION_FORCE_CANCEL` and gated by the unpaused st
 
 #### Parameters
 
-| Name       | Type    | Description                                             |
-| ---------- | ------- | ------------------------------------------------------- |
-| dividendId | uint256 | One-indexed identifier of the dividend to force-cancel. |
+| Name         | Type    | Description                                             |
+| ------------ | ------- | ------------------------------------------------------- |
+| \_dividendId | uint256 | One-indexed identifier of the dividend to force-cancel. |
 
 #### Returns
 
@@ -57,7 +57,7 @@ _Restricted to `ROLE_CORPORATE_ACTION_FORCE_CANCEL` and gated by the unpaused st
 ### getDividend
 
 ```solidity
-function getDividend(uint256 dividendId) external view returns (struct IDividendTypes.RegisteredDividend registeredDividend_, bool isDisabled_)
+function getDividend(uint256 _dividendId) external view returns (struct IDividendTypes.RegisteredDividend registeredDividend_, bool isDisabled_)
 ```
 
 Returns the persisted dividend record together with its cancelled flag.
@@ -66,9 +66,9 @@ _Reverts via `onlyMatchingActionType` if `dividendId` does not resolve to a divi
 
 #### Parameters
 
-| Name       | Type    | Description                      |
-| ---------- | ------- | -------------------------------- |
-| dividendId | uint256 | One-indexed dividend identifier. |
+| Name         | Type    | Description                      |
+| ------------ | ------- | -------------------------------- |
+| \_dividendId | uint256 | One-indexed dividend identifier. |
 
 #### Returns
 
@@ -80,7 +80,7 @@ _Reverts via `onlyMatchingActionType` if `dividendId` does not resolve to a divi
 ### getDividendAmountFor
 
 ```solidity
-function getDividendAmountFor(uint256 dividendId, address account) external view returns (struct IDividendTypes.DividendAmountFor dividendAmountFor_)
+function getDividendAmountFor(uint256 _dividendId, address _account) external view returns (struct IDividendTypes.DividendAmountFor dividendAmountFor_)
 ```
 
 Returns the fractional dividend amount payable to a specific holder.
@@ -89,10 +89,10 @@ _Reverts via `onlyMatchingActionType` if `dividendId` does not resolve to a divi
 
 #### Parameters
 
-| Name       | Type    | Description                      |
-| ---------- | ------- | -------------------------------- |
-| dividendId | uint256 | One-indexed dividend identifier. |
-| account    | address | Holder address to query.         |
+| Name         | Type    | Description                      |
+| ------------ | ------- | -------------------------------- |
+| \_dividendId | uint256 | One-indexed dividend identifier. |
+| \_account    | address | Holder address to query.         |
 
 #### Returns
 
@@ -103,7 +103,7 @@ _Reverts via `onlyMatchingActionType` if `dividendId` does not resolve to a divi
 ### getDividendFor
 
 ```solidity
-function getDividendFor(uint256 dividendId, address account) external view returns (struct IDividendTypes.DividendFor dividendFor_)
+function getDividendFor(uint256 _dividendId, address _account) external view returns (struct IDividendTypes.DividendFor dividendFor_)
 ```
 
 Returns the per-account view of a dividend, including the holder&#39;s balance at the record date and the metadata required to compute the payable amount.
@@ -112,10 +112,10 @@ _Reverts via `onlyMatchingActionType` if `dividendId` does not resolve to a divi
 
 #### Parameters
 
-| Name       | Type    | Description                      |
-| ---------- | ------- | -------------------------------- |
-| dividendId | uint256 | One-indexed dividend identifier. |
-| account    | address | Holder address to query.         |
+| Name         | Type    | Description                      |
+| ------------ | ------- | -------------------------------- |
+| \_dividendId | uint256 | One-indexed dividend identifier. |
+| \_account    | address | Holder address to query.         |
 
 #### Returns
 
@@ -150,14 +150,14 @@ _Callable once; subsequent calls revert with `FacetAlreadyRegistered`. Requires 
 ### setDividend
 
 ```solidity
-function setDividend(IDividendTypes.Dividend newDividend) external nonpayable returns (uint256 dividendId_)
+function setDividend(IDividendTypes.Dividend _newDividend) external nonpayable returns (uint256 dividendId_)
 ```
 
 #### Parameters
 
-| Name        | Type                    | Description |
-| ----------- | ----------------------- | ----------- |
-| newDividend | IDividendTypes.Dividend | undefined   |
+| Name          | Type                    | Description |
+| ------------- | ----------------------- | ----------- |
+| \_newDividend | IDividendTypes.Dividend | undefined   |
 
 #### Returns
 

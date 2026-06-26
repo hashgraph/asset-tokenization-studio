@@ -190,9 +190,9 @@ interface ILoan {
      * @dev Requires `ROLE_LOAN_MANAGER`. Token must be operational, activated, and unpaused.
      *      All timestamps are validated; `originatorAccount` and `servicerAccount` must be
      *      non-zero. Emits {LoanDetailsSet} on success.
-     * @param loanDetailsData_ Updated loan descriptor to persist.
+     * @param _loanDetailsData Updated loan descriptor to persist.
      */
-    function setLoanDetails(LoanDetailsData calldata loanDetailsData_) external;
+    function setLoanDetails(LoanDetailsData calldata _loanDetailsData) external;
 
     /**
      * @notice Returns the current loan details.

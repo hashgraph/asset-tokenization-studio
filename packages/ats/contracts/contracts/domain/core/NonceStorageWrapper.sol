@@ -33,7 +33,7 @@ library NonceStorageWrapper {
      */
     function setNonceFor(address _account) internal {
         unchecked {
-            ++nonceStorage().nonces[_account];
+            ++_nonceStorage().nonces[_account];
         }
     }
 
@@ -43,7 +43,7 @@ library NonceStorageWrapper {
      * @return The current nonce value, zero if never set.
      */
     function getNonceFor(address _account) internal view returns (uint256) {
-        return nonceStorage().nonces[_account];
+        return _nonceStorage().nonces[_account];
     }
 
     /**
@@ -52,7 +52,7 @@ library NonceStorageWrapper {
      *      `STORAGE_LOCATION_NONCE`.
      * @return nonces_ Storage reference to the `NonceDataStorage` struct.
      */
-    function nonceStorage() private pure returns (NonceDataStorage storage nonces_) {
+    function _nonceStorage() private pure returns (NonceDataStorage storage nonces_) {
         bytes32 position = STORAGE_LOCATION_NONCE;
         // solhint-disable-next-line no-inline-assembly
         assembly {

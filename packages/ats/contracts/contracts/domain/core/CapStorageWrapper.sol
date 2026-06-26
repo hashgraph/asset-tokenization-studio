@@ -41,7 +41,7 @@ library CapStorageWrapper {
      * @param partitionCap Array of partition-specific caps to be recorded.
      */
     function initializeCap(uint256 maxSupply, ICap.PartitionCap[] calldata partitionCap) internal {
-        CapDataStorage storage cs = capStorage();
+        CapDataStorage storage cs = _capStorage();
         cs.maxSupply = maxSupply;
         uint256 length = partitionCap.length;
         for (uint256 i; i < length; ) {
@@ -67,7 +67,7 @@ library CapStorageWrapper {
      */
     function setMaxSupply(uint256 _maxSupply, uint256 _timestamp) internal returns (uint256 previousMaxSupply) {
         previousMaxSupply = getMaxSupplyAdjustedAt(_timestamp);
-        capStorage().maxSupply = _maxSupply;
+        _capStorage().maxSupply = _maxSupply;
     }
 
     /**
@@ -86,7 +86,7 @@ library CapStorageWrapper {
         uint256 _timestamp
     ) internal returns (uint256 previousMaxSupplyByPartition) {
         previousMaxSupplyByPartition = getMaxSupplyByPartitionAdjustedAt(_partition, _timestamp);
-        capStorage().maxSupplyByPartition[_partition] = _maxSupply;
+        _capStorage().maxSupplyByPartition[_partition] = _maxSupply;
     }
 
     /**
@@ -96,7 +96,7 @@ library CapStorageWrapper {
      * @param factor The scaling factor (e.g., 10x, 100x for decimal adjustments).
      */
     function adjustMaxSupply(uint256 factor) internal {
-        CapDataStorage storage cs = capStorage();
+        CapDataStorage storage cs = _capStorage();
         uint256 limit = MAX_UINT256 / factor;
         cs.maxSupply = (cs.maxSupply > limit) ? MAX_UINT256 : cs.maxSupply * factor;
     }
@@ -109,7 +109,7 @@ library CapStorageWrapper {
      * @param factor The scaling factor.
      */
     function adjustMaxSupplyByPartition(bytes32 partition, uint256 factor) internal {
-        CapDataStorage storage cs = capStorage();
+        CapDataStorage storage cs = _capStorage();
         uint256 limit = MAX_UINT256 / factor;
         cs.maxSupplyByPartition[partition] = (cs.maxSupplyByPartition[partition] > limit)
             ? MAX_UINT256
@@ -200,7 +200,7 @@ library CapStorageWrapper {
      * @return The adjusted global supply cap at that timestamp.
      */
     function getMaxSupplyAdjustedAt(uint256 timestamp) internal view returns (uint256) {
-        CapDataStorage storage cs = capStorage();
+        CapDataStorage storage cs = _capStorage();
         (uint256 pendingAbaf, ) = AdjustBalancesStorageWrapper.getPendingScheduledBalanceAdjustmentsAt(
             timestamp,
             false
@@ -219,7 +219,7 @@ library CapStorageWrapper {
      * @return The adjusted partition supply cap at that timestamp.
      */
     function getMaxSupplyByPartitionAdjustedAt(bytes32 partition, uint256 timestamp) internal view returns (uint256) {
-        CapDataStorage storage cs = capStorage();
+        CapDataStorage storage cs = _capStorage();
         uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(
             AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp),
             AdjustBalancesStorageWrapper.getLabafByPartition(partition)
@@ -247,7 +247,7 @@ library CapStorageWrapper {
      *      allowing access to the cap data at its designated storage location.
      * @return cap_ A storage reference to `CapDataStorage` at the ERC-7201 slot.
      */
-    function capStorage() private pure returns (CapDataStorage storage cap_) {
+    function _capStorage() private pure returns (CapDataStorage storage cap_) {
         bytes32 position = STORAGE_LOCATION_CAP;
         // solhint-disable-next-line no-inline-assembly
         assembly {

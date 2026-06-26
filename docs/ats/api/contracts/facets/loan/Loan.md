@@ -6,7 +6,7 @@ _Asset Tokenization Studio Team_
 
 Abstract implementation of `ILoan`.
 
-_Delegates all storage reads and writes to `LoanStorageWrapper`. Access guards are enforced via `Modifiers`; date validation uses `onlyValidTimestamp` and `validateDates`._
+_Delegates all storage reads and writes to `LoanStorageWrapper`. Access guards are enforced via `Modifiers`; date validation uses `onlyValidTimestamp` and `onlyValidDates`._
 
 ## Methods
 

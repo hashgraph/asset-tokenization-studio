@@ -41,9 +41,9 @@ interface ICore {
 
     /**
      * @notice Initializes the Core domain (name, symbol, decimals and the rest of the ERC20 metadata).
-     * @param metadata The full ERC-20 metadata bundle to persist.
+     * @param _metadata The full ERC-20 metadata bundle to persist.
      */
-    function initializeCore(ERC20Metadata calldata metadata) external;
+    function initializeCore(ERC20Metadata calldata _metadata) external;
 
     /**
      * @notice Updates the token name. Restricted to the TREX owner role.

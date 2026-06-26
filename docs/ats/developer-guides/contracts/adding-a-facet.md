@@ -128,6 +128,18 @@ interface IRewards {
 }
 ```
 
+#### Type placement
+
+| Usage                                   | Where to declare                                           |
+| --------------------------------------- | ---------------------------------------------------------- |
+| `struct` / `enum` used by **1 facet**   | Inline on that facet's interface (`IFeature.sol`)          |
+| `struct` / `enum` used by **2+ facets** | Shared `I<Domain>Types.sol`                                |
+| `event`                                 | Writer interface (`IFeature.sol`) — never on `I*Types.sol` |
+| `error` (single facet)                  | Writer interface of the facet that reverts with it         |
+| `error` (cross-domain)                  | `ICommonErrors.sol`                                        |
+
+A facet interface inherits a types interface **only if it uses at least one symbol from it**.
+
 ### Step 2: Create Storage Wrapper (if needed)
 
 If your facet requires custom storage, create a storage wrapper under
@@ -138,10 +150,29 @@ If your facet requires custom storage, create a storage wrapper under
 → **R3 Single-slot scalars (uint256, bytes32, string)** → **R4 Aggregates
 (mapping, array, EnumerableSet, checkpoint arrays)** → **APPEND-ONLY ZONE**.
 New fields go below the marker — the boundary is greppable and audit-visible.
-All four region banners are **always present, in canonical order, even when a region has no
+All five region banners are **always present, in canonical order, even when a region has no
 fields** — the empty banners are scaffolding that fixes each field's insertion point and the
 region numbering. Never renumber a region when its only field is removed; leave the empty
 banner in place.
+
+Every storage struct must follow the 5-region layout. All five region banner comments are **always present**, even when a region has no fields:
+
+```solidity
+struct CapDataStorage {
+  // ─── R1 Lifecycle ──────────────────────────────────────────
+  bool isInitialized;
+  // ─── R2 Packed scalars ─────────────────────────────────────
+
+  // ─── R3 Single-slot scalars ────────────────────────────────
+  uint256 maxSupply;
+
+  // ─── R4 Aggregates ─────────────────────────────────────────
+
+  // ─── APPEND-ONLY ZONE ──────────────────────────────────────
+  // New fields must be added below this line.
+  // Reordering fields above this marker requires a major version bump and clean redeploy.
+}
+```
 
 **File**: `contracts/domain/asset/RewardsStorageWrapper.sol`
 
@@ -363,6 +394,31 @@ contract RewardsFacet is Rewards, IStaticFunctionSelectors {
     ids[0] = type(IRewards).interfaceId;
     return ids;
   }
+}
+```
+
+#### `getStaticFunctionSelectors` — descending `unchecked` pattern
+
+**Use the descending `unchecked` pattern — the ascending form is prohibited.**
+
+```solidity
+// ✅ descending — mandatory for new/modified facets
+function getStaticFunctionSelectors() external pure override returns (bytes4[] memory r) {
+    uint256 i = 3;
+    r = new bytes4[](i);
+    unchecked {
+        r[--i] = this.getRewards.selector;
+        r[--i] = this.distributeReward.selector;
+        r[--i] = this.initialize_Rewards.selector;
+    }
+}
+
+// ❌ ascending — forbidden
+function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+    bytes4[] memory selectors = new bytes4[](3);
+    uint256 i = 0;
+    selectors[i++] = this.initialize_Rewards.selector;
+    ...
 }
 ```
 
@@ -593,6 +649,13 @@ _before_ configurations are created — see
 
 ## Best Practices
 
+### ERC-3643 import boundary
+
+**Hard rule.** Files under `contracts/constants/`, `contracts/domain/`, `contracts/facets/layer_1-2/`,
+and `contracts/factory/Factory.sol` must **never** import from `contracts/factory/ERC3643/`.
+When types need to be shared, the canonical definition lives at the neutral location;
+the T-REX side re-exports or keeps an isolated copy.
+
 ### Naming Conventions
 
 | Element                 | Convention                      | Example                    |
@@ -605,6 +668,13 @@ _before_ configurations are created — see
 | Storage position        | STORAGE_LOCATION_FEATURE        | `STORAGE_LOCATION_REWARDS` |
 | Role                    | ROLE_NAME                       | `ROLE_REWARDS_DISTRIBUTOR` |
 | Initialization          | initializeFeatureName           | `initializeRewards`        |
+
+#### Library `internal` functions — `_` prefix convention
+
+**Library `internal` functions — no `_` prefix by default.**
+These functions are inlined into the calling contract's bytecode at compile time and form the library's composable API, always called as `LibraryName.fn()`. Using `_` would imply they are hidden implementation details when they are not.
+
+**Optional exception — explicit call-type annotation:** In libraries that mix `internal` (inlined, bytecode-composed) and `external` (DELEGATECALL) functions, a team may adopt `_` on all `internal` functions as a visual signal distinguishing bytecode composition from DELEGATECALL dispatch. If adopted, apply it consistently across the entire library — never mixed.
 
 ### Storage Management
 
@@ -620,6 +690,28 @@ _before_ configurations are created — see
 3. **Validate addresses**: `validateAddress(_tokenHolder)`
 4. **Check KYC status**: Verify compliance for sensitive operations
 
+#### Initializer modifier — `onlyNot<Feature>Initialized`
+
+Every initializer MUST apply an `onlyNot<Feature>Initialized` modifier — never an inline `_checkNotInitialized(...)` call buried in the function body:
+
+```solidity
+// ✅
+function initializeCap(uint256 _maxSupply)
+    external
+    override
+    onlyRole(DEFAULT_ADMIN_ROLE)
+    onlyFacetNotRegistered(RESOLVER_KEY_CAP)
+    onlyNotCapInitialized
+    onlyValidMaxSupply(_maxSupply)
+{ ... }
+
+// ❌
+function initializeCap(uint256 _maxSupply) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+    _checkNotInitialized(RESOLVER_KEY_CAP);
+    ...
+}
+```
+
 ### Gas Optimization
 
 1. **Separate read/write operations**: Consider split facets (like Bond/BondRead)
@@ -633,11 +725,45 @@ _before_ configurations are created — see
 2. **Descriptive error names**: `RewardAmountIsZero` vs `InvalidAmount`
 3. **Document error conditions**: Add NatSpec comments
 
+### No `solhint-disable` comments
+
+`// solhint-disable` comments (inline or block form) must not be introduced without justification. The only known acceptable use is the `no-inline-assembly` suppression immediately before the `assembly { s_.slot := position }` block inside a StorageWrapper accessor:
+
+```solidity
+// solhint-disable-next-line no-inline-assembly
+assembly {
+    s_.slot := position
+}
+```
+
+Every other occurrence is a signal to refactor — ask: _Is there a change to the code that removes the need for this suppression?_
+
 ### Event Emission
 
 1. **Emit events for state changes**: Required for off-chain tracking
 2. **Include indexed parameters**: For efficient filtering
 3. **Use descriptive event names**: `RewardDistributed` vs `Distributed`
+
+#### Event parameter names — no `_` prefix
+
+Event parameters use clean names — **no `_` prefix**.
+
+```solidity
+event Paused(address indexed operator); // ✅
+event Paused(address indexed _operator); // ❌
+```
+
+This applies to the `event` declaration and its `@param` NatSpec tags. The ABI/topic hash depends on event name and parameter types only — never on parameter names — so renaming is non-breaking. Follows the same convention as OpenZeppelin (`Transfer(address indexed from, ...)`), even where the source EIP uses underscores.
+
+**Out of scope:** function parameters keep the project convention — `_input` for inputs, `output_` for named returns.
+
+#### Emission location — exceptions
+
+Events should be emitted at the outermost business-logic layer. **Exceptions — the emit may stay in the domain layer when:**
+
+- The emit lives in a low-level helper reached from several callers, the orchestrator (`*Ops`), or another wrapper — moving it would duplicate or drop the event.
+- The emit is conditional on internal state the facet does not have.
+- The event reconstructs internal storage state, or is a **synthetic** ledger event (e.g. a `Transfer` / `TransferByPartition` to/from `address(0)` mirroring a hold or lock). These are bookkeeping details of the domain representation and belong with it.
 
 ## Examples
 

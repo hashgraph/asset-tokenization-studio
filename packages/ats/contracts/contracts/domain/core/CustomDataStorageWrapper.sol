@@ -45,8 +45,8 @@ library CustomDataStorageWrapper {
      * @param _value The ordered list of byte payloads to persist under `_key`.
      */
     function setCustomData(bytes32 _key, bytes[] calldata _value) internal {
-        bytes[] storage stored = customDataStorage().customData[_key];
-        delete customDataStorage().customData[_key];
+        bytes[] storage stored = _customDataStorage().customData[_key];
+        delete _customDataStorage().customData[_key];
         uint256 length = _value.length;
         for (uint256 i; i < length; ) {
             stored.push(_value[i]);
@@ -66,7 +66,7 @@ library CustomDataStorageWrapper {
      *         unset.
      */
     function getCustomData(bytes32 _key) internal view returns (bytes[] memory value_) {
-        value_ = customDataStorage().customData[_key];
+        value_ = _customDataStorage().customData[_key];
     }
 
     /**
@@ -78,7 +78,7 @@ library CustomDataStorageWrapper {
      * @return customData_ Reference to the `CustomDataDataStorage` struct at the custom data
      *         storage slot.
      */
-    function customDataStorage() private pure returns (CustomDataDataStorage storage customData_) {
+    function _customDataStorage() private pure returns (CustomDataDataStorage storage customData_) {
         bytes32 position = STORAGE_LOCATION_CUSTOM_DATA;
         // solhint-disable-next-line no-inline-assembly
         assembly {

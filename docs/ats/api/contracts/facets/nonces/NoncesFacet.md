@@ -65,16 +65,16 @@ _Callable once; subsequent calls revert with `FacetAlreadyRegistered`. Requires 
 ### nonces
 
 ```solidity
-function nonces(address owner) external view returns (uint256)
+function nonces(address _owner) external view returns (uint256)
 ```
 
 Returns the current nonce for `owner`.
 
 #### Parameters
 
-| Name  | Type    | Description                     |
-| ----- | ------- | ------------------------------- |
-| owner | address | Address whose nonce is queried. |
+| Name    | Type    | Description                     |
+| ------- | ------- | ------------------------------- |
+| \_owner | address | Address whose nonce is queried. |
 
 #### Returns
 

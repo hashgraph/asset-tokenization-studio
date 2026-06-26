@@ -37,9 +37,10 @@ bytes32 constant STORAGE_LOCATION_SCHEDULED_CROSS_ORDERED_TASKS = 0xc0ba5b9a8206
  *        - erc7201:security.token.standard.storage.ScheduledCouponListing
  *        - erc7201:security.token.standard.storage.ScheduledBalanceAdjustments
  *        - erc7201:security.token.standard.storage.ScheduledCrossOrderedTasks
- *      No single `@custom:storage-location` annotation can capture the four-slot binding;
- *      tooling that needs per-slot layout resolution must consult the four STORAGE_LOCATION_*
- *      constants in this file directly.
+ *      No single real `@custom:storage-location` can capture the four-slot binding, so the reuse
+ *      is flagged with the `erc7201:multiple` sentinel below; tooling that needs per-slot layout
+ *      resolution must consult the four STORAGE_LOCATION_* constants in this file directly.
+ * @custom:storage-location erc7201:multiple
  */
 struct ScheduledTasksDataStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
@@ -126,7 +127,7 @@ library ScheduledTasksStorageWrapper {
      * @param _actionId Corporate action identifier associated with the snapshot.
      */
     function addScheduledSnapshot(uint256 _newScheduledTimestamp, bytes32 _actionId) internal {
-        ScheduledTasksLib.addScheduledTask(scheduledSnapshotStorage(), _newScheduledTimestamp, abi.encode(_actionId));
+        ScheduledTasksLib.addScheduledTask(_scheduledSnapshotStorage(), _newScheduledTimestamp, abi.encode(_actionId));
     }
 
     /**
@@ -138,7 +139,7 @@ library ScheduledTasksStorageWrapper {
      */
     function addScheduledCouponListing(uint256 _newScheduledTimestamp, bytes32 _actionId) internal {
         ScheduledTasksLib.addScheduledTask(
-            scheduledCouponListingStorage(),
+            _scheduledCouponListingStorage(),
             _newScheduledTimestamp,
             abi.encode(_actionId)
         );
@@ -153,7 +154,7 @@ library ScheduledTasksStorageWrapper {
      */
     function addScheduledBalanceAdjustment(uint256 _newScheduledTimestamp, bytes32 _actionId) internal {
         ScheduledTasksLib.addScheduledTask(
-            scheduledBalanceAdjustmentStorage(),
+            _scheduledBalanceAdjustmentStorage(),
             _newScheduledTimestamp,
             abi.encode(_actionId)
         );
@@ -168,7 +169,7 @@ library ScheduledTasksStorageWrapper {
      */
     function addScheduledCrossOrderedTask(uint256 _newScheduledTimestamp, bytes32 _taskType) internal {
         ScheduledTasksLib.addScheduledTask(
-            scheduledCrossOrderedTaskStorage(),
+            _scheduledCrossOrderedTaskStorage(),
             _newScheduledTimestamp,
             abi.encode(_taskType)
         );
@@ -182,7 +183,7 @@ library ScheduledTasksStorageWrapper {
      * @return Number of cross-ordered tasks removed from the queue.
      */
     function triggerScheduledCrossOrderedTasks(uint256 _max) internal returns (uint256) {
-        return triggerScheduledTasks(scheduledCrossOrderedTaskStorage(), bytes32("crossOrdered"), _max);
+        return triggerScheduledTasks(_scheduledCrossOrderedTaskStorage(), bytes32("crossOrdered"), _max);
     }
 
     /**
@@ -203,7 +204,7 @@ library ScheduledTasksStorageWrapper {
      * @return count_ Number of queued snapshot tasks, optionally filtered.
      */
     function getScheduledSnapshotCount(bool _includeDisabled) internal view returns (uint256 count_) {
-        ScheduledTasksDataStorage storage store = scheduledSnapshotStorage();
+        ScheduledTasksDataStorage storage store = _scheduledSnapshotStorage();
         uint256 total = ScheduledTasksLib.getScheduledTaskCount(store);
         if (_includeDisabled) return total;
 
@@ -236,8 +237,8 @@ library ScheduledTasksStorageWrapper {
         bool _includeDisabled
     ) internal view returns (ScheduledTask[] memory scheduledSnapshots_) {
         scheduledSnapshots_ = _includeDisabled
-            ? ScheduledTasksLib.getScheduledTasks(scheduledSnapshotStorage(), _pageIndex, _pageLength)
-            : _getActivePage(scheduledSnapshotStorage(), _pageIndex, _pageLength);
+            ? ScheduledTasksLib.getScheduledTasks(_scheduledSnapshotStorage(), _pageIndex, _pageLength)
+            : _getActivePage(_scheduledSnapshotStorage(), _pageIndex, _pageLength);
     }
 
     /**
@@ -250,7 +251,7 @@ library ScheduledTasksStorageWrapper {
      * @return count_ Number of queued coupon listing tasks, optionally filtered.
      */
     function getScheduledCouponListingCount(bool _includeDisabled) internal view returns (uint256 count_) {
-        uint256 total = ScheduledTasksLib.getScheduledTaskCount(scheduledCouponListingStorage());
+        uint256 total = ScheduledTasksLib.getScheduledTaskCount(_scheduledCouponListingStorage());
         if (_includeDisabled) return total;
 
         for (uint256 i; i < total; ) {
@@ -278,8 +279,8 @@ library ScheduledTasksStorageWrapper {
         bool _includeDisabled
     ) internal view returns (ScheduledTask[] memory scheduledCouponListing_) {
         scheduledCouponListing_ = _includeDisabled
-            ? ScheduledTasksLib.getScheduledTasks(scheduledCouponListingStorage(), _pageIndex, _pageLength)
-            : _getActivePage(scheduledCouponListingStorage(), _pageIndex, _pageLength);
+            ? ScheduledTasksLib.getScheduledTasks(_scheduledCouponListingStorage(), _pageIndex, _pageLength)
+            : _getActivePage(_scheduledCouponListingStorage(), _pageIndex, _pageLength);
     }
 
     /**
@@ -295,7 +296,7 @@ library ScheduledTasksStorageWrapper {
         uint256 _timestamp,
         bool _includeDisabled
     ) internal view returns (uint256 total_) {
-        ScheduledTasksDataStorage storage scheduledCouponListing = scheduledCouponListingStorage();
+        ScheduledTasksDataStorage storage scheduledCouponListing = _scheduledCouponListingStorage();
         uint256 length = ScheduledTasksLib.getScheduledTaskCount(scheduledCouponListing);
         uint256 pos;
 
@@ -336,7 +337,7 @@ library ScheduledTasksStorageWrapper {
      */
     function isScheduledCouponListingDisabledAtIndex(uint256 _index) internal view returns (bool) {
         ScheduledTask memory couponListing = ScheduledTasksLib.getScheduledTasksByIndex(
-            scheduledCouponListingStorage(),
+            _scheduledCouponListingStorage(),
             _index
         );
         return CorporateActionsStorageWrapper.isCorporateActionDisabled(abi.decode(couponListing.data, (bytes32)));
@@ -351,7 +352,7 @@ library ScheduledTasksStorageWrapper {
      */
     function getScheduledCouponListingIdAtIndex(uint256 _index) internal view returns (uint256 couponID_) {
         ScheduledTask memory couponListing = ScheduledTasksLib.getScheduledTasksByIndex(
-            scheduledCouponListingStorage(),
+            _scheduledCouponListingStorage(),
             _index
         );
         (, couponID_, , ) = CorporateActionsStorageWrapper.getCorporateAction(
@@ -368,7 +369,7 @@ library ScheduledTasksStorageWrapper {
      * @return count_ Number of queued balance adjustment tasks, optionally filtered.
      */
     function getScheduledBalanceAdjustmentCount(bool _includeDisabled) internal view returns (uint256 count_) {
-        ScheduledTasksDataStorage storage store = scheduledBalanceAdjustmentStorage();
+        ScheduledTasksDataStorage storage store = _scheduledBalanceAdjustmentStorage();
         uint256 total = ScheduledTasksLib.getScheduledTaskCount(store);
         if (_includeDisabled) return total;
 
@@ -401,8 +402,8 @@ library ScheduledTasksStorageWrapper {
         bool _includeDisabled
     ) internal view returns (ScheduledTask[] memory scheduledBalanceAdjustment_) {
         scheduledBalanceAdjustment_ = _includeDisabled
-            ? ScheduledTasksLib.getScheduledTasks(scheduledBalanceAdjustmentStorage(), _pageIndex, _pageLength)
-            : _getActivePage(scheduledBalanceAdjustmentStorage(), _pageIndex, _pageLength);
+            ? ScheduledTasksLib.getScheduledTasks(_scheduledBalanceAdjustmentStorage(), _pageIndex, _pageLength)
+            : _getActivePage(_scheduledBalanceAdjustmentStorage(), _pageIndex, _pageLength);
     }
 
     /**
@@ -420,7 +421,7 @@ library ScheduledTasksStorageWrapper {
         bool _includeDisabled
     ) internal view returns (uint256 pendingABAF_, uint8 pendingDecimals_) {
         pendingABAF_ = 1;
-        ScheduledTasksDataStorage storage scheduledBalanceAdjustments = scheduledBalanceAdjustmentStorage();
+        ScheduledTasksDataStorage storage scheduledBalanceAdjustments = _scheduledBalanceAdjustmentStorage();
         uint256 length = ScheduledTasksLib.getScheduledTaskCount(scheduledBalanceAdjustments);
         uint256 pos = length;
 
@@ -457,7 +458,7 @@ library ScheduledTasksStorageWrapper {
      * @return Number of queued cross-ordered tasks.
      */
     function getScheduledCrossOrderedTaskCount() internal view returns (uint256) {
-        return ScheduledTasksLib.getScheduledTaskCount(scheduledCrossOrderedTaskStorage());
+        return ScheduledTasksLib.getScheduledTaskCount(_scheduledCrossOrderedTaskStorage());
     }
 
     /**
@@ -471,58 +472,7 @@ library ScheduledTasksStorageWrapper {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (ScheduledTask[] memory scheduledTask_) {
-        return ScheduledTasksLib.getScheduledTasks(scheduledCrossOrderedTaskStorage(), _pageIndex, _pageLength);
-    }
-
-    /**
-     * @notice Returns the storage pointer for scheduled coupon listing tasks.
-     * @dev Uses the fixed unstructured storage slot reserved for coupon listing tasks.
-     * @return scheduledCouponListing_ Storage reference for the coupon listing task queue.
-     */
-    function scheduledCouponListingStorage()
-        internal
-        pure
-        returns (ScheduledTasksDataStorage storage scheduledCouponListing_)
-    {
-        bytes32 position = STORAGE_LOCATION_SCHEDULED_COUPON_LISTING;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            scheduledCouponListing_.slot := position
-        }
-    }
-
-    /**
-     * @notice Returns the storage pointer for scheduled balance adjustment tasks.
-     * @dev Uses the fixed unstructured storage slot reserved for balance adjustment tasks.
-     * @return scheduledBalanceAdjustments_ Storage reference for the adjustment task queue.
-     */
-    function scheduledBalanceAdjustmentStorage()
-        internal
-        pure
-        returns (ScheduledTasksDataStorage storage scheduledBalanceAdjustments_)
-    {
-        bytes32 position = STORAGE_LOCATION_SCHEDULED_BALANCE_ADJUSTMENTS;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            scheduledBalanceAdjustments_.slot := position
-        }
-    }
-
-    /**
-     * @notice Returns the storage pointer for scheduled cross-ordered tasks.
-     * @dev Uses the fixed unstructured storage slot reserved for cross-ordered tasks.
-     * @return scheduledCrossOrderedTasks_ Storage reference for the cross-ordered task queue.
-     */
-    function scheduledCrossOrderedTaskStorage()
-        internal
-        pure
-        returns (ScheduledTasksDataStorage storage scheduledCrossOrderedTasks_)
-    {
-        bytes32 position = STORAGE_LOCATION_SCHEDULED_CROSS_ORDERED_TASKS;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            scheduledCrossOrderedTasks_.slot := position
-        }
+        return ScheduledTasksLib.getScheduledTasks(_scheduledCrossOrderedTaskStorage(), _pageIndex, _pageLength);
     }
 
     /**
@@ -537,13 +487,13 @@ library ScheduledTasksStorageWrapper {
         bytes32 subCallbackType;
 
         if (subTaskType == SCHEDULED_TASK_TYPE_SNAPSHOT) {
-            subQueue_ = scheduledSnapshotStorage();
+            subQueue_ = _scheduledSnapshotStorage();
             subCallbackType = bytes32("snapshot");
         } else if (subTaskType == SCHEDULED_TASK_TYPE_BALANCE_ADJUSTMENT) {
-            subQueue_ = scheduledBalanceAdjustmentStorage();
+            subQueue_ = _scheduledBalanceAdjustmentStorage();
             subCallbackType = bytes32("balance");
         } else if (subTaskType == SCHEDULED_TASK_TYPE_COUPON_LISTING) {
-            subQueue_ = scheduledCouponListingStorage();
+            subQueue_ = _scheduledCouponListingStorage();
             subCallbackType = bytes32("coupon");
         } else {
             return;
@@ -611,11 +561,62 @@ library ScheduledTasksStorageWrapper {
     }
 
     /**
+     * @notice Returns the storage pointer for scheduled coupon listing tasks.
+     * @dev Uses the fixed unstructured storage slot reserved for coupon listing tasks.
+     * @return scheduledCouponListing_ Storage reference for the coupon listing task queue.
+     */
+    function _scheduledCouponListingStorage()
+        private
+        pure
+        returns (ScheduledTasksDataStorage storage scheduledCouponListing_)
+    {
+        bytes32 position = STORAGE_LOCATION_SCHEDULED_COUPON_LISTING;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            scheduledCouponListing_.slot := position
+        }
+    }
+
+    /**
+     * @notice Returns the storage pointer for scheduled balance adjustment tasks.
+     * @dev Uses the fixed unstructured storage slot reserved for balance adjustment tasks.
+     * @return scheduledBalanceAdjustments_ Storage reference for the adjustment task queue.
+     */
+    function _scheduledBalanceAdjustmentStorage()
+        private
+        pure
+        returns (ScheduledTasksDataStorage storage scheduledBalanceAdjustments_)
+    {
+        bytes32 position = STORAGE_LOCATION_SCHEDULED_BALANCE_ADJUSTMENTS;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            scheduledBalanceAdjustments_.slot := position
+        }
+    }
+
+    /**
+     * @notice Returns the storage pointer for scheduled cross-ordered tasks.
+     * @dev Uses the fixed unstructured storage slot reserved for cross-ordered tasks.
+     * @return scheduledCrossOrderedTasks_ Storage reference for the cross-ordered task queue.
+     */
+    function _scheduledCrossOrderedTaskStorage()
+        private
+        pure
+        returns (ScheduledTasksDataStorage storage scheduledCrossOrderedTasks_)
+    {
+        bytes32 position = STORAGE_LOCATION_SCHEDULED_CROSS_ORDERED_TASKS;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            scheduledCrossOrderedTasks_.slot := position
+        }
+    }
+
+    /**
      * @notice Returns the storage pointer for scheduled snapshot tasks.
      * @dev Uses the fixed unstructured storage slot reserved for scheduled snapshots.
      * @return scheduledSnapshots_ Storage reference for the snapshot task queue.
      */
-    function scheduledSnapshotStorage() private pure returns (ScheduledTasksDataStorage storage scheduledSnapshots_) {
+    function _scheduledSnapshotStorage() private pure returns (ScheduledTasksDataStorage storage scheduledSnapshots_) {
         bytes32 position = STORAGE_LOCATION_SCHEDULED_SNAPSHOTS;
         // solhint-disable-next-line no-inline-assembly
         assembly {

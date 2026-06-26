@@ -84,7 +84,7 @@ library ProceedRecipientsStorageWrapper {
      * @param _data The payload bytes to persist.
      */
     function setProceedRecipientData(address _proceedRecipient, bytes calldata _data) internal {
-        proceedRecipientsDataStorage().proceedRecipientData[_proceedRecipient] = _data;
+        _proceedRecipientsDataStorage().proceedRecipientData[_proceedRecipient] = _data;
     }
 
     /**
@@ -92,7 +92,7 @@ library ProceedRecipientsStorageWrapper {
      * @param _proceedRecipient The recipient address.
      */
     function removeProceedRecipientData(address _proceedRecipient) internal {
-        delete proceedRecipientsDataStorage().proceedRecipientData[_proceedRecipient];
+        delete _proceedRecipientsDataStorage().proceedRecipientData[_proceedRecipient];
     }
 
     /**
@@ -121,7 +121,7 @@ library ProceedRecipientsStorageWrapper {
      * @return data_ The stored payload bytes (empty when no data has been set).
      */
     function getProceedRecipientData(address _proceedRecipient) internal view returns (bytes memory data_) {
-        return proceedRecipientsDataStorage().proceedRecipientData[_proceedRecipient];
+        return _proceedRecipientsDataStorage().proceedRecipientData[_proceedRecipient];
     }
 
     /**
@@ -165,8 +165,8 @@ library ProceedRecipientsStorageWrapper {
      * @dev Uses inline assembly to load the ERC-7201 slot from a precomputed constant.
      * @return proceedRecipientsDataStorage_ Storage pointer to `ProceedRecipientsDataStorage`.
      */
-    function proceedRecipientsDataStorage()
-        internal
+    function _proceedRecipientsDataStorage()
+        private
         pure
         returns (ProceedRecipientsDataStorage storage proceedRecipientsDataStorage_)
     {

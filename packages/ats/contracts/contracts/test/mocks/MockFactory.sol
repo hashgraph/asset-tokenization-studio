@@ -15,7 +15,6 @@ import { InterestRateStorageWrapper } from "../../domain/asset/InterestRateStora
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 import { IEvmAccessorsFacet } from "../testAccessors/IEvmAccessorsFacet.sol";
-import { IDiamondCutManager } from "../../infrastructure/diamond/IDiamondCutManager.sol";
 import { IMockDiamondCut } from "./MockDiamondCut.sol";
 import { ResolverProxy } from "../../infrastructure/proxy/ResolverProxy.sol";
 import { IResolverProxy } from "../../infrastructure/proxy/IResolverProxy.sol";
@@ -226,7 +225,7 @@ abstract contract MockFactory is Factory, IMockFactory {
         // 1. Build RBAC: seed the caller as temporary DEFAULT_ADMIN_ROLE holder
         IResolverProxy.Rbac[] memory rbacs = new IResolverProxy.Rbac[](1);
         rbacs[0] = IResolverProxy.Rbac({ role: DEFAULT_ADMIN_ROLE, members: new address[](1) });
-        rbacs[0].members[0] = msg.sender;
+        rbacs[0].members[0] = EvmAccessors.getMsgSender();
 
         // 2. Deploy a bare ResolverProxy against ASSET_MOCK_CONFIG_ID, version 1.
         //    Mirrors Factory._deploySecurityProxy but creates the proxy directly

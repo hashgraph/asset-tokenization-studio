@@ -39,14 +39,14 @@ Returns the full metadata struct of the security token.
 ### initializeCore
 
 ```solidity
-function initializeCore(ICore.ERC20Metadata metadata) external nonpayable
+function initializeCore(ICore.ERC20Metadata _metadata) external nonpayable
 ```
 
 #### Parameters
 
-| Name     | Type                | Description |
-| -------- | ------------------- | ----------- |
-| metadata | ICore.ERC20Metadata | undefined   |
+| Name       | Type                | Description |
+| ---------- | ------------------- | ----------- |
+| \_metadata | ICore.ERC20Metadata | undefined   |
 
 ### name
 

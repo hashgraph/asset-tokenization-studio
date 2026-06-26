@@ -14,8 +14,8 @@ import { IKyc } from "../kyc/IKyc.sol";
 interface IExternalKycList {
     /**
      * @notice Returns the KYC status of `account` as recorded in the external KYC list.
-     * @param account Address to check.
+     * @param _account Address to check.
      * @return The `IKyc.KycStatus` value for the given account.
      */
-    function getKycStatus(address account) external view returns (IKyc.KycStatus);
+    function getKycStatus(address _account) external view returns (IKyc.KycStatus);
 }

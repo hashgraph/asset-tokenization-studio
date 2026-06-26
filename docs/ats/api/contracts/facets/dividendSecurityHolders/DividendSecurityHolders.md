@@ -22,11 +22,11 @@ _Reverts through `onlyMatchingActionType` if `dividendId` does not match the div
 
 #### Parameters
 
-| Name       | Type    | Description                                                                |
-| ---------- | ------- | -------------------------------------------------------------------------- |
-| dividendId | uint256 | One-indexed dividend identifier within the dividend corporate action type. |
-| pageIndex  | uint256 | Zero-based index of the page to retrieve.                                  |
-| pageLength | uint256 | Maximum number of holders returned in the page.                            |
+| Name       | Type    | Description |
+| ---------- | ------- | ----------- |
+| dividendId | uint256 | undefined   |
+| pageIndex  | uint256 | undefined   |
+| pageLength | uint256 | undefined   |
 
 #### Returns
 
@@ -46,9 +46,9 @@ _Reverts through `onlyMatchingActionType` if `dividendId` does not match the div
 
 #### Parameters
 
-| Name       | Type    | Description                                                                |
-| ---------- | ------- | -------------------------------------------------------------------------- |
-| dividendId | uint256 | One-indexed dividend identifier within the dividend corporate action type. |
+| Name       | Type    | Description |
+| ---------- | ------- | ----------- |
+| dividendId | uint256 | undefined   |
 
 #### Returns
 
