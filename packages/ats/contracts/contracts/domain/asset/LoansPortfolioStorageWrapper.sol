@@ -18,8 +18,8 @@ bytes32 constant STORAGE_LOCATION_LOANS_PORTFOLIO = 0x5981f3997a6cf8235e2e8b5dd3
  * @title LoansPortfolioDataStorage
  * @notice Data structure representing the entire loans portfolio storage.
  * @dev Backing storage for the loans portfolio facet. Loan classification sets
- *      (secured / non-secured, performing / non-performing / defaulted) and the country
- *      tracking maps are maintained in lockstep with the master `loanHoldingsAssets` set;
+ *      (secured / non-secured, performing / non-performing / defaulted)
+ *      are maintained in lockstep with the master `loanHoldingsAssets` set;
  *      mutations must keep all derived sets consistent.
  * @param initialized Indicates whether the portfolio storage has been initialised.
  * @param portfolioType The type of the portfolio (e.g., SECURED, UNSECURED).
@@ -32,9 +32,6 @@ bytes32 constant STORAGE_LOCATION_LOANS_PORTFOLIO = 0x5981f3997a6cf8235e2e8b5dd3
  * @param performingLoanHoldingsAssets Set of loan addresses currently performing.
  * @param nonPerformingLoanHoldingsAssets Set of loan addresses currently non-performing.
  * @param defaultedLoanHoldingsAssets Set of loan addresses that have defaulted.
- * @param loanHoldingsAssetsByCountryKeys Set of hashed country keys for geographical tracking.
- * @param countryNames Mapping from hashed key to human-readable country name.
- * @param loanHoldingsAssetsByCountry Mapping from hashed key to count of loans in that country.
  * @custom:storage-location erc7201:security.token.standard.storage.LoansPortfolio
  */
 struct LoansPortfolioDataStorage {
@@ -52,9 +49,6 @@ struct LoansPortfolioDataStorage {
     EnumerableSet.AddressSet performingLoanHoldingsAssets;
     EnumerableSet.AddressSet nonPerformingLoanHoldingsAssets;
     EnumerableSet.AddressSet defaultedLoanHoldingsAssets;
-    EnumerableSet.Bytes32Set loanHoldingsAssetsByCountryKeys;
-    mapping(bytes32 => string) countryNames;
-    mapping(bytes32 => uint256) loanHoldingsAssetsByCountry;
     // ─── APPEND-ONLY ZONE BELOW ───
 }
 
@@ -62,14 +56,13 @@ struct LoansPortfolioDataStorage {
  * @title LoansPortfolioStorageWrapper
  * @notice Library providing storage management and query functions for a loans portfolio.
  * @dev Manages the storage layout of a loans portfolio via a predefined storage slot.
- *      Handles both loan and cash holdings asset sets, classifies loans by collateral
- *      and performance status, and tracks geographical exposure. Uses EnumerableSet
+ *      Handles both loan and cash holdings asset sets, and classifies loans by collateral
+ *      and performance status. Uses EnumerableSet
  *      for gas-efficient membership checks and iteration.
  * @author Asset Tokenization Studio Team
  */
 library LoansPortfolioStorageWrapper {
     using EnumerableSet for EnumerableSet.AddressSet;
-    using EnumerableSet for EnumerableSet.Bytes32Set;
     using Pagination for EnumerableSet.AddressSet;
 
     /**
@@ -265,35 +258,6 @@ library LoansPortfolioStorageWrapper {
     }
 
     /**
-     * @notice Returns an array of geographical exposure data for all tracked countries.
-     * @dev Iterates over the `loanHoldingsAssetsByCountryKeys` set and builds exposure structs.
-     *      Returns an empty array if no countries are tracked.
-     * @return geographicalExposure_ Array of `GeographicalExposureData` structs.
-     */
-    function getGeographicalExposure()
-        internal
-        view
-        returns (ILoansPortfolio.GeographicalExposureData[] memory geographicalExposure_)
-    {
-        LoansPortfolioDataStorage storage storage_ = loansPortfolioStorage();
-        uint256 countryCount = storage_.loanHoldingsAssetsByCountryKeys.length();
-        if (countryCount == 0) {
-            return new ILoansPortfolio.GeographicalExposureData[](0);
-        }
-        geographicalExposure_ = new ILoansPortfolio.GeographicalExposureData[](countryCount);
-        for (uint256 i; i < countryCount; ) {
-            bytes32 key = storage_.loanHoldingsAssetsByCountryKeys.at(i);
-            geographicalExposure_[i] = ILoansPortfolio.GeographicalExposureData({
-                country: storage_.countryNames[key],
-                count: storage_.loanHoldingsAssetsByCountry[key]
-            });
-            unchecked {
-                ++i;
-            }
-        }
-    }
-
-    /**
      * @notice Returns the number of performing loans in the portfolio.
      * @return numberOfPerformingLoans_ Count of performing loan holdings.
      */
@@ -325,10 +289,6 @@ library LoansPortfolioStorageWrapper {
         numberOfAssets_ = loansPortfolioStorage().holdingsAssets.length();
     }
 
-    /**
-     * @notice Returns whether the loans portfolio storage has been initialised.
-     * @return True if `initializeLoansPortfolio` was called, false otherwise.
-     */
     /**
      * @notice Returns the number of loan holding assets in the portfolio.
      * @return numberOfLoans_ Count of loan holdings.
@@ -416,7 +376,7 @@ library LoansPortfolioStorageWrapper {
     /**
      * @notice Adds a loan asset to the loan holdings set and classifies it by collateral and performance.
      * @dev Fetches loan details, adds the address to the loan set, classifies by collateral,
-     *      then by performance status. Also attempts to track the country (currently a placeholder).
+     *      then by performance status.
      * @param _loanPortfolioStorage Reference to the portfolio storage struct.
      * @param _loanAddress Address of the loan contract.
      */
@@ -432,11 +392,6 @@ library LoansPortfolioStorageWrapper {
             _loanAddress,
             loanDetails.loanPerformanceStatus.performanceStatus
         );
-        // TODO: Get country from loan - implement when loan has country field or find the correct source
-        // string memory country = loanDetails.loanBasicData.country;
-        // _addLoanHoldingsAssetByCountry(_loanPortfolioStorage, country);
-        // Placeholder for now - use empty string to avoid breaking
-        _addLoanHoldingsAssetByCountry(_loanPortfolioStorage, "");
     }
 
     /**
@@ -462,30 +417,9 @@ library LoansPortfolioStorageWrapper {
     }
 
     /**
-     * @notice Tracks a loan by country, incrementing the count and adding the country key if new.
-     * @dev Stores the country name under the keccak256 hash of the country string.
-     *      Currently receiving an empty string placeholder.
-     * @param _loanPortfolioStorage Reference to the portfolio storage struct.
-     * @param _country Country name string.
-     */
-    function _addLoanHoldingsAssetByCountry(
-        LoansPortfolioDataStorage storage _loanPortfolioStorage,
-        string memory _country
-    ) private {
-        EnumerableSet.Bytes32Set storage loanHoldingsAssetsByCountryKeys = _loanPortfolioStorage
-            .loanHoldingsAssetsByCountryKeys;
-        bytes32 key = keccak256(abi.encodePacked(_country));
-        if (!loanHoldingsAssetsByCountryKeys.contains(key)) {
-            loanHoldingsAssetsByCountryKeys.add(key);
-            _loanPortfolioStorage.countryNames[key] = _country;
-        }
-        _loanPortfolioStorage.loanHoldingsAssetsByCountry[key] += 1;
-    }
-
-    /**
      * @notice Removes a loan asset from all loan‑related sets.
      * @dev Removes the address from the main loan holdings set, the collateral sets,
-     *      the performance status sets, and from country tracking (currently placeholder).
+     *      and the performance status sets.
      * @param _loanPortfolioStorage Reference to the portfolio storage struct.
      * @param _loanAddress Address of the loan contract to remove.
      */
@@ -498,11 +432,6 @@ library LoansPortfolioStorageWrapper {
         _loanPortfolioStorage.securedLoanHoldingsAssets.remove(_loanAddress);
         _loanPortfolioStorage.nonSecuredLoanHoldingsAssets.remove(_loanAddress);
         _removeLoanHoldingsAssetByPerformanceStatus(_loanPortfolioStorage, _loanAddress);
-        // TODO: Get country from loan - implement when loan has country field or find the correct source
-        // string memory country = ILoan(_loanAddress).getLoanDetails().loanBasicData.country;
-        // _removeHoldingsAssetByCountry(_loanPortfolioStorage, country);
-        // Placeholder for now - use empty string to avoid breaking
-        _removeHoldingsAssetByCountry(_loanPortfolioStorage, "");
     }
 
     /**
@@ -518,32 +447,6 @@ library LoansPortfolioStorageWrapper {
         _loanPortfolioStorage.performingLoanHoldingsAssets.remove(_loanAddress);
         _loanPortfolioStorage.nonPerformingLoanHoldingsAssets.remove(_loanAddress);
         _loanPortfolioStorage.defaultedLoanHoldingsAssets.remove(_loanAddress);
-    }
-
-    /**
-     * @notice Decrements the country count and cleans up if count reaches zero.
-     * @dev If the current count is zero, the function returns early.
-     *      When count becomes zero, the key and country name are deleted from storage.
-     * @param _loanPortfolioStorage Reference to the portfolio storage struct.
-     * @param _country Country name string.
-     */
-    function _removeHoldingsAssetByCountry(
-        LoansPortfolioDataStorage storage _loanPortfolioStorage,
-        string memory _country
-    ) private {
-        bytes32 key = keccak256(abi.encodePacked(_country));
-        uint256 current = _loanPortfolioStorage.loanHoldingsAssetsByCountry[key];
-        if (current == 0) {
-            return;
-        }
-        uint256 newCount = current - 1;
-        if (newCount == 0) {
-            delete _loanPortfolioStorage.loanHoldingsAssetsByCountry[key];
-            _loanPortfolioStorage.loanHoldingsAssetsByCountryKeys.remove(key);
-            delete _loanPortfolioStorage.countryNames[key];
-        } else {
-            _loanPortfolioStorage.loanHoldingsAssetsByCountry[key] = newCount;
-        }
     }
 
     /**
