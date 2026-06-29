@@ -21,7 +21,6 @@ bytes32 constant STORAGE_LOCATION_LOANS_PORTFOLIO = 0x5981f3997a6cf8235e2e8b5dd3
  *      (secured / non-secured, performing / non-performing / defaulted)
  *      are maintained in lockstep with the master `loanHoldingsAssets` set;
  *      mutations must keep all derived sets consistent.
- * @param initialized Indicates whether the portfolio storage has been initialised.
  * @param portfolioType The type of the portfolio (e.g., SECURED, UNSECURED).
  * @param distributionPolicy The distribution policy applied to the portfolio (e.g., PRO_RATA).
  * @param holdingsAssets Set of all holding asset addresses (loans and cash).
@@ -67,7 +66,7 @@ library LoansPortfolioStorageWrapper {
 
     /**
      * @notice Initialises the loans portfolio storage with the provided details.
-     * @dev Sets the `initialized` flag to `true` and stores the portfolio type and distribution policy.
+     * @dev Stores the portfolio type and distribution policy.
      * @param _loansPortfolioData The portfolio details containing type and distribution policy.
      */
     function initializeLoansPortfolio(ILoansPortfolio.LoansPortfolioDetailsData calldata _loansPortfolioData) internal {
@@ -76,7 +75,7 @@ library LoansPortfolioStorageWrapper {
 
     /**
      * @notice Stores or updates the portfolio type and distribution policy in storage.
-     * @dev Does not modify the `initialized` flag.
+     * @dev Overwrites the portfolio type and distribution policy directly in storage.
      * @param _loansPortfolioDetails Memory struct containing the new portfolio type and distribution policy.
      */
     function storeLoansPortfolioDetails(
