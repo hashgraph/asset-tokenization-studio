@@ -77,49 +77,60 @@ library InitializerStorageWrapper {
      */
     // Verifies that every facet of the current config+version is ready, in batches of MAX_INITIALIZER_FACET_INDEX.
     // Persists progress so next calls resume where the previous one stopped, until the whole config is operational.
+    //
+    // BUG TRACE — call setOperationalStatus() before initializeInitializer() (maxInitializerFacetIndex = 0):
     function setOperationalStatus()
         internal
         returns (bool isOperational_, uint256 lastFacetIndex_, bytes32 configId_, uint256 versionId_)
     {
         (configId_, versionId_) = ResolverProxyStorageWrapper.getResolverProxyConfigurationIdAndVersion();
 
-        uint256 operationStatus = getOperationalStatus(configId_, versionId_);
+        uint256 operationStatus = getOperationalStatus(configId_, versionId_);       // operationStatus = 0  (never set)
 
         // Already fully operational — nothing to do.
-        if (operationStatus == 1) {
+        if (operationStatus == 1) {                                                  // 0 == 1 → false, skip
             return (true, 0, configId_, versionId_);
         }
 
         uint256 nextFacetIndex;
         unchecked {
-            nextFacetIndex = operationStatus > 1 ? operationStatus - 1 : 0;
+            nextFacetIndex = operationStatus > 1 ? operationStatus - 1 : 0;         // 0 > 1 → false  →  nextFacetIndex = 0
         }
 
         unchecked {
-            lastFacetIndex_ = getMaxInitializerFacetIndex() + nextFacetIndex;
+            lastFacetIndex_ = getMaxInitializerFacetIndex() + nextFacetIndex;       // 0 + 0 = 0
         }
 
         uint256 facetsLength = ResolverProxyStorageWrapper
             .getBusinessLogicResolver()
-            .getFacetsLengthByConfigurationIdAndVersion(configId_, versionId_);
+            .getFacetsLengthByConfigurationIdAndVersion(configId_, versionId_);     // facetsLength = 5
 
-        if (facetsLength < lastFacetIndex_) {
+        if (facetsLength < lastFacetIndex_) {                                        // 5 < 0 → false, skip
             lastFacetIndex_ = facetsLength;
         }
 
         IDiamondCutManager.FacetConfiguration[] memory facetConfigurations = ResolverProxyStorageWrapper
             .getBusinessLogicResolver()
-            .getFacetConfigurationsByConfigurationIdAndVersion(configId_, versionId_, nextFacetIndex, lastFacetIndex_);
+            .getFacetConfigurationsByConfigurationIdAndVersion(
+                configId_, versionId_, nextFacetIndex, lastFacetIndex_             // fetch [0, 0) → []  (empty slice)
+            );
 
         (isOperational_, lastFacetIndex_) = _checkFacetsReady(
-            facetConfigurations,
-            nextFacetIndex,
-            facetsLength,
-            lastFacetIndex_
+            facetConfigurations,                                                     // []     — loop never runs
+            nextFacetIndex,                                                          // 0
+            facetsLength,                                                            // 5
+            lastFacetIndex_                                                          // 0
         );
+        // _checkFacetsReady returns: allReady_ = (lastFacetIndex_ == facetsLength) = (0 == 5) = false
+        //   → isOperational_ = false,  lastFacetIndex_ = 0
 
+        // ENCODING COLLISION: isOperational_=false  →  stores lastFacetIndex_(0) + 1 = 1
+        //   but 1 is the "fully operational" sentinel.
+        //   configVersionStatus is now 1, so checkOperational() passes on every subsequent call
+        //   even though zero facets were verified.
         unchecked {
             _initializerStorage().configVersionStatus[configId_][versionId_] = isOperational_ ? 1 : lastFacetIndex_ + 1;
+            //                                                                 false ? 1 : 0 + 1  =  1  ← BUG
         }
     }
 
@@ -322,16 +333,17 @@ library InitializerStorageWrapper {
             );
     }
 
+    // BUG TRACE — inputs arriving from setOperationalStatus() with maxInitializerFacetIndex = 0:
     function _checkFacetsReady(
-        IDiamondCutManager.FacetConfiguration[] memory _facetConfigurations,
-        uint256 _nextFacetIndex,
-        uint256 _facetsLength,
-        uint256 _requestedLastFacetIndex
+        IDiamondCutManager.FacetConfiguration[] memory _facetConfigurations, // []  (empty slice)
+        uint256 _nextFacetIndex,                                              // 0
+        uint256 _facetsLength,                                                // 5
+        uint256 _requestedLastFacetIndex                                      // 0
     ) private view returns (bool allReady_, uint256 lastFacetIndex_) {
-        lastFacetIndex_ = _requestedLastFacetIndex;
-        uint256 facetConfigurationsLength = _facetConfigurations.length;
+        lastFacetIndex_ = _requestedLastFacetIndex;                           // lastFacetIndex_ = 0
+        uint256 facetConfigurationsLength = _facetConfigurations.length;      // facetConfigurationsLength = 0
 
-        for (uint256 facetIndex; facetIndex < facetConfigurationsLength; ) {
+        for (uint256 facetIndex; facetIndex < facetConfigurationsLength; ) {  // 0 < 0 → false, loop never runs
             uint256 facetStatus = getFacetVersionStatus(
                 _facetConfigurations[facetIndex].id,
                 _facetConfigurations[facetIndex].version
@@ -346,7 +358,7 @@ library InitializerStorageWrapper {
             }
         }
 
-        allReady_ = lastFacetIndex_ == _facetsLength;
+        allReady_ = lastFacetIndex_ == _facetsLength;                         // 0 == 5 → false  →  returns (false, 0)
     }
 
     /**
