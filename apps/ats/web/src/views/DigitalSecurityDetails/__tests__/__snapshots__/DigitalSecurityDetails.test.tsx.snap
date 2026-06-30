@@ -195,24 +195,6 @@ exports[`DigitalSecurityDetails render correctly 1`] = `
                   </div>
                   <div
                     class="css-tvba8"
-                    data-testid="definition-list-item-ISIN"
-                    tabindex="0"
-                  >
-                    <p
-                      class="chakra-text css-vbc1qe"
-                    >
-                      ISIN
-                    </p>
-                    <div
-                      class="chakra-skeleton__group css-1rr4qq7"
-                    >
-                      <div
-                        class="chakra-skeleton css-5dkehc"
-                      />
-                    </div>
-                  </div>
-                  <div
-                    class="css-tvba8"
                     data-testid="definition-list-item-EVM Address"
                     tabindex="0"
                   >

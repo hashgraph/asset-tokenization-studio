@@ -12,7 +12,7 @@ import {
   InputNumberController,
   ToggleController,
 } from "io-bricks-ui";
-import { greaterOrEqualThan, isISINValid, lowerOrEqualThan, maxLength, required } from "../../../utils/rules";
+import { greaterOrEqualThan, lowerOrEqualThan, maxLength, required } from "../../../utils/rules";
 import { useFormContext, useFormState } from "react-hook-form";
 import { ICreateEquityFormValues } from "../ICreateEquityFormValues";
 import { CancelButton } from "../../../components/CancelButton";
@@ -93,25 +93,6 @@ export const StepTokenDetails = () => {
               lowerOrEqualThan: lowerOrEqualThan(18),
               greaterThan: greaterOrEqualThan(0),
             },
-          }}
-        />
-      </Stack>
-      <Stack w="full">
-        <HStack justifySelf="flex-start">
-          <Text textStyle="BodyTextRegularSM">{t("stepTokenDetails.isin")}*</Text>
-          <Tooltip label={t("stepTokenDetails.isinTooltip")} placement="right">
-            <PhosphorIcon as={Info} />
-          </Tooltip>
-        </HStack>
-        <InputController
-          id="isin"
-          control={control}
-          placeholder={t("stepTokenDetails.placeholderIsin")}
-          backgroundColor="neutral.600"
-          size="md"
-          rules={{
-            required,
-            validate: isISINValid,
           }}
         />
       </Stack>

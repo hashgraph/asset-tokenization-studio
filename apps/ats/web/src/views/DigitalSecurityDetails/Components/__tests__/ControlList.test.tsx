@@ -12,7 +12,6 @@ const testSecurity = {
   evmDiamondAddress: "0x83887e04c70e0b857738f89d12bf018bc0fe0310",
   isControllable: true,
   isWhiteList: true,
-  isin: "123456789102",
   name: "Equity Total",
   paused: false,
   securityType: "EQUITY",
