@@ -426,6 +426,7 @@ abstract contract Factory is IFactory {
         _initializeOperatorsAndControllers(securityAddress_);
         _initializeBatchOperations(securityAddress_);
         _initializeClearingAndHold(securityAddress_, _securityData.clearingActive);
+        _initializeDepositTokenExtendedFacets(securityAddress_);
         // Seed the initializer batch size last so a single setOperationalStatus pass
         // can validate every facet initialised above.
         IInitializer(securityAddress_).initializeInitializer(_SECURITY_FACETS_MAX);
@@ -569,6 +570,50 @@ abstract contract Factory is IFactory {
 
         IHoldFacet(_securityAddress).initializeHold();
         IHoldByPartition(_securityAddress).initializeHoldByPartition();
+    }
+
+    /**
+     * @notice Initialises the extended deposit-token facets beyond the always-on base set.
+     * @dev Each facet listed in the deposit-token resolver configuration must be initialised
+     *      before `setOperationalStatus`, otherwise the proxy never becomes operational. The
+     *      initialisers are independent (each only marks its own facet ready), so the order
+     *      below is grouped for readability rather than dependency.
+     * @param _securityAddress Address of the deposit-token proxy being initialised.
+     */
+    function _initializeDepositTokenExtendedFacets(address _securityAddress) private {
+        // adjusted balances
+        ICoreAdjusted(_securityAddress).initializeCoreAdjusted();
+        IBalanceTrackerAdjusted(_securityAddress).initializeBalanceTrackerAdjusted();
+        // compliance
+        IComplianceByPartition(_securityAddress).initializeComplianceByPartition();
+        // lock
+        ILockByPartition(_securityAddress).initializeLockByPartition();
+        ITransferAndLockByPartition(_securityAddress).initializeTransferAndLockByPartition();
+        // maturity
+        IMaturityByPartition(_securityAddress).initializeMaturityByPartition();
+        // income / governance holders
+        ICouponSecurityHolders(_securityAddress).initializeCouponSecurityHolders();
+        IDividendSecurityHolders(_securityAddress).initializeDividendSecurityHolders();
+        IVotingSecurityHolders(_securityAddress).initializeVotingSecurityHolders();
+        // protected partitions
+        IProtectedByPartition(_securityAddress).initializeProtectedByPartition();
+        IProtectedHoldByPartition(_securityAddress).initializeProtectedHoldByPartition();
+        IProtectedClearingByPartition(_securityAddress).initializeProtectedClearingByPartition();
+        IProtectedClearingHoldByPartition(_securityAddress).initializeProtectedClearingHoldByPartition();
+        // snapshots
+        ISnapshotsByPartition(_securityAddress).initializeSnapshotsByPartition();
+        ISecurityHoldersAtSnapshot(_securityAddress).initializeSecurityHoldersAtSnapshot();
+        ICoreAtSnapshot(_securityAddress).initializeCoreAtSnapshot();
+        INominalValueAtSnapshot(_securityAddress).initializeNominalValueAtSnapshot();
+        IBalanceTrackerAtSnapshot(_securityAddress).initializeBalanceTrackerAtSnapshot();
+        IBalanceTrackerAtSnapshotByPartition(_securityAddress).initializeBalanceTrackerAtSnapshotByPartition();
+        IFreezeAtSnapshot(_securityAddress).initializeFreezeAtSnapshot();
+        IFreezeAtSnapshotByPartition(_securityAddress).initializeFreezeAtSnapshotByPartition();
+        IHoldAtSnapshot(_securityAddress).initializeHoldAtSnapshot();
+        IHoldAtSnapshotByPartition(_securityAddress).initializeHoldAtSnapshotByPartition();
+        ILockAtSnapshotByPartition(_securityAddress).initializeLockAtSnapshotByPartition();
+        IClearingAtSnapshot(_securityAddress).initializeClearingAtSnapshot();
+        IClearingAtSnapshotByPartition(_securityAddress).initializeClearingAtSnapshotByPartition();
     }
 
     /**
