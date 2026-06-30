@@ -235,7 +235,6 @@ export class RPCQueryAdapter {
     return new Security({
       name: erc20Metadata.info.name,
       symbol: erc20Metadata.info.symbol,
-      isin: erc20Metadata.info.isin,
       type: CastSecurityType.fromBigint(erc20Metadata.securityType),
       decimals: Number(erc20Metadata.info.decimals),
       isWhiteList: isWhiteList,
