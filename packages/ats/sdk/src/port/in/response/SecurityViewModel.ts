@@ -6,7 +6,6 @@ import RegulationViewModel from "./RegulationViewModel";
 export default interface SecurityViewModel extends QueryResponse {
   name?: string;
   symbol?: string;
-  isin?: string;
   type?: string;
   decimals?: number;
   isWhiteList?: boolean;

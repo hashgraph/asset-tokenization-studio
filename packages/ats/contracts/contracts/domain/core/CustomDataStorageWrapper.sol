@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ICustomData } from "../../facets/customData/ICustomData.sol";
-
 /// @custom:hash storage CustomData
 bytes32 constant STORAGE_LOCATION_CUSTOM_DATA = 0x92acc34fbd05df4f7a3d758b1a1755231ecd82ae24df88ea7a638c1b704de700;
 

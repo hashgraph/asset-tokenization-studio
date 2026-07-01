@@ -13,7 +13,6 @@ export const getMockEquityFormData = (): Partial<ICreateEquityFormValues> => {
     name: "Demo Equity 2026",
     symbol: "DES2026",
     decimals: 6,
-    isin: "US0378331005",
     isControllable: true,
     isBlocklist: true,
     isApproval: false,

@@ -186,14 +186,4 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
     function getDefaultedLoansRatio() external view override returns (uint256 numerator_, uint256 denominator_) {
         (numerator_, denominator_) = LoansPortfolioStorageWrapper.getDefaultedLoansRatio();
     }
-
-    /// @inheritdoc ILoansPortfolio
-    function getGeographicalExposure()
-        external
-        view
-        override
-        returns (ILoansPortfolio.GeographicalExposureData[] memory geographicalExposure_)
-    {
-        geographicalExposure_ = LoansPortfolioStorageWrapper.getGeographicalExposure();
-    }
 }

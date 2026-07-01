@@ -44,7 +44,6 @@ export const useAddDigitalSecurity = () => {
           const security = {
             name: data.name ?? "",
             symbol: data.symbol ?? "",
-            isin: data.isin ?? "",
             type: data.type,
             address: data.diamondAddress?.toString() ?? "",
             evmAddress: data.evmDiamondAddress?.toString() ?? "",

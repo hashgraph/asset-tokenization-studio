@@ -34,24 +34,16 @@ interface ILoansPortfolio {
     }
 
     /// @notice Tuple describing one underlying holding tracked by the portfolio.
-    /// @dev `country` is the ISO-style identifier used when aggregating geographical
-    ///      exposure; `assetAddress` is the on-chain handle of the loan or cash token.
+    /// @dev `assetAddress` is the on-chain handle of the loan or cash token.
     struct HoldingsAsset {
         address assetAddress;
         HoldingsAssetType holdingsAssetType;
-        string country;
     }
 
     /// @notice Portfolio-level configuration captured at initialisation.
     struct LoansPortfolioDetailsData {
         PortfolioType portfolioType;
         DistributionPolicy distributionPolicy;
-    }
-
-    /// @notice Per-country aggregate showing how many holdings reference the same country.
-    struct GeographicalExposureData {
-        string country;
-        uint256 count;
     }
 
     /// @notice Emitted once when the LoansPortfolio capability is initialised on a token.
@@ -199,9 +191,4 @@ interface ILoansPortfolio {
     /// @return numerator_   Numerator of the defaulted-loans ratio.
     /// @return denominator_ Denominator of the defaulted-loans ratio.
     function getDefaultedLoansRatio() external view returns (uint256 numerator_, uint256 denominator_);
-
-    /// @notice Returns the geographical exposure aggregated by country.
-    /// @return geographicalExposure_ Array of `(country, count)` tuples covering every
-    ///         country present in the portfolio's holdings.
-    function getGeographicalExposure() external view returns (GeographicalExposureData[] memory geographicalExposure_);
 }

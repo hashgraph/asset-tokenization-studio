@@ -21,7 +21,6 @@ import {
   RegulationSubType,
   ADDRESS_ZERO,
   EQUITY_CONFIG_ID,
-  GAS_LIMIT,
   ATS_ROLES,
   BOND_CONFIG_ID,
   BOND_FIXED_RATE_CONFIG_ID,
@@ -148,122 +147,6 @@ describe("Factory Tests", () => {
         };
 
         await expect(factory.deployEquity(equityData, getRegulationData())).to.emit(factory, "EquityDeployed");
-      });
-    });
-
-    describe("onlyValidISIN modifier", () => {
-      it("GIVEN ISIN with length < 12 WHEN deploying equity THEN reverts with WrongISIN", async () => {
-        const equityData = {
-          security: getSecurityData(businessLogicResolver, {
-            erc20MetadataInfo: { isin: "US037833100" }, // 11 characters
-            rbacs: init_rbacs,
-          }),
-          equityDetails: makeEquityDetailsData(),
-        };
-        equityData.security.resolverProxyConfiguration = {
-          key: EQUITY_CONFIG_ID,
-          version: 1,
-        };
-
-        await expect(factory.deployEquity(equityData, getRegulationData())).to.be.revertedWithCustomError(
-          factory,
-          "WrongISIN",
-        );
-      });
-
-      it("GIVEN ISIN with length > 12 WHEN deploying equity THEN reverts with WrongISIN", async () => {
-        const equityData = {
-          security: getSecurityData(businessLogicResolver, {
-            erc20MetadataInfo: { isin: "US03783310051" }, // 13 characters
-            rbacs: init_rbacs,
-          }),
-          equityDetails: makeEquityDetailsData(),
-        };
-        equityData.security.resolverProxyConfiguration = {
-          key: EQUITY_CONFIG_ID,
-          version: 1,
-        };
-
-        await expect(factory.deployEquity(equityData, getRegulationData())).to.be.revertedWithCustomError(
-          factory,
-          "WrongISIN",
-        );
-      });
-
-      it("GIVEN empty ISIN WHEN deploying bond THEN reverts with WrongISIN", async () => {
-        const bondData = {
-          security: getSecurityData(businessLogicResolver, {
-            erc20MetadataInfo: { isin: "" },
-            rbacs: init_rbacs,
-          }),
-          bondDetails: await getBondDetails(),
-          proceedRecipients: [],
-          proceedRecipientsData: [],
-        };
-        bondData.security.resolverProxyConfiguration = {
-          key: BOND_CONFIG_ID,
-          version: 1,
-        };
-
-        await expect(factory.deployBond(bondData, getRegulationData())).to.be.revertedWithCustomError(
-          factory,
-          "WrongISIN",
-        );
-      });
-
-      it("GIVEN invalid ISIN checksum WHEN deploying equity THEN reverts with WrongISINChecksum", async () => {
-        const equityData = {
-          security: getSecurityData(businessLogicResolver, {
-            erc20MetadataInfo: { isin: "US0378331009" }, // Wrong checksum digit
-            rbacs: init_rbacs,
-          }),
-          equityDetails: makeEquityDetailsData(),
-        };
-        equityData.security.resolverProxyConfiguration = {
-          key: EQUITY_CONFIG_ID,
-          version: 1,
-        };
-
-        await expect(factory.deployEquity(equityData, getRegulationData())).to.be.revertedWithCustomError(
-          factory,
-          "WrongISINChecksum",
-        );
-      });
-
-      it("GIVEN invalid ISIN checksum WHEN deploying equity THEN reverts with WrongISIN", async () => {
-        const equityData = {
-          security: getSecurityData(businessLogicResolver, {
-            erc20MetadataInfo: { isin: "US0378331009" }, // Wrong checksum digit
-            rbacs: init_rbacs,
-          }),
-          equityDetails: makeEquityDetailsData(),
-        };
-        equityData.security.resolverProxyConfiguration = {
-          key: EQUITY_CONFIG_ID,
-          version: 1,
-        };
-
-        await expect(factory.deployEquity(equityData, getRegulationData())).to.be.revertedWithCustomError(
-          factory,
-          "WrongISINChecksum",
-        );
-      });
-
-      it("GIVEN valid ISIN WHEN deploying bond THEN passes onlyValidISIN validation", async () => {
-        const bondData = {
-          security: getSecurityData(businessLogicResolver, {
-            rbacs: init_rbacs,
-          }),
-          bondDetails: await getBondDetails(),
-          proceedRecipients: [],
-          proceedRecipientsData: [],
-        };
-        bondData.security.resolverProxyConfiguration = {
-          key: BOND_CONFIG_ID,
-          version: 1,
-        };
-
-        await expect(factory.deployBond(bondData, getRegulationData())).to.emit(factory, "BondDeployed");
       });
     });
 
@@ -580,32 +463,6 @@ describe("Factory Tests", () => {
       );
     });
 
-    it("GIVEN a wrong ISIN WHEN deploying a new resolverProxy THEN transaction fails", async () => {
-      const equityData = {
-        security: getSecurityData(businessLogicResolver, {
-          erc20MetadataInfo: { isin: "short" },
-        }),
-        equityDetails: makeEquityDetailsData(),
-      };
-      equityData.security.resolverProxyConfiguration = {
-        key: EQUITY_CONFIG_ID,
-        version: 1,
-      };
-
-      const factoryRegulationData = getRegulationData();
-
-      await expect(
-        factory.deployEquity(equityData, factoryRegulationData, {
-          gasLimit: GAS_LIMIT.default,
-        }),
-      ).to.be.revertedWithCustomError(factory, "WrongISIN");
-      equityData.security.erc20MetadataInfo.isin = "SJ5633813321";
-      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.revertedWithCustomError(
-        factory,
-        "WrongISINChecksum",
-      );
-    });
-
     it("GIVEN no admin WHEN deploying a new resolverProxy THEN transaction fails", async () => {
       const equityData = {
         security: getSecurityData(businessLogicResolver),
@@ -720,7 +577,6 @@ describe("Factory Tests", () => {
       expect(metadata.info.name).to.be.equal(equityData.security.erc20MetadataInfo.name);
       expect(metadata.info.symbol).to.be.equal(equityData.security.erc20MetadataInfo.symbol);
       expect(metadata.info.decimals).to.be.equal(equityData.security.erc20MetadataInfo.decimals);
-      expect(metadata.info.isin).to.be.equal(equityData.security.erc20MetadataInfo.isin);
       expect(metadata.securityType).to.be.equal(SecurityType.EQUITY);
 
       const nominalValueFacet = await ethers.getContractAt("NominalValue", equityAddress);
@@ -756,34 +612,6 @@ describe("Factory Tests", () => {
       await expect(factory.deployBond(bondData, factoryRegulationData)).to.be.revertedWithCustomError(
         factory,
         "EmptyResolver",
-      );
-    });
-
-    it("GIVEN a wrong ISIN WHEN deploying a new resolverProxy THEN transaction fails", async () => {
-      const bondData = {
-        security: getSecurityData(businessLogicResolver, {
-          erc20MetadataInfo: { isin: "wrong_isin" },
-          rbacs: init_rbacs,
-        }),
-        bondDetails: await getBondDetails(),
-        proceedRecipients: [],
-        proceedRecipientsData: [],
-      };
-      bondData.security.resolverProxyConfiguration = {
-        key: BOND_CONFIG_ID,
-        version: 1,
-      };
-
-      const factoryRegulationData = getRegulationData();
-
-      await expect(factory.deployBond(bondData, factoryRegulationData)).to.be.revertedWithCustomError(
-        factory,
-        "WrongISIN",
-      );
-      bondData.security.erc20MetadataInfo.isin = "SJ5633813321";
-      await expect(factory.deployBond(bondData, factoryRegulationData)).to.be.revertedWithCustomError(
-        factory,
-        "WrongISINChecksum",
       );
     });
 
@@ -885,7 +713,6 @@ describe("Factory Tests", () => {
       expect(metadata.info.name).to.be.equal(bondData.security.erc20MetadataInfo.name);
       expect(metadata.info.symbol).to.be.equal(bondData.security.erc20MetadataInfo.symbol);
       expect(metadata.info.decimals).to.be.equal(bondData.security.erc20MetadataInfo.decimals);
-      expect(metadata.info.isin).to.be.equal(bondData.security.erc20MetadataInfo.isin);
       expect(metadata.securityType).to.be.equal(SecurityType.BOND_VARIABLE_RATE);
 
       const capFacet = await ethers.getContractAt("Cap", bondAddress);
@@ -992,22 +819,6 @@ describe("Factory Tests", () => {
       );
     });
 
-    it("GIVEN a wrong ISIN WHEN deploying a new deposit token THEN transaction fails", async () => {
-      depositTokenData.security.erc20MetadataInfo.isin = "short";
-
-      await expect(
-        factory.deployDepositToken(depositTokenData, getRegulationData(), {
-          gasLimit: GAS_LIMIT.default,
-        }),
-      ).to.be.revertedWithCustomError(factory, "WrongISIN");
-
-      depositTokenData.security.erc20MetadataInfo.isin = "SJ5633813321";
-      await expect(factory.deployDepositToken(depositTokenData, getRegulationData())).to.be.revertedWithCustomError(
-        factory,
-        "WrongISINChecksum",
-      );
-    });
-
     it("GIVEN no admin WHEN deploying a new deposit token THEN transaction fails", async () => {
       depositTokenData.security.rbacs = [];
 
@@ -1062,7 +873,6 @@ describe("Factory Tests", () => {
       expect(metadata.info.name).to.be.equal(depositTokenData.security.erc20MetadataInfo.name);
       expect(metadata.info.symbol).to.be.equal(depositTokenData.security.erc20MetadataInfo.symbol);
       expect(metadata.info.decimals).to.be.equal(depositTokenData.security.erc20MetadataInfo.decimals);
-      expect(metadata.info.isin).to.be.equal(depositTokenData.security.erc20MetadataInfo.isin);
       expect(metadata.securityType).to.be.equal(SecurityType.DEPOSIT_TOKEN);
 
       // Cap initialised from SecurityData.maxSupply
@@ -1100,94 +910,6 @@ describe("Factory Tests", () => {
 
       expect(regulationData.regulationType).to.equal(regulationType);
       expect(regulationData.regulationSubType).to.equal(regulationSubType);
-    });
-  });
-
-  describe("ISIN validation edge cases", () => {
-    it("GIVEN an ISIN with length less than 12 WHEN deploying equity THEN transaction fails with WrongISIN", async () => {
-      const equityData = {
-        security: getSecurityData(businessLogicResolver, {
-          erc20MetadataInfo: { isin: "US037833100" }, // 11 characters - too short
-          rbacs: init_rbacs,
-        }),
-        equityDetails: makeEquityDetailsData(),
-      };
-      equityData.security.resolverProxyConfiguration = {
-        key: EQUITY_CONFIG_ID,
-        version: 1,
-      };
-
-      const factoryRegulationData = getRegulationData();
-
-      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.revertedWithCustomError(
-        factory,
-        "WrongISIN",
-      );
-    });
-
-    it("GIVEN an ISIN with length greater than 12 WHEN deploying equity THEN transaction fails with WrongISIN", async () => {
-      const equityData = {
-        security: getSecurityData(businessLogicResolver, {
-          erc20MetadataInfo: { isin: "US03783310051" }, // 13 characters - too long
-          rbacs: init_rbacs,
-        }),
-        equityDetails: makeEquityDetailsData(),
-      };
-      equityData.security.resolverProxyConfiguration = {
-        key: EQUITY_CONFIG_ID,
-        version: 1,
-      };
-
-      const factoryRegulationData = getRegulationData();
-
-      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.revertedWithCustomError(
-        factory,
-        "WrongISIN",
-      );
-    });
-
-    it("GIVEN an empty ISIN WHEN deploying equity THEN transaction fails with WrongISIN", async () => {
-      const equityData = {
-        security: getSecurityData(businessLogicResolver, {
-          erc20MetadataInfo: { isin: "" }, // Empty string
-          rbacs: init_rbacs,
-        }),
-        equityDetails: makeEquityDetailsData(),
-      };
-      equityData.security.resolverProxyConfiguration = {
-        key: EQUITY_CONFIG_ID,
-        version: 1,
-      };
-
-      const factoryRegulationData = getRegulationData();
-
-      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.revertedWithCustomError(
-        factory,
-        "WrongISIN",
-      );
-    });
-
-    it("GIVEN an ISIN with wrong length WHEN deploying bond THEN transaction fails with WrongISIN", async () => {
-      const bondData = {
-        security: getSecurityData(businessLogicResolver, {
-          erc20MetadataInfo: { isin: "SHORT" }, // Too short
-          rbacs: init_rbacs,
-        }),
-        bondDetails: await getBondDetails(),
-        proceedRecipients: [],
-        proceedRecipientsData: [],
-      };
-      bondData.security.resolverProxyConfiguration = {
-        key: BOND_CONFIG_ID,
-        version: 1,
-      };
-
-      const factoryRegulationData = getRegulationData();
-
-      await expect(factory.deployBond(bondData, factoryRegulationData)).to.be.revertedWithCustomError(
-        factory,
-        "WrongISIN",
-      );
     });
   });
 
@@ -1256,32 +978,6 @@ describe("Factory Tests", () => {
         factory,
         "EmptyResolver",
       );
-    });
-
-    it("GIVEN wrong ISIN WHEN deploying BondFixedRate THEN transaction fails", async () => {
-      const bondFixedRateData = {
-        bondData: {
-          security: getSecurityData(businessLogicResolver, {
-            erc20MetadataInfo: { isin: "short" },
-            rbacs: init_rbacs,
-          }),
-          bondDetails: await getBondDetails(),
-          proceedRecipients: [],
-          proceedRecipientsData: [],
-        },
-        factoryRegulationData: getRegulationData(),
-        fixedRateData: {
-          rate: 500,
-          rateDecimals: 2,
-        },
-      };
-
-      bondFixedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_FIXED_RATE_CONFIG_ID,
-        version: 1,
-      };
-
-      await expect(factory.deployBondFixedRate(bondFixedRateData)).to.be.revertedWithCustomError(factory, "WrongISIN");
     });
 
     it("GIVEN no admin WHEN deploying BondFixedRate THEN transaction fails", async () => {
@@ -1683,48 +1379,6 @@ describe("Factory Tests", () => {
       await expect(factory.deployBondKpiLinkedRate(bondKpiLinkedRateData)).to.be.revertedWithCustomError(
         factory,
         "EmptyResolver",
-      );
-    });
-
-    it("GIVEN wrong ISIN WHEN deploying BondKpiLinkedRate THEN transaction fails", async () => {
-      const bondKpiLinkedRateData = {
-        bondData: {
-          security: getSecurityData(businessLogicResolver, {
-            erc20MetadataInfo: { isin: "short" },
-            rbacs: init_rbacs,
-          }),
-          bondDetails: await getBondDetails(),
-          proceedRecipients: [],
-          proceedRecipientsData: [],
-        },
-        factoryRegulationData: getRegulationData(),
-        interestRate: {
-          maxRate: 1000,
-          baseRate: 500,
-          minRate: 100,
-          startPeriod: Math.floor(Date.now() / 1000) + 86400,
-          startRate: 500,
-          missedPenalty: 50,
-          reportPeriod: 86400 * 30,
-          rateDecimals: 2,
-        },
-        impactData: {
-          maxDeviationCap: 150,
-          baseLine: 100,
-          maxDeviationFloor: 50,
-          impactDataDecimals: 2,
-          adjustmentPrecision: 100,
-        },
-      };
-
-      bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_KPI_LINKED_RATE_CONFIG_ID,
-        version: 1,
-      };
-
-      await expect(factory.deployBondKpiLinkedRate(bondKpiLinkedRateData)).to.be.revertedWithCustomError(
-        factory,
-        "WrongISIN",
       );
     });
 
