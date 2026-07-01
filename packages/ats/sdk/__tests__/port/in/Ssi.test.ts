@@ -40,7 +40,6 @@ SDK.log = { level: "ERROR", transports: new LoggerTransports.Console() };
 const decimals = 0;
 const name = "TEST_SECURITY_TOKEN";
 const symbol = "TEST";
-const isin = "ABCDE123456Z";
 const votingRight = true;
 const informationRight = false;
 const liquidationRight = true;
@@ -114,7 +113,6 @@ describe("🧪 SSI Management tests", () => {
       const requestST = new CreateEquityRequest({
         name,
         symbol,
-        isin,
         decimals,
         isWhiteList: false,
         erc20VotesActivated: false,

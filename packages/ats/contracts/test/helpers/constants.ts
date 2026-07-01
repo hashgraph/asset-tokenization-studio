@@ -946,9 +946,6 @@ export const TEST_TOKEN_METADATA = {
   /** Sample token symbol */
   SYMBOL: "TEST",
 
-  /** Sample ISIN */
-  ISIN: "US0000000000",
-
   /** Standard decimals */
   DECIMALS: 18,
 

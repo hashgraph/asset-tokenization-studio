@@ -28,8 +28,6 @@ export interface SecurityDataParams {
     symbol: string;
     /** Token decimals */
     decimals: number;
-    /** ISIN identifier */
-    isin: string;
   };
   /** Enable clearing functionality */
   clearingActive: boolean;

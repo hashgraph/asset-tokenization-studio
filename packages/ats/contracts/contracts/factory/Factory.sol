@@ -48,7 +48,6 @@ import {
 } from "../facets/externalControlListManagement/IExternalControlListManagement.sol";
 import { IExternalKycListManagement } from "../facets/externalKycListManagement/IExternalKycListManagement.sol";
 import { IKyc } from "../facets/kyc/IKyc.sol";
-import { _validateISIN } from "./isinValidator.sol";
 import { IInterestRate } from "../facets/interestRate/IInterestRate.sol";
 import { EvmAccessors } from "../infrastructure/utils/EvmAccessors.sol";
 import { DatesValidation } from "../infrastructure/utils/DatesValidation.sol";
@@ -178,7 +177,7 @@ abstract contract Factory is FactoryCommon, IFactoryEquityBond {
 
     /**
      * @notice Deploys and initialises an equity security proxy.
-     * @dev Validates resolver, ISIN, admin RBAC and regulation data. Initialises equity,
+     * @dev Validates resolver, admin RBAC and regulation data. Initialises equity,
      *      security, nominal value, dividend, voting and common security facets, marks the
      *      proxy operational, renounces this factory's temporary admin role and emits
      *      `EquityDeployed`.
@@ -193,7 +192,6 @@ abstract contract Factory is FactoryCommon, IFactoryEquityBond {
         external
         override
         onlyValidResolver(_equityData.security.resolver)
-        onlyValidISIN(_equityData.security.erc20MetadataInfo.isin)
         onlyValidAdmins(_equityData.security.rbacs)
         onlyValidRegulation(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType)
         returns (address equityAddress_)
@@ -218,7 +216,7 @@ abstract contract Factory is FactoryCommon, IFactoryEquityBond {
 
     /**
      * @notice Deploys and initialises a variable-rate bond security proxy.
-     * @dev Validates resolver, ISIN, admin RBAC, regulation data and bond dates. Initialises
+     * @dev Validates resolver, admin RBAC, regulation data and bond dates. Initialises
      *      bond-specific and common facets, sets the rate type to standard, marks the proxy
      *      operational, renounces this factory's temporary admin role and emits `BondDeployed`.
      * @param _bondData Bond deployment data, including common security configuration.
@@ -232,7 +230,6 @@ abstract contract Factory is FactoryCommon, IFactoryEquityBond {
         external
         override
         onlyValidResolver(_bondData.security.resolver)
-        onlyValidISIN(_bondData.security.erc20MetadataInfo.isin)
         onlyValidAdmins(_bondData.security.rbacs)
         onlyValidRegulation(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType)
         onlyValidBondDates(_bondData.bondDetails.startingDate, _bondData.bondDetails.maturityDate)
@@ -382,7 +379,7 @@ abstract contract Factory is FactoryCommon, IFactoryEquityBond {
         // configure core adjusted
         ICoreAdjusted(_securityAddress).initializeCoreAdjusted();
         // configure custom data
-        ICustomData(_securityAddress).initializeCustomData();
+        ICustomData(_securityAddress).initializeCustomData(new ICustomData.CustomDataEntry[](0));
         // configure freeze
         IFreeze(_securityAddress).initializeFreeze();
         // configure batch freeze

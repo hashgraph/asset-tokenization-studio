@@ -15,7 +15,6 @@ import { GetSecurityQuery } from "@query/security/get/GetSecurityQuery";
 export const SecurityPropsFixture = createFixture<SecurityProps>((security) => {
   security.name.faker((faker) => faker.company.name());
   security.symbol.faker((faker) => faker.string.alpha({ length: 3, casing: "upper" }));
-  security.isin.faker((faker) => `US${faker.string.numeric(9)}`);
   security.type?.faker((faker) => faker.helpers.arrayElement(Object.values(SecurityType)));
   security.decimals.faker((faker) => faker.number.int({ min: 0, max: 18 }));
   security.isWhiteList.faker((faker) => faker.datatype.boolean());

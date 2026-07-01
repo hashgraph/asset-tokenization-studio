@@ -261,7 +261,6 @@ export async function deployLoanTokenFixture({
       name: securityData.erc20MetadataInfo.name,
       symbol: securityData.erc20MetadataInfo.symbol,
       decimals: securityData.erc20MetadataInfo.decimals,
-      isin: securityData.erc20MetadataInfo.isin,
     },
     securityType: 1, // SecurityType.Equity (reuse for loan)
   });
@@ -354,7 +353,7 @@ export async function deployLoanTokenFixture({
   await asset.initializeDeactivate();
   await asset.initializeOperatorHoldByPartition();
   await asset.initializeCoreAdjusted();
-  await asset.initializeCustomData();
+  await asset.initializeCustomData([]);
   await asset.initializeCompliance(ZeroAddress);
   await asset.initializeCouponListing();
   await asset.initializeCapByPartition();

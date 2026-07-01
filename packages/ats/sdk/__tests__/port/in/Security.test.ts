@@ -99,7 +99,6 @@ SDK.log = { level: "ERROR", transports: new LoggerTransports.Console() };
 const decimals = 0;
 const name = "TEST_SECURITY_TOKEN";
 const symbol = "TEST";
-const isin = "ABCDE123456Z";
 const type = "EQUITY";
 const votingRight = true;
 const informationRight = false;
@@ -171,7 +170,6 @@ describe("🧪 Security tests", () => {
     const requestST = new CreateEquityRequest({
       name: name,
       symbol: symbol,
-      isin: isin,
       decimals: decimals,
       isWhiteList: false,
       erc20VotesActivated: false,
@@ -348,7 +346,6 @@ describe("🧪 Security tests", () => {
     );
     expect(equityInfo.name).toEqual(name);
     expect(equityInfo.symbol).toEqual(symbol);
-    expect(equityInfo.isin).toEqual(isin);
     expect(equityInfo.type).toEqual(type);
     expect(equityInfo.decimals).toEqual(decimals);
     expect(equityInfo.isWhiteList).toEqual(false);

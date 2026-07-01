@@ -12,7 +12,7 @@ contract LoansPortfolioFacet is LoansPortfolio, IStaticFunctionSelectors {
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](20);
+        staticFunctionSelectors_ = new bytes4[](19);
         staticFunctionSelectors_[selectorIndex++] = this.initializeLoansPortfolio.selector;
         staticFunctionSelectors_[selectorIndex++] = this.addHoldingsAsset.selector;
         staticFunctionSelectors_[selectorIndex++] = this.removeHoldingsAsset.selector;
@@ -32,7 +32,6 @@ contract LoansPortfolioFacet is LoansPortfolio, IStaticFunctionSelectors {
         staticFunctionSelectors_[selectorIndex++] = this.getPerformingLoansRatio.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getNonPerformingLoansRatio.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getDefaultedLoansRatio.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getGeographicalExposure.selector;
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {

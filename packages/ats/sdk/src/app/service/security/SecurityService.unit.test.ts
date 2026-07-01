@@ -42,7 +42,6 @@ describe("SecurityService", () => {
         {
           decimals: security.decimals,
           symbol: security.symbol,
-          isin: security.isin,
           evmDiamondAddress: security.evmDiamondAddress,
         },
       ],
@@ -51,7 +50,6 @@ describe("SecurityService", () => {
         {
           name: security.name,
           symbol: security.symbol,
-          isin: security.isin,
           evmDiamondAddress: security.evmDiamondAddress,
         },
       ],
@@ -60,16 +58,6 @@ describe("SecurityService", () => {
         {
           name: security.name,
           decimals: security.decimals,
-          isin: security.isin,
-          evmDiamondAddress: security.evmDiamondAddress,
-        },
-      ],
-      [
-        "missing isin",
-        {
-          name: security.name,
-          decimals: security.decimals,
-          symbol: security.symbol,
           evmDiamondAddress: security.evmDiamondAddress,
         },
       ],
@@ -79,7 +67,6 @@ describe("SecurityService", () => {
           name: security.name,
           decimals: security.decimals,
           symbol: security.symbol,
-          isin: security.isin,
         },
       ],
     ])("should throw SecurityNotFound when %s", async (_description, incompleteViewModel) => {

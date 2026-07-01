@@ -543,59 +543,6 @@ exports[`CreateBond render correctly 1`] = `
               </div>
             </div>
             <div
-              class="chakra-stack css-1h0sumw"
-            >
-              <div
-                class="chakra-stack css-1nqqhpy"
-              >
-                <p
-                  class="css-0"
-                >
-                  ISIN*
-                </p>
-                <div
-                  class="css-k008qs"
-                >
-                  <svg
-                    class="chakra-icon css-kpbtv0"
-                    fill="currentColor"
-                    focusable="false"
-                    height="1em"
-                    viewBox="0 0 256 256"
-                    width="1em"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"
-                    />
-                  </svg>
-                </div>
-              </div>
-              <div
-                class="chakra-form-control css-1kxonj9"
-                role="group"
-              >
-                <label
-                  class="css-1fey8w1"
-                  for="isin"
-                >
-                  <div
-                    class="chakra-input__group css-pwmwmr"
-                    data-group="true"
-                  >
-                    <input
-                      class="chakra-input css-ixs4pt"
-                      data-testid="isin"
-                      id="isin"
-                      name="isin"
-                      placeholder="12"
-                      value=""
-                    />
-                  </div>
-                </label>
-              </div>
-            </div>
-            <div
               class="css-7xu97p"
               data-testid="info-divider"
             >
@@ -660,7 +607,7 @@ exports[`CreateBond render correctly 1`] = `
                       <label
                         class="chakra-form__label css-1ii0m7i"
                         for="isControllable"
-                        id="field-:rd:-label"
+                        id="field-:ra:-label"
                       >
                         Controllable
                       </label>
@@ -724,7 +671,7 @@ exports[`CreateBond render correctly 1`] = `
                       <label
                         class="chakra-form__label css-1ii0m7i"
                         for="isBlocklist"
-                        id="field-:rg:-label"
+                        id="field-:rd:-label"
                       >
                         Blocklist
                       </label>
@@ -784,7 +731,7 @@ exports[`CreateBond render correctly 1`] = `
                       <label
                         class="chakra-form__label css-1ii0m7i"
                         for="isApproval"
-                        id="field-:rj:-label"
+                        id="field-:rg:-label"
                       >
                         Approval list
                       </label>
@@ -871,7 +818,7 @@ exports[`CreateBond render correctly 1`] = `
                       <label
                         class="chakra-form__label css-1ii0m7i"
                         for="isClearing"
-                        id="field-:rn:-label"
+                        id="field-:rk:-label"
                       >
                         Clearing mode enabled
                       </label>
@@ -935,7 +882,7 @@ exports[`CreateBond render correctly 1`] = `
                       <label
                         class="chakra-form__label css-1ii0m7i"
                         for="internalKycActivated"
-                        id="field-:rq:-label"
+                        id="field-:rn:-label"
                       >
                         Internal Kyc Activated
                       </label>

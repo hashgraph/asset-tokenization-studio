@@ -25,7 +25,6 @@ interface TRexICore {
     struct ERC20MetadataInfo {
         string name;
         string symbol;
-        string isin;
         uint8 decimals;
     }
 

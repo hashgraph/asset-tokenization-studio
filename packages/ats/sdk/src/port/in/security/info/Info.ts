@@ -25,7 +25,6 @@ export class SecurityInPortInfo extends BaseSecurityInPort implements ISecurityI
     const security: SecurityViewModel = {
       name: res.security.name,
       symbol: res.security.symbol,
-      isin: res.security.isin,
       type: res.security.type,
       decimals: res.security.decimals,
       isWhiteList: res.security.isWhiteList,

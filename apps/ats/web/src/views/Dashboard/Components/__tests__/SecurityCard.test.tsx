@@ -7,7 +7,6 @@ const defaultProps = {
   digitalSecurity: {
     name: "testing",
     symbol: "TEST",
-    isin: "123456789101",
     address: "0.0.123456",
     evmAddress: "0x38949962d54e5a2c6081d7e87203e3565e90cc80",
   },
