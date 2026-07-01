@@ -6,7 +6,6 @@ import { ResolverProxy } from "../infrastructure/proxy/ResolverProxy.sol";
 import { IResolverProxy } from "../infrastructure/proxy/IResolverProxy.sol";
 import { DEFAULT_ADMIN_ROLE } from "../constants/roles.sol";
 import { RegulationType, RegulationSubType, _checkRegulationTypeAndSubType } from "../constants/regulation.sol";
-import { _validateISIN } from "./isinValidator.sol";
 import { IBusinessLogicResolver } from "../infrastructure/diamond/IBusinessLogicResolver.sol";
 import { IAccessControl } from "../facets/accessControl/IAccessControl.sol";
 import { IDiamondFacet } from "../infrastructure/diamond/IDiamondFacet.sol";
@@ -50,16 +49,6 @@ abstract contract FactoryCommon is IFactoryCommon {
      */
     modifier onlyValidResolver(IBusinessLogicResolver resolver) {
         _checkResolver(resolver);
-        _;
-    }
-
-    /**
-     * @notice Guarantees the provided ISIN satisfies the project validator.
-     * @dev Delegates to `_checkISIN`, which reverts when the identifier is malformed.
-     * @param isin International Securities Identification Number to validate.
-     */
-    modifier onlyValidISIN(string calldata isin) {
-        _checkISIN(isin);
         _;
     }
 
@@ -143,7 +132,7 @@ abstract contract FactoryCommon is IFactoryCommon {
         );
         ICap(_securityAddress).initializeCap(_securityData.maxSupply, new ICap.PartitionCap[](0));
         ICapByPartition(_securityAddress).initializeCapByPartition();
-        ICustomData(_securityAddress).initializeCustomData();
+        ICustomData(_securityAddress).initializeCustomData(new ICustomData.CustomDataEntry[](0));
         IDocumentation(_securityAddress).initializeDocumentation();
 
         IPartitions(_securityAddress).initializePartitions(_securityData.isMultiPartition);
@@ -159,16 +148,6 @@ abstract contract FactoryCommon is IFactoryCommon {
         if (address(resolver) == address(0)) {
             revert EmptyResolver(resolver);
         }
-    }
-
-    /**
-     * @notice Asserts that the provided ISIN satisfies the project validator.
-     * @dev Forwards to the `_validateISIN` free function, which reverts when the identifier is
-     *      malformed.
-     * @param isin International Securities Identification Number to validate.
-     */
-    function _checkISIN(string calldata isin) private pure {
-        _validateISIN(isin);
     }
 
     /**

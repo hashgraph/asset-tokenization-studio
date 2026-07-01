@@ -106,7 +106,6 @@ abstract contract DepositTokenFactory is FactoryCommon, IDepositTokenFactory {
         external
         override
         onlyValidResolver(_depositTokenData.security.resolver)
-        onlyValidISIN(_depositTokenData.security.erc20MetadataInfo.isin)
         onlyValidAdmins(_depositTokenData.security.rbacs)
         onlyValidRegulation(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType)
         returns (address depositTokenAddress_)
