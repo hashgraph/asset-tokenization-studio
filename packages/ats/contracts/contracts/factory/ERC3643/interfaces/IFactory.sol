@@ -178,14 +178,6 @@ interface TRexIFactory {
     }
 
     /**
-     * @notice Full configuration for deploying a deposit token.
-     * @param security Core security configuration shared across all security types.
-     */
-    struct DepositTokenData {
-        SecurityData security;
-    }
-
-    /**
      * @notice Emitted when a new equity token is deployed.
      * @param deployer Address that initiated the deployment.
      * @param equityAddress Address of the newly deployed equity proxy.
@@ -210,20 +202,6 @@ interface TRexIFactory {
         address indexed deployer,
         address bondAddress,
         BondData bondData,
-        FactoryRegulationData regulationData
-    );
-
-    /**
-     * @notice Emitted when a new deposit token is deployed.
-     * @param deployer Address that initiated the deployment.
-     * @param depositTokenAddress Address of the newly deployed deposit token proxy.
-     * @param depositTokenData Full deposit token configuration.
-     * @param regulationData Regulation data validated for the deposit token.
-     */
-    event DepositTokenDeployed(
-        address indexed deployer,
-        address depositTokenAddress,
-        DepositTokenData depositTokenData,
         FactoryRegulationData regulationData
     );
 
@@ -301,19 +279,6 @@ interface TRexIFactory {
         BondData calldata _bondData,
         FactoryRegulationData calldata _factoryRegulationData
     ) external returns (address bondAddress_);
-
-    /**
-     * @notice Deploys a new deposit token from the supplied configuration.
-     * @dev DepositToken is a minimal cash-style asset; the regulation data is validated and
-     *      emitted for indexing but not persisted on-chain.
-     * @param _depositTokenData Deposit token creation data wrapping the shared `SecurityData`.
-     * @param _factoryRegulationData Regulation type and sub-type validated for the deposit token.
-     * @return depositTokenAddress_ Address of the newly deployed deposit token proxy.
-     */
-    function deployDepositToken(
-        DepositTokenData calldata _depositTokenData,
-        FactoryRegulationData calldata _factoryRegulationData
-    ) external returns (address depositTokenAddress_);
 
     /**
      * @notice Returns the regulation data that applies to a given type/sub-type pair.

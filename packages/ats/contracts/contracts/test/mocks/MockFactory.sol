@@ -208,20 +208,6 @@ abstract contract MockFactory is Factory, IMockFactory {
         ITimeTravel(securityAddress_).initializeTimeTravel();
     }
 
-    /// @inheritdoc Factory
-    /// @notice Deploys a deposit token proxy and initialises time-travel state.
-    /// @dev Initialises time-travel state on the deployed deposit token after the base deployment.
-    /// @param _securityData Core security configuration shared across all security types.
-    /// @param _securityType Distinguishes the security variant being deployed.
-    /// @return securityAddress_ Address of the deployed deposit token proxy.
-    function _deployDepositToken(
-        SecurityData calldata _securityData,
-        SecurityType _securityType
-    ) internal override returns (address securityAddress_) {
-        securityAddress_ = super._deployDepositToken(_securityData, _securityType);
-        ITimeTravel(securityAddress_).initializeTimeTravel();
-    }
-
     /**
      * @notice Deploys and initialises the KPI-linked-rate bond facet set.
      * @dev Builds on `_deployBond`, then initialises KPI-linked rate metadata, rate type and

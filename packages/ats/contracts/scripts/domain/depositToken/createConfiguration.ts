@@ -4,9 +4,9 @@
  * Deposit Token configuration module.
  *
  * Registers the deposit token configuration in the BusinessLogicResolver by calling the generic
- * createConfiguration() operation with the deposit-token facet list and configuration id. Every
- * facet listed here is initialised by `Factory._deployDepositToken`, so the set must stay in sync
- * with that function or `setOperationalStatus` will not mark deployed proxies operational.
+ * createConfiguration() operation with the deposit-token facet list and configuration id. The list
+ * defines the resolver configuration a deposit-token proxy resolves against; each facet must be
+ * initialised before `setOperationalStatus` can mark a deployed proxy operational.
  *
  * @module domain/depositToken/createConfiguration
  */
@@ -24,18 +24,19 @@ import { DEPOSIT_TOKEN_CONFIG_ID } from "../constants";
 import { atsRegistry } from "../atsRegistry";
 
 /**
- * Deposit Token configuration: 43 facets (42 capability facets + InitializerFacet).
+ * Deposit Token configuration: 69 facets (68 capability facets + InitializerFacet).
  *
- * A deposit token is a minimal cash-style asset, so this list omits the facets for capabilities
- * it does not expose (compliance, KYC, external KYC, external pause, protected partitions,
- * identity, snapshots, lock, coupon, maturity, …). Each facet listed here has a matching
- * initialiser in `Factory._deployDepositToken`.
+ * This list still omits the facets for capabilities the deposit token does not expose (KYC,
+ * external KYC, external pause, identity, full compliance, …), but includes the snapshot,
+ * adjusted-balance, lock, per-partition compliance, income-holder, maturity, protected-partition
+ * and voting-holder facets so a deposit-token resolver configuration exposes the full capability
+ * set it needs.
  */
 const DEPOSIT_TOKEN_FACETS = [
   // Always-on (initializers + diamond infra)
   "AccessControlFacet",
   "DiamondFacet",
-  "InitializerFacet", // required by setOperationalStatus / Factory._deployDepositToken
+  "InitializerFacet", // required by setOperationalStatus
   "ControlListFacet", // also = Eligibility
   "CoreFacet", // also = Core
   "CapFacet", // also = Cap
@@ -106,6 +107,48 @@ const DEPOSIT_TOKEN_FACETS = [
   "CustomDataFacet",
   "NominalValueFacet",
   "PauseFacet",
+
+  // Snapshots
+  "SnapshotsByPartitionFacet",
+  "BalanceTrackerAtSnapshotFacet",
+  "BalanceTrackerAtSnapshotByPartitionFacet",
+  "ClearingAtSnapshotFacet",
+  "ClearingAtSnapshotByPartitionFacet",
+  "CoreAtSnapshotFacet",
+  "FreezeAtSnapshotFacet",
+  "FreezeAtSnapshotByPartitionFacet",
+  "HoldAtSnapshotFacet",
+  "HoldAtSnapshotByPartitionFacet",
+  "LockAtSnapshotByPartitionFacet",
+  "NominalValueAtSnapshotFacet",
+  "SecurityHoldersAtSnapshotFacet",
+
+  // Adjusted balances
+  "BalanceTrackerAdjustedFacet",
+  "CoreAdjustedFacet",
+
+  // Lock
+  "LockByPartitionFacet",
+  "TransferAndLockByPartitionFacet",
+
+  // Compliance
+  "ComplianceByPartitionFacet",
+
+  // Income (coupon / dividend holders)
+  "CouponSecurityHoldersFacet",
+  "DividendSecurityHoldersFacet",
+
+  // Maturity
+  "MaturityByPartitionFacet",
+
+  // Protected partitions
+  "ProtectedByPartitionFacet",
+  "ProtectedHoldByPartitionFacet",
+  "ProtectedClearingByPartitionFacet",
+  "ProtectedClearingHoldByPartitionFacet",
+
+  // Voting
+  "VotingSecurityHoldersFacet",
 ] as const;
 
 /**
@@ -114,7 +157,7 @@ const DEPOSIT_TOKEN_FACETS = [
  * Thin wrapper that calls the generic core operation with deposit-token-specific
  * data:
  * - Configuration ID: DEPOSIT_TOKEN_CONFIG_ID
- * - Facet list: DEPOSIT_TOKEN_FACETS (43 facets)
+ * - Facet list: DEPOSIT_TOKEN_FACETS (69 facets)
  *
  * @param blrContract - BusinessLogicResolver contract instance
  * @param facetAddresses - Map of facet names to their deployed addresses
