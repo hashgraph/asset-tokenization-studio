@@ -26,11 +26,14 @@ import { atsRegistry } from "../atsRegistry";
 import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
 
 /**
- * Factory-specific facets list (1 facet).
+ * Factory-specific facets list (2 facets).
  *
- * Factory is a single-facet ResolverProxy that handles token deployment.
+ * The factory ResolverProxy dispatches token deployment across two facets that share no
+ * selectors: `FactoryFacet` (equity/bond/proxy) and `DepositTokenFactoryFacet` (deposit token).
+ * The deposit-token deployment path is kept in its own facet so neither exceeds the EIP-170
+ * 24 KB bytecode limit. In time-travel mode both are served by the single fat `MockFactoryFacet`.
  */
-const FACTORY_FACETS = ["FactoryFacet"] as const;
+const FACTORY_FACETS = ["FactoryFacet", "DepositTokenFactoryFacet"] as const;
 
 /**
  * Create factory token configuration in BusinessLogicResolver.
@@ -86,8 +89,10 @@ export async function createFactoryConfiguration(
   confirmations: number = 0,
   retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  // Build facet list based on time travel mode
-  const facetNames = useTimeTravel ? FACTORY_FACETS.map(() => "MockFactoryFacet") : [...FACTORY_FACETS];
+  // Build facet list based on time travel mode. The mock factory facet is a single fat facet
+  // that exposes every factory selector (including deployDepositToken), so time-travel mode
+  // collapses the split production facets into that one facet.
+  const facetNames = useTimeTravel ? ["MockFactoryFacet"] : [...FACTORY_FACETS];
 
   // Build facet data with resolver keys from registry
   const facets = facetNames.map((name) => {

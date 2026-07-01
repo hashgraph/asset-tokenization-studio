@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { Factory } from "../../factory/Factory.sol";
+import { DepositTokenFactory } from "../../factory/DepositTokenFactory.sol";
 import { IFactory, FactoryRegulationData } from "../../factory/IFactory.sol";
 import { ITimeTravel } from "../testTimeTravel/ITimeTravel.sol";
 import { IInterestRate } from "../../facets/interestRate/IInterestRate.sol";
@@ -106,7 +107,7 @@ interface IMockFactory is IFactory {
  * @title Mock Factory Implementation
  * @author Asset Tokenization Studio Team
  */
-abstract contract MockFactory is Factory, IMockFactory {
+abstract contract MockFactory is Factory, DepositTokenFactory, IMockFactory {
     /**
      * @notice Guarantees KPI-linked interest rate data is valid before deployment.
      * @dev Delegates to `_checkInterestRate`, which reverts for invalid interest-rate data.
@@ -208,7 +209,7 @@ abstract contract MockFactory is Factory, IMockFactory {
         ITimeTravel(securityAddress_).initializeTimeTravel();
     }
 
-    /// @inheritdoc Factory
+    /// @inheritdoc DepositTokenFactory
     /// @notice Deploys a deposit token proxy and initialises time-travel state.
     /// @dev Initialises time-travel state on the deployed deposit token after the base deployment.
     /// @param _securityData Core security configuration shared across all security types.

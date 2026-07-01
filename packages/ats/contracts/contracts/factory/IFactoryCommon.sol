@@ -1,27 +1,22 @@
 // SPDX-License-Identifier: Apache-2.0
-// AUTO-GENERATED — DO NOT EDIT.
-// Source: contracts/factory/IFactory.sol
-// Regenerated on every `npx hardhat compile` by the
-// `erc3643-clone-interfaces` task in `tasks/compile.ts`.
-// Edits to this file will be silently overwritten.
-pragma solidity ^0.8.17;
+pragma solidity >=0.8.0 <0.9.0;
 
-import { TRexIResolverProxy as IResolverProxy } from "./IResolverProxy.sol";
-import { TRexIBusinessLogicResolver as IBusinessLogicResolver } from "./IBusinessLogicResolver.sol";
-import { TRexICore as ICore } from "./ICore.sol";
-import { FactoryRegulationData, RegulationData, RegulationType, RegulationSubType } from "./regulation.sol";
-
-/// @custom:hash resolverKey Factory
-bytes32 constant RESOLVER_KEY_FACTORY = 0x9fc26269cc1cb994e66f269ed6b58a5bb0c344a134b9dabd342ac466d48f95c7;
+import { IResolverProxy } from "../infrastructure/proxy/IResolverProxy.sol";
+import { IBusinessLogicResolver } from "../infrastructure/diamond/IBusinessLogicResolver.sol";
+import { ICore } from "../facets/core/ICore.sol";
+import { FactoryRegulationData, RegulationType, RegulationSubType } from "../constants/regulation.sol";
 
 /**
- * @title Factory Interface
+ * @title IFactoryCommon
  * @author Asset Tokenization Studio Team
- * @notice Interface for deploying tokenised securities (equity, bonds, loans)
- *         through a centralised factory that configures resolver proxies,
- *         business-logic resolvers, and role-based access control.
+ * @notice Shared factory type system: the enums, structs, deployment events and errors used by
+ *         every factory facet.
+ * @dev Split out of `IFactory` so each facet interface (`IFactoryEquityBond`, `IDepositTokenFactory`)
+ *      and the shared `FactoryCommon` base reuse the same types without inheriting deployment
+ *      functions they do not implement. The concrete `IFactory` union still exposes every type via
+ *      inheritance, so off-chain consumers keep using `IFactory.SecurityData` unchanged.
  */
-interface TRexIFactory {
+interface IFactoryCommon {
     /**
      * @notice Distinguishes the security variant being deployed.
      * @dev Used internally to select the correct initialisation path in the factory.
@@ -262,67 +257,4 @@ interface TRexIFactory {
      * @param regulationSubType Sub-category within the regulation.
      */
     error RegulationTypeAndSubTypeForbidden(RegulationType regulationType, RegulationSubType regulationSubType);
-
-    /**
-     * @notice Deploys a new resolver proxy and initialises its RBAC.
-     * @param _resolver Business-logic resolver to attach.
-     * @param _configKey Configuration identifier for the proxy.
-     * @param _version Initial configuration version.
-     * @param _rbacs Role-based access control entries to seed.
-     * @param _data Additional data for the proxy deployment.
-     * @return proxyAddress_ Address of the deployed proxy.
-     */
-    function deployProxy(
-        IBusinessLogicResolver _resolver,
-        bytes32 _configKey,
-        uint256 _version,
-        IResolverProxy.Rbac[] memory _rbacs,
-        bytes calldata _data
-    ) external returns (address proxyAddress_);
-
-    /**
-     * @notice Deploys a new equity token with the supplied data.
-     * @param _equityData Equity configuration and metadata.
-     * @param _factoryRegulationData Regulation settings for the equity.
-     * @return equityAddress_ Address of the deployed equity proxy.
-     */
-    function deployEquity(
-        EquityData calldata _equityData,
-        FactoryRegulationData calldata _factoryRegulationData
-    ) external returns (address equityAddress_);
-
-    /**
-     * @notice Deploys a new variable-rate bond with the supplied data.
-     * @param _bondData Bond configuration and metadata.
-     * @param _factoryRegulationData Regulation settings for the bond.
-     * @return bondAddress_ Address of the deployed bond proxy.
-     */
-    function deployBond(
-        BondData calldata _bondData,
-        FactoryRegulationData calldata _factoryRegulationData
-    ) external returns (address bondAddress_);
-
-    /**
-     * @notice Deploys a new deposit token from the supplied configuration.
-     * @dev DepositToken is a minimal cash-style asset; the regulation data is validated and
-     *      emitted for indexing but not persisted on-chain.
-     * @param _depositTokenData Deposit token creation data wrapping the shared `SecurityData`.
-     * @param _factoryRegulationData Regulation type and sub-type validated for the deposit token.
-     * @return depositTokenAddress_ Address of the newly deployed deposit token proxy.
-     */
-    function deployDepositToken(
-        DepositTokenData calldata _depositTokenData,
-        FactoryRegulationData calldata _factoryRegulationData
-    ) external returns (address depositTokenAddress_);
-
-    /**
-     * @notice Returns the regulation data that applies to a given type/sub-type pair.
-     * @param _regulationType Primary regulation category.
-     * @param _regulationSubType Sub-category within the regulation.
-     * @return regulationData_ Matched regulation configuration.
-     */
-    function getAppliedRegulationData(
-        RegulationType _regulationType,
-        RegulationSubType _regulationSubType
-    ) external pure returns (RegulationData memory regulationData_);
 }
