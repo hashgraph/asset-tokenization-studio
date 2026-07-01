@@ -283,39 +283,6 @@ abstract contract Factory is IFactory {
     }
 
     /**
-     * @notice Deploys and fully initialises a deposit token proxy.
-     * @dev Creates the proxy and initialises its facets via `_deployDepositToken`, marks the
-     *      proxy operational and renounces this factory's temporary `DEFAULT_ADMIN_ROLE`. The
-     *      deposit token configuration does not include `SecurityFacet`, so
-     *      `_factoryRegulationData` is validated by `onlyValidRegulation` and emitted in
-     *      `DepositTokenDeployed` but not persisted on-chain.
-     * @param _depositTokenData Deposit token creation data wrapping the shared `SecurityData`.
-     * @param _factoryRegulationData Regulation type and sub-type validated for the deposit token.
-     * @return depositTokenAddress_ Address of the newly deployed deposit token proxy.
-     */
-    function deployDepositToken(
-        DepositTokenData calldata _depositTokenData,
-        FactoryRegulationData calldata _factoryRegulationData
-    )
-        external
-        onlyValidResolver(_depositTokenData.security.resolver)
-        onlyValidAdmins(_depositTokenData.security.rbacs)
-        onlyValidRegulation(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType)
-        returns (address depositTokenAddress_)
-    {
-        depositTokenAddress_ = _deployDepositToken(_depositTokenData.security, SecurityType.DepositToken);
-        (bool isOperational_, ) = IInitializer(depositTokenAddress_).setOperationalStatus();
-        _checkUnexpectedError(!isOperational_, FACTORY_OPERATIONAL_STATUS);
-        IAccessControl(depositTokenAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
-        emit DepositTokenDeployed(
-            EvmAccessors.getMsgSender(),
-            depositTokenAddress_,
-            _depositTokenData,
-            _factoryRegulationData
-        );
-    }
-
-    /**
      * @notice Builds and returns the full `RegulationData` struct for a given regulation type
      *         and sub-type combination.
      * @param _regulationType The primary regulation category.
@@ -385,39 +352,6 @@ abstract contract Factory is IFactory {
     }
 
     /**
-     * @notice Deploys a deposit-token proxy and initialises only the facets it exposes.
-     * @dev Initialises exactly the facets registered for the deposit-token resolver
-     *      configuration and no others; in particular it does not call the snapshot, lock,
-     *      transfer-and-lock, corporate-action, identity, recovery, SSI, balance-adjustment,
-     *      scheduled-task, ERC20-permit, ERC20-votes, compliance, KYC, external-pause or
-     *      protected-partition initialisers. Each initialiser invoked here requires its facet to
-     *      be present in the resolver configuration, otherwise `IInitializer.setOperationalStatus`
-     *      cannot mark the proxy operational. The `InitializerFacet` batch size is seeded last so a
-     *      single `setOperationalStatus` pass validates every facet initialised above.
-     * @param _securityData Common security deployment configuration.
-     * @param _securityType Security type recorded in core metadata.
-     * @return securityAddress_ Address of the fully initialised deposit-token proxy.
-     */
-    function _deployDepositToken(
-        SecurityData calldata _securityData,
-        SecurityType _securityType
-    ) internal virtual returns (address securityAddress_) {
-        securityAddress_ = _deploySecurityProxy(_securityData);
-        _initializeBaseConfiguration(securityAddress_, _securityData, _securityType);
-        // DepositToken carries no nominal value; seed the facet with its zero default.
-        INominalValue(securityAddress_).initializeNominalValue(0, 0, bytes3(0));
-        _initializeTransferAndSupply(securityAddress_);
-        _initializeStateControls(securityAddress_);
-        _initializeBalances(securityAddress_);
-        _initializeOperatorsAndControllers(securityAddress_);
-        _initializeBatchOperations(securityAddress_);
-        _initializeClearingAndHold(securityAddress_, _securityData.clearingActive);
-        // Seed the initializer batch size last so a single setOperationalStatus pass
-        // can validate every facet initialised above.
-        IInitializer(securityAddress_).initializeInitializer(_SECURITY_FACETS_MAX);
-    }
-
-    /**
      * @notice Deploys a bare security proxy and seeds this factory as a temporary admin.
      * @dev Builds an extended RBAC array that appends `address(this)` as a `DEFAULT_ADMIN_ROLE`
      *      member so the factory can run facet initialisers. Callers MUST renounce that role
@@ -444,117 +378,6 @@ abstract contract Factory is IFactory {
             extendedRbacs
         );
         securityAddress_ = address(proxy);
-    }
-
-    /**
-     * @notice Initialises a security's metadata, eligibility, supply caps and partition
-     *         configuration.
-     * @dev Covers the always-on infrastructure (access control, diamond cut) plus core metadata,
-     *      control lists, caps, custom data, documentation and the partition and controller flags.
-     *      Nominal value is asset-specific and initialised separately by each deployer.
-     * @param _securityAddress Address of the security proxy being initialised.
-     * @param _securityData Common security deployment configuration.
-     * @param _securityType Security type recorded in core metadata.
-     */
-    function _initializeBaseConfiguration(
-        address _securityAddress,
-        SecurityData calldata _securityData,
-        SecurityType _securityType
-    ) private {
-        IAccessControl(_securityAddress).initializeAccessControl();
-        IDiamondFacet(_securityAddress).initializeDiamondCut();
-
-        ICore.ERC20Metadata memory erc20Metadata = ICore.ERC20Metadata({
-            info: _securityData.erc20MetadataInfo,
-            securityType: _securityType
-        });
-        ICore(_securityAddress).initializeCore(erc20Metadata);
-        IControlList(_securityAddress).initializeControlList(_securityData.isWhiteList);
-        IExternalControlListManagement(_securityAddress).initializeExternalControlLists(
-            _securityData.externalControlLists
-        );
-        ICap(_securityAddress).initializeCap(_securityData.maxSupply, new ICap.PartitionCap[](0));
-        ICapByPartition(_securityAddress).initializeCapByPartition();
-        ICustomData(_securityAddress).initializeCustomData(new ICustomData.CustomDataEntry[](0));
-        IDocumentation(_securityAddress).initializeDocumentation();
-
-        IPartitions(_securityAddress).initializePartitions(_securityData.isMultiPartition);
-        IController(_securityAddress).initializeController(_securityData.isControllable);
-    }
-
-    /**
-     * @notice Initialises the transfer, allowance and supply (mint/burn) facets.
-     * @param _securityAddress Address of the security proxy being initialised.
-     */
-    function _initializeTransferAndSupply(address _securityAddress) private {
-        IAllowance(_securityAddress).initializeAllowance();
-        ITransfer(_securityAddress).initializeTransfer();
-        ITransferByPartition(_securityAddress).initializeTransferByPartition();
-        IMint(_securityAddress).initializeERC1594();
-        IMintByPartition(_securityAddress).initializeMintByPartition();
-        IBurn(_securityAddress).initializeBurn();
-        IBurnByPartition(_securityAddress).initializeBurnByPartition();
-    }
-
-    /**
-     * @notice Initialises the state-control facets: freeze, pause and deactivate.
-     * @param _securityAddress Address of the security proxy being initialised.
-     */
-    function _initializeStateControls(address _securityAddress) private {
-        IFreeze(_securityAddress).initializeFreeze();
-        IPause(_securityAddress).initializePause();
-        IDeactivate(_securityAddress).initializeDeactivate();
-    }
-
-    /**
-     * @notice Initialises the balance-tracking and security-holder facets.
-     * @param _securityAddress Address of the security proxy being initialised.
-     */
-    function _initializeBalances(address _securityAddress) private {
-        IBalanceTracker(_securityAddress).initializeBalanceTracker();
-        IBalanceTrackerByPartition(_securityAddress).initializeBalanceTrackerByPartition();
-        ISecurityHolders(_securityAddress).initializeSecurityHolders();
-    }
-
-    /**
-     * @notice Initialises the operator and controller delegation facets.
-     * @param _securityAddress Address of the security proxy being initialised.
-     */
-    function _initializeOperatorsAndControllers(address _securityAddress) private {
-        IOperator(_securityAddress).initializeOperator();
-        IOperatorByPartition(_securityAddress).initializeOperatorByPartition();
-        IOperatorHoldByPartition(_securityAddress).initializeOperatorHoldByPartition();
-        IOperatorClearingByPartition(_securityAddress).initializeOperatorClearingByPartition();
-        IOperatorClearingHoldByPartition(_securityAddress).initializeOperatorClearingHoldByPartition();
-
-        IControllerByPartition(_securityAddress).initializeControllerByPartition();
-        IControllerHoldByPartition(_securityAddress).initializeControllerHoldByPartition();
-    }
-
-    /**
-     * @notice Initialises the batch-operation facets.
-     * @param _securityAddress Address of the security proxy being initialised.
-     */
-    function _initializeBatchOperations(address _securityAddress) private {
-        IBatchController(_securityAddress).initializeBatchController();
-        IBatchBurn(_securityAddress).initializeBatchBurn();
-        IBatchMint(_securityAddress).initializeBatchMint();
-        IBatchTransfer(_securityAddress).initializeBatchTransfer();
-        IBatchFreeze(_securityAddress).initializeBatchFreeze();
-    }
-
-    /**
-     * @notice Initialises the clearing and hold facets.
-     * @param _securityAddress Address of the security proxy being initialised.
-     * @param _clearingActive Whether clearing is initially active.
-     */
-    function _initializeClearingAndHold(address _securityAddress, bool _clearingActive) private {
-        IClearing(_securityAddress).initializeClearing(_clearingActive);
-        IClearingByPartition(_securityAddress).initializeClearingByPartition();
-        IClearingHoldByPartition(_securityAddress).initializeClearingHoldByPartition();
-
-        IHoldFacet(_securityAddress).initializeHold();
-        IHoldByPartition(_securityAddress).initializeHoldByPartition();
     }
 
     /**

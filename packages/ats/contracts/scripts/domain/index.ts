@@ -66,7 +66,6 @@ export * from "./factory/deployBondFixedRateToken";
 export * from "./factory/deployBondKpiLinkedRateToken";
 export * from "./factory/deployLoanToken";
 export * from "./factory/deployLoansPortfolioToken";
-export * from "./factory/deployDepositToken";
 
 // Equity configuration
 export * from "./equity/createConfiguration";
