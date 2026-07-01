@@ -57,6 +57,7 @@ import {
   PauseFacet__factory,
   ProxyAdmin,
   FactoryFacet__factory,
+  DepositTokenFactoryFacet__factory,
 } from "@contract-types";
 
 describe("Phase 1 Deployment System - Integration Tests", () => {
@@ -364,6 +365,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
       const facets = await deployFacets(
         {
           FactoryFacet: new FactoryFacet__factory(deployer),
+          DepositTokenFactoryFacet: new DepositTokenFactoryFacet__factory(deployer),
         },
         {
           confirmations: 1,
@@ -371,6 +373,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
         },
       );
       const factoryFacetAddress = facets.deployed.get("FactoryFacet")!.address!;
+      const depositTokenFactoryFacetAddress = facets.deployed.get("DepositTokenFactoryFacet")!.address!;
       await registerFacets(blr, {
         facets: [
           {
@@ -378,10 +381,16 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
             address: factoryFacetAddress,
             resolverKey: atsRegistry.getFacetDefinition("FactoryFacet")!.resolverKey!.value,
           },
+          {
+            name: "DepositTokenFactoryFacet",
+            address: depositTokenFactoryFacetAddress,
+            resolverKey: atsRegistry.getFacetDefinition("DepositTokenFactoryFacet")!.resolverKey!.value,
+          },
         ],
       });
       await createFactoryConfiguration(blr, {
         FactoryFacet: factoryFacetAddress,
+        DepositTokenFactoryFacet: depositTokenFactoryFacetAddress,
       });
       // Deploy Factory with BLR reference
       const factoryResult = await deployFactory(deployer, {
