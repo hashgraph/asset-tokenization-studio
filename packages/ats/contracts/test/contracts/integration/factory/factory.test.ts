@@ -25,7 +25,6 @@ import {
   BOND_CONFIG_ID,
   BOND_FIXED_RATE_CONFIG_ID,
   BOND_KPI_LINKED_RATE_CONFIG_ID,
-  DEPOSIT_TOKEN_CONFIG_ID,
 } from "@scripts";
 import { Rbac, SecurityType } from "@scripts/domain";
 import { decodeEvent } from "@scripts/infrastructure";
