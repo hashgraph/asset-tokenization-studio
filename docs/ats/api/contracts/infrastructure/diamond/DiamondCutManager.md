@@ -95,7 +95,7 @@ _Intended to gate resolver-proxy operations; reverts with {ResolverProxyConfigur
 ### createBatchConfiguration
 
 ```solidity
-function createBatchConfiguration(bytes32 _configurationId, IDiamondCutManager.FacetConfiguration[] _facetConfigurations, bool _isLastBatch) external nonpayable
+function createBatchConfiguration(bytes32 _configurationId, IDiamondCutManager.FacetConfiguration[] _facetConfigurations, bool _isLastBatch, bytes _data) external nonpayable
 ```
 
 #### Parameters
@@ -105,11 +105,12 @@ function createBatchConfiguration(bytes32 _configurationId, IDiamondCutManager.F
 | \_configurationId     | bytes32                                 | undefined   |
 | \_facetConfigurations | IDiamondCutManager.FacetConfiguration[] | undefined   |
 | \_isLastBatch         | bool                                    | undefined   |
+| \_data                | bytes                                   | undefined   |
 
 ### createConfiguration
 
 ```solidity
-function createConfiguration(bytes32 _configurationId, IDiamondCutManager.FacetConfiguration[] _facetConfigurations) external nonpayable
+function createConfiguration(bytes32 _configurationId, IDiamondCutManager.FacetConfiguration[] _facetConfigurations, bytes _data) external nonpayable
 ```
 
 #### Parameters
@@ -118,6 +119,7 @@ function createConfiguration(bytes32 _configurationId, IDiamondCutManager.FacetC
 | --------------------- | --------------------------------------- | ----------- |
 | \_configurationId     | bytes32                                 | undefined   |
 | \_facetConfigurations | IDiamondCutManager.FacetConfiguration[] | undefined   |
+| \_data                | bytes                                   | undefined   |
 
 ### getBusinessLogicCount
 
@@ -1059,7 +1061,7 @@ Emitted when an in-progress batch configuration is discarded.
 ### DiamondBatchConfigurationCreated
 
 ```solidity
-event DiamondBatchConfigurationCreated(bytes32 configurationId, IDiamondCutManager.FacetConfiguration[] facetConfigurations, bool _isLastBatch, uint256 version)
+event DiamondBatchConfigurationCreated(bytes32 configurationId, IDiamondCutManager.FacetConfiguration[] facetConfigurations, bool isLastBatch, uint256 version, bytes data)
 ```
 
 Emitted on every {createBatchConfiguration} call, including the final batch.
@@ -1070,13 +1072,14 @@ Emitted on every {createBatchConfiguration} call, including the final batch.
 | ------------------- | --------------------------------------- | -------------------------------------------------------- |
 | configurationId     | bytes32                                 | Configuration key being assembled.                       |
 | facetConfigurations | IDiamondCutManager.FacetConfiguration[] | Facets appended in this batch.                           |
-| \_isLastBatch       | bool                                    | True when this call finalises the configuration version. |
+| isLastBatch         | bool                                    | True when this call finalises the configuration version. |
 | version             | uint256                                 | Version number being assembled for this configuration.   |
+| data                | bytes                                   | Additional data passed to the configuration.             |
 
 ### DiamondConfigurationCreated
 
 ```solidity
-event DiamondConfigurationCreated(bytes32 configurationId, IDiamondCutManager.FacetConfiguration[] facetConfigurations, uint256 version)
+event DiamondConfigurationCreated(bytes32 configurationId, IDiamondCutManager.FacetConfiguration[] facetConfigurations, uint256 version, bytes data)
 ```
 
 Emitted when a configuration is created atomically via {createConfiguration}.
@@ -1088,6 +1091,24 @@ Emitted when a configuration is created atomically via {createConfiguration}.
 | configurationId     | bytes32                                 | Configuration key that was registered.                      |
 | facetConfigurations | IDiamondCutManager.FacetConfiguration[] | Facets (id, version) that compose the new configuration.    |
 | version             | uint256                                 | Version number assigned to the newly created configuration. |
+| data                | bytes                                   | Additional data passed to the configuration.                |
+
+### EffectivelyRolesApplied
+
+```solidity
+event EffectivelyRolesApplied(bytes32[] roles, bool[] actives)
+```
+
+Emitted when one or more role changes are effectively applied.
+
+_`roles` and `actives` are parallel arrays containing the role states that resulted in effective storage mutations._
+
+#### Parameters
+
+| Name    | Type      | Description                                                                   |
+| ------- | --------- | ----------------------------------------------------------------------------- |
+| roles   | bytes32[] | The roles whose assigned state changed.                                       |
+| actives | bool[]    | The effective state applied to each role; `true` granted and `false` revoked. |
 
 ### OwnershipAccepted
 
@@ -1199,20 +1220,20 @@ Emitted when a role is revoked from an account.
 ### RolesApplied
 
 ```solidity
-event RolesApplied(bytes32[] requestedRoles, bool[] requestedStates, address account, bytes32[] appliedRoles, bool[] appliedStates)
+event RolesApplied(bytes32[] roles, bool[] actives, address account)
 ```
 
-Emitted when multiple roles are applied to an account in a single operation.
+Emitted when multiple role operations are requested for an account.
+
+_`roles` and `actives` are parallel arrays and must have the same length. Entries represent the requested role state changes, not necessarily only the effective storage mutations._
 
 #### Parameters
 
-| Name            | Type      | Description                                                              |
-| --------------- | --------- | ------------------------------------------------------------------------ |
-| requestedRoles  | bytes32[] | The roles that were submitted by the caller.                             |
-| requestedStates | bool[]    | Corresponding grant/revoke flags; `true` means granted, `false` revoked. |
-| account         | address   | The account to which the roles were applied.                             |
-| appliedRoles    | bytes32[] | The subset of `requestedRoles` whose state effectively changed.          |
-| appliedStates   | bool[]    | The corresponding final state for each effectively applied role.         |
+| Name    | Type      | Description                                                           |
+| ------- | --------- | --------------------------------------------------------------------- |
+| roles   | bytes32[] | The roles processed by the batch operation.                           |
+| actives | bool[]    | The requested state for each role; `true` grants and `false` revokes. |
+| account | address   | The account for which the role operations are requested.              |
 
 ### Unpaused
 

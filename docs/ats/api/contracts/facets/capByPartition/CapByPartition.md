@@ -50,7 +50,7 @@ function setMaxSupplyByPartition(bytes32 _partition, uint256 _maxSupply) externa
 
 Sets the maximum supply cap for a specific partition of the token.
 
-_Reverts with `NewMaxSupplyCannotBeZero` when `_maxSupply` is zero, and with `NewMaxSupplyForPartitionTooLow` when it is below the partition&#39;s adjusted total supply. Emits {MaxSupplyByPartitionSet}._
+_Emits {ICap.MaxSupplyByPartitionSet}._
 
 #### Parameters
 

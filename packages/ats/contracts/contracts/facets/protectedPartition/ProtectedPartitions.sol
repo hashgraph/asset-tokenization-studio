@@ -6,6 +6,7 @@ import { ROLE_PROTECTED_PARTITIONS, DEFAULT_ADMIN_ROLE } from "../../constants/r
 import { ProtectedPartitionsStorageWrapper } from "../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title ProtectedPartitions
@@ -44,6 +45,7 @@ abstract contract ProtectedPartitions is IProtectedPartitions, Modifiers {
         returns (bool success_)
     {
         ProtectedPartitionsStorageWrapper.setProtectedPartitions(true);
+        emit IProtectedPartitions.PartitionsProtected(EvmAccessors.getMsgSender());
         success_ = true;
     }
 
@@ -58,6 +60,7 @@ abstract contract ProtectedPartitions is IProtectedPartitions, Modifiers {
         returns (bool success_)
     {
         ProtectedPartitionsStorageWrapper.setProtectedPartitions(false);
+        emit IProtectedPartitions.PartitionsUnProtected(EvmAccessors.getMsgSender());
         success_ = true;
     }
 

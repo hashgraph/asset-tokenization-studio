@@ -141,6 +141,8 @@ library ERC20VotesStorageWrapper {
 
         erc20VotesStorage_().delegates[delegator] = delegatee;
 
+        // Emitted here, not in the facet: conditional (skipped when the delegate is
+        // unchanged) and depends on the prior delegate read from storage.
         emit IERC20Votes.DelegateChanged(delegator, currentDelegate, delegatee);
 
         moveVotingPower(

@@ -33,7 +33,8 @@ library DividendStorageWrapper {
      * @dev Encodes the dividend struct, delegates creation to
      *      `CorporateActionsStorageWrapper.addCorporateAction`, then calls
      *      `initDividend` to schedule snapshot and record-date tasks. Reverts if
-     *      the underlying corporate action creation fails.
+     *      the underlying corporate action creation fails. The calling facet (`Dividend`)
+     *      emits `DividendSet`.
      * @param newDividend The dividend parameters (record date, execution date,
      *                    amount, etc.)
      * @return corporateActionId_ The unique identifier for the created corporate
@@ -52,16 +53,6 @@ library DividendStorageWrapper {
         );
 
         initDividend(corporateActionId_, data);
-
-        emit IDividend.DividendSet(
-            corporateActionId_,
-            dividendId_,
-            EvmAccessors.getMsgSender(),
-            newDividend.recordDate,
-            newDividend.executionDate,
-            newDividend.amount,
-            newDividend.amountDecimals
-        );
     }
 
     /**
@@ -69,7 +60,7 @@ library DividendStorageWrapper {
      * @dev Checks that the dividend execution date is still in the future;
      *      otherwise reverts with `DividendAlreadyExecuted`. Calls
      *      `CorporateActionsStorageWrapper.cancelCorporateAction` to mark the
-     *      action as disabled and emits `DividendCancelled`.
+     *      action as disabled. The calling facet (`Dividend`) emits `DividendCancelled`.
      * @param dividendId The identifier of the dividend to cancel
      * @return success_ Always true if no revert occurred
      */
@@ -84,8 +75,6 @@ library DividendStorageWrapper {
 
         _executeCancelDividend(corporateActionId);
         success_ = true;
-
-        emit IDividend.DividendCancelled(dividendId, EvmAccessors.getMsgSender());
     }
 
     /**

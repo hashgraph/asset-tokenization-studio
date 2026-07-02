@@ -49,6 +49,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
         returns (bool success_)
     {
         LoansPortfolioStorageWrapper.addHoldingsAsset(_holdingsAsset);
+        emit ILoansPortfolio.HoldingsAssetAdded(_holdingsAsset);
         success_ = true;
     }
 
@@ -67,6 +68,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
         returns (bool success_)
     {
         LoansPortfolioStorageWrapper.removeHoldingsAsset(_holdingsAsset);
+        emit ILoansPortfolio.HoldingsAssetRemoved(_holdingsAsset);
         success_ = true;
     }
 
@@ -84,6 +86,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
         returns (bool success_)
     {
         LoansPortfolioStorageWrapper.notifyLoanHoldingsAssetUpdate(_holdingsAssetAddress);
+        emit ILoansPortfolio.LoanHoldingsAssetUpdated(_holdingsAssetAddress);
         success_ = true;
     }
 
@@ -104,6 +107,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
         returns (bool success_)
     {
         success_ = LoansPortfolioStorageWrapper.loansPortfolioWithdraw(_assetAddress, _to, _amount);
+        emit ILoansPortfolio.LoansPortfolioWithdrawn(_assetAddress, _to, _amount);
     }
 
     /// @inheritdoc ILoansPortfolio

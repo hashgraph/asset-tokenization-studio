@@ -73,22 +73,21 @@ library CapStorageWrapper {
 
     /**
      * @notice Updates the supply cap for a specific partition.
-     * @dev Captures the previous partition cap, writes the new cap, and emits
-     *      `MaxSupplyByPartitionSet`. No zero-cap bypass for partition-level
-     *      constraints (unlike the global cap).
+     * @dev Captures and returns the previous partition cap, then writes the new cap. No
+     *      zero-cap bypass for partition-level constraints (unlike the global cap). The calling
+     *      facet (`CapByPartition`) emits `MaxSupplyByPartitionSet`.
      * @param _partition The partition identifier.
      * @param _maxSupply The new partition supply cap.
      * @param _timestamp The reference time for balance-adjustment factor lookup.
+     * @return previousMaxSupplyByPartition The partition cap (adjusted) prior to this call.
      */
-    function setMaxSupplyByPartition(bytes32 _partition, uint256 _maxSupply, uint256 _timestamp) internal {
-        uint256 previousMaxSupplyByPartition = getMaxSupplyByPartitionAdjustedAt(_partition, _timestamp);
+    function setMaxSupplyByPartition(
+        bytes32 _partition,
+        uint256 _maxSupply,
+        uint256 _timestamp
+    ) internal returns (uint256 previousMaxSupplyByPartition) {
+        previousMaxSupplyByPartition = getMaxSupplyByPartitionAdjustedAt(_partition, _timestamp);
         capStorage().maxSupplyByPartition[_partition] = _maxSupply;
-        emit ICap.MaxSupplyByPartitionSet(
-            EvmAccessors.getMsgSender(),
-            _partition,
-            _maxSupply,
-            previousMaxSupplyByPartition
-        );
     }
 
     /**

@@ -91,7 +91,7 @@ library LoansPortfolioStorageWrapper {
      * @notice Adds a holding asset (loan or cash) to the portfolio.
      * @dev Reverts if the asset already exists in the holdings set. If the asset type is LOAN,
      *      it is classified by collateral and performance status; otherwise it is added to cash holdings.
-     *      Emits a `HoldingsAssetAdded` event.
+     *      The calling facet (`LoansPortfolio`) emits `HoldingsAssetAdded`.
      * @param _holdingsAsset The holding asset structure including address and type.
      * @custom:error HoldingsAssetAlreadyExists If the asset address already exists in the portfolio.
      */
@@ -107,13 +107,13 @@ library LoansPortfolioStorageWrapper {
             loanPortfolioStorage.cashHoldingsAssets.add(_holdingsAsset.assetAddress);
         }
         loanPortfolioStorage.holdingsAssets.add(_holdingsAsset.assetAddress);
-        emit ILoansPortfolio.HoldingsAssetAdded(_holdingsAsset);
     }
 
     /**
      * @notice Removes a holding asset from the portfolio.
      * @dev Checks that the asset exists, then removes it from the appropriate subsets
-     *      (loan or cash) and from the master holdings set. Emits a `HoldingsAssetRemoved` event.
+     *      (loan or cash) and from the master holdings set. The calling facet (`LoansPortfolio`)
+     *      emits `HoldingsAssetRemoved`.
      * @param _holdingsAsset The holding asset structure to remove.
      * @custom:error HoldingAssetNotFound If the asset address is not present in the portfolio.
      */
@@ -129,14 +129,13 @@ library LoansPortfolioStorageWrapper {
             cashAssets.remove(assetAddress);
         }
         loanPortfolioStorage.holdingsAssets.remove(assetAddress);
-        emit ILoansPortfolio.HoldingsAssetRemoved(_holdingsAsset);
     }
 
     /**
      * @notice Updates the classification of a loan holding asset after its details change.
      * @dev Reclassifies the loan based on its current collateral and performance status.
      *      Removes the loan from all collateral and performance subsets before re-adding.
-     *      Emits a `LoanHoldingsAssetUpdated` event.
+     *      The calling facet (`LoansPortfolio`) emits `LoanHoldingsAssetUpdated`.
      * @param _holdingsAssetAddress The address of the loan to reclassify.
      * @custom:error HoldingAssetNotFound If the asset address is not in the portfolio.
      */
@@ -155,14 +154,13 @@ library LoansPortfolioStorageWrapper {
             _holdingsAssetAddress,
             loanDetails.loanPerformanceStatus.performanceStatus
         );
-        emit ILoansPortfolio.LoanHoldingsAssetUpdated(_holdingsAssetAddress);
     }
 
     /**
      * @notice Withdraws a specified amount of a holding asset from the portfolio.
      * @dev Uses the `transferByPartition` function on the target ERC1410 token.
      *      Reverts if the amount is zero or if the asset does not exist in the portfolio.
-     *      Emits a `LoansPortfolioWithdrawn` event.
+     *      The calling facet (`LoansPortfolio`) emits `LoansPortfolioWithdrawn`.
      * @param _assetAddress The ERC1410 token address to withdraw.
      * @param _to The recipient address.
      * @param _amount The amount to withdraw (must be > 0).
@@ -184,7 +182,6 @@ library LoansPortfolioStorageWrapper {
             value: _amount
         });
         ITransferByPartition(_assetAddress).transferByPartition(_DEFAULT_PARTITION, transferInfo, "");
-        emit ILoansPortfolio.LoansPortfolioWithdrawn(_assetAddress, _to, _amount);
         success_ = true;
     }
 

@@ -7,7 +7,6 @@ import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageW
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
-import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { IVoting } from "../../facets/voting/IVoting.sol";
 import { IVotingTypes } from "../../facets/voting/IVotingTypes.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
@@ -29,7 +28,7 @@ library VotingStorageWrapper {
      * @notice Registers a new voting-rights corporate action and schedules its snapshot.
      * @dev Encodes the voting payload, delegates id allocation to
      *      `CorporateActionsStorageWrapper.addCorporateAction`, then wires the record-date
-     *      snapshot via `initVotingRights`. Emits `IVoting.VotingSet` on success.
+     *      snapshot via `initVotingRights`. The calling facet (`Voting`) emits `IVoting.VotingSet`.
      * @param newVoting Voting parameters supplied by the caller.
      * @return corporateActionId_ Identifier of the newly registered corporate action.
      * @return voteID_            One-based index of the voting action within its type bucket.
@@ -45,22 +44,14 @@ library VotingStorageWrapper {
         );
 
         initVotingRights(corporateActionId_, data);
-
-        emit IVoting.VotingSet(
-            corporateActionId_,
-            voteID_,
-            EvmAccessors.getMsgSender(),
-            newVoting.recordDate,
-            newVoting.data
-        );
     }
 
     /**
      * @notice Cancels an existing voting-rights corporate action prior to its record date.
      * @dev Reverts with `IVoting.VotingAlreadyRecorded` once the record date has been reached;
      *      otherwise delegates the cancellation to
-     *      `CorporateActionsStorageWrapper.cancelCorporateAction`. Emits
-     *      `IVoting.VotingCancelled`.
+     *      `CorporateActionsStorageWrapper.cancelCorporateAction`. The calling facet (`Voting`)
+     *      emits `IVoting.VotingCancelled`.
      * @param voteId One-based vote identifier within the voting-rights bucket.
      * @return success_ Always true on a successful path (revert otherwise).
      */
@@ -73,8 +64,6 @@ library VotingStorageWrapper {
 
         _executeCancelVoting(corporateActionId);
         success_ = true;
-
-        emit IVoting.VotingCancelled(voteId, EvmAccessors.getMsgSender());
     }
 
     /**
