@@ -100,7 +100,10 @@ jobs:
 
       - name: Upload coverage report
         if: ${{ steps.generate_coverage.outcome == 'success' }}
-        uses: codecov/codecov-action@e28ff129e5465c2c0dcc6f003fc735cb6ae0c673 # v5.4.0
+        uses: codecov/codecov-action@5c47607acb93fed5485fdbf7232e8a31425f672a # v5.4.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: ats
 
       # TEMPORARY DIAGNOSTIC (non-blocking).
       # The prior enforcement step only read commit *statuses* and never found
@@ -118,8 +121,8 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           echo "Inspecting Codecov reporting for head SHA ${HEAD_SHA} in ${REPO}"
-          for attempt in $(seq 1 30); do
-            echo "----- attempt ${attempt}/30 -----"
+          for attempt in $(seq 1 10); do
+            echo "----- attempt ${attempt}/10 -----"
 
             echo "[commit statuses]"
             gh api "repos/${REPO}/commits/${HEAD_SHA}/statuses" \
