@@ -42,7 +42,7 @@ export function proceedRecipientsTests(getCtx: () => AssetMockCtx): void {
         { role: ATS_ROLES.ROLE_INTEREST_RATE_MANAGER, members: [signer_A.address] },
       ]);
       await asset.updateMaturityDate(dateToUnixTimestamp(`2031-01-01T00:00:00Z`));
-      await asset.setCouponRateType(2); // KPI_LINKED — creates 2 pending tasks on setCoupon
+      await asset.setCouponRateType(3); // KPI_LINKED — creates 2 pending tasks on setCoupon
     });
 
     describe("Add Tests", () => {

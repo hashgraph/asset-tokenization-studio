@@ -29,7 +29,7 @@ export function couponListingTests(getCtx: () => AssetMockCtx): void {
       await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
       await asset.grantRole(ATS_ROLES.ROLE_INTEREST_RATE_MANAGER, signer_A.address);
       await asset.grantRole(ATS_ROLES.ROLE_MATURITY_MANAGER, signer_A.address);
-      await asset.setCouponRateType(2);
+      await asset.setCouponRateType(3);
       await asset.updateMaturityDate(maturityDate);
     });
 
@@ -42,7 +42,7 @@ export function couponListingTests(getCtx: () => AssetMockCtx): void {
       await kpiAsset.grantRole(ATS_ROLES.ROLE_INTEREST_RATE_MANAGER, signer_A.address);
       await kpiAsset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
       await kpiAsset.grantRole(ATS_ROLES.ROLE_MATURITY_MANAGER, signer_A.address);
-      await kpiAsset.setCouponRateType(2);
+      await kpiAsset.setCouponRateType(3);
       await kpiAsset.updateMaturityDate(maturityDate);
 
       const timestamp = await getDltTimestamp();

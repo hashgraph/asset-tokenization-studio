@@ -33,7 +33,7 @@ import type { FacetName } from "../atsRegistry";
  * and voting-holder facets so a deposit-token resolver configuration exposes the full capability
  * set it needs.
  */
-const DEPOSIT_TOKEN_FACETS: readonly FacetName[] = [
+export const DEPOSIT_TOKEN_FACETS: readonly FacetName[] = [
   // Always-on (initializers + diamond infra)
   "AccessControlFacet",
   "DiamondFacet",

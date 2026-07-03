@@ -35,7 +35,7 @@ import { BusinessLogicResolver } from "@contract-types";
  * interest rate, principal). The bondFixedRate / bondKpiLinkedRate variants
  * extend this same composition with their rate-specific facets.
  */
-const BOND_FACETS: readonly FacetName[] = [
+export const BOND_FACETS: readonly FacetName[] = [
   // Core Functionality
   "AccessControlFacet",
   "CapFacet",

@@ -142,6 +142,10 @@ export function couponTests(getCtx: () => AssetMockCtx): void {
           role: ATS_ROLES.ROLE_NOMINAL_VALUE,
           members: [signer_A.address],
         },
+        {
+          role: ATS_ROLES.ROLE_INTEREST_RATE_MANAGER,
+          members: [signer_A.address],
+        },
       ]);
 
       await asset.connect(signer_A).addIssuer(signer_A.address);
@@ -150,6 +154,7 @@ export function couponTests(getCtx: () => AssetMockCtx): void {
       await asset.forceDecimals(6);
       await asset.updateMaturityDate(maturityDate);
       await asset.setNominalValue(100, 2);
+      await asset.connect(signer_A).setCouponRateType(1); // STANDARD — honours the caller-supplied rate/rateDecimals
     });
 
     it("GIVEN an account without corporateActions role WHEN setCoupon THEN transaction fails with AccountHasNoRole", async () => {
@@ -1145,7 +1150,7 @@ export function couponTests(getCtx: () => AssetMockCtx): void {
       await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
       await asset.activateInternalKyc();
 
-      await asset.setCouponRateType(1);
+      await asset.setCouponRateType(2); // FIXED — resolves PENDING coupons from setRate() storage
       await asset.setRate(TEST_BOND_FIXED_RATE.RATE, TEST_BOND_FIXED_RATE.RATE_DECIMALS);
 
       const future = currentTimestamp + TIME_PERIODS_S.YEAR * 10;
