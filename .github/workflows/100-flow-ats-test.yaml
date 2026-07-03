@@ -8,6 +8,7 @@ on:
       - "packages/ats/**"
       - "apps/ats/**"
       - "package.json"
+      - "codecov.yml"
       - ".github/workflows/*ats*.yaml"
   workflow_dispatch:
 
@@ -17,6 +18,7 @@ defaults:
 
 permissions:
   contents: read
+  statuses: read # gate step reads the codecov/project commit status
 
 jobs:
   test-ats:
@@ -98,4 +100,54 @@ jobs:
 
       - name: Upload coverage report
         if: ${{ steps.generate_coverage.outcome == 'success' }}
-        uses: codecov/codecov-action@e28ff129e5465c2c0dcc6f003fc735cb6ae0c673 # v5.4.0
+        uses: codecov/codecov-action@5c47607acb93fed5485fdbf7232e8a31425f672a # v5.4.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: ats
+
+      # TEMPORARY DIAGNOSTIC (non-blocking).
+      # The prior enforcement step only read commit *statuses* and never found
+      # `codecov/project` (state='<none>' for 5 min), producing a false failure.
+      # Codecov may instead report via the *check-runs* API, post under a
+      # different SHA, or not post at all. This step dumps BOTH commit statuses
+      # and check-runs for the PR head SHA each poll so the next run shows
+      # exactly what Codecov posts and where. It NEVER fails the job — re-enable
+      # enforcement once we know the reporting mechanism.
+      - name: Diagnose Codecov status/check-run posting
+        if: ${{ github.event_name == 'pull_request' && steps.generate_coverage.outcome == 'success' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          REPO: ${{ github.repository }}
+        run: |
+          echo "Inspecting Codecov reporting for head SHA ${HEAD_SHA} in ${REPO}"
+          for attempt in $(seq 1 10); do
+            echo "----- attempt ${attempt}/10 -----"
+
+            echo "[commit statuses]"
+            gh api "repos/${REPO}/commits/${HEAD_SHA}/statuses" \
+              --jq '.[] | "  status: \(.context) = \(.state)"' \
+              || echo "  (statuses query failed)"
+
+            echo "[check runs]"
+            gh api "repos/${REPO}/commits/${HEAD_SHA}/check-runs" \
+              --jq '.check_runs[] | "  check : \(.name) = status:\(.status) conclusion:\(.conclusion // "n/a")"' \
+              || echo "  (check-runs query failed)"
+
+            # Stop early once anything Codecov-related has posted in either place.
+            found=$(
+              {
+                gh api "repos/${REPO}/commits/${HEAD_SHA}/statuses" --jq '.[].context' 2>/dev/null
+                gh api "repos/${REPO}/commits/${HEAD_SHA}/check-runs" --jq '.check_runs[].name' 2>/dev/null
+              } | grep -i codecov || true
+            )
+            if [ -n "${found}" ]; then
+              echo "✓ Found Codecov entries (note whether they are statuses or checks above):"
+              echo "${found}" | sed 's/^/    /'
+              break
+            fi
+
+            echo "  no codecov entry yet — waiting 10s"
+            sleep 10
+          done
+          echo "Diagnostic complete (non-blocking; job will not fail here)."
