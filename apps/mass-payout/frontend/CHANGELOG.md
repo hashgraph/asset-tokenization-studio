@@ -11,8 +11,13 @@
 ### Patch Changes
 
 - Updated dependencies
+  <<<<<<< HEAD
 
 ## 1.1.1
+
+=======
+
+> > > > > > > 98ce4d2fd (fix: v8.0.0 (#1315))
 
 ### Patch Changes
 

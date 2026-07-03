@@ -52,5 +52,8 @@ module.exports = {
     "not-rely-on-time": "off",
 
     "use-natspec": "warn",
+
+    "duplicated-imports": "error",
+    "gas-increment-by-one": "error",
   },
 };

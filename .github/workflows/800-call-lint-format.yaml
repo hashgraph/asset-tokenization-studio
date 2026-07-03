@@ -7,11 +7,6 @@ on:
         description: "Module slug used to derive script names (e.g. 'ats' or 'mass-payout')."
         required: true
         type: string
-      runs-on:
-        description: "Runner label."
-        required: false
-        type: string
-        default: token-studio-linux-medium
       timeout-minutes:
         description: "Job timeout in minutes."
         required: false
@@ -26,9 +21,9 @@ permissions:
   contents: read
 
 jobs:
-  lint-and-format:
-    name: lint-and-format
-    runs-on: ${{ inputs.runs-on }}
+  format-and-lint:
+    name: format-and-lint
+    runs-on: token-studio-linux-medium
     timeout-minutes: ${{ inputs.timeout-minutes }}
     steps:
       - name: Harden Runner

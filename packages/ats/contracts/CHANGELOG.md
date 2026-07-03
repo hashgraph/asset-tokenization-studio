@@ -308,9 +308,15 @@ Highlights — KPI/sustainability rates, ERC20 allowance management, partition-s
 - ad45d49: Fix checkpoint ID format documentation and update step counts in JSDoc comments.
 - fe7032f: Refactor integration test helpers to reduce boilerplate and eliminate magic numbers:.
 
+<<<<<<< HEAD
+
 ## 4.1.1
 
 ### Patch Changes
+
+=======
+
+> > > > > > > 98ce4d2fd (fix: v8.0.0 (#1315))
 
 ## 4.1.0
 
@@ -426,14 +432,25 @@ Highlights — Initial ERC1400+ERC3643 dual-standard architecture, Diamond proxy
 - c62eb6e: Update DEVELOPER_GUIDE.md with current architecture and comprehensive script documentation.
 - c62eb6e: Fix base implementation in TotalBalanceStorageWrapper.
 
+<<<<<<< HEAD
+
 ## 1.17.1
 
 ### Patch Changes
+
+=======
+
+> > > > > > > 98ce4d2fd (fix: v8.0.0 (#1315))
 
 ## 1.17.0
 
 ### Minor Changes
 
 - a36b1c8: Integrate Changesets for version management and implement enterprise-grade release workflow.
+  <<<<<<< HEAD
 
 ### Patch Changes
+
+=======
+
+> > > > > > > 98ce4d2fd (fix: v8.0.0 (#1315))
