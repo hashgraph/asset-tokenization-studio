@@ -18,7 +18,7 @@ defaults:
 
 permissions:
   contents: read
-  statuses: read # gate step reads the codecov/project commit status
+  checks: read # gate step reads the codecov/project and codecov/patch check-runs
 
 jobs:
   test-ats:
@@ -105,49 +105,75 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: ats
 
-      # TEMPORARY DIAGNOSTIC (non-blocking).
-      # The prior enforcement step only read commit *statuses* and never found
-      # `codecov/project` (state='<none>' for 5 min), producing a false failure.
-      # Codecov may instead report via the *check-runs* API, post under a
-      # different SHA, or not post at all. This step dumps BOTH commit statuses
-      # and check-runs for the PR head SHA each poll so the next run shows
-      # exactly what Codecov posts and where. It NEVER fails the job — re-enable
-      # enforcement once we know the reporting mechanism.
-      - name: Diagnose Codecov status/check-run posting
+      # Blocking coverage gate. Codecov reports via GitHub *check-runs*
+      # (the Status API never surfaced `codecov/project` — see history of
+      # this step). codecov.yml marks both `project` and `patch` as
+      # informational: false, so both must conclude 'success'. Fails closed:
+      # if Codecov hasn't reported by MAX_ATTEMPTS, treat it as a gate
+      # failure rather than silently letting the PR through.
+      - name: Enforce Codecov coverage gate
         if: ${{ github.event_name == 'pull_request' && steps.generate_coverage.outcome == 'success' }}
         env:
           GH_TOKEN: ${{ github.token }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           REPO: ${{ github.repository }}
+          EXPECTED_CHECKS: "codecov/project codecov/patch"
+          MAX_ATTEMPTS: "40"
+          POLL_INTERVAL_SECONDS: "15"
         run: |
-          echo "Inspecting Codecov reporting for head SHA ${HEAD_SHA} in ${REPO}"
-          for attempt in $(seq 1 10); do
-            echo "----- attempt ${attempt}/10 -----"
+          set -euo pipefail
+          echo "Waiting for Codecov check-runs on ${HEAD_SHA} in ${REPO}..."
 
-            echo "[commit statuses]"
-            gh api "repos/${REPO}/commits/${HEAD_SHA}/statuses" \
-              --jq '.[] | "  status: \(.context) = \(.state)"' \
-              || echo "  (statuses query failed)"
+          declare -A seen_conclusion
 
-            echo "[check runs]"
-            gh api "repos/${REPO}/commits/${HEAD_SHA}/check-runs" \
-              --jq '.check_runs[] | "  check : \(.name) = status:\(.status) conclusion:\(.conclusion // "n/a")"' \
-              || echo "  (check-runs query failed)"
+          for attempt in $(seq 1 "${MAX_ATTEMPTS}"); do
+            echo "----- attempt ${attempt}/${MAX_ATTEMPTS} -----"
 
-            # Stop early once anything Codecov-related has posted in either place.
-            found=$(
-              {
-                gh api "repos/${REPO}/commits/${HEAD_SHA}/statuses" --jq '.[].context' 2>/dev/null
-                gh api "repos/${REPO}/commits/${HEAD_SHA}/check-runs" --jq '.check_runs[].name' 2>/dev/null
-              } | grep -i codecov || true
-            )
-            if [ -n "${found}" ]; then
-              echo "✓ Found Codecov entries (note whether they are statuses or checks above):"
-              echo "${found}" | sed 's/^/    /'
+            checks_json=$(gh api "repos/${REPO}/commits/${HEAD_SHA}/check-runs" --paginate \
+              --jq '.check_runs[] | select(.name | startswith("codecov/"))' 2>/dev/null || echo "")
+
+            if [ -n "${checks_json}" ]; then
+              echo "Codecov check-runs found so far:"
+              echo "${checks_json}" | jq -r '"  \(.name): status=\(.status) conclusion=\(.conclusion // "pending")"'
+            else
+              echo "  no codecov/* check-run yet"
+            fi
+
+            all_done=true
+            for expected in ${EXPECTED_CHECKS}; do
+              entry=$(echo "${checks_json}" | jq -s --arg name "${expected}" \
+                'map(select(.name == $name)) | sort_by(.started_at) | last // empty')
+              if [ -z "${entry}" ] || [ "$(echo "${entry}" | jq -r '.status')" != "completed" ]; then
+                all_done=false
+                continue
+              fi
+              seen_conclusion["${expected}"]=$(echo "${entry}" | jq -r '.conclusion')
+            done
+
+            if [ "${all_done}" = true ]; then
               break
             fi
 
-            echo "  no codecov entry yet — waiting 10s"
-            sleep 10
+            echo "  not all expected checks (${EXPECTED_CHECKS}) completed yet — waiting ${POLL_INTERVAL_SECONDS}s"
+            sleep "${POLL_INTERVAL_SECONDS}"
           done
-          echo "Diagnostic complete (non-blocking; job will not fail here)."
+
+          failed=false
+          for expected in ${EXPECTED_CHECKS}; do
+            conclusion="${seen_conclusion[${expected}]:-}"
+            if [ -z "${conclusion}" ]; then
+              echo "::error::Timed out waiting for check-run '${expected}' to complete on ${HEAD_SHA}. Treating this as a coverage-gate failure — check the Codecov PR comment/dashboard, or re-run this job once Codecov has reported."
+              failed=true
+            elif [ "${conclusion}" != "success" ]; then
+              echo "::error::Check-run '${expected}' concluded '${conclusion}' — coverage regressed against the target branch."
+              failed=true
+            else
+              echo "✓ ${expected}: success"
+            fi
+          done
+
+          if [ "${failed}" = true ]; then
+            exit 1
+          fi
+
+          echo "All Codecov coverage checks passed."
