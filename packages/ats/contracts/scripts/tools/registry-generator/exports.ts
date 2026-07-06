@@ -66,7 +66,7 @@ export { CacheManager } from "./cache/manager";
 // ============================================================================
 
 // Scanner
-export { findAllContracts, categorizeContracts, pairTimeTravelVariants } from "./core/scanner";
+export { findAllContracts, categorizeContracts } from "./core/scanner";
 
 // Extractor
 export { extractMetadata } from "./core/extractor";
@@ -90,8 +90,6 @@ export {
   extractInheritance,
   extractNatspecDescription,
   isFacetName,
-  isTimeTravelVariant,
-  getBaseName,
 } from "./utils/solidityParser";
 
 // Logging

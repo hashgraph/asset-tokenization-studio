@@ -289,13 +289,6 @@ function generateHeader(
     factoryImports.push(`${name}__factory`);
   }
 
-  // Include TimeTravel variant factory imports for facets that have them
-  const facetsWithTimeTravel = facets.filter((f) => f.hasTimeTravel && f.name !== "TimeTravelFacet");
-  const sortedTimeTravelNames = [...facetsWithTimeTravel].map((f) => `${f.name}TimeTravel`).sort();
-  for (const name of sortedTimeTravelNames) {
-    factoryImports.push(`${name}__factory`);
-  }
-
   // Include mock contract factory imports (only deployable mocks)
   if (mocks && mocks.length > 0) {
     const deployableMocks = mocks.filter((m) => m.isDeployable);
@@ -449,35 +442,23 @@ function generateFacetEntry(facet: ContractMetadata): string {
   // Add TypeChain factory reference (only for deployable contracts)
   // Abstract contracts (isDeployable: false) don't have constructors in their factories
   let factoryLine: string;
-  let timeTravelFactoryLine: string;
 
   if (!facet.isDeployable) {
     // Abstract contracts - no factory constructor, only static methods
     factoryLine = "";
-    timeTravelFactoryLine = "";
   } else {
     // Deployable contracts - generate factory code
     const libDeps = getCachedLibDeps(facet.name, facet.sourceFile);
     if (libDeps.length > 0) {
       const libArgs = libDeps.map((l) => `"${l}"`).join(", ");
       factoryLine = `\n        factory: (signer) => new ${facet.name}__factory(getLibLinks(${libArgs}) as any, signer),`;
-
-      timeTravelFactoryLine =
-        facet.hasTimeTravel && facet.name !== "TimeTravelFacet"
-          ? `\n        timeTravelFactory: (signer) => new ${facet.name}TimeTravel__factory(getLibLinks(${libArgs}) as any, signer),`
-          : "";
     } else {
       factoryLine = `\n        factory: (signer) => new ${facet.name}__factory(signer),`;
-
-      timeTravelFactoryLine =
-        facet.hasTimeTravel && facet.name !== "TimeTravelFacet"
-          ? `\n        timeTravelFactory: (signer) => new ${facet.name}TimeTravel__factory(signer),`
-          : "";
     }
   }
 
   return `    ${facet.name}: {
-        name: '${facet.name}',${descriptionLine}${resolverKeyLine}${rolesLine}${inheritanceLine}${methodsLine}${eventsLine}${errorsLine}${factoryLine}${timeTravelFactoryLine}
+        name: '${facet.name}',${descriptionLine}${resolverKeyLine}${rolesLine}${inheritanceLine}${methodsLine}${eventsLine}${errorsLine}${factoryLine}
     }`;
 }
 
@@ -728,18 +709,15 @@ export function generateSummary(
   totalInfrastructure: number;
   byCategory: Record<string, number>;
   byLayer: Record<number, number>;
-  withTimeTravel: number;
   withRoles: number;
 } {
   const byCategory: Record<string, number> = {};
   const byLayer: Record<number, number> = {};
-  let withTimeTravel = 0;
   let withRoles = 0;
 
   for (const facet of facets) {
     byCategory[facet.category] = (byCategory[facet.category] || 0) + 1;
     byLayer[facet.layer] = (byLayer[facet.layer] || 0) + 1;
-    if (facet.hasTimeTravel) withTimeTravel++;
     if (facet.roles.length > 0) withRoles++;
   }
 
@@ -748,7 +726,6 @@ export function generateSummary(
     totalInfrastructure: infrastructure.length,
     byCategory,
     byLayer,
-    withTimeTravel,
     withRoles,
   };
 }

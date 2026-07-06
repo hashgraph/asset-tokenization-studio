@@ -108,12 +108,9 @@ export async function createEquityConfiguration(
 
   // Build facet data with resolver keys from registry
   const facets = facetNames.map((name) => {
-    // Strip "TimeTravel" suffix to get base name for registry lookup
-    const baseName = name.replace(/TimeTravel$/, "");
-
-    const facetDef = atsRegistry.getFacetDefinition(baseName) ?? getMockFacetDefinition(baseName);
+    const facetDef = atsRegistry.getFacetDefinition(name) ?? getMockFacetDefinition(name);
     if (!facetDef?.resolverKey?.value) {
-      throw new Error(`No resolver key found for facet: ${baseName}`);
+      throw new Error(`No resolver key found for facet: ${name}`);
     }
     return {
       facetName: name,

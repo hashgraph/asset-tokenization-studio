@@ -511,9 +511,6 @@ export const TEST_STANDARD_CONTRACTS = {
   /** CapTable facet */
   CAP_TABLE_FACET: "CapTableFacet",
 
-  /** TimeTravel facet (invariant - no TimeTravel variant) */
-  TIME_TRAVEL_FACET: "TimeTravelFacet",
-
   /** Pausable facet (for CheckpointManager tests) */
   PAUSABLE_FACET: "PausableFacet",
 
@@ -533,24 +530,6 @@ export const TEST_STANDARD_CONTRACTS = {
 
   /** MyFacetContract (has Facet in middle, not at end) */
   MY_FACET_CONTRACT: "MyFacetContract",
-} as const;
-
-// ============================================================================
-// Time Travel Variants
-// ============================================================================
-
-/**
- * TimeTravel variant names for testing.
- */
-export const TEST_TIME_TRAVEL_VARIANTS = {
-  /** AccessControlFacet TimeTravel variant */
-  ACCESS_CONTROL: "AccessControlFacetTimeTravel",
-
-  /** PauseFacet TimeTravel variant */
-  PAUSE: "PauseFacetTimeTravel",
-
-  /** Generic TimeTravel suffix */
-  SUFFIX: "TimeTravel",
 } as const;
 
 // ============================================================================

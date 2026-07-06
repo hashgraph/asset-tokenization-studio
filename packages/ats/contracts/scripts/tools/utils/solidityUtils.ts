@@ -703,29 +703,6 @@ export function isFacetName(contractName: string): boolean {
 }
 
 /**
- * Check if contract is a TimeTravel variant.
- *
- * @param contractName - Contract name to check
- * @returns true if name ends with 'TimeTravel'
- */
-export function isTimeTravelVariant(contractName: string): boolean {
-  return contractName.endsWith("TimeTravel");
-}
-
-/**
- * Get base contract name from TimeTravel variant.
- *
- * @param contractName - Contract name (potentially TimeTravel)
- * @returns Base contract name without 'TimeTravel' suffix
- */
-export function getBaseName(contractName: string): string {
-  if (isTimeTravelVariant(contractName)) {
-    return contractName.slice(0, -10); // Remove "TimeTravel"
-  }
-  return contractName;
-}
-
-/**
  * Extract pragma Solidity version.
  *
  * @param source - Solidity source code

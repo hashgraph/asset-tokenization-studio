@@ -415,11 +415,10 @@ async function deployFacetsPhase(ctx: UpgradePhaseContext): Promise<void> {
   }
 
   // Create factories from registry
-  // When useTimeTravel=true, deploy TimeTravel variant facets instead of production ones
   // Skip facets without factories (abstract contracts like LockFacet)
   const facetFactories: Record<string, ContractFactory> = {};
   for (const facet of allFacets) {
-    const selectedFactory = useTimeTravel && facet.timeTravelFactory ? facet.timeTravelFactory : facet.factory;
+    const selectedFactory = facet.factory;
 
     if (!selectedFactory) {
       info(`   Skipping ${facet.name} (abstract contract, no factory)`);
