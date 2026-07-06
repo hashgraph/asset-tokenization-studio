@@ -12,26 +12,32 @@ bytes32 constant RESOLVER_KEY_FACTORY = 0x9fc26269cc1cb994e66f269ed6b58a5bb0c344
 /**
  * @title Factory Interface
  * @author Asset Tokenization Studio Team
- * @notice Interface for deploying tokenised securities (equity, bonds, loans)
+ * @notice Interface for deploying tokenised securities (equity, bonds, deposit tokens)
  *         through a centralised factory that configures resolver proxies,
  *         business-logic resolvers, and role-based access control.
  */
 interface IFactory {
     /**
      * @notice Distinguishes the security variant being deployed.
-     * @dev Used internally to select the correct initialisation path in the factory.
+     * @dev Used internally to select the correct initialisation path in the factory. The
+     *      ordinal of each variant is persisted on-chain in `ERC20StorageWrapper.securityType`,
+     *      so members MUST NOT be reordered or removed — doing so would reinterpret or invalidate
+     *      the stored value of already-deployed tokens. `BondFixedRate`, `BondKpiLinkedRate` and
+     *      `Loan` are no longer deployable through the factory (BBND-1882) but are retained here
+     *      to keep their ordinals stable for tokens deployed before that change.
      */
     enum SecurityType {
         /// @notice A bond whose coupon rate floats against an external index.
         BondVariableRate,
         /// @notice An equity instrument (shares).
         Equity,
-        /// @notice A bond with a fixed coupon rate.
+        /// @notice A bond with a fixed coupon rate (retained for ordinal stability; not deployable).
         BondFixedRate,
-        /// @notice A bond whose coupon is tied to KPI performance metrics.
+        /// @notice A bond whose coupon is tied to KPI performance metrics (retained; not deployable).
         BondKpiLinkedRate,
-        /// @notice A loan instrument.
+        /// @notice A loan instrument (retained for ordinal stability; not deployable).
         Loan,
+        /// @notice A minimal cash-style deposit token.
         DepositToken
     }
 
@@ -130,7 +136,7 @@ interface IFactory {
     /**
      * @notice Input data describing a bond's economic parameters.
      * @dev    Replaces the removed `IBondRead.BondDetailsData` type. Consumed by the Factory
-     *         during `deployBond`, `deployBondFixedRate`, and `deployBondKpiLinkedRate`.
+     *         during `deployBond`.
      * @param currency               ISO 4217 currency code encoded as `bytes3`.
      * @param nominalValue           Face value of one unit of the bond (raw integer).
      * @param nominalValueDecimals   Number of decimals applied to `nominalValue`.

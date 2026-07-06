@@ -5,12 +5,18 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock, MockLoanHolding__factory } from "@contract-types";
 import type { AssetMockCtx } from "@test";
-import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, LOANS_PORTFOLIO } from "@scripts";
-import { HoldingsAssetType } from "@scripts/domain";
+import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION } from "@scripts";
+import { HoldingsAssetType, getFacetDefinition } from "@scripts/domain";
 import { executeRbac } from "@test";
 
 export function loansPortfolioTests(getCtx: () => AssetMockCtx): void {
   describe("LoansPortfolio Token Tests", () => {
+    // Sourced from the generated registry (single source of truth, derived from
+    // contracts/facets/loansPortfolio/ILoansPortfolio.sol) rather than a hand-maintained copy.
+    const loansPortfolioResolverKey = getFacetDefinition("LoansPortfolioFacet")?.resolverKey?.value;
+    if (!loansPortfolioResolverKey) {
+      throw new Error("LoansPortfolioFacet resolver key missing from the registry");
+    }
     let signer_A: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
     let signer_C: HardhatEthersSigner;
@@ -30,7 +36,7 @@ export function loansPortfolioTests(getCtx: () => AssetMockCtx): void {
         { role: ATS_ROLES.ROLE_DEACTIVATE, members: [signer_A.address] },
       ]);
 
-      await asset.forceFacetNotRegistered(LOANS_PORTFOLIO);
+      await asset.forceFacetNotRegistered(loansPortfolioResolverKey);
       await asset.initializeLoansPortfolio({ portfolioType: 1, distributionPolicy: 1 });
     });
 
@@ -61,7 +67,7 @@ export function loansPortfolioTests(getCtx: () => AssetMockCtx): void {
       });
 
       it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeLoansPortfolio is called THEN it emits LoansPortfolioInitialized", async () => {
-        await asset.forceFacetNotRegistered(LOANS_PORTFOLIO);
+        await asset.forceFacetNotRegistered(loansPortfolioResolverKey);
         const loansPortfolioData = {
           portfolioType: 1,
           distributionPolicy: 1,

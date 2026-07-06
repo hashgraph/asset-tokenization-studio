@@ -20,12 +20,8 @@
 import { expect } from "chai";
 import { COMMON_TOKEN_FACETS, EXTENDED_TOKEN_FACETS, BOND_COMMON_FACETS, ALL_ASSET_FACETS } from "@scripts/domain";
 import { BOND_FACETS } from "../../../../scripts/domain/bond/createConfiguration";
-import { BOND_FIXED_RATE_FACETS } from "../../../../scripts/domain/bondFixedRate/createConfiguration";
-import { BOND_KPI_LINKED_RATE_FACETS } from "../../../../scripts/domain/bondKpiLinkedRate/createConfiguration";
 import { EQUITY_FACETS } from "../../../../scripts/domain/equity/createConfiguration";
 import { DEPOSIT_TOKEN_FACETS } from "../../../../scripts/domain/depositToken/createConfiguration";
-import { LOAN_FACETS } from "../../../../scripts/domain/loan/createConfiguration";
-import { LOANS_PORTFOLIO_FACETS } from "../../../../scripts/domain/loanPortfolio/createConfiguration";
 import { FACTORY_FACETS } from "../../../../scripts/domain/factory/createConfiguration";
 import { INITIALIZE_MOCK_FACETS } from "../../../../scripts/domain/initializeMock/createConfiguration";
 
@@ -59,12 +55,8 @@ describe("facetSets", () => {
   describe("composed configuration lists", () => {
     const configurationLists: Record<string, readonly string[]> = {
       BOND_FACETS,
-      BOND_FIXED_RATE_FACETS,
-      BOND_KPI_LINKED_RATE_FACETS,
       EQUITY_FACETS,
       DEPOSIT_TOKEN_FACETS,
-      LOAN_FACETS,
-      LOANS_PORTFOLIO_FACETS,
       FACTORY_FACETS,
       INITIALIZE_MOCK_FACETS,
     };
@@ -77,27 +69,26 @@ describe("facetSets", () => {
   });
 
   describe("ALL_ASSET_FACETS", () => {
-    // The seven asset-class lists whose union the mega-asset (AssetMock) config registers.
-    // Factory and InitializeMock are deliberately excluded — they are not IAsset facets.
-    const assetClassLists = [
-      EQUITY_FACETS,
-      BOND_FACETS,
-      BOND_FIXED_RATE_FACETS,
-      BOND_KPI_LINKED_RATE_FACETS,
-      LOAN_FACETS,
-      LOANS_PORTFOLIO_FACETS,
-      DEPOSIT_TOKEN_FACETS,
-    ];
+    // The asset-class deploy lists registered in production. Factory and InitializeMock are
+    // deliberately excluded — they are not IAsset facets.
+    //
+    // BBND-1882: Loan, LoansPortfolio, BondFixedRate and BondKpiLinkedRate are no longer
+    // deployed in production (their per-class deploy configs were removed), but their facets
+    // still exist and are exercised by the shared AssetMock mega-asset, so ALL_ASSET_FACETS
+    // (the mega-asset union) is a *superset* of the deployable per-class lists below.
+    const assetClassLists = [EQUITY_FACETS, BOND_FACETS, DEPOSIT_TOKEN_FACETS];
 
     it("has no duplicates", () => {
       expect(hasDuplicates(ALL_ASSET_FACETS)).to.be.false;
     });
 
-    it("equals the deduplicated union of every asset-class facet list", () => {
-      // Guards against drift in either direction: a facet added to a per-class list but
-      // missing from ALL_ASSET_FACETS (or vice-versa) fails here, before any deployment.
-      const union = [...new Set(assetClassLists.flat())].sort();
-      expect([...ALL_ASSET_FACETS].sort()).to.deep.equal(union);
+    it("contains every facet from each deployable asset-class facet list", () => {
+      // Drift guard: a facet added to a per-class deploy list but missing from the mega-asset
+      // union fails here, before any deployment.
+      const all = new Set<string>(ALL_ASSET_FACETS);
+      const missing = [...new Set(assetClassLists.flat())].filter((facet) => !all.has(facet));
+      expect(missing, `facets in a per-class list but missing from ALL_ASSET_FACETS: ${missing.join(", ")}`).to.be
+        .empty;
     });
   });
 });

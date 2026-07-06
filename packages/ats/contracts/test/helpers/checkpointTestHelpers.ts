@@ -531,18 +531,6 @@ export function createCompletedTestCheckpoint(overrides: Partial<DeploymentCheck
           facetCount: 43,
           txHash: TEST_TX_HASHES.SAMPLE_5,
         },
-        bondFixedRate: {
-          configId: TEST_CONFIG_IDS.BOND_FIXED_RATE,
-          version: 1,
-          facetCount: 47,
-          txHash: "0xabc789",
-        },
-        bondKpiLinkedRate: {
-          configId: TEST_CONFIG_IDS.BOND_KPI_LINKED,
-          version: 1,
-          facetCount: 47,
-          txHash: "0xdef123",
-        },
       },
       factory: {
         address: TEST_ADDRESSES.VALID_6,

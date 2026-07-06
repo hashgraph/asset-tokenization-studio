@@ -373,24 +373,14 @@ describe("Failure Injection Utilities", () => {
 
   describe("SUPPORTED_STEPS", () => {
     it("should contain all workflow steps", () => {
-      const expectedSteps = [
-        "proxyAdmin",
-        "blr",
-        "facets",
-        "register",
-        "equity",
-        "bond",
-        "bondFixedRate",
-        "bondKpiLinkedRate",
-        "factory",
-      ];
+      const expectedSteps = ["proxyAdmin", "blr", "facets", "register", "equity", "bond", "factory"];
 
       expect(SUPPORTED_STEPS).to.deep.equal(expectedSteps);
     });
 
     it("should be a readonly array", () => {
       // TypeScript enforces this at compile time, but we can check length
-      expect(SUPPORTED_STEPS).to.have.length(9);
+      expect(SUPPORTED_STEPS).to.have.length(7);
     });
   });
 });

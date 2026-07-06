@@ -29,83 +29,6 @@ import { IBusinessLogicResolver } from "../../infrastructure/diamond/IBusinessLo
  * @author Asset Tokenization Studio Team
  */
 interface IMockFactory is IFactory {
-    /**
-     * @notice Full configuration for deploying a KPI-linked-rate bond.
-     * @param bondData              Base bond configuration.
-     * @param factoryRegulationData Regulatory classification applied at deployment.
-     * @param interestRate          Initial KPI-linked interest-rate parameters.
-     * @param impactData            KPI impact metrics used to compute the variable coupon.
-     */
-    struct BondKpiLinkedRateData {
-        BondData bondData;
-        FactoryRegulationData factoryRegulationData;
-        IKpiLinkedRate.InterestRate interestRate;
-        IKpiLinkedRate.ImpactData impactData;
-    }
-
-    /**
-     * @notice Full configuration for deploying a fixed-rate bond.
-     * @param bondData              Base bond configuration.
-     * @param factoryRegulationData Regulatory classification applied at deployment.
-     * @param fixedRateData         Fixed coupon rate and day-count convention parameters.
-     */
-    struct BondFixedRateData {
-        BondData bondData;
-        FactoryRegulationData factoryRegulationData;
-        IFixedRate.FixedRateData fixedRateData;
-    }
-
-    /**
-     * @notice Emitted when a new fixed-rate bond is deployed.
-     * @param deployer Address that initiated the deployment.
-     * @param bondAddress Address of the newly deployed bond proxy.
-     * @param bondFixedRateData Full fixed-rate bond configuration.
-     */
-    event BondFixedRateDeployed(address indexed deployer, address bondAddress, BondFixedRateData bondFixedRateData);
-
-    /**
-     * @notice Emitted when a new KPI-linked-rate bond is deployed.
-     * @param deployer Address that initiated the deployment.
-     * @param bondAddress Address of the newly deployed bond proxy.
-     * @param bondKpiLinkedRateData Full KPI-linked-rate bond configuration.
-     */
-    event BondKpiLinkedRateDeployed(
-        address indexed deployer,
-        address bondAddress,
-        BondKpiLinkedRateData bondKpiLinkedRateData
-    );
-
-    /// @notice Thrown when the supplied interest-rate parameters violate ordering invariants
-    ///         (e.g. `minRate > baseRate` or `baseRate > maxRate`).
-    error WrongInterestRateValues(IKpiLinkedRate.InterestRate interestRate);
-
-    /// @notice Thrown when the supplied KPI impact-data parameters violate ordering invariants
-    ///         (e.g. `maxDeviationFloor >= baseLine` or `baseLine >= maxDeviationCap`).
-    error WrongImpactDataValues(IKpiLinkedRate.ImpactData impactData);
-
-    /**
-     * @notice Deploys and initialises a fixed-rate bond security proxy.
-     * @dev Validates resolver, admin RBAC, regulation data and bond dates. Initialises
-     *      bond-specific and fixed-rate facets, marks the proxy operational, renounces this
-     *      factory's temporary admin role and emits `BondFixedRateDeployed`.
-     * @param _bondFixedRateData Fixed-rate bond deployment, regulation and rate data.
-     * @return bondAddress_ Address of the deployed fixed-rate bond proxy.
-     */
-    function deployBondFixedRate(BondFixedRateData calldata _bondFixedRateData) external returns (address bondAddress_);
-
-    /**
-     * @notice Deploys and initialises a KPI-linked-rate bond security proxy.
-     * @dev Validates resolver, admin RBAC, regulation data, bond dates, interest-rate
-     *      and impact data. Initialises bond-specific and KPI facets, marks the proxy
-     *      operational, renounces this factory's temporary admin role and emits
-     *      `BondKpiLinkedRateDeployed`.
-     * @param _bondKpiLinkedRateData KPI-linked-rate bond deployment, regulation, rate and impact data.
-     * @return bondAddress_ Address of the deployed KPI-linked-rate bond proxy.
-     */
-    function deployBondKpiLinkedRate(
-        BondKpiLinkedRateData calldata _bondKpiLinkedRateData
-    ) external returns (address bondAddress_);
-
     /// @notice Deploy a test-only asset diamond against the AssetMock configuration.
     /// @dev Mirrors `Factory._deploySecurityProxy` but force-readies every facet via
     ///      `MockDiamondCut.forceFacetsReady` instead of running per-facet initialisers.
@@ -122,101 +45,11 @@ interface IMockFactory is IFactory {
  */
 abstract contract MockFactory is Factory, IMockFactory {
     /// @notice Resolver configuration ID that registers the full IAsset facet union.
-    /// @dev All 7 asset-class facet sets (equity, bond, bondFixedRate, bondKpiLinkedRate,
-    ///      loan, loansPortfolio, depositToken) with DiamondFacet swapped for MockDiamondCut
-    ///      and EvmAccessorsFacet appended. Created by the TypeScript-side
+    /// @dev All asset-class facet sets (equity, bond, depositToken) with DiamondFacet swapped
+    ///      for MockDiamondCut and EvmAccessorsFacet appended. Created by the TypeScript-side
     ///      `createAssetMockConfiguration` at infrastructure deploy time.
     ///      Value: 0x000000000000000000000000000000000000000000000000000000000000000a
     bytes32 private constant _ASSET_MOCK_CONFIG_ID = 0x000000000000000000000000000000000000000000000000000000000000000a;
-
-    /**
-     * @notice Guarantees KPI-linked interest rate data is valid before deployment.
-     * @dev Delegates to `_checkInterestRate`, which reverts for invalid interest-rate data.
-     * @param _newInterestRate KPI-linked interest rate configuration to validate.
-     */
-    modifier onlyValidInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) {
-        _checkInterestRate(_newInterestRate);
-        _;
-    }
-
-    /**
-     * @notice Guarantees KPI impact data is valid before deployment.
-     * @dev Delegates to `_checkImpactData`, which reverts for invalid impact data.
-     * @param _newImpactData KPI impact configuration to validate.
-     */
-    modifier onlyValidImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) {
-        _checkImpactData(_newImpactData);
-        _;
-    }
-
-    /**
-     * @notice Deploys and initialises a fixed-rate bond security proxy.
-     * @dev Validates resolver, admin RBAC, regulation data and bond dates. Initialises
-     *      bond-specific and fixed-rate facets, marks the proxy operational, renounces this
-     *      factory's temporary admin role and emits `BondFixedRateDeployed`.
-     * @param _bondFixedRateData Fixed-rate bond deployment, regulation and rate data.
-     * @return bondAddress_ Address of the deployed fixed-rate bond proxy.
-     */
-    function deployBondFixedRate(
-        BondFixedRateData calldata _bondFixedRateData
-    )
-        external
-        onlyValidResolver(_bondFixedRateData.bondData.security.resolver)
-        onlyValidAdmins(_bondFixedRateData.bondData.security.rbacs)
-        onlyValidRegulation(
-            _bondFixedRateData.factoryRegulationData.regulationType,
-            _bondFixedRateData.factoryRegulationData.regulationSubType
-        )
-        onlyValidBondDates(
-            _bondFixedRateData.bondData.bondDetails.startingDate,
-            _bondFixedRateData.bondData.bondDetails.maturityDate
-        )
-        returns (address bondAddress_)
-    {
-        bondAddress_ = _deployBond(_bondFixedRateData.bondData, SecurityType.BondFixedRate);
-        IFixedRate(bondAddress_).initializeFixedRate(_bondFixedRateData.fixedRateData);
-        IInterestRate(bondAddress_).initializeInterestRateType(IInterestRate.RateType.FIXED);
-        (bool isOperational_, ) = IInitializer(bondAddress_).setOperationalStatus();
-        _checkUnexpectedError(!isOperational_, FACTORY_OPERATIONAL_STATUS);
-        IAccessControl(bondAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
-        emit BondFixedRateDeployed(EvmAccessors.getMsgSender(), bondAddress_, _bondFixedRateData);
-    }
-
-    /**
-     * @notice Deploys and initialises a KPI-linked-rate bond security proxy.
-     * @dev Validates resolver, admin RBAC, regulation data, KPI rate data, impact data
-     *      and bond dates. Initialises bond-specific and KPI-linked facets, marks the proxy
-     *      operational, renounces this factory's temporary admin role and emits
-     *      `BondKpiLinkedRateDeployed`.
-     * @param _bondKpiLinkedRateData KPI-linked bond deployment, regulation and rate data.
-     * @return bondAddress_ Address of the deployed KPI-linked-rate bond proxy.
-     */
-    function deployBondKpiLinkedRate(
-        BondKpiLinkedRateData calldata _bondKpiLinkedRateData
-    )
-        external
-        onlyValidResolver(_bondKpiLinkedRateData.bondData.security.resolver)
-        onlyValidAdmins(_bondKpiLinkedRateData.bondData.security.rbacs)
-        onlyValidRegulation(
-            _bondKpiLinkedRateData.factoryRegulationData.regulationType,
-            _bondKpiLinkedRateData.factoryRegulationData.regulationSubType
-        )
-        onlyValidInterestRate(_bondKpiLinkedRateData.interestRate)
-        onlyValidImpactData(_bondKpiLinkedRateData.impactData)
-        onlyValidBondDates(
-            _bondKpiLinkedRateData.bondData.bondDetails.startingDate,
-            _bondKpiLinkedRateData.bondData.bondDetails.maturityDate
-        )
-        returns (address bondAddress_)
-    {
-        bondAddress_ = _deployBondKpiLinkedRate(_bondKpiLinkedRateData);
-        (bool isOperational_, ) = IInitializer(bondAddress_).setOperationalStatus();
-        _checkUnexpectedError(!isOperational_, FACTORY_OPERATIONAL_STATUS);
-        IAccessControl(bondAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
-        _emitBondKpiLinkedRateDeployed(bondAddress_, _bondKpiLinkedRateData);
-    }
-
-    // ── Test-only: deploy a diamond proxy against AssetMock config ──────────
 
     /// @inheritdoc IMockFactory
     function deployAssetMock(IBusinessLogicResolver resolver_) external returns (address assetAddress_) {
@@ -277,53 +110,5 @@ abstract contract MockFactory is Factory, IMockFactory {
     ) internal override returns (address securityAddress_) {
         securityAddress_ = super._deploySecurity(_securityData, _securityType);
         ITimeTravel(securityAddress_).initializeTimeTravel();
-    }
-
-    /**
-     * @notice Deploys and initialises the KPI-linked-rate bond facet set.
-     * @dev Builds on `_deployBond`, then initialises KPI-linked rate metadata, rate type and
-     *      KPI tracking. Operational status and admin renouncement remain caller concerns.
-     * @param _data KPI-linked bond deployment data.
-     * @return bondAddress_ Address of the deployed KPI-linked-rate bond proxy.
-     */
-    function _deployBondKpiLinkedRate(BondKpiLinkedRateData calldata _data) internal returns (address bondAddress_) {
-        bondAddress_ = _deployBond(_data.bondData, SecurityType.BondKpiLinkedRate);
-        IKpiLinkedRate(bondAddress_).initializeKpiLinkedRate(_data.interestRate, _data.impactData);
-        IInterestRate(bondAddress_).initializeInterestRateType(IInterestRate.RateType.KPI_LINKED);
-        IKpis(bondAddress_).initializeKpis();
-    }
-
-    /**
-     * @notice Emits the KPI-linked-rate bond deployment event.
-     * @dev Uses `EvmAccessors.getMsgSender()` so the emitted deployer follows the project's
-     *      message-sender abstraction.
-     * @param _bondAddress Address of the deployed KPI-linked-rate bond proxy.
-     * @param _bondKpiLinkedRateData KPI-linked bond deployment data emitted for indexing.
-     */
-    function _emitBondKpiLinkedRateDeployed(
-        address _bondAddress,
-        BondKpiLinkedRateData calldata _bondKpiLinkedRateData
-    ) private {
-        emit BondKpiLinkedRateDeployed(EvmAccessors.getMsgSender(), _bondAddress, _bondKpiLinkedRateData);
-    }
-
-    /**
-     * @notice Asserts that KPI-linked interest rate data is valid.
-     * @dev Forwards to `InterestRateStorageWrapper.requireValidInterestRate`, which reverts for
-     *      invalid interest-rate data.
-     * @param _newInterestRate KPI-linked interest rate configuration to validate.
-     */
-    function _checkInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) private pure {
-        InterestRateStorageWrapper.requireValidInterestRate(_newInterestRate);
-    }
-
-    /**
-     * @notice Asserts that KPI impact data is valid.
-     * @dev Forwards to `InterestRateStorageWrapper.requireValidImpactData`, which reverts for
-     *      invalid impact data.
-     * @param _newImpactData KPI impact configuration to validate.
-     */
-    function _checkImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) private pure {
-        InterestRateStorageWrapper.requireValidImpactData(_newImpactData);
     }
 }

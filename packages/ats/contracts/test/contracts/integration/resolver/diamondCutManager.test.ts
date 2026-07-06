@@ -16,12 +16,8 @@ import {
 import {
   ATS_ROLES,
   BOND_CONFIG_ID,
-  BOND_FIXED_RATE_CONFIG_ID,
-  BOND_KPI_LINKED_RATE_CONFIG_ID,
   EQUITY_CONFIG_ID,
   FACTORY_CONFIG_ID,
-  LOAN_CONFIG_ID,
-  LOANS_PORTFOLIO_CONFIG_ID,
   DEPOSIT_TOKEN_CONFIG_ID,
   INITIALIZE_MOCK_CONFIG_ID,
 } from "@scripts";
@@ -59,11 +55,7 @@ describe("DiamondCutManager", () => {
   let pause: Pause;
   let equityFacetIdList: string[] = [];
   let bondFacetIdList: string[] = [];
-  let bondFixedRateFacetIdList: string[] = [];
-  let bondKpiLinkedRateFacetIdList: string[] = [];
-  let loanFacetIdList: string[] = [];
   let depositTokenFacetIdList: string[] = [];
-  let loansPortfolioFacetIdList: string[] = [];
   let factoryFacetIdList: string[] = [];
   let equityFacetVersionList: number[] = [];
   let configToFacetIdsMap: Record<string, string[]>;
@@ -116,22 +108,14 @@ describe("DiamondCutManager", () => {
     diamondCutManager = DiamondCutManager__factory.connect(businessLogicResolver.target.toString(), signer_A);
     equityFacetIdList = Object.values(infrastructure.equityFacetKeys);
     bondFacetIdList = Object.values(infrastructure.bondFacetKeys);
-    bondFixedRateFacetIdList = Object.values(infrastructure.bondFixedRateFacetKeys);
-    bondKpiLinkedRateFacetIdList = Object.values(infrastructure.bondKpiLinkedRateFacetKeys);
-    loanFacetIdList = Object.values(infrastructure.loanFacetKeys);
     depositTokenFacetIdList = Object.values(infrastructure.depositTokenFacetKeys);
-    loansPortfolioFacetIdList = Object.values(infrastructure.loansPortfolioFacetKeys);
     factoryFacetIdList = Object.values(infrastructure.factoryFacetKeys);
     equityFacetVersionList = Array(equityFacetIdList.length).fill(1);
 
     configToFacetIdsMap = {
       [EQUITY_CONFIG_ID]: equityFacetIdList,
       [BOND_CONFIG_ID]: bondFacetIdList,
-      [BOND_FIXED_RATE_CONFIG_ID]: bondFixedRateFacetIdList,
-      [BOND_KPI_LINKED_RATE_CONFIG_ID]: bondKpiLinkedRateFacetIdList,
-      [LOAN_CONFIG_ID]: loanFacetIdList,
       [DEPOSIT_TOKEN_CONFIG_ID]: depositTokenFacetIdList,
-      [LOANS_PORTFOLIO_CONFIG_ID]: loansPortfolioFacetIdList,
       [FACTORY_CONFIG_ID]: factoryFacetIdList,
     };
   });
@@ -364,17 +348,13 @@ describe("DiamondCutManager", () => {
 
   it("GIVEN a resolver WHEN reading configuration information THEN everything matches", async () => {
     const configLength = Number(await diamondCutManager.getConfigurationsLength());
-    expect(configLength).to.equal(9);
+    expect(configLength).to.equal(5);
 
     const configIds = await diamondCutManager.getConfigurations(0, configLength);
     expect([...configIds]).to.have.members([
       EQUITY_CONFIG_ID,
       BOND_CONFIG_ID,
-      BOND_FIXED_RATE_CONFIG_ID,
-      BOND_KPI_LINKED_RATE_CONFIG_ID,
-      LOAN_CONFIG_ID,
       DEPOSIT_TOKEN_CONFIG_ID,
-      LOANS_PORTFOLIO_CONFIG_ID,
       FACTORY_CONFIG_ID,
       INITIALIZE_MOCK_CONFIG_ID,
     ]);

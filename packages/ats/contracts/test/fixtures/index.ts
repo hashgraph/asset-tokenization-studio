@@ -28,22 +28,12 @@ export {
   makeBondDetailsData as getBondDetails,
 } from "./tokens/bond.fixture";
 
-export { deployBondFixedRateTokenFixture, DEFAULT_BOND_FIXED_RATE_PARAMS } from "./tokens/bondFixedRate.fixture";
-
-export {
-  deployBondKpiLinkedRateTokenFixture,
-  DEFAULT_BOND_KPI_LINKED_RATE_PARAMS,
-} from "./tokens/bondKpiLinkedRate.fixture";
-
-// Loan token fixtures
-export { deployLoanTokenFixture, DEFAULT_LOAN_PARAMS, getLoanDetails } from "./tokens/loan.fixture";
-
-// Loan Portfolio token fixtures
-export {
-  deployLoansPortfolioTokenFixture,
-  DEFAULT_LOANS_PORTFOLIO_PARAMS,
-  getLoansPortfolioDetails,
-} from "./tokens/loansPortfolio.fixture";
+// Removed-type test data builders (BBND-1882): these asset types are no longer deployed
+// through the production factory, but their facets remain on the shared AssetMock mega-asset,
+// so the facet integration suites still consume these default parameters / detail builders.
+export { DEFAULT_BOND_FIXED_RATE_PARAMS } from "./tokens/bondFixedRate.fixture";
+export { DEFAULT_BOND_KPI_LINKED_RATE_PARAMS } from "./tokens/bondKpiLinkedRate.fixture";
+export { getLoanDetails } from "./tokens/loan.fixture";
 
 // Common token utilities
 export {

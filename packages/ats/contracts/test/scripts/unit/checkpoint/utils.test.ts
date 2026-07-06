@@ -70,14 +70,11 @@ describe("Checkpoint Utilities", () => {
       expect(output.configurations.bond.configId).to.equal(TEST_CONFIG_IDS.BOND);
       expect(output.configurations.bond.version).to.equal(1);
       expect(output.configurations.bond.facetCount).to.equal(43);
-      expect(output.configurations.bondFixedRate.configId).to.equal(TEST_CONFIG_IDS.BOND_FIXED_RATE);
-      expect(output.configurations.bondFixedRate.version).to.equal(1);
-      expect(output.configurations.bondFixedRate.facetCount).to.equal(47);
 
       // Summary
       expect(output.summary.totalContracts).to.equal(5); // ProxyAdmin + BLR + Factory + 2 facets
       expect(output.summary.totalFacets).to.equal(2);
-      expect(output.summary.totalConfigurations).to.equal(4);
+      expect(output.summary.totalConfigurations).to.equal(2);
       expect(output.summary.success).to.be.true;
       expect(output.summary.deploymentTime).to.be.a("number");
       expect(output.summary.gasUsed).to.equal("1750000"); // 500000 + 450000 + 800000
@@ -131,18 +128,6 @@ describe("Checkpoint Utilities", () => {
               version: 1,
               facetCount: 0,
               txHash: TEST_TX_HASHES.SAMPLE_5,
-            },
-            bondFixedRate: {
-              configId: TEST_CONFIG_IDS.BOND_FIXED_RATE,
-              version: 1,
-              facetCount: 0,
-              txHash: TEST_TX_HASHES.SAMPLE_6,
-            },
-            bondKpiLinkedRate: {
-              configId: TEST_CONFIG_IDS.BOND_KPI_LINKED,
-              version: 1,
-              facetCount: 0,
-              txHash: TEST_TX_HASHES.SAMPLE_7,
             },
           },
         },
@@ -227,15 +212,8 @@ describe("Checkpoint Utilities", () => {
         expect(getStepName(TEST_STEPS_NEW_BLR.REGISTER_FACETS, TEST_WORKFLOWS.NEW_BLR)).to.equal("Register Facets");
         expect(getStepName(TEST_STEPS_NEW_BLR.EQUITY_CONFIG, TEST_WORKFLOWS.NEW_BLR)).to.equal("Equity Configuration");
         expect(getStepName(TEST_STEPS_NEW_BLR.BOND_CONFIG, TEST_WORKFLOWS.NEW_BLR)).to.equal("Bond Configuration");
-        expect(getStepName(TEST_STEPS_NEW_BLR.BOND_FIXED_RATE_CONFIG, TEST_WORKFLOWS.NEW_BLR)).to.equal(
-          "Bond Fixed Rate Configuration",
-        );
-        expect(getStepName(TEST_STEPS_NEW_BLR.BOND_KPI_LINKED_CONFIG, TEST_WORKFLOWS.NEW_BLR)).to.equal(
-          "Bond KpiLinked Rate Configuration",
-        );
-        expect(getStepName(TEST_STEPS_NEW_BLR.LOAN_CONFIG, TEST_WORKFLOWS.NEW_BLR)).to.equal("Loan Configuration");
-        expect(getStepName(TEST_STEPS_NEW_BLR.LOANS_PORTFOLIO_CONFIG, TEST_WORKFLOWS.NEW_BLR)).to.equal(
-          "Loans Portfolio Configuration",
+        expect(getStepName(TEST_STEPS_NEW_BLR.DEPOSIT_TOKEN_CONFIG, TEST_WORKFLOWS.NEW_BLR)).to.equal(
+          "Deposit Token Configuration",
         );
         expect(getStepName(TEST_STEPS_NEW_BLR.FACTORY, TEST_WORKFLOWS.NEW_BLR)).to.equal("Factory");
       });
@@ -265,17 +243,11 @@ describe("Checkpoint Utilities", () => {
         expect(getStepName(TEST_STEPS_EXISTING_BLR.BOND_CONFIG, TEST_WORKFLOWS.EXISTING_BLR)).to.equal(
           "Bond Configuration",
         );
-        expect(getStepName(TEST_STEPS_EXISTING_BLR.BOND_FIXED_RATE_CONFIG, TEST_WORKFLOWS.EXISTING_BLR)).to.equal(
-          "Bond Fixed Rate Configuration",
+        expect(getStepName(TEST_STEPS_EXISTING_BLR.DEPOSIT_TOKEN_CONFIG, TEST_WORKFLOWS.EXISTING_BLR)).to.equal(
+          "Deposit Token Configuration",
         );
-        expect(getStepName(TEST_STEPS_EXISTING_BLR.BOND_KPI_LINKED_CONFIG, TEST_WORKFLOWS.EXISTING_BLR)).to.equal(
-          "Bond KpiLinked Rate Configuration",
-        );
-        expect(getStepName(TEST_STEPS_EXISTING_BLR.LOAN_CONFIG, TEST_WORKFLOWS.EXISTING_BLR)).to.equal(
-          "Loan Configuration",
-        );
-        expect(getStepName(TEST_STEPS_EXISTING_BLR.LOANS_PORTFOLIO_CONFIG, TEST_WORKFLOWS.EXISTING_BLR)).to.equal(
-          "Loans Portfolio Configuration",
+        expect(getStepName(TEST_STEPS_EXISTING_BLR.FACTORY_CONFIG, TEST_WORKFLOWS.EXISTING_BLR)).to.equal(
+          "Factory Configuration",
         );
         expect(getStepName(TEST_STEPS_EXISTING_BLR.FACTORY, TEST_WORKFLOWS.EXISTING_BLR)).to.equal("Factory");
       });
