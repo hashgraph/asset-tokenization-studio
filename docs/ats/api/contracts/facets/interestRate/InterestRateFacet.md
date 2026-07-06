@@ -78,9 +78,9 @@ _Intended to be called by the factory immediately after proxy creation. No role 
 
 #### Parameters
 
-| Name     | Type                        | Description                                                 |
-| -------- | --------------------------- | ----------------------------------------------------------- |
-| rateType | enum IInterestRate.RateType | The `RateType` to persist (STANDARD, FIXED, or KPI_LINKED). |
+| Name     | Type                        | Description |
+| -------- | --------------------------- | ----------- |
+| rateType | enum IInterestRate.RateType | undefined   |
 
 ### setCouponRateType
 
@@ -94,9 +94,9 @@ _Protected by `onlyRole(ROLE_INTEREST_RATE_MANAGER)` and `onlyValidRateType`._
 
 #### Parameters
 
-| Name     | Type                        | Description                                                 |
-| -------- | --------------------------- | ----------------------------------------------------------- |
-| rateType | enum IInterestRate.RateType | The `RateType` to persist (STANDARD, FIXED, or KPI_LINKED). |
+| Name     | Type                        | Description |
+| -------- | --------------------------- | ----------- |
+| rateType | enum IInterestRate.RateType | undefined   |
 
 ## Events
 

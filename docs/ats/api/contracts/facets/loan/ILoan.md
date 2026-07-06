@@ -39,14 +39,14 @@ function initializeLoan(ILoan.LoanDetailsData _loanDetailsData) external nonpaya
 ### setLoanDetails
 
 ```solidity
-function setLoanDetails(ILoan.LoanDetailsData loanDetailsData_) external nonpayable
+function setLoanDetails(ILoan.LoanDetailsData _loanDetailsData) external nonpayable
 ```
 
 #### Parameters
 
 | Name              | Type                  | Description |
 | ----------------- | --------------------- | ----------- |
-| loanDetailsData\_ | ILoan.LoanDetailsData | undefined   |
+| \_loanDetailsData | ILoan.LoanDetailsData | undefined   |
 
 ## Events
 

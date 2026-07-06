@@ -69,20 +69,20 @@ interface ITransfer {
 
     /**
      * @notice Moves `amount` tokens from the caller to `to`.
-     * @param to     Recipient address.
-     * @param amount Number of tokens to transfer.
+     * @param _to     Recipient address.
+     * @param _amount Number of tokens to transfer.
      * @return True if the transfer succeeded.
      */
-    function transfer(address to, uint256 amount) external returns (bool);
+    function transfer(address _to, uint256 _amount) external returns (bool);
 
     /**
      * @notice Moves `amount` tokens from `from` to `to` using the caller's allowance.
-     * @param from   Source address.
-     * @param to     Destination address.
-     * @param amount Number of tokens to transfer.
+     * @param _from   Source address.
+     * @param _to     Destination address.
+     * @param _amount Number of tokens to transfer.
      * @return True if the transfer succeeded.
      */
-    function transferFrom(address from, address to, uint256 amount) external returns (bool);
+    function transferFrom(address _from, address _to, uint256 _amount) external returns (bool);
 
     /**
      * @notice Transfers tokens to `_to` with additional `_data` attached.

@@ -33,11 +33,11 @@ library TokenCoreOps {
     /// @return The partition from which tokens were transferred.
     function transferByPartition(
         address _from,
-        IERC1410Types.BasicTransferInfo memory _basicTransferInfo,
+        IERC1410Types.BasicTransferInfo calldata _basicTransferInfo,
         bytes32 _partition,
-        bytes memory _data,
+        bytes calldata _data,
         address _operator,
-        bytes memory _operatorData
+        bytes calldata _operatorData
     ) external returns (bytes32) {
         return
             ERC1410StorageWrapper.transferByPartition(
@@ -78,7 +78,7 @@ library TokenCoreOps {
 
     /// @notice Issues tokens on a specific partition using packed issue data.
     /// @param _issueData Struct containing partition, recipient, value, and associated data.
-    function issueByPartition(IERC1410Types.IssueData memory _issueData) external {
+    function issueByPartition(IERC1410Types.IssueData calldata _issueData) external {
         ERC1410StorageWrapper.issueByPartition(_issueData);
     }
 
@@ -94,8 +94,8 @@ library TokenCoreOps {
         address _from,
         address _operator,
         uint256 _value,
-        bytes memory _data,
-        bytes memory _operatorData
+        bytes calldata _data,
+        bytes calldata _operatorData
     ) external {
         ERC1410StorageWrapper.redeemByPartition(_partition, _from, _operator, _value, _data, _operatorData);
     }

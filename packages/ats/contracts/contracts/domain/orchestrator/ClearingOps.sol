@@ -54,6 +54,10 @@ library ClearingOps {
      * PROTECTED)
      * @return success_ Always true if no revert
      * @return clearingId_ Assigned clearing identifier
+     * @dev `_clearingOperation` and `_operatorData` are kept as `memory` (not
+     * `calldata`) intentionally: converting them triggers a stack-too-deep
+     * error under the current optimiser settings (no `viaIR`). ATS-FUNC-001 is
+     * therefore knowingly waived here.
      */
     function clearingTransferCreation(
         IClearingTypes.ClearingOperation memory _clearingOperation,
@@ -136,10 +140,10 @@ library ClearingOps {
      * @return clearingId_ Assigned clearing identifier
      */
     function clearingRedeemCreation(
-        IClearingTypes.ClearingOperation memory _clearingOperation,
+        IClearingTypes.ClearingOperation calldata _clearingOperation,
         uint256 _amount,
         address _from,
-        bytes memory _operatorData,
+        bytes calldata _operatorData,
         ThirdPartyType _thirdPartyType
     ) external returns (bool success_, uint256 clearingId_) {
         ClearingStorageWrapper.checkNonZeroClearingAmount(_amount);
@@ -218,6 +222,10 @@ library ClearingOps {
      * @param _thirdPartyType Role of the caller
      * @return success_ Always true if no revert
      * @return clearingId_ Assigned clearing identifier
+     * @dev `_clearingOperation` and `_operatorData` are kept as `memory` (not
+     * `calldata`) intentionally: converting them triggers a stack-too-deep
+     * error under the current optimiser settings (no `viaIR`). ATS-FUNC-001 is
+     * therefore knowingly waived here.
      */
     function clearingHoldCreationCreation(
         IClearingTypes.ClearingOperation calldata _clearingOperation,

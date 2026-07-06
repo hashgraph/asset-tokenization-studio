@@ -11,11 +11,6 @@ pragma solidity >=0.8.0 <0.9.0;
  *
  * This file is reserved for non-hash primitives: numeric limits, default
  * partition, error IDs, ASCII helpers, KPI dispatch IDs.
- *
- * Pre-existing constants here keep their legacy `_` prefix (it documents
- * their non-public, file-scope nature in this codebase). New hash-derived
- * constants follow the no-leading-underscore rule of the canonical naming
- * convention.
  */
 
 uint256 constant MAX_UINT256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
@@ -33,34 +28,37 @@ bytes constant EMPTY_BYTES = bytes("");
 
 // Default partition identifier (bytes32(1))
 // Used as the default partition for ERC1410 token operations when no specific partition is specified
-bytes32 constant _DEFAULT_PARTITION = 0x0000000000000000000000000000000000000000000000000000000000000001;
+bytes32 constant DEFAULT_PARTITION = 0x0000000000000000000000000000000000000000000000000000000000000001;
 uint256 constant SNAPSHOT_RESULT_ID = 0;
 uint256 constant COUPON_LISTING_RESULT_ID = 1;
 
-bytes1 constant _IS_PAUSED_ERROR_ID = 0x40;
-bytes1 constant _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID = 0x41;
-bytes1 constant _FROM_ACCOUNT_BLOCKED_ERROR_ID = 0x42;
-bytes1 constant _TO_ACCOUNT_BLOCKED_ERROR_ID = 0x43;
-bytes1 constant _FROM_ACCOUNT_NULL_ERROR_ID = 0x44;
-bytes1 constant _TO_ACCOUNT_NULL_ERROR_ID = 0x45;
-bytes1 constant _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID = 0x46;
-bytes1 constant _IS_NOT_OPERATOR_ERROR_ID = 0x47;
-bytes1 constant _WRONG_PARTITION_ERROR_ID = 0x48;
-bytes1 constant _ALLOWANCE_REACHED_ERROR_ID = 0x49;
-bytes1 constant _FROM_ACCOUNT_KYC_ERROR_ID = 0x50;
-bytes1 constant _TO_ACCOUNT_KYC_ERROR_ID = 0x51;
-bytes1 constant _CLEARING_ACTIVE_ERROR_ID = 0x52;
-bytes1 constant _ADDRESS_RECOVERED_OPERATOR_ERROR_ID = 0x53;
-bytes1 constant _ADDRESS_RECOVERED_FROM_ERROR_ID = 0x54;
-bytes1 constant _ADDRESS_RECOVERED_TO_ERROR_ID = 0x55;
+// TODO: remove — these transfer/operation error-status IDs are unused across the codebase.
+bytes1 constant IS_PAUSED_ERROR_ID = 0x40;
+bytes1 constant OPERATOR_ACCOUNT_BLOCKED_ERROR_ID = 0x41;
+bytes1 constant FROM_ACCOUNT_BLOCKED_ERROR_ID = 0x42;
+bytes1 constant TO_ACCOUNT_BLOCKED_ERROR_ID = 0x43;
+bytes1 constant FROM_ACCOUNT_NULL_ERROR_ID = 0x44;
+bytes1 constant TO_ACCOUNT_NULL_ERROR_ID = 0x45;
+bytes1 constant NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID = 0x46;
+bytes1 constant IS_NOT_OPERATOR_ERROR_ID = 0x47;
+bytes1 constant WRONG_PARTITION_ERROR_ID = 0x48;
+bytes1 constant ALLOWANCE_REACHED_ERROR_ID = 0x49;
+bytes1 constant FROM_ACCOUNT_KYC_ERROR_ID = 0x50;
+bytes1 constant TO_ACCOUNT_KYC_ERROR_ID = 0x51;
+bytes1 constant CLEARING_ACTIVE_ERROR_ID = 0x52;
+bytes1 constant ADDRESS_RECOVERED_OPERATOR_ERROR_ID = 0x53;
+bytes1 constant ADDRESS_RECOVERED_FROM_ERROR_ID = 0x54;
+bytes1 constant ADDRESS_RECOVERED_TO_ERROR_ID = 0x55;
 
-bytes1 constant _SUCCESS = 0x00;
+// TODO: remove — unused across the codebase.
+bytes1 constant SUCCESS = 0x00;
 
-uint8 constant _TEN = 10;
-uint8 constant _UINT_WITH_ONE_DIGIT = 9;
-uint8 constant _ASCII_9 = 57;
-uint8 constant _ASCII_7 = 55;
-uint8 constant _ASCII_0 = 48;
+// TODO: remove — these number-to-string conversion helpers are unused across the codebase.
+uint8 constant TEN = 10;
+uint8 constant UINT_WITH_ONE_DIGIT = 9;
+uint8 constant ASCII_9 = 57;
+uint8 constant ASCII_7 = 55;
+uint8 constant ASCII_0 = 48;
 
 /// @dev ID for CorporateActionsStorageWrapper.addCorporateAction()
 bytes4 constant KPI_CA_ADD_ACTION = 0x00000001;

@@ -21,17 +21,17 @@ _Callable once; subsequent calls revert with `FacetAlreadyRegistered`. Requires 
 ### transfer
 
 ```solidity
-function transfer(address to, uint256 amount) external nonpayable returns (bool)
+function transfer(address _to, uint256 _amount) external nonpayable returns (bool)
 ```
 
 Moves `amount` tokens from the caller to `to`.
 
 #### Parameters
 
-| Name   | Type    | Description                   |
-| ------ | ------- | ----------------------------- |
-| to     | address | Recipient address.            |
-| amount | uint256 | Number of tokens to transfer. |
+| Name     | Type    | Description                   |
+| -------- | ------- | ----------------------------- |
+| \_to     | address | Recipient address.            |
+| \_amount | uint256 | Number of tokens to transfer. |
 
 #### Returns
 
@@ -42,18 +42,18 @@ Moves `amount` tokens from the caller to `to`.
 ### transferFrom
 
 ```solidity
-function transferFrom(address from, address to, uint256 amount) external nonpayable returns (bool)
+function transferFrom(address _from, address _to, uint256 _amount) external nonpayable returns (bool)
 ```
 
 Moves `amount` tokens from `from` to `to` using the caller&#39;s allowance.
 
 #### Parameters
 
-| Name   | Type    | Description                   |
-| ------ | ------- | ----------------------------- |
-| from   | address | Source address.               |
-| to     | address | Destination address.          |
-| amount | uint256 | Number of tokens to transfer. |
+| Name     | Type    | Description                   |
+| -------- | ------- | ----------------------------- |
+| \_from   | address | Source address.               |
+| \_to     | address | Destination address.          |
+| \_amount | uint256 | Number of tokens to transfer. |
 
 #### Returns
 

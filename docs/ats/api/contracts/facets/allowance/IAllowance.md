@@ -11,7 +11,7 @@ Consolidated interface for the ERC-20 allowance domain: granting, reading and at
 ### allowance
 
 ```solidity
-function allowance(address owner, address spender) external view returns (uint256)
+function allowance(address _owner, address _spender) external view returns (uint256)
 ```
 
 Returns the remaining amount `spender` may spend on behalf of `owner` via a downstream `transferFrom`-style call.
@@ -20,10 +20,10 @@ _Zero by default. Updated by {approve}, {increaseAllowance}, {decreaseAllowance}
 
 #### Parameters
 
-| Name    | Type    | Description                                          |
-| ------- | ------- | ---------------------------------------------------- |
-| owner   | address | Address that granted the allowance.                  |
-| spender | address | Address authorised to spend on `owner`&#39;s behalf. |
+| Name      | Type    | Description                                          |
+| --------- | ------- | ---------------------------------------------------- |
+| \_owner   | address | Address that granted the allowance.                  |
+| \_spender | address | Address authorised to spend on `owner`&#39;s behalf. |
 
 #### Returns
 
@@ -34,7 +34,7 @@ _Zero by default. Updated by {approve}, {increaseAllowance}, {decreaseAllowance}
 ### approve
 
 ```solidity
-function approve(address spender, uint256 value) external nonpayable returns (bool)
+function approve(address _spender, uint256 _value) external nonpayable returns (bool)
 ```
 
 Sets `value` as the allowance of `spender` over the caller&#39;s tokens.
@@ -43,10 +43,10 @@ _Overwrites any previously-granted allowance. Known race: moving a non-zero allo
 
 #### Parameters
 
-| Name    | Type    | Description                                             |
-| ------- | ------- | ------------------------------------------------------- |
-| spender | address | Address authorised to spend on the caller&#39;s behalf. |
-| value   | uint256 | Absolute allowance amount to grant.                     |
+| Name      | Type    | Description                                             |
+| --------- | ------- | ------------------------------------------------------- |
+| \_spender | address | Address authorised to spend on the caller&#39;s behalf. |
+| \_value   | uint256 | Absolute allowance amount to grant.                     |
 
 #### Returns
 
@@ -57,7 +57,7 @@ _Overwrites any previously-granted allowance. Known race: moving a non-zero allo
 ### decreaseAllowance
 
 ```solidity
-function decreaseAllowance(address spender, uint256 subtractedValue) external nonpayable returns (bool)
+function decreaseAllowance(address _spender, uint256 _subtractedValue) external nonpayable returns (bool)
 ```
 
 Atomically decreases the allowance granted to `spender` by the caller.
@@ -66,10 +66,10 @@ _Preferred alternative to {approve} as it avoids the read-modify-write allowance
 
 #### Parameters
 
-| Name            | Type    | Description                                    |
-| --------------- | ------- | ---------------------------------------------- |
-| spender         | address | Address whose allowance is being decreased.    |
-| subtractedValue | uint256 | Amount subtracted from the existing allowance. |
+| Name              | Type    | Description                                    |
+| ----------------- | ------- | ---------------------------------------------- |
+| \_spender         | address | Address whose allowance is being decreased.    |
+| \_subtractedValue | uint256 | Amount subtracted from the existing allowance. |
 
 #### Returns
 
@@ -80,7 +80,7 @@ _Preferred alternative to {approve} as it avoids the read-modify-write allowance
 ### increaseAllowance
 
 ```solidity
-function increaseAllowance(address spender, uint256 addedValue) external nonpayable returns (bool)
+function increaseAllowance(address _spender, uint256 _addedValue) external nonpayable returns (bool)
 ```
 
 Atomically increases the allowance granted to `spender` by the caller.
@@ -89,10 +89,10 @@ _Preferred alternative to {approve} as it avoids the read-modify-write allowance
 
 #### Parameters
 
-| Name       | Type    | Description                                 |
-| ---------- | ------- | ------------------------------------------- |
-| spender    | address | Address whose allowance is being increased. |
-| addedValue | uint256 | Amount added to the existing allowance.     |
+| Name         | Type    | Description                                 |
+| ------------ | ------- | ------------------------------------------- |
+| \_spender    | address | Address whose allowance is being increased. |
+| \_addedValue | uint256 | Amount added to the existing allowance.     |
 
 #### Returns
 

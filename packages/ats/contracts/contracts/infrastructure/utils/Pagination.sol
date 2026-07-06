@@ -26,8 +26,11 @@ library Pagination {
 
         items_ = new bytes32[](getSize(start, end, listCount));
 
-        for (uint256 i = 0; i < items_.length; ++i) {
+        for (uint256 i = 0; i < items_.length; ) {
             items_[i] = _set.at(start + i);
+            unchecked {
+                ++i;
+            }
         }
     }
 
@@ -41,8 +44,11 @@ library Pagination {
 
         items_ = new uint256[](getSize(start, end, listCount));
 
-        for (uint256 i = 0; i < items_.length; ++i) {
+        for (uint256 i = 0; i < items_.length; ) {
             items_[i] = _set.at(start + i);
+            unchecked {
+                ++i;
+            }
         }
     }
 
@@ -56,8 +62,11 @@ library Pagination {
 
         items_ = new address[](getSize(start, end, listCount));
 
-        for (uint256 i = 0; i < items_.length; ++i) {
+        for (uint256 i = 0; i < items_.length; ) {
             items_[i] = _set.at(start + i);
+            unchecked {
+                ++i;
+            }
         }
     }
 
@@ -71,8 +80,11 @@ library Pagination {
 
         items_ = new bytes4[](getSize(start, end, listCount));
 
-        for (uint256 i = 0; i < items_.length; ++i) {
+        for (uint256 i = 0; i < items_.length; ) {
             items_[i] = _set.at(start + i);
+            unchecked {
+                ++i;
+            }
         }
     }
 

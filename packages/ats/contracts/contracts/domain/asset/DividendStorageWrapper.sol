@@ -7,7 +7,6 @@ import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageW
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 
 import { DecimalsLib } from "../../infrastructure/utils/DecimalsLib.sol";
-import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { IDividend } from "../../facets/dividend/IDividend.sol";
 import { IDividendTypes } from "../../facets/dividend/IDividendTypes.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";

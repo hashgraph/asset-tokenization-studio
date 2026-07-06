@@ -55,7 +55,7 @@ library KpisStorageWrapper {
      */
     function addKpiData(uint256 date, uint256 value, address project) internal {
         setCheckpointDate(date, project);
-        Checkpoints.Checkpoint[] storage ckpt = kpisDataStorage().checkpointsByProject[project];
+        Checkpoints.Checkpoint[] storage ckpt = _kpisDataStorage().checkpointsByProject[project];
         uint256 length = ckpt.length;
         uint256 latest;
         unchecked {
@@ -90,7 +90,7 @@ library KpisStorageWrapper {
      * @param project The project the checkpoint belongs to.
      */
     function setCheckpointDate(uint256 date, address project) internal {
-        kpisDataStorage().checkpointsDatesByProject[project][date] = true;
+        _kpisDataStorage().checkpointsDatesByProject[project][date] = true;
     }
 
     /**
@@ -121,7 +121,7 @@ library KpisStorageWrapper {
      * @return found True when a qualifying checkpoint was located, false otherwise.
      */
     function getLatestKpiData(uint256 from, uint256 to, address project) internal view returns (uint256, bool) {
-        (uint256 checkpointFrom, uint256 value_) = kpisDataStorage().checkpointsByProject[project].checkpointsLookup(
+        (uint256 checkpointFrom, uint256 value_) = _kpisDataStorage().checkpointsByProject[project].checkpointsLookup(
             to
         );
         if (checkpointFrom <= from) return (0, false); // solhint-disable-line gas-strict-inequalities
@@ -135,7 +135,7 @@ library KpisStorageWrapper {
      * @return minDate_ The adjusted minimum date below which new KPI entries are rejected.
      */
     function getMinDateAdjusted() internal view returns (uint256 minDate_) {
-        minDate_ = kpisDataStorage().minDate;
+        minDate_ = _kpisDataStorage().minDate;
 
         uint256 total = CouponStorageWrapper.getCouponsOrderedListTotalAdjustedAt(
             TimeTravelStorageWrapper.getBlockTimestamp(),
@@ -163,7 +163,7 @@ library KpisStorageWrapper {
      * @return True when the date is a recorded checkpoint for the project.
      */
     function isCheckpointDate(uint256 date, address project) internal view returns (bool) {
-        return kpisDataStorage().checkpointsDatesByProject[project][date];
+        return _kpisDataStorage().checkpointsDatesByProject[project][date];
     }
 
     /**
@@ -171,7 +171,7 @@ library KpisStorageWrapper {
      * @dev Uses inline assembly to load the ERC-7201 slot from a precomputed constant.
      * @return kpisDataStorage_ Storage pointer to `KpisDataStorage`.
      */
-    function kpisDataStorage() private pure returns (KpisDataStorage storage kpisDataStorage_) {
+    function _kpisDataStorage() private pure returns (KpisDataStorage storage kpisDataStorage_) {
         bytes32 position = STORAGE_LOCATION_KPIS;
         // solhint-disable-next-line no-inline-assembly
         assembly {

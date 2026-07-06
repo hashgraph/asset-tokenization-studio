@@ -517,16 +517,16 @@ _Iterates over all supplied keys and returns zero for keys with no registered ve
 ### getOwner
 
 ```solidity
-function getOwner(bytes32 configId) external view returns (address owner_)
+function getOwner(bytes32 _configId) external view returns (address owner_)
 ```
 
 Returns the current owner of a configuration.
 
 #### Parameters
 
-| Name     | Type    | Description             |
-| -------- | ------- | ----------------------- |
-| configId | bytes32 | Configuration to query. |
+| Name       | Type    | Description             |
+| ---------- | ------- | ----------------------- |
+| \_configId | bytes32 | Configuration to query. |
 
 #### Returns
 
@@ -537,16 +537,16 @@ Returns the current owner of a configuration.
 ### getPendingOwner
 
 ```solidity
-function getPendingOwner(bytes32 configId) external view returns (address pendingOwner_)
+function getPendingOwner(bytes32 _configId) external view returns (address pendingOwner_)
 ```
 
 Returns the pending owner of a configuration, if any.
 
 #### Parameters
 
-| Name     | Type    | Description             |
-| -------- | ------- | ----------------------- |
-| configId | bytes32 | Configuration to query. |
+| Name       | Type    | Description             |
+| ---------- | ------- | ----------------------- |
+| \_configId | bytes32 | Configuration to query. |
 
 #### Returns
 

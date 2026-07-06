@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ROLE_CONTROLLER, ROLE_AGENT, _buildRoles, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
-import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { DEFAULT_PARTITION } from "../../constants/values.sol";
 import { IBurn, RESOLVER_KEY_BURN } from "./IBurn.sol";
 import { IControllerTypes } from "../controller/IControllerTypes.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
@@ -57,7 +57,7 @@ abstract contract Burn is IBurn, Modifiers {
         onlyActivated
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanRedeemFromByPartition(EvmAccessors.getMsgSender(), _DEFAULT_PARTITION, _value)
+        onlyCanRedeemFromByPartition(EvmAccessors.getMsgSender(), DEFAULT_PARTITION, _value)
     {
         address sender = EvmAccessors.getMsgSender();
         TokenCoreOps.redeem(_value);
@@ -76,7 +76,7 @@ abstract contract Burn is IBurn, Modifiers {
         onlyActivated
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanRedeemFromByPartition(_tokenHolder, _DEFAULT_PARTITION, _value)
+        onlyCanRedeemFromByPartition(_tokenHolder, DEFAULT_PARTITION, _value)
     {
         address sender = EvmAccessors.getMsgSender();
         TokenCoreOps.redeemFrom(_tokenHolder, _value);

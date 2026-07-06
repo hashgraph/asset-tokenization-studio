@@ -32,15 +32,15 @@ _Validates the deadline, owner nonce, EIP-712 digest, and recovered signer befor
 
 #### Parameters
 
-| Name     | Type    | Description                                     |
-| -------- | ------- | ----------------------------------------------- |
-| owner    | address | Token holder granting the allowance.            |
-| spender  | address | Address authorised to spend `owner` tokens.     |
-| value    | uint256 | Allowance amount approved for `spender`.        |
-| deadline | uint256 | Last timestamp at which the signature is valid. |
-| v        | uint8   | Recovery identifier of the ECDSA signature.     |
-| r        | bytes32 | First 32-byte word of the ECDSA signature.      |
-| s        | bytes32 | Second 32-byte word of the ECDSA signature.     |
+| Name     | Type    | Description |
+| -------- | ------- | ----------- |
+| owner    | address | undefined   |
+| spender  | address | undefined   |
+| value    | uint256 | undefined   |
+| deadline | uint256 | undefined   |
+| v        | uint8   | undefined   |
+| r        | bytes32 | undefined   |
+| s        | bytes32 | undefined   |
 
 ## Events
 

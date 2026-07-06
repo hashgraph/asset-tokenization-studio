@@ -45,7 +45,7 @@ library ControlListStorageWrapper {
      * @param _isWhiteList True for whitelist mode; false for blacklist mode.
      */
     function initializeControlList(bool _isWhiteList) internal {
-        controlListStorage().isWhiteList = _isWhiteList;
+        _controlListStorage().isWhiteList = _isWhiteList;
     }
 
     /**
@@ -57,7 +57,7 @@ library ControlListStorageWrapper {
      *         present.
      */
     function addToControlList(address _account) internal returns (bool success_) {
-        success_ = controlListStorage().list.add(_account);
+        success_ = _controlListStorage().list.add(_account);
     }
 
     /**
@@ -69,7 +69,7 @@ library ControlListStorageWrapper {
      *         present.
      */
     function removeFromControlList(address _account) internal returns (bool success_) {
-        success_ = controlListStorage().list.remove(_account);
+        success_ = _controlListStorage().list.remove(_account);
     }
 
     /**
@@ -93,7 +93,7 @@ library ControlListStorageWrapper {
      * @return True if the address is in the control list; false otherwise.
      */
     function isInControlList(address _account) internal view returns (bool) {
-        return controlListStorage().list.contains(_account);
+        return _controlListStorage().list.contains(_account);
     }
 
     /**
@@ -108,7 +108,7 @@ library ControlListStorageWrapper {
      */
     // ✅ Internal function - ERC1594StorageWrapper calls this directly
     function canAccess(address _account) internal view returns (bool) {
-        ControlListStorage storage cls = controlListStorage();
+        ControlListStorage storage cls = _controlListStorage();
         return (cls.isWhiteList == cls.list.contains(_account) &&
             ExternalListManagementStorageWrapper.isExternallyAuthorized(_account));
     }
@@ -119,7 +119,7 @@ library ControlListStorageWrapper {
      * @return True for whitelist; false for blacklist.
      */
     function getControlListType() internal view returns (bool) {
-        return controlListStorage().isWhiteList;
+        return _controlListStorage().isWhiteList;
     }
 
     /**
@@ -128,7 +128,7 @@ library ControlListStorageWrapper {
      * @return controlListCount_ The count of addresses in the control list.
      */
     function getControlListCount() internal view returns (uint256 controlListCount_) {
-        controlListCount_ = controlListStorage().list.length();
+        controlListCount_ = _controlListStorage().list.length();
     }
 
     /**
@@ -142,7 +142,7 @@ library ControlListStorageWrapper {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory members_) {
-        members_ = controlListStorage().list.getFromSet(_pageIndex, _pageLength);
+        members_ = _controlListStorage().list.getFromSet(_pageIndex, _pageLength);
     }
 
     /**
@@ -154,7 +154,7 @@ library ControlListStorageWrapper {
      * @return controlList_ A storage reference to `ControlListStorage` at the
      *         ERC-7201 slot.
      */
-    function controlListStorage() private pure returns (ControlListStorage storage controlList_) {
+    function _controlListStorage() private pure returns (ControlListStorage storage controlList_) {
         bytes32 position = STORAGE_LOCATION_CONTROL_LIST;
         // solhint-disable-next-line no-inline-assembly
         assembly {

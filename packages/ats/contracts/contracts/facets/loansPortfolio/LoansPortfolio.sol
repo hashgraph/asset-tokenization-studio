@@ -6,7 +6,6 @@ import { ROLE_LOANS_PORTFOLIO_MANAGER, DEFAULT_ADMIN_ROLE } from "../../constant
 import { Modifiers } from "../../services/Modifiers.sol";
 import { LoansPortfolioStorageWrapper } from "../../domain/asset/LoansPortfolioStorageWrapper.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title  LoansPortfolio
@@ -36,7 +35,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
 
     /// @inheritdoc ILoansPortfolio
     function addHoldingsAsset(
-        ILoansPortfolio.HoldingsAsset memory _holdingsAsset
+        ILoansPortfolio.HoldingsAsset calldata _holdingsAsset
     )
         external
         override
@@ -46,6 +45,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
         onlyRole(ROLE_LOANS_PORTFOLIO_MANAGER)
         validateAddressNotZero(_holdingsAsset.assetAddress)
         onlySupportedHoldingsAssetType(_holdingsAsset)
+        onlyNotExistingHoldingsAsset(_holdingsAsset.assetAddress)
         returns (bool success_)
     {
         LoansPortfolioStorageWrapper.addHoldingsAsset(_holdingsAsset);
@@ -55,7 +55,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
 
     /// @inheritdoc ILoansPortfolio
     function removeHoldingsAsset(
-        ILoansPortfolio.HoldingsAsset memory _holdingsAsset
+        ILoansPortfolio.HoldingsAsset calldata _holdingsAsset
     )
         external
         override
@@ -65,6 +65,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
         onlyRole(ROLE_LOANS_PORTFOLIO_MANAGER)
         validateAddressNotZero(_holdingsAsset.assetAddress)
         onlySupportedHoldingsAssetType(_holdingsAsset)
+        onlyExistingHoldingsAsset(_holdingsAsset.assetAddress)
         returns (bool success_)
     {
         LoansPortfolioStorageWrapper.removeHoldingsAsset(_holdingsAsset);

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 import { ROLE_TREX_OWNER, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
-import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { DEFAULT_PARTITION } from "../../constants/values.sol";
 import { IComplianceFacet, RESOLVER_KEY_COMPLIANCE } from "./IComplianceFacet.sol";
 import { IERC3643Types } from "../commonTypes/IERC3643Types.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
@@ -60,7 +60,7 @@ abstract contract Compliance is IComplianceFacet, Modifiers {
         (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.canTransferFromByPartition(
             EvmAccessors.getMsgSender(),
             _to,
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             _value,
             _data,
             ""
@@ -82,7 +82,7 @@ abstract contract Compliance is IComplianceFacet, Modifiers {
         (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.canTransferFromByPartition(
             _from,
             _to,
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             _value,
             _data,
             ""

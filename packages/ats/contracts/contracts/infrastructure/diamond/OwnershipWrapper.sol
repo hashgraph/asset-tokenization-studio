@@ -137,13 +137,13 @@ abstract contract OwnershipWrapper {
      * @notice Returns the ownership storage pointer.
      * @dev Binds the storage pointer to {STORAGE_LOCATION_OWNERSHIP} using the diamond
      *      storage pattern. This function does not read or mutate state by itself.
-     * @return os Storage pointer for the ownership layout.
+     * @return os_ Storage pointer for the ownership layout.
      */
-    function _ownershipStorage() private pure returns (OwnershipStorage storage os) {
+    function _ownershipStorage() private pure returns (OwnershipStorage storage os_) {
         bytes32 position = STORAGE_LOCATION_OWNERSHIP;
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            os.slot := position
+            os_.slot := position
         }
     }
 }

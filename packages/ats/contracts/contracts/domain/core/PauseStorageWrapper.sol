@@ -53,7 +53,7 @@ library PauseStorageWrapper {
      * @param _paused New value of the internal paused flag.
      */
     function setPause(bool _paused) internal {
-        pauseStorage().paused = _paused;
+        _pauseStorage().paused = _paused;
     }
 
     /**
@@ -79,7 +79,7 @@ library PauseStorageWrapper {
      * @return True when the internal flag is set or any external pause reports paused.
      */
     function isPaused() internal view returns (bool) {
-        return pauseStorage().paused || isExternallyPaused();
+        return _pauseStorage().paused || isExternallyPaused();
     }
 
     /**
@@ -117,7 +117,7 @@ library PauseStorageWrapper {
      *      still remove it as long as the token has not been paused internally.
      */
     function checkNotInternallyPaused() internal view {
-        if (pauseStorage().paused) revert IPause.IsPaused();
+        if (_pauseStorage().paused) revert IPause.IsPaused();
     }
 
     /**
@@ -134,7 +134,7 @@ library PauseStorageWrapper {
      *      `STORAGE_LOCATION_PAUSE`.
      * @return pause_ Storage reference to the `PauseDataStorage` struct.
      */
-    function pauseStorage() private pure returns (PauseDataStorage storage pause_) {
+    function _pauseStorage() private pure returns (PauseDataStorage storage pause_) {
         bytes32 position = STORAGE_LOCATION_PAUSE;
         // solhint-disable-next-line no-inline-assembly
         assembly {

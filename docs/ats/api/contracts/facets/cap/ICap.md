@@ -29,15 +29,15 @@ _The raw stored cap is multiplied by any pending scheduled balance-adjustment fa
 ### initializeCap
 
 ```solidity
-function initializeCap(uint256 maxSupply, ICap.PartitionCap[] partitionCap) external nonpayable
+function initializeCap(uint256 _maxSupply, ICap.PartitionCap[] _partitionCap) external nonpayable
 ```
 
 #### Parameters
 
-| Name         | Type                | Description |
-| ------------ | ------------------- | ----------- |
-| maxSupply    | uint256             | undefined   |
-| partitionCap | ICap.PartitionCap[] | undefined   |
+| Name           | Type                | Description |
+| -------------- | ------------------- | ----------- |
+| \_maxSupply    | uint256             | undefined   |
+| \_partitionCap | ICap.PartitionCap[] | undefined   |
 
 ### setMaxSupply
 

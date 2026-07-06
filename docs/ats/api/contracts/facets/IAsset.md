@@ -270,7 +270,7 @@ _Requires `ROLE_CONTROL_LIST` and the token to be unpaused. Reverts with `Listed
 ### adjustBalances
 
 ```solidity
-function adjustBalances(uint256 factor, uint8 decimals) external nonpayable returns (bool success_)
+function adjustBalances(uint256 _factor, uint8 _decimals) external nonpayable returns (bool success_)
 ```
 
 Applies a balance adjustment to all token holders immediately.
@@ -279,10 +279,10 @@ _Caller must hold `ROLE_ADJUSTMENT_BALANCE`. The token must not be paused and `f
 
 #### Parameters
 
-| Name     | Type    | Description                                                          |
-| -------- | ------- | -------------------------------------------------------------------- |
-| factor   | uint256 | Numerator of the multiplier; effective ratio = factor / 10^decimals. |
-| decimals | uint8   | Denominator exponent.                                                |
+| Name       | Type    | Description                                                          |
+| ---------- | ------- | -------------------------------------------------------------------- |
+| \_factor   | uint256 | Numerator of the multiplier; effective ratio = factor / 10^decimals. |
+| \_decimals | uint8   | Denominator exponent.                                                |
 
 #### Returns
 
@@ -293,7 +293,7 @@ _Caller must hold `ROLE_ADJUSTMENT_BALANCE`. The token must not be paused and `f
 ### allowance
 
 ```solidity
-function allowance(address owner, address spender) external view returns (uint256)
+function allowance(address _owner, address _spender) external view returns (uint256)
 ```
 
 Returns the remaining amount `spender` may spend on behalf of `owner` via a downstream `transferFrom`-style call.
@@ -302,10 +302,10 @@ _Zero by default. Updated by {approve}, {increaseAllowance}, {decreaseAllowance}
 
 #### Parameters
 
-| Name    | Type    | Description                                          |
-| ------- | ------- | ---------------------------------------------------- |
-| owner   | address | Address that granted the allowance.                  |
-| spender | address | Address authorised to spend on `owner`&#39;s behalf. |
+| Name      | Type    | Description                                          |
+| --------- | ------- | ---------------------------------------------------- |
+| \_owner   | address | Address that granted the allowance.                  |
+| \_spender | address | Address authorised to spend on `owner`&#39;s behalf. |
 
 #### Returns
 
@@ -334,7 +334,7 @@ _The caller must hold the admin role for each role in `_roles` (checked per entr
 ### approve
 
 ```solidity
-function approve(address spender, uint256 value) external nonpayable returns (bool)
+function approve(address _spender, uint256 _value) external nonpayable returns (bool)
 ```
 
 Sets `value` as the allowance of `spender` over the caller&#39;s tokens.
@@ -343,10 +343,10 @@ _Overwrites any previously-granted allowance. Known race: moving a non-zero allo
 
 #### Parameters
 
-| Name    | Type    | Description                                             |
-| ------- | ------- | ------------------------------------------------------- |
-| spender | address | Address authorised to spend on the caller&#39;s behalf. |
-| value   | uint256 | Absolute allowance amount to grant.                     |
+| Name      | Type    | Description                                             |
+| --------- | ------- | ------------------------------------------------------- |
+| \_spender | address | Address authorised to spend on the caller&#39;s behalf. |
+| \_value   | uint256 | Absolute allowance amount to grant.                     |
 
 #### Returns
 
@@ -721,7 +721,7 @@ Calculates the role required to transfer tokens from a given partition
 ### canRedeemByPartition
 
 ```solidity
-function canRedeemByPartition(address _from, bytes32 _partition, uint256 _value, bytes _data, bytes _operatorData) external view returns (bool status, bytes1 code, bytes32 reason)
+function canRedeemByPartition(address _from, bytes32 _partition, uint256 _value, bytes _data, bytes _operatorData) external view returns (bool status_, bytes1 code_, bytes32 reason_)
 ```
 
 Checks whether a redemption can be executed on a specific partition.
@@ -740,11 +740,11 @@ _Assumes that if the caller has an admin role the redemption will be performed u
 
 #### Returns
 
-| Name   | Type    | Description                                     |
-| ------ | ------- | ----------------------------------------------- |
-| status | bool    | True when the redemption is allowed.            |
-| code   | bytes1  | EIP-1066 status code describing the result.     |
-| reason | bytes32 | Additional reason data tied to the status code. |
+| Name     | Type    | Description                                     |
+| -------- | ------- | ----------------------------------------------- |
+| status\_ | bool    | True when the redemption is allowed.            |
+| code\_   | bytes1  | EIP-1066 status code describing the result.     |
+| reason\_ | bytes32 | Additional reason data tied to the status code. |
 
 ### canTransfer
 
@@ -773,7 +773,7 @@ Checks if a transfer can be executed
 ### canTransferByPartition
 
 ```solidity
-function canTransferByPartition(address _from, address _to, bytes32 _partition, uint256 _value, bytes _data, bytes _operatorData) external view returns (bool status, bytes1 code, bytes32 reason)
+function canTransferByPartition(address _from, address _to, bytes32 _partition, uint256 _value, bytes _data, bytes _operatorData) external view returns (bool status_, bytes1 code_, bytes32 reason_)
 ```
 
 Checks whether a transfer can be executed on a specific partition.
@@ -793,11 +793,11 @@ _Assumes that if the caller has an admin role the transfer will be performed usi
 
 #### Returns
 
-| Name   | Type    | Description                                     |
-| ------ | ------- | ----------------------------------------------- |
-| status | bool    | True when the transfer is allowed.              |
-| code   | bytes1  | EIP-1066 status code describing the result.     |
-| reason | bytes32 | Additional reason data tied to the status code. |
+| Name     | Type    | Description                                     |
+| -------- | ------- | ----------------------------------------------- |
+| status\_ | bool    | True when the transfer is allowed.              |
+| code\_   | bytes1  | EIP-1066 status code describing the result.     |
+| reason\_ | bytes32 | Additional reason data tied to the status code. |
 
 ### canTransferFrom
 
@@ -883,7 +883,7 @@ _Restricted to `ROLE_CORPORATE_ACTION` and gated by the unpaused state. Reverts 
 ### cancelDividend
 
 ```solidity
-function cancelDividend(uint256 dividendId) external nonpayable returns (bool success_)
+function cancelDividend(uint256 _dividendId) external nonpayable returns (bool success_)
 ```
 
 Cancels a previously scheduled dividend before its execution date is reached.
@@ -892,9 +892,9 @@ _Restricted to `ROLE_CORPORATE_ACTION` and gated by the unpaused state. Reverts 
 
 #### Parameters
 
-| Name       | Type    | Description                                       |
-| ---------- | ------- | ------------------------------------------------- |
-| dividendId | uint256 | One-indexed identifier of the dividend to cancel. |
+| Name         | Type    | Description                                       |
+| ------------ | ------- | ------------------------------------------------- |
+| \_dividendId | uint256 | One-indexed identifier of the dividend to cancel. |
 
 #### Returns
 
@@ -1463,7 +1463,7 @@ Returns the token decimals at the time of a given snapshot.
 ### decreaseAllowance
 
 ```solidity
-function decreaseAllowance(address spender, uint256 subtractedValue) external nonpayable returns (bool)
+function decreaseAllowance(address _spender, uint256 _subtractedValue) external nonpayable returns (bool)
 ```
 
 Atomically decreases the allowance granted to `spender` by the caller.
@@ -1472,10 +1472,10 @@ _Preferred alternative to {approve} as it avoids the read-modify-write allowance
 
 #### Parameters
 
-| Name            | Type    | Description                                    |
-| --------------- | ------- | ---------------------------------------------- |
-| spender         | address | Address whose allowance is being decreased.    |
-| subtractedValue | uint256 | Amount subtracted from the existing allowance. |
+| Name              | Type    | Description                                    |
+| ----------------- | ------- | ---------------------------------------------- |
+| \_spender         | address | Address whose allowance is being decreased.    |
+| \_subtractedValue | uint256 | Amount subtracted from the existing allowance. |
 
 #### Returns
 
@@ -1486,7 +1486,7 @@ _Preferred alternative to {approve} as it avoids the read-modify-write allowance
 ### delegate
 
 ```solidity
-function delegate(address delegatee) external nonpayable
+function delegate(address _delegatee) external nonpayable
 ```
 
 Delegates the caller&#39;s voting power to `delegatee`.
@@ -1495,14 +1495,14 @@ _Delegates votes from the sender to `delegatee`._
 
 #### Parameters
 
-| Name      | Type    | Description                                              |
-| --------- | ------- | -------------------------------------------------------- |
-| delegatee | address | Address that will receive the caller&#39;s voting power. |
+| Name        | Type    | Description                                              |
+| ----------- | ------- | -------------------------------------------------------- |
+| \_delegatee | address | Address that will receive the caller&#39;s voting power. |
 
 ### delegates
 
 ```solidity
-function delegates(address account) external view returns (address)
+function delegates(address _account) external view returns (address)
 ```
 
 Returns the delegate address that `account` has chosen.
@@ -1511,9 +1511,9 @@ _Returns the delegate that `account` has chosen._
 
 #### Parameters
 
-| Name    | Type    | Description                               |
-| ------- | ------- | ----------------------------------------- |
-| account | address | Address whose chosen delegate is queried. |
+| Name      | Type    | Description                               |
+| --------- | ------- | ----------------------------------------- |
+| \_account | address | Address whose chosen delegate is queried. |
 
 #### Returns
 
@@ -1593,7 +1593,7 @@ _Restricted to `ROLE_CORPORATE_ACTION_FORCE_CANCEL` and gated by the unpaused st
 ### forceCancelDividend
 
 ```solidity
-function forceCancelDividend(uint256 dividendId) external nonpayable returns (bool success_)
+function forceCancelDividend(uint256 _dividendId) external nonpayable returns (bool success_)
 ```
 
 Force-cancels a dividend regardless of its execution date.
@@ -1602,9 +1602,9 @@ _Restricted to `ROLE_CORPORATE_ACTION_FORCE_CANCEL` and gated by the unpaused st
 
 #### Parameters
 
-| Name       | Type    | Description                                             |
-| ---------- | ------- | ------------------------------------------------------- |
-| dividendId | uint256 | One-indexed identifier of the dividend to force-cancel. |
+| Name         | Type    | Description                                             |
+| ------------ | ------- | ------------------------------------------------------- |
+| \_dividendId | uint256 | One-indexed identifier of the dividend to force-cancel. |
 
 #### Returns
 
@@ -2609,7 +2609,7 @@ Returns the defaulted-loans ratio as a numerator/denominator pair.
 ### getDividend
 
 ```solidity
-function getDividend(uint256 dividendId) external view returns (struct IDividendTypes.RegisteredDividend registeredDividend_, bool isDisabled_)
+function getDividend(uint256 _dividendId) external view returns (struct IDividendTypes.RegisteredDividend registeredDividend_, bool isDisabled_)
 ```
 
 Returns the persisted dividend record together with its cancelled flag.
@@ -2618,9 +2618,9 @@ _Reverts via `onlyMatchingActionType` if `dividendId` does not resolve to a divi
 
 #### Parameters
 
-| Name       | Type    | Description                      |
-| ---------- | ------- | -------------------------------- |
-| dividendId | uint256 | One-indexed dividend identifier. |
+| Name         | Type    | Description                      |
+| ------------ | ------- | -------------------------------- |
+| \_dividendId | uint256 | One-indexed dividend identifier. |
 
 #### Returns
 
@@ -2632,7 +2632,7 @@ _Reverts via `onlyMatchingActionType` if `dividendId` does not resolve to a divi
 ### getDividendAmountFor
 
 ```solidity
-function getDividendAmountFor(uint256 dividendId, address account) external view returns (struct IDividendTypes.DividendAmountFor dividendAmountFor_)
+function getDividendAmountFor(uint256 _dividendId, address _account) external view returns (struct IDividendTypes.DividendAmountFor dividendAmountFor_)
 ```
 
 Returns the fractional dividend amount payable to a specific holder.
@@ -2641,10 +2641,10 @@ _Reverts via `onlyMatchingActionType` if `dividendId` does not resolve to a divi
 
 #### Parameters
 
-| Name       | Type    | Description                      |
-| ---------- | ------- | -------------------------------- |
-| dividendId | uint256 | One-indexed dividend identifier. |
-| account    | address | Holder address to query.         |
+| Name         | Type    | Description                      |
+| ------------ | ------- | -------------------------------- |
+| \_dividendId | uint256 | One-indexed dividend identifier. |
+| \_account    | address | Holder address to query.         |
 
 #### Returns
 
@@ -2655,7 +2655,7 @@ _Reverts via `onlyMatchingActionType` if `dividendId` does not resolve to a divi
 ### getDividendFor
 
 ```solidity
-function getDividendFor(uint256 dividendId, address account) external view returns (struct IDividendTypes.DividendFor dividendFor_)
+function getDividendFor(uint256 _dividendId, address _account) external view returns (struct IDividendTypes.DividendFor dividendFor_)
 ```
 
 Returns the per-account view of a dividend, including the holder&#39;s balance at the record date and the metadata required to compute the payable amount.
@@ -2664,10 +2664,10 @@ _Reverts via `onlyMatchingActionType` if `dividendId` does not resolve to a divi
 
 #### Parameters
 
-| Name       | Type    | Description                      |
-| ---------- | ------- | -------------------------------- |
-| dividendId | uint256 | One-indexed dividend identifier. |
-| account    | address | Holder address to query.         |
+| Name         | Type    | Description                      |
+| ------------ | ------- | -------------------------------- |
+| \_dividendId | uint256 | One-indexed dividend identifier. |
+| \_account    | address | Holder address to query.         |
 
 #### Returns
 
@@ -2678,7 +2678,7 @@ _Reverts via `onlyMatchingActionType` if `dividendId` does not resolve to a divi
 ### getDividendHolders
 
 ```solidity
-function getDividendHolders(uint256 dividendId, uint256 pageIndex, uint256 pageLength) external view returns (address[] holders_)
+function getDividendHolders(uint256 _dividendId, uint256 _pageIndex, uint256 _pageLength) external view returns (address[] holders_)
 ```
 
 Returns the page of holder addresses eligible for a given dividend.
@@ -2687,11 +2687,11 @@ _Reverts via the `onlyMatchingActionType` modifier when `dividendId` does not re
 
 #### Parameters
 
-| Name       | Type    | Description                                                                |
-| ---------- | ------- | -------------------------------------------------------------------------- |
-| dividendId | uint256 | One-indexed dividend identifier within the dividend corporate action type. |
-| pageIndex  | uint256 | Zero-based index of the page to retrieve.                                  |
-| pageLength | uint256 | Maximum number of holders returned in the page.                            |
+| Name         | Type    | Description                                                                |
+| ------------ | ------- | -------------------------------------------------------------------------- |
+| \_dividendId | uint256 | One-indexed dividend identifier within the dividend corporate action type. |
+| \_pageIndex  | uint256 | Zero-based index of the page to retrieve.                                  |
+| \_pageLength | uint256 | Maximum number of holders returned in the page.                            |
 
 #### Returns
 
@@ -3487,16 +3487,16 @@ Returns all KYC metadata recorded for an account.
 ### getKycStatus
 
 ```solidity
-function getKycStatus(address account) external view returns (enum IKyc.KycStatus)
+function getKycStatus(address _account) external view returns (enum IKyc.KycStatus)
 ```
 
 Returns the KYC status of `account` as recorded in the external KYC list.
 
 #### Parameters
 
-| Name    | Type    | Description       |
-| ------- | ------- | ----------------- |
-| account | address | Address to check. |
+| Name      | Type    | Description       |
+| --------- | ------- | ----------------- |
+| \_account | address | Address to check. |
 
 #### Returns
 
@@ -4027,7 +4027,7 @@ _Encoding: `0` = not started, `1` = fully operational, `&gt;1` = resume facet in
 ### getPastTotalSupply
 
 ```solidity
-function getPastTotalSupply(uint256 timepoint) external view returns (uint256)
+function getPastTotalSupply(uint256 _timepoint) external view returns (uint256)
 ```
 
 Returns the total vote supply available at a past `timepoint`.
@@ -4036,9 +4036,9 @@ _Returns the total supply of votes available at a specific moment in the past. I
 
 #### Parameters
 
-| Name      | Type    | Description                                                      |
-| --------- | ------- | ---------------------------------------------------------------- |
-| timepoint | uint256 | Block number or timestamp at which the total supply is resolved. |
+| Name        | Type    | Description                                                      |
+| ----------- | ------- | ---------------------------------------------------------------- |
+| \_timepoint | uint256 | Block number or timestamp at which the total supply is resolved. |
 
 #### Returns
 
@@ -4049,7 +4049,7 @@ _Returns the total supply of votes available at a specific moment in the past. I
 ### getPastVotes
 
 ```solidity
-function getPastVotes(address account, uint256 timepoint) external view returns (uint256)
+function getPastVotes(address _account, uint256 _timepoint) external view returns (uint256)
 ```
 
 Returns the vote weight of `account` at a past `timepoint`.
@@ -4058,10 +4058,10 @@ _Returns the amount of votes that `account` had at a specific moment in the past
 
 #### Parameters
 
-| Name      | Type    | Description                                                |
-| --------- | ------- | ---------------------------------------------------------- |
-| account   | address | Address whose historical vote weight is queried.           |
-| timepoint | uint256 | Block number or timestamp at which the weight is resolved. |
+| Name        | Type    | Description                                                |
+| ----------- | ------- | ---------------------------------------------------------- |
+| \_account   | address | Address whose historical vote weight is queried.           |
+| \_timepoint | uint256 | Block number or timestamp at which the weight is resolved. |
 
 #### Returns
 
@@ -4434,7 +4434,7 @@ _Pair semantics avoid loss-of-precision compared to a single fixed-point value._
 ### getSecurityHolders
 
 ```solidity
-function getSecurityHolders(uint256 _pageIndex, uint256 _pageLength) external view returns (address[] holders)
+function getSecurityHolders(uint256 _pageIndex, uint256 _pageLength) external view returns (address[] holders_)
 ```
 
 Gets the security holders (paginated)
@@ -4448,9 +4448,9 @@ Gets the security holders (paginated)
 
 #### Returns
 
-| Name    | Type      | Description                        |
-| ------- | --------- | ---------------------------------- |
-| holders | address[] | Array of security holder addresses |
+| Name      | Type      | Description                        |
+| --------- | --------- | ---------------------------------- |
+| holders\_ | address[] | Array of security holder addresses |
 
 ### getStaticFunctionSelectors
 
@@ -4640,7 +4640,7 @@ _Count is taken from the snapshot at the coupon record date when one exists; fal
 ### getTotalDividendHolders
 
 ```solidity
-function getTotalDividendHolders(uint256 dividendId) external view returns (uint256)
+function getTotalDividendHolders(uint256 _dividendId) external view returns (uint256)
 ```
 
 Returns the total number of holders eligible for a given dividend.
@@ -4649,9 +4649,9 @@ _Reverts via the `onlyMatchingActionType` modifier when `dividendId` does not re
 
 #### Parameters
 
-| Name       | Type    | Description                                                                |
-| ---------- | ------- | -------------------------------------------------------------------------- |
-| dividendId | uint256 | One-indexed dividend identifier within the dividend corporate action type. |
+| Name         | Type    | Description                                                                |
+| ------------ | ------- | -------------------------------------------------------------------------- |
+| \_dividendId | uint256 | One-indexed dividend identifier within the dividend corporate action type. |
 
 #### Returns
 
@@ -4682,16 +4682,16 @@ Retrieves the total amount of tokens locked in holds for a given amortization.
 ### getTotalSecurityHolders
 
 ```solidity
-function getTotalSecurityHolders() external view returns (uint256 count)
+function getTotalSecurityHolders() external view returns (uint256 count_)
 ```
 
 Gets the total number of security holders
 
 #### Returns
 
-| Name  | Type    | Description                      |
-| ----- | ------- | -------------------------------- |
-| count | uint256 | Total number of security holders |
+| Name    | Type    | Description                      |
+| ------- | ------- | -------------------------------- |
+| count\_ | uint256 | Total number of security holders |
 
 ### getTotalTokenHoldersAtSnapshot
 
@@ -4740,7 +4740,7 @@ _Count is taken from the snapshot at the voting record date when one exists; fal
 ### getVotes
 
 ```solidity
-function getVotes(address account) external view returns (uint256)
+function getVotes(address _account) external view returns (uint256)
 ```
 
 Returns the current vote weight of `account`.
@@ -4749,9 +4749,9 @@ _Returns the current amount of votes that `account` has._
 
 #### Parameters
 
-| Name    | Type    | Description                                   |
-| ------- | ------- | --------------------------------------------- |
-| account | address | Address whose current vote weight is queried. |
+| Name      | Type    | Description                                   |
+| --------- | ------- | --------------------------------------------- |
+| \_account | address | Address whose current vote weight is queried. |
 
 #### Returns
 
@@ -4971,7 +4971,7 @@ Returns the address of the identity registry contract.
 ### increaseAllowance
 
 ```solidity
-function increaseAllowance(address spender, uint256 addedValue) external nonpayable returns (bool)
+function increaseAllowance(address _spender, uint256 _addedValue) external nonpayable returns (bool)
 ```
 
 Atomically increases the allowance granted to `spender` by the caller.
@@ -4980,10 +4980,10 @@ _Preferred alternative to {approve} as it avoids the read-modify-write allowance
 
 #### Parameters
 
-| Name       | Type    | Description                                 |
-| ---------- | ------- | ------------------------------------------- |
-| spender    | address | Address whose allowance is being increased. |
-| addedValue | uint256 | Amount added to the existing allowance.     |
+| Name         | Type    | Description                                 |
+| ------------ | ------- | ------------------------------------------- |
+| \_spender    | address | Address whose allowance is being increased. |
+| \_addedValue | uint256 | Amount added to the existing allowance.     |
 
 #### Returns
 
@@ -5154,15 +5154,15 @@ _Callable once; subsequent calls revert with `FacetAlreadyRegistered`. Requires 
 ### initializeCap
 
 ```solidity
-function initializeCap(uint256 maxSupply, ICap.PartitionCap[] partitionCap) external nonpayable
+function initializeCap(uint256 _maxSupply, ICap.PartitionCap[] _partitionCap) external nonpayable
 ```
 
 #### Parameters
 
-| Name         | Type                | Description |
-| ------------ | ------------------- | ----------- |
-| maxSupply    | uint256             | undefined   |
-| partitionCap | ICap.PartitionCap[] | undefined   |
+| Name           | Type                | Description |
+| -------------- | ------------------- | ----------- |
+| \_maxSupply    | uint256             | undefined   |
+| \_partitionCap | ICap.PartitionCap[] | undefined   |
 
 ### initializeCapByPartition
 
@@ -5311,14 +5311,14 @@ _Callable once; subsequent calls revert with `FacetAlreadyRegistered`. Requires 
 ### initializeCore
 
 ```solidity
-function initializeCore(ICore.ERC20Metadata metadata) external nonpayable
+function initializeCore(ICore.ERC20Metadata _metadata) external nonpayable
 ```
 
 #### Parameters
 
-| Name     | Type                | Description |
-| -------- | ------------------- | ----------- |
-| metadata | ICore.ERC20Metadata | undefined   |
+| Name       | Type                | Description |
+| ---------- | ------------------- | ----------- |
+| \_metadata | ICore.ERC20Metadata | undefined   |
 
 ### initializeCoreAdjusted
 
@@ -5649,7 +5649,7 @@ _Restricted to `DEFAULT_ADMIN_ROLE` and guarded against re-registration via `onl
 ### initializeInterestRateType
 
 ```solidity
-function initializeInterestRateType(enum IInterestRate.RateType rateType) external nonpayable
+function initializeInterestRateType(enum IInterestRate.RateType _rateType) external nonpayable
 ```
 
 Initializes the coupon rate type during asset deployment.
@@ -5658,9 +5658,9 @@ _Intended to be called by the factory immediately after proxy creation. No role 
 
 #### Parameters
 
-| Name     | Type                        | Description                                                 |
-| -------- | --------------------------- | ----------------------------------------------------------- |
-| rateType | enum IInterestRate.RateType | The `RateType` to persist (STANDARD, FIXED, or KPI_LINKED). |
+| Name       | Type                        | Description                                                 |
+| ---------- | --------------------------- | ----------------------------------------------------------- |
+| \_rateType | enum IInterestRate.RateType | The `RateType` to persist (STANDARD, FIXED, or KPI_LINKED). |
 
 ### initializeInternalKyc
 
@@ -6199,16 +6199,16 @@ _Checks if an account has the agent role._
 ### isAuthorized
 
 ```solidity
-function isAuthorized(address account) external view returns (bool)
+function isAuthorized(address _account) external view returns (bool)
 ```
 
 Returns whether `account` is authorised according to the external control list.
 
 #### Parameters
 
-| Name    | Type    | Description       |
-| ------- | ------- | ----------------- |
-| account | address | Address to check. |
+| Name      | Type    | Description       |
+| --------- | ------- | ----------------- |
+| \_account | address | Address to check. |
 
 #### Returns
 
@@ -6759,16 +6759,16 @@ _Resolved against the `nominalValueDecimalsSnapshots` series; falls back to the 
 ### nonces
 
 ```solidity
-function nonces(address owner) external view returns (uint256)
+function nonces(address _owner) external view returns (uint256)
 ```
 
 Returns the current nonce for `owner`.
 
 #### Parameters
 
-| Name  | Type    | Description                     |
-| ----- | ------- | ------------------------------- |
-| owner | address | Address whose nonce is queried. |
+| Name    | Type    | Description                     |
+| ------- | ------- | ------------------------------- |
+| \_owner | address | Address whose nonce is queried. |
 
 #### Returns
 
@@ -7031,7 +7031,7 @@ _Returns `true` if the token&#39;s own pause flag is set, or if any registered e
 ### permit
 
 ```solidity
-function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external nonpayable
+function permit(address _owner, address _spender, uint256 _value, uint256 _deadline, uint8 _v, bytes32 _r, bytes32 _s) external nonpayable
 ```
 
 Approves a spender using an owner&#39;s off-chain ERC-2612 signature.
@@ -7040,15 +7040,15 @@ _Validates the deadline, owner nonce, EIP-712 digest, and recovered signer befor
 
 #### Parameters
 
-| Name     | Type    | Description                                     |
-| -------- | ------- | ----------------------------------------------- |
-| owner    | address | Token holder granting the allowance.            |
-| spender  | address | Address authorised to spend `owner` tokens.     |
-| value    | uint256 | Allowance amount approved for `spender`.        |
-| deadline | uint256 | Last timestamp at which the signature is valid. |
-| v        | uint8   | Recovery identifier of the ECDSA signature.     |
-| r        | bytes32 | First 32-byte word of the ECDSA signature.      |
-| s        | bytes32 | Second 32-byte word of the ECDSA signature.     |
+| Name       | Type    | Description                                     |
+| ---------- | ------- | ----------------------------------------------- |
+| \_owner    | address | Token holder granting the allowance.            |
+| \_spender  | address | Address authorised to spend `owner` tokens.     |
+| \_value    | uint256 | Allowance amount approved for `spender`.        |
+| \_deadline | uint256 | Last timestamp at which the signature is valid. |
+| \_v        | uint8   | Recovery identifier of the ECDSA signature.     |
+| \_r        | bytes32 | First 32-byte word of the ECDSA signature.      |
+| \_s        | bytes32 | Second 32-byte word of the ECDSA signature.     |
 
 ### protectPartitions
 
@@ -7856,7 +7856,7 @@ function setCoupon(ICouponTypes.Coupon _newCoupon) external nonpayable returns (
 ### setCouponRateType
 
 ```solidity
-function setCouponRateType(enum IInterestRate.RateType rateType) external nonpayable
+function setCouponRateType(enum IInterestRate.RateType _rateType) external nonpayable
 ```
 
 Sets the coupon rate type discriminator for this asset.
@@ -7865,9 +7865,9 @@ _Requires `ROLE_INTEREST_RATE_MANAGER`. Reverts with `InvalidRateType` if `rateT
 
 #### Parameters
 
-| Name     | Type                        | Description                                                 |
-| -------- | --------------------------- | ----------------------------------------------------------- |
-| rateType | enum IInterestRate.RateType | The `RateType` to persist (STANDARD, FIXED, or KPI_LINKED). |
+| Name       | Type                        | Description                                                 |
+| ---------- | --------------------------- | ----------------------------------------------------------- |
+| \_rateType | enum IInterestRate.RateType | The `RateType` to persist (STANDARD, FIXED, or KPI_LINKED). |
 
 ### setCustomData
 
@@ -7889,14 +7889,14 @@ _Requires `ROLE_CUSTOM_DATA_MANAGER` and the token to be unpaused. Overwrites th
 ### setDividend
 
 ```solidity
-function setDividend(IDividendTypes.Dividend newDividend) external nonpayable returns (uint256 dividendId_)
+function setDividend(IDividendTypes.Dividend _newDividend) external nonpayable returns (uint256 dividendId_)
 ```
 
 #### Parameters
 
-| Name        | Type                    | Description |
-| ----------- | ----------------------- | ----------- |
-| newDividend | IDividendTypes.Dividend | undefined   |
+| Name          | Type                    | Description |
+| ------------- | ----------------------- | ----------- |
+| \_newDividend | IDividendTypes.Dividend | undefined   |
 
 #### Returns
 
@@ -7965,14 +7965,14 @@ function setKpiLinkedRateInterestRate(IKpiLinkedRate.InterestRate _newInterestRa
 ### setLoanDetails
 
 ```solidity
-function setLoanDetails(ILoan.LoanDetailsData loanDetailsData_) external nonpayable
+function setLoanDetails(ILoan.LoanDetailsData _loanDetailsData) external nonpayable
 ```
 
 #### Parameters
 
 | Name              | Type                  | Description |
 | ----------------- | --------------------- | ----------- |
-| loanDetailsData\_ | ILoan.LoanDetailsData | undefined   |
+| \_loanDetailsData | ILoan.LoanDetailsData | undefined   |
 
 ### setMaxSupply
 
@@ -8296,17 +8296,17 @@ Returns the total token supply within a specific partition, simulating non-trigg
 ### transfer
 
 ```solidity
-function transfer(address to, uint256 amount) external nonpayable returns (bool)
+function transfer(address _to, uint256 _amount) external nonpayable returns (bool)
 ```
 
 Moves `amount` tokens from the caller to `to`.
 
 #### Parameters
 
-| Name   | Type    | Description                   |
-| ------ | ------- | ----------------------------- |
-| to     | address | Recipient address.            |
-| amount | uint256 | Number of tokens to transfer. |
+| Name     | Type    | Description                   |
+| -------- | ------- | ----------------------------- |
+| \_to     | address | Recipient address.            |
+| \_amount | uint256 | Number of tokens to transfer. |
 
 #### Returns
 
@@ -8386,18 +8386,18 @@ function transferByPartition(bytes32 _partition, IERC1410Types.BasicTransferInfo
 ### transferFrom
 
 ```solidity
-function transferFrom(address from, address to, uint256 amount) external nonpayable returns (bool)
+function transferFrom(address _from, address _to, uint256 _amount) external nonpayable returns (bool)
 ```
 
 Moves `amount` tokens from `from` to `to` using the caller&#39;s allowance.
 
 #### Parameters
 
-| Name   | Type    | Description                   |
-| ------ | ------- | ----------------------------- |
-| from   | address | Source address.               |
-| to     | address | Destination address.          |
-| amount | uint256 | Number of tokens to transfer. |
+| Name     | Type    | Description                   |
+| -------- | ------- | ----------------------------- |
+| \_from   | address | Source address.               |
+| \_to     | address | Destination address.          |
+| \_amount | uint256 | Number of tokens to transfer. |
 
 #### Returns
 

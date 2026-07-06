@@ -249,7 +249,7 @@ interface IFactory {
         IBusinessLogicResolver _resolver,
         bytes32 _configKey,
         uint256 _version,
-        IResolverProxy.Rbac[] memory _rbacs,
+        IResolverProxy.Rbac[] calldata _rbacs,
         bytes calldata _data
     ) external returns (address proxyAddress_);
 

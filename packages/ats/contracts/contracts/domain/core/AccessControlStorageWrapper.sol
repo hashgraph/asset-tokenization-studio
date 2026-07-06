@@ -64,7 +64,7 @@ library AccessControlStorageWrapper {
      * @return success_ True when both directions of the index were updated.
      */
     function grantRole(bytes32 _role, address _account) internal returns (bool success_) {
-        RoleDataStorage storage roleDataStorage = rolesStorage();
+        RoleDataStorage storage roleDataStorage = _rolesStorage();
         success_ =
             roleDataStorage.roles[_role].roleMembers.add(_account) &&
             roleDataStorage.memberRoles[_account].add(_role);
@@ -80,7 +80,7 @@ library AccessControlStorageWrapper {
      * @return success_ True when both directions of the index were updated.
      */
     function revokeRole(bytes32 _role, address _account) internal returns (bool success_) {
-        RoleDataStorage storage roleDataStorage = rolesStorage();
+        RoleDataStorage storage roleDataStorage = _rolesStorage();
         success_ =
             roleDataStorage.roles[_role].roleMembers.remove(_account) &&
             roleDataStorage.memberRoles[_account].remove(_role);
@@ -106,7 +106,7 @@ library AccessControlStorageWrapper {
         bool[] calldata _actives,
         address _account
     ) internal returns (bytes32[] memory appliedRoles_, bool[] memory appliedStates_) {
-        RoleDataStorage storage roleDataStorage = rolesStorage();
+        RoleDataStorage storage roleDataStorage = _rolesStorage();
         address sender = EvmAccessors.getMsgSender();
         uint256 length = _roles.length;
 
@@ -192,7 +192,7 @@ library AccessControlStorageWrapper {
      * @return bytes32 Admin role identifier; defaults to `DEFAULT_ADMIN_ROLE` when unset.
      */
     function getRoleAdmin(bytes32 _role) internal view returns (bytes32) {
-        return rolesStorage().roles[_role].roleAdmin;
+        return _rolesStorage().roles[_role].roleAdmin;
     }
 
     /**
@@ -202,7 +202,7 @@ library AccessControlStorageWrapper {
      * @return bool True when `_account` holds `_role`.
      */
     function hasRole(bytes32 _role, address _account) internal view returns (bool) {
-        return _has(rolesStorage(), _role, _account);
+        return _has(_rolesStorage(), _role, _account);
     }
 
     /**
@@ -214,7 +214,7 @@ library AccessControlStorageWrapper {
      * @return bool True when `_account` holds at least one role from `_roles`.
      */
     function hasAnyRole(bytes32[] memory _roles, address _account) internal view returns (bool) {
-        RoleDataStorage storage roleDataStorage = rolesStorage();
+        RoleDataStorage storage roleDataStorage = _rolesStorage();
         for (uint256 i; i < _roles.length; ) {
             if (_has(roleDataStorage, _roles[i], _account)) {
                 return true;
@@ -232,7 +232,7 @@ library AccessControlStorageWrapper {
      * @return roleCount_ Cardinality of the reverse `memberRoles[_account]` set.
      */
     function getRoleCountFor(address _account) internal view returns (uint256 roleCount_) {
-        roleCount_ = rolesStorage().memberRoles[_account].length();
+        roleCount_ = _rolesStorage().memberRoles[_account].length();
     }
 
     /**
@@ -247,7 +247,7 @@ library AccessControlStorageWrapper {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (bytes32[] memory roles_) {
-        roles_ = rolesStorage().memberRoles[_account].getFromSet(_pageIndex, _pageLength);
+        roles_ = _rolesStorage().memberRoles[_account].getFromSet(_pageIndex, _pageLength);
     }
 
     /**
@@ -256,7 +256,7 @@ library AccessControlStorageWrapper {
      * @return memberCount_ Cardinality of the `roles[_role].roleMembers` set.
      */
     function getRoleMemberCount(bytes32 _role) internal view returns (uint256 memberCount_) {
-        memberCount_ = rolesStorage().roles[_role].roleMembers.length();
+        memberCount_ = _rolesStorage().roles[_role].roleMembers.length();
     }
 
     /**
@@ -271,7 +271,7 @@ library AccessControlStorageWrapper {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory members_) {
-        members_ = rolesStorage().roles[_role].roleMembers.getFromSet(_pageIndex, _pageLength);
+        members_ = _rolesStorage().roles[_role].roleMembers.getFromSet(_pageIndex, _pageLength);
     }
 
     /**
@@ -304,7 +304,7 @@ library AccessControlStorageWrapper {
      * @return True if the caller would be the sole admin after renouncing.
      */
     function _isSoleAdmin(bytes32 _role) private view returns (bool) {
-        return _role == DEFAULT_ADMIN_ROLE && rolesStorage().roles[_role].roleMembers.length() == 1;
+        return _role == DEFAULT_ADMIN_ROLE && _rolesStorage().roles[_role].roleMembers.length() == 1;
     }
 
     /**
@@ -329,7 +329,7 @@ library AccessControlStorageWrapper {
      * @dev Binds the struct pointer to `STORAGE_LOCATION_ACCESS_CONTROL` via inline assembly.
      * @return roles_ Storage reference to the `RoleDataStorage` struct.
      */
-    function rolesStorage() private pure returns (RoleDataStorage storage roles_) {
+    function _rolesStorage() private pure returns (RoleDataStorage storage roles_) {
         bytes32 position = STORAGE_LOCATION_ACCESS_CONTROL;
         // solhint-disable-next-line no-inline-assembly
         assembly {

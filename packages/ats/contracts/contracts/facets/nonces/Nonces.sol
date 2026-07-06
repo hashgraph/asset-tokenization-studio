@@ -30,7 +30,7 @@ abstract contract Nonces is INonces, Modifiers {
     }
 
     /// @inheritdoc INonces
-    function nonces(address owner) external view returns (uint256) {
-        return NonceStorageWrapper.getNonceFor(owner);
+    function nonces(address _owner) external view returns (uint256) {
+        return NonceStorageWrapper.getNonceFor(_owner);
     }
 }

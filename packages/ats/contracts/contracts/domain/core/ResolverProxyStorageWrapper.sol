@@ -44,7 +44,7 @@ library ResolverProxyStorageWrapper {
         bytes32 _resolverProxyConfigurationId,
         uint256 _version
     ) internal {
-        ResolverProxyStorage storage ds = resolverProxyStorage();
+        ResolverProxyStorage storage ds = _resolverProxyStorage();
         ds.resolver = _resolver;
         ds.resolverProxyConfigurationId = _resolverProxyConfigurationId;
         ds.version = _version;
@@ -55,7 +55,7 @@ library ResolverProxyStorageWrapper {
      * @param _resolver The new resolver instance.
      */
     function setBusinessLogicResolver(IBusinessLogicResolver _resolver) internal {
-        resolverProxyStorage().resolver = _resolver;
+        _resolverProxyStorage().resolver = _resolver;
     }
 
     /**
@@ -63,7 +63,7 @@ library ResolverProxyStorageWrapper {
      * @param _resolverProxyConfigurationId The new configuration identifier.
      */
     function setResolverProxyConfigurationId(bytes32 _resolverProxyConfigurationId) internal {
-        resolverProxyStorage().resolverProxyConfigurationId = _resolverProxyConfigurationId;
+        _resolverProxyStorage().resolverProxyConfigurationId = _resolverProxyConfigurationId;
     }
 
     /**
@@ -71,7 +71,7 @@ library ResolverProxyStorageWrapper {
      * @param _version The new configuration version.
      */
     function setResolverProxyVersion(uint256 _version) internal {
-        resolverProxyStorage().version = _version;
+        _resolverProxyStorage().version = _version;
     }
 
     /**
@@ -79,7 +79,7 @@ library ResolverProxyStorageWrapper {
      * @return The active resolver instance for this proxy.
      */
     function getBusinessLogicResolver() internal view returns (IBusinessLogicResolver) {
-        return resolverProxyStorage().resolver;
+        return _resolverProxyStorage().resolver;
     }
 
     /**
@@ -87,7 +87,7 @@ library ResolverProxyStorageWrapper {
      * @return The configured `bytes32` identifier.
      */
     function getResolverProxyConfigurationId() internal view returns (bytes32) {
-        return resolverProxyStorage().resolverProxyConfigurationId;
+        return _resolverProxyStorage().resolverProxyConfigurationId;
     }
 
     /**
@@ -95,7 +95,7 @@ library ResolverProxyStorageWrapper {
      * @return The configuration version, zero when the proxy tracks the latest.
      */
     function getResolverProxyVersion() internal view returns (uint256) {
-        return resolverProxyStorage().version;
+        return _resolverProxyStorage().version;
     }
 
     /**
@@ -104,7 +104,7 @@ library ResolverProxyStorageWrapper {
      *      `STORAGE_LOCATION_RESOLVER_PROXY`.
      * @return ds Storage reference to the `ResolverProxyStorage` struct.
      */
-    function resolverProxyStorage() private pure returns (ResolverProxyStorage storage ds) {
+    function _resolverProxyStorage() private pure returns (ResolverProxyStorage storage ds) {
         bytes32 position = STORAGE_LOCATION_RESOLVER_PROXY;
         // solhint-disable-next-line no-inline-assembly
         assembly {

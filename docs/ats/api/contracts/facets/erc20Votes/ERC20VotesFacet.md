@@ -71,9 +71,9 @@ _Requires the system to be operational, activated, and not paused._
 
 #### Parameters
 
-| Name        | Type    | Description |
-| ----------- | ------- | ----------- |
-| \_delegatee | address | undefined   |
+| Name        | Type    | Description                                              |
+| ----------- | ------- | -------------------------------------------------------- |
+| \_delegatee | address | Address that will receive the caller&#39;s voting power. |
 
 ### delegates
 
@@ -87,9 +87,9 @@ _Returns the delegate that `account` has chosen._
 
 #### Parameters
 
-| Name      | Type    | Description |
-| --------- | ------- | ----------- |
-| \_account | address | undefined   |
+| Name      | Type    | Description                               |
+| --------- | ------- | ----------------------------------------- |
+| \_account | address | Address whose chosen delegate is queried. |
 
 #### Returns
 
@@ -109,9 +109,9 @@ _Returns the total supply of votes available at a specific moment in the past. I
 
 #### Parameters
 
-| Name        | Type    | Description |
-| ----------- | ------- | ----------- |
-| \_timepoint | uint256 | undefined   |
+| Name        | Type    | Description                                                      |
+| ----------- | ------- | ---------------------------------------------------------------- |
+| \_timepoint | uint256 | Block number or timestamp at which the total supply is resolved. |
 
 #### Returns
 
@@ -131,10 +131,10 @@ _Returns the amount of votes that `account` had at a specific moment in the past
 
 #### Parameters
 
-| Name        | Type    | Description |
-| ----------- | ------- | ----------- |
-| \_account   | address | undefined   |
-| \_timepoint | uint256 | undefined   |
+| Name        | Type    | Description                                                |
+| ----------- | ------- | ---------------------------------------------------------- |
+| \_account   | address | Address whose historical vote weight is queried.           |
+| \_timepoint | uint256 | Block number or timestamp at which the weight is resolved. |
 
 #### Returns
 
@@ -196,9 +196,9 @@ _Returns the current amount of votes that `account` has._
 
 #### Parameters
 
-| Name      | Type    | Description |
-| --------- | ------- | ----------- |
-| \_account | address | undefined   |
+| Name      | Type    | Description                                   |
+| --------- | ------- | --------------------------------------------- |
+| \_account | address | Address whose current vote weight is queried. |
 
 #### Returns
 

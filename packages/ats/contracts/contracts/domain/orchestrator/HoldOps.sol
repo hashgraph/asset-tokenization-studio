@@ -30,8 +30,8 @@ library HoldOps {
     function createHoldByPartition(
         bytes32 _partition,
         address _from,
-        IHoldTypes.Hold memory _hold,
-        bytes memory _operatorData,
+        IHoldTypes.Hold calldata _hold,
+        bytes calldata _operatorData,
         ThirdPartyType _thirdPartyType
     ) external returns (bool success_, uint256 holdId_) {
         return HoldStorageWrapper.createHoldByPartition(_partition, _from, _hold, _operatorData, _thirdPartyType);
@@ -51,7 +51,7 @@ library HoldOps {
     function protectedCreateHoldByPartition(
         bytes32 _partition,
         address _from,
-        IHoldTypes.ProtectedHold memory _protectedHold,
+        IHoldTypes.ProtectedHold calldata _protectedHold,
         bytes calldata _signature
     ) external returns (bool success_, uint256 holdId_) {
         return HoldStorageWrapper.protectedCreateHoldByPartition(_partition, _from, _protectedHold, _signature);

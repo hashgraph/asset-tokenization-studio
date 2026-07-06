@@ -13,7 +13,7 @@ _Read-only counterpart of `IComplianceFacet` for multi-partition mode. Both meth
 ### canRedeemByPartition
 
 ```solidity
-function canRedeemByPartition(address _from, bytes32 _partition, uint256 _value, bytes _data, bytes _operatorData) external view returns (bool status, bytes1 code, bytes32 reason)
+function canRedeemByPartition(address _from, bytes32 _partition, uint256 _value, bytes _data, bytes _operatorData) external view returns (bool status_, bytes1 code_, bytes32 reason_)
 ```
 
 Checks whether a redemption can be executed on a specific partition.
@@ -32,16 +32,16 @@ _Assumes that if the caller has an admin role the redemption will be performed u
 
 #### Returns
 
-| Name   | Type    | Description                                     |
-| ------ | ------- | ----------------------------------------------- |
-| status | bool    | True when the redemption is allowed.            |
-| code   | bytes1  | EIP-1066 status code describing the result.     |
-| reason | bytes32 | Additional reason data tied to the status code. |
+| Name     | Type    | Description                                     |
+| -------- | ------- | ----------------------------------------------- |
+| status\_ | bool    | True when the redemption is allowed.            |
+| code\_   | bytes1  | EIP-1066 status code describing the result.     |
+| reason\_ | bytes32 | Additional reason data tied to the status code. |
 
 ### canTransferByPartition
 
 ```solidity
-function canTransferByPartition(address _from, address _to, bytes32 _partition, uint256 _value, bytes _data, bytes _operatorData) external view returns (bool status, bytes1 code, bytes32 reason)
+function canTransferByPartition(address _from, address _to, bytes32 _partition, uint256 _value, bytes _data, bytes _operatorData) external view returns (bool status_, bytes1 code_, bytes32 reason_)
 ```
 
 Checks whether a transfer can be executed on a specific partition.
@@ -61,11 +61,11 @@ _Assumes that if the caller has an admin role the transfer will be performed usi
 
 #### Returns
 
-| Name   | Type    | Description                                     |
-| ------ | ------- | ----------------------------------------------- |
-| status | bool    | True when the transfer is allowed.              |
-| code   | bytes1  | EIP-1066 status code describing the result.     |
-| reason | bytes32 | Additional reason data tied to the status code. |
+| Name     | Type    | Description                                     |
+| -------- | ------- | ----------------------------------------------- |
+| status\_ | bool    | True when the transfer is allowed.              |
+| code\_   | bytes1  | EIP-1066 status code describing the result.     |
+| reason\_ | bytes32 | Additional reason data tied to the status code. |
 
 ### initializeComplianceByPartition
 

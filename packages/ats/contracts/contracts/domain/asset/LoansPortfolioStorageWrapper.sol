@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { DEFAULT_PARTITION } from "../../constants/values.sol";
 import { ILoan } from "../../facets/loan/ILoan.sol";
 import { IERC1410Types } from "../../facets/commonTypes/IERC1410Types.sol";
 import { ILoansPortfolio } from "../../facets/loansPortfolio/ILoansPortfolio.sol";
@@ -82,7 +82,7 @@ library LoansPortfolioStorageWrapper {
         ILoansPortfolio.LoansPortfolioDetailsData memory _loansPortfolioDetails
     ) internal {
         ScheduledTasksOps.triggerPendingScheduledCrossOrderedTasks();
-        LoansPortfolioDataStorage storage s = loansPortfolioStorage();
+        LoansPortfolioDataStorage storage s = _loansPortfolioStorage();
         s.portfolioType = _loansPortfolioDetails.portfolioType;
         s.distributionPolicy = _loansPortfolioDetails.distributionPolicy;
     }
@@ -96,17 +96,16 @@ library LoansPortfolioStorageWrapper {
      * @custom:error HoldingsAssetAlreadyExists If the asset address already exists in the portfolio.
      */
     function addHoldingsAsset(ILoansPortfolio.HoldingsAsset memory _holdingsAsset) internal {
+        LoansPortfolioDataStorage storage loanPortfolioStorage = _loansPortfolioStorage();
+        address assetAddress = _holdingsAsset.assetAddress;
         ILoansPortfolio.HoldingsAssetType holdingsAssetType = _holdingsAsset.holdingsAssetType;
-        LoansPortfolioDataStorage storage loanPortfolioStorage = loansPortfolioStorage();
-        if (loanPortfolioStorage.holdingsAssets.contains(_holdingsAsset.assetAddress)) {
-            revert ILoansPortfolio.HoldingsAssetAlreadyExists(_holdingsAsset.assetAddress);
-        }
+
         if (holdingsAssetType == ILoansPortfolio.HoldingsAssetType.LOAN) {
-            _addLoanHoldingsAsset(loanPortfolioStorage, _holdingsAsset.assetAddress);
+            _addLoanHoldingsAsset(loanPortfolioStorage, assetAddress);
         } else {
-            loanPortfolioStorage.cashHoldingsAssets.add(_holdingsAsset.assetAddress);
+            loanPortfolioStorage.cashHoldingsAssets.add(assetAddress);
         }
-        loanPortfolioStorage.holdingsAssets.add(_holdingsAsset.assetAddress);
+        loanPortfolioStorage.holdingsAssets.add(assetAddress);
     }
 
     /**
@@ -120,8 +119,7 @@ library LoansPortfolioStorageWrapper {
     function removeHoldingsAsset(ILoansPortfolio.HoldingsAsset memory _holdingsAsset) internal {
         ILoansPortfolio.HoldingsAssetType holdingsAssetType = _holdingsAsset.holdingsAssetType;
         address assetAddress = _holdingsAsset.assetAddress;
-        checkHoldingAssetExists(assetAddress);
-        LoansPortfolioDataStorage storage loanPortfolioStorage = loansPortfolioStorage();
+        LoansPortfolioDataStorage storage loanPortfolioStorage = _loansPortfolioStorage();
         if (holdingsAssetType == ILoansPortfolio.HoldingsAssetType.LOAN) {
             _removeLoanHoldingsAsset(loanPortfolioStorage, assetAddress);
         } else {
@@ -141,7 +139,7 @@ library LoansPortfolioStorageWrapper {
      */
     function notifyLoanHoldingsAssetUpdate(address _holdingsAssetAddress) internal {
         checkHoldingAssetExists(_holdingsAssetAddress);
-        LoansPortfolioDataStorage storage loanPortfolioStorage = loansPortfolioStorage();
+        LoansPortfolioDataStorage storage loanPortfolioStorage = _loansPortfolioStorage();
         ILoan.LoanDetailsData memory loanDetails = ILoan(_holdingsAssetAddress).getLoanDetails();
         loanPortfolioStorage.securedLoanHoldingsAssets.remove(_holdingsAssetAddress);
         loanPortfolioStorage.nonSecuredLoanHoldingsAssets.remove(_holdingsAssetAddress);
@@ -181,7 +179,7 @@ library LoansPortfolioStorageWrapper {
             to: _to,
             value: _amount
         });
-        ITransferByPartition(_assetAddress).transferByPartition(_DEFAULT_PARTITION, transferInfo, "");
+        ITransferByPartition(_assetAddress).transferByPartition(DEFAULT_PARTITION, transferInfo, "");
         success_ = true;
     }
 
@@ -192,7 +190,7 @@ library LoansPortfolioStorageWrapper {
      * @custom:error HoldingAssetNotFound If the asset address is missing from the holdings set.
      */
     function checkHoldingAssetExists(address _assetAddress) internal view {
-        if (!loansPortfolioStorage().holdingsAssets.contains(_assetAddress)) {
+        if (!_loansPortfolioStorage().holdingsAssets.contains(_assetAddress)) {
             revert ILoansPortfolio.HoldingAssetNotFound(_assetAddress);
         }
     }
@@ -206,7 +204,7 @@ library LoansPortfolioStorageWrapper {
         view
         returns (ILoansPortfolio.LoansPortfolioDetailsData memory loansPortfolioDetails_)
     {
-        LoansPortfolioDataStorage storage s = loansPortfolioStorage();
+        LoansPortfolioDataStorage storage s = _loansPortfolioStorage();
         loansPortfolioDetails_ = ILoansPortfolio.LoansPortfolioDetailsData({
             portfolioType: s.portfolioType,
             distributionPolicy: s.distributionPolicy
@@ -220,7 +218,7 @@ library LoansPortfolioStorageWrapper {
      * @return denominator_ Total number of loans in the portfolio.
      */
     function getSecuredLoansRatio() internal view returns (uint256 numerator_, uint256 denominator_) {
-        return _getLoanRatioFor(loansPortfolioStorage().securedLoanHoldingsAssets);
+        return _getLoanRatioFor(_loansPortfolioStorage().securedLoanHoldingsAssets);
     }
 
     /**
@@ -230,7 +228,7 @@ library LoansPortfolioStorageWrapper {
      * @return denominator_ Total number of loans in the portfolio.
      */
     function getPerformingLoansRatio() internal view returns (uint256 numerator_, uint256 denominator_) {
-        return _getLoanRatioFor(loansPortfolioStorage().performingLoanHoldingsAssets);
+        return _getLoanRatioFor(_loansPortfolioStorage().performingLoanHoldingsAssets);
     }
 
     /**
@@ -240,7 +238,7 @@ library LoansPortfolioStorageWrapper {
      * @return denominator_ Total number of loans in the portfolio.
      */
     function getNonPerformingLoansRatio() internal view returns (uint256 numerator_, uint256 denominator_) {
-        return _getLoanRatioFor(loansPortfolioStorage().nonPerformingLoanHoldingsAssets);
+        return _getLoanRatioFor(_loansPortfolioStorage().nonPerformingLoanHoldingsAssets);
     }
 
     /**
@@ -250,7 +248,7 @@ library LoansPortfolioStorageWrapper {
      * @return denominator_ Total number of loans in the portfolio.
      */
     function getDefaultedLoansRatio() internal view returns (uint256 numerator_, uint256 denominator_) {
-        return _getLoanRatioFor(loansPortfolioStorage().defaultedLoanHoldingsAssets);
+        return _getLoanRatioFor(_loansPortfolioStorage().defaultedLoanHoldingsAssets);
     }
 
     /**
@@ -258,7 +256,7 @@ library LoansPortfolioStorageWrapper {
      * @return numberOfPerformingLoans_ Count of performing loan holdings.
      */
     function getNumberOfPerformingLoans() internal view returns (uint256 numberOfPerformingLoans_) {
-        numberOfPerformingLoans_ = loansPortfolioStorage().performingLoanHoldingsAssets.length();
+        numberOfPerformingLoans_ = _loansPortfolioStorage().performingLoanHoldingsAssets.length();
     }
 
     /**
@@ -266,7 +264,7 @@ library LoansPortfolioStorageWrapper {
      * @return numberOfNonPerformingLoans_ Count of non-performing loan holdings.
      */
     function getNumberOfNonPerformingLoans() internal view returns (uint256 numberOfNonPerformingLoans_) {
-        numberOfNonPerformingLoans_ = loansPortfolioStorage().nonPerformingLoanHoldingsAssets.length();
+        numberOfNonPerformingLoans_ = _loansPortfolioStorage().nonPerformingLoanHoldingsAssets.length();
     }
 
     /**
@@ -274,7 +272,7 @@ library LoansPortfolioStorageWrapper {
      * @return numberDefaultedLoans_ Count of defaulted loan holdings.
      */
     function getNumberDefaultedLoans() internal view returns (uint256 numberDefaultedLoans_) {
-        numberDefaultedLoans_ = loansPortfolioStorage().defaultedLoanHoldingsAssets.length();
+        numberDefaultedLoans_ = _loansPortfolioStorage().defaultedLoanHoldingsAssets.length();
     }
 
     /**
@@ -282,7 +280,7 @@ library LoansPortfolioStorageWrapper {
      * @return numberOfAssets_ Count of all holding assets.
      */
     function getNumberOfAssets() internal view returns (uint256 numberOfAssets_) {
-        numberOfAssets_ = loansPortfolioStorage().holdingsAssets.length();
+        numberOfAssets_ = _loansPortfolioStorage().holdingsAssets.length();
     }
 
     /**
@@ -290,7 +288,7 @@ library LoansPortfolioStorageWrapper {
      * @return numberOfLoans_ Count of loan holdings.
      */
     function getNumberOfLoans() internal view returns (uint256 numberOfLoans_) {
-        numberOfLoans_ = loansPortfolioStorage().loanHoldingsAssets.length();
+        numberOfLoans_ = _loansPortfolioStorage().loanHoldingsAssets.length();
     }
 
     /**
@@ -298,7 +296,7 @@ library LoansPortfolioStorageWrapper {
      * @return numberOfCash_ Count of cash holdings.
      */
     function getNumberOfCash() internal view returns (uint256 numberOfCash_) {
-        numberOfCash_ = loansPortfolioStorage().cashHoldingsAssets.length();
+        numberOfCash_ = _loansPortfolioStorage().cashHoldingsAssets.length();
     }
 
     /**
@@ -312,7 +310,7 @@ library LoansPortfolioStorageWrapper {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory assets_) {
-        assets_ = loansPortfolioStorage().holdingsAssets.getFromSet(_pageIndex, _pageLength);
+        assets_ = _loansPortfolioStorage().holdingsAssets.getFromSet(_pageIndex, _pageLength);
     }
 
     /**
@@ -326,12 +324,12 @@ library LoansPortfolioStorageWrapper {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory assets_) {
-        assets_ = loansPortfolioStorage().loanHoldingsAssets.getFromSet(_pageIndex, _pageLength);
+        assets_ = _loansPortfolioStorage().loanHoldingsAssets.getFromSet(_pageIndex, _pageLength);
     }
 
     /**
      * @notice Returns a paginated list of holding asset addresses along with their token balances.
-     * @dev For each asset, retrieves the balance of the `_DEFAULT_PARTITION` partition held by this contract.
+     * @dev For each asset, retrieves the balance of the `DEFAULT_PARTITION` partition held by this contract.
      * @param _pageIndex Zero-based page index.
      * @param _pageLength Number of elements per page.
      * @return assets_ Array of asset addresses for the requested page.
@@ -341,17 +339,29 @@ library LoansPortfolioStorageWrapper {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory assets_, uint256[] memory tokenBalances_) {
-        assets_ = loansPortfolioStorage().holdingsAssets.getFromSet(_pageIndex, _pageLength);
+        assets_ = _loansPortfolioStorage().holdingsAssets.getFromSet(_pageIndex, _pageLength);
         uint256 arraySize = assets_.length;
         tokenBalances_ = new uint256[](arraySize);
         for (uint256 i; i < arraySize; ) {
             tokenBalances_[i] = IBalanceTrackerByPartition(assets_[i]).balanceOfByPartition(
-                _DEFAULT_PARTITION,
+                DEFAULT_PARTITION,
                 address(this)
             );
             unchecked {
                 ++i;
             }
+        }
+    }
+
+    /**
+     * @notice Reverts if the given holdings asset is already registered in the portfolio.
+     * @dev Used as a pre-condition guard before adding a new asset to prevent duplicates.
+     *      Reverts with `HoldingsAssetAlreadyExists` when the address is present in the set.
+     * @param _holdingsAssetAddress Address of the holdings asset to check.
+     */
+    function checkHoldingAssetNotExists(address _holdingsAssetAddress) internal view {
+        if (_loansPortfolioStorage().holdingsAssets.contains(_holdingsAssetAddress)) {
+            revert ILoansPortfolio.HoldingsAssetAlreadyExists(_holdingsAssetAddress);
         }
     }
 
@@ -461,7 +471,7 @@ library LoansPortfolioStorageWrapper {
     function _getLoanRatioFor(
         EnumerableSet.AddressSet storage _subSet
     ) private view returns (uint256 numerator_, uint256 denominator_) {
-        denominator_ = loansPortfolioStorage().loanHoldingsAssets.length();
+        denominator_ = _loansPortfolioStorage().loanHoldingsAssets.length();
         if (denominator_ == 0) return (0, 0);
         numerator_ = _subSet.length();
     }
@@ -472,7 +482,7 @@ library LoansPortfolioStorageWrapper {
      *      `STORAGE_LOCATION_LOANS_PORTFOLIO`.
      * @return loansPortfolioData_ Reference to the `LoansPortfolioDataStorage` struct in storage.
      */
-    function loansPortfolioStorage() private pure returns (LoansPortfolioDataStorage storage loansPortfolioData_) {
+    function _loansPortfolioStorage() private pure returns (LoansPortfolioDataStorage storage loansPortfolioData_) {
         bytes32 position = STORAGE_LOCATION_LOANS_PORTFOLIO;
         // solhint-disable-next-line no-inline-assembly
         assembly {

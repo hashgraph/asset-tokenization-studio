@@ -27,7 +27,7 @@ Returns the stored coupon rate type.
 ### initializeInterestRateType
 
 ```solidity
-function initializeInterestRateType(enum IInterestRate.RateType rateType) external nonpayable
+function initializeInterestRateType(enum IInterestRate.RateType _rateType) external nonpayable
 ```
 
 Initializes the coupon rate type during asset deployment.
@@ -36,14 +36,14 @@ _Intended to be called by the factory immediately after proxy creation. No role 
 
 #### Parameters
 
-| Name     | Type                        | Description                                                 |
-| -------- | --------------------------- | ----------------------------------------------------------- |
-| rateType | enum IInterestRate.RateType | The `RateType` to persist (STANDARD, FIXED, or KPI_LINKED). |
+| Name       | Type                        | Description                                                 |
+| ---------- | --------------------------- | ----------------------------------------------------------- |
+| \_rateType | enum IInterestRate.RateType | The `RateType` to persist (STANDARD, FIXED, or KPI_LINKED). |
 
 ### setCouponRateType
 
 ```solidity
-function setCouponRateType(enum IInterestRate.RateType rateType) external nonpayable
+function setCouponRateType(enum IInterestRate.RateType _rateType) external nonpayable
 ```
 
 Sets the coupon rate type discriminator for this asset.
@@ -52,9 +52,9 @@ _Requires `ROLE_INTEREST_RATE_MANAGER`. Reverts with `InvalidRateType` if `rateT
 
 #### Parameters
 
-| Name     | Type                        | Description                                                 |
-| -------- | --------------------------- | ----------------------------------------------------------- |
-| rateType | enum IInterestRate.RateType | The `RateType` to persist (STANDARD, FIXED, or KPI_LINKED). |
+| Name       | Type                        | Description                                                 |
+| ---------- | --------------------------- | ----------------------------------------------------------- |
+| \_rateType | enum IInterestRate.RateType | The `RateType` to persist (STANDARD, FIXED, or KPI_LINKED). |
 
 ## Events
 

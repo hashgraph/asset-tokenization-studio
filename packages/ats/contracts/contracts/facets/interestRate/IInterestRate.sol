@@ -54,17 +54,17 @@ interface IInterestRate {
      * @dev Intended to be called by the factory immediately after proxy creation.
      *      No role required — the factory is trusted at deploy time.
      *      Reverts with `InvalidRateType` if `rateType` is `NONE`.
-     * @param rateType The `RateType` to persist (STANDARD, FIXED, or KPI_LINKED).
+     * @param _rateType The `RateType` to persist (STANDARD, FIXED, or KPI_LINKED).
      */
-    function initializeInterestRateType(RateType rateType) external;
+    function initializeInterestRateType(RateType _rateType) external;
 
     /**
      * @notice Sets the coupon rate type discriminator for this asset.
      * @dev Requires `ROLE_INTEREST_RATE_MANAGER`.
      *      Reverts with `InvalidRateType` if `rateType` is `NONE`.
-     * @param rateType The `RateType` to persist (STANDARD, FIXED, or KPI_LINKED).
+     * @param _rateType The `RateType` to persist (STANDARD, FIXED, or KPI_LINKED).
      */
-    function setCouponRateType(RateType rateType) external;
+    function setCouponRateType(RateType _rateType) external;
 
     /**
      * @notice Returns the stored coupon rate type.

@@ -223,7 +223,7 @@ abstract contract MockFactory is Factory, IMockFactory {
         // 1. Build RBAC: seed the caller as temporary DEFAULT_ADMIN_ROLE holder
         IResolverProxy.Rbac[] memory rbacs = new IResolverProxy.Rbac[](1);
         rbacs[0] = IResolverProxy.Rbac({ role: DEFAULT_ADMIN_ROLE, members: new address[](1) });
-        rbacs[0].members[0] = msg.sender;
+        rbacs[0].members[0] = EvmAccessors.getMsgSender();
 
         // 2. Deploy a bare ResolverProxy against ASSET_MOCK_CONFIG_ID, version 1.
         //    Mirrors Factory._deploySecurityProxy but creates the proxy directly
