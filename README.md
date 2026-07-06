@@ -109,7 +109,7 @@ For detailed product capabilities, see the [Mass Payout User Guides](docs/mass-p
 └── package.json              # Workspace configuration and root scripts
 ```
 
-## Documentation
+## Local Documentation
 
 **Complete documentation:** [docs/index.md](docs/index.md)
 
