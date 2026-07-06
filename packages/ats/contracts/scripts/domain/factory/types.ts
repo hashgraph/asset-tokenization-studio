@@ -109,11 +109,6 @@ export interface FactoryRegulationDataParams {
   };
 }
 
-export interface FixedRateDataParams {
-  rate: number;
-  rateDecimals: number;
-}
-
 export enum SecurityType {
   BOND_VARIABLE_RATE = 0,
   EQUITY = 1,

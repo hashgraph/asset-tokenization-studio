@@ -5,8 +5,9 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import { ZERO, EMPTY_STRING, ATS_ROLES, RESOLVER_KEY_LOAN } from "@scripts";
-import { executeRbac, getLoanDetails, MAX_UINT256 } from "@test";
+import { executeRbac, MAX_UINT256 } from "@test";
 import type { AssetMockCtx } from "@test";
+import { getLoanDetails } from "./loanData";
 
 const EMPTY_VC_ID = EMPTY_STRING;
 

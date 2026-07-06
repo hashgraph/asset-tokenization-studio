@@ -5,7 +5,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { IAssetMock, KpiLinkedRate__factory, Kpis__factory } from "@contract-types";
 import type { KpiLinkedRate, Kpis } from "@contract-types";
 import { ATS_ROLES, RESOLVER_KEY_KPI_LINKED_RATE, TIME_PERIODS_S } from "@scripts";
-import { DEFAULT_BOND_KPI_LINKED_RATE_PARAMS, executeRbac, getDltTimestamp } from "@test";
+import { TEST_BOND_KPI_LINKED_RATE, executeRbac, getDltTimestamp } from "@test";
 import type { AssetMockCtx } from "@test";
 
 export function kpiLinkedRateTests(getCtx: () => AssetMockCtx): void {
@@ -33,21 +33,21 @@ export function kpiLinkedRateTests(getCtx: () => AssetMockCtx): void {
       await asset.connect(signer_A).setCouponRateType(KPI_INTEREST_RATE_TYPE);
       kpiRate = KpiLinkedRate__factory.connect(ctx.diamond.target as string, signer_A);
       await kpiRate.setKpiLinkedRateInterestRate({
-        maxRate: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.maxRate,
-        baseRate: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.baseRate,
-        minRate: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.minRate,
-        startPeriod: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.startPeriod,
-        startRate: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.startRate,
-        missedPenalty: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.missedPenalty,
-        reportPeriod: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.reportPeriod,
-        rateDecimals: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.rateDecimals,
+        maxRate: TEST_BOND_KPI_LINKED_RATE.maxRate,
+        baseRate: TEST_BOND_KPI_LINKED_RATE.baseRate,
+        minRate: TEST_BOND_KPI_LINKED_RATE.minRate,
+        startPeriod: TEST_BOND_KPI_LINKED_RATE.startPeriod,
+        startRate: TEST_BOND_KPI_LINKED_RATE.startRate,
+        missedPenalty: TEST_BOND_KPI_LINKED_RATE.missedPenalty,
+        reportPeriod: TEST_BOND_KPI_LINKED_RATE.reportPeriod,
+        rateDecimals: TEST_BOND_KPI_LINKED_RATE.rateDecimals,
       });
       await kpiRate.setKpiLinkedRateImpactData({
-        maxDeviationCap: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.maxDeviationCap,
-        baseLine: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.baseLine,
-        maxDeviationFloor: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.maxDeviationFloor,
-        impactDataDecimals: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.impactDataDecimals,
-        adjustmentPrecision: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.adjustmentPrecision,
+        maxDeviationCap: TEST_BOND_KPI_LINKED_RATE.maxDeviationCap,
+        baseLine: TEST_BOND_KPI_LINKED_RATE.baseLine,
+        maxDeviationFloor: TEST_BOND_KPI_LINKED_RATE.maxDeviationFloor,
+        impactDataDecimals: TEST_BOND_KPI_LINKED_RATE.impactDataDecimals,
+        adjustmentPrecision: TEST_BOND_KPI_LINKED_RATE.adjustmentPrecision,
       });
     });
 
@@ -305,14 +305,14 @@ export function kpiLinkedRateTests(getCtx: () => AssetMockCtx): void {
 
       it("GIVEN correct interest rate WHEN setInterestRate THEN transaction succeeds", async () => {
         const newInterestRate = {
-          maxRate: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.maxRate + 100,
-          baseRate: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.baseRate + 100,
-          minRate: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.minRate + 100,
-          startPeriod: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.startPeriod + 1000,
-          startRate: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.startRate + 100,
-          missedPenalty: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.missedPenalty + 100,
-          reportPeriod: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.reportPeriod + 1000,
-          rateDecimals: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.rateDecimals + 1,
+          maxRate: TEST_BOND_KPI_LINKED_RATE.maxRate + 100,
+          baseRate: TEST_BOND_KPI_LINKED_RATE.baseRate + 100,
+          minRate: TEST_BOND_KPI_LINKED_RATE.minRate + 100,
+          startPeriod: TEST_BOND_KPI_LINKED_RATE.startPeriod + 1000,
+          startRate: TEST_BOND_KPI_LINKED_RATE.startRate + 100,
+          missedPenalty: TEST_BOND_KPI_LINKED_RATE.missedPenalty + 100,
+          reportPeriod: TEST_BOND_KPI_LINKED_RATE.reportPeriod + 1000,
+          rateDecimals: TEST_BOND_KPI_LINKED_RATE.rateDecimals + 1,
         };
 
         await expect(kpiRate.setKpiLinkedRateInterestRate(newInterestRate))
@@ -392,11 +392,11 @@ export function kpiLinkedRateTests(getCtx: () => AssetMockCtx): void {
 
       it("GIVEN correct impact data WHEN setImpactData THEN transaction succeeds", async () => {
         const newImpactData = {
-          maxDeviationCap: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.maxDeviationCap + 100,
-          baseLine: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.baseLine + 100,
-          maxDeviationFloor: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.maxDeviationFloor + 100,
-          impactDataDecimals: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.impactDataDecimals + 1,
-          adjustmentPrecision: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.adjustmentPrecision + 1,
+          maxDeviationCap: TEST_BOND_KPI_LINKED_RATE.maxDeviationCap + 100,
+          baseLine: TEST_BOND_KPI_LINKED_RATE.baseLine + 100,
+          maxDeviationFloor: TEST_BOND_KPI_LINKED_RATE.maxDeviationFloor + 100,
+          impactDataDecimals: TEST_BOND_KPI_LINKED_RATE.impactDataDecimals + 1,
+          adjustmentPrecision: TEST_BOND_KPI_LINKED_RATE.adjustmentPrecision + 1,
         };
 
         await expect(kpiRate.setKpiLinkedRateImpactData(newImpactData))
@@ -508,14 +508,14 @@ export function kpiLinkedRateTests(getCtx: () => AssetMockCtx): void {
         const currentTimestamp = await getDltTimestamp();
         const fixingDate = currentTimestamp + TIME_PERIODS_S.DAY;
         await kpiRate.setKpiLinkedRateInterestRate({
-          maxRate: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.maxRate,
-          baseRate: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.baseRate,
-          minRate: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.minRate,
+          maxRate: TEST_BOND_KPI_LINKED_RATE.maxRate,
+          baseRate: TEST_BOND_KPI_LINKED_RATE.baseRate,
+          minRate: TEST_BOND_KPI_LINKED_RATE.minRate,
           startPeriod: fixingDate + 1,
-          startRate: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.startRate,
-          missedPenalty: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.missedPenalty,
-          reportPeriod: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.reportPeriod,
-          rateDecimals: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.rateDecimals,
+          startRate: TEST_BOND_KPI_LINKED_RATE.startRate,
+          missedPenalty: TEST_BOND_KPI_LINKED_RATE.missedPenalty,
+          reportPeriod: TEST_BOND_KPI_LINKED_RATE.reportPeriod,
+          rateDecimals: TEST_BOND_KPI_LINKED_RATE.rateDecimals,
         });
         await asset.connect(signer_A).setCoupon({
           recordDate: fixingDate.toString(),
@@ -529,8 +529,8 @@ export function kpiLinkedRateTests(getCtx: () => AssetMockCtx): void {
         });
         await asset.changeSystemTimestamp(fixingDate + 2);
         const [registeredCoupon] = await asset.getCoupon(1);
-        expect(registeredCoupon.coupon.rate).to.equal(DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.startRate);
-        expect(registeredCoupon.coupon.rateDecimals).to.equal(DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.rateDecimals);
+        expect(registeredCoupon.coupon.rate).to.equal(TEST_BOND_KPI_LINKED_RATE.startRate);
+        expect(registeredCoupon.coupon.rateDecimals).to.equal(TEST_BOND_KPI_LINKED_RATE.rateDecimals);
       });
 
       it("GIVEN no KPI report and baseRate+missedPenalty exceeds maxRate WHEN getCoupon THEN rate is capped at maxRate", async () => {
@@ -539,11 +539,11 @@ export function kpiLinkedRateTests(getCtx: () => AssetMockCtx): void {
           maxRate: maxRate,
           baseRate: 95,
           minRate: 50,
-          startPeriod: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.startPeriod,
-          startRate: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.startRate,
+          startPeriod: TEST_BOND_KPI_LINKED_RATE.startPeriod,
+          startRate: TEST_BOND_KPI_LINKED_RATE.startRate,
           missedPenalty: 10,
-          reportPeriod: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.reportPeriod,
-          rateDecimals: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.rateDecimals,
+          reportPeriod: TEST_BOND_KPI_LINKED_RATE.reportPeriod,
+          rateDecimals: TEST_BOND_KPI_LINKED_RATE.rateDecimals,
         });
         const currentTimestamp = await getDltTimestamp();
         const fixingDate = currentTimestamp + TIME_PERIODS_S.DAY;
@@ -565,14 +565,14 @@ export function kpiLinkedRateTests(getCtx: () => AssetMockCtx): void {
 
       it("GIVEN reportPeriod larger than fixingDate WHEN getCoupon THEN windowStart equals fixingDate and no report found", async () => {
         await kpiRate.setKpiLinkedRateInterestRate({
-          maxRate: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.maxRate,
-          baseRate: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.baseRate,
-          minRate: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.minRate,
-          startPeriod: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.startPeriod,
-          startRate: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.startRate,
-          missedPenalty: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.missedPenalty,
+          maxRate: TEST_BOND_KPI_LINKED_RATE.maxRate,
+          baseRate: TEST_BOND_KPI_LINKED_RATE.baseRate,
+          minRate: TEST_BOND_KPI_LINKED_RATE.minRate,
+          startPeriod: TEST_BOND_KPI_LINKED_RATE.startPeriod,
+          startRate: TEST_BOND_KPI_LINKED_RATE.startRate,
+          missedPenalty: TEST_BOND_KPI_LINKED_RATE.missedPenalty,
           reportPeriod: 4000000000n, // exceeds any realistic fixingDate → windowStart = fixingDate
-          rateDecimals: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.rateDecimals,
+          rateDecimals: TEST_BOND_KPI_LINKED_RATE.rateDecimals,
         });
         const currentTimestamp = await getDltTimestamp();
         const fixingDate = currentTimestamp + TIME_PERIODS_S.DAY;
@@ -590,7 +590,7 @@ export function kpiLinkedRateTests(getCtx: () => AssetMockCtx): void {
         const [registeredCoupon] = await asset.getCoupon(1);
         // empty window → no report → baseRate(75) + missedPenalty(10) = 85
         expect(registeredCoupon.coupon.rate).to.equal(
-          DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.baseRate + DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.missedPenalty,
+          TEST_BOND_KPI_LINKED_RATE.baseRate + TEST_BOND_KPI_LINKED_RATE.missedPenalty,
         );
       });
 
@@ -612,7 +612,7 @@ export function kpiLinkedRateTests(getCtx: () => AssetMockCtx): void {
             fixingDate: fixingDate.toString(),
             rateStatus: 0,
           });
-          const kpiDate = fixingDate - DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.reportPeriod + 1;
+          const kpiDate = fixingDate - TEST_BOND_KPI_LINKED_RATE.reportPeriod + 1;
           await asset.changeSystemTimestamp(kpiDate);
           // impactData=600 in (maxDeviationFloor=500, baseLine=750):
           //   impactDeltaRate = (100*(750-600))/(750-500) = 60 → rate = 75 - (25*60/100) = 60
@@ -635,7 +635,7 @@ export function kpiLinkedRateTests(getCtx: () => AssetMockCtx): void {
             fixingDate: fixingDate.toString(),
             rateStatus: 0,
           });
-          const kpiDate = fixingDate - DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.reportPeriod + 1;
+          const kpiDate = fixingDate - TEST_BOND_KPI_LINKED_RATE.reportPeriod + 1;
           await asset.changeSystemTimestamp(kpiDate);
           // impactData=850 in (baseLine=750, maxDeviationCap=1000):
           //   impactDeltaRate = (100*(850-750))/(1000-750) = 40 → rate = 75 + (25*40/100) = 85
@@ -658,7 +658,7 @@ export function kpiLinkedRateTests(getCtx: () => AssetMockCtx): void {
             fixingDate: fixingDate.toString(),
             rateStatus: 0,
           });
-          const kpiDate = fixingDate - DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.reportPeriod + 1;
+          const kpiDate = fixingDate - TEST_BOND_KPI_LINKED_RATE.reportPeriod + 1;
           await asset.changeSystemTimestamp(kpiDate);
           // impactData=400 < maxDeviationFloor=500:
           //   impactDeltaRate = (100*(750-400))/(750-500) = 140 > factor(100) → capped to 100
@@ -666,7 +666,7 @@ export function kpiLinkedRateTests(getCtx: () => AssetMockCtx): void {
           await kpis.addKpiData(kpiDate, 400, signer_A.address);
           await asset.changeSystemTimestamp(fixingDate + 1);
           const [registeredCoupon] = await asset.getCoupon(1);
-          expect(registeredCoupon.coupon.rate).to.equal(DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.minRate);
+          expect(registeredCoupon.coupon.rate).to.equal(TEST_BOND_KPI_LINKED_RATE.minRate);
         });
 
         it("GIVEN impactData above maxDeviationCap WHEN getCoupon THEN impactDeltaRate is capped and rate equals maxRate", async () => {
@@ -682,7 +682,7 @@ export function kpiLinkedRateTests(getCtx: () => AssetMockCtx): void {
             fixingDate: fixingDate.toString(),
             rateStatus: 0,
           });
-          const kpiDate = fixingDate - DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.reportPeriod + 1;
+          const kpiDate = fixingDate - TEST_BOND_KPI_LINKED_RATE.reportPeriod + 1;
           await asset.changeSystemTimestamp(kpiDate);
           // impactData=1200 > maxDeviationCap=1000:
           //   impactDeltaRate = (100*(1200-750))/(1000-750) = 180 > factor(100) → capped to 100
@@ -690,7 +690,7 @@ export function kpiLinkedRateTests(getCtx: () => AssetMockCtx): void {
           await kpis.addKpiData(kpiDate, 1200, signer_A.address);
           await asset.changeSystemTimestamp(fixingDate + 1);
           const [registeredCoupon] = await asset.getCoupon(1);
-          expect(registeredCoupon.coupon.rate).to.equal(DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.maxRate);
+          expect(registeredCoupon.coupon.rate).to.equal(TEST_BOND_KPI_LINKED_RATE.maxRate);
         });
       });
     });

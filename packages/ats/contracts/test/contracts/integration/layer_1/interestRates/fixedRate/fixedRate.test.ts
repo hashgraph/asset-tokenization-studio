@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import { ATS_ROLES, RESOLVER_KEY_FIXED_RATE } from "@scripts";
-import { DEFAULT_BOND_FIXED_RATE_PARAMS, executeRbac } from "@test";
+import { TEST_BOND_FIXED_RATE, executeRbac } from "@test";
 import type { AssetMockCtx } from "@test";
 
 export function fixedRateTests(getCtx: () => AssetMockCtx): void {
@@ -29,9 +29,7 @@ export function fixedRateTests(getCtx: () => AssetMockCtx): void {
       ]);
 
       await asset.connect(signer_A).setCouponRateType(FIXED_INTEREST_RATE_TYPE);
-      await asset
-        .connect(signer_A)
-        .setRate(DEFAULT_BOND_FIXED_RATE_PARAMS.rate, DEFAULT_BOND_FIXED_RATE_PARAMS.rateDecimals);
+      await asset.connect(signer_A).setRate(TEST_BOND_FIXED_RATE.RATE, TEST_BOND_FIXED_RATE.RATE_DECIMALS);
     });
 
     describe("initializeFixedRate", () => {
@@ -84,8 +82,8 @@ export function fixedRateTests(getCtx: () => AssetMockCtx): void {
 
         const newRateValues = await asset.connect(signer_A).getRate();
 
-        expect(oldRateValues.rate_).to.equal(DEFAULT_BOND_FIXED_RATE_PARAMS.rate);
-        expect(oldRateValues.decimals_).to.equal(DEFAULT_BOND_FIXED_RATE_PARAMS.rateDecimals);
+        expect(oldRateValues.rate_).to.equal(TEST_BOND_FIXED_RATE.RATE);
+        expect(oldRateValues.decimals_).to.equal(TEST_BOND_FIXED_RATE.RATE_DECIMALS);
         expect(newRateValues.rate_).to.equal(newRate);
         expect(newRateValues.decimals_).to.equal(newRateDecimals);
       });
