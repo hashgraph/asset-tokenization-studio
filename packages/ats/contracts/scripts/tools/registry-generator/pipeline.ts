@@ -421,7 +421,14 @@ export async function generateRegistryPipeline(
   }
 
   // Collect warnings
-  const missingResolverKeys = facetsWithoutResolverKeys.filter((f) => f.name !== "TimeTravelFacet");
+  // `IDiamondFacet` is a shared interface (init function/event only), not an actual
+  // facet — its resolver key (`RESOLVER_KEY_DIAMOND`) lives in `IDiamond.sol` and is
+  // already picked up by `DiamondFacet`. Excluded here for the same reason as
+  // `TimeTravelFacet`: matches `isFacetName` by ending in "Facet" but never owns a key.
+  const FACETS_WITHOUT_OWN_RESOLVER_KEY = ["TimeTravelFacet", "IDiamondFacet"];
+  const missingResolverKeys = facetsWithoutResolverKeys.filter(
+    (f) => !FACETS_WITHOUT_OWN_RESOLVER_KEY.includes(f.name),
+  );
   if (missingResolverKeys.length > 0) {
     const warningMsg = `${missingResolverKeys.length} facets missing resolver keys: ${missingResolverKeys.map((f) => f.name).join(", ")}`;
     warnings.push(warningMsg);

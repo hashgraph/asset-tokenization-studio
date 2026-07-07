@@ -156,12 +156,10 @@ library ClearingReadOps {
     /// @param _clearingOperationIdentifier Identifier of the clearing operation to check.
     /// @param _mustBeExpired               When `true`, reverts unless the operation has already
     ///                                     expired; when `false`, reverts if it has expired.
-    /// @param _blockTimestamp             Accepted for interface compatibility; not used by this implementation.
     function checkClearingExpirationTimestamp(
         IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
         bool _mustBeExpired,
-        // solhint-disable-next-line no-unused-vars
-        uint256 _blockTimestamp
+        uint256 /* _blockTimestamp */
     ) external view {
         ClearingStorageWrapper.requireExpirationTimestamp(_clearingOperationIdentifier, _mustBeExpired);
     }

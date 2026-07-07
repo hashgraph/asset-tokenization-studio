@@ -163,8 +163,6 @@ library ERC1594StorageWrapper {
      * @param from Account whose partition balance is checked for redemption.
      * @param partition Partition identifier from which tokens are redeemed.
      * @param value Amount of tokens to redeem.
-     * @param _data Caller-supplied data; ignored, present for interface compatibility.
-     * @param _operatorData Operator-supplied data; ignored, present for interface compatibility.
      * @return canRedeemFrom True when the redemption is permitted.
      * @return statusCode EIP-1066 status code describing the validation result.
      * @return reasonCode Error selector or reason identifier associated with the result.
@@ -174,10 +172,8 @@ library ERC1594StorageWrapper {
         address from,
         bytes32 partition,
         uint256 value,
-        // solhint-disable-next-line no-unused-vars
-        bytes memory _data,
-        // solhint-disable-next-line no-unused-vars
-        bytes memory _operatorData
+        bytes memory /* _data */,
+        bytes memory /* _operatorData */
     ) internal view returns (bool canRedeemFrom, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
         (canRedeemFrom, statusCode, reasonCode, details) = _genericChecks();
         if (!canRedeemFrom) return (canRedeemFrom, statusCode, reasonCode, details);
@@ -240,8 +236,6 @@ library ERC1594StorageWrapper {
      * @param to Recipient account checked against transfer eligibility rules.
      * @param partition Partition identifier from which tokens are transferred.
      * @param value Amount of tokens to transfer.
-     * @param _data Caller-supplied data; ignored, present for interface compatibility.
-     * @param _operatorData Operator-supplied data; ignored, present for interface compatibility.
      * @return canTransfer True when the transfer is permitted.
      * @return statusCode EIP-1066 status code describing the validation result.
      * @return reasonCode Error selector or reason identifier associated with the result.
@@ -252,10 +246,8 @@ library ERC1594StorageWrapper {
         address to,
         bytes32 partition,
         uint256 value,
-        // solhint-disable-next-line no-unused-vars
-        bytes memory _data,
-        // solhint-disable-next-line no-unused-vars
-        bytes memory _operatorData
+        bytes memory /* _data */,
+        bytes memory /* _operatorData */
     ) internal view returns (bool canTransfer, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
         (canTransfer, statusCode, reasonCode, details) = _genericChecks();
         if (!canTransfer) return (canTransfer, statusCode, reasonCode, details);
