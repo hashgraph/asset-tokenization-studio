@@ -20,9 +20,9 @@ Returns the stored coupon rate type.
 
 #### Returns
 
-| Name | Type                        | Description                                                |
-| ---- | --------------------------- | ---------------------------------------------------------- |
-| \_0  | enum IInterestRate.RateType | The `RateType` value; defaults to `NONE` (0) if never set. |
+| Name | Type                        | Description                                                    |
+| ---- | --------------------------- | -------------------------------------------------------------- |
+| \_0  | enum IInterestRate.RateType | The `RateType` value; defaults to `STANDARD` (0) if never set. |
 
 ### initializeInterestRateType
 
@@ -32,7 +32,7 @@ function initializeInterestRateType(enum IInterestRate.RateType _rateType) exter
 
 Initializes the coupon rate type during asset deployment.
 
-_Intended to be called by the factory immediately after proxy creation. No role required — the factory is trusted at deploy time. Reverts with `InvalidRateType` if `rateType` is `NONE`._
+_Intended to be called by the factory immediately after proxy creation. No role required — the factory is trusted at deploy time._
 
 #### Parameters
 
@@ -48,7 +48,7 @@ function setCouponRateType(enum IInterestRate.RateType _rateType) external nonpa
 
 Sets the coupon rate type discriminator for this asset.
 
-_Requires `ROLE_INTEREST_RATE_MANAGER`. Reverts with `InvalidRateType` if `rateType` is `NONE`._
+_Requires `ROLE_INTEREST_RATE_MANAGER`._
 
 #### Parameters
 
@@ -88,21 +88,3 @@ _Fires exclusively from `initializeInterestRateType` after the storage write suc
 | Name     | Type                        | Description                 |
 | -------- | --------------------------- | --------------------------- |
 | rateType | enum IInterestRate.RateType | The rate type that was set. |
-
-## Errors
-
-### InvalidRateType
-
-```solidity
-error InvalidRateType(enum IInterestRate.RateType rateType)
-```
-
-Reverts when `NONE` is passed as a rate type.
-
-_`NONE` is reserved as the uninitialized default; it must never be set explicitly._
-
-#### Parameters
-
-| Name     | Type                        | Description                                   |
-| -------- | --------------------------- | --------------------------------------------- |
-| rateType | enum IInterestRate.RateType | The invalid rate type supplied by the caller. |

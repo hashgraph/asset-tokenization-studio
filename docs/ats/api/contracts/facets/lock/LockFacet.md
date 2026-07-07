@@ -42,7 +42,7 @@ function getLockByPartition(bytes32 _partition, uint256 _lockId) external view r
 
 Returns the raw `LockData` entry for a given partition, scoped to the caller.
 
-_Reads the lock keyed by the message sender (resolved through `EvmAccessors`), not by an explicit token holder. Returns the unadjusted on-chain entry — callers that need balance-adjusted figures should use the partition-scoped reads on `LockByPartitionFacet`._
+_Reads the lock keyed by the message sender (resolved through `EvmAccessors`), not by an explicit token holder. Returns the unadjusted on-chain entry — callers that need balance-adjusted figures should use the partition-scoped reads on `LockByPartitionFacet`. Marked `virtual` so test doubles such as `LockFacetTimeTravel` can override it._
 
 #### Parameters
 
@@ -85,7 +85,7 @@ function getLockFor(address _tokenHolder, uint256 _lockId) external view returns
 
 Returns the amount and expiration of a lock created on the default partition.
 
-_Returns the default-partition figures adjusted by any pending balance-adjustment factors, evaluated at `EvmAccessors.getBlockTimestamp()`._
+_Returns the default-partition figures adjusted by any pending balance-adjustment factors, evaluated at `TimeTravelStorageWrapper.getBlockTimestamp()`._
 
 #### Parameters
 
@@ -109,7 +109,7 @@ function getLockedAmountFor(address _tokenHolder) external view returns (uint256
 
 Returns the total amount currently locked for `_tokenHolder` across every partition, adjusted by any pending balance-adjustment factors.
 
-_Returns the default-partition figure adjusted by any pending balance-adjustment factors, evaluated at `EvmAccessors.getBlockTimestamp()`._
+_Returns the default-partition figure adjusted by any pending balance-adjustment factors, evaluated at `TimeTravelStorageWrapper.getBlockTimestamp()`._
 
 #### Parameters
 

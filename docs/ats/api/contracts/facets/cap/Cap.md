@@ -6,7 +6,7 @@ _Asset Tokenization Studio Team_
 
 Abstract contract implementing maximum supply management for a security token, both globally and per partition.
 
-_Implements `ICap`. Cap state is stored at `STORAGE_LOCATION_CAP` via `CapStorageWrapper`. All timestamp-sensitive operations delegate to `EvmAccessors.getBlockTimestamp()` so the same code path is exercisable in test environments. `setMaxSupply` and `getMaxSupply` use the adjusted supply (`AdjustBalancesStorageWrapper`) to account for pending scheduled balance adjustments. Intended to be inherited exclusively by `CapFacet`._
+_Implements `ICap`. Cap state is stored at `STORAGE_LOCATION_CAP` via `CapStorageWrapper`. All timestamp-sensitive operations delegate to `TimeTravelStorageiWrapper.getBlockTimestamp()` so the same code path is exercisable in test environments. `setMaxSupply` and `getMaxSupply` use the adjusted supply (`AdjustBalancesStorageWrapper`) to account for pending scheduled balance adjustments. Intended to be inherited exclusively by `CapFacet`._
 
 ## Methods
 

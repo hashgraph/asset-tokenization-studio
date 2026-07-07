@@ -20,9 +20,9 @@ Returns the stored coupon rate type.
 
 #### Returns
 
-| Name | Type                        | Description                                                |
-| ---- | --------------------------- | ---------------------------------------------------------- |
-| \_0  | enum IInterestRate.RateType | The `RateType` value; defaults to `NONE` (0) if never set. |
+| Name | Type                        | Description                                                    |
+| ---- | --------------------------- | -------------------------------------------------------------- |
+| \_0  | enum IInterestRate.RateType | The `RateType` value; defaults to `STANDARD` (0) if never set. |
 
 ### getStaticFunctionSelectors
 
@@ -74,7 +74,7 @@ function initializeInterestRateType(enum IInterestRate.RateType rateType) extern
 
 Initializes the coupon rate type during asset deployment.
 
-_Intended to be called by the factory immediately after proxy creation. No role required — the factory is trusted at deploy time. Reverts with `InvalidRateType` if `rateType` is `NONE`._
+_Intended to be called by the factory immediately after proxy creation. No role required — the factory is trusted at deploy time._
 
 #### Parameters
 
@@ -90,7 +90,7 @@ function setCouponRateType(enum IInterestRate.RateType rateType) external nonpay
 
 Sets the coupon rate type discriminator for this asset.
 
-_Protected by `onlyRole(ROLE_INTEREST_RATE_MANAGER)` and `onlyValidRateType`._
+_Protected by `onlyRole(ROLE_INTEREST_RATE_MANAGER)`._
 
 #### Parameters
 

@@ -6,7 +6,7 @@ _Asset Tokenization Studio Team_
 
 Interface for the high-level, partition-agnostic hold read accessors.
 
-_Defines the read surface of the `HoldFacet` diamond facet: the aggregate held balance for an account and the third party registered on a specific hold. Partition-scoped accessors remain on `IHoldByPartition`. Implementations are expected to honour `EvmAccessors` for adjusted balance reads so results stay consistent under time-travel tests._
+_Defines the read surface of the `HoldFacet` diamond facet: the aggregate held balance for an account and the third party registered on a specific hold. Partition-scoped accessors remain on `IHoldByPartition`. Implementations are expected to honour `TimeTravelStorageWrapper` for adjusted balance reads so results stay consistent under time-travel tests._
 
 ## Methods
 

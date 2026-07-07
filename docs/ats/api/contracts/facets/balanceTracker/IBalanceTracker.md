@@ -6,7 +6,7 @@ _Asset Tokenization Studio Team_
 
 Interface for querying token balances and total supply across all partitions, with support for time-adjusted values that simulate pending balance adjustments.
 
-_All read operations resolve the current block timestamp via `EvmAccessors`, enabling deterministic results in test environments without altering production behaviour._
+_All read operations resolve the current block timestamp via `TimeTravelStorageWrapper`, enabling deterministic results in test environments without altering production behaviour._
 
 ## Methods
 

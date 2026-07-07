@@ -673,13 +673,13 @@ _Emits `IFreeze.TokensUnfrozen` for each address. Token must be unpaused._
 function blockTimestamp() external view returns (uint256)
 ```
 
-Returns the currently resolved system timestamp (override or native).
+Retrieves the current system timestamp
 
 #### Returns
 
-| Name | Type    | Description                                                                |
-| ---- | ------- | -------------------------------------------------------------------------- |
-| \_0  | uint256 | The active timestamp — the override when set, otherwise `block.timestamp`. |
+| Name | Type    | Description |
+| ---- | ------- | ----------- |
+| \_0  | uint256 | undefined   |
 
 ### burn
 
@@ -944,49 +944,17 @@ Cancels an existing voting
 | --------- | ---- | --------------------------------------- |
 | success\_ | bool | Whether the cancellation was successful |
 
-### changeSystemBlockNumber
+### changeSystemBlocknumber
 
 ```solidity
-function changeSystemBlockNumber(uint256 _newSystemBlockNumber) external nonpayable
+function changeSystemBlocknumber(uint256 _newSystemBlocknumber) external nonpayable
 ```
-
-Overrides the block number returned by `EvmAccessors.getBlockNumber`.
 
 #### Parameters
 
-| Name                   | Type    | Description                    |
-| ---------------------- | ------- | ------------------------------ |
-| \_newSystemBlockNumber | uint256 | The new override block number. |
-
-### changeSystemChainId
-
-```solidity
-function changeSystemChainId(uint256 _newChainId) external nonpayable
-```
-
-Overrides the chain id returned by `EvmAccessors.getChainId`.
-
-#### Parameters
-
-| Name         | Type    | Description                |
-| ------------ | ------- | -------------------------- |
-| \_newChainId | uint256 | The new override chain id. |
-
-### changeSystemSender
-
-```solidity
-function changeSystemSender(address _newSender) external nonpayable
-```
-
-Overrides the sender returned by `EvmAccessors.getMsgSender`.
-
-_The override is global storage applied to every read on the diamond; prefer Hardhat impersonation for ordinary per-call sender control. Reverts on the zero address (the override sentinel) — use `resetSystemSender` to clear._
-
-#### Parameters
-
-| Name        | Type    | Description              |
-| ----------- | ------- | ------------------------ |
-| \_newSender | address | The new override sender. |
+| Name                   | Type    | Description |
+| ---------------------- | ------- | ----------- |
+| \_newSystemBlocknumber | uint256 | undefined   |
 
 ### changeSystemTimestamp
 
@@ -994,13 +962,13 @@ _The override is global storage applied to every read on the diamond; prefer Har
 function changeSystemTimestamp(uint256 _newSystemTime) external nonpayable
 ```
 
-Overrides the timestamp returned by `EvmAccessors.getBlockTimestamp`.
+Changes the system timestamp emits SystemTimestampChanged event
 
 #### Parameters
 
-| Name            | Type    | Description                 |
-| --------------- | ------- | --------------------------- |
-| \_newSystemTime | uint256 | The new override timestamp. |
+| Name            | Type    | Description              |
+| --------------- | ------- | ------------------------ |
+| \_newSystemTime | uint256 | The new system timestamp |
 
 ### checkpoints
 
@@ -2500,9 +2468,9 @@ Returns the stored coupon rate type.
 
 #### Returns
 
-| Name | Type                        | Description                                                |
-| ---- | --------------------------- | ---------------------------------------------------------- |
-| \_0  | enum IInterestRate.RateType | The `RateType` value; defaults to `NONE` (0) if never set. |
+| Name | Type                        | Description                                                    |
+| ---- | --------------------------- | -------------------------------------------------------------- |
+| \_0  | enum IInterestRate.RateType | The `RateType` value; defaults to `STANDARD` (0) if never set. |
 
 ### getCouponsFor
 
@@ -2512,7 +2480,7 @@ function getCouponsFor(uint256 _couponID, uint256 _pageIndex, uint256 _pageLengt
 
 Returns coupon information for every holder of a given coupon, paginated.
 
-_Internally resolves the holder page then retrieves per-holder coupon details. The two returned arrays share the same index: `couponFor_[i]`corresponds to`holders*[i]`.*
+_Internally resolves the holder page then retrieves per-holder coupon details. The two returned arrays share the same index: `couponFor_[i]` corresponds to `holders_[i]`._
 
 #### Parameters
 
@@ -3171,20 +3139,6 @@ Returns the total amount of tokens currently frozen for a wallet.
 | Name | Type    | Description                                                             |
 | ---- | ------- | ----------------------------------------------------------------------- |
 | \_0  | uint256 | The total frozen token amount for `_userAddress` across all partitions. |
-
-### getGeographicalExposure
-
-```solidity
-function getGeographicalExposure() external view returns (struct ILoansPortfolio.GeographicalExposureData[] geographicalExposure_)
-```
-
-Returns the geographical exposure aggregated by country.
-
-#### Returns
-
-| Name                   | Type                                       | Description                                                                                        |
-| ---------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------- |
-| geographicalExposure\_ | ILoansPortfolio.GeographicalExposureData[] | Array of `(country, count)` tuples covering every country present in the portfolio&#39;s holdings. |
 
 ### getHeldAmountFor
 
@@ -5385,12 +5339,14 @@ _Callable once; subsequent calls revert with `FacetAlreadyRegistered`. Requires 
 ### initializeCustomData
 
 ```solidity
-function initializeCustomData() external nonpayable
+function initializeCustomData(ICustomData.CustomDataEntry[] _entries) external nonpayable
 ```
 
-Initialises the custom data capability on the token.
+#### Parameters
 
-_Callable once; subsequent calls revert with `FacetAlreadyRegistered`. Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment._
+| Name      | Type                          | Description |
+| --------- | ----------------------------- | ----------- |
+| \_entries | ICustomData.CustomDataEntry[] | undefined   |
 
 ### initializeDeactivate
 
@@ -5475,16 +5431,6 @@ Initialises the ERC-20Votes capability on the token.
 | Name        | Type | Description                                                       |
 | ----------- | ---- | ----------------------------------------------------------------- |
 | \_activated | bool | Whether the voting feature should be active after initialisation. |
-
-### initializeEvmAccessors
-
-```solidity
-function initializeEvmAccessors() external nonpayable
-```
-
-Marks the facet ready in the centralised initializer so a token that registers it reaches operational status. Reverts if already registered.
-
-_Called once per deployed security — by the test factory immediately after deployment, or directly by the deployer in direct-deploy fixtures._
 
 ### initializeExternalControlLists
 
@@ -5656,7 +5602,7 @@ function initializeInterestRateType(enum IInterestRate.RateType _rateType) exter
 
 Initializes the coupon rate type during asset deployment.
 
-_Intended to be called by the factory immediately after proxy creation. No role required — the factory is trusted at deploy time. Reverts with `InvalidRateType` if `rateType` is `NONE`._
+_Intended to be called by the factory immediately after proxy creation. No role required — the factory is trusted at deploy time._
 
 #### Parameters
 
@@ -6081,6 +6027,14 @@ function initializeSsiManagement() external nonpayable
 Initialises the SSI management capability on the token.
 
 _Callable once; subsequent calls revert with `FacetAlreadyRegistered`. Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment._
+
+### initializeTimeTravel
+
+```solidity
+function initializeTimeTravel() external nonpayable
+```
+
+Initializes the time travel contract
 
 ### initializeTransfer
 
@@ -7599,29 +7553,11 @@ _Operates on `msg.sender` only; no admin role is required. Reverts with `Account
 | --------- | ---- | -------------------------------------------- |
 | success\_ | bool | True if the role was successfully renounced. |
 
-### resetSystemBlockNumber
+### resetSystemBlocknumber
 
 ```solidity
-function resetSystemBlockNumber() external nonpayable
+function resetSystemBlocknumber() external nonpayable
 ```
-
-Clears the block number override, restoring `block.number`.
-
-### resetSystemChainId
-
-```solidity
-function resetSystemChainId() external nonpayable
-```
-
-Clears the chain id override, restoring `block.chainid`.
-
-### resetSystemSender
-
-```solidity
-function resetSystemSender() external nonpayable
-```
-
-Clears the sender override, restoring `msg.sender`.
 
 ### resetSystemTimestamp
 
@@ -7629,7 +7565,7 @@ Clears the sender override, restoring `msg.sender`.
 function resetSystemTimestamp() external nonpayable
 ```
 
-Clears the timestamp override, restoring `block.timestamp`.
+Resets the system timestamp emits SystemTimestampReset event
 
 ### revokeKyc
 
@@ -7863,7 +7799,7 @@ function setCouponRateType(enum IInterestRate.RateType _rateType) external nonpa
 
 Sets the coupon rate type discriminator for this asset.
 
-_Requires `ROLE_INTEREST_RATE_MANAGER`. Reverts with `InvalidRateType` if `rateType` is `NONE`._
+_Requires `ROLE_INTEREST_RATE_MANAGER`._
 
 #### Parameters
 
@@ -7887,6 +7823,18 @@ _Requires `ROLE_CUSTOM_DATA_MANAGER` and the token to be unpaused. Overwrites th
 | ------- | ------- | ------------------------------------------------------------ |
 | \_key   | bytes32 | The custom data key under which to store the value.          |
 | \_value | bytes[] | The ordered list of byte payloads to associate with the key. |
+
+### setCustomDataBatch
+
+```solidity
+function setCustomDataBatch(ICustomData.CustomDataEntry[] _entries) external nonpayable
+```
+
+#### Parameters
+
+| Name      | Type                          | Description |
+| --------- | ----------------------------- | ----------- |
+| \_entries | ICustomData.CustomDataEntry[] | undefined   |
 
 ### setDividend
 
@@ -9901,15 +9849,54 @@ Emitted when an operator schedules a new coupon corporate action.
 | operator `indexed`          | address             | Address that scheduled the coupon.                                     |
 | coupon                      | ICouponTypes.Coupon | The coupon parameters captured at scheduling time.                     |
 
+### CustomDataBatchSet
+
+```solidity
+event CustomDataBatchSet(ICustomData.CustomDataEntry[] entries)
+```
+
+Emitted once when multiple key/value entries are written atomically via `setCustomDataBatch`.
+
+_Fires once per `setCustomDataBatch` call, after all entries have been persisted. Does NOT fire from `initializeCustomData`, which emits `CustomDataInitialized` instead. Each entry in `entries` follows the same full-overwrite semantics as `setCustomData`; an empty inner array clears that key._
+
+#### Parameters
+
+| Name    | Type                          | Description                                             |
+| ------- | ----------------------------- | ------------------------------------------------------- |
+| entries | ICustomData.CustomDataEntry[] | The list of key/value pairs written in this batch call. |
+
 ### CustomDataInitialized
 
 ```solidity
-event CustomDataInitialized()
+event CustomDataInitialized(ICustomData.CustomDataEntry[] entries)
 ```
 
 Emitted once when the metadata capability is initialised on a token.
 
-_Fires exclusively from `initializeCustomData`._
+_Fires exclusively from `initializeCustomData`, after all seed entries have been written._
+
+#### Parameters
+
+| Name    | Type                          | Description                                                                                                |
+| ------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| entries | ICustomData.CustomDataEntry[] | The list of key/value pairs seeded at initialisation time, or an empty array if no seed data was provided. |
+
+### CustomDataSet
+
+```solidity
+event CustomDataSet(bytes32 indexed key, bytes[] value)
+```
+
+Emitted whenever the value stored under `key` is set or replaced by `setCustomData`.
+
+_Fires once per `setCustomData` call. Does NOT fire from `setCustomDataBatch` or `initializeCustomData`. The emitted `value` is the full replacement array; an empty array signals the key was cleared._
+
+#### Parameters
+
+| Name          | Type    | Description                                               |
+| ------------- | ------- | --------------------------------------------------------- |
+| key `indexed` | bytes32 | The custom data key whose value was set.                  |
+| value         | bytes[] | The ordered list of byte payloads now stored under `key`. |
 
 ### DeactivateInitialized
 
@@ -10113,13 +10100,22 @@ _Fires exclusively from `initializeERC20Votes` after the storage write succeeds.
 | --------- | ---- | --------------------------------------------------------------- |
 | activated | bool | Whether the ERC-20Votes feature is active after initialisation. |
 
-### EvmAccessorsInitialized
+### EffectivelyRolesApplied
 
 ```solidity
-event EvmAccessorsInitialized()
+event EffectivelyRolesApplied(bytes32[] roles, bool[] actives)
 ```
 
-Emitted when the facet is marked ready in the centralised initializer.
+Emitted when one or more role changes are effectively applied.
+
+_`roles` and `actives` are parallel arrays containing the role states that resulted in effective storage mutations._
+
+#### Parameters
+
+| Name    | Type      | Description                                                                   |
+| ------- | --------- | ----------------------------------------------------------------------------- |
+| roles   | bytes32[] | The roles whose assigned state changed.                                       |
+| actives | bool[]    | The effective state applied to each role; `true` granted and `false` revoked. |
 
 ### ExternalControlListInitialized
 
@@ -10721,9 +10717,9 @@ _Fires exclusively from `initializeLoansPortfolio` after the storage write succe
 
 #### Parameters
 
-| Name               | Type                                      | Description                                              |
-| ------------------ | ----------------------------------------- | -------------------------------------------------------- |
-| loansPortfolioData | ILoansPortfolio.LoansPortfolioDetailsData | The portfolio configuration persisted at initialisation. |
+| Name               | Type                                      | Description |
+| ------------------ | ----------------------------------------- | ----------- |
+| loansPortfolioData | ILoansPortfolio.LoansPortfolioDetailsData | undefined   |
 
 ### LoansPortfolioWithdrawn
 
@@ -11743,20 +11739,20 @@ Emitted when a role is revoked from an account.
 ### RolesApplied
 
 ```solidity
-event RolesApplied(bytes32[] requestedRoles, bool[] requestedStates, address account, bytes32[] appliedRoles, bool[] appliedStates)
+event RolesApplied(bytes32[] roles, bool[] actives, address account)
 ```
 
-Emitted when multiple roles are applied to an account in a single operation.
+Emitted when multiple role operations are requested for an account.
+
+_`roles` and `actives` are parallel arrays and must have the same length. Entries represent the requested role state changes, not necessarily only the effective storage mutations._
 
 #### Parameters
 
-| Name            | Type      | Description                                                              |
-| --------------- | --------- | ------------------------------------------------------------------------ |
-| requestedRoles  | bytes32[] | The roles that were submitted by the caller.                             |
-| requestedStates | bool[]    | Corresponding grant/revoke flags; `true` means granted, `false` revoked. |
-| account         | address   | The account to which the roles were applied.                             |
-| appliedRoles    | bytes32[] | The subset of `requestedRoles` whose state effectively changed.          |
-| appliedStates   | bool[]    | The corresponding final state for each effectively applied role.         |
+| Name    | Type      | Description                                                           |
+| ------- | --------- | --------------------------------------------------------------------- |
+| roles   | bytes32[] | The roles processed by the batch operation.                           |
+| actives | bool[]    | The requested state for each role; `true` grants and `false` revokes. |
+| account | address   | The account for which the role operations are requested.              |
 
 ### ScheduledBalanceAdjustmentCancelled
 
@@ -11907,74 +11903,24 @@ Emitted once when the SSI management capability is initialised on a token.
 
 _Fires exclusively from `initializeSsiManagement`._
 
-### SystemBlockNumberChanged
+### SystemBlocknumberChanged
 
 ```solidity
-event SystemBlockNumberChanged(uint256 legacySystemNumber, uint256 newSystemNumber)
+event SystemBlocknumberChanged(uint256 legacySystemNumber, uint256 newSystemNumber)
 ```
-
-Emitted when the overridden system block number is changed.
 
 #### Parameters
 
-| Name               | Type    | Description                                        |
-| ------------------ | ------- | -------------------------------------------------- |
-| legacySystemNumber | uint256 | The previous override value (0 when none was set). |
-| newSystemNumber    | uint256 | The new override value.                            |
+| Name               | Type    | Description |
+| ------------------ | ------- | ----------- |
+| legacySystemNumber | uint256 | undefined   |
+| newSystemNumber    | uint256 | undefined   |
 
-### SystemBlockNumberReset
-
-```solidity
-event SystemBlockNumberReset()
-```
-
-Emitted when the system block number override is cleared.
-
-### SystemChainIdChanged
+### SystemBlocknumberReset
 
 ```solidity
-event SystemChainIdChanged(uint256 oldChainId, uint256 newChainId)
+event SystemBlocknumberReset()
 ```
-
-Emitted when the overridden chain id is changed.
-
-#### Parameters
-
-| Name       | Type    | Description                                        |
-| ---------- | ------- | -------------------------------------------------- |
-| oldChainId | uint256 | The previous override value (0 when none was set). |
-| newChainId | uint256 | The new override value.                            |
-
-### SystemChainIdReset
-
-```solidity
-event SystemChainIdReset()
-```
-
-Emitted when the chain id override is cleared.
-
-### SystemSenderChanged
-
-```solidity
-event SystemSenderChanged(address oldSender, address newSender)
-```
-
-Emitted when the overridden message sender is changed.
-
-#### Parameters
-
-| Name      | Type    | Description                                                       |
-| --------- | ------- | ----------------------------------------------------------------- |
-| oldSender | address | The previous override value (the zero address when none was set). |
-| newSender | address | The new override value.                                           |
-
-### SystemSenderReset
-
-```solidity
-event SystemSenderReset()
-```
-
-Emitted when the message sender override is cleared.
 
 ### SystemTimestampChanged
 
@@ -11982,14 +11928,14 @@ Emitted when the message sender override is cleared.
 event SystemTimestampChanged(uint256 legacySystemTime, uint256 newSystemTime)
 ```
 
-Emitted when the overridden system timestamp is changed.
+Emitted when the system timestamp is changed
 
 #### Parameters
 
-| Name             | Type    | Description                                        |
-| ---------------- | ------- | -------------------------------------------------- |
-| legacySystemTime | uint256 | The previous override value (0 when none was set). |
-| newSystemTime    | uint256 | The new override value.                            |
+| Name             | Type    | Description                                    |
+| ---------------- | ------- | ---------------------------------------------- |
+| legacySystemTime | uint256 | The legacy system timestamp (0 if not changed) |
+| newSystemTime    | uint256 | The new system timestamp                       |
 
 ### SystemTimestampReset
 
@@ -11997,7 +11943,7 @@ Emitted when the overridden system timestamp is changed.
 event SystemTimestampReset()
 ```
 
-Emitted when the system timestamp override is cleared.
+Emitted when the system timestamp is reset
 
 ### TaskExecutionFailed
 
@@ -13165,33 +13111,19 @@ Thrown when attempting to set a hold with a zero token amount.
 | -------------- | ------- | -------------------- |
 | amortizationID | uint256 | The amortization ID. |
 
-### InvalidBlockNumber
+### InvalidBlocknumber
 
 ```solidity
-error InvalidBlockNumber(uint256 newSystemNumber)
+error InvalidBlocknumber(uint256 newSystemNumber)
 ```
 
-Thrown when setting a zero system block number.
+Error thrown when attempting to set an invalid new system block number
 
 #### Parameters
 
-| Name            | Type    | Description                |
-| --------------- | ------- | -------------------------- |
-| newSystemNumber | uint256 | The rejected block number. |
-
-### InvalidChainId
-
-```solidity
-error InvalidChainId(uint256 chainId)
-```
-
-Thrown when setting a zero chain id.
-
-#### Parameters
-
-| Name    | Type    | Description            |
-| ------- | ------- | ---------------------- |
-| chainId | uint256 | The rejected chain id. |
+| Name            | Type    | Description                                    |
+| --------------- | ------- | ---------------------------------------------- |
+| newSystemNumber | uint256 | The new system timestamp that caused the error |
 
 ### InvalidClearingAmount
 
@@ -13305,36 +13237,6 @@ Thrown when an account does not hold or is not associated with the specified par
 | --------- | ------- | --------------------------------------------- |
 | account   | address | Address that was checked.                     |
 | partition | bytes32 | Partition that was not found for the account. |
-
-### InvalidRateType
-
-```solidity
-error InvalidRateType(enum IInterestRate.RateType rateType)
-```
-
-Reverts when `NONE` is passed as a rate type.
-
-_`NONE` is reserved as the uninitialized default; it must never be set explicitly._
-
-#### Parameters
-
-| Name     | Type                        | Description                                   |
-| -------- | --------------------------- | --------------------------------------------- |
-| rateType | enum IInterestRate.RateType | The invalid rate type supplied by the caller. |
-
-### InvalidSender
-
-```solidity
-error InvalidSender(address sender)
-```
-
-Thrown when setting the zero address as the sender override (it is the sentinel).
-
-#### Parameters
-
-| Name   | Type    | Description                  |
-| ------ | ------- | ---------------------------- |
-| sender | address | The rejected sender address. |
 
 ### InvalidTimestamp
 
@@ -13878,7 +13780,7 @@ Thrown when attempting to recover a wallet that has already been recovered.
 error WrongChainId()
 ```
 
-Thrown when the resolved chain id does not match the expected value.
+Emitted when using time travel out of test environment
 
 ### WrongClearingId
 

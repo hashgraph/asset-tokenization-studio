@@ -6,7 +6,7 @@ _Asset Tokenization Studio Team_
 
 Manages internal KYC records and exposes paginated KYC status queries.
 
-_Implements `IKyc` and delegates persistent state to `KycStorageWrapper`. Mutating operations require the token to be operational, activated and unpaused, except initialisation, which is restricted to an unregistered facet. Time-dependent status checks use `EvmAccessors` as the canonical timestamp source._
+_Implements `IKyc` and delegates persistent state to `KycStorageWrapper`. Mutating operations require the token to be operational, activated and unpaused, except initialisation, which is restricted to an unregistered facet. Time-dependent status checks use `TimeTravelStorageWrapper` as the canonical timestamp source._
 
 ## Methods
 

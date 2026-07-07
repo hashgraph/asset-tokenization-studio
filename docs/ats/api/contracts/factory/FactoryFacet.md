@@ -29,25 +29,6 @@ function deployBond(IFactory.BondData _bondData, FactoryRegulationData _factoryR
 | ------------- | ------- | ----------- |
 | bondAddress\_ | address | undefined   |
 
-### deployDepositToken
-
-```solidity
-function deployDepositToken(IFactory.DepositTokenData _depositTokenData, FactoryRegulationData _factoryRegulationData) external nonpayable returns (address depositTokenAddress_)
-```
-
-#### Parameters
-
-| Name                    | Type                      | Description |
-| ----------------------- | ------------------------- | ----------- |
-| \_depositTokenData      | IFactory.DepositTokenData | undefined   |
-| \_factoryRegulationData | FactoryRegulationData     | undefined   |
-
-#### Returns
-
-| Name                  | Type    | Description |
-| --------------------- | ------- | ----------- |
-| depositTokenAddress\_ | address | undefined   |
-
 ### deployEquity
 
 ```solidity
@@ -170,23 +151,6 @@ Emitted when a new variable-rate bond is deployed.
 | bondData           | IFactory.BondData     | Full bond configuration supplied at deployment. |
 | regulationData     | FactoryRegulationData | Regulation settings applied to the bond.        |
 
-### DepositTokenDeployed
-
-```solidity
-event DepositTokenDeployed(address indexed deployer, address depositTokenAddress, IFactory.DepositTokenData depositTokenData, FactoryRegulationData regulationData)
-```
-
-Emitted when a new deposit token is deployed.
-
-#### Parameters
-
-| Name                | Type                      | Description                                        |
-| ------------------- | ------------------------- | -------------------------------------------------- |
-| deployer `indexed`  | address                   | Address that initiated the deployment.             |
-| depositTokenAddress | address                   | Address of the newly deployed deposit token proxy. |
-| depositTokenData    | IFactory.DepositTokenData | Full deposit token configuration.                  |
-| regulationData      | FactoryRegulationData     | Regulation data validated for the deposit token.   |
-
 ### EquityDeployed
 
 ```solidity
@@ -207,7 +171,7 @@ Emitted when a new equity token is deployed.
 ### ProxyDeployed
 
 ```solidity
-event ProxyDeployed(address indexed proxyAddress, contract IBusinessLogicResolver resolver, bytes32 configKey, uint256 version, IResolverProxy.Rbac[] rbac)
+event ProxyDeployed(address indexed proxyAddress, contract IBusinessLogicResolver resolver, bytes32 configKey, uint256 version, IResolverProxy.Rbac[] rbac, bytes data)
 ```
 
 Emitted when a new resolver proxy is deployed.
@@ -221,6 +185,7 @@ Emitted when a new resolver proxy is deployed.
 | configKey              | bytes32                         | Configuration identifier used by the proxy.             |
 | version                | uint256                         | Initial configuration version.                          |
 | rbac                   | IResolverProxy.Rbac[]           | Role-based access control entries seeded at deployment. |
+| data                   | bytes                           | Additional data for the proxy deployment.               |
 
 ## Errors
 
@@ -294,34 +259,6 @@ _The expected relationship between both dates is defined by the caller&#39;s val
 | firstDate  | uint256 | First date participating in the failed comparison.  |
 | secondDate | uint256 | Second date participating in the failed comparison. |
 
-### WrongISIN
-
-```solidity
-error WrongISIN(string isin)
-```
-
-Raised when the provided ISIN does not meet the expected format or length.
-
-#### Parameters
-
-| Name | Type   | Description              |
-| ---- | ------ | ------------------------ |
-| isin | string | The invalid ISIN string. |
-
-### WrongISINChecksum
-
-```solidity
-error WrongISINChecksum(string isin)
-```
-
-Raised when the ISIN checksum is invalid.
-
-#### Parameters
-
-| Name | Type   | Description              |
-| ---- | ------ | ------------------------ |
-| isin | string | The invalid ISIN string. |
-
 ### WrongTimestamp
 
 ```solidity
@@ -330,7 +267,7 @@ error WrongTimestamp(uint256 timeStamp)
 
 Reverts when a scheduled timestamp is not strictly in the future.
 
-_The current timestamp is read through `EvmAccessors`._
+_The current timestamp is read through `TimeTravelStorageWrapper`._
 
 #### Parameters
 

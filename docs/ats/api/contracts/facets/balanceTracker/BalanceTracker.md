@@ -6,7 +6,7 @@ _Asset Tokenization Studio Team_
 
 Abstract implementation of `IBalanceTracker` that consolidates token balance and total supply queries into a single, time-aware read layer.
 
-_Delegates all storage reads to `ERC1410StorageWrapper` and `TokenCoreOps`, passing the resolved timestamp from `EvmAccessors` to support non-triggered adjustment simulation. Intended to be inherited by `BalanceTrackerFacet`._
+_Delegates all storage reads to `ERC1410StorageWrapper` and `TokenCoreOps`, passing the resolved timestamp from `TimeTravelStorageWrapper` to support non-triggered adjustment simulation. Intended to be inherited by `BalanceTrackerFacet`._
 
 ## Methods
 

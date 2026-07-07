@@ -4,7 +4,7 @@ _Asset Tokenization Studio Team_
 
 > Factory Interface
 
-Interface for deploying tokenised securities (equity, bonds, loans) through a centralised factory that configures resolver proxies, business-logic resolvers, and role-based access control.
+Interface for deploying tokenised securities (equity, bonds, deposit tokens) through a centralised factory that configures resolver proxies, business-logic resolvers, and role-based access control.
 
 ## Methods
 
@@ -26,25 +26,6 @@ function deployBond(IFactory.BondData _bondData, FactoryRegulationData _factoryR
 | Name          | Type    | Description |
 | ------------- | ------- | ----------- |
 | bondAddress\_ | address | undefined   |
-
-### deployDepositToken
-
-```solidity
-function deployDepositToken(IFactory.DepositTokenData _depositTokenData, FactoryRegulationData _factoryRegulationData) external nonpayable returns (address depositTokenAddress_)
-```
-
-#### Parameters
-
-| Name                    | Type                      | Description |
-| ----------------------- | ------------------------- | ----------- |
-| \_depositTokenData      | IFactory.DepositTokenData | undefined   |
-| \_factoryRegulationData | FactoryRegulationData     | undefined   |
-
-#### Returns
-
-| Name                  | Type    | Description |
-| --------------------- | ------- | ----------- |
-| depositTokenAddress\_ | address | undefined   |
 
 ### deployEquity
 
@@ -126,23 +107,6 @@ Emitted when a new variable-rate bond is deployed.
 | bondData           | IFactory.BondData     | Full bond configuration supplied at deployment. |
 | regulationData     | FactoryRegulationData | Regulation settings applied to the bond.        |
 
-### DepositTokenDeployed
-
-```solidity
-event DepositTokenDeployed(address indexed deployer, address depositTokenAddress, IFactory.DepositTokenData depositTokenData, FactoryRegulationData regulationData)
-```
-
-Emitted when a new deposit token is deployed.
-
-#### Parameters
-
-| Name                | Type                      | Description                                        |
-| ------------------- | ------------------------- | -------------------------------------------------- |
-| deployer `indexed`  | address                   | Address that initiated the deployment.             |
-| depositTokenAddress | address                   | Address of the newly deployed deposit token proxy. |
-| depositTokenData    | IFactory.DepositTokenData | Full deposit token configuration.                  |
-| regulationData      | FactoryRegulationData     | Regulation data validated for the deposit token.   |
-
 ### EquityDeployed
 
 ```solidity
@@ -163,7 +127,7 @@ Emitted when a new equity token is deployed.
 ### ProxyDeployed
 
 ```solidity
-event ProxyDeployed(address indexed proxyAddress, contract IBusinessLogicResolver resolver, bytes32 configKey, uint256 version, IResolverProxy.Rbac[] rbac)
+event ProxyDeployed(address indexed proxyAddress, contract IBusinessLogicResolver resolver, bytes32 configKey, uint256 version, IResolverProxy.Rbac[] rbac, bytes data)
 ```
 
 Emitted when a new resolver proxy is deployed.
@@ -177,6 +141,7 @@ Emitted when a new resolver proxy is deployed.
 | configKey              | bytes32                         | Configuration identifier used by the proxy.             |
 | version                | uint256                         | Initial configuration version.                          |
 | rbac                   | IResolverProxy.Rbac[]           | Role-based access control entries seeded at deployment. |
+| data                   | bytes                           | Additional data for the proxy deployment.               |
 
 ## Errors
 
@@ -216,31 +181,3 @@ Raised when the requested regulation type and sub-type combination is not permit
 | ----------------- | ---------------------- | ----------------------------------- |
 | regulationType    | enum RegulationType    | Primary regulation category.        |
 | regulationSubType | enum RegulationSubType | Sub-category within the regulation. |
-
-### WrongISIN
-
-```solidity
-error WrongISIN(string isin)
-```
-
-Raised when the provided ISIN does not meet the expected format or length.
-
-#### Parameters
-
-| Name | Type   | Description              |
-| ---- | ------ | ------------------------ |
-| isin | string | The invalid ISIN string. |
-
-### WrongISINChecksum
-
-```solidity
-error WrongISINChecksum(string isin)
-```
-
-Raised when the ISIN checksum is invalid.
-
-#### Parameters
-
-| Name | Type   | Description              |
-| ---- | ------ | ------------------------ |
-| isin | string | The invalid ISIN string. |

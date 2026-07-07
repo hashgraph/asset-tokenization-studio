@@ -6,7 +6,7 @@ _Hashgraph Asset Tokenization_
 
 Manages the lifecycle and retrieval of token-related documentation.
 
-_Provides the abstract implementation of `IDocumentation` for diamond facets. Write operations require an operational, activated and unpaused token, and are restricted to authorised documenters. Document data is persisted through `DocumentationStorageWrapper`, while timestamps are resolved through `EvmAccessors` to support deterministic test execution._
+_Provides the abstract implementation of `IDocumentation` for diamond facets. Write operations require an operational, activated and unpaused token, and are restricted to authorised documenters. Document data is persisted through `DocumentationStorageWrapper`, while timestamps are resolved through `TimeTravelStorageWrapper` to support deterministic test execution._
 
 ## Methods
 

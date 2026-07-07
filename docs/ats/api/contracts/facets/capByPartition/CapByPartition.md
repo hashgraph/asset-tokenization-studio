@@ -6,7 +6,7 @@ _Asset Tokenization Studio Team_
 
 Abstract implementation of `ICapByPartition` providing per-partition maximum supply cap management.
 
-_Delegates persistence to {CapStorageWrapper} and resolves the active timestamp via {EvmAccessors}. The setter is gated by `onlyUnpaused`, `onlyRole(ROLE_CAP)` and `onlyValidNewMaxSupplyByPartition`; the latter enforces the partition-vs-global relationship and rejects values below the partition&#39;s adjusted total supply. Intended to be inherited by `CapByPartitionFacet`._
+_Delegates persistence to {CapStorageWrapper} and resolves the active timestamp via {TimeTravelStorageWrapper}. The setter is gated by `onlyUnpaused`, `onlyRole(ROLE_CAP)` and `onlyValidNewMaxSupplyByPartition`; the latter enforces the partition-vs-global relationship and rejects values below the partition&#39;s adjusted total supply. Intended to be inherited by `CapByPartitionFacet`._
 
 ## Methods
 

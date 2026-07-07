@@ -6,7 +6,7 @@ _Asset Tokenization Studio Team_
 
 Abstract implementation of `IBalanceTrackerByPartition` that consolidates partition-scoped token balance and total supply queries into a single, time-aware read layer.
 
-_Delegates all storage reads to `ERC1410StorageWrapper` and `ERC3643StorageWrapper`, passing the resolved timestamp from `EvmAccessors` to support non-triggered adjustment simulation. Intended to be inherited by `BalanceTrackerByPartitionFacet`._
+_Delegates all storage reads to `ERC1410StorageWrapper` and `ERC3643StorageWrapper`, passing the resolved timestamp from `TimeTravelStorageWrapper` to support non-triggered adjustment simulation. Intended to be inherited by `BalanceTrackerByPartitionFacet`._
 
 ## Methods
 

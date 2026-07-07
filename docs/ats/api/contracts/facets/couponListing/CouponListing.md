@@ -6,7 +6,7 @@ _Asset Tokenization Studio Team_
 
 Abstract implementation of `ICouponListing`, providing read-only queries for the ordered coupon list and the scheduled coupon listing.
 
-_Reads from `CouponStorageWrapper`, `ScheduledTasksStorageWrapper`, and `EvmAccessors`. Intended to be inherited by `CouponListingFacet`._
+_Reads from `CouponStorageWrapper`, `ScheduledTasksStorageWrapper`, and `TimeTravelStorageWrapper`. Intended to be inherited by `CouponListingFacet`._
 
 ## Methods
 

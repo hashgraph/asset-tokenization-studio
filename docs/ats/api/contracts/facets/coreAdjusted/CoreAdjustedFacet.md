@@ -1,7 +1,5 @@
 # CoreAdjustedFacet
 
-_Asset Tokenization Studio Team_
-
 > CoreAdjustedFacet
 
 Diamond facet for the CoreAdjusted domain. Registers the single selector that exposes time-adjusted ERC-20 decimal reads (`decimalsAt`) to the Diamond proxy.

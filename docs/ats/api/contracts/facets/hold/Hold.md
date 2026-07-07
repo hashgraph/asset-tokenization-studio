@@ -6,7 +6,7 @@ _Asset Tokenization Studio Team_
 
 Abstract implementation of high-level hold read operations.
 
-_Exposes read accessors that do not depend on a specific partition and reads the current block timestamp through `EvmAccessors` so the returned values remain consistent with partition-scoped queries under test-mode overrides._
+_Exposes read accessors that do not depend on a specific partition and reads the current block timestamp through `TimeTravelStorageWrapper` so the returned values remain consistent with partition-scoped queries under time-travel tests._
 
 ## Methods
 

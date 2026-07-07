@@ -18,7 +18,7 @@ error WrongTimestamp(uint256 timeStamp)
 
 Reverts when a scheduled timestamp is not strictly in the future.
 
-_The current timestamp is read through `EvmAccessors`._
+_The current timestamp is read through `TimeTravelStorageWrapper`._
 
 #### Parameters
 

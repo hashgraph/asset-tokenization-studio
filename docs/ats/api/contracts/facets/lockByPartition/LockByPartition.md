@@ -6,7 +6,7 @@ _Asset Tokenization Studio Team_
 
 Abstract base for the partition-aware lock writes and partition-scoped read queries declared in `ILockByPartition`.
 
-_Combines the partition write operations (`lockByPartition`, `releaseByPartition`) with the partition-scoped reads (`getLockedAmountForByPartition`, `getLockCountForByPartition`, `getLocksIdForByPartition`, `getLockForByPartition`). All write methods delegate persistence to `LockStorageWrapper`; balance-adjusted reads are timestamped via `EvmAccessors.getBlockTimestamp` so they remain deterministic under time-travel testing. Intended to be inherited by `LockByPartitionFacet`._
+_Combines the partition write operations (`lockByPartition`, `releaseByPartition`) with the partition-scoped reads (`getLockedAmountForByPartition`, `getLockCountForByPartition`, `getLocksIdForByPartition`, `getLockForByPartition`). All write methods delegate persistence to `LockStorageWrapper`; balance-adjusted reads are timestamped via `TimeTravelStorageWrapper.getBlockTimestamp` so they remain deterministic under time-travel testing. Intended to be inherited by `LockByPartitionFacet`._
 
 ## Methods
 
@@ -39,7 +39,7 @@ function getLockForByPartition(bytes32 _partition, address _tokenHolder, uint256
 
 Returns the amount and expiration of a lock on `_partition`.
 
-_Returns the partition figures adjusted by any pending balance-adjustment factors, evaluated at `EvmAccessors.getBlockTimestamp()`._
+_Returns the partition figures adjusted by any pending balance-adjustment factors, evaluated at `TimeTravelStorageWrapper.getBlockTimestamp()`._
 
 #### Parameters
 
@@ -64,7 +64,7 @@ function getLockedAmountForByPartition(bytes32 _partition, address _tokenHolder)
 
 Returns the total locked amount of `_tokenHolder` on `_partition`, adjusted by any pending balance-adjustment factors.
 
-_Returns the partition figure adjusted by any pending balance-adjustment factors, evaluated at `EvmAccessors.getBlockTimestamp()`._
+_Returns the partition figure adjusted by any pending balance-adjustment factors, evaluated at `TimeTravelStorageWrapper.getBlockTimestamp()`._
 
 #### Parameters
 
