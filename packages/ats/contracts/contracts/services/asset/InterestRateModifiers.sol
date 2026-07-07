@@ -3,7 +3,6 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { InterestRateStorageWrapper } from "../../domain/asset/InterestRateStorageWrapper.sol";
 import { IKpiLinkedRate } from "../../facets/kpiLinkedRate/IKpiLinkedRate.sol";
-import { IInterestRate } from "../../facets/interestRate/IInterestRate.sol";
 
 /**
  * @title InterestRateModifiers
@@ -30,16 +29,6 @@ abstract contract InterestRateModifiers {
      */
     modifier onlyValidImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) {
         InterestRateStorageWrapper.requireValidImpactData(_newImpactData);
-        _;
-    }
-
-    /**
-     * @notice Modifier that reverts when `NONE` is supplied as the rate type.
-     * @dev `NONE` is the zero-value default reserved for uninitialised assets.
-     * @param rateType The rate type to validate.
-     */
-    modifier onlyValidRateType(IInterestRate.RateType rateType) {
-        InterestRateStorageWrapper.checkValidRateType(rateType);
         _;
     }
 }

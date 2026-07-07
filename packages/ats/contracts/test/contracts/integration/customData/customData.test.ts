@@ -9,7 +9,6 @@ import { executeRbac } from "@test";
 import type { AssetMockCtx } from "@test";
 
 const KEY_A = ethers.id("customData.test.key.A");
-const KEY_B = ethers.id("customData.test.key.B");
 const UNSET_KEY = ethers.id("customData.test.key.unset");
 
 const PAYLOAD_1 = ethers.hexlify(ethers.toUtf8Bytes("payload-one"));

@@ -16,13 +16,10 @@ bytes32 constant RESOLVER_KEY_INTEREST_RATE = 0xc09a5111a37fc8806e149b4a20c17a33
 interface IInterestRate {
     /**
      * @notice Discriminator that selects which coupon-rate formula is applied.
-     * @dev NONE (0) is the implicit default when no rate type has been set.
-     *      It forces the coupon rate to (0, 0) regardless of any facet state.
-     *      The admin must call `setCouponRateType` with STANDARD, FIXED, or KPI_LINKED
-     *      to enable coupon payments on the asset.
+     * @dev STANDARD (0) is the implicit default when no rate type has been explicitly set.
+     *      It passes user-supplied coupon rates through unchanged.
      */
     enum RateType {
-        NONE,
         STANDARD,
         FIXED,
         KPI_LINKED
@@ -43,17 +40,9 @@ interface IInterestRate {
     event CouponRateTypeSet(address indexed operator, RateType rateType);
 
     /**
-     * @notice Reverts when `NONE` is passed as a rate type.
-     * @dev `NONE` is reserved as the uninitialized default; it must never be set explicitly.
-     * @param rateType The invalid rate type supplied by the caller.
-     */
-    error InvalidRateType(RateType rateType);
-
-    /**
      * @notice Initializes the coupon rate type during asset deployment.
      * @dev Intended to be called by the factory immediately after proxy creation.
      *      No role required — the factory is trusted at deploy time.
-     *      Reverts with `InvalidRateType` if `rateType` is `NONE`.
      * @param _rateType The `RateType` to persist (STANDARD, FIXED, or KPI_LINKED).
      */
     function initializeInterestRateType(RateType _rateType) external;
@@ -61,14 +50,13 @@ interface IInterestRate {
     /**
      * @notice Sets the coupon rate type discriminator for this asset.
      * @dev Requires `ROLE_INTEREST_RATE_MANAGER`.
-     *      Reverts with `InvalidRateType` if `rateType` is `NONE`.
      * @param _rateType The `RateType` to persist (STANDARD, FIXED, or KPI_LINKED).
      */
     function setCouponRateType(RateType _rateType) external;
 
     /**
      * @notice Returns the stored coupon rate type.
-     * @return The `RateType` value; defaults to `NONE` (0) if never set.
+     * @return The `RateType` value; defaults to `STANDARD` (0) if never set.
      */
     function getCouponRateType() external view returns (RateType);
 }

@@ -21,6 +21,7 @@ import {
   EVENT_NAMES,
   TEST_COUPON,
   TEST_BOND_FIXED_RATE,
+  INTEREST_RATE_TYPE,
   expectExactlyOneEvent,
 } from "@test";
 import { ASSET_MOCK_CONFIG_ID } from "../../../../fixtures/deploy/assetMockConfiguration";
@@ -154,7 +155,8 @@ export function couponTests(getCtx: () => AssetMockCtx): void {
       await asset.forceDecimals(6);
       await asset.updateMaturityDate(maturityDate);
       await asset.setNominalValue(100, 2);
-      await asset.connect(signer_A).setCouponRateType(1); // STANDARD — honours the caller-supplied rate/rateDecimals
+      // STANDARD honours the caller-supplied rate/rateDecimals
+      await asset.connect(signer_A).setCouponRateType(INTEREST_RATE_TYPE.STANDARD);
     });
 
     it("GIVEN an account without corporateActions role WHEN setCoupon THEN transaction fails with AccountHasNoRole", async () => {
@@ -1150,7 +1152,7 @@ export function couponTests(getCtx: () => AssetMockCtx): void {
       await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
       await asset.activateInternalKyc();
 
-      await asset.setCouponRateType(2); // FIXED — resolves PENDING coupons from setRate() storage
+      await asset.setCouponRateType(INTEREST_RATE_TYPE.FIXED); // resolves PENDING coupons from setRate() storage
       await asset.setRate(TEST_BOND_FIXED_RATE.RATE, TEST_BOND_FIXED_RATE.RATE_DECIMALS);
 
       const future = currentTimestamp + TIME_PERIODS_S.YEAR * 10;

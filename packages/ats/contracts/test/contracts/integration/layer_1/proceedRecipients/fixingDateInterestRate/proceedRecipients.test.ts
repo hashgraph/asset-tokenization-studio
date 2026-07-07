@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import { dateToUnixTimestamp, ATS_ROLES } from "@scripts";
-import { executeRbac } from "@test";
+import { INTEREST_RATE_TYPE, executeRbac } from "@test";
 import type { AssetMockCtx } from "@test";
 
 const PROCEED_RECIPIENT_1 = "0x1234567890123456789012345678901234567890";
@@ -41,7 +41,7 @@ export function proceedRecipientsTests(getCtx: () => AssetMockCtx): void {
         { role: ATS_ROLES.ROLE_INTEREST_RATE_MANAGER, members: [signer_A.address] },
       ]);
       await asset.updateMaturityDate(dateToUnixTimestamp(`2031-01-01T00:00:00Z`));
-      await asset.setCouponRateType(3); // KPI_LINKED — creates 2 pending tasks on setCoupon
+      await asset.setCouponRateType(INTEREST_RATE_TYPE.KPI_LINKED); // creates 2 pending tasks on setCoupon
     });
 
     describe("Add Tests", () => {

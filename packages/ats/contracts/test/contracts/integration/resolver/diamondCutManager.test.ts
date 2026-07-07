@@ -416,14 +416,6 @@ describe("DiamondCutManager", () => {
     ).to.be.revertedWithCustomError(diamondCutManager, "DefaultValueForConfigurationIdNotPermitted");
   });
 
-  it.skip("GIVEN a resolver and a non admin user WHEN adding a new configuration THEN fails with AccountHasNoRole", async () => {
-    const facetConfigurations = createFacetConfigurations(equityFacetIdList, equityFacetVersionList);
-
-    await expect(
-      diamondCutManager.connect(signer_B).createConfiguration(CONFIG_IDS.equity, facetConfigurations, "0x"),
-    ).to.be.revertedWithCustomError(diamondCutManager, "AccountHasNoRole");
-  });
-
   it("GIVEN a paused resolver WHEN adding a new configuration THEN fails with IsPaused", async () => {
     await pause.connect(signer_B).pause();
 
@@ -530,14 +522,6 @@ describe("DiamondCutManager", () => {
           "0x",
         ),
     ).to.be.revertedWithCustomError(diamondCutManager, "DefaultValueForConfigurationIdNotPermitted");
-  });
-
-  it.skip("GIVEN a resolver and a non admin user WHEN adding a new configuration with createBatchConfiguration THEN fails with AccountHasNoRole", async () => {
-    const facetConfigurations = createFacetConfigurations(equityFacetIdList, equityFacetVersionList);
-
-    await expect(
-      diamondCutManager.connect(signer_B).createBatchConfiguration(CONFIG_IDS.equity, facetConfigurations, false, "0x"),
-    ).to.be.revertedWithCustomError(diamondCutManager, "AccountHasNoRole");
   });
 
   it("GIVEN a paused resolver WHEN adding a new configuration with createBatchConfiguration THEN fails with IsPaused", async () => {
@@ -704,27 +688,6 @@ describe("DiamondCutManager", () => {
 
   it("GIVEN a resolver and an account without ROLE_CREATE_CONFIGURATION WHEN calling cancelBatchConfiguration THEN fails with AccountHasNoRole", async () => {
     const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000052";
-
-    await expect(diamondCutManager.connect(signer_B).cancelBatchConfiguration(testConfigId))
-      .to.be.revertedWithCustomError(diamondCutManager, "AccountHasNoRole")
-      .withArgs(signer_B.address, ATS_ROLES.ROLE_CREATE_CONFIGURATION);
-  });
-
-  it.skip("GIVEN a resolver and a non admin user WHEN canceling a batch configuration THEN fails with AccountHasNoRole", async () => {
-    // Skipped: onlyOwner fires before onlyRole — signer_A creates the batch (becoming owner),
-    // so signer_B reverts with NotOwner before AccountHasNoRole is reached.
-    // The AccountHasNoRole path for cancelBatchConfiguration is covered by the test above,
-    // which calls with a fresh config ID so ownership is unset and onlyRole is reached.
-    const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000011";
-
-    const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] = [
-      {
-        id: equityFacetIdList[0],
-        version: 1,
-      },
-    ];
-
-    await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, facetConfigurations, false, "0x");
 
     await expect(diamondCutManager.connect(signer_B).cancelBatchConfiguration(testConfigId))
       .to.be.revertedWithCustomError(diamondCutManager, "AccountHasNoRole")

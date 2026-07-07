@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { IAssetMock, Kpis__factory } from "@contract-types";
 import type { Kpis } from "@contract-types";
 import { ATS_ROLES, dateToUnixTimestamp, TIME_PERIODS_S, RESOLVER_KEYS } from "@scripts";
-import { executeRbac, getDltTimestamp } from "@test";
+import { INTEREST_RATE_TYPE, executeRbac, getDltTimestamp } from "@test";
 import { ASSET_MOCK_CONFIG_ID } from "../../../../../fixtures/deploy/assetMockConfiguration";
 import type { AssetMockCtx } from "@test";
 
@@ -208,7 +208,7 @@ export function kpiLatestTests(getCtx: () => AssetMockCtx): void {
         });
 
         it("WHEN getMinDate is called THEN returns the coupon fixing date", async () => {
-          await asset.connect(signer_A).setCouponRateType(3);
+          await asset.connect(signer_A).setCouponRateType(INTEREST_RATE_TYPE.KPI_LINKED);
 
           const currentTimestamp = await getDltTimestamp();
           const fixingDate = currentTimestamp + TIME_PERIODS_S.DAY;

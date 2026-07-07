@@ -1226,6 +1226,16 @@ export const TEST_COUPON = {
 } as const;
 
 /**
+ * Mirrors the on-chain `IInterestRate.RateType` enum ordinals (`STANDARD` is the
+ * implicit zero-value default since `NONE` was removed from the Solidity enum).
+ */
+export const INTEREST_RATE_TYPE = {
+  STANDARD: 0,
+  FIXED: 1,
+  KPI_LINKED: 2,
+} as const;
+
+/**
  * Fixed-rate bond test values (coupon rate + decimals).
  *
  * Consumed by the coupon, fixed-rate and interest-rate facet suites, which exercise the

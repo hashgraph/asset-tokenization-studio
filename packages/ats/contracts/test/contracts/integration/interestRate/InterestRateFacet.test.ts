@@ -4,15 +4,8 @@ import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import { ATS_ROLES, RESOLVER_KEYS } from "@scripts";
-import { TEST_BOND_FIXED_RATE, executeRbac } from "@test";
+import { TEST_BOND_FIXED_RATE, INTEREST_RATE_TYPE, executeRbac } from "@test";
 import type { AssetMockCtx } from "@test";
-
-enum RateType {
-  NONE = 0,
-  STANDARD = 1,
-  FIXED = 2,
-  KPI_LINKED = 3,
-}
 
 export function interestRateFacetTests(getCtx: () => AssetMockCtx): void {
   describe("InterestRateFacet Tests", () => {
@@ -28,49 +21,55 @@ export function interestRateFacetTests(getCtx: () => AssetMockCtx): void {
 
       await executeRbac(asset, [{ role: ATS_ROLES.ROLE_INTEREST_RATE_MANAGER, members: [admin.address] }]);
 
-      await asset.connect(admin).setCouponRateType(RateType.FIXED);
+      await asset.connect(admin).setCouponRateType(INTEREST_RATE_TYPE.FIXED);
       await asset.connect(admin).setRate(TEST_BOND_FIXED_RATE.RATE, TEST_BOND_FIXED_RATE.RATE_DECIMALS);
     });
 
     describe("initializeInterestRateType", () => {
       it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeInterestRateType is called THEN AccountHasNoRole", async () => {
-        await expect(asset.connect(nonAdmin).initializeInterestRateType(RateType.FIXED))
+        await expect(asset.connect(nonAdmin).initializeInterestRateType(INTEREST_RATE_TYPE.FIXED))
           .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
           .withArgs(nonAdmin.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
       });
 
       it("GIVEN already-initialised WHEN initializeInterestRateType is called again THEN FacetAlreadyRegistered", async () => {
-        await expect(asset.initializeInterestRateType(RateType.FIXED)).to.be.revertedWithCustomError(
+        await expect(asset.initializeInterestRateType(INTEREST_RATE_TYPE.FIXED)).to.be.revertedWithCustomError(
           asset,
           "FacetAlreadyRegistered",
         );
       });
     });
 
+    describe("out-of-range RateType", () => {
+      it("GIVEN a numeric value outside the RateType enum WHEN setCouponRateType is called THEN reverts without a reason", async () => {
+        await expect(asset.connect(admin).setCouponRateType(4)).to.be.revertedWithoutReason();
+      });
+    });
+
     describe("initializeInterestRateType event", () => {
       it("GIVEN a fresh deployment WHEN initializeInterestRateType is called THEN emits InterestRateTypeInitialized", async () => {
         await asset.forceFacetNotRegistered(RESOLVER_KEYS.interestRate);
-        await expect(asset.initializeInterestRateType(RateType.FIXED))
+        await expect(asset.initializeInterestRateType(INTEREST_RATE_TYPE.FIXED))
           .to.emit(asset, "InterestRateTypeInitialized")
-          .withArgs(RateType.FIXED);
+          .withArgs(INTEREST_RATE_TYPE.FIXED);
       });
     });
 
     describe("Fixed-rate bond", () => {
       it("GIVEN a fixed-rate bond WHEN getCouponRateType THEN returns FIXED", async () => {
-        expect(await asset.getCouponRateType()).to.equal(RateType.FIXED);
+        expect(await asset.getCouponRateType()).to.equal(INTEREST_RATE_TYPE.FIXED);
       });
 
       it("GIVEN admin WHEN setCouponRateType with valid type THEN emits CouponRateTypeSet and updates storage", async () => {
-        await expect(asset.connect(admin).setCouponRateType(RateType.STANDARD))
+        await expect(asset.connect(admin).setCouponRateType(INTEREST_RATE_TYPE.STANDARD))
           .to.emit(asset, "CouponRateTypeSet")
-          .withArgs(admin.address, RateType.STANDARD);
+          .withArgs(admin.address, INTEREST_RATE_TYPE.STANDARD);
 
-        expect(await asset.getCouponRateType()).to.equal(RateType.STANDARD);
+        expect(await asset.getCouponRateType()).to.equal(INTEREST_RATE_TYPE.STANDARD);
       });
 
       it("GIVEN non-admin WHEN setCouponRateType THEN reverts with AccountHasNoRole", async () => {
-        await expect(asset.connect(nonAdmin).setCouponRateType(RateType.FIXED)).to.be.revertedWithCustomError(
+        await expect(asset.connect(nonAdmin).setCouponRateType(INTEREST_RATE_TYPE.FIXED)).to.be.revertedWithCustomError(
           asset,
           "AccountHasNoRole",
         );
@@ -78,7 +77,7 @@ export function interestRateFacetTests(getCtx: () => AssetMockCtx): void {
 
       it("GIVEN a deactivated asset WHEN setCouponRateType THEN reverts with Deactivated", async () => {
         await asset.forceDeactivate();
-        await expect(asset.connect(admin).setCouponRateType(RateType.STANDARD)).to.be.revertedWithCustomError(
+        await expect(asset.connect(admin).setCouponRateType(INTEREST_RATE_TYPE.STANDARD)).to.be.revertedWithCustomError(
           asset,
           "Deactivated",
         );
@@ -87,8 +86,8 @@ export function interestRateFacetTests(getCtx: () => AssetMockCtx): void {
 
     describe("Standard bond", () => {
       it("GIVEN a standard bond WHEN getCouponRateType THEN returns STANDARD", async () => {
-        await asset.connect(admin).setCouponRateType(RateType.STANDARD);
-        expect(await asset.getCouponRateType()).to.equal(RateType.STANDARD);
+        await asset.connect(admin).setCouponRateType(INTEREST_RATE_TYPE.STANDARD);
+        expect(await asset.getCouponRateType()).to.equal(INTEREST_RATE_TYPE.STANDARD);
       });
     });
 
@@ -98,7 +97,10 @@ export function interestRateFacetTests(getCtx: () => AssetMockCtx): void {
       });
 
       it("GIVEN non-operational asset WHEN setCouponRateType THEN reverts with AssetNotOperational", async () => {
-        await expect(asset.setCouponRateType(1)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+        await expect(asset.setCouponRateType(INTEREST_RATE_TYPE.STANDARD)).to.be.revertedWithCustomError(
+          asset,
+          "AssetNotOperational",
+        );
       });
     });
   });

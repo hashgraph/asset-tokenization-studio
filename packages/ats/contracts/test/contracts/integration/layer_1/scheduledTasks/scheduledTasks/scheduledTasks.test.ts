@@ -8,7 +8,7 @@ import type { AssetMockCtx } from "@test";
 import { ZERO, EMPTY_STRING, dateToUnixTimestamp, ATS_ROLES, ATS_TASK, TIME_PERIODS_S, RESOLVER_KEYS } from "@scripts";
 import { getOrchestratorLibraryAddresses } from "@scripts/domain";
 import { takeSnapshot } from "@nomicfoundation/hardhat-network-helpers";
-import { executeRbac, getDltTimestamp, MAX_UINT256 } from "@test";
+import { INTEREST_RATE_TYPE, executeRbac, getDltTimestamp, MAX_UINT256 } from "@test";
 
 const _PARTITION_ID_1 = "0x0000000000000000000000000000000000000000000000000000000000000001";
 const INITIAL_AMOUNT = 1000;
@@ -409,7 +409,7 @@ export function scheduledTasksTests(getCtx: () => AssetMockCtx): void {
     });
 
     it("GIVEN failing crossOrdered COUPON_LISTING task WHEN triggered THEN transaction reverts and queue not drained", async () => {
-      await asset.setCouponRateType(2);
+      await asset.setCouponRateType(INTEREST_RATE_TYPE.FIXED);
 
       await injectMockDispatch();
 
@@ -534,7 +534,7 @@ export function scheduledTasksTests(getCtx: () => AssetMockCtx): void {
       });
 
       it("GIVEN a KPI-linked coupon WHEN triggered at fixing date THEN coupon listing sub-task is successfully processed", async () => {
-        await asset.connect(deployer).setCouponRateType(3);
+        await asset.connect(deployer).setCouponRateType(INTEREST_RATE_TYPE.KPI_LINKED);
 
         const currentTimestamp = await getDltTimestamp();
         const fixingDate = currentTimestamp + TIME_PERIODS_S.DAY;

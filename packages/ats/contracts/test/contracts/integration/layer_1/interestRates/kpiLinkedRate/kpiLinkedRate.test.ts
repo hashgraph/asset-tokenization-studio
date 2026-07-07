@@ -5,13 +5,11 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { IAssetMock, KpiLinkedRate__factory, Kpis__factory } from "@contract-types";
 import type { KpiLinkedRate, Kpis } from "@contract-types";
 import { ATS_ROLES, TIME_PERIODS_S, RESOLVER_KEYS } from "@scripts";
-import { TEST_BOND_KPI_LINKED_RATE, executeRbac, getDltTimestamp } from "@test";
+import { TEST_BOND_KPI_LINKED_RATE, INTEREST_RATE_TYPE, executeRbac, getDltTimestamp } from "@test";
 import type { AssetMockCtx } from "@test";
 
 export function kpiLinkedRateTests(getCtx: () => AssetMockCtx): void {
   describe("Kpi Linked Rate Tests", () => {
-    const KPI_INTEREST_RATE_TYPE = 3;
-
     let asset: IAssetMock;
     let kpiRate: KpiLinkedRate;
     let signer_A: HardhatEthersSigner;
@@ -30,7 +28,7 @@ export function kpiLinkedRateTests(getCtx: () => AssetMockCtx): void {
         { role: ATS_ROLES.ROLE_INTEREST_RATE_MANAGER, members: [signer_A.address] },
       ]);
 
-      await asset.connect(signer_A).setCouponRateType(KPI_INTEREST_RATE_TYPE);
+      await asset.connect(signer_A).setCouponRateType(INTEREST_RATE_TYPE.KPI_LINKED);
       kpiRate = KpiLinkedRate__factory.connect(ctx.diamond.target as string, signer_A);
       await kpiRate.setKpiLinkedRateInterestRate({
         maxRate: TEST_BOND_KPI_LINKED_RATE.maxRate,
@@ -458,7 +456,7 @@ export function kpiLinkedRateTests(getCtx: () => AssetMockCtx): void {
       });
 
       it("GIVEN non-operational asset WHEN setCouponRateType THEN reverts with AssetNotOperational", async () => {
-        await expect(asset.setCouponRateType(KPI_INTEREST_RATE_TYPE)).to.be.revertedWithCustomError(
+        await expect(asset.setCouponRateType(INTEREST_RATE_TYPE.KPI_LINKED)).to.be.revertedWithCustomError(
           asset,
           "AssetNotOperational",
         );

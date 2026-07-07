@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock, IAssetMock__factory } from "@contract-types";
 import { ATS_ROLES, TIME_PERIODS_S, RESOLVER_KEYS } from "@scripts";
-import { getDltTimestamp } from "@test";
+import { INTEREST_RATE_TYPE, getDltTimestamp } from "@test";
 import type { AssetMockCtx } from "@test";
 
 export function couponListingTests(getCtx: () => AssetMockCtx): void {
@@ -29,7 +29,7 @@ export function couponListingTests(getCtx: () => AssetMockCtx): void {
       await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
       await asset.grantRole(ATS_ROLES.ROLE_INTEREST_RATE_MANAGER, signer_A.address);
       await asset.grantRole(ATS_ROLES.ROLE_MATURITY_MANAGER, signer_A.address);
-      await asset.setCouponRateType(3);
+      await asset.setCouponRateType(INTEREST_RATE_TYPE.KPI_LINKED);
       await asset.updateMaturityDate(maturityDate);
     });
 
@@ -42,7 +42,7 @@ export function couponListingTests(getCtx: () => AssetMockCtx): void {
       await kpiAsset.grantRole(ATS_ROLES.ROLE_INTEREST_RATE_MANAGER, signer_A.address);
       await kpiAsset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
       await kpiAsset.grantRole(ATS_ROLES.ROLE_MATURITY_MANAGER, signer_A.address);
-      await kpiAsset.setCouponRateType(3);
+      await kpiAsset.setCouponRateType(INTEREST_RATE_TYPE.KPI_LINKED);
       await kpiAsset.updateMaturityDate(maturityDate);
 
       const timestamp = await getDltTimestamp();

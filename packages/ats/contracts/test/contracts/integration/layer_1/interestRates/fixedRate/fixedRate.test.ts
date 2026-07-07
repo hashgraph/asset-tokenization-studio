@@ -4,13 +4,11 @@ import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import { ATS_ROLES, RESOLVER_KEYS } from "@scripts";
-import { TEST_BOND_FIXED_RATE, executeRbac } from "@test";
+import { TEST_BOND_FIXED_RATE, INTEREST_RATE_TYPE, executeRbac } from "@test";
 import type { AssetMockCtx } from "@test";
 
 export function fixedRateTests(getCtx: () => AssetMockCtx): void {
   describe("Fixed Rate Tests", () => {
-    const FIXED_INTEREST_RATE_TYPE = 1;
-
     let asset: IAssetMock;
     let signer_A: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
@@ -28,7 +26,7 @@ export function fixedRateTests(getCtx: () => AssetMockCtx): void {
         { role: ATS_ROLES.ROLE_INTEREST_RATE_MANAGER, members: [signer_A.address] },
       ]);
 
-      await asset.connect(signer_A).setCouponRateType(FIXED_INTEREST_RATE_TYPE);
+      await asset.connect(signer_A).setCouponRateType(INTEREST_RATE_TYPE.FIXED);
       await asset.connect(signer_A).setRate(TEST_BOND_FIXED_RATE.RATE, TEST_BOND_FIXED_RATE.RATE_DECIMALS);
     });
 
@@ -105,7 +103,7 @@ export function fixedRateTests(getCtx: () => AssetMockCtx): void {
       });
 
       it("GIVEN non-operational asset WHEN setCouponRateType THEN reverts with AssetNotOperational", async () => {
-        await expect(asset.setCouponRateType(FIXED_INTEREST_RATE_TYPE)).to.be.revertedWithCustomError(
+        await expect(asset.setCouponRateType(INTEREST_RATE_TYPE.FIXED)).to.be.revertedWithCustomError(
           asset,
           "AssetNotOperational",
         );
