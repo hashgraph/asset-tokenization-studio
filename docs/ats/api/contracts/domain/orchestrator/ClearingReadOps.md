@@ -13,7 +13,7 @@ _Contains read-only clearing operations with ABAF adjustments_
 ### checkClearingExpirationTimestamp
 
 ```solidity
-function checkClearingExpirationTimestamp(IClearingTypes.ClearingOperationIdentifier _clearingOperationIdentifier, bool _mustBeExpired, uint256 _blockTimestamp) external view
+function checkClearingExpirationTimestamp(IClearingTypes.ClearingOperationIdentifier _clearingOperationIdentifier, bool _mustBeExpired, uint256) external view
 ```
 
 #### Parameters
@@ -22,7 +22,7 @@ function checkClearingExpirationTimestamp(IClearingTypes.ClearingOperationIdenti
 | ----------------------------- | ------------------------------------------ | ----------- |
 | \_clearingOperationIdentifier | IClearingTypes.ClearingOperationIdentifier | undefined   |
 | \_mustBeExpired               | bool                                       | undefined   |
-| \_blockTimestamp              | uint256                                    | undefined   |
+| \_2                           | uint256                                    | undefined   |
 
 ### checkClearingValidExpirationTimestamp
 
