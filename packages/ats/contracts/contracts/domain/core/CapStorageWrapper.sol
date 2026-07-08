@@ -4,7 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { MAX_UINT256 } from "../../constants/values.sol";
 import { ICap } from "../../facets/cap/ICap.sol";
 import { AdjustBalancesStorageWrapper } from "../asset/AdjustBalancesStorageWrapper.sol";
-import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 /// @custom:hash storage Cap
@@ -42,7 +41,7 @@ library CapStorageWrapper {
      * @param partitionCap Array of partition-specific caps to be recorded.
      */
     function initializeCap(uint256 maxSupply, ICap.PartitionCap[] calldata partitionCap) internal {
-        CapDataStorage storage cs = capStorage();
+        CapDataStorage storage cs = _capStorage();
         cs.maxSupply = maxSupply;
         uint256 length = partitionCap.length;
         for (uint256 i; i < length; ) {
@@ -68,27 +67,26 @@ library CapStorageWrapper {
      */
     function setMaxSupply(uint256 _maxSupply, uint256 _timestamp) internal returns (uint256 previousMaxSupply) {
         previousMaxSupply = getMaxSupplyAdjustedAt(_timestamp);
-        capStorage().maxSupply = _maxSupply;
+        _capStorage().maxSupply = _maxSupply;
     }
 
     /**
      * @notice Updates the supply cap for a specific partition.
-     * @dev Captures the previous partition cap, writes the new cap, and emits
-     *      `MaxSupplyByPartitionSet`. No zero-cap bypass for partition-level
-     *      constraints (unlike the global cap).
+     * @dev Captures and returns the previous partition cap, then writes the new cap. No
+     *      zero-cap bypass for partition-level constraints (unlike the global cap). The calling
+     *      facet (`CapByPartition`) emits `MaxSupplyByPartitionSet`.
      * @param _partition The partition identifier.
      * @param _maxSupply The new partition supply cap.
      * @param _timestamp The reference time for balance-adjustment factor lookup.
+     * @return previousMaxSupplyByPartition The partition cap (adjusted) prior to this call.
      */
-    function setMaxSupplyByPartition(bytes32 _partition, uint256 _maxSupply, uint256 _timestamp) internal {
-        uint256 previousMaxSupplyByPartition = getMaxSupplyByPartitionAdjustedAt(_partition, _timestamp);
-        capStorage().maxSupplyByPartition[_partition] = _maxSupply;
-        emit ICap.MaxSupplyByPartitionSet(
-            EvmAccessors.getMsgSender(),
-            _partition,
-            _maxSupply,
-            previousMaxSupplyByPartition
-        );
+    function setMaxSupplyByPartition(
+        bytes32 _partition,
+        uint256 _maxSupply,
+        uint256 _timestamp
+    ) internal returns (uint256 previousMaxSupplyByPartition) {
+        previousMaxSupplyByPartition = getMaxSupplyByPartitionAdjustedAt(_partition, _timestamp);
+        _capStorage().maxSupplyByPartition[_partition] = _maxSupply;
     }
 
     /**
@@ -98,7 +96,7 @@ library CapStorageWrapper {
      * @param factor The scaling factor (e.g., 10x, 100x for decimal adjustments).
      */
     function adjustMaxSupply(uint256 factor) internal {
-        CapDataStorage storage cs = capStorage();
+        CapDataStorage storage cs = _capStorage();
         uint256 limit = MAX_UINT256 / factor;
         cs.maxSupply = (cs.maxSupply > limit) ? MAX_UINT256 : cs.maxSupply * factor;
     }
@@ -111,7 +109,7 @@ library CapStorageWrapper {
      * @param factor The scaling factor.
      */
     function adjustMaxSupplyByPartition(bytes32 partition, uint256 factor) internal {
-        CapDataStorage storage cs = capStorage();
+        CapDataStorage storage cs = _capStorage();
         uint256 limit = MAX_UINT256 / factor;
         cs.maxSupplyByPartition[partition] = (cs.maxSupplyByPartition[partition] > limit)
             ? MAX_UINT256
@@ -202,7 +200,7 @@ library CapStorageWrapper {
      * @return The adjusted global supply cap at that timestamp.
      */
     function getMaxSupplyAdjustedAt(uint256 timestamp) internal view returns (uint256) {
-        CapDataStorage storage cs = capStorage();
+        CapDataStorage storage cs = _capStorage();
         (uint256 pendingAbaf, ) = AdjustBalancesStorageWrapper.getPendingScheduledBalanceAdjustmentsAt(
             timestamp,
             false
@@ -221,7 +219,7 @@ library CapStorageWrapper {
      * @return The adjusted partition supply cap at that timestamp.
      */
     function getMaxSupplyByPartitionAdjustedAt(bytes32 partition, uint256 timestamp) internal view returns (uint256) {
-        CapDataStorage storage cs = capStorage();
+        CapDataStorage storage cs = _capStorage();
         uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(
             AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp),
             AdjustBalancesStorageWrapper.getLabafByPartition(partition)
@@ -229,20 +227,6 @@ library CapStorageWrapper {
 
         uint256 limit = MAX_UINT256 / factor;
         return (cs.maxSupplyByPartition[partition] > limit) ? MAX_UINT256 : cs.maxSupplyByPartition[partition] * factor;
-    }
-
-    /**
-     * @notice Loads the cap storage struct from its ERC-7201 namespace slot.
-     * @dev Uses inline assembly to set the storage slot for the returned reference,
-     *      allowing access to the cap data at its designated storage location.
-     * @return cap_ A storage reference to `CapDataStorage` at the ERC-7201 slot.
-     */
-    function capStorage() internal pure returns (CapDataStorage storage cap_) {
-        bytes32 position = STORAGE_LOCATION_CAP;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            cap_.slot := position
-        }
     }
 
     /**
@@ -254,6 +238,20 @@ library CapStorageWrapper {
      * @return True if the amount is compliant with the cap; false otherwise.
      */
     function isCorrectMaxSupply(uint256 _amount, uint256 _maxSupply) internal pure returns (bool) {
-        return (_maxSupply == 0) || (_amount <= _maxSupply);
+        return (_maxSupply == 0) || (_amount <= _maxSupply); // solhint-disable-line gas-strict-inequalities
+    }
+
+    /**
+     * @notice Loads the cap storage struct from its ERC-7201 namespace slot.
+     * @dev Uses inline assembly to set the storage slot for the returned reference,
+     *      allowing access to the cap data at its designated storage location.
+     * @return cap_ A storage reference to `CapDataStorage` at the ERC-7201 slot.
+     */
+    function _capStorage() private pure returns (CapDataStorage storage cap_) {
+        bytes32 position = STORAGE_LOCATION_CAP;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            cap_.slot := position
+        }
     }
 }

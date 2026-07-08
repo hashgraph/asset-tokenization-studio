@@ -5,9 +5,7 @@ import { SNAPSHOT_RESULT_ID } from "../../constants/values.sol";
 import { CORPORATE_ACTION_TYPE_VOTING_RIGHTS, SCHEDULED_TASK_TYPE_SNAPSHOT } from "../../constants/dispatchTypes.sol";
 import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
-import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
-import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
-import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+
 import { IVoting } from "../../facets/voting/IVoting.sol";
 import { IVotingTypes } from "../../facets/voting/IVotingTypes.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
@@ -29,7 +27,7 @@ library VotingStorageWrapper {
      * @notice Registers a new voting-rights corporate action and schedules its snapshot.
      * @dev Encodes the voting payload, delegates id allocation to
      *      `CorporateActionsStorageWrapper.addCorporateAction`, then wires the record-date
-     *      snapshot via `initVotingRights`. Emits `IVoting.VotingSet` on success.
+     *      snapshot via `initVotingRights`. The calling facet (`Voting`) emits `IVoting.VotingSet`.
      * @param newVoting Voting parameters supplied by the caller.
      * @return corporateActionId_ Identifier of the newly registered corporate action.
      * @return voteID_            One-based index of the voting action within its type bucket.
@@ -45,36 +43,27 @@ library VotingStorageWrapper {
         );
 
         initVotingRights(corporateActionId_, data);
-
-        emit IVoting.VotingSet(
-            corporateActionId_,
-            voteID_,
-            EvmAccessors.getMsgSender(),
-            newVoting.recordDate,
-            newVoting.data
-        );
     }
 
     /**
      * @notice Cancels an existing voting-rights corporate action prior to its record date.
      * @dev Reverts with `IVoting.VotingAlreadyRecorded` once the record date has been reached;
      *      otherwise delegates the cancellation to
-     *      `CorporateActionsStorageWrapper.cancelCorporateAction`. Emits
-     *      `IVoting.VotingCancelled`.
+     *      `CorporateActionsStorageWrapper.cancelCorporateAction`. The calling facet (`Voting`)
+     *      emits `IVoting.VotingCancelled`.
      * @param voteId One-based vote identifier within the voting-rights bucket.
      * @return success_ Always true on a successful path (revert otherwise).
      */
     function cancelVoting(uint256 voteId) internal returns (bool success_) {
         (IVoting.RegisteredVoting memory registeredVoting, bytes32 corporateActionId, ) = getVoting(voteId);
 
+        // solhint-disable-next-line gas-strict-inequalities
         if (registeredVoting.voting.recordDate <= TimeTravelStorageWrapper.getBlockTimestamp()) {
             revert IVoting.VotingAlreadyRecorded(corporateActionId, voteId);
         }
 
         _executeCancelVoting(corporateActionId);
         success_ = true;
-
-        emit IVoting.VotingCancelled(voteId, EvmAccessors.getMsgSender());
     }
 
     /**
@@ -216,18 +205,6 @@ library VotingStorageWrapper {
         return ERC1410StorageWrapper.getTotalTokenHolders();
     }
 
-    /**
-     * @notice Resolves the account's snapshot balance and decimals when the record date is met.
-     * @dev Returns zeroed outputs and `dateReached_ == false` while the record date is in the
-     *      future. When a snapshot is bound, queries the snapshot store; otherwise reads the
-     *      adjusted ERC3643 balance and live ERC20 decimals at `date`.
-     * @param date       Record date being checked against the current block timestamp.
-     * @param snapshotId Snapshot identifier bound to the voting action (zero when none).
-     * @param account    Address whose balance is being projected.
-     * @return balance_     Account balance at the resolved point in time.
-     * @return decimals_    Token decimals at the resolved point in time.
-     * @return dateReached_ True when the record date has been reached.
-     */
     /**
      * @notice Performs the storage write that cancels a voting corporate action.
      * @param corporateActionId The corporate-action identifier linked to the voting.

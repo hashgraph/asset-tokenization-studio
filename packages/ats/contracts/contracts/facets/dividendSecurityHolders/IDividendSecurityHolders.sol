@@ -36,23 +36,23 @@ interface IDividendSecurityHolders {
      * @dev Reverts via the `onlyMatchingActionType` modifier when `dividendId` does not resolve
      *      to a dividend corporate action. Pages past the holder count return an empty array.
      *      Before the record date is reached, the underlying storage layer returns an empty page.
-     * @param dividendId One-indexed dividend identifier within the dividend corporate action type.
-     * @param pageIndex Zero-based index of the page to retrieve.
-     * @param pageLength Maximum number of holders returned in the page.
+     * @param _dividendId One-indexed dividend identifier within the dividend corporate action type.
+     * @param _pageIndex Zero-based index of the page to retrieve.
+     * @param _pageLength Maximum number of holders returned in the page.
      * @return holders_ Holder addresses on the requested page, in storage order.
      */
     function getDividendHolders(
-        uint256 dividendId,
-        uint256 pageIndex,
-        uint256 pageLength
+        uint256 _dividendId,
+        uint256 _pageIndex,
+        uint256 _pageLength
     ) external view returns (address[] memory holders_);
 
     /**
      * @notice Returns the total number of holders eligible for a given dividend.
      * @dev Reverts via the `onlyMatchingActionType` modifier when `dividendId` does not resolve
      *      to a dividend corporate action. Returns zero before the record date is reached.
-     * @param dividendId One-indexed dividend identifier within the dividend corporate action type.
+     * @param _dividendId One-indexed dividend identifier within the dividend corporate action type.
      * @return Total number of eligible holders.
      */
-    function getTotalDividendHolders(uint256 dividendId) external view returns (uint256);
+    function getTotalDividendHolders(uint256 _dividendId) external view returns (uint256);
 }

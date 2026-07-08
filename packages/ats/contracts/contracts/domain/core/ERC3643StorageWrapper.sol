@@ -2,19 +2,19 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ROLE_AGENT } from "../../constants/roles.sol";
-import { _DEFAULT_PARTITION } from "../../constants/values.sol";
-import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
+import { DEFAULT_PARTITION } from "../../constants/values.sol";
+import { IERC3643Types } from "../../facets/commonTypes/IERC3643Types.sol";
 import { IFreeze } from "../../facets/freeze/IFreeze.sol";
 import { IAccessControl } from "../../facets/accessControl/IAccessControl.sol";
-import { IIdentityRegistry } from "../../facets/layer_1/ERC3643/IIdentityRegistry.sol";
-import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
+import { IIdentityRegistry } from "../../facets/identity/externalInterfaces/IIdentityRegistry.sol";
+import { ICompliance } from "../../facets/compliance/externalInterfaces/ICompliance.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { AccessControlStorageWrapper } from "./AccessControlStorageWrapper.sol";
 import { ControlListStorageWrapper } from "./ControlListStorageWrapper.sol";
 import { ResolverProxyStorageWrapper } from "./ResolverProxyStorageWrapper.sol";
-import { ERC20StorageWrapper, ERC20Storage } from "../asset/ERC20StorageWrapper.sol";
+import { ERC20StorageWrapper } from "../asset/ERC20StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../asset/ERC1410StorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "../asset/SnapshotsStorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "../asset/AdjustBalancesStorageWrapper.sol";
@@ -109,24 +109,22 @@ library ERC3643StorageWrapper {
 
     /**
      * @notice Replaces the compliance contract wired into the token.
-     * @dev Emits `ComplianceAdded` so off-chain observers can rebuild the audit trail of which
-     *      compliance contract was authoritative at any point in time.
+     * @dev Pure storage write; the owning `Compliance` facet emits the public event for the
+     *      change (`ComplianceAdded` on the setter, `ComplianceInitialized` on initialisation).
      * @param _compliance New compliance contract address.
      */
     function setCompliance(address _compliance) internal {
-        erc3643Storage().compliance = _compliance;
-        emit IERC3643Types.ComplianceAdded(_compliance);
+        _erc3643Storage().compliance = _compliance;
     }
 
     /**
      * @notice Replaces the identity registry wired into the token.
-     * @dev Emits `IdentityRegistryAdded` so off-chain indexers can track which registry vetted
-     *      holders at any historical block.
+     * @dev Pure storage write; the owning `Identity` facet emits the public event for the change
+     *      (`IdentityRegistryAdded` on the setter, `IdentityInitialized` on initialisation).
      * @param _identityRegistry New identity-registry address.
      */
     function setIdentityRegistry(address _identityRegistry) internal {
-        erc3643Storage().identityRegistry = _identityRegistry;
-        emit IERC3643Types.IdentityRegistryAdded(_identityRegistry);
+        _erc3643Storage().identityRegistry = _identityRegistry;
     }
 
     /**
@@ -138,13 +136,12 @@ library ERC3643StorageWrapper {
      */
     function setName(string calldata _name) internal {
         ERC20StorageWrapper.setName(_name);
-        ERC20Storage storage erc20Storage_ = ERC20StorageWrapper.erc20Storage();
         emit IERC3643Types.UpdatedTokenInformation(
-            erc20Storage_.name,
-            erc20Storage_.symbol,
-            erc20Storage_.decimals,
+            ERC20StorageWrapper.getName(),
+            ERC20StorageWrapper.getSymbol(),
+            ERC20StorageWrapper.decimals(),
             version(),
-            erc3643Storage().onchainID
+            _erc3643Storage().onchainID
         );
     }
 
@@ -155,13 +152,12 @@ library ERC3643StorageWrapper {
      */
     function setSymbol(string calldata _symbol) internal {
         ERC20StorageWrapper.setSymbol(_symbol);
-        ERC20Storage storage erc20Storage_ = ERC20StorageWrapper.erc20Storage();
         emit IERC3643Types.UpdatedTokenInformation(
-            erc20Storage_.name,
-            erc20Storage_.symbol,
-            erc20Storage_.decimals,
+            ERC20StorageWrapper.getName(),
+            ERC20StorageWrapper.getSymbol(),
+            ERC20StorageWrapper.decimals(),
             version(),
-            erc3643Storage().onchainID
+            _erc3643Storage().onchainID
         );
     }
 
@@ -172,12 +168,11 @@ library ERC3643StorageWrapper {
      * @param _onchainID New OnchainID address.
      */
     function setOnchainID(address _onchainID) internal {
-        erc3643Storage().onchainID = _onchainID;
-        ERC20Storage storage erc20Storage_ = ERC20StorageWrapper.erc20Storage();
+        _erc3643Storage().onchainID = _onchainID;
         emit IERC3643Types.UpdatedTokenInformation(
-            erc20Storage_.name,
-            erc20Storage_.symbol,
-            erc20Storage_.decimals,
+            ERC20StorageWrapper.getName(),
+            ERC20StorageWrapper.getSymbol(),
+            ERC20StorageWrapper.decimals(),
             version(),
             _onchainID
         );
@@ -196,16 +191,16 @@ library ERC3643StorageWrapper {
     function freezeTokens(address _account, uint256 _amount) internal {
         checkNonZeroFreezeAmount(_amount);
 
-        ERC1410StorageWrapper.triggerAndSyncAll(_DEFAULT_PARTITION, _account, address(0));
-        updateTotalFreeze(_DEFAULT_PARTITION, _account);
-        SnapshotsStorageWrapper.updateAccountSnapshot(_account, _DEFAULT_PARTITION);
-        SnapshotsStorageWrapper.updateAccountFrozenBalancesSnapshot(_account, _DEFAULT_PARTITION);
+        ERC1410StorageWrapper.triggerAndSyncAll(DEFAULT_PARTITION, _account, address(0));
+        updateTotalFreeze(DEFAULT_PARTITION, _account);
+        SnapshotsStorageWrapper.updateAccountSnapshot(_account, DEFAULT_PARTITION);
+        SnapshotsStorageWrapper.updateAccountFrozenBalancesSnapshot(_account, DEFAULT_PARTITION);
 
-        ERC3643Storage storage st = erc3643Storage();
+        ERC3643Storage storage st = _erc3643Storage();
         st.frozenTokens[_account] += _amount;
-        st.frozenTokensByPartition[_account][_DEFAULT_PARTITION] += _amount;
+        st.frozenTokensByPartition[_account][DEFAULT_PARTITION] += _amount;
 
-        ERC1410StorageWrapper.reducePartitionOnly(_account, _amount, _DEFAULT_PARTITION);
+        ERC1410StorageWrapper.reducePartitionOnly(_account, _amount, DEFAULT_PARTITION);
         ERC20StorageWrapper.performTransfer(_account, address(0), _amount);
     }
 
@@ -222,19 +217,19 @@ library ERC3643StorageWrapper {
      *        the frozen balance against historical adjustments.
      */
     function unfreezeTokens(address _account, uint256 _amount, uint256 _timestamp) internal {
-        _checkUnfreezeAmount(_DEFAULT_PARTITION, _account, _amount, _timestamp);
-        ERC1410StorageWrapper.triggerAndSyncAll(_DEFAULT_PARTITION, _account, address(0));
-        updateTotalFreeze(_DEFAULT_PARTITION, _account);
-        SnapshotsStorageWrapper.updateAccountSnapshot(_account, _DEFAULT_PARTITION);
-        SnapshotsStorageWrapper.updateAccountFrozenBalancesSnapshot(_account, _DEFAULT_PARTITION);
+        _checkUnfreezeAmount(DEFAULT_PARTITION, _account, _amount, _timestamp);
+        ERC1410StorageWrapper.triggerAndSyncAll(DEFAULT_PARTITION, _account, address(0));
+        updateTotalFreeze(DEFAULT_PARTITION, _account);
+        SnapshotsStorageWrapper.updateAccountSnapshot(_account, DEFAULT_PARTITION);
+        SnapshotsStorageWrapper.updateAccountFrozenBalancesSnapshot(_account, DEFAULT_PARTITION);
 
-        ERC3643Storage storage st = erc3643Storage();
+        ERC3643Storage storage st = _erc3643Storage();
         st.frozenTokens[_account] -= _amount;
-        st.frozenTokensByPartition[_account][_DEFAULT_PARTITION] -= _amount;
+        st.frozenTokensByPartition[_account][DEFAULT_PARTITION] -= _amount;
 
-        _transferFrozenBalanceOnly(_DEFAULT_PARTITION, _account, _amount);
+        _transferFrozenBalanceOnly(DEFAULT_PARTITION, _account, _amount);
         ERC20StorageWrapper.performTransfer(address(0), _account, _amount);
-        ERC1410StorageWrapper.afterTokenTransfer(_DEFAULT_PARTITION, _account, _account, _amount);
+        ERC1410StorageWrapper.afterTokenTransfer(DEFAULT_PARTITION, _account, _account, _amount);
     }
 
     /**
@@ -282,7 +277,7 @@ library ERC3643StorageWrapper {
      * @param _abaf Active ABAF value to persist as the new LABAF.
      */
     function updateTotalFreezeAmountAndLabaf(address _tokenHolder, uint256 _factor, uint256 _abaf) internal {
-        erc3643Storage().frozenTokens[_tokenHolder] *= _factor;
+        _erc3643Storage().frozenTokens[_tokenHolder] *= _factor;
         AdjustBalancesStorageWrapper.setTotalFreezeLabaf(_tokenHolder, _abaf);
     }
 
@@ -301,7 +296,7 @@ library ERC3643StorageWrapper {
         uint256 _factor,
         uint256 _abaf
     ) internal {
-        erc3643Storage().frozenTokensByPartition[_tokenHolder][_partition] *= _factor;
+        _erc3643Storage().frozenTokensByPartition[_tokenHolder][_partition] *= _factor;
         AdjustBalancesStorageWrapper.setTotalFreezeLabafByPartition(_partition, _tokenHolder, _abaf);
     }
 
@@ -310,24 +305,17 @@ library ERC3643StorageWrapper {
      *         ERC3643 recovery flow.
      * @dev Workflow: unfreezes any frozen balance on the lost wallet, transfers the spendable
      *      and previously-frozen balances to `_newWallet`, re-freezes the same amount on the
-     *      new wallet, mirrors the lost wallet's control-list presence onto the new wallet,
-     *      flips the `addressRecovered` flag on both, and emits `RecoverySuccess`. All balance
-     *      reads use the adjustment-factor-aware accessors so the recovery is consistent with
-     *      the holder's historical position.
+     *      new wallet, mirrors the lost wallet's control-list presence onto the new wallet, and
+     *      flips the `addressRecovered` flag on both. The calling facet (`Recovery`) emits
+     *      `RecoverySuccess`. All balance reads use the adjustment-factor-aware accessors so the
+     *      recovery is consistent with the holder's historical position.
      * @param _lostWallet Wallet being abandoned.
      * @param _newWallet Wallet receiving the migrated balances.
-     * @param _investorOnchainID OnchainID of the underlying investor, included in the emitted
-     *        event for off-chain reconciliation.
      * @param _timestamp Reference timestamp for adjustment-factor calculations.
      * @return Always `true` on success; the function reverts otherwise.
      */
-    function recoveryAddress(
-        address _lostWallet,
-        address _newWallet,
-        address _investorOnchainID,
-        uint256 _timestamp
-    ) internal returns (bool) {
-        ERC3643Storage storage $ = erc3643Storage();
+    function recoveryAddress(address _lostWallet, address _newWallet, uint256 _timestamp) internal returns (bool) {
+        ERC3643Storage storage $ = _erc3643Storage();
         $.addressRecovered[_lostWallet] = true;
         $.addressRecovered[_newWallet] = false;
 
@@ -346,7 +334,6 @@ library ERC3643StorageWrapper {
             ControlListStorageWrapper.addToControlList(_newWallet);
         }
 
-        emit IERC3643Types.RecoverySuccess(_lostWallet, _newWallet, _investorOnchainID);
         return true;
     }
 
@@ -356,7 +343,7 @@ library ERC3643StorageWrapper {
      *      wallets (e.g. mint/transfer entry points).
      * @param _account Wallet whose recovery status is being checked.
      */
-    function requireUnrecoveredAddress(address _account) internal view {
+    function checkUnrecoveredAddress(address _account) internal view {
         if (isRecovered(_account)) revert IERC3643Types.WalletRecovered();
     }
 
@@ -376,7 +363,7 @@ library ERC3643StorageWrapper {
      * @return Frozen amount stored against `_userAddress`.
      */
     function getFrozenAmountFor(address _userAddress) internal view returns (uint256) {
-        return erc3643Storage().frozenTokens[_userAddress];
+        return _erc3643Storage().frozenTokens[_userAddress];
     }
 
     /**
@@ -386,7 +373,7 @@ library ERC3643StorageWrapper {
      * @return The freezing status of a wallet.
      */
     function isFrozen(address _userAddress) internal view returns (bool) {
-        return erc3643Storage().frozenTokens[_userAddress] > 0;
+        return _erc3643Storage().frozenTokens[_userAddress] > 0;
     }
 
     /**
@@ -396,16 +383,16 @@ library ERC3643StorageWrapper {
      * @return Frozen amount stored against the partition for `_userAddress`.
      */
     function getFrozenAmountForByPartition(bytes32 _partition, address _userAddress) internal view returns (uint256) {
-        return erc3643Storage().frozenTokensByPartition[_userAddress][_partition];
+        return _erc3643Storage().frozenTokensByPartition[_userAddress][_partition];
     }
 
     /**
      * @notice Reports whether the supplied wallet has been recovered.
      * @param _sender Wallet whose recovery flag is being read.
-     * @return `true` if the wallet has been recovered.
+     * @return Ttrue if the wallet has been recovered.
      */
     function isRecovered(address _sender) internal view returns (bool) {
-        return erc3643Storage().addressRecovered[_sender];
+        return _erc3643Storage().addressRecovered[_sender];
     }
 
     /**
@@ -416,6 +403,8 @@ library ERC3643StorageWrapper {
      * @return versionJson_ JSON-encoded version descriptor.
      */
     function version() internal view returns (string memory versionJson_) {
+        (bytes32 configId, uint256 versionId) = ResolverProxyStorageWrapper.getResolverProxyConfigurationIdAndVersion();
+
         return
             string(
                 abi.encodePacked(
@@ -425,10 +414,10 @@ library ERC3643StorageWrapper {
                     Strings.toHexString(uint160(address(ResolverProxyStorageWrapper.getBusinessLogicResolver())), 20),
                     '", ',
                     '"Config ID": "',
-                    Strings.toHexString(uint256(ResolverProxyStorageWrapper.getResolverProxyConfigurationId()), 32),
+                    Strings.toHexString(uint256(configId), 32),
                     '", ',
                     '"Version": "',
-                    Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
+                    Strings.toString(versionId),
                     '"',
                     "}"
                     // solhint-enable quotes
@@ -441,7 +430,7 @@ library ERC3643StorageWrapper {
      * @return Compliance contract wired into the token.
      */
     function getCompliance() internal view returns (ICompliance) {
-        return ICompliance(erc3643Storage().compliance);
+        return ICompliance(_erc3643Storage().compliance);
     }
 
     /**
@@ -449,7 +438,7 @@ library ERC3643StorageWrapper {
      * @return Identity-registry contract wired into the token.
      */
     function getIdentityRegistry() internal view returns (IIdentityRegistry) {
-        return IIdentityRegistry(erc3643Storage().identityRegistry);
+        return IIdentityRegistry(_erc3643Storage().identityRegistry);
     }
 
     /**
@@ -457,7 +446,7 @@ library ERC3643StorageWrapper {
      * @return Configured OnchainID address.
      */
     function getOnchainID() internal view returns (address) {
-        return erc3643Storage().onchainID;
+        return _erc3643Storage().onchainID;
     }
 
     /**
@@ -538,21 +527,6 @@ library ERC3643StorageWrapper {
     }
 
     /**
-     * @notice Returns a storage pointer to the ERC3643 namespace.
-     * @dev Uses inline assembly to bind the returned reference to the deterministic ERC-7201
-     *      slot `STORAGE_LOCATION_ERC3643`. Marked `pure` because Solidity treats slot literals
-     *      as pure even though the returned reference reads/writes storage.
-     * @return erc3643Storage_ Storage reference for the ERC3643 namespace.
-     */
-    function erc3643Storage() internal pure returns (ERC3643Storage storage erc3643Storage_) {
-        bytes32 position = STORAGE_LOCATION_ERC3643;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            erc3643Storage_.slot := position
-        }
-    }
-
-    /**
      * @notice Reverts unless the addresses and amounts arrays have the same length.
      * @dev Pre-condition guard for batch freeze/unfreeze entry points; raises
      *      `InputAmountsArrayLengthMismatch` to surface caller error explicitly.
@@ -625,6 +599,21 @@ library ERC3643StorageWrapper {
         uint256 frozenAmount = getFrozenAmountForByPartitionAdjustedAt(_partition, _userAddress, _timestamp);
         if (frozenAmount < _amount) {
             revert IERC3643Types.InsufficientFrozenBalance(_userAddress, _amount, frozenAmount, _partition);
+        }
+    }
+
+    /**
+     * @notice Returns a storage pointer to the ERC3643 namespace.
+     * @dev Uses inline assembly to bind the returned reference to the deterministic ERC-7201
+     *      slot `STORAGE_LOCATION_ERC3643`. Marked `pure` because Solidity treats slot literals
+     *      as pure even though the returned reference reads/writes storage.
+     * @return erc3643Storage_ Storage reference for the ERC3643 namespace.
+     */
+    function _erc3643Storage() private pure returns (ERC3643Storage storage erc3643Storage_) {
+        bytes32 position = STORAGE_LOCATION_ERC3643;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc3643Storage_.slot := position
         }
     }
 }

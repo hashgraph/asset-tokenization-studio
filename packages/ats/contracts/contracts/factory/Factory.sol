@@ -34,13 +34,13 @@ import { IClearingByPartition } from "../facets/clearingByPartition/IClearingByP
 import { IClearingHoldByPartition } from "../facets/clearingHoldByPartition/IClearingHoldByPartition.sol";
 import { IERC20Permit } from "../facets/erc20Permit/IERC20Permit.sol";
 import { IIdentity } from "../facets/identity/IIdentity.sol";
-import { IScheduledCrossOrderedTasks } from "../facets/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
-import { ISnapshots } from "../facets/snapshot/ISnapshots.sol";
-import { IProceedRecipients } from "../facets/proceedRecipient/IProceedRecipients.sol";
+import { IScheduledCrossOrderedTasks } from "../facets/scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol";
+import { ISnapshots } from "../facets/snapshots/ISnapshots.sol";
+import { IProceedRecipients } from "../facets/proceedRecipients/IProceedRecipients.sol";
 
-import { INominalValue } from "../facets/layer_2/nominalValue/INominalValue.sol";
+import { INominalValue } from "../facets/nominalValue/INominalValue.sol";
 import { ScheduledTasksStorageWrapper } from "../domain/asset/ScheduledTasksStorageWrapper.sol";
-import { IProtectedPartitions } from "../facets/protectedPartition/IProtectedPartitions.sol";
+import { IProtectedPartitions } from "../facets/protectedPartitions/IProtectedPartitions.sol";
 import { IExternalPauseManagement } from "../facets/externalPauseManagement/IExternalPauseManagement.sol";
 import {
     IExternalControlListManagement
@@ -198,21 +198,26 @@ abstract contract Factory is IFactory {
      * @dev The resolver must be non-zero and `_rbacs` must include at least one non-zero
      *      `DEFAULT_ADMIN_ROLE` member. Emits `ProxyDeployed`.
      * @param _resolver Business logic resolver used by the proxy.
-     * @param _configKey Resolver configuration key selecting the facet set.
-     * @param _version Resolver configuration version to activate.
+     * @param _resolverProxyConfigurationV2 Resolver configuration data for the proxy.
      * @param _rbacs Initial RBAC assignments applied by the proxy constructor.
      * @param _data Additional data for the proxy deployment.
      * @return proxyAddress_ Address of the deployed resolver proxy.
      */
     function deployProxy(
         IBusinessLogicResolver _resolver,
-        bytes32 _configKey,
-        uint256 _version,
+        IResolverProxy.ResolverProxyConfigurationV2 calldata _resolverProxyConfigurationV2,
         IResolverProxy.Rbac[] calldata _rbacs,
         bytes calldata _data
     ) external onlyValidResolver(_resolver) onlyValidAdmins(_rbacs) returns (address proxyAddress_) {
-        proxyAddress_ = address(new ResolverProxy(_resolver, _configKey, _version, _rbacs));
-        emit ProxyDeployed(proxyAddress_, _resolver, _configKey, _version, _rbacs, _data);
+        proxyAddress_ = address(new ResolverProxy(_resolver, _resolverProxyConfigurationV2, _rbacs));
+        emit ProxyDeployed(
+            proxyAddress_,
+            _resolver,
+            _resolverProxyConfigurationV2.configurationId,
+            _resolverProxyConfigurationV2.configurationVersion,
+            _rbacs,
+            _data
+        );
     }
 
     /**
@@ -247,6 +252,8 @@ abstract contract Factory is IFactory {
         IDividendSecurityHolders(equityAddress_).initializeDividendSecurityHolders();
         IVoting(equityAddress_).initializeVoting();
         IVotingSecurityHolders(equityAddress_).initializeVotingSecurityHolders();
+        ICouponSecurityHolders(equityAddress_).initializeCouponSecurityHolders();
+        IMaturityByPartition(equityAddress_).initializeMaturityByPartition();
         (bool isOperational_, ) = IInitializer(equityAddress_).setOperationalStatus();
         _checkUnexpectedError(!isOperational_, FACTORY_OPERATIONAL_STATUS);
         IAccessControl(equityAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
@@ -276,6 +283,8 @@ abstract contract Factory is IFactory {
         bondAddress_ = _deployBond(_bondData, SecurityType.BondVariableRate);
         IInterestRate(bondAddress_).initializeInterestRateType(IInterestRate.RateType.STANDARD);
         IFixedRate(bondAddress_).initializeFixedRate(IFixedRate.FixedRateData({ rate: 0, rateDecimals: 0 }));
+        IVotingSecurityHolders(bondAddress_).initializeVotingSecurityHolders();
+        IDividendSecurityHolders(bondAddress_).initializeDividendSecurityHolders();
         (bool isOperational_, ) = IInitializer(bondAddress_).setOperationalStatus();
         _checkUnexpectedError(!isOperational_, FACTORY_OPERATIONAL_STATUS);
         IAccessControl(bondAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
@@ -373,8 +382,7 @@ abstract contract Factory is IFactory {
         extendedRbacs[rbacsLen].members[0] = address(this);
         ResolverProxy proxy = new ResolverProxy(
             _securityData.resolver,
-            _securityData.resolverProxyConfiguration.key,
-            _securityData.resolverProxyConfiguration.version,
+            _securityData.resolverProxyConfigurationV2,
             extendedRbacs
         );
         securityAddress_ = address(proxy);

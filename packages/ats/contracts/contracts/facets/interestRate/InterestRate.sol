@@ -6,6 +6,7 @@ import { InterestRateStorageWrapper } from "../../domain/asset/InterestRateStora
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ROLE_INTEREST_RATE_MANAGER, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title InterestRate
@@ -19,26 +20,20 @@ abstract contract InterestRate is IInterestRate, Modifiers {
     /// @inheritdoc IInterestRate
     function initializeInterestRateType(
         IInterestRate.RateType rateType
-    )
-        external
-        override
-        onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(RESOLVER_KEY_INTEREST_RATE)
-        onlyValidRateType(rateType)
-    {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_INTEREST_RATE) {
         InterestRateStorageWrapper.initializeCouponRateType(rateType);
         InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_INTEREST_RATE);
         emit IInterestRate.InterestRateTypeInitialized(rateType);
     }
 
     /// @inheritdoc IInterestRate
-    /// @dev Protected by `onlyRole(ROLE_INTEREST_RATE_MANAGER)` and `onlyValidRateType`.
+    /// @dev Protected by `onlyRole(ROLE_INTEREST_RATE_MANAGER)`.
     function setCouponRateType(
         IInterestRate.RateType rateType
-    ) external override onlyOperational onlyActivated onlyRole(ROLE_INTEREST_RATE_MANAGER) onlyValidRateType(rateType) {
+    ) external override onlyOperational onlyActivated onlyRole(ROLE_INTEREST_RATE_MANAGER) {
         // TODO: check if changing the rate type is allowed after existing coupons have been issued
         InterestRateStorageWrapper.setCouponRateType(rateType);
-        emit CouponRateTypeSet(msg.sender, rateType);
+        emit CouponRateTypeSet(EvmAccessors.getMsgSender(), rateType);
     }
 
     /// @inheritdoc IInterestRate

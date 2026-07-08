@@ -5,9 +5,9 @@ import {
   AtsRoleHash,
   AtsRoleName,
   DeepPartial,
-  EQUITY_CONFIG_ID,
   RegulationSubType,
   RegulationType,
+  CONFIG_IDS,
 } from "@scripts";
 import { FactoryRegulationDataParams, Rbac, SecurityDataParams } from "@scripts/domain";
 import { IAsset, BusinessLogicResolver } from "@contract-types";
@@ -87,9 +87,10 @@ export function getSecurityData(
     erc20VotesActivated: params?.erc20VotesActivated ?? DEFAULT_SECURITY_PARAMS.erc20VotesActivated,
     compliance: params?.compliance ?? DEFAULT_SECURITY_PARAMS.compliance,
     identityRegistry: params?.identityRegistry ?? DEFAULT_SECURITY_PARAMS.identityRegistry,
-    resolverProxyConfiguration: {
-      key: params?.resolverProxyConfiguration?.key ?? EQUITY_CONFIG_ID,
-      version: params?.resolverProxyConfiguration?.version ?? 1,
+    resolverProxyConfigurationV2: {
+      configurationId: params?.resolverProxyConfigurationV2?.configurationId ?? CONFIG_IDS.equity,
+      configurationVersion: params?.resolverProxyConfigurationV2?.configurationVersion ?? 1,
+      replacementEnabled: params?.resolverProxyConfigurationV2?.replacementEnabled ?? true,
     },
   };
 }

@@ -25,8 +25,12 @@ import {
     POW10_18
 } from "../../constants/values.sol";
 
+/// @title DecimalsLib
+/// @author Asset Tokenization Studio Team
+/// @notice Library for decimal-aware arithmetic: scaling amounts between precisions and
+///         computing powers of ten efficiently via a Yul switch lookup.
 library DecimalsLib {
-    uint8 private constant MAX_DECIMALS = 77;
+    uint8 private constant _MAX_DECIMALS = 77;
 
     function calculateDecimalsAdjustment(
         uint256 _amount,
@@ -37,7 +41,7 @@ library DecimalsLib {
         uint8 decimalsDiff;
         if (_newDecimals > _decimals) {
             decimalsDiff = _newDecimals - _decimals;
-            if (decimalsDiff > MAX_DECIMALS) revert ICommonErrors.DecimalsTooLarge(_decimals, _newDecimals);
+            if (decimalsDiff > _MAX_DECIMALS) revert ICommonErrors.DecimalsTooLarge(_decimals, _newDecimals);
             uint256 multiplier = pow10(decimalsDiff);
             if (_amount > (MAX_UINT256 / multiplier)) revert ICommonErrors.GreaterThanMaxUint256(_amount, decimalsDiff);
             unchecked {
@@ -45,7 +49,7 @@ library DecimalsLib {
             }
         }
         decimalsDiff = _decimals - _newDecimals;
-        if (decimalsDiff > MAX_DECIMALS) revert ICommonErrors.DecimalsTooLarge(_decimals, _newDecimals);
+        if (decimalsDiff > _MAX_DECIMALS) revert ICommonErrors.DecimalsTooLarge(_decimals, _newDecimals);
         unchecked {
             return _amount / pow10(decimalsDiff);
         }
@@ -59,7 +63,7 @@ library DecimalsLib {
      * @param exponent The value to validate before use as a power-of-ten exponent.
      */
     function checkExponentOverflow(uint256 exponent) internal pure {
-        if (exponent > MAX_DECIMALS) {
+        if (exponent > _MAX_DECIMALS) {
             revert ICommonErrors.ExponentOverflow(exponent);
         }
     }

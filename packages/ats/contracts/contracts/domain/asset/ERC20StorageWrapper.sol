@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _DEFAULT_PARTITION, KPI_ERC20_APPROVE_OWNER } from "../../constants/values.sol";
+import { DEFAULT_PARTITION, KPI_ERC20_APPROVE_OWNER } from "../../constants/values.sol";
 import { ICore } from "../../facets/core/ICore.sol";
 import { IFactory } from "../../factory/IFactory.sol";
 import { ITransfer } from "../../facets/transfer/ITransfer.sol";
 import { IAllowanceTypes } from "../../facets/allowance/IAllowanceTypes.sol";
-import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
+import { IERC1410Types } from "../../facets/commonTypes/IERC1410Types.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
@@ -62,7 +62,7 @@ library ERC20StorageWrapper {
      */
     function initializeERC20(ICore.ERC20Metadata calldata erc20Metadata) internal {
         ScheduledTasksOps.triggerPendingScheduledCrossOrderedTasks();
-        ERC20Storage storage erc20Stor = erc20Storage();
+        ERC20Storage storage erc20Stor = _erc20Storage();
         erc20Stor.name = erc20Metadata.info.name;
         erc20Stor.symbol = erc20Metadata.info.symbol;
         erc20Stor.decimals = erc20Metadata.info.decimals;
@@ -74,7 +74,7 @@ library ERC20StorageWrapper {
      * @param _name The new token name to store.
      */
     function setName(string calldata _name) internal {
-        erc20Storage().name = _name;
+        _erc20Storage().name = _name;
     }
 
     /**
@@ -82,7 +82,20 @@ library ERC20StorageWrapper {
      * @param _symbol The new token symbol to store.
      */
     function setSymbol(string calldata _symbol) internal {
-        erc20Storage().symbol = _symbol;
+        _erc20Storage().symbol = _symbol;
+    }
+
+    /**
+     * @notice Overwrites the decimal count in the ERC-20 storage slot.
+     * @dev This is a minimal raw-struct setter intended for test scaffolding
+     *      (`MockDiamondCut.forceDecimals`). It writes only the `decimals`
+     *      field via the private `_erc20Storage()` accessor and does NOT
+     *      trigger `ScheduledTasksOps` or overwrite name/symbol — making it
+     *      safe to use alongside snapshot scheduled-tasks tests.
+     * @param _newDecimals The new decimal count to store.
+     */
+    function setDecimals(uint8 _newDecimals) internal {
+        _erc20Storage().decimals = _newDecimals;
     }
 
     /// @notice Updates ERC-20 balances and emits the EIP-20 Transfer event.
@@ -107,7 +120,7 @@ library ERC20StorageWrapper {
      */
     function increaseBalance(address to, uint256 value) internal {
         unchecked {
-            erc20Storage().balances[to] += value;
+            _erc20Storage().balances[to] += value;
         }
     }
 
@@ -120,7 +133,7 @@ library ERC20StorageWrapper {
      */
     function reduceBalance(address from, uint256 value) internal {
         unchecked {
-            erc20Storage().balances[from] -= value;
+            _erc20Storage().balances[from] -= value;
         }
     }
 
@@ -131,7 +144,7 @@ library ERC20StorageWrapper {
      */
     function increaseTotalSupply(uint256 value) internal {
         unchecked {
-            erc20Storage().totalSupply += value;
+            _erc20Storage().totalSupply += value;
         }
     }
 
@@ -142,7 +155,7 @@ library ERC20StorageWrapper {
      */
     function reduceTotalSupply(uint256 value) internal {
         unchecked {
-            erc20Storage().totalSupply -= value;
+            _erc20Storage().totalSupply -= value;
         }
     }
 
@@ -153,7 +166,7 @@ library ERC20StorageWrapper {
      * @param factor Multiplier to apply to the current total supply.
      */
     function adjustTotalSupply(uint256 factor) internal {
-        erc20Storage().totalSupply *= factor;
+        _erc20Storage().totalSupply *= factor;
     }
 
     /**
@@ -163,7 +176,7 @@ library ERC20StorageWrapper {
      * @param adjustedDecimals Number of decimal places to add.
      */
     function adjustDecimals(uint8 adjustedDecimals) internal {
-        erc20Storage().decimals += adjustedDecimals;
+        _erc20Storage().decimals += adjustedDecimals;
     }
 
     /**
@@ -178,11 +191,11 @@ library ERC20StorageWrapper {
      * @param account Token-holder address whose balance is being adjusted.
      */
     function adjustTotalBalanceFor(uint256 abaf, address account) internal {
-        uint256 oldBalance = erc20Storage().balances[account];
+        uint256 oldBalance = _erc20Storage().balances[account];
         uint256 newBalance = oldBalance *
             AdjustBalancesStorageWrapper.calculateFactorByAbafAndTokenHolder(abaf, account);
         if (newBalance != oldBalance) {
-            erc20Storage().balances[account] = newBalance;
+            _erc20Storage().balances[account] = newBalance;
             unchecked {
                 emit ITransfer.Transfer(address(0), address(0), newBalance - oldBalance);
             }
@@ -200,7 +213,7 @@ library ERC20StorageWrapper {
      * @param spender Spender whose allowance checkpoint is updated.
      */
     function beforeAllowanceUpdate(address owner, address spender) internal {
-        ERC1410StorageWrapper.triggerAndSyncAll(_DEFAULT_PARTITION, owner, address(0));
+        ERC1410StorageWrapper.triggerAndSyncAll(DEFAULT_PARTITION, owner, address(0));
         updateAllowanceAndLabaf(owner, spender);
     }
 
@@ -219,7 +232,7 @@ library ERC20StorageWrapper {
 
         if (abaf == labaf) return;
 
-        erc20Storage().allowed[owner][spender] *= AdjustBalancesStorageWrapper.calculateFactor(abaf, labaf);
+        _erc20Storage().allowed[owner][spender] *= AdjustBalancesStorageWrapper.calculateFactor(abaf, labaf);
         AdjustBalancesStorageWrapper.updateAllowanceLabaf(owner, spender, abaf);
     }
 
@@ -232,7 +245,7 @@ library ERC20StorageWrapper {
      * @param owner   Address granting the allowance. Must not be the zero address.
      * @param spender Address permitted to spend `value` tokens on behalf of `owner`.
      * @param value   Allowance amount to set.
-     * @return `true` unconditionally on success; reverts on failure.
+     * @return True unconditionally on success; reverts on failure.
      */
     function approve(address owner, address spender, uint256 value) internal returns (bool) {
         _checkUnexpectedError(owner == address(0), KPI_ERC20_APPROVE_OWNER);
@@ -241,8 +254,8 @@ library ERC20StorageWrapper {
             revert IAllowanceTypes.SpenderWithZeroAddress();
         }
 
-        ERC1410StorageWrapper.triggerAndSyncAll(_DEFAULT_PARTITION, owner, spender);
-        erc20Storage().allowed[owner][spender] = value;
+        ERC1410StorageWrapper.triggerAndSyncAll(DEFAULT_PARTITION, owner, spender);
+        _erc20Storage().allowed[owner][spender] = value;
         AdjustBalancesStorageWrapper.updateAllowanceLabaf(owner, spender, AdjustBalancesStorageWrapper.getAbaf());
         emit IAllowanceTypes.Approval(owner, spender, value);
         return true;
@@ -256,7 +269,7 @@ library ERC20StorageWrapper {
      *      emits an `Approval` event.
      * @param spender    Address whose allowance is increased.
      * @param addedValue Amount to add to the existing allowance.
-     * @return `true` unconditionally on success; reverts on failure.
+     * @return True unconditionally on success; reverts on failure.
      */
     function increaseAllowance(address spender, uint256 addedValue) internal returns (bool) {
         if (spender == address(0)) {
@@ -276,7 +289,7 @@ library ERC20StorageWrapper {
      *      allowance. Reverts via `decreaseAllowedBalance` if allowance is insufficient.
      * @param spender         Address whose allowance is decreased.
      * @param subtractedValue Amount to subtract from the existing allowance.
-     * @return `true` unconditionally on success; reverts on failure.
+     * @return True unconditionally on success; reverts on failure.
      */
     function decreaseAllowance(address spender, uint256 subtractedValue) internal returns (bool) {
         if (spender == address(0)) {
@@ -286,7 +299,7 @@ library ERC20StorageWrapper {
         emit IAllowanceTypes.Approval(
             EvmAccessors.getMsgSender(),
             spender,
-            erc20Storage().allowed[EvmAccessors.getMsgSender()][spender]
+            _erc20Storage().allowed[EvmAccessors.getMsgSender()][spender]
         );
         return true;
     }
@@ -300,14 +313,14 @@ library ERC20StorageWrapper {
      * @param from    Source account whose balance is debited.
      * @param to      Destination account whose balance is credited.
      * @param value   Amount of tokens to transfer.
-     * @return `true` unconditionally on success; reverts on failure.
+     * @return True unconditionally on success; reverts on failure.
      */
     function transferFrom(address spender, address from, address to, uint256 value) internal returns (bool) {
         decreaseAllowedBalance(from, spender, value);
         ERC1410StorageWrapper.transferByPartition(
             from,
             IERC1410Types.BasicTransferInfo(to, value),
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             "",
             spender,
             ""
@@ -323,13 +336,13 @@ library ERC20StorageWrapper {
      * @param from  Source account.
      * @param to    Destination account.
      * @param value Amount of tokens to transfer.
-     * @return `true` unconditionally on success; reverts on failure.
+     * @return True unconditionally on success; reverts on failure.
      */
     function transfer(address from, address to, uint256 value) internal returns (bool) {
         ERC1410StorageWrapper.transferByPartition(
             from,
             IERC1410Types.BasicTransferInfo(to, value),
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             "",
             address(0),
             ""
@@ -344,7 +357,7 @@ library ERC20StorageWrapper {
      * @param value Amount of tokens to mint.
      */
     function mint(address to, uint256 value) internal {
-        ERC1410StorageWrapper.issueByPartition(IERC1410Types.IssueData(_DEFAULT_PARTITION, to, value, ""));
+        ERC1410StorageWrapper.issueByPartition(IERC1410Types.IssueData(DEFAULT_PARTITION, to, value, ""));
     }
 
     /**
@@ -354,7 +367,7 @@ library ERC20StorageWrapper {
      * @param value Amount of tokens to burn.
      */
     function burn(address from, uint256 value) internal {
-        ERC1410StorageWrapper.redeemByPartition(_DEFAULT_PARTITION, from, address(0), value, "", "");
+        ERC1410StorageWrapper.redeemByPartition(DEFAULT_PARTITION, from, address(0), value, "", "");
     }
 
     /**
@@ -383,7 +396,7 @@ library ERC20StorageWrapper {
     function decreaseAllowedBalance(address from, address spender, uint256 value) internal {
         beforeAllowanceUpdate(from, spender);
 
-        ERC20Storage storage erc20Stor = erc20Storage();
+        ERC20Storage storage erc20Stor = _erc20Storage();
 
         if (value > erc20Stor.allowed[from][spender]) {
             revert IAllowanceTypes.InsufficientAllowance(spender, from);
@@ -404,11 +417,11 @@ library ERC20StorageWrapper {
     function increaseAllowedBalance(address from, address spender, uint256 value) internal {
         beforeAllowanceUpdate(from, spender);
 
-        ERC20Storage storage erc20Stor = erc20Storage();
+        ERC20Storage storage erc20Stor = _erc20Storage();
 
         erc20Stor.allowed[from][spender] += value;
 
-        emit IAllowanceTypes.Approval(from, spender, erc20Storage().allowed[from][spender]);
+        emit IAllowanceTypes.Approval(from, spender, _erc20Storage().allowed[from][spender]);
     }
 
     /**
@@ -416,7 +429,7 @@ library ERC20StorageWrapper {
      * @return The total number of tokens in circulation.
      */
     function totalSupply() internal view returns (uint256) {
-        return erc20Storage().totalSupply;
+        return _erc20Storage().totalSupply;
     }
 
     /**
@@ -425,7 +438,7 @@ library ERC20StorageWrapper {
      * @return The token balance of `tokenHolder`.
      */
     function balanceOf(address tokenHolder) internal view returns (uint256) {
-        return erc20Storage().balances[tokenHolder];
+        return _erc20Storage().balances[tokenHolder];
     }
 
     /**
@@ -436,7 +449,7 @@ library ERC20StorageWrapper {
      * @return The remaining allowance for `spender` on `owner`'s balance.
      */
     function allowance(address owner, address spender) internal view returns (uint256) {
-        return erc20Storage().allowed[owner][spender];
+        return _erc20Storage().allowed[owner][spender];
     }
 
     /**
@@ -444,7 +457,15 @@ library ERC20StorageWrapper {
      * @return The ERC-20 token name string.
      */
     function getName() internal view returns (string memory) {
-        return erc20Storage().name;
+        return _erc20Storage().name;
+    }
+
+    /**
+     * @notice Returns the stored token symbol.
+     * @return The ERC-20 token symbol string.
+     */
+    function getSymbol() internal view returns (string memory) {
+        return _erc20Storage().symbol;
     }
 
     /**
@@ -452,7 +473,7 @@ library ERC20StorageWrapper {
      * @return The ERC-20 decimals value.
      */
     function decimals() internal view returns (uint8) {
-        return erc20Storage().decimals;
+        return _erc20Storage().decimals;
     }
 
     /**
@@ -461,7 +482,7 @@ library ERC20StorageWrapper {
      * @return erc20Metadata_ The packed `ICore.ERC20Metadata` value read from storage.
      */
     function getERC20Metadata() internal view returns (ICore.ERC20Metadata memory erc20Metadata_) {
-        ERC20Storage storage erc20Stor = erc20Storage();
+        ERC20Storage storage erc20Stor = _erc20Storage();
         ICore.ERC20MetadataInfo memory erc20Info = ICore.ERC20MetadataInfo({
             name: erc20Stor.name,
             symbol: erc20Stor.symbol,
@@ -526,7 +547,7 @@ library ERC20StorageWrapper {
      *      through this accessor.
      * @return erc20Storage_ Storage pointer to the ERC-20 data slot.
      */
-    function erc20Storage() internal pure returns (ERC20Storage storage erc20Storage_) {
+    function _erc20Storage() private pure returns (ERC20Storage storage erc20Storage_) {
         bytes32 position = STORAGE_LOCATION_ERC20;
         // solhint-disable-next-line no-inline-assembly
         assembly {

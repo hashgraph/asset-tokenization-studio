@@ -7,6 +7,7 @@ import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunc
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 /**
  * @title BalanceTrackerAtSnapshotFacet
+ * @author Asset Tokenization Studio Team
  * @notice Diamond facet that exposes snapshotted balance and total-supply queries through the
  *         `IBalanceTrackerAtSnapshot` interface, registered under
  *         `RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT`.

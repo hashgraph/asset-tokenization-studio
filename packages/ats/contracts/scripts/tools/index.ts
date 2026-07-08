@@ -39,7 +39,6 @@ export {
   // Core components
   findAllContracts as standalonesFindAllContracts,
   categorizeContracts as standaloneCategorizeContracts,
-  pairTimeTravelVariants as standalonePairTimeTravelVariants,
   extractMetadata as standaloneExtractMetadata,
   generateRegistry as standaloneGenerateRegistry,
   generateSummary as standaloneGenerateSummary,
@@ -62,12 +61,7 @@ export type { RegistryConfig, RegistryResult, CacheEntry, RegistryCache } from "
 
 export type { ContractFile, CategorizedContracts } from "./scanner/contractFinder";
 
-export {
-  findAllContracts,
-  categorizeContracts,
-  pairTimeTravelVariants,
-  findTimeTravelPair,
-} from "./scanner/contractFinder";
+export { findAllContracts, categorizeContracts } from "./scanner/contractFinder";
 
 // ============================================================================
 // Metadata Extractor
@@ -121,8 +115,6 @@ export {
   implementsInterface,
   // Naming utilities
   isFacetName,
-  isTimeTravelVariant,
-  getBaseName,
   // Roles and keys
   extractRoles,
   extractResolverKeys,

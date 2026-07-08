@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IERC1410Types } from "../layer_1/ERC1400/ERC1410/IERC1410Types.sol";
+import { IERC1410Types } from "../commonTypes/IERC1410Types.sol";
 import { IOperatorByPartition, RESOLVER_KEY_OPERATOR_BY_PARTITION } from "./IOperatorByPartition.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
@@ -31,6 +31,7 @@ abstract contract OperatorByPartition is IOperatorByPartition, Modifiers {
     }
 
     /// @inheritdoc IOperatorByPartition
+    /// @dev Emits {AuthorizedOperatorByPartition}.
     function authorizeOperatorByPartition(
         bytes32 _partition,
         address _operator
@@ -44,11 +45,11 @@ abstract contract OperatorByPartition is IOperatorByPartition, Modifiers {
         onlyCompliant(EvmAccessors.getMsgSender(), _operator, false)
     {
         ERC1410StorageWrapper.authorizeOperatorByPartition(_partition, _operator);
+        emit IERC1410Types.AuthorizedOperatorByPartition(_partition, _operator, EvmAccessors.getMsgSender());
     }
 
     /// @inheritdoc IOperatorByPartition
-    /// @dev Emits {RevokedOperatorByPartition} via
-    ///      ERC1410StorageWrapper.revokeOperatorByPartition.
+    /// @dev Emits {RevokedOperatorByPartition}.
     function revokeOperatorByPartition(
         bytes32 _partition,
         address _operator
@@ -63,6 +64,7 @@ abstract contract OperatorByPartition is IOperatorByPartition, Modifiers {
         onlyCompliant(EvmAccessors.getMsgSender(), _operator, false)
     {
         ERC1410StorageWrapper.revokeOperatorByPartition(_partition, _operator);
+        emit IERC1410Types.RevokedOperatorByPartition(_partition, _operator, EvmAccessors.getMsgSender());
     }
 
     /// @inheritdoc IOperatorByPartition
@@ -74,7 +76,7 @@ abstract contract OperatorByPartition is IOperatorByPartition, Modifiers {
         override
         onlyOperational
         onlyActivated
-        notZeroAddress(_operatorTransferData.to)
+        validateAddressNotZero(_operatorTransferData.to)
         onlyDefaultPartitionWithSinglePartition(_operatorTransferData.partition)
         onlyUnProtectedPartitionsOrWildCardRole
         onlyCanTransferFromByPartition(

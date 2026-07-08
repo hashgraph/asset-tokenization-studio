@@ -6,7 +6,8 @@ bytes32 constant RESOLVER_KEY_OPERATOR = 0x5c2062c6ba02b76ae0c3884d5c0fdd3416b20
 
 /**
  * @title IOperator
- * @notice Interface for operator management: query, authorize and revoke operators for all partitions.
+ * @author Asset Tokenization Studio Team
+ * @notice Interface for operator management: query, authorise and revoke operators for all partitions.
  */
 interface IOperator {
     /**
@@ -14,16 +15,6 @@ interface IOperator {
      * @dev Fires exclusively from `initializeOperator`.
      */
     event OperatorInitialized();
-
-    /// @notice Emitted when an operator is authorized by an account for all partitions of the account
-    /// @param operator The account that changed their delegation
-    /// @param tokenHolder The account who authorized the operator
-    event OperatorAuthorized(address indexed operator, address indexed tokenHolder);
-
-    /// @notice Emitted when an operator is revoked by an account for all partitions of the account
-    /// @param operator The account that changed their delegation
-    /// @param tokenHolder The account who revoked the operator
-    event OperatorRevoked(address indexed operator, address indexed tokenHolder);
 
     /**
      * @notice Initialises the operator capability on the token.

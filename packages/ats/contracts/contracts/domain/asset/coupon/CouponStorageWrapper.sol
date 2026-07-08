@@ -590,7 +590,6 @@ library CouponStorageWrapper {
      *      allowing access to the coupon data at its designated storage location.
      * @return cs_ A storage reference to `CouponDataStorage` at the ERC-7201 slot.
      */
-    // solhint-disable-next-line func-name-mixedcase
     function _couponStorage() private pure returns (CouponDataStorage storage cs_) {
         bytes32 position = STORAGE_LOCATION_COUPON;
         // solhint-disable-next-line no-inline-assembly

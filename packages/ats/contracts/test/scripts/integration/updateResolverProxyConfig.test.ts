@@ -29,7 +29,7 @@ import {
 } from "@scripts/infrastructure";
 
 // Domain layer
-import { atsRegistry } from "@scripts/domain";
+import { ATS_ROLES, atsRegistry } from "@scripts/domain";
 
 // Test helpers
 import {
@@ -73,12 +73,12 @@ describe("updateResolverProxy* - Integration Tests", () => {
       expect(result.previousConfig).to.deep.include({
         resolver: blrAddress,
         configurationId: configId,
-        version: BLR_VERSIONS.FIRST,
+        configurationVersion: BLR_VERSIONS.FIRST,
       });
       expect(result.newConfig).to.deep.include({
         resolver: blrAddress,
         configurationId: configId,
-        version: BLR_VERSIONS.SECOND,
+        configurationVersion: BLR_VERSIONS.SECOND,
       });
     });
 
@@ -87,7 +87,7 @@ describe("updateResolverProxy* - Integration Tests", () => {
 
       // Verify initial version
       const configBefore = await getResolverProxyConfigInfo(deployer, proxyAddress);
-      expect(configBefore.version).to.equal(BLR_VERSIONS.FIRST);
+      expect(configBefore.configurationVersion).to.equal(BLR_VERSIONS.FIRST);
 
       // Update version
       await updateResolverProxyVersion(deployer, proxyAddress, initialVersion + 1, {
@@ -96,7 +96,7 @@ describe("updateResolverProxy* - Integration Tests", () => {
 
       // Verify new version on-chain
       const configAfter = await getResolverProxyConfigInfo(deployer, proxyAddress);
-      expect(configAfter.version).to.equal(BLR_VERSIONS.SECOND);
+      expect(configAfter.configurationVersion).to.equal(BLR_VERSIONS.SECOND);
     });
   });
 
@@ -113,7 +113,7 @@ describe("updateResolverProxy* - Integration Tests", () => {
       expect(result.success).to.be.true;
       expect(result.updateType).to.equal("config");
       expect(result.newConfig?.configurationId).to.equal(altConfigId);
-      expect(result.newConfig?.version).to.equal(BLR_VERSIONS.SECOND);
+      expect(result.newConfig?.configurationVersion).to.equal(BLR_VERSIONS.SECOND);
     });
 
     it("should verify configId changed on-chain", async () => {
@@ -176,7 +176,9 @@ describe("updateResolverProxy* - Integration Tests", () => {
         id: f.resolverKey,
         version: 1,
       }));
+
       // Create version 1
+      await newBlr.grantRole(ATS_ROLES.ROLE_CREATE_CONFIGURATION, deployer.address);
       await newBlr.createConfiguration(newConfigId, facetConfigs, "0x");
       // Create version 2
       await newBlr.createConfiguration(newConfigId, facetConfigs, "0x");
@@ -347,7 +349,7 @@ describe("updateResolverProxy* - Integration Tests", () => {
 
       // Verify persistence by reading again
       const configInfo = await getResolverProxyConfigInfo(deployer, proxyAddress);
-      expect(configInfo.version).to.equal(BLR_VERSIONS.SECOND);
+      expect(configInfo.configurationVersion).to.equal(BLR_VERSIONS.SECOND);
     });
 
     it("should allow subsequent version updates within registered versions", async () => {
@@ -361,7 +363,7 @@ describe("updateResolverProxy* - Integration Tests", () => {
 
       // Verify final state is at max registered version
       const configInfo = await getResolverProxyConfigInfo(deployer, proxyAddress);
-      expect(configInfo.version).to.equal(maxVersion);
+      expect(configInfo.configurationVersion).to.equal(maxVersion);
     });
 
     it("should allow subsequent config updates", async () => {
@@ -378,7 +380,7 @@ describe("updateResolverProxy* - Integration Tests", () => {
       // Verify final state
       const configInfo = await getResolverProxyConfigInfo(deployer, proxyAddress);
       expect(configInfo.configurationId).to.equal(altConfigId);
-      expect(configInfo.version).to.equal(initialVersion + 1);
+      expect(configInfo.configurationVersion).to.equal(initialVersion + 1);
     });
   });
 

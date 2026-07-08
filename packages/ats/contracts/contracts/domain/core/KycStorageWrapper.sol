@@ -46,7 +46,7 @@ library KycStorageWrapper {
      * @param _internalKycActivated Initial value of the internal-KYC activation flag.
      */
     function initializeInternalKyc(bool _internalKycActivated) internal {
-        kycStorage().internalKycActivated = _internalKycActivated;
+        _kycStorage().internalKycActivated = _internalKycActivated;
     }
 
     /**
@@ -55,7 +55,7 @@ library KycStorageWrapper {
      * @return success_ Always `true`; the boolean return preserves the facet's API contract.
      */
     function setInternalKyc(bool _activated) internal returns (bool success_) {
-        kycStorage().internalKycActivated = _activated;
+        _kycStorage().internalKycActivated = _activated;
         success_ = true;
     }
 
@@ -80,7 +80,7 @@ library KycStorageWrapper {
         uint256 _validTo,
         address _issuer
     ) internal returns (bool success_) {
-        KycStorage storage $ = kycStorage();
+        KycStorage storage $ = _kycStorage();
         $.kyc[_account] = IKyc.KycData(_validFrom, _validTo, _vcId, _issuer, IKyc.KycStatus.GRANTED);
         $.kycAddressesByStatus[IKyc.KycStatus.GRANTED].add(_account);
         success_ = true;
@@ -92,8 +92,8 @@ library KycStorageWrapper {
      * @return success_ Always `true`; preserves the facet's API contract.
      */
     function revokeKyc(address _account) internal returns (bool success_) {
-        delete kycStorage().kyc[_account];
-        kycStorage().kycAddressesByStatus[IKyc.KycStatus.GRANTED].remove(_account);
+        delete _kycStorage().kyc[_account];
+        _kycStorage().kycAddressesByStatus[IKyc.KycStatus.GRANTED].remove(_account);
         success_ = true;
     }
 
@@ -148,7 +148,7 @@ library KycStorageWrapper {
      * @return data_ The stored `KycData` for `_account`; zero-valued when never granted.
      */
     function getKycFor(address _account) internal view returns (IKyc.KycData memory data_) {
-        return kycStorage().kyc[_account];
+        return _kycStorage().kyc[_account];
     }
 
     /**
@@ -160,7 +160,7 @@ library KycStorageWrapper {
      * @return kycAccountsCount_ Number of accounts in the set for `_kycStatus`.
      */
     function getKycAccountsCount(IKyc.KycStatus _kycStatus) internal view returns (uint256 kycAccountsCount_) {
-        kycAccountsCount_ = kycStorage().kycAddressesByStatus[_kycStatus].length();
+        kycAccountsCount_ = _kycStorage().kycAddressesByStatus[_kycStatus].length();
     }
 
     /**
@@ -181,7 +181,7 @@ library KycStorageWrapper {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory accounts_, IKyc.KycData[] memory kycData_) {
-        accounts_ = kycStorage().kycAddressesByStatus[_kycStatus].getFromSet(_pageIndex, _pageLength);
+        accounts_ = _kycStorage().kycAddressesByStatus[_kycStatus].getFromSet(_pageIndex, _pageLength);
 
         uint256 totalAccounts = accounts_.length;
         kycData_ = new IKyc.KycData[](totalAccounts);
@@ -204,7 +204,7 @@ library KycStorageWrapper {
      * @return True when both internal (if active) and external checks recognise the status.
      */
     function verifyKycStatus(IKyc.KycStatus _kycStatus, address _account) internal view returns (bool) {
-        bool internalKycValid = !kycStorage().internalKycActivated ||
+        bool internalKycValid = !_kycStorage().internalKycActivated ||
             getKycStatusFor(_account, TimeTravelStorageWrapper.getBlockTimestamp()) == _kycStatus;
         return internalKycValid && ExternalListManagementStorageWrapper.isExternallyGranted(_account, _kycStatus);
     }
@@ -214,7 +214,7 @@ library KycStorageWrapper {
      * @return True when internal KYC participates in `verifyKycStatus`.
      */
     function isInternalKycActivated() internal view returns (bool) {
-        return kycStorage().internalKycActivated;
+        return _kycStorage().internalKycActivated;
     }
 
     /**
@@ -223,7 +223,7 @@ library KycStorageWrapper {
      *      `STORAGE_LOCATION_KYC`.
      * @return kyc_ Storage reference to the `KycStorage` struct.
      */
-    function kycStorage() internal pure returns (KycStorage storage kyc_) {
+    function _kycStorage() private pure returns (KycStorage storage kyc_) {
         bytes32 position = STORAGE_LOCATION_KYC;
         // solhint-disable-next-line no-inline-assembly
         assembly {

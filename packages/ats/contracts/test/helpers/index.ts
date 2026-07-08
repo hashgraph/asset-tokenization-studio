@@ -15,3 +15,4 @@ export * from "./globalSetup";
 export * from "./assertions";
 export * from "./errors";
 export * from "./eventAssertions";
+export { grantKycToHolders } from "./assetMockSetup";

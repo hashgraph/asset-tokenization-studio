@@ -20,11 +20,11 @@ import { EvmAccessors } from "../utils/EvmAccessors.sol";
 abstract contract Ownership is IOwnership, Pause, OwnershipWrapper {
     /**
      * @inheritdoc IOwnership
-     * @dev Gated by {onlyUnpaused} and {onlyConfigurationOwner}: only the existing owner can
-     *      nominate a successor, and only while the diamond is unpaused. Stores `_newOwner`
+     * @dev Gated by {onlyUnpaused}, {onlyConfigurationOwner} and {onlyCreateConfigurationRole}:
+     *      only the existing owner can nominate a successor who was previously granted the
+     *      ROLE_CREATE_CONFIGURATION, and only while the diamond is unpaused. Stores `_newOwner`
      *      as the pending owner without touching the current owner; finalisation happens in
-     *      {acceptOwnership}. Emits {OwnershipTransfered} with the caller as the outgoing
-     *      owner.
+     *      {acceptOwnership}. Emits {OwnershipTransfered} with the caller as the outgoing owner.
      */
     function transferOwnership(
         bytes32 _configId,
@@ -51,12 +51,12 @@ abstract contract Ownership is IOwnership, Pause, OwnershipWrapper {
     }
 
     /// @inheritdoc IOwnership
-    function getOwner(bytes32 configId) external view returns (address owner_) {
-        return _getOwner(configId);
+    function getOwner(bytes32 _configId) external view returns (address owner_) {
+        return _getOwner(_configId);
     }
 
     /// @inheritdoc IOwnership
-    function getPendingOwner(bytes32 configId) external view returns (address pendingOwner_) {
-        return _getPendingOwner(configId);
+    function getPendingOwner(bytes32 _configId) external view returns (address pendingOwner_) {
+        return _getPendingOwner(_configId);
     }
 }

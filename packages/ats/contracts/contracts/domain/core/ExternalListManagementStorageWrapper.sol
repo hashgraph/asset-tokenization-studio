@@ -6,8 +6,8 @@ import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 import { MAX_EXTERNAL_LIST_SIZE } from "../../constants/values.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { IExternalControlList } from "../../facets/layer_1/externalControlList/IExternalControlList.sol";
-import { IExternalKycList } from "../../facets/layer_1/externalKycList/IExternalKycList.sol";
+import { IExternalControlList } from "../../facets/externalControlListManagement/IExternalControlList.sol";
+import { IExternalKycList } from "../../facets/externalKycListManagement/IExternalKycList.sol";
 import { IKyc } from "../../facets/kyc/IKyc.sol";
 
 /// @custom:hash storage ControlListManagement
@@ -27,9 +27,11 @@ bytes32 constant STORAGE_LOCATION_KYC_MANAGEMENT = 0x44eb866201f22832539d7232090
  *          (STORAGE_LOCATION_PAUSE_MANAGEMENT in PauseStorageWrapper.sol)
  *        - erc7201:security.token.standard.storage.ProceedRecipients
  *          (STORAGE_LOCATION_PROCEED_RECIPIENTS in ProceedRecipientsStorageWrapper.sol)
- *      No single `@custom:storage-location` annotation is present because one line cannot
- *      capture the four-slot reuse and would mislead tooling into binding the struct to a
- *      single namespace; each slot is defined by its `STORAGE_LOCATION_*` constant instead.
+ *      A single real `@custom:storage-location` would mislead tooling into binding the struct to
+ *      one namespace, so the reuse is flagged with the `erc7201:multiple` sentinel below; the four
+ *      real bindings are the namespaces listed above, each defined by its `STORAGE_LOCATION_*`
+ *      constant.
+ * @custom:storage-location erc7201:multiple
  */
 struct ExternalListDataStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
@@ -72,7 +74,7 @@ library ExternalListManagementStorageWrapper {
     ) internal returns (bool success_) {
         uint256 length = _lists.length;
         for (uint256 index; index < length; ) {
-            checkValidAddress(_lists[index]);
+            DefaultValueValidation.checkZeroAddress(_lists[index]);
             if (_actives[index]) {
                 if (!isExternalList(_position, _lists[index])) {
                     addExternalList(_position, _lists[index]);
@@ -131,7 +133,7 @@ library ExternalListManagementStorageWrapper {
     function initializeExternalControlLists(address[] calldata _controlLists) internal {
         uint256 length = _controlLists.length;
         for (uint256 index; index < length; ) {
-            checkValidAddress(_controlLists[index]);
+            DefaultValueValidation.checkZeroAddress(_controlLists[index]);
             addExternalList(STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT, _controlLists[index]);
             unchecked {
                 ++index;
@@ -147,7 +149,7 @@ library ExternalListManagementStorageWrapper {
     function initializeExternalKycLists(address[] calldata _kycLists) internal {
         uint256 length = _kycLists.length;
         for (uint256 index; index < length; ) {
-            checkValidAddress(_kycLists[index]);
+            DefaultValueValidation.checkZeroAddress(_kycLists[index]);
             addExternalList(STORAGE_LOCATION_KYC_MANAGEMENT, _kycLists[index]);
             unchecked {
                 ++index;
@@ -232,15 +234,6 @@ library ExternalListManagementStorageWrapper {
             }
         }
         return true;
-    }
-
-    /**
-     * @notice Reverts when `_addr` equals the zero address.
-     * @dev Delegates to `DefaultValueValidation.checkZeroAddress`; used to guard insertions.
-     * @param _addr Address being validated.
-     */
-    function checkValidAddress(address _addr) internal pure {
-        DefaultValueValidation.checkZeroAddress(_addr);
     }
 
     /**

@@ -21,6 +21,7 @@ interface IExternalControlListManagement {
      * @notice Emitted once when the external control list capability is initialised on a token.
      * @dev Fires exclusively from `initializeExternalControlLists` after the storage write
      *      succeeds.
+     * @param controlLists The initial array of external control list contract addresses registered.
      */
     event ExternalControlListInitialized(address[] controlLists);
 

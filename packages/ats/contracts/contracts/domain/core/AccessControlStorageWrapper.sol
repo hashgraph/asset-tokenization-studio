@@ -6,6 +6,7 @@ import { ArrayValidation } from "../../infrastructure/utils/ArrayValidation.sol"
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { IAccessControl } from "../../facets/accessControl/IAccessControl.sol";
+import { ERC3643StorageWrapper } from "./ERC3643StorageWrapper.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 
 /// @custom:hash storage AccessControl
@@ -55,60 +56,6 @@ library AccessControlStorageWrapper {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     /**
-     * @notice Resolves the access-control storage struct at its diamond storage slot.
-     * @dev Binds the struct pointer to `STORAGE_LOCATION_ACCESS_CONTROL` via inline assembly.
-     * @return roles_ Storage reference to the `RoleDataStorage` struct.
-     */
-    function rolesStorage() internal pure returns (RoleDataStorage storage roles_) {
-        bytes32 position = STORAGE_LOCATION_ACCESS_CONTROL;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            roles_.slot := position
-        }
-    }
-
-    /**
-     * @notice Reverts when the `roles` and `actives` arrays passed to `applyRoles` differ in
-     *         length.
-     * @param _rolesLength   Length of the roles array.
-     * @param _activesLength Length of the parallel actives array.
-     */
-    function checkSameRolesAndActivesLength(uint256 _rolesLength, uint256 _activesLength) internal pure {
-        if (_rolesLength != _activesLength) {
-            revert IAccessControl.RolesAndActivesLengthMismatch(_rolesLength, _activesLength);
-        }
-    }
-
-    /**
-     * @notice Reverts when a role appears more than once in the parallel `_roles`/`_actives`
-     *         input batches.
-     * @dev Delegates to `ArrayValidation.checkUniqueValues` so duplicate-role entries cannot
-     *      silently overwrite each other in `applyRoles`.
-     * @param _roles   Roles being applied in the batch.
-     * @param _actives Parallel active flags aligned with `_roles`.
-     */
-    function checkConsistentRoles(bytes32[] calldata _roles, bool[] calldata _actives) internal pure {
-        ArrayValidation.checkUniqueValues(_roles, _actives);
-    }
-
-    /**
-     * @notice Reads role membership directly from the supplied storage reference.
-     * @dev Reverse-indexed lookup via `memberRoles` to avoid resolving the storage slot twice
-     *      in batch operations such as `applyRoles`.
-     * @param _rolesStorageData Storage reference resolved once by the caller.
-     * @param _role             Role being checked.
-     * @param _account          Account being checked.
-     * @return hasRole_ True when `_account` holds `_role`.
-     */
-    function _has(
-        RoleDataStorage storage _rolesStorageData,
-        bytes32 _role,
-        address _account
-    ) private view returns (bool hasRole_) {
-        hasRole_ = _rolesStorageData.memberRoles[_account].contains(_role);
-    }
-
-    /**
      * @notice Adds `_account` to the holders of `_role` and keeps the reverse index in sync.
      * @dev Both writes must succeed for `success_` to be true; if either set already contains
      *      the entry, the operation reports failure without reverting.
@@ -116,9 +63,8 @@ library AccessControlStorageWrapper {
      * @param _account Account receiving the role.
      * @return success_ True when both directions of the index were updated.
      */
-    // solhint-disable-next-line ordering
     function grantRole(bytes32 _role, address _account) internal returns (bool success_) {
-        RoleDataStorage storage roleDataStorage = rolesStorage();
+        RoleDataStorage storage roleDataStorage = _rolesStorage();
         success_ =
             roleDataStorage.roles[_role].roleMembers.add(_account) &&
             roleDataStorage.memberRoles[_account].add(_role);
@@ -134,7 +80,7 @@ library AccessControlStorageWrapper {
      * @return success_ True when both directions of the index were updated.
      */
     function revokeRole(bytes32 _role, address _account) internal returns (bool success_) {
-        RoleDataStorage storage roleDataStorage = rolesStorage();
+        RoleDataStorage storage roleDataStorage = _rolesStorage();
         success_ =
             roleDataStorage.roles[_role].roleMembers.remove(_account) &&
             roleDataStorage.memberRoles[_account].remove(_role);
@@ -160,7 +106,7 @@ library AccessControlStorageWrapper {
         bool[] calldata _actives,
         address _account
     ) internal returns (bytes32[] memory appliedRoles_, bool[] memory appliedStates_) {
-        RoleDataStorage storage roleDataStorage = rolesStorage();
+        RoleDataStorage storage roleDataStorage = _rolesStorage();
         address sender = EvmAccessors.getMsgSender();
         uint256 length = _roles.length;
 
@@ -203,35 +149,41 @@ library AccessControlStorageWrapper {
     }
 
     /**
-     * @notice Reverts with `AccountHasNoRole` when `_account` does not hold `_role`.
+     * @notice Reverts with `WalletRecovered` when `_account` has been recovered, or with
+     *         `AccountHasNoRole` when `_account` does not hold `_role`.
+     * @dev Centralised authorization gate: every role-gated path funnels through here (the
+     *      `only*Role` modifiers, `onlyFreezeRoles`, `applyRoles`, `grantRole`, `revokeRole`),
+     *      so rejecting recovered wallets here disables a recovered/lost wallet everywhere a
+     *      single role is required — including paths that call this helper directly rather than
+     *      through a modifier.
      * @param _role    Role required.
      * @param _account Account being checked.
      */
     function checkRole(bytes32 _role, address _account) internal view {
+        ERC3643StorageWrapper.checkUnrecoveredAddress(_account);
         if (!hasRole(_role, _account)) revert IAccessControl.AccountHasNoRole(_account, _role);
     }
 
     /**
-     * @notice Reverts with `AccountHasNoRoles` when `_account` holds none of `_roles`.
+     * @notice Reverts with `WalletRecovered` when `_account` has been recovered, or with
+     *         `AccountHasNoRoles` when `_account` holds none of `_roles`.
+     * @dev Any-of-N counterpart to `checkRole`; same centralised recovered-wallet gate (used by
+     *      `onlyAnyRole` and `onlyFreezeRoles`).
      * @param _roles   Set of acceptable roles for the caller.
      * @param _account Account being checked.
      */
     function checkAnyRole(bytes32[] memory _roles, address _account) internal view {
+        ERC3643StorageWrapper.checkUnrecoveredAddress(_account);
         if (!hasAnyRole(_roles, _account)) revert IAccessControl.AccountHasNoRoles(_account, _roles);
     }
 
-    /// @notice Reverts if the caller is the sole holder of `DEFAULT_ADMIN_ROLE`.
-    /// @dev Guards `renounceRole` so the contract cannot be left without an admin.
-    /// @param _role The role being renounced.
+    /**
+     * @notice Reverts if the caller is the sole holder of `DEFAULT_ADMIN_ROLE`.
+     * @dev Guards `renounceRole` so the contract cannot be left without an admin.
+     * @param _role The role being renounced.
+     */
     function checkNotSoleAdmin(bytes32 _role) internal view {
         if (_isSoleAdmin(_role)) revert IAccessControl.CannotRenounceSoleAdmin();
-    }
-
-    /// @notice Returns `true` when `_role` is `DEFAULT_ADMIN_ROLE` and only one member holds it.
-    /// @param _role The role to inspect.
-    /// @return `true` if the caller would be the sole admin after renouncing.
-    function _isSoleAdmin(bytes32 _role) private view returns (bool) {
-        return _role == DEFAULT_ADMIN_ROLE && rolesStorage().roles[_role].roleMembers.length() == 1;
     }
 
     /**
@@ -240,7 +192,7 @@ library AccessControlStorageWrapper {
      * @return bytes32 Admin role identifier; defaults to `DEFAULT_ADMIN_ROLE` when unset.
      */
     function getRoleAdmin(bytes32 _role) internal view returns (bytes32) {
-        return rolesStorage().roles[_role].roleAdmin;
+        return _rolesStorage().roles[_role].roleAdmin;
     }
 
     /**
@@ -250,7 +202,7 @@ library AccessControlStorageWrapper {
      * @return bool True when `_account` holds `_role`.
      */
     function hasRole(bytes32 _role, address _account) internal view returns (bool) {
-        return _has(rolesStorage(), _role, _account);
+        return _has(_rolesStorage(), _role, _account);
     }
 
     /**
@@ -262,7 +214,7 @@ library AccessControlStorageWrapper {
      * @return bool True when `_account` holds at least one role from `_roles`.
      */
     function hasAnyRole(bytes32[] memory _roles, address _account) internal view returns (bool) {
-        RoleDataStorage storage roleDataStorage = rolesStorage();
+        RoleDataStorage storage roleDataStorage = _rolesStorage();
         for (uint256 i; i < _roles.length; ) {
             if (_has(roleDataStorage, _roles[i], _account)) {
                 return true;
@@ -280,7 +232,7 @@ library AccessControlStorageWrapper {
      * @return roleCount_ Cardinality of the reverse `memberRoles[_account]` set.
      */
     function getRoleCountFor(address _account) internal view returns (uint256 roleCount_) {
-        roleCount_ = rolesStorage().memberRoles[_account].length();
+        roleCount_ = _rolesStorage().memberRoles[_account].length();
     }
 
     /**
@@ -295,7 +247,7 @@ library AccessControlStorageWrapper {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (bytes32[] memory roles_) {
-        roles_ = rolesStorage().memberRoles[_account].getFromSet(_pageIndex, _pageLength);
+        roles_ = _rolesStorage().memberRoles[_account].getFromSet(_pageIndex, _pageLength);
     }
 
     /**
@@ -304,7 +256,7 @@ library AccessControlStorageWrapper {
      * @return memberCount_ Cardinality of the `roles[_role].roleMembers` set.
      */
     function getRoleMemberCount(bytes32 _role) internal view returns (uint256 memberCount_) {
-        memberCount_ = rolesStorage().roles[_role].roleMembers.length();
+        memberCount_ = _rolesStorage().roles[_role].roleMembers.length();
     }
 
     /**
@@ -319,6 +271,69 @@ library AccessControlStorageWrapper {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory members_) {
-        members_ = rolesStorage().roles[_role].roleMembers.getFromSet(_pageIndex, _pageLength);
+        members_ = _rolesStorage().roles[_role].roleMembers.getFromSet(_pageIndex, _pageLength);
+    }
+
+    /**
+     * @notice Reverts when the `roles` and `actives` arrays passed to `applyRoles` differ in
+     *         length.
+     * @param _rolesLength   Length of the roles array.
+     * @param _activesLength Length of the parallel actives array.
+     */
+    function checkSameRolesAndActivesLength(uint256 _rolesLength, uint256 _activesLength) internal pure {
+        if (_rolesLength != _activesLength) {
+            revert IAccessControl.RolesAndActivesLengthMismatch(_rolesLength, _activesLength);
+        }
+    }
+
+    /**
+     * @notice Reverts when a role appears more than once in the parallel `_roles`/`_actives`
+     *         input batches.
+     * @dev Delegates to `ArrayValidation.checkUniqueValues` so duplicate-role entries cannot
+     *      silently overwrite each other in `applyRoles`.
+     * @param _roles   Roles being applied in the batch.
+     * @param _actives Parallel active flags aligned with `_roles`.
+     */
+    function checkConsistentRoles(bytes32[] calldata _roles, bool[] calldata _actives) internal pure {
+        ArrayValidation.checkUniqueValues(_roles, _actives);
+    }
+
+    /**
+     * @notice Returns `true` when `_role` is `DEFAULT_ADMIN_ROLE` and only one member holds it.
+     * @param _role The role to inspect.
+     * @return True if the caller would be the sole admin after renouncing.
+     */
+    function _isSoleAdmin(bytes32 _role) private view returns (bool) {
+        return _role == DEFAULT_ADMIN_ROLE && _rolesStorage().roles[_role].roleMembers.length() == 1;
+    }
+
+    /**
+     * @notice Reads role membership directly from the supplied storage reference.
+     * @dev Reverse-indexed lookup via `memberRoles` to avoid resolving the storage slot twice
+     *      in batch operations such as `applyRoles`.
+     * @param _rolesStorageData Storage reference resolved once by the caller.
+     * @param _role             Role being checked.
+     * @param _account          Account being checked.
+     * @return hasRole_ True when `_account` holds `_role`.
+     */
+    function _has(
+        RoleDataStorage storage _rolesStorageData,
+        bytes32 _role,
+        address _account
+    ) private view returns (bool hasRole_) {
+        hasRole_ = _rolesStorageData.memberRoles[_account].contains(_role);
+    }
+
+    /**
+     * @notice Resolves the access-control storage struct at its diamond storage slot.
+     * @dev Binds the struct pointer to `STORAGE_LOCATION_ACCESS_CONTROL` via inline assembly.
+     * @return roles_ Storage reference to the `RoleDataStorage` struct.
+     */
+    function _rolesStorage() private pure returns (RoleDataStorage storage roles_) {
+        bytes32 position = STORAGE_LOCATION_ACCESS_CONTROL;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            roles_.slot := position
+        }
     }
 }

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { deployAtsInfrastructureFixture } from "../infrastructure.fixture";
-import { ATS_ROLES, CURRENCIES, DeepPartial, TIME_PERIODS_S, BOND_CONFIG_ID } from "../../../scripts";
+import { ATS_ROLES, CURRENCIES, DeepPartial, TIME_PERIODS_S, CONFIG_IDS } from "../../../scripts";
 import {
   AccessControlFacet__factory,
   PauseFacet__factory,
@@ -74,9 +74,10 @@ export async function deployBondTokenFixture({
 
   const securityData = getSecurityData(blr, {
     ...bondDataParams?.securityData,
-    resolverProxyConfiguration: {
-      key: BOND_CONFIG_ID,
-      version: 1,
+    resolverProxyConfigurationV2: {
+      configurationId: CONFIG_IDS.bond,
+      configurationVersion: 1,
+      replacementEnabled: true,
     },
   });
   const bondDetails = await makeBondDetailsData(bondDataParams?.bondDetails);

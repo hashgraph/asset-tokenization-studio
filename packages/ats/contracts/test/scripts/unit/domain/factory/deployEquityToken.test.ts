@@ -12,7 +12,7 @@
 
 import { expect } from "chai";
 import sinon from "sinon";
-import { deployEquityFromFactory, ATS_ROLES, EQUITY_CONFIG_ID } from "@scripts/domain";
+import { deployEquityFromFactory, ATS_ROLES, CONFIG_IDS } from "@scripts/domain";
 import { TEST_ADDRESSES, TEST_FACTORY_EVENTS, TEST_TOKEN_METADATA } from "@test";
 import {
   createMockFactory,
@@ -98,7 +98,7 @@ describe("Equity Token Deployment", () => {
   // ============================================================================
 
   describe("resolverProxyConfiguration", () => {
-    it("should use EQUITY_CONFIG_ID", async () => {
+    it("should use CONFIG_IDS.equity", async () => {
       const diamondAddress = TEST_ADDRESSES.VALID_3;
       const mockFactory = createMockFactory(TEST_FACTORY_EVENTS.EQUITY_DEPLOYED, diamondAddress);
       const params = createDeployEquityParams(mockFactory);
@@ -107,12 +107,12 @@ describe("Equity Token Deployment", () => {
       await deployEquityFromFactory(params, regulationData);
 
       const callArgs = mockFactory.deployEquity.getCall(0).args[0];
-      const config = callArgs.security.resolverProxyConfiguration;
+      const config = callArgs.security.resolverProxyConfigurationV2;
 
-      expect(config.key).to.equal(EQUITY_CONFIG_ID);
+      expect(config.configurationId).to.equal(CONFIG_IDS.equity);
     });
 
-    it("should set version to 1", async () => {
+    it("should set configurationVersion to 1", async () => {
       const diamondAddress = TEST_ADDRESSES.VALID_3;
       const mockFactory = createMockFactory(TEST_FACTORY_EVENTS.EQUITY_DEPLOYED, diamondAddress);
       const params = createDeployEquityParams(mockFactory);
@@ -121,9 +121,23 @@ describe("Equity Token Deployment", () => {
       await deployEquityFromFactory(params, regulationData);
 
       const callArgs = mockFactory.deployEquity.getCall(0).args[0];
-      const config = callArgs.security.resolverProxyConfiguration;
+      const config = callArgs.security.resolverProxyConfigurationV2;
 
-      expect(config.version).to.equal(1);
+      expect(config.configurationVersion).to.equal(1);
+    });
+
+    it("should set replacementEnabled to true", async () => {
+      const diamondAddress = TEST_ADDRESSES.VALID_3;
+      const mockFactory = createMockFactory(TEST_FACTORY_EVENTS.EQUITY_DEPLOYED, diamondAddress);
+      const params = createDeployEquityParams(mockFactory);
+      const regulationData = createMockRegulationData();
+
+      await deployEquityFromFactory(params, regulationData);
+
+      const callArgs = mockFactory.deployEquity.getCall(0).args[0];
+      const config = callArgs.security.resolverProxyConfigurationV2;
+
+      expect(config.replacementEnabled).to.equal(true);
     });
   });
 

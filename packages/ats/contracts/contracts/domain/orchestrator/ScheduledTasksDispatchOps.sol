@@ -3,30 +3,33 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ScheduledTask } from "../../facets/scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { IScheduledBalanceAdjustment } from "../../facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol";
-import { ISnapshots } from "../../facets/snapshot/ISnapshots.sol";
+import { ISnapshots } from "../../facets/snapshots/ISnapshots.sol";
 import { SNAPSHOT_RESULT_ID, COUPON_LISTING_RESULT_ID } from "../../constants/values.sol";
 import { SnapshotsStorageWrapper } from "../asset/SnapshotsStorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "../asset/AdjustBalancesStorageWrapper.sol";
 import { CouponStorageWrapper } from "../asset/coupon/CouponStorageWrapper.sol";
 import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageWrapper.sol";
 import { InterestRateStorageWrapper } from "../asset/InterestRateStorageWrapper.sol";
-import { KpiLinkedRateLib } from "../asset/KpiLinkedRateLib.sol";
 import { ICouponTypes } from "../../facets/coupon/ICouponTypes.sol";
-import { CouponRateDispatch } from "../../domain/asset/coupon/CouponRateDispatch.sol";
 import { IInterestRate } from "../../facets/interestRate/IInterestRate.sol";
-import {
-    CORPORATE_ACTION_TYPE_COUPON,
-    SCHEDULED_TASK_TYPE_COUPON_LISTING,
-    SCHEDULED_TASK_TYPE_SNAPSHOT
-} from "../../constants/dispatchTypes.sol";
+import { CORPORATE_ACTION_TYPE_COUPON } from "../../constants/dispatchTypes.sol";
 
 /// @title ScheduledTasksDispatchOps - External library for isolated scheduled task dispatch
+/// @author Asset Tokenization Studio Team
 /// @notice Deployed once as a separate contract. Called via DELEGATECALL. Handles only
 ///         leaf-task business logic (snapshot, coupon, balance). A revert propagates to the
 ///         caller, blocking the queue until an authorised caller force-cancels the task.
 ///         Cross-ordered sub-task routing and all queue storage access live in
 ///         ScheduledTasksStorageWrapper to avoid circular imports.
 library ScheduledTasksDispatchOps {
+    /// @notice Dispatches a scheduled task to the appropriate handler based on `callbackType`.
+    /// @dev Routes to `_onScheduledSnapshotTriggered`, `_onScheduledCouponListingTriggered`,
+    ///      `_onScheduledBalanceAdjustmentTriggered`, or decodes a cross-ordered sub-task type.
+    ///      Returns `bytes32(0)` for leaf tasks; returns a non-zero sub-task type for
+    ///      cross-ordered tasks so the caller can chain the sub-queue dispatch.
+    /// @param callbackType Identifies the task variant (`"snapshot"`, `"coupon"`, `"balance"`,
+    ///                     or `"crossOrdered"`).
+    /// @param task         Scheduled task record carrying encoded payload data.
     /// @return subTaskType_ Non-zero only for crossOrdered tasks: the sub-task type to trigger.
     ///         ScheduledTasksStorageWrapper reads this value and dispatches the sub-queue internally.
     function execute(bytes32 callbackType, ScheduledTask calldata task) external returns (bytes32 subTaskType_) {

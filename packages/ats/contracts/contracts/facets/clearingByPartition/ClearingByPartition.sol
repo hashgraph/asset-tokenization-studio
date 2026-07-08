@@ -158,7 +158,7 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
         onlyUnrecoveredAddress(_clearingOperationFrom.from)
         onlyClearingActivated
         onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
-        notZeroAddress(_clearingOperationFrom.from)
+        validateAddressNotZero(_clearingOperationFrom.from)
         onlyDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition)
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 clearingId_)
@@ -195,7 +195,7 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
         onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
         onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyUnrecoveredAddress(_to)
-        notZeroAddress(_to)
+        validateAddressNotZero(_to)
         onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 clearingId_)
@@ -224,8 +224,8 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
         onlyUnpaused
         onlyClearingActivated
         onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
-        notZeroAddress(_clearingOperationFrom.from)
-        notZeroAddress(_to)
+        validateAddressNotZero(_clearingOperationFrom.from)
+        validateAddressNotZero(_to)
         onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyUnrecoveredAddress(_to)
         onlyUnrecoveredAddress(_clearingOperationFrom.from)

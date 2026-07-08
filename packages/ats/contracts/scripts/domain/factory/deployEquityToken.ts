@@ -4,7 +4,7 @@ import { ethers, type EventLog } from "ethers";
 import type { IFactory, ResolverProxy } from "@contract-types";
 import { ResolverProxy__factory } from "@contract-types";
 import { GAS_LIMIT } from "@scripts/infrastructure";
-import { ATS_ROLES, EQUITY_CONFIG_ID } from "../constants";
+import { ATS_ROLES, CONFIG_IDS } from "../constants";
 import { EquityDetailsDataParams, FactoryRegulationDataParams, Rbac, SecurityDataParams } from "./types";
 
 // ============================================================================
@@ -70,9 +70,10 @@ export async function deployEquityFromFactory(
   ];
 
   // Build resolver proxy configuration
-  const resolverProxyConfiguration = {
-    key: EQUITY_CONFIG_ID,
-    version: 1,
+  const resolverProxyConfigurationV2 = {
+    configurationId: CONFIG_IDS.equity,
+    configurationVersion: 1,
+    replacementEnabled: true,
   };
 
   // Build security data structure
@@ -80,7 +81,7 @@ export async function deployEquityFromFactory(
     arePartitionsProtected: securityDataParams.arePartitionsProtected,
     isMultiPartition: securityDataParams.isMultiPartition,
     resolver: securityDataParams.resolver,
-    resolverProxyConfiguration,
+    resolverProxyConfigurationV2,
     rbacs,
     isControllable: securityDataParams.isControllable,
     isWhiteList: securityDataParams.isWhiteList,

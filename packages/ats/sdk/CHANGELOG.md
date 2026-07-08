@@ -1,5 +1,43 @@
 # @hashgraph/asset-tokenization-sdk
 
+## 9.0.0
+
+### Patch Changes
+
+- Updated dependencies [93cbfc8]
+- Updated dependencies [fa2f462]
+- Updated dependencies [6945eb5]
+- Updated dependencies [0f4bfa1]
+- Updated dependencies [da8bd72]
+- Updated dependencies [2a24712]
+- Updated dependencies [dd29415]
+- Updated dependencies [9a7fecd]
+- Updated dependencies [656f903]
+- Updated dependencies [16ea27d]
+- Updated dependencies [760f475]
+- Updated dependencies [85ac8d2]
+- Updated dependencies [7444da6]
+- Updated dependencies [3e96613]
+- Updated dependencies [9900cd2]
+- Updated dependencies [766422f]
+- Updated dependencies [7bf12b8]
+- Updated dependencies [37a4f32]
+- Updated dependencies [64e8681]
+- Updated dependencies [9e56b43]
+- Updated dependencies [001cb25]
+- Updated dependencies [f4ca6b0]
+- Updated dependencies [c06db90]
+- Updated dependencies [eb6d462]
+- Updated dependencies [9fee020]
+- Updated dependencies [61a7fcc]
+- Updated dependencies [f5e9915]
+- Updated dependencies [5c0caa9]
+- Updated dependencies [2dcfaa1]
+- Updated dependencies [a8d246d]
+- Updated dependencies [12d4a25]
+- Updated dependencies [4d4309b]
+  - @hashgraph/asset-tokenization-contracts@9.0.0
+
 ## 8.0.0
 
 ### Major Changes

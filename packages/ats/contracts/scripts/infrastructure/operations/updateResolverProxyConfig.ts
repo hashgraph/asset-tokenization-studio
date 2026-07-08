@@ -67,6 +67,8 @@ interface InternalUpdateOptions {
   newVersion: number;
   /** New configuration ID (required for 'config' and 'resolver' types) */
   newConfigurationId?: string;
+  /** New replacement enabled flag (required for 'config' and 'resolver' types) */
+  newReplacementEnabled?: boolean;
   /** New BLR address (required for 'resolver' type) */
   newBlrAddress?: string;
   /** Transaction overrides */
@@ -82,11 +84,15 @@ export interface ResolverProxyConfigInfo {
   /** Current BusinessLogicResolver address */
   resolver: string;
 
+  version: number;
+
   /** Current configuration ID */
   configurationId: string;
 
   /** Current version */
-  version: number;
+  configurationVersion: number;
+
+  replacementEnabled: boolean;
 }
 
 /**
@@ -155,12 +161,15 @@ export async function getResolverProxyConfigInfo(
     validateAddress(proxyAddress, "ResolverProxy address");
 
     const diamondCutFacet = DiamondFacet__factory.connect(proxyAddress, signerOrProvider);
-    const [resolver, configId, version] = await diamondCutFacet.getConfigInfo();
+    const [resolver, version, configId, configurationVersion, replacementEnabled] =
+      await diamondCutFacet.getConfigInfo();
 
     return {
       resolver,
-      configurationId: configId,
       version: Number(version),
+      configurationId: configId,
+      configurationVersion: Number(configurationVersion),
+      replacementEnabled: replacementEnabled,
     };
   } catch (err) {
     const errorMessage = extractRevertReason(err);
@@ -241,7 +250,7 @@ export async function updateResolverProxyVersion(
  * const result = await updateResolverProxyConfig(
  *   signer,
  *   '0x123...',            // proxy address
- *   BOND_CONFIG_ID,        // new config ID
+ *   CONFIG_IDS.bond,        // new config ID
  *   2,                     // new version
  *   { confirmations: 0 }
  * )
@@ -293,7 +302,7 @@ export async function updateResolverProxyConfig(
  *   signer,
  *   '0x123...',            // proxy address
  *   '0xNewBLR...',         // new BLR address
- *   EQUITY_CONFIG_ID,      // new config ID
+ *   CONFIG_IDS.equity,      // new config ID
  *   1,                     // new version
  *   { confirmations: 0 }
  * )
@@ -342,6 +351,7 @@ async function _updateResolverProxyInternal(
     updateType,
     newVersion,
     newConfigurationId,
+    newReplacementEnabled,
     newBlrAddress,
     overrides = {},
     confirmations,
@@ -370,7 +380,7 @@ async function _updateResolverProxyInternal(
     info("Fetching current configuration...");
     const previousConfig = await getResolverProxyConfigInfo(signer, proxyAddress);
     debug(
-      `Previous config: resolver=${previousConfig.resolver}, configId=${previousConfig.configurationId}, version=${previousConfig.version}`,
+      `Previous config: resolver=${previousConfig.resolver}, configId=${previousConfig.configurationId}, version=${previousConfig.configurationVersion}`,
     );
 
     const diamondCutFacet = DiamondFacet__factory.connect(proxyAddress, signer);
@@ -382,7 +392,13 @@ async function _updateResolverProxyInternal(
       switch (updateType) {
         case "resolver":
           debug("Calling updateResolver()");
-          updateTx = await diamondCutFacet.updateResolver(newBlrAddress!, newConfigurationId!, newVersion, overrides);
+          updateTx = await diamondCutFacet.updateResolver(
+            newBlrAddress!,
+            newConfigurationId!,
+            newVersion,
+            newReplacementEnabled ?? false,
+            overrides,
+          );
           break;
         case "config":
           debug("Calling updateConfig()");
@@ -431,7 +447,7 @@ async function _updateResolverProxyInternal(
     try {
       newConfig = await getResolverProxyConfigInfo(signer, proxyAddress);
       debug(
-        `New config: resolver=${newConfig.resolver}, configId=${newConfig.configurationId}, version=${newConfig.version}`,
+        `New config: resolver=${newConfig.resolver}, configId=${newConfig.configurationId}, version=${newConfig.configurationVersion}`,
       );
     } catch (configErr) {
       const errorMessage = extractRevertReason(configErr);
@@ -450,8 +466,8 @@ async function _updateResolverProxyInternal(
     }
 
     success("ResolverProxy configuration updated successfully");
-    info(`  Previous version: ${previousConfig.version}`);
-    info(`  New version: ${newConfig.version}`);
+    info(`  Previous version: ${previousConfig.configurationVersion}`);
+    info(`  New version: ${newConfig.configurationVersion}`);
     if (previousConfig.configurationId !== newConfig.configurationId) {
       info(`  Previous config ID: ${previousConfig.configurationId}`);
       info(`  New config ID: ${newConfig.configurationId}`);

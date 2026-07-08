@@ -111,7 +111,7 @@ library InterestRateStorageWrapper {
      * @param _newRateDecimals The number of decimals for the new rate.
      */
     function setRate(uint256 _newRate, uint8 _newRateDecimals) internal {
-        FixedRateDataStorage storage frs = fixedRateStorage();
+        FixedRateDataStorage storage frs = _fixedRateStorage();
         frs.rate = _newRate;
         frs.decimals = _newRateDecimals;
     }
@@ -122,7 +122,7 @@ library InterestRateStorageWrapper {
      * @param _newInterestRate The InterestRate structure containing all rate parameters.
      */
     function setInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) internal {
-        KpiLinkedRateDataStorage storage kpiRateStorage = kpiLinkedRateStorage();
+        KpiLinkedRateDataStorage storage kpiRateStorage = _kpiLinkedRateStorage();
         kpiRateStorage.maxRate = _newInterestRate.maxRate;
         kpiRateStorage.baseRate = _newInterestRate.baseRate;
         kpiRateStorage.minRate = _newInterestRate.minRate;
@@ -139,7 +139,7 @@ library InterestRateStorageWrapper {
      * @param _newImpactData The ImpactData structure containing deviation and precision parameters.
      */
     function setImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) internal {
-        KpiLinkedRateDataStorage storage kpiRateStorage = kpiLinkedRateStorage();
+        KpiLinkedRateDataStorage storage kpiRateStorage = _kpiLinkedRateStorage();
         kpiRateStorage.maxDeviationCap = _newImpactData.maxDeviationCap;
         kpiRateStorage.baseLine = _newImpactData.baseLine;
         kpiRateStorage.maxDeviationFloor = _newImpactData.maxDeviationFloor;
@@ -164,15 +164,15 @@ library InterestRateStorageWrapper {
      * @param _rateType The `IInterestRate.RateType` to persist.
      */
     function setCouponRateType(IInterestRate.RateType _rateType) internal {
-        interestRateTypeStorage().rateType = _rateType;
+        _interestRateTypeStorage().rateType = _rateType;
     }
 
     /**
      * @notice Returns the stored coupon rate type.
-     * @return rateType_ The `IInterestRate.RateType` value; defaults to `NONE` (0) if never set.
+     * @return rateType_ The `IInterestRate.RateType` value; defaults to `STANDARD` (0) if unset.
      */
     function getCouponRateType() internal view returns (IInterestRate.RateType rateType_) {
-        return interestRateTypeStorage().rateType;
+        return _interestRateTypeStorage().rateType;
     }
 
     /**
@@ -181,8 +181,8 @@ library InterestRateStorageWrapper {
      * @return decimals_ The number of decimals for the rate.
      */
     function getRate() internal view returns (uint256 rate_, uint8 decimals_) {
-        rate_ = fixedRateStorage().rate;
-        decimals_ = fixedRateStorage().decimals;
+        rate_ = _fixedRateStorage().rate;
+        decimals_ = _fixedRateStorage().decimals;
     }
 
     /**
@@ -190,7 +190,7 @@ library InterestRateStorageWrapper {
      * @return interestRate_ An InterestRate memory struct with all KPI rate parameters.
      */
     function getInterestRate() internal view returns (IKpiLinkedRate.InterestRate memory interestRate_) {
-        KpiLinkedRateDataStorage storage kpiRateStorage = kpiLinkedRateStorage();
+        KpiLinkedRateDataStorage storage kpiRateStorage = _kpiLinkedRateStorage();
         interestRate_ = IKpiLinkedRate.InterestRate({
             maxRate: kpiRateStorage.maxRate,
             baseRate: kpiRateStorage.baseRate,
@@ -208,7 +208,7 @@ library InterestRateStorageWrapper {
      * @return impactData_ An ImpactData memory struct with deviation bounds and precision.
      */
     function getImpactData() internal view returns (IKpiLinkedRate.ImpactData memory impactData_) {
-        KpiLinkedRateDataStorage storage kpiRateStorage = kpiLinkedRateStorage();
+        KpiLinkedRateDataStorage storage kpiRateStorage = _kpiLinkedRateStorage();
         impactData_ = IKpiLinkedRate.ImpactData({
             maxDeviationCap: kpiRateStorage.maxDeviationCap,
             baseLine: kpiRateStorage.baseLine,
@@ -219,14 +219,99 @@ library InterestRateStorageWrapper {
     }
 
     /**
-     * @notice Reverts when `NONE` is supplied as the rate type.
-     * @dev `NONE` is the zero-value default reserved for uninitialised assets; it must never
-     *      be set explicitly.
-     * @param _rateType The rate type to validate.
-     * @custom:revert IInterestRate.InvalidRateType If `_rateType` is `NONE`.
+     * @notice Returns the start period timestamp for the KPI-linked rate.
+     * @return startPeriod_ The Unix timestamp marking the start of the KPI-linked rate period.
      */
-    function checkValidRateType(IInterestRate.RateType _rateType) internal pure {
-        if (_rateType == IInterestRate.RateType.NONE) revert IInterestRate.InvalidRateType(_rateType);
+    function getStartPeriod() internal view returns (uint256 startPeriod_) {
+        startPeriod_ = _kpiLinkedRateStorage().startPeriod;
+    }
+
+    /**
+     * @notice Returns the baseline value for the KPI-linked rate impact calculations.
+     * @return baseLine_ The baseline against which KPI deviations are measured.
+     */
+    function getBaseLine() internal view returns (uint256 baseLine_) {
+        baseLine_ = _kpiLinkedRateStorage().baseLine;
+    }
+
+    /**
+     * @notice Returns the precision factor used in KPI-linked rate adjustments.
+     * @return adjustmentPrecision_ The precision factor for rate adjustments based on KPI impact.
+     */
+    function getAdjustmentPrecision() internal view returns (uint256 adjustmentPrecision_) {
+        adjustmentPrecision_ = _kpiLinkedRateStorage().adjustmentPrecision;
+    }
+
+    /**
+     * @notice Returns the start rate for the KPI-linked rate.
+     * @return startRate_ The initial interest rate applicable at the start period.
+     */
+    function getStartRate() internal view returns (uint256 startRate_) {
+        startRate_ = _kpiLinkedRateStorage().startRate;
+    }
+
+    /**
+     * @notice Returns the report period duration for the KPI-linked rate.
+     * @return reportPeriod_ The duration in seconds between successive KPI reports.
+     */
+    function getReportPeriod() internal view returns (uint256 reportPeriod_) {
+        reportPeriod_ = _kpiLinkedRateStorage().reportPeriod;
+    }
+
+    /**
+     * @notice Returns the number of decimals used for KPI-linked rate values.
+     * @return rateDecimals_ The number of decimal places for KPI-linked rates.
+     */
+    function getRateDecimals() internal view returns (uint8 rateDecimals_) {
+        rateDecimals_ = _kpiLinkedRateStorage().rateDecimals;
+    }
+
+    /**
+     * @notice Returns the penalty rate applied when a KPI report is missed.
+     * @return missedPenalty_ The penalty rate for missed KPI reports.
+     */
+    function getMissedPenalty() internal view returns (uint256 missedPenalty_) {
+        missedPenalty_ = _kpiLinkedRateStorage().missedPenalty;
+    }
+
+    /**
+     * @notice Returns the upper deviation floor for KPI-linked impact data.
+     * @return maxDeviationFloor_ The maximum deviation floor for KPI impact data.
+     */
+    function getMaxDeviationFloor() internal view returns (uint256 maxDeviationFloor_) {
+        maxDeviationFloor_ = _kpiLinkedRateStorage().maxDeviationFloor;
+    }
+
+    /**
+     * @notice Returns the upper deviation cap for KPI-linked impact data.
+     * @return maxDeviationCap_ The maximum deviation cap for KPI impact data.
+     */
+    function getMaxDeviationCap() internal view returns (uint256 maxDeviationCap_) {
+        maxDeviationCap_ = _kpiLinkedRateStorage().maxDeviationCap;
+    }
+
+    /**
+     * @notice Returns the upper bound for the KPI-linked interest rate.
+     * @return maxRate_ The maximum possible interest rate under the KPI-linked model.
+     */
+    function getMaxRate() internal view returns (uint256 maxRate_) {
+        maxRate_ = _kpiLinkedRateStorage().maxRate;
+    }
+
+    /**
+     * @notice Returns the lower bound for the KPI-linked interest rate.
+     * @return minRate_ The minimum possible interest rate under the KPI-linked model.
+     */
+    function getMinRate() internal view returns (uint256 minRate_) {
+        minRate_ = _kpiLinkedRateStorage().minRate;
+    }
+
+    /**
+     * @notice Returns the base rate from which KPI-linked adjustments are applied.
+     * @return baseRate_ The base interest rate for the KPI-linked model.
+     */
+    function getBaseRate() internal view returns (uint256 baseRate_) {
+        baseRate_ = _kpiLinkedRateStorage().baseRate;
     }
 
     /**
@@ -267,7 +352,7 @@ library InterestRateStorageWrapper {
      * @dev Uses inline assembly to load the slot from a precomputed constant value.
      * @return fixedRateDataStorage_ Storage pointer to FixedRateDataStorage.
      */
-    function fixedRateStorage() internal pure returns (FixedRateDataStorage storage fixedRateDataStorage_) {
+    function _fixedRateStorage() private pure returns (FixedRateDataStorage storage fixedRateDataStorage_) {
         bytes32 position = STORAGE_LOCATION_FIXED_RATE;
         // solhint-disable-next-line no-inline-assembly
         assembly {
@@ -280,7 +365,7 @@ library InterestRateStorageWrapper {
      * @dev Uses inline assembly to load the slot from a precomputed constant value.
      * @return kpiLinkedRateDataStorage_ Storage pointer to KpiLinkedRateDataStorage.
      */
-    function kpiLinkedRateStorage() internal pure returns (KpiLinkedRateDataStorage storage kpiLinkedRateDataStorage_) {
+    function _kpiLinkedRateStorage() private pure returns (KpiLinkedRateDataStorage storage kpiLinkedRateDataStorage_) {
         bytes32 position = STORAGE_LOCATION_KPI_LINKED_RATE;
         // solhint-disable-next-line no-inline-assembly
         assembly {
@@ -293,7 +378,7 @@ library InterestRateStorageWrapper {
      * @dev Uses inline assembly to load the slot from a precomputed constant value.
      * @return data_ Storage pointer to InterestRateTypeDataStorage.
      */
-    function interestRateTypeStorage() private pure returns (InterestRateTypeDataStorage storage data_) {
+    function _interestRateTypeStorage() private pure returns (InterestRateTypeDataStorage storage data_) {
         bytes32 position = STORAGE_LOCATION_INTEREST_RATE_TYPE;
         // solhint-disable-next-line no-inline-assembly
         assembly {

@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IProceedRecipients } from "../../facets/proceedRecipient/IProceedRecipients.sol";
+import { IProceedRecipients } from "../../facets/proceedRecipients/IProceedRecipients.sol";
 import { ExternalListManagementStorageWrapper } from "../core/ExternalListManagementStorageWrapper.sol";
+import { DefaultValueValidation } from "../../infrastructure/utils/DefaultValueValidation.sol";
 
 /// @custom:hash storage ProceedRecipients
 // solhint-disable-next-line max-line-length
@@ -50,7 +51,7 @@ library ProceedRecipientsStorageWrapper {
     function initializeProceedRecipients(address[] calldata _proceedRecipients, bytes[] calldata _data) internal {
         uint256 length = _proceedRecipients.length;
         for (uint256 index; index < length; ) {
-            ExternalListManagementStorageWrapper.checkValidAddress(_proceedRecipients[index]);
+            DefaultValueValidation.checkZeroAddress(_proceedRecipients[index]);
             addProceedRecipient(_proceedRecipients[index], _data[index]);
             unchecked {
                 ++index;
@@ -83,7 +84,7 @@ library ProceedRecipientsStorageWrapper {
      * @param _data The payload bytes to persist.
      */
     function setProceedRecipientData(address _proceedRecipient, bytes calldata _data) internal {
-        proceedRecipientsDataStorage().proceedRecipientData[_proceedRecipient] = _data;
+        _proceedRecipientsDataStorage().proceedRecipientData[_proceedRecipient] = _data;
     }
 
     /**
@@ -91,14 +92,14 @@ library ProceedRecipientsStorageWrapper {
      * @param _proceedRecipient The recipient address.
      */
     function removeProceedRecipientData(address _proceedRecipient) internal {
-        delete proceedRecipientsDataStorage().proceedRecipientData[_proceedRecipient];
+        delete _proceedRecipientsDataStorage().proceedRecipientData[_proceedRecipient];
     }
 
     /**
      * @notice Reverts when the supplied address is not a registered proceed recipient.
      * @param _proceedRecipient Address to check.
      */
-    function requireProceedRecipient(address _proceedRecipient) internal view {
+    function checkProceedRecipient(address _proceedRecipient) internal view {
         if (!isProceedRecipient(_proceedRecipient)) {
             revert IProceedRecipients.ProceedRecipientNotFound(_proceedRecipient);
         }
@@ -108,7 +109,7 @@ library ProceedRecipientsStorageWrapper {
      * @notice Reverts when the supplied address is already a registered proceed recipient.
      * @param _proceedRecipient Address to check.
      */
-    function requireNotProceedRecipient(address _proceedRecipient) internal view {
+    function checkNotProceedRecipient(address _proceedRecipient) internal view {
         if (isProceedRecipient(_proceedRecipient)) {
             revert IProceedRecipients.ProceedRecipientAlreadyExists(_proceedRecipient);
         }
@@ -120,7 +121,7 @@ library ProceedRecipientsStorageWrapper {
      * @return data_ The stored payload bytes (empty when no data has been set).
      */
     function getProceedRecipientData(address _proceedRecipient) internal view returns (bytes memory data_) {
-        return proceedRecipientsDataStorage().proceedRecipientData[_proceedRecipient];
+        return _proceedRecipientsDataStorage().proceedRecipientData[_proceedRecipient];
     }
 
     /**
@@ -164,8 +165,8 @@ library ProceedRecipientsStorageWrapper {
      * @dev Uses inline assembly to load the ERC-7201 slot from a precomputed constant.
      * @return proceedRecipientsDataStorage_ Storage pointer to `ProceedRecipientsDataStorage`.
      */
-    function proceedRecipientsDataStorage()
-        internal
+    function _proceedRecipientsDataStorage()
+        private
         pure
         returns (ProceedRecipientsDataStorage storage proceedRecipientsDataStorage_)
     {

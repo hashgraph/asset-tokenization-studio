@@ -27,8 +27,6 @@ library CouponRateDispatch {
      * @notice Resolves the coupon rate at read or listing-trigger time for variants that
      *         compute the rate lazily.
      * @dev Rate-type dispatch:
-     *      - NONE: rate was forced to (0, 0) at write time — no override needed here.
-     *              Returns shouldOverride_=false.
      *      - STANDARD: user-supplied rate is already SET — no override needed here.
      *              Returns shouldOverride_=false.
      *      - FIXED: rate was stamped at write time — no override needed here.
@@ -50,14 +48,12 @@ library CouponRateDispatch {
                 .calculateKpiLinkedInterestRate(couponID, coupon);
         }
         return resolvedCoupon_;
-        // NONE, STANDARD, FIXED: rate is owned at write time; no action needed at read/trigger time.
+        // STANDARD, FIXED: rate is owned at write time; no action needed at read/trigger time.
     }
 
     /**
      * @notice Validates and stamps the coupon rate at creation (write) time.
      * @dev Rate-type dispatch:
-     *      - NONE: forces rate to (0, 0) with status SET, regardless of user input.
-     *              No coupon payments will ever be owed for this asset.
      *      - FIXED: rejects any non-pending rate triplet, then stamps the rate from storage.
      *              Returns (0, 0) if the fixed-rate facet has not been initialized.
      *      - KPI_LINKED: rejects any non-pending rate triplet; rate stays PENDING and is
@@ -73,13 +69,6 @@ library CouponRateDispatch {
     ) internal view returns (ICouponTypes.Coupon memory resolved_) {
         IInterestRate.RateType rateType = InterestRateStorageWrapper.getCouponRateType();
         resolved_ = newCoupon;
-
-        if (rateType == IInterestRate.RateType.NONE) {
-            resolved_.rate = 0;
-            resolved_.rateDecimals = 0;
-            resolved_.rateStatus = ICouponTypes.RateCalculationStatus.SET;
-            return resolved_;
-        }
 
         if (rateType == IInterestRate.RateType.FIXED) {
             if (!_isPendingRate(resolved_)) revert IFixedRate.InterestRateIsFixed();
@@ -102,10 +91,12 @@ library CouponRateDispatch {
     }
 
     /**
-     * @dev Returns true when a coupon's rate triplet is in the pending shape:
-     *      rateStatus=PENDING, rate=0, rateDecimals=0.
+     * @notice Checks whether a coupon's rate triplet is in the pending shape.
+     * @dev Pending shape is rateStatus=PENDING, rate=0, rateDecimals=0.
      *      Protocol-owned variants reject any non-pending triplet so callers cannot
      *      pre-stamp a rate that the protocol must control.
+     * @param coupon The coupon data struct to inspect.
+     * @return ok_ True if the coupon's rate triplet matches the pending shape.
      */
     function _isPendingRate(ICouponTypes.Coupon memory coupon) private pure returns (bool ok_) {
         ok_ =

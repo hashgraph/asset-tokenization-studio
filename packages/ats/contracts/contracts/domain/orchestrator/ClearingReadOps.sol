@@ -7,13 +7,18 @@ import { IClearingTypes } from "../../facets/clearing/IClearingTypes.sol";
 import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 
 /// @title ClearingReadOps
+/// @author Asset Tokenization Studio Team
 /// @notice Clearing read operations library - deployed once and called via DELEGATECALL
 /// @dev Contains read-only clearing operations with ABAF adjustments
 library ClearingReadOps {
     // CLEARING READ OPERATIONS (ABAF-adjusted)
 
-    /// @notice Get cleared amount for token holder adjusted at timestamp
-    /// @dev Uses ABAF factor to adjust the cleared amount for balance adjustments
+    /// @notice Returns the cleared amount for a token holder, scaled by the ABAF factor at the
+    ///         given timestamp.
+    /// @dev Uses ABAF factor to adjust the cleared amount for balance adjustments.
+    /// @param _tokenHolder Holder whose cleared amount is being queried.
+    /// @param _timestamp   Reference timestamp for the adjustment-factor calculation.
+    /// @return Adjusted cleared amount at `_timestamp`.
     function getClearedAmountForAdjustedAt(address _tokenHolder, uint256 _timestamp) external view returns (uint256) {
         return
             ClearingStorageWrapper.getClearedAmountFor(_tokenHolder) *
@@ -23,8 +28,13 @@ library ClearingReadOps {
             );
     }
 
-    /// @notice Get cleared amount by partition adjusted at timestamp
-    /// @dev Uses ABAF factor to adjust the cleared amount for balance adjustments
+    /// @notice Returns the cleared amount for a token holder on a specific partition, scaled by
+    ///         the ABAF factor at the given timestamp.
+    /// @dev Uses ABAF factor to adjust the cleared amount for balance adjustments.
+    /// @param _partition   Partition being queried.
+    /// @param _tokenHolder Holder whose partition cleared amount is being queried.
+    /// @param _timestamp   Reference timestamp for the adjustment-factor calculation.
+    /// @return Adjusted partition cleared amount at `_timestamp`.
     function getClearedAmountForByPartitionAdjustedAt(
         bytes32 _partition,
         address _tokenHolder,
@@ -38,8 +48,14 @@ library ClearingReadOps {
             );
     }
 
-    /// @notice Get clearing transfer data by partition adjusted at timestamp
-    /// @dev Returns transfer data with ABAF-adjusted amount
+    /// @notice Returns clearing transfer data for a specific operation, with the stored amount
+    ///         scaled by the ABAF factor at the given timestamp.
+    /// @dev Returns transfer data with ABAF-adjusted amount.
+    /// @param _partition   Partition of the clearing operation.
+    /// @param _tokenHolder Holder who initiated the clearing transfer.
+    /// @param _clearingId  Identifier of the clearing operation.
+    /// @param _timestamp   Reference timestamp for the adjustment-factor calculation.
+    /// @return clearingTransferData_ Transfer record with the amount adjusted to `_timestamp`.
     function getClearingTransferForByPartitionAdjustedAt(
         bytes32 _partition,
         address _tokenHolder,
@@ -65,8 +81,14 @@ library ClearingReadOps {
         );
     }
 
-    /// @notice Get clearing redeem data by partition adjusted at timestamp
-    /// @dev Returns redeem data with ABAF-adjusted amount
+    /// @notice Returns clearing redeem data for a specific operation, with the stored amount
+    ///         scaled by the ABAF factor at the given timestamp.
+    /// @dev Returns redeem data with ABAF-adjusted amount.
+    /// @param _partition   Partition of the clearing operation.
+    /// @param _tokenHolder Holder who initiated the clearing redeem.
+    /// @param _clearingId  Identifier of the clearing operation.
+    /// @param _timestamp   Reference timestamp for the adjustment-factor calculation.
+    /// @return clearingRedeemData_ Redeem record with the amount adjusted to `_timestamp`.
     function getClearingRedeemForByPartitionAdjustedAt(
         bytes32 _partition,
         address _tokenHolder,
@@ -92,8 +114,14 @@ library ClearingReadOps {
         );
     }
 
-    /// @notice Get clearing hold creation data by partition adjusted at timestamp
-    /// @dev Returns hold creation data with ABAF-adjusted amount
+    /// @notice Returns clearing hold-creation data for a specific operation, with the stored
+    ///         amount scaled by the ABAF factor at the given timestamp.
+    /// @dev Returns hold creation data with ABAF-adjusted amount.
+    /// @param _partition   Partition of the clearing operation.
+    /// @param _tokenHolder Holder who initiated the clearing hold creation.
+    /// @param _clearingId  Identifier of the clearing operation.
+    /// @param _timestamp   Reference timestamp for the adjustment-factor calculation.
+    /// @return clearingHoldCreationData_ Hold-creation record with the amount adjusted to `_timestamp`.
     function getClearingHoldCreationForByPartitionAdjustedAt(
         bytes32 _partition,
         address _tokenHolder,
@@ -121,7 +149,13 @@ library ClearingReadOps {
 
     // TIMESTAMP VALIDATION
 
-    /// @notice Check clearing operation expiration timestamp
+    /// @notice Reverts unless the clearing operation's expiration state matches `_mustBeExpired`.
+    /// @dev    Delegates expiration logic to `ClearingStorageWrapper.requireExpirationTimestamp`,
+    ///         which reads the current block timestamp internally. `_blockTimestamp` is accepted
+    ///         for interface compatibility but is not used by this implementation.
+    /// @param _clearingOperationIdentifier Identifier of the clearing operation to check.
+    /// @param _mustBeExpired               When `true`, reverts unless the operation has already
+    ///                                     expired; when `false`, reverts if it has expired.
     function checkClearingExpirationTimestamp(
         IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
         bool _mustBeExpired,
@@ -130,7 +164,10 @@ library ClearingReadOps {
         ClearingStorageWrapper.requireExpirationTimestamp(_clearingOperationIdentifier, _mustBeExpired);
     }
 
-    /// @notice Validate that a clearing expiration timestamp is in the future
+    /// @notice Reverts when `_expirationTimestamp` is not strictly in the future relative to
+    ///         `_blockTimestamp`.
+    /// @param _expirationTimestamp Expiration timestamp supplied by the caller.
+    /// @param _blockTimestamp      Current block timestamp used as the reference point.
     function checkClearingValidExpirationTimestamp(
         uint256 _expirationTimestamp,
         uint256 _blockTimestamp

@@ -12,8 +12,8 @@
  * ```typescript
  * // Import from domain layer
  * import {
- *   EQUITY_CONFIG_ID,
- *   BOND_CONFIG_ID,
+ *   CONFIG_IDS.equity,
+ *   CONFIG_IDS.bond,
  *   deployFactory,
  *   createEquityConfiguration,
  *   createBondConfiguration,
@@ -48,6 +48,9 @@ export * from "./constants";
 // Test-environment facet substitution
 export * from "./facetEnvironment";
 
+// Shared, type-checked facet sets for deployment configurations
+export * from "./facetSets";
+
 // Orchestrator library management
 export * from "./orchestratorLibraries";
 
@@ -62,10 +65,6 @@ export * from "./factory/createConfiguration";
 // Token deployment from factory
 export * from "./factory/deployEquityToken";
 export * from "./factory/deployBondToken";
-export * from "./factory/deployBondFixedRateToken";
-export * from "./factory/deployBondKpiLinkedRateToken";
-export * from "./factory/deployLoanToken";
-export * from "./factory/deployLoansPortfolioToken";
 
 // Equity configuration
 export * from "./equity/createConfiguration";
@@ -73,20 +72,11 @@ export * from "./equity/createConfiguration";
 // Bond Variable Rate configuration
 export * from "./bond/createConfiguration";
 
-// Bond Fixed Rate configuration
-export * from "./bondFixedRate/createConfiguration";
-
-// Bond Kpi Linked Rate configuration
-export * from "./bondKpiLinkedRate/createConfiguration";
-
 // Deposit Token configuration
 export * from "./depositToken/createConfiguration";
 
-// Loan configuration
-export * from "./loan/createConfiguration";
-
-// Loans Portfolio configuration
-export * from "./loanPortfolio/createConfiguration";
+// Loans-portfolio domain types (HoldingsAssetType) — retained for the LoansPortfolio facet
+// suite even though the asset type is no longer deployed through the factory (BBND-1882).
 export * from "./loanPortfolio/types";
 
 // TEST-ONLY: InitializeMock domain — stub configuration used by initializer-versioning tests.

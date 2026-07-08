@@ -6,12 +6,12 @@ import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableS
 import { ILock } from "../../facets/lock/ILock.sol";
 import { ILockTypes } from "../../facets/lock/ILockTypes.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
-import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
+import { IERC1410Types } from "../../facets/commonTypes/IERC1410Types.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
-import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { DEFAULT_PARTITION } from "../../constants/values.sol";
 import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 
 /// @custom:hash storage Lock
@@ -190,7 +190,7 @@ library LockStorageWrapper {
      * @param factor Multiplicative factor derived from the current ABAF and the stored LABAF.
      */
     function updateLockAmountById(bytes32 partition, uint256 lockId, address tokenHolder, uint256 factor) internal {
-        lockStorage().locksByAccountPartitionAndId[tokenHolder][partition][lockId].amount *= factor;
+        _lockStorage().locksByAccountPartitionAndId[tokenHolder][partition][lockId].amount *= factor;
     }
 
     /**
@@ -203,7 +203,7 @@ library LockStorageWrapper {
      * @param abaf Active ABAF value to persist as the new LABAF.
      */
     function updateTotalLockedAmountAndLabaf(address tokenHolder, uint256 factor, uint256 abaf) internal {
-        lockStorage().totalLockedAmountByAccount[tokenHolder] *= factor;
+        _lockStorage().totalLockedAmountByAccount[tokenHolder] *= factor;
         AdjustBalancesStorageWrapper.setTotalLockLabaf(tokenHolder, abaf);
     }
 
@@ -222,7 +222,7 @@ library LockStorageWrapper {
         uint256 factor,
         uint256 abaf
     ) internal {
-        lockStorage().totalLockedAmountByAccountAndPartition[tokenHolder][partition] *= factor;
+        _lockStorage().totalLockedAmountByAccountAndPartition[tokenHolder][partition] *= factor;
         AdjustBalancesStorageWrapper.setTotalLockLabafByPartition(partition, tokenHolder, abaf);
     }
 
@@ -234,14 +234,14 @@ library LockStorageWrapper {
      *      second (`amount`) and fourth (`expirationTimestamp`) arguments are deliberately unused;
      *      they exist only to keep the helper signature-compatible with the locking pipeline's
      *      call-site.
-     * @param partition Partition being mutated.
+     * @param partition   Partition being mutated.
      * @param tokenHolder Holder whose snapshots are being refreshed.
      */
     function updateLockedBalancesBeforeLock(
         bytes32 partition,
-        uint256 /*amount*/,
+        uint256 /* amount */,
         address tokenHolder,
-        uint256 /*expirationTimestamp*/
+        uint256 /* expirationTimestamp */
     ) internal {
         SnapshotsStorageWrapper.updateAccountSnapshot(tokenHolder, partition);
         SnapshotsStorageWrapper.updateAccountLockedBalancesSnapshot(tokenHolder, partition);
@@ -252,10 +252,10 @@ library LockStorageWrapper {
      * @dev Mirror of `updateLockedBalancesBeforeLock`. The second (`lockId`) argument is
      *      deliberately unused; it exists only to keep the helper signature-compatible with
      *      the release pipeline's call-site.
-     * @param partition Partition being mutated.
+     * @param partition   Partition being mutated.
      * @param tokenHolder Holder whose snapshots are being refreshed.
      */
-    function updateLockedBalancesBeforeRelease(bytes32 partition, uint256 /*lockId*/, address tokenHolder) internal {
+    function updateLockedBalancesBeforeRelease(bytes32 partition, uint256 /* lockId */, address tokenHolder) internal {
         SnapshotsStorageWrapper.updateAccountSnapshot(tokenHolder, partition);
         SnapshotsStorageWrapper.updateAccountLockedBalancesSnapshot(tokenHolder, partition);
     }
@@ -278,7 +278,7 @@ library LockStorageWrapper {
         uint256 lockId,
         uint256 newExpirationTimestamp
     ) internal returns (uint256 oldExpirationTimestamp_) {
-        ILock.LockData storage lock = lockStorage().locksByAccountPartitionAndId[tokenHolder][partition][lockId];
+        ILock.LockData storage lock = _lockStorage().locksByAccountPartitionAndId[tokenHolder][partition][lockId];
         oldExpirationTimestamp_ = lock.expirationTimestamp;
         lock.expirationTimestamp = newExpirationTimestamp;
     }
@@ -289,7 +289,7 @@ library LockStorageWrapper {
      * @return amount_ Sum of all locked amounts held under `tokenHolder`.
      */
     function getLockedAmountFor(address tokenHolder) internal view returns (uint256 amount_) {
-        return lockStorage().totalLockedAmountByAccount[tokenHolder];
+        return _lockStorage().totalLockedAmountByAccount[tokenHolder];
     }
 
     /**
@@ -306,7 +306,7 @@ library LockStorageWrapper {
         address tokenHolder,
         uint256 lockId
     ) internal view returns (ILock.LockData memory data_) {
-        return lockStorage().locksByAccountPartitionAndId[tokenHolder][partition][lockId];
+        return _lockStorage().locksByAccountPartitionAndId[tokenHolder][partition][lockId];
     }
 
     /**
@@ -318,7 +318,7 @@ library LockStorageWrapper {
      * @param partition Partition the lock belongs to.
      * @param tokenHolder Holder that owns the lock.
      * @param lockId Identifier of the lock being inspected.
-     * @return `true` if the lock can be released, `false` otherwise.
+     * @return True if the lock has expired and can be released, false otherwise.
      */
     function isLockedExpirationTimestamp(
         bytes32 partition,
@@ -336,10 +336,10 @@ library LockStorageWrapper {
      * @param partition Partition the lock would belong to.
      * @param tokenHolder Holder that would own the lock.
      * @param lockId Identifier being checked.
-     * @return `true` when the lock exists; `false` otherwise.
+     * @return True if the lock id exists for the given holder and partition, false otherwise.
      */
     function isLockIdValid(bytes32 partition, address tokenHolder, uint256 lockId) internal view returns (bool) {
-        return lockStorage().lockIdsByAccountAndPartition[tokenHolder][partition].contains(lockId);
+        return _lockStorage().lockIdsByAccountAndPartition[tokenHolder][partition].contains(lockId);
     }
 
     /**
@@ -383,7 +383,7 @@ library LockStorageWrapper {
      * @return Per-partition aggregate locked amount.
      */
     function getLockedAmountForByPartition(bytes32 partition, address tokenHolder) internal view returns (uint256) {
-        return lockStorage().totalLockedAmountByAccountAndPartition[tokenHolder][partition];
+        return _lockStorage().totalLockedAmountByAccountAndPartition[tokenHolder][partition];
     }
 
     /**
@@ -396,7 +396,7 @@ library LockStorageWrapper {
         bytes32 partition,
         address tokenHolder
     ) internal view returns (uint256 lockCount_) {
-        return lockStorage().lockIdsByAccountAndPartition[tokenHolder][partition].length();
+        return _lockStorage().lockIdsByAccountAndPartition[tokenHolder][partition].length();
     }
 
     /**
@@ -415,7 +415,7 @@ library LockStorageWrapper {
         uint256 pageIndex,
         uint256 pageLength
     ) internal view returns (uint256[] memory locksId_) {
-        return lockStorage().lockIdsByAccountAndPartition[tokenHolder][partition].getFromSet(pageIndex, pageLength);
+        return _lockStorage().lockIdsByAccountAndPartition[tokenHolder][partition].getFromSet(pageIndex, pageLength);
     }
 
     /**
@@ -511,7 +511,7 @@ library LockStorageWrapper {
      * @return lockCount_ Cardinality of the default-partition lock-id set.
      */
     function getLockCountFor(address tokenHolder) internal view returns (uint256 lockCount_) {
-        lockCount_ = lockStorage().lockIdsByAccountAndPartition[tokenHolder][_DEFAULT_PARTITION].length();
+        lockCount_ = _lockStorage().lockIdsByAccountAndPartition[tokenHolder][DEFAULT_PARTITION].length();
     }
 
     /**
@@ -527,25 +527,10 @@ library LockStorageWrapper {
         uint256 pageIndex,
         uint256 pageLength
     ) internal view returns (uint256[] memory locksId_) {
-        locksId_ = lockStorage().lockIdsByAccountAndPartition[tokenHolder][_DEFAULT_PARTITION].getFromSet(
+        locksId_ = _lockStorage().lockIdsByAccountAndPartition[tokenHolder][DEFAULT_PARTITION].getFromSet(
             pageIndex,
             pageLength
         );
-    }
-
-    /**
-     * @notice Returns a storage pointer to the Lock namespace.
-     * @dev Uses inline assembly to bind the returned reference to the deterministic ERC-7201
-     *      slot `STORAGE_LOCATION_LOCK`. Marked `pure` because Solidity treats slot literals
-     *      as pure even though the returned reference reads/writes storage.
-     * @return lock_ Storage reference for the Lock namespace.
-     */
-    function lockStorage() internal pure returns (LockDataStorage storage lock_) {
-        bytes32 position = STORAGE_LOCATION_LOCK;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            lock_.slot := position
-        }
     }
 
     /**
@@ -620,7 +605,7 @@ library LockStorageWrapper {
         uint256 expirationTimestamp,
         uint256 abaf
     ) private returns (uint256 lockId_) {
-        LockDataStorage storage lockStorageRef = lockStorage();
+        LockDataStorage storage lockStorageRef = _lockStorage();
 
         lockId_ = ++lockStorageRef.nextLockIdByAccountAndPartition[tokenHolder][partition];
 
@@ -648,7 +633,7 @@ library LockStorageWrapper {
      * @return lockAmount_ Stored amount that was held by the removed lock.
      */
     function _removeLock(bytes32 partition, address tokenHolder, uint256 lockId) private returns (uint256 lockAmount_) {
-        LockDataStorage storage lockStorageRef = lockStorage();
+        LockDataStorage storage lockStorageRef = _lockStorage();
 
         lockAmount_ = lockStorageRef.locksByAccountPartitionAndId[tokenHolder][partition][lockId].amount;
 
@@ -706,5 +691,20 @@ library LockStorageWrapper {
     function _emitReleaseEvents(bytes32 partition, address operator, address tokenHolder, uint256 lockAmount) private {
         ERC20StorageWrapper.performTransfer(address(0), tokenHolder, lockAmount);
         emit IERC1410Types.TransferByPartition(partition, operator, address(0), tokenHolder, lockAmount, "", "");
+    }
+
+    /**
+     * @notice Returns a storage pointer to the Lock namespace.
+     * @dev Uses inline assembly to bind the returned reference to the deterministic ERC-7201
+     *      slot `STORAGE_LOCATION_LOCK`. Marked `pure` because Solidity treats slot literals
+     *      as pure even though the returned reference reads/writes storage.
+     * @return lock_ Storage reference for the Lock namespace.
+     */
+    function _lockStorage() private pure returns (LockDataStorage storage lock_) {
+        bytes32 position = STORAGE_LOCATION_LOCK;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            lock_.slot := position
+        }
     }
 }

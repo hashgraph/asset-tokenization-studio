@@ -38,11 +38,9 @@ fixtures/
 ├── tokens/
 │   ├── equity.fixture.ts       # Equity token fixtures (single/multi-partition, etc.)
 │   └── common.fixture.ts       # Shared token utilities and constants
-├── features/
-│   ├── pause.fixture.ts        # Pause functionality with external pause mocks
-│   └── controlList.fixture.ts  # Control list setup
-└── trex/
-    └── fullSuite.fixture.ts    # T-REX (ERC-3643) full suite deployment
+└── features/
+    ├── pause.fixture.ts        # Pause functionality with external pause mocks
+    └── controlList.fixture.ts  # Control list setup
 ```
 
 ## Usage Patterns
@@ -283,6 +281,14 @@ const { diamond } = await loadFixture(deployEquityTokenFixture);
 // ❌ Bad - deploys every time
 const { diamond } = await deployEquityTokenFixture();
 ```
+
+> **Mega-asset suites are registered centrally on purpose.** All `deployAssetMockCtx`-based
+> IAsset suites are invoked from the single `test/contracts/integration/ats.test.ts` (each
+> suite exports an `xTests(getCtx)` function rather than self-registering). Keeping them in one
+> contiguous `describe` lets `loadFixture` deploy the expensive mega-asset **once**. Splitting
+> them into self-registering files is measurably slower in both serial (snapshot thrash when
+> interleaved with other-fixture suites) and `--parallel` (one deploy per worker) — see the
+> header of `ats.test.ts`. To run one suite, use `--grep "<Suite Name>"`, not a bare file path.
 
 ### 2. Pre-load Fixtures in before()
 

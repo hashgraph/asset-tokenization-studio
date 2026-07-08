@@ -179,12 +179,6 @@ export interface FacetDefinition {
    * The registry stores the factory reference; deployment code handles library linking.
    */
   factory?: (signer: Signer, useTimeTravel?: boolean) => ContractFactory;
-
-  /**
-   * TypeChain factory for the TimeTravel variant of this facet (test-only).
-   * Same library linking assumptions as factory.
-   */
-  timeTravelFactory?: (signer: Signer) => unknown;
 }
 
 /**
@@ -761,10 +755,6 @@ export interface DeploymentOutputType {
   configurations: {
     equity: ConfigurationMetadata;
     bond: ConfigurationMetadata;
-    bondFixedRate: ConfigurationMetadata;
-    bondKpiLinkedRate: ConfigurationMetadata;
-    loan: ConfigurationMetadata;
-    loansPortfolio: ConfigurationMetadata;
     depositToken: ConfigurationMetadata;
     factory: ConfigurationMetadata;
   };
@@ -779,11 +769,7 @@ export interface DeploymentOutputType {
   helpers: {
     getEquityFacets(): FacetMetadata[];
     getBondFacets(): FacetMetadata[];
-    getBondFixedRateFacets(): FacetMetadata[];
-    getBondKpiLinkedRateFacets(): FacetMetadata[];
-    getLoanFacets(): FacetMetadata[];
     getDepositTokenFacets(): FacetMetadata[];
-    getLoansPortfolioFacets(): FacetMetadata[];
     getFactoryFacets(): FacetMetadata[];
   };
 }

@@ -45,6 +45,10 @@ describe("ResolverProxy Tests", () => {
 
     await resolverContract.registerBusinessLogics(businessLogicsRegistryDatas);
 
+    const accessControl = await ethers.getContractAt("AccessControl", resolverContract.target);
+    if (!(await accessControl.hasRole(ATS_ROLES.ROLE_CREATE_CONFIGURATION, signer_A.address))) {
+      await accessControl.grantRole(ATS_ROLES.ROLE_CREATE_CONFIGURATION, signer_A.address);
+    }
     await resolverContract.createConfiguration(configID, facetConfigurations as any, "0x");
   }
 
@@ -110,7 +114,7 @@ describe("ResolverProxy Tests", () => {
 
     const resolverProxy = await (
       await ethers.getContractFactory("ResolverProxy")
-    ).deploy(resolver.target, CONFIG_ID, 1, []);
+    ).deploy(resolver.target, { configurationId: CONFIG_ID, configurationVersion: 1, replacementEnabled: false }, []);
 
     const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target);
 
@@ -118,7 +122,8 @@ describe("ResolverProxy Tests", () => {
 
     expect(result.resolver_).to.equal(resolver.target);
     expect(result.configurationId_).to.equal(CONFIG_ID);
-    expect(result.version_).to.equal(1);
+    expect(result.configurationVersion_).to.equal(1);
+    expect(result.replacementEnabled_).to.equal(false);
 
     const diamondLoupe = await ethers.getContractAt("DiamondFacet", resolverProxy.target);
 
@@ -137,7 +142,7 @@ describe("ResolverProxy Tests", () => {
 
     const resolverProxy = await (
       await ethers.getContractFactory("ResolverProxy")
-    ).deploy(resolver.target, CONFIG_ID, 1, []);
+    ).deploy(resolver.target, { configurationId: CONFIG_ID, configurationVersion: 1, replacementEnabled: false }, []);
 
     const accessControl = await ethers.getContractAt("AccessControl", resolverProxy.target);
     const diamondLoupe = await ethers.getContractAt("DiamondFacet", resolverProxy.target);
@@ -180,7 +185,7 @@ describe("ResolverProxy Tests", () => {
 
     const resolverProxy_v1 = await (
       await ethers.getContractFactory("ResolverProxy")
-    ).deploy(resolver.target, CONFIG_ID, 1, []);
+    ).deploy(resolver.target, { configurationId: CONFIG_ID, configurationVersion: 1, replacementEnabled: false }, []);
     const diamondFacet_v1 = await ethers.getContractAt("DiamondFacet", resolverProxy_v1.target);
     await checkFacets(businessLogicsRegistryDatas_1, diamondFacet_v1);
 
@@ -191,7 +196,11 @@ describe("ResolverProxy Tests", () => {
 
     const resolverProxy_v2 = await (
       await ethers.getContractFactory("ResolverProxy")
-    ).deploy(resolver.target, CONFIG_ID, latestVersion, []);
+    ).deploy(
+      resolver.target,
+      { configurationId: CONFIG_ID, configurationVersion: latestVersion, replacementEnabled: false },
+      [],
+    );
     const diamondFacet_v2 = await ethers.getContractAt("DiamondFacet", resolverProxy_v2.target);
 
     await checkFacets(businessLogicsRegistryDatas_1, diamondFacet_v1);
@@ -214,7 +223,13 @@ describe("ResolverProxy Tests", () => {
 
     const resolverProxyFactory = await ethers.getContractFactory("ResolverProxy");
 
-    await expect(resolverProxyFactory.deploy(resolver.target, CONFIG_ID, 0, []))
+    await expect(
+      resolverProxyFactory.deploy(
+        resolver.target,
+        { configurationId: CONFIG_ID, configurationVersion: 0, replacementEnabled: false },
+        [],
+      ),
+    )
       .to.be.revertedWithCustomError(resolver, "VersionZero")
       .withArgs(CONFIG_ID);
   });
@@ -235,7 +250,7 @@ describe("ResolverProxy Tests", () => {
 
     const resolverProxy = await (
       await ethers.getContractFactory("ResolverProxy")
-    ).deploy(resolver.target, CONFIG_ID, 1, []);
+    ).deploy(resolver.target, { configurationId: CONFIG_ID, configurationVersion: 1, replacementEnabled: false }, []);
 
     const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target);
 
@@ -265,7 +280,7 @@ describe("ResolverProxy Tests", () => {
 
     const resolverProxy = await (
       await ethers.getContractFactory("ResolverProxy")
-    ).deploy(resolver.target, CONFIG_ID, 1, rbac);
+    ).deploy(resolver.target, { configurationId: CONFIG_ID, configurationVersion: 1, replacementEnabled: false }, rbac);
 
     const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target, signer_A);
 
@@ -300,7 +315,11 @@ describe("ResolverProxy Tests", () => {
 
     const resolverProxy = await (
       await ethers.getContractFactory("ResolverProxy")
-    ).deploy(resolver.target, CONFIG_ID, oldVersion, rbac);
+    ).deploy(
+      resolver.target,
+      { configurationId: CONFIG_ID, configurationVersion: oldVersion, replacementEnabled: false },
+      rbac,
+    );
 
     const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target, signer_A);
 
@@ -308,7 +327,8 @@ describe("ResolverProxy Tests", () => {
 
     expect(result.resolver_).to.equal(resolver.target);
     expect(result.configurationId_).to.equal(CONFIG_ID);
-    expect(result.version_).to.equal(oldVersion);
+    expect(result.configurationVersion_).to.equal(oldVersion);
+    expect(result.replacementEnabled_).to.equal(false);
 
     const newVersion = 1;
 
@@ -318,7 +338,87 @@ describe("ResolverProxy Tests", () => {
 
     expect(result.resolver_).to.equal(resolver.target);
     expect(result.configurationId_).to.equal(CONFIG_ID);
-    expect(result.version_).to.equal(newVersion);
+    expect(result.configurationVersion_).to.equal(newVersion);
+    expect(result.replacementEnabled_).to.equal(false);
+  });
+
+  it("GIVEN resolverProxy and non-admin user WHEN updating replacement enabled flag THEN fails with AccountHasNoRole", async () => {
+    const businessLogicsRegistryDatas = [
+      {
+        businessLogicKey: await diamondFacet.getStaticResolverKey(),
+        businessLogicAddress: diamondFacet.target,
+      },
+      {
+        businessLogicKey: await accessControlImpl.getStaticResolverKey(),
+        businessLogicAddress: accessControlImpl.target,
+      },
+    ];
+
+    await setUpResolver(businessLogicsRegistryDatas);
+
+    const resolverProxy = await (
+      await ethers.getContractFactory("ResolverProxy")
+    ).deploy(resolver.target, { configurationId: CONFIG_ID, configurationVersion: 1, replacementEnabled: false }, []);
+
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target);
+
+    await expect(diamondCut.updateReplacementEnabled(true)).to.be.revertedWithCustomError(
+      diamondCut,
+      "AccountHasNoRole",
+    );
+  });
+
+  it("GIVEN resolverProxy and admin user WHEN updating replacement enabled flag THEN succeeds", async () => {
+    const businessLogicsRegistryDatas = [
+      {
+        businessLogicKey: await diamondFacet.getStaticResolverKey(),
+        businessLogicAddress: diamondFacet.target,
+      },
+      {
+        businessLogicKey: await accessControlImpl.getStaticResolverKey(),
+        businessLogicAddress: accessControlImpl.target,
+      },
+    ];
+
+    await setUpResolver(businessLogicsRegistryDatas);
+
+    const rbac = [
+      {
+        role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
+        members: [signer_A.address],
+      },
+    ];
+
+    const version = 1;
+    const oldReplacementEnabledFlag = false;
+
+    const resolverProxy = await (
+      await ethers.getContractFactory("ResolverProxy")
+    ).deploy(
+      resolver.target,
+      { configurationId: CONFIG_ID, configurationVersion: version, replacementEnabled: oldReplacementEnabledFlag },
+      rbac,
+    );
+
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target, signer_A);
+
+    let result = await diamondCut.getConfigInfo();
+
+    expect(result.resolver_).to.equal(resolver.target);
+    expect(result.configurationId_).to.equal(CONFIG_ID);
+    expect(result.configurationVersion_).to.equal(version);
+    expect(result.replacementEnabled_).to.equal(oldReplacementEnabledFlag);
+
+    const newReplacementEnabledFlag = !oldReplacementEnabledFlag;
+
+    await diamondCut.updateReplacementEnabled(newReplacementEnabledFlag);
+
+    result = await diamondCut.getConfigInfo();
+
+    expect(result.resolver_).to.equal(resolver.target);
+    expect(result.configurationId_).to.equal(CONFIG_ID);
+    expect(result.configurationVersion_).to.equal(version);
+    expect(result.replacementEnabled_).to.equal(newReplacementEnabledFlag);
   });
 
   it("GIVEN resolverProxy and non-admin user WHEN updating configID THEN fails with AccountHasNoRole", async () => {
@@ -337,7 +437,7 @@ describe("ResolverProxy Tests", () => {
 
     const resolverProxy = await (
       await ethers.getContractFactory("ResolverProxy")
-    ).deploy(resolver.target, CONFIG_ID, 1, []);
+    ).deploy(resolver.target, { configurationId: CONFIG_ID, configurationVersion: 1, replacementEnabled: false }, []);
 
     const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target);
 
@@ -367,7 +467,7 @@ describe("ResolverProxy Tests", () => {
 
     const resolverProxy = await (
       await ethers.getContractFactory("ResolverProxy")
-    ).deploy(resolver.target, CONFIG_ID, 1, rbac);
+    ).deploy(resolver.target, { configurationId: CONFIG_ID, configurationVersion: 1, replacementEnabled: false }, rbac);
 
     const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target, signer_A);
 
@@ -403,7 +503,11 @@ describe("ResolverProxy Tests", () => {
 
     const resolverProxy = await (
       await ethers.getContractFactory("ResolverProxy")
-    ).deploy(resolver.target, CONFIG_ID, oldVersion, rbac);
+    ).deploy(
+      resolver.target,
+      { configurationId: CONFIG_ID, configurationVersion: oldVersion, replacementEnabled: false },
+      rbac,
+    );
 
     const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target, signer_A);
 
@@ -411,7 +515,8 @@ describe("ResolverProxy Tests", () => {
 
     expect(result.resolver_).to.equal(resolver.target);
     expect(result.configurationId_).to.equal(CONFIG_ID);
-    expect(result.version_).to.equal(oldVersion);
+    expect(result.configurationVersion_).to.equal(oldVersion);
+    expect(result.replacementEnabled_).to.equal(false);
 
     const newVersion = 1;
 
@@ -421,7 +526,8 @@ describe("ResolverProxy Tests", () => {
 
     expect(result.resolver_).to.equal(resolver.target);
     expect(result.configurationId_).to.equal(CONFIG_ID_2);
-    expect(result.version_).to.equal(newVersion);
+    expect(result.configurationVersion_).to.equal(newVersion);
+    expect(result.replacementEnabled_).to.equal(false);
   });
 
   it("GIVEN resolverProxy and non-admin user WHEN updating resolver THEN fails with AccountHasNoRole", async () => {
@@ -442,11 +548,11 @@ describe("ResolverProxy Tests", () => {
 
     const resolverProxy = await (
       await ethers.getContractFactory("ResolverProxy")
-    ).deploy(resolver.target, CONFIG_ID, 1, []);
+    ).deploy(resolver.target, { configurationId: CONFIG_ID, configurationVersion: 1, replacementEnabled: false }, []);
 
     const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target);
 
-    await expect(diamondCut.updateResolver(resolver_2.target, CONFIG_ID_2, 1)).to.be.revertedWithCustomError(
+    await expect(diamondCut.updateResolver(resolver_2.target, CONFIG_ID_2, 1, true)).to.be.revertedWithCustomError(
       diamondCut,
       "AccountHasNoRole",
     );
@@ -477,11 +583,11 @@ describe("ResolverProxy Tests", () => {
 
     const resolverProxy = await (
       await ethers.getContractFactory("ResolverProxy")
-    ).deploy(resolver.target, CONFIG_ID, 1, rbac);
+    ).deploy(resolver.target, { configurationId: CONFIG_ID, configurationVersion: 1, replacementEnabled: false }, rbac);
 
     const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target, signer_A);
 
-    await expect(diamondCut.updateResolver(resolver_2.target, CONFIG_ID_2, 1)).to.be.revertedWithCustomError(
+    await expect(diamondCut.updateResolver(resolver_2.target, CONFIG_ID_2, 1, true)).to.be.revertedWithCustomError(
       resolver,
       "ResolverProxyConfigurationNoRegistered",
     );
@@ -515,7 +621,11 @@ describe("ResolverProxy Tests", () => {
 
     const resolverProxy = await (
       await ethers.getContractFactory("ResolverProxy")
-    ).deploy(resolver.target, CONFIG_ID, oldVersion, rbac);
+    ).deploy(
+      resolver.target,
+      { configurationId: CONFIG_ID, configurationVersion: oldVersion, replacementEnabled: false },
+      rbac,
+    );
 
     const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target, signer_A);
 
@@ -523,16 +633,18 @@ describe("ResolverProxy Tests", () => {
 
     expect(result.resolver_).to.equal(resolver.target);
     expect(result.configurationId_).to.equal(CONFIG_ID);
-    expect(result.version_).to.equal(oldVersion);
+    expect(result.configurationVersion_).to.equal(oldVersion);
+    expect(result.replacementEnabled_).to.equal(false);
 
     const newVersion = 1;
 
-    await diamondCut.updateResolver(resolver_2.target, CONFIG_ID_2, newVersion);
+    await diamondCut.updateResolver(resolver_2.target, CONFIG_ID_2, newVersion, true);
 
     result = await diamondCut.getConfigInfo();
 
     expect(result.resolver_).to.equal(resolver_2.target);
     expect(result.configurationId_).to.equal(CONFIG_ID_2);
-    expect(result.version_).to.equal(newVersion);
+    expect(result.configurationVersion_).to.equal(newVersion);
+    expect(result.replacementEnabled_).to.equal(true);
   });
 });

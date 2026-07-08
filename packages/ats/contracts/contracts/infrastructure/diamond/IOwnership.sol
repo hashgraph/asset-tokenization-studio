@@ -69,17 +69,17 @@ interface IOwnership {
 
     /**
      * @notice Returns the current owner of a configuration.
-     * @param configId Configuration to query.
+     * @param _configId Configuration to query.
      * @return owner_ Address that currently owns `configId`, or the zero address when no
      *         owner has been recorded.
      */
-    function getOwner(bytes32 configId) external view returns (address owner_);
+    function getOwner(bytes32 _configId) external view returns (address owner_);
 
     /**
      * @notice Returns the pending owner of a configuration, if any.
-     * @param configId Configuration to query.
+     * @param _configId Configuration to query.
      * @return pendingOwner_ Address currently nominated to accept ownership, or the zero
      *         address when no transfer is in flight.
      */
-    function getPendingOwner(bytes32 configId) external view returns (address pendingOwner_);
+    function getPendingOwner(bytes32 _configId) external view returns (address pendingOwner_);
 }

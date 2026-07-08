@@ -198,15 +198,6 @@ export const TEST_CONFIG_IDS = {
   /** Bond configuration ID */
   BOND: "0x0000000000000000000000000000000000000000000000000000000000000002",
 
-  /** Bond Fixed Rate configuration ID */
-  BOND_FIXED_RATE: "0x0000000000000000000000000000000000000000000000000000000000000003",
-
-  /** Bond KPI Linked Rate configuration ID */
-  BOND_KPI_LINKED: "0x0000000000000000000000000000000000000000000000000000000000000004",
-
-  /** Bond Sustainability Performance Target Rate configuration ID */
-  BOND_SPT: "0x0000000000000000000000000000000000000000000000000000000000000005",
-
   // Alternative IDs for testing config updates
   /** Alternative configuration ID (for testing config updates) */
   ALTERNATIVE: "0x00000000000000000000000000000000000000000000000000000000000000bb",
@@ -290,6 +281,21 @@ export const TEST_BYTES32 = {
   /** Non-hex characters */
   NON_HEX: "0x" + "g".repeat(64),
 } as const;
+
+// ============================================================================
+// Partition Identifiers (bytes32)
+// ============================================================================
+
+/**
+ * Canonical partition identifiers used across IAsset integration test suites.
+ *
+ * Every suite that creates multi-partition holds, locks, or balances should
+ * import these constants instead of spelling them out as hex literals.
+ */
+export const DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
+export const PARTITION_ID_2 = "0x0000000000000000000000000000000000000000000000000000000000000002";
+export const PARTITION_ID_3 = "0x0000000000000000000000000000000000000000000000000000000000000003";
+export const NON_DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000011";
 
 // ============================================================================
 // Resolver Keys
@@ -435,12 +441,9 @@ export const TEST_STEPS_NEW_BLR = {
   REGISTER_FACETS: 3,
   EQUITY_CONFIG: 4,
   BOND_CONFIG: 5,
-  BOND_FIXED_RATE_CONFIG: 6,
-  BOND_KPI_LINKED_CONFIG: 7,
-  LOAN_CONFIG: 8,
-  LOANS_PORTFOLIO_CONFIG: 9,
-  FACTORY: 10,
-  INITIALIZE_MOCK_CONFIG: 11,
+  DEPOSIT_TOKEN_CONFIG: 6,
+  FACTORY: 7,
+  INITIALIZE_MOCK_CONFIG: 8,
 } as const;
 
 /**
@@ -452,12 +455,9 @@ export const TEST_STEPS_EXISTING_BLR = {
   REGISTER_FACETS: 2,
   EQUITY_CONFIG: 3,
   BOND_CONFIG: 4,
-  BOND_FIXED_RATE_CONFIG: 5,
-  BOND_KPI_LINKED_CONFIG: 6,
-  DEPOSIT_TOKEN_CONFIG: 7,
-  LOAN_CONFIG: 8,
-  LOANS_PORTFOLIO_CONFIG: 9,
-  FACTORY: 11,
+  DEPOSIT_TOKEN_CONFIG: 5,
+  FACTORY_CONFIG: 6,
+  FACTORY: 7,
 } as const;
 
 // ============================================================================
@@ -511,9 +511,6 @@ export const TEST_STANDARD_CONTRACTS = {
   /** CapTable facet */
   CAP_TABLE_FACET: "CapTableFacet",
 
-  /** TimeTravel facet (invariant - no TimeTravel variant) */
-  TIME_TRAVEL_FACET: "TimeTravelFacet",
-
   /** Pausable facet (for CheckpointManager tests) */
   PAUSABLE_FACET: "PausableFacet",
 
@@ -533,24 +530,6 @@ export const TEST_STANDARD_CONTRACTS = {
 
   /** MyFacetContract (has Facet in middle, not at end) */
   MY_FACET_CONTRACT: "MyFacetContract",
-} as const;
-
-// ============================================================================
-// Time Travel Variants
-// ============================================================================
-
-/**
- * TimeTravel variant names for testing.
- */
-export const TEST_TIME_TRAVEL_VARIANTS = {
-  /** AccessControlFacet TimeTravel variant */
-  ACCESS_CONTROL: "AccessControlFacetTimeTravel",
-
-  /** PauseFacet TimeTravel variant */
-  PAUSE: "PauseFacetTimeTravel",
-
-  /** Generic TimeTravel suffix */
-  SUFFIX: "TimeTravel",
 } as const;
 
 // ============================================================================
@@ -1024,12 +1003,6 @@ export const TEST_FACTORY_EVENTS = {
   /** Bond deployed event */
   BOND_DEPLOYED: "BondDeployed",
 
-  /** Bond Fixed Rate deployed event */
-  BOND_FIXED_RATE_DEPLOYED: "BondFixedRateDeployed",
-
-  /** Bond KPI Linked Rate deployed event */
-  BOND_KPI_LINKED_RATE_DEPLOYED: "BondKpiLinkedRateDeployed",
-
   /** Unknown event (for negative tests) */
   UNKNOWN: "UnknownEvent",
 } as const;
@@ -1253,15 +1226,45 @@ export const TEST_COUPON = {
 } as const;
 
 /**
- * Default fixed-rate bond fixture parameters mirrored as test-side expectations.
+ * Mirrors the on-chain `IInterestRate.RateType` enum ordinals (`STANDARD` is the
+ * implicit zero-value default since `NONE` was removed from the Solidity enum).
+ */
+export const INTEREST_RATE_TYPE = {
+  STANDARD: 0,
+  FIXED: 1,
+  KPI_LINKED: 2,
+} as const;
+
+/**
+ * Fixed-rate bond test values (coupon rate + decimals).
  *
- * Kept in sync with `DEFAULT_BOND_FIXED_RATE_PARAMS` in `test/fixtures/tokens/bondFixedRate.fixture.ts`.
- * Tests using `deployBondFixedRateTokenFixture` with default `fixedRateParams` should
- * assert against these values.
+ * Consumed by the coupon, fixed-rate and interest-rate facet suites, which exercise the
+ * FixedRate facet on the shared AssetMock mega-asset.
  */
 export const TEST_BOND_FIXED_RATE = {
   RATE: 50,
   RATE_DECIMALS: 1,
+} as const;
+
+/**
+ * KPI-linked-rate bond test values — the InterestRate + ImpactData inputs the KpiLinkedRate
+ * suite feeds to `initializeKpiLinkedRate` on the shared AssetMock mega-asset. Field names mirror
+ * the on-chain `IKpiLinkedRate.InterestRate` / `IKpiLinkedRate.ImpactData` structs.
+ */
+export const TEST_BOND_KPI_LINKED_RATE = {
+  maxRate: 100,
+  baseRate: 75,
+  minRate: 50,
+  startPeriod: 1000,
+  startRate: 60,
+  missedPenalty: 10,
+  reportPeriod: 2000,
+  rateDecimals: 1,
+  maxDeviationCap: 1000,
+  baseLine: 750,
+  maxDeviationFloor: 500,
+  impactDataDecimals: 2,
+  adjustmentPrecision: 2,
 } as const;
 
 // ============================================================================

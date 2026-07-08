@@ -55,7 +55,7 @@ library InitializerStorageWrapper {
      * @param _maxInitializerFacetIndex Maximum initializer facet index to store.
      */
     function setMaxInitializerFacetIndex(uint256 _maxInitializerFacetIndex) internal {
-        initializerStorage().maxInitializerFacetIndex = _maxInitializerFacetIndex;
+        _initializerStorage().maxInitializerFacetIndex = _maxInitializerFacetIndex;
     }
 
     /**
@@ -81,8 +81,7 @@ library InitializerStorageWrapper {
         internal
         returns (bool isOperational_, uint256 lastFacetIndex_, bytes32 configId_, uint256 versionId_)
     {
-        configId_ = ResolverProxyStorageWrapper.getResolverProxyConfigurationId();
-        versionId_ = ResolverProxyStorageWrapper.getResolverProxyVersion();
+        (configId_, versionId_) = ResolverProxyStorageWrapper.getResolverProxyConfigurationIdAndVersion();
 
         uint256 operationStatus = getOperationalStatus(configId_, versionId_);
 
@@ -120,7 +119,7 @@ library InitializerStorageWrapper {
         );
 
         unchecked {
-            initializerStorage().configVersionStatus[configId_][versionId_] = isOperational_ ? 1 : lastFacetIndex_ + 1;
+            _initializerStorage().configVersionStatus[configId_][versionId_] = isOperational_ ? 1 : lastFacetIndex_ + 1;
         }
     }
 
@@ -160,7 +159,7 @@ library InitializerStorageWrapper {
      * @param _status Status value to store, following the encoding above.
      */
     function setFacetStatusForVersion(bytes32 _facetId, uint256 _versionId, uint256 _status) internal {
-        initializerStorage().facetVersionStatus[_facetId][_versionId] = _status;
+        _initializerStorage().facetVersionStatus[_facetId][_versionId] = _status;
     }
 
     /**
@@ -170,7 +169,7 @@ library InitializerStorageWrapper {
      * @param _versionId Version to store as the facet's latest registered version.
      */
     function setFacetLastVersionTo(bytes32 _facetId, uint256 _versionId) internal {
-        initializerStorage().facetLastVersion[_facetId] = _versionId;
+        _initializerStorage().facetLastVersion[_facetId] = _versionId;
     }
 
     /// @notice Sets the operational status for a configuration version.
@@ -180,7 +179,7 @@ library InitializerStorageWrapper {
     /// @param versionId Configuration version.
     /// @param status Status value: 0 = not started, 1 = fully operational.
     function setConfigVersion(bytes32 configId, uint256 versionId, uint256 status) internal {
-        initializerStorage().configVersionStatus[configId][versionId] = status;
+        _initializerStorage().configVersionStatus[configId][versionId] = status;
     }
 
     /**
@@ -190,10 +189,10 @@ library InitializerStorageWrapper {
      *      check to `isConfigVersionOperational`. Reverts with `IInitializer.AssetNotOperational`.
      */
     function checkOperational() internal view {
-        isConfigVersionOperational(
-            ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
-            ResolverProxyStorageWrapper.getResolverProxyVersion()
-        );
+        bytes32 configId;
+        uint256 versionId;
+        (configId, versionId) = ResolverProxyStorageWrapper.getResolverProxyConfigurationIdAndVersion();
+        isConfigVersionOperational(configId, versionId);
     }
 
     /**
@@ -273,7 +272,7 @@ library InitializerStorageWrapper {
      *         resume facet index + 1).
      */
     function getOperationalStatus(bytes32 _configId, uint256 _versionId) internal view returns (uint256 status_) {
-        return initializerStorage().configVersionStatus[_configId][_versionId];
+        return _initializerStorage().configVersionStatus[_configId][_versionId];
     }
 
     /**
@@ -285,7 +284,7 @@ library InitializerStorageWrapper {
      * @return status_ Initialisation status of the requested facet version.
      */
     function getFacetVersionStatus(bytes32 _facetId, uint256 _versionId) internal view returns (uint256 status_) {
-        return initializerStorage().facetVersionStatus[_facetId][_versionId];
+        return _initializerStorage().facetVersionStatus[_facetId][_versionId];
     }
 
     /**
@@ -294,7 +293,7 @@ library InitializerStorageWrapper {
      * @return lastVersion_ Most recent version stored for the facet, or zero if absent.
      */
     function getFacetLastVersion(bytes32 _facetId) internal view returns (uint256 lastVersion_) {
-        return initializerStorage().facetLastVersion[_facetId];
+        return _initializerStorage().facetLastVersion[_facetId];
     }
 
     /**
@@ -303,7 +302,7 @@ library InitializerStorageWrapper {
      * @return maxInitializerFacetIndex_ Maximum number of facets per call.
      */
     function getMaxInitializerFacetIndex() internal view returns (uint256 maxInitializerFacetIndex_) {
-        return initializerStorage().maxInitializerFacetIndex;
+        return _initializerStorage().maxInitializerFacetIndex;
     }
 
     /**
@@ -313,10 +312,12 @@ library InitializerStorageWrapper {
      * @return version_ Current version of the facet within the active configuration.
      */
     function currentFacetVersion(bytes32 _facetId) internal view returns (uint256 version_) {
+        (bytes32 configId, uint256 versionId) = ResolverProxyStorageWrapper.getResolverProxyConfigurationIdAndVersion();
+
         return
             ResolverProxyStorageWrapper.getBusinessLogicResolver().getFacetVersionByConfigurationIdVersionAndFacetId(
-                ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
-                ResolverProxyStorageWrapper.getResolverProxyVersion(),
+                configId,
+                versionId,
                 _facetId
             );
     }
@@ -355,7 +356,7 @@ library InitializerStorageWrapper {
      * @return initializer_ Reference to the initializer storage struct.
      */
     // Diamond storage accessor: pins InitializerDataStorage to a fixed slot to avoid layout collisions across facets.
-    function initializerStorage() private pure returns (InitializerDataStorage storage initializer_) {
+    function _initializerStorage() private pure returns (InitializerDataStorage storage initializer_) {
         bytes32 position = STORAGE_LOCATION_INITIALIZER;
         // solhint-disable-next-line no-inline-assembly
         assembly {

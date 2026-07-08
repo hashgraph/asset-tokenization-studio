@@ -60,7 +60,7 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_KYC_MANAGER)
-        onlyValidAddress(_kycLists)
+        validateAddressNotZero(_kycLists)
         returns (bool success_)
     {
         success_ = ExternalListManagementStorageWrapper.addExternalList(STORAGE_LOCATION_KYC_MANAGEMENT, _kycLists);

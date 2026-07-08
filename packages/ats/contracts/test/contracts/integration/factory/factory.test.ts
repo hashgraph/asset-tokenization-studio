@@ -16,16 +16,7 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture } from "@test";
 import { getRegulationData, getSecurityData } from "@test";
 import { makeEquityDetailsData } from "@test";
-import {
-  RegulationType,
-  RegulationSubType,
-  ADDRESS_ZERO,
-  EQUITY_CONFIG_ID,
-  ATS_ROLES,
-  BOND_CONFIG_ID,
-  BOND_FIXED_RATE_CONFIG_ID,
-  BOND_KPI_LINKED_RATE_CONFIG_ID,
-} from "@scripts";
+import { RegulationType, RegulationSubType, ADDRESS_ZERO, ATS_ROLES, CONFIG_IDS } from "@scripts";
 import { Rbac, SecurityType } from "@scripts/domain";
 import { decodeEvent } from "@scripts/infrastructure";
 import { getBondDetails } from "@test";
@@ -101,9 +92,10 @@ describe("Factory Tests", () => {
           equityDetails: makeEquityDetailsData(),
         };
         equityData.security.resolver = ADDRESS_ZERO;
-        equityData.security.resolverProxyConfiguration = {
-          key: EQUITY_CONFIG_ID,
-          version: 1,
+        equityData.security.resolverProxyConfigurationV2 = {
+          configurationId: CONFIG_IDS.equity,
+          configurationVersion: 1,
+          replacementEnabled: true,
         };
 
         await expect(factory.deployEquity(equityData, getRegulationData())).to.be.revertedWithCustomError(
@@ -122,9 +114,10 @@ describe("Factory Tests", () => {
           proceedRecipientsData: [],
         };
         bondData.security.resolver = ADDRESS_ZERO;
-        bondData.security.resolverProxyConfiguration = {
-          key: BOND_CONFIG_ID,
-          version: 1,
+        bondData.security.resolverProxyConfigurationV2 = {
+          configurationId: CONFIG_IDS.bond,
+          configurationVersion: 1,
+          replacementEnabled: true,
         };
 
         await expect(factory.deployBond(bondData, getRegulationData())).to.be.revertedWithCustomError(
@@ -140,9 +133,10 @@ describe("Factory Tests", () => {
           }),
           equityDetails: makeEquityDetailsData(),
         };
-        equityData.security.resolverProxyConfiguration = {
-          key: EQUITY_CONFIG_ID,
-          version: 1,
+        equityData.security.resolverProxyConfigurationV2 = {
+          configurationId: CONFIG_IDS.equity,
+          configurationVersion: 1,
+          replacementEnabled: true,
         };
 
         await expect(factory.deployEquity(equityData, getRegulationData())).to.emit(factory, "EquityDeployed");
@@ -164,9 +158,10 @@ describe("Factory Tests", () => {
           }),
           equityDetails: makeEquityDetailsData(),
         };
-        equityData.security.resolverProxyConfiguration = {
-          key: EQUITY_CONFIG_ID,
-          version: 1,
+        equityData.security.resolverProxyConfigurationV2 = {
+          configurationId: CONFIG_IDS.equity,
+          configurationVersion: 1,
+          replacementEnabled: true,
         };
 
         await expect(factory.deployEquity(equityData, getRegulationData())).to.be.revertedWithCustomError(
@@ -191,9 +186,10 @@ describe("Factory Tests", () => {
           proceedRecipients: [],
           proceedRecipientsData: [],
         };
-        bondData.security.resolverProxyConfiguration = {
-          key: BOND_CONFIG_ID,
-          version: 1,
+        bondData.security.resolverProxyConfigurationV2 = {
+          configurationId: CONFIG_IDS.bond,
+          configurationVersion: 1,
+          replacementEnabled: true,
         };
 
         await expect(factory.deployBond(bondData, getRegulationData())).to.be.revertedWithCustomError(
@@ -216,9 +212,10 @@ describe("Factory Tests", () => {
           }),
           equityDetails: makeEquityDetailsData(),
         };
-        equityData.security.resolverProxyConfiguration = {
-          key: EQUITY_CONFIG_ID,
-          version: 1,
+        equityData.security.resolverProxyConfigurationV2 = {
+          configurationId: CONFIG_IDS.equity,
+          configurationVersion: 1,
+          replacementEnabled: true,
         };
 
         await expect(factory.deployEquity(equityData, getRegulationData())).to.be.revertedWithCustomError(
@@ -241,9 +238,10 @@ describe("Factory Tests", () => {
           }),
           equityDetails: makeEquityDetailsData(),
         };
-        equityData.security.resolverProxyConfiguration = {
-          key: EQUITY_CONFIG_ID,
-          version: 1,
+        equityData.security.resolverProxyConfigurationV2 = {
+          configurationId: CONFIG_IDS.equity,
+          configurationVersion: 1,
+          replacementEnabled: true,
         };
 
         await expect(factory.deployEquity(equityData, getRegulationData())).to.emit(factory, "EquityDeployed");
@@ -269,9 +267,10 @@ describe("Factory Tests", () => {
           proceedRecipients: [],
           proceedRecipientsData: [],
         };
-        bondData.security.resolverProxyConfiguration = {
-          key: BOND_CONFIG_ID,
-          version: 1,
+        bondData.security.resolverProxyConfigurationV2 = {
+          configurationId: CONFIG_IDS.bond,
+          configurationVersion: 1,
+          replacementEnabled: true,
         };
 
         await expect(factory.deployBond(bondData, getRegulationData())).to.emit(factory, "BondDeployed");
@@ -286,9 +285,10 @@ describe("Factory Tests", () => {
           }),
           equityDetails: makeEquityDetailsData(),
         };
-        equityData.security.resolverProxyConfiguration = {
-          key: EQUITY_CONFIG_ID,
-          version: 1,
+        equityData.security.resolverProxyConfigurationV2 = {
+          configurationId: CONFIG_IDS.equity,
+          configurationVersion: 1,
+          replacementEnabled: true,
         };
 
         const invalidRegulationData = getRegulationData({
@@ -310,9 +310,10 @@ describe("Factory Tests", () => {
           proceedRecipients: [],
           proceedRecipientsData: [],
         };
-        bondData.security.resolverProxyConfiguration = {
-          key: BOND_CONFIG_ID,
-          version: 1,
+        bondData.security.resolverProxyConfigurationV2 = {
+          configurationId: CONFIG_IDS.bond,
+          configurationVersion: 1,
+          replacementEnabled: true,
         };
 
         const invalidRegulationData = getRegulationData({
@@ -332,9 +333,10 @@ describe("Factory Tests", () => {
           }),
           equityDetails: makeEquityDetailsData(),
         };
-        equityData.security.resolverProxyConfiguration = {
-          key: EQUITY_CONFIG_ID,
-          version: 1,
+        equityData.security.resolverProxyConfigurationV2 = {
+          configurationId: CONFIG_IDS.equity,
+          configurationVersion: 1,
+          replacementEnabled: true,
         };
 
         const invalidRegulationData = getRegulationData({
@@ -354,9 +356,10 @@ describe("Factory Tests", () => {
           }),
           equityDetails: makeEquityDetailsData(),
         };
-        equityData.security.resolverProxyConfiguration = {
-          key: EQUITY_CONFIG_ID,
-          version: 1,
+        equityData.security.resolverProxyConfigurationV2 = {
+          configurationId: CONFIG_IDS.equity,
+          configurationVersion: 1,
+          replacementEnabled: true,
         };
 
         const validRegulationData = getRegulationData({
@@ -376,9 +379,10 @@ describe("Factory Tests", () => {
           proceedRecipients: [],
           proceedRecipientsData: [],
         };
-        bondData.security.resolverProxyConfiguration = {
-          key: BOND_CONFIG_ID,
-          version: 1,
+        bondData.security.resolverProxyConfigurationV2 = {
+          configurationId: CONFIG_IDS.bond,
+          configurationVersion: 1,
+          replacementEnabled: true,
         };
 
         const regSRegulationData = getRegulationData({
@@ -393,24 +397,39 @@ describe("Factory Tests", () => {
 
   describe("Generic Proxy tests", () => {
     it("GIVEN an empty Resolver WHEN deploying a new resolverProxy THEN transaction fails", async () => {
+      const resolverProxyConfigurationV2 = {
+        configurationId: CONFIG_IDS.equity,
+        configurationVersion: 1,
+        replacementEnabled: true,
+      };
       await expect(
-        factory.deployProxy(ADDRESS_ZERO, EQUITY_CONFIG_ID, 1, init_rbacs, "0x"),
+        factory.deployProxy(ADDRESS_ZERO, resolverProxyConfigurationV2, init_rbacs, "0x"),
       ).to.be.revertedWithCustomError(factory, "EmptyResolver");
     });
 
     it("GIVEN no admin WHEN deploying a new resolverProxy THEN transaction fails", async () => {
+      const resolverProxyConfigurationV2 = {
+        configurationId: CONFIG_IDS.equity,
+        configurationVersion: 1,
+        replacementEnabled: true,
+      };
       await expect(
-        factory.deployProxy(businessLogicResolver, EQUITY_CONFIG_ID, 1, [], "0x"),
+        factory.deployProxy(businessLogicResolver, resolverProxyConfigurationV2, [], "0x"),
       ).to.be.revertedWithCustomError(factory, "NoInitialAdmins");
     });
 
     it("GIVEN the proper information WHEN deploying a new resolverProxy THEN transaction succeeds", async () => {
       const originalData = "0x1234567812345678";
+      const resolverProxyConfigurationV2 = {
+        configurationId: CONFIG_IDS.equity,
+        configurationVersion: 1,
+        replacementEnabled: true,
+      };
       const expectedProxyAddress = await factory
         .getFunction("deployProxy")
-        .staticCall(businessLogicResolver, EQUITY_CONFIG_ID, 1, init_rbacs, originalData);
+        .staticCall(businessLogicResolver, resolverProxyConfigurationV2, init_rbacs, originalData);
 
-      const tx = factory.deployProxy(businessLogicResolver, EQUITY_CONFIG_ID, 1, init_rbacs, originalData);
+      const tx = factory.deployProxy(businessLogicResolver, resolverProxyConfigurationV2, init_rbacs, originalData);
       await expect(tx).to.emit(factory, "ProxyDeployed");
 
       const result = await tx;
@@ -428,7 +447,7 @@ describe("Factory Tests", () => {
       expect(proxyAddress).not.to.equal(ADDRESS_ZERO);
       expect(proxyAddress).to.equal(expectedProxyAddress);
       expect(resolver).to.equal(businessLogicResolver);
-      expect(configKey).to.equal(EQUITY_CONFIG_ID);
+      expect(configKey).to.equal(CONFIG_IDS.equity);
       expect(version).to.equal(1);
       expect(rbac.length).to.equal(init_rbacs.length);
       expect(data).to.equal(originalData);
@@ -448,9 +467,10 @@ describe("Factory Tests", () => {
         security: getSecurityData(businessLogicResolver),
         equityDetails: makeEquityDetailsData(),
       };
-      equityData.security.resolverProxyConfiguration = {
-        key: EQUITY_CONFIG_ID,
-        version: 1,
+      equityData.security.resolverProxyConfigurationV2 = {
+        configurationId: CONFIG_IDS.equity,
+        configurationVersion: 1,
+        replacementEnabled: true,
       };
       equityData.security.resolver = ADDRESS_ZERO;
 
@@ -467,9 +487,10 @@ describe("Factory Tests", () => {
         security: getSecurityData(businessLogicResolver),
         equityDetails: makeEquityDetailsData(),
       };
-      equityData.security.resolverProxyConfiguration = {
-        key: EQUITY_CONFIG_ID,
-        version: 1,
+      equityData.security.resolverProxyConfigurationV2 = {
+        configurationId: CONFIG_IDS.equity,
+        configurationVersion: 1,
+        replacementEnabled: true,
       };
 
       const factoryRegulationData = getRegulationData();
@@ -487,9 +508,10 @@ describe("Factory Tests", () => {
         }),
         equityDetails: makeEquityDetailsData(),
       };
-      equityData.security.resolverProxyConfiguration = {
-        key: EQUITY_CONFIG_ID,
-        version: 1,
+      equityData.security.resolverProxyConfigurationV2 = {
+        configurationId: CONFIG_IDS.equity,
+        configurationVersion: 1,
+        replacementEnabled: true,
       };
 
       const factoryRegulationData = getRegulationData({
@@ -514,9 +536,10 @@ describe("Factory Tests", () => {
         }),
         equityDetails: makeEquityDetailsData(),
       };
-      equityData.security.resolverProxyConfiguration = {
-        key: EQUITY_CONFIG_ID,
-        version: 1,
+      equityData.security.resolverProxyConfigurationV2 = {
+        configurationId: CONFIG_IDS.equity,
+        configurationVersion: 1,
+        replacementEnabled: true,
       };
 
       const factoryRegulationData = getRegulationData({
@@ -541,9 +564,10 @@ describe("Factory Tests", () => {
         }),
         equityDetails: makeEquityDetailsData(),
       };
-      equityData.security.resolverProxyConfiguration = {
-        key: EQUITY_CONFIG_ID,
-        version: 1,
+      equityData.security.resolverProxyConfigurationV2 = {
+        configurationId: CONFIG_IDS.equity,
+        configurationVersion: 1,
+        replacementEnabled: true,
       };
 
       const factoryRegulationData = getRegulationData();
@@ -600,9 +624,10 @@ describe("Factory Tests", () => {
         proceedRecipients: [],
         proceedRecipientsData: [],
       };
-      bondData.security.resolverProxyConfiguration = {
-        key: BOND_CONFIG_ID,
-        version: 1,
+      bondData.security.resolverProxyConfigurationV2 = {
+        configurationId: CONFIG_IDS.bond,
+        configurationVersion: 1,
+        replacementEnabled: true,
       };
       bondData.security.resolver = ADDRESS_ZERO;
 
@@ -621,9 +646,10 @@ describe("Factory Tests", () => {
         proceedRecipients: [],
         proceedRecipientsData: [],
       };
-      bondData.security.resolverProxyConfiguration = {
-        key: BOND_CONFIG_ID,
-        version: 1,
+      bondData.security.resolverProxyConfigurationV2 = {
+        configurationId: CONFIG_IDS.bond,
+        configurationVersion: 1,
+        replacementEnabled: true,
       };
 
       const factoryRegulationData = getRegulationData();
@@ -645,9 +671,10 @@ describe("Factory Tests", () => {
         proceedRecipients: [],
         proceedRecipientsData: [],
       };
-      bondData.security.resolverProxyConfiguration = {
-        key: BOND_CONFIG_ID,
-        version: 1,
+      bondData.security.resolverProxyConfigurationV2 = {
+        configurationId: CONFIG_IDS.bond,
+        configurationVersion: 1,
+        replacementEnabled: true,
       };
 
       const factoryRegulationData = getRegulationData();
@@ -676,9 +703,10 @@ describe("Factory Tests", () => {
         proceedRecipients: [],
         proceedRecipientsData: [],
       };
-      bondData.security.resolverProxyConfiguration = {
-        key: BOND_CONFIG_ID,
-        version: 1,
+      bondData.security.resolverProxyConfigurationV2 = {
+        configurationId: CONFIG_IDS.bond,
+        configurationVersion: 1,
+        replacementEnabled: true,
       };
 
       const factoryRegulationData = getRegulationData();
@@ -743,9 +771,10 @@ describe("Factory Tests", () => {
         proceedRecipients: [],
         proceedRecipientsData: [],
       };
-      bondData.security.resolverProxyConfiguration = {
-        key: BOND_CONFIG_ID,
-        version: 1,
+      bondData.security.resolverProxyConfigurationV2 = {
+        configurationId: CONFIG_IDS.bond,
+        configurationVersion: 1,
+        replacementEnabled: true,
       };
 
       const factoryRegulationData = getRegulationData({
@@ -772,9 +801,10 @@ describe("Factory Tests", () => {
         proceedRecipients: [],
         proceedRecipientsData: [],
       };
-      bondData.security.resolverProxyConfiguration = {
-        key: BOND_CONFIG_ID,
-        version: 1,
+      bondData.security.resolverProxyConfigurationV2 = {
+        configurationId: CONFIG_IDS.bond,
+        configurationVersion: 1,
+        replacementEnabled: true,
       };
 
       const factoryRegulationData = getRegulationData({
@@ -825,558 +855,6 @@ describe("Factory Tests", () => {
     });
   });
 
-  describe("Bond with Fixed Rate tests", () => {
-    it("GIVEN proper BondFixedRateData WHEN deploying a new bond with fixed rate THEN transaction succeeds", async () => {
-      const bondFixedRateData = {
-        bondData: {
-          security: getSecurityData(businessLogicResolver, {
-            rbacs: init_rbacs,
-          }),
-          bondDetails: await getBondDetails(),
-          proceedRecipients: [],
-          proceedRecipientsData: [],
-        },
-        factoryRegulationData: getRegulationData(),
-        fixedRateData: {
-          rate: 500, // 5% with 2 decimals
-          rateDecimals: 2,
-        },
-      };
-
-      bondFixedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_FIXED_RATE_CONFIG_ID,
-        version: 1,
-      };
-
-      const tx = factory.deployBondFixedRate(bondFixedRateData);
-      await expect(tx).to.emit(factory, "BondFixedRateDeployed");
-
-      const result = await tx;
-      const receipt = await result.wait();
-      const decoded = await decodeEvent(factory, "BondFixedRateDeployed", receipt);
-      const bondAddress = decoded.bondAddress;
-
-      // Verify fixed rate was set
-      const fixedRateFacet = await ethers.getContractAt("FixedRate", bondAddress);
-      const [rate, decimals] = await fixedRateFacet.getRate();
-      expect(rate).to.equal(bondFixedRateData.fixedRateData.rate);
-      expect(decimals).to.equal(bondFixedRateData.fixedRateData.rateDecimals);
-    });
-
-    it("GIVEN empty resolver WHEN deploying BondFixedRate THEN transaction fails", async () => {
-      const bondFixedRateData = {
-        bondData: {
-          security: getSecurityData(businessLogicResolver, {
-            rbacs: init_rbacs,
-          }),
-          bondDetails: await getBondDetails(),
-          proceedRecipients: [],
-          proceedRecipientsData: [],
-        },
-        factoryRegulationData: getRegulationData(),
-        fixedRateData: {
-          rate: 500,
-          rateDecimals: 2,
-        },
-      };
-
-      bondFixedRateData.bondData.security.resolver = ADDRESS_ZERO;
-      bondFixedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_FIXED_RATE_CONFIG_ID,
-        version: 1,
-      };
-
-      await expect(factory.deployBondFixedRate(bondFixedRateData)).to.be.revertedWithCustomError(
-        factory,
-        "EmptyResolver",
-      );
-    });
-
-    it("GIVEN no admin WHEN deploying BondFixedRate THEN transaction fails", async () => {
-      const bondFixedRateData = {
-        bondData: {
-          security: getSecurityData(businessLogicResolver),
-          bondDetails: await getBondDetails(),
-          proceedRecipients: [],
-          proceedRecipientsData: [],
-        },
-        factoryRegulationData: getRegulationData(),
-        fixedRateData: {
-          rate: 500,
-          rateDecimals: 2,
-        },
-      };
-
-      bondFixedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_FIXED_RATE_CONFIG_ID,
-        version: 1,
-      };
-
-      await expect(factory.deployBondFixedRate(bondFixedRateData)).to.be.revertedWithCustomError(
-        factory,
-        "NoInitialAdmins",
-      );
-    });
-
-    it("GIVEN wrong regulation type WHEN deploying BondFixedRate THEN transaction fails", async () => {
-      const bondFixedRateData = {
-        bondData: {
-          security: getSecurityData(businessLogicResolver, {
-            rbacs: init_rbacs,
-          }),
-          bondDetails: await getBondDetails(),
-          proceedRecipients: [],
-          proceedRecipientsData: [],
-        },
-        factoryRegulationData: getRegulationData({
-          regulationType: RegulationType.NONE,
-          regulationSubType: RegulationSubType.REG_D_506_B,
-        }),
-        fixedRateData: {
-          rate: 500,
-          rateDecimals: 2,
-        },
-      };
-
-      bondFixedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_FIXED_RATE_CONFIG_ID,
-        version: 1,
-      };
-
-      await expect(factory.deployBondFixedRate(bondFixedRateData))
-        .to.be.revertedWithCustomError(factory, "RegulationTypeAndSubTypeForbidden")
-        .withArgs(RegulationType.NONE, RegulationSubType.REG_D_506_B);
-    });
-  });
-
-  describe("Bond with KPI Linked Rate tests", () => {
-    it("GIVEN proper BondKpiLinkedRateData WHEN deploying a new bond with KPI linked rate THEN transaction succeeds", async () => {
-      const bondKpiLinkedRateData = {
-        bondData: {
-          security: getSecurityData(businessLogicResolver, {
-            rbacs: init_rbacs,
-          }),
-          bondDetails: await getBondDetails(),
-          proceedRecipients: [],
-          proceedRecipientsData: [],
-        },
-        factoryRegulationData: getRegulationData(),
-        interestRate: {
-          maxRate: 1000, // 10%
-          baseRate: 500, // 5%
-          minRate: 100, // 1%
-          startPeriod: Math.floor(Date.now() / 1000) + 86400,
-          startRate: 500,
-          missedPenalty: 50,
-          reportPeriod: 86400 * 30, // 30 days
-          rateDecimals: 2,
-        },
-        impactData: {
-          maxDeviationCap: 150,
-          baseLine: 100,
-          maxDeviationFloor: 50,
-          impactDataDecimals: 2,
-          adjustmentPrecision: 100,
-        },
-      };
-
-      bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_KPI_LINKED_RATE_CONFIG_ID,
-        version: 1,
-      };
-
-      const tx = factory.deployBondKpiLinkedRate(bondKpiLinkedRateData);
-      await expect(tx).to.emit(factory, "BondKpiLinkedRateDeployed");
-
-      const result = await tx;
-      const receipt = await result.wait();
-      const decoded = await decodeEvent(factory, "BondKpiLinkedRateDeployed", receipt);
-      const bondAddress = decoded.bondAddress;
-
-      // Verify KPI linked rate was set
-      const asset = await ethers.getContractAt("IAsset", bondAddress);
-      const interestRate = await asset.getKpiLinkedRateInterestRate();
-      expect(interestRate.maxRate).to.equal(bondKpiLinkedRateData.interestRate.maxRate);
-      expect(interestRate.baseRate).to.equal(bondKpiLinkedRateData.interestRate.baseRate);
-      expect(interestRate.minRate).to.equal(bondKpiLinkedRateData.interestRate.minRate);
-
-      const impactData = await asset.getKpiLinkedRateImpactData();
-      expect(impactData.maxDeviationCap).to.equal(bondKpiLinkedRateData.impactData.maxDeviationCap);
-      expect(impactData.baseLine).to.equal(bondKpiLinkedRateData.impactData.baseLine);
-      expect(impactData.maxDeviationFloor).to.equal(bondKpiLinkedRateData.impactData.maxDeviationFloor);
-    });
-
-    it("GIVEN invalid interest rate (minRate > baseRate) WHEN deploying bond THEN transaction fails", async () => {
-      const bondKpiLinkedRateData = {
-        bondData: {
-          security: getSecurityData(businessLogicResolver, {
-            rbacs: init_rbacs,
-          }),
-          bondDetails: await getBondDetails(),
-          proceedRecipients: [],
-          proceedRecipientsData: [],
-        },
-        factoryRegulationData: getRegulationData(),
-        interestRate: {
-          maxRate: 1000,
-          baseRate: 500,
-          minRate: 600, // minRate > baseRate - INVALID
-          startPeriod: Math.floor(Date.now() / 1000) + 86400,
-          startRate: 500,
-          missedPenalty: 50,
-          reportPeriod: 86400 * 30,
-          rateDecimals: 2,
-        },
-        impactData: {
-          maxDeviationCap: 150,
-          baseLine: 100,
-          maxDeviationFloor: 50,
-          impactDataDecimals: 2,
-          adjustmentPrecision: 100,
-        },
-      };
-
-      bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_KPI_LINKED_RATE_CONFIG_ID,
-        version: 1,
-      };
-
-      await expect(factory.deployBondKpiLinkedRate(bondKpiLinkedRateData)).to.be.revertedWithCustomError(
-        factory,
-        "WrongInterestRateValues",
-      );
-    });
-
-    it("GIVEN invalid impact data (maxDeviationFloor == baseLine) WHEN deploying bond THEN transaction fails", async () => {
-      const bondKpiLinkedRateData = {
-        bondData: {
-          security: getSecurityData(businessLogicResolver, {
-            rbacs: init_rbacs,
-          }),
-          bondDetails: await getBondDetails(),
-          proceedRecipients: [],
-          proceedRecipientsData: [],
-        },
-        factoryRegulationData: getRegulationData(),
-        interestRate: {
-          maxRate: 1000,
-          baseRate: 500,
-          minRate: 100,
-          startPeriod: Math.floor(Date.now() / 1000) + 86400,
-          startRate: 500,
-          missedPenalty: 50,
-          reportPeriod: 86400 * 30,
-          rateDecimals: 2,
-        },
-        impactData: {
-          maxDeviationCap: 150,
-          baseLine: 100,
-          maxDeviationFloor: 100, // maxDeviationFloor == baseLine - INVALID (zero denominator)
-          impactDataDecimals: 2,
-          adjustmentPrecision: 100,
-        },
-      };
-
-      bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_KPI_LINKED_RATE_CONFIG_ID,
-        version: 1,
-      };
-
-      await expect(factory.deployBondKpiLinkedRate(bondKpiLinkedRateData)).to.be.revertedWithCustomError(
-        factory,
-        "WrongImpactDataValues",
-      );
-    });
-
-    it("GIVEN invalid impact data (baseLine == maxDeviationCap) WHEN deploying bond THEN transaction fails", async () => {
-      const bondKpiLinkedRateData = {
-        bondData: {
-          security: getSecurityData(businessLogicResolver, {
-            rbacs: init_rbacs,
-          }),
-          bondDetails: await getBondDetails(),
-          proceedRecipients: [],
-          proceedRecipientsData: [],
-        },
-        factoryRegulationData: getRegulationData(),
-        interestRate: {
-          maxRate: 1000,
-          baseRate: 500,
-          minRate: 100,
-          startPeriod: Math.floor(Date.now() / 1000) + 86400,
-          startRate: 500,
-          missedPenalty: 50,
-          reportPeriod: 86400 * 30,
-          rateDecimals: 2,
-        },
-        impactData: {
-          maxDeviationCap: 100,
-          baseLine: 100, // baseLine == maxDeviationCap - INVALID (zero denominator)
-          maxDeviationFloor: 50,
-          impactDataDecimals: 2,
-          adjustmentPrecision: 100,
-        },
-      };
-
-      bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_KPI_LINKED_RATE_CONFIG_ID,
-        version: 1,
-      };
-
-      await expect(factory.deployBondKpiLinkedRate(bondKpiLinkedRateData)).to.be.revertedWithCustomError(
-        factory,
-        "WrongImpactDataValues",
-      );
-    });
-
-    it("GIVEN invalid interest rate (baseRate > maxRate) WHEN deploying bond THEN transaction fails", async () => {
-      const bondKpiLinkedRateData = {
-        bondData: {
-          security: getSecurityData(businessLogicResolver, {
-            rbacs: init_rbacs,
-          }),
-          bondDetails: await getBondDetails(),
-          proceedRecipients: [],
-          proceedRecipientsData: [],
-        },
-        factoryRegulationData: getRegulationData(),
-        interestRate: {
-          maxRate: 400,
-          baseRate: 500, // baseRate > maxRate - INVALID
-          minRate: 100,
-          startPeriod: Math.floor(Date.now() / 1000) + 86400,
-          startRate: 500,
-          missedPenalty: 50,
-          reportPeriod: 86400 * 30,
-          rateDecimals: 2,
-        },
-        impactData: {
-          maxDeviationCap: 150,
-          baseLine: 100,
-          maxDeviationFloor: 50,
-          impactDataDecimals: 2,
-          adjustmentPrecision: 100,
-        },
-      };
-
-      bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_KPI_LINKED_RATE_CONFIG_ID,
-        version: 1,
-      };
-
-      await expect(factory.deployBondKpiLinkedRate(bondKpiLinkedRateData)).to.be.revertedWithCustomError(
-        factory,
-        "WrongInterestRateValues",
-      );
-    });
-
-    it("GIVEN invalid impact data (maxDeviationFloor > baseLine) WHEN deploying bond THEN transaction fails", async () => {
-      const bondKpiLinkedRateData = {
-        bondData: {
-          security: getSecurityData(businessLogicResolver, {
-            rbacs: init_rbacs,
-          }),
-          bondDetails: await getBondDetails(),
-          proceedRecipients: [],
-          proceedRecipientsData: [],
-        },
-        factoryRegulationData: getRegulationData(),
-        interestRate: {
-          maxRate: 1000,
-          baseRate: 500,
-          minRate: 100,
-          startPeriod: Math.floor(Date.now() / 1000) + 86400,
-          startRate: 500,
-          missedPenalty: 50,
-          reportPeriod: 86400 * 30,
-          rateDecimals: 2,
-        },
-        impactData: {
-          maxDeviationCap: 150,
-          baseLine: 100,
-          maxDeviationFloor: 120, // maxDeviationFloor > baseLine - INVALID
-          impactDataDecimals: 2,
-          adjustmentPrecision: 100,
-        },
-      };
-
-      bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_KPI_LINKED_RATE_CONFIG_ID,
-        version: 1,
-      };
-
-      await expect(factory.deployBondKpiLinkedRate(bondKpiLinkedRateData)).to.be.revertedWithCustomError(
-        factory,
-        "WrongImpactDataValues",
-      );
-    });
-
-    it("GIVEN invalid impact data (baseLine > maxDeviationCap) WHEN deploying bond THEN transaction fails", async () => {
-      const bondKpiLinkedRateData = {
-        bondData: {
-          security: getSecurityData(businessLogicResolver, {
-            rbacs: init_rbacs,
-          }),
-          bondDetails: await getBondDetails(),
-          proceedRecipients: [],
-          proceedRecipientsData: [],
-        },
-        factoryRegulationData: getRegulationData(),
-        interestRate: {
-          maxRate: 1000,
-          baseRate: 500,
-          minRate: 100,
-          startPeriod: Math.floor(Date.now() / 1000) + 86400,
-          startRate: 500,
-          missedPenalty: 50,
-          reportPeriod: 86400 * 30,
-          rateDecimals: 2,
-        },
-        impactData: {
-          maxDeviationCap: 90,
-          baseLine: 100, // baseLine > maxDeviationCap - INVALID
-          maxDeviationFloor: 50,
-          impactDataDecimals: 2,
-          adjustmentPrecision: 100,
-        },
-      };
-
-      bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_KPI_LINKED_RATE_CONFIG_ID,
-        version: 1,
-      };
-
-      await expect(factory.deployBondKpiLinkedRate(bondKpiLinkedRateData)).to.be.revertedWithCustomError(
-        factory,
-        "WrongImpactDataValues",
-      );
-    });
-
-    it("GIVEN empty resolver WHEN deploying BondKpiLinkedRate THEN transaction fails", async () => {
-      const bondKpiLinkedRateData = {
-        bondData: {
-          security: getSecurityData(businessLogicResolver, {
-            rbacs: init_rbacs,
-          }),
-          bondDetails: await getBondDetails(),
-          proceedRecipients: [],
-          proceedRecipientsData: [],
-        },
-        factoryRegulationData: getRegulationData(),
-        interestRate: {
-          maxRate: 1000,
-          baseRate: 500,
-          minRate: 100,
-          startPeriod: Math.floor(Date.now() / 1000) + 86400,
-          startRate: 500,
-          missedPenalty: 50,
-          reportPeriod: 86400 * 30,
-          rateDecimals: 2,
-        },
-        impactData: {
-          maxDeviationCap: 150,
-          baseLine: 100,
-          maxDeviationFloor: 50,
-          impactDataDecimals: 2,
-          adjustmentPrecision: 100,
-        },
-      };
-
-      bondKpiLinkedRateData.bondData.security.resolver = ADDRESS_ZERO;
-      bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_KPI_LINKED_RATE_CONFIG_ID,
-        version: 1,
-      };
-
-      await expect(factory.deployBondKpiLinkedRate(bondKpiLinkedRateData)).to.be.revertedWithCustomError(
-        factory,
-        "EmptyResolver",
-      );
-    });
-
-    it("GIVEN no admin WHEN deploying BondKpiLinkedRate THEN transaction fails", async () => {
-      const bondKpiLinkedRateData = {
-        bondData: {
-          security: getSecurityData(businessLogicResolver),
-          bondDetails: await getBondDetails(),
-          proceedRecipients: [],
-          proceedRecipientsData: [],
-        },
-        factoryRegulationData: getRegulationData(),
-        interestRate: {
-          maxRate: 1000,
-          baseRate: 500,
-          minRate: 100,
-          startPeriod: Math.floor(Date.now() / 1000) + 86400,
-          startRate: 500,
-          missedPenalty: 50,
-          reportPeriod: 86400 * 30,
-          rateDecimals: 2,
-        },
-        impactData: {
-          maxDeviationCap: 150,
-          baseLine: 100,
-          maxDeviationFloor: 50,
-          impactDataDecimals: 2,
-          adjustmentPrecision: 100,
-        },
-      };
-
-      bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_KPI_LINKED_RATE_CONFIG_ID,
-        version: 1,
-      };
-
-      await expect(factory.deployBondKpiLinkedRate(bondKpiLinkedRateData)).to.be.revertedWithCustomError(
-        factory,
-        "NoInitialAdmins",
-      );
-    });
-
-    it("GIVEN wrong regulation type WHEN deploying BondKpiLinkedRate THEN transaction fails", async () => {
-      const bondKpiLinkedRateData = {
-        bondData: {
-          security: getSecurityData(businessLogicResolver, {
-            rbacs: init_rbacs,
-          }),
-          bondDetails: await getBondDetails(),
-          proceedRecipients: [],
-          proceedRecipientsData: [],
-        },
-        factoryRegulationData: getRegulationData({
-          regulationType: RegulationType.REG_D,
-          regulationSubType: RegulationSubType.NONE,
-        }),
-        interestRate: {
-          maxRate: 1000,
-          baseRate: 500,
-          minRate: 100,
-          startPeriod: Math.floor(Date.now() / 1000) + 86400,
-          startRate: 500,
-          missedPenalty: 50,
-          reportPeriod: 86400 * 30,
-          rateDecimals: 2,
-        },
-        impactData: {
-          maxDeviationCap: 150,
-          baseLine: 100,
-          maxDeviationFloor: 50,
-          impactDataDecimals: 2,
-          adjustmentPrecision: 100,
-        },
-      };
-
-      bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_KPI_LINKED_RATE_CONFIG_ID,
-        version: 1,
-      };
-
-      await expect(factory.deployBondKpiLinkedRate(bondKpiLinkedRateData))
-        .to.be.revertedWithCustomError(factory, "RegulationTypeAndSubTypeForbidden")
-        .withArgs(RegulationType.REG_D, RegulationSubType.NONE);
-    });
-  });
-
   describe("onlyValidAdmins edge cases", () => {
     it("GIVEN rbacs with empty members array for admin role WHEN deploying equity THEN transaction fails", async () => {
       const emptyAdminRbacs: Rbac[] = [
@@ -1392,9 +870,10 @@ describe("Factory Tests", () => {
         }),
         equityDetails: makeEquityDetailsData(),
       };
-      equityData.security.resolverProxyConfiguration = {
-        key: EQUITY_CONFIG_ID,
-        version: 1,
+      equityData.security.resolverProxyConfigurationV2 = {
+        configurationId: CONFIG_IDS.equity,
+        configurationVersion: 1,
+        replacementEnabled: true,
       };
 
       const factoryRegulationData = getRegulationData();
@@ -1419,9 +898,10 @@ describe("Factory Tests", () => {
         }),
         equityDetails: makeEquityDetailsData(),
       };
-      equityData.security.resolverProxyConfiguration = {
-        key: EQUITY_CONFIG_ID,
-        version: 1,
+      equityData.security.resolverProxyConfigurationV2 = {
+        configurationId: CONFIG_IDS.equity,
+        configurationVersion: 1,
+        replacementEnabled: true,
       };
 
       const factoryRegulationData = getRegulationData();
@@ -1450,9 +930,10 @@ describe("Factory Tests", () => {
         }),
         equityDetails: makeEquityDetailsData(),
       };
-      equityData.security.resolverProxyConfiguration = {
-        key: EQUITY_CONFIG_ID,
-        version: 1,
+      equityData.security.resolverProxyConfigurationV2 = {
+        configurationId: CONFIG_IDS.equity,
+        configurationVersion: 1,
+        replacementEnabled: true,
       };
 
       const factoryRegulationData = getRegulationData();
@@ -1477,9 +958,10 @@ describe("Factory Tests", () => {
         }),
         equityDetails: makeEquityDetailsData(),
       };
-      equityData.security.resolverProxyConfiguration = {
-        key: EQUITY_CONFIG_ID,
-        version: 1,
+      equityData.security.resolverProxyConfigurationV2 = {
+        configurationId: CONFIG_IDS.equity,
+        configurationVersion: 1,
+        replacementEnabled: true,
       };
 
       const factoryRegulationData = getRegulationData();
@@ -1511,9 +993,10 @@ describe("Factory Tests", () => {
         proceedRecipients: [],
         proceedRecipientsData: [],
       };
-      bondData.security.resolverProxyConfiguration = {
-        key: BOND_CONFIG_ID,
-        version: 1,
+      bondData.security.resolverProxyConfigurationV2 = {
+        configurationId: CONFIG_IDS.bond,
+        configurationVersion: 1,
+        replacementEnabled: true,
       };
 
       const factoryRegulationData = getRegulationData();

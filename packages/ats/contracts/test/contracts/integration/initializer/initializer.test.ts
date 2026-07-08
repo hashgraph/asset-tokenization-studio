@@ -31,20 +31,15 @@ import {
   MockFacet3__factory,
 } from "@contract-types";
 import { deployAtsInfrastructureFixture } from "@test";
-import {
-  INITIALIZE_MOCK_CONFIG_ID,
-  EQUITY_CONFIG_ID,
-  ATS_ROLES,
-  RESOLVER_KEY_DIAMOND,
-  RESOLVER_KEY_INITIALIZER,
-} from "@scripts";
+import { ATS_ROLES, CONFIG_IDS, RESOLVER_KEYS } from "@scripts";
+import { INITIALIZE_MOCK_CONFIG_ID } from "@scripts/domain";
 import { decodeEvent } from "@scripts/infrastructure";
 
 describe("Initializer — InitializeMock domain", () => {
-  // TEST-ONLY: mirrors `RESOLVER_KEY_INITIALIZER` declared file-scope in
+  // TEST-ONLY: mirrors `RESOLVER_KEYS.initializer` declared file-scope in
   // `contracts/facets/initializer/IInitializer.sol`. Sourced from the
   // auto-generated atsRegistry so the test stays in sync with the codegen.
-  const initializerFacetId = RESOLVER_KEY_INITIALIZER;
+  const initializerFacetId = RESOLVER_KEYS.initializer;
   // TEST-ONLY: mirrors the `_MOCK_FACET_N = bytes32("MockFacetN")`
   // constants declared in `contracts/test/mocks/MockFacets.sol`.
   const mockFacet1Id = "0x4d6f636b46616365743100000000000000000000000000000000000000000000";
@@ -53,7 +48,7 @@ describe("Initializer — InitializeMock domain", () => {
   // TEST-ONLY: mirrors the production `_DIAMOND` from
   // `contracts/constants/resolverKeys.sol`. MockDiamondCut shares the same
   // key so that BLR registration and facet-version-status assertions align.
-  const mockDiamondCutId = RESOLVER_KEY_DIAMOND;
+  const mockDiamondCutId = RESOLVER_KEYS.diamond;
 
   let factory: IFactory;
   let blrAddress: string;
@@ -130,7 +125,12 @@ describe("Initializer — InitializeMock domain", () => {
   // Each test gets its own proxy so initializer state never leaks between them.
   const deployMockAsset = async (version: number) => {
     const rbacs = [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [deployer.address] }];
-    const tx = await factory.deployProxy(blrAddress, INITIALIZE_MOCK_CONFIG_ID, version, rbacs, "0x");
+    const tx = await factory.deployProxy(
+      blrAddress,
+      { configurationId: INITIALIZE_MOCK_CONFIG_ID, configurationVersion: version, replacementEnabled: false },
+      rbacs,
+      "0x",
+    );
     const receipt = await tx.wait();
     const proxyAddress = (await decodeEvent(factory, "ProxyDeployed", receipt!)).proxyAddress as string;
 
@@ -595,8 +595,7 @@ describe("Initializer — InitializeMock domain", () => {
       const infra = await loadFixture(deployAtsInfrastructureFixture);
       const proxyTx = await infra.factory.deployProxy(
         infra.blr.target as string,
-        EQUITY_CONFIG_ID,
-        1,
+        { configurationId: CONFIG_IDS.equity, configurationVersion: 1, replacementEnabled: false },
         [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] }],
         "0x",
       );
@@ -613,8 +612,7 @@ describe("Initializer — InitializeMock domain", () => {
       const infra = await loadFixture(deployAtsInfrastructureFixture);
       const proxyTx = await infra.factory.deployProxy(
         infra.blr.target as string,
-        EQUITY_CONFIG_ID,
-        1,
+        { configurationId: CONFIG_IDS.equity, configurationVersion: 1, replacementEnabled: false },
         [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] }],
         "0x",
       );
@@ -634,8 +632,7 @@ describe("Initializer — InitializeMock domain", () => {
       const infra = await loadFixture(deployAtsInfrastructureFixture);
       const proxyTx = await infra.factory.deployProxy(
         infra.blr.target as string,
-        EQUITY_CONFIG_ID,
-        1,
+        { configurationId: CONFIG_IDS.equity, configurationVersion: 1, replacementEnabled: false },
         [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] }],
         "0x",
       );

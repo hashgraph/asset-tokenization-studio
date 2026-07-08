@@ -236,7 +236,7 @@ export const DigitalSecurityDetails = () => {
       showConfiguration: true,
     };
 
-    const isLoadingTabs = isLoadingRoles || isLoadingSecurityDetails || isFetchingSecurityDetails;
+    const isLoadingTabs = (!!roleCountFor && isLoadingRoles) || isLoadingSecurityDetails || isFetchingSecurityDetails;
 
     const showOperationTab = !isLoadingTabs && Object.values(operationsConfig).some((isVisible) => isVisible);
 
@@ -288,6 +288,7 @@ export const DigitalSecurityDetails = () => {
     isPaused,
     isLoadingIsPaused,
     isLoadingRoles,
+    roleCountFor,
     rolesStored,
   ]);
 
@@ -295,7 +296,7 @@ export const DigitalSecurityDetails = () => {
     return `tabs-${rolesStored.join("-")}-${tabs.length}`;
   }, [rolesStored, tabs.length]);
 
-  const isLoadingTabs = isLoadingRoles || isLoadingSecurityDetails || isFetchingSecurityDetails;
+  const isLoadingTabs = (!!roleCountFor && isLoadingRoles) || isLoadingSecurityDetails || isFetchingSecurityDetails;
 
   // Advance steps once on mount using a snapshot of the initial step count.
   // animationDone fires after the last timeout, decoupled from progressSteps changing later.

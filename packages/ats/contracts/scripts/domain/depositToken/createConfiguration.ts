@@ -20,8 +20,11 @@ import {
   RetryOptions,
 } from "@scripts/infrastructure";
 import { BusinessLogicResolver } from "@contract-types";
-import { DEPOSIT_TOKEN_CONFIG_ID } from "../constants";
+import { CONFIG_IDS } from "../constants";
 import { atsRegistry } from "../atsRegistry";
+import type { FacetName } from "../atsRegistry";
+import { buildFacetList } from "../facetEnvironment";
+import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
 
 /**
  * Deposit Token configuration: 69 facets (68 capability facets + InitializerFacet).
@@ -32,7 +35,7 @@ import { atsRegistry } from "../atsRegistry";
  * and voting-holder facets so a deposit-token resolver configuration exposes the full capability
  * set it needs.
  */
-const DEPOSIT_TOKEN_FACETS = [
+export const DEPOSIT_TOKEN_FACETS: readonly FacetName[] = [
   // Always-on (initializers + diamond infra)
   "AccessControlFacet",
   "DiamondFacet",
@@ -156,8 +159,8 @@ const DEPOSIT_TOKEN_FACETS = [
  *
  * Thin wrapper that calls the generic core operation with deposit-token-specific
  * data:
- * - Configuration ID: DEPOSIT_TOKEN_CONFIG_ID
- * - Facet list: DEPOSIT_TOKEN_FACETS (69 facets)
+ * - Configuration ID: CONFIG_IDS.depositToken
+ * - Facet list: DEPOSIT_TOKEN_FACETS
  *
  * @param blrContract - BusinessLogicResolver contract instance
  * @param facetAddresses - Map of facet names to their deployed addresses
@@ -176,20 +179,13 @@ export async function createDepositTokenConfiguration(
   confirmations: number = 0,
   retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  // When useTimeTravel=true, ALL facets get the TimeTravel suffix (universal mapping)
-  // plus the TimeTravelFacet controller. No filtering needed — simplifies deployment logic.
-  const facetNames = useTimeTravel
-    ? [...DEPOSIT_TOKEN_FACETS.map((name) => `${name}TimeTravel`), "TimeTravelFacet"]
-    : [...DEPOSIT_TOKEN_FACETS];
+  const facetNames = buildFacetList(DEPOSIT_TOKEN_FACETS, useTimeTravel);
 
   // Build facet data with resolver keys from registry
   const facets = facetNames.map((name) => {
-    // Strip "TimeTravel" suffix to get the base name for registry lookup
-    const baseName = name.replace(/TimeTravel$/, "");
-
-    const facetDef = atsRegistry.getFacetDefinition(baseName);
+    const facetDef = atsRegistry.getFacetDefinition(name) ?? getMockFacetDefinition(name);
     if (!facetDef?.resolverKey?.value) {
-      throw new Error(`No resolver key found for facet: ${baseName}`);
+      throw new Error(`No resolver key found for facet: ${name}`);
     }
     return {
       facetName: name,
@@ -199,7 +195,7 @@ export async function createDepositTokenConfiguration(
   });
 
   return createBatchConfiguration(blrContract, {
-    configurationId: DEPOSIT_TOKEN_CONFIG_ID,
+    configurationId: CONFIG_IDS.depositToken,
     facets,
     partialBatchDeploy,
     batchSize,

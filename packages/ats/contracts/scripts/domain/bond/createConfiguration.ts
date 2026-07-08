@@ -20,25 +20,21 @@ import {
   DEFAULT_BATCH_SIZE,
   RetryOptions,
 } from "@scripts/infrastructure";
-import { BOND_CONFIG_ID } from "../constants";
-import { atsRegistry } from "../atsRegistry";
+import { CONFIG_IDS } from "../constants";
+import { atsRegistry, FacetName } from "../atsRegistry";
 import { buildFacetList } from "../facetEnvironment";
+
 import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
 import { BusinessLogicResolver } from "@contract-types";
 
 /**
  * Bond Token Configuration
  *
- * Defines the set of facets for Bond tokens.
- * Includes all common facets plus BondUSAFacet (NOT EquityUSAFacet).
- *
- * Note: DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet functionality,
- * so we only include DiamondFacet to avoid selector collisions.
- *
- * Updated to match origin/develop feature parity (all facets registered).
- *
+ * The common token tiers plus the bond-shared facets (coupons, maturity,
+ * interest rate, principal). The bondFixedRate / bondKpiLinkedRate variants
+ * extend this same composition with their rate-specific facets.
  */
-const BOND_FACETS = [
+export const BOND_FACETS: readonly FacetName[] = [
   // Core Functionality
   "AccessControlFacet",
   "CapFacet",
@@ -133,6 +129,8 @@ const BOND_FACETS = [
   "ScheduledBalanceAdjustmentFacet",
   "CouponFacet",
   "CouponSecurityHoldersFacet",
+  "VotingSecurityHoldersFacet",
+  "DividendSecurityHoldersFacet",
   "LockFacet",
   "LockByPartitionFacet",
   "MaturityFacet",
@@ -160,8 +158,8 @@ const BOND_FACETS = [
  * Create bond token configuration in BusinessLogicResolver.
  *
  * Thin wrapper that calls the generic core operation with bond-specific data:
- * - Configuration ID: BOND_CONFIG_ID
- * - Facet list: BOND_FACETS (43 facets)
+ * - Configuration ID: CONFIG_IDS.bond
+ * - Facet list: BOND_FACETS
  *
  * All implementation logic is handled by the generic createConfiguration()
  * operation in core/operations/blrConfigurations.ts.
@@ -186,7 +184,6 @@ const BOND_FACETS = [
  *     blr,
  *     {
  *         'AccessControlFacet': '0xabc...',
- *         'BondUSAFacet': '0xdef...',
  *         // ... more facets
  *     },
  *     false,
@@ -216,12 +213,9 @@ export async function createBondConfiguration(
 
   // Build facet data with resolver keys from registry
   const facets = facetNames.map((name) => {
-    // Strip "TimeTravel" suffix to get base name for registry lookup
-    const baseName = name.replace(/TimeTravel$/, "");
-
-    const facetDef = atsRegistry.getFacetDefinition(baseName) ?? getMockFacetDefinition(baseName);
+    const facetDef = atsRegistry.getFacetDefinition(name) ?? getMockFacetDefinition(name);
     if (!facetDef?.resolverKey?.value) {
-      throw new Error(`No resolver key found for facet: ${baseName}`);
+      throw new Error(`No resolver key found for facet: ${name}`);
     }
     return {
       facetName: name,
@@ -231,7 +225,7 @@ export async function createBondConfiguration(
   });
 
   return createBatchConfiguration(blrContract, {
-    configurationId: BOND_CONFIG_ID,
+    configurationId: CONFIG_IDS.bond,
     facets,
     partialBatchDeploy,
     batchSize,

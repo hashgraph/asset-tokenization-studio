@@ -8,11 +8,20 @@ import { IVotes } from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 import { ERC20Votes } from "./ERC20Votes.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
+/**
+ * @title ERC20VotesFacet
+ * @author Asset Tokenization Studio Team
+ * @notice Diamond facet that exposes ERC-20 voting-delegation and checkpoint query selectors.
+ * @dev Registers the full ERC-5805/ERC-6372/IVotes interface surface via `getStaticFunctionSelectors`.
+ *      Inherits all business logic from `ERC20Votes`.
+ */
 contract ERC20VotesFacet is ERC20Votes, IStaticFunctionSelectors {
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = RESOLVER_KEY_ERC20VOTES;
     }
 
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
@@ -30,6 +39,7 @@ contract ERC20VotesFacet is ERC20Votes, IStaticFunctionSelectors {
             );
     }
 
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(

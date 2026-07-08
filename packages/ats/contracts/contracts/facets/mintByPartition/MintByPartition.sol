@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ROLE_AGENT, ROLE_ISSUER, _buildRoles } from "../../constants/roles.sol";
 import { IMintByPartition, RESOLVER_KEY_MINT_BY_PARTITION } from "./IMintByPartition.sol";
-import { IERC1410Types } from "../layer_1/ERC1400/ERC1410/IERC1410Types.sol";
+import { IERC1410Types } from "../commonTypes/IERC1410Types.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
@@ -42,7 +42,6 @@ abstract contract MintByPartition is IMintByPartition, Modifiers {
         onlyActivated
         onlyUnpaused
         onlyAnyRole(_buildRoles(ROLE_ISSUER, ROLE_AGENT))
-        onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyDefaultPartitionWithSinglePartition(_issueData.partition)
         onlyWithinMaxSupply(_issueData.value, TimeTravelStorageWrapper.getBlockTimestamp())
         onlyWithinMaxSupplyByPartition(
@@ -51,7 +50,7 @@ abstract contract MintByPartition is IMintByPartition, Modifiers {
             TimeTravelStorageWrapper.getBlockTimestamp()
         )
         onlyIdentifiedAddresses(address(0), _issueData.tokenHolder)
-        onlyCompliant(address(0), _issueData.tokenHolder, false)
+        onlyCompliant(EvmAccessors.getMsgSender(), _issueData.tokenHolder, false)
     {
         TokenCoreOps.issueByPartition(_issueData);
     }

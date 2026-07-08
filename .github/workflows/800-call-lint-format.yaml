@@ -7,11 +7,6 @@ on:
         description: "Module slug used to derive script names (e.g. 'ats' or 'mass-payout')."
         required: true
         type: string
-      runs-on:
-        description: "Runner label."
-        required: false
-        type: string
-        default: token-studio-linux-medium
       timeout-minutes:
         description: "Job timeout in minutes."
         required: false
@@ -26,9 +21,9 @@ permissions:
   contents: read
 
 jobs:
-  lint-and-format:
-    name: lint-and-format
-    runs-on: ${{ inputs.runs-on }}
+  format-and-lint:
+    name: format-and-lint
+    runs-on: token-studio-linux-medium
     timeout-minutes: ${{ inputs.timeout-minutes }}
     steps:
       - name: Harden Runner
@@ -47,6 +42,14 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      # The ATS contracts lint (`lint:sol`) generates EvmAccessors.sol, whose
+      # generator imports `@contract-types` (TypeChain). `npm ci` does not build
+      # it (ignore-scripts skips `prepare`), so compile first to emit
+      # typechain-types/ and the generated accessors before linting.
+      - name: Build TypeChain types (ATS contracts)
+        if: inputs.module == 'ats'
+        run: npm run compile --workspace=packages/ats/contracts
 
       - name: Check format
         run: npm run ${{ inputs.module }}:format:check

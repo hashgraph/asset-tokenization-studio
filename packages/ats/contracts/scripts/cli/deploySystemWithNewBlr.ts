@@ -46,7 +46,7 @@ async function main() {
   info(`⏰ TimeTravel: ${useTimeTravel ? "enabled" : "disabled"}`);
   info(`📦 PartialBatchDeploy: ${partialBatchDeploy ? "enabled" : "disabled"}`);
   info(`📊 Batch Size: ${batchSize}`);
-  if (deployOnlyBondConfig) info(`⚡ Mode: Bond-only (Equity, Bond variants, Loan, LoansPortfolio skipped)`);
+  if (deployOnlyBondConfig) info(`⚡ Mode: Bond-only (Equity and Deposit Token skipped)`);
   if (parallelFacetDeployment)
     info(`⚡ Parallel facet deployment: concurrency=${concurrency} (retries off, checkpoint skipped)`);
   info("---");

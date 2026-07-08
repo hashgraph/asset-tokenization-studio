@@ -66,7 +66,9 @@ library ScheduledTasksLib {
             return;
         }
         delete (_scheduledTasks.scheduledTasks[scheduledTasksLength - 1]);
-        _scheduledTasks.scheduledTaskCount--;
+        unchecked {
+            --_scheduledTasks.scheduledTaskCount;
+        }
     }
 
     /// @notice Returns the number of tasks currently queued.
@@ -140,6 +142,8 @@ library ScheduledTasksLib {
     ) private {
         _scheduledTasks.scheduledTasks[_pos].scheduledTimestamp = scheduledTaskToInsert.scheduledTimestamp;
         _scheduledTasks.scheduledTasks[_pos].data = scheduledTaskToInsert.data;
-        _scheduledTasks.scheduledTaskCount++;
+        unchecked {
+            ++_scheduledTasks.scheduledTaskCount;
+        }
     }
 }

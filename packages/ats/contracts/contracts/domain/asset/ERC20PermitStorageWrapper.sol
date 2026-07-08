@@ -53,7 +53,6 @@ library ERC20PermitStorageWrapper {
         uint256 currentNonce = NonceStorageWrapper.getNonceFor(owner);
 
         NonceStorageWrapper.setNonceFor(owner);
-        // solhint-disable-next-line func-name-mixedcase
         address signer = ECDSA.recover(
             ECDSA.toTypedDataHash(
                 DOMAIN_SEPARATOR(),
@@ -82,7 +81,7 @@ library ERC20PermitStorageWrapper {
         return
             _getDomainHash(
                 ERC20StorageWrapper.getName(),
-                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
+                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion()),
                 EvmAccessors.getChainId(),
                 address(this)
             );

@@ -12,7 +12,7 @@
 
 import { deployAtsInfrastructureFixture } from "./infrastructure.fixture";
 import { configureLogger, LogLevel } from "@scripts/infrastructure";
-import { deployEquityFromFactory, deployBondFromFactory, BOND_CONFIG_ID } from "@scripts/domain";
+import { deployEquityFromFactory, deployBondFromFactory, CONFIG_IDS } from "@scripts/domain";
 import { getSecurityData, getRegulationData } from "./tokens/common.fixture";
 import { makeEquityDetailsData } from "./tokens/equity.fixture";
 import { makeBondDetailsData } from "./tokens/bond.fixture";
@@ -109,9 +109,10 @@ export async function deployUpgradeTestFixture(): Promise<UpgradeTestFixtureResu
 
   // Deploy sample Bond token via Factory
   const bondSecurityData = getSecurityData(blr, {
-    resolverProxyConfiguration: {
-      key: BOND_CONFIG_ID,
-      version: 1,
+    resolverProxyConfigurationV2: {
+      configurationId: CONFIG_IDS.bond,
+      configurationVersion: 1,
+      replacementEnabled: true,
     },
   });
   const bondDetails = await makeBondDetailsData();

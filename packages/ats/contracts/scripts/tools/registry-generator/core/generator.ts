@@ -118,6 +118,28 @@ function normalizeRoleValue(value: string): string {
 }
 
 /**
+ * Derive the camelCase dot-access alias for a facet name.
+ *
+ * Strips the trailing `Facet` suffix and camelCases the remainder, collapsing
+ * acronym runs (e.g. `ERC20VotesFacet` -> `erc20Votes`, `EIP712Facet` ->
+ * `eip712`, `AccessControlFacet` -> `accessControl`). The aliases are the keys
+ * of the generated `FACET_KEYS` map and, transitively, of the `FACETS` /
+ * `RESOLVER_KEYS` accessors in `scripts/domain/atsRegistry.ts`.
+ *
+ * @param name - Facet contract name (e.g. `"AccessControlFacet"`).
+ * @returns camelCase alias (e.g. `"accessControl"`).
+ */
+function toFacetKey(name: string): string {
+  const base = name.replace(/Facet$/, "");
+  const tokens = base.match(/[A-Z]+(?=[A-Z][a-z])|[A-Z]?[a-z]+[0-9]*|[A-Z]+[0-9]*|[0-9]+/g) ?? [base];
+  return tokens
+    .map((token, index) =>
+      index === 0 ? token.toLowerCase() : token.charAt(0).toUpperCase() + token.slice(1).toLowerCase(),
+    )
+    .join("");
+}
+
+/**
  * Generate complete registry TypeScript code.
  *
  * @param facets - Array of facet metadata
@@ -148,6 +170,8 @@ export function generateRegistry(
     mocks,
   );
   const facetRegistry = generateFacetRegistry(facets);
+  const facetNameUnion = generateFacetNameUnion(facets);
+  const facetKeysMap = generateFacetKeysMap(facets);
   const contractRegistry = generateContractRegistry(infrastructure);
   const storageWrapperRegistry = storageWrappers ? generateStorageWrapperRegistry(storageWrappers) : "";
   const mockRegistry = mocks && mocks.length > 0 ? generateMockRegistry(mocks) : "";
@@ -160,7 +184,7 @@ export function generateRegistry(
    * roles file remain checked into git while the rest of this file is
    * gitignored and regenerated on `prepare`.
    */
-  const registries = [header, facetRegistry, contractRegistry];
+  const registries = [header, facetRegistry, facetNameUnion, facetKeysMap, contractRegistry];
   if (storageWrapperRegistry) {
     registries.push(storageWrapperRegistry);
   }
@@ -265,13 +289,6 @@ function generateHeader(
     factoryImports.push(`${name}__factory`);
   }
 
-  // Include TimeTravel variant factory imports for facets that have them
-  const facetsWithTimeTravel = facets.filter((f) => f.hasTimeTravel && f.name !== "TimeTravelFacet");
-  const sortedTimeTravelNames = [...facetsWithTimeTravel].map((f) => `${f.name}TimeTravel`).sort();
-  for (const name of sortedTimeTravelNames) {
-    factoryImports.push(`${name}__factory`);
-  }
-
   // Include mock contract factory imports (only deployable mocks)
   if (mocks && mocks.length > 0) {
     const deployableMocks = mocks.filter((m) => m.isDeployable);
@@ -336,6 +353,66 @@ export const TOTAL_FACETS = ${facets.length} as const`;
 }
 
 /**
+ * Generate the `FacetName` string-literal union type.
+ *
+ * Emits a union of every facet contract name in the registry, sorted
+ * alphabetically for deterministic output. Consumers (e.g. deployment
+ * configuration facet sets) type their lists as `readonly FacetName[]` so an
+ * unknown or mis-typed facet name is a compile error rather than a runtime
+ * lookup miss. `keyof typeof FACET_REGISTRY` cannot serve this purpose because
+ * the registry is typed `Record<string, FacetDefinition>` and widens its keys
+ * to `string`; the explicit literal union preserves the names.
+ *
+ * Emits `never` when there are no facets so the output is always valid
+ * TypeScript (an empty union is a syntax error).
+ *
+ * @param facets - Array of facet metadata
+ * @returns TypeScript code for the FacetName union type
+ */
+function generateFacetNameUnion(facets: ContractMetadata[]): string {
+  const sortedNames = [...facets].map((f) => f.name).sort((a, b) => a.localeCompare(b));
+
+  const body = sortedNames.length > 0 ? sortedNames.map((name) => `    | '${name}'`).join("\n") : "    never";
+
+  return `/**
+ * Union of every facet contract name known to the registry.
+ *
+ * Type the facet-name lists that drive deployment configurations as
+ * \`readonly FacetName[]\` so typos and renames surface as compile errors.
+ */
+export type FacetName =
+${body}`;
+}
+
+/**
+ * Generate the `FACET_KEYS` map: camelCase alias -> facet contract name.
+ *
+ * Sorted by facet name for deterministic output. `as const` preserves the
+ * literal keys and values so consumers can derive `keyof typeof FACET_KEYS`
+ * (the camelCase alias union) and so each value narrows to its `FacetName`.
+ * `scripts/domain/atsRegistry.ts` builds the `FACETS` and `RESOLVER_KEYS`
+ * dot-access accessors on top of this map.
+ *
+ * @param facets - Array of facet metadata
+ * @returns TypeScript code for the FACET_KEYS constant
+ */
+function generateFacetKeysMap(facets: ContractMetadata[]): string {
+  const sortedNames = [...facets].map((f) => f.name).sort((a, b) => a.localeCompare(b));
+
+  const entries = sortedNames.map((name) => `    ${toFacetKey(name)}: '${name}',`).join("\n");
+
+  return `/**
+ * Map of camelCase facet alias to facet contract name.
+ *
+ * Drives the \`FACETS\` and \`RESOLVER_KEYS\` dot-access accessors in
+ * \`scripts/domain/atsRegistry.ts\`; \`keyof typeof FACET_KEYS\` is the alias union.
+ */
+export const FACET_KEYS = {
+${entries}
+} as const`;
+}
+
+/**
  * Generate single facet registry entry.
  *
  * Includes resolver key object, role count, inheritance, methods, events, and errors.
@@ -365,35 +442,23 @@ function generateFacetEntry(facet: ContractMetadata): string {
   // Add TypeChain factory reference (only for deployable contracts)
   // Abstract contracts (isDeployable: false) don't have constructors in their factories
   let factoryLine: string;
-  let timeTravelFactoryLine: string;
 
   if (!facet.isDeployable) {
     // Abstract contracts - no factory constructor, only static methods
     factoryLine = "";
-    timeTravelFactoryLine = "";
   } else {
     // Deployable contracts - generate factory code
     const libDeps = getCachedLibDeps(facet.name, facet.sourceFile);
     if (libDeps.length > 0) {
       const libArgs = libDeps.map((l) => `"${l}"`).join(", ");
       factoryLine = `\n        factory: (signer) => new ${facet.name}__factory(getLibLinks(${libArgs}) as any, signer),`;
-
-      timeTravelFactoryLine =
-        facet.hasTimeTravel && facet.name !== "TimeTravelFacet"
-          ? `\n        timeTravelFactory: (signer) => new ${facet.name}TimeTravel__factory(getLibLinks(${libArgs}) as any, signer),`
-          : "";
     } else {
       factoryLine = `\n        factory: (signer) => new ${facet.name}__factory(signer),`;
-
-      timeTravelFactoryLine =
-        facet.hasTimeTravel && facet.name !== "TimeTravelFacet"
-          ? `\n        timeTravelFactory: (signer) => new ${facet.name}TimeTravel__factory(signer),`
-          : "";
     }
   }
 
   return `    ${facet.name}: {
-        name: '${facet.name}',${descriptionLine}${resolverKeyLine}${rolesLine}${inheritanceLine}${methodsLine}${eventsLine}${errorsLine}${factoryLine}${timeTravelFactoryLine}
+        name: '${facet.name}',${descriptionLine}${resolverKeyLine}${rolesLine}${inheritanceLine}${methodsLine}${eventsLine}${errorsLine}${factoryLine}
     }`;
 }
 
@@ -644,18 +709,15 @@ export function generateSummary(
   totalInfrastructure: number;
   byCategory: Record<string, number>;
   byLayer: Record<number, number>;
-  withTimeTravel: number;
   withRoles: number;
 } {
   const byCategory: Record<string, number> = {};
   const byLayer: Record<number, number> = {};
-  let withTimeTravel = 0;
   let withRoles = 0;
 
   for (const facet of facets) {
     byCategory[facet.category] = (byCategory[facet.category] || 0) + 1;
     byLayer[facet.layer] = (byLayer[facet.layer] || 0) + 1;
-    if (facet.hasTimeTravel) withTimeTravel++;
     if (facet.roles.length > 0) withRoles++;
   }
 
@@ -664,7 +726,6 @@ export function generateSummary(
     totalInfrastructure: infrastructure.length,
     byCategory,
     byLayer,
-    withTimeTravel,
     withRoles,
   };
 }
