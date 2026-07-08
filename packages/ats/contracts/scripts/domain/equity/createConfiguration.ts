@@ -22,10 +22,8 @@ import {
 } from "@scripts/infrastructure";
 import { BusinessLogicResolver } from "@contract-types";
 import { CONFIG_IDS } from "../constants";
-import { atsRegistry } from "../atsRegistry";
-import type { FacetName } from "../atsRegistry";
+import { atsRegistry, FacetName } from "../atsRegistry";
 import { buildFacetList } from "../facetEnvironment";
-import { COMMON_TOKEN_FACETS, EXTENDED_TOKEN_FACETS } from "../facetSets";
 import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
 
 /**
@@ -34,18 +32,112 @@ import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
  * The common token tiers plus the equity-specific facets: dividends, voting,
  * and the supporting interest-rate / proceed-recipients / clearing-hold facets.
  */
+
 export const EQUITY_FACETS: readonly FacetName[] = [
-  ...COMMON_TOKEN_FACETS,
-  ...EXTENDED_TOKEN_FACETS,
+  // Core Functionality (10 - DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet)
+  "AccessControlFacet",
+  "AllowanceFacet",
+  "CapFacet",
+  "CapByPartitionFacet",
+  "ControlListFacet",
+  "CorporateActionsFacet",
+  "DiamondFacet",
+  "CoreFacet",
+  "TransferFacet",
+  "CoreAdjustedFacet",
+  "InitializerFacet",
+  "CustomDataFacet",
+  "FreezeFacet",
+  "BatchFreezeFacet",
+  "KycFacet",
+  "PauseFacet",
+  "BalanceTrackerFacet",
+  "BalanceTrackerAdjustedFacet",
+  "SnapshotsFacet",
+  "SnapshotsByPartitionFacet",
+  "SecurityHoldersAtSnapshotFacet",
+  "HoldAtSnapshotFacet",
+  "LockAtSnapshotByPartitionFacet",
+  "FreezeAtSnapshotFacet",
+  "FreezeAtSnapshotByPartitionFacet",
+  "LockAtSnapshotFacet",
+  "CoreAtSnapshotFacet",
+  "BalanceTrackerByPartitionFacet",
+  "BalanceTrackerAtSnapshotFacet",
+  "BalanceTrackerAtSnapshotByPartitionFacet",
+  "ClearingAtSnapshotFacet",
+  "ClearingAtSnapshotByPartitionFacet",
+  "HoldAtSnapshotByPartitionFacet",
+
+  // ERC Standards (13)
+  "MintByPartitionFacet",
+  "ProtectedByPartitionFacet",
+  "OperatorFacet",
+  "TransferByPartitionFacet",
+  "PartitionsFacet",
+  "OperatorByPartitionFacet",
+  "BurnByPartitionFacet",
+  "DocumentationFacet",
+  "ControllerFacet",
+  "ERC20PermitFacet",
+  "EIP712Facet",
+  "NoncesFacet",
+  "DeactivateFacet",
+  "ERC20VotesFacet",
+  "BatchControllerFacet",
+  "BatchBurnFacet",
+  "BatchMintFacet",
+  "BatchTransferFacet",
+  "RecoveryFacet",
+  "IdentityFacet",
+  "ComplianceFacet",
+  "ComplianceByPartitionFacet",
+  "MintFacet",
+  "BurnFacet",
+
+  // Clearing & Settlement (7)
+  "ClearingByPartitionFacet",
+  "ProtectedClearingHoldByPartitionFacet",
   "ClearingHoldByPartitionFacet",
+  "OperatorClearingHoldByPartitionFacet",
+  "ClearingFacet",
+  "OperatorClearingByPartitionFacet",
+  "ProtectedClearingByPartitionFacet",
+  "HoldFacet",
+  "OperatorHoldByPartitionFacet",
+  "ControllerHoldByPartitionFacet",
+  "ControllerByPartitionFacet",
+  "ProtectedHoldByPartitionFacet",
+  "HoldByPartitionFacet",
+
+  // External Management (3)
+  "ExternalControlListManagementFacet",
+  "ExternalKycListManagementFacet",
+  "ExternalPauseManagementFacet",
+
+  // Advanced Features (12)
+  "AdjustBalancesFacet",
+  "ScheduledBalanceAdjustmentFacet",
   "DividendFacet",
   "DividendSecurityHoldersFacet",
-  "InterestRateFacet",
-  "NoncesFacet",
-  "ProceedRecipientsFacet",
+  "CouponSecurityHoldersFacet",
+  "MaturityByPartitionFacet",
+  "LockFacet",
+  "LockByPartitionFacet",
+  "NominalValueFacet",
+  "NominalValueAtSnapshotFacet",
+  "ProtectedPartitionsFacet",
+  "ScheduledCrossOrderedTasksFacet",
+  "SecurityHoldersFacet",
+  "SsiManagementFacet",
+  "TransferAndLockFacet",
+  "TransferAndLockByPartitionFacet",
   "VotingFacet",
   "VotingSecurityHoldersFacet",
-];
+
+  "InterestRateFacet",
+  "ProceedRecipientsFacet",
+] as const;
 
 /**
  * Create equity token configuration in BusinessLogicResolver.

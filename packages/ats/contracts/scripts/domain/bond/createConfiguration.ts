@@ -21,8 +21,7 @@ import {
   RetryOptions,
 } from "@scripts/infrastructure";
 import { CONFIG_IDS } from "../constants";
-import { atsRegistry } from "../atsRegistry";
-import type { FacetName } from "../atsRegistry";
+import { atsRegistry, FacetName } from "../atsRegistry";
 import { buildFacetList } from "../facetEnvironment";
 
 import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
@@ -130,6 +129,8 @@ export const BOND_FACETS: readonly FacetName[] = [
   "ScheduledBalanceAdjustmentFacet",
   "CouponFacet",
   "CouponSecurityHoldersFacet",
+  "VotingSecurityHoldersFacet",
+  "DividendSecurityHoldersFacet",
   "LockFacet",
   "LockByPartitionFacet",
   "MaturityFacet",

@@ -252,6 +252,8 @@ abstract contract Factory is IFactory {
         IDividendSecurityHolders(equityAddress_).initializeDividendSecurityHolders();
         IVoting(equityAddress_).initializeVoting();
         IVotingSecurityHolders(equityAddress_).initializeVotingSecurityHolders();
+        ICouponSecurityHolders(equityAddress_).initializeCouponSecurityHolders();
+        IMaturityByPartition(equityAddress_).initializeMaturityByPartition();
         (bool isOperational_, ) = IInitializer(equityAddress_).setOperationalStatus();
         _checkUnexpectedError(!isOperational_, FACTORY_OPERATIONAL_STATUS);
         IAccessControl(equityAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
@@ -281,6 +283,8 @@ abstract contract Factory is IFactory {
         bondAddress_ = _deployBond(_bondData, SecurityType.BondVariableRate);
         IInterestRate(bondAddress_).initializeInterestRateType(IInterestRate.RateType.STANDARD);
         IFixedRate(bondAddress_).initializeFixedRate(IFixedRate.FixedRateData({ rate: 0, rateDecimals: 0 }));
+        IVotingSecurityHolders(bondAddress_).initializeVotingSecurityHolders();
+        IDividendSecurityHolders(bondAddress_).initializeDividendSecurityHolders();
         (bool isOperational_, ) = IInitializer(bondAddress_).setOperationalStatus();
         _checkUnexpectedError(!isOperational_, FACTORY_OPERATIONAL_STATUS);
         IAccessControl(bondAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
