@@ -1,5 +1,105 @@
 # @hashgraph/asset-tokenization-contracts
 
+## 9.0.0
+
+### Major Changes
+
+- 3e96613: Complete the deposit-token resolver configuration (43 to 69 facets) and remove the factory deployDepositToken entry point.
+- 766422f: emegency replacement table added to BLR and resolveResolverProxyCall updated. Proxy storage also updated to fit configuraiton into a single bytes data type. V1 of Proxy Resolver and previous resolverResolverProxyCall method kept for retrocompatibility reasons
+- 61a7fcc: Tighten every `*Storage()` slot accessor across all 27 `*StorageWrapper` libraries from `internal` to `private`, so facets and other libraries can no longer bypass the public library API and reach into storage directly. No ABI or storage-layout change.
+
+  Breaking: any contract or library that called a `*Storage()` accessor on a wrapper it does not own no longer compiles and must use that wrapper's dedicated `internal` read/write helper instead (e.g. `ERC3643StorageWrapper.getCompliance()` rather than `.erc3643Storage().compliance`).
+
+- 5c0caa9: Remove country from LoansPortfolio and isin from the token core. The country field is dropped from the HoldingsAsset struct and all geographical-exposure tracking (GeographicalExposureData, getGeographicalExposure and the per-country storage) is removed. The isin field is dropped from ERC20MetadataInfo and ERC20Storage, and the factory ISIN validation (isinValidator, onlyValidISIN, WrongISIN errors and ISIN constants) is removed. Both values can now be stored in the CustomData facet instead.
+- 2dcfaa1: Introduce `ROLE_CREATE_CONFIGURATION` access control on diamond configuration mutation and ownership transfer.
+
+  **New role: `ROLE_CREATE_CONFIGURATION`**
+  `bytes32 constant ROLE_CREATE_CONFIGURATION = 0x185bc02f8b16b873d7c8b9a6cb21f91bb77dcec0ee1f4af6cc568f084b1da9f8`
+  Added to `contracts/constants/roles.sol`. The BLR deployer is granted this role automatically during `initializeBusinessLogicResolver()` in the deployment scripts.
+
+  **Breaking: `DiamondCutManager` — three functions now require `ROLE_CREATE_CONFIGURATION`**
+  `createConfiguration`, `createBatchConfiguration`, and `cancelBatchConfiguration` each have a new `onlyRole(ROLE_CREATE_CONFIGURATION)` modifier. Any account that previously called these functions without holding the role will now revert with `AccountHasNoRole(account, ROLE_CREATE_CONFIGURATION)`. The role must be explicitly granted via `grantRole` before calling these functions.
+
+### Minor Changes
+
+- da8bd72: chore(contracts): remove the isolated T-REX (`factory/ERC3643/`) scaffolding wholesale (BBND-1840). Drops the `TREXFactoryAts` stub, its `TRex*` interface clones, the `@tokenysolutions/t-rex` and `@onchain-id/solidity` deps and their typechain exports; the native ERC-3643 facets are unaffected.
+- 2a24712: Replaced the redundant custom OperatorAuthorized and OperatorRevoked events with the ERC-1410 standard AuthorizedOperator and RevokedOperator emitted from the Operator facet, and hoisted the ComplianceAdded and IdentityRegistryAdded emits from ERC3643StorageWrapper up to the Compliance and Identity facets so they are no longer emitted twice during initialisation.
+- 9a7fecd: Clean the deploy scripts and Factory so only Equity, Bond and DepositToken are deployed, removing the Loan, LoansPortfolio, BondFixedRate and BondKpiLinkedRate deploy configurations and the Factory `SecurityType` entries for them.
+- 656f903: Source ATS contract resolver keys from the generated registry via new typed RESOLVER_KEYS/FACETS dot-access accessors and group the BLR configuration IDs into a typed CONFIG_IDS object, removing the hand-maintained constants.
+- 7444da6: Extends the `CustomData` facet with seed entries on init and a batch setter.
+  - `initializeCustomData(CustomDataEntry[] entries)` — accepts an optional list of key/value pairs to seed atomically at deployment; empty array preserves existing behaviour.
+  - `setCustomDataBatch(CustomDataEntry[] entries)` — new runtime setter that writes multiple entries in a single call; requires `ROLE_CUSTOM_DATA_MANAGER` and emits one `CustomDataBatchSet` event per invocation.
+  - Fix: `setCustomData` was not emitting any event; now emits `CustomDataSet` on every write.
+  - `CustomDataStorageWrapper` gains an internal `setCustomDataBatch` helper with no events and no access control; used by both init and batch paths.
+
+- 9900cd2: compliance modifiers and methods simplified
+- 37a4f32: proceed recipient and scheduled crossordered updated.Unused contracts removed.
+- 64e8681: npmrc added blocking install script and new scripts implemented
+- 12d4a25: smart contracts docs automatically updated when merging in any branch and automatically verified when merging in main. Locally, external changes overwritte local ones
+
+### Patch Changes
+
+- 93cbfc8: test: migrate all IAsset integration suites onto one reconfigurable shared fixture (deployAssetMockCtx), eliminating the redundant per-file token deploys (BBND-1876). Test-only — no contract behaviour change; test run ~5 min → ~1 min and the coverage run roughly halved.
+- fa2f462: chore: add a custom `solhint-plugin-ats` with house-style lint rules (msg.sender/block.timestamp accessors, parameter/return underscore conventions, ERC-7201 storage layout, no solhint-disable, etc.) plus a `conventions/` doc set and the `ats-style-guide` skill that enforces them. Apply the resulting fixes across contracts and mocks so the codebase lints clean under the new ruleset.
+- 6945eb5: POST-MAF review: emit business events from the facet that exposes the operation rather than from the `*StorageWrapper`, with wrappers returning any generated id the facet needs to build the event. Covers the Loan, Controller, ProtectedPartitions, Operator(ByPartition), Kpis, Dividend, Voting, LoansPortfolio, Amortization, Compliance, Identity and CapByPartition events; emits reached from multiple callers, from the orchestrator, or that mirror synthetic ledger `Transfer` events stay in the domain layer by design. Also drops the leading underscore from the standard events' parameter names to match the OpenZeppelin convention. ABI-safe: emit location does not change the emitter address (wrappers are inlined libraries) and event topic hashes depend on the name and parameter types, never parameter names.
+- 0f4bfa1: Recovered (lost) wallets are now rejected by the centralized access-control checks: AccessControlStorageWrapper.checkRole and checkAnyRole revert with WalletRecovered for a recovered account, so a compromised role-bearing wallet can no longer pass any role gate after recovery — including paths that call the helpers directly (onlyFreezeRoles, applyRoles) rather than through onlyRole (BBND-1825).
+- dd29415: Adapt the diamond storage wrappers to resolve their namespaced storage struct internally instead of receiving it as a parameter (BBND-1861). Removes the threaded `DiamondCutManagerStorage storage` argument from `DiamondCutManagerWrapper`'s internal helpers and applies the same adaptation to `BusinessLogicResolverWrapper`, `ResolverProxyUnstructured`, `ResolverProxyStorageWrapper`, `ResolverProxy`, `DiamondCut`, `DiamondCutManager`, `DiamondLoupe` and `BusinessLogicResolver`, alongside NatSpec alignment. Internal refactor only — `STORAGE_LOCATION_*` constants, storage layout, selectors and runtime behaviour are unchanged, so SDK and dapp consumers see no API change.
+- 16ea27d: Consolidate the three structurally identical `TransferAndLock` facet variants into one. `TransferAndLockFacet`, `TransferAndLockFixedRateFacet`, and `TransferAndLockKpiLinkedRateFacet` differed only by the resolver key they returned, and all asset configurations already referenced the base `TransferAndLockFacet` (the rate-variant keys had no runtime consumers). The base facet is promoted to `transferAndLock/TransferAndLockFacet.sol`, the `fixedRate`/`kpiLinkedRate` variant facets are deleted, the stale `orchestratorLibraries.ts` entries (also missing the required `tokenCoreOps` dependency) are removed, and the registry is regenerated.
+- 760f475: test: increase contract unit test coverage for ScheduledTasksStorageWrapper, KpisStorageWrapper, and KpiLinkedRateLib to 100%; fix timing-sensitive coupon test offsets; add missing NatSpec across several interfaces and libraries; suppress a false-positive gas-strict-inequalities lint warning. No contract behaviour change.
+- 85ac8d2: docs(contracts): restructure and expand the ATS contracts developer documentation.
+  - Split large monolithic pages (`overview.md`, `upgrading.md`, `deployment.md`, `hash-codegen-validation.md`) into focused, single-purpose pages.
+  - Added new pages: `architecture`, `core-concepts`, `getting-started`, `repository-structure`, `roles-and-permissions`, `glossary`, `creating-an-asset-type`, `deploying-an-asset-proxy`, `deployment-workflows`, `downstream-deployment-utils`, `upgrading-configurations`, `upgrading-infrastructure`, `checkpoints-and-recovery`, `hash-codegen`, `erc-3643-compatibility`, `scheduled-tasks-force-cancel`, `testing`.
+  - Renamed `adding-facets.md` → `adding-a-facet.md` and `BLR.md` → `managing-the-blr.md`.
+  - Updated `packages/ats/contracts/README.md` and `scripts/DEVELOPER_GUIDE.md` for accuracy and alignment with the new structure.
+  - Updated the Docusaurus sidebar (`sidebars-ats.ts`) to reflect the new hierarchy.
+
+- 7bf12b8: Add missing modifier tests for all forceCancel corporate action functions (forceCancelCoupon, forceCancelDividend, forceCancelVoting, forceCancelScheduledBalanceAdjustment, forceCancelAmortization): onlyActivated (Deactivated) branch now covered for all five; onlyWithoutMultiPartition (NotAllowedInMultiPartitionMode) branch added for forceCancelAmortization. Fixes incorrect rejection assertion in forceCancelVoting WrongIndexForAction test. [FIND-033]
+- 9e56b43: Rename the `proceedRecipient`, `protectedPartition`, `scheduledCrossOrderedTask`, `kpi`, and `snapshot` facet folders to their plural form so each folder matches its collection contract and the repository's folder-naming convention; no ABI, selector, resolver-key, or storage-layout change.
+- 001cb25: Relocate the shared ERC-1410/ERC-3643 type files (`IERC1410Types`, `IERC3643Types`) to `facets/commonTypes/` and the external adapter interfaces (`ICompliance`, `IIdentityRegistry`) into the respective facets' `externalInterfaces/` directories, as part of the POST-MAF layer-flattening, updating import paths in all callers. No ABI, selector, or storage-layout change.
+- f4ca6b0: Relocate external-adapter interfaces out of `layer_1/` nesting into top-level `facets/` subdirectories as part of the POST-MAF layer-flattening effort.
+
+  What changes:
+  - `facets/layer_1/externalControlList/IExternalControlList.sol` moved to `facets/externalControlListManagement/`
+  - `facets/layer_1/externalKycList/IExternalKycList.sol` moved to `facets/externalKycListManagement/`
+  - `facets/layer_1/externalPause/IExternalPause.sol` moved to `facets/externalPauseManagement/`
+  - Import paths updated in all callers: `ExternalListManagementStorageWrapper.sol`, `PauseStorageWrapper.sol`, `IAsset.sol`, `MockedExternalBlacklist.sol`, `MockedExternalKycList.sol`, `MockedExternalPause.sol`, `MockedExternalWhitelist.sol`
+
+  No ABI, selector, or storage layout changes.
+
+- c06db90: Relocate `Loan` facet out of `layer_2/` nesting into `facets/loan/` as part of the POST-MAF layer-flattening effort.
+
+  What changes:
+  - `facets/layer_2/loan/ILoan.sol` moved to `facets/loan/`
+  - `facets/layer_2/loan/Loan.sol` moved to `facets/loan/`
+  - `facets/layer_2/loan/LoanFacet.sol` moved to `facets/loan/`
+  - Import paths updated in all callers: `LoanStorageWrapper.sol`, `LoansPortfolioStorageWrapper.sol`
+
+  No ABI, selector, or storage layout changes.
+
+- eb6d462: Relocate `LoansPortfolio` facet out of `layer_2/` nesting into `facets/loansPortfolio/` as part of the POST-MAF layer-flattening effort.
+
+  What changes:
+  - `facets/layer_2/loansPortfolio/ILoansPortfolio.sol` moved to `facets/loansPortfolio/`
+  - `facets/layer_2/loansPortfolio/LoansPortfolio.sol` moved to `facets/loansPortfolio/`
+  - `facets/layer_2/loansPortfolio/LoansPortfolioFacet.sol` moved to `facets/loansPortfolio/`
+  - Import paths updated in all callers: `LoansPortfolioStorageWrapper.sol`, `LoansPortfolioModifiers.sol`
+
+  No ABI, selector, or storage layout changes.
+
+- 9fee020: Relocate `NominalValue` facet out of `layer_2/` nesting into `facets/nominalValue/` as part of the POST-MAF layer-flattening effort.
+
+  What changes:
+  - `facets/layer_2/nominalValue/INominalValue.sol` moved to `facets/nominalValue/`
+  - `facets/layer_2/nominalValue/NominalValue.sol` moved to `facets/nominalValue/`
+  - `facets/layer_2/nominalValue/NominalValueFacet.sol` moved to `facets/nominalValue/`
+  - Import paths updated in all callers: `Factory.sol`, `IAsset.sol`
+
+  No ABI, selector, or storage layout changes.
+
+- f5e9915: Remove unused constants
+- a8d246d: Adopt solhint 6.2.1 and clear its recommended-ruleset lint warnings, with no functional, ABI or storage change.
+- 4d4309b: Compose the per-domain deployment facet lists from shared, type-checked facet sets backed by a generated `FacetName` union, so unknown or mis-typed facet names become compile errors instead of runtime lookup misses. No on-chain, ABI, or configuration change — every deployment configuration resolves to the same facet set as before.
+
 ## 8.0.0
 
 Highlights — Modular Asset Factory release (BREAKING — clean redeploy required):

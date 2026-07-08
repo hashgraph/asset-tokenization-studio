@@ -1,5 +1,7 @@
 # @hashgraph/mass-payout-frontend
 
+## 1.1.4
+
 ## 1.1.3
 
 ### Patch Changes

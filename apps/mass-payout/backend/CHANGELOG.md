@@ -1,5 +1,12 @@
 # @hashgraph/mass-payout-backend
 
+## 1.1.4
+
+### Patch Changes
+
+- @hashgraph/asset-tokenization-sdk@9.0.0
+- @hashgraph/mass-payout-sdk@1.1.4
+
 ## 1.1.3
 
 ### Patch Changes
