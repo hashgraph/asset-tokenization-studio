@@ -33,7 +33,6 @@ import {
   deployOrchestratorLibraries,
   getFacetLibraryLinks,
   hasOrchestratorLibraryAddresses,
-  ATS_ROLES,
   CONFIG_IDS,
 } from "@scripts/domain";
 
@@ -248,7 +247,6 @@ describe("External Facet Extensibility - Integration Tests", () => {
 
       // Create configuration with external facet
       // This should now WARN but NOT filter out the facet
-      await blrContract.grantRole(ATS_ROLES.ROLE_CREATE_CONFIGURATION, deployer);
       const configResult = await createBatchConfiguration(blrContract, {
         configurationId: ethers.encodeBytes32String("TEST_CONFIG"),
         facets: [
@@ -303,7 +301,6 @@ describe("External Facet Extensibility - Integration Tests", () => {
       });
 
       // Create mixed configuration
-      await blrContract.grantRole(ATS_ROLES.ROLE_CREATE_CONFIGURATION, deployer);
       const configResult = await createBatchConfiguration(blrContract, {
         configurationId: ethers.encodeBytes32String("MIXED_CONFIG"),
         facets: [
@@ -363,7 +360,6 @@ describe("External Facet Extensibility - Integration Tests", () => {
       });
 
       // Create configuration with only external facets
-      await blrContract.grantRole(ATS_ROLES.ROLE_CREATE_CONFIGURATION, deployer);
       const configResult = await createBatchConfiguration(blrContract, {
         configurationId: ethers.encodeBytes32String("EXTERNAL_CONFIG"),
         facets: [
@@ -437,7 +433,6 @@ describe("External Facet Extensibility - Integration Tests", () => {
       expect(registerResult.registered.length).to.equal(TEST_SIZES.TRIPLE);
 
       // Step 5: Create configuration with all facets
-      await blrContract.grantRole(ATS_ROLES.ROLE_CREATE_CONFIGURATION, deployer);
       const configResult = await createBatchConfiguration(blrContract, {
         configurationId: CONFIG_IDS.equity,
         facets: [
@@ -501,7 +496,6 @@ describe("External Facet Extensibility - Integration Tests", () => {
 
       // Try to create configuration with some facets not deployed
       // Only include facets that have been deployed
-      await blrContract.grantRole(ATS_ROLES.ROLE_CREATE_CONFIGURATION, deployer);
       const configResult = await createBatchConfiguration(blrContract, {
         configurationId: ethers.encodeBytes32String("PARTIAL_CONFIG"),
         facets: [
@@ -554,7 +548,6 @@ describe("External Facet Extensibility - Integration Tests", () => {
       expect(registerResult.registered).to.include("PauseFacet");
 
       // Configure the same facet - createBatchConfiguration should also warn but succeed
-      await blrContract.grantRole(ATS_ROLES.ROLE_CREATE_CONFIGURATION, deployer);
       const configResult = await createBatchConfiguration(blrContract, {
         configurationId: ethers.encodeBytes32String("CONSISTENCY_TEST"),
         facets: [
@@ -627,7 +620,6 @@ describe("External Facet Extensibility - Integration Tests", () => {
       });
 
       const configId = ethers.encodeBytes32String("EXPLICIT_LATEST_TEST");
-      await blrContract.grantRole(ATS_ROLES.ROLE_CREATE_CONFIGURATION, deployer);
       await createBatchConfiguration(blrContract, {
         configurationId: configId,
         facets: [
@@ -684,7 +676,6 @@ describe("External Facet Extensibility - Integration Tests", () => {
 
       // Create first configuration
       const firstConfigId = ethers.encodeBytes32String("FIRST_CONFIG");
-      await blrContract.grantRole(ATS_ROLES.ROLE_CREATE_CONFIGURATION, deployer);
       const firstConfigResult = await createBatchConfiguration(blrContract, {
         configurationId: firstConfigId,
         facets: [

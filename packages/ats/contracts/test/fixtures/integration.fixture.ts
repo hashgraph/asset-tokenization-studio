@@ -15,7 +15,7 @@ import { ethers } from "hardhat";
 import { BusinessLogicResolver__factory } from "@contract-types";
 import type { BusinessLogicResolver } from "@contract-types";
 import { deployContract, deployProxy, registerFacets } from "@scripts/infrastructure";
-import { atsRegistry, ATS_ROLES } from "@scripts/domain";
+import { atsRegistry } from "@scripts/domain";
 import {
   deployOrchestratorLibraries,
   getFacetLibraryLinks,
@@ -64,7 +64,6 @@ export async function deployBlrFixture() {
   // Get contract instance and initialize
   const blr = BusinessLogicResolver__factory.connect(blrResult.proxyAddress, deployer) as BusinessLogicResolver;
   await blr.initializeBusinessLogicResolver();
-  await blr.grantRole(ATS_ROLES.ROLE_CREATE_CONFIGURATION, deployer.address);
 
   return {
     deployer,

@@ -654,46 +654,6 @@ describe("DiamondCutManager", () => {
       .withArgs(testConfigId, signer_B.address, signer_A.address);
   });
 
-  it("GIVEN a resolver and an account without ROLE_CREATE_CONFIGURATION WHEN calling createConfiguration THEN fails with AccountHasNoRole", async () => {
-    const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000050";
-
-    const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] = [
-      {
-        id: equityFacetIdList[0],
-        version: 1,
-      },
-    ];
-
-    await expect(diamondCutManager.connect(signer_B).createConfiguration(testConfigId, facetConfigurations, "0x"))
-      .to.be.revertedWithCustomError(diamondCutManager, "AccountHasNoRole")
-      .withArgs(signer_B.address, ATS_ROLES.ROLE_CREATE_CONFIGURATION);
-  });
-
-  it("GIVEN a resolver and an account without ROLE_CREATE_CONFIGURATION WHEN calling createBatchConfiguration THEN fails with AccountHasNoRole", async () => {
-    const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000051";
-
-    const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] = [
-      {
-        id: equityFacetIdList[0],
-        version: 1,
-      },
-    ];
-
-    await expect(
-      diamondCutManager.connect(signer_B).createBatchConfiguration(testConfigId, facetConfigurations, false, "0x"),
-    )
-      .to.be.revertedWithCustomError(diamondCutManager, "AccountHasNoRole")
-      .withArgs(signer_B.address, ATS_ROLES.ROLE_CREATE_CONFIGURATION);
-  });
-
-  it("GIVEN a resolver and an account without ROLE_CREATE_CONFIGURATION WHEN calling cancelBatchConfiguration THEN fails with AccountHasNoRole", async () => {
-    const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000052";
-
-    await expect(diamondCutManager.connect(signer_B).cancelBatchConfiguration(testConfigId))
-      .to.be.revertedWithCustomError(diamondCutManager, "AccountHasNoRole")
-      .withArgs(signer_B.address, ATS_ROLES.ROLE_CREATE_CONFIGURATION);
-  });
-
   it("GIVEN a paused resolver WHEN canceling a batch configuration THEN fails with IsPaused", async () => {
     const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000012";
 

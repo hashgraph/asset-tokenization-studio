@@ -65,7 +65,6 @@ describe("Ownership", () => {
 
     accessControl = AccessControlFacet__factory.connect(blr.target.toString(), signer_A);
     await accessControl.grantRole(ATS_ROLES.ROLE_PAUSER, signer_Pauser.address);
-    await accessControl.grantRole(ATS_ROLES.ROLE_CREATE_CONFIGURATION, signer_C.address);
 
     pause = Pause__factory.connect(blr.target.toString(), signer_A);
     ownership = IOwnership__factory.connect(blr.target.toString(), signer_A);
@@ -143,7 +142,6 @@ describe("Ownership", () => {
     it("GIVEN the current owner WHEN nominating the zero address THEN the nomination is recorded without validation", async () => {
       await seedOwner(CONFIG_ID_A, signer_B.address);
 
-      await accessControl.grantRole(ATS_ROLES.ROLE_CREATE_CONFIGURATION, ZERO_ADDRESS);
       await expect(ownership.connect(signer_B).transferOwnership(CONFIG_ID_A, ZERO_ADDRESS))
         .to.emit(ownership, "OwnershipTransfered")
         .withArgs(CONFIG_ID_A, signer_B.address, ZERO_ADDRESS);
