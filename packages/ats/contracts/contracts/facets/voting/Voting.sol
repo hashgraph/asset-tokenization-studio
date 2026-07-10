@@ -38,7 +38,7 @@ abstract contract Voting is IVoting, Modifiers {
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_CORPORATE_ACTION)
-        onlyValidTimestamp(_newVoting.recordDate)
+        onlyFutureTimestamp(_newVoting.recordDate)
         returns (uint256 voteID_)
     {
         bytes32 corporateActionId_;

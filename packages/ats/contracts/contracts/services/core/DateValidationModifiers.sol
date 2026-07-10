@@ -47,4 +47,17 @@ abstract contract DateValidationModifiers {
         DatesValidation.checkTimestamp(_timestamp);
         _;
     }
+
+    /**
+     * @dev Modifier that validates a timestamp is strictly in the future
+     *
+     * Requirements:
+     * - Timestamp must be strictly greater than the current block time
+     *
+     * @param _timestamp The timestamp to validate
+     */
+    modifier onlyFutureTimestamp(uint256 _timestamp) {
+        DatesValidation.checkFutureTimestamp(_timestamp);
+        _;
+    }
 }

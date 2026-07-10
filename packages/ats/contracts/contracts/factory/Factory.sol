@@ -39,7 +39,6 @@ import { ISnapshots } from "../facets/snapshots/ISnapshots.sol";
 import { IProceedRecipients } from "../facets/proceedRecipients/IProceedRecipients.sol";
 
 import { INominalValue } from "../facets/nominalValue/INominalValue.sol";
-import { ScheduledTasksStorageWrapper } from "../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { IProtectedPartitions } from "../facets/protectedPartitions/IProtectedPartitions.sol";
 import { IExternalPauseManagement } from "../facets/externalPauseManagement/IExternalPauseManagement.sol";
 import {
@@ -638,7 +637,7 @@ abstract contract Factory is IFactory {
      */
     function _checkBondDates(uint256 startingDate, uint256 maturityDate) private view {
         DatesValidation.checkDates(startingDate, maturityDate);
-        ScheduledTasksStorageWrapper.requireValidTimestamp(maturityDate);
+        DatesValidation.checkFutureTimestamp(maturityDate);
     }
 
     /**

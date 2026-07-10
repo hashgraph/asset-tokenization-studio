@@ -48,8 +48,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         onlyWithoutMultiPartition
         onlyRole(ROLE_CORPORATE_ACTION)
         onlyValidDates(_amortization.recordDate, _amortization.executionDate)
-        onlyValidTimestamp(_amortization.recordDate)
-        onlyValidDates(_amortization.recordDate, _amortization.executionDate)
+        onlyFutureTimestamp(_amortization.recordDate)
         returns (bool success_, uint256 amortizationID_)
     {
         bytes32 corporateActionId_;

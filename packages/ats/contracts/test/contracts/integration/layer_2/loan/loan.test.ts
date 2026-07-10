@@ -99,19 +99,19 @@ export function loanTests(getCtx: () => AssetMockCtx): void {
         );
       });
 
-      it("GIVEN startingDate is 0 WHEN setLoanDetails THEN transaction fails with WrongTimestamp", async () => {
+      it("GIVEN startingDate is 0 WHEN setLoanDetails THEN transaction fails with InvalidTimestamp", async () => {
         const loanDetails = await getLoanDetails({ startingDate: 0 });
         await expect(asset.connect(signer_A).setLoanDetails(loanDetails)).to.be.revertedWithCustomError(
           asset,
-          "WrongTimestamp",
+          "InvalidTimestamp",
         );
       });
 
-      it("GIVEN maturityDate is 0 WHEN setLoanDetails THEN transaction fails with WrongTimestamp", async () => {
+      it("GIVEN maturityDate is 0 WHEN setLoanDetails THEN transaction fails with InvalidTimestamp", async () => {
         const loanDetails = await getLoanDetails({ maturityDate: 0 });
         await expect(asset.connect(signer_A).setLoanDetails(loanDetails)).to.be.revertedWithCustomError(
           asset,
-          "WrongTimestamp",
+          "InvalidTimestamp",
         );
       });
 
@@ -123,11 +123,11 @@ export function loanTests(getCtx: () => AssetMockCtx): void {
         );
       });
 
-      it("GIVEN signingDate is 0 WHEN setLoanDetails THEN transaction fails with WrongTimestamp", async () => {
+      it("GIVEN signingDate is 0 WHEN setLoanDetails THEN transaction fails with InvalidTimestamp", async () => {
         const loanDetails = await getLoanDetails({ signingDate: 0 });
         await expect(asset.connect(signer_A).setLoanDetails(loanDetails)).to.be.revertedWithCustomError(
           asset,
-          "WrongTimestamp",
+          "InvalidTimestamp",
         );
       });
 
@@ -147,11 +147,11 @@ export function loanTests(getCtx: () => AssetMockCtx): void {
         );
       });
 
-      it("GIVEN firstAccrualDate is 0 WHEN setLoanDetails THEN transaction fails with WrongTimestamp", async () => {
+      it("GIVEN firstAccrualDate is 0 WHEN setLoanDetails THEN transaction fails with InvalidTimestamp", async () => {
         const loanDetails = await getLoanDetails({ firstAccrualDate: 0 });
         await expect(asset.connect(signer_A).setLoanDetails(loanDetails)).to.be.revertedWithCustomError(
           asset,
-          "WrongTimestamp",
+          "InvalidTimestamp",
         );
       });
     });

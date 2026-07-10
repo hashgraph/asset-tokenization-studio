@@ -47,7 +47,7 @@ abstract contract ScheduledBalanceAdjustment is IScheduledBalanceAdjustment, Sch
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_CORPORATE_ACTION)
-        onlyValidTimestamp(_newBalanceAdjustment.executionDate)
+        onlyFutureTimestamp(_newBalanceAdjustment.executionDate)
         onlyValidFactor(_newBalanceAdjustment.factor)
         onlyNotOverflowingAdjustment(_newBalanceAdjustment.factor, _newBalanceAdjustment.decimals)
         returns (uint256 balanceAdjustmentID_)

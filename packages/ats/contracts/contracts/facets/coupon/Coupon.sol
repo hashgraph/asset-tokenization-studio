@@ -61,8 +61,8 @@ abstract contract Coupon is ICoupon, Modifiers {
         onlyValidDates(_newCoupon.startDate, _newCoupon.endDate)
         onlyValidDates(_newCoupon.recordDate, _newCoupon.executionDate)
         onlyValidDates(_newCoupon.fixingDate, _newCoupon.executionDate)
-        onlyValidTimestamp(_newCoupon.recordDate)
-        onlyValidTimestamp(_newCoupon.fixingDate)
+        onlyFutureTimestamp(_newCoupon.recordDate)
+        onlyFutureTimestamp(_newCoupon.fixingDate)
         onlyValidCouponEndDate(_newCoupon.endDate)
         returns (uint256 couponID_)
     {

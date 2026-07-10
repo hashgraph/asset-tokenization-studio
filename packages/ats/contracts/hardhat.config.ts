@@ -104,7 +104,6 @@ const config: HardhatUserConfig = {
   },
   mocha: {
     timeout: 3_000_000,
-    require: ["./test/helpers/globalSetup.ts"],
     rootHooks: {
       beforeAll() {
         // Direct require to avoid barrel import (prevents eager typechain loading)

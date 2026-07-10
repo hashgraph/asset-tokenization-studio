@@ -78,22 +78,6 @@ export function couponTests(getCtx: () => AssetMockCtx): void {
       startingDate = currentTimestamp + TIME_PERIODS_S.DAY;
       maturityDate = startingDate + numberOfCoupons * frequency;
 
-      couponRecordDateInSeconds = currentTimestamp + TIME_PERIODS_S.DAY;
-      couponExecutionDateInSeconds = currentTimestamp + TIME_PERIODS_S.DAY + 1000;
-      couponFixingDateInSeconds = currentTimestamp + 1200;
-      couponEndDateInSeconds = couponFixingDateInSeconds - 1;
-      couponStartDateInSeconds = couponEndDateInSeconds - couponPeriod;
-      couponData = {
-        recordDate: couponRecordDateInSeconds.toString(),
-        executionDate: couponExecutionDateInSeconds.toString(),
-        rate: couponRate,
-        rateDecimals: couponRateDecimals,
-        startDate: couponStartDateInSeconds.toString(),
-        endDate: couponEndDateInSeconds.toString(),
-        fixingDate: couponFixingDateInSeconds.toString(),
-        rateStatus: couponRateStatus,
-      };
-
       await executeRbac(asset, [
         {
           role: ATS_ROLES.ROLE_FREEZE_MANAGER,
@@ -157,6 +141,26 @@ export function couponTests(getCtx: () => AssetMockCtx): void {
       await asset.setNominalValue(100, 2);
       // STANDARD honours the caller-supplied rate/rateDecimals
       await asset.connect(signer_A).setCouponRateType(INTEREST_RATE_TYPE.STANDARD);
+
+      // Captured after the setup transactions above (not before) so the future-dated fields
+      // below keep enough headroom under slow/instrumented runs (e.g. solidity-coverage),
+      // where each preceding transaction can advance the chain's real timestamp noticeably.
+      const now = await getDltTimestamp();
+      couponRecordDateInSeconds = now + TIME_PERIODS_S.DAY;
+      couponExecutionDateInSeconds = now + TIME_PERIODS_S.DAY + 1000;
+      couponFixingDateInSeconds = now + 1200;
+      couponEndDateInSeconds = couponFixingDateInSeconds - 1;
+      couponStartDateInSeconds = couponEndDateInSeconds - couponPeriod;
+      couponData = {
+        recordDate: couponRecordDateInSeconds.toString(),
+        executionDate: couponExecutionDateInSeconds.toString(),
+        rate: couponRate,
+        rateDecimals: couponRateDecimals,
+        startDate: couponStartDateInSeconds.toString(),
+        endDate: couponEndDateInSeconds.toString(),
+        fixingDate: couponFixingDateInSeconds.toString(),
+        rateStatus: couponRateStatus,
+      };
     });
 
     it("GIVEN an account without corporateActions role WHEN setCoupon THEN transaction fails with AccountHasNoRole", async () => {
@@ -1118,13 +1122,6 @@ export function couponTests(getCtx: () => AssetMockCtx): void {
 
       asset = ctx.asset;
 
-      const currentTimestamp = await getDltTimestamp();
-      couponRecordDateInSeconds = currentTimestamp + TEST_COUPON.TIMING.RECORD_OFFSET_S;
-      couponExecutionDateInSeconds = currentTimestamp + TEST_COUPON.TIMING.EXECUTION_OFFSET_S;
-      couponFixingDateInSeconds = currentTimestamp + TEST_COUPON.TIMING.EXECUTION_OFFSET_S;
-      couponEndDateInSeconds = couponFixingDateInSeconds - 1;
-      couponStartDateInSeconds = couponEndDateInSeconds - couponPeriod;
-
       await executeRbac(asset, [
         {
           role: ATS_ROLES.ROLE_SSI_MANAGER,
@@ -1154,10 +1151,20 @@ export function couponTests(getCtx: () => AssetMockCtx): void {
 
       await asset.setCouponRateType(INTEREST_RATE_TYPE.FIXED); // resolves PENDING coupons from setRate() storage
       await asset.setRate(TEST_BOND_FIXED_RATE.RATE, TEST_BOND_FIXED_RATE.RATE_DECIMALS);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+
+      // Captured after the setup transactions above (not before) so the future-dated fields
+      // below keep enough headroom under slow/instrumented runs (e.g. solidity-coverage),
+      // where each preceding transaction can advance the chain's real timestamp noticeably.
+      const currentTimestamp = await getDltTimestamp();
+      couponRecordDateInSeconds = currentTimestamp + TEST_COUPON.TIMING.RECORD_OFFSET_S;
+      couponExecutionDateInSeconds = currentTimestamp + TEST_COUPON.TIMING.EXECUTION_OFFSET_S;
+      couponFixingDateInSeconds = currentTimestamp + TEST_COUPON.TIMING.EXECUTION_OFFSET_S;
+      couponEndDateInSeconds = couponFixingDateInSeconds - 1;
+      couponStartDateInSeconds = couponEndDateInSeconds - couponPeriod;
 
       const future = currentTimestamp + TIME_PERIODS_S.YEAR * 10;
       await asset.updateMaturityDate(future);
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
     });
 
     it("GIVEN a fixed-rate bond WHEN setCoupon with PENDING rate THEN CouponSet emits with the resolved configured rate", async () => {

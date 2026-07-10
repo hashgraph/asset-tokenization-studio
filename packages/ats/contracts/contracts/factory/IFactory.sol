@@ -5,6 +5,7 @@ import { IResolverProxy } from "../infrastructure/proxy/IResolverProxy.sol";
 import { IBusinessLogicResolver } from "../infrastructure/diamond/IBusinessLogicResolver.sol";
 import { ICore } from "../facets/core/ICore.sol";
 import { FactoryRegulationData, RegulationData, RegulationType, RegulationSubType } from "../constants/regulation.sol";
+import { ICommonErrors } from "../infrastructure/errors/ICommonErrors.sol";
 
 /// @custom:hash resolverKey Factory
 bytes32 constant RESOLVER_KEY_FACTORY = 0x9fc26269cc1cb994e66f269ed6b58a5bb0c344a134b9dabd342ac466d48f95c7;
@@ -16,7 +17,7 @@ bytes32 constant RESOLVER_KEY_FACTORY = 0x9fc26269cc1cb994e66f269ed6b58a5bb0c344
  *         through a centralised factory that configures resolver proxies,
  *         business-logic resolvers, and role-based access control.
  */
-interface IFactory {
+interface IFactory is ICommonErrors {
     /**
      * @notice Categories of dividend entitlement an equity token may carry.
      */

@@ -96,6 +96,20 @@ export function amortizationTests(getCtx: () => AssetMockCtx): void {
         );
       });
 
+      it("GIVEN recordDate = 0 WHEN setAmortization THEN reverts with WrongTimestamp", async () => {
+        const now = await getDltTimestamp();
+        const wrongData = {
+          recordDate: 0,
+          executionDate: now + EXECUTION_DATE_OFFSET,
+          tokensToRedeem: TOKENS_TO_REDEEM,
+        };
+
+        await expect(amort.connect(user2).setAmortization(wrongData)).to.be.revertedWithCustomError(
+          asset,
+          "WrongTimestamp",
+        );
+      });
+
       it("GIVEN identical amortization data submitted twice WHEN second setAmortization THEN reverts with AmortizationCreationFailed", async () => {
         const data = await makeAmortizationData();
         await amort.connect(user2).setAmortization(data);
