@@ -60,13 +60,6 @@ interface IExternalPauseManagement {
     error UnlistedPause(address pause);
 
     /**
-     * @notice Thrown when a batch update of external pauses fails to complete.
-     * @param pauses Array of external pause contract addresses that were submitted.
-     * @param actives Corresponding activation flags that were submitted.
-     */
-    error ExternalPausesNotUpdated(address[] pauses, bool[] actives);
-
-    /**
      * @notice One-time initialiser that populates the external pause list at token deployment.
      * @dev Can only be called once; subsequent calls revert via `onlyFacetNotRegistered`.
      *      The leading-underscore naming convention signals this is an initialiser function.

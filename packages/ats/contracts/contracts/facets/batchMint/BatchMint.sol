@@ -47,7 +47,6 @@ abstract contract BatchMint is IBatchMint, Modifiers {
         onlyValidInputAmountsArrayLength(_toList, _amounts)
         onlyWithoutMultiPartition
         onlyAnyRole(_buildRoles(ROLE_ISSUER, ROLE_AGENT))
-        onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
     {
         uint256 totalAmount;
         uint256 length = _toList.length;

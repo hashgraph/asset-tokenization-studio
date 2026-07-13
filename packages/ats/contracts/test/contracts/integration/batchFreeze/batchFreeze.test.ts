@@ -264,6 +264,16 @@ export function batchFreezeTests(getCtx: () => AssetMockCtx): void {
             "InputAmountsArrayLengthMismatch",
           );
         });
+
+        it("GIVEN a zero amount in the amounts array WHEN batchUnfreezePartialTokens THEN transaction fails with InvalidFreezeAmount", async () => {
+          const userAddresses = [signer_D.address, signer_E.address];
+          const amounts = [0, unfreezeAmount];
+
+          await expect(asset.batchUnfreezePartialTokens(userAddresses, amounts)).to.be.revertedWithCustomError(
+            asset,
+            "InvalidFreezeAmount",
+          );
+        });
       });
 
       describe("Paused", () => {

@@ -571,6 +571,14 @@ export function holdByPartitionTests(getCtx: () => AssetMockCtx): void {
           ).to.be.revertedWithCustomError(asset, "InsufficientHoldBalance");
         });
 
+        it("GIVEN a hold WHEN executeHoldByPartition for a zero amount THEN transaction fails with InvalidHoldAmount", async () => {
+          await asset.createHoldByPartition(_DEFAULT_PARTITION, hold);
+
+          await expect(
+            asset.connect(signer_B).executeHoldByPartition(holdIdentifier, signer_C.address, 0),
+          ).to.be.revertedWithCustomError(asset, "InvalidHoldAmount");
+        });
+
         it("GIVEN a hold WHEN executeHoldByPartition after expiration date THEN transaction fails with HoldExpirationReached", async () => {
           const initDate = dateToUnixTimestamp("2030-01-01T00:00:03Z");
           const finalDate = dateToUnixTimestamp("2030-02-01T00:00:03Z");
@@ -649,6 +657,15 @@ export function holdByPartitionTests(getCtx: () => AssetMockCtx): void {
           await expect(
             asset.connect(signer_B).releaseHoldByPartition(holdIdentifier, 2 * _AMOUNT),
           ).to.be.revertedWithCustomError(asset, "InsufficientHoldBalance");
+        });
+
+        it("GIVEN a hold WHEN releaseHoldByPartition for a zero amount THEN transaction fails with InvalidHoldAmount", async () => {
+          await asset.createHoldByPartition(_DEFAULT_PARTITION, hold);
+
+          await expect(asset.connect(signer_B).releaseHoldByPartition(holdIdentifier, 0)).to.be.revertedWithCustomError(
+            asset,
+            "InvalidHoldAmount",
+          );
         });
 
         it("GIVEN hold WHEN releaseHoldByPartition after expiration date THEN transaction fails with HoldExpirationReached", async () => {

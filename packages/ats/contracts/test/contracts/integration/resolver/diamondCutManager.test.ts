@@ -877,6 +877,80 @@ describe("DiamondCutManager", () => {
       .withArgs(CONFIG_IDS.equity);
   });
 
+  it("GIVEN an existing configuration WHEN getFacetsLengthByConfigurationIdAndVersion called with version 0 THEN reverts with VersionZero", async () => {
+    await expect(diamondCutManager.getFacetsLengthByConfigurationIdAndVersion(CONFIG_IDS.equity, 0))
+      .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
+      .withArgs(CONFIG_IDS.equity);
+  });
+
+  it("GIVEN an existing configuration WHEN getFacetSelectorsLengthByConfigurationIdVersionAndFacetId called with version 0 THEN reverts with VersionZero", async () => {
+    const facetId = "0x0000000000000000000000000000000000000000000000000000000000000001";
+
+    await expect(
+      diamondCutManager.getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(CONFIG_IDS.equity, 0, facetId),
+    )
+      .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
+      .withArgs(CONFIG_IDS.equity);
+  });
+
+  it("GIVEN an existing configuration WHEN getFacetSelectorsByConfigurationIdVersionAndFacetId called with version 0 THEN reverts with VersionZero", async () => {
+    const facetId = "0x0000000000000000000000000000000000000000000000000000000000000001";
+
+    await expect(
+      diamondCutManager.getFacetSelectorsByConfigurationIdVersionAndFacetId(CONFIG_IDS.equity, 0, facetId, 0, 10),
+    )
+      .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
+      .withArgs(CONFIG_IDS.equity);
+  });
+
+  it("GIVEN an existing configuration WHEN getFacetIdsByConfigurationIdAndVersion called with version 0 THEN reverts with VersionZero", async () => {
+    await expect(diamondCutManager.getFacetIdsByConfigurationIdAndVersion(CONFIG_IDS.equity, 0, 0, 10))
+      .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
+      .withArgs(CONFIG_IDS.equity);
+  });
+
+  it("GIVEN an existing configuration WHEN getFacetConfigurationsByConfigurationIdAndVersion called with version 0 THEN reverts with VersionZero", async () => {
+    await expect(diamondCutManager.getFacetConfigurationsByConfigurationIdAndVersion(CONFIG_IDS.equity, 0, 0, 10))
+      .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
+      .withArgs(CONFIG_IDS.equity);
+  });
+
+  it("GIVEN an existing configuration WHEN getFacetAddressesByConfigurationIdAndVersion called with version 0 THEN reverts with VersionZero", async () => {
+    await expect(diamondCutManager.getFacetAddressesByConfigurationIdAndVersion(CONFIG_IDS.equity, 0, 0, 10))
+      .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
+      .withArgs(CONFIG_IDS.equity);
+  });
+
+  it("GIVEN an existing configuration WHEN getFacetIdByConfigurationIdVersionAndSelector called with version 0 THEN reverts with VersionZero", async () => {
+    await expect(diamondCutManager.getFacetIdByConfigurationIdVersionAndSelector(CONFIG_IDS.equity, 0, PAUSE_SELECTOR))
+      .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
+      .withArgs(CONFIG_IDS.equity);
+  });
+
+  it("GIVEN an existing configuration WHEN getFacetByConfigurationIdVersionAndFacetId called with version 0 THEN reverts with VersionZero", async () => {
+    const facetId = "0x0000000000000000000000000000000000000000000000000000000000000001";
+
+    await expect(diamondCutManager.getFacetByConfigurationIdVersionAndFacetId(CONFIG_IDS.equity, 0, facetId))
+      .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
+      .withArgs(CONFIG_IDS.equity);
+  });
+
+  it("GIVEN an existing configuration WHEN getFacetAddressByConfigurationIdVersionAndFacetId called with version 0 THEN reverts with VersionZero", async () => {
+    const facetId = "0x0000000000000000000000000000000000000000000000000000000000000001";
+
+    await expect(diamondCutManager.getFacetAddressByConfigurationIdVersionAndFacetId(CONFIG_IDS.equity, 0, facetId))
+      .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
+      .withArgs(CONFIG_IDS.equity);
+  });
+
+  it("GIVEN an existing configuration WHEN getFacetVersionByConfigurationIdVersionAndFacetId called with version 0 THEN reverts with VersionZero", async () => {
+    const facetId = "0x0000000000000000000000000000000000000000000000000000000000000001";
+
+    await expect(diamondCutManager.getFacetVersionByConfigurationIdVersionAndFacetId(CONFIG_IDS.equity, 0, facetId))
+      .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
+      .withArgs(CONFIG_IDS.equity);
+  });
+
   it("GIVEN a registered configuration WHEN getFacetVersionByConfigurationIdVersionAndFacetId called with non-existent facetId THEN reverts with FacetIdNotRegistered", async () => {
     const nonExistentFacetId = "0x1234567890123456789012345678901234567890123456789012345678901234";
 

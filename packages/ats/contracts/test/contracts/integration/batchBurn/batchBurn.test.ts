@@ -112,6 +112,15 @@ export function batchBurnTests(getCtx: () => AssetMockCtx): void {
           "IsPaused",
         );
       });
+
+      it("GIVEN caller without ROLE_CONTROLLER or ROLE_AGENT WHEN batchBurn THEN transaction fails with AccountHasNoRoles", async () => {
+        const userAddresses = [signer_D.address];
+        const amounts = [burnAmount];
+
+        await expect(asset.connect(unknownSigner).batchBurn(userAddresses, amounts))
+          .to.be.revertedWithCustomError(asset, "AccountHasNoRoles")
+          .withArgs(unknownSigner.address, [ATS_ROLES.ROLE_CONTROLLER, ATS_ROLES.ROLE_AGENT]);
+      });
     });
 
     describe("multi partition", () => {

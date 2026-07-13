@@ -62,13 +62,6 @@ interface IExternalKycListManagement {
     error UnlistedKycList(address kycList);
 
     /**
-     * @notice Thrown when a batch update of external KYC lists fails to complete.
-     * @param kycList Array of external KYC list contract addresses that were submitted.
-     * @param actives Corresponding activation flags that were submitted.
-     */
-    error ExternalKycListsNotUpdated(address[] kycList, bool[] actives);
-
-    /**
      * @notice One-time initialiser that populates the external KYC list at token deployment.
      * @dev Can only be called once; subsequent calls revert via `onlyFacetNotRegistered`.
      *      The leading-underscore naming convention signals this is an initialiser function.
@@ -80,8 +73,7 @@ interface IExternalKycListManagement {
      * @notice Adds or removes multiple external KYC list contracts in a single transaction.
      * @dev Requires `ROLE_KYC_MANAGER` and the token to be unpaused. Both arrays must have the
      *      same length and contain no duplicate addresses, validated by
-     *      `ArrayValidation.checkUniqueValues`. Reverts with `ExternalKycListsNotUpdated` on
-     *      failure. Emits `ExternalKycListsUpdated`.
+     *      `ArrayValidation.checkUniqueValues`. Emits `ExternalKycListsUpdated`.
      * @param _kycLists Array of external KYC list contract addresses to process.
      * @param _actives Corresponding flags; `true` adds the address to the list, `false` removes it.
      * @return success_ True if the batch update completed successfully.

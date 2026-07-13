@@ -4,6 +4,8 @@ pragma solidity >=0.8.0 <0.9.0;
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { ScheduledTask } from "../scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { ScheduledTasksDataStorage } from "../../domain/asset/ScheduledTasksStorageWrapper.sol";
+import { SCHEDULED_TASK_POP_EMPTY } from "../../constants/values.sol";
+import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 
 /// @title ScheduledTasksLib
 /// @author Asset Tokenization Studio Team
@@ -56,15 +58,16 @@ library ScheduledTasksLib {
     }
 
     /// @notice Removes the tail entry from the queue.
-    /// @dev No-op when the queue is empty; otherwise clears the last slot and decrements
-    ///      `scheduledTaskCount`. Callers must pop in order (typically after executing
-    ///      the head entry and rotating it to the tail upstream).
+    /// @dev Reverts with `UnexpectedError(SCHEDULED_TASK_POP_EMPTY)` when the queue is empty —
+    ///      every legitimate caller checks `getScheduledTaskCount` before popping, so an empty
+    ///      queue here indicates a caller-side invariant violation rather than a valid state.
+    ///      Otherwise clears the last slot and decrements `scheduledTaskCount`. Callers must
+    ///      pop in order (typically after executing the head entry and rotating it to the tail
+    ///      upstream).
     /// @param _scheduledTasks The storage struct whose tail entry is discarded.
     function popScheduledTask(ScheduledTasksDataStorage storage _scheduledTasks) internal {
         uint256 scheduledTasksLength = getScheduledTaskCount(_scheduledTasks);
-        if (scheduledTasksLength == 0) {
-            return;
-        }
+        _checkUnexpectedError(scheduledTasksLength == 0, SCHEDULED_TASK_POP_EMPTY);
         delete (_scheduledTasks.scheduledTasks[scheduledTasksLength - 1]);
         unchecked {
             --_scheduledTasks.scheduledTaskCount;

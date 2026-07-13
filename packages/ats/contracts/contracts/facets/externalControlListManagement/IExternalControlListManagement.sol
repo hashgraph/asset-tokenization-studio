@@ -63,13 +63,6 @@ interface IExternalControlListManagement {
     error UnlistedControlList(address controlList);
 
     /**
-     * @notice Thrown when a batch update of external control lists fails to complete.
-     * @param controlLista Array of external control list contract addresses that were submitted.
-     * @param actives Corresponding activation flags that were submitted.
-     */
-    error ExternalControlListsNotUpdated(address[] controlLista, bool[] actives);
-
-    /**
      * @notice One-time initialiser that populates the external control list at token deployment.
      * @dev Can only be called once; subsequent calls revert via
      *      `onlyFacetNotRegistered`. The leading-underscore naming convention
@@ -82,8 +75,7 @@ interface IExternalControlListManagement {
      * @notice Adds or removes multiple external control list contracts in a single transaction.
      * @dev Requires `ROLE_CONTROL_LIST_MANAGER` and the token to be unpaused. Both arrays must
      *      have the same length and contain no duplicate addresses, validated by
-     *      `ArrayValidation.checkUniqueValues`. Reverts with `ExternalControlListsNotUpdated` on
-     *      failure. Emits `ExternalControlListsUpdated`.
+     *      `ArrayValidation.checkUniqueValues`. Emits `ExternalControlListsUpdated`.
      * @param _controlLists Array of external control list contract addresses to process.
      * @param _actives Corresponding flags; `true` adds the address to the list, `false` removes
      *        it.

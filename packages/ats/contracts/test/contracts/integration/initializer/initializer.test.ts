@@ -150,36 +150,63 @@ describe("Initializer — InitializeMock domain", () => {
       await deployMockAsset(1);
     });
 
-    it("GIVEN a freshly-deployed asset WHEN non admin updateMaxInitializerFacetIndex THEN reverts with AccountHasNoRole", async () => {
-      await expect(
-        initializerFacet.connect(unknownSigner).updateMaxInitializerFacetIndex(5),
-      ).to.be.revertedWithCustomError(initializerFacet, "AccountHasNoRole");
+    describe("initializeInitializer", () => {
+      it("GIVEN an asset WHEN non admin initializes THEN reverts with AccountHasNoRole", async () => {
+        await expect(initializerFacet.connect(unknownSigner).initializeInitializer(1)).to.be.revertedWithCustomError(
+          initializerFacet,
+          "AccountHasNoRole",
+        );
+      });
+
+      it("GIVEN an admin WHEN initializeInitializer is called with zero THEN reverts with ZeroValueNotAllowed", async () => {
+        await expect(initializerFacet.initializeInitializer(0)).to.be.revertedWithCustomError(
+          initializerFacet,
+          "ZeroValueNotAllowed",
+        );
+      });
+
+      it("GIVEN an asset whose initializer has been initialized WHEN initialized again THEN reverts with FacetAlreadyRegistered", async () => {
+        await expect(initializerFacet.initializeInitializer(1)).to.not.be.reverted;
+
+        await expect(initializerFacet.initializeInitializer(1)).to.be.revertedWithCustomError(
+          initializerFacet,
+          "FacetAlreadyRegistered",
+        );
+      });
     });
 
-    it("GIVEN an asset WHEN non admin initializes THEN reverts with AccountHasNoRole", async () => {
-      await expect(initializerFacet.connect(unknownSigner).initializeInitializer(1)).to.be.revertedWithCustomError(
-        initializerFacet,
-        "AccountHasNoRole",
-      );
+    describe("updateMaxInitializerFacetIndex", () => {
+      it("GIVEN a freshly-deployed asset WHEN non admin updateMaxInitializerFacetIndex THEN reverts with AccountHasNoRole", async () => {
+        await expect(
+          initializerFacet.connect(unknownSigner).updateMaxInitializerFacetIndex(5),
+        ).to.be.revertedWithCustomError(initializerFacet, "AccountHasNoRole");
+      });
+
+      it("GIVEN an admin WHEN updateMaxInitializerFacetIndex is called with zero THEN reverts with ZeroValueNotAllowed", async () => {
+        await expect(initializerFacet.updateMaxInitializerFacetIndex(0)).to.be.revertedWithCustomError(
+          initializerFacet,
+          "ZeroValueNotAllowed",
+        );
+      });
+
+      it("GIVEN a freshly-deployed asset WHEN admin updateMaxInitializerFacetIndex THEN succeeds", async () => {
+        const maxInitializerFacetIndex = 3;
+
+        expect(await initializerFacet.getMaxInitializerFacetIndex()).to.equal(0);
+
+        await expect(initializerFacet.updateMaxInitializerFacetIndex(maxInitializerFacetIndex))
+          .to.emit(initializerFacet, "MaxInitializerFacetIndexUpdated")
+          .withArgs(await deployer.getAddress(), maxInitializerFacetIndex);
+      });
     });
 
-    it("GIVEN an asset whose initializer has been initialized WHEN initialized again THEN reverts with FacetAlreadyRegistered", async () => {
-      await expect(initializerFacet.initializeInitializer(1)).to.not.be.reverted;
-
-      await expect(initializerFacet.initializeInitializer(1)).to.be.revertedWithCustomError(
-        initializerFacet,
-        "FacetAlreadyRegistered",
-      );
-    });
-
-    it("GIVEN a freshly-deployed asset WHEN admin updateMaxInitializerFacetIndex THEN succeeds", async () => {
-      const maxInitializerFacetIndex = 3;
-
-      expect(await initializerFacet.getMaxInitializerFacetIndex()).to.equal(0);
-
-      await expect(initializerFacet.updateMaxInitializerFacetIndex(maxInitializerFacetIndex))
-        .to.emit(initializerFacet, "MaxInitializerFacetIndexUpdated")
-        .withArgs(await deployer.getAddress(), maxInitializerFacetIndex);
+    describe("setOperationalStatus", () => {
+      it("GIVEN a freshly-deployed asset WHEN non admin calls setOperationalStatus THEN reverts with AccountHasNoRole", async () => {
+        await expect(initializerFacet.connect(unknownSigner).setOperationalStatus()).to.be.revertedWithCustomError(
+          initializerFacet,
+          "AccountHasNoRole",
+        );
+      });
     });
 
     it("GIVEN a freshly-deployed asset WHEN calling mockFacet1Method THEN reverts with AssetNotOperational AND every facet + operational status reads as 0", async () => {

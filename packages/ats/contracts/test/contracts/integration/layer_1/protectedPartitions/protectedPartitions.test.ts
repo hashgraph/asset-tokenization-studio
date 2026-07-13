@@ -27,6 +27,8 @@ const domain = {
   verifyingContract: "",
 };
 
+const EMPTY_VC_ID = EMPTY_STRING;
+
 const transferType = {
   protectedTransferFromByPartition: [
     { name: "_partition", type: "bytes32" },
@@ -37,8 +39,6 @@ const transferType = {
     { name: "_nonce", type: "uint256" },
   ],
 };
-
-const EMPTY_VC_ID = EMPTY_STRING;
 
 const clearingTransferType = {
   ClearingOperation: [
@@ -494,107 +494,6 @@ export function protectedPartitionsTests(getCtx: () => AssetMockCtx): void {
 
           await asset.connect(signer_B).transferAndLock(signer_C.address, amount, "0x1234", MAX_UINT256);
         });
-
-        it("GIVEN a signed protected transfer with nonce > currentNonce+1 WHEN executed THEN reverts with WrongNonce (FIND-073)", async () => {
-          const deadline = MAX_UINT256;
-          const NONCE_GAP = 1000;
-          const signature = await signer_A.signTypedData(domain, transferType, {
-            _partition: DEFAULT_PARTITION,
-            _from: signer_A.address,
-            _to: signer_B.address,
-            _amount: amount,
-            _deadline: deadline,
-            _nonce: NONCE_GAP,
-          });
-          await asset.connect(signer_B).issueByPartition({
-            partition: DEFAULT_PARTITION,
-            tokenHolder: signer_A.address,
-            value: amount,
-            data: "0x",
-          });
-          await expect(
-            asset
-              .connect(signer_B)
-              .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
-                deadline,
-                nonce: NONCE_GAP,
-                signature,
-              }),
-          ).to.be.revertedWithCustomError(asset, "WrongNonce");
-        });
-
-        it("GIVEN three pre-signed transfers with consecutive nonces WHEN executed in order THEN all succeed and nonce is 3 (FIND-073)", async () => {
-          const deadline = MAX_UINT256;
-          const signatures: string[] = [];
-          for (let n = 1; n <= 3; n++) {
-            signatures.push(
-              await signer_A.signTypedData(domain, transferType, {
-                _partition: DEFAULT_PARTITION,
-                _from: signer_A.address,
-                _to: signer_B.address,
-                _amount: amount,
-                _deadline: deadline,
-                _nonce: n,
-              }),
-            );
-          }
-          await asset.connect(signer_B).issueByPartition({
-            partition: DEFAULT_PARTITION,
-            tokenHolder: signer_A.address,
-            value: 3 * amount,
-            data: "0x",
-          });
-          for (let n = 1; n <= 3; n++) {
-            await asset
-              .connect(signer_B)
-              .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
-                deadline,
-                nonce: n,
-                signature: signatures[n - 1],
-              });
-          }
-          expect(await asset.nonces(signer_A.address)).to.equal(3);
-        });
-
-        it("GIVEN a correct signature WHEN performing a protected transfer THEN transaction succeeds", async () => {
-          const deadline = MAX_UINT256;
-
-          const message = {
-            _partition: DEFAULT_PARTITION,
-            _from: signer_A.address,
-            _to: signer_B.address,
-            _amount: amount,
-            _deadline: deadline,
-            _nonce: 1,
-          };
-
-          // Sign the message hash
-          const signature = await signer_A.signTypedData(domain, transferType, message);
-
-          await asset.connect(signer_B).issueByPartition({
-            partition: DEFAULT_PARTITION,
-            tokenHolder: signer_A.address,
-            value: amount,
-            data: "0x",
-          });
-
-          const tx = asset
-            .connect(signer_B)
-            .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
-              deadline: deadline,
-              nonce: 1,
-              signature: signature,
-            });
-          await expect(tx)
-            .to.emit(asset, EVENT_NAMES.PROTECTED_TRANSFERRED_BY_PARTITION)
-            .withArgs(signer_B.address, signer_A.address, signer_B.address, amount, DEFAULT_PARTITION, [
-              deadline,
-              1,
-              signature,
-            ]);
-          const receipt = await (await tx).wait();
-          expectExactlyOneEvent(receipt!, asset, EVENT_NAMES.PROTECTED_TRANSFERRED_BY_PARTITION);
-        });
       });
 
       describe("Redeem Tests", () => {
@@ -1018,30 +917,6 @@ export function protectedPartitionsTests(getCtx: () => AssetMockCtx): void {
         await expect(asset.connect(signer_A).unprotectPartitions()).to.be.revertedWithCustomError(asset, "Deactivated");
       });
 
-      it("GIVEN a deactivated asset WHEN protectedTransferFromByPartition THEN transaction fails with Deactivated", async () => {
-        await asset.forceDeactivate();
-        await expect(
-          asset
-            .connect(signer_A)
-            .protectedTransferFromByPartition(ethers.ZeroHash, ethers.ZeroAddress, ethers.ZeroAddress, 0, {
-              deadline: 0,
-              nonce: 0,
-              signature: "0x",
-            }),
-        ).to.be.revertedWithCustomError(asset, "Deactivated");
-      });
-
-      it("GIVEN a deactivated asset WHEN protectedRedeemFromByPartition THEN transaction fails with Deactivated", async () => {
-        await asset.forceDeactivate();
-        await expect(
-          asset.connect(signer_A).protectedRedeemFromByPartition(ethers.ZeroHash, ethers.ZeroAddress, 0, {
-            deadline: 0,
-            nonce: 0,
-            signature: "0x",
-          }),
-        ).to.be.revertedWithCustomError(asset, "Deactivated");
-      });
-
       it("GIVEN a deactivated asset WHEN protectedClearingRedeemByPartition THEN transaction fails with Deactivated", async () => {
         await asset.forceDeactivate();
         await expect(
@@ -1105,26 +980,6 @@ export function protectedPartitionsTests(getCtx: () => AssetMockCtx): void {
         await expect(asset.unprotectPartitions()).to.be.revertedWithCustomError(asset, "AssetNotOperational");
       });
 
-      it("GIVEN non-operational asset WHEN protectedTransferFromByPartition THEN reverts with AssetNotOperational", async () => {
-        await expect(
-          asset.protectedTransferFromByPartition(ethers.ZeroHash, ethers.ZeroAddress, ethers.ZeroAddress, 0, {
-            deadline: 0,
-            nonce: 0,
-            signature: "0x",
-          }),
-        ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
-      });
-
-      it("GIVEN non-operational asset WHEN protectedRedeemFromByPartition THEN reverts with AssetNotOperational", async () => {
-        await expect(
-          asset.protectedRedeemFromByPartition(ethers.ZeroHash, ethers.ZeroAddress, 0, {
-            deadline: 0,
-            nonce: 0,
-            signature: "0x",
-          }),
-        ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
-      });
-
       it("GIVEN non-operational asset WHEN protectedClearingRedeemByPartition THEN reverts with AssetNotOperational", async () => {
         await expect(
           asset.protectedClearingRedeemByPartition(
@@ -1169,27 +1024,6 @@ export function protectedPartitionsTests(getCtx: () => AssetMockCtx): void {
             "0x",
           ),
         ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
-      });
-    });
-
-    describe("initializeProtectedByPartition", () => {
-      it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeProtectedByPartition THEN AccountHasNoRole", async () => {
-        await expect(asset.connect(signer_C).initializeProtectedByPartition())
-          .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
-          .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
-      });
-
-      it("GIVEN already-initialised WHEN initializeProtectedByPartition THEN FacetAlreadyRegistered", async () => {
-        await expect(asset.initializeProtectedByPartition())
-          .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-          .withArgs(RESOLVER_KEYS.protectedByPartition, 1);
-      });
-    });
-
-    describe("initializeProtectedByPartition event", () => {
-      it("GIVEN fresh facet WHEN initializeProtectedByPartition THEN emits ProtectedByPartitionInitialized", async () => {
-        await asset.forceFacetNotRegistered(RESOLVER_KEYS.protectedByPartition);
-        await expect(asset.initializeProtectedByPartition()).to.emit(asset, "ProtectedByPartitionInitialized");
       });
     });
 

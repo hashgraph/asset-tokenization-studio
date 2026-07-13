@@ -145,6 +145,40 @@ describe("BusinessLogicResolver", () => {
     });
   });
 
+  describe("Pause", () => {
+    it("GIVEN an account without ROLE_PAUSER WHEN pause THEN reverts with AccountHasNoRole", async () => {
+      await expect(pause.connect(signer_C).pause())
+        .to.be.revertedWithCustomError(businessLogicResolver, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.ROLE_PAUSER);
+    });
+
+    it("GIVEN an account without ROLE_PAUSER WHEN unpause THEN reverts with AccountHasNoRole", async () => {
+      await expect(pause.connect(signer_C).unpause())
+        .to.be.revertedWithCustomError(businessLogicResolver, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.ROLE_PAUSER);
+    });
+
+    it("GIVEN an already-paused contract WHEN pause THEN reverts with IsPaused", async () => {
+      await pause.connect(signer_B).pause();
+      await expect(pause.connect(signer_B).pause()).to.be.revertedWithCustomError(businessLogicResolver, "IsPaused");
+    });
+
+    it("GIVEN a not-yet-paused contract WHEN unpause THEN reverts with IsUnpaused", async () => {
+      await expect(pause.connect(signer_B).unpause()).to.be.revertedWithCustomError(
+        businessLogicResolver,
+        "IsUnpaused",
+      );
+    });
+
+    it("GIVEN an account with ROLE_PAUSER WHEN pause and unpause THEN succeeds", async () => {
+      await expect(pause.connect(signer_B).pause()).to.emit(pause, "Paused").withArgs(signer_B.address);
+      expect(await pause.paused()).to.equal(true);
+
+      await expect(pause.connect(signer_B).unpause()).to.emit(pause, "Unpaused").withArgs(signer_B.address);
+      expect(await pause.paused()).to.equal(false);
+    });
+  });
+
   describe("AccessControl", () => {
     it("GIVEN an account without admin role WHEN registrying logics THEN transaction fails with AccountHasNoRole", async () => {
       // add to list fails
@@ -581,6 +615,14 @@ describe("BusinessLogicResolver", () => {
         await expect(
           accessControl.applyRoles([ATS_ROLES.ROLE_PAUSER], [true], signer_C.address),
         ).to.be.revertedWithCustomError(accessControl, "IsPaused");
+      });
+
+      it("GIVEN contradictory roles WHEN applyRoles THEN fails with ContradictoryValuesInArray", async () => {
+        await expect(
+          accessControl.applyRoles([ATS_ROLES.ROLE_PAUSER, ATS_ROLES.ROLE_PAUSER], [true, false], signer_C.address),
+        )
+          .to.be.revertedWithCustomError(accessControl, "ContradictoryValuesInArray")
+          .withArgs(0, 1);
       });
     });
   });

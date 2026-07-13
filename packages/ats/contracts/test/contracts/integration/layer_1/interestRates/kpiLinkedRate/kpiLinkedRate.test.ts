@@ -99,6 +99,58 @@ export function kpiLinkedRateTests(getCtx: () => AssetMockCtx): void {
           ),
         ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
       });
+
+      it("GIVEN an invalid interest rate WHEN initializeKpiLinkedRate THEN transaction fails with WrongInterestRateValues", async () => {
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.kpiLinkedRate);
+
+        await expect(
+          kpiRate.initializeKpiLinkedRate(
+            {
+              maxRate: 3,
+              baseRate: 2,
+              minRate: 3,
+              startPeriod: 1000,
+              startRate: 2,
+              missedPenalty: 2,
+              reportPeriod: 5000,
+              rateDecimals: 1,
+            },
+            {
+              maxDeviationCap: 1000,
+              baseLine: 700,
+              maxDeviationFloor: 300,
+              impactDataDecimals: 1,
+              adjustmentPrecision: 3,
+            },
+          ),
+        ).to.be.revertedWithCustomError(asset, "WrongInterestRateValues");
+      });
+
+      it("GIVEN an invalid impact data WHEN initializeKpiLinkedRate THEN transaction fails with WrongImpactDataValues", async () => {
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.kpiLinkedRate);
+
+        await expect(
+          kpiRate.initializeKpiLinkedRate(
+            {
+              maxRate: 3,
+              baseRate: 2,
+              minRate: 1,
+              startPeriod: 1000,
+              startRate: 2,
+              missedPenalty: 2,
+              reportPeriod: 5000,
+              rateDecimals: 1,
+            },
+            {
+              maxDeviationCap: 1000,
+              baseLine: 700,
+              maxDeviationFloor: 700,
+              impactDataDecimals: 1,
+              adjustmentPrecision: 3,
+            },
+          ),
+        ).to.be.revertedWithCustomError(asset, "WrongImpactDataValues");
+      });
     });
 
     describe("initializeKpiLinkedRate event", () => {

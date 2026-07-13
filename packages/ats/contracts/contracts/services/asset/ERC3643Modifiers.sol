@@ -83,4 +83,17 @@ abstract contract ERC3643Modifiers {
         ERC1594StorageWrapper.checkIdentity(_from, _to);
         _;
     }
+
+    /**
+     * @dev Modifier that rejects a zero-amount unfreeze request.
+     *
+     * Requirements:
+     * - `_amount` must be strictly positive.
+     *
+     * @param _amount The amount being unfrozen.
+     */
+    modifier onlyPositiveUnfreezeAmount(uint256 _amount) {
+        ERC3643StorageWrapper.checkNonZeroFreezeAmount(_amount);
+        _;
+    }
 }

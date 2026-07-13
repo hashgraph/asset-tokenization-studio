@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { DEFAULT_PARTITION, ATS_ROLES, ZERO } from "@scripts";
+import { DEFAULT_PARTITION, ATS_ROLES, RESOLVER_KEYS, ZERO } from "@scripts";
 import { executeRbac, MAX_UINT256 } from "@test";
 import type { AssetMockCtx } from "@test";
 
@@ -22,6 +22,7 @@ export function principalTests(getCtx: () => AssetMockCtx): void {
     let kycManager: HardhatEthersSigner;
     let holder: HardhatEthersSigner;
     let issuer: HardhatEthersSigner;
+    let unknownSigner: HardhatEthersSigner;
 
     beforeEach(async () => {
       const ctx = getCtx();
@@ -30,6 +31,7 @@ export function principalTests(getCtx: () => AssetMockCtx): void {
       kycManager = ctx.user1;
       holder = ctx.user2;
       issuer = ctx.user3;
+      unknownSigner = ctx.unknownSigner;
 
       // The mega-mock starts in EVM-default state (no initialisers run).
       // Reproduce the bond-fixture's token decimals and nominal value.
@@ -45,6 +47,24 @@ export function principalTests(getCtx: () => AssetMockCtx): void {
       await asset.connect(kycManager).grantKyc(holder.address, EMPTY_VC_ID, ZERO, MAX_UINT256, deployer.address);
     });
 
+    describe("initializePrincipal", () => {
+      it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializePrincipal is called THEN reverts with AccountHasNoRole", async () => {
+        await expect(asset.connect(unknownSigner).initializePrincipal())
+          .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+          .withArgs(unknownSigner.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+      });
+
+      it("GIVEN already-initialised WHEN initializePrincipal is called again THEN reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.initializePrincipal())
+          .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+          .withArgs(RESOLVER_KEYS.principal, 1);
+      });
+
+      it("GIVEN a fresh deployment WHEN initializePrincipal is called THEN emits PrincipalInitialized", async () => {
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.principal);
+        await expect(asset.initializePrincipal()).to.emit(asset, "PrincipalInitialized");
+      });
+    });
     describe("getPrincipalFor", () => {
       it("GIVEN an account with zero balance WHEN getPrincipalFor THEN returns zero numerator with token-precision denominator", async () => {
         const principal = await asset.getPrincipalFor(holder.address);
