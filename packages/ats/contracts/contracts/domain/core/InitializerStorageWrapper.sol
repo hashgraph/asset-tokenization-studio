@@ -173,7 +173,7 @@ library InitializerStorageWrapper {
     }
 
     /// @notice Sets the operational status for a configuration version.
-    /// @dev Used by tests (via MockDiamondCut.forceNonOperational()) to set status to 0
+    /// @dev Used by tests (via MockDiamondCutHelpers.forceNonOperational()) to set status to 0
     ///      and by `setOperationalStatus` flow to set status to 1 after full initialisation.
     /// @param configId Resolver-proxy configuration.
     /// @param versionId Configuration version.

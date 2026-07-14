@@ -3,9 +3,9 @@
 /**
  * Integration tests for the AssetMock BLR test-only configuration.
  *
- * These tests verify that the full IAsset facet union plus MockDiamondCut
- * can be registered in the BusinessLogicResolver without selector or
- * resolver-key collisions.
+ * These tests verify that the full IAsset facet union, the real DiamondFacet, and the
+ * standalone MockDiamondCutHelpers test-controls facet can all be registered in the
+ * BusinessLogicResolver without selector or resolver-key collisions.
  *
  * @module test/contracts/integration/assetMock/assetMockConfiguration
  */
@@ -53,19 +53,20 @@ describe("AssetMock BLR Configuration - Integration Tests", () => {
     expect(Number(facetCount)).to.equal(expectedFacets.length);
   });
 
-  it("should register MockDiamondCut under the diamond resolver key", async () => {
+  it("should register the real DiamondFacet under the diamond resolver key", async () => {
     // GIVEN the full ATS infrastructure with the AssetMock config registered
 
     // WHEN we query the BLR's latest version for the diamond resolver key
     const diamondVersion = (await ctx.blr.getLatestVersions([RESOLVER_KEYS.diamond]))[0];
 
-    // THEN the diamond facet (MockDiamondCut) has been registered (version >= 1)
+    // THEN the diamond facet (the real DiamondFacet) has been registered (version >= 1)
     expect(Number(diamondVersion)).to.be.greaterThanOrEqual(1);
 
-    // AND the expected facet list includes MockDiamondCut rather than DiamondFacet
+    // AND the expected facet list includes the real DiamondFacet plus the standalone
+    // MockDiamondCutHelpers test-controls facet
     const mockFacetNames = getAssetMockFacets();
-    expect(mockFacetNames).to.include("MockDiamondCut");
-    expect(mockFacetNames).to.not.include("DiamondFacet");
+    expect(mockFacetNames).to.include("DiamondFacet");
+    expect(mockFacetNames).to.include("MockDiamondCutHelpers");
   });
 
   it("should have the same facet count across loadFixture restores", async () => {

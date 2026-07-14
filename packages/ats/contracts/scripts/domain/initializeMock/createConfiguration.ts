@@ -22,15 +22,15 @@ import { getMockFacetDefinition, INITIALIZE_MOCK_CONFIG_ID } from "./mockFacetsR
 import type { MockFacetName } from "./mockFacetsRegistry";
 
 // TEST-ONLY: facet set for the InitializeMock domain — the real InitializerFacet
-// followed by `MockDiamondCut` (a mock variant of `DiamondFacet` that exposes
-// the same diamond-cut/loupe surface plus an `initializeDiamondCut()` hook so
-// it can participate in the initializer flow) and the three mock facets.
-// `InitializerFacet` is resolved from `atsRegistry`; the mocks are resolved
-// from the local mock registry since they are excluded from the auto-generated
-// atsRegistry.
+// and DiamondFacet (registered under RESOLVER_KEY_DIAMOND like every other domain
+// config; its `initializeDiamondCut()`/`updateConfigVersion()` let it participate
+// in the initializer flow like any other facet) plus the three mock facets.
+// `InitializerFacet` and `DiamondFacet` are resolved from `atsRegistry`; the mocks
+// are resolved from the local mock registry since they are excluded from the
+// auto-generated atsRegistry.
 export const INITIALIZE_MOCK_FACETS: readonly (FacetName | MockFacetName)[] = [
   "InitializerFacet",
-  "MockDiamondCut",
+  "DiamondFacet",
   "MockFacet1",
   "MockFacet2",
   "MockFacet3",

@@ -16,7 +16,7 @@ import { InterestRateStorageWrapper } from "../../domain/asset/InterestRateStora
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 import { IDiamondCutManager } from "../../infrastructure/diamond/IDiamondCutManager.sol";
-import { IMockDiamondCut } from "./MockDiamondCut.sol";
+import { IMockDiamondCutHelpers } from "./MockDiamondCutHelpers.sol";
 import { ResolverProxy } from "../../infrastructure/proxy/ResolverProxy.sol";
 import { IResolverProxy } from "../../infrastructure/proxy/IResolverProxy.sol";
 import { IBusinessLogicResolver } from "../../infrastructure/diamond/IBusinessLogicResolver.sol";
@@ -31,7 +31,7 @@ import { IBusinessLogicResolver } from "../../infrastructure/diamond/IBusinessLo
 interface IMockFactory is IFactory {
     /// @notice Deploy a test-only asset diamond against the AssetMock configuration.
     /// @dev Mirrors `Factory._deploySecurityProxy` but force-readies every facet via
-    ///      `MockDiamondCut.forceFacetsReady` instead of running per-facet initialisers.
+    ///      `MockDiamondCutHelpers.forceFacetsReady` instead of running per-facet initialisers.
     ///      The caller (test deployer) receives `DEFAULT_ADMIN_ROLE` on the proxy so per-suite test
     ///      configuration (forceNonOperational, etc.) remains possible.
     /// @param resolver_ The deployed BusinessLogicResolver (BLR) address.
@@ -46,8 +46,8 @@ interface IMockFactory is IFactory {
 abstract contract MockFactory is Factory, IMockFactory {
     /// @notice Resolver configuration ID that registers the full IAsset facet union.
     /// @dev Every asset-class facet set, deduplicated (it remains the complete union even though
-    ///      only equity, bond and depositToken are deployable through the factory), with
-    ///      DiamondFacet swapped for MockDiamondCut and EvmAccessorsFacet appended. Created by the
+    ///      only equity, bond and depositToken are deployable through the factory), with the real
+    ///      DiamondFacet plus MockDiamondCutHelpers and EvmAccessorsFacet appended. Created by the
     ///      TypeScript-side `createAssetMockConfiguration` at infrastructure deploy time.
     ///      Value: 0x000000000000000000000000000000000000000000000000000000000000000a
     bytes32 private constant _ASSET_MOCK_CONFIG_ID = 0x000000000000000000000000000000000000000000000000000000000000000a;
@@ -84,7 +84,7 @@ abstract contract MockFactory is Factory, IMockFactory {
         //    This includes EvmAccessorsFacet (part of the full union), so the
         //    explicit initializeEvmAccessors() call from the production path is
         //    redundant here.
-        IMockDiamondCut(assetAddress_).forceFacetsReady(facetIds);
+        IMockDiamondCutHelpers(assetAddress_).forceFacetsReady(facetIds);
 
         // 5. Mark the proxy operational.  We use `forceSetOperational` (a mock
         //    control) instead of the production `IInitializer.setOperationalStatus`
@@ -93,19 +93,23 @@ abstract contract MockFactory is Factory, IMockFactory {
         //    `IInitializer.initializeInitializer(150)`, which cannot be called here
         //    because `forceFacetsReady` already marked the InitializerFacet.
         //    Since every facet is already READY, direct status-setting is equivalent.
-        IMockDiamondCut(assetAddress_).forceSetOperational();
+        IMockDiamondCutHelpers(assetAddress_).forceSetOperational();
 
         // 6. Do NOT renounce DEFAULT_ADMIN_ROLE — the caller needs it for
         //    per-suite reconfiguration (forceNonOperational, etc.).
     }
 
     /// @inheritdoc Factory
-    /// @notice Deploys a security proxy and initialises time-travel state.
-    /// @dev Initialises time-travel state on the deployed security after the base deployment.
+    /// @notice Deploys a security proxy and initialises time-travel and mock-helper state.
+    /// @dev Initialises time-travel state and the `MockDiamondCutHelpers` facet on the deployed
+    ///      security after the base deployment — both are `TEST_ONLY_EXTRAS` facets appended to
+    ///      every test configuration, and `setOperationalStatus` requires every registered facet
+    ///      to be marked ready.
     /// @param _securityData Core security configuration shared across all security types.
     /// @return securityAddress_ Address of the deployed security proxy.
     function _deploySecurity(SecurityData calldata _securityData) internal override returns (address securityAddress_) {
         securityAddress_ = super._deploySecurity(_securityData);
         ITimeTravel(securityAddress_).initializeTimeTravel();
+        IMockDiamondCutHelpers(securityAddress_).initializeMockDiamondCutHelpers();
     }
 }

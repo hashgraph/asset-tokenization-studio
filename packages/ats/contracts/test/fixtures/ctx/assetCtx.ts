@@ -44,13 +44,13 @@ type InfraData = Awaited<ReturnType<typeof deployAtsInfrastructureFullAssetFixtu
 /**
  * Resolved AssetMock context with every contract handle bound to the same proxy.
  *
- * - `asset` — typed as IAssetMock (full IAsset + MockDiamondCut interface)
+ * - `asset` — typed as IAssetMock (full IAsset + MockDiamondCutHelpers interface)
  * - `diamond` — the ResolverProxy (diamond) contract instance
  * - All infrastructure handles from the base fixture (blr, factory, accessControl,
  *   signers, etc.) — inherited via the spread of InfraData.
  */
 export interface AssetMockCtx extends InfraData {
-  /** IAssetMock handle bound to the diamond proxy address (combines IAsset + MockDiamondCut). */
+  /** IAssetMock handle bound to the diamond proxy address (combines IAsset + MockDiamondCutHelpers). */
   asset: IAssetMock;
   /** The deployed ResolverProxy (diamond) contract. */
   diamond: ResolverProxy;

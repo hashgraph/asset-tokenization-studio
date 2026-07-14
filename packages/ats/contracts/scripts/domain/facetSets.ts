@@ -169,7 +169,7 @@ export const ASSET_TYPE_FACETS = [
  *
  * Production has no single asset that deploys every facet, so this currently has one
  * consumer — the test-only AssetMock "mega-asset" configuration, which passes it through
- * `buildFacetList()` to apply the `DiamondFacet`→`MockDiamondCut` swap and append the
+ * `buildFacetList()` to append `TimeTravelFacet`, `MockDiamondCutHelpers`, and the
  * test-only `EvmAccessorsFacet`. It is intentionally a production-domain constant (it is
  * a facet *set*, like the tiers) so it is reusable for future registry/config validation.
  */

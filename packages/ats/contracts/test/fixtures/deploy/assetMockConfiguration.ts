@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // TEST-ONLY FILE: AssetMock domain configuration. Registers the full IAsset facet
-// union (all 7 asset-class facet sets, deduplicated) with DiamondFacet → MockDiamondCut
+// union (all 7 asset-class facet sets, deduplicated) alongside the real DiamondFacet
+// and the standalone MockDiamondCutHelpers test-controls facet.
 //
 // The facet list is built dynamically by the caller and passed in as facetNames,
 // replacing the old hardcoded per-type arrays that lived under scripts/domain/assetMock/.
@@ -37,9 +38,9 @@ export function setAssetMockFacets(names: string[]): void {
 /**
  * TEST-ONLY: create the AssetMock configuration in BusinessLogicResolver.
  *
- * Registers the union of all asset-class facets (replacing DiamondFacet with
- * MockDiamondCut) under ASSET_MOCK_CONFIG_ID so a single diamond proxy exposes
- * every IAsset function plus the mock testing controls.
+ * Registers the union of all asset-class facets (including the real DiamondFacet plus
+ * the standalone MockDiamondCutHelpers) under ASSET_MOCK_CONFIG_ID so a single diamond
+ * proxy exposes every IAsset function plus the mock testing controls.
  *
  * @param blrContract        BusinessLogicResolver contract instance.
  * @param facetNames         Names of the facets to include in this configuration.
