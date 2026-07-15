@@ -116,6 +116,13 @@ export function transferTests(getCtx: () => AssetMockCtx): void {
           expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_D.address)).to.equal(amount / 2);
           expect(await asset.totalSupplyByPartition(DEFAULT_PARTITION)).to.equal(amount);
         });
+
+        it("GIVEN a zero-value amount WHEN transfer THEN reverts with ZeroValue", async () => {
+          await expect(asset.connect(signer_C).transfer(signer_D.address, 0)).to.be.revertedWithCustomError(
+            asset,
+            "ZeroValue",
+          );
+        });
       });
 
       describe("transferFrom", () => {
@@ -147,6 +154,12 @@ export function transferTests(getCtx: () => AssetMockCtx): void {
           expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_C.address)).to.equal(amount / 2);
           expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_D.address)).to.equal(amount / 2);
           expect(await asset.totalSupplyByPartition(DEFAULT_PARTITION)).to.equal(amount);
+        });
+
+        it("GIVEN a zero-value amount WHEN transferFrom THEN reverts with ZeroValue", async () => {
+          await expect(
+            asset.connect(signer_D).transferFrom(signer_C.address, signer_D.address, 0),
+          ).to.be.revertedWithCustomError(asset, "ZeroValue");
         });
       });
 
@@ -184,6 +197,12 @@ export function transferTests(getCtx: () => AssetMockCtx): void {
           expect(await asset.balanceOf(signer_D.address)).to.be.equal(amount / 2);
           expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.be.equal(amount / 2);
           expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_D.address)).to.be.equal(amount / 2);
+        });
+
+        it("GIVEN a zero-value amount WHEN transferWithData THEN reverts with ZeroValue", async () => {
+          await expect(
+            asset.connect(signer_E).transferWithData(signer_D.address, 0, DATA),
+          ).to.be.revertedWithCustomError(asset, "ZeroValue");
         });
       });
 
@@ -224,6 +243,12 @@ export function transferTests(getCtx: () => AssetMockCtx): void {
           expect(await asset.balanceOf(signer_D.address)).to.be.equal(amount / 2);
           expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.be.equal(amount / 2);
           expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_D.address)).to.be.equal(amount / 2);
+        });
+
+        it("GIVEN a zero-value amount WHEN transferFromWithData THEN reverts with ZeroValue", async () => {
+          await expect(
+            asset.connect(signer_D).transferFromWithData(signer_E.address, signer_D.address, 0, DATA),
+          ).to.be.revertedWithCustomError(asset, "ZeroValue");
         });
       });
 

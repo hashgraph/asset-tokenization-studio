@@ -55,6 +55,7 @@ abstract contract TransferAndLockByPartition is ITransferAndLockByPartition, Mod
         onlyWithValidExpirationTimestamp(_expirationTimestamp)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyPositiveTransferAmount(_amount)
         returns (uint256 lockId_)
     {
         TokenCoreOps.transferByPartition(

@@ -322,73 +322,6 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
     }
 
     /**
-     * @notice Returns whether a configuration version supports an interface identifier.
-     * @param _dcms Diamond cut manager storage reference.
-     * @param _configurationId Identifier of the configuration to query.
-     * @param _version Configuration version to query.
-     * @param _interfaceId Interface identifier to check.
-     * @return exists_ True when the interface is registered as supported.
-     */
-    function _resolveSupportsInterface(
-        DiamondCutManagerStorage storage _dcms,
-        bytes32 _configurationId,
-        uint256 _version,
-        bytes4 _interfaceId
-    ) internal view returns (bool exists_) {
-        exists_ = _dcms.supportsInterface[_buildHashSelector(_configurationId, _version, _interfaceId)];
-    }
-
-    /**
-     * @notice Returns whether a resolver proxy configuration version is registered.
-     * @param _dcms Diamond cut manager storage reference.
-     * @param _configurationId Identifier of the configuration to inspect.
-     * @param _version Version to inspect.
-     * @return isRegistered_ True when the active configuration contains the version.
-     */
-    function _isResolverProxyConfigurationRegistered(
-        DiamondCutManagerStorage storage _dcms,
-        bytes32 _configurationId,
-        uint256 _version
-    ) internal view returns (bool isRegistered_) {
-        return !_isResolverProxyConfigurationNotRegistered(_dcms, _configurationId, _version);
-    }
-
-    /**
-     * @notice Returns whether a resolver proxy configuration version is not registered.
-     * @dev Version zero, inactive configurations and versions above latest are considered
-     *      unregistered.
-     * @param _dcms Diamond cut manager storage reference.
-     * @param _configurationId Identifier of the configuration to inspect.
-     * @param _version Version to inspect.
-     * @return isRegistered_ True when the version is not registered.
-     */
-    function _isResolverProxyConfigurationNotRegistered(
-        DiamondCutManagerStorage storage _dcms,
-        bytes32 _configurationId,
-        uint256 _version
-    ) internal view returns (bool isRegistered_) {
-        return
-            _version == 0 ||
-            !_dcms.activeConfigurations[_configurationId] ||
-            _version > _dcms.latestVersion[_configurationId];
-    }
-
-    /**
-     * @notice Returns active configuration identifiers using pagination.
-     * @param _dcms Diamond cut manager storage reference.
-     * @param _pageIndex Page index used to derive the start offset.
-     * @param _pageLength Maximum number of entries requested.
-     * @return configurationIds_ Configuration identifiers in the requested page.
-     */
-    function _getConfigurations(
-        DiamondCutManagerStorage storage _dcms,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view returns (bytes32[] memory configurationIds_) {
-        configurationIds_ = _buildPaginated(_dcms.configurations, _pageIndex, _pageLength);
-    }
-
-    /**
      * @notice Returns the number of facets registered for a configuration version.
      * @param _configurationId Identifier of the configuration to query.
      * @param _version Configuration version to query.
@@ -632,25 +565,6 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         unchecked {
             facetVersion_ = dcms.facetVersions[_buildHash(_configurationId, _version)][pos - 1];
         }
-    }
-
-    /**
-     * @notice Resolves the facet address responsible for handling a proxy call selector.
-     * @dev Returns the zero address when the selector is not registered for the requested
-     *      configuration version.
-     * @param _configurationId Identifier of the configuration used by the proxy.
-     * @param _version Configuration version used by the proxy.
-     * @param _selector Function selector to resolve.
-     * @return facetAddress_ Facet implementation address registered for the selector.
-     */
-    function _resolveResolverProxyCall(
-        bytes32 _configurationId,
-        uint256 _version,
-        bytes4 _selector
-    ) internal view returns (address facetAddress_) {
-        facetAddress_ = _diamondCutManagerStorage().facetAddress[
-            _buildHashSelector(_configurationId, _version, _selector)
-        ];
     }
 
     /**

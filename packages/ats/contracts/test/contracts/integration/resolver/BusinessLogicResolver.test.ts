@@ -458,6 +458,42 @@ describe("BusinessLogicResolver", () => {
       const replacementAddressAfterRemoval = await businessLogicResolver.getReplacementAddress(replacedAddress);
       expect(replacementAddressAfterRemoval).to.equal(ADDRESS_ZERO);
     });
+
+    it("GIVEN an address with no replacement registered WHEN removeReplacementAddress THEN it is a no-op", async () => {
+      const neverReplacedAddress = "0x0102030405010203040501020304050102030405";
+
+      await expect(businessLogicResolver.removeReplacementAddress(neverReplacedAddress))
+        .to.emit(businessLogicResolver, "ReplacementAddressRemoved")
+        .withArgs(neverReplacedAddress, ADDRESS_ZERO);
+
+      expect(await businessLogicResolver.getReplacementAddress(neverReplacedAddress)).to.equal(ADDRESS_ZERO);
+    });
+
+    it("GIVEN an address already in use as a replacement WHEN replacing it THEN transaction fails with InvalidReplacedAddress", async () => {
+      const replacedAddress = "0x0102030405010203040501020304050102030405";
+      const newAddress = "0x0504030201050403020105040302010504030201";
+      const anotherNewAddress = "0x0203040501020304050102030405010203040502";
+
+      // newAddress is now registered as a replacement, so it cannot be used as a _replacedAddress
+      await businessLogicResolver.updateReplacementAddress(replacedAddress, newAddress);
+
+      await expect(businessLogicResolver.updateReplacementAddress(newAddress, anotherNewAddress))
+        .to.be.revertedWithCustomError(businessLogicResolver, "InvalidReplacedAddress")
+        .withArgs(newAddress);
+    });
+
+    it("GIVEN an address already replaced WHEN using it as a replacement THEN transaction fails with InvalidReplacementAddress", async () => {
+      const replacedAddress = "0x0102030405010203040501020304050102030405";
+      const newAddress = "0x0504030201050403020105040302010504030201";
+      const anotherReplacedAddress = "0x0203040501020304050102030405010203040502";
+
+      // replacedAddress has already been replaced, so it cannot be used as a _replacementAddress
+      await businessLogicResolver.updateReplacementAddress(replacedAddress, newAddress);
+
+      await expect(businessLogicResolver.updateReplacementAddress(anotherReplacedAddress, replacedAddress))
+        .to.be.revertedWithCustomError(businessLogicResolver, "InvalidReplacementAddress")
+        .withArgs(replacedAddress);
+    });
   });
 
   it("GIVEN a facet registered with a mismatched key WHEN registerBusinessLogics THEN fails with BusinessLogicKeyMismatch", async () => {

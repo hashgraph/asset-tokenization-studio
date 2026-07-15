@@ -98,7 +98,6 @@ library EnumerableSetBytes4 {
      * @return True if the value was present and has been deleted; false otherwise.
      */
     function _remove(Set storage set, bytes4 value) private returns (bool) {
-        if (!_contains(set, value)) return false;
         // We read and store the value's index to prevent multiple reads from the same storage slot
         uint256 valueIndex = set._indexes[value];
 

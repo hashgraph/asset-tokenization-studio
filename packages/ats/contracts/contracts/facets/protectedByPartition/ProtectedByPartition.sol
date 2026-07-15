@@ -48,17 +48,11 @@ abstract contract ProtectedByPartition is IProtectedByPartition, Modifiers {
         onlyUnpaused
         onlyRole(ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition))
         onlyProtectedPartitions
+        onlyPositiveTransferAmount(_amount)
         onlyCanTransferFromByPartition(_from, _to, _partition, _amount)
         returns (bytes32)
     {
-        emit ProtectedTransferredByPartition(
-            EvmAccessors.getMsgSender(),
-            _from,
-            _to,
-            _amount,
-            _partition,
-            _protectionData
-        );
+        _emitProtectedTransferredByPartition(_from, _to, _amount, _partition, _protectionData);
 
         return TokenCoreOps.protectedTransferFromByPartition(_partition, _from, _to, _amount, _protectionData);
     }
@@ -82,5 +76,33 @@ abstract contract ProtectedByPartition is IProtectedByPartition, Modifiers {
         TokenCoreOps.protectedRedeemFromByPartition(_partition, _from, _amount, _protectionData);
 
         emit ProtectedRedeemedByPartition(EvmAccessors.getMsgSender(), _from, _amount, _partition, _protectionData);
+    }
+
+    /**
+     * @notice Emits {ProtectedTransferredByPartition} for a protected partition transfer.
+     * @dev Extracted to its own stack frame — `protectedTransferFromByPartition`'s modifier
+     *      list plus this emit's argument count exceeds Solidity's 16-slot stack window
+     *      (legacy codegen, no viaIR).
+     * @param _from The token holder whose balance is debited.
+     * @param _to The recipient credited with the transferred amount.
+     * @param _amount The transferred amount.
+     * @param _partition The partition the transfer is executed on.
+     * @param _protectionData The EIP-712 protection signature data authorising the transfer.
+     */
+    function _emitProtectedTransferredByPartition(
+        address _from,
+        address _to,
+        uint256 _amount,
+        bytes32 _partition,
+        IProtectedPartitions.ProtectionData calldata _protectionData
+    ) private {
+        emit ProtectedTransferredByPartition(
+            EvmAccessors.getMsgSender(),
+            _from,
+            _to,
+            _amount,
+            _partition,
+            _protectionData
+        );
     }
 }

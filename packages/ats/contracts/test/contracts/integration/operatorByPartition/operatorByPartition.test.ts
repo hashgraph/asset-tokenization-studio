@@ -34,9 +34,12 @@ export function operatorByPartitionTests(getCtx: () => AssetMockCtx): void {
         { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
         { role: ATS_ROLES.ROLE_PAUSER, members: [signer_A.address] },
         { role: ATS_ROLES.ROLE_CONTROL_LIST, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_INTERNAL_KYC_MANAGER, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_PROTECTED_PARTITIONS, members: [signer_A.address] },
       ]);
 
       await asset.addIssuer(signer_A.address);
+      await asset.connect(signer_A).activateInternalKyc();
       await grantKycToHolders(asset, signer_A, [signer_A, signer_B, signer_C, signer_D]);
 
       await asset.issueByPartition({
@@ -116,6 +119,20 @@ export function operatorByPartitionTests(getCtx: () => AssetMockCtx): void {
         expect(await asset.isOperatorForPartition(DEFAULT_PARTITION, signer_B.address, signer_A.address)).to.equal(
           false,
         );
+      });
+
+      it("GIVEN a non-KYC'd caller WHEN revokeOperatorByPartition THEN reverts with InvalidKycStatus", async () => {
+        await asset.connect(signer_A).revokeKyc(signer_A.address);
+        await expect(
+          asset.connect(signer_A).revokeOperatorByPartition(DEFAULT_PARTITION, signer_B.address),
+        ).to.be.revertedWithCustomError(asset, "InvalidKycStatus");
+      });
+
+      it("GIVEN a non-KYC'd operator WHEN revokeOperatorByPartition THEN reverts with InvalidKycStatus", async () => {
+        await asset.connect(signer_A).revokeKyc(signer_B.address);
+        await expect(
+          asset.connect(signer_A).revokeOperatorByPartition(DEFAULT_PARTITION, signer_B.address),
+        ).to.be.revertedWithCustomError(asset, "InvalidKycStatus");
       });
     });
 
@@ -224,6 +241,54 @@ export function operatorByPartitionTests(getCtx: () => AssetMockCtx): void {
           initialBalanceC + BigInt(AMOUNT),
         );
       });
+
+      it("GIVEN protected partitions without wildcard role WHEN operatorTransferByPartition THEN reverts with PartitionsAreProtectedAndNoRole", async () => {
+        await asset.connect(signer_A).authorizeOperatorByPartition(DEFAULT_PARTITION, signer_B.address);
+        await asset.connect(signer_A).protectPartitions();
+
+        await expect(
+          asset.connect(signer_B).operatorTransferByPartition({
+            partition: DEFAULT_PARTITION,
+            from: signer_A.address,
+            to: signer_C.address,
+            value: AMOUNT,
+            data: EMPTY_HEX_BYTES,
+            operatorData: EMPTY_HEX_BYTES,
+          }),
+        ).to.be.revertedWithCustomError(asset, "PartitionsAreProtectedAndNoRole");
+      });
+
+      it("GIVEN a zero-value operator transfer WHEN operatorTransferByPartition THEN reverts with ZeroValue", async () => {
+        await asset.connect(signer_A).authorizeOperatorByPartition(DEFAULT_PARTITION, signer_B.address);
+
+        await expect(
+          asset.connect(signer_B).operatorTransferByPartition({
+            partition: DEFAULT_PARTITION,
+            from: signer_A.address,
+            to: signer_D.address,
+            value: 0,
+            data: EMPTY_HEX_BYTES,
+            operatorData: EMPTY_HEX_BYTES,
+          }),
+        ).to.be.revertedWithCustomError(asset, "ZeroValue");
+      });
+
+      it("GIVEN protected partitions with wildcard role WHEN operatorTransferByPartition THEN succeeds", async () => {
+        await asset.connect(signer_A).authorizeOperatorByPartition(DEFAULT_PARTITION, signer_B.address);
+        await asset.connect(signer_A).protectPartitions();
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_WILD_CARD, signer_B.address);
+
+        await expect(
+          asset.connect(signer_B).operatorTransferByPartition({
+            partition: DEFAULT_PARTITION,
+            from: signer_A.address,
+            to: signer_C.address,
+            value: AMOUNT,
+            data: EMPTY_HEX_BYTES,
+            operatorData: EMPTY_HEX_BYTES,
+          }),
+        ).to.not.be.reverted;
+      });
     });
 
     // ─── operatorRedeemByPartition ────────────────────────────────────────────────
@@ -246,6 +311,15 @@ export function operatorByPartitionTests(getCtx: () => AssetMockCtx): void {
             .connect(signer_B)
             .operatorRedeemByPartition(DEFAULT_PARTITION, signer_A.address, AMOUNT, EMPTY_HEX_BYTES, EMPTY_HEX_BYTES),
         ).to.be.revertedWithCustomError(asset, "InsufficientAllowance");
+      });
+
+      it("GIVEN an approved but non-operator caller WHEN operatorRedeemByPartition THEN reverts with Unauthorized", async () => {
+        await asset.connect(signer_A).approve(signer_B.address, AMOUNT);
+        await expect(
+          asset
+            .connect(signer_B)
+            .operatorRedeemByPartition(DEFAULT_PARTITION, signer_A.address, AMOUNT, EMPTY_HEX_BYTES, EMPTY_HEX_BYTES),
+        ).to.be.revertedWithCustomError(asset, "Unauthorized");
       });
 
       it("GIVEN insufficient balance WHEN operatorRedeemByPartition THEN reverts", async () => {

@@ -79,6 +79,7 @@ abstract contract OperatorByPartition is IOperatorByPartition, Modifiers {
         validateAddressNotZero(_operatorTransferData.to)
         onlyDefaultPartitionWithSinglePartition(_operatorTransferData.partition)
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyPositiveTransferAmount(_operatorTransferData.value)
         onlyCanTransferFromByPartition(
             _operatorTransferData.from,
             _operatorTransferData.to,

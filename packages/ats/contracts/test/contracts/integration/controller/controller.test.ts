@@ -167,6 +167,12 @@ export function controllerTests(getCtx: () => AssetMockCtx): void {
           expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.equal(amount);
         });
 
+        it("GIVEN a zero-value amount WHEN controllerTransfer THEN reverts with ZeroValue", async () => {
+          await expect(
+            asset.connect(signer_B).controllerTransfer(signer_D.address, signer_E.address, 0, data, operatorData),
+          ).to.be.revertedWithCustomError(asset, "ZeroValue");
+        });
+
         it("GIVEN a controllable token WHEN controllerRedeem THEN transaction succeeds", async () => {
           expect(await asset.connect(signer_B).controllerRedeem(signer_D.address, amount, data, operatorData))
             .to.emit(asset, "ControllerRedemption")
@@ -252,6 +258,16 @@ export function controllerTests(getCtx: () => AssetMockCtx): void {
           expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.be.equal(amount);
           expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_D.address)).to.be.equal(amount);
           expect(await asset.totalSupplyByPartition(DEFAULT_PARTITION)).to.be.equal(amount * 2);
+        });
+
+        it("GIVEN a zero-value amount WHEN forcedTransfer THEN reverts with ZeroValue", async () => {
+          await asset.connect(signer_B).mint(signer_E.address, amount);
+          await asset.grantRole(ATS_ROLES.ROLE_CONTROLLER, signer_E.address);
+
+          await expect(asset.forcedTransfer(signer_E.address, signer_D.address, 0)).to.be.revertedWithCustomError(
+            asset,
+            "ZeroValue",
+          );
         });
 
         it("GIVEN a paused token WHEN attempting to forcedTransfer IsPaused error", async () => {

@@ -39,6 +39,7 @@ abstract contract TransferByPartition is ITransferByPartition, Modifiers {
         onlyActivated
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyPositiveTransferAmount(_basicTransferInfo.value)
         onlyCanTransferFromByPartition(
             EvmAccessors.getMsgSender(),
             _basicTransferInfo.to,

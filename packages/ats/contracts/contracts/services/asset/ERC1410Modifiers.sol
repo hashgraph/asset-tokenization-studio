@@ -24,4 +24,17 @@ abstract contract ERC1410Modifiers {
         ERC1410StorageWrapper.requireOperator(_partition, _account);
         _;
     }
+
+    /**
+     * @dev Modifier that rejects a zero-value partition transfer.
+     *
+     * Requirements:
+     * - `_value` must be strictly positive.
+     *
+     * @param _value The transfer amount.
+     */
+    modifier onlyPositiveTransferAmount(uint256 _value) {
+        ERC1410StorageWrapper.checkNonZeroTransferAmount(_value);
+        _;
+    }
 }

@@ -55,14 +55,15 @@ export function transferByPartitionTests(getCtx: () => AssetMockCtx): void {
         await setupBalances();
       });
 
-      describe("onlyDefaultPartitionWithSinglePartition", () => {
-        it("GIVEN a non-default partition in single-partition mode WHEN transferByPartition THEN reverts with PartitionNotAllowedInSinglePartitionMode", async () => {
-          await expect(
-            asset
-              .connect(signer_A)
-              .transferByPartition(_WRONG_PARTITION, { to: signer_C.address, value: _AMOUNT }, "0x"),
-          ).to.be.revertedWithCustomError(asset, "PartitionNotAllowedInSinglePartitionMode");
-        });
+      it("GIVEN a non-default partition in single-partition mode WHEN transferByPartition THEN reverts with PartitionNotAllowedInSinglePartitionMode", async () => {
+        await expect(
+          asset.connect(signer_A).transferByPartition(_WRONG_PARTITION, { to: signer_C.address, value: _AMOUNT }, "0x"),
+        ).to.be.revertedWithCustomError(asset, "PartitionNotAllowedInSinglePartitionMode");
+      });
+      it("GIVEN a zero-value transfer WHEN transferByPartition THEN reverts with ZeroValue", async () => {
+        await expect(
+          asset.connect(signer_A).transferByPartition(DEFAULT_PARTITION, { to: signer_C.address, value: 0 }, "0x"),
+        ).to.be.revertedWithCustomError(asset, "ZeroValue");
       });
 
       describe("Happy path", () => {

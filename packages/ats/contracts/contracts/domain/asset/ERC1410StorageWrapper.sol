@@ -1074,6 +1074,17 @@ library ERC1410StorageWrapper {
     }
 
     /**
+     * @notice Reverts with `ZeroValue` when `_value` is zero.
+     * @dev Guards `transferByPartition` against creating a zero-balance ("ghost") partition
+     *      entry on the receiver via `addPartitionToOnly`, the same class of issue closed for
+     *      unfreeze and hold execute/release by `checkNonZeroFreezeAmount`/`checkNonZeroHoldAmount`.
+     * @param _value The transfer amount being validated.
+     */
+    function checkNonZeroTransferAmount(uint256 _value) internal pure {
+        if (_value == 0) revert IERC1410Types.ZeroValue();
+    }
+
+    /**
      * @notice Rebases an account's partition balance against the active adjustment factor.
      * @dev No-op when the account has no entry for the partition. Otherwise computes the factor for the
      *      (account, partition) pair, scales the stored amount and — when the rebase changes the

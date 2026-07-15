@@ -78,6 +78,16 @@ export function batchControllerTests(getCtx: () => AssetMockCtx): void {
           expect(finalBalanceE).to.equal(initialBalanceE + BigInt(transferAmount * 2));
         });
 
+        it("GIVEN a zero-value amount in the batch WHEN batchForcedTransfer THEN reverts with ZeroValue", async () => {
+          const fromList = [signer_F.address, signer_D.address];
+          const toList = [signer_E.address, signer_E.address];
+          const amounts = [transferAmount, 0];
+
+          await expect(
+            asset.connect(signer_A).batchForcedTransfer(fromList, toList, amounts),
+          ).to.be.revertedWithCustomError(asset, "ZeroValue");
+        });
+
         describe("bug Transfer", () => {
           it("GIVEN controller WHEN batchForcedTransfer THEN Transfer event is emitted for each transfer", async () => {
             const fromList = [signer_F.address, signer_D.address];

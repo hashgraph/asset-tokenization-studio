@@ -30,7 +30,6 @@ import {
 import { createAssetMockConfiguration } from "./assetMockConfiguration";
 import { ALL_ASSET_FACETS, buildFacetList } from "@scripts/domain";
 import { BusinessLogicResolver__factory, IMockFactory__factory, ProxyAdmin__factory } from "@contract-types";
-import type { IMockFactory, BusinessLogicResolver, ProxyAdmin } from "@contract-types";
 
 /**
  * Augmented deployment type that includes the AssetMock configuration.
