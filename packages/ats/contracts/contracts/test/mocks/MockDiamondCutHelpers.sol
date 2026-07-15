@@ -20,6 +20,7 @@ import { KycStorageWrapper } from "../../domain/core/KycStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC20StorageWrapper } from "../../domain/asset/ERC20StorageWrapper.sol";
 import { ERC20VotesStorageWrapper } from "../../domain/asset/ERC20VotesStorageWrapper.sol";
+import { NominalValueStorageWrapper } from "../../domain/asset/NominalValueStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "../../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { ScheduledTasksLib } from "../../facets/scheduledTasksLib/ScheduledTasksLib.sol";
 
@@ -104,6 +105,24 @@ interface IMockDiamondCutHelpers {
      * @param _newDecimals New decimal precision to expose.
      */
     function forceDecimals(uint8 _newDecimals) external;
+
+    /**
+     * @notice Forces the nominal value state reported by the mock.
+     * @dev Mutates nominal-value metadata state directly, bypassing the real facet's
+     *      registration guard and role checks entirely.
+     * @param _nominalValue New nominal value to store.
+     * @param _nominalValueDecimals New nominal value decimal precision to store.
+     * @param _nominalValueCurrency New nominal value currency code to store.
+     * @param _effectiveDatetime New effective datetime to store.
+     * @param _isUnitNominalValue True to mark the nominal value as unit-based, false otherwise.
+     */
+    function forceSetNominalValue(
+        uint256 _nominalValue,
+        uint8 _nominalValueDecimals,
+        bytes3 _nominalValueCurrency,
+        uint256 _effectiveDatetime,
+        bool _isUnitNominalValue
+    ) external;
 
     /**
      * @notice Forces whether ERC20Votes-related behaviour is activated.
@@ -257,6 +276,25 @@ contract MockDiamondCutHelpers is IStaticFunctionSelectors, IMockDiamondCutHelpe
     }
 
     /// @inheritdoc IMockDiamondCutHelpers
+    /// @dev Writes the nominal value fields directly through `NominalValueStorageWrapper`,
+    ///      bypassing the real facet's registration guard and role checks entirely.
+    function forceSetNominalValue(
+        uint256 _nominalValue,
+        uint8 _nominalValueDecimals,
+        bytes3 _nominalValueCurrency,
+        uint256 _effectiveDatetime,
+        bool _isUnitNominalValue
+    ) external override {
+        NominalValueStorageWrapper.initializeNominalValue(
+            _nominalValue,
+            _nominalValueDecimals,
+            _nominalValueCurrency,
+            _effectiveDatetime,
+            _isUnitNominalValue
+        );
+    }
+
+    /// @inheritdoc IMockDiamondCutHelpers
     /// @dev Writes the ERC20Votes activation flag directly through the votes storage wrapper.
     function forceErc20VotesActivated(bool _newActivated) external override {
         ERC20VotesStorageWrapper.setActivate(_newActivated);
@@ -302,11 +340,11 @@ contract MockDiamondCutHelpers is IStaticFunctionSelectors, IMockDiamondCutHelpe
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    /// @dev `initializeMockDiamondCutHelpers` plus the 15 `force*`/`setMultiPartition` mock-control
+    /// @dev `initializeMockDiamondCutHelpers` plus the 16 `force*`/`setMultiPartition` mock-control
     ///      selectors, with no diamond cut, loupe, or ERC-165 selectors — those belong to the real
     ///      `DiamondFacet` now.
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorsIndex = 16;
+        uint256 selectorsIndex = 17;
         staticFunctionSelectors_ = new bytes4[](selectorsIndex);
         unchecked {
             staticFunctionSelectors_[--selectorsIndex] = this.initializeMockDiamondCutHelpers.selector;
@@ -320,6 +358,7 @@ contract MockDiamondCutHelpers is IStaticFunctionSelectors, IMockDiamondCutHelpe
             staticFunctionSelectors_[--selectorsIndex] = this.forceSecurityFlags.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.forceControllable.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.forceDecimals.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.forceSetNominalValue.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.forceErc20VotesActivated.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.forceWhitelist.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.forceAddCrossOrderedTask.selector;

@@ -954,9 +954,6 @@ export const TEST_NOMINAL_VALUES = {
 
   /** Max supply for tokens */
   MAX_SUPPLY: "1000000000000000000000000",
-
-  /** bytes3(0) — represents "no currency set" for nominalValueCurrency. Alias of `EMPTY_BYTES.BYTES3`. */
-  CURRENCY_ZERO: EMPTY_BYTES.BYTES3,
 } as const;
 
 // ============================================================================
@@ -1303,10 +1300,4 @@ export const EVENT_NAMES = {
   PROTECTED_CLEARED_TRANSFER_BY_PARTITION: "ProtectedClearedTransferByPartition",
   /** Emitted by `ProtectedClearingHoldByPartitionFacet.protectedClearingCreateHoldByPartition`. */
   PROTECTED_CLEARED_HOLD_BY_PARTITION: "ProtectedClearedHoldByPartition",
-  /** Emitted by `NominalValue.initializeNominalValue`. */
-  NOMINAL_VALUE_INITIALIZED: "NominalValueInitialized",
-  /** Emitted by `NominalValue.setNominalValue` (and by the bootstrap path inside `setNominalValue` for legacy tokens). */
-  NOMINAL_VALUE_SET: "NominalValueSet",
-  /** Emitted by `NominalValue.setNominalValueCurrency`. */
-  NOMINAL_VALUE_CURRENCY_SET: "NominalValueCurrencySet",
 } as const;

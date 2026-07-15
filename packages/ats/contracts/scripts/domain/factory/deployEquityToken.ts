@@ -114,6 +114,8 @@ export async function deployEquityFromFactory(
     currency: equityDetailsParams.currency,
     nominalValue: equityDetailsParams.nominalValue,
     nominalValueDecimals: equityDetailsParams.nominalValueDecimals,
+    effectiveDatetime: equityDetailsParams.effectiveDatetime,
+    isUnitNominalValue: equityDetailsParams.isUnitNominalValue,
   };
 
   // Build equity data

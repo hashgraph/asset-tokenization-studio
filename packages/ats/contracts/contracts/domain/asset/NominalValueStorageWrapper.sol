@@ -9,24 +9,29 @@ bytes32 constant STORAGE_LOCATION_NOMINAL_VALUE = 0xf4ae98634996e72bf90c5471fce1
 
 /**
  * @title NominalValueDataStorage
- * @notice Backing storage for nominal value, decimals, and ISO 4217 currency code.
+ * @notice Backing storage for nominal value, decimals, ISO 4217 currency code, effective
+ *         datetime, and the unit/total nominal value flag.
  * @dev Sole source of truth for nominal-value fields on this asset; mutated only via
- *      `NominalValueStorageWrapper` against the deterministic ERC-7201 slot. New fields
- *      must be appended below the marker to preserve storage layout compatibility.
- * @param nominalValueDecimals Number of decimals applied to `nominalValue`.
+ *      `NominalValueStorageWrapper` against the deterministic ERC-7201 slot.
+ * @param nominalValueDecimals Number of decimals applied to `nominalValue`. Fixed at
+ *        initialization; never changed by `publishNominalValue`/`republishNominalValue`.
  * @param nominalValueCurrency ISO 4217 currency code, or `0x000000` when unset.
+ * @param isUnitNominalValue Whether `nominalValue` expresses a per-unit (true) or aggregate
+ *        (false) value. Fixed at initialization.
  * @param nominalValue Nominal amount expressed with `nominalValueDecimals` precision.
+ * @param effectiveDatetime Timestamp (Unix epoch, seconds) as of which `nominalValue` is
+ *        effective. Advances strictly forward on each `publishNominalValue` call; unchanged by
+ *        `republishNominalValue`.
  * @custom:storage-location erc7201:security.token.standard.storage.NominalValue
  */
 struct NominalValueDataStorage {
-    // ─── R1 Lifecycle (bool flags) ───────────────────────────
-    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    // ─── R2 Packed scalars (uint8, bytes3, bool) ─────────────
     uint8 nominalValueDecimals;
     bytes3 nominalValueCurrency;
-    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    bool isUnitNominalValue;
+    // ─── R3 Single-slot scalars (uint256) ────────────────────
     uint256 nominalValue;
-    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
-    // ─── APPEND-ONLY ZONE BELOW ───
+    uint256 effectiveDatetime;
 }
 
 /**
@@ -38,42 +43,44 @@ struct NominalValueDataStorage {
  */
 library NominalValueStorageWrapper {
     /**
-     * @notice Initialises the dedicated nominal value storage with amount, decimals, and currency.
+     * @notice Initialises the dedicated nominal value storage with amount, decimals, currency,
+     *         effective datetime, and the unit/total flag.
      * @param _nominalValue Initial nominal value amount.
      * @param _nominalValueDecimals Number of decimals applied to `_nominalValue`.
      * @param _nominalValueCurrency ISO 4217 currency code as `bytes3`.
+     * @param _effectiveDatetime Timestamp as of which `_nominalValue` is effective.
+     * @param _isUnitNominalValue Whether `_nominalValue` is a per-unit (true) or aggregate
+     *        (false) value.
      */
     function initializeNominalValue(
         uint256 _nominalValue,
         uint8 _nominalValueDecimals,
-        bytes3 _nominalValueCurrency
+        bytes3 _nominalValueCurrency,
+        uint256 _effectiveDatetime,
+        bool _isUnitNominalValue
     ) internal {
-        setNominalValue(_nominalValue, _nominalValueDecimals);
-        setNominalValueCurrency(_nominalValueCurrency);
-    }
-
-    /**
-     * @notice Writes the nominal value amount and decimals to the dedicated storage slot.
-     * @param _nominalValue New nominal value amount.
-     * @param _nominalValueDecimals New decimals applied to `_nominalValue`.
-     */
-    function setNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals) internal {
-        ScheduledTasksOps.triggerPendingScheduledCrossOrderedTasks();
-
-        SnapshotsStorageWrapper.updateNominalValueSnapshot();
         SnapshotsStorageWrapper.updateNominalValueDecimalsSnapshot();
 
         NominalValueDataStorage storage nvData_ = _nominalValueStorage();
-        nvData_.nominalValue = _nominalValue;
         nvData_.nominalValueDecimals = _nominalValueDecimals;
+        nvData_.nominalValueCurrency = _nominalValueCurrency;
+        nvData_.isUnitNominalValue = _isUnitNominalValue;
+
+        writeNominalValue(_nominalValue, _effectiveDatetime);
     }
 
     /**
-     * @notice Writes the ISO 4217 currency code to the dedicated storage slot.
-     * @param _nominalValueCurrency New ISO 4217 currency code as `bytes3`.
+     * @param _nominalValue New nominal value amount.
+     * @param _effectiveDatetime New effective datetime to store.
      */
-    function setNominalValueCurrency(bytes3 _nominalValueCurrency) internal {
-        _nominalValueStorage().nominalValueCurrency = _nominalValueCurrency;
+    function writeNominalValue(uint256 _nominalValue, uint256 _effectiveDatetime) internal {
+        ScheduledTasksOps.triggerPendingScheduledCrossOrderedTasks();
+
+        SnapshotsStorageWrapper.updateNominalValueSnapshot();
+
+        NominalValueDataStorage storage nvData_ = _nominalValueStorage();
+        nvData_.nominalValue = _nominalValue;
+        nvData_.effectiveDatetime = _effectiveDatetime;
     }
 
     /**
@@ -98,6 +105,22 @@ library NominalValueStorageWrapper {
      */
     function getNominalValueCurrency() internal view returns (bytes3) {
         return _nominalValueStorage().nominalValueCurrency;
+    }
+
+    /**
+     * @notice Reads whether the nominal value is a per-unit or aggregate value.
+     * @return True when the nominal value is expressed per unit; false when aggregate.
+     */
+    function getIsUnitNominalValue() internal view returns (bool) {
+        return _nominalValueStorage().isUnitNominalValue;
+    }
+
+    /**
+     * @notice Reads the currently stored effective datetime from the dedicated storage slot.
+     * @return The currently stored effective datetime.
+     */
+    function getEffectiveDatetime() internal view returns (uint256) {
+        return _nominalValueStorage().effectiveDatetime;
     }
 
     /**

@@ -89,7 +89,7 @@ describe("Factory Tests", () => {
           security: getSecurityData(businessLogicResolver, {
             rbacs: init_rbacs,
           }),
-          equityDetails: makeEquityDetailsData(),
+          equityDetails: await makeEquityDetailsData(),
         };
         equityData.security.resolver = ADDRESS_ZERO;
         equityData.security.resolverProxyConfigurationV2 = {
@@ -131,7 +131,7 @@ describe("Factory Tests", () => {
           security: getSecurityData(businessLogicResolver, {
             rbacs: init_rbacs,
           }),
-          equityDetails: makeEquityDetailsData(),
+          equityDetails: await makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfigurationV2 = {
           configurationId: CONFIG_IDS.equity,
@@ -156,7 +156,7 @@ describe("Factory Tests", () => {
           security: getSecurityData(businessLogicResolver, {
             rbacs: emptyAdminRbacs,
           }),
-          equityDetails: makeEquityDetailsData(),
+          equityDetails: await makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfigurationV2 = {
           configurationId: CONFIG_IDS.equity,
@@ -210,7 +210,7 @@ describe("Factory Tests", () => {
           security: getSecurityData(businessLogicResolver, {
             rbacs: noAdminRbacs,
           }),
-          equityDetails: makeEquityDetailsData(),
+          equityDetails: await makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfigurationV2 = {
           configurationId: CONFIG_IDS.equity,
@@ -236,7 +236,7 @@ describe("Factory Tests", () => {
           security: getSecurityData(businessLogicResolver, {
             rbacs: mixedAdminRbacs,
           }),
-          equityDetails: makeEquityDetailsData(),
+          equityDetails: await makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfigurationV2 = {
           configurationId: CONFIG_IDS.equity,
@@ -283,7 +283,7 @@ describe("Factory Tests", () => {
           security: getSecurityData(businessLogicResolver, {
             rbacs: init_rbacs,
           }),
-          equityDetails: makeEquityDetailsData(),
+          equityDetails: await makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfigurationV2 = {
           configurationId: CONFIG_IDS.equity,
@@ -331,7 +331,7 @@ describe("Factory Tests", () => {
           security: getSecurityData(businessLogicResolver, {
             rbacs: init_rbacs,
           }),
-          equityDetails: makeEquityDetailsData(),
+          equityDetails: await makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfigurationV2 = {
           configurationId: CONFIG_IDS.equity,
@@ -354,7 +354,7 @@ describe("Factory Tests", () => {
           security: getSecurityData(businessLogicResolver, {
             rbacs: init_rbacs,
           }),
-          equityDetails: makeEquityDetailsData(),
+          equityDetails: await makeEquityDetailsData(),
         };
         equityData.security.resolverProxyConfigurationV2 = {
           configurationId: CONFIG_IDS.equity,
@@ -465,7 +465,7 @@ describe("Factory Tests", () => {
     it("GIVEN an empty Resolver WHEN deploying a new resolverProxy THEN transaction fails", async () => {
       const equityData = {
         security: getSecurityData(businessLogicResolver),
-        equityDetails: makeEquityDetailsData(),
+        equityDetails: await makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfigurationV2 = {
         configurationId: CONFIG_IDS.equity,
@@ -485,7 +485,7 @@ describe("Factory Tests", () => {
     it("GIVEN no admin WHEN deploying a new resolverProxy THEN transaction fails", async () => {
       const equityData = {
         security: getSecurityData(businessLogicResolver),
-        equityDetails: makeEquityDetailsData(),
+        equityDetails: await makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfigurationV2 = {
         configurationId: CONFIG_IDS.equity,
@@ -506,7 +506,7 @@ describe("Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
-        equityDetails: makeEquityDetailsData(),
+        equityDetails: await makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfigurationV2 = {
         configurationId: CONFIG_IDS.equity,
@@ -534,7 +534,7 @@ describe("Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
-        equityDetails: makeEquityDetailsData(),
+        equityDetails: await makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfigurationV2 = {
         configurationId: CONFIG_IDS.equity,
@@ -562,7 +562,7 @@ describe("Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
-        equityDetails: makeEquityDetailsData(),
+        equityDetails: await makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfigurationV2 = {
         configurationId: CONFIG_IDS.equity,
@@ -866,7 +866,7 @@ describe("Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: emptyAdminRbacs,
         }),
-        equityDetails: makeEquityDetailsData(),
+        equityDetails: await makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfigurationV2 = {
         configurationId: CONFIG_IDS.equity,
@@ -894,7 +894,7 @@ describe("Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: zeroAddressAdminRbacs,
         }),
-        equityDetails: makeEquityDetailsData(),
+        equityDetails: await makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfigurationV2 = {
         configurationId: CONFIG_IDS.equity,
@@ -926,7 +926,7 @@ describe("Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: noAdminRbacs,
         }),
-        equityDetails: makeEquityDetailsData(),
+        equityDetails: await makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfigurationV2 = {
         configurationId: CONFIG_IDS.equity,
@@ -954,7 +954,7 @@ describe("Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: mixedAdminRbacs,
         }),
-        equityDetails: makeEquityDetailsData(),
+        equityDetails: await makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfigurationV2 = {
         configurationId: CONFIG_IDS.equity,

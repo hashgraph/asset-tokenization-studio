@@ -44,6 +44,7 @@ let couponStartDateInSeconds = 0;
 const EMPTY_VC_ID = EMPTY_STRING;
 const YEAR_SECONDS = 365 * 24 * 60 * 60;
 const couponRateStatus = 1;
+const CURRENCY_ZERO = "0x000000";
 
 let couponData = {
   recordDate: couponRecordDateInSeconds.toString(),
@@ -138,7 +139,7 @@ export function couponTests(getCtx: () => AssetMockCtx): void {
       await asset.activateInternalKyc();
       await asset.forceDecimals(6);
       await asset.updateMaturityDate(maturityDate);
-      await asset.setNominalValue(100, 2);
+      await asset.forceSetNominalValue(100, 2, CURRENCY_ZERO, (await getDltTimestamp()) - TIME_PERIODS_S.DAY, true);
       // STANDARD honours the caller-supplied rate/rateDecimals
       await asset.connect(signer_A).setCouponRateType(INTEREST_RATE_TYPE.STANDARD);
 
@@ -728,7 +729,10 @@ export function couponTests(getCtx: () => AssetMockCtx): void {
       await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
       await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
 
-      await asset.connect(signer_A).setNominalValue(NominalValue, NominalValueDecimals);
+      // Re-init with a different decimals value than the suite-level beforeEach (decimals are
+      // fixed at initialisation and never change afterwards).
+      const nominalValueInitDate = (await getDltTimestamp()) - TIME_PERIODS_S.DAY;
+      await asset.forceSetNominalValue(NominalValue, NominalValueDecimals, CURRENCY_ZERO, nominalValueInitDate, true);
 
       await asset.connect(signer_A).issueByPartition({
         partition: DEFAULT_PARTITION,
@@ -774,7 +778,7 @@ export function couponTests(getCtx: () => AssetMockCtx): void {
       expect(couponFor.nominalValueDecimals).to.equal(NominalValueDecimals);
       expect(couponFor.isDisabled).to.be.false;
 
-      await asset.connect(signer_A).setNominalValue(NominalValue + 1, NominalValueDecimals + 1);
+      await asset.connect(signer_A).publishNominalValue(NominalValue + 1, nominalValueInitDate + 60);
 
       const couponFor_2 = await asset.getCouponFor(1, signer_A.address);
       expect(couponFor_2.nominalValue).to.equal(NominalValue);
@@ -789,7 +793,10 @@ export function couponTests(getCtx: () => AssetMockCtx): void {
       await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
       await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
 
-      await asset.connect(signer_A).setNominalValue(NominalValue, NominalValueDecimals);
+      // Re-init with a different decimals value than the suite-level beforeEach (decimals are
+      // fixed at initialisation and never change afterwards).
+      const nominalValueInitDate = (await getDltTimestamp()) - TIME_PERIODS_S.DAY;
+      await asset.forceSetNominalValue(NominalValue, NominalValueDecimals, CURRENCY_ZERO, nominalValueInitDate, true);
 
       await asset.connect(signer_A).issueByPartition({
         partition: DEFAULT_PARTITION,
@@ -822,7 +829,8 @@ export function couponTests(getCtx: () => AssetMockCtx): void {
       expect(registered.snapshotId).to.be.greaterThan(0);
 
       // Change nominal value AFTER the snapshot — current scale now diverges from snapshot scale.
-      await asset.connect(signer_A).setNominalValue(NominalValue + 5, NominalValueDecimals + 2);
+      // Decimals are fixed at initialisation and never change; only the value is published here.
+      await asset.connect(signer_A).publishNominalValue(NominalValue + 5, nominalValueInitDate + 60);
 
       const couponFor = await asset.getCouponFor(1, signer_A.address);
       const couponAmountFor = await asset.getCouponAmountFor(1, signer_A.address);
@@ -1027,7 +1035,15 @@ export function couponTests(getCtx: () => AssetMockCtx): void {
 
         await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
         await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
-        await asset.connect(signer_A).setNominalValue(NOMINAL, HIGH_NOMINAL_DECIMALS);
+        // Re-init with a different decimals value than the suite-level beforeEach (decimals are
+        // fixed at initialisation and never change afterwards).
+        await asset.forceSetNominalValue(
+          NOMINAL,
+          HIGH_NOMINAL_DECIMALS,
+          CURRENCY_ZERO,
+          (await getDltTimestamp()) - TIME_PERIODS_S.DAY,
+          true,
+        );
         await asset.connect(signer_A).issueByPartition({
           partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,

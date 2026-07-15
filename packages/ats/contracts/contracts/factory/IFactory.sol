@@ -85,6 +85,10 @@ interface IFactory is ICommonErrors {
      * @param currency             ISO 4217 currency code encoded as `bytes3`.
      * @param nominalValue         Face value of one equity unit (raw integer).
      * @param nominalValueDecimals Number of decimal places applied to `nominalValue`.
+     * @param effectiveDatetime    Timestamp as of which `nominalValue` is effective; must be
+     *                             non-zero and strictly less than `block.timestamp`.
+     * @param isUnitNominalValue   Whether `nominalValue` is a per-unit (true) or aggregate
+     *                             (false) value.
      */
     struct EquityDetailsData {
         bool votingRight;
@@ -98,6 +102,8 @@ interface IFactory is ICommonErrors {
         bytes3 currency;
         uint256 nominalValue;
         uint8 nominalValueDecimals;
+        uint256 effectiveDatetime;
+        bool isUnitNominalValue;
     }
 
     /**
@@ -122,6 +128,10 @@ interface IFactory is ICommonErrors {
      *                               `BOND_STARTING_DATE_METADATA_KEY`.
      * @param maturityDate           Redemption date timestamp (Unix epoch, seconds). Must be
      *                               strictly greater than `startingDate`.
+     * @param effectiveDatetime      Timestamp as of which `nominalValue` is effective; must be
+     *                               non-zero and strictly less than `block.timestamp`.
+     * @param isUnitNominalValue     Whether `nominalValue` is a per-unit (true) or aggregate
+     *                               (false) value.
      */
     struct BondDetailsData {
         bytes3 currency;
@@ -129,6 +139,8 @@ interface IFactory is ICommonErrors {
         uint8 nominalValueDecimals;
         uint256 startingDate;
         uint256 maturityDate;
+        uint256 effectiveDatetime;
+        bool isUnitNominalValue;
     }
 
     /**

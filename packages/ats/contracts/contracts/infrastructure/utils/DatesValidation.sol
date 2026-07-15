@@ -14,6 +14,10 @@ library DatesValidation {
         if (_timestamp <= TimeTravelStorageWrapper.getBlockTimestamp()) revert ICommonErrors.WrongTimestamp(_timestamp);
     }
 
+    function checkPastTimestamp(uint256 _timestamp) internal view {
+        if (_timestamp >= TimeTravelStorageWrapper.getBlockTimestamp()) revert ICommonErrors.WrongTimestamp(_timestamp);
+    }
+
     function checkDates(uint256 _firstDate, uint256 _secondDate) internal pure {
         if (_secondDate < _firstDate) {
             revert ICommonErrors.WrongDates(_firstDate, _secondDate);
