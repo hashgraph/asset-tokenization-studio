@@ -240,7 +240,7 @@ abstract contract Factory is IFactory {
         onlyValidRegulation(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType)
         returns (address equityAddress_)
     {
-        equityAddress_ = _deploySecurity(_equityData.security, SecurityType.Equity);
+        equityAddress_ = _deploySecurity(_equityData.security);
         INominalValue(equityAddress_).initializeNominalValue(
             _equityData.equityDetails.nominalValue,
             _equityData.equityDetails.nominalValueDecimals,
@@ -280,7 +280,7 @@ abstract contract Factory is IFactory {
         onlyValidBondDates(_bondData.bondDetails.startingDate, _bondData.bondDetails.maturityDate)
         returns (address bondAddress_)
     {
-        bondAddress_ = _deployBond(_bondData, SecurityType.BondVariableRate);
+        bondAddress_ = _deployBond(_bondData);
         IInterestRate(bondAddress_).initializeInterestRateType(IInterestRate.RateType.STANDARD);
         IFixedRate(bondAddress_).initializeFixedRate(IFixedRate.FixedRateData({ rate: 0, rateDecimals: 0 }));
         IVotingSecurityHolders(bondAddress_).initializeVotingSecurityHolders();
@@ -312,14 +312,10 @@ abstract contract Factory is IFactory {
      *      nominal-value, coupon, maturity and principal facets. Operational status and
      *      factory admin renouncement are handled by the public deployment functions.
      * @param _bondData Bond deployment data.
-     * @param _securityType Concrete bond security type used in core metadata.
      * @return bondAddress_ Address of the deployed bond proxy.
      */
-    function _deployBond(
-        BondData calldata _bondData,
-        SecurityType _securityType
-    ) internal returns (address bondAddress_) {
-        bondAddress_ = _deploySecurity(_bondData.security, _securityType);
+    function _deployBond(BondData calldata _bondData) internal returns (address bondAddress_) {
+        bondAddress_ = _deploySecurity(_bondData.security);
         IProceedRecipients(bondAddress_).initializeProceedRecipients(
             _bondData.proceedRecipients,
             _bondData.proceedRecipientsData
@@ -342,15 +338,11 @@ abstract contract Factory is IFactory {
      * @dev Appends this factory as a temporary `DEFAULT_ADMIN_ROLE` holder to allow facet
      *      initialisation. Callers must later mark the proxy operational and renounce that role.
      * @param _securityData Common security deployment configuration.
-     * @param _securityType Security type recorded in core metadata.
      * @return securityAddress_ Address of the deployed security proxy.
      */
-    function _deploySecurity(
-        SecurityData calldata _securityData,
-        SecurityType _securityType
-    ) internal virtual returns (address securityAddress_) {
+    function _deploySecurity(SecurityData calldata _securityData) internal virtual returns (address securityAddress_) {
         securityAddress_ = _deploySecurityProxy(_securityData);
-        _initializeSecurityMetadata(securityAddress_, _securityData, _securityType);
+        _initializeSecurityMetadata(securityAddress_, _securityData);
         _initializeSecurityCompliance(securityAddress_);
         _initializeCoreFacets(securityAddress_);
         _initializeSnapshotFacets(securityAddress_);
@@ -394,13 +386,8 @@ abstract contract Factory is IFactory {
      *      core metadata, caps, clearing, KYC, ERC20 votes and ERC3643 integration.
      * @param _securityAddress Address of the proxy being initialised.
      * @param _securityData Common security deployment configuration.
-     * @param _securityType Security type recorded in core metadata.
      */
-    function _initializeSecurityMetadata(
-        address _securityAddress,
-        SecurityData calldata _securityData,
-        SecurityType _securityType
-    ) private {
+    function _initializeSecurityMetadata(address _securityAddress, SecurityData calldata _securityData) private {
         // configure Control List
         IControlList(_securityAddress).initializeControlList(_securityData.isWhiteList);
         // configure multi partition flag
@@ -408,11 +395,7 @@ abstract contract Factory is IFactory {
         // configure controller flag
         IController(_securityAddress).initializeController(_securityData.isControllable);
         // configure erc20 metadata
-        ICore.ERC20Metadata memory erc20Metadata = ICore.ERC20Metadata({
-            info: _securityData.erc20MetadataInfo,
-            securityType: _securityType
-        });
-        ICore(_securityAddress).initializeCore(erc20Metadata);
+        ICore(_securityAddress).initializeCore(_securityData.erc20Metadata);
         // configure issue flag
         IMint(_securityAddress).initializeERC1594();
         // configure cap

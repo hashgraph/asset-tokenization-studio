@@ -47,12 +47,12 @@ abstract contract Core is ICore, Modifiers {
 
     /// @inheritdoc ICore
     function name() external view override returns (string memory) {
-        return ERC20StorageWrapper.getERC20Metadata().info.name;
+        return ERC20StorageWrapper.getERC20Metadata().name;
     }
 
     /// @inheritdoc ICore
     function symbol() external view override returns (string memory) {
-        return ERC20StorageWrapper.getERC20Metadata().info.symbol;
+        return ERC20StorageWrapper.getERC20Metadata().symbol;
     }
 
     /// @inheritdoc ICore

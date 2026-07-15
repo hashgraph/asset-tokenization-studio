@@ -143,7 +143,7 @@ export function erc20PermitTests(getCtx: () => AssetMockCtx): void {
         it("GIVEN a signature from a different owner WHEN permit is called THEN the transaction reverts with ERC2612InvalidSigner", async () => {
           const nonce = await asset.nonces(signer_A.address);
           const expiry = (await getDltTimestamp()) + 3600;
-          const name = (await asset.getERC20Metadata()).info.name;
+          const name = (await asset.getERC20Metadata()).name;
           const version = (await asset.getConfigInfo()).configurationVersion_.toString();
           const verifyingContract = await asset.getAddress();
 
@@ -183,7 +183,7 @@ export function erc20PermitTests(getCtx: () => AssetMockCtx): void {
         it("GIVEN a valid signature WHEN permit is called THEN the approval succeeds and emits Approval event", async () => {
           const nonce = await asset.nonces(signer_A.address);
           const expiry = (await getDltTimestamp()) + 3600;
-          const name = (await asset.getERC20Metadata()).info.name;
+          const name = (await asset.getERC20Metadata()).name;
           const version = (await asset.getConfigInfo()).configurationVersion_.toString();
           const verifyingContract = await asset.getAddress();
 

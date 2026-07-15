@@ -103,13 +103,9 @@ abstract contract MockFactory is Factory, IMockFactory {
     /// @notice Deploys a security proxy and initialises time-travel state.
     /// @dev Initialises time-travel state on the deployed security after the base deployment.
     /// @param _securityData Core security configuration shared across all security types.
-    /// @param _securityType Distinguishes the security variant being deployed.
     /// @return securityAddress_ Address of the deployed security proxy.
-    function _deploySecurity(
-        SecurityData calldata _securityData,
-        SecurityType _securityType
-    ) internal override returns (address securityAddress_) {
-        securityAddress_ = super._deploySecurity(_securityData, _securityType);
+    function _deploySecurity(SecurityData calldata _securityData) internal override returns (address securityAddress_) {
+        securityAddress_ = super._deploySecurity(_securityData);
         ITimeTravel(securityAddress_).initializeTimeTravel();
     }
 }

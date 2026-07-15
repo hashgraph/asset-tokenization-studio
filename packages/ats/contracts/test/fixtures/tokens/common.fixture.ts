@@ -74,10 +74,10 @@ export function getSecurityData(
     isControllable: params?.isControllable ?? DEFAULT_SECURITY_PARAMS.isControllable,
     isWhiteList: params?.isWhiteList ?? DEFAULT_SECURITY_PARAMS.isWhiteList,
     maxSupply: params?.maxSupply ?? DEFAULT_SECURITY_PARAMS.maxSupply,
-    erc20MetadataInfo: {
-      name: params?.erc20MetadataInfo?.name ?? DEFAULT_SECURITY_PARAMS.name,
-      symbol: params?.erc20MetadataInfo?.symbol ?? DEFAULT_SECURITY_PARAMS.symbol,
-      decimals: params?.erc20MetadataInfo?.decimals ?? DEFAULT_SECURITY_PARAMS.decimals,
+    erc20Metadata: {
+      name: params?.erc20Metadata?.name ?? DEFAULT_SECURITY_PARAMS.name,
+      symbol: params?.erc20Metadata?.symbol ?? DEFAULT_SECURITY_PARAMS.symbol,
+      decimals: params?.erc20Metadata?.decimals ?? DEFAULT_SECURITY_PARAMS.decimals,
     },
     clearingActive: params?.clearingActive ?? DEFAULT_SECURITY_PARAMS.clearingActive,
     internalKycActivated: params?.internalKycActivated ?? DEFAULT_SECURITY_PARAMS.internalKycActivated,

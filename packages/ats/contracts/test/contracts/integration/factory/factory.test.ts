@@ -17,7 +17,7 @@ import { deployAtsInfrastructureFixture } from "@test";
 import { getRegulationData, getSecurityData } from "@test";
 import { makeEquityDetailsData } from "@test";
 import { RegulationType, RegulationSubType, ADDRESS_ZERO, ATS_ROLES, CONFIG_IDS } from "@scripts";
-import { Rbac, SecurityType } from "@scripts/domain";
+import { Rbac } from "@scripts/domain";
 import { decodeEvent } from "@scripts/infrastructure";
 import { getBondDetails } from "@test";
 
@@ -597,10 +597,9 @@ describe("Factory Tests", () => {
       expect(controllable).to.be.equal(equityData.security.isControllable);
 
       const metadata = await coreFacet.getERC20Metadata();
-      expect(metadata.info.name).to.be.equal(equityData.security.erc20MetadataInfo.name);
-      expect(metadata.info.symbol).to.be.equal(equityData.security.erc20MetadataInfo.symbol);
-      expect(metadata.info.decimals).to.be.equal(equityData.security.erc20MetadataInfo.decimals);
-      expect(metadata.securityType).to.be.equal(SecurityType.EQUITY);
+      expect(metadata.name).to.be.equal(equityData.security.erc20Metadata.name);
+      expect(metadata.symbol).to.be.equal(equityData.security.erc20Metadata.symbol);
+      expect(metadata.decimals).to.be.equal(equityData.security.erc20Metadata.decimals);
 
       const nominalValueFacet = await ethers.getContractAt("NominalValue", equityAddress);
       expect(await nominalValueFacet.getNominalValueCurrency()).to.equal(equityData.equityDetails.currency);
@@ -737,10 +736,9 @@ describe("Factory Tests", () => {
       expect(controllable).to.be.equal(bondData.security.isControllable);
 
       const metadata = await coreFacet.getERC20Metadata();
-      expect(metadata.info.name).to.be.equal(bondData.security.erc20MetadataInfo.name);
-      expect(metadata.info.symbol).to.be.equal(bondData.security.erc20MetadataInfo.symbol);
-      expect(metadata.info.decimals).to.be.equal(bondData.security.erc20MetadataInfo.decimals);
-      expect(metadata.securityType).to.be.equal(SecurityType.BOND_VARIABLE_RATE);
+      expect(metadata.name).to.be.equal(bondData.security.erc20Metadata.name);
+      expect(metadata.symbol).to.be.equal(bondData.security.erc20Metadata.symbol);
+      expect(metadata.decimals).to.be.equal(bondData.security.erc20Metadata.decimals);
 
       const capFacet = await ethers.getContractAt("Cap", bondAddress);
       const maxSupply = await capFacet.getMaxSupply();

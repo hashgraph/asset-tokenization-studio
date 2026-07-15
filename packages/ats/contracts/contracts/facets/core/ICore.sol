@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IFactory } from "../../factory/IFactory.sol";
-
 /// @custom:hash resolverKey Core
 bytes32 constant RESOLVER_KEY_CORE = 0xb54e0c9a42346a2760a44e59035a2b84a61d07bed66a2f24cffe3ca4bae1996f;
 
@@ -11,37 +9,29 @@ bytes32 constant RESOLVER_KEY_CORE = 0xb54e0c9a42346a2760a44e59035a2b84a61d07bed
  * @author Asset Tokenization Studio Team
  * @notice Consolidated interface for the token "Core" domain: identity-defining methods
  *         (ERC20 metadata readers, ERC3643 name/symbol setters, and version).
- *         Also owns the `ERC20MetadataInfo` and `ERC20Metadata` structs, since the only
- *         initializer for this data (`initializeCore`) lives in CoreFacet.
+ *         Also owns the `ERC20Metadata` struct, since the only initializer for this
+ *         data (`initializeCore`) lives in CoreFacet.
  */
 interface ICore {
     /**
      * @notice Basic ERC-20 token identity fields.
      */
-    struct ERC20MetadataInfo {
+    struct ERC20Metadata {
         string name;
         string symbol;
         uint8 decimals;
     }
 
     /**
-     * @notice Full metadata bundle passed to `initializeCore`.
-     */
-    struct ERC20Metadata {
-        ERC20MetadataInfo info;
-        IFactory.SecurityType securityType;
-    }
-
-    /**
      * @notice Emitted once when the core ERC-20 metadata is initialised on a token.
      * @dev Fires exclusively from `initializeCore` after the storage write succeeds.
-     * @param metadata The full ERC-20 metadata bundle persisted at initialisation.
+     * @param metadata The ERC-20 metadata persisted at initialisation.
      */
     event CoreInitialized(ERC20Metadata metadata);
 
     /**
-     * @notice Initializes the Core domain (name, symbol, decimals and the rest of the ERC20 metadata).
-     * @param _metadata The full ERC-20 metadata bundle to persist.
+     * @notice Initializes the Core domain (name, symbol and decimals).
+     * @param _metadata The ERC-20 metadata to persist.
      */
     function initializeCore(ERC20Metadata calldata _metadata) external;
 
@@ -77,7 +67,7 @@ interface ICore {
 
     /**
      * @notice Returns the full metadata struct of the security token.
-     * @return The persisted `ERC20Metadata` bundle.
+     * @return The persisted `ERC20Metadata`.
      */
     function getERC20Metadata() external view returns (ERC20Metadata memory);
 
