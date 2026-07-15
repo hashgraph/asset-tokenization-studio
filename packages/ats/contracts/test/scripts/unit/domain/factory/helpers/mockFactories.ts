@@ -47,7 +47,7 @@ export function createMockSecurityData(overrides?: Partial<SecurityDataParams>):
     isControllable: true,
     isWhiteList: true,
     maxSupply: TEST_NOMINAL_VALUES.MAX_SUPPLY,
-    erc20MetadataInfo: {
+    erc20Metadata: {
       name: TEST_TOKEN_METADATA.NAME,
       symbol: TEST_TOKEN_METADATA.SYMBOL,
       decimals: TEST_TOKEN_METADATA.DECIMALS,

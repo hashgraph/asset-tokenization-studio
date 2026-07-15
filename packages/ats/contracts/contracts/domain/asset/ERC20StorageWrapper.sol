@@ -3,7 +3,6 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { DEFAULT_PARTITION, KPI_ERC20_APPROVE_OWNER } from "../../constants/values.sol";
 import { ICore } from "../../facets/core/ICore.sol";
-import { IFactory } from "../../factory/IFactory.sol";
 import { ITransfer } from "../../facets/transfer/ITransfer.sol";
 import { IAllowanceTypes } from "../../facets/allowance/IAllowanceTypes.sol";
 import { IERC1410Types } from "../../facets/commonTypes/IERC1410Types.sol";
@@ -20,16 +19,15 @@ bytes32 constant STORAGE_LOCATION_ERC20 = 0xba2beddc557de36eb4836f4ff1fd9d33a28d
 /**
  * @title ERC20Storage
  * @notice Backing storage for the ERC-20 metadata, balances, and allowances of an asset.
- * @dev Sole source of truth for name, symbol, decimals, security type, total
- *      supply, per-holder balances, and per-spender allowances; mutated only via
- *      `ERC20StorageWrapper` against the deterministic ERC-7201 slot.
+ * @dev Sole source of truth for name, symbol, decimals, total supply, per-holder
+ *      balances, and per-spender allowances; mutated only via `ERC20StorageWrapper`
+ *      against the deterministic ERC-7201 slot.
  * @custom:storage-location erc7201:security.token.standard.storage.Erc20
  */
 struct ERC20Storage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
     // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
     uint8 decimals;
-    IFactory.SecurityType securityType;
     // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     string name;
     string symbol;
@@ -55,18 +53,16 @@ library ERC20StorageWrapper {
     /**
      * @notice Initialises the ERC-20 storage with metadata from the deployment
      *         configuration and marks the slot as initialised.
-     * @dev Writes name, symbol, decimals, and security type from `erc20Metadata`
-     *      then sets `initialized` to `true`. One-shot guarantee is enforced by the
-     *      caller via `onlyNotERC20Initialized`.
-     * @param erc20Metadata The metadata struct containing token info and security type.
+     * @dev Writes name, symbol and decimals from `erc20Metadata`. One-shot
+     *      guarantee is enforced by the caller via `onlyNotERC20Initialized`.
+     * @param erc20Metadata The metadata struct containing the token identity fields.
      */
     function initializeERC20(ICore.ERC20Metadata calldata erc20Metadata) internal {
         ScheduledTasksOps.triggerPendingScheduledCrossOrderedTasks();
         ERC20Storage storage erc20Stor = _erc20Storage();
-        erc20Stor.name = erc20Metadata.info.name;
-        erc20Stor.symbol = erc20Metadata.info.symbol;
-        erc20Stor.decimals = erc20Metadata.info.decimals;
-        erc20Stor.securityType = erc20Metadata.securityType;
+        erc20Stor.name = erc20Metadata.name;
+        erc20Stor.symbol = erc20Metadata.symbol;
+        erc20Stor.decimals = erc20Metadata.decimals;
     }
 
     /**
@@ -477,18 +473,16 @@ library ERC20StorageWrapper {
     }
 
     /**
-     * @notice Returns the full ERC-20 metadata struct including token info and security
-     *         type.
-     * @return erc20Metadata_ The packed `ICore.ERC20Metadata` value read from storage.
+     * @notice Returns the ERC-20 metadata (name, symbol and decimals) read from storage.
+     * @return erc20Metadata_ The `ICore.ERC20Metadata` value read from storage.
      */
     function getERC20Metadata() internal view returns (ICore.ERC20Metadata memory erc20Metadata_) {
         ERC20Storage storage erc20Stor = _erc20Storage();
-        ICore.ERC20MetadataInfo memory erc20Info = ICore.ERC20MetadataInfo({
+        erc20Metadata_ = ICore.ERC20Metadata({
             name: erc20Stor.name,
             symbol: erc20Stor.symbol,
             decimals: erc20Stor.decimals
         });
-        erc20Metadata_ = ICore.ERC20Metadata({ info: erc20Info, securityType: erc20Stor.securityType });
     }
 
     /**
@@ -507,7 +501,7 @@ library ERC20StorageWrapper {
             false
         );
         erc20Metadata_ = getERC20Metadata();
-        erc20Metadata_.info.decimals += pendingDecimals;
+        erc20Metadata_.decimals += pendingDecimals;
     }
 
     /**
@@ -517,7 +511,7 @@ library ERC20StorageWrapper {
      * @return The projected decimal count.
      */
     function decimalsAdjustedAt(uint256 timestamp) internal view returns (uint8) {
-        return getERC20MetadataAdjustedAt(timestamp).info.decimals;
+        return getERC20MetadataAdjustedAt(timestamp).decimals;
     }
 
     /**

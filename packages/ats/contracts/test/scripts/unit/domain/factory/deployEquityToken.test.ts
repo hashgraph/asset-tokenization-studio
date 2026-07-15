@@ -169,11 +169,11 @@ describe("Equity Token Deployment", () => {
       expect(security.isWhiteList).to.be.false;
     });
 
-    it("should nest erc20MetadataInfo correctly", async () => {
+    it("should nest erc20Metadata correctly", async () => {
       const diamondAddress = TEST_ADDRESSES.VALID_3;
       const mockFactory = createMockFactory(TEST_FACTORY_EVENTS.EQUITY_DEPLOYED, diamondAddress);
       const securityData = createMockSecurityData({
-        erc20MetadataInfo: {
+        erc20Metadata: {
           name: "Custom Token",
           symbol: "CUST",
           decimals: 8,
@@ -185,7 +185,7 @@ describe("Equity Token Deployment", () => {
       await deployEquityFromFactory(params, regulationData);
 
       const callArgs = mockFactory.deployEquity.getCall(0).args[0];
-      const metadata = callArgs.security.erc20MetadataInfo;
+      const metadata = callArgs.security.erc20Metadata;
 
       expect(metadata.name).to.equal("Custom Token");
       expect(metadata.symbol).to.equal("CUST");

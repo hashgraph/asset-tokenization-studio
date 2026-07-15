@@ -6,7 +6,6 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
 import { ATS_ROLES, RESOLVER_KEYS } from "@scripts";
-import { SecurityType } from "@scripts/domain";
 import { assertObject, executeRbac } from "@test";
 
 const name = "TEST_Core";
@@ -45,40 +44,29 @@ export function coreTests(getCtx: () => AssetMockCtx): void {
     describe("initializeCore", () => {
       it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeCore is called THEN AccountHasNoRole", async () => {
         await expect(
-          asset.connect(signer_D).initializeCore({
-            info: { name: "X", symbol: "Y", decimals: 6 },
-            securityType: SecurityType.BOND_VARIABLE_RATE,
-          }),
+          asset.connect(signer_D).initializeCore({ name: "X", symbol: "Y", decimals: 6 }),
         ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
       });
 
       it("GIVEN already-initialised WHEN initializeCore is called again THEN FacetAlreadyRegistered", async () => {
-        await expect(
-          asset.initializeCore({
-            info: { name: "X", symbol: "Y", decimals: 6 },
-            securityType: SecurityType.BOND_VARIABLE_RATE,
-          }),
-        ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+        await expect(asset.initializeCore({ name: "X", symbol: "Y", decimals: 6 })).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
       });
     });
 
     describe("initializeCore event", () => {
       it("GIVEN a fresh deployment WHEN initializeCore is called THEN emits CoreInitialized", async () => {
         await asset.forceFacetNotRegistered(RESOLVER_KEYS.core);
-        await expect(
-          asset.initializeCore({
-            info: { name, symbol, decimals },
-            securityType: SecurityType.EQUITY,
-          }),
-        ).to.emit(asset, "CoreInitialized");
+        await expect(asset.initializeCore({ name, symbol, decimals })).to.emit(asset, "CoreInitialized");
       });
     });
 
     describe("readers", () => {
       it("GIVEN an initialized token WHEN getERC20Metadata THEN returns the configured metadata", async () => {
         const metadata = await asset.getERC20Metadata();
-        assertObject(metadata.info, { name, symbol, decimals });
-        expect(metadata.securityType).to.equal(SecurityType.BOND_VARIABLE_RATE);
+        assertObject(metadata, { name, symbol, decimals });
       });
 
       it("GIVEN an initialized token WHEN reading name, symbol, decimals THEN returns the configured values", async () => {

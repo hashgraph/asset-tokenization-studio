@@ -95,10 +95,10 @@ export async function deployBondFromFactory(
     isControllable: securityDataParams.isControllable,
     isWhiteList: securityDataParams.isWhiteList,
     maxSupply: securityDataParams.maxSupply,
-    erc20MetadataInfo: {
-      name: securityDataParams.erc20MetadataInfo.name,
-      symbol: securityDataParams.erc20MetadataInfo.symbol,
-      decimals: securityDataParams.erc20MetadataInfo.decimals,
+    erc20Metadata: {
+      name: securityDataParams.erc20Metadata.name,
+      symbol: securityDataParams.erc20Metadata.symbol,
+      decimals: securityDataParams.erc20Metadata.decimals,
     },
     clearingActive: securityDataParams.clearingActive,
     internalKycActivated: securityDataParams.internalKycActivated,

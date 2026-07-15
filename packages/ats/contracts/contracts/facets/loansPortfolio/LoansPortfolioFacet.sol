@@ -39,27 +39,26 @@ contract LoansPortfolioFacet is LoansPortfolio, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](19);
-        staticFunctionSelectors_[selectorIndex++] = this.initializeLoansPortfolio.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.addHoldingsAsset.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.removeHoldingsAsset.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.notifyLoanHoldingsAssetUpdate.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.loansPortfolioWithdraw.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getLoansPortfolioData.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getHoldingsAssets.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getLoanHoldingsAssets.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getHoldingsAssetOwnership.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getNumberOfAssets.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getNumberOfLoans.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getNumberOfCash.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getNumberOfPerformingLoans.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getNumberOfNonPerformingLoans.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getNumberDefaultedLoans.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getSecuredLoansRatio.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getPerformingLoansRatio.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getNonPerformingLoansRatio.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getDefaultedLoansRatio.selector;
+        staticFunctionSelectors_[0] = this.initializeLoansPortfolio.selector;
+        staticFunctionSelectors_[1] = this.addHoldingsAsset.selector;
+        staticFunctionSelectors_[2] = this.removeHoldingsAsset.selector;
+        staticFunctionSelectors_[3] = this.notifyLoanHoldingsAssetUpdate.selector;
+        staticFunctionSelectors_[4] = this.loansPortfolioWithdraw.selector;
+        staticFunctionSelectors_[5] = this.getLoansPortfolioData.selector;
+        staticFunctionSelectors_[6] = this.getHoldingsAssets.selector;
+        staticFunctionSelectors_[7] = this.getLoanHoldingsAssets.selector;
+        staticFunctionSelectors_[8] = this.getHoldingsAssetOwnership.selector;
+        staticFunctionSelectors_[9] = this.getNumberOfAssets.selector;
+        staticFunctionSelectors_[10] = this.getNumberOfLoans.selector;
+        staticFunctionSelectors_[11] = this.getNumberOfCash.selector;
+        staticFunctionSelectors_[12] = this.getNumberOfPerformingLoans.selector;
+        staticFunctionSelectors_[13] = this.getNumberOfNonPerformingLoans.selector;
+        staticFunctionSelectors_[14] = this.getNumberDefaultedLoans.selector;
+        staticFunctionSelectors_[15] = this.getSecuredLoansRatio.selector;
+        staticFunctionSelectors_[16] = this.getPerformingLoansRatio.selector;
+        staticFunctionSelectors_[17] = this.getNonPerformingLoansRatio.selector;
+        staticFunctionSelectors_[18] = this.getDefaultedLoansRatio.selector;
     }
 
     /// @inheritdoc IStaticFunctionSelectors

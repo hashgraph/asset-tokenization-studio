@@ -20,7 +20,7 @@ export interface SecurityDataParams {
   isWhiteList: boolean;
   /** Maximum supply of tokens */
   maxSupply: ethers.BigNumberish;
-  erc20MetadataInfo: {
+  erc20Metadata: {
     /** ERC20 metadata information */
     /** Token name */
     name: string;
@@ -107,10 +107,4 @@ export interface FactoryRegulationDataParams {
     /** Additional security information */
     info: string;
   };
-}
-
-export enum SecurityType {
-  BOND_VARIABLE_RATE = 0,
-  EQUITY = 1,
-  DEPOSIT_TOKEN = 5,
 }

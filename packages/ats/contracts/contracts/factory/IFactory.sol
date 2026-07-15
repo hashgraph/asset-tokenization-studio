@@ -18,30 +18,6 @@ bytes32 constant RESOLVER_KEY_FACTORY = 0x9fc26269cc1cb994e66f269ed6b58a5bb0c344
  */
 interface IFactory {
     /**
-     * @notice Distinguishes the security variant being deployed.
-     * @dev Used internally to select the correct initialisation path in the factory. The
-     *      ordinal of each variant is persisted on-chain in `ERC20StorageWrapper.securityType`,
-     *      so members MUST NOT be reordered or removed — doing so would reinterpret or invalidate
-     *      the stored value of already-deployed tokens. `BondFixedRate`, `BondKpiLinkedRate` and
-     *      `Loan` are no longer deployable through the factory (BBND-1882) but are retained here
-     *      to keep their ordinals stable for tokens deployed before that change.
-     */
-    enum SecurityType {
-        /// @notice A bond whose coupon rate floats against an external index.
-        BondVariableRate,
-        /// @notice An equity instrument (shares).
-        Equity,
-        /// @notice A bond with a fixed coupon rate (retained for ordinal stability; not deployable).
-        BondFixedRate,
-        /// @notice A bond whose coupon is tied to KPI performance metrics (retained; not deployable).
-        BondKpiLinkedRate,
-        /// @notice A loan instrument (retained for ordinal stability; not deployable).
-        Loan,
-        /// @notice A minimal cash-style deposit token.
-        DepositToken
-    }
-
-    /**
      * @notice Categories of dividend entitlement an equity token may carry.
      */
     enum DividendType {
@@ -65,7 +41,7 @@ interface IFactory {
      * @param isControllable             Whether an operator can forcibly transfer tokens.
      * @param isWhiteList                Whether transfers are gated by a whitelist.
      * @param maxSupply                  Hard cap on total token supply (0 means unlimited).
-     * @param erc20MetadataInfo          ERC-20 name, symbol, and decimals.
+     * @param erc20Metadata              ERC-20 name, symbol, and decimals.
      * @param clearingActive             Whether clearing and settlement is activated.
      * @param internalKycActivated       Whether the internal KYC module is activated.
      * @param externalPauses             External pause contract addresses consulted on transfer.
@@ -79,7 +55,7 @@ interface IFactory {
         IBusinessLogicResolver resolver;
         uint256 maxSupply;
         IResolverProxy.ResolverProxyConfigurationV2 resolverProxyConfigurationV2;
-        ICore.ERC20MetadataInfo erc20MetadataInfo;
+        ICore.ERC20Metadata erc20Metadata;
         IResolverProxy.Rbac[] rbacs;
         address[] externalPauses;
         address[] externalControlLists;
