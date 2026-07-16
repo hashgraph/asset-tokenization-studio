@@ -125,14 +125,6 @@ Thrown when an account does not hold a required role.
 | account | address | The account that lacks the role. |
 | role    | bytes32 | The role that is not held.       |
 
-### Deactivated
-
-```solidity
-error Deactivated()
-```
-
-Thrown when an operation guarded by `onlyActivated` is attempted on a token whose deactivation flag has already been set.
-
 ### FacetAlreadyRegistered
 
 ```solidity

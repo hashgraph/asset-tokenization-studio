@@ -343,3 +343,11 @@ error WrongExpirationTimestamp()
 Reverts when an expiration timestamp is invalid.
 
 _Used for expired, past, or otherwise unacceptable expiration values._
+
+### ZeroValue
+
+```solidity
+error ZeroValue()
+```
+
+Thrown when a zero token amount is supplied to an operation that requires a positive value.

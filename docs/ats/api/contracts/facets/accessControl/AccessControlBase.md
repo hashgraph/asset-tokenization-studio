@@ -1,12 +1,12 @@
-# AccessControl
+# AccessControlBase
 
 _Asset Tokenization Studio Team_
 
-> AccessControl
+> AccessControlBase
 
-Entry point for role-based access control for direct-inheritance consumers that do not operate through the ResolverProxy pattern (e.g. `DiamondCutManager`). Supports individual and batch role mutations as well as paginated role queries (inherited).
+Shared implementation for role-mutating operations, reused by `AccessControl` and `AccessControlOperational`. Holds the single copy of each operation&#39;s storage mutation and event emission, so the two entry points differ only in the guard modifiers appropriate to how they are wired into the system.
 
-_Thin wrapper over `AccessControlBase`: declares the guard modifiers appropriate to a non-proxy consumer and delegates the actual storage mutation and event emission to the shared internal helpers. Use `AccessControlOperational` (with `onlyOperational`) for proxy facets instead._
+_`AccessControl` is inherited directly by non-proxy consumers (e.g. `DiamondCutManager`), which must remain usable before any diamond configuration is operational. `AccessControlOperational` is inherited by `AccessControlFacet`, a proxy facet that additionally requires `onlyOperational`. Solidity modifiers must be declared statically on the function signature, so the guard difference cannot be parameterised at runtime — each subclass declares its own thin external function and delegates to the internal helpers here. `initializeAccessControl` needs no such split: its guards are identical for both consumers, so it is implemented once and inherited unchanged._
 
 ## Methods
 
@@ -18,7 +18,7 @@ function applyRoles(bytes32[] _roles, bool[] _actives, address _account) externa
 
 Applies multiple role grants or revocations to an account in a single transaction.
 
-_Requires the token to be unpaused, equal-length arrays, and no duplicate role entries. Per-role admin checks are enforced inside the storage layer._
+_The caller must hold the admin role for each role in `_roles` (checked per entry in the storage layer). `_roles` and `_actives` must have equal length and contain no duplicate role entries. Grant entries where the account already holds the role and revoke entries where it does not are silently skipped. Emits `RolesApplied` with the subset that effectively changed state._
 
 #### Parameters
 
@@ -124,7 +124,7 @@ function grantRole(bytes32 _role, address _account) external nonpayable returns 
 
 Grants a role to an account.
 
-_Requires the token to be unpaused and the caller to hold the admin role of `_role`._
+_The caller must hold the admin role of `_role` (resolved dynamically via `getRoleAdmin`). Reverts with `AccountAssignedToRole` if the account already holds the role. Emits `RoleGranted`._
 
 #### Parameters
 
@@ -178,7 +178,7 @@ function renounceRole(bytes32 _role) external nonpayable returns (bool success_)
 
 Allows the caller to renounce a role held by their own account.
 
-_Requires the token to be unpaused. No admin role required; acts on `msg.sender`. Reverts with `CannotRenounceSoleAdmin` if the caller is the sole DEFAULT_ADMIN_ROLE holder._
+_Operates on `msg.sender` only; no admin role is required. Reverts with `AccountNotAssignedToRole` if the caller does not hold the role. Emits `RoleRenounced`._
 
 #### Parameters
 
@@ -200,7 +200,7 @@ function revokeRole(bytes32 _role, address _account) external nonpayable returns
 
 Revokes a role from an account.
 
-_Requires the token to be unpaused and the caller to hold the admin role of `_role`._
+_The caller must hold the admin role of `_role` (resolved dynamically via `getRoleAdmin`). Reverts with `AccountNotAssignedToRole` if the account does not hold the role. Emits `RoleRevoked`._
 
 #### Parameters
 
@@ -379,23 +379,6 @@ error CannotRenounceSoleAdmin()
 
 Thrown when the sole holder of `DEFAULT_ADMIN_ROLE` attempts to renounce it, which would permanently lock all admin-gated functions.
 
-### ContradictoryValuesInArray
-
-```solidity
-error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex)
-```
-
-Reverts when ordered array values contradict expected ordering.
-
-_Indicates that two indexed values cannot both satisfy the required monotonic or range invariant._
-
-#### Parameters
-
-| Name       | Type    | Description                                      |
-| ---------- | ------- | ------------------------------------------------ |
-| lowerIndex | uint256 | Lower array index involved in the contradiction. |
-| upperIndex | uint256 | Upper array index involved in the contradiction. |
-
 ### FacetAlreadyRegistered
 
 ```solidity
@@ -410,14 +393,6 @@ Raised when an initialiser tries to register a facet that already has a non-zero
 | ----------- | ------- | -------------------------------------------------------------- |
 | facetId     | bytes32 | Identifier of the offending facet.                             |
 | lastVersion | uint256 | Last version recorded for that facet at the time of the check. |
-
-### IsPaused
-
-```solidity
-error IsPaused()
-```
-
-Thrown when an operation that requires the token to be unpaused is attempted while the token is paused (own flag or any external pause contract).
 
 ### RolesAndActivesLengthMismatch
 

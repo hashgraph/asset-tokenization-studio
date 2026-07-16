@@ -251,6 +251,22 @@ error SnapshotIdNull()
 
 Thrown when a snapshot identifier of zero is supplied; zero is reserved and never assigned to a valid snapshot.
 
+### UnexpectedError
+
+```solidity
+error UnexpectedError(bytes4 _errorId)
+```
+
+Reverts when an unreachable validation state is detected.
+
+_Replaces assertions for defensive handling of logically impossible states._
+
+#### Parameters
+
+| Name      | Type   | Description                                        |
+| --------- | ------ | -------------------------------------------------- |
+| \_errorId | bytes4 | Identifier of the unexpected validation condition. |
+
 ### UnrecognizedResolverProxyVersion
 
 ```solidity

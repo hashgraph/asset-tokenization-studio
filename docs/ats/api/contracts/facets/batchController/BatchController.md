@@ -192,3 +192,11 @@ error WalletRecovered()
 ```
 
 Thrown when attempting to recover a wallet that has already been recovered.
+
+### ZeroValue
+
+```solidity
+error ZeroValue()
+```
+
+Thrown when a zero token amount is supplied to an operation that requires a positive value.

@@ -704,16 +704,6 @@ Thrown when an account does not hold or is not associated with the specified par
 | account   | address | Address that was checked.                     |
 | partition | bytes32 | Partition that was not found for the account. |
 
-### InvalidTimestamp
-
-```solidity
-error InvalidTimestamp()
-```
-
-Reverts when a timestamp value is invalid.
-
-_Used for shared timestamp validation that is not tied to expiration._
-
 ### IsPaused
 
 ```solidity
@@ -821,3 +811,19 @@ Thrown when a type-scoped index does not correspond to an existing action.
 | ---------- | ------- | ------------------------------------------------------ |
 | index      | uint256 | The out-of-range index that was provided.              |
 | actionType | bytes32 | The action type against which the index was validated. |
+
+### WrongTimestamp
+
+```solidity
+error WrongTimestamp(uint256 timeStamp)
+```
+
+Reverts when a scheduled timestamp is not strictly in the future.
+
+_Used for shared scheduling validation where the current block time is read through `TimeTravelStorageWrapper`._
+
+#### Parameters
+
+| Name      | Type    | Description                        |
+| --------- | ------- | ---------------------------------- |
+| timeStamp | uint256 | Timestamp rejected for scheduling. |
