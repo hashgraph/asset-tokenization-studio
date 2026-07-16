@@ -158,7 +158,7 @@ function updateExternalKycLists(address[] _kycLists, bool[] _actives) external n
 
 Adds or removes multiple external KYC list contracts in a single transaction.
 
-_Requires `ROLE_KYC_MANAGER` and the token to be unpaused. Both arrays must have the same length and contain no duplicate addresses, validated by `ArrayValidation.checkUniqueValues`. Reverts with `ExternalKycListsNotUpdated` on failure. Emits `ExternalKycListsUpdated`._
+_Requires `ROLE_KYC_MANAGER` and the token to be unpaused. Both arrays must have the same length and contain no duplicate addresses, validated by `ArrayValidation.checkUniqueValues`. Emits `ExternalKycListsUpdated`._
 
 #### Parameters
 
@@ -294,21 +294,6 @@ error Deactivated()
 
 Thrown when an operation guarded by `onlyActivated` is attempted on a token whose deactivation flag has already been set.
 
-### ExternalKycListsNotUpdated
-
-```solidity
-error ExternalKycListsNotUpdated(address[] kycList, bool[] actives)
-```
-
-Thrown when a batch update of external KYC lists fails to complete.
-
-#### Parameters
-
-| Name    | Type      | Description                                                        |
-| ------- | --------- | ------------------------------------------------------------------ |
-| kycList | address[] | Array of external KYC list contract addresses that were submitted. |
-| actives | bool[]    | Corresponding activation flags that were submitted.                |
-
 ### FacetAlreadyRegistered
 
 ```solidity
@@ -361,6 +346,22 @@ _Enforced by `ExternalListManagementStorageWrapper.addExternalList` for the exte
 | Name | Type    | Description                                               |
 | ---- | ------- | --------------------------------------------------------- |
 | max  | uint256 | Maximum number of entries permitted in the external list. |
+
+### UnexpectedError
+
+```solidity
+error UnexpectedError(bytes4 _errorId)
+```
+
+Reverts when an unreachable validation state is detected.
+
+_Replaces assertions for defensive handling of logically impossible states._
+
+#### Parameters
+
+| Name      | Type   | Description                                        |
+| --------- | ------ | -------------------------------------------------- |
+| \_errorId | bytes4 | Identifier of the unexpected validation condition. |
 
 ### UnlistedKycList
 

@@ -46,7 +46,7 @@ export function amortizationTests(getCtx: () => AssetMockCtx): void {
 
       await asset.forceDecimals(DEFAULT_SECURITY_PARAMS.decimals);
       await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_NOMINAL_VALUE, deployer.address);
-      await asset.connect(deployer).setNominalValue(100, 2);
+      await asset.forceSetNominalValue(100, 2, "0x000000", (await getDltTimestamp()) - 3600, true);
     });
 
     describe("setAmortization", () => {

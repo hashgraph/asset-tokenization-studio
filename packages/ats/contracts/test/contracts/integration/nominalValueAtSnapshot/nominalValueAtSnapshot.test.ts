@@ -5,8 +5,10 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
 import { ATS_ROLES, RESOLVER_KEYS } from "@scripts";
-import { executeRbac } from "@test";
+import { executeRbac, getDltTimestamp } from "@test";
 import type { AssetMockCtx } from "@test";
+
+const CURRENCY_ZERO = "0x000000";
 
 export function nominalValueAtSnapshotTests(getCtx: () => AssetMockCtx): void {
   describe("NominalValueAtSnapshot Tests", () => {
@@ -54,11 +56,12 @@ export function nominalValueAtSnapshotTests(getCtx: () => AssetMockCtx): void {
       });
 
       it("GIVEN a nominal value set and a snapshot taken WHEN nominalValueAtSnapshot THEN returns recorded value", async () => {
-        await asset.connect(deployer).setNominalValue(200n, 4);
+        const initDate = (await getDltTimestamp()) - 3600;
+        await asset.forceSetNominalValue(200n, 4, CURRENCY_ZERO, initDate, true);
         await asset.connect(deployer).takeSnapshot();
 
-        // mutating the nominal value after the snapshot should not change the snapshotted value
-        await asset.connect(deployer).setNominalValue(500n, 4);
+        // publishing a new value after the snapshot should not change the snapshotted value
+        await asset.connect(deployer).publishNominalValue(500n, initDate + 60);
 
         expect(await asset.nominalValueAtSnapshot(1)).to.equal(200n);
       });
@@ -76,12 +79,13 @@ export function nominalValueAtSnapshotTests(getCtx: () => AssetMockCtx): void {
         );
       });
 
-      it("GIVEN a nominal value set and a snapshot taken WHEN nominalValueDecimalsAtSnapshot THEN returns recorded decimals", async () => {
-        await asset.connect(deployer).setNominalValue(200n, 4);
+      it("GIVEN a nominal value set and a snapshot taken WHEN nominalValueDecimalsAtSnapshot THEN returns the recorded (immutable) decimals", async () => {
+        const initDate = (await getDltTimestamp()) - 3600;
+        await asset.forceSetNominalValue(200n, 4, CURRENCY_ZERO, initDate, true);
         await asset.connect(deployer).takeSnapshot();
 
-        // mutating the decimals after the snapshot should not change the snapshotted value
-        await asset.connect(deployer).setNominalValue(500n, 6);
+        // decimals are fixed at initialisation; publishing a new value never changes them.
+        await asset.connect(deployer).publishNominalValue(500n, initDate + 60);
 
         expect(await asset.nominalValueDecimalsAtSnapshot(1)).to.equal(4);
       });

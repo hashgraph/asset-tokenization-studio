@@ -21,28 +21,59 @@ abstract contract NominalValue is INominalValue, Modifiers {
     function initializeNominalValue(
         uint256 _nominalValue,
         uint8 _nominalValueDecimals,
-        bytes3 _nominalValueCurrency
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_NOMINAL_VALUE) {
-        NominalValueStorageWrapper.initializeNominalValue(_nominalValue, _nominalValueDecimals, _nominalValueCurrency);
+        bytes3 _nominalValueCurrency,
+        uint256 _effectiveDatetime,
+        bool _isUnitNominalValue
+    )
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_NOMINAL_VALUE)
+        onlyValidTimestamp(_effectiveDatetime)
+        onlyPastTimestamp(_effectiveDatetime)
+    {
+        NominalValueStorageWrapper.initializeNominalValue(
+            _nominalValue,
+            _nominalValueDecimals,
+            _nominalValueCurrency,
+            _effectiveDatetime,
+            _isUnitNominalValue
+        );
         InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_NOMINAL_VALUE);
         emit NominalValueInitialized(_nominalValue, _nominalValueDecimals, _nominalValueCurrency);
     }
 
     /// @inheritdoc INominalValue
-    function setNominalValue(
+    function publishNominalValue(
         uint256 _nominalValue,
-        uint8 _nominalValueDecimals
-    ) external override onlyOperational onlyActivated onlyRole(ROLE_NOMINAL_VALUE) {
-        NominalValueStorageWrapper.setNominalValue(_nominalValue, _nominalValueDecimals);
-        emit NominalValueSet(EvmAccessors.getMsgSender(), _nominalValue, _nominalValueDecimals);
+        uint256 _effectiveDatetime
+    )
+        external
+        override
+        onlyOperational
+        onlyActivated
+        onlyRole(ROLE_NOMINAL_VALUE)
+        onlyValidPublishDatetime(_effectiveDatetime)
+        onlyPastTimestamp(_effectiveDatetime)
+    {
+        NominalValueStorageWrapper.writeNominalValue(_nominalValue, _effectiveDatetime);
+        emit NominalValuePublished(EvmAccessors.getMsgSender(), _nominalValue, _effectiveDatetime);
     }
 
     /// @inheritdoc INominalValue
-    function setNominalValueCurrency(
-        bytes3 _nominalValueCurrency
-    ) external override onlyOperational onlyActivated onlyRole(ROLE_NOMINAL_VALUE) {
-        NominalValueStorageWrapper.setNominalValueCurrency(_nominalValueCurrency);
-        emit NominalValueCurrencySet(EvmAccessors.getMsgSender(), _nominalValueCurrency);
+    function republishNominalValue(
+        uint256 _nominalValue,
+        uint256 _effectiveDatetime
+    )
+        external
+        override
+        onlyOperational
+        onlyActivated
+        onlyRole(ROLE_NOMINAL_VALUE)
+        onlyValidRepublishDatetime(_effectiveDatetime)
+    {
+        NominalValueStorageWrapper.writeNominalValue(_nominalValue, _effectiveDatetime);
+        emit NominalValueRepublished(EvmAccessors.getMsgSender(), _nominalValue, _effectiveDatetime);
     }
 
     /// @inheritdoc INominalValue
@@ -58,5 +89,10 @@ abstract contract NominalValue is INominalValue, Modifiers {
     /// @inheritdoc INominalValue
     function getNominalValueCurrency() external view override returns (bytes3) {
         return NominalValueStorageWrapper.getNominalValueCurrency();
+    }
+
+    /// @inheritdoc INominalValue
+    function getIsUnitNominalValue() external view override returns (bool) {
+        return NominalValueStorageWrapper.getIsUnitNominalValue();
     }
 }

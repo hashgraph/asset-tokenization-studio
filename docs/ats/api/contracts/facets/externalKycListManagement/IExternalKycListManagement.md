@@ -158,7 +158,7 @@ function updateExternalKycLists(address[] _kycLists, bool[] _actives) external n
 
 Adds or removes multiple external KYC list contracts in a single transaction.
 
-_Requires `ROLE_KYC_MANAGER` and the token to be unpaused. Both arrays must have the same length and contain no duplicate addresses, validated by `ArrayValidation.checkUniqueValues`. Reverts with `ExternalKycListsNotUpdated` on failure. Emits `ExternalKycListsUpdated`._
+_Requires `ROLE_KYC_MANAGER` and the token to be unpaused. Both arrays must have the same length and contain no duplicate addresses, validated by `ArrayValidation.checkUniqueValues`. Emits `ExternalKycListsUpdated`._
 
 #### Parameters
 
@@ -238,21 +238,6 @@ Emitted when an external KYC list contract is removed from the list.
 | kycList            | address | Address of the external KYC list contract that was removed. |
 
 ## Errors
-
-### ExternalKycListsNotUpdated
-
-```solidity
-error ExternalKycListsNotUpdated(address[] kycList, bool[] actives)
-```
-
-Thrown when a batch update of external KYC lists fails to complete.
-
-#### Parameters
-
-| Name    | Type      | Description                                                        |
-| ------- | --------- | ------------------------------------------------------------------ |
-| kycList | address[] | Array of external KYC list contract addresses that were submitted. |
-| actives | bool[]    | Corresponding activation flags that were submitted.                |
 
 ### ListedKycList
 

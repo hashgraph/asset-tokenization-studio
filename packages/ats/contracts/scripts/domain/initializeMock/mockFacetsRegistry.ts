@@ -16,6 +16,7 @@ import {
   MockFacet3__factory,
   MockFactoryFacet__factory,
 } from "@contract-types";
+import { getLibLinks } from "../orchestratorLibraries";
 
 // TEST-ONLY: BLR configuration ID for the InitializeMock domain, bytes32(uint256(9)).
 // Lives with the mock domain rather than the production `CONFIG_IDS` so test-only
@@ -40,7 +41,10 @@ export const MOCK_FACET_REGISTRY = {
     name: "MockDiamondCutHelpers",
     description: "TEST-ONLY force* state-forcing controls, appended alongside the real DiamondFacet",
     resolverKey: { name: "_MOCK_DIAMOND_CUT_HELPERS", value: _MOCK_DIAMOND_CUT_HELPERS },
-    factory: (signer) => new MockDiamondCutHelpers__factory(signer),
+    // NominalValueStorageWrapper's initializeNominalValue (called from forceSetNominalValue)
+    // triggers pending scheduled cross-ordered tasks via the external ScheduledTasksOps
+    // library, so this mock facet's bytecode needs it linked too.
+    factory: (signer) => new MockDiamondCutHelpers__factory(getLibLinks("scheduledTasksOps") as any, signer),
   },
   MockFacet1: {
     name: "MockFacet1",

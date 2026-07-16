@@ -271,21 +271,6 @@ error Deactivated()
 
 Thrown when an operation guarded by `onlyActivated` is attempted on a token whose deactivation flag has already been set.
 
-### ExternalPausesNotUpdated
-
-```solidity
-error ExternalPausesNotUpdated(address[] pauses, bool[] actives)
-```
-
-Thrown when a batch update of external pauses fails to complete.
-
-#### Parameters
-
-| Name    | Type      | Description                                                     |
-| ------- | --------- | --------------------------------------------------------------- |
-| pauses  | address[] | Array of external pause contract addresses that were submitted. |
-| actives | bool[]    | Corresponding activation flags that were submitted.             |
-
 ### FacetAlreadyRegistered
 
 ```solidity
@@ -338,6 +323,22 @@ _Enforced by `ExternalListManagementStorageWrapper.addExternalList` for the exte
 | Name | Type    | Description                                               |
 | ---- | ------- | --------------------------------------------------------- |
 | max  | uint256 | Maximum number of entries permitted in the external list. |
+
+### UnexpectedError
+
+```solidity
+error UnexpectedError(bytes4 _errorId)
+```
+
+Reverts when an unreachable validation state is detected.
+
+_Replaces assertions for defensive handling of logically impossible states._
+
+#### Parameters
+
+| Name      | Type   | Description                                        |
+| --------- | ------ | -------------------------------------------------- |
+| \_errorId | bytes4 | Identifier of the unexpected validation condition. |
 
 ### UnlistedPause
 

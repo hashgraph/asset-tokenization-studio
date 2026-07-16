@@ -25,8 +25,12 @@ export const DEFAULT_BOND_PARAMS = {
   nominalValueDecimals: 2,
   proceedRecipients: [] as string[],
   proceedRecipientsData: [] as string[],
+  isUnitNominalValue: true,
   startingDate: async () => {
     return (await getDltTimestamp()) + 3600; //block.timestamp + 1 hour
+  },
+  effectiveDatetime: async () => {
+    return (await getDltTimestamp()) - 3600; //block.timestamp - 1 hour
   },
 } as const;
 
@@ -42,6 +46,8 @@ export async function makeBondDetailsData(params?: DeepPartial<BondDetailsDataPa
     nominalValueDecimals: params?.nominalValueDecimals ?? DEFAULT_BOND_PARAMS.nominalValueDecimals,
     startingDate: params?.startingDate ?? (await DEFAULT_BOND_PARAMS.startingDate()),
     maturityDate: maturityDate,
+    isUnitNominalValue: params?.isUnitNominalValue ?? DEFAULT_BOND_PARAMS.isUnitNominalValue,
+    effectiveDatetime: params?.effectiveDatetime ?? (await DEFAULT_BOND_PARAMS.effectiveDatetime()),
   };
 }
 

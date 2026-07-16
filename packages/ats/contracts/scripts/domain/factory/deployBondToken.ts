@@ -117,6 +117,8 @@ export async function deployBondFromFactory(
     nominalValueDecimals: bondDetailsParams.nominalValueDecimals,
     startingDate: bondDetailsParams.startingDate || Math.floor(Date.now() / 1000),
     maturityDate: bondDetailsParams.maturityDate || 0,
+    effectiveDatetime: bondDetailsParams.effectiveDatetime,
+    isUnitNominalValue: bondDetailsParams.isUnitNominalValue,
   };
 
   // Build bond data

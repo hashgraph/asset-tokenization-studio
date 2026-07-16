@@ -243,7 +243,9 @@ abstract contract Factory is IFactory {
         INominalValue(equityAddress_).initializeNominalValue(
             _equityData.equityDetails.nominalValue,
             _equityData.equityDetails.nominalValueDecimals,
-            _equityData.equityDetails.currency
+            _equityData.equityDetails.currency,
+            _equityData.equityDetails.effectiveDatetime,
+            _equityData.equityDetails.isUnitNominalValue
         );
         IInterestRate(equityAddress_).initializeInterestRateType(IInterestRate.RateType.STANDARD);
         IProceedRecipients(equityAddress_).initializeProceedRecipients(new address[](0), new bytes[](0));
@@ -322,7 +324,9 @@ abstract contract Factory is IFactory {
         INominalValue(bondAddress_).initializeNominalValue(
             _bondData.bondDetails.nominalValue,
             _bondData.bondDetails.nominalValueDecimals,
-            _bondData.bondDetails.currency
+            _bondData.bondDetails.currency,
+            _bondData.bondDetails.effectiveDatetime,
+            _bondData.bondDetails.isUnitNominalValue
         );
         ICoupon(bondAddress_).initializeCoupon();
         ICouponListing(bondAddress_).initializeCouponListing();
