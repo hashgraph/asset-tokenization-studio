@@ -1,0 +1,105 @@
+// SPDX-License-Identifier: Apache-2.0
+
+import { expect } from "chai";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
+import { ATS_ROLES, RESOLVER_KEYS } from "@lib";
+import { grantRoleAndPauseToken } from "@test";
+import { IAssetMock } from "@contract-types";
+import type { AssetMockCtx } from "@test";
+
+export function deactivateTests(getCtx: () => AssetMockCtx): void {
+  describe("Deactivate Tests", () => {
+    let asset: IAssetMock;
+    let deployer: HardhatEthersSigner;
+    let unknownSigner: HardhatEthersSigner;
+
+    beforeEach(async () => {
+      const ctx = getCtx();
+      asset = ctx.asset;
+      deployer = ctx.deployer;
+      unknownSigner = ctx.unknownSigner;
+    });
+
+    it("GIVEN an account without deactivate role WHEN deactivate THEN transaction fails with AccountHasNoRole", async () => {
+      await expect(asset.connect(unknownSigner).deactivate()).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+    });
+
+    it("GIVEN a paused Token WHEN deactivate THEN transaction fails with IsPaused", async () => {
+      // Grant ROLE_DEACTIVATE to unknownSigner and pause the token using deployer's ROLE_PAUSER
+      await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_PAUSER, deployer.address);
+      await grantRoleAndPauseToken(asset, ATS_ROLES.ROLE_DEACTIVATE, deployer, deployer, unknownSigner.address);
+
+      // deactivate fails because token is paused
+      await expect(asset.connect(unknownSigner).deactivate()).to.be.revertedWithCustomError(asset, "IsPaused");
+    });
+
+    it("GIVEN an account with deactivate role WHEN deactivate THEN transaction succeeds and isDeactivated returns true", async () => {
+      // Granting Role
+      await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, unknownSigner.address);
+
+      // Initial state must be active
+      expect(await asset.isDeactivated()).to.be.equal(false);
+
+      // DEACTIVATE
+      await expect(asset.connect(unknownSigner).deactivate()).not.to.be.reverted;
+
+      // State must reflect deactivation
+      expect(await asset.isDeactivated()).to.be.equal(true);
+    });
+
+    it("GIVEN an already deactivated Token WHEN deactivate THEN transaction fails with Deactivated", async () => {
+      // Granting Role
+      await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, unknownSigner.address);
+
+      // First deactivation
+      await asset.connect(unknownSigner).deactivate();
+      expect(await asset.isDeactivated()).to.be.equal(true);
+
+      // Second deactivation does not revert and state stays deactivated (idempotent)
+      await expect(asset.connect(unknownSigner).deactivate()).to.be.revertedWithCustomError(asset, "Deactivated");
+      expect(await asset.isDeactivated()).to.be.equal(true);
+    });
+
+    describe("Deactivated", () => {
+      beforeEach(async () => {
+        await asset.grantRole(ATS_ROLES.ROLE_DEACTIVATE, deployer.address);
+        await asset.connect(deployer).deactivate();
+      });
+
+      it("GIVEN a deactivated asset WHEN deactivate THEN transaction fails with Deactivated", async () => {
+        await expect(asset.connect(deployer).deactivate()).to.be.revertedWithCustomError(asset, "Deactivated");
+      });
+    });
+
+    describe("initializeDeactivate", () => {
+      it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeDeactivate is called THEN AccountHasNoRole", async () => {
+        await expect(asset.connect(unknownSigner).initializeDeactivate())
+          .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+          .withArgs(unknownSigner.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+      });
+
+      it("GIVEN already-initialised WHEN initializeDeactivate is called again THEN FacetAlreadyRegistered", async () => {
+        await expect(asset.initializeDeactivate())
+          .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+          .withArgs(RESOLVER_KEYS.deactivate, 1);
+      });
+    });
+
+    describe("initializeDeactivate event", () => {
+      it("GIVEN a fresh deployment WHEN initializeDeactivate is called THEN emits DeactivateInitialized", async () => {
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.deactivate);
+        await expect(asset.initializeDeactivate()).to.emit(asset, "DeactivateInitialized");
+      });
+    });
+
+    describe("nonOperational", () => {
+      beforeEach(async () => {
+        await asset.forceNonOperational();
+      });
+
+      it("GIVEN non-operational asset WHEN deactivate THEN reverts with AssetNotOperational", async () => {
+        await expect(asset.deactivate()).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+      });
+    });
+  });
+}

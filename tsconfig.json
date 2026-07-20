@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "moduleResolution": "node10",
+    "declaration": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "importHelpers": true,
+    "alwaysStrict": true,
+    "strict": true,
+    "outDir": "./build",
+    "resolveJsonModule": true,
+    "paths": {
+      "@configuration": ["./Configuration.ts"],
+      "@contract-types": ["./typechain-types/index.ts"],
+      "@lib": ["./lib/index.ts"],
+      "@lib/operations": ["./lib/operations/index.ts"],
+      "@lib/domain": ["./lib/domain/index.ts"],
+      "@tasks": ["./tasks/index.ts"],
+      "@test": ["./test/internal.ts"],
+      "@common-types": ["./typechain-types/common.ts"],
+      "@test/*": ["./test/*"]
+    }
+  },
+  "include": ["lib/**/*", "Configuration.ts", "typechain-types/**/*", "test/**/*", "tasks/**/*"],
+  "exclude": ["node_modules"]
+}

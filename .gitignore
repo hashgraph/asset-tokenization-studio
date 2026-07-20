@@ -129,6 +129,16 @@ dist
 .pnp.*
 
 asset-tokenization-studio.iml
+*.iml
+
+# Hardhat outputs
+artifacts/
+cache/
+build/
+typechain-types/
+ignition/deployments/
+coverage.json
+gas-report.txt
 
 # IntelliJ Idea
 /.idea/

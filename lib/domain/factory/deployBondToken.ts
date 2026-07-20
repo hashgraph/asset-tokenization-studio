@@ -1,0 +1,131 @@
+// SPDX-License-Identifier: Apache-2.0
+
+import { ethers, type EventLog } from "ethers";
+import type { IFactory, IMockFactory, ResolverProxy } from "@contract-types";
+import { ResolverProxy__factory } from "@contract-types";
+import { gasLimitOverride } from "@lib/operations";
+import { ATS_ROLES, CONFIG_IDS } from "../constants";
+import { BondDetailsDataParams, FactoryRegulationDataParams, Rbac, SecurityDataParams } from "./types";
+
+export interface DeployBondFromFactoryParams {
+  /** Admin account address */
+  adminAccount: string;
+  factory: IFactory | IMockFactory;
+  securityData: SecurityDataParams;
+  bondDetails: BondDetailsDataParams;
+  proceedRecipients: string[];
+  proceedRecipientsData: string[];
+}
+
+/**
+ * Deploy a bond token using the Factory contract.
+ *
+ * This function constructs the required data structures and calls the factory's
+ * deployBond method to create a new bond token with a diamond proxy.
+ */
+export async function deployBondFromFactory(
+  bondDataParams: DeployBondFromFactoryParams,
+  regulationTypeParams: FactoryRegulationDataParams,
+): Promise<ResolverProxy> {
+  const {
+    factory,
+    adminAccount,
+    securityData: securityDataParams,
+    bondDetails: bondDetailsParams,
+    proceedRecipients,
+    proceedRecipientsData,
+  } = bondDataParams;
+
+  // Build RBAC array with admin
+  const rbacs: Rbac[] = [
+    {
+      role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
+      members: [adminAccount],
+    },
+    ...securityDataParams.rbacs,
+  ];
+
+  // Build resolver proxy configuration
+  const resolverProxyConfigurationV2 = {
+    configurationId: CONFIG_IDS.bond,
+    configurationVersion: 1,
+    replacementEnabled: true,
+  };
+
+  // Build security data structure
+  const securityData = {
+    arePartitionsProtected: securityDataParams.arePartitionsProtected,
+    isMultiPartition: securityDataParams.isMultiPartition,
+    resolver: securityDataParams.resolver,
+    resolverProxyConfigurationV2,
+    rbacs,
+    isControllable: securityDataParams.isControllable,
+    isWhiteList: securityDataParams.isWhiteList,
+    maxSupply: securityDataParams.maxSupply,
+    erc20MetadataInfo: {
+      name: securityDataParams.erc20MetadataInfo.name,
+      symbol: securityDataParams.erc20MetadataInfo.symbol,
+      decimals: securityDataParams.erc20MetadataInfo.decimals,
+    },
+    clearingActive: securityDataParams.clearingActive,
+    internalKycActivated: securityDataParams.internalKycActivated,
+    erc20VotesActivated: securityDataParams.erc20VotesActivated,
+    externalPauses: securityDataParams.externalPauses,
+    externalControlLists: securityDataParams.externalControlLists,
+    externalKycLists: securityDataParams.externalKycLists,
+    compliance: securityDataParams.compliance,
+    identityRegistry: securityDataParams.identityRegistry,
+  };
+
+  // Build bond details structure
+  const bondDetails = {
+    currency: bondDetailsParams.currency,
+    nominalValue: bondDetailsParams.nominalValue,
+    nominalValueDecimals: bondDetailsParams.nominalValueDecimals,
+    startingDate: bondDetailsParams.startingDate || Math.floor(Date.now() / 1000),
+    maturityDate: bondDetailsParams.maturityDate || 0,
+  };
+
+  // Build bond data
+  const bondData = {
+    security: securityData,
+    bondDetails,
+    proceedRecipients: proceedRecipients,
+    proceedRecipientsData: proceedRecipientsData,
+  };
+
+  // Build regulation data
+  const factoryRegulationData = {
+    regulationType: regulationTypeParams.regulationType,
+    regulationSubType: regulationTypeParams.regulationSubType,
+    additionalSecurityData: {
+      countriesControlListType: regulationTypeParams.additionalSecurityData.countriesControlListType,
+      listOfCountries: regulationTypeParams.additionalSecurityData.listOfCountries,
+      info: regulationTypeParams.additionalSecurityData.info,
+    },
+  };
+
+  // Deploy bond token via factory
+  const tx = await factory.deployBond(bondData, factoryRegulationData, gasLimitOverride());
+  const receipt = await tx.wait();
+
+  // Find BondDeployed event to get diamond address
+  const event = receipt?.logs.find((log) => "eventName" in log && (log as EventLog).eventName === "BondDeployed") as
+    EventLog | undefined;
+  if (!event || !event.args) {
+    throw new Error(
+      `BondDeployed event not found in deployment transaction. Events: ${JSON.stringify(
+        receipt?.logs.filter((log) => "eventName" in log).map((e) => (e as EventLog).eventName),
+      )}`,
+    );
+  }
+
+  const diamondAddress = event.args.diamondProxyAddress || event.args[1];
+
+  if (!diamondAddress || diamondAddress === ethers.ZeroAddress) {
+    throw new Error(`Invalid diamond address from event. Args: ${JSON.stringify(event.args)}`);
+  }
+
+  // Return diamond proxy as ResolverProxy contract
+  return ResolverProxy__factory.connect(diamondAddress, factory.runner);
+}

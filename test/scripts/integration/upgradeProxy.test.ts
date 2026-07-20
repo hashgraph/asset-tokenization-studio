@@ -1,0 +1,347 @@
+// SPDX-License-Identifier: Apache-2.0
+
+/**
+ * Integration tests for upgradeProxy: upgrades (fresh and pre-deployed
+ * implementations, with/without upgradeAndCall init), the already-at-target
+ * short-circuit, and ProxyAdmin access control.
+ *
+ * @module test/scripts/integration/upgradeProxy.test
+ */
+
+import { expect } from "chai";
+import { ethers } from "hardhat";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { upgradeProxy, getProxyImplementation, proxyNeedsUpgrade, prepareUpgrade } from "@lib/operations";
+import {
+  TUP_VERSIONS,
+  deployTupProxyFixture,
+  deployTupProxyWithV2Fixture,
+  TEST_ADDRESSES,
+  EIP1967_SLOTS,
+  TEST_INIT_VALUES,
+} from "@test";
+import { MockImplementation__factory, MockImplementationV2__factory, ProxyAdmin__factory } from "@contract-types";
+
+describe("upgradeProxy - Integration Tests", () => {
+  describe("Basic Upgrade", () => {
+    it("should upgrade proxy successfully (deploy new impl)", async () => {
+      const { deployer, proxyAdmin, proxyAddress } = await loadFixture(deployTupProxyFixture);
+
+      const result = await upgradeProxy(proxyAdmin, {
+        proxyAddress,
+        newImplementationFactory: new MockImplementationV2__factory(deployer),
+        newImplementationArgs: [],
+      });
+
+      expect(result.upgraded).to.be.true;
+      expect(result.transactionHash).to.exist;
+    });
+
+    it("should return old and new implementation addresses", async () => {
+      const { proxyAdmin, proxyAddress, implementationV1Address, implementationV2Address } =
+        await loadFixture(deployTupProxyWithV2Fixture);
+
+      const result = await upgradeProxy(proxyAdmin, {
+        proxyAddress,
+        newImplementationAddress: implementationV2Address,
+      });
+
+      expect(result.oldImplementation).to.exist;
+      expect(result.newImplementation).to.exist;
+      expect(result.oldImplementation?.toLowerCase()).to.equal(implementationV1Address.toLowerCase());
+      expect(result.newImplementation?.toLowerCase()).to.equal(implementationV2Address.toLowerCase());
+    });
+
+    it("should verify implementation changed on-chain", async () => {
+      const { deployer, proxyAdmin, proxyAddress, implementationV1Address, implementationV2Address } =
+        await loadFixture(deployTupProxyWithV2Fixture);
+
+      const implBefore = await getProxyImplementation(ethers.provider, proxyAddress);
+      expect(implBefore.toLowerCase()).to.equal(implementationV1Address.toLowerCase());
+
+      await upgradeProxy(proxyAdmin, {
+        proxyAddress,
+        newImplementationAddress: implementationV2Address,
+      });
+
+      const implAfter = await getProxyImplementation(ethers.provider, proxyAddress);
+      expect(implAfter.toLowerCase()).to.equal(implementationV2Address.toLowerCase());
+
+      const mockV2 = MockImplementationV2__factory.connect(proxyAddress, deployer);
+      expect(await mockV2.version()).to.equal(TUP_VERSIONS.V2);
+    });
+  });
+
+  describe("Upgrade with Pre-deployed Implementation", () => {
+    it("should upgrade using existing implementation address", async () => {
+      const { proxyAdmin, proxyAddress, implementationV2Address } = await loadFixture(deployTupProxyWithV2Fixture);
+
+      const result = await upgradeProxy(proxyAdmin, {
+        proxyAddress,
+        newImplementationAddress: implementationV2Address,
+      });
+
+      expect(result.upgraded).to.be.true;
+      expect(result.newImplementation).to.equal(implementationV2Address);
+    });
+
+    it("should verify implementation changed on-chain", async () => {
+      const { proxyAdmin, proxyAddress, implementationV2Address } = await loadFixture(deployTupProxyWithV2Fixture);
+
+      await upgradeProxy(proxyAdmin, {
+        proxyAddress,
+        newImplementationAddress: implementationV2Address,
+      });
+
+      const implAfter = await getProxyImplementation(ethers.provider, proxyAddress);
+      expect(implAfter.toLowerCase()).to.equal(implementationV2Address.toLowerCase());
+    });
+  });
+
+  describe("Upgrade with Initialization", () => {
+    it("should upgrade and call initialization function", async () => {
+      const { deployer, proxyAdmin, proxyAddress } = await loadFixture(deployTupProxyFixture);
+
+      const initData = MockImplementationV2__factory.createInterface().encodeFunctionData("initializeV2", [
+        TEST_INIT_VALUES.BASIC,
+      ]);
+
+      const result = await upgradeProxy(proxyAdmin, {
+        proxyAddress,
+        newImplementationFactory: new MockImplementationV2__factory(deployer),
+        newImplementationArgs: [],
+        initData,
+      });
+
+      expect(result.upgraded).to.be.true;
+    });
+
+    it("should verify initialization data was executed", async () => {
+      const { deployer, proxyAdmin, proxyAddress } = await loadFixture(deployTupProxyFixture);
+
+      const initData = MockImplementationV2__factory.createInterface().encodeFunctionData("initializeV2", [
+        TEST_INIT_VALUES.UPGRADE,
+      ]);
+
+      await upgradeProxy(proxyAdmin, {
+        proxyAddress,
+        newImplementationFactory: new MockImplementationV2__factory(deployer),
+        newImplementationArgs: [],
+        initData,
+      });
+
+      const mockV2 = MockImplementationV2__factory.connect(proxyAddress, deployer);
+      expect(await mockV2.newState()).to.equal(TEST_INIT_VALUES.UPGRADE);
+      expect(await mockV2.initializedV2()).to.be.true;
+    });
+
+    it("should preserve proxy state after upgradeAndCall", async () => {
+      const { deployer, proxyAdmin, proxyAddress } = await loadFixture(deployTupProxyFixture);
+
+      const mockV1 = MockImplementation__factory.connect(proxyAddress, deployer);
+      await mockV1.initialize();
+      const initializedValueV1 = await mockV1.initializedValue();
+
+      const initData = MockImplementationV2__factory.createInterface().encodeFunctionData("initializeV2", [
+        TEST_INIT_VALUES.STATE_VERIFY,
+      ]);
+
+      await upgradeProxy(proxyAdmin, {
+        proxyAddress,
+        newImplementationFactory: new MockImplementationV2__factory(deployer),
+        newImplementationArgs: [],
+        initData,
+      });
+
+      const mockV2 = MockImplementationV2__factory.connect(proxyAddress, deployer);
+      expect(await mockV2.initializedValue()).to.equal(initializedValueV1); // V1 state preserved
+      expect(await mockV2.newState()).to.equal(TEST_INIT_VALUES.STATE_VERIFY); // V2 state set
+    });
+  });
+
+  describe("Already at Target Implementation", () => {
+    it("should return upgraded=false when already at target", async () => {
+      const { proxyAdmin, proxyAddress, implementationV1Address } = await loadFixture(deployTupProxyFixture);
+
+      // Attempt to "upgrade" to same implementation
+      const result = await upgradeProxy(proxyAdmin, {
+        proxyAddress,
+        newImplementationAddress: implementationV1Address,
+      });
+
+      expect(result.upgraded).to.be.false;
+      expect(result.oldImplementation).to.exist;
+      expect(result.newImplementation).to.exist;
+      expect(result.oldImplementation?.toLowerCase()).to.equal(implementationV1Address.toLowerCase());
+      expect(result.newImplementation?.toLowerCase()).to.equal(implementationV1Address.toLowerCase());
+    });
+
+    it("should not execute transaction when already upgraded", async () => {
+      const { proxyAdmin, proxyAddress, implementationV1Address } = await loadFixture(deployTupProxyFixture);
+
+      const result = await upgradeProxy(proxyAdmin, {
+        proxyAddress,
+        newImplementationAddress: implementationV1Address,
+      });
+
+      // No transaction should be executed
+      expect(result.transactionHash).to.be.undefined;
+    });
+  });
+
+  describe("Access Control", () => {
+    it("should succeed when ProxyAdmin owner calls upgrade", async () => {
+      const { proxyAdmin, proxyAddress, implementationV2Address } = await loadFixture(deployTupProxyWithV2Fixture);
+
+      const result = await upgradeProxy(proxyAdmin, {
+        proxyAddress,
+        newImplementationAddress: implementationV2Address,
+      });
+
+      expect(result.upgraded).to.be.true;
+    });
+
+    it("should fail when non-owner attempts upgrade", async () => {
+      const { unknownSigner, proxyAdminAddress, proxyAddress, implementationV2Address } =
+        await loadFixture(deployTupProxyWithV2Fixture);
+
+      const proxyAdminAsNonOwner = ProxyAdmin__factory.connect(proxyAdminAddress, unknownSigner);
+
+      await expect(
+        upgradeProxy(proxyAdminAsNonOwner, {
+          proxyAddress,
+          newImplementationAddress: implementationV2Address,
+        }),
+      ).to.be.rejectedWith(/caller is not the owner|Ownable/i);
+    });
+
+    it("should verify ProxyAdmin controls proxy", async () => {
+      const { proxyAddress, proxyAdminAddress } = await loadFixture(deployTupProxyFixture);
+
+      // Verify ProxyAdmin is the admin of the proxy (EIP-1967)
+      const adminAddressSlot = await ethers.provider.getStorage(proxyAddress, EIP1967_SLOTS.ADMIN);
+      const adminAddress = ethers.getAddress("0x" + adminAddressSlot.slice(-40));
+
+      expect(adminAddress.toLowerCase()).to.equal(proxyAdminAddress.toLowerCase());
+    });
+  });
+
+  describe("Error Handling", () => {
+    it("should fail for invalid proxy address", async () => {
+      const { proxyAdmin } = await loadFixture(deployTupProxyFixture);
+
+      await expect(
+        upgradeProxy(proxyAdmin, {
+          proxyAddress: TEST_ADDRESSES.NO_CODE,
+          newImplementationAddress: ethers.ZeroAddress,
+        }),
+      ).to.be.rejectedWith(/No contract found at proxy address/);
+    });
+  });
+
+  describe("State Verification", () => {
+    it("should preserve proxy address (unchanged)", async () => {
+      const { proxyAdmin, proxyAddress, implementationV2Address } = await loadFixture(deployTupProxyWithV2Fixture);
+
+      const result = await upgradeProxy(proxyAdmin, {
+        proxyAddress,
+        newImplementationAddress: implementationV2Address,
+      });
+
+      expect(result.proxyAddress).to.equal(proxyAddress); // Proxy address unchanged
+    });
+
+    it("should persist implementation change after upgrade", async () => {
+      const { proxyAdmin, proxyAddress, implementationV2Address } = await loadFixture(deployTupProxyWithV2Fixture);
+
+      await upgradeProxy(proxyAdmin, {
+        proxyAddress,
+        newImplementationAddress: implementationV2Address,
+      });
+
+      const implAfter = await getProxyImplementation(ethers.provider, proxyAddress);
+      expect(implAfter.toLowerCase()).to.equal(implementationV2Address.toLowerCase());
+    });
+
+    it("should allow subsequent upgrades", async () => {
+      const { proxyAdmin, proxyAddress, implementationV1Address, implementationV2Address } =
+        await loadFixture(deployTupProxyWithV2Fixture);
+
+      // First upgrade: V1 -> V2
+      await upgradeProxy(proxyAdmin, {
+        proxyAddress,
+        newImplementationAddress: implementationV2Address,
+      });
+
+      // Second upgrade: V2 -> V1 (downgrade for testing)
+      await upgradeProxy(proxyAdmin, {
+        proxyAddress,
+        newImplementationAddress: implementationV1Address,
+      });
+
+      const implFinal = await getProxyImplementation(ethers.provider, proxyAddress);
+      expect(implFinal.toLowerCase()).to.equal(implementationV1Address.toLowerCase());
+    });
+  });
+
+  describe("Gas Usage", () => {
+    it("should report gas used for upgrade() call", async () => {
+      const { proxyAdmin, proxyAddress, implementationV2Address } = await loadFixture(deployTupProxyWithV2Fixture);
+
+      await upgradeProxy(proxyAdmin, {
+        proxyAddress,
+        newImplementationAddress: implementationV2Address,
+      });
+    });
+
+    it("should report gas used for upgradeAndCall() call", async () => {
+      const { deployer, proxyAdmin, proxyAddress } = await loadFixture(deployTupProxyFixture);
+
+      const initData = MockImplementationV2__factory.createInterface().encodeFunctionData("initializeV2", [
+        TEST_INIT_VALUES.BASIC,
+      ]);
+
+      await upgradeProxy(proxyAdmin, {
+        proxyAddress,
+        newImplementationFactory: new MockImplementationV2__factory(deployer),
+        newImplementationArgs: [],
+        initData,
+      });
+    });
+  });
+
+  describe("Helper Functions", () => {
+    it("proxyNeedsUpgrade should return true when upgrade needed", async () => {
+      const { proxyAddress, implementationV1Address, implementationV2Address } =
+        await loadFixture(deployTupProxyWithV2Fixture);
+
+      const needsUpgrade = await proxyNeedsUpgrade(ethers.provider, proxyAddress, implementationV2Address);
+
+      expect(needsUpgrade).to.be.true;
+
+      const currentImpl = await getProxyImplementation(ethers.provider, proxyAddress);
+      expect(currentImpl.toLowerCase()).to.equal(implementationV1Address.toLowerCase());
+    });
+
+    it("proxyNeedsUpgrade should return false when already at target", async () => {
+      const { proxyAddress, implementationV1Address } = await loadFixture(deployTupProxyFixture);
+
+      const needsUpgrade = await proxyNeedsUpgrade(ethers.provider, proxyAddress, implementationV1Address);
+
+      expect(needsUpgrade).to.be.false;
+    });
+
+    it("prepareUpgrade should deploy implementation without upgrading", async () => {
+      const { deployer, proxyAddress } = await loadFixture(deployTupProxyFixture);
+
+      // Prepare upgrade (deploy V2 without upgrading) using TypeChain factory
+      const newImplAddress = await prepareUpgrade(new MockImplementationV2__factory(deployer), []);
+
+      expect(newImplAddress).to.be.a("string");
+      expect(newImplAddress).to.not.equal(ethers.ZeroAddress);
+
+      const currentImpl = await getProxyImplementation(ethers.provider, proxyAddress);
+      expect(currentImpl.toLowerCase()).to.not.equal(newImplAddress.toLowerCase());
+    });
+  });
+});

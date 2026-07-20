@@ -1,0 +1,126 @@
+// SPDX-License-Identifier: Apache-2.0
+
+import { ethers, type EventLog } from "ethers";
+import type { IFactory, ResolverProxy } from "@contract-types";
+import { ResolverProxy__factory } from "@contract-types";
+import { gasLimitOverride } from "@lib/operations";
+import { ATS_ROLES, CONFIG_IDS } from "../constants";
+import { EquityDetailsDataParams, FactoryRegulationDataParams, Rbac, SecurityDataParams } from "./types";
+
+export interface DeployEquityFromFactoryParams {
+  /** Admin account address */
+  adminAccount: string;
+  factory: IFactory;
+  securityData: SecurityDataParams;
+  equityDetails: EquityDetailsDataParams;
+}
+
+/**
+ * Deploy an equity token using the Factory contract.
+ *
+ * This function constructs the required data structures and calls the factory's
+ * deployEquity method to create a new equity token with a diamond proxy.
+ */
+export async function deployEquityFromFactory(
+  params: DeployEquityFromFactoryParams,
+  regulationTypeParams: FactoryRegulationDataParams,
+): Promise<ResolverProxy> {
+  const { adminAccount, factory, equityDetails: equityDetailsParams, securityData: securityDataParams } = params;
+
+  // Build RBAC array with admin
+  const rbacs: Rbac[] = [
+    {
+      role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
+      members: [adminAccount],
+    },
+    ...securityDataParams.rbacs,
+  ];
+
+  // Build resolver proxy configuration
+  const resolverProxyConfigurationV2 = {
+    configurationId: CONFIG_IDS.equity,
+    configurationVersion: 1,
+    replacementEnabled: true,
+  };
+
+  // Build security data structure
+  const securityData = {
+    arePartitionsProtected: securityDataParams.arePartitionsProtected,
+    isMultiPartition: securityDataParams.isMultiPartition,
+    resolver: securityDataParams.resolver,
+    resolverProxyConfigurationV2,
+    rbacs,
+    isControllable: securityDataParams.isControllable,
+    isWhiteList: securityDataParams.isWhiteList,
+    maxSupply: securityDataParams.maxSupply,
+    erc20MetadataInfo: {
+      name: securityDataParams.erc20MetadataInfo.name,
+      symbol: securityDataParams.erc20MetadataInfo.symbol,
+      decimals: securityDataParams.erc20MetadataInfo.decimals,
+    },
+    clearingActive: securityDataParams.clearingActive,
+    internalKycActivated: securityDataParams.internalKycActivated,
+    erc20VotesActivated: securityDataParams.erc20VotesActivated,
+    externalPauses: securityDataParams.externalPauses,
+    externalControlLists: securityDataParams.externalControlLists,
+    externalKycLists: securityDataParams.externalKycLists,
+    compliance: securityDataParams.compliance,
+    identityRegistry: securityDataParams.identityRegistry,
+  };
+
+  // Build equity details structure
+  const equityDetails = {
+    votingRight: equityDetailsParams.votingRight,
+    informationRight: equityDetailsParams.informationRight,
+    liquidationRight: equityDetailsParams.liquidationRight,
+    subscriptionRight: equityDetailsParams.subscriptionRight,
+    conversionRight: equityDetailsParams.conversionRight,
+    redemptionRight: equityDetailsParams.redemptionRight,
+    putRight: equityDetailsParams.putRight,
+    dividendRight: equityDetailsParams.dividendRight,
+    currency: equityDetailsParams.currency,
+    nominalValue: equityDetailsParams.nominalValue,
+    nominalValueDecimals: equityDetailsParams.nominalValueDecimals,
+  };
+
+  // Build equity data
+  const equityData = {
+    security: securityData,
+    equityDetails,
+  };
+
+  // Build regulation data
+  const factoryRegulationData = {
+    regulationType: regulationTypeParams.regulationType,
+    regulationSubType: regulationTypeParams.regulationSubType,
+    additionalSecurityData: {
+      countriesControlListType: regulationTypeParams.additionalSecurityData.countriesControlListType,
+      listOfCountries: regulationTypeParams.additionalSecurityData.listOfCountries,
+      info: regulationTypeParams.additionalSecurityData.info,
+    },
+  };
+
+  // Deploy equity token via factory
+  const tx = await factory.deployEquity(equityData, factoryRegulationData, gasLimitOverride());
+  const receipt = await tx.wait();
+
+  // Find EquityDeployed event to get diamond address
+  const event = receipt?.logs.find((log) => "eventName" in log && (log as EventLog).eventName === "EquityDeployed") as
+    EventLog | undefined;
+  if (!event || !event.args) {
+    throw new Error(
+      `EquityDeployed event not found in deployment transaction. Events: ${JSON.stringify(
+        receipt?.logs.filter((log) => "eventName" in log).map((e) => (e as EventLog).eventName),
+      )}`,
+    );
+  }
+
+  const diamondAddress = event.args.diamondProxyAddress || event.args[1];
+
+  if (!diamondAddress || diamondAddress === ethers.ZeroAddress) {
+    throw new Error(`Invalid diamond address from event. Args: ${JSON.stringify(event.args)}`);
+  }
+
+  // Return diamond proxy as ResolverProxy contract
+  return ResolverProxy__factory.connect(diamondAddress, factory.runner);
+}

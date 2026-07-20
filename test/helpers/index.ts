@@ -1,0 +1,16 @@
+// SPDX-License-Identifier: Apache-2.0
+
+/**
+ * Test helpers barrel export.
+ *
+ * Exports shared test utilities, constants, and factory functions.
+ *
+ * @module test/helpers
+ */
+
+export * from "./constants";
+export * from "./globalSetup";
+export * from "./assertions";
+export * from "./errors";
+export * from "./eventAssertions";
+export { grantKycToHolders } from "./assetMockSetup";
