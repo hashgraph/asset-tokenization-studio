@@ -1,10 +1,10 @@
 /**
- * Root Prettier configuration for Asset Tokenization Studio monorepo
- * This base configuration can be extended by package-specific configs
+ * Prettier configuration for ATS Contracts
+ * (formerly inherited from the monorepo root config — now inlined)
  * @see https://prettier.io/docs/configuration
  * @type {import("prettier").Config}
  */
-const baseConfig = {
+const config = {
   printWidth: 120,
   tabWidth: 2,
   useTabs: false,
@@ -18,7 +18,6 @@ const baseConfig = {
   arrowParens: "always",
   endOfLine: "lf",
 
-  // Include Solidity plugin for global formatting scripts
   plugins: ["prettier-plugin-solidity"],
 
   overrides: [
@@ -65,4 +64,4 @@ const baseConfig = {
   ],
 };
 
-export default baseConfig;
+export default config;
