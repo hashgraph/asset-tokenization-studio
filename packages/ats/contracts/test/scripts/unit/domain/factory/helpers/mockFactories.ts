@@ -107,6 +107,8 @@ export function createMockEquityDetails(overrides?: Partial<EquityDetailsDataPar
     currency: TEST_TOKEN_METADATA.CURRENCY,
     nominalValue: TEST_NOMINAL_VALUES.STANDARD,
     nominalValueDecimals: TEST_NOMINAL_VALUES.DECIMALS,
+    effectiveDatetime: Math.floor(Date.now() / 1000) - 3600,
+    isUnitNominalValue: true,
     ...overrides,
   };
 }
@@ -128,6 +130,8 @@ export function createMockBondDetails(overrides?: Partial<BondDetailsDataParams>
     nominalValueDecimals: TEST_NOMINAL_VALUES.DECIMALS,
     startingDate: Math.floor(Date.now() / 1000),
     maturityDate: Math.floor(Date.now() / 1000) + 365 * 24 * 60 * 60, // 1 year
+    effectiveDatetime: Math.floor(Date.now() / 1000) - 3600,
+    isUnitNominalValue: true,
     ...overrides,
   };
 }

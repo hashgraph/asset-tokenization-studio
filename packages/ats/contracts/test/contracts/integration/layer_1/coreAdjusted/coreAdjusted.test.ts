@@ -5,11 +5,11 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { IAssetMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
 import { ATS_ROLES, RESOLVER_KEYS } from "@scripts";
-import { executeRbac } from "@test";
+import { executeRbac, getDltTimestamp } from "@test";
 
 const decimals = 6;
 const decimalAdjustment = 2;
-const adjustmentTimestamp = 100_000;
+const ADJUSTMENT_OFFSET = 100_000;
 
 export function coreAdjustedTests(getCtx: () => AssetMockCtx): void {
   describe("CoreAdjusted Facet Tests", () => {
@@ -39,6 +39,7 @@ export function coreAdjustedTests(getCtx: () => AssetMockCtx): void {
       });
 
       it("GIVEN a token with a pending scheduled balance adjustment WHEN decimalsAt is called with a timestamp after the adjustment THEN returns adjusted decimals", async () => {
+        const adjustmentTimestamp = (await getDltTimestamp()) + ADJUSTMENT_OFFSET;
         await asset.setScheduledBalanceAdjustment({
           executionDate: adjustmentTimestamp,
           factor: 100,
@@ -49,6 +50,7 @@ export function coreAdjustedTests(getCtx: () => AssetMockCtx): void {
       });
 
       it("GIVEN a token with a pending scheduled balance adjustment WHEN decimalsAt is called with a timestamp before the adjustment THEN returns original decimals", async () => {
+        const adjustmentTimestamp = (await getDltTimestamp()) + ADJUSTMENT_OFFSET;
         await asset.setScheduledBalanceAdjustment({
           executionDate: adjustmentTimestamp,
           factor: 100,

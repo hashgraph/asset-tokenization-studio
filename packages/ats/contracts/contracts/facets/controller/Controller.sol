@@ -44,6 +44,7 @@ abstract contract Controller is IController, Modifiers {
         onlyControllable
         onlyWithoutMultiPartition
         onlyAnyRole(_buildRoles(ROLE_CONTROLLER, ROLE_AGENT))
+        onlyPositiveTransferAmount(_value)
     {
         TokenCoreOps.transfer(_from, _to, _value);
         emit ControllerTransfer(EvmAccessors.getMsgSender(), _from, _to, _value, _data, _operatorData);
@@ -97,6 +98,7 @@ abstract contract Controller is IController, Modifiers {
         onlyWithoutMultiPartition
         onlyControllable
         onlyAnyRole(_buildRoles(ROLE_CONTROLLER, ROLE_AGENT))
+        onlyPositiveTransferAmount(_amount)
         returns (bool)
     {
         TokenCoreOps.transfer(_from, _to, _amount);

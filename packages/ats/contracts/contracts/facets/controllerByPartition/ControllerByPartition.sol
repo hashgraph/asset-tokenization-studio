@@ -48,6 +48,7 @@ abstract contract ControllerByPartition is IControllerByPartition, Modifiers {
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyControllable
         onlyAnyRole(_buildRoles(ROLE_CONTROLLER, ROLE_AGENT))
+        onlyPositiveTransferAmount(_value)
         returns (bytes32)
     {
         return

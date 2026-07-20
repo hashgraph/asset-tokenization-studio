@@ -40,7 +40,7 @@ abstract contract Dividend is IDividend, Modifiers {
 
     /// @inheritdoc IDividend
     /// @dev Restricted to `ROLE_CORPORATE_ACTION`; gated by `onlyUnpaused`,
-    ///      `onlyValidDates(recordDate, executionDate)`, and `onlyValidTimestamp(recordDate)`.
+    ///      `onlyValidDates(recordDate, executionDate)`, and `onlyFutureTimestamp(recordDate)`.
     function setDividend(
         IDividendTypes.Dividend calldata newDividend
     )
@@ -51,7 +51,7 @@ abstract contract Dividend is IDividend, Modifiers {
         onlyUnpaused
         onlyRole(ROLE_CORPORATE_ACTION)
         onlyValidDates(newDividend.recordDate, newDividend.executionDate)
-        onlyValidTimestamp(newDividend.recordDate)
+        onlyFutureTimestamp(newDividend.recordDate)
         returns (uint256 dividendId_)
     {
         bytes32 corporateActionId_;

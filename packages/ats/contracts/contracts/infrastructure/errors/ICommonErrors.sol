@@ -80,6 +80,14 @@ interface ICommonErrors {
     error InvalidTimestamp();
 
     /**
+     * @notice Reverts when a scheduled timestamp is not strictly in the future.
+     * @dev Used for shared scheduling validation where the current block time is read
+     *      through `TimeTravelStorageWrapper`.
+     * @param timeStamp Timestamp rejected for scheduling.
+     */
+    error WrongTimestamp(uint256 timeStamp);
+
+    /**
      * @notice Reverts when ordered array values contradict expected ordering.
      * @dev Indicates that two indexed values cannot both satisfy the required
      *      monotonic or range invariant.

@@ -30,7 +30,6 @@ import {
 import { createAssetMockConfiguration } from "./assetMockConfiguration";
 import { ALL_ASSET_FACETS, buildFacetList } from "@scripts/domain";
 import { BusinessLogicResolver__factory, IMockFactory__factory, ProxyAdmin__factory } from "@contract-types";
-import type { IMockFactory, BusinessLogicResolver, ProxyAdmin } from "@contract-types";
 
 /**
  * Augmented deployment type that includes the AssetMock configuration.
@@ -83,8 +82,8 @@ export async function deploySystemWithNewBlrFullAsset(
 
   // 3. Resolve the full IAsset facet union from the compile-checked ALL_ASSET_FACETS
   //    constant, then run it through buildFacetList — the same helper every production
-  //    config uses — which (in test mode) swaps DiamondFacet→MockDiamondCut and appends
-  //    the test-only EvmAccessorsFacet. No hardcoded facet names live here any more.
+  //    config uses — which (in test mode) appends TimeTravelFacet, MockDiamondCutHelpers,
+  //    and the test-only EvmAccessorsFacet. No hardcoded facet names live here any more.
   const allFacetNames = buildFacetList(ALL_ASSET_FACETS, true);
 
   // 4. Connect to BLR and create assetMock configuration

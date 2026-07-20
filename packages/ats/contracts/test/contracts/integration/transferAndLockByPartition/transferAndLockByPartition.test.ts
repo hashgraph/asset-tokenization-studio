@@ -115,6 +115,14 @@ export function transferAndLockByPartitionTests(getCtx: () => AssetMockCtx): voi
             .withArgs(signer_C.address, NON_DEFAULT_PARTITION);
         });
 
+        it("GIVEN a zero amount WHEN transferAndLockByPartition THEN transaction fails with ZeroValue", async () => {
+          await expect(
+            asset
+              .connect(signer_C)
+              .transferAndLockByPartition(NON_DEFAULT_PARTITION, signer_B.address, 0, "0x", expirationTimestamp),
+          ).to.be.revertedWithCustomError(asset, "ZeroValue");
+        });
+
         it("GIVEN a valid partition WHEN transferAndLockByPartition with enough balance THEN transaction success", async () => {
           await asset.connect(signer_B).issueByPartition({
             partition: NON_DEFAULT_PARTITION,

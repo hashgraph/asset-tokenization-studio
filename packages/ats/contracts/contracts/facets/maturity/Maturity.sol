@@ -11,6 +11,8 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
+import { MATURITY_ZERO_BALANCE_PARTITION } from "../../constants/values.sol";
 
 /**
  * @title  Maturity
@@ -59,9 +61,8 @@ abstract contract Maturity is IMaturity, Modifiers {
         for (uint256 i; i < length; ) {
             bytes32 partition = partitions[i];
             uint256 balance = ERC1410StorageWrapper.balanceOfByPartition(partition, _tokenHolder);
-            if (balance != 0) {
-                _redeemByPartition(partition, _tokenHolder, sender, balance);
-            }
+            _checkUnexpectedError(balance == 0, MATURITY_ZERO_BALANCE_PARTITION);
+            _redeemByPartition(partition, _tokenHolder, sender, balance);
             unchecked {
                 ++i;
             }

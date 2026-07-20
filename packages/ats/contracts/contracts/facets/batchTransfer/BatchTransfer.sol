@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IBatchTransfer, RESOLVER_KEY_BATCH_TRANSFER } from "./IBatchTransfer.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.sol";
+import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { DEFAULT_PARTITION } from "../../constants/values.sol";
@@ -49,6 +50,7 @@ abstract contract BatchTransfer is IBatchTransfer, Modifiers {
     {
         uint256 length = _toList.length;
         for (uint256 i; i < length; ) {
+            ERC1410StorageWrapper.checkNonZeroTransferAmount(_amounts[i]);
             ERC1594StorageWrapper.checkCanTransferFromByPartition(
                 EvmAccessors.getMsgSender(),
                 _toList[i],

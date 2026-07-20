@@ -65,6 +65,21 @@ bytes4 constant FACTORY_OPERATIONAL_STATUS = 0x0000000D;
 /// @dev ID for CouponRateDispatch.unrecognizedRateType()
 bytes4 constant UNRECOGNIZED_RATE_TYPE = 0x0000000E;
 
+/// @dev ID for ExternalControlListManagement.updateExternalControlLists()
+bytes4 constant EXTERNAL_CONTROL_LIST_UPDATE = 0x0000000F;
+
+/// @dev ID for ExternalKycListManagement.updateExternalKycLists()
+bytes4 constant EXTERNAL_KYC_LIST_UPDATE = 0x00000010;
+
+/// @dev ID for ExternalPauseManagement.updateExternalPauses()
+bytes4 constant EXTERNAL_PAUSE_LIST_UPDATE = 0x00000011;
+
+/// @dev ID for the defensive zero-balance-partition guard in Maturity.fullRedeemAtMaturity()
+bytes4 constant MATURITY_ZERO_BALANCE_PARTITION = 0x00000012;
+
+/// @dev ID for the defensive empty-queue guard in ScheduledTasksLib.popScheduledTask()
+bytes4 constant SCHEDULED_TASK_POP_EMPTY = 0x00000013;
+
 /// @dev Precomputed constants for powers of 10 (0-18)
 uint256 constant POW10_0 = 1;
 uint256 constant POW10_1 = 10;

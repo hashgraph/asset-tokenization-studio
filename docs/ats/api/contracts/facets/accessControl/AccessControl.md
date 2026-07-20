@@ -4,9 +4,9 @@ _Asset Tokenization Studio Team_
 
 > AccessControl
 
-Abstract contract implementing role-based access control for a security token. Supports individual and batch role mutations as well as paginated role queries.
+Entry point for role-based access control for direct-inheritance consumers that do not operate through the ResolverProxy pattern (e.g. `DiamondCutManager`). Supports individual and batch role mutations as well as paginated role queries (inherited).
 
-_Implements `IAccessControl`. All state is delegated to `AccessControlStorageWrapper`. All mutating functions additionally require the token to be unpaused (`onlyUnpaused`). `grantRole` and `revokeRole` resolve the required admin role dynamically via `AccessControlStorageWrapper.getRoleAdmin`. `applyRoles` enforces per-role admin checks inside the storage layer. Intended to be inherited exclusively by `AccessControlFacet`._
+_Thin wrapper over `AccessControlBase`: declares the guard modifiers appropriate to a non-proxy consumer and delegates the actual storage mutation and event emission to the shared internal helpers. Use `AccessControlOperational` (with `onlyOperational`) for proxy facets instead._
 
 ## Methods
 
@@ -395,14 +395,6 @@ _Indicates that two indexed values cannot both satisfy the required monotonic or
 | ---------- | ------- | ------------------------------------------------ |
 | lowerIndex | uint256 | Lower array index involved in the contradiction. |
 | upperIndex | uint256 | Upper array index involved in the contradiction. |
-
-### Deactivated
-
-```solidity
-error Deactivated()
-```
-
-Thrown when an operation guarded by `onlyActivated` is attempted on a token whose deactivation flag has already been set.
 
 ### FacetAlreadyRegistered
 

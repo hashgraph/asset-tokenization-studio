@@ -98,7 +98,7 @@ export function adjustBalancesFacetTests(getCtx: () => AssetMockCtx): void {
         ).to.be.revertedWithCustomError(asset, "WrongTimestamp");
       });
 
-      it("GIVEN an account with corporateActions role WHEN setScheduledBalanceAdjustment with zero timestamp THEN transaction fails with InvalidTimestamp", async () => {
+      it("GIVEN an account with corporateActions role WHEN setScheduledBalanceAdjustment with zero timestamp THEN transaction fails with WrongTimestamp", async () => {
         await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
         const zeroTimestampBalanceAdjustmentData = {
@@ -109,7 +109,7 @@ export function adjustBalancesFacetTests(getCtx: () => AssetMockCtx): void {
 
         await expect(
           asset.connect(signer_C).setScheduledBalanceAdjustment(zeroTimestampBalanceAdjustmentData),
-        ).to.be.revertedWithCustomError(asset, "InvalidTimestamp");
+        ).to.be.revertedWithCustomError(asset, "WrongTimestamp");
       });
 
       it("GIVEN an account with corporateActions role WHEN setScheduledBalanceAdjustment with invalid factor THEN transaction fails with FactorIsZero", async () => {

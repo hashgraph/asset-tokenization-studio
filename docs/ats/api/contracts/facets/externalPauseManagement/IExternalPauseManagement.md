@@ -216,21 +216,6 @@ Emitted when an external pause contract is removed from the list.
 
 ## Errors
 
-### ExternalPausesNotUpdated
-
-```solidity
-error ExternalPausesNotUpdated(address[] pauses, bool[] actives)
-```
-
-Thrown when a batch update of external pauses fails to complete.
-
-#### Parameters
-
-| Name    | Type      | Description                                                     |
-| ------- | --------- | --------------------------------------------------------------- |
-| pauses  | address[] | Array of external pause contract addresses that were submitted. |
-| actives | bool[]    | Corresponding activation flags that were submitted.             |
-
 ### ListedPause
 
 ```solidity

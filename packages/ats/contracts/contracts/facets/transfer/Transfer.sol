@@ -39,6 +39,7 @@ abstract contract Transfer is ITransfer, Modifiers {
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyPositiveTransferAmount(amount)
         onlyCanTransferFromByPartition(EvmAccessors.getMsgSender(), to, DEFAULT_PARTITION, amount)
         returns (bool)
     {
@@ -58,6 +59,7 @@ abstract contract Transfer is ITransfer, Modifiers {
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyPositiveTransferAmount(amount)
         onlyCanTransferFromByPartition(from, to, DEFAULT_PARTITION, amount)
         returns (bool)
     {
@@ -76,6 +78,7 @@ abstract contract Transfer is ITransfer, Modifiers {
         onlyActivated
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyPositiveTransferAmount(_value)
         onlyCanTransferFromByPartition(EvmAccessors.getMsgSender(), _to, DEFAULT_PARTITION, _value)
     {
         TokenCoreOps.transfer(EvmAccessors.getMsgSender(), _to, _value);
@@ -95,6 +98,7 @@ abstract contract Transfer is ITransfer, Modifiers {
         onlyActivated
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyPositiveTransferAmount(_value)
         onlyCanTransferFromByPartition(_from, _to, DEFAULT_PARTITION, _value)
     {
         TokenCoreOps.transferFrom(EvmAccessors.getMsgSender(), _from, _to, _value);

@@ -118,17 +118,12 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
         onlyIdentifiedAddresses(_holdIdentifier.tokenHolder, _to)
         onlyCompliant(address(0), _to, false)
         onlyValidHoldId(_holdIdentifier)
+        onlyPositiveHoldOperationAmount(_amount)
         returns (bool success_, bytes32 partition_)
     {
         (success_, partition_) = HoldOps.executeHoldByPartition(_holdIdentifier, _to, _amount);
 
-        emit HoldByPartitionExecuted(
-            _holdIdentifier.tokenHolder,
-            _holdIdentifier.partition,
-            _holdIdentifier.holdId,
-            _amount,
-            _to
-        );
+        _emitHoldByPartitionExecuted(_holdIdentifier, _to, _amount);
     }
 
     /// @inheritdoc IHoldByPartition
@@ -143,6 +138,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
         onlyValidHoldId(_holdIdentifier)
+        onlyPositiveHoldOperationAmount(_amount)
         returns (bool success_)
     {
         success_ = HoldOps.releaseHoldByPartition(_holdIdentifier, _amount);
@@ -231,5 +227,29 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
                 _holdIdentifier,
                 TimeTravelStorageWrapper.getBlockTimestamp()
             );
+    }
+
+    /**
+     * @notice Emits `HoldByPartitionExecuted`.
+     * @dev Extracted to a `private` helper so the DELEGATECALL setup happens in a fresh stack
+     *      frame; `executeHoldByPartition` carries 8 modifiers plus 2 return values, which
+     *      exceeds the Solidity 16-slot stack window when the event's 5 fields are emitted
+     *      inline in the function body.
+     * @param _holdIdentifier The triple (partition, tokenHolder, holdId) identifying the hold.
+     * @param _to The destination address that received the executed amount.
+     * @param _amount The amount that was executed from the hold.
+     */
+    function _emitHoldByPartitionExecuted(
+        IHoldTypes.HoldIdentifier calldata _holdIdentifier,
+        address _to,
+        uint256 _amount
+    ) private {
+        emit HoldByPartitionExecuted(
+            _holdIdentifier.tokenHolder,
+            _holdIdentifier.partition,
+            _holdIdentifier.holdId,
+            _amount,
+            _to
+        );
     }
 }

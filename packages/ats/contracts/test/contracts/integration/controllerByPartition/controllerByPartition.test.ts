@@ -159,6 +159,23 @@ export function controllerByPartitionTests(getCtx: () => AssetMockCtx): void {
         });
       });
 
+      describe("onlyPositiveTransferAmount", () => {
+        it("GIVEN a zero value WHEN controllerTransferByPartition THEN revert ZeroValue", async () => {
+          await expect(
+            asset
+              .connect(signer_C)
+              .controllerTransferByPartition(
+                DEFAULT_PARTITION,
+                signer_A.address,
+                signer_E.address,
+                0,
+                _DATA,
+                _OPERATOR_DATA,
+              ),
+          ).to.be.revertedWithCustomError(asset, "ZeroValue");
+        });
+      });
+
       describe("AccessControl — onlyAnyRole", () => {
         it("GIVEN an account without ROLE_CONTROLLER or ROLE_AGENT WHEN controllerTransferByPartition THEN revert AccountHasNoRoles", async () => {
           await expect(

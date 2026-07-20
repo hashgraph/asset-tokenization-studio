@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IExternalKycListManagement, RESOLVER_KEY_EXTERNAL_KYC_LIST } from "./IExternalKycListManagement.sol";
 import { ROLE_KYC_MANAGER, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { EXTERNAL_KYC_LIST_UPDATE } from "../../constants/values.sol";
 import { STORAGE_LOCATION_KYC_MANAGEMENT } from "../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { ExternalListManagementStorageWrapper } from "../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
@@ -10,6 +11,7 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
 import { ArrayValidation } from "../../infrastructure/utils/ArrayValidation.sol";
 import { IKyc } from "../kyc/IKyc.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 
 /**
  * @title ExternalKycListManagement
@@ -44,9 +46,7 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
             _kycLists,
             _actives
         );
-        if (!success_) {
-            revert ExternalKycListsNotUpdated(_kycLists, _actives);
-        }
+        _checkUnexpectedError(!success_, EXTERNAL_KYC_LIST_UPDATE);
         emit ExternalKycListsUpdated(EvmAccessors.getMsgSender(), _kycLists, _actives);
     }
 

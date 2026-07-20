@@ -84,7 +84,7 @@ library ERC20StorageWrapper {
     /**
      * @notice Overwrites the decimal count in the ERC-20 storage slot.
      * @dev This is a minimal raw-struct setter intended for test scaffolding
-     *      (`MockDiamondCut.forceDecimals`). It writes only the `decimals`
+     *      (`MockDiamondCutHelpers.forceDecimals`). It writes only the `decimals`
      *      field via the private `_erc20Storage()` accessor and does NOT
      *      trigger `ScheduledTasksOps` or overwrite name/symbol — making it
      *      safe to use alongside snapshot scheduled-tasks tests.

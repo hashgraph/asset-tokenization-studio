@@ -111,6 +111,16 @@ export function batchTransferTests(getCtx: () => AssetMockCtx): void {
           });
         });
 
+        it("GIVEN a zero-value amount in the batch WHEN batchTransfer THEN reverts with ZeroValue", async () => {
+          const toList = [signer_F.address, signer_D.address];
+          const amounts = [transferAmount, 0];
+
+          await expect(asset.connect(signer_E).batchTransfer(toList, amounts)).to.be.revertedWithCustomError(
+            asset,
+            "ZeroValue",
+          );
+        });
+
         it("GIVEN insufficient balance WHEN batchTransfer THEN transaction fails", async () => {
           const toList = [signer_F.address, signer_D.address];
           const amounts = [initialMintAmount, transferAmount];

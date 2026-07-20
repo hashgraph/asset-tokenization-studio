@@ -62,13 +62,6 @@ struct ScheduledTasksDataStorage {
  */
 library ScheduledTasksStorageWrapper {
     /**
-     * @notice Reverts when a scheduled timestamp is not strictly in the future.
-     * @dev The current timestamp is read through `TimeTravelStorageWrapper`.
-     * @param timeStamp Timestamp rejected for scheduling.
-     */
-    error WrongTimestamp(uint256 timeStamp);
-
-    /**
      * @notice Executes due scheduled tasks from a queue up to the requested limit.
      * @dev Pops each due task before dispatch. A failed execution reverts the entire call,
      *      leaving the queue unchanged so the blocked task can be force-cancelled by an
@@ -184,15 +177,6 @@ library ScheduledTasksStorageWrapper {
      */
     function triggerScheduledCrossOrderedTasks(uint256 _max) internal returns (uint256) {
         return triggerScheduledTasks(_scheduledCrossOrderedTaskStorage(), bytes32("crossOrdered"), _max);
-    }
-
-    /**
-     * @notice Validates that a timestamp is strictly greater than the current block time.
-     * @dev Reverts with `WrongTimestamp` when the timestamp is in the past or present.
-     * @param _timestamp Timestamp to validate.
-     */
-    function requireValidTimestamp(uint256 _timestamp) internal view {
-        if (_timestamp <= TimeTravelStorageWrapper.getBlockTimestamp()) revert WrongTimestamp(_timestamp);
     }
 
     /**

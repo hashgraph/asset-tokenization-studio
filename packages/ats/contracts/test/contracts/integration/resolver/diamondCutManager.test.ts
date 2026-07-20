@@ -281,7 +281,7 @@ describe("DiamondCutManager", () => {
 
       const resolverProxyConfiguration = buildBytes(RESOLVER_PROXY_VERSION_V2, configId, configVersion, false);
 
-      const facetAddressForSelector = await diamondCutManager.resolveResolverProxyCall(
+      const facetAddressForSelector = await diamondCutManager["resolveResolverProxyCall(bytes,bytes4)"](
         resolverProxyConfiguration,
         selectorId,
       );
@@ -395,11 +395,59 @@ describe("DiamondCutManager", () => {
 
     const resolverProxyConfiguration = buildBytes(RESOLVER_PROXY_VERSION_V2, CONFIG_IDS.equity, 1, false);
 
-    const noFacetAddress = await diamondCutManager.resolveResolverProxyCall(resolverProxyConfiguration, "0x00000001");
+    const noFacetAddress = await diamondCutManager["resolveResolverProxyCall(bytes,bytes4)"](
+      resolverProxyConfiguration,
+      "0x00000001",
+    );
     expect(noFacetAddress).to.equal("0x0000000000000000000000000000000000000000");
 
     const interfaceDoesnotExist = await diamondCutManager.resolveSupportsInterface(CONFIG_IDS.equity, 1, "0x00000001");
     expect(interfaceDoesnotExist).to.equal(false);
+  });
+
+  it("GIVEN a facet with a registered replacement WHEN resolving a call with replacement enabled THEN returns the replacement address", async () => {
+    const resolverProxyConfigurationNoReplacement = buildBytes(RESOLVER_PROXY_VERSION_V2, CONFIG_IDS.equity, 1, false);
+
+    const originalFacetAddress = await diamondCutManager["resolveResolverProxyCall(bytes,bytes4)"](
+      resolverProxyConfigurationNoReplacement,
+      PAUSE_SELECTOR,
+    );
+
+    await businessLogicResolver.connect(signer_A).updateReplacementAddress(originalFacetAddress, signer_B.address);
+
+    const resolverProxyConfigurationWithReplacement = buildBytes(RESOLVER_PROXY_VERSION_V2, CONFIG_IDS.equity, 1, true);
+
+    const replacedFacetAddress = await diamondCutManager["resolveResolverProxyCall(bytes,bytes4)"](
+      resolverProxyConfigurationWithReplacement,
+      PAUSE_SELECTOR,
+    );
+
+    expect(replacedFacetAddress).to.equal(signer_B.address);
+
+    const facetAddressWithoutReplacement = await diamondCutManager["resolveResolverProxyCall(bytes,bytes4)"](
+      resolverProxyConfigurationNoReplacement,
+      PAUSE_SELECTOR,
+    );
+
+    expect(facetAddressWithoutReplacement).to.equal(originalFacetAddress);
+  });
+
+  it("GIVEN a facet without a registered replacement WHEN resolving a call with replacement enabled THEN returns the original address", async () => {
+    const resolverProxyConfigurationNoReplacement = buildBytes(RESOLVER_PROXY_VERSION_V2, CONFIG_IDS.equity, 1, false);
+
+    const originalFacetAddress = await diamondCutManager["resolveResolverProxyCall(bytes,bytes4)"](
+      resolverProxyConfigurationNoReplacement,
+      PAUSE_SELECTOR,
+    );
+
+    const resolverProxyConfigurationWithReplacement = buildBytes(RESOLVER_PROXY_VERSION_V2, CONFIG_IDS.equity, 1, true);
+
+    const facetAddress = await diamondCutManager["resolveResolverProxyCall(bytes,bytes4)"](
+      resolverProxyConfigurationWithReplacement,
+      PAUSE_SELECTOR,
+    );
+
+    expect(facetAddress).to.equal(originalFacetAddress);
   });
 
   it("GIVEN a resolver WHEN adding a new configuration with configId at 0 THEN fails with DefaultValueForConfigurationIdNotPermitted", async () => {
@@ -825,7 +873,9 @@ describe("DiamondCutManager", () => {
   it("GIVEN an existing configuration WHEN resolving a call with version 0 THEN reverts with VersionZero", async () => {
     const resolverProxyConfiguration = buildBytes(RESOLVER_PROXY_VERSION_V2, CONFIG_IDS.equity, 0, false);
 
-    await expect(diamondCutManager.resolveResolverProxyCall(resolverProxyConfiguration, PAUSE_SELECTOR))
+    await expect(
+      diamondCutManager["resolveResolverProxyCall(bytes,bytes4)"](resolverProxyConfiguration, PAUSE_SELECTOR),
+    )
       .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
       .withArgs(CONFIG_IDS.equity);
   });
@@ -841,7 +891,9 @@ describe("DiamondCutManager", () => {
   it("GIVEN a wrong proxy configuration with a bytes that is not a multiple of 32 WHEN resolving a call THEN reverts with InvalidResolverProxyConfiguration", async () => {
     const resolverProxyConfiguration = "0x01";
 
-    await expect(diamondCutManager.resolveResolverProxyCall(resolverProxyConfiguration, PAUSE_SELECTOR))
+    await expect(
+      diamondCutManager["resolveResolverProxyCall(bytes,bytes4)"](resolverProxyConfiguration, PAUSE_SELECTOR),
+    )
       .to.be.revertedWithCustomError(diamondCutManager, "InvalidResolverProxyConfiguration")
       .withArgs(resolverProxyConfiguration);
   });
@@ -850,7 +902,9 @@ describe("DiamondCutManager", () => {
     let resolverProxyConfiguration = buildBytes(RESOLVER_PROXY_VERSION_V2, CONFIG_IDS.equity, 0, false);
     resolverProxyConfiguration = resolverProxyConfiguration.substring(0, resolverProxyConfiguration.length - 2);
 
-    await expect(diamondCutManager.resolveResolverProxyCall(resolverProxyConfiguration, PAUSE_SELECTOR))
+    await expect(
+      diamondCutManager["resolveResolverProxyCall(bytes,bytes4)"](resolverProxyConfiguration, PAUSE_SELECTOR),
+    )
       .to.be.revertedWithCustomError(diamondCutManager, "InvalidResolverProxyConfiguration")
       .withArgs(resolverProxyConfiguration);
   });
@@ -860,7 +914,9 @@ describe("DiamondCutManager", () => {
 
     const resolverProxyConfiguration = buildBytes(WRONG_RESOLVER_PROXY_VERSION, CONFIG_IDS.equity, 0, false);
 
-    await expect(diamondCutManager.resolveResolverProxyCall(resolverProxyConfiguration, PAUSE_SELECTOR))
+    await expect(
+      diamondCutManager["resolveResolverProxyCall(bytes,bytes4)"](resolverProxyConfiguration, PAUSE_SELECTOR),
+    )
       .to.be.revertedWithCustomError(diamondCutManager, "UnrecognizedResolverProxyVersion")
       .withArgs(WRONG_RESOLVER_PROXY_VERSION);
   });
@@ -875,6 +931,111 @@ describe("DiamondCutManager", () => {
     await expect(diamondCutManager.getFacetsByConfigurationIdAndVersion(CONFIG_IDS.equity, 0, 0, 10))
       .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
       .withArgs(CONFIG_IDS.equity);
+  });
+
+  it("GIVEN an existing configuration WHEN getFacetsLengthByConfigurationIdAndVersion called with version 0 THEN reverts with VersionZero", async () => {
+    await expect(diamondCutManager.getFacetsLengthByConfigurationIdAndVersion(CONFIG_IDS.equity, 0))
+      .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
+      .withArgs(CONFIG_IDS.equity);
+  });
+
+  it("GIVEN an existing configuration WHEN getFacetSelectorsLengthByConfigurationIdVersionAndFacetId called with version 0 THEN reverts with VersionZero", async () => {
+    const facetId = "0x0000000000000000000000000000000000000000000000000000000000000001";
+
+    await expect(
+      diamondCutManager.getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(CONFIG_IDS.equity, 0, facetId),
+    )
+      .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
+      .withArgs(CONFIG_IDS.equity);
+  });
+
+  it("GIVEN an existing configuration WHEN getFacetSelectorsByConfigurationIdVersionAndFacetId called with version 0 THEN reverts with VersionZero", async () => {
+    const facetId = "0x0000000000000000000000000000000000000000000000000000000000000001";
+
+    await expect(
+      diamondCutManager.getFacetSelectorsByConfigurationIdVersionAndFacetId(CONFIG_IDS.equity, 0, facetId, 0, 10),
+    )
+      .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
+      .withArgs(CONFIG_IDS.equity);
+  });
+
+  it("GIVEN an existing configuration WHEN getFacetIdsByConfigurationIdAndVersion called with version 0 THEN reverts with VersionZero", async () => {
+    await expect(diamondCutManager.getFacetIdsByConfigurationIdAndVersion(CONFIG_IDS.equity, 0, 0, 10))
+      .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
+      .withArgs(CONFIG_IDS.equity);
+  });
+
+  it("GIVEN an existing configuration WHEN getFacetConfigurationsByConfigurationIdAndVersion called with version 0 THEN reverts with VersionZero", async () => {
+    await expect(diamondCutManager.getFacetConfigurationsByConfigurationIdAndVersion(CONFIG_IDS.equity, 0, 0, 10))
+      .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
+      .withArgs(CONFIG_IDS.equity);
+  });
+
+  it("GIVEN a registered configuration WHEN getFacetConfigurationsByConfigurationIdAndVersion called THEN returns the registered facet configurations", async () => {
+    const facetsLength = Number(
+      await diamondCutManager.getFacetsLengthByConfigurationIdAndVersion(CONFIG_IDS.equity, 1),
+    );
+
+    const facetConfigurations = await diamondCutManager.getFacetConfigurationsByConfigurationIdAndVersion(
+      CONFIG_IDS.equity,
+      1,
+      0,
+      facetsLength,
+    );
+
+    expect(facetConfigurations.length).to.equal(facetsLength);
+    expect([...facetConfigurations.map((facetConfiguration) => facetConfiguration.id)]).to.have.members(
+      equityFacetIdList,
+    );
+    for (const facetConfiguration of facetConfigurations) {
+      expect(Number(facetConfiguration.version)).to.equal(1);
+    }
+  });
+
+  it("GIVEN an existing configuration WHEN getFacetAddressesByConfigurationIdAndVersion called with version 0 THEN reverts with VersionZero", async () => {
+    await expect(diamondCutManager.getFacetAddressesByConfigurationIdAndVersion(CONFIG_IDS.equity, 0, 0, 10))
+      .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
+      .withArgs(CONFIG_IDS.equity);
+  });
+
+  it("GIVEN an existing configuration WHEN getFacetIdByConfigurationIdVersionAndSelector called with version 0 THEN reverts with VersionZero", async () => {
+    await expect(diamondCutManager.getFacetIdByConfigurationIdVersionAndSelector(CONFIG_IDS.equity, 0, PAUSE_SELECTOR))
+      .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
+      .withArgs(CONFIG_IDS.equity);
+  });
+
+  it("GIVEN an existing configuration WHEN getFacetByConfigurationIdVersionAndFacetId called with version 0 THEN reverts with VersionZero", async () => {
+    const facetId = "0x0000000000000000000000000000000000000000000000000000000000000001";
+
+    await expect(diamondCutManager.getFacetByConfigurationIdVersionAndFacetId(CONFIG_IDS.equity, 0, facetId))
+      .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
+      .withArgs(CONFIG_IDS.equity);
+  });
+
+  it("GIVEN an existing configuration WHEN getFacetAddressByConfigurationIdVersionAndFacetId called with version 0 THEN reverts with VersionZero", async () => {
+    const facetId = "0x0000000000000000000000000000000000000000000000000000000000000001";
+
+    await expect(diamondCutManager.getFacetAddressByConfigurationIdVersionAndFacetId(CONFIG_IDS.equity, 0, facetId))
+      .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
+      .withArgs(CONFIG_IDS.equity);
+  });
+
+  it("GIVEN an existing configuration WHEN getFacetVersionByConfigurationIdVersionAndFacetId called with version 0 THEN reverts with VersionZero", async () => {
+    const facetId = "0x0000000000000000000000000000000000000000000000000000000000000001";
+
+    await expect(diamondCutManager.getFacetVersionByConfigurationIdVersionAndFacetId(CONFIG_IDS.equity, 0, facetId))
+      .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
+      .withArgs(CONFIG_IDS.equity);
+  });
+
+  it("GIVEN a registered configuration WHEN getFacetVersionByConfigurationIdVersionAndFacetId called with a registered facetId THEN returns the registered version", async () => {
+    const facetVersion = await diamondCutManager.getFacetVersionByConfigurationIdVersionAndFacetId(
+      CONFIG_IDS.equity,
+      1,
+      equityFacetIdList[0],
+    );
+
+    expect(Number(facetVersion)).to.equal(1);
   });
 
   it("GIVEN a registered configuration WHEN getFacetVersionByConfigurationIdVersionAndFacetId called with non-existent facetId THEN reverts with FacetIdNotRegistered", async () => {

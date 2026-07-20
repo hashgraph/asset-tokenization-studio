@@ -1,29 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-// TEST-ONLY: mock variant of `DiamondFacet` used by the InitializeMock domain.
-// Inherits the same `DiamondCut` + `DiamondLoupe` bases that production
-// `DiamondFacet` does — provides a mock-style `initializeDiamondCut()` that
-// overrides the production one. It carries the `onlyFacetNotRegistered`
-// modifier and simply marks itself ready by calling `setFacetToReady`.
-// It carries its own resolver key, `_MOCK_DIAMOND_CUT_RESOLVER_KEY =
-// bytes32("MockDiamondCut")`, which is distinct from the production
-// `_DIAMOND_RESOLVER_KEY`. This matches the `mockDiamondCutId` constant
-// in the initializer test so facet-version-status assertions resolve to
-// the correct storage slot.
+// TEST-ONLY: standalone facet carrying the `force*` test controls, appended via
+// `TEST_ONLY_EXTRAS` in `scripts/domain/facetEnvironment.ts` ALONGSIDE the real
+// production `DiamondFacet` — mirrors the `TimeTravelFacet` pattern. This lets
+// `DiamondBase`/`DiamondFacet` be exercised for real in every test fixture,
+// instead of being fully substituted by a mock that re-derives its own
+// `initializeDiamondCut` from scratch.
 
-import { IDiamondFacet } from "../../infrastructure/diamond/IDiamondFacet.sol";
-import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { DiamondCut } from "../../infrastructure/diamond/DiamondCut.sol";
-import { DiamondLoupe } from "../../infrastructure/diamond/DiamondLoupe.sol";
-import { IDiamond, RESOLVER_KEY_DIAMOND } from "../../infrastructure/proxy/IDiamond.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
-import { InitializerModifiers } from "../../services/core/InitializerModifiers.sol";
-import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 import { ResolverProxyStorageWrapper } from "../../domain/core/ResolverProxyStorageWrapper.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { DeactivateStorageWrapper } from "../../domain/core/DeactivateStorageWrapper.sol";
-import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC1644StorageWrapper } from "../../domain/asset/ERC1644StorageWrapper.sol";
 import { ControlListStorageWrapper } from "../../domain/core/ControlListStorageWrapper.sol";
@@ -31,8 +20,13 @@ import { KycStorageWrapper } from "../../domain/core/KycStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC20StorageWrapper } from "../../domain/asset/ERC20StorageWrapper.sol";
 import { ERC20VotesStorageWrapper } from "../../domain/asset/ERC20VotesStorageWrapper.sol";
+import { NominalValueStorageWrapper } from "../../domain/asset/NominalValueStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "../../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { ScheduledTasksLib } from "../../facets/scheduledTasksLib/ScheduledTasksLib.sol";
+
+// keccak256("security.token.standard.mockDiamondCutHelpers.resolverKey")
+// solhint-disable-next-line max-line-length
+bytes32 constant _MOCK_DIAMOND_CUT_HELPERS_RESOLVER_KEY = 0xa5b023f9f188f3ba68c8758aaaf5ab8080f7660f3e8e5c8c6aed79dfbfd307e7;
 
 /* solhint-disable */
 
@@ -40,9 +34,11 @@ import { ScheduledTasksLib } from "../../facets/scheduledTasksLib/ScheduledTasks
  * @title Mock Diamond Cut Control Interface
  * @notice Defines test-only controls for forcing diamond and facet operational states.
  * @dev Exposes privileged mock hooks intended for test environments, not production use.
+ *      Implemented by `MockDiamondCutHelpers`, a standalone facet appended to every test
+ *      configuration via `TEST_ONLY_EXTRAS`.
  * @author Asset Tokenization Studio Team
  */
-interface IMockDiamondCut {
+interface IMockDiamondCutHelpers {
     /**
      * @notice Forces the diamond into a non-operational state.
      * @dev Mutates operational status and may cause operational guards to reject calls.
@@ -111,6 +107,24 @@ interface IMockDiamondCut {
     function forceDecimals(uint8 _newDecimals) external;
 
     /**
+     * @notice Forces the nominal value state reported by the mock.
+     * @dev Mutates nominal-value metadata state directly, bypassing the real facet's
+     *      registration guard and role checks entirely.
+     * @param _nominalValue New nominal value to store.
+     * @param _nominalValueDecimals New nominal value decimal precision to store.
+     * @param _nominalValueCurrency New nominal value currency code to store.
+     * @param _effectiveDatetime New effective datetime to store.
+     * @param _isUnitNominalValue True to mark the nominal value as unit-based, false otherwise.
+     */
+    function forceSetNominalValue(
+        uint256 _nominalValue,
+        uint8 _nominalValueDecimals,
+        bytes3 _nominalValueCurrency,
+        uint256 _effectiveDatetime,
+        bool _isUnitNominalValue
+    ) external;
+
+    /**
      * @notice Forces whether ERC20Votes-related behaviour is activated.
      * @dev Mutates mock governance capability state for vote-related test scenarios.
      * @param _newActivated True to activate ERC20Votes behaviour, false otherwise.
@@ -144,29 +158,38 @@ interface IMockDiamondCut {
      * @param timestamp Scheduled execution timestamp for the sub-task.
      */
     function forceAddRawBalanceAdjustmentSubTask(uint256 timestamp) external;
+
+    /**
+     * @notice Marks the `MockDiamondCutHelpers` facet as ready.
+     * @dev Mirrors `ITimeTravel.initializeTimeTravel()`: called by `MockFactory._deploySecurity`
+     *      on factory-deployed test securities so `setOperationalStatus` finds this facet ready,
+     *      the same way it does for `TimeTravelFacet`. A no-op wherever facets are instead
+     *      force-readied in bulk via `forceFacetsReady` (e.g. `deployAssetMock`).
+     */
+    function initializeMockDiamondCutHelpers() external;
 }
 
 /**
- * @title Mock Diamond Cut Facet
- * @notice Provides diamond configuration operations and test-only state forcing helpers.
- * @dev Extends the production diamond cut and loupe behaviour with mock controls that write
- *      directly to facet, configuration, security, deactivation, and token feature storage.
- *      These helpers are intended for tests and bypass normal initialisation and role flows.
- * @author Hashgraph
+ * @title Mock Diamond Cut Helpers Facet
+ * @notice TEST-ONLY facet exposing the `force*` state-forcing controls consumed by the test
+ *         suite through `IAssetMock`/`IMockDiamondCutHelpers`.
+ * @dev Registered under its own resolver key via `TEST_ONLY_EXTRAS`, appended to every test
+ *      configuration alongside the real, unmodified `DiamondFacet` — never substituting it.
+ *      Carries `initializeMockDiamondCutHelpers`, called explicitly by `MockFactory._deploySecurity`
+ *      for factory-deployed test securities (mirroring `TimeTravelFacet.initializeTimeTravel`);
+ *      elsewhere (e.g. `deployAssetMock`) facet readiness is forced in bulk via `forceFacetsReady`.
+ * @author Asset Tokenization Studio Team
  */
-contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, InitializerModifiers, IMockDiamondCut {
-    /**
-     * @notice Marks the diamond cut facet as initialised for the active resolver key.
-     * @dev Requires the caller to hold the default admin role and the diamond facet not to
-     *      be registered already. Mutates initialiser storage and emits
-     *      `DiamondCutInitialized`.
-     */
-    function initializeDiamondCut() external onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_DIAMOND) {
-        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_DIAMOND);
-        emit DiamondCutInitialized();
+contract MockDiamondCutHelpers is IStaticFunctionSelectors, IMockDiamondCutHelpers {
+    /// @inheritdoc IMockDiamondCutHelpers
+    /// @dev Marks this facet ready under its own resolver key; called explicitly by
+    ///      `MockFactory._deploySecurity` for factory-deployed test securities, mirroring
+    ///      `TimeTravelFacet.initializeTimeTravel()`.
+    function initializeMockDiamondCutHelpers() external override {
+        InitializerStorageWrapper.setFacetToReady(_MOCK_DIAMOND_CUT_HELPERS_RESOLVER_KEY);
     }
 
-    /// @inheritdoc IMockDiamondCut
+    /// @inheritdoc IMockDiamondCutHelpers
     /// @dev Writes status `0` for the active resolver proxy configuration and version.
     function forceNonOperational() external override {
         (bytes32 configId, uint256 versionId) = ResolverProxyStorageWrapper.getResolverProxyConfigurationIdAndVersion();
@@ -174,7 +197,7 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
         InitializerStorageWrapper.setConfigVersion(configId, versionId, 0);
     }
 
-    /// @inheritdoc IMockDiamondCut
+    /// @inheritdoc IMockDiamondCutHelpers
     /// @dev Resolves the current facet version through the business logic resolver and resets
     ///      both its version status and last-version pointer.
     function forceFacetNotRegistered(bytes32 _facetKey) external override {
@@ -187,13 +210,13 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
         InitializerStorageWrapper.setFacetLastVersionTo(_facetKey, 0);
     }
 
-    /// @inheritdoc IMockDiamondCut
+    /// @inheritdoc IMockDiamondCutHelpers
     /// @dev Marks the facet ready for the version resolved from the business logic resolver.
     function forceFacetReady(bytes32 _facetKey) external override {
         InitializerStorageWrapper.setFacetToReady(_facetKey);
     }
 
-    /// @inheritdoc IMockDiamondCut
+    /// @inheritdoc IMockDiamondCutHelpers
     /// @dev Iterates over all supplied facet keys and marks each current facet version ready.
     function forceFacetsReady(bytes32[] calldata _facetKeys) external override {
         uint256 length = _facetKeys.length;
@@ -205,7 +228,7 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
         }
     }
 
-    /// @inheritdoc IMockDiamondCut
+    /// @inheritdoc IMockDiamondCutHelpers
     /// @dev Writes status `1` for the active resolver proxy configuration and version without
     ///      walking the configured facet list. The caller is responsible for ensuring every
     ///      required facet has already been marked ready.
@@ -215,20 +238,20 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
         InitializerStorageWrapper.setConfigVersion(configId, versionId, 1);
     }
 
-    /// @inheritdoc IMockDiamondCut
+    /// @inheritdoc IMockDiamondCutHelpers
     /// @dev Writes the ERC-1410 multi-partition flag through the same storage wrapper used by
     ///      the production partitions initialiser.
     function setMultiPartition(bool _multiPartition) external override {
         ERC1410StorageWrapper.initializeERC1410(_multiPartition);
     }
 
-    /// @inheritdoc IMockDiamondCut
+    /// @inheritdoc IMockDiamondCutHelpers
     /// @dev Uses the production deactivation storage wrapper and bypasses role checks.
     function forceDeactivate() external override {
         DeactivateStorageWrapper.deactivate();
     }
 
-    /// @inheritdoc IMockDiamondCut
+    /// @inheritdoc IMockDiamondCutHelpers
     /// @dev Sets ERC-1410 multi-partition, control-list mode, internal KYC, and protected
     ///      partition flags to the same value through their production storage wrappers.
     function forceSecurityFlags(bool _newSecurityFlags) external override {
@@ -238,34 +261,53 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
         ProtectedPartitionsStorageWrapper.initializeProtectedPartitions(_newSecurityFlags);
     }
 
-    /// @inheritdoc IMockDiamondCut
+    /// @inheritdoc IMockDiamondCutHelpers
     /// @dev Writes the ERC-1644 controller activation flag through the controller storage
     ///      wrapper without invoking the production facet initialiser.
     function forceControllable(bool _newControllable) external override {
         ERC1644StorageWrapper.initializeController(_newControllable);
     }
 
-    /// @inheritdoc IMockDiamondCut
+    /// @inheritdoc IMockDiamondCutHelpers
     /// @dev Updates only the ERC-20 decimal count and does not mutate token name, symbol, or
     ///      scheduled-task state.
     function forceDecimals(uint8 _newDecimals) external override {
         ERC20StorageWrapper.setDecimals(_newDecimals);
     }
 
-    /// @inheritdoc IMockDiamondCut
+    /// @inheritdoc IMockDiamondCutHelpers
+    /// @dev Writes the nominal value fields directly through `NominalValueStorageWrapper`,
+    ///      bypassing the real facet's registration guard and role checks entirely.
+    function forceSetNominalValue(
+        uint256 _nominalValue,
+        uint8 _nominalValueDecimals,
+        bytes3 _nominalValueCurrency,
+        uint256 _effectiveDatetime,
+        bool _isUnitNominalValue
+    ) external override {
+        NominalValueStorageWrapper.initializeNominalValue(
+            _nominalValue,
+            _nominalValueDecimals,
+            _nominalValueCurrency,
+            _effectiveDatetime,
+            _isUnitNominalValue
+        );
+    }
+
+    /// @inheritdoc IMockDiamondCutHelpers
     /// @dev Writes the ERC20Votes activation flag directly through the votes storage wrapper.
     function forceErc20VotesActivated(bool _newActivated) external override {
         ERC20VotesStorageWrapper.setActivate(_newActivated);
     }
 
-    /// @inheritdoc IMockDiamondCut
+    /// @inheritdoc IMockDiamondCutHelpers
     /// @dev Writes the control-list type flag directly; `true` represents whitelist mode and
     ///      `false` represents blacklist mode.
     function forceWhitelist(bool _newWhiteList) external override {
         ControlListStorageWrapper.initializeControlList(_newWhiteList);
     }
 
-    /// @inheritdoc IMockDiamondCut
+    /// @inheritdoc IMockDiamondCutHelpers
     /// @dev Encodes the task type and inserts it into cross-ordered task storage via the lib.
     function forceAddCrossOrderedTask(uint256 timestamp, bytes32 taskType) external override {
         ScheduledTasksLib.addScheduledTask(
@@ -275,13 +317,13 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
         );
     }
 
-    /// @inheritdoc IMockDiamondCut
+    /// @inheritdoc IMockDiamondCutHelpers
     /// @dev Removes the tail entry from balance-adjustment storage via the lib.
     function forcePopBalanceAdjustmentSubTask() external override {
         ScheduledTasksLib.popScheduledTask(ScheduledTasksStorageWrapper._scheduledBalanceAdjustmentStorage());
     }
 
-    /// @inheritdoc IMockDiamondCut
+    /// @inheritdoc IMockDiamondCutHelpers
     /// @dev Inserts a balance-adjustment sub-task with `bytes32(0)` data at the given timestamp.
     function forceAddRawBalanceAdjustmentSubTask(uint256 timestamp) external override {
         ScheduledTasksLib.addScheduledTask(
@@ -292,24 +334,20 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    /// @dev Returns the production diamond resolver key so registry lookups match the deployed
-    ///      diamond cut facet entry.
+    /// @dev Returns this facet's own resolver key, distinct from `RESOLVER_KEY_DIAMOND`.
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        // Must return the production `RESOLVER_KEY_DIAMOND` so the BLR
-        // registration matches the `atsRegistry.data.ts` entry. The internal
-        // initializer uses `_MOCK_DIAMOND_CUT_RESOLVER_KEY` which is what
-        // `mockDiamondCutId` in the initializer test checks.
-        staticResolverKey_ = RESOLVER_KEY_DIAMOND;
+        staticResolverKey_ = _MOCK_DIAMOND_CUT_HELPERS_RESOLVER_KEY;
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    /// @dev Includes the mock helper selectors together with inherited diamond cut, loupe, and
-    ///      ERC-165 selectors expected to be registered for this test facet.
+    /// @dev `initializeMockDiamondCutHelpers` plus the 16 `force*`/`setMultiPartition` mock-control
+    ///      selectors, with no diamond cut, loupe, or ERC-165 selectors — those belong to the real
+    ///      `DiamondFacet` now.
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorsIndex = 34;
+        uint256 selectorsIndex = 17;
         staticFunctionSelectors_ = new bytes4[](selectorsIndex);
         unchecked {
-            staticFunctionSelectors_[--selectorsIndex] = this.initializeDiamondCut.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.initializeMockDiamondCutHelpers.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.forceNonOperational.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.forceFacetNotRegistered.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.forceFacetReady.selector;
@@ -320,36 +358,20 @@ contract MockDiamondCut is IDiamond, IDiamondFacet, DiamondCut, DiamondLoupe, In
             staticFunctionSelectors_[--selectorsIndex] = this.forceSecurityFlags.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.forceControllable.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.forceDecimals.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.forceSetNominalValue.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.forceErc20VotesActivated.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.forceWhitelist.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.forceAddCrossOrderedTask.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.forcePopBalanceAdjustmentSubTask.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.forceAddRawBalanceAdjustmentSubTask.selector;
-            staticFunctionSelectors_[--selectorsIndex] = this.updateConfigVersion.selector;
-            staticFunctionSelectors_[--selectorsIndex] = this.updateConfig.selector;
-            staticFunctionSelectors_[--selectorsIndex] = this.updateResolver.selector;
-            staticFunctionSelectors_[--selectorsIndex] = this.getConfigInfo.selector;
-            staticFunctionSelectors_[--selectorsIndex] = this.getFacets.selector;
-            staticFunctionSelectors_[--selectorsIndex] = this.getFacetsLength.selector;
-            staticFunctionSelectors_[--selectorsIndex] = this.getFacetsByPage.selector;
-            staticFunctionSelectors_[--selectorsIndex] = this.getFacetSelectors.selector;
-            staticFunctionSelectors_[--selectorsIndex] = this.getFacetSelectorsLength.selector;
-            staticFunctionSelectors_[--selectorsIndex] = this.getFacetSelectorsByPage.selector;
-            staticFunctionSelectors_[--selectorsIndex] = this.getFacetIds.selector;
-            staticFunctionSelectors_[--selectorsIndex] = this.getFacetIdsByPage.selector;
-            staticFunctionSelectors_[--selectorsIndex] = this.getFacetAddresses.selector;
-            staticFunctionSelectors_[--selectorsIndex] = this.getFacetAddressesByPage.selector;
-            staticFunctionSelectors_[--selectorsIndex] = this.getFacetIdBySelector.selector;
-            staticFunctionSelectors_[--selectorsIndex] = this.getFacet.selector;
-            staticFunctionSelectors_[--selectorsIndex] = this.getFacetAddress.selector;
-            staticFunctionSelectors_[--selectorsIndex] = this.supportsInterface.selector;
         }
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    /// @dev Advertises ERC-165 and the mock diamond cut interface for static registration.
+    /// @dev Advertises only the mock diamond cut helpers interface; ERC-165/loupe support is
+    ///      owned by the real `DiamondFacet` registered alongside this facet.
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        return Bytes4Builder.build(type(IERC165).interfaceId, type(IMockDiamondCut).interfaceId);
+        return Bytes4Builder.build(type(IMockDiamondCutHelpers).interfaceId);
     }
 }
 /* solhint-enable */

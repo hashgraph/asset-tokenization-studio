@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ICommonErrors } from "../errors/ICommonErrors.sol";
+import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 /**
  * @title Dates Validation
@@ -9,6 +10,14 @@ import { ICommonErrors } from "../errors/ICommonErrors.sol";
  * @notice Utility library for dates validation
  */
 library DatesValidation {
+    function checkFutureTimestamp(uint256 _timestamp) internal view {
+        if (_timestamp <= TimeTravelStorageWrapper.getBlockTimestamp()) revert ICommonErrors.WrongTimestamp(_timestamp);
+    }
+
+    function checkPastTimestamp(uint256 _timestamp) internal view {
+        if (_timestamp >= TimeTravelStorageWrapper.getBlockTimestamp()) revert ICommonErrors.WrongTimestamp(_timestamp);
+    }
+
     function checkDates(uint256 _firstDate, uint256 _secondDate) internal pure {
         if (_secondDate < _firstDate) {
             revert ICommonErrors.WrongDates(_firstDate, _secondDate);

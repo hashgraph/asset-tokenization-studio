@@ -598,6 +598,16 @@ export function lockByPartitionTests(getCtx: () => AssetMockCtx): void {
             .to.be.revertedWithCustomError(asset, "PartitionNotAllowedInSinglePartitionMode")
             .withArgs(_NON_DEFAULT_PARTITION);
         });
+
+        it("GIVEN a token with single-partition mode GIVEN updateLockExpirationByPartition THEN fails with PartitionNotAllowedInSinglePartitionMode", async () => {
+          await expect(
+            asset
+              .connect(signer_C)
+              .updateLockExpirationByPartition(_NON_DEFAULT_PARTITION, signer_A.address, 1, expirationTimestamp),
+          )
+            .to.be.revertedWithCustomError(asset, "PartitionNotAllowedInSinglePartitionMode")
+            .withArgs(_NON_DEFAULT_PARTITION);
+        });
       });
 
       describe("snapshot", () => {
@@ -782,6 +792,12 @@ export function lockByPartitionTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN a deactivated asset WHEN releaseByPartition THEN transaction fails with Deactivated", async () => {
         await expect(
           asset.connect(signer_A).releaseByPartition(ethers.ZeroHash, 0, ADDRESS_ZERO),
+        ).to.be.revertedWithCustomError(asset, "Deactivated");
+      });
+
+      it("GIVEN a deactivated asset WHEN updateLockExpirationByPartition THEN transaction fails with Deactivated", async () => {
+        await expect(
+          asset.connect(signer_A).updateLockExpirationByPartition(ethers.ZeroHash, ADDRESS_ZERO, 0, 0),
         ).to.be.revertedWithCustomError(asset, "Deactivated");
       });
     });

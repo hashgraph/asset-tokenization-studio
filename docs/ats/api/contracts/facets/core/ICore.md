@@ -4,7 +4,7 @@ _Asset Tokenization Studio Team_
 
 > ICore
 
-Consolidated interface for the token &quot;Core&quot; domain: identity-defining methods (ERC20 metadata readers, ERC3643 name/symbol setters, and version). Also owns the `ERC20MetadataInfo` and `ERC20Metadata` structs, since the only initializer for this data (`initializeCore`) lives in CoreFacet.
+Consolidated interface for the token &quot;Core&quot; domain: identity-defining methods (ERC20 metadata readers, ERC3643 name/symbol setters, and version). Also owns the `ERC20Metadata` struct, since the only initializer for this data (`initializeCore`) lives in CoreFacet.
 
 ## Methods
 
@@ -32,9 +32,9 @@ Returns the full metadata struct of the security token.
 
 #### Returns
 
-| Name | Type                | Description                           |
-| ---- | ------------------- | ------------------------------------- |
-| \_0  | ICore.ERC20Metadata | The persisted `ERC20Metadata` bundle. |
+| Name | Type                | Description                    |
+| ---- | ------------------- | ------------------------------ |
+| \_0  | ICore.ERC20Metadata | The persisted `ERC20Metadata`. |
 
 ### initializeCore
 
@@ -132,6 +132,6 @@ _Fires exclusively from `initializeCore` after the storage write succeeds._
 
 #### Parameters
 
-| Name     | Type                | Description                                                  |
-| -------- | ------------------- | ------------------------------------------------------------ |
-| metadata | ICore.ERC20Metadata | The full ERC-20 metadata bundle persisted at initialisation. |
+| Name     | Type                | Description                                      |
+| -------- | ------------------- | ------------------------------------------------ |
+| metadata | ICore.ERC20Metadata | The ERC-20 metadata persisted at initialisation. |

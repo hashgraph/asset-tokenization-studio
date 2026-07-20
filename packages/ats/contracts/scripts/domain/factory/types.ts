@@ -60,6 +60,8 @@ export interface BondDetailsDataParams {
   nominalValueDecimals: number;
   startingDate: number;
   maturityDate: number;
+  effectiveDatetime: number;
+  isUnitNominalValue: boolean;
 }
 
 /**
@@ -91,6 +93,8 @@ export interface EquityDetailsDataParams {
   currency: string;
   nominalValue: ethers.BigNumberish;
   nominalValueDecimals: number;
+  effectiveDatetime: number;
+  isUnitNominalValue: boolean;
 }
 
 export interface FactoryRegulationDataParams {

@@ -2,7 +2,13 @@
 
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { type BusinessLogicResolver, type AccessControlFacet, type PauseFacet, DiamondFacet } from "@contract-types";
+import {
+  type BusinessLogicResolver,
+  type AccessControlFacet,
+  type PauseFacet,
+  type FactoryFacet,
+  DiamondFacet,
+} from "@contract-types";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { ATS_ROLES } from "@scripts";
 import { assertObject } from "../../../common";
@@ -17,6 +23,7 @@ describe("ResolverProxy Tests", () => {
   let diamondFacet: DiamondFacet;
   let accessControlImpl: AccessControlFacet;
   let pauseImpl: PauseFacet;
+  let factoryImpl: FactoryFacet;
   let signer_A: HardhatEthersSigner;
 
   async function deployContracts() {
@@ -26,6 +33,7 @@ describe("ResolverProxy Tests", () => {
     diamondFacet = await (await ethers.getContractFactory("DiamondFacet", signer_A)).deploy();
     accessControlImpl = await (await ethers.getContractFactory("AccessControlFacet", signer_A)).deploy();
     pauseImpl = await (await ethers.getContractFactory("PauseFacet", signer_A)).deploy();
+    factoryImpl = await (await ethers.getContractFactory("FactoryFacet", signer_A)).deploy();
   }
 
   async function setUpResolver(
@@ -120,6 +128,29 @@ describe("ResolverProxy Tests", () => {
     expect(result.configurationId_).to.equal(CONFIG_ID);
     expect(result.configurationVersion_).to.equal(1);
     expect(result.replacementEnabled_).to.equal(false);
+
+    const diamondLoupe = await ethers.getContractAt("DiamondFacet", resolverProxy.target);
+
+    await checkFacets(businessLogicsRegistryDatas, diamondLoupe);
+  });
+
+  it("GIVEN a deployed FactoryFacet WHEN deploy a new resolverProxy with correct configuration THEN its static selectors and interface ids are correctly registered", async () => {
+    const businessLogicsRegistryDatas = [
+      {
+        businessLogicKey: await diamondFacet.getStaticResolverKey(),
+        businessLogicAddress: diamondFacet.target,
+      },
+      {
+        businessLogicKey: await factoryImpl.getStaticResolverKey(),
+        businessLogicAddress: factoryImpl.target,
+      },
+    ];
+
+    await setUpResolver(businessLogicsRegistryDatas);
+
+    const resolverProxy = await (
+      await ethers.getContractFactory("ResolverProxy")
+    ).deploy(resolver.target, { configurationId: CONFIG_ID, configurationVersion: 1, replacementEnabled: false }, []);
 
     const diamondLoupe = await ethers.getContractAt("DiamondFacet", resolverProxy.target);
 

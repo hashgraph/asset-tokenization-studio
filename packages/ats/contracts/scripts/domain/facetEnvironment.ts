@@ -23,13 +23,11 @@
 // Facets swapped for a test-specific variant when useTimeTravel=true.
 // Key = production facet name, value = test facet name (used verbatim, no suffix).
 // Edit this map in one place to affect all configurations.
-const TEST_REPLACEMENTS: Record<string, string> = {
-  DiamondFacet: "MockDiamondCut",
-};
+const TEST_REPLACEMENTS: Record<string, string> = {};
 
 // Facets appended to every configuration when useTimeTravel=true.
 // Edit this list in one place to affect all configurations.
-const TEST_ONLY_EXTRAS = ["TimeTravelFacet"] as const;
+const TEST_ONLY_EXTRAS = ["TimeTravelFacet", "MockDiamondCutHelpers"] as const;
 
 /**
  * Build the final facet name list for a given environment.

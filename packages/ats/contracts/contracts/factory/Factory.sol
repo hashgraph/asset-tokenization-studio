@@ -39,7 +39,6 @@ import { ISnapshots } from "../facets/snapshots/ISnapshots.sol";
 import { IProceedRecipients } from "../facets/proceedRecipients/IProceedRecipients.sol";
 
 import { INominalValue } from "../facets/nominalValue/INominalValue.sol";
-import { ScheduledTasksStorageWrapper } from "../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { IProtectedPartitions } from "../facets/protectedPartitions/IProtectedPartitions.sol";
 import { IExternalPauseManagement } from "../facets/externalPauseManagement/IExternalPauseManagement.sol";
 import {
@@ -244,7 +243,9 @@ abstract contract Factory is IFactory {
         INominalValue(equityAddress_).initializeNominalValue(
             _equityData.equityDetails.nominalValue,
             _equityData.equityDetails.nominalValueDecimals,
-            _equityData.equityDetails.currency
+            _equityData.equityDetails.currency,
+            _equityData.equityDetails.effectiveDatetime,
+            _equityData.equityDetails.isUnitNominalValue
         );
         IInterestRate(equityAddress_).initializeInterestRateType(IInterestRate.RateType.STANDARD);
         IProceedRecipients(equityAddress_).initializeProceedRecipients(new address[](0), new bytes[](0));
@@ -323,7 +324,9 @@ abstract contract Factory is IFactory {
         INominalValue(bondAddress_).initializeNominalValue(
             _bondData.bondDetails.nominalValue,
             _bondData.bondDetails.nominalValueDecimals,
-            _bondData.bondDetails.currency
+            _bondData.bondDetails.currency,
+            _bondData.bondDetails.effectiveDatetime,
+            _bondData.bondDetails.isUnitNominalValue
         );
         ICoupon(bondAddress_).initializeCoupon();
         ICouponListing(bondAddress_).initializeCouponListing();
@@ -638,7 +641,7 @@ abstract contract Factory is IFactory {
      */
     function _checkBondDates(uint256 startingDate, uint256 maturityDate) private view {
         DatesValidation.checkDates(startingDate, maturityDate);
-        ScheduledTasksStorageWrapper.requireValidTimestamp(maturityDate);
+        DatesValidation.checkFutureTimestamp(maturityDate);
     }
 
     /**

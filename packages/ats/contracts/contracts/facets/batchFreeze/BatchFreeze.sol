@@ -101,6 +101,7 @@ abstract contract BatchFreeze is IBatchFreeze, Modifiers {
         for (uint256 i; i < length; ) {
             DefaultValueValidation.checkZeroAddress(_userAddresses[i]);
             ERC3643StorageWrapper.checkUnrecoveredAddress(_userAddresses[i]);
+            ERC3643StorageWrapper.checkNonZeroFreezeAmount(_amounts[i]);
             ERC3643StorageWrapper.unfreezeTokens(_userAddresses[i], _amounts[i], 0);
             emit IFreezeTypes.TokensUnfrozen(_userAddresses[i], _amounts[i], DEFAULT_PARTITION);
             unchecked {

@@ -127,6 +127,17 @@ export function maturityByPartitionTests(getCtx: () => AssetMockCtx): void {
           ).to.be.revertedWithCustomError(asset, "WalletRecovered");
         });
 
+        it("GIVEN a non-recovered caller redeeming on behalf of a recovered token holder WHEN redeeming at maturity THEN transaction fails with WalletRecovered", async () => {
+          const signers = await ethers.getSigners();
+          const newWallet = signers[11];
+
+          await asset.connect(signer_A).recoveryAddress(signer_C.address, newWallet.address, ADDRESS_ZERO);
+
+          await expect(
+            asset.connect(signer_A).redeemAtMaturityByPartition(signer_C.address, DEFAULT_PARTITION, amount),
+          ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+        });
+
         it("GIVEN all conditions are met WHEN redeeming at maturity THEN transaction succeeds and emits RedeemedByPartition", async () => {
           await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
 

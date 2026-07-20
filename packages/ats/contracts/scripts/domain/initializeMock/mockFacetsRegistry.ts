@@ -10,12 +10,13 @@
 import { toBeHex } from "ethers";
 import type { FacetDefinition } from "@scripts/infrastructure";
 import {
-  MockDiamondCut__factory,
+  MockDiamondCutHelpers__factory,
   MockFacet1__factory,
   MockFacet2__factory,
   MockFacet3__factory,
   MockFactoryFacet__factory,
 } from "@contract-types";
+import { getLibLinks } from "../orchestratorLibraries";
 
 // TEST-ONLY: BLR configuration ID for the InitializeMock domain, bytes32(uint256(9)).
 // Lives with the mock domain rather than the production `CONFIG_IDS` so test-only
@@ -26,22 +27,24 @@ export const INITIALIZE_MOCK_CONFIG_ID = toBeHex(9, 32);
 
 // Resolver keys mirror the `bytes32("...")` literals declared in the mock
 // contracts. Solidity right-pads short string-to-bytes32 conversions with
-// zeros: e.g. `MockFacetN` is 10 ASCII bytes + 22 zero bytes; `MockDiamondCut`
-// is 14 ASCII bytes + 18 zero bytes.
+// zeros: e.g. `MockFacetN` is 10 ASCII bytes + 22 zero bytes.
 const _MOCK_FACET_1 = "0x4d6f636b46616365743100000000000000000000000000000000000000000000";
 const _MOCK_FACET_2 = "0x4d6f636b46616365743200000000000000000000000000000000000000000000";
 const _MOCK_FACET_3 = "0x4d6f636b46616365743300000000000000000000000000000000000000000000";
-const _DIAMOND = "0xd9202bb838fd8d0f2866f13141398cfb9fa74cbbbce7449c9158caffa9c509f4";
+const _MOCK_DIAMOND_CUT_HELPERS = "0xa5b023f9f188f3ba68c8758aaaf5ab8080f7660f3e8e5c8c6aed79dfbfd307e7";
 
 // TEST-ONLY: registry of the mock facets, keyed by the contract name used in
 // `INITIALIZE_MOCK_FACETS`. Shape matches the production `FACET_REGISTRY` so
 // the deploy + configuration code can treat it the same way.
 export const MOCK_FACET_REGISTRY = {
-  MockDiamondCut: {
-    name: "MockDiamondCut",
-    description: "TEST-ONLY mock variant of DiamondFacet used by InitializeMock domain",
-    resolverKey: { name: "_DIAMOND", value: _DIAMOND },
-    factory: (signer) => new MockDiamondCut__factory(signer),
+  MockDiamondCutHelpers: {
+    name: "MockDiamondCutHelpers",
+    description: "TEST-ONLY force* state-forcing controls, appended alongside the real DiamondFacet",
+    resolverKey: { name: "_MOCK_DIAMOND_CUT_HELPERS", value: _MOCK_DIAMOND_CUT_HELPERS },
+    // NominalValueStorageWrapper's initializeNominalValue (called from forceSetNominalValue)
+    // triggers pending scheduled cross-ordered tasks via the external ScheduledTasksOps
+    // library, so this mock facet's bytecode needs it linked too.
+    factory: (signer) => new MockDiamondCutHelpers__factory(getLibLinks("scheduledTasksOps") as any, signer),
   },
   MockFacet1: {
     name: "MockFacet1",

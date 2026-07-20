@@ -26,9 +26,10 @@ contract NominalValueFacet is NominalValue, IStaticFunctionSelectors {
                 this.getNominalValue.selector,
                 this.getNominalValueCurrency.selector,
                 this.getNominalValueDecimals.selector,
+                this.getIsUnitNominalValue.selector,
                 this.initializeNominalValue.selector,
-                this.setNominalValue.selector,
-                this.setNominalValueCurrency.selector
+                this.publishNominalValue.selector,
+                this.republishNominalValue.selector
             );
     }
 

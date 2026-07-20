@@ -49,6 +49,12 @@ export function customDataTests(getCtx: () => AssetMockCtx): void {
           "AccountHasNoRole",
         );
       });
+
+      it("GIVEN an account without custom data manager role WHEN setCustomDataBatch THEN transaction fails with AccountHasNoRole", async () => {
+        await expect(
+          asset.connect(signer_C).setCustomDataBatch([{ key: KEY_A, value: [PAYLOAD_1] }]),
+        ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+      });
     });
 
     describe("Paused", () => {
@@ -71,6 +77,12 @@ export function customDataTests(getCtx: () => AssetMockCtx): void {
     });
 
     describe("setCustomData & getCustomData", () => {
+      it("GIVEN role and unpaused token WHEN setCustomData THEN emits CustomDataSet with correct key and value", async () => {
+        await expect(asset.connect(signer_A).setCustomData(KEY_A, [PAYLOAD_1]))
+          .to.emit(asset, "CustomDataSet")
+          .withArgs(KEY_A, [PAYLOAD_1]);
+      });
+
       it("GIVEN role and unpaused token WHEN setCustomData with a single payload THEN getCustomData returns it", async () => {
         await asset.connect(signer_A).setCustomData(KEY_A, [PAYLOAD_1]);
 
@@ -111,6 +123,79 @@ export function customDataTests(getCtx: () => AssetMockCtx): void {
       });
     });
 
+    describe("setCustomDataBatch", () => {
+      const KEY_B = ethers.id("customData.test.key.B");
+
+      it("GIVEN role and unpaused token WHEN setCustomDataBatch with a single entry THEN getCustomData returns it", async () => {
+        await asset.connect(signer_A).setCustomDataBatch([{ key: KEY_A, value: [PAYLOAD_1] }]);
+
+        const stored = await asset.getCustomData(KEY_A);
+        expect(stored).to.deep.equal([PAYLOAD_1]);
+      });
+
+      it("GIVEN role and unpaused token WHEN setCustomDataBatch with multiple entries THEN getCustomData returns each value", async () => {
+        await asset.connect(signer_A).setCustomDataBatch([
+          { key: KEY_A, value: [PAYLOAD_1, PAYLOAD_2] },
+          { key: KEY_B, value: [PAYLOAD_3] },
+        ]);
+
+        expect(await asset.getCustomData(KEY_A)).to.deep.equal([PAYLOAD_1, PAYLOAD_2]);
+        expect(await asset.getCustomData(KEY_B)).to.deep.equal([PAYLOAD_3]);
+      });
+
+      it("GIVEN an existing custom data entry WHEN setCustomDataBatch is called again for the same key THEN the previous value is fully overwritten", async () => {
+        await asset.connect(signer_A).setCustomDataBatch([{ key: KEY_A, value: [PAYLOAD_1, PAYLOAD_2] }]);
+
+        await asset.connect(signer_A).setCustomDataBatch([{ key: KEY_A, value: [PAYLOAD_3] }]);
+
+        const stored = await asset.getCustomData(KEY_A);
+        expect(stored).to.deep.equal([PAYLOAD_3]);
+      });
+
+      it("GIVEN a batch with a repeated key WHEN setCustomDataBatch is called THEN the last write for that key wins", async () => {
+        await asset.connect(signer_A).setCustomDataBatch([
+          { key: KEY_A, value: [PAYLOAD_1] },
+          { key: KEY_A, value: [PAYLOAD_2] },
+        ]);
+
+        const stored = await asset.getCustomData(KEY_A);
+        expect(stored).to.deep.equal([PAYLOAD_2]);
+      });
+
+      it("GIVEN an existing custom data entry WHEN setCustomDataBatch is called with an empty value array for its key THEN the entry is cleared", async () => {
+        await asset.connect(signer_A).setCustomDataBatch([{ key: KEY_A, value: [PAYLOAD_1, PAYLOAD_2] }]);
+
+        await asset.connect(signer_A).setCustomDataBatch([{ key: KEY_A, value: [] }]);
+
+        const stored = await asset.getCustomData(KEY_A);
+        expect(stored).to.deep.equal([]);
+      });
+
+      it("GIVEN an existing custom data entry WHEN setCustomDataBatch is called with an empty entries array THEN it is a silent no-op with no state change", async () => {
+        await asset.connect(signer_A).setCustomDataBatch([{ key: KEY_A, value: [PAYLOAD_1] }]);
+
+        await expect(asset.connect(signer_A).setCustomDataBatch([])).to.not.be.reverted;
+
+        const stored = await asset.getCustomData(KEY_A);
+        expect(stored).to.deep.equal([PAYLOAD_1]);
+      });
+
+      it("GIVEN role and unpaused token WHEN setCustomDataBatch is called THEN it emits CustomDataBatchSet with the entries", async () => {
+        const entries = [{ key: KEY_A, value: [PAYLOAD_1] }];
+
+        await expect(asset.connect(signer_A).setCustomDataBatch(entries))
+          .to.emit(asset, "CustomDataBatchSet")
+          .withArgs(entries.map((e) => [e.key, e.value]));
+      });
+
+      it("GIVEN role and unpaused token WHEN setCustomDataBatch is called THEN it does not emit CustomDataSet", async () => {
+        await expect(asset.connect(signer_A).setCustomDataBatch([{ key: KEY_A, value: [PAYLOAD_1] }])).to.not.emit(
+          asset,
+          "CustomDataSet",
+        );
+      });
+    });
+
     describe("Deactivated", () => {
       beforeEach(async () => {
         await asset.forceDeactivate();
@@ -118,6 +203,13 @@ export function customDataTests(getCtx: () => AssetMockCtx): void {
 
       it("GIVEN a deactivated asset WHEN setCustomData THEN transaction fails with Deactivated", async () => {
         await expect(asset.connect(signer_A).setCustomData(ethers.ZeroHash, [])).to.be.revertedWithCustomError(
+          asset,
+          "Deactivated",
+        );
+      });
+
+      it("GIVEN a deactivated asset WHEN setCustomDataBatch THEN transaction fails with Deactivated", async () => {
+        await expect(asset.connect(signer_A).setCustomDataBatch([])).to.be.revertedWithCustomError(
           asset,
           "Deactivated",
         );
@@ -154,6 +246,10 @@ export function customDataTests(getCtx: () => AssetMockCtx): void {
           asset,
           "AssetNotOperational",
         );
+      });
+
+      it("GIVEN non-operational asset WHEN setCustomDataBatch THEN reverts with AssetNotOperational", async () => {
+        await expect(asset.setCustomDataBatch([])).to.be.revertedWithCustomError(asset, "AssetNotOperational");
       });
     });
   });

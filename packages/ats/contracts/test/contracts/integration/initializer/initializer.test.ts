@@ -4,13 +4,13 @@
 // ATS infrastructure fixture (which, with useTimeTravel=true, deploys three
 // distinct BLR versions of each of MockFacet1/2/3 — all backed by identical
 // bytecode — and creates two versions of the InitializeMock configuration:
-//   v1 = { InitializerFacet:1, MockDiamondCut:1, MockFacet1:1, MockFacet2:2, MockFacet3:1 }
-//   v2 = { InitializerFacet:1, MockDiamondCut:1, MockFacet1:3, MockFacet2:3, MockFacet3:3 }
+//   v1 = { InitializerFacet:1, DiamondFacet:1, MockFacet1:1, MockFacet2:2, MockFacet3:1 }
+//   v2 = { InitializerFacet:1, DiamondFacet:1, MockFacet1:3, MockFacet2:3, MockFacet3:3 }
 // and deploys a ResolverProxy against INITIALIZE_MOCK_CONFIG_ID to exercise
 // the initializer-versioning flow on the five facets of that configuration.
-// `MockDiamondCut` is a mock variant of production `DiamondFacet` carrying the
-// same diamond-cut/loupe selectors plus its own `initializeDiamondCut()` hook
-// (so it participates in the initializer flow just like the MockFacets).
+// `DiamondFacet` is the same shared production facet every other domain config
+// registers under `RESOLVER_KEY_DIAMOND`; its `initializeDiamondCut()` hook lets
+// it participate in the initializer flow just like the MockFacets.
 
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -21,8 +21,8 @@ import {
   IDiamondFacet__factory,
   InitializerFacet,
   InitializerFacet__factory,
-  MockDiamondCut,
-  MockDiamondCut__factory,
+  DiamondFacet,
+  DiamondFacet__factory,
   MockFacet1,
   MockFacet1__factory,
   MockFacet2,
@@ -45,10 +45,9 @@ describe("Initializer — InitializeMock domain", () => {
   const mockFacet1Id = "0x4d6f636b46616365743100000000000000000000000000000000000000000000";
   const mockFacet2Id = "0x4d6f636b46616365743200000000000000000000000000000000000000000000";
   const mockFacet3Id = "0x4d6f636b46616365743300000000000000000000000000000000000000000000";
-  // TEST-ONLY: mirrors the production `_DIAMOND` from
-  // `contracts/constants/resolverKeys.sol`. MockDiamondCut shares the same
-  // key so that BLR registration and facet-version-status assertions align.
-  const mockDiamondCutId = RESOLVER_KEYS.diamond;
+  // TEST-ONLY: the production `_DIAMOND` resolver key from
+  // `contracts/constants/resolverKeys.sol`, shared with every other domain config.
+  const diamondFacetId = RESOLVER_KEYS.diamond;
 
   let factory: IFactory;
   let blrAddress: string;
@@ -59,7 +58,7 @@ describe("Initializer — InitializeMock domain", () => {
   let mockFacet1: MockFacet1;
   let mockFacet2: MockFacet2;
   let mockFacet3: MockFacet3;
-  let mockDiamondCut: MockDiamondCut;
+  let diamondFacet: DiamondFacet;
   let initializerFacet: InitializerFacet;
 
   const setupEnvironment = async () => {
@@ -79,7 +78,7 @@ describe("Initializer — InitializeMock domain", () => {
     configVersion: number;
     operationalStatus: number;
     initializer: ExpectedFacetState;
-    mockDiamondCut: ExpectedFacetState;
+    diamondFacet: ExpectedFacetState;
     mockFacet1: ExpectedFacetState;
     mockFacet2: ExpectedFacetState;
     mockFacet3: ExpectedFacetState;
@@ -100,8 +99,8 @@ describe("Initializer — InitializeMock domain", () => {
     expect(await initializerFacet.getFacetVersionStatus(initializerFacetId, expected.initializer.version)).to.equal(
       expected.initializer.versionStatus,
     );
-    expect(await initializerFacet.getFacetVersionStatus(mockDiamondCutId, expected.mockDiamondCut.version)).to.equal(
-      expected.mockDiamondCut.versionStatus,
+    expect(await initializerFacet.getFacetVersionStatus(diamondFacetId, expected.diamondFacet.version)).to.equal(
+      expected.diamondFacet.versionStatus,
     );
     expect(await initializerFacet.getFacetVersionStatus(mockFacet1Id, expected.mockFacet1.version)).to.equal(
       expected.mockFacet1.versionStatus,
@@ -114,7 +113,7 @@ describe("Initializer — InitializeMock domain", () => {
     );
 
     expect(await initializerFacet.getFacetLastVersion(initializerFacetId)).to.equal(expected.initializer.lastVersion);
-    expect(await initializerFacet.getFacetLastVersion(mockDiamondCutId)).to.equal(expected.mockDiamondCut.lastVersion);
+    expect(await initializerFacet.getFacetLastVersion(diamondFacetId)).to.equal(expected.diamondFacet.lastVersion);
     expect(await initializerFacet.getFacetLastVersion(mockFacet1Id)).to.equal(expected.mockFacet1.lastVersion);
     expect(await initializerFacet.getFacetLastVersion(mockFacet2Id)).to.equal(expected.mockFacet2.lastVersion);
     expect(await initializerFacet.getFacetLastVersion(mockFacet3Id)).to.equal(expected.mockFacet3.lastVersion);
@@ -137,7 +136,7 @@ describe("Initializer — InitializeMock domain", () => {
     mockFacet1 = MockFacet1__factory.connect(proxyAddress, deployer);
     mockFacet2 = MockFacet2__factory.connect(proxyAddress, deployer);
     mockFacet3 = MockFacet3__factory.connect(proxyAddress, deployer);
-    mockDiamondCut = MockDiamondCut__factory.connect(proxyAddress, deployer);
+    diamondFacet = DiamondFacet__factory.connect(proxyAddress, deployer);
     initializerFacet = InitializerFacet__factory.connect(proxyAddress, deployer);
   };
 
@@ -150,36 +149,63 @@ describe("Initializer — InitializeMock domain", () => {
       await deployMockAsset(1);
     });
 
-    it("GIVEN a freshly-deployed asset WHEN non admin updateMaxInitializerFacetIndex THEN reverts with AccountHasNoRole", async () => {
-      await expect(
-        initializerFacet.connect(unknownSigner).updateMaxInitializerFacetIndex(5),
-      ).to.be.revertedWithCustomError(initializerFacet, "AccountHasNoRole");
+    describe("initializeInitializer", () => {
+      it("GIVEN an asset WHEN non admin initializes THEN reverts with AccountHasNoRole", async () => {
+        await expect(initializerFacet.connect(unknownSigner).initializeInitializer(1)).to.be.revertedWithCustomError(
+          initializerFacet,
+          "AccountHasNoRole",
+        );
+      });
+
+      it("GIVEN an admin WHEN initializeInitializer is called with zero THEN reverts with ZeroValueNotAllowed", async () => {
+        await expect(initializerFacet.initializeInitializer(0)).to.be.revertedWithCustomError(
+          initializerFacet,
+          "ZeroValueNotAllowed",
+        );
+      });
+
+      it("GIVEN an asset whose initializer has been initialized WHEN initialized again THEN reverts with FacetAlreadyRegistered", async () => {
+        await expect(initializerFacet.initializeInitializer(1)).to.not.be.reverted;
+
+        await expect(initializerFacet.initializeInitializer(1)).to.be.revertedWithCustomError(
+          initializerFacet,
+          "FacetAlreadyRegistered",
+        );
+      });
     });
 
-    it("GIVEN an asset WHEN non admin initializes THEN reverts with AccountHasNoRole", async () => {
-      await expect(initializerFacet.connect(unknownSigner).initializeInitializer(1)).to.be.revertedWithCustomError(
-        initializerFacet,
-        "AccountHasNoRole",
-      );
+    describe("updateMaxInitializerFacetIndex", () => {
+      it("GIVEN a freshly-deployed asset WHEN non admin updateMaxInitializerFacetIndex THEN reverts with AccountHasNoRole", async () => {
+        await expect(
+          initializerFacet.connect(unknownSigner).updateMaxInitializerFacetIndex(5),
+        ).to.be.revertedWithCustomError(initializerFacet, "AccountHasNoRole");
+      });
+
+      it("GIVEN an admin WHEN updateMaxInitializerFacetIndex is called with zero THEN reverts with ZeroValueNotAllowed", async () => {
+        await expect(initializerFacet.updateMaxInitializerFacetIndex(0)).to.be.revertedWithCustomError(
+          initializerFacet,
+          "ZeroValueNotAllowed",
+        );
+      });
+
+      it("GIVEN a freshly-deployed asset WHEN admin updateMaxInitializerFacetIndex THEN succeeds", async () => {
+        const maxInitializerFacetIndex = 3;
+
+        expect(await initializerFacet.getMaxInitializerFacetIndex()).to.equal(0);
+
+        await expect(initializerFacet.updateMaxInitializerFacetIndex(maxInitializerFacetIndex))
+          .to.emit(initializerFacet, "MaxInitializerFacetIndexUpdated")
+          .withArgs(await deployer.getAddress(), maxInitializerFacetIndex);
+      });
     });
 
-    it("GIVEN an asset whose initializer has been initialized WHEN initialized again THEN reverts with FacetAlreadyRegistered", async () => {
-      await expect(initializerFacet.initializeInitializer(1)).to.not.be.reverted;
-
-      await expect(initializerFacet.initializeInitializer(1)).to.be.revertedWithCustomError(
-        initializerFacet,
-        "FacetAlreadyRegistered",
-      );
-    });
-
-    it("GIVEN a freshly-deployed asset WHEN admin updateMaxInitializerFacetIndex THEN succeeds", async () => {
-      const maxInitializerFacetIndex = 3;
-
-      expect(await initializerFacet.getMaxInitializerFacetIndex()).to.equal(0);
-
-      await expect(initializerFacet.updateMaxInitializerFacetIndex(maxInitializerFacetIndex))
-        .to.emit(initializerFacet, "MaxInitializerFacetIndexUpdated")
-        .withArgs(await deployer.getAddress(), maxInitializerFacetIndex);
+    describe("setOperationalStatus", () => {
+      it("GIVEN a freshly-deployed asset WHEN non admin calls setOperationalStatus THEN reverts with AccountHasNoRole", async () => {
+        await expect(initializerFacet.connect(unknownSigner).setOperationalStatus()).to.be.revertedWithCustomError(
+          initializerFacet,
+          "AccountHasNoRole",
+        );
+      });
     });
 
     it("GIVEN a freshly-deployed asset WHEN calling mockFacet1Method THEN reverts with AssetNotOperational AND every facet + operational status reads as 0", async () => {
@@ -192,7 +218,7 @@ describe("Initializer — InitializeMock domain", () => {
         configVersion: 1,
         operationalStatus: 0,
         initializer: { version: 1, versionStatus: 0, lastVersion: 0 },
-        mockDiamondCut: { version: 1, versionStatus: 0, lastVersion: 0 },
+        diamondFacet: { version: 1, versionStatus: 0, lastVersion: 0 },
         mockFacet1: { version: 1, versionStatus: 0, lastVersion: 0 },
         mockFacet2: { version: 2, versionStatus: 0, lastVersion: 0 },
         mockFacet3: { version: 1, versionStatus: 0, lastVersion: 0 },
@@ -222,7 +248,7 @@ describe("Initializer — InitializeMock domain", () => {
         configVersion: 1,
         operationalStatus: 0,
         initializer: { version: 1, versionStatus: 0, lastVersion: 0 },
-        mockDiamondCut: { version: 1, versionStatus: 0, lastVersion: 0 },
+        diamondFacet: { version: 1, versionStatus: 0, lastVersion: 0 },
         mockFacet1: { version: 1, versionStatus: 1, lastVersion: 1 },
         mockFacet2: { version: 2, versionStatus: 0, lastVersion: 0 },
         mockFacet3: { version: 1, versionStatus: 0, lastVersion: 0 },
@@ -236,7 +262,7 @@ describe("Initializer — InitializeMock domain", () => {
         configVersion: 1,
         operationalStatus: 0,
         initializer: { version: 1, versionStatus: 0, lastVersion: 0 },
-        mockDiamondCut: { version: 1, versionStatus: 0, lastVersion: 0 },
+        diamondFacet: { version: 1, versionStatus: 0, lastVersion: 0 },
         mockFacet1: { version: 1, versionStatus: 0, lastVersion: 0 },
         mockFacet2: { version: 2, versionStatus: 0, lastVersion: 0 },
         mockFacet3: { version: 1, versionStatus: 2, lastVersion: 0 },
@@ -248,7 +274,7 @@ describe("Initializer — InitializeMock domain", () => {
         configVersion: 1,
         operationalStatus: 0,
         initializer: { version: 1, versionStatus: 0, lastVersion: 0 },
-        mockDiamondCut: { version: 1, versionStatus: 0, lastVersion: 0 },
+        diamondFacet: { version: 1, versionStatus: 0, lastVersion: 0 },
         mockFacet1: { version: 1, versionStatus: 0, lastVersion: 0 },
         mockFacet2: { version: 2, versionStatus: 0, lastVersion: 0 },
         mockFacet3: { version: 1, versionStatus: 51, lastVersion: 0 },
@@ -260,7 +286,7 @@ describe("Initializer — InitializeMock domain", () => {
         configVersion: 1,
         operationalStatus: 0,
         initializer: { version: 1, versionStatus: 0, lastVersion: 0 },
-        mockDiamondCut: { version: 1, versionStatus: 0, lastVersion: 0 },
+        diamondFacet: { version: 1, versionStatus: 0, lastVersion: 0 },
         mockFacet1: { version: 1, versionStatus: 0, lastVersion: 0 },
         mockFacet2: { version: 2, versionStatus: 0, lastVersion: 0 },
         mockFacet3: { version: 1, versionStatus: 1, lastVersion: 1 },
@@ -274,7 +300,7 @@ describe("Initializer — InitializeMock domain", () => {
       await expect(mockFacet1.initializeMockFacet1()).to.not.be.reverted;
       await expect(mockFacet2.initializeMockFacet2()).to.not.be.reverted;
       await expect(mockFacet3.initializeMockFacet3(0)).to.not.be.reverted;
-      await expect(mockDiamondCut.initializeDiamondCut()).to.not.be.reverted;
+      await expect(diamondFacet.initializeDiamondCut()).to.not.be.reverted;
       await expect(initializerFacet.initializeInitializer(maxInitializerFacetIndex)).to.not.be.reverted;
 
       await expect(mockFacet1.mockFacet1Method()).to.be.revertedWithCustomError(
@@ -286,7 +312,7 @@ describe("Initializer — InitializeMock domain", () => {
         configVersion: 1,
         operationalStatus: 0,
         initializer: { version: 1, versionStatus: 1, lastVersion: 1 },
-        mockDiamondCut: { version: 1, versionStatus: 1, lastVersion: 1 },
+        diamondFacet: { version: 1, versionStatus: 1, lastVersion: 1 },
         mockFacet1: { version: 1, versionStatus: 1, lastVersion: 1 },
         mockFacet2: { version: 2, versionStatus: 1, lastVersion: 2 },
         mockFacet3: { version: 1, versionStatus: 1, lastVersion: 1 },
@@ -300,7 +326,7 @@ describe("Initializer — InitializeMock domain", () => {
       await expect(mockFacet1.initializeMockFacet1()).to.not.be.reverted;
       await expect(mockFacet2.initializeMockFacet2()).to.not.be.reverted;
       await expect(mockFacet3.initializeMockFacet3(0)).to.not.be.reverted;
-      await expect(mockDiamondCut.initializeDiamondCut()).to.not.be.reverted;
+      await expect(diamondFacet.initializeDiamondCut()).to.not.be.reverted;
       await expect(initializerFacet.initializeInitializer(maxInitializerFacetIndex)).to.not.be.reverted;
 
       await expect(initializerFacet.setOperationalStatus())
@@ -318,7 +344,7 @@ describe("Initializer — InitializeMock domain", () => {
         configVersion: 1,
         operationalStatus: 4,
         initializer: { version: 1, versionStatus: 1, lastVersion: 1 },
-        mockDiamondCut: { version: 1, versionStatus: 1, lastVersion: 1 },
+        diamondFacet: { version: 1, versionStatus: 1, lastVersion: 1 },
         mockFacet1: { version: 1, versionStatus: 1, lastVersion: 1 },
         mockFacet2: { version: 2, versionStatus: 1, lastVersion: 2 },
         mockFacet3: { version: 1, versionStatus: 1, lastVersion: 1 },
@@ -332,7 +358,7 @@ describe("Initializer — InitializeMock domain", () => {
       await expect(mockFacet1.initializeMockFacet1()).to.not.be.reverted;
       await expect(mockFacet2.initializeMockFacet2()).to.not.be.reverted;
       await expect(mockFacet3.initializeMockFacet3(0)).to.not.be.reverted;
-      await expect(mockDiamondCut.initializeDiamondCut()).to.not.be.reverted;
+      await expect(diamondFacet.initializeDiamondCut()).to.not.be.reverted;
       await expect(initializerFacet.initializeInitializer(maxInitializerFacetIndex)).to.not.be.reverted;
 
       await expect(initializerFacet.setOperationalStatus())
@@ -349,7 +375,7 @@ describe("Initializer — InitializeMock domain", () => {
         configVersion: 1,
         operationalStatus: 1,
         initializer: { version: 1, versionStatus: 1, lastVersion: 1 },
-        mockDiamondCut: { version: 1, versionStatus: 1, lastVersion: 1 },
+        diamondFacet: { version: 1, versionStatus: 1, lastVersion: 1 },
         mockFacet1: { version: 1, versionStatus: 1, lastVersion: 1 },
         mockFacet2: { version: 2, versionStatus: 1, lastVersion: 2 },
         mockFacet3: { version: 1, versionStatus: 1, lastVersion: 1 },
@@ -363,7 +389,7 @@ describe("Initializer — InitializeMock domain", () => {
       await expect(mockFacet1.initializeMockFacet1()).to.not.be.reverted;
       await expect(mockFacet2.initializeMockFacet2()).to.not.be.reverted;
       await expect(mockFacet3.initializeMockFacet3(0)).to.not.be.reverted;
-      await expect(mockDiamondCut.initializeDiamondCut()).to.not.be.reverted;
+      await expect(diamondFacet.initializeDiamondCut()).to.not.be.reverted;
       await expect(initializerFacet.initializeInitializer(maxInitializerFacetIndex)).to.not.be.reverted;
 
       await expect(initializerFacet.setOperationalStatus()).to.not.be.reverted;
@@ -375,7 +401,7 @@ describe("Initializer — InitializeMock domain", () => {
         configVersion: 1,
         operationalStatus: 1,
         initializer: { version: 1, versionStatus: 1, lastVersion: 1 },
-        mockDiamondCut: { version: 1, versionStatus: 1, lastVersion: 1 },
+        diamondFacet: { version: 1, versionStatus: 1, lastVersion: 1 },
         mockFacet1: { version: 1, versionStatus: 1, lastVersion: 1 },
         mockFacet2: { version: 2, versionStatus: 1, lastVersion: 2 },
         mockFacet3: { version: 1, versionStatus: 1, lastVersion: 1 },
@@ -398,7 +424,7 @@ describe("Initializer — InitializeMock domain", () => {
       await expect(mockFacet1.initializeMockFacet1()).to.not.be.reverted;
       await expect(mockFacet2.initializeMockFacet2()).to.not.be.reverted;
       await expect(mockFacet3.initializeMockFacet3(0)).to.not.be.reverted;
-      await expect(mockDiamondCut.initializeDiamondCut()).to.not.be.reverted;
+      await expect(diamondFacet.initializeDiamondCut()).to.not.be.reverted;
       await expect(initializerFacet.initializeInitializer(maxInitializerFacetIndex)).to.not.be.reverted;
       await expect(initializerFacet.setOperationalStatus())
         .to.emit(initializerFacet, "OperationalStatusSet")
@@ -414,11 +440,11 @@ describe("Initializer — InitializeMock domain", () => {
       expect(lastFacetIndex).to.equal(0);
     });
 
-    it("GIVEN only initializer and mockDiamondCut initialized WHEN setOperationalStatus called with large batch THEN breaks at first unready facet", async () => {
+    it("GIVEN only initializer and diamondFacet initialized WHEN setOperationalStatus called with large batch THEN breaks at first unready facet", async () => {
       // TEST-ONLY: batch large enough to cover all 5 facets in one pass.
       const maxInitializerFacetIndex = 10;
 
-      await expect(mockDiamondCut.initializeDiamondCut()).to.not.be.reverted;
+      await expect(diamondFacet.initializeDiamondCut()).to.not.be.reverted;
       await expect(initializerFacet.initializeInitializer(maxInitializerFacetIndex)).to.not.be.reverted;
 
       // MockFacet1/2/3 are NOT initialised — setOperationalStatus must break at the
@@ -435,7 +461,7 @@ describe("Initializer — InitializeMock domain", () => {
       await mockFacet1.initializeMockFacet1();
       await mockFacet2.initializeMockFacet2();
       await mockFacet3.initializeMockFacet3(0);
-      await mockDiamondCut.initializeDiamondCut();
+      await diamondFacet.initializeDiamondCut();
       await initializerFacet.initializeInitializer(100);
       await initializerFacet.setOperationalStatus();
     });
@@ -444,7 +470,7 @@ describe("Initializer — InitializeMock domain", () => {
       const response = await mockFacet2.mockFacet2Method();
       expect(response).to.equal("MockFacet2 method called");
 
-      await mockDiamondCut.updateConfigVersion(2);
+      await diamondFacet.updateConfigVersion(2);
 
       await expect(mockFacet1.initializeMockFacet1())
         .to.be.revertedWithCustomError(initializerFacet, "FacetAlreadyRegistered")
@@ -459,7 +485,7 @@ describe("Initializer — InitializeMock domain", () => {
         configVersion: 2,
         operationalStatus: 0,
         initializer: { version: 1, versionStatus: 1, lastVersion: 1 },
-        mockDiamondCut: { version: 1, versionStatus: 1, lastVersion: 1 },
+        diamondFacet: { version: 1, versionStatus: 1, lastVersion: 1 },
         mockFacet1: { version: 3, versionStatus: 0, lastVersion: 1 },
         mockFacet2: { version: 3, versionStatus: 0, lastVersion: 2 },
         mockFacet3: { version: 3, versionStatus: 0, lastVersion: 1 },
@@ -467,7 +493,7 @@ describe("Initializer — InitializeMock domain", () => {
     });
 
     it("GIVEN deployed mock asset upgrade to version 2 WHEN upgrading facets THEN succeeds", async () => {
-      await mockDiamondCut.updateConfigVersion(2);
+      await diamondFacet.updateConfigVersion(2);
 
       await expect(mockFacet1.upgradeMockFacet1()).to.not.be.reverted;
 
@@ -475,7 +501,7 @@ describe("Initializer — InitializeMock domain", () => {
         configVersion: 2,
         operationalStatus: 0,
         initializer: { version: 1, versionStatus: 1, lastVersion: 1 },
-        mockDiamondCut: { version: 1, versionStatus: 1, lastVersion: 1 },
+        diamondFacet: { version: 1, versionStatus: 1, lastVersion: 1 },
         mockFacet1: { version: 3, versionStatus: 1, lastVersion: 3 },
         mockFacet2: { version: 3, versionStatus: 0, lastVersion: 2 },
         mockFacet3: { version: 3, versionStatus: 0, lastVersion: 1 },
@@ -483,7 +509,7 @@ describe("Initializer — InitializeMock domain", () => {
     });
 
     it("GIVEN deployed mock asset upgrade to version 2 WHEN upgrading facets with multi steps THEN succeeds", async () => {
-      await mockDiamondCut.updateConfigVersion(2);
+      await diamondFacet.updateConfigVersion(2);
 
       await expect(mockFacet3.upgradeMockFacet3(40)).to.not.be.reverted;
 
@@ -491,7 +517,7 @@ describe("Initializer — InitializeMock domain", () => {
         configVersion: 2,
         operationalStatus: 0,
         initializer: { version: 1, versionStatus: 1, lastVersion: 1 },
-        mockDiamondCut: { version: 1, versionStatus: 1, lastVersion: 1 },
+        diamondFacet: { version: 1, versionStatus: 1, lastVersion: 1 },
         mockFacet1: { version: 3, versionStatus: 0, lastVersion: 1 },
         mockFacet2: { version: 3, versionStatus: 0, lastVersion: 2 },
         mockFacet3: { version: 3, versionStatus: 41, lastVersion: 1 },
@@ -503,7 +529,7 @@ describe("Initializer — InitializeMock domain", () => {
         configVersion: 2,
         operationalStatus: 0,
         initializer: { version: 1, versionStatus: 1, lastVersion: 1 },
-        mockDiamondCut: { version: 1, versionStatus: 1, lastVersion: 1 },
+        diamondFacet: { version: 1, versionStatus: 1, lastVersion: 1 },
         mockFacet1: { version: 3, versionStatus: 0, lastVersion: 1 },
         mockFacet2: { version: 3, versionStatus: 0, lastVersion: 2 },
         mockFacet3: { version: 3, versionStatus: 1, lastVersion: 3 },
@@ -519,7 +545,7 @@ describe("Initializer — InitializeMock domain", () => {
         configVersion: 1,
         operationalStatus: 0,
         initializer: { version: 1, versionStatus: 0, lastVersion: 0 },
-        mockDiamondCut: { version: 1, versionStatus: 0, lastVersion: 0 },
+        diamondFacet: { version: 1, versionStatus: 0, lastVersion: 0 },
         mockFacet1: { version: 1, versionStatus: 0, lastVersion: 0 },
         mockFacet2: { version: 2, versionStatus: 0, lastVersion: 0 },
         mockFacet3: { version: 1, versionStatus: 0, lastVersion: 0 },
@@ -529,7 +555,7 @@ describe("Initializer — InitializeMock domain", () => {
         configVersion: 2,
         operationalStatus: 0,
         initializer: { version: 1, versionStatus: 0, lastVersion: 0 },
-        mockDiamondCut: { version: 1, versionStatus: 0, lastVersion: 0 },
+        diamondFacet: { version: 1, versionStatus: 0, lastVersion: 0 },
         mockFacet1: { version: 3, versionStatus: 0, lastVersion: 0 },
         mockFacet2: { version: 3, versionStatus: 0, lastVersion: 0 },
         mockFacet3: { version: 3, versionStatus: 0, lastVersion: 0 },
@@ -538,7 +564,7 @@ describe("Initializer — InitializeMock domain", () => {
       await expect(mockFacet1.initializeMockFacet1()).to.not.be.reverted;
       await expect(mockFacet2.initializeMockFacet2()).to.not.be.reverted;
       await expect(mockFacet3.initializeMockFacet3(0)).to.not.be.reverted;
-      await expect(mockDiamondCut.initializeDiamondCut()).to.not.be.reverted;
+      await expect(diamondFacet.initializeDiamondCut()).to.not.be.reverted;
       await expect(initializerFacet.initializeInitializer(maxInitializerFacetIndex)).to.not.be.reverted;
 
       await expect(initializerFacet.setOperationalStatus())
@@ -549,7 +575,7 @@ describe("Initializer — InitializeMock domain", () => {
         configVersion: 2,
         operationalStatus: 1,
         initializer: { version: 1, versionStatus: 1, lastVersion: 1 },
-        mockDiamondCut: { version: 1, versionStatus: 1, lastVersion: 1 },
+        diamondFacet: { version: 1, versionStatus: 1, lastVersion: 1 },
         mockFacet1: { version: 3, versionStatus: 1, lastVersion: 3 },
         mockFacet2: { version: 3, versionStatus: 1, lastVersion: 3 },
         mockFacet3: { version: 3, versionStatus: 1, lastVersion: 3 },
@@ -557,7 +583,7 @@ describe("Initializer — InitializeMock domain", () => {
     });
 
     it("GIVEN deployed mock asset upgrade to version 2 WHEN upgrading facets THEN succeeds", async () => {
-      await mockDiamondCut.updateConfigVersion(2);
+      await diamondFacet.updateConfigVersion(2);
 
       await expect(mockFacet1.upgradeMockFacet1()).to.not.be.reverted;
       await expect(mockFacet2.upgradeMockFacet2()).to.not.be.reverted;
@@ -567,7 +593,7 @@ describe("Initializer — InitializeMock domain", () => {
         configVersion: 2,
         operationalStatus: 0,
         initializer: { version: 1, versionStatus: 1, lastVersion: 1 },
-        mockDiamondCut: { version: 1, versionStatus: 1, lastVersion: 1 },
+        diamondFacet: { version: 1, versionStatus: 1, lastVersion: 1 },
         mockFacet1: { version: 3, versionStatus: 1, lastVersion: 3 },
         mockFacet2: { version: 3, versionStatus: 1, lastVersion: 3 },
         mockFacet3: { version: 3, versionStatus: 1, lastVersion: 3 },
@@ -579,7 +605,7 @@ describe("Initializer — InitializeMock domain", () => {
         configVersion: 2,
         operationalStatus: 1,
         initializer: { version: 1, versionStatus: 1, lastVersion: 1 },
-        mockDiamondCut: { version: 1, versionStatus: 1, lastVersion: 1 },
+        diamondFacet: { version: 1, versionStatus: 1, lastVersion: 1 },
         mockFacet1: { version: 3, versionStatus: 1, lastVersion: 3 },
         mockFacet2: { version: 3, versionStatus: 1, lastVersion: 3 },
         mockFacet3: { version: 3, versionStatus: 1, lastVersion: 3 },

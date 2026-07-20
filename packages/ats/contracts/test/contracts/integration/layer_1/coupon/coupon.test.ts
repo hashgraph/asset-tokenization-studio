@@ -44,6 +44,7 @@ let couponStartDateInSeconds = 0;
 const EMPTY_VC_ID = EMPTY_STRING;
 const YEAR_SECONDS = 365 * 24 * 60 * 60;
 const couponRateStatus = 1;
+const CURRENCY_ZERO = "0x000000";
 
 let couponData = {
   recordDate: couponRecordDateInSeconds.toString(),
@@ -77,22 +78,6 @@ export function couponTests(getCtx: () => AssetMockCtx): void {
       const currentTimestamp = await getDltTimestamp();
       startingDate = currentTimestamp + TIME_PERIODS_S.DAY;
       maturityDate = startingDate + numberOfCoupons * frequency;
-
-      couponRecordDateInSeconds = currentTimestamp + TIME_PERIODS_S.DAY;
-      couponExecutionDateInSeconds = currentTimestamp + TIME_PERIODS_S.DAY + 1000;
-      couponFixingDateInSeconds = currentTimestamp + 1200;
-      couponEndDateInSeconds = couponFixingDateInSeconds - 1;
-      couponStartDateInSeconds = couponEndDateInSeconds - couponPeriod;
-      couponData = {
-        recordDate: couponRecordDateInSeconds.toString(),
-        executionDate: couponExecutionDateInSeconds.toString(),
-        rate: couponRate,
-        rateDecimals: couponRateDecimals,
-        startDate: couponStartDateInSeconds.toString(),
-        endDate: couponEndDateInSeconds.toString(),
-        fixingDate: couponFixingDateInSeconds.toString(),
-        rateStatus: couponRateStatus,
-      };
 
       await executeRbac(asset, [
         {
@@ -154,9 +139,29 @@ export function couponTests(getCtx: () => AssetMockCtx): void {
       await asset.activateInternalKyc();
       await asset.forceDecimals(6);
       await asset.updateMaturityDate(maturityDate);
-      await asset.setNominalValue(100, 2);
+      await asset.forceSetNominalValue(100, 2, CURRENCY_ZERO, (await getDltTimestamp()) - TIME_PERIODS_S.DAY, true);
       // STANDARD honours the caller-supplied rate/rateDecimals
       await asset.connect(signer_A).setCouponRateType(INTEREST_RATE_TYPE.STANDARD);
+
+      // Captured after the setup transactions above (not before) so the future-dated fields
+      // below keep enough headroom under slow/instrumented runs (e.g. solidity-coverage),
+      // where each preceding transaction can advance the chain's real timestamp noticeably.
+      const now = await getDltTimestamp();
+      couponRecordDateInSeconds = now + TIME_PERIODS_S.DAY;
+      couponExecutionDateInSeconds = now + TIME_PERIODS_S.DAY + 1000;
+      couponFixingDateInSeconds = now + 1200;
+      couponEndDateInSeconds = couponFixingDateInSeconds - 1;
+      couponStartDateInSeconds = couponEndDateInSeconds - couponPeriod;
+      couponData = {
+        recordDate: couponRecordDateInSeconds.toString(),
+        executionDate: couponExecutionDateInSeconds.toString(),
+        rate: couponRate,
+        rateDecimals: couponRateDecimals,
+        startDate: couponStartDateInSeconds.toString(),
+        endDate: couponEndDateInSeconds.toString(),
+        fixingDate: couponFixingDateInSeconds.toString(),
+        rateStatus: couponRateStatus,
+      };
     });
 
     it("GIVEN an account without corporateActions role WHEN setCoupon THEN transaction fails with AccountHasNoRole", async () => {
@@ -724,7 +729,10 @@ export function couponTests(getCtx: () => AssetMockCtx): void {
       await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
       await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
 
-      await asset.connect(signer_A).setNominalValue(NominalValue, NominalValueDecimals);
+      // Re-init with a different decimals value than the suite-level beforeEach (decimals are
+      // fixed at initialisation and never change afterwards).
+      const nominalValueInitDate = (await getDltTimestamp()) - TIME_PERIODS_S.DAY;
+      await asset.forceSetNominalValue(NominalValue, NominalValueDecimals, CURRENCY_ZERO, nominalValueInitDate, true);
 
       await asset.connect(signer_A).issueByPartition({
         partition: DEFAULT_PARTITION,
@@ -770,7 +778,7 @@ export function couponTests(getCtx: () => AssetMockCtx): void {
       expect(couponFor.nominalValueDecimals).to.equal(NominalValueDecimals);
       expect(couponFor.isDisabled).to.be.false;
 
-      await asset.connect(signer_A).setNominalValue(NominalValue + 1, NominalValueDecimals + 1);
+      await asset.connect(signer_A).publishNominalValue(NominalValue + 1, nominalValueInitDate + 60);
 
       const couponFor_2 = await asset.getCouponFor(1, signer_A.address);
       expect(couponFor_2.nominalValue).to.equal(NominalValue);
@@ -785,7 +793,10 @@ export function couponTests(getCtx: () => AssetMockCtx): void {
       await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
       await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
 
-      await asset.connect(signer_A).setNominalValue(NominalValue, NominalValueDecimals);
+      // Re-init with a different decimals value than the suite-level beforeEach (decimals are
+      // fixed at initialisation and never change afterwards).
+      const nominalValueInitDate = (await getDltTimestamp()) - TIME_PERIODS_S.DAY;
+      await asset.forceSetNominalValue(NominalValue, NominalValueDecimals, CURRENCY_ZERO, nominalValueInitDate, true);
 
       await asset.connect(signer_A).issueByPartition({
         partition: DEFAULT_PARTITION,
@@ -818,7 +829,8 @@ export function couponTests(getCtx: () => AssetMockCtx): void {
       expect(registered.snapshotId).to.be.greaterThan(0);
 
       // Change nominal value AFTER the snapshot — current scale now diverges from snapshot scale.
-      await asset.connect(signer_A).setNominalValue(NominalValue + 5, NominalValueDecimals + 2);
+      // Decimals are fixed at initialisation and never change; only the value is published here.
+      await asset.connect(signer_A).publishNominalValue(NominalValue + 5, nominalValueInitDate + 60);
 
       const couponFor = await asset.getCouponFor(1, signer_A.address);
       const couponAmountFor = await asset.getCouponAmountFor(1, signer_A.address);
@@ -1023,7 +1035,15 @@ export function couponTests(getCtx: () => AssetMockCtx): void {
 
         await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
         await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
-        await asset.connect(signer_A).setNominalValue(NOMINAL, HIGH_NOMINAL_DECIMALS);
+        // Re-init with a different decimals value than the suite-level beforeEach (decimals are
+        // fixed at initialisation and never change afterwards).
+        await asset.forceSetNominalValue(
+          NOMINAL,
+          HIGH_NOMINAL_DECIMALS,
+          CURRENCY_ZERO,
+          (await getDltTimestamp()) - TIME_PERIODS_S.DAY,
+          true,
+        );
         await asset.connect(signer_A).issueByPartition({
           partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
@@ -1118,13 +1138,6 @@ export function couponTests(getCtx: () => AssetMockCtx): void {
 
       asset = ctx.asset;
 
-      const currentTimestamp = await getDltTimestamp();
-      couponRecordDateInSeconds = currentTimestamp + TEST_COUPON.TIMING.RECORD_OFFSET_S;
-      couponExecutionDateInSeconds = currentTimestamp + TEST_COUPON.TIMING.EXECUTION_OFFSET_S;
-      couponFixingDateInSeconds = currentTimestamp + TEST_COUPON.TIMING.EXECUTION_OFFSET_S;
-      couponEndDateInSeconds = couponFixingDateInSeconds - 1;
-      couponStartDateInSeconds = couponEndDateInSeconds - couponPeriod;
-
       await executeRbac(asset, [
         {
           role: ATS_ROLES.ROLE_SSI_MANAGER,
@@ -1154,10 +1167,20 @@ export function couponTests(getCtx: () => AssetMockCtx): void {
 
       await asset.setCouponRateType(INTEREST_RATE_TYPE.FIXED); // resolves PENDING coupons from setRate() storage
       await asset.setRate(TEST_BOND_FIXED_RATE.RATE, TEST_BOND_FIXED_RATE.RATE_DECIMALS);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+
+      // Captured after the setup transactions above (not before) so the future-dated fields
+      // below keep enough headroom under slow/instrumented runs (e.g. solidity-coverage),
+      // where each preceding transaction can advance the chain's real timestamp noticeably.
+      const currentTimestamp = await getDltTimestamp();
+      couponRecordDateInSeconds = currentTimestamp + TEST_COUPON.TIMING.RECORD_OFFSET_S;
+      couponExecutionDateInSeconds = currentTimestamp + TEST_COUPON.TIMING.EXECUTION_OFFSET_S;
+      couponFixingDateInSeconds = currentTimestamp + TEST_COUPON.TIMING.EXECUTION_OFFSET_S;
+      couponEndDateInSeconds = couponFixingDateInSeconds - 1;
+      couponStartDateInSeconds = couponEndDateInSeconds - couponPeriod;
 
       const future = currentTimestamp + TIME_PERIODS_S.YEAR * 10;
       await asset.updateMaturityDate(future);
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
     });
 
     it("GIVEN a fixed-rate bond WHEN setCoupon with PENDING rate THEN CouponSet emits with the resolved configured rate", async () => {

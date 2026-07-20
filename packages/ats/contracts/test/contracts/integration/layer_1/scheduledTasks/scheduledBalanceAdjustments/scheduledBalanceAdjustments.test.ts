@@ -200,6 +200,24 @@ export function scheduledBalanceAdjustmentsTests(getCtx: () => AssetMockCtx): vo
       });
     });
 
+    describe("duplicated balance adjustment", () => {
+      it("GIVEN an already-scheduled balance adjustment WHEN setScheduledBalanceAdjustment is called again with identical data THEN transaction fails with BalanceAdjustmentCreationFailed", async () => {
+        await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+
+        const balanceAdjustmentData = {
+          executionDate: dateToUnixTimestamp("2030-01-01T00:00:06Z").toString(),
+          factor: 1,
+          decimals: 2,
+        };
+
+        await asset.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
+
+        await expect(
+          asset.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData),
+        ).to.be.revertedWithCustomError(asset, "BalanceAdjustmentCreationFailed");
+      });
+    });
+
     describe("nonOperational", () => {
       beforeEach(async () => {
         await asset.forceNonOperational();

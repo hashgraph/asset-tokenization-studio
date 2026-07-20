@@ -103,4 +103,17 @@ abstract contract HoldModifiers {
         HoldStorageWrapper.requireValidHoldId(_holdIdentifier);
         _;
     }
+
+    /**
+     * @dev Modifier that rejects a zero-amount execute/release/reclaim request against a hold.
+     *
+     * Requirements:
+     * - `_amount` must be strictly positive.
+     *
+     * @param _amount The amount being operated against the hold.
+     */
+    modifier onlyPositiveHoldOperationAmount(uint256 _amount) {
+        HoldStorageWrapper.checkNonZeroHoldAmount(_amount);
+        _;
+    }
 }

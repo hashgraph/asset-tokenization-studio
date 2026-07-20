@@ -91,7 +91,7 @@ export async function deployUpgradeTestFixture(): Promise<UpgradeTestFixtureResu
 
   // Deploy sample Equity token via Factory
   const equitySecurityData = getSecurityData(blr);
-  const equityDetails = makeEquityDetailsData();
+  const equityDetails = await makeEquityDetailsData();
   const equityRegulationData = getRegulationData();
 
   const equityTokenProxy = await deployEquityFromFactory(

@@ -135,6 +135,18 @@ export function maturityTests(getCtx: () => AssetMockCtx): void {
         );
       });
 
+      it("GIVEN a non-recovered caller redeeming on behalf of a recovered token holder WHEN fullRedeemAtMaturity THEN reverts with WalletRecovered", async () => {
+        const signers = await ethers.getSigners();
+        const newWallet = signers[11];
+
+        await asset.connect(signer_A).recoveryAddress(signer_C.address, newWallet.address, ADDRESS_ZERO);
+
+        await expect(asset.connect(signer_A).fullRedeemAtMaturity(signer_C.address)).to.be.revertedWithCustomError(
+          asset,
+          "WalletRecovered",
+        );
+      });
+
       it("GIVEN all conditions are met WHEN fullRedeemAtMaturity THEN emits RedeemedByPartition", async () => {
         await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
 
@@ -313,6 +325,13 @@ export function maturityTests(getCtx: () => AssetMockCtx): void {
         await expect(asset.initializeMaturity(mockMaturityDate))
           .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
           .withArgs(RESOLVER_KEYS.maturity, 1);
+      });
+
+      it("GIVEN a maturity date in the past WHEN initializeMaturity THEN reverts with MaturityDateInvalid", async () => {
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.maturity);
+        const pastDate = (await getDltTimestamp()) - 1;
+
+        await expect(asset.initializeMaturity(pastDate)).to.be.revertedWithCustomError(asset, "MaturityDateInvalid");
       });
     });
 

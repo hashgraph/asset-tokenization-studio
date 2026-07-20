@@ -116,7 +116,7 @@ function transferOwnership(bytes32 _configId, address _newOwner) external nonpay
 
 Nominates `_newOwner` as the pending owner of `_configId`.
 
-_Gated by {onlyUnpaused}, {onlyConfigurationOwner} and {onlyCreateConfigurationRole}: only the existing owner can nominate a successor who was previously granted the ROLE_CREATE_CONFIGURATION, and only while the diamond is unpaused. Stores `_newOwner` as the pending owner without touching the current owner; finalisation happens in {acceptOwnership}. Emits {OwnershipTransfered} with the caller as the outgoing owner._
+_Gated by {onlyUnpaused} and {onlyConfigurationOwner}: only the existing owner can nominate a successor, and only while the diamond is unpaused. Stores `_newOwner` as the pending owner without touching the current owner; finalisation happens in {acceptOwnership}. Emits {OwnershipTransfered} with the caller as the outgoing owner._
 
 #### Parameters
 
@@ -233,14 +233,6 @@ Thrown when an account does not hold a required role.
 | ------- | ------- | -------------------------------- |
 | account | address | The account that lacks the role. |
 | role    | bytes32 | The role that is not held.       |
-
-### Deactivated
-
-```solidity
-error Deactivated()
-```
-
-Thrown when an operation guarded by `onlyActivated` is attempted on a token whose deactivation flag has already been set.
 
 ### FacetAlreadyRegistered
 

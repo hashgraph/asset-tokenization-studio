@@ -832,17 +832,18 @@ export async function deploySystemWithNewBlr(
     // different per-facet versions.
     //
     // Step 2/3 already deployed and registered v1 of `InitializerFacet`,
-    // `MockFacet1`, `MockFacet2` and `MockFacet3`. Here we additionally:
+    // `DiamondFacet`, `MockFacet1`, `MockFacet2` and `MockFacet3`. Here we
+    // additionally:
     //   - deploy two extra fresh copies of each of `MockFacet1`, `MockFacet2`
     //     and `MockFacet3` and register them in the BLR. Each registration
     //     bumps the facet's BLR version, so after this loop the BLR holds
     //     three distinct versions of every MockFacet, all backed by identical
-    //     bytecode but different addresses. `InitializerFacet` stays at v1
-    //     (no other config references higher versions of it).
+    //     bytecode but different addresses. `InitializerFacet` and `DiamondFacet`
+    //     stay at v1 (no other config references higher versions of them).
     //   - mint two versions of `INITIALIZE_MOCK_CONFIG_ID`, each pinning an
     //     explicit per-facet version map:
-    //       v1: { InitializerFacet:1, MockFacet1:1, MockFacet2:2, MockFacet3:1 }
-    //       v2: { InitializerFacet:1, MockFacet1:3, MockFacet2:3, MockFacet3:3 }
+    //       v1: { InitializerFacet:1, DiamondFacet:1, MockFacet1:1, MockFacet2:2, MockFacet3:1 }
+    //       v2: { InitializerFacet:1, DiamondFacet:1, MockFacet1:3, MockFacet2:3, MockFacet3:3 }
     //
     // Only executed under `useTimeTravel`; skipped (but the step slot is still
     // advanced) otherwise so Factory's step index stays stable across runs.
@@ -855,13 +856,14 @@ export async function deploySystemWithNewBlr(
     let initializeMockVersions: number[] = [];
 
     // TEST-ONLY: per-version facet-version maps. Order matters — index `i` is
-    // configId version `i + 1`. `MockDiamondCut` is pinned at v1 in both
-    // versions: it is only registered once in Step 3 and is included so the
-    // resulting ResolverProxy exposes `updateConfigVersion` / `getConfigInfo`
-    // through its mock variant of `DiamondFacet`.
+    // configId version `i + 1`. `DiamondFacet` is pinned at v1 in both versions:
+    // it is the same shared instance every other domain config references (only
+    // ever registered once), included here so the resulting ResolverProxy exposes
+    // `updateConfigVersion` / `getConfigInfo` and can participate in the
+    // initializer flow like any other facet.
     const INITIALIZE_MOCK_VERSION_MAPS: Array<Record<string, number>> = [
-      { InitializerFacet: 1, MockDiamondCut: 1, MockFacet1: 1, MockFacet2: 2, MockFacet3: 1 },
-      { InitializerFacet: 1, MockDiamondCut: 1, MockFacet1: 3, MockFacet2: 3, MockFacet3: 3 },
+      { InitializerFacet: 1, DiamondFacet: 1, MockFacet1: 1, MockFacet2: 2, MockFacet3: 1 },
+      { InitializerFacet: 1, DiamondFacet: 1, MockFacet1: 3, MockFacet2: 3, MockFacet3: 3 },
     ];
     // TEST-ONLY: target BLR version count for the three MockFacets (v1 minted
     // in Step 3, so we add v2 and v3 here). InitializerFacet is intentionally

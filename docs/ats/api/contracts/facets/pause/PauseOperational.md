@@ -4,7 +4,7 @@ _Asset Tokenization Studio Team_
 
 > PauseOperational
 
-Variant of Pause for proxy facets only. Identical to Pause except pause() and unpause() require onlyOperational as their first modifier. Use Pause (without onlyOperational) for direct-inheritance consumers such as DiamondCutManager that do not operate through the ResolverProxy pattern.
+Variant of Pause for proxy facets only. Identical to Pause except pause() and unpause() also require onlyOperational and onlyActivated, since token proxies (unlike direct-inheritance consumers such as DiamondCutManager) can be non-operational or deactivated. Use Pause (without these two checks) for direct-inheritance consumers that do not operate through the ResolverProxy pattern.
 
 _Implements `IPause`. Intended to be inherited exclusively by `PauseFacet`._
 

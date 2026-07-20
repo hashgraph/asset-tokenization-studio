@@ -235,6 +235,22 @@ Reverts when a signature payload has an invalid byte length.
 
 _Used before signature recovery or verification to reject malformed input._
 
+### WrongTimestamp
+
+```solidity
+error WrongTimestamp(uint256 timeStamp)
+```
+
+Reverts when a scheduled timestamp is not strictly in the future.
+
+_Used for shared scheduling validation where the current block time is read through `TimeTravelStorageWrapper`._
+
+#### Parameters
+
+| Name      | Type    | Description                        |
+| --------- | ------- | ---------------------------------- |
+| timeStamp | uint256 | Timestamp rejected for scheduling. |
+
 ### ZeroAddressNotAllowed
 
 ```solidity

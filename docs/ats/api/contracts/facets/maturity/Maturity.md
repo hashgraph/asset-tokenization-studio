@@ -211,6 +211,22 @@ Thrown when an operation that requires the token to be unpaused is attempted whi
 error MaturityDateInvalid()
 ```
 
+### UnexpectedError
+
+```solidity
+error UnexpectedError(bytes4 _errorId)
+```
+
+Reverts when an unreachable validation state is detected.
+
+_Replaces assertions for defensive handling of logically impossible states._
+
+#### Parameters
+
+| Name      | Type   | Description                                        |
+| --------- | ------ | -------------------------------------------------- |
+| \_errorId | bytes4 | Identifier of the unexpected validation condition. |
+
 ### UnrecognizedResolverProxyVersion
 
 ```solidity

@@ -28,9 +28,11 @@ export function operatorTests(getCtx: () => AssetMockCtx): void {
         { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
         { role: ATS_ROLES.ROLE_PAUSER, members: [signer_A.address] },
         { role: ATS_ROLES.ROLE_CONTROL_LIST, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_INTERNAL_KYC_MANAGER, members: [signer_A.address] },
       ]);
 
       await asset.addIssuer(signer_A.address);
+      await asset.connect(signer_A).activateInternalKyc();
       await grantKycToHolders(asset, signer_A, [signer_A, signer_B, signer_C]);
     });
 
@@ -103,6 +105,24 @@ export function operatorTests(getCtx: () => AssetMockCtx): void {
         await expect(asset.connect(signer_C).revokeOperator(signer_B.address)).to.be.revertedWithCustomError(
           asset,
           "AccountIsBlocked",
+        );
+      });
+
+      it("GIVEN a non-KYC'd caller WHEN revokeOperator THEN reverts with InvalidKycStatus", async () => {
+        await asset.connect(signer_C).authorizeOperator(signer_B.address);
+        await asset.connect(signer_A).revokeKyc(signer_C.address);
+        await expect(asset.connect(signer_C).revokeOperator(signer_B.address)).to.be.revertedWithCustomError(
+          asset,
+          "InvalidKycStatus",
+        );
+      });
+
+      it("GIVEN a non-KYC'd operator WHEN revokeOperator THEN reverts with InvalidKycStatus", async () => {
+        await asset.connect(signer_C).authorizeOperator(signer_B.address);
+        await asset.connect(signer_A).revokeKyc(signer_B.address);
+        await expect(asset.connect(signer_C).revokeOperator(signer_B.address)).to.be.revertedWithCustomError(
+          asset,
+          "InvalidKycStatus",
         );
       });
     });

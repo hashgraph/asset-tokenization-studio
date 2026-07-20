@@ -109,6 +109,20 @@ export function transferAndLockTests(getCtx: () => AssetMockCtx): void {
 
     describe("Multi-partition disabled", () => {
       describe("transferAndLock", () => {
+        it("GIVEN an expiration timestamp in the past WHEN transferAndLock THEN transaction fails with WrongExpirationTimestamp", async () => {
+          await expect(
+            asset
+              .connect(signer_C)
+              .transferAndLock(signer_A.address, _AMOUNT, "0x", currentTimestamp - ONE_YEAR_IN_SECONDS),
+          ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
+        });
+
+        it("GIVEN a zero amount WHEN transferAndLock THEN transaction fails with ZeroValue", async () => {
+          await expect(
+            asset.connect(signer_C).transferAndLock(signer_A.address, 0, "0x", expirationTimestamp),
+          ).to.be.revertedWithCustomError(asset, "ZeroValue");
+        });
+
         it("GIVEN a valid partition WHEN transferAndLock with enough balance THEN transaction success", async () => {
           await asset.connect(signer_B).issueByPartition({
             partition: _DEFAULT_PARTITION,

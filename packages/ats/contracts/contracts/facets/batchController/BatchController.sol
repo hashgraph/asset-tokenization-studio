@@ -5,6 +5,7 @@ import { ROLE_CONTROLLER, ROLE_AGENT, DEFAULT_ADMIN_ROLE, _buildRoles } from "..
 import { IBatchController, RESOLVER_KEY_BATCH_CONTROLLER } from "./IBatchController.sol";
 import { IControllerTypes } from "../controller/IControllerTypes.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
+import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
@@ -50,6 +51,7 @@ abstract contract BatchController is IBatchController, Modifiers {
         address operator = EvmAccessors.getMsgSender();
         uint256 length = _fromList.length;
         for (uint256 i; i < length; ) {
+            ERC1410StorageWrapper.checkNonZeroTransferAmount(_amounts[i]);
             TokenCoreOps.transfer(_fromList[i], _toList[i], _amounts[i]);
             emit IControllerTypes.ControllerTransfer(operator, _fromList[i], _toList[i], _amounts[i], "", "");
             unchecked {

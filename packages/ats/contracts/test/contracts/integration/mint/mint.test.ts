@@ -130,6 +130,45 @@ export function mintTests(getCtx: () => AssetMockCtx): void {
         expect(await asset.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
       });
 
+      it("GIVEN a recovered caller WHEN issue THEN reverts with WalletRecovered", async () => {
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
+        await asset.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
+
+        await expect(asset.issue(signer_E.address, AMOUNT, DATA)).to.be.revertedWithCustomError(
+          asset,
+          "WalletRecovered",
+        );
+      });
+
+      it("GIVEN a recovered caller WHEN mint THEN reverts with WalletRecovered", async () => {
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
+        await asset.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
+
+        await expect(asset.mint(signer_E.address, AMOUNT)).to.be.revertedWithCustomError(asset, "WalletRecovered");
+      });
+
+      it("GIVEN a paused token WHEN issue THEN reverts with IsPaused", async () => {
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_PAUSER, signer_A.address);
+        await asset.connect(signer_A).pause();
+
+        await expect(asset.issue(signer_E.address, AMOUNT, DATA)).to.be.revertedWithCustomError(asset, "IsPaused");
+      });
+
+      it("GIVEN a paused token WHEN mint THEN reverts with IsPaused", async () => {
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_PAUSER, signer_A.address);
+        await asset.connect(signer_A).pause();
+
+        await expect(asset.mint(signer_E.address, AMOUNT)).to.be.revertedWithCustomError(asset, "IsPaused");
+      });
+
+      it("GIVEN a mint amount exceeding max supply WHEN mint THEN reverts with MaxSupplyReached", async () => {
+        await asset.connect(signer_A).setMaxSupply(AMOUNT);
+
+        await expect(asset.mint(signer_E.address, AMOUNT + 1))
+          .to.be.revertedWithCustomError(asset, "MaxSupplyReached")
+          .withArgs(AMOUNT);
+      });
+
       describe("bug Transfer", () => {
         it("GIVEN an issuer WHEN issue THEN Transfer event is emitted from address(0) to receiver", async () => {
           await expect(asset.issue(signer_E.address, AMOUNT / 2, DATA))

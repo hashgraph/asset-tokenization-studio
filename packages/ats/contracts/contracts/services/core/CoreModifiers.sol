@@ -8,6 +8,7 @@ import { ControlListModifiers } from "./ControlListModifiers.sol";
 import { DateValidationModifiers } from "./DateValidationModifiers.sol";
 import { DocumentationModifiers } from "./DocumentationModifiers.sol";
 import { KycModifiers } from "./KycModifiers.sol";
+import { NominalValueModifiers } from "./NominalValueModifiers.sol";
 import { PartitionModifiers } from "./PartitionModifiers.sol";
 import { PartitionValidationModifiers } from "./PartitionValidationModifiers.sol";
 import { PauseModifiers } from "./PauseModifiers.sol";
@@ -30,6 +31,7 @@ abstract contract CoreModifiers is
     DateValidationModifiers,
     DocumentationModifiers,
     KycModifiers,
+    NominalValueModifiers,
     PartitionModifiers,
     PartitionValidationModifiers,
     PauseModifiers,

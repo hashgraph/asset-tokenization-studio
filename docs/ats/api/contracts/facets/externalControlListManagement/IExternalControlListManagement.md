@@ -135,7 +135,7 @@ function updateExternalControlLists(address[] _controlLists, bool[] _actives) ex
 
 Adds or removes multiple external control list contracts in a single transaction.
 
-_Requires `ROLE_CONTROL_LIST_MANAGER` and the token to be unpaused. Both arrays must have the same length and contain no duplicate addresses, validated by `ArrayValidation.checkUniqueValues`. Reverts with `ExternalControlListsNotUpdated` on failure. Emits `ExternalControlListsUpdated`._
+_Requires `ROLE_CONTROL_LIST_MANAGER` and the token to be unpaused. Both arrays must have the same length and contain no duplicate addresses, validated by `ArrayValidation.checkUniqueValues`. Emits `ExternalControlListsUpdated`._
 
 #### Parameters
 
@@ -215,21 +215,6 @@ Emitted when an external control list contract is removed from the list.
 | controlList        | address | Address of the external control list contract that was removed. |
 
 ## Errors
-
-### ExternalControlListsNotUpdated
-
-```solidity
-error ExternalControlListsNotUpdated(address[] controlLista, bool[] actives)
-```
-
-Thrown when a batch update of external control lists fails to complete.
-
-#### Parameters
-
-| Name         | Type      | Description                                                            |
-| ------------ | --------- | ---------------------------------------------------------------------- |
-| controlLista | address[] | Array of external control list contract addresses that were submitted. |
-| actives      | bool[]    | Corresponding activation flags that were submitted.                    |
 
 ### ListedControlList
 

@@ -86,6 +86,7 @@ abstract contract Freeze is IFreeze, Modifiers {
         validateAddressNotZero(_userAddress)
         onlyWithoutMultiPartition
         onlyFreezeRoles(EvmAccessors.getMsgSender())
+        onlyPositiveUnfreezeAmount(_amount)
     {
         ERC3643StorageWrapper.unfreezeTokens(_userAddress, _amount, 0);
         emit TokensUnfrozen(_userAddress, _amount, DEFAULT_PARTITION);

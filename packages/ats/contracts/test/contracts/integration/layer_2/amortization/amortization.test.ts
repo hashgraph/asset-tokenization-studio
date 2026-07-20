@@ -46,7 +46,7 @@ export function amortizationTests(getCtx: () => AssetMockCtx): void {
 
       await asset.forceDecimals(DEFAULT_SECURITY_PARAMS.decimals);
       await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_NOMINAL_VALUE, deployer.address);
-      await asset.connect(deployer).setNominalValue(100, 2);
+      await asset.forceSetNominalValue(100, 2, "0x000000", (await getDltTimestamp()) - 3600, true);
     });
 
     describe("setAmortization", () => {
@@ -86,6 +86,20 @@ export function amortizationTests(getCtx: () => AssetMockCtx): void {
         const now = await getDltTimestamp();
         const wrongData = {
           recordDate: now - 1,
+          executionDate: now + EXECUTION_DATE_OFFSET,
+          tokensToRedeem: TOKENS_TO_REDEEM,
+        };
+
+        await expect(amort.connect(user2).setAmortization(wrongData)).to.be.revertedWithCustomError(
+          asset,
+          "WrongTimestamp",
+        );
+      });
+
+      it("GIVEN recordDate = 0 WHEN setAmortization THEN reverts with WrongTimestamp", async () => {
+        const now = await getDltTimestamp();
+        const wrongData = {
+          recordDate: 0,
           executionDate: now + EXECUTION_DATE_OFFSET,
           tokensToRedeem: TOKENS_TO_REDEEM,
         };

@@ -48,6 +48,7 @@ abstract contract TransferAndLock is ITransferAndLock, Modifiers {
         onlyWithValidExpirationTimestamp(_expirationTimestamp)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyPositiveTransferAmount(_amount)
         returns (uint256 lockId_)
     {
         TokenCoreOps.transferByPartition(

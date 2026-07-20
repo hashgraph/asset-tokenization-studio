@@ -4,9 +4,9 @@ _Asset Tokenization Studio Team_
 
 > AccessControlOperational
 
-Variant of AccessControl for proxy facets only. Identical to AccessControl except every state-changing function requires onlyOperational as its first modifier. Use AccessControl (without onlyOperational) for direct-inheritance consumers such as DiamondCutManager that do not operate through the ResolverProxy pattern.
+Entry point for role-based access control for proxy facets. Identical to `AccessControl` except every state-changing function additionally requires `onlyOperational` as its first modifier. Use `AccessControl` (without `onlyOperational`) for direct-inheritance consumers such as `DiamondCutManager` that do not operate through the ResolverProxy pattern.
 
-_Implements `IAccessControl`. Intended to be inherited exclusively by `AccessControlFacet`._
+_Thin wrapper over `AccessControlBase`: declares the guard modifiers appropriate to a proxy facet and delegates the actual storage mutation and event emission to the shared internal helpers. Intended to be inherited exclusively by `AccessControlFacet`._
 
 ## Methods
 
