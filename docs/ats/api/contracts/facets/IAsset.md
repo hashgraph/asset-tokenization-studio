@@ -2715,9 +2715,9 @@ Returns the full metadata struct of the security token.
 
 #### Returns
 
-| Name | Type                | Description                           |
-| ---- | ------------------- | ------------------------------------- |
-| \_0  | ICore.ERC20Metadata | The persisted `ERC20Metadata` bundle. |
+| Name | Type                | Description                    |
+| ---- | ------------------- | ------------------------------ |
+| \_0  | ICore.ERC20Metadata | The persisted `ERC20Metadata`. |
 
 ### getExternalControlListsCount
 
@@ -9728,9 +9728,9 @@ _Fires exclusively from `initializeCore` after the storage write succeeds._
 
 #### Parameters
 
-| Name     | Type                | Description                                                  |
-| -------- | ------------------- | ------------------------------------------------------------ |
-| metadata | ICore.ERC20Metadata | The full ERC-20 metadata bundle persisted at initialisation. |
+| Name     | Type                | Description                                      |
+| -------- | ------------------- | ------------------------------------------------ |
+| metadata | ICore.ERC20Metadata | The ERC-20 metadata persisted at initialisation. |
 
 ### CorporateActionAdded
 
