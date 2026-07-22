@@ -118,7 +118,7 @@ interface IMockDiamondCutHelpers {
      */
     function forceSetNominalValue(
         uint256 _nominalValue,
-        uint8 _nominalValueDecimals,
+        uint256 _nominalValueDecimals,
         bytes3 _nominalValueCurrency,
         uint256 _effectiveDatetime,
         bool _isUnitNominalValue
@@ -280,7 +280,7 @@ contract MockDiamondCutHelpers is IStaticFunctionSelectors, IMockDiamondCutHelpe
     ///      bypassing the real facet's registration guard and role checks entirely.
     function forceSetNominalValue(
         uint256 _nominalValue,
-        uint8 _nominalValueDecimals,
+        uint256 _nominalValueDecimals,
         bytes3 _nominalValueCurrency,
         uint256 _effectiveDatetime,
         bool _isUnitNominalValue

@@ -25,8 +25,9 @@ bytes32 constant STORAGE_LOCATION_NOMINAL_VALUE = 0xf4ae98634996e72bf90c5471fce1
  * @custom:storage-location erc7201:security.token.standard.storage.NominalValue
  */
 struct NominalValueDataStorage {
-    // ─── R2 Packed scalars (uint8, bytes3, bool) ─────────────
-    uint8 nominalValueDecimals;
+    // ─── R3 Single-slot scalars (uint256) ────────────────────
+    uint256 nominalValueDecimals;
+    // ─── R2 Packed scalars (bytes3, bool) ────────────────────
     bytes3 nominalValueCurrency;
     bool isUnitNominalValue;
     // ─── R3 Single-slot scalars (uint256) ────────────────────
@@ -54,7 +55,7 @@ library NominalValueStorageWrapper {
      */
     function initializeNominalValue(
         uint256 _nominalValue,
-        uint8 _nominalValueDecimals,
+        uint256 _nominalValueDecimals,
         bytes3 _nominalValueCurrency,
         uint256 _effectiveDatetime,
         bool _isUnitNominalValue
@@ -95,7 +96,7 @@ library NominalValueStorageWrapper {
      * @notice Reads the nominal value decimals from the dedicated storage slot.
      * @return The number of decimals applied to the nominal value amount.
      */
-    function getNominalValueDecimals() internal view returns (uint8) {
+    function getNominalValueDecimals() internal view returns (uint256) {
         return _nominalValueStorage().nominalValueDecimals;
     }
 

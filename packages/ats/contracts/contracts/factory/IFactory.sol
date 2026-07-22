@@ -101,7 +101,7 @@ interface IFactory is ICommonErrors {
         DividendType dividendRight;
         bytes3 currency;
         uint256 nominalValue;
-        uint8 nominalValueDecimals;
+        uint256 nominalValueDecimals;
         uint256 effectiveDatetime;
         bool isUnitNominalValue;
     }
@@ -136,7 +136,7 @@ interface IFactory is ICommonErrors {
     struct BondDetailsData {
         bytes3 currency;
         uint256 nominalValue;
-        uint8 nominalValueDecimals;
+        uint256 nominalValueDecimals;
         uint256 startingDate;
         uint256 maturityDate;
         uint256 effectiveDatetime;

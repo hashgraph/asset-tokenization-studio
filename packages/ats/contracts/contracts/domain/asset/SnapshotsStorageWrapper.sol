@@ -933,9 +933,9 @@ library SnapshotsStorageWrapper {
      * @param snapshotId The snapshot identifier to resolve.
      * @return           The nominal-value decimals at the requested snapshot.
      */
-    function nominalValueDecimalsAtSnapshot(uint256 snapshotId) internal view returns (uint8) {
+    function nominalValueDecimalsAtSnapshot(uint256 snapshotId) internal view returns (uint256) {
         (bool snapshotted, uint256 value) = valueAt(snapshotId, _snapshotStorage().nominalValueDecimalsSnapshots);
-        return snapshotted ? uint8(value) : NominalValueStorageWrapper.getNominalValueDecimals();
+        return snapshotted ? value : NominalValueStorageWrapper.getNominalValueDecimals();
     }
 
     /**

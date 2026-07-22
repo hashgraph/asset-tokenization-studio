@@ -20,7 +20,7 @@ abstract contract NominalValue is INominalValue, Modifiers {
     /// @inheritdoc INominalValue
     function initializeNominalValue(
         uint256 _nominalValue,
-        uint8 _nominalValueDecimals,
+        uint256 _nominalValueDecimals,
         bytes3 _nominalValueCurrency,
         uint256 _effectiveDatetime,
         bool _isUnitNominalValue
@@ -82,7 +82,7 @@ abstract contract NominalValue is INominalValue, Modifiers {
     }
 
     /// @inheritdoc INominalValue
-    function getNominalValueDecimals() external view override returns (uint8) {
+    function getNominalValueDecimals() external view override returns (uint256) {
         return NominalValueStorageWrapper.getNominalValueDecimals();
     }
 

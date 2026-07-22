@@ -46,7 +46,7 @@ interface IAmortization {
         uint256 abafAtSnapshot; // ABAF at snapshot (0 if record date not reached yet)
         // Nominal value
         uint256 nominalValue; // face value of the token
-        uint8 nominalValueDecimals; // decimals of the nominal value
+        uint256 nominalValueDecimals; // decimals of the nominal value
     }
 
     /**

@@ -311,7 +311,7 @@ library CouponStorageWrapper {
             couponFor_.tokenBalance,
             couponFor_.decimals,
             couponFor_.nominalValue,
-            uint8(couponFor_.nominalValueDecimals),
+            couponFor_.nominalValueDecimals,
             couponFor_.recordDateReached
         );
     }
@@ -562,7 +562,7 @@ library CouponStorageWrapper {
         uint256 tokenBalance,
         uint8 decimals,
         uint256 nominalValue,
-        uint8 nominalValueDecimals,
+        uint256 nominalValueDecimals,
         bool recordDateReached
     ) private pure returns (ICouponTypes.CouponAmountFor memory couponAmountFor_) {
         if (!recordDateReached) return couponAmountFor_;

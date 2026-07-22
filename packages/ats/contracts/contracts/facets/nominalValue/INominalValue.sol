@@ -23,7 +23,7 @@ interface INominalValue {
      * @param nominalValueDecimals The number of decimals applied to `nominalValue`.
      * @param nominalValueCurrency ISO 4217 currency code as `bytes3`; `0x000000` means "unset".
      */
-    event NominalValueInitialized(uint256 nominalValue, uint8 nominalValueDecimals, bytes3 nominalValueCurrency);
+    event NominalValueInitialized(uint256 nominalValue, uint256 nominalValueDecimals, bytes3 nominalValueCurrency);
 
     /**
      * @notice Emitted when a new nominal value is published for a new valuation period.
@@ -78,7 +78,7 @@ interface INominalValue {
      */
     function initializeNominalValue(
         uint256 _nominalValue,
-        uint8 _nominalValueDecimals,
+        uint256 _nominalValueDecimals,
         bytes3 _nominalValueCurrency,
         uint256 _effectiveDatetime,
         bool _isUnitNominalValue
@@ -119,7 +119,7 @@ interface INominalValue {
      * @notice Returns the decimals applied to the nominal value.
      * @return The current decimals applied to `getNominalValue`.
      */
-    function getNominalValueDecimals() external view returns (uint8);
+    function getNominalValueDecimals() external view returns (uint256);
 
     /**
      * @notice Returns the ISO 4217 currency code attached to the nominal value.
