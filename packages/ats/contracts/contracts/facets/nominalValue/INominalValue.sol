@@ -63,16 +63,14 @@ interface INominalValue {
      * @notice Initialises the nominal value capability with amount, decimals, currency,
      *         effective datetime, and the unit/total flag.
      * @dev Callable once per token; subsequent calls revert with `AlreadyInitialized` via the
-     *      `onlyFacetNotRegistered` modifier on the implementation. The `onlyValidTimestamp`
-     *      modifier reverts with `ICommonErrors.InvalidTimestamp` if `_effectiveDatetime` is
-     *      zero, and the `onlyPastTimestamp` modifier reverts with `ICommonErrors.WrongTimestamp`
-     *      unless `_effectiveDatetime` is strictly less than `block.timestamp`.
+     *      `onlyFacetNotRegistered` modifier on the implementation. `_effectiveDatetime` may be
+     *      zero during initialisation; any non-zero value must be strictly less than
+     *      `block.timestamp` or the call reverts with `ICommonErrors.WrongTimestamp`.
      * @param _nominalValue Initial nominal value amount.
      * @param _nominalValueDecimals Number of decimals applied to `_nominalValue`. Fixed for the
      *        lifetime of the token.
      * @param _nominalValueCurrency ISO 4217 currency code as `bytes3`; pass `0x000000` to leave unset.
-     * @param _effectiveDatetime Timestamp as of which `_nominalValue` is effective; must be
-     *        non-zero and strictly less than `block.timestamp`.
+     * @param _effectiveDatetime Zero or a timestamp strictly less than `block.timestamp`.
      * @param _isUnitNominalValue Whether `_nominalValue` is a per-unit (true) or aggregate
      *        (false) value.
      */
@@ -86,12 +84,11 @@ interface INominalValue {
 
     /**
      * @notice Publishes a new nominal value for a new valuation period.
-     * @dev Restricted to holders of `ROLE_NOMINAL_VALUE`. The `onlyValidPublishDatetime` modifier
-     *      reverts with `NominalValueEffectiveDatetimeNotAfterCurrent` unless `_effectiveDatetime`
-     *      is strictly greater than the currently stored `effectiveDatetime`, and the
-     *      `onlyPastTimestamp` modifier reverts with `ICommonErrors.WrongTimestamp` unless it is
-     *      also strictly less than `block.timestamp`. Triggers pending scheduled cross-ordered
-     *      tasks and emits `NominalValuePublished`.
+     * @dev Restricted to holders of `ROLE_NOMINAL_VALUE`. The `onlyValidTimestamp` modifier rejects
+     *      zero, `onlyValidPublishDatetime` requires `_effectiveDatetime` to be strictly greater
+     *      than the currently stored `effectiveDatetime`, and `onlyPastTimestamp` requires it to
+     *      be strictly less than `block.timestamp`. Triggers pending scheduled cross-ordered tasks
+     *      and emits `NominalValuePublished`.
      * @param _nominalValue New nominal value amount.
      * @param _effectiveDatetime New effective datetime; must satisfy
      *        `storedEffectiveDatetime < _effectiveDatetime < block.timestamp`.
@@ -100,12 +97,13 @@ interface INominalValue {
 
     /**
      * @notice Corrects the nominal value already published for the current valuation period.
-     * @dev Restricted to holders of `ROLE_NOMINAL_VALUE`. The `onlyValidRepublishDatetime`
-     *      modifier reverts with `NominalValueEffectiveDatetimeMismatch` unless
-     *      `_effectiveDatetime` exactly equals the currently stored `effectiveDatetime`. Triggers
-     *      pending scheduled cross-ordered tasks and emits `NominalValueRepublished`.
+     * @dev Restricted to holders of `ROLE_NOMINAL_VALUE`. The `onlyValidTimestamp` modifier rejects
+     *      zero, and `onlyValidRepublishDatetime` reverts with
+     *      `NominalValueEffectiveDatetimeMismatch` unless `_effectiveDatetime` exactly equals the
+     *      currently stored `effectiveDatetime`. Triggers pending scheduled cross-ordered tasks and
+     *      emits `NominalValueRepublished`.
      * @param _nominalValue Corrected nominal value amount.
-     * @param _effectiveDatetime Effective datetime; must equal the currently stored one.
+     * @param _effectiveDatetime Non-zero effective datetime; must equal the currently stored one.
      */
     function republishNominalValue(uint256 _nominalValue, uint256 _effectiveDatetime) external;
 

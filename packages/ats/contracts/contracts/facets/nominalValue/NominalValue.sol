@@ -29,7 +29,6 @@ abstract contract NominalValue is INominalValue, Modifiers {
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
         onlyFacetNotRegistered(RESOLVER_KEY_NOMINAL_VALUE)
-        onlyValidTimestamp(_effectiveDatetime)
         onlyPastTimestamp(_effectiveDatetime)
     {
         NominalValueStorageWrapper.initializeNominalValue(
@@ -53,6 +52,7 @@ abstract contract NominalValue is INominalValue, Modifiers {
         onlyOperational
         onlyActivated
         onlyRole(ROLE_NOMINAL_VALUE)
+        onlyValidTimestamp(_effectiveDatetime)
         onlyValidPublishDatetime(_effectiveDatetime)
         onlyPastTimestamp(_effectiveDatetime)
     {
@@ -70,6 +70,7 @@ abstract contract NominalValue is INominalValue, Modifiers {
         onlyOperational
         onlyActivated
         onlyRole(ROLE_NOMINAL_VALUE)
+        onlyValidTimestamp(_effectiveDatetime)
         onlyValidRepublishDatetime(_effectiveDatetime)
     {
         NominalValueStorageWrapper.writeNominalValue(_nominalValue, _effectiveDatetime);

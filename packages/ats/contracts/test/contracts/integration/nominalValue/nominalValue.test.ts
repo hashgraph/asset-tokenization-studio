@@ -45,11 +45,11 @@ export function nominalValueTests(getCtx: () => AssetMockCtx): void {
           await asset.forceFacetNotRegistered(RESOLVER_KEYS.nominalValue);
         });
 
-        it("GIVEN a zero effective datetime WHEN initializeNominalValue THEN reverts with InvalidTimestamp", async () => {
-          await expect(asset.initializeNominalValue(1, 6, CURRENCY_ZERO, 0, true)).to.be.revertedWithCustomError(
-            asset,
-            "InvalidTimestamp",
-          );
+        it("GIVEN a zero effective datetime WHEN initializeNominalValue THEN stores the initial value", async () => {
+          await expect(asset.initializeNominalValue(1, 6, CURRENCY_ZERO, 0, true))
+            .to.emit(asset, "NominalValueInitialized")
+            .withArgs(1, 6, CURRENCY_ZERO);
+          expect(await asset.getNominalValue()).to.equal(1n);
         });
 
         it("GIVEN an effective datetime equal to now WHEN initializeNominalValue THEN reverts with WrongTimestamp", async () => {
@@ -163,6 +163,13 @@ export function nominalValueTests(getCtx: () => AssetMockCtx): void {
         ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
+      it("GIVEN a zero effective datetime WHEN publishNominalValue THEN reverts with InvalidTimestamp", async () => {
+        await expect(asset.connect(signer_B).publishNominalValue(200n, 0)).to.be.revertedWithCustomError(
+          asset,
+          "InvalidTimestamp",
+        );
+      });
+
       describe("date boundaries with a stored effective datetime", () => {
         let stored: number;
 
@@ -241,10 +248,22 @@ export function nominalValueTests(getCtx: () => AssetMockCtx): void {
       });
 
       it("GIVEN a paused token WHEN republishNominalValue THEN fails with IsPaused", async () => {
+        const effectiveDatetime = (await getDltTimestamp()) - TIME_HOUR;
+        await asset.connect(signer_B).publishNominalValue(1, effectiveDatetime);
         await asset.connect(signer_D).pause();
-        await expect(asset.connect(signer_B).republishNominalValue(0, 0)).to.be.revertedWithCustomError(
+        await expect(asset.connect(signer_B).republishNominalValue(0, effectiveDatetime)).to.be.revertedWithCustomError(
           asset,
           "IsPaused",
+        );
+      });
+
+      it("GIVEN initialization with zero and no valid publish WHEN republishNominalValue uses zero THEN reverts with InvalidTimestamp", async () => {
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.nominalValue);
+        await asset.initializeNominalValue(1, 6, CURRENCY_ZERO, 0, true);
+
+        await expect(asset.connect(signer_B).republishNominalValue(2, 0)).to.be.revertedWithCustomError(
+          asset,
+          "InvalidTimestamp",
         );
       });
 
