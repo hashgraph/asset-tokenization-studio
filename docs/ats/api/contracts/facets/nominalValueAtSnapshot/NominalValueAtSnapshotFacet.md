@@ -85,7 +85,7 @@ _Resolved against the `nominalValueSnapshots` series; falls back to the live nom
 ### nominalValueDecimalsAtSnapshot
 
 ```solidity
-function nominalValueDecimalsAtSnapshot(uint256 _snapshotID) external view returns (uint8 nominalValueDecimals_)
+function nominalValueDecimalsAtSnapshot(uint256 _snapshotID) external view returns (uint256 nominalValueDecimals_)
 ```
 
 Returns the decimals applied to the nominal value at the time of a given snapshot.
@@ -100,9 +100,9 @@ _Resolved against the `nominalValueDecimalsSnapshots` series; falls back to the 
 
 #### Returns
 
-| Name                   | Type  | Description                                           |
-| ---------------------- | ----- | ----------------------------------------------------- |
-| nominalValueDecimals\_ | uint8 | The nominal value decimals recorded at `_snapshotID`. |
+| Name                   | Type    | Description                                           |
+| ---------------------- | ------- | ----------------------------------------------------- |
+| nominalValueDecimals\_ | uint256 | The nominal value decimals recorded at `_snapshotID`. |
 
 ## Events
 
