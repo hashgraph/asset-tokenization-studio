@@ -1,15 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-  HederaNetworks,
-  hashsphere,
-  hashsphereChainIdEnvVars,
-  local,
-  mainnet,
-  previewnet,
-  resolveHashsphereChainId,
-  testnet,
-} from "./Environment";
+import { hashsphereChainIdEnvVars, reservedChainIds, resolveHashsphereChainId } from "./Environment";
 
 describe("Environment", () => {
   describe("resolveHashsphereChainId", () => {
@@ -26,7 +17,7 @@ describe("Environment", () => {
     });
 
     it("prefers HASHSPHERE_CHAIN_ID over the web-app prefixed variable", () => {
-      expect(resolveHashsphereChainId({ HASHSPHERE_CHAIN_ID: "4618", REACT_APP_HASHSPHERE_CHAIN_ID: "296" })).toBe(
+      expect(resolveHashsphereChainId({ HASHSPHERE_CHAIN_ID: "4618", REACT_APP_HASHSPHERE_CHAIN_ID: "1234" })).toBe(
         4618,
       );
     });
@@ -39,31 +30,69 @@ describe("Environment", () => {
       expect(resolveHashsphereChainId({ HASHSPHERE_CHAIN_ID: value })).toBeUndefined();
     });
 
+    it.each(reservedChainIds)("ignores %i, which is reserved by a public network", (chainId) => {
+      expect(resolveHashsphereChainId({ HASHSPHERE_CHAIN_ID: String(chainId) })).toBeUndefined();
+    });
+
+    it("falls back to the next variable when the first is a reserved chain id", () => {
+      expect(resolveHashsphereChainId({ HASHSPHERE_CHAIN_ID: "296", REACT_APP_HASHSPHERE_CHAIN_ID: "4618" })).toBe(
+        4618,
+      );
+    });
+
     it("exposes the variables it reads, in precedence order", () => {
       expect(hashsphereChainIdEnvVars).toEqual(["HASHSPHERE_CHAIN_ID", "REACT_APP_HASHSPHERE_CHAIN_ID"]);
     });
   });
 
   describe("HederaNetworks", () => {
-    it("always registers the public Hedera networks", () => {
-      expect(HederaNetworks).toEqual(
-        expect.arrayContaining([
-          { network: testnet, chainId: 296 },
-          { network: previewnet, chainId: 297 },
-          { network: mainnet, chainId: 295 },
-          { network: local, chainId: 298 },
-        ]),
-      );
+    const saved: Record<string, string | undefined> = {};
+
+    beforeEach(() => {
+      for (const key of hashsphereChainIdEnvVars) {
+        saved[key] = process.env[key];
+        delete process.env[key];
+      }
+      jest.resetModules();
     });
 
-    it("registers HashSphere only when its chain id is configured", () => {
-      const entry = HederaNetworks.find((n) => n.network === hashsphere);
-      const configured = resolveHashsphereChainId(typeof process !== "undefined" && process.env ? process.env : {});
-      if (configured === undefined) {
-        expect(entry).toBeUndefined();
-      } else {
-        expect(entry).toEqual({ network: hashsphere, chainId: configured });
+    afterEach(() => {
+      for (const key of hashsphereChainIdEnvVars) {
+        if (saved[key] === undefined) delete process.env[key];
+        else process.env[key] = saved[key];
       }
+      jest.resetModules();
+    });
+
+    const load = () => import("./Environment");
+
+    it("registers only the public Hedera networks when HashSphere is not configured", async () => {
+      const { HederaNetworks, testnet, previewnet, mainnet, local } = await load();
+
+      expect(HederaNetworks).toEqual([
+        { network: testnet, chainId: 296 },
+        { network: previewnet, chainId: 297 },
+        { network: mainnet, chainId: 295 },
+        { network: local, chainId: 298 },
+      ]);
+    });
+
+    it("appends HashSphere when its chain id is configured", async () => {
+      process.env.HASHSPHERE_CHAIN_ID = "4618";
+
+      const { HederaNetworks, hashsphere } = await load();
+
+      expect(HederaNetworks).toHaveLength(reservedChainIds.length + 1);
+      expect(HederaNetworks).toContainEqual({ network: hashsphere, chainId: 4618 });
+    });
+
+    it("leaves a public network as the sole owner of its chain id", async () => {
+      process.env.HASHSPHERE_CHAIN_ID = "296";
+
+      const { HederaNetworks, hashsphere, testnet } = await load();
+
+      expect(HederaNetworks.filter(({ chainId }) => chainId === 296)).toEqual([{ network: testnet, chainId: 296 }]);
+      expect(HederaNetworks.map(({ network }) => network)).not.toContain(hashsphere);
     });
   });
 });

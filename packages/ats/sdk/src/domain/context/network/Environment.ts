@@ -9,6 +9,27 @@ export const unrecognized = "unrecognized";
 
 export type Environment = "testnet" | "previewnet" | "mainnet" | "local" | "hashsphere" | "unrecognized" | string;
 
+const publicHederaNetworks = [
+  {
+    network: testnet,
+    chainId: 296,
+  },
+  {
+    network: previewnet,
+    chainId: 297,
+  },
+  {
+    network: mainnet,
+    chainId: 295,
+  },
+  {
+    network: local,
+    chainId: 298,
+  },
+];
+
+export const reservedChainIds = publicHederaNetworks.map(({ chainId }) => chainId);
+
 export const hashsphereChainIdEnvVars = ["HASHSPHERE_CHAIN_ID", "REACT_APP_HASHSPHERE_CHAIN_ID"];
 
 export const resolveHashsphereChainId = (env: Record<string, string | undefined>): number | undefined => {
@@ -16,7 +37,9 @@ export const resolveHashsphereChainId = (env: Record<string, string | undefined>
     const raw = env[key];
     if (raw === undefined || raw.trim() === "") continue;
     const chainId = Number(raw);
-    if (Number.isInteger(chainId) && chainId > 0) return chainId;
+    if (!Number.isInteger(chainId) || chainId <= 0) continue;
+    if (reservedChainIds.includes(chainId)) continue;
+    return chainId;
   }
   return undefined;
 };
@@ -37,21 +60,6 @@ const readEnv = (): Record<string, string | undefined> => {
 const hashsphereChainId = resolveHashsphereChainId(readEnv());
 
 export const HederaNetworks = [
-  {
-    network: testnet,
-    chainId: 296,
-  },
-  {
-    network: previewnet,
-    chainId: 297,
-  },
-  {
-    network: mainnet,
-    chainId: 295,
-  },
-  {
-    network: local,
-    chainId: 298,
-  },
+  ...publicHederaNetworks,
   ...(hashsphereChainId === undefined ? [] : [{ network: hashsphere, chainId: hashsphereChainId }]),
 ];
