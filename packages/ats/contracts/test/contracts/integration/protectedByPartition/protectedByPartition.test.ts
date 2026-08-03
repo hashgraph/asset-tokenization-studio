@@ -119,7 +119,7 @@ export function protectedByPartitionTests(getCtx: () => AssetMockCtx): void {
       signer_C = ctx.user3;
       asset = ctx.asset;
 
-      domain.name = (await asset.getERC20Metadata()).info.name;
+      domain.name = (await asset.getERC20Metadata()).name;
       domain.version = (await asset.getConfigInfo()).configurationVersion_.toString();
       domain.chainId = await network.provider.send("eth_chainId");
       domain.verifyingContract = asset.target as string;
