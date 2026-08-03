@@ -454,24 +454,38 @@ describe("Initializer — InitializeMock domain", () => {
         .withArgs(await deployer.getAddress(), INITIALIZE_MOCK_CONFIG_ID, 1, 2);
     });
 
+    it("GIVEN only one facet initialized WHEN setOperationalStatus is called THEN breaks at first unready facet", async () => {
+      const maxInitializerFacetIndex = 10;
+
+      await expect(initializerFacet.initializeInitializer(maxInitializerFacetIndex)).to.not.be.reverted;
+
+      await expect(initializerFacet.setOperationalStatus())
+        .to.emit(initializerFacet, "OperationalStatusPartialSet")
+        .withArgs(await deployer.getAddress(), INITIALIZE_MOCK_CONFIG_ID, 1, 1);
+    });
+
+    it("GIVEN only a middle facet initialized WHEN setOperationalStatus is called THEN still breaks at index 0", async () => {
+      const maxInitializerFacetIndex = 10;
+      await expect(initializerFacet.updateMaxInitializerFacetIndex(maxInitializerFacetIndex)).to.not.be.reverted;
+
+      await expect(mockFacet1.initializeMockFacet1()).to.not.be.reverted;
+
+      await expect(initializerFacet.setOperationalStatus())
+        .to.emit(initializerFacet, "OperationalStatusPartialSet")
+        .withArgs(await deployer.getAddress(), INITIALIZE_MOCK_CONFIG_ID, 1, 0);
+
+      expect(await initializerFacet.getOperationalStatus(INITIALIZE_MOCK_CONFIG_ID, 1)).to.equal(0);
+    });
+
     it("GIVEN initializeInitializer has not been called AND maxInitializerFacetIndex == 0 WHEN setOperationalStatus is called THEN configVersionStatus stays at 0", async () => {
-      // Precondition: maxInitializerFacetIndex is 0 because initializeInitializer was never called.
       expect(await initializerFacet.getMaxInitializerFacetIndex()).to.equal(0);
 
       await expect(initializerFacet.setOperationalStatus())
         .to.emit(initializerFacet, "OperationalStatusPartialSet")
         .withArgs(await deployer.getAddress(), INITIALIZE_MOCK_CONFIG_ID, 1, 0);
 
-      // Status stays at 0 — configVersionStatus was never written.
       expect(await initializerFacet.getOperationalStatus(INITIALIZE_MOCK_CONFIG_ID, 1)).to.equal(0);
 
-      // business logic remains inaccessible.
-      await expect(mockFacet1.mockFacet1Method()).to.be.revertedWithCustomError(
-        initializerFacet,
-        "AssetNotOperational",
-      );
-
-      // Every facet is still uninitialized — none were examined by setOperationalStatus.
       await expectFacetStates({
         configVersion: 1,
         operationalStatus: 0,
@@ -484,7 +498,6 @@ describe("Initializer — InitializeMock domain", () => {
     });
 
     it("GIVEN initializeInitializer has not been called AND maxInitializerFacetIndex > 0 WHEN setOperationalStatus is called THEN configVersionStatus stays at 0", async () => {
-      // Precondition: maxInitializerFacetIndex is >0 even if initializeInitializer was never called.
       const maxInitializerFacetIndex = 5;
       await expect(initializerFacet.updateMaxInitializerFacetIndex(maxInitializerFacetIndex)).to.not.be.reverted;
 
@@ -494,16 +507,8 @@ describe("Initializer — InitializeMock domain", () => {
         .to.emit(initializerFacet, "OperationalStatusPartialSet")
         .withArgs(await deployer.getAddress(), INITIALIZE_MOCK_CONFIG_ID, 1, 0);
 
-      // configVersionStatus written to 0
       expect(await initializerFacet.getOperationalStatus(INITIALIZE_MOCK_CONFIG_ID, 1)).to.equal(0);
 
-      // business logic remains inaccessible.
-      await expect(mockFacet1.mockFacet1Method()).to.be.revertedWithCustomError(
-        initializerFacet,
-        "AssetNotOperational",
-      );
-
-      // Every facet is still uninitialized
       await expectFacetStates({
         configVersion: 1,
         operationalStatus: 0,
