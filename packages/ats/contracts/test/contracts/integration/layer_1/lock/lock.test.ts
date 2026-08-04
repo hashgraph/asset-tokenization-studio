@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { IAssetMock } from "@contract-types";
+import { IAssetMock, LockFacet__factory, type LockFacet } from "@contract-types";
 import type { AssetMockCtx } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
 
@@ -331,10 +331,10 @@ export function lockTests(getCtx: () => AssetMockCtx): void {
     });
 
     describe("forceReleaseByPartition", () => {
-      let lockFacet: Awaited<ReturnType<typeof ethers.getContractAt>>;
+      let lockFacet: LockFacet;
 
       beforeEach(async () => {
-        lockFacet = await ethers.getContractAt("LockFacet", await asset.getAddress());
+        lockFacet = LockFacet__factory.connect(await asset.getAddress(), ethers.provider);
 
         await asset.connect(signer_B).issueByPartition({
           partition: _DEFAULT_PARTITION,

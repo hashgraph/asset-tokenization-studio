@@ -82,6 +82,9 @@ library InitializerStorageWrapper {
         returns (bool isOperational_, uint256 lastFacetIndex_, bytes32 configId_, uint256 versionId_)
     {
         (configId_, versionId_) = ResolverProxyStorageWrapper.getResolverProxyConfigurationIdAndVersion();
+        uint256 maxInitializer = getMaxInitializerFacetIndex();
+
+        if (maxInitializer == 0) return (false, 0, configId_, versionId_);
 
         uint256 operationStatus = getOperationalStatus(configId_, versionId_);
 
@@ -96,7 +99,7 @@ library InitializerStorageWrapper {
         }
 
         unchecked {
-            lastFacetIndex_ = getMaxInitializerFacetIndex() + nextFacetIndex;
+            lastFacetIndex_ = maxInitializer + nextFacetIndex;
         }
 
         uint256 facetsLength = ResolverProxyStorageWrapper
@@ -119,7 +122,9 @@ library InitializerStorageWrapper {
         );
 
         unchecked {
-            _initializerStorage().configVersionStatus[configId_][versionId_] = isOperational_ ? 1 : lastFacetIndex_ + 1;
+            _initializerStorage().configVersionStatus[configId_][versionId_] = isOperational_
+                ? 1
+                : (lastFacetIndex_ == 0 ? 0 : lastFacetIndex_ + 1);
         }
     }
 

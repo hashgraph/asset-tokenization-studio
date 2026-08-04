@@ -3863,16 +3863,16 @@ Returns the ISO 4217 currency code attached to the nominal value.
 ### getNominalValueDecimals
 
 ```solidity
-function getNominalValueDecimals() external view returns (uint8)
+function getNominalValueDecimals() external view returns (uint256)
 ```
 
 Returns the decimals applied to the nominal value.
 
 #### Returns
 
-| Name | Type  | Description                                        |
-| ---- | ----- | -------------------------------------------------- |
-| \_0  | uint8 | The current decimals applied to `getNominalValue`. |
+| Name | Type    | Description                                        |
+| ---- | ------- | -------------------------------------------------- |
+| \_0  | uint256 | The current decimals applied to `getNominalValue`. |
 
 ### getNonPerformingLoansRatio
 
@@ -5766,22 +5766,22 @@ _Callable once; subsequent calls revert with `FacetAlreadyRegistered`. Requires 
 ### initializeNominalValue
 
 ```solidity
-function initializeNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals, bytes3 _nominalValueCurrency, uint256 _effectiveDatetime, bool _isUnitNominalValue) external nonpayable
+function initializeNominalValue(uint256 _nominalValue, uint256 _nominalValueDecimals, bytes3 _nominalValueCurrency, uint256 _effectiveDatetime, bool _isUnitNominalValue) external nonpayable
 ```
 
 Initialises the nominal value capability with amount, decimals, currency, effective datetime, and the unit/total flag.
 
-_Callable once per token; subsequent calls revert with `AlreadyInitialized` via the `onlyFacetNotRegistered` modifier on the implementation. The `onlyValidTimestamp` modifier reverts with `ICommonErrors.InvalidTimestamp` if `_effectiveDatetime` is zero, and the `onlyPastTimestamp` modifier reverts with `ICommonErrors.WrongTimestamp` unless `_effectiveDatetime` is strictly less than `block.timestamp`._
+_Callable once per token; subsequent calls revert with `AlreadyInitialized` via the `onlyFacetNotRegistered` modifier on the implementation. `_effectiveDatetime` may be zero during initialisation; any non-zero value must be strictly less than `block.timestamp` or the call reverts with `ICommonErrors.WrongTimestamp`._
 
 #### Parameters
 
-| Name                   | Type    | Description                                                                                                    |
-| ---------------------- | ------- | -------------------------------------------------------------------------------------------------------------- |
-| \_nominalValue         | uint256 | Initial nominal value amount.                                                                                  |
-| \_nominalValueDecimals | uint8   | Number of decimals applied to `_nominalValue`. Fixed for the lifetime of the token.                            |
-| \_nominalValueCurrency | bytes3  | ISO 4217 currency code as `bytes3`; pass `0x000000` to leave unset.                                            |
-| \_effectiveDatetime    | uint256 | Timestamp as of which `_nominalValue` is effective; must be non-zero and strictly less than `block.timestamp`. |
-| \_isUnitNominalValue   | bool    | Whether `_nominalValue` is a per-unit (true) or aggregate (false) value.                                       |
+| Name                   | Type    | Description                                                                         |
+| ---------------------- | ------- | ----------------------------------------------------------------------------------- |
+| \_nominalValue         | uint256 | Initial nominal value amount.                                                       |
+| \_nominalValueDecimals | uint256 | Number of decimals applied to `_nominalValue`. Fixed for the lifetime of the token. |
+| \_nominalValueCurrency | bytes3  | ISO 4217 currency code as `bytes3`; pass `0x000000` to leave unset.                 |
+| \_effectiveDatetime    | uint256 | Zero or a timestamp strictly less than `block.timestamp`.                           |
+| \_isUnitNominalValue   | bool    | Whether `_nominalValue` is a per-unit (true) or aggregate (false) value.            |
 
 ### initializeNominalValueAtSnapshot
 
@@ -6711,7 +6711,7 @@ _Resolved against the `nominalValueSnapshots` series; falls back to the live nom
 ### nominalValueDecimalsAtSnapshot
 
 ```solidity
-function nominalValueDecimalsAtSnapshot(uint256 _snapshotID) external view returns (uint8 nominalValueDecimals_)
+function nominalValueDecimalsAtSnapshot(uint256 _snapshotID) external view returns (uint256 nominalValueDecimals_)
 ```
 
 Returns the decimals applied to the nominal value at the time of a given snapshot.
@@ -6726,9 +6726,9 @@ _Resolved against the `nominalValueDecimalsSnapshots` series; falls back to the 
 
 #### Returns
 
-| Name                   | Type  | Description                                           |
-| ---------------------- | ----- | ----------------------------------------------------- |
-| nominalValueDecimals\_ | uint8 | The nominal value decimals recorded at `_snapshotID`. |
+| Name                   | Type    | Description                                           |
+| ---------------------- | ------- | ----------------------------------------------------- |
+| nominalValueDecimals\_ | uint256 | The nominal value decimals recorded at `_snapshotID`. |
 
 ### nonces
 
@@ -7171,7 +7171,7 @@ function publishNominalValue(uint256 _nominalValue, uint256 _effectiveDatetime) 
 
 Publishes a new nominal value for a new valuation period.
 
-_Restricted to holders of `ROLE_NOMINAL_VALUE`. The `onlyValidPublishDatetime` modifier reverts with `NominalValueEffectiveDatetimeNotAfterCurrent` unless `_effectiveDatetime` is strictly greater than the currently stored `effectiveDatetime`, and the `onlyPastTimestamp` modifier reverts with `ICommonErrors.WrongTimestamp` unless it is also strictly less than `block.timestamp`. Triggers pending scheduled cross-ordered tasks and emits `NominalValuePublished`._
+_Restricted to holders of `ROLE_NOMINAL_VALUE`. The `onlyValidTimestamp` modifier rejects zero, `onlyValidPublishDatetime` requires `_effectiveDatetime` to be strictly greater than the currently stored `effectiveDatetime`, and `onlyPastTimestamp` requires it to be strictly less than `block.timestamp`. Triggers pending scheduled cross-ordered tasks and emits `NominalValuePublished`._
 
 #### Parameters
 
@@ -7596,14 +7596,14 @@ function republishNominalValue(uint256 _nominalValue, uint256 _effectiveDatetime
 
 Corrects the nominal value already published for the current valuation period.
 
-_Restricted to holders of `ROLE_NOMINAL_VALUE`. The `onlyValidRepublishDatetime` modifier reverts with `NominalValueEffectiveDatetimeMismatch` unless `_effectiveDatetime` exactly equals the currently stored `effectiveDatetime`. Triggers pending scheduled cross-ordered tasks and emits `NominalValueRepublished`._
+_Restricted to holders of `ROLE_NOMINAL_VALUE`. The `onlyValidTimestamp` modifier rejects zero, and `onlyValidRepublishDatetime` reverts with `NominalValueEffectiveDatetimeMismatch` unless `_effectiveDatetime` exactly equals the currently stored `effectiveDatetime`. Triggers pending scheduled cross-ordered tasks and emits `NominalValueRepublished`._
 
 #### Parameters
 
-| Name                | Type    | Description                                              |
-| ------------------- | ------- | -------------------------------------------------------- |
-| \_nominalValue      | uint256 | Corrected nominal value amount.                          |
-| \_effectiveDatetime | uint256 | Effective datetime; must equal the currently stored one. |
+| Name                | Type    | Description                                                       |
+| ------------------- | ------- | ----------------------------------------------------------------- |
+| \_nominalValue      | uint256 | Corrected nominal value amount.                                   |
+| \_effectiveDatetime | uint256 | Non-zero effective datetime; must equal the currently stored one. |
 
 ### resetSystemBlocknumber
 
@@ -10968,7 +10968,7 @@ _Fires exclusively from `initializeNominalValueAtSnapshot`._
 ### NominalValueInitialized
 
 ```solidity
-event NominalValueInitialized(uint256 nominalValue, uint8 nominalValueDecimals, bytes3 nominalValueCurrency)
+event NominalValueInitialized(uint256 nominalValue, uint256 nominalValueDecimals, bytes3 nominalValueCurrency)
 ```
 
 Emitted once when the nominal value capability is initialised on a token.
@@ -10980,7 +10980,7 @@ _Fires exclusively from `initializeNominalValue` after the storage write succeed
 | Name                 | Type    | Description                                                             |
 | -------------------- | ------- | ----------------------------------------------------------------------- |
 | nominalValue         | uint256 | The initial nominal value amount.                                       |
-| nominalValueDecimals | uint8   | The number of decimals applied to `nominalValue`.                       |
+| nominalValueDecimals | uint256 | The number of decimals applied to `nominalValue`.                       |
 | nominalValueCurrency | bytes3  | ISO 4217 currency code as `bytes3`; `0x000000` means &quot;unset&quot;. |
 
 ### NominalValuePublished

@@ -453,6 +453,72 @@ describe("Initializer — InitializeMock domain", () => {
         .to.emit(initializerFacet, "OperationalStatusPartialSet")
         .withArgs(await deployer.getAddress(), INITIALIZE_MOCK_CONFIG_ID, 1, 2);
     });
+
+    it("GIVEN only one facet initialized WHEN setOperationalStatus is called THEN breaks at first unready facet", async () => {
+      const maxInitializerFacetIndex = 10;
+
+      await expect(initializerFacet.initializeInitializer(maxInitializerFacetIndex)).to.not.be.reverted;
+
+      await expect(initializerFacet.setOperationalStatus())
+        .to.emit(initializerFacet, "OperationalStatusPartialSet")
+        .withArgs(await deployer.getAddress(), INITIALIZE_MOCK_CONFIG_ID, 1, 1);
+    });
+
+    it("GIVEN only a middle facet initialized WHEN setOperationalStatus is called THEN still breaks at index 0", async () => {
+      const maxInitializerFacetIndex = 10;
+      await expect(initializerFacet.updateMaxInitializerFacetIndex(maxInitializerFacetIndex)).to.not.be.reverted;
+
+      await expect(mockFacet1.initializeMockFacet1()).to.not.be.reverted;
+
+      await expect(initializerFacet.setOperationalStatus())
+        .to.emit(initializerFacet, "OperationalStatusPartialSet")
+        .withArgs(await deployer.getAddress(), INITIALIZE_MOCK_CONFIG_ID, 1, 0);
+
+      expect(await initializerFacet.getOperationalStatus(INITIALIZE_MOCK_CONFIG_ID, 1)).to.equal(0);
+    });
+
+    it("GIVEN initializeInitializer has not been called AND maxInitializerFacetIndex == 0 WHEN setOperationalStatus is called THEN configVersionStatus stays at 0", async () => {
+      expect(await initializerFacet.getMaxInitializerFacetIndex()).to.equal(0);
+
+      await expect(initializerFacet.setOperationalStatus())
+        .to.emit(initializerFacet, "OperationalStatusPartialSet")
+        .withArgs(await deployer.getAddress(), INITIALIZE_MOCK_CONFIG_ID, 1, 0);
+
+      expect(await initializerFacet.getOperationalStatus(INITIALIZE_MOCK_CONFIG_ID, 1)).to.equal(0);
+
+      await expectFacetStates({
+        configVersion: 1,
+        operationalStatus: 0,
+        initializer: { version: 1, versionStatus: 0, lastVersion: 0 },
+        diamondFacet: { version: 1, versionStatus: 0, lastVersion: 0 },
+        mockFacet1: { version: 1, versionStatus: 0, lastVersion: 0 },
+        mockFacet2: { version: 2, versionStatus: 0, lastVersion: 0 },
+        mockFacet3: { version: 1, versionStatus: 0, lastVersion: 0 },
+      });
+    });
+
+    it("GIVEN initializeInitializer has not been called AND maxInitializerFacetIndex > 0 WHEN setOperationalStatus is called THEN configVersionStatus stays at 0", async () => {
+      const maxInitializerFacetIndex = 5;
+      await expect(initializerFacet.updateMaxInitializerFacetIndex(maxInitializerFacetIndex)).to.not.be.reverted;
+
+      expect(await initializerFacet.getMaxInitializerFacetIndex()).to.equal(maxInitializerFacetIndex);
+
+      await expect(initializerFacet.setOperationalStatus())
+        .to.emit(initializerFacet, "OperationalStatusPartialSet")
+        .withArgs(await deployer.getAddress(), INITIALIZE_MOCK_CONFIG_ID, 1, 0);
+
+      expect(await initializerFacet.getOperationalStatus(INITIALIZE_MOCK_CONFIG_ID, 1)).to.equal(0);
+
+      await expectFacetStates({
+        configVersion: 1,
+        operationalStatus: 0,
+        initializer: { version: 1, versionStatus: 0, lastVersion: 0 },
+        diamondFacet: { version: 1, versionStatus: 0, lastVersion: 0 },
+        mockFacet1: { version: 1, versionStatus: 0, lastVersion: 0 },
+        mockFacet2: { version: 2, versionStatus: 0, lastVersion: 0 },
+        mockFacet3: { version: 1, versionStatus: 0, lastVersion: 0 },
+      });
+    });
   });
 
   describe("Mock asset at version 2", () => {
