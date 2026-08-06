@@ -128,7 +128,7 @@ The BLR supports multiple concurrent configurations, allowing different token ty
 #### Configuration Management
 
 - **Configuration ID**: A `bytes32` identifier (e.g., `bytes32(1)` for EQUITY, `bytes32(2)` for BOND)
-- **Facet Blacklist**: Per-configuration blacklist of function selectors that should not be delegated
+- **Facet Blacklist**: Per-configuration blacklist checked when a selector is **registered** into a new configuration or configuration version (`_registerSelectors()`). It prevents that selector from being wired into the new version — it does not affect a selector already resolved in an already-active configuration.
 - **Version Tracking**: Each configuration maintains its own version pointer independent of others
 
 #### Multi-Configuration Usage

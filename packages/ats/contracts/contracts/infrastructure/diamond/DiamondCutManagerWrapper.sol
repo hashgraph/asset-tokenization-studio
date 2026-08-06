@@ -192,6 +192,9 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
             if (addr == address(0)) {
                 revert FacetIdNotRegistered(_configurationId, facetId);
             }
+            if (_getVersionStatus(facetId, facetVersion) == VersionStatus.DEACTIVATED) {
+                revert DeactivatedVersionNotAllowed(facetId, facetVersion);
+            }
             if (_dcms.addr[configVersionFacetHash] != address(0)) {
                 revert DuplicatedFacetInConfiguration(facetId);
             }

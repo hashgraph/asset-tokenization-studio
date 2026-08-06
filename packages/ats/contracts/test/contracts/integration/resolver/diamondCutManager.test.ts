@@ -32,6 +32,12 @@ const TEST_CONFIG_IDS = {
 const RESOLVER_PROXY_VERSION_V2 = "0x0000000000000002"; // bytes8
 const PAUSE_SELECTOR = "0x8456cb59";
 
+enum VersionStatus {
+  NONE = 0,
+  ACTIVATED = 1,
+  DEACTIVATED = 2,
+}
+
 describe("DiamondCutManager", () => {
   function createFacetConfigurations(ids: string[], versions: number[]): IDiamondCutManager.FacetConfigurationStruct[] {
     return ids.map((id, index) => ({
@@ -610,6 +616,22 @@ describe("DiamondCutManager", () => {
         .connect(signer_A)
         .createBatchConfiguration(CONFIG_IDS.equity, facetConfigurations, false, "0x", { gasLimit: 60_000_000 }),
     ).to.be.revertedWithCustomError(diamondCutManager, "DuplicatedFacetInConfiguration");
+  });
+
+  it("FIND-033 (TDD, expected red) GIVEN a facet version marked DEACTIVATED WHEN createBatchConfiguration selects it THEN fails with DeactivatedVersionNotAllowed", async () => {
+    await businessLogicResolver
+      .connect(signer_A)
+      .setVersionStatus(equityFacetIdList[0], equityFacetVersionList[0], VersionStatus.DEACTIVATED);
+
+    const facetConfigurations = createFacetConfigurations(equityFacetIdList, equityFacetVersionList);
+
+    await expect(
+      diamondCutManager
+        .connect(signer_A)
+        .createBatchConfiguration(CONFIG_IDS.equity, facetConfigurations, false, "0x", { gasLimit: 60_000_000 }),
+    )
+      .to.be.revertedWithCustomError(diamondCutManager, "DeactivatedVersionNotAllowed")
+      .withArgs(equityFacetIdList[0], equityFacetVersionList[0]);
   });
 
   it("GIVEN a resolver WHEN a selector is blacklisted THEN transaction fails with SelectorBlacklisted", async () => {

@@ -93,6 +93,17 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
     }
 
     /// @inheritdoc IBusinessLogicResolver
+    function setVersionStatus(
+        bytes32 _businessLogicKey,
+        uint256 _version,
+        VersionStatus _status
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyUnpaused validVersion(_businessLogicKey, _version) {
+        if (_status == VersionStatus.NONE) revert InvalidVersionStatus();
+        _setVersionStatus(_businessLogicKey, _version, _status);
+        emit VersionStatusUpdated(_businessLogicKey, _version, _status);
+    }
+
+    /// @inheritdoc IBusinessLogicResolver
     function getReplacementAddress(address _replacedAddress) external view returns (address replacementAddress_) {
         replacementAddress_ = _getReplacementAddress(_replacedAddress);
     }
