@@ -245,6 +245,7 @@ export function burnTests(getCtx: () => AssetMockCtx): void {
 
           it("GIVEN a recovered msgSender WHEN redeemFrom THEN transaction fails with WalletRecovered", async () => {
             await asset.connect(signer_E).approve(signer_C.address, AMOUNT / 2);
+            await asset.connect(signer_A).revokeRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
             await asset.recoveryAddress(signer_C.address, signer_D.address, ethers.ZeroAddress);
             expect(await asset.isAddressRecovered(signer_C.address)).to.be.true;
             await expect(

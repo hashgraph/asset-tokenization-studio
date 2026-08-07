@@ -46,6 +46,7 @@ export function operatorClearingHoldByPartitionTests(getCtx: () => AssetMockCtx)
     let signer_C: HardhatEthersSigner;
     let signer_D: HardhatEthersSigner;
     let signer_E: HardhatEthersSigner;
+    let signer_F: HardhatEthersSigner;
 
     let asset: IAssetMock;
 
@@ -86,6 +87,7 @@ export function operatorClearingHoldByPartitionTests(getCtx: () => AssetMockCtx)
       signer_C = ctx.user2;
       signer_D = ctx.user3;
       signer_E = ctx.user4;
+      signer_F = ctx.user5;
       asset = ctx.asset;
 
       hold = {
@@ -176,11 +178,11 @@ export function operatorClearingHoldByPartitionTests(getCtx: () => AssetMockCtx)
         it("GIVEN a recovered msgSender WHEN calling operatorClearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
           await asset.connect(signer_B).authorizeOperator(signer_A.address);
           await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-          await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
+          await asset.recoveryAddress(signer_F.address, signer_D.address, ADDRESS_ZERO);
 
           const clearingOperationFromB = {
             ...clearingOperationFrom,
-            from: signer_B.address,
+            from: signer_F.address,
           };
 
           await expect(
@@ -191,11 +193,11 @@ export function operatorClearingHoldByPartitionTests(getCtx: () => AssetMockCtx)
         it("GIVEN a recovered from address WHEN calling operatorClearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
           await asset.connect(signer_B).authorizeOperator(signer_A.address);
           await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-          await asset.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
+          await asset.recoveryAddress(signer_F.address, signer_D.address, ADDRESS_ZERO);
 
           const clearingOperationFromB = {
             ...clearingOperationFrom,
-            from: signer_B.address,
+            from: signer_F.address,
           };
 
           await expect(
@@ -215,13 +217,13 @@ export function operatorClearingHoldByPartitionTests(getCtx: () => AssetMockCtx)
           await asset.connect(signer_B).authorizeOperator(signer_A.address);
           await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
           // Recover the hold.to address (signer_C - the actual hold.to)
-          await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
+          await asset.recoveryAddress(signer_F.address, signer_D.address, ADDRESS_ZERO);
 
           const clearingOperationFromB = {
             ...clearingOperationFrom,
             from: signer_B.address,
           };
-
+          hold.to = signer_F.address;
           await expect(
             asset.connect(signer_A).operatorClearingCreateHoldByPartition(clearingOperationFromB, hold),
           ).to.be.revertedWithCustomError(asset, "WalletRecovered");

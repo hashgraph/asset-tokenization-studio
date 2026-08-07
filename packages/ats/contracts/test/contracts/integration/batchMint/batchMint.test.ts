@@ -123,13 +123,17 @@ export function batchMintTests(getCtx: () => AssetMockCtx): void {
         });
 
         it("GIVEN a recovered caller WHEN batchMint THEN transaction fails with WalletRecovered", async () => {
-          await asset.recoveryAddress(signer_A.address, signer_B.address, ethers.ZeroAddress);
+          await asset.recoveryAddress(signer_D.address, signer_B.address, ethers.ZeroAddress);
+          await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_AGENT, signer_D.address);
 
           const mintAmount = AMOUNT / 2;
-          const toList = [signer_D.address];
+          const toList = [signer_E.address];
           const amounts = [mintAmount];
 
-          await expect(asset.batchMint(toList, amounts)).to.be.revertedWithCustomError(asset, "WalletRecovered");
+          await expect(asset.connect(signer_D).batchMint(toList, amounts)).to.be.revertedWithCustomError(
+            asset,
+            "WalletRecovered",
+          );
         });
       });
     });

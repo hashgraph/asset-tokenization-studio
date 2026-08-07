@@ -36,6 +36,7 @@ export function operatorClearingByPartitionTests(getCtx: () => AssetMockCtx): vo
     let signer_C: HardhatEthersSigner;
     let signer_D: HardhatEthersSigner;
     let signer_E: HardhatEthersSigner;
+    let signer_F: HardhatEthersSigner;
 
     let asset: IAssetMock;
 
@@ -69,6 +70,7 @@ export function operatorClearingByPartitionTests(getCtx: () => AssetMockCtx): vo
       signer_C = ctx.user2;
       signer_D = ctx.user3;
       signer_E = ctx.user4;
+      signer_F = ctx.user5;
       asset = ctx.asset;
 
       clearingOperation = {
@@ -164,6 +166,8 @@ export function operatorClearingByPartitionTests(getCtx: () => AssetMockCtx): vo
         describe("onlyUnrecoveredAddress modifier", () => {
           it("GIVEN a recovered msgSender WHEN operatorClearingTransferByPartition THEN transaction fails with WalletRecovered", async () => {
             await asset.connect(signer_A).authorizeOperator(signer_B.address);
+            await asset.revokeRole(ATS_ROLES.ROLE_ISSUER, signer_B.address);
+            await asset.revokeRole(ATS_ROLES.ROLE_KYC, signer_B.address);
             await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
             await asset.recoveryAddress(signer_B.address, signer_E.address, ADDRESS_ZERO);
 
@@ -177,8 +181,8 @@ export function operatorClearingByPartitionTests(getCtx: () => AssetMockCtx): vo
           it("GIVEN a recovered from address WHEN operatorClearingTransferByPartition THEN transaction fails with WalletRecovered", async () => {
             await asset.connect(signer_A).authorizeOperator(signer_B.address);
             await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-            await asset.recoveryAddress(signer_A.address, signer_E.address, ADDRESS_ZERO);
-
+            await asset.recoveryAddress(signer_F.address, signer_E.address, ADDRESS_ZERO);
+            clearingOperationFrom.from = signer_F.address;
             await expect(
               asset
                 .connect(signer_B)
@@ -245,6 +249,8 @@ export function operatorClearingByPartitionTests(getCtx: () => AssetMockCtx): vo
         describe("onlyUnrecoveredAddress modifier", () => {
           it("GIVEN a recovered msgSender WHEN operatorClearingRedeemByPartition THEN transaction fails with WalletRecovered", async () => {
             await asset.connect(signer_A).authorizeOperator(signer_B.address);
+            await asset.revokeRole(ATS_ROLES.ROLE_ISSUER, signer_B.address);
+            await asset.revokeRole(ATS_ROLES.ROLE_KYC, signer_B.address);
             await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
             await asset.recoveryAddress(signer_B.address, signer_E.address, ADDRESS_ZERO);
 
@@ -256,8 +262,8 @@ export function operatorClearingByPartitionTests(getCtx: () => AssetMockCtx): vo
           it("GIVEN a recovered from address WHEN operatorClearingRedeemByPartition THEN transaction fails with WalletRecovered", async () => {
             await asset.connect(signer_A).authorizeOperator(signer_B.address);
             await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-            await asset.recoveryAddress(signer_A.address, signer_E.address, ADDRESS_ZERO);
-
+            await asset.recoveryAddress(signer_F.address, signer_E.address, ADDRESS_ZERO);
+            clearingOperationFrom.from = signer_F.address;
             await expect(
               asset.connect(signer_B).operatorClearingRedeemByPartition(clearingOperationFrom, _AMOUNT),
             ).to.be.revertedWithCustomError(asset, "WalletRecovered");

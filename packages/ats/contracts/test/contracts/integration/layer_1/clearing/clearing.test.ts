@@ -90,6 +90,7 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
     let signer_C: HardhatEthersSigner;
     let signer_D: HardhatEthersSigner;
     let signer_E: HardhatEthersSigner;
+    let signer_F: HardhatEthersSigner;
 
     let asset: IAssetMock;
 
@@ -299,6 +300,7 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
       signer_C = ctx.user2;
       signer_D = ctx.user3;
       signer_E = ctx.user4;
+      signer_F = ctx.user5;
       asset = ctx.asset;
 
       const block = await ethers.provider.getBlock("latest");
@@ -3018,7 +3020,7 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
           it("GIVEN a recovered msgSender WHEN calling operatorClearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
             await asset.connect(signer_B).authorizeOperator(signer_A.address);
             await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-            await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
+            await asset.recoveryAddress(signer_F.address, signer_D.address, ADDRESS_ZERO);
 
             const clearingOperationFromB = {
               ...clearingOperationFrom,
@@ -3026,18 +3028,18 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
             };
 
             await expect(
-              asset.connect(signer_A).operatorClearingCreateHoldByPartition(clearingOperationFromB, hold),
+              asset.connect(signer_F).operatorClearingCreateHoldByPartition(clearingOperationFromB, hold),
             ).to.be.revertedWithCustomError(asset, "WalletRecovered");
           });
 
           it("GIVEN a recovered from address WHEN calling operatorClearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
             await asset.connect(signer_B).authorizeOperator(signer_A.address);
             await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-            await asset.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
+            await asset.recoveryAddress(signer_F.address, signer_D.address, ADDRESS_ZERO);
 
             const clearingOperationFromB = {
               ...clearingOperationFrom,
-              from: signer_B.address,
+              from: signer_F.address,
             };
 
             await expect(
@@ -3046,7 +3048,6 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
           });
 
           it("GIVEN a recovered hold.to WHEN calling operatorClearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
-            // Give signer_B some tokens and authorize operator
             await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
             await asset.issueByPartition({
               partition: _DEFAULT_PARTITION,
@@ -3056,14 +3057,13 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
             });
             await asset.connect(signer_B).authorizeOperator(signer_A.address);
             await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-            // Recover the hold.to address (signer_C - the actual hold.to)
-            await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
+            await asset.recoveryAddress(signer_F.address, signer_D.address, ADDRESS_ZERO);
 
             const clearingOperationFromB = {
               ...clearingOperationFrom,
               from: signer_B.address,
             };
-
+            hold.to = signer_F.address;
             await expect(
               asset.connect(signer_A).operatorClearingCreateHoldByPartition(clearingOperationFromB, hold),
             ).to.be.revertedWithCustomError(asset, "WalletRecovered");
@@ -3073,10 +3073,10 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
         describe("clearingRedeemByPartition", () => {
           it("GIVEN a recovered msgSender WHEN calling clearingRedeemByPartition THEN transaction fails with WalletRecovered", async () => {
             await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-            await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
+            await asset.recoveryAddress(signer_F.address, signer_D.address, ADDRESS_ZERO);
 
             await expect(
-              asset.connect(signer_A).clearingRedeemByPartition(clearingOperation, _AMOUNT),
+              asset.connect(signer_F).clearingRedeemByPartition(clearingOperation, _AMOUNT),
             ).to.be.revertedWithCustomError(asset, "WalletRecovered");
           });
         });
@@ -3085,7 +3085,7 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
           it("GIVEN a recovered msgSender WHEN calling clearingRedeemFromByPartition THEN transaction fails with WalletRecovered", async () => {
             await asset.connect(signer_B).authorizeOperator(signer_A.address);
             await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-            await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
+            await asset.recoveryAddress(signer_F.address, signer_D.address, ADDRESS_ZERO);
 
             const clearingOperationFromB = {
               ...clearingOperationFrom,
@@ -3093,18 +3093,18 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
             };
 
             await expect(
-              asset.connect(signer_A).clearingRedeemFromByPartition(clearingOperationFromB, _AMOUNT),
+              asset.connect(signer_F).clearingRedeemFromByPartition(clearingOperationFromB, _AMOUNT),
             ).to.be.revertedWithCustomError(asset, "WalletRecovered");
           });
 
           it("GIVEN a recovered from address WHEN calling clearingRedeemFromByPartition THEN transaction fails with WalletRecovered", async () => {
             await asset.connect(signer_B).authorizeOperator(signer_A.address);
             await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-            await asset.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
+            await asset.recoveryAddress(signer_F.address, signer_D.address, ADDRESS_ZERO);
 
             const clearingOperationFromB = {
               ...clearingOperationFrom,
-              from: signer_B.address,
+              from: signer_F.address,
             };
 
             await expect(
@@ -3117,7 +3117,7 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
           it("GIVEN a recovered msgSender WHEN calling operatorClearingRedeemByPartition THEN transaction fails with WalletRecovered", async () => {
             await asset.connect(signer_B).authorizeOperator(signer_A.address);
             await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-            await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
+            await asset.recoveryAddress(signer_F.address, signer_D.address, ADDRESS_ZERO);
 
             const clearingOperationFromB = {
               ...clearingOperationFrom,
@@ -3125,18 +3125,18 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
             };
 
             await expect(
-              asset.connect(signer_A).operatorClearingRedeemByPartition(clearingOperationFromB, _AMOUNT),
+              asset.connect(signer_F).operatorClearingRedeemByPartition(clearingOperationFromB, _AMOUNT),
             ).to.be.revertedWithCustomError(asset, "WalletRecovered");
           });
 
           it("GIVEN a recovered from address WHEN calling operatorClearingRedeemByPartition THEN transaction fails with WalletRecovered", async () => {
             await asset.connect(signer_B).authorizeOperator(signer_A.address);
             await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-            await asset.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
+            await asset.recoveryAddress(signer_F.address, signer_D.address, ADDRESS_ZERO);
 
             const clearingOperationFromB = {
               ...clearingOperationFrom,
-              from: signer_B.address,
+              from: signer_F.address,
             };
 
             await expect(
@@ -3148,19 +3148,19 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
         describe("clearingTransferByPartition", () => {
           it("GIVEN a recovered msgSender WHEN calling clearingTransferByPartition THEN transaction fails with WalletRecovered", async () => {
             await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-            await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
+            await asset.recoveryAddress(signer_F.address, signer_D.address, ADDRESS_ZERO);
 
             await expect(
-              asset.connect(signer_A).clearingTransferByPartition(clearingOperation, _AMOUNT, signer_B.address),
+              asset.connect(signer_F).clearingTransferByPartition(clearingOperation, _AMOUNT, signer_B.address),
             ).to.be.revertedWithCustomError(asset, "WalletRecovered");
           });
 
           it("GIVEN a recovered to address WHEN calling clearingTransferByPartition THEN transaction fails with WalletRecovered", async () => {
             await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-            await asset.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
+            await asset.recoveryAddress(signer_F.address, signer_D.address, ADDRESS_ZERO);
 
             await expect(
-              asset.connect(signer_A).clearingTransferByPartition(clearingOperation, _AMOUNT, signer_B.address),
+              asset.connect(signer_A).clearingTransferByPartition(clearingOperation, _AMOUNT, signer_F.address),
             ).to.be.revertedWithCustomError(asset, "WalletRecovered");
           });
         });
@@ -3169,7 +3169,7 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
           it("GIVEN a recovered msgSender WHEN calling clearingTransferFromByPartition THEN transaction fails with WalletRecovered", async () => {
             await asset.connect(signer_B).authorizeOperator(signer_A.address);
             await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-            await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
+            await asset.recoveryAddress(signer_F.address, signer_D.address, ADDRESS_ZERO);
 
             const clearingOperationFromB = {
               ...clearingOperationFrom,
@@ -3178,7 +3178,7 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
 
             await expect(
               asset
-                .connect(signer_A)
+                .connect(signer_F)
                 .clearingTransferFromByPartition(clearingOperationFromB, _AMOUNT, signer_C.address),
             ).to.be.revertedWithCustomError(asset, "WalletRecovered");
           });
@@ -3186,7 +3186,7 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
           it("GIVEN a recovered to address WHEN calling clearingTransferFromByPartition THEN transaction fails with WalletRecovered", async () => {
             await asset.connect(signer_B).authorizeOperator(signer_A.address);
             await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-            await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
+            await asset.recoveryAddress(signer_F.address, signer_D.address, ADDRESS_ZERO);
 
             const clearingOperationFromB = {
               ...clearingOperationFrom,
@@ -3196,18 +3196,18 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
             await expect(
               asset
                 .connect(signer_A)
-                .clearingTransferFromByPartition(clearingOperationFromB, _AMOUNT, signer_C.address),
+                .clearingTransferFromByPartition(clearingOperationFromB, _AMOUNT, signer_F.address),
             ).to.be.revertedWithCustomError(asset, "WalletRecovered");
           });
 
           it("GIVEN a recovered from address WHEN calling clearingTransferFromByPartition THEN transaction fails with WalletRecovered", async () => {
             await asset.connect(signer_B).authorizeOperator(signer_A.address);
             await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-            await asset.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
+            await asset.recoveryAddress(signer_F.address, signer_D.address, ADDRESS_ZERO);
 
             const clearingOperationFromB = {
               ...clearingOperationFrom,
-              from: signer_B.address,
+              from: signer_F.address,
             };
 
             await expect(
@@ -3222,7 +3222,7 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
           it("GIVEN a recovered msgSender WHEN calling operatorClearingTransferByPartition THEN transaction fails with WalletRecovered", async () => {
             await asset.connect(signer_B).authorizeOperator(signer_A.address);
             await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-            await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
+            await asset.recoveryAddress(signer_F.address, signer_D.address, ADDRESS_ZERO);
 
             const clearingOperationFromB = {
               ...clearingOperationFrom,
@@ -3231,7 +3231,7 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
 
             await expect(
               asset
-                .connect(signer_A)
+                .connect(signer_F)
                 .operatorClearingTransferByPartition(clearingOperationFromB, _AMOUNT, signer_C.address),
             ).to.be.revertedWithCustomError(asset, "WalletRecovered");
           });
@@ -3239,7 +3239,7 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
           it("GIVEN a recovered to address WHEN calling operatorClearingTransferByPartition THEN transaction fails with WalletRecovered", async () => {
             await asset.connect(signer_B).authorizeOperator(signer_A.address);
             await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-            await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
+            await asset.recoveryAddress(signer_F.address, signer_D.address, ADDRESS_ZERO);
 
             const clearingOperationFromB = {
               ...clearingOperationFrom,
@@ -3249,18 +3249,18 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
             await expect(
               asset
                 .connect(signer_A)
-                .operatorClearingTransferByPartition(clearingOperationFromB, _AMOUNT, signer_C.address),
+                .operatorClearingTransferByPartition(clearingOperationFromB, _AMOUNT, signer_F.address),
             ).to.be.revertedWithCustomError(asset, "WalletRecovered");
           });
 
           it("GIVEN a recovered from address WHEN calling operatorClearingTransferByPartition THEN transaction fails with WalletRecovered", async () => {
             await asset.connect(signer_B).authorizeOperator(signer_A.address);
             await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-            await asset.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
+            await asset.recoveryAddress(signer_F.address, signer_D.address, ADDRESS_ZERO);
 
             const clearingOperationFromB = {
               ...clearingOperationFrom,
-              from: signer_B.address,
+              from: signer_F.address,
             };
 
             await expect(
@@ -3629,11 +3629,11 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
       describe("onlyUnrecoveredAddress modifier for protectedClearingCreateHoldByPartition", () => {
         it("GIVEN a recovered from address WHEN calling protectedClearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
           await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-          await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
+          await asset.recoveryAddress(signer_F.address, signer_D.address, ADDRESS_ZERO);
 
           const protectedClearingOperation = {
             clearingOperation: clearingOperation,
-            from: signer_A.address,
+            from: signer_F.address,
             deadline: expirationTimestamp,
             nonce: 1,
           };
@@ -3647,8 +3647,7 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
 
         it("GIVEN a recovered hold.to address WHEN calling protectedClearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
           await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-          // Recover the hold.to address (signer_C)
-          await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
+          await asset.recoveryAddress(signer_F.address, signer_D.address, ADDRESS_ZERO);
 
           const protectedClearingOperation = {
             clearingOperation: clearingOperation,
@@ -3658,7 +3657,7 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
           };
 
           const signature = "0x1234"; // Dummy signature
-
+          hold.to = signer_F.address;
           await expect(
             asset.protectedClearingCreateHoldByPartition(protectedClearingOperation, hold, signature),
           ).to.be.revertedWithCustomError(asset, "WalletRecovered");
@@ -4910,20 +4909,17 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
           });
         });
 
-        // Recovery tests following hold.test.ts pattern
         it("GIVEN a from user recovering WHEN protectedClearingTransferByPartition THEN transaction fails with WalletRecovered", async () => {
-          // Setup: Issue tokens to signer_A
           await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
           await asset.issueByPartition({
             partition: _DEFAULT_PARTITION,
-            tokenHolder: signer_A.address,
+            tokenHolder: signer_F.address,
             value: _AMOUNT,
             data: _DATA,
           });
 
-          // Recover signer_A's address (needs single-partition)
           await asset.setMultiPartition(false);
-          await asset.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
+          await asset.recoveryAddress(signer_F.address, signer_B.address, ADDRESS_ZERO);
 
           const message = {
             _protectedClearingOperation: protectedClearingTransfer,
@@ -4931,8 +4927,8 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
             _amount: _AMOUNT,
           };
 
-          const signature = await signer_A.signTypedData(domain, clearingTransferType, message);
-
+          const signature = await signer_F.signTypedData(domain, clearingTransferType, message);
+          protectedClearingTransfer.from = signer_F.address;
           await expect(
             asset
               .connect(signer_B)
@@ -4941,7 +4937,6 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
         });
 
         it("GIVEN a to user recovering WHEN protectedClearingTransferByPartition THEN transaction fails with WalletRecovered", async () => {
-          // Setup: Issue tokens to signer_A
           await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
           await asset.issueByPartition({
             partition: _DEFAULT_PARTITION,
@@ -4950,13 +4945,12 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
             data: _DATA,
           });
 
-          // Recover signer_C's address (needs single-partition)
           await asset.setMultiPartition(false);
-          await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
+          await asset.recoveryAddress(signer_F.address, signer_D.address, ADDRESS_ZERO);
 
           const message = {
             _protectedClearingOperation: protectedClearingTransfer,
-            _to: signer_C.address,
+            _to: signer_F.address,
             _amount: _AMOUNT,
           };
 
@@ -4965,7 +4959,7 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
           await expect(
             asset
               .connect(signer_B)
-              .protectedClearingTransferByPartition(protectedClearingTransfer, _AMOUNT, signer_C.address, signature),
+              .protectedClearingTransferByPartition(protectedClearingTransfer, _AMOUNT, signer_F.address, signature),
           ).to.be.revertedWithCustomError(asset, "WalletRecovered");
         });
 
@@ -4988,16 +4982,14 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
         });
 
         it("GIVEN a from user recovering WHEN protectedClearingRedeemByPartition THEN transaction fails with WalletRecovered", async () => {
-          // Setup: Issue tokens to signer_A
           await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
           await asset.issueByPartition({
             partition: _DEFAULT_PARTITION,
-            tokenHolder: signer_A.address,
+            tokenHolder: signer_F.address,
             value: _AMOUNT,
             data: _DATA,
           });
 
-          // Grant partition-specific role to signer_B
           const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
             ["bytes32", "bytes32"],
             [ATS_ROLES.ROLE_PROTECTED_PARTITIONS_PARTICIPANT, _DEFAULT_PARTITION],
@@ -5006,30 +4998,26 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
           const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
           await asset.grantRole(protectedPartitionRole, signer_B.address);
 
-          // Recover signer_A's address (needs single-partition)
           await asset.setMultiPartition(false);
-          await asset.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
-
-          // Try to call - should hit onlyUnrecoveredAddress before signature validation
+          await asset.recoveryAddress(signer_F.address, signer_B.address, ADDRESS_ZERO);
+          protectedClearingRedeem.from = signer_F.address;
           await expect(
             asset.connect(signer_B).protectedClearingRedeemByPartition(protectedClearingRedeem, _AMOUNT, "0x1234"),
           ).to.be.revertedWithCustomError(asset, "WalletRecovered");
         });
 
         it("GIVEN a from user recovering WHEN protectedClearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
-          // Setup: Issue tokens to signer_A
           await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
           await asset.issueByPartition({
             partition: _DEFAULT_PARTITION,
-            tokenHolder: signer_A.address,
+            tokenHolder: signer_F.address,
             value: _AMOUNT,
             data: _DATA,
           });
 
-          // Recover signer_A's address (needs single-partition)
           await asset.setMultiPartition(false);
-          await asset.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
-
+          await asset.recoveryAddress(signer_F.address, signer_B.address, ADDRESS_ZERO);
+          protectedClearingHoldCreation.from = signer_F.address;
           const holdForClearing = {
             amount: _AMOUNT,
             expirationTimestamp: expirationTimestamp,
@@ -5043,7 +5031,7 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
             _hold: holdForClearing,
           };
 
-          const signature = await signer_A.signTypedData(domain, clearingHoldType, message);
+          const signature = await signer_F.signTypedData(domain, clearingHoldType, message);
 
           await expect(
             asset
@@ -5062,15 +5050,14 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
             data: _DATA,
           });
 
-          // Recover signer_C's address (needs single-partition)
           await asset.setMultiPartition(false);
-          await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
+          await asset.recoveryAddress(signer_F.address, signer_D.address, ADDRESS_ZERO);
 
           const holdForClearing = {
             amount: _AMOUNT,
             expirationTimestamp: expirationTimestamp,
             escrow: signer_D.address,
-            to: signer_C.address,
+            to: signer_F.address,
             data: _DATA,
           };
 

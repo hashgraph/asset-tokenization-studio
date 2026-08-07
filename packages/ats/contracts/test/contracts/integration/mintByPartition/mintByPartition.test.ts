@@ -125,7 +125,7 @@ export function mintByPartitionTests(getCtx: () => AssetMockCtx): void {
 
       it("GIVEN a recovered caller WHEN issueByPartition THEN reverts with WalletRecovered", async () => {
         await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_C.address);
-        await asset.connect(signer_C).recoveryAddress(signer_A.address, signer_E.address, ethers.ZeroAddress);
+        await asset.connect(signer_C).recoveryAddress(signer_E.address, signer_D.address, ethers.ZeroAddress);
 
         await expect(
           asset.issueByPartition({

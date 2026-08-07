@@ -149,14 +149,14 @@ export function clearingByPartitionTests(getCtx: () => AssetMockCtx): void {
 
       it("GIVEN a recovered sender WHEN clearingRedeemByPartition THEN reverts with WalletRecovered", async () => {
         await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-        await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
+        await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
         const clearingOperation = {
           partition: _DEFAULT_PARTITION,
           expirationTimestamp: EXPIRATION_TIMESTAMP,
           data: EMPTY_HEX_BYTES,
         };
         await expect(
-          asset.connect(signer_A).clearingRedeemByPartition(clearingOperation, _AMOUNT),
+          asset.connect(signer_C).clearingRedeemByPartition(clearingOperation, _AMOUNT),
         ).to.be.revertedWithCustomError(asset, "WalletRecovered");
       });
 
@@ -280,38 +280,22 @@ export function clearingByPartitionTests(getCtx: () => AssetMockCtx): void {
         ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
-      it("GIVEN a recovered sender WHEN clearingRedeemFromByPartition THEN reverts with WalletRecovered", async () => {
+      it("GIVEN a recovered tokenHolder WHEN clearingRedeemFromByPartition THEN reverts with WalletRecovered", async () => {
         await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-        await asset.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
+        await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
         const clearingOperationFrom = {
           clearingOperation: {
             partition: _DEFAULT_PARTITION,
             expirationTimestamp: EXPIRATION_TIMESTAMP,
             data: EMPTY_HEX_BYTES,
           },
-          from: signer_A.address,
+          from: signer_C.address,
           operatorData: EMPTY_HEX_BYTES,
         };
-        await expect(
-          asset.connect(signer_B).clearingRedeemFromByPartition(clearingOperationFrom, _AMOUNT),
-        ).to.be.revertedWithCustomError(asset, "WalletRecovered");
-      });
-
-      it("GIVEN a recovered from address WHEN clearingRedeemFromByPartition THEN reverts with WalletRecovered", async () => {
-        await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-        await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
-        const clearingOperationFrom = {
-          clearingOperation: {
-            partition: _DEFAULT_PARTITION,
-            expirationTimestamp: EXPIRATION_TIMESTAMP,
-            data: EMPTY_HEX_BYTES,
-          },
-          from: signer_A.address,
-          operatorData: EMPTY_HEX_BYTES,
-        };
-        await expect(
-          asset.connect(signer_B).clearingRedeemFromByPartition(clearingOperationFrom, _AMOUNT),
-        ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+        await expect(asset.clearingRedeemFromByPartition(clearingOperationFrom, _AMOUNT)).to.be.revertedWithCustomError(
+          asset,
+          "WalletRecovered",
+        );
       });
 
       it("GIVEN clearing deactivated WHEN clearingRedeemFromByPartition THEN reverts with ClearingIsDisabled", async () => {
@@ -525,27 +509,27 @@ export function clearingByPartitionTests(getCtx: () => AssetMockCtx): void {
 
       it("GIVEN a recovered sender WHEN clearingTransferByPartition THEN reverts with WalletRecovered", async () => {
         await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-        await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
+        await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
         const clearingOperation = {
           partition: _DEFAULT_PARTITION,
           expirationTimestamp: EXPIRATION_TIMESTAMP,
           data: EMPTY_HEX_BYTES,
         };
         await expect(
-          asset.connect(signer_A).clearingTransferByPartition(clearingOperation, _AMOUNT, signer_B.address),
+          asset.connect(signer_C).clearingTransferByPartition(clearingOperation, _AMOUNT, signer_B.address),
         ).to.be.revertedWithCustomError(asset, "WalletRecovered");
       });
 
       it("GIVEN a recovered destination WHEN clearingTransferByPartition THEN reverts with WalletRecovered", async () => {
         await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-        await asset.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
+        await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
         const clearingOperation = {
           partition: _DEFAULT_PARTITION,
           expirationTimestamp: EXPIRATION_TIMESTAMP,
           data: EMPTY_HEX_BYTES,
         };
         await expect(
-          asset.connect(signer_A).clearingTransferByPartition(clearingOperation, _AMOUNT, signer_B.address),
+          asset.connect(signer_A).clearingTransferByPartition(clearingOperation, _AMOUNT, signer_C.address),
         ).to.be.revertedWithCustomError(asset, "WalletRecovered");
       });
 
@@ -691,7 +675,7 @@ export function clearingByPartitionTests(getCtx: () => AssetMockCtx): void {
 
       it("GIVEN a recovered sender WHEN clearingTransferFromByPartition THEN reverts with WalletRecovered", async () => {
         await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-        await asset.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
+        await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
         const clearingOperationFrom = {
           clearingOperation: {
             partition: _DEFAULT_PARTITION,
@@ -702,7 +686,7 @@ export function clearingByPartitionTests(getCtx: () => AssetMockCtx): void {
           operatorData: EMPTY_HEX_BYTES,
         };
         await expect(
-          asset.connect(signer_B).clearingTransferFromByPartition(clearingOperationFrom, _AMOUNT, signer_C.address),
+          asset.connect(signer_C).clearingTransferFromByPartition(clearingOperationFrom, _AMOUNT, signer_D.address),
         ).to.be.revertedWithCustomError(asset, "WalletRecovered");
       });
 
@@ -725,7 +709,7 @@ export function clearingByPartitionTests(getCtx: () => AssetMockCtx): void {
 
       it("GIVEN a recovered from address WHEN clearingTransferFromByPartition THEN reverts with WalletRecovered", async () => {
         await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-        await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
+        await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
         const clearingOperationFrom = {
           clearingOperation: {
             partition: _DEFAULT_PARTITION,
@@ -736,7 +720,7 @@ export function clearingByPartitionTests(getCtx: () => AssetMockCtx): void {
           operatorData: EMPTY_HEX_BYTES,
         };
         await expect(
-          asset.connect(signer_B).clearingTransferFromByPartition(clearingOperationFrom, _AMOUNT, signer_C.address),
+          asset.connect(signer_C).clearingTransferFromByPartition(clearingOperationFrom, _AMOUNT, signer_D.address),
         ).to.be.revertedWithCustomError(asset, "WalletRecovered");
       });
 

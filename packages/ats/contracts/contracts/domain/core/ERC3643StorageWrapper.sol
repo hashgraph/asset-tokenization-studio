@@ -523,7 +523,8 @@ library ERC3643StorageWrapper {
             LockStorageWrapper.getLockedAmountFor(_tokenHolder) +
                 HoldStorageWrapper.getHeldAmountFor(_tokenHolder) +
                 ClearingStorageWrapper.getClearedAmountFor(_tokenHolder) ==
-            0;
+            0 &&
+            AccessControlStorageWrapper.getRoleCountFor(_tokenHolder) == 0;
     }
 
     /**

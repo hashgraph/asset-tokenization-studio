@@ -127,12 +127,15 @@ export function maturityTests(getCtx: () => AssetMockCtx): void {
       });
 
       it("GIVEN a recovered wallet WHEN fullRedeemAtMaturity THEN reverts with WalletRecovered", async () => {
-        await asset.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
+        const signers = await ethers.getSigners();
+        const recoveredSigner = signers[11];
 
-        await expect(asset.connect(signer_A).fullRedeemAtMaturity(signer_A.address)).to.be.revertedWithCustomError(
-          asset,
-          "WalletRecovered",
-        );
+        await asset.connect(signer_A).recoveryAddress(recoveredSigner.address, signer_B.address, ADDRESS_ZERO);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_MATURITY_REDEEMER, recoveredSigner.address);
+
+        await expect(
+          asset.connect(recoveredSigner).fullRedeemAtMaturity(recoveredSigner.address),
+        ).to.be.revertedWithCustomError(asset, "WalletRecovered");
       });
 
       it("GIVEN a non-recovered caller redeeming on behalf of a recovered token holder WHEN fullRedeemAtMaturity THEN reverts with WalletRecovered", async () => {

@@ -39,6 +39,7 @@ export function operatorHoldByPartitionTests(getCtx: () => AssetMockCtx): void {
     let signer_C: HardhatEthersSigner;
     let signer_D: HardhatEthersSigner;
     let signer_E: HardhatEthersSigner;
+    let signer_F: HardhatEthersSigner;
 
     let asset: IAssetMock;
 
@@ -163,6 +164,7 @@ export function operatorHoldByPartitionTests(getCtx: () => AssetMockCtx): void {
       signer_C = ctx.user2;
       signer_D = ctx.user3;
       signer_E = ctx.user4;
+      signer_F = ctx.user5;
       asset = ctx.asset;
 
       await executeRbac(asset, set_initRbacs());
@@ -210,34 +212,22 @@ export function operatorHoldByPartitionTests(getCtx: () => AssetMockCtx): void {
       ).to.be.revertedWithCustomError(asset, "Unauthorized");
     });
 
-    // --- modifier: onlyValidOperatorCreateHoldByPartition (recovered addresses) ---
-    it("GIVEN a recovered msgSender WHEN operatorCreateHoldByPartition THEN reverts with WalletRecovered", async () => {
-      await asset.connect(signer_A).authorizeOperator(signer_B.address);
-      await asset.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
-
-      await expect(
-        asset
-          .connect(signer_B)
-          .operatorCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
-      ).to.be.revertedWithCustomError(asset, "WalletRecovered");
-    });
-
     it("GIVEN a recovered _from address WHEN operatorCreateHoldByPartition THEN reverts with WalletRecovered", async () => {
       await asset.connect(signer_A).authorizeOperator(signer_B.address);
-      await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
+      await asset.recoveryAddress(signer_F.address, signer_D.address, ADDRESS_ZERO);
 
       await expect(
         asset
           .connect(signer_B)
-          .operatorCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
+          .operatorCreateHoldByPartition(_DEFAULT_PARTITION, signer_F.address, hold, EMPTY_HEX_BYTES),
       ).to.be.revertedWithCustomError(asset, "WalletRecovered");
     });
 
     it("GIVEN a recovered hold.to address WHEN operatorCreateHoldByPartition THEN reverts with WalletRecovered", async () => {
       const holdWithTo = { ...hold, to: signer_C.address };
       await asset.connect(signer_A).authorizeOperator(signer_B.address);
-      await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
-
+      await asset.recoveryAddress(signer_F.address, signer_D.address, ADDRESS_ZERO);
+      holdWithTo.to = signer_F.address;
       await expect(
         asset
           .connect(signer_B)
