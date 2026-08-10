@@ -85,40 +85,41 @@ Asset Tokenization Studio implements complex token functionality by splitting bu
 
 **Business Logic Address (BLA)**: The deployed contract address for a specific facet at a specific version.
 
-**Version**: An unsigned integer representing a specific set of compatible facets. All facets are versioned together—registering a new facet or updating an existing facet increments the global latest version.
+**Version**: An unsigned integer scoped to a single business logic key. Each key keeps its own independent version counter — registering a new implementation for one key increments only that key's counter; other keys are unaffected.
 
 **Configuration ID**: A `bytes32` identifier for a facet set configuration (e.g., `EQUITY_CONFIG_ID`, `BOND_CONFIG_ID`). Different token types may have different facet configurations.
 
 ### Version Management
 
-The BLR maintains a multi-dimensional registry of facets: each facet can have multiple versions, and multiple configurations can exist simultaneously.
+The BLR maintains a multi-dimensional registry of facets: each business logic key has its own independent version history, and multiple configurations can exist simultaneously.
 
 #### Version Evolution Example
 
-This example demonstrates how versions evolve as new facets are registered:
+This example demonstrates how each business logic key's version evolves independently as facets are registered:
 
-| Version | BLK: Compliance | BLK: Transfer | BLK: Pause | Status    |
-| ------- | --------------- | ------------- | ---------- | --------- |
-| 1       | 0x1000...       | 0x2000...     | 0x3000...  | ACTIVATED |
-| 2       | 0x1100...       | 0x2000...     | 0x3000...  | ACTIVATED |
-| 3       | 0x1100...       | 0x2100...     | 0x3000...  | ACTIVATED |
-| 4       | 0x1100...       | 0x2100...     | 0x3100...  | ACTIVATED |
-| 5       | 0x1200...       | 0x2100...     | 0x3100...  | DRAFT     |
+| Business Logic Key | Version | Address   | Status      |
+| ------------------ | ------- | --------- | ----------- |
+| Compliance         | 1       | 0x1000... | ACTIVATED   |
+| Compliance         | 2       | 0x1100... | ACTIVATED   |
+| Compliance         | 3       | 0x1200... | DEACTIVATED |
+| Transfer           | 1       | 0x2000... | ACTIVATED   |
+| Transfer           | 2       | 0x2100... | ACTIVATED   |
+| Pause              | 1       | 0x3000... | ACTIVATED   |
+| Pause              | 2       | 0x3100... | ACTIVATED   |
 
 **Reading the table**:
 
-- **V1**: Initial deployment with three facets (Compliance, Transfer, Pause)
-- **V2**: Compliance facet upgraded (new address 0x1100...), others unchanged
-- **V3**: Transfer facet upgraded (new address 0x2100...), others unchanged
-- **V4**: Pause facet upgraded (new address 0x3100...), all three facets updated
-- **V5**: Compliance upgraded again (new address 0x1200...), but marked as DRAFT (not yet activated)
+- **Compliance** has been registered three times: v1 (initial deployment), v2 (upgraded address), v3 (upgraded again, then explicitly retired via `setVersionStatus(..., DEACTIVATED)`)
+- **Transfer** and **Pause** each have their own independent version history — registering a new Compliance version never touches their counters
+- A configuration selects one `(key, version)` pair per facet explicitly; it is never resolved automatically to "the latest version" of anything
 
 **Important invariants**:
 
-- All facets share the same version number (V1–V4 include all three)
-- Adding a new facet or updating any facet increments the version for all facets
-- A facet's address may remain the same across versions (Transfer and Pause in V2)
-- Status applies to the entire version, not individual facets
+- Each business logic key has its own independent version counter — registering one key never advances another key's counter
+- A `registerBusinessLogics()` call may include any subset of keys; omitting a previously-registered key leaves that key's counter untouched rather than erroring
+- A facet's address may remain the same across versions if it is re-registered without changing the implementation
+- `VersionStatus` (`ACTIVATED`/`DEACTIVATED`) is set per `(key, version)` pair via `setVersionStatus()`, not per a version shared across facets
+- `createConfiguration()`/`createBatchConfiguration()` reject selecting a `DEACTIVATED` version for a new configuration
 - Clients should only use facets from activated versions
 
 ### Configuration System
@@ -154,18 +155,14 @@ BLR Registry:
 The BLR inherits from `DiamondCutManager` which provides functions to:
 
 - Register new facets: `registerBusinessLogics()`
-- Manage facet versions: `setPartialVersion()`, `completeVersion()`
+- Manage facet version status: `setVersionStatus()`
 - Control function access: `addSelectorsToBlacklist()`, `removeSelectorsFromBlacklist()`
 
-#### Partial Versions
+#### Registering in Batches
 
-When registering a large number of facets, a single transaction may exceed gas limits. The BLR supports a "partial" mechanism:
+`registerBusinessLogics()` accepts any subset of business logic keys per call — there is no dedicated "partial" mode or finalization step. Because each key's version counter is independent (see above), registering a large facet set across multiple transactions to stay under gas limits is safe: split the keys into batches and call `registerBusinessLogics()` once per batch, in any order. Keys not yet included in any call simply haven't been registered yet — there is no intermediate state to finalize.
 
-1. Call `registerBusinessLogics()` with `isPartial = true` and first batch of facets
-2. Call `registerBusinessLogics()` again with more facets (still partial)
-3. Call `registerBusinessLogics()` with final batch and `isPartial = false` to finalize
-
-This allows splitting large version updates across multiple transactions without creating inconsistent state.
+`scripts/infrastructure/operations/registerAdditionalFacets.ts` uses this to register facets in batches of `FACET_REGISTRATION_BATCH_SIZE`.
 
 ### BLR Files
 
@@ -425,22 +422,22 @@ The infrastructure implements EIP-2535 Diamond Pattern with the following charac
 1. **Single Proxy Address**: All token functionality accessible through one address
 2. **Multiple Facets**: Business logic split across multiple facet contracts
 3. **Facet Registry**: BLR maintains mapping of function selectors to facet addresses
-4. **Versioning**: All facets versioned together for compatibility
+4. **Versioning**: Each facet key keeps its own independent version; a configuration selects a specific `(key, version)` pair per facet
 5. **Upgradeability**: Add/remove/modify facets without touching proxy
 
 ### Version Synchronization
 
-All facets across the system maintain synchronized versions:
+Each business logic key keeps its own independent version. A **configuration** groups one specific `(key, version)` pair per facet, explicitly chosen by whoever creates it — it is not a single number that governs every facet's version:
 
 ```
-Proxy points to Version 3:
-├── ComplianceFacet V3 (address 0x1234...)
-├── TransferFacet V3 (address 0x5678...)
-├── PauseFacet V3 (address 0x9abc...)
-└── (All other registered facets at V3)
+Configuration #3 selects:
+├── ComplianceFacet at key version 2 (address 0x1234...)
+├── TransferFacet at key version 5 (address 0x5678...)
+├── PauseFacet at key version 1 (address 0x9abc...)
+└── (any other facet key, each at its own explicitly chosen version)
 ```
 
-Updating any facet creates a new global version that includes all current facets (at their current addresses) plus the updated facet.
+Registering a new implementation for a facet key advances that key's own version counter only — it does not affect any other key's version, and it does not change what any existing configuration resolves to. A new configuration must explicitly select the new `(key, version)` pair to start using it.
 
 ### Configuration-Based Routing
 
@@ -474,7 +471,7 @@ Typical upgrade process:
 
 1. **Deploy new facet versions**: New contracts with updated logic
 2. **Register with BLR**: `registerBusinessLogics([{key, newAddress}])`
-3. **New version created**: BLR increments global version counter
+3. **New version created**: BLR increments that key's own version counter; other keys are unaffected
 4. **Update proxies**: Call `proxy.updateConfigVersion(newVersion)`
 5. **New calls route to new facets**: Future calls use new version
 

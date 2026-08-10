@@ -110,7 +110,9 @@ interface IBusinessLogicResolver is IDiamondCutManager {
     /**
      * @notice Update existing business logics addresses or add new business logics to the register.
      *         the BusinessLogicsRegistered event must be emitted.
-     *         The latest "version" for all business logics is increased by 1.
+     *         Each business logic key included in `_businessLogics` has its own independent
+     *         version counter, increased by 1 for that key only. Keys omitted from the call keep
+     *         their existing latest version untouched — see the per-key versioning note above.
      * @param _businessLogics list of business logics to be registered.
      */
     function registerBusinessLogics(BusinessLogicRegistryData[] calldata _businessLogics) external;
