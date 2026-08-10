@@ -30,6 +30,23 @@ abstract contract DiamondCut is IDiamondCut, ResolverProxyUnstructured {
         _;
     }
 
+    /// @notice Restricts execution to a candidate resolver that is neither the zero address nor
+    ///         fails an explicit `isBusinessLogicResolver()` identity check.
+    /// @dev The identity check is performed through a low-level `call()`, not a direct interface
+    ///      call, so a non-conforming target reverts with `InvalidBusinessLogicResolver` instead of
+    ///      an unrelated low-level revert.
+    /// @param _resolver Candidate resolver address to validate.
+    modifier onlyValidBusinessLogicResolver(IBusinessLogicResolver _resolver) {
+        if (address(_resolver) == address(0)) revert InvalidBusinessLogicResolver(address(_resolver));
+        (bool success, bytes memory returnData) = address(_resolver).call(
+            abi.encodeWithSelector(IBusinessLogicResolver.isBusinessLogicResolver.selector)
+        );
+        if (!success || returnData.length < 32 || !abi.decode(returnData, (bool))) {
+            revert InvalidBusinessLogicResolver(address(_resolver));
+        }
+        _;
+    }
+
     /// @inheritdoc IDiamondCut
     /// @dev Requires `DEFAULT_ADMIN_ROLE` and preserves the active configuration identifier and
     ///      resolver while updating only the pinned configuration version.
@@ -45,15 +62,19 @@ abstract contract DiamondCut is IDiamondCut, ResolverProxyUnstructured {
             _newVersion
         )
     {
+        uint256 oldVersion = ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion();
         IResolverProxy.ResolverProxyConfigurationV2 memory v2 = ResolverProxyStorageWrapper
             .getResolverProxyConfigurationV2();
         v2.configurationVersion = _newVersion;
         ResolverProxyStorageWrapper.setResolverProxyConfigurationV2(v2);
+        emit ConfigVersionUpdated(EvmAccessors.getMsgSender(), oldVersion, _newVersion);
     }
 
     /// @inheritdoc IDiamondCut
     /// @dev Requires `DEFAULT_ADMIN_ROLE` and validates the configuration before storing the new
-    ///      configuration identifier and pinned version.
+    ///      configuration identifier and pinned version. The admin is responsible for confirming
+    ///      that `_newConfigurationId` is compatible with the currently active configuration
+    ///      before calling this function; no on-chain compatibility check is performed.
     function updateConfig(
         bytes32 _newConfigurationId,
         uint256 _newVersion
@@ -67,11 +88,13 @@ abstract contract DiamondCut is IDiamondCut, ResolverProxyUnstructured {
             _newVersion
         )
     {
+        bytes32 oldConfigurationId = ResolverProxyStorageWrapper.getResolverProxyConfigurationId();
         IResolverProxy.ResolverProxyConfigurationV2 memory v2 = ResolverProxyStorageWrapper
             .getResolverProxyConfigurationV2();
         v2.configurationId = _newConfigurationId;
         v2.configurationVersion = _newVersion;
         ResolverProxyStorageWrapper.setResolverProxyConfigurationV2(v2);
+        emit ConfigUpdated(EvmAccessors.getMsgSender(), oldConfigurationId, _newConfigurationId, _newVersion);
     }
 
     /// @inheritdoc IDiamondCut
@@ -83,8 +106,13 @@ abstract contract DiamondCut is IDiamondCut, ResolverProxyUnstructured {
     }
 
     /// @inheritdoc IDiamondCut
-    /// @dev Requires `DEFAULT_ADMIN_ROLE` and validates the target configuration against the new
-    ///      resolver before replacing the resolver pointer, configuration identifier and version.
+    /// @dev Requires `DEFAULT_ADMIN_ROLE`, validates `_newResolver` is a genuine
+    ///      `IBusinessLogicResolver`, and validates the target configuration against it before
+    ///      replacing the resolver pointer, configuration identifier and version. The admin is
+    ///      responsible for confirming business-key and configuration compatibility across the
+    ///      resolver switch before calling this function; no on-chain compatibility check is
+    ///      performed — `_newResolver`, `_newConfigurationId` and `_newVersion` are trusted as a
+    ///      deliberate, atomic choice by a trusted admin role.
     function updateResolver(
         IBusinessLogicResolver _newResolver,
         bytes32 _newConfigurationId,
@@ -94,8 +122,10 @@ abstract contract DiamondCut is IDiamondCut, ResolverProxyUnstructured {
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyValidBusinessLogicResolver(_newResolver)
         onlyRegisteredResolverProxyConfiguration(_newResolver, _newConfigurationId, _newVersion)
     {
+        address oldResolver = address(ResolverProxyStorageWrapper.getBusinessLogicResolver());
         ResolverProxyStorageWrapper.setBusinessLogicResolver(_newResolver);
         ResolverProxyStorageWrapper.setResolverProxyConfigurationV2(
             IResolverProxy.ResolverProxyConfigurationV2({
@@ -103,6 +133,13 @@ abstract contract DiamondCut is IDiamondCut, ResolverProxyUnstructured {
                 configurationVersion: _newVersion,
                 replacementEnabled: _newReplacementEnabled
             })
+        );
+        emit ResolverUpdated(
+            EvmAccessors.getMsgSender(),
+            oldResolver,
+            address(_newResolver),
+            _newConfigurationId,
+            _newVersion
         );
     }
 

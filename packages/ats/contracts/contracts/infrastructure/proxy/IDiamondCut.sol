@@ -9,6 +9,47 @@ import { IBusinessLogicResolver } from "../diamond/IBusinessLogicResolver.sol";
 /// @notice Interface for upgrading the Diamond proxy's Business Logic Resolver (BLR),
 ///         configuration identifier, and version in a single or multi-step operation.
 interface IDiamondCut is IStaticFunctionSelectors {
+    /// @notice Emitted when the resolver-proxy's Business Logic Resolver is replaced.
+    /// @param caller Account that performed the update.
+    /// @param oldResolver Previous Business Logic Resolver address.
+    /// @param newResolver New Business Logic Resolver address.
+    /// @param newConfigurationId Configuration identifier activated on the new resolver.
+    /// @param newConfigurationVersion Configuration version activated on the new resolver.
+    event ResolverUpdated(
+        address indexed caller,
+        address oldResolver,
+        address newResolver,
+        bytes32 newConfigurationId,
+        uint256 newConfigurationVersion
+    );
+
+    /// @notice Emitted when the active configuration identifier is replaced.
+    /// @param caller Account that performed the update.
+    /// @param oldConfigurationId Previous configuration identifier.
+    /// @param newConfigurationId New configuration identifier.
+    /// @param newConfigurationVersion Version activated for the new configuration.
+    event ConfigUpdated(
+        address indexed caller,
+        bytes32 oldConfigurationId,
+        bytes32 newConfigurationId,
+        uint256 newConfigurationVersion
+    );
+
+    /// @notice Emitted when the pinned version of the active configuration is replaced.
+    /// @param caller Account that performed the update.
+    /// @param oldConfigurationVersion Previous configuration version.
+    /// @param newConfigurationVersion New configuration version.
+    event ConfigVersionUpdated(
+        address indexed caller,
+        uint256 oldConfigurationVersion,
+        uint256 newConfigurationVersion
+    );
+
+    /// @notice Thrown when a candidate resolver is the zero address or fails the
+    ///         `isBusinessLogicResolver()` identity check.
+    /// @param invalidResolver The address that failed validation.
+    error InvalidBusinessLogicResolver(address invalidResolver);
+
     /**
      * @notice For the current BLR and configuration, update the used version.
      * @param _newVersion The new version number to set for the current configuration.
