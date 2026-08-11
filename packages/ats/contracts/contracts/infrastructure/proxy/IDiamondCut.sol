@@ -10,28 +10,42 @@ import { IBusinessLogicResolver } from "../diamond/IBusinessLogicResolver.sol";
 ///         configuration identifier, and version in a single or multi-step operation.
 interface IDiamondCut is IStaticFunctionSelectors {
     /// @notice Emitted when the resolver-proxy's Business Logic Resolver is replaced.
+    /// @dev `updateResolver()` combines four changes in one call; every one of them gets a
+    ///      complete old/new pair here rather than only the fields that happen to differ.
     /// @param caller Account that performed the update.
     /// @param oldResolver Previous Business Logic Resolver address.
     /// @param newResolver New Business Logic Resolver address.
+    /// @param oldConfigurationId Previous configuration identifier.
     /// @param newConfigurationId Configuration identifier activated on the new resolver.
+    /// @param oldConfigurationVersion Previous configuration version.
     /// @param newConfigurationVersion Configuration version activated on the new resolver.
+    /// @param oldReplacementEnabled Previous replacement-enabled flag.
+    /// @param newReplacementEnabled Replacement-enabled flag activated on the new resolver.
     event ResolverUpdated(
         address indexed caller,
         address oldResolver,
         address newResolver,
+        bytes32 oldConfigurationId,
         bytes32 newConfigurationId,
-        uint256 newConfigurationVersion
+        uint256 oldConfigurationVersion,
+        uint256 newConfigurationVersion,
+        bool oldReplacementEnabled,
+        bool newReplacementEnabled
     );
 
     /// @notice Emitted when the active configuration identifier is replaced.
+    /// @dev `updateConfig()` combines an id change and a version change in one call; both get a
+    ///      complete old/new pair here.
     /// @param caller Account that performed the update.
     /// @param oldConfigurationId Previous configuration identifier.
     /// @param newConfigurationId New configuration identifier.
+    /// @param oldConfigurationVersion Previous configuration version.
     /// @param newConfigurationVersion Version activated for the new configuration.
     event ConfigUpdated(
         address indexed caller,
         bytes32 oldConfigurationId,
         bytes32 newConfigurationId,
+        uint256 oldConfigurationVersion,
         uint256 newConfigurationVersion
     );
 
@@ -44,6 +58,12 @@ interface IDiamondCut is IStaticFunctionSelectors {
         uint256 oldConfigurationVersion,
         uint256 newConfigurationVersion
     );
+
+    /// @notice Emitted when the replacement-enabled flag is replaced.
+    /// @param caller Account that performed the update.
+    /// @param oldReplacementEnabled Previous replacement-enabled flag.
+    /// @param newReplacementEnabled New replacement-enabled flag.
+    event ReplacementEnabledUpdated(address indexed caller, bool oldReplacementEnabled, bool newReplacementEnabled);
 
     /// @notice Thrown when a candidate resolver is the zero address or fails the
     ///         `isBusinessLogicResolver()` identity check.

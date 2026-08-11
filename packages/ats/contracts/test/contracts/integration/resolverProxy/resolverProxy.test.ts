@@ -758,7 +758,7 @@ describe("ResolverProxy Tests", () => {
 
     await expect(diamondCut.updateResolver(resolver_2.target, CONFIG_ID_2, 1, true))
       .to.emit(diamondCut, "ResolverUpdated")
-      .withArgs(signer_A.address, resolver.target, resolver_2.target, CONFIG_ID_2, 1);
+      .withArgs(signer_A.address, resolver.target, resolver_2.target, CONFIG_ID, CONFIG_ID_2, 1, 1, false, true);
   });
 
   it("FIND-053 (TDD, expected red) GIVEN resolverProxy and admin user WHEN updating config THEN emits ConfigUpdated", async () => {
@@ -786,7 +786,7 @@ describe("ResolverProxy Tests", () => {
 
     await expect(diamondCut.updateConfig(CONFIG_ID_2, 1))
       .to.emit(diamondCut, "ConfigUpdated")
-      .withArgs(signer_A.address, CONFIG_ID, CONFIG_ID_2, 1);
+      .withArgs(signer_A.address, CONFIG_ID, CONFIG_ID_2, 1, 1);
   });
 
   it("FIND-053 (TDD, expected red) GIVEN resolverProxy and admin user WHEN updating config version THEN emits ConfigVersionUpdated", async () => {
@@ -814,5 +814,32 @@ describe("ResolverProxy Tests", () => {
     await expect(diamondCut.updateConfigVersion(1))
       .to.emit(diamondCut, "ConfigVersionUpdated")
       .withArgs(signer_A.address, 1, 1);
+  });
+
+  it("FIND-053 (TDD, expected red) GIVEN resolverProxy and admin user WHEN updating replacement enabled THEN emits ReplacementEnabledUpdated", async () => {
+    const businessLogicsRegistryDatas = [
+      {
+        businessLogicKey: await diamondFacet.getStaticResolverKey(),
+        businessLogicAddress: diamondFacet.target,
+      },
+      {
+        businessLogicKey: await accessControlImpl.getStaticResolverKey(),
+        businessLogicAddress: accessControlImpl.target,
+      },
+    ];
+
+    await setUpResolver(businessLogicsRegistryDatas);
+
+    const rbac = [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [signer_A.address] }];
+
+    const resolverProxy = await (
+      await ethers.getContractFactory("ResolverProxy")
+    ).deploy(resolver.target, { configurationId: CONFIG_ID, configurationVersion: 1, replacementEnabled: false }, rbac);
+
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target, signer_A);
+
+    await expect(diamondCut.updateReplacementEnabled(true))
+      .to.emit(diamondCut, "ReplacementEnabledUpdated")
+      .withArgs(signer_A.address, false, true);
   });
 });

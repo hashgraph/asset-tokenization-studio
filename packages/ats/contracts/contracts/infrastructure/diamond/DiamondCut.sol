@@ -91,18 +91,27 @@ abstract contract DiamondCut is IDiamondCut, ResolverProxyUnstructured {
         bytes32 oldConfigurationId = ResolverProxyStorageWrapper.getResolverProxyConfigurationId();
         IResolverProxy.ResolverProxyConfigurationV2 memory v2 = ResolverProxyStorageWrapper
             .getResolverProxyConfigurationV2();
+        uint256 oldConfigurationVersion = v2.configurationVersion;
         v2.configurationId = _newConfigurationId;
         v2.configurationVersion = _newVersion;
         ResolverProxyStorageWrapper.setResolverProxyConfigurationV2(v2);
-        emit ConfigUpdated(EvmAccessors.getMsgSender(), oldConfigurationId, _newConfigurationId, _newVersion);
+        emit ConfigUpdated(
+            EvmAccessors.getMsgSender(),
+            oldConfigurationId,
+            _newConfigurationId,
+            oldConfigurationVersion,
+            _newVersion
+        );
     }
 
     /// @inheritdoc IDiamondCut
     function updateReplacementEnabled(bool _newReplacementEnabled) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         IResolverProxy.ResolverProxyConfigurationV2 memory v2 = ResolverProxyStorageWrapper
             .getResolverProxyConfigurationV2();
+        bool oldReplacementEnabled = v2.replacementEnabled;
         v2.replacementEnabled = _newReplacementEnabled;
         ResolverProxyStorageWrapper.setResolverProxyConfigurationV2(v2);
+        emit ReplacementEnabledUpdated(EvmAccessors.getMsgSender(), oldReplacementEnabled, _newReplacementEnabled);
     }
 
     /// @inheritdoc IDiamondCut
@@ -125,22 +134,7 @@ abstract contract DiamondCut is IDiamondCut, ResolverProxyUnstructured {
         onlyValidBusinessLogicResolver(_newResolver)
         onlyRegisteredResolverProxyConfiguration(_newResolver, _newConfigurationId, _newVersion)
     {
-        address oldResolver = address(ResolverProxyStorageWrapper.getBusinessLogicResolver());
-        ResolverProxyStorageWrapper.setBusinessLogicResolver(_newResolver);
-        ResolverProxyStorageWrapper.setResolverProxyConfigurationV2(
-            IResolverProxy.ResolverProxyConfigurationV2({
-                configurationId: _newConfigurationId,
-                configurationVersion: _newVersion,
-                replacementEnabled: _newReplacementEnabled
-            })
-        );
-        emit ResolverUpdated(
-            EvmAccessors.getMsgSender(),
-            oldResolver,
-            address(_newResolver),
-            _newConfigurationId,
-            _newVersion
-        );
+        _updateResolver(_newResolver, _newConfigurationId, _newVersion, _newReplacementEnabled);
     }
 
     /// @inheritdoc IDiamondCut
@@ -161,6 +155,39 @@ abstract contract DiamondCut is IDiamondCut, ResolverProxyUnstructured {
             ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
             ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion(),
             ResolverProxyStorageWrapper.getResolverProxyReplacementEnabled()
+        );
+    }
+
+    /// @notice Body of `updateResolver()`, extracted to a private helper to give it a fresh
+    ///         stack frame — the four parameters plus the old/new locals needed for the fully
+    ///         old/new-covering `ResolverUpdated` event otherwise trip "stack too deep".
+    function _updateResolver(
+        IBusinessLogicResolver _newResolver,
+        bytes32 _newConfigurationId,
+        uint256 _newVersion,
+        bool _newReplacementEnabled
+    ) private {
+        address oldResolver = address(ResolverProxyStorageWrapper.getBusinessLogicResolver());
+        IResolverProxy.ResolverProxyConfigurationV2 memory oldV2 = ResolverProxyStorageWrapper
+            .getResolverProxyConfigurationV2();
+        ResolverProxyStorageWrapper.setBusinessLogicResolver(_newResolver);
+        ResolverProxyStorageWrapper.setResolverProxyConfigurationV2(
+            IResolverProxy.ResolverProxyConfigurationV2({
+                configurationId: _newConfigurationId,
+                configurationVersion: _newVersion,
+                replacementEnabled: _newReplacementEnabled
+            })
+        );
+        emit ResolverUpdated(
+            EvmAccessors.getMsgSender(),
+            oldResolver,
+            address(_newResolver),
+            oldV2.configurationId,
+            _newConfigurationId,
+            oldV2.configurationVersion,
+            _newVersion,
+            oldV2.replacementEnabled,
+            _newReplacementEnabled
         );
     }
 }
