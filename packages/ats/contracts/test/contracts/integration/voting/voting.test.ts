@@ -250,6 +250,36 @@ export function votingTests(getCtx: () => AssetMockCtx): void {
       expect([...votingHolders]).to.have.members([signer_A.address]);
     });
 
+    it("GIVEN a voting-rights snapshot and a balance adjustment scheduled for the SAME record-date timestamp WHEN the cross-ordered queue is triggered THEN the voting entitlement is unaffected (FIND-015)", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
+
+      const TotalAmount = 100000n;
+
+      await asset.connect(signer_C).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: TotalAmount,
+        data: "0x",
+      });
+
+      const balanceAdjustmentData = {
+        executionDate: votingRecordDateInSeconds,
+        factor: 20,
+        decimals: 1,
+      };
+
+      await asset.connect(signer_C).setVoting(votingData);
+      await asset.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
+
+      await asset.changeSystemTimestamp(votingRecordDateInSeconds + 1n);
+      await asset.connect(signer_C).triggerPendingScheduledCrossOrderedTasks();
+
+      const votingFor = await asset.getVotingFor(1, signer_A.address);
+      expect(votingFor.recordDateReached).to.equal(true);
+      expect(votingFor.tokenBalance).to.equal(TotalAmount);
+    });
+
     describe("Cancel Voting", () => {
       it("GIVEN an account without corporateActions role WHEN cancelVoting THEN transaction fails with AccountHasNoRole", async () => {
         await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_B.address);
