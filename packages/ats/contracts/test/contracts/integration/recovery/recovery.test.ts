@@ -684,6 +684,37 @@ export function recoveryTests(getCtx: () => AssetMockCtx): void {
           ).to.be.revertedWithCustomError(asset, "WalletRecovered");
         });
 
+        it("GIVEN a recovered-wallet recipient WHEN transferAndLock or transferAndLockByPartition THEN both transactions fail with WalletRecovered (FIND-065)", async () => {
+          await asset.grantRole(ATS_ROLES.ROLE_LOCKER, signer_A.address);
+          const amount = 1000;
+          await asset.connect(signer_C).issueByPartition({
+            partition: DEFAULT_PARTITION,
+            tokenHolder: signer_A.address,
+            value: amount * 4,
+            data: EMPTY_HEX_BYTES,
+          });
+          await asset.recoveryAddress(signer_F.address, signer_E.address, ADDRESS_ZERO);
+
+          const latestBlock = await ethers.provider.getBlock("latest");
+          const expirationTimestamp = latestBlock!.timestamp + 365 * 24 * 60 * 60;
+
+          await expect(
+            asset.connect(signer_A).transferAndLock(signer_F.address, amount, EMPTY_HEX_BYTES, expirationTimestamp),
+          ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+
+          await expect(
+            asset
+              .connect(signer_A)
+              .transferAndLockByPartition(
+                DEFAULT_PARTITION,
+                signer_F.address,
+                amount,
+                EMPTY_HEX_BYTES,
+                expirationTimestamp,
+              ),
+          ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+        });
+
         describe("Recovered wallets fail centralized role checks", () => {
           it("GIVEN a recovered wallet still holding ROLE_PAUSER WHEN it calls pause (onlyRole) THEN reverts WalletRecovered", async () => {
             await asset.grantRole(ATS_ROLES.ROLE_PAUSER, signer_D.address);
