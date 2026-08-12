@@ -55,6 +55,7 @@ abstract contract Burn is IBurn, Modifiers {
         override
         onlyOperational
         onlyActivated
+        onlyUnpaused
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
         onlyCanRedeemFromByPartition(EvmAccessors.getMsgSender(), DEFAULT_PARTITION, _value)
@@ -74,6 +75,7 @@ abstract contract Burn is IBurn, Modifiers {
         override
         onlyOperational
         onlyActivated
+        onlyUnpaused
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
         onlyCanRedeemFromByPartition(_tokenHolder, DEFAULT_PARTITION, _value)

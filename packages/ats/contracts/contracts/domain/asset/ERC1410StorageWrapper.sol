@@ -5,6 +5,7 @@ import { ITransfer } from "../../facets/transfer/ITransfer.sol";
 import { IERC1410Types } from "../../facets/commonTypes/IERC1410Types.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
+import { PauseStorageWrapper } from "../core/PauseStorageWrapper.sol";
 import { ERC20VotesStorageWrapper } from "./ERC20VotesStorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
@@ -549,6 +550,8 @@ library ERC1410StorageWrapper {
      * @param amount    Token amount about to move.
      */
     function beforeTokenTransfer(bytes32 partition, address from, address to, uint256 amount) internal {
+        PauseStorageWrapper.checkUnpaused();
+
         if (from == to) return;
         triggerAndSyncAll(partition, from, to);
 
