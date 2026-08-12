@@ -229,6 +229,21 @@ library ERC1594StorageWrapper {
     }
 
     /**
+     * @notice Validates that an account's partition balance covers a requested amount.
+     * @dev Reverts with `InsufficientBalance` when the account's current, balance-adjusted
+     *      partition balance is lower than `value`. Intended for callers that need to check a
+     *      running/cumulative total against a balance without running the full compliance and
+     *      identity pipeline of `checkCanTransferFromByPartition`.
+     * @param from Account whose partition balance is checked.
+     * @param value Amount the caller intends to validate against the balance.
+     * @param partition Partition identifier the balance is read from.
+     */
+    function checkPartitionBalance(address from, uint256 value, bytes32 partition) internal view {
+        (bool ok, , bytes32 reasonCode, bytes memory details) = _checkPartitionBalance(from, value, partition);
+        if (!ok) LowLevelCall.revertWithData(bytes4(reasonCode), details);
+    }
+
+    /**
      * @notice Reports whether tokens can be transferred from an account to another for a partition.
      * @dev Performs generic, address, compliance, identity, authorisation, allowance, and business
      *      rule checks without mutating state. Returns early on the first failed validation.

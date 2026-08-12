@@ -48,26 +48,41 @@ abstract contract BatchTransfer is IBatchTransfer, Modifiers {
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
     {
-        uint256 length = _toList.length;
+        address sender = EvmAccessors.getMsgSender();
+        uint256 length = _checkBatchTransferBalances(sender, _toList, _amounts, DEFAULT_PARTITION);
         for (uint256 i; i < length; ) {
-            ERC1410StorageWrapper.checkNonZeroTransferAmount(_amounts[i]);
+            TokenCoreOps.transfer(sender, _toList[i], _amounts[i]);
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    function _checkBatchTransferBalances(
+        address _from,
+        address[] calldata _toList,
+        uint256[] calldata _amounts,
+        bytes32 _partition
+    ) private returns (uint256 length_) {
+        length_ = _toList.length;
+        uint256 total;
+
+        for (uint256 i; i < length_; ) {
+            uint256 amount = _amounts[i];
+            ERC1410StorageWrapper.checkNonZeroTransferAmount(amount);
             ERC1594StorageWrapper.checkCanTransferFromByPartition(
-                EvmAccessors.getMsgSender(),
+                _from,
                 _toList[i],
-                DEFAULT_PARTITION,
-                _amounts[i],
+                _partition,
+                amount,
                 EMPTY_BYTES,
                 EMPTY_BYTES
             );
             unchecked {
+                total += amount;
                 ++i;
             }
         }
-        for (uint256 i; i < length; ) {
-            TokenCoreOps.transfer(EvmAccessors.getMsgSender(), _toList[i], _amounts[i]);
-            unchecked {
-                ++i;
-            }
-        }
+        ERC1594StorageWrapper.checkPartitionBalance(_from, total, DEFAULT_PARTITION);
     }
 }

@@ -7,7 +7,7 @@ import { ComplianceMock, IdentityRegistryMock, IAssetMock } from "@contract-type
 import type { AssetMockCtx } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
 import { ASSET_MOCK_CONFIG_ID } from "../../../fixtures/deploy/assetMockConfiguration";
-import { ATS_ROLES, EMPTY_STRING, ZERO, ADDRESS_ZERO, RESOLVER_KEYS } from "@scripts";
+import { ATS_ROLES, EMPTY_STRING, ZERO, ADDRESS_ZERO, DEFAULT_PARTITION, RESOLVER_KEYS } from "@scripts";
 
 const AMOUNT = 1000;
 const EMPTY_VC_ID = EMPTY_STRING;
@@ -121,14 +121,41 @@ export function batchTransferTests(getCtx: () => AssetMockCtx): void {
           );
         });
 
-        it("GIVEN insufficient balance WHEN batchTransfer THEN transaction fails", async () => {
+        it("GIVEN insufficient balance WHEN batchTransfer THEN transaction fails with InsufficientBalance (FIND-046)", async () => {
           const toList = [signer_F.address, signer_D.address];
           const amounts = [initialMintAmount, transferAmount];
 
-          await expect(asset.connect(signer_E).batchTransfer(toList, amounts)).to.be.revertedWithCustomError(
-            asset,
-            "InvalidPartition",
-          );
+          await expect(asset.connect(signer_E).batchTransfer(toList, amounts))
+            .to.be.revertedWithCustomError(asset, "InsufficientBalance")
+            .withArgs(signer_E.address, initialMintAmount, initialMintAmount + transferAmount, DEFAULT_PARTITION);
+        });
+
+        describe("FIND-046 - cumulative amount ignored by validation loop", () => {
+          const firstLeg = (initialMintAmount * 6) / 10;
+          const secondLeg = (initialMintAmount * 5) / 10;
+
+          it("GIVEN a cumulative-over-balance batch WHEN each leg is queried individually via canTransfer THEN both are misreported as transferable", async () => {
+            const [canTransferFirst] = await asset.connect(signer_E).canTransfer(signer_F.address, firstLeg, "0x");
+            const [canTransferSecond] = await asset.connect(signer_E).canTransfer(signer_D.address, secondLeg, "0x");
+
+            expect(canTransferFirst).to.equal(true);
+            expect(canTransferSecond).to.equal(true);
+          });
+
+          it("GIVEN a cumulative-over-balance batch WHEN batchTransfer THEN the whole transaction reverts with InsufficientBalance against the running total, before any leg executes", async () => {
+            const toList = [signer_F.address, signer_D.address];
+            const amounts = [firstLeg, secondLeg];
+
+            const initialBalanceSender = await asset.balanceOf(signer_E.address);
+            const initialBalanceF = await asset.balanceOf(signer_F.address);
+
+            await expect(asset.connect(signer_E).batchTransfer(toList, amounts))
+              .to.be.revertedWithCustomError(asset, "InsufficientBalance")
+              .withArgs(signer_E.address, initialMintAmount, firstLeg + secondLeg, DEFAULT_PARTITION);
+
+            expect(await asset.balanceOf(signer_E.address)).to.equal(initialBalanceSender);
+            expect(await asset.balanceOf(signer_F.address)).to.equal(initialBalanceF);
+          });
         });
 
         it("GIVEN an invalid input amounts array THEN transaction fails with InputAmountsArrayLengthMismatch", async () => {
