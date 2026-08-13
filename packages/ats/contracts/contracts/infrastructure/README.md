@@ -70,7 +70,7 @@ The **Business Logic Resolver (BLR)** is a smart contract that centralizes the m
 
 Asset Tokenization Studio implements complex token functionality by splitting business logic into multiple smart contracts (facets). As the system evolves, newer versions of these facets are deployed, older versions are maintained, and new facets are added. The BLR manages this version complexity, ensuring that:
 
-1. All facets across the system maintain synchronized versions
+1. Each business logic key maintains its own independent version counter
 2. Any previous version can be resolved for any registered facet
 3. Consumers can query compatible facet sets for a given version
 4. Version status can be tracked (ACTIVATED, DEACTIVATED, NONE)
@@ -425,7 +425,7 @@ The infrastructure implements EIP-2535 Diamond Pattern with the following charac
 4. **Versioning**: Each facet key keeps its own independent version; a configuration selects a specific `(key, version)` pair per facet
 5. **Upgradeability**: Add/remove/modify facets without touching proxy
 
-### Version Synchronization
+### Version Independence
 
 Each business logic key keeps its own independent version. A **configuration** groups one specific `(key, version)` pair per facet, explicitly chosen by whoever creates it — it is not a single number that governs every facet's version:
 
@@ -470,10 +470,10 @@ Facets are isolated but can share storage:
 Typical upgrade process:
 
 1. **Deploy new facet versions**: New contracts with updated logic
-2. **Register with BLR**: `registerBusinessLogics([{key, newAddress}])`
-3. **New version created**: BLR increments that key's own version counter; other keys are unaffected
-4. **Update proxies**: Call `proxy.updateConfigVersion(newVersion)`
-5. **New calls route to new facets**: Future calls use new version
+2. **Register with BLR**: `registerBusinessLogics([{key, newAddress}])` — advances that key's own version counter only; other keys are unaffected
+3. **Create a new configuration**: `createConfiguration()`/`createBatchConfiguration()`, explicitly selecting the new `(key, version)` pair alongside the existing versions of every other facet. A facet's version counter and a configuration's version are different things — bumping the former does not by itself change what any configuration resolves to
+4. **Point the proxy at it**: Call `proxy.updateConfigVersion(newConfigurationVersion)` to activate that configuration version
+5. **New calls route to new facets**: Future calls use the new configuration
 
 ---
 

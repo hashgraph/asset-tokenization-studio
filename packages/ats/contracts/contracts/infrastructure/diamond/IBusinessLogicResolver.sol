@@ -12,9 +12,13 @@ import { IDiamondCutManager } from "./IDiamondCutManager.sol";
  *      advance alongside the keys that were included. Callers intending a full re-registration of
  *      every active key must supply all of them in the same call (or across the batches of the
  *      same registration operation) — the registry does not enforce this on their behalf, so a
- *      partial call is a valid, if incomplete, update rather than a rejected one. Marking a
- *      version `VersionStatus.DEACTIVATED` (see `setVersionStatus`) is the supported way to retire
- *      a key from future full re-registrations without needing to keep re-supplying it.
+ *      partial call is a valid, if incomplete, update rather than a rejected one.
+ *
+ *      `VersionStatus.DEACTIVATED` (see `setVersionStatus`) is unrelated to registration: it does
+ *      not affect `registerBusinessLogics()` in any way and does not retire a key. It only blocks
+ *      that one specific `(key, version)` pair from being selected into a new resolver-proxy
+ *      configuration going forward; other versions of the same key remain selectable, and
+ *      configurations that already reference the deactivated version are unaffected.
  */
 interface IBusinessLogicResolver is IDiamondCutManager {
     /// @notice Lifecycle state of a registered business logic version.
