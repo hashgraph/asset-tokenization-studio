@@ -223,6 +223,7 @@ library ERC20StorageWrapper {
      * @param spender Spender whose allowance is scaled.
      */
     function updateAllowanceAndLabaf(address owner, address spender) internal {
+        if (_erc20Storage().allowed[owner][spender] == type(uint256).max) return;
         uint256 abaf = AdjustBalancesStorageWrapper.getAbaf();
         uint256 labaf = AdjustBalancesStorageWrapper.getAllowanceLabaf(owner, spender);
 
@@ -523,15 +524,22 @@ library ERC20StorageWrapper {
      * @param owner     Address that granted the allowance.
      * @param spender   Address permitted to spend on `owner`'s behalf.
      * @param timestamp Unix timestamp at which to project the allowance.
-     * @return The projected allowance amount.
+     * @return allowance_ The projected allowance amount.
      */
-    function allowanceAdjustedAt(address owner, address spender, uint256 timestamp) internal view returns (uint256) {
+    function allowanceAdjustedAt(
+        address owner,
+        address spender,
+        uint256 timestamp
+    ) internal view returns (uint256 allowance_) {
+        allowance_ = allowance(owner, spender);
         return
-            allowance(owner, spender) *
-            AdjustBalancesStorageWrapper.calculateFactor(
-                AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp),
-                AdjustBalancesStorageWrapper.getAllowanceLabaf(owner, spender)
-            );
+            allowance_ == type(uint256).max
+                ? allowance_
+                : allowance_ *
+                    AdjustBalancesStorageWrapper.calculateFactor(
+                        AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp),
+                        AdjustBalancesStorageWrapper.getAllowanceLabaf(owner, spender)
+                    );
     }
 
     /**
