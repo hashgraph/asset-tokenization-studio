@@ -161,7 +161,9 @@ export function maturityTests(getCtx: () => AssetMockCtx): void {
 
         await expect(asset.connect(signer_A).fullRedeemAtMaturity(signer_A.address))
           .to.emit(asset, "RedeemedByPartition")
-          .withArgs(DEFAULT_PARTITION, signer_A.address, signer_A.address, amount, "0x", "0x");
+          .withArgs(DEFAULT_PARTITION, signer_A.address, signer_A.address, amount, "0x", "0x")
+          .to.emit(asset, "FullyRedeemedAtMaturity")
+          .withArgs(signer_A.address);
       });
 
       it("GIVEN a token holder with zero balance WHEN fullRedeemAtMaturity THEN succeeds without redeeming", async () => {
@@ -220,7 +222,211 @@ export function maturityTests(getCtx: () => AssetMockCtx): void {
           .to.emit(asset, "RedeemedByPartition")
           .withArgs(_PARTITION_ID, signer_A.address, signer_A.address, amount, "0x", "0x")
           .to.emit(asset, "RedeemedByPartition")
-          .withArgs(DEFAULT_PARTITION, signer_A.address, signer_A.address, amount, "0x", "0x");
+          .withArgs(DEFAULT_PARTITION, signer_A.address, signer_A.address, amount, "0x", "0x")
+          .to.emit(asset, "FullyRedeemedAtMaturity")
+          .withArgs(signer_A.address);
+      });
+    });
+
+    describe("redeemAtMaturityByPartitionRange", () => {
+      it("GIVEN a zero address as token holder WHEN redeemAtMaturityByPartitionRange THEN reverts with ZeroAddressNotAllowed", async () => {
+        await expect(
+          asset.connect(signer_A).redeemAtMaturityByPartitionRange(ADDRESS_ZERO, ZERO, 10),
+        ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
+      });
+
+      it("GIVEN the token holder account is blocked WHEN redeemAtMaturityByPartitionRange THEN reverts with AccountIsBlocked", async () => {
+        await asset.connect(signer_D).addToControlList(signer_B.address);
+
+        await expect(
+          asset.connect(signer_A).redeemAtMaturityByPartitionRange(signer_B.address, ZERO, 10),
+        ).to.be.revertedWithCustomError(asset, "AccountIsBlocked");
+      });
+
+      it("GIVEN the caller lacks ROLE_MATURITY_REDEEMER WHEN redeemAtMaturityByPartitionRange THEN reverts with AccountHasNoRole", async () => {
+        await expect(
+          asset.connect(signer_B).redeemAtMaturityByPartitionRange(signer_C.address, ZERO, 10),
+        ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+      });
+
+      it("GIVEN clearing is activated WHEN redeemAtMaturityByPartitionRange THEN reverts with ClearingIsActivated", async () => {
+        await asset.connect(signer_A).activateClearing();
+
+        await expect(
+          asset.connect(signer_A).redeemAtMaturityByPartitionRange(signer_C.address, ZERO, 10),
+        ).to.be.revertedWithCustomError(asset, "ClearingIsActivated");
+      });
+
+      it("GIVEN the token is paused WHEN redeemAtMaturityByPartitionRange THEN reverts with IsPaused", async () => {
+        await grantRoleAndPauseToken(asset, ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A, signer_B, signer_C.address);
+
+        await expect(
+          asset.connect(signer_C).redeemAtMaturityByPartitionRange(signer_C.address, ZERO, 10),
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
+      });
+
+      it("GIVEN the token holder lacks valid KYC status WHEN redeemAtMaturityByPartitionRange THEN reverts with InvalidKycStatus", async () => {
+        await expect(
+          asset.connect(signer_A).redeemAtMaturityByPartitionRange(signer_C.address, ZERO, 10),
+        ).to.be.revertedWithCustomError(asset, "InvalidKycStatus");
+      });
+
+      it("GIVEN the current date is before maturity WHEN redeemAtMaturityByPartitionRange THEN reverts with MaturityDateInvalid", async () => {
+        await expect(
+          asset.connect(signer_A).redeemAtMaturityByPartitionRange(signer_A.address, ZERO, 10),
+        ).to.be.revertedWithCustomError(asset, "MaturityDateInvalid");
+      });
+
+      it("GIVEN a recovered wallet WHEN redeemAtMaturityByPartitionRange THEN reverts with WalletRecovered", async () => {
+        await asset.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
+
+        await expect(
+          asset.connect(signer_A).redeemAtMaturityByPartitionRange(signer_A.address, ZERO, 10),
+        ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+      });
+
+      it("GIVEN a non-recovered caller redeeming on behalf of a recovered token holder WHEN redeemAtMaturityByPartitionRange THEN reverts with WalletRecovered", async () => {
+        const signers = await ethers.getSigners();
+        const newWallet = signers[11];
+
+        await asset.connect(signer_A).recoveryAddress(signer_C.address, newWallet.address, ADDRESS_ZERO);
+
+        await expect(
+          asset.connect(signer_A).redeemAtMaturityByPartitionRange(signer_C.address, ZERO, 10),
+        ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+      });
+
+      it("GIVEN all conditions are met and the page covers the holder's only partition WHEN redeemAtMaturityByPartitionRange THEN emits RedeemedByPartition and RedeemedAtMaturityByPartitionRange", async () => {
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
+        await asset.connect(signer_C).issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: amount,
+          data: "0x",
+        });
+        await asset.changeSystemTimestamp(maturityDate + 1);
+
+        await expect(asset.connect(signer_A).redeemAtMaturityByPartitionRange(signer_A.address, ZERO, 1))
+          .to.emit(asset, "RedeemedByPartition")
+          .withArgs(DEFAULT_PARTITION, signer_A.address, signer_A.address, amount, "0x", "0x")
+          .to.emit(asset, "RedeemedAtMaturityByPartitionRange")
+          .withArgs(signer_A.address, ZERO, 1);
+      });
+
+      it("GIVEN a token holder with no partitions WHEN redeemAtMaturityByPartitionRange THEN succeeds without redeeming but still emits RedeemedAtMaturityByPartitionRange", async () => {
+        const signers = await ethers.getSigners();
+        const newUser = signers[10];
+
+        await asset.connect(signer_B).grantKyc(newUser.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+        await asset.changeSystemTimestamp(maturityDate + TIME_PERIODS_S.DAY);
+
+        const tx = asset.connect(signer_A).redeemAtMaturityByPartitionRange(newUser.address, ZERO, 10);
+
+        await expect(tx).to.not.emit(asset, "RedeemedByPartition");
+        await expect(tx).to.emit(asset, "RedeemedAtMaturityByPartitionRange").withArgs(newUser.address, ZERO, 10);
+      });
+
+      it("GIVEN a page length of zero WHEN redeemAtMaturityByPartitionRange THEN succeeds without redeeming regardless of the page index", async () => {
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
+        await asset.connect(signer_C).issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: amount,
+          data: "0x",
+        });
+        await asset.changeSystemTimestamp(maturityDate + 1);
+
+        const tx = asset.connect(signer_A).redeemAtMaturityByPartitionRange(signer_A.address, 3, ZERO);
+
+        await expect(tx).to.not.emit(asset, "RedeemedByPartition");
+        await expect(tx).to.emit(asset, "RedeemedAtMaturityByPartitionRange").withArgs(signer_A.address, 3, ZERO);
+
+        expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_A.address)).to.equal(amount);
+      });
+
+      describe("multi-partition pagination", () => {
+        beforeEach(async () => {
+          await asset.setMultiPartition(true);
+          await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
+          await asset.connect(signer_C).issueByPartition({
+            partition: _PARTITION_ID,
+            tokenHolder: signer_A.address,
+            value: amount,
+            data: "0x",
+          });
+          await asset.connect(signer_C).issueByPartition({
+            partition: DEFAULT_PARTITION,
+            tokenHolder: signer_A.address,
+            value: amount,
+            data: "0x",
+          });
+          await asset.changeSystemTimestamp(maturityDate + 1);
+        });
+
+        it("GIVEN a single page covering both partitions WHEN redeemAtMaturityByPartitionRange THEN emits RedeemedByPartition for each partition and the completion event with the exact caller-supplied arguments", async () => {
+          await expect(asset.connect(signer_A).redeemAtMaturityByPartitionRange(signer_A.address, ZERO, 2))
+            .to.emit(asset, "RedeemedByPartition")
+            .withArgs(_PARTITION_ID, signer_A.address, signer_A.address, amount, "0x", "0x")
+            .to.emit(asset, "RedeemedByPartition")
+            .withArgs(DEFAULT_PARTITION, signer_A.address, signer_A.address, amount, "0x", "0x")
+            .to.emit(asset, "RedeemedAtMaturityByPartitionRange")
+            .withArgs(signer_A.address, ZERO, 2);
+        });
+
+        it("GIVEN page 0 with a page length smaller than the partition count WHEN redeemAtMaturityByPartitionRange THEN only the partitions in that page are redeemed", async () => {
+          await expect(asset.connect(signer_A).redeemAtMaturityByPartitionRange(signer_A.address, ZERO, 1))
+            .to.emit(asset, "RedeemedByPartition")
+            .withArgs(_PARTITION_ID, signer_A.address, signer_A.address, amount, "0x", "0x")
+            .to.emit(asset, "RedeemedAtMaturityByPartitionRange")
+            .withArgs(signer_A.address, ZERO, 1);
+
+          expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_A.address)).to.equal(amount);
+        });
+
+        it("GIVEN page 1 is requested directly WHEN redeemAtMaturityByPartitionRange THEN the second partition is redeemed without needing page 0 first", async () => {
+          await expect(asset.connect(signer_A).redeemAtMaturityByPartitionRange(signer_A.address, 1, 1))
+            .to.emit(asset, "RedeemedByPartition")
+            .withArgs(DEFAULT_PARTITION, signer_A.address, signer_A.address, amount, "0x", "0x")
+            .to.emit(asset, "RedeemedAtMaturityByPartitionRange")
+            .withArgs(signer_A.address, 1, 1);
+
+          expect(await asset.balanceOfByPartition(_PARTITION_ID, signer_A.address)).to.equal(amount);
+        });
+
+        it("GIVEN a holder whose redeemed partitions are removed from the list via swap-and-pop, shifting the remaining partition down to index 0 WHEN redeemAtMaturityByPartitionRange is called twice for page 0 THEN both partitions end up fully redeemed", async () => {
+          await asset.connect(signer_A).redeemAtMaturityByPartitionRange(signer_A.address, ZERO, 1);
+          await asset.connect(signer_A).redeemAtMaturityByPartitionRange(signer_A.address, ZERO, 1);
+
+          expect(await asset.balanceOfByPartition(_PARTITION_ID, signer_A.address)).to.equal(ZERO);
+          expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_A.address)).to.equal(ZERO);
+        });
+
+        it("GIVEN a page whose start lands exactly on the partition count WHEN redeemAtMaturityByPartitionRange THEN succeeds without redeeming or reverting", async () => {
+          const tx = asset.connect(signer_A).redeemAtMaturityByPartitionRange(signer_A.address, 2, 1);
+
+          await expect(tx).to.not.emit(asset, "RedeemedByPartition");
+          await expect(tx).to.emit(asset, "RedeemedAtMaturityByPartitionRange").withArgs(signer_A.address, 2, 1);
+
+          expect(await asset.balanceOfByPartition(_PARTITION_ID, signer_A.address)).to.equal(amount);
+          expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_A.address)).to.equal(amount);
+        });
+
+        it("GIVEN a page whose start is well beyond the partition count WHEN redeemAtMaturityByPartitionRange THEN succeeds without redeeming or reverting", async () => {
+          const tx = asset.connect(signer_A).redeemAtMaturityByPartitionRange(signer_A.address, 5, 3);
+
+          await expect(tx).to.not.emit(asset, "RedeemedByPartition");
+          await expect(tx).to.emit(asset, "RedeemedAtMaturityByPartitionRange").withArgs(signer_A.address, 5, 3);
+        });
+
+        it("GIVEN a page length larger than the remaining partitions WHEN redeemAtMaturityByPartitionRange THEN the range is clamped and only the remaining partitions are redeemed", async () => {
+          await expect(asset.connect(signer_A).redeemAtMaturityByPartitionRange(signer_A.address, ZERO, 5))
+            .to.emit(asset, "RedeemedByPartition")
+            .withArgs(_PARTITION_ID, signer_A.address, signer_A.address, amount, "0x", "0x")
+            .to.emit(asset, "RedeemedByPartition")
+            .withArgs(DEFAULT_PARTITION, signer_A.address, signer_A.address, amount, "0x", "0x")
+            .to.emit(asset, "RedeemedAtMaturityByPartitionRange")
+            .withArgs(signer_A.address, ZERO, 5);
+        });
       });
     });
 
@@ -312,6 +518,12 @@ export function maturityTests(getCtx: () => AssetMockCtx): void {
       it("GIVEN a deactivated asset WHEN updateMaturityDate THEN transaction fails with Deactivated", async () => {
         await expect(asset.connect(signer_A).updateMaturityDate(0)).to.be.revertedWithCustomError(asset, "Deactivated");
       });
+
+      it("GIVEN a deactivated asset WHEN redeemAtMaturityByPartitionRange THEN transaction fails with Deactivated", async () => {
+        await expect(
+          asset.connect(signer_A).redeemAtMaturityByPartitionRange(ethers.ZeroAddress, 0, 0),
+        ).to.be.revertedWithCustomError(asset, "Deactivated");
+      });
     });
 
     describe("initializeMaturity", () => {
@@ -359,6 +571,13 @@ export function maturityTests(getCtx: () => AssetMockCtx): void {
 
       it("GIVEN non-operational asset WHEN updateMaturityDate THEN reverts with AssetNotOperational", async () => {
         await expect(asset.updateMaturityDate(0)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+      });
+
+      it("GIVEN non-operational asset WHEN redeemAtMaturityByPartitionRange THEN reverts with AssetNotOperational", async () => {
+        await expect(asset.redeemAtMaturityByPartitionRange(ADDRESS_ZERO, 0, 0)).to.be.revertedWithCustomError(
+          asset,
+          "AssetNotOperational",
+        );
       });
     });
   });
