@@ -644,6 +644,63 @@ export function kpiLinkedRateTests(getCtx: () => AssetMockCtx): void {
         );
       });
 
+      it("FIND-023 (TDD, expected red) GIVEN a pending KPI coupon WHEN couponRateType is switched away from KPI_LINKED THEN the coupon still resolves instead of staying pending forever", async () => {
+        const currentTimestamp = await getDltTimestamp();
+        const fixingDate = currentTimestamp + TIME_PERIODS_S.DAY;
+        await asset.connect(signer_A).setCoupon({
+          recordDate: fixingDate.toString(),
+          executionDate: (fixingDate + TIME_PERIODS_S.DAY).toString(),
+          rate: 0,
+          rateDecimals: 0,
+          startDate: currentTimestamp.toString(),
+          endDate: fixingDate.toString(),
+          fixingDate: fixingDate.toString(),
+          rateStatus: 0,
+        });
+        await asset.changeSystemTimestamp(fixingDate + 1);
+        // Switch away from KPI_LINKED before the pending coupon is ever read/resolved.
+        await expect(asset.connect(signer_A).setCouponRateType(INTEREST_RATE_TYPE.STANDARD))
+          .to.revertedWithCustomError(asset, "CouponRatePending")
+          .withArgs(1);
+        const [registeredCoupon] = await asset.getCoupon(1);
+        expect(registeredCoupon.coupon.rateStatus).to.not.equal(0);
+      });
+
+      it("FIND-023 GIVEN a cancelled coupon alongside a genuinely pending one WHEN setCouponRateType switches away from KPI_LINKED THEN only the pending coupon blocks the switch", async () => {
+        const currentTimestamp = await getDltTimestamp();
+        const fixingDate1 = currentTimestamp + TIME_PERIODS_S.DAY;
+        const fixingDate2 = currentTimestamp + 2 * TIME_PERIODS_S.DAY;
+
+        await asset.connect(signer_A).setCoupon({
+          recordDate: fixingDate1.toString(),
+          executionDate: (fixingDate1 + TIME_PERIODS_S.DAY).toString(),
+          rate: 0,
+          rateDecimals: 0,
+          startDate: currentTimestamp.toString(),
+          endDate: fixingDate1.toString(),
+          fixingDate: fixingDate1.toString(),
+          rateStatus: 0,
+        });
+        await asset.connect(signer_A).cancelCoupon(1);
+
+        await asset.connect(signer_A).setCoupon({
+          recordDate: fixingDate2.toString(),
+          executionDate: (fixingDate2 + TIME_PERIODS_S.DAY).toString(),
+          rate: 0,
+          rateDecimals: 0,
+          startDate: currentTimestamp.toString(),
+          endDate: fixingDate2.toString(),
+          fixingDate: fixingDate2.toString(),
+          rateStatus: 0,
+        });
+
+        await asset.changeSystemTimestamp(fixingDate2 + 1);
+
+        await expect(asset.connect(signer_A).setCouponRateType(INTEREST_RATE_TYPE.STANDARD))
+          .to.revertedWithCustomError(asset, "CouponRatePending")
+          .withArgs(2);
+      });
+
       describe("GIVEN a proceed recipient with KPI data in the report window", () => {
         beforeEach(async () => {
           await asset.connect(signer_A).addProceedRecipient(signer_A.address, "0x");

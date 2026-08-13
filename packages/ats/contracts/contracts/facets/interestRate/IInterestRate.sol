@@ -49,8 +49,11 @@ interface IInterestRate {
 
     /**
      * @notice Sets the coupon rate type discriminator for this asset.
-     * @dev Requires `ROLE_INTEREST_RATE_MANAGER`.
+     * @dev Requires `ROLE_INTEREST_RATE_MANAGER`. Reverts if any active coupon still has an
+     *      unresolved rate, so a coupon issued under the previous type can never be left
+     *      permanently unresolved by the switch.
      * @param _rateType The `RateType` to persist (STANDARD, FIXED, or KPI_LINKED).
+     * @custom:revert ICoupon.CouponRatePending If any active coupon's rate status is PENDING.
      */
     function setCouponRateType(RateType _rateType) external;
 

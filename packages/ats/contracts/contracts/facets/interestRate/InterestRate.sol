@@ -27,11 +27,12 @@ abstract contract InterestRate is IInterestRate, Modifiers {
     }
 
     /// @inheritdoc IInterestRate
-    /// @dev Protected by `onlyRole(ROLE_INTEREST_RATE_MANAGER)`.
+    /// @dev Protected by `onlyRole(ROLE_INTEREST_RATE_MANAGER)`. Reverts with
+    ///      `ICoupon.CouponRatePending` if any active coupon still has an unresolved rate,
+    ///      so switching away from `KPI_LINKED` can never strand a pending coupon.
     function setCouponRateType(
         IInterestRate.RateType rateType
-    ) external override onlyOperational onlyActivated onlyRole(ROLE_INTEREST_RATE_MANAGER) {
-        // TODO: check if changing the rate type is allowed after existing coupons have been issued
+    ) external override onlyOperational onlyActivated onlyRole(ROLE_INTEREST_RATE_MANAGER) onlyNoPendingCoupons {
         InterestRateStorageWrapper.setCouponRateType(rateType);
         emit CouponRateTypeSet(EvmAccessors.getMsgSender(), rateType);
     }

@@ -151,33 +151,6 @@ library CouponStorageWrapper {
     }
 
     /**
-     * @notice Stamps a resolved fixed-rate value and decimals onto a previously
-     *         scheduled coupon.
-     * @dev Mutates the supplied `coupon` struct in memory and persists it via
-     *      `CorporateActionsStorageWrapper.updateCorporateActionData`. Rate status
-     *      is transitioned to SET.
-     * @param couponID One-indexed coupon identifier.
-     * @param coupon In-memory coupon struct modified by reference.
-     * @param rate Fixed-rate numerator resolved by `CouponRateDispatch`.
-     * @param rateDecimals Scale of the rate value.
-     */
-    function updateCouponRate(
-        uint256 couponID,
-        ICouponTypes.Coupon memory coupon,
-        uint256 rate,
-        uint8 rateDecimals
-    ) internal {
-        coupon.rate = rate;
-        coupon.rateDecimals = rateDecimals;
-        coupon.rateStatus = ICouponTypes.RateCalculationStatus.SET;
-
-        CorporateActionsStorageWrapper.updateCorporateActionData(
-            CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(CORPORATE_ACTION_TYPE_COUPON, couponID - 1),
-            abi.encode(coupon)
-        );
-    }
-
-    /**
      * @notice Reverts with `ICommonErrors.WrongDates` when the security has a non-zero maturity
      *         date and `endDate` exceeds it.
      * @dev When `maturityDate` is zero the security is treated as open-ended and no constraint is
@@ -339,6 +312,31 @@ library CouponStorageWrapper {
      */
     function getCouponCount() internal view returns (uint256 couponCount_) {
         return CorporateActionsStorageWrapper.getCorporateActionCountByType(CORPORATE_ACTION_TYPE_COUPON);
+    }
+
+    /**
+     * @notice Reverts if any non-cancelled coupon has not yet had its rate resolved.
+     * @dev Scans every coupon via `getRawCouponData`, bypassing lazy resolution, so a coupon
+     *      whose scheduled listing has not yet persisted a resolved rate is detected
+     *      regardless of the current coupon rate type. Guards
+     *      `InterestRate::setCouponRateType` against leaving a KPI-linked coupon permanently
+     *      unresolved by switching the rate type away before the coupon's scheduled listing
+     *      has run. Coupon count is role-gated (only `ROLE_CORPORATE_ACTION` creates
+     *      coupons), so this unbounded scan does not carry the attacker-inflatable gas-limit
+     *      risk that a user-facing list (e.g. partitions) would.
+     * @custom:revert ICoupon.CouponRatePending If an active coupon's rate status is PENDING.
+     */
+    function checkPendingCoupons() internal view {
+        uint256 count = getCouponCount();
+        for (uint256 couponID = 1; couponID <= count; ) {
+            (ICouponTypes.Coupon memory rawCoupon, , bool isDisabled) = getRawCouponData(couponID);
+            if (!isDisabled && rawCoupon.rateStatus == ICouponTypes.RateCalculationStatus.PENDING) {
+                revert ICoupon.CouponRatePending(couponID);
+            }
+            unchecked {
+                ++couponID;
+            }
+        }
     }
 
     /**
