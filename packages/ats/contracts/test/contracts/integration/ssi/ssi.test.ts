@@ -192,12 +192,6 @@ export function ssiTests(getCtx: () => AssetMockCtx): void {
         revertingRegistry = await (await ethers.getContractFactory("RevertingRevocationRegistry")).deploy();
       });
 
-      it("GIVEN a reverting registry WHEN transfer THEN succeeds treating KYC credential as not revoked", async () => {
-        await equityAsset.setRevocationRegistryAddress(revertingRegistry.target);
-        await equityAsset.connect(signer_B).transfer(signer_C.address, AMOUNT);
-        expect(await equityAsset.balanceOf(signer_C.address)).to.equal(AMOUNT);
-      });
-
       it("GIVEN a working registry with revoked credential WHEN transfer THEN reverts with InvalidKycStatus", async () => {
         await equityAsset.setRevocationRegistryAddress(revocationList.target);
         await revocationList.revoke(VC_ID); // signer_A (the issuer) revokes the credential
@@ -211,6 +205,14 @@ export function ssiTests(getCtx: () => AssetMockCtx): void {
         await equityAsset.setRevocationRegistryAddress(revocationList.target);
         await equityAsset.connect(signer_B).transfer(signer_C.address, AMOUNT);
         expect(await equityAsset.balanceOf(signer_C.address)).to.equal(AMOUNT);
+      });
+
+      it("FIND-011 (TDD, expected red) GIVEN a reverting registry WHEN transfer THEN reverts with InvalidKycStatus instead of failing open", async () => {
+        await equityAsset.setRevocationRegistryAddress(revertingRegistry.target);
+        await expect(equityAsset.connect(signer_B).transfer(signer_C.address, AMOUNT)).to.be.revertedWithCustomError(
+          equityAsset,
+          "InvalidKycStatus",
+        );
       });
     });
 
