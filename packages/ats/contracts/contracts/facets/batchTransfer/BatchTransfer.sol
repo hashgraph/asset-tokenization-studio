@@ -78,8 +78,8 @@ abstract contract BatchTransfer is IBatchTransfer, Modifiers {
                 EMPTY_BYTES,
                 EMPTY_BYTES
             );
+            total += amount;
             unchecked {
-                total += amount;
                 ++i;
             }
         }

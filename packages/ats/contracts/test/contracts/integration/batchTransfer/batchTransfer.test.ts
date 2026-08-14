@@ -156,6 +156,25 @@ export function batchTransferTests(getCtx: () => AssetMockCtx): void {
             expect(await asset.balanceOf(signer_E.address)).to.equal(initialBalanceSender);
             expect(await asset.balanceOf(signer_F.address)).to.equal(initialBalanceF);
           });
+
+          it("FIND-046 (TDD, expected red) GIVEN two legs each within the sender's adjusted balance individually WHEN their sum overflows uint256 THEN the running-total accumulation reverts instead of wrapping past the balance check", async () => {
+            // Inflate signer_E's adjusted balance close to MAX_UINT256 so each leg passes
+            // ERC1594's per-leg balance check on its own, while their sum still overflows.
+            const factor = MAX_UINT256 / BigInt(initialMintAmount);
+            await asset.grantRole(ATS_ROLES.ROLE_ADJUSTMENT_BALANCE, signer_E.address);
+            await asset.connect(signer_E).adjustBalances(factor, 0);
+
+            const inflatedBalance = await asset.balanceOf(signer_E.address);
+            const toList = [signer_F.address, signer_D.address];
+            const amounts = [inflatedBalance, inflatedBalance];
+
+            const initialBalanceF = await asset.balanceOf(signer_F.address);
+
+            await expect(asset.connect(signer_E).batchTransfer(toList, amounts)).to.be.revertedWithPanic(0x11);
+
+            expect(await asset.balanceOf(signer_E.address)).to.equal(inflatedBalance);
+            expect(await asset.balanceOf(signer_F.address)).to.equal(initialBalanceF);
+          });
         });
 
         it("GIVEN an invalid input amounts array THEN transaction fails with InputAmountsArrayLengthMismatch", async () => {
