@@ -15,6 +15,7 @@ import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageW
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { HoldStorageWrapper } from "./HoldStorageWrapper.sol";
+import { HoldOps } from "../orchestrator/HoldOps.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
@@ -61,8 +62,10 @@ struct AmortizationDataStorage {
  * @notice Library managing the full lifecycle of amortisation corporate actions:
  *         creation, hold placement and release, cancellation, and paginated holder queries.
  * @dev All state resides at `_AMORTIZATION_STORAGE_POSITION` via the diamond-storage pattern.
- *      Hold management writes directly to `HoldStorageWrapper` storage rather than going
- *      through the facet call surface, avoiding calldata-conversion overhead.
+ *      Hold creation delegates to `HoldOps` (deployed once, invoked via `delegatecall`) to keep
+ *      this facet's own bytecode under the EIP-170 limit. Release still writes directly to
+ *      `HoldStorageWrapper` storage, since it also has to resync `totalHoldByAmortizationId` —
+ *      bookkeeping `HoldOps` has no notion of — in the same pass as the hold-level resync.
  *      Snapshot balances are used after the record date; live ERC1410 state is used before it.
  */
 library AmortizationStorageWrapper {
@@ -170,14 +173,7 @@ library AmortizationStorageWrapper {
         AmortizationHoldInfo storage existing = s.amortizationHolds[corporateActionId][_tokenHolder];
 
         if (existing.holdActive) {
-            IHoldTypes.HoldIdentifier memory id_ = IHoldTypes.HoldIdentifier({
-                partition: DEFAULT_PARTITION,
-                tokenHolder: _tokenHolder,
-                holdId: existing.holdId
-            });
-            uint256 existingAmount = HoldStorageWrapper.getHold(id_).hold.amount;
-            _releaseHold(_tokenHolder, existing.holdId, existingAmount);
-            s.totalHoldByAmortizationId[corporateActionId] -= existingAmount;
+            _releaseExistingHold(corporateActionId, _tokenHolder, existing.holdId);
         }
 
         IHoldTypes.Hold memory hold = IHoldTypes.Hold({
@@ -188,7 +184,7 @@ library AmortizationStorageWrapper {
             data: ""
         });
 
-        (, uint256 newHoldId) = HoldStorageWrapper.createHoldByPartition(
+        (, uint256 newHoldId) = HoldOps.createHoldByPartition(
             DEFAULT_PARTITION,
             _tokenHolder,
             hold,
@@ -201,6 +197,7 @@ library AmortizationStorageWrapper {
             holdActive: true
         });
         s.activeHoldHolders[corporateActionId].add(_tokenHolder);
+        _syncTotalHoldByAmortizationId(corporateActionId);
         s.totalHoldByAmortizationId[corporateActionId] += _tokenAmount;
         holdId_ = newHoldId;
         corporateActionId_ = corporateActionId;
@@ -232,18 +229,11 @@ library AmortizationStorageWrapper {
             revert IAmortization.AmortizationHoldNotActive(corporateActionId, _amortizationID, _tokenHolder);
         }
 
-        IHoldTypes.HoldIdentifier memory id_ = IHoldTypes.HoldIdentifier({
-            partition: DEFAULT_PARTITION,
-            tokenHolder: _tokenHolder,
-            holdId: holdInfo.holdId
-        });
-        uint256 holdAmount = HoldStorageWrapper.getHold(id_).hold.amount;
-        _releaseHold(_tokenHolder, holdInfo.holdId, holdAmount);
+        _releaseExistingHold(corporateActionId, _tokenHolder, holdInfo.holdId);
 
         uint256 releasedHoldId = holdInfo.holdId;
         holdInfo.holdActive = false;
         s.activeHoldHolders[corporateActionId].remove(_tokenHolder);
-        s.totalHoldByAmortizationId[corporateActionId] -= holdAmount;
 
         corporateActionId_ = corporateActionId;
         releasedHoldId_ = releasedHoldId;
@@ -467,15 +457,26 @@ library AmortizationStorageWrapper {
 
     /**
      * @notice Returns the aggregate token amount held against a given amortization.
+     * @dev Computed live: `_syncTotalHoldByAmortizationId` only rebases the stored total at
+     *      write time (the next hold created or released), so a read taken between two writes
+     *      would otherwise see the value as of the last touchpoint, not the current ABAF — the
+     *      same gap `getHeldAmountFor` closes for the per-account aggregate via
+     *      `getHeldAmountForAdjustedAt`.
      * @param _amortizationID The one-based identifier of the amortization.
-     * @return The cumulative held amount across every active hold for this amortization.
+     * @return The cumulative held amount across every active hold for this amortization,
+     *         adjusted to the current ABAF.
      */
     function getTotalHoldByAmortizationId(uint256 _amortizationID) internal view returns (uint256) {
         bytes32 corporateActionId = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
             CORPORATE_ACTION_TYPE_AMORTIZATION,
             _amortizationID - 1
         );
-        return _amortizationStorage().totalHoldByAmortizationId[corporateActionId];
+        return
+            _amortizationStorage().totalHoldByAmortizationId[corporateActionId] *
+            AdjustBalancesStorageWrapper.calculateFactor(
+                AdjustBalancesStorageWrapper.getAbaf(),
+                AdjustBalancesStorageWrapper.getAmortizationHoldLabaf(corporateActionId)
+            );
     }
 
     /**
@@ -538,6 +539,31 @@ library AmortizationStorageWrapper {
     }
 
     /**
+     * @notice Resyncs, values and releases an existing amortization hold, shared by
+     *         `setAmortizationHold`'s replacement branch and `releaseAmortizationHold`.
+     * @dev Resolves the hold's current ABAF-adjusted amount only after
+     *      `HoldStorageWrapper.beforeReleaseHold` has rebased the account/partition
+     *      aggregates, then resyncs and decrements `totalHoldByAmortizationId` by that same
+     *      amount before actually releasing it. Leaves `AmortizationHoldInfo`/
+     *      `activeHoldHolders` bookkeeping to the caller.
+     * @param _corporateActionId The amortization corporate action the hold belongs to.
+     * @param _tokenHolder The holder whose hold is being released.
+     * @param _holdId The hold identifier on the default partition.
+     */
+    function _releaseExistingHold(bytes32 _corporateActionId, address _tokenHolder, uint256 _holdId) private {
+        IHoldTypes.HoldIdentifier memory id_ = IHoldTypes.HoldIdentifier({
+            partition: DEFAULT_PARTITION,
+            tokenHolder: _tokenHolder,
+            holdId: _holdId
+        });
+        HoldStorageWrapper.beforeReleaseHold(id_);
+        uint256 amount = HoldStorageWrapper.getHoldAmountAdjustedAt(id_, TimeTravelStorageWrapper.getBlockTimestamp());
+        _syncTotalHoldByAmortizationId(_corporateActionId);
+        _amortizationStorage().totalHoldByAmortizationId[_corporateActionId] -= amount;
+        _releaseHold(_tokenHolder, _holdId, amount);
+    }
+
+    /**
      * @notice Fully removes an amortization hold by writing directly to hold storage.
      * @dev Removes the LABAF entry and emits the standard transfer events to keep
      *      observers in sync.
@@ -553,7 +579,7 @@ library AmortizationStorageWrapper {
             holdId: _holdId
         });
 
-        HoldStorageWrapper.removeHold(identifier);
+        HoldStorageWrapper.removeAndTransferHoldBalance(identifier, _amount);
 
         emit IERC1410Types.TransferByPartition(
             DEFAULT_PARTITION,
@@ -570,10 +596,26 @@ library AmortizationStorageWrapper {
     }
 
     /**
-     * @notice Returns the storage reference at the ERC-7201 slot for the amortization namespace.
-     * @dev Resolved via inline assembly against {STORAGE_LOCATION_AMORTIZATION}.
-     * @return amortizationData_ The storage reference for the amortization data struct.
+     * @notice Rebases `totalHoldByAmortizationId[_corporateActionId]` to the current ABAF.
+     * @dev Mirrors `HoldStorageWrapper`'s `updateTotalHeldAmountAndLabaf` for this
+     *      amortization-scoped aggregate — the only aggregate in this codebase that sums
+     *      across multiple accounts rather than living inside one. Must be called immediately
+     *      before every increment or decrement of `totalHoldByAmortizationId`, so the running
+     *      total is never rebased retroactively across a mixed history of holds created at
+     *      different ABAF values, only incrementally at each touchpoint — the same invariant
+     *      every other LABAF-tracked aggregate in this codebase already relies on.
+     * @param _corporateActionId The amortization corporate action whose aggregate is synced.
      */
+    function _syncTotalHoldByAmortizationId(bytes32 _corporateActionId) private {
+        uint256 abaf = AdjustBalancesStorageWrapper.getAbaf();
+        uint256 labaf = AdjustBalancesStorageWrapper.getAmortizationHoldLabaf(_corporateActionId);
+        if (abaf != labaf) {
+            _amortizationStorage().totalHoldByAmortizationId[_corporateActionId] *= AdjustBalancesStorageWrapper
+                .calculateFactor(abaf, labaf);
+            AdjustBalancesStorageWrapper.setAmortizationHoldLabaf(_corporateActionId, abaf);
+        }
+    }
+
     function _amortizationStorage() private pure returns (AmortizationDataStorage storage amortizationData_) {
         bytes32 position = STORAGE_LOCATION_AMORTIZATION;
         // solhint-disable-next-line no-inline-assembly

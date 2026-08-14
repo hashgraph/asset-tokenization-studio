@@ -34,6 +34,17 @@ export function amortizationTests(getCtx: () => AssetMockCtx): void {
       };
     }
 
+    async function expectHolderAmortizationAndBalanceState(
+      holder: string,
+      expectedHeldAmount: bigint,
+      expectedBalance: bigint,
+    ): Promise<void> {
+      expect(await asset.getHeldAmountFor(holder)).to.equal(expectedHeldAmount);
+      expect(await asset.getTotalHoldByAmortizationId(1)).to.equal(expectedHeldAmount);
+      expect((await asset.getAmortizationFor(1, holder)).tokenHeldAmount).to.equal(expectedHeldAmount);
+      expect(await asset.balanceOf(holder)).to.equal(expectedBalance);
+    }
+
     beforeEach(async () => {
       const ctx = getCtx();
       asset = ctx.asset;
@@ -914,7 +925,7 @@ export function amortizationTests(getCtx: () => AssetMockCtx): void {
           .withArgs("0x0000000000000000000000000000000000000000000000000000000000000001", 1n, deployer.address);
       });
 
-      it("GIVEN active hold WHEN releaseAmortizationHold THEN emits AmortizationHoldReleased and holdActive becomes false", async () => {
+      it("GIVEN active hold with no balance adjustment in between WHEN releaseAmortizationHold THEN emits AmortizationHoldReleased, holdActive becomes false, and the held balance is restored to the holder in full", async () => {
         await expect(amort.connect(user2).releaseAmortizationHold(1, deployer.address))
           .to.emit(asset, "AmortizationHoldReleased")
           .withArgs("0x0000000000000000000000000000000000000000000000000000000000000001", 1n, deployer.address, 1n);
@@ -922,6 +933,47 @@ export function amortizationTests(getCtx: () => AssetMockCtx): void {
         const amortizationFor = await amort.getAmortizationFor(1, deployer.address);
         expect(amortizationFor.holdActive).to.equal(false);
         expect(amortizationFor.tokenHeldAmount).to.equal(0n);
+        expect(await asset.balanceOf(deployer.address)).to.equal(BigInt(TOTAL_UNITS));
+      });
+
+      it("FIND-009 (TDD, expected red) GIVEN a balance adjustment before release WHEN releaseAmortizationHold THEN getHeldAmountFor no longer reports the released amount", async () => {
+        await asset.grantRole(ATS_ROLES.ROLE_ADJUSTMENT_BALANCE, user2.address);
+
+        await expectHolderAmortizationAndBalanceState(deployer.address, holdAmount, holdAmount);
+
+        await asset.connect(user2).adjustBalances(2, 0);
+        const adjustedHoldAmount = holdAmount * 2n;
+        await expectHolderAmortizationAndBalanceState(deployer.address, adjustedHoldAmount, adjustedHoldAmount);
+
+        await amort.connect(user2).releaseAmortizationHold(1, deployer.address);
+        const totalBalance = holdAmount * 4n;
+        await expectHolderAmortizationAndBalanceState(deployer.address, 0n, totalBalance);
+      });
+
+      it("FIND-009 GIVEN deployer's hold predates a balance adjustment and user1's hold under the same amortization is only created after it, so the two holds are anchored to different ABAF snapshots, WHEN both holders release THEN getTotalHoldByAmortizationId tracks each holder's own snapshot correctly instead of rebasing both by the same factor", async () => {
+        await asset.grantRole(ATS_ROLES.ROLE_ADJUSTMENT_BALANCE, user2.address);
+
+        await asset.connect(user2).adjustBalances(2, 0);
+
+        await asset.connect(user2).issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: user1.address,
+          value: TOTAL_UNITS,
+          data: EMPTY_HEX_BYTES,
+        });
+        const secondHoldAmount = BigInt(TOKENS_TO_REDEEM);
+        await amort.connect(user2).setAmortizationHold(1, user1.address, secondHoldAmount);
+
+        const adjustedFirstHoldAmount = holdAmount * 2n;
+        expect(await asset.getTotalHoldByAmortizationId(1)).to.equal(adjustedFirstHoldAmount + secondHoldAmount);
+
+        await amort.connect(user2).releaseAmortizationHold(1, deployer.address);
+        expect(await asset.getTotalHoldByAmortizationId(1)).to.equal(secondHoldAmount);
+        expect(await asset.getHeldAmountFor(deployer.address)).to.equal(0n);
+
+        await amort.connect(user2).releaseAmortizationHold(1, user1.address);
+        expect(await asset.getTotalHoldByAmortizationId(1)).to.equal(0n);
+        expect(await asset.getHeldAmountFor(user1.address)).to.equal(0n);
       });
     });
 
