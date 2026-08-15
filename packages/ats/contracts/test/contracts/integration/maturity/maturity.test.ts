@@ -428,6 +428,60 @@ export function maturityTests(getCtx: () => AssetMockCtx): void {
             .withArgs(signer_A.address, ZERO, 5);
         });
       });
+
+      describe("bounded storage read regardless of total partition count (FIND-012 follow-up)", () => {
+        beforeEach(async () => {
+          await asset.setMultiPartition(true);
+        });
+
+        it("GIVEN holders with very different total partition counts WHEN redeemAtMaturityByPartitionRange requests the same one-partition page THEN gas cost does not scale with the holder's total partition count", async () => {
+          const manyPartitionsHolder = signer_A;
+          const signers = await ethers.getSigners();
+          const fewPartitionsHolder = signers[10];
+
+          const TOTAL_MANY_PARTITIONS = 25;
+          for (let i = 0; i < TOTAL_MANY_PARTITIONS; i++) {
+            await asset.connect(signer_A).issueByPartition({
+              partition: ethers.zeroPadValue(ethers.toBeHex(i + 10), 32),
+              tokenHolder: manyPartitionsHolder.address,
+              value: amount,
+              data: "0x",
+            });
+          }
+
+          await asset
+            .connect(signer_B)
+            .grantKyc(fewPartitionsHolder.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+          await asset.connect(signer_A).issueByPartition({
+            partition: DEFAULT_PARTITION,
+            tokenHolder: fewPartitionsHolder.address,
+            value: amount,
+            data: "0x",
+          });
+          await asset.connect(signer_A).issueByPartition({
+            partition: _PARTITION_ID,
+            tokenHolder: fewPartitionsHolder.address,
+            value: amount,
+            data: "0x",
+          });
+
+          await asset.changeSystemTimestamp(maturityDate + TIME_PERIODS_S.DAY);
+
+          const txMany = await asset
+            .connect(signer_A)
+            .redeemAtMaturityByPartitionRange(manyPartitionsHolder.address, ZERO, 1);
+          const receiptMany = await txMany.wait();
+
+          const txFew = await asset
+            .connect(signer_A)
+            .redeemAtMaturityByPartitionRange(fewPartitionsHolder.address, ZERO, 1);
+          const receiptFew = await txFew.wait();
+
+          const gasDelta = receiptMany!.gasUsed - receiptFew!.gasUsed;
+
+          expect(gasDelta < 5_000n).to.equal(true);
+        });
+      });
     });
 
     describe("updateMaturityDate", () => {
