@@ -383,7 +383,10 @@ library ERC20StorageWrapper {
     /**
      * @notice Reduces the allowance of `spender` on `from`'s balance by `value`,
      *         reverting if the existing allowance is insufficient.
-     * @dev Calls `beforeAllowanceUpdate` first to synchronise ABAF state.
+     * @dev Calls `beforeAllowanceUpdate` first to synchronise ABAF state. An allowance of
+     *      `type(uint256).max` is a permanent unlimited-approval sentinel and is never
+     *      decremented, so it cannot be converted into a finite value with a stale LABAF
+     *      checkpoint by a spend; only `approve()` can change it.
      *      Reverts with `InsufficientAllowance` when `value` exceeds the current
      *      allowance.
      * @param from    Token owner whose allowance is consumed.
@@ -394,12 +397,14 @@ library ERC20StorageWrapper {
         beforeAllowanceUpdate(from, spender);
 
         ERC20Storage storage erc20Stor = _erc20Storage();
+        uint256 currentAllowance = erc20Stor.allowed[from][spender];
 
-        if (value > erc20Stor.allowed[from][spender]) {
-            revert IAllowanceTypes.InsufficientAllowance(spender, from);
+        if (currentAllowance == type(uint256).max) return;
+        if (value > currentAllowance) revert IAllowanceTypes.InsufficientAllowance(spender, from);
+
+        unchecked {
+            erc20Stor.allowed[from][spender] = currentAllowance - value;
         }
-
-        erc20Stor.allowed[from][spender] -= value;
     }
 
     /**

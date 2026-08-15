@@ -19,6 +19,7 @@
 import { Signer } from "ethers";
 import {
   GAS_LIMIT,
+  gasLimitOverride,
   hederaGasOverrides,
   info,
   retryTransaction,
@@ -316,7 +317,7 @@ export async function deployOrchestratorLibraries(
     });
 
   // Phase 1: ScheduledTasksDispatchOps and ClearingReadOps have no library dependencies.
-  const gasOverrides = { ...hederaGasOverrides(), gasLimit: GAS_LIMIT.max };
+  const gasOverrides = { ...hederaGasOverrides(), ...gasLimitOverride(GAS_LIMIT.max) };
   const scheduledTasksDispatchOpsAddr = await deployLib("ScheduledTasksDispatchOps", () =>
     new ScheduledTasksDispatchOps__factory(signer)
       .deploy(gasOverrides)
