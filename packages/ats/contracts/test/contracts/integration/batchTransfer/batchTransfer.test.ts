@@ -142,6 +142,17 @@ export function batchTransferTests(getCtx: () => AssetMockCtx): void {
             expect(canTransferSecond).to.equal(true);
           });
 
+          it("GIVEN a self-transfer batch WHEN batchTransfer THEN no balance change", async () => {
+            const toList = [signer_E.address, signer_E.address];
+            const amounts = [firstLeg, secondLeg];
+
+            const initialBalanceSender = await asset.balanceOf(signer_E.address);
+
+            await expect(asset.connect(signer_E).batchTransfer(toList, amounts)).to.not.be.reverted;
+
+            expect(await asset.balanceOf(signer_E.address)).to.equal(initialBalanceSender);
+          });
+
           it("GIVEN a cumulative-over-balance batch WHEN batchTransfer THEN the whole transaction reverts with InsufficientBalance against the running total, before any leg executes", async () => {
             const toList = [signer_F.address, signer_D.address];
             const amounts = [firstLeg, secondLeg];

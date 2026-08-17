@@ -51,10 +51,13 @@ abstract contract BatchTransfer is IBatchTransfer, Modifiers {
         address sender = EvmAccessors.getMsgSender();
         uint256 length = _checkBatchTransferBalances(sender, _toList, _amounts, DEFAULT_PARTITION);
         for (uint256 i; i < length; ) {
-            TokenCoreOps.transfer(sender, _toList[i], _amounts[i]);
+            address to = _toList[i];
+            uint256 amount = _amounts[i];
             unchecked {
                 ++i;
             }
+            if (sender == to) continue;
+            TokenCoreOps.transfer(sender, to, amount);
         }
     }
 
@@ -68,20 +71,22 @@ abstract contract BatchTransfer is IBatchTransfer, Modifiers {
         uint256 total;
 
         for (uint256 i; i < length_; ) {
+            address to = _toList[i];
             uint256 amount = _amounts[i];
+            unchecked {
+                ++i;
+            }
+            if (_from == to) continue;
             ERC1410StorageWrapper.checkNonZeroTransferAmount(amount);
             ERC1594StorageWrapper.checkCanTransferFromByPartition(
                 _from,
-                _toList[i],
+                to,
                 _partition,
                 amount,
                 EMPTY_BYTES,
                 EMPTY_BYTES
             );
             total += amount;
-            unchecked {
-                ++i;
-            }
         }
         ERC1594StorageWrapper.checkPartitionBalance(_from, total, DEFAULT_PARTITION);
     }
