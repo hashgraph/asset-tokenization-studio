@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { IAssetMock } from "@contract-types";
+import { IAssetMock, ComplianceMock } from "@contract-types";
 import { ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import { ASSET_MOCK_CONFIG_ID } from "../../../fixtures/deploy/assetMockConfiguration";
 import { executeRbac, getDltTimestamp, grantKycToHolders, NON_DEFAULT_PARTITION, DEFAULT_PARTITION } from "@test";
@@ -17,6 +17,7 @@ export function transferAndLockByPartitionTests(getCtx: () => AssetMockCtx): voi
     let signer_B: HardhatEthersSigner;
     let signer_C: HardhatEthersSigner;
     let signer_D: HardhatEthersSigner;
+    let signer_E: HardhatEthersSigner;
 
     let asset: IAssetMock;
 
@@ -61,6 +62,7 @@ export function transferAndLockByPartitionTests(getCtx: () => AssetMockCtx): voi
       signer_B = ctx.user2;
       signer_C = ctx.user3;
       signer_D = ctx.user4;
+      signer_E = ctx.user1;
       await executeRbac(asset, set_initRbacs());
       await setFacets(asset);
       currentTimestamp = await getDltTimestamp();
@@ -253,6 +255,67 @@ export function transferAndLockByPartitionTests(getCtx: () => AssetMockCtx): voi
         await expect(asset.transferAndLockByPartition(ethers.ZeroHash, ethers.ZeroAddress, 0n, "0x", 0n))
           .to.be.revertedWithCustomError(asset, "AssetNotOperational")
           .withArgs(ASSET_MOCK_CONFIG_ID, 1);
+      });
+    });
+
+    describe("FIND-065 - recipient compliance checks", () => {
+      it("GIVEN a recipient without KYC WHEN transferAndLockByPartition THEN transaction fails with InvalidKycStatus", async () => {
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_INTERNAL_KYC_MANAGER, signer_A.address);
+        await asset.connect(signer_A).activateInternalKyc();
+
+        await asset.connect(signer_B).issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_C.address,
+          value: _AMOUNT * 2,
+          data: "0x",
+        });
+
+        await expect(
+          asset
+            .connect(signer_C)
+            .transferAndLockByPartition(DEFAULT_PARTITION, signer_D.address, _AMOUNT, "0x", expirationTimestamp),
+        ).to.be.revertedWithCustomError(asset, "InvalidKycStatus");
+      });
+
+      it("GIVEN a compliance module that rejects the transfer WHEN transferAndLockByPartition THEN transaction fails with ComplianceNotAllowed", async () => {
+        await asset.connect(signer_B).issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_C.address,
+          value: _AMOUNT * 2,
+          data: "0x",
+        });
+
+        const complianceMock: ComplianceMock = await (
+          await ethers.getContractFactory("ComplianceMock", signer_A)
+        ).deploy(false, false);
+        await complianceMock.waitForDeployment();
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_TREX_OWNER, signer_A.address);
+        await asset.connect(signer_A).setCompliance(complianceMock.target as string);
+
+        await expect(
+          asset
+            .connect(signer_C)
+            .transferAndLockByPartition(DEFAULT_PARTITION, signer_A.address, _AMOUNT, "0x", expirationTimestamp),
+        ).to.be.revertedWithCustomError(asset, "ComplianceNotAllowed");
+      });
+
+      it("GIVEN a recovered-wallet recipient WHEN transferAndLockByPartition THEN transaction fails with WalletRecovered", async () => {
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
+        const strangerWallet = ethers.Wallet.createRandom().address;
+        await asset.connect(signer_A).recoveryAddress(signer_E.address, strangerWallet, ethers.ZeroAddress);
+
+        await asset.connect(signer_B).issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_C.address,
+          value: _AMOUNT * 2,
+          data: "0x",
+        });
+
+        await expect(
+          asset
+            .connect(signer_C)
+            .transferAndLockByPartition(DEFAULT_PARTITION, signer_E.address, _AMOUNT, "0x", expirationTimestamp),
+        ).to.be.revertedWithCustomError(asset, "WalletRecovered");
       });
     });
   });

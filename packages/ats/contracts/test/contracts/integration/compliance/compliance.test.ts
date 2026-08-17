@@ -8,6 +8,7 @@ import type { AssetMockCtx } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
 import {
   ATS_ROLES,
+  DEFAULT_PARTITION,
   EIP1066_CODES,
   EMPTY_HEX_BYTES,
   EMPTY_STRING,
@@ -320,6 +321,40 @@ export function complianceTests(getCtx: () => AssetMockCtx): void {
           asset,
           "IsPaused",
         );
+      });
+
+      it("GIVEN a compliance module that rejects the transfer WHEN transferAndLock or transferAndLockByPartition THEN both transactions fail with ComplianceNotAllowed (FIND-065)", async () => {
+        const amount = 1000;
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_LOCKER, signer_A.address);
+
+        await asset.connect(signer_A).issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: amount * 4,
+          data: EMPTY_HEX_BYTES,
+        });
+
+        await complianceMock.setFlags(false, false);
+
+        const latestBlock = await ethers.provider.getBlock("latest");
+        const expirationTimestamp = latestBlock!.timestamp + 365 * 24 * 60 * 60;
+
+        await expect(
+          asset.connect(signer_A).transferAndLock(signer_C.address, amount, EMPTY_HEX_BYTES, expirationTimestamp),
+        ).to.be.revertedWithCustomError(asset, "ComplianceNotAllowed");
+
+        await expect(
+          asset
+            .connect(signer_A)
+            .transferAndLockByPartition(
+              DEFAULT_PARTITION,
+              signer_C.address,
+              amount,
+              EMPTY_HEX_BYTES,
+              expirationTimestamp,
+            ),
+        ).to.be.revertedWithCustomError(asset, "ComplianceNotAllowed");
       });
     });
 

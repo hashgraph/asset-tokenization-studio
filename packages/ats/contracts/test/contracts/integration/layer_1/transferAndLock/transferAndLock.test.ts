@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { expect } from "chai";
+import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { IAssetMock } from "@contract-types";
+import { IAssetMock, ComplianceMock } from "@contract-types";
 import type { AssetMockCtx } from "@test";
 import { ZERO, EMPTY_STRING, ATS_ROLES, ADDRESS_ZERO, RESOLVER_KEYS } from "@scripts";
 import { getDltTimestamp, MAX_UINT256 } from "@test";
@@ -18,6 +19,7 @@ export function transferAndLockTests(getCtx: () => AssetMockCtx): void {
     let signer_B: HardhatEthersSigner;
     let signer_C: HardhatEthersSigner;
     let signer_D: HardhatEthersSigner;
+    let signer_E: HardhatEthersSigner;
     let unknownSigner: HardhatEthersSigner;
 
     let asset: IAssetMock;
@@ -63,6 +65,7 @@ export function transferAndLockTests(getCtx: () => AssetMockCtx): void {
       signer_B = ctx.user2;
       signer_C = ctx.user3;
       signer_D = ctx.user4;
+      signer_E = ctx.user1;
       unknownSigner = ctx.unknownSigner;
       asset = ctx.asset;
 
@@ -203,6 +206,61 @@ export function transferAndLockTests(getCtx: () => AssetMockCtx): void {
           asset,
           "AssetNotOperational",
         );
+      });
+    });
+
+    describe("FIND-065 - recipient compliance checks", () => {
+      it("GIVEN a recipient without KYC WHEN transferAndLock THEN transaction fails with InvalidKycStatus", async () => {
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_INTERNAL_KYC_MANAGER, signer_A.address);
+        await asset.connect(signer_A).activateInternalKyc();
+
+        await asset.connect(signer_B).issueByPartition({
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_C.address,
+          value: _AMOUNT * 2,
+          data: "0x",
+        });
+
+        await expect(
+          asset.connect(signer_C).transferAndLock(signer_D.address, _AMOUNT, "0x", expirationTimestamp),
+        ).to.be.revertedWithCustomError(asset, "InvalidKycStatus");
+      });
+
+      it("GIVEN a compliance module that rejects the transfer WHEN transferAndLock THEN transaction fails with ComplianceNotAllowed", async () => {
+        await asset.connect(signer_B).issueByPartition({
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_C.address,
+          value: _AMOUNT * 2,
+          data: "0x",
+        });
+
+        const complianceMock: ComplianceMock = await (
+          await ethers.getContractFactory("ComplianceMock", signer_A)
+        ).deploy(false, false);
+        await complianceMock.waitForDeployment();
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_TREX_OWNER, signer_A.address);
+        await asset.connect(signer_A).setCompliance(complianceMock.target as string);
+
+        await expect(
+          asset.connect(signer_C).transferAndLock(signer_A.address, _AMOUNT, "0x", expirationTimestamp),
+        ).to.be.revertedWithCustomError(asset, "ComplianceNotAllowed");
+      });
+
+      it("GIVEN a recovered-wallet recipient WHEN transferAndLock THEN transaction fails with WalletRecovered", async () => {
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
+        const strangerWallet = ethers.Wallet.createRandom().address;
+        await asset.connect(signer_A).recoveryAddress(signer_E.address, strangerWallet, ADDRESS_ZERO);
+
+        await asset.connect(signer_B).issueByPartition({
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_C.address,
+          value: _AMOUNT * 2,
+          data: "0x",
+        });
+
+        await expect(
+          asset.connect(signer_C).transferAndLock(signer_E.address, _AMOUNT, "0x", expirationTimestamp),
+        ).to.be.revertedWithCustomError(asset, "WalletRecovered");
       });
     });
   });
