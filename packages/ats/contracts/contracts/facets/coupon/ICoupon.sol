@@ -90,6 +90,16 @@ interface ICoupon is ICouponTypes {
     error CouponNotFound(uint256 couponID);
 
     /**
+     * @notice Reverts when at least one coupon is still awaiting rate resolution.
+     * @dev Raised by `CouponStorageWrapper.checkPendingCoupons`, used to guard
+     *      `InterestRate::setCouponRateType` so a KPI-linked coupon cannot be left
+     *      permanently unresolved by switching the rate type away before its scheduled
+     *      listing has persisted a resolved rate.
+     * @param couponID One-indexed identifier of the first pending coupon found.
+     */
+    error CouponRatePending(uint256 couponID);
+
+    /**
      * @notice Initialises the coupon capability on the token.
      * @dev Callable once; subsequent calls revert with FacetAlreadyRegistered.
      *      Requires DEFAULT_ADMIN_ROLE. Called by the factory during deployment.

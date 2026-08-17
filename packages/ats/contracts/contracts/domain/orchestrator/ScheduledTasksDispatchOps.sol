@@ -9,10 +9,6 @@ import { SnapshotsStorageWrapper } from "../asset/SnapshotsStorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "../asset/AdjustBalancesStorageWrapper.sol";
 import { CouponStorageWrapper } from "../asset/coupon/CouponStorageWrapper.sol";
 import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageWrapper.sol";
-import { InterestRateStorageWrapper } from "../asset/InterestRateStorageWrapper.sol";
-import { ICouponTypes } from "../../facets/coupon/ICouponTypes.sol";
-import { IInterestRate } from "../../facets/interestRate/IInterestRate.sol";
-import { CORPORATE_ACTION_TYPE_COUPON } from "../../constants/dispatchTypes.sol";
 
 /// @title ScheduledTasksDispatchOps - External library for isolated scheduled task dispatch
 /// @author Asset Tokenization Studio Team
@@ -85,8 +81,7 @@ library ScheduledTasksDispatchOps {
             abi.encodePacked(orderedListPos)
         );
 
-        if (InterestRateStorageWrapper.getCouponRateType() == IInterestRate.RateType.KPI_LINKED)
-            updateCouponRate(couponID);
+        CouponStorageWrapper.updateCouponRate(couponID);
     }
 
     function _onScheduledBalanceAdjustmentTriggered(ScheduledTask memory _scheduledTask) private {
@@ -102,15 +97,6 @@ library ScheduledTasksDispatchOps {
         );
 
         AdjustBalancesStorageWrapper.adjustBalances(balanceAdjustment.factor, balanceAdjustment.decimals);
-    }
-
-    function updateCouponRate(uint256 couponID) private {
-        (ICouponTypes.RegisteredCoupon memory registeredCoupon, , ) = CouponStorageWrapper.getCoupon(couponID);
-
-        CorporateActionsStorageWrapper.updateCorporateActionData(
-            CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(CORPORATE_ACTION_TYPE_COUPON, couponID - 1),
-            abi.encode(registeredCoupon.coupon)
-        );
     }
 
     function _getCouponIdFromAction(bytes32 actionId) private view returns (uint256 couponID_) {

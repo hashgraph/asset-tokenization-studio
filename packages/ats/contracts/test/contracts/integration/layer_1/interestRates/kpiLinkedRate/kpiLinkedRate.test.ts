@@ -644,6 +644,113 @@ export function kpiLinkedRateTests(getCtx: () => AssetMockCtx): void {
         );
       });
 
+      it("FIND-023 (TDD, expected red) GIVEN a pending KPI coupon WHEN couponRateType is switched away from KPI_LINKED THEN the coupon still resolves instead of staying pending forever", async () => {
+        const currentTimestamp = await getDltTimestamp();
+        const fixingDate = currentTimestamp + TIME_PERIODS_S.DAY;
+        await asset.connect(signer_A).setCoupon({
+          recordDate: fixingDate.toString(),
+          executionDate: (fixingDate + TIME_PERIODS_S.DAY).toString(),
+          rate: 0,
+          rateDecimals: 0,
+          startDate: currentTimestamp.toString(),
+          endDate: fixingDate.toString(),
+          fixingDate: fixingDate.toString(),
+          rateStatus: 0,
+        });
+        await asset.changeSystemTimestamp(fixingDate + 1);
+        // Switch away from KPI_LINKED before the pending coupon is ever read/resolved.
+        await expect(asset.connect(signer_A).setCouponRateType(INTEREST_RATE_TYPE.STANDARD))
+          .to.revertedWithCustomError(asset, "CouponRatePending")
+          .withArgs(1);
+        const [registeredCoupon] = await asset.getCoupon(1);
+        expect(registeredCoupon.coupon.rateStatus).to.not.equal(0);
+      });
+
+      it("FIND-023 GIVEN a cancelled coupon alongside a genuinely pending one WHEN setCouponRateType switches away from KPI_LINKED THEN only the pending coupon blocks the switch", async () => {
+        const currentTimestamp = await getDltTimestamp();
+        const fixingDate1 = currentTimestamp + TIME_PERIODS_S.DAY;
+        const fixingDate2 = currentTimestamp + 2 * TIME_PERIODS_S.DAY;
+
+        await asset.connect(signer_A).setCoupon({
+          recordDate: fixingDate1.toString(),
+          executionDate: (fixingDate1 + TIME_PERIODS_S.DAY).toString(),
+          rate: 0,
+          rateDecimals: 0,
+          startDate: currentTimestamp.toString(),
+          endDate: fixingDate1.toString(),
+          fixingDate: fixingDate1.toString(),
+          rateStatus: 0,
+        });
+        await asset.connect(signer_A).cancelCoupon(1);
+
+        await asset.connect(signer_A).setCoupon({
+          recordDate: fixingDate2.toString(),
+          executionDate: (fixingDate2 + TIME_PERIODS_S.DAY).toString(),
+          rate: 0,
+          rateDecimals: 0,
+          startDate: currentTimestamp.toString(),
+          endDate: fixingDate2.toString(),
+          fixingDate: fixingDate2.toString(),
+          rateStatus: 0,
+        });
+
+        await asset.changeSystemTimestamp(fixingDate2 + 1);
+
+        await expect(asset.connect(signer_A).setCouponRateType(INTEREST_RATE_TYPE.STANDARD))
+          .to.revertedWithCustomError(asset, "CouponRatePending")
+          .withArgs(2);
+      });
+
+      it("FIND-023 (TDD, expected red) GIVEN very different total historical coupon counts WHEN setCouponRateType is called with none pending THEN gas cost does not scale with total coupon count", async () => {
+        const fewTimestamp = await getDltTimestamp();
+        const fewFixingDate = fewTimestamp + TIME_PERIODS_S.DAY;
+        await asset.connect(signer_A).setCoupon({
+          recordDate: fewFixingDate.toString(),
+          executionDate: (fewFixingDate + TIME_PERIODS_S.DAY).toString(),
+          rate: 0,
+          rateDecimals: 0,
+          startDate: fewTimestamp.toString(),
+          endDate: fewFixingDate.toString(),
+          fixingDate: fewFixingDate.toString(),
+          rateStatus: 0,
+        });
+        await asset.changeSystemTimestamp(fewFixingDate + 1);
+        await asset.triggerPendingScheduledCrossOrderedTasks();
+
+        const txFew = await asset.connect(signer_A).setCouponRateType(INTEREST_RATE_TYPE.STANDARD);
+        const receiptFew = await txFew.wait();
+
+        // Switch back to KPI_LINKED (nothing pending, so this succeeds trivially) to create
+        // and resolve more coupons on the same asset, then measure the identical switch again.
+        await asset.connect(signer_A).setCouponRateType(INTEREST_RATE_TYPE.KPI_LINKED);
+
+        const MORE_COUPONS = 24;
+        let manyTimestamp = await getDltTimestamp();
+        for (let i = 0; i < MORE_COUPONS; i++) {
+          const fixingDate = manyTimestamp + TIME_PERIODS_S.DAY;
+          await asset.connect(signer_A).setCoupon({
+            recordDate: fixingDate.toString(),
+            executionDate: (fixingDate + TIME_PERIODS_S.DAY).toString(),
+            rate: 0,
+            rateDecimals: 0,
+            startDate: manyTimestamp.toString(),
+            endDate: fixingDate.toString(),
+            fixingDate: fixingDate.toString(),
+            rateStatus: 0,
+          });
+          await asset.changeSystemTimestamp(fixingDate + 1);
+          await asset.triggerPendingScheduledCrossOrderedTasks();
+          manyTimestamp = fixingDate + 1;
+        }
+
+        const txMany = await asset.connect(signer_A).setCouponRateType(INTEREST_RATE_TYPE.STANDARD);
+        const receiptMany = await txMany.wait();
+
+        const gasDelta = receiptMany!.gasUsed - receiptFew!.gasUsed;
+
+        expect(gasDelta < 5_000n).to.equal(true);
+      });
+
       describe("GIVEN a proceed recipient with KPI data in the report window", () => {
         beforeEach(async () => {
           await asset.connect(signer_A).addProceedRecipient(signer_A.address, "0x");
