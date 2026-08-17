@@ -852,6 +852,53 @@ export function couponTests(getCtx: () => AssetMockCtx): void {
       );
     });
 
+    it("GIVEN a coupon snapshot and a balance adjustment scheduled for the SAME record-date timestamp WHEN the cross-ordered queue is triggered THEN the coupon entitlement is unaffected (FIND-015)", async () => {
+      const TotalAmount = 1000;
+
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
+
+      await asset.connect(signer_A).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: TotalAmount,
+        data: "0x",
+      });
+
+      couponRecordDateInSeconds = (await getDltTimestamp()) + 10000;
+      couponExecutionDateInSeconds = (await getDltTimestamp()) + 20000;
+
+      const localCouponData = {
+        recordDate: couponRecordDateInSeconds.toString(),
+        executionDate: couponExecutionDateInSeconds.toString(),
+        rate: couponRate,
+        rateDecimals: couponRateDecimals,
+        startDate: couponStartDateInSeconds.toString(),
+        endDate: couponEndDateInSeconds.toString(),
+        fixingDate: couponFixingDateInSeconds.toString(),
+        rateStatus: couponRateStatus,
+      };
+
+      const balanceAdjustmentData = {
+        executionDate: BigInt(localCouponData.recordDate),
+        factor: 20,
+        decimals: 1,
+      };
+
+      await asset.connect(signer_A).setCoupon(localCouponData);
+      await asset.connect(signer_A).setScheduledBalanceAdjustment(balanceAdjustmentData);
+
+      await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
+      await asset.connect(signer_A).triggerPendingScheduledCrossOrderedTasks();
+
+      const registered = (await asset.getCoupon(1)).registeredCoupon_;
+      expect(registered.snapshotId).to.be.greaterThan(0);
+
+      const couponFor = await asset.getCouponFor(1, signer_A.address);
+      expect(couponFor.recordDateReached).to.equal(true);
+      expect(couponFor.tokenBalance).to.equal(TotalAmount);
+    });
+
     it("GIVEN a coupon WHEN getCoupon is called THEN decodes coupon data", async () => {
       await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
       couponRecordDateInSeconds = (await getDltTimestamp()) + 1000;

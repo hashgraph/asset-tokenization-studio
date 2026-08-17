@@ -442,6 +442,52 @@ export function dividendTests(getCtx: () => AssetMockCtx): void {
       expect(dividendAmountFor.denominator).to.equal(10n ** BigInt(dividendFor.amountDecimals));
     });
 
+    it("GIVEN a dividend snapshot and a balance adjustment scheduled for the SAME record-date timestamp WHEN the cross-ordered queue is triggered THEN the snapshot executes before the balance adjustment and the dividend entitlement uses the pre-adjustment balance (FIND-015)", async () => {
+      await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+      await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
+
+      const TotalAmount = number_Of_Shares;
+
+      await asset.connect(signer_C).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: TotalAmount,
+        data: "0x",
+      });
+
+      await asset.connect(signer_C).setDividend(dividendData);
+      await asset.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
+
+      await asset.changeSystemTimestamp((dividendsRecordDateInSeconds + 1).toString());
+
+      const tx = await asset.connect(signer_C).triggerPendingScheduledCrossOrderedTasks();
+      const receipt = await tx.wait();
+
+      const adjustmentTopic = asset.interface.getEvent("AdjustmentBalanceSet")!.topicHash;
+      const snapshotTopic = asset.interface.getEvent("SnapshotTriggered")!.topicHash;
+
+      const adjustmentIndex = receipt!.logs.findIndex((l) => l.topics[0] === adjustmentTopic);
+      const snapshotIndex = receipt!.logs.findIndex((l) => l.topics[0] === snapshotTopic);
+
+      expect(adjustmentIndex).to.not.equal(-1);
+      expect(snapshotIndex).to.not.equal(-1);
+
+      expect(snapshotIndex).to.be.lessThan(adjustmentIndex);
+
+      const dividendFor = await asset.getDividendFor(1, signer_A.address);
+      const dividendAmountFor = await asset.getDividendAmountFor(1, signer_A.address);
+
+      expect(dividendFor.tokenBalance).to.equal(TotalAmount);
+      expect(dividendFor.recordDateReached).to.equal(true);
+      expect(dividendFor.amount).to.equal(dividendsAmountPerEquity);
+      expect(dividendFor.amountDecimals).to.equal(dividendsAmountDecimalsPerEquity);
+      expect(dividendAmountFor.recordDateReached).to.equal(dividendFor.recordDateReached);
+      expect(dividendAmountFor.numerator).to.equal(
+        (dividendFor.tokenBalance * dividendFor.amount) / 10n ** BigInt(dividendFor.decimals),
+      );
+      expect(dividendAmountFor.denominator).to.equal(10n ** BigInt(dividendFor.amountDecimals));
+    });
+
     it("GIVEN frozen tokens WHEN calculating dividends without snapshot THEN frozen tokens are included in dividend calculation", async () => {
       await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
       await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);

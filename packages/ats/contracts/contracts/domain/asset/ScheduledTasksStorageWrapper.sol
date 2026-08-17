@@ -161,10 +161,10 @@ library ScheduledTasksStorageWrapper {
      * @param _taskType Encoded task type identifier for the sub-queue to coordinate.
      */
     function addScheduledCrossOrderedTask(uint256 _newScheduledTimestamp, bytes32 _taskType) internal {
-        ScheduledTasksLib.addScheduledTask(
+        ScheduledTasksLib.addScheduledCrossOrderedTaskWithPriority(
             _scheduledCrossOrderedTaskStorage(),
             _newScheduledTimestamp,
-            abi.encode(_taskType)
+            _taskType
         );
     }
 
