@@ -472,7 +472,7 @@ Typical upgrade process:
 1. **Deploy new facet versions**: New contracts with updated logic
 2. **Register with BLR**: `registerBusinessLogics([{key, newAddress}])` — advances that key's own version counter only; other keys are unaffected
 3. **Create a new configuration**: `createConfiguration()`/`createBatchConfiguration()`, explicitly selecting the new `(key, version)` pair alongside the existing versions of every other facet. A facet's version counter and a configuration's version are different things — bumping the former does not by itself change what any configuration resolves to
-4. **Point the proxy at it**: Call `proxy.updateConfigVersion(newConfigurationVersion)` to activate that configuration version
+4. **Update proxies**: Call `proxy.updateConfigVersion(newConfigurationVersion)` to activate that configuration version
 5. **New calls route to new facets**: Future calls use the new configuration
 
 ---

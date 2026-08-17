@@ -557,6 +557,32 @@ describe("DiamondCutManager", () => {
     expect(await diamondCutManager.getLatestVersionByConfiguration(testConfigId)).to.equal(0);
   });
 
+  it("FIND-060 (TDD, expected red) GIVEN a cancelled batch configuration WHEN a new batch reuses the same version and queries a facet from the cancelled batch THEN it reverts with FacetIdNotRegistered", async () => {
+    const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000060";
+
+    const cancelledBatchFacets: IDiamondCutManager.FacetConfigurationStruct[] = [
+      { id: equityFacetIdList[0], version: 1 },
+      { id: equityFacetIdList[1], version: 1 },
+      { id: equityFacetIdList[2], version: 1 },
+    ];
+
+    await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, cancelledBatchFacets, false, "0x");
+    await diamondCutManager.connect(signer_A).cancelBatchConfiguration(testConfigId);
+
+    const newBatchFacets: IDiamondCutManager.FacetConfigurationStruct[] = [{ id: equityFacetIdList[3], version: 1 }];
+
+    await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, newBatchFacets, true, "0x");
+    const newLatestVersion = Number(await diamondCutManager.getLatestVersionByConfiguration(testConfigId));
+
+    await expect(
+      diamondCutManager.getFacetVersionByConfigurationIdVersionAndFacetId(
+        testConfigId,
+        newLatestVersion,
+        equityFacetIdList[0],
+      ),
+    ).to.be.revertedWithCustomError(diamondCutManager, "FacetIdNotRegistered");
+  });
+
   it("GIVEN a resolver WHEN adding a new configuration with configId at 0 with createBatchConfiguration THEN fails with DefaultValueForConfigurationIdNotPermitted", async () => {
     const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] = [];
     equityFacetIdList.forEach((id, index) =>

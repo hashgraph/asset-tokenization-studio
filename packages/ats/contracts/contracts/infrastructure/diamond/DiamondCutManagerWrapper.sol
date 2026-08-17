@@ -231,6 +231,7 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, Ownership, Bus
         for (uint256 index; index < facetIdsLength; ) {
             bytes32 configVersionFacetHash = _buildHash(_configurationId, batchVersion_, facetIds[index]);
             delete dcms.addr[configVersionFacetHash];
+            delete dcms.facetIdPosition[configVersionFacetHash];
             _cleanSelectors(dcms, _configurationId, batchVersion_, configVersionFacetHash);
             _cleanInterfacesIds(dcms, _configurationId, batchVersion_, configVersionFacetHash);
             unchecked {
