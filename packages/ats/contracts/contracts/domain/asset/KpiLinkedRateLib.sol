@@ -114,7 +114,7 @@ library KpiLinkedRateLib {
     ) private view returns (uint256 impactData_, bool reportFound_) {
         uint256 windowStart;
         unchecked {
-            windowStart = fixingDate > reportPeriod ? fixingDate - reportPeriod : fixingDate;
+            windowStart = fixingDate > reportPeriod ? fixingDate - reportPeriod : 0;
         }
         uint256 projectCount = ProceedRecipientsStorageWrapper.getProceedRecipientsCount();
 

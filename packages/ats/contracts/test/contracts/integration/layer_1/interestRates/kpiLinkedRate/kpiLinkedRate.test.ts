@@ -742,6 +742,74 @@ export function kpiLinkedRateTests(getCtx: () => AssetMockCtx): void {
           const [registeredCoupon] = await asset.getCoupon(1);
           expect(registeredCoupon.coupon.rate).to.equal(TEST_BOND_KPI_LINKED_RATE.maxRate);
         });
+
+        describe("FIND-021 - wrong KPI window start when fixingDate is at or before reportPeriod", () => {
+          const kpiDate = 1;
+          const impactData = 600;
+          const expectedRate = 60n;
+
+          it("GIVEN fixingDate equal to reportPeriod WHEN getCoupon THEN rate reflects the KPI impact instead of the missed-report penalty", async () => {
+            const currentTimestamp = await getDltTimestamp();
+            const fixingDate = currentTimestamp + TIME_PERIODS_S.DAY;
+
+            await kpiRate.setKpiLinkedRateInterestRate({
+              maxRate: TEST_BOND_KPI_LINKED_RATE.maxRate,
+              baseRate: TEST_BOND_KPI_LINKED_RATE.baseRate,
+              minRate: TEST_BOND_KPI_LINKED_RATE.minRate,
+              startPeriod: TEST_BOND_KPI_LINKED_RATE.startPeriod,
+              startRate: TEST_BOND_KPI_LINKED_RATE.startRate,
+              missedPenalty: TEST_BOND_KPI_LINKED_RATE.missedPenalty,
+              reportPeriod: fixingDate,
+              rateDecimals: TEST_BOND_KPI_LINKED_RATE.rateDecimals,
+            });
+            await kpis.addKpiData(kpiDate, impactData, signer_A.address);
+            await asset.connect(signer_A).setCoupon({
+              recordDate: fixingDate.toString(),
+              executionDate: (fixingDate + TIME_PERIODS_S.DAY).toString(),
+              rate: 0,
+              rateDecimals: 0,
+              startDate: currentTimestamp.toString(),
+              endDate: fixingDate.toString(),
+              fixingDate: fixingDate.toString(),
+              rateStatus: 0,
+            });
+            await asset.changeSystemTimestamp(fixingDate + 1);
+
+            const [registeredCoupon] = await asset.getCoupon(1);
+            expect(registeredCoupon.coupon.rate).to.equal(expectedRate);
+          });
+
+          it("GIVEN fixingDate lower than reportPeriod WHEN getCoupon THEN rate reflects the KPI impact instead of the missed-report penalty", async () => {
+            const currentTimestamp = await getDltTimestamp();
+            const fixingDate = currentTimestamp + TIME_PERIODS_S.DAY;
+
+            await kpiRate.setKpiLinkedRateInterestRate({
+              maxRate: TEST_BOND_KPI_LINKED_RATE.maxRate,
+              baseRate: TEST_BOND_KPI_LINKED_RATE.baseRate,
+              minRate: TEST_BOND_KPI_LINKED_RATE.minRate,
+              startPeriod: TEST_BOND_KPI_LINKED_RATE.startPeriod,
+              startRate: TEST_BOND_KPI_LINKED_RATE.startRate,
+              missedPenalty: TEST_BOND_KPI_LINKED_RATE.missedPenalty,
+              reportPeriod: fixingDate + 500,
+              rateDecimals: TEST_BOND_KPI_LINKED_RATE.rateDecimals,
+            });
+            await kpis.addKpiData(kpiDate, impactData, signer_A.address);
+            await asset.connect(signer_A).setCoupon({
+              recordDate: fixingDate.toString(),
+              executionDate: (fixingDate + TIME_PERIODS_S.DAY).toString(),
+              rate: 0,
+              rateDecimals: 0,
+              startDate: currentTimestamp.toString(),
+              endDate: fixingDate.toString(),
+              fixingDate: fixingDate.toString(),
+              rateStatus: 0,
+            });
+            await asset.changeSystemTimestamp(fixingDate + 1);
+
+            const [registeredCoupon] = await asset.getCoupon(1);
+            expect(registeredCoupon.coupon.rate).to.equal(expectedRate);
+          });
+        });
       });
     });
   });
