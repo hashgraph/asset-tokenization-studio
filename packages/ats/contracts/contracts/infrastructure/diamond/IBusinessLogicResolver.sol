@@ -6,9 +6,19 @@ import { IDiamondCutManager } from "./IDiamondCutManager.sol";
  * @title IBusinessLogicResolver
  * @author Asset Tokenization Studio Team
  * @notice Registry for resolving Business Logic (facet) addresses by a bytes32 key and version.
- *         All registered Business Logics share a common version counter so consumers can safely
- *         target a single version and know it is fully compatible across every registered key.
- *         Registering or updating any Business Logic increments the shared latest version by 1.
+ * @dev Each business logic key has its own independent version counter — `registerBusinessLogics()`
+ *      increments `latestVersionByFacetId` only for the keys included in a given call. Omitting a
+ *      previously-registered key from a call leaves that key's counter untouched; it does not
+ *      advance alongside the keys that were included. Callers intending a full re-registration of
+ *      every active key must supply all of them in the same call (or across the batches of the
+ *      same registration operation) — the registry does not enforce this on their behalf, so a
+ *      partial call is a valid, if incomplete, update rather than a rejected one.
+ *
+ *      `VersionStatus.DEACTIVATED` (see `setVersionStatus`) is unrelated to registration: it does
+ *      not affect `registerBusinessLogics()` in any way and does not retire a key. It only blocks
+ *      that one specific `(key, version)` pair from being selected into a new resolver-proxy
+ *      configuration going forward; other versions of the same key remain selectable, and
+ *      configurations that already reference the deactivated version are unaffected.
  */
 interface IBusinessLogicResolver is IDiamondCutManager {
     /// @notice Lifecycle state of a registered business logic version.
@@ -55,9 +65,19 @@ interface IBusinessLogicResolver is IDiamondCutManager {
     /// @param replacementAddressRemoved removed replacement address.
     event ReplacementAddressRemoved(address indexed replacedAddress, address indexed replacementAddressRemoved);
 
+    /// @notice Event emitted when a business logic version's status is updated.
+    /// @param businessLogicKey Business logic key whose version status changed.
+    /// @param version Version number whose status changed.
+    /// @param status New status assigned to the version.
+    event VersionStatusUpdated(bytes32 indexed businessLogicKey, uint256 version, VersionStatus status);
+
     /// @notice Thrown when the requested version has never been registered for any business logic key.
     /// @param version The version number that does not exist in the registry.
     error BusinessLogicVersionDoesNotExist(uint256 version);
+
+    /// @notice Thrown when `setVersionStatus` is called with `VersionStatus.NONE`, which represents
+    ///         an unregistered version rather than a settable lifecycle state.
+    error InvalidVersionStatus();
 
     /// @notice Thrown when two entries in a registration batch share the same business logic key.
     /// @param businessLogicKey The duplicated key found in the batch.
@@ -94,7 +114,9 @@ interface IBusinessLogicResolver is IDiamondCutManager {
     /**
      * @notice Update existing business logics addresses or add new business logics to the register.
      *         the BusinessLogicsRegistered event must be emitted.
-     *         The latest "version" for all business logics is increased by 1.
+     *         Each business logic key included in `_businessLogics` has its own independent
+     *         version counter, increased by 1 for that key only. Keys omitted from the call keep
+     *         their existing latest version untouched — see the per-key versioning note above.
      * @param _businessLogics list of business logics to be registered.
      */
     function registerBusinessLogics(BusinessLogicRegistryData[] calldata _businessLogics) external;
@@ -125,6 +147,19 @@ interface IBusinessLogicResolver is IDiamondCutManager {
      * @param _oldAddress the address for which to remove the replacement
      */
     function removeReplacementAddress(address _oldAddress) external;
+
+    /**
+     * @notice Sets the status of a registered business logic version.
+     * @dev Restricted to `DEFAULT_ADMIN_ROLE`. Reverts with `InvalidVersionStatus` when `_status`
+     *      is `VersionStatus.NONE`, and with `BusinessLogicVersionDoesNotExist` when `_version` is
+     *      zero or has never been registered for `_businessLogicKey`. Marking a version
+     *      `DEACTIVATED` prevents it from being selected into any new resolver-proxy
+     *      configuration, but does not affect configurations that already reference it.
+     * @param _businessLogicKey The bytes32 key identifying the business logic to update.
+     * @param _version The version number to update.
+     * @param _status The new status (`ACTIVATED` or `DEACTIVATED`) to assign to the version.
+     */
+    function setVersionStatus(bytes32 _businessLogicKey, uint256 _version, VersionStatus _status) external;
 
     /**
      * @notice Returns the replacement address for a given address, or address(0) if none exists

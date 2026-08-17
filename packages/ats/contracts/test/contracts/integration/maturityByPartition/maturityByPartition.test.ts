@@ -29,6 +29,7 @@ export function maturityByPartitionTests(getCtx: () => AssetMockCtx): void {
     let signer_B: HardhatEthersSigner;
     let signer_C: HardhatEthersSigner;
     let signer_D: HardhatEthersSigner;
+    let signer_E: HardhatEthersSigner;
 
     let maturityDate: number;
 
@@ -39,6 +40,7 @@ export function maturityByPartitionTests(getCtx: () => AssetMockCtx): void {
       signer_B = ctx.user1;
       signer_C = ctx.user2;
       signer_D = ctx.user3;
+      signer_E = ctx.user4;
 
       await executeRbac(asset, [
         { role: ATS_ROLES.ROLE_FREEZE_MANAGER, members: [signer_A.address] },
@@ -120,10 +122,10 @@ export function maturityByPartitionTests(getCtx: () => AssetMockCtx): void {
         });
 
         it("GIVEN a recovered wallet WHEN redeeming at maturity THEN transaction fails with WalletRecovered", async () => {
-          await asset.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
+          await asset.recoveryAddress(signer_E.address, signer_B.address, ADDRESS_ZERO);
 
           await expect(
-            asset.connect(signer_A).redeemAtMaturityByPartition(signer_A.address, DEFAULT_PARTITION, amount),
+            asset.connect(signer_A).redeemAtMaturityByPartition(signer_E.address, DEFAULT_PARTITION, amount),
           ).to.be.revertedWithCustomError(asset, "WalletRecovered");
         });
 

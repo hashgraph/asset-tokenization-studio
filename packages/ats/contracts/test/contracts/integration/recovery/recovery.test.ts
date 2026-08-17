@@ -199,6 +199,7 @@ export function recoveryTests(getCtx: () => AssetMockCtx): void {
         });
 
         it("GIVEN _lostWallet is already recovered WHEN recoveryAddress THEN transaction fails with WalletRecovered", async () => {
+          await asset.revokeRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
           await asset.recoveryAddress(signer_C.address, signer_B.address, ADDRESS_ZERO);
           await expect(
             asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO),
@@ -206,6 +207,7 @@ export function recoveryTests(getCtx: () => AssetMockCtx): void {
         });
 
         it("GIVEN _newWallet is already recovered WHEN recoveryAddress THEN transaction fails with WalletRecovered", async () => {
+          await asset.revokeRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
           await asset.recoveryAddress(signer_C.address, signer_B.address, ADDRESS_ZERO);
           await expect(
             asset.recoveryAddress(signer_B.address, signer_C.address, ADDRESS_ZERO),
@@ -223,6 +225,7 @@ export function recoveryTests(getCtx: () => AssetMockCtx): void {
           await asset.connect(signer_A).authorizeOperator(signer_C.address);
           await asset.connect(signer_A).authorizeOperator(signer_A.address);
           const amount = 1000;
+          await asset.revokeRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
           await asset.recoveryAddress(signer_C.address, signer_B.address, ADDRESS_ZERO);
           const basicTransferInfo = {
             to: signer_B.address,
@@ -677,25 +680,25 @@ export function recoveryTests(getCtx: () => AssetMockCtx): void {
         });
 
         it("GIVEN a recovered wallet WHEN recoveryAddress THEN transaction fails with WalletRecovered", async () => {
-          await asset.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
+          await asset.recoveryAddress(signer_D.address, signer_B.address, ADDRESS_ZERO);
 
           await expect(
-            asset.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO),
+            asset.recoveryAddress(signer_D.address, signer_B.address, ADDRESS_ZERO),
           ).to.be.revertedWithCustomError(asset, "WalletRecovered");
         });
 
         describe("Recovered wallets fail centralized role checks", () => {
           it("GIVEN a recovered wallet still holding ROLE_PAUSER WHEN it calls pause (onlyRole) THEN reverts WalletRecovered", async () => {
-            await asset.grantRole(ATS_ROLES.ROLE_PAUSER, signer_D.address);
             await asset.recoveryAddress(signer_D.address, signer_F.address, ADDRESS_ZERO);
+            await asset.grantRole(ATS_ROLES.ROLE_PAUSER, signer_D.address);
 
             expect(await asset.hasRole(ATS_ROLES.ROLE_PAUSER, signer_D.address)).to.equal(true);
             await expect(asset.connect(signer_D).pause()).to.be.revertedWithCustomError(asset, "WalletRecovered");
           });
 
           it("GIVEN a recovered wallet still holding ROLE_FREEZE_MANAGER WHEN it freezes (onlyFreezeRoles → checkAnyRole) THEN reverts WalletRecovered", async () => {
-            await asset.grantRole(ATS_ROLES.ROLE_FREEZE_MANAGER, signer_D.address);
             await asset.recoveryAddress(signer_D.address, signer_F.address, ADDRESS_ZERO);
+            await asset.grantRole(ATS_ROLES.ROLE_FREEZE_MANAGER, signer_D.address);
 
             expect(await asset.hasRole(ATS_ROLES.ROLE_FREEZE_MANAGER, signer_D.address)).to.equal(true);
             await expect(
@@ -704,13 +707,32 @@ export function recoveryTests(getCtx: () => AssetMockCtx): void {
           });
 
           it("GIVEN a recovered wallet still holding DEFAULT_ADMIN_ROLE WHEN it calls applyRoles (direct checkRole) THEN reverts WalletRecovered", async () => {
-            await asset.grantRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, signer_D.address);
             await asset.recoveryAddress(signer_D.address, signer_F.address, ADDRESS_ZERO);
+            await asset.grantRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, signer_D.address);
 
             expect(await asset.hasRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, signer_D.address)).to.equal(true);
             await expect(
               asset.connect(signer_D).applyRoles([ATS_ROLES.ROLE_LOCKER], [true], signer_E.address),
             ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+          });
+
+          it("FIND-039 (TDD, expected red) GIVEN a sole DEFAULT_ADMIN_ROLE holder WHEN recoveryAddress is called on it before rotating the role THEN transaction fails instead of permanently bricking admin operations", async () => {
+            const roleCount = await asset.getRoleMemberCount(ATS_ROLES.DEFAULT_ADMIN_ROLE);
+            expect(roleCount).to.equal(1);
+            expect(await asset.hasRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, signer_A.address)).to.equal(true);
+
+            await expect(
+              asset.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO),
+            ).to.be.revertedWithCustomError(asset, "CannotRecoverWallet");
+          });
+
+          it("FIND-039 GIVEN a role-bearing wallet that is not the sole holder of that role WHEN recoveryAddress is called THEN transaction fails with CannotRecoverWallet", async () => {
+            await asset.grantRole(ATS_ROLES.ROLE_LOCKER, signer_D.address);
+            await asset.grantRole(ATS_ROLES.ROLE_LOCKER, signer_E.address);
+
+            await expect(
+              asset.recoveryAddress(signer_D.address, signer_F.address, ADDRESS_ZERO),
+            ).to.be.revertedWithCustomError(asset, "CannotRecoverWallet");
           });
         });
       });
@@ -746,6 +768,7 @@ export function recoveryTests(getCtx: () => AssetMockCtx): void {
 
       it("GIVEN a multi partition token WHEN recoveryAddress THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
         await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
+        await asset.revokeRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
         await expect(
           asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO),
         ).to.be.revertedWithCustomError(asset, "NotAllowedInMultiPartitionMode");

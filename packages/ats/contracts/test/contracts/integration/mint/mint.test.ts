@@ -130,9 +130,9 @@ export function mintTests(getCtx: () => AssetMockCtx): void {
         expect(await asset.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
       });
 
-      it("GIVEN a recovered caller WHEN issue THEN reverts with WalletRecovered", async () => {
+      it("GIVEN a recovered tokenHolder WHEN issue THEN reverts with WalletRecovered", async () => {
         await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-        await asset.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
+        await asset.recoveryAddress(signer_E.address, signer_B.address, ADDRESS_ZERO);
 
         await expect(asset.issue(signer_E.address, AMOUNT, DATA)).to.be.revertedWithCustomError(
           asset,
@@ -140,9 +140,9 @@ export function mintTests(getCtx: () => AssetMockCtx): void {
         );
       });
 
-      it("GIVEN a recovered caller WHEN mint THEN reverts with WalletRecovered", async () => {
+      it("GIVEN a recovered to WHEN mint THEN reverts with WalletRecovered", async () => {
         await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
-        await asset.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
+        await asset.recoveryAddress(signer_E.address, signer_B.address, ADDRESS_ZERO);
 
         await expect(asset.mint(signer_E.address, AMOUNT)).to.be.revertedWithCustomError(asset, "WalletRecovered");
       });

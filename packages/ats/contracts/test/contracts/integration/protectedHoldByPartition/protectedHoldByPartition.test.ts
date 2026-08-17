@@ -447,12 +447,12 @@ export function protectedHoldByPartitionTests(getCtx: () => AssetMockCtx): void 
           nonce: 1,
         };
 
-        await asset.connect(signer_A).recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
+        await asset.connect(signer_A).recoveryAddress(signer_C.address, signer_B.address, ADDRESS_ZERO);
 
         await expect(
           asset
             .connect(signer_B)
-            .protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
+            .protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_C.address, protectedHold, "0x1234"),
         ).to.be.revertedWithCustomError(asset, "WalletRecovered");
       });
 

@@ -237,6 +237,26 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
     }
 
     /**
+     * @notice Sets the status of a registered business logic version.
+     * @dev Callers must validate `_version` (via `validVersion`) and reject
+     *      `IBusinessLogicResolver.VersionStatus.NONE` before calling this function.
+     * @param _businessLogicKey Business logic key whose version status is updated.
+     * @param _version Version number to update.
+     * @param _status New status to assign to the version.
+     */
+    function _setVersionStatus(
+        bytes32 _businessLogicKey,
+        uint256 _version,
+        IBusinessLogicResolver.VersionStatus _status
+    ) internal {
+        BusinessLogicResolverDataStorage storage businessLogicResolverDataStorage = _businessLogicResolverStorage();
+        businessLogicResolverDataStorage.statusByFacetIdAndVersion[
+            keccak256(abi.encodePacked(_businessLogicKey, _version))
+        ] = _status;
+        businessLogicResolverDataStorage.businessLogics[_businessLogicKey][_version - 1].versionData.status = _status;
+    }
+
+    /**
      * @notice Returns the status stored for a business logic version.
      * @dev Returns `NONE` for keys or versions without an explicit status entry.
      * @param _businessLogicKey Business logic key to query.

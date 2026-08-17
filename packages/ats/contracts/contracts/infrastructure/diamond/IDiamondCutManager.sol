@@ -97,6 +97,15 @@ interface IDiamondCutManager {
     error DuplicatedFacetInConfiguration(bytes32 facetId);
 
     /**
+     * @notice Thrown when a configuration selects a facet version whose status has been set
+     *         to `DEACTIVATED`. Configurations that already reference the version are unaffected;
+     *         this only blocks the version from being selected into a new configuration.
+     * @param facetId Facet id whose selected version is deactivated.
+     * @param version Deactivated version that was selected.
+     */
+    error DeactivatedVersionNotAllowed(bytes32 facetId, uint256 version);
+
+    /**
      * @notice Thrown when {createConfiguration} is called for a configuration id that already
      *         has an in-progress batch, which would prematurely finalise the incomplete batch
      *         and absorb any facets that were intended for subsequent batch additions.

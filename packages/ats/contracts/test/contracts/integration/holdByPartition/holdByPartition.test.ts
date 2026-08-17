@@ -49,6 +49,7 @@ export function holdByPartitionTests(getCtx: () => AssetMockCtx): void {
     let signer_C: HardhatEthersSigner;
     let signer_D: HardhatEthersSigner;
     let signer_E: HardhatEthersSigner;
+    let signer_F: HardhatEthersSigner;
 
     let asset: IAssetMock;
 
@@ -174,6 +175,7 @@ export function holdByPartitionTests(getCtx: () => AssetMockCtx): void {
         signer_C = ctx.user2;
         signer_D = ctx.user3;
         signer_E = ctx.user4;
+        signer_F = ctx.user5;
         asset = ctx.asset;
 
         await executeRbac(asset, set_initRbacs());
@@ -400,12 +402,11 @@ export function holdByPartitionTests(getCtx: () => AssetMockCtx): void {
         });
 
         it("GIVEN msg.sender recovering WHEN createHoldByPartition THEN transaction fails with WalletRecovered", async () => {
-          await asset.connect(signer_A).recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
+          await asset.connect(signer_A).recoveryAddress(signer_F.address, signer_E.address, ADDRESS_ZERO);
 
-          await expect(asset.createHoldByPartition(_DEFAULT_PARTITION, hold)).to.be.revertedWithCustomError(
-            asset,
-            "WalletRecovered",
-          );
+          await expect(
+            asset.connect(signer_F).createHoldByPartition(_DEFAULT_PARTITION, hold),
+          ).to.be.revertedWithCustomError(asset, "WalletRecovered");
         });
 
         it("GIVEN hold.to recovering WHEN createHoldByPartition THEN transaction fails with WalletRecovered", async () => {
@@ -413,11 +414,11 @@ export function holdByPartitionTests(getCtx: () => AssetMockCtx): void {
             amount: _AMOUNT,
             expirationTimestamp: expirationTimestamp,
             escrow: signer_B.address,
-            to: signer_C.address,
+            to: signer_F.address,
             data: _DATA,
           };
 
-          await asset.connect(signer_A).recoveryAddress(signer_C.address, signer_B.address, ADDRESS_ZERO);
+          await asset.connect(signer_A).recoveryAddress(signer_F.address, signer_B.address, ADDRESS_ZERO);
 
           await expect(
             asset.createHoldByPartition(_DEFAULT_PARTITION, hold_with_destination),
