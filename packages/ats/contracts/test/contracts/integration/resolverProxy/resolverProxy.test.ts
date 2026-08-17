@@ -674,4 +674,172 @@ describe("ResolverProxy Tests", () => {
     expect(result.configurationVersion_).to.equal(newVersion);
     expect(result.replacementEnabled_).to.equal(true);
   });
+
+  it("FIND-053 (TDD, expected red) GIVEN resolverProxy and admin user WHEN updating resolver to the zero address THEN reverts with InvalidBusinessLogicResolver", async () => {
+    const businessLogicsRegistryDatas = [
+      {
+        businessLogicKey: await diamondFacet.getStaticResolverKey(),
+        businessLogicAddress: diamondFacet.target,
+      },
+      {
+        businessLogicKey: await accessControlImpl.getStaticResolverKey(),
+        businessLogicAddress: accessControlImpl.target,
+      },
+    ];
+
+    await setUpResolver(businessLogicsRegistryDatas);
+
+    const rbac = [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [signer_A.address] }];
+
+    const resolverProxy = await (
+      await ethers.getContractFactory("ResolverProxy")
+    ).deploy(resolver.target, { configurationId: CONFIG_ID, configurationVersion: 1, replacementEnabled: false }, rbac);
+
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target, signer_A);
+
+    await expect(diamondCut.updateResolver(ethers.ZeroAddress, CONFIG_ID, 1, true)).to.be.revertedWithCustomError(
+      diamondCut,
+      "InvalidBusinessLogicResolver",
+    );
+  });
+
+  it("FIND-053 (TDD, expected red) GIVEN resolverProxy and admin user WHEN updating resolver to a contract that is not a BusinessLogicResolver THEN reverts with InvalidBusinessLogicResolver", async () => {
+    const businessLogicsRegistryDatas = [
+      {
+        businessLogicKey: await diamondFacet.getStaticResolverKey(),
+        businessLogicAddress: diamondFacet.target,
+      },
+      {
+        businessLogicKey: await accessControlImpl.getStaticResolverKey(),
+        businessLogicAddress: accessControlImpl.target,
+      },
+    ];
+
+    await setUpResolver(businessLogicsRegistryDatas);
+
+    const rbac = [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [signer_A.address] }];
+
+    const resolverProxy = await (
+      await ethers.getContractFactory("ResolverProxy")
+    ).deploy(resolver.target, { configurationId: CONFIG_ID, configurationVersion: 1, replacementEnabled: false }, rbac);
+
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target, signer_A);
+
+    await expect(diamondCut.updateResolver(diamondFacet.target, CONFIG_ID, 1, true)).to.be.revertedWithCustomError(
+      diamondCut,
+      "InvalidBusinessLogicResolver",
+    );
+  });
+
+  it("FIND-053 (TDD, expected red) GIVEN resolverProxy and admin user WHEN updating resolver THEN emits ResolverUpdated", async () => {
+    resolver_2 = await deployResolver();
+
+    const businessLogicsRegistryDatas = [
+      {
+        businessLogicKey: await diamondFacet.getStaticResolverKey(),
+        businessLogicAddress: diamondFacet.target,
+      },
+      {
+        businessLogicKey: await accessControlImpl.getStaticResolverKey(),
+        businessLogicAddress: accessControlImpl.target,
+      },
+    ];
+
+    await setUpResolver(businessLogicsRegistryDatas);
+    await setUpResolver(businessLogicsRegistryDatas, CONFIG_ID_2, resolver_2);
+
+    const rbac = [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [signer_A.address] }];
+
+    const resolverProxy = await (
+      await ethers.getContractFactory("ResolverProxy")
+    ).deploy(resolver.target, { configurationId: CONFIG_ID, configurationVersion: 1, replacementEnabled: false }, rbac);
+
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target, signer_A);
+
+    await expect(diamondCut.updateResolver(resolver_2.target, CONFIG_ID_2, 1, true))
+      .to.emit(diamondCut, "ResolverUpdated")
+      .withArgs(signer_A.address, resolver.target, resolver_2.target, CONFIG_ID, CONFIG_ID_2, 1, 1, false, true);
+  });
+
+  it("FIND-053 (TDD, expected red) GIVEN resolverProxy and admin user WHEN updating config THEN emits ConfigUpdated", async () => {
+    const businessLogicsRegistryDatas = [
+      {
+        businessLogicKey: await diamondFacet.getStaticResolverKey(),
+        businessLogicAddress: diamondFacet.target,
+      },
+      {
+        businessLogicKey: await accessControlImpl.getStaticResolverKey(),
+        businessLogicAddress: accessControlImpl.target,
+      },
+    ];
+
+    await setUpResolver(businessLogicsRegistryDatas, CONFIG_ID);
+    await setUpResolver(businessLogicsRegistryDatas, CONFIG_ID_2);
+
+    const rbac = [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [signer_A.address] }];
+
+    const resolverProxy = await (
+      await ethers.getContractFactory("ResolverProxy")
+    ).deploy(resolver.target, { configurationId: CONFIG_ID, configurationVersion: 1, replacementEnabled: false }, rbac);
+
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target, signer_A);
+
+    await expect(diamondCut.updateConfig(CONFIG_ID_2, 1))
+      .to.emit(diamondCut, "ConfigUpdated")
+      .withArgs(signer_A.address, CONFIG_ID, CONFIG_ID_2, 1, 1);
+  });
+
+  it("FIND-053 (TDD, expected red) GIVEN resolverProxy and admin user WHEN updating config version THEN emits ConfigVersionUpdated", async () => {
+    const businessLogicsRegistryDatas = [
+      {
+        businessLogicKey: await diamondFacet.getStaticResolverKey(),
+        businessLogicAddress: diamondFacet.target,
+      },
+      {
+        businessLogicKey: await accessControlImpl.getStaticResolverKey(),
+        businessLogicAddress: accessControlImpl.target,
+      },
+    ];
+
+    await setUpResolver(businessLogicsRegistryDatas);
+
+    const rbac = [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [signer_A.address] }];
+
+    const resolverProxy = await (
+      await ethers.getContractFactory("ResolverProxy")
+    ).deploy(resolver.target, { configurationId: CONFIG_ID, configurationVersion: 1, replacementEnabled: false }, rbac);
+
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target, signer_A);
+
+    await expect(diamondCut.updateConfigVersion(1))
+      .to.emit(diamondCut, "ConfigVersionUpdated")
+      .withArgs(signer_A.address, 1, 1);
+  });
+
+  it("FIND-053 (TDD, expected red) GIVEN resolverProxy and admin user WHEN updating replacement enabled THEN emits ReplacementEnabledUpdated", async () => {
+    const businessLogicsRegistryDatas = [
+      {
+        businessLogicKey: await diamondFacet.getStaticResolverKey(),
+        businessLogicAddress: diamondFacet.target,
+      },
+      {
+        businessLogicKey: await accessControlImpl.getStaticResolverKey(),
+        businessLogicAddress: accessControlImpl.target,
+      },
+    ];
+
+    await setUpResolver(businessLogicsRegistryDatas);
+
+    const rbac = [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [signer_A.address] }];
+
+    const resolverProxy = await (
+      await ethers.getContractFactory("ResolverProxy")
+    ).deploy(resolver.target, { configurationId: CONFIG_ID, configurationVersion: 1, replacementEnabled: false }, rbac);
+
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target, signer_A);
+
+    await expect(diamondCut.updateReplacementEnabled(true))
+      .to.emit(diamondCut, "ReplacementEnabledUpdated")
+      .withArgs(signer_A.address, false, true);
+  });
 });

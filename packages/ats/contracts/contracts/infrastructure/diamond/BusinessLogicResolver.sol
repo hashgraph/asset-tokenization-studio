@@ -172,4 +172,9 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
     ) external view override returns (bytes4[] memory selectors_) {
         return _getSelectorsBlacklist(_configurationId, _pageIndex, _pageLength);
     }
+
+    /// @inheritdoc IBusinessLogicResolver
+    function isBusinessLogicResolver() external pure override returns (bool isBusinessLogicResolver_) {
+        return true;
+    }
 }

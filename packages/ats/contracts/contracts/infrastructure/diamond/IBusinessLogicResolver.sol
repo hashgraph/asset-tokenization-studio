@@ -248,4 +248,12 @@ interface IBusinessLogicResolver is IDiamondCutManager {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view returns (bytes4[] memory selectors_);
+
+    /**
+     * @notice Identity marker used to confirm a candidate address is a genuine
+     *         `IBusinessLogicResolver`, checked via low-level `call()` rather than a direct
+     *         interface call (see `DiamondCut::onlyValidBusinessLogicResolver`).
+     * @return isBusinessLogicResolver_ Always `true` for a real `BusinessLogicResolver`.
+     */
+    function isBusinessLogicResolver() external pure returns (bool isBusinessLogicResolver_);
 }
