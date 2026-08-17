@@ -927,6 +927,60 @@ export function holdByPartitionTests(getCtx: () => AssetMockCtx): void {
             .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
         });
       });
+
+      describe("FIND-066", () => {
+        it("GIVEN an unlimited allowance WHEN createHoldFromByPartition and releaseHoldByPartition THEN no third party is recorded and the allowance stays unlimited", async () => {
+          await asset.connect(signer_A).approve(signer_B.address, MAX_UINT256);
+
+          await asset
+            .connect(signer_B)
+            .createHoldFromByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES);
+
+          expect(await asset.getHoldThirdParty(holdIdentifier)).to.equal(ADDRESS_ZERO);
+          expect(await asset.allowance(signer_A.address, signer_B.address)).to.equal(MAX_UINT256);
+
+          await expect(asset.connect(signer_B).releaseHoldByPartition(holdIdentifier, _AMOUNT)).to.not.emit(
+            asset,
+            "Approval",
+          );
+
+          expect(await asset.allowance(signer_A.address, signer_B.address)).to.equal(MAX_UINT256);
+        });
+
+        it("GIVEN a finite allowance debited by a hold WHEN the owner re-approves an unlimited allowance before releaseHoldByPartition THEN restoration is skipped without reverting", async () => {
+          await asset.connect(signer_A).increaseAllowance(signer_B.address, _AMOUNT);
+
+          await asset
+            .connect(signer_B)
+            .createHoldFromByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES);
+
+          expect(await asset.getHoldThirdParty(holdIdentifier)).to.equal(signer_B.address);
+          expect(await asset.allowance(signer_A.address, signer_B.address)).to.equal(ZERO);
+
+          await asset.connect(signer_A).approve(signer_B.address, MAX_UINT256);
+
+          await expect(asset.connect(signer_B).releaseHoldByPartition(holdIdentifier, _AMOUNT)).to.not.be.reverted;
+
+          expect(await asset.allowance(signer_A.address, signer_B.address)).to.equal(MAX_UINT256);
+        });
+
+        it("GIVEN a hold created by an authorized operator WHEN releaseHoldByPartition THEN the allowance between owner and operator is untouched", async () => {
+          await asset.connect(signer_A).authorizeOperator(signer_B.address);
+
+          await asset
+            .connect(signer_B)
+            .operatorCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES);
+
+          expect(await asset.allowance(signer_A.address, signer_B.address)).to.equal(ZERO);
+
+          await expect(asset.connect(signer_B).releaseHoldByPartition(holdIdentifier, _AMOUNT)).to.not.emit(
+            asset,
+            "Approval",
+          );
+
+          expect(await asset.allowance(signer_A.address, signer_B.address)).to.equal(ZERO);
+        });
+      });
     });
 
     describe("Multi-partition", () => {

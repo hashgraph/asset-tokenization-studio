@@ -12,6 +12,7 @@ import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 import { ScheduledTasksOps } from "../orchestrator/ScheduledTasksOps.sol";
+import { IAllowance } from "../../facets/allowance/IAllowance.sol";
 
 /// @custom:hash storage Erc20
 bytes32 constant STORAGE_LOCATION_ERC20 = 0xba2beddc557de36eb4836f4ff1fd9d33a28d780fce70d36cf80b490142788200;
@@ -223,7 +224,7 @@ library ERC20StorageWrapper {
      * @param spender Spender whose allowance is scaled.
      */
     function updateAllowanceAndLabaf(address owner, address spender) internal {
-        if (_erc20Storage().allowed[owner][spender] == type(uint256).max) return;
+        if (isInfiniteAllowance(owner, spender)) return;
         uint256 abaf = AdjustBalancesStorageWrapper.getAbaf();
         uint256 labaf = AdjustBalancesStorageWrapper.getAllowanceLabaf(owner, spender);
 
@@ -389,22 +390,23 @@ library ERC20StorageWrapper {
      *      checkpoint by a spend; only `approve()` can change it.
      *      Reverts with `InsufficientAllowance` when `value` exceeds the current
      *      allowance.
-     * @param from    Token owner whose allowance is consumed.
+     * @param owner   Token owner whose allowance is consumed.
      * @param spender Address whose spending limit is reduced.
      * @param value   Amount to deduct from the allowance.
+     * @return If current allowance was decreased.
      */
-    function decreaseAllowedBalance(address from, address spender, uint256 value) internal {
-        beforeAllowanceUpdate(from, spender);
+    function decreaseAllowedBalance(address owner, address spender, uint256 value) internal returns (bool) {
+        beforeAllowanceUpdate(owner, spender);
+        if (isInfiniteAllowance(owner, spender)) return false;
 
         ERC20Storage storage erc20Stor = _erc20Storage();
-        uint256 currentAllowance = erc20Stor.allowed[from][spender];
-
-        if (currentAllowance == type(uint256).max) return;
-        if (value > currentAllowance) revert IAllowanceTypes.InsufficientAllowance(spender, from);
+        uint256 currentAllowance = erc20Stor.allowed[owner][spender];
+        if (value > currentAllowance) revert IAllowanceTypes.InsufficientAllowance(spender, owner);
 
         unchecked {
-            erc20Stor.allowed[from][spender] = currentAllowance - value;
+            erc20Stor.allowed[owner][spender] = currentAllowance - value;
         }
+        return true;
     }
 
     /**
@@ -545,6 +547,27 @@ library ERC20StorageWrapper {
                         AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp),
                         AdjustBalancesStorageWrapper.getAllowanceLabaf(owner, spender)
                     );
+    }
+
+    /**
+     * @notice Checks whether a spender has an unlimited allowance from an owner.
+     * @dev Treats `type(uint256).max` as an infinite allowance sentinel.
+     * @param _owner Account that granted the allowance.
+     * @param _spender Account authorised to spend the owner's tokens.
+     * @return infinite_ True if the current allowance equals the maximum uint256 value.
+     */
+    function isInfiniteAllowance(address _owner, address _spender) internal view returns (bool infinite_) {
+        infinite_ = allowance(_owner, _spender) == type(uint256).max;
+    }
+
+    /**
+     * @notice Ensures that a spender does not have an infinite allowance from an owner.
+     * @dev Reverts with `InfiniteAllowance` when the allowance equals `type(uint256).max`.
+     * @param _owner Address that granted the allowance.
+     * @param _spender Address authorised to spend the owner's tokens.
+     */
+    function checkFiniteAllowance(address _owner, address _spender) internal view {
+        if (isInfiniteAllowance(_owner, _spender)) revert IAllowance.InfiniteAllowance(_owner, _spender);
     }
 
     /**

@@ -382,6 +382,14 @@ export function allowanceTests(getCtx: () => AssetMockCtx): void {
 
           expect(await asset.allowance(signer_C.address, signer_D.address)).to.equal(MAX_UINT256);
         });
+
+        it("GIVEN an unlimited allowance WHEN decreaseAllowance THEN reverts with InfiniteAllowance", async () => {
+          await assetSignerC.approve(signer_D.address, MAX_UINT256);
+
+          await expect(assetSignerC.decreaseAllowance(signer_D.address, 1n))
+            .to.be.revertedWithCustomError(asset, "InfiniteAllowance")
+            .withArgs(signer_C.address, signer_D.address);
+        });
       });
     });
 

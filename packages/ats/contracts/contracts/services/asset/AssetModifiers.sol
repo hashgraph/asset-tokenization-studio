@@ -18,6 +18,7 @@ import { ProceedRecipientModifiers } from "./ProceedRecipientModifiers.sol";
 import { StateModifiers } from "./StateModifiers.sol";
 import { AmortizationModifiers } from "./AmortizationModifiers.sol";
 import { LoansPortfolioModifiers } from "./LoansPortfolioModifiers.sol";
+import { AllowanceModifiers } from "./AllowanceModifiers.sol";
 
 /**
  * @title AssetModifiers
@@ -29,6 +30,7 @@ import { LoansPortfolioModifiers } from "./LoansPortfolioModifiers.sol";
  * Asset Modifiers:
  * - ActionValidationModifiers: Action validation
  * - AdjustBalancesModifiers: Adjust balances validation
+ * - AllowanceModifiers: Allowance validation
  * - ClearingModifiers: Clearing state validation
  * - CouponModifiers: Coupon date validation
  * - ComplianceModifiers: Compliance validation
@@ -49,6 +51,7 @@ abstract contract AssetModifiers is
     ActionValidationModifiers,
     AdjustBalancesModifiers,
     AmortizationModifiers,
+    AllowanceModifiers,
     ClearingModifiers,
     CouponModifiers,
     ComplianceModifiers,
