@@ -133,7 +133,7 @@ library KycStorageWrapper {
                     return IKyc.KycStatus.NOT_GRANTED;
                 }
             } catch {
-                // we consider that the kyc was not revoked
+                return IKyc.KycStatus.NOT_GRANTED;
             }
         }
 
