@@ -64,10 +64,7 @@ library AccessControlStorageWrapper {
      * @return success_ True when both directions of the index were updated.
      */
     function grantRole(bytes32 _role, address _account) internal returns (bool success_) {
-        RoleDataStorage storage roleDataStorage = _rolesStorage();
-        success_ =
-            roleDataStorage.roles[_role].roleMembers.add(_account) &&
-            roleDataStorage.memberRoles[_account].add(_role);
+        success_ = _grantRole(_rolesStorage(), _role, _account);
     }
 
     /**
@@ -80,10 +77,7 @@ library AccessControlStorageWrapper {
      * @return success_ True when both directions of the index were updated.
      */
     function revokeRole(bytes32 _role, address _account) internal returns (bool success_) {
-        RoleDataStorage storage roleDataStorage = _rolesStorage();
-        success_ =
-            roleDataStorage.roles[_role].roleMembers.remove(_account) &&
-            roleDataStorage.memberRoles[_account].remove(_role);
+        success_ = _revokeRole(_rolesStorage(), _role, _account);
     }
 
     /**
@@ -131,12 +125,10 @@ library AccessControlStorageWrapper {
             }
 
             if (active) {
-                roleDataStorage.roles[role].roleMembers.add(_account);
-                roleDataStorage.memberRoles[_account].add(role);
+                _grantRole(roleDataStorage, role, _account);
                 continue;
             }
-            roleDataStorage.roles[role].roleMembers.remove(_account);
-            roleDataStorage.memberRoles[_account].remove(role);
+            _revokeRole(roleDataStorage, role, _account);
         }
 
         // Shrink the dynamic-array length slot in memory to `count` —
@@ -296,6 +288,46 @@ library AccessControlStorageWrapper {
      */
     function checkConsistentRoles(bytes32[] calldata _roles, bool[] calldata _actives) internal pure {
         ArrayValidation.checkUniqueValues(_roles, _actives);
+    }
+
+    /**
+     * @notice Grants a role to an account within the role data storage.
+     * @dev Mutates both role-to-member and member-to-role indexes atomically at expression
+     *      level. Returns false if either association already exists or cannot be added.
+     * @param _roleDataStorage Storage reference containing role membership indexes.
+     * @param _role Role identifier to grant.
+     * @param _account Account receiving the role.
+     * @return success_ True if both membership indexes are updated successfully.
+     */
+    function _grantRole(
+        RoleDataStorage storage _roleDataStorage,
+        bytes32 _role,
+        address _account
+    ) private returns (bool success_) {
+        success_ =
+            _roleDataStorage.roles[_role].roleMembers.add(_account) &&
+            _roleDataStorage.memberRoles[_account].add(_role);
+    }
+
+    /**
+     * @notice Revokes a role from an account when doing so preserves admin availability.
+     * @dev Reverts if the role is the sole admin role according to `checkNotSoleAdmin`.
+     *      Mutates both role-to-member and member-to-role indexes only when both removals
+     *      succeed.
+     * @param roleDataStorage Storage pointer containing role membership and reverse indexes.
+     * @param _role Role identifier to revoke from the account.
+     * @param _account Account from which the role is revoked.
+     * @return success_ True when the account is removed from both role indexes.
+     */
+    function _revokeRole(
+        RoleDataStorage storage roleDataStorage,
+        bytes32 _role,
+        address _account
+    ) private returns (bool success_) {
+        checkNotSoleAdmin(_role);
+        success_ =
+            roleDataStorage.roles[_role].roleMembers.remove(_account) &&
+            roleDataStorage.memberRoles[_account].remove(_role);
     }
 
     /**

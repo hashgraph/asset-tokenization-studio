@@ -378,6 +378,38 @@ export function accessControlTests(getCtx: () => AssetMockCtx): void {
       expect(await asset.getRoleMemberCount(ATS_ROLES.DEFAULT_ADMIN_ROLE)).to.equal(1);
     });
 
+    it("FIND-003 (TDD, expected red) GIVEN the sole DEFAULT_ADMIN_ROLE holder WHEN revokeRole targets itself THEN transaction fails with CannotRenounceSoleAdmin instead of bricking the token", async () => {
+      const memberCount = await asset.getRoleMemberCount(ATS_ROLES.DEFAULT_ADMIN_ROLE);
+      expect(memberCount).to.equal(1);
+
+      await expect(
+        asset.connect(deployer).revokeRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, deployer.address),
+      ).to.be.revertedWithCustomError(asset, "CannotRenounceSoleAdmin");
+    });
+
+    it("FIND-003 (TDD, expected red) GIVEN the sole DEFAULT_ADMIN_ROLE holder WHEN applyRoles revokes it THEN transaction fails with CannotRenounceSoleAdmin instead of bricking the token", async () => {
+      const memberCount = await asset.getRoleMemberCount(ATS_ROLES.DEFAULT_ADMIN_ROLE);
+      expect(memberCount).to.equal(1);
+
+      await expect(
+        asset.connect(deployer).applyRoles([ATS_ROLES.DEFAULT_ADMIN_ROLE], [false], deployer.address),
+      ).to.be.revertedWithCustomError(asset, "CannotRenounceSoleAdmin");
+    });
+
+    it("FIND-003 GIVEN the sole DEFAULT_ADMIN_ROLE holder WHEN applyRoles bundles an unrelated role grant ahead of the sole-admin revocation in the same batch THEN the whole call reverts atomically with CannotRenounceSoleAdmin and the unrelated grant is not applied", async () => {
+      expect(await asset.getRoleMemberCount(ATS_ROLES.DEFAULT_ADMIN_ROLE)).to.equal(1);
+      expect(await asset.hasRole(ATS_ROLES.ROLE_PAUSER, deployer.address)).to.equal(false);
+
+      await expect(
+        asset
+          .connect(deployer)
+          .applyRoles([ATS_ROLES.ROLE_PAUSER, ATS_ROLES.DEFAULT_ADMIN_ROLE], [true, false], deployer.address),
+      ).to.be.revertedWithCustomError(asset, "CannotRenounceSoleAdmin");
+
+      expect(await asset.hasRole(ATS_ROLES.ROLE_PAUSER, deployer.address)).to.equal(false);
+      expect(await asset.getRoleMemberCount(ATS_ROLES.DEFAULT_ADMIN_ROLE)).to.equal(1);
+    });
+
     describe("initializeAccessControl", () => {
       it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeAccessControl is called THEN it reverts with AccountHasNoRole", async () => {
         await expect(asset.connect(unknownSigner).initializeAccessControl())

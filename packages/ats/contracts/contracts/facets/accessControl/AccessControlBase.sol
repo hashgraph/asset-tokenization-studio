@@ -78,7 +78,6 @@ abstract contract AccessControlBase is AccessControlRead {
      */
     function _renounceRole(bytes32 _role) internal returns (bool success_) {
         address account = EvmAccessors.getMsgSender();
-        AccessControlStorageWrapper.checkNotSoleAdmin(_role);
         success_ = AccessControlStorageWrapper.revokeRole(_role, account);
         if (!success_) {
             revert AccountNotAssignedToRole(_role, account);
