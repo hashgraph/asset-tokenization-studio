@@ -289,6 +289,22 @@ export function operatorByPartitionTests(getCtx: () => AssetMockCtx): void {
           }),
         ).to.not.be.reverted;
       });
+
+      it("GIVEN a paused token WHEN operatorTransferByPartition self-transfer THEN reverts with IsPaused (FIND-002)", async () => {
+        await asset.connect(signer_A).authorizeOperatorByPartition(DEFAULT_PARTITION, signer_B.address);
+        await asset.pause();
+
+        await expect(
+          asset.connect(signer_B).operatorTransferByPartition({
+            partition: DEFAULT_PARTITION,
+            from: signer_A.address,
+            to: signer_A.address,
+            value: AMOUNT,
+            data: EMPTY_HEX_BYTES,
+            operatorData: EMPTY_HEX_BYTES,
+          }),
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
+      });
     });
 
     // ─── operatorRedeemByPartition ────────────────────────────────────────────────

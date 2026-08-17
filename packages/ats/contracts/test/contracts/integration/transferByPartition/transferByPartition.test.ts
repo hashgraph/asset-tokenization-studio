@@ -89,6 +89,29 @@ export function transferByPartitionTests(getCtx: () => AssetMockCtx): void {
       });
     });
 
+    describe("Paused", () => {
+      beforeEach(async () => {
+        await executeRbac(asset, [
+          { role: ATS_ROLES.ROLE_ISSUER, members: [signer_B.address] },
+          { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+          { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
+          { role: ATS_ROLES.ROLE_PAUSER, members: [signer_A.address] },
+        ]);
+
+        await asset.connect(signer_A).addIssuer(signer_A.address);
+        await setupBalances();
+        await asset.connect(signer_A).pause();
+      });
+
+      it("GIVEN a paused token WHEN transferByPartition self-transfer THEN fails with IsPaused (FIND-002)", async () => {
+        await expect(
+          asset
+            .connect(signer_A)
+            .transferByPartition(DEFAULT_PARTITION, { to: signer_A.address, value: _AMOUNT }, "0x"),
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
+      });
+    });
+
     describe("Multi partition mode", () => {
       beforeEach(async () => {
         await asset.setMultiPartition(true);

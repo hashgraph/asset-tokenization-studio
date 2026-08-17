@@ -76,6 +76,7 @@ abstract contract Transfer is ITransfer, Modifiers {
         override
         onlyOperational
         onlyActivated
+        onlyUnpaused
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
         onlyPositiveTransferAmount(_value)
@@ -96,6 +97,7 @@ abstract contract Transfer is ITransfer, Modifiers {
         override
         onlyOperational
         onlyActivated
+        onlyUnpaused
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
         onlyPositiveTransferAmount(_value)

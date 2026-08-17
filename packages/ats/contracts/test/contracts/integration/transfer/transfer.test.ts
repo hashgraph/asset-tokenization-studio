@@ -325,6 +325,18 @@ export function transferTests(getCtx: () => AssetMockCtx): void {
           ).to.be.revertedWithCustomError(asset, "IsPaused");
         });
 
+        it("GIVEN a paused token WHEN transferWithData self-transfer THEN fails with IsPaused (FIND-002)", async () => {
+          await expect(
+            asset.connect(signer_E).transferWithData(signer_E.address, amount / 2, DATA),
+          ).to.be.revertedWithCustomError(asset, "IsPaused");
+        });
+
+        it("GIVEN a paused token WHEN transferFromWithData self-transfer THEN fails with IsPaused (FIND-002)", async () => {
+          await expect(
+            asset.connect(signer_C).transferFromWithData(signer_E.address, signer_E.address, amount / 2, DATA),
+          ).to.be.revertedWithCustomError(asset, "IsPaused");
+        });
+
         it("GIVEN a paused token WHEN transferWithData called by non-paused path THEN transferWithData is NOT blocked by pause", async () => {
           await asset.connect(signer_B).unpause();
           expect(await asset.connect(signer_E).transferWithData(signer_D.address, amount / 2, DATA))

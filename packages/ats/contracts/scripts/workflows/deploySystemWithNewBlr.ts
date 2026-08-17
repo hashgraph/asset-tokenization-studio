@@ -30,6 +30,8 @@ import {
   DEFAULT_BATCH_SIZE,
   DEFAULT_TRANSACTION_TIMEOUT,
   GAS_LIMIT,
+  hederaGasOverrides,
+  gasLimitOverride,
   retryTransaction,
   isInstantMiningNetwork,
   CheckpointManager,
@@ -493,10 +495,12 @@ export async function deploySystemWithNewBlr(
       if (Object.keys(facetFactories).length > 0) {
         info(`   Deploying ${Object.keys(facetFactories).length} remaining facets...`);
 
-        // On real networks (Hedera) provide explicit gasLimit to skip eth_estimateGas.
-        // On instant-mining networks (Hardhat/local) let ethers auto-estimate so large
-        // contracts like TimeTravel facets get the gas they actually need.
-        const facetOverrides = isInstantMiningNetwork(network) ? {} : { gasLimit: GAS_LIMIT.max };
+        // On real networks (Hedera) or during coverage provide explicit gasLimit.
+        // On instant-mining networks (Hardhat/local) let ethers auto-estimate unless in coverage.
+        const facetOverrides = {
+          ...hederaGasOverrides(),
+          ...(process.env.COVERAGE || !isInstantMiningNetwork(network) ? gasLimitOverride(GAS_LIMIT.max) : {}),
+        };
 
         facetsResult = await deployFacets(facetFactories, {
           confirmations,
