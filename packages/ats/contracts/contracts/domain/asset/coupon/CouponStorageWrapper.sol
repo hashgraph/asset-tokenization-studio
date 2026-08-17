@@ -17,6 +17,7 @@ import { ICouponTypes } from "../../../facets/coupon/ICouponTypes.sol";
 import { MaturityDateStorageWrapper } from "../MaturityDateStorageWrapper.sol";
 import { CouponRateDispatch } from "./CouponRateDispatch.sol";
 import { DatesValidation } from "../../../infrastructure/utils/DatesValidation.sol";
+import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { DecimalsLib } from "../../../infrastructure/utils/DecimalsLib.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { NominalValueStorageWrapper } from "../NominalValueStorageWrapper.sol";
@@ -43,6 +44,7 @@ struct CouponDataStorage {
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     uint256[] couponsOrderedListByIds;
     // ─── APPEND-ONLY ZONE BELOW ───
+    EnumerableSet.UintSet pendingCoupons;
 }
 
 /// @title Coupon Storage Wrapper
@@ -50,6 +52,7 @@ struct CouponDataStorage {
 /// @dev Provides structured access to CouponDataStorage at a dedicated storage slot.
 /// @author Asset Tokenization Studio Team
 library CouponStorageWrapper {
+    using EnumerableSet for EnumerableSet.UintSet;
     /**
      * @notice Persists a new coupon corporate action and schedules its snapshot/listing
      *         tasks. Variant invariants and rate stamping are delegated to
@@ -76,6 +79,10 @@ library CouponStorageWrapper {
             abi.encode(newCoupon)
         );
 
+        if (newCoupon.rateStatus == ICouponTypes.RateCalculationStatus.PENDING) {
+            _couponStorage().pendingCoupons.add(couponID_);
+        }
+
         initCoupon(corporateActionId_, newCoupon);
         resolved_ = newCoupon;
     }
@@ -96,6 +103,7 @@ library CouponStorageWrapper {
             revert ICoupon.CouponAlreadyExecuted(corporateActionId, couponId);
         }
         CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
+        _couponStorage().pendingCoupons.remove(couponId);
         success_ = true;
     }
 
@@ -110,6 +118,7 @@ library CouponStorageWrapper {
         bytes32 corporateActionId;
         (, corporateActionId, ) = getCoupon(couponId);
         CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
+        _couponStorage().pendingCoupons.remove(couponId);
         success_ = true;
     }
 
@@ -148,6 +157,43 @@ library CouponStorageWrapper {
      */
     function addToCouponsOrderedList(uint256 couponID) internal {
         _couponStorage().couponsOrderedListByIds.push(couponID);
+    }
+
+    /**
+     * @notice Removes `couponId` from the pending-coupon set once its rate has been resolved.
+     * @dev Called by the scheduled-listing trigger after it confirms a coupon's rate stamped
+     *      `SET` (`RateCalculationStatus.SET`); a no-op if `couponId` is not currently pending.
+     * @param couponId The coupon whose rate was just resolved.
+     */
+    function clearPendingCoupon(uint256 couponId) internal {
+        _couponStorage().pendingCoupons.remove(couponId);
+    }
+
+    /**
+     * @notice Resolves and persists `couponId`'s rate if the current coupon rate type is
+     *         `KPI_LINKED`; a no-op otherwise.
+     * @dev Called by the scheduled-listing trigger once a coupon's fixing date has passed.
+     *      `getCoupon` lazily resolves the rate via `CouponRateDispatch.resolveRate`; this
+     *      function is what actually persists that resolution back into corporate-action
+     *      storage, and clears the coupon's pending marker once persisted with a `SET` status.
+     *      Safe to call for any coupon regardless of its own rate type or current status: the
+     *      `KPI_LINKED`-only gate mirrors `resolveRate`'s own condition, so calling this for a
+     *      non-`KPI_LINKED` coupon or asset would otherwise just re-persist the same data.
+     * @param couponId The coupon whose rate should be resolved and persisted.
+     */
+    function updateCouponRate(uint256 couponId) internal {
+        if (InterestRateStorageWrapper.getCouponRateType() != IInterestRate.RateType.KPI_LINKED) return;
+
+        (ICouponTypes.RegisteredCoupon memory registeredCoupon, , ) = getCoupon(couponId);
+
+        CorporateActionsStorageWrapper.updateCorporateActionData(
+            CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(CORPORATE_ACTION_TYPE_COUPON, couponId - 1),
+            abi.encode(registeredCoupon.coupon)
+        );
+
+        if (registeredCoupon.coupon.rateStatus == ICouponTypes.RateCalculationStatus.SET) {
+            clearPendingCoupon(couponId);
+        }
     }
 
     /**
@@ -315,27 +361,22 @@ library CouponStorageWrapper {
     }
 
     /**
-     * @notice Reverts if any non-cancelled coupon has not yet had its rate resolved.
-     * @dev Scans every coupon via `getRawCouponData`, bypassing lazy resolution, so a coupon
-     *      whose scheduled listing has not yet persisted a resolved rate is detected
-     *      regardless of the current coupon rate type. Guards
-     *      `InterestRate::setCouponRateType` against leaving a KPI-linked coupon permanently
-     *      unresolved by switching the rate type away before the coupon's scheduled listing
-     *      has run. Coupon count is role-gated (only `ROLE_CORPORATE_ACTION` creates
-     *      coupons), so this unbounded scan does not carry the attacker-inflatable gas-limit
-     *      risk that a user-facing list (e.g. partitions) would.
-     * @custom:revert ICoupon.CouponRatePending If an active coupon's rate status is PENDING.
+     * @notice Reverts if any coupon still has an unresolved rate.
+     * @dev O(1): checks the `pendingCoupons` set maintained alongside the coupon lifecycle
+     *      instead of scanning every historical coupon. A coupon is added to the set at
+     *      creation time when it starts PENDING (`setCoupon`) and removed when its rate is
+     *      persisted as resolved (`clearPendingCoupon`, called once a scheduled listing
+     *      successfully stamps a `SET` rate) or when it is cancelled while still pending
+     *      (`cancelCoupon`/`forceCancelCoupon`), so the set always reflects exactly the
+     *      currently-pending, non-cancelled coupons. Guards `InterestRate::setCouponRateType`
+     *      against leaving a KPI-linked coupon permanently unresolved by switching the rate
+     *      type away before the coupon's scheduled listing has run.
+     * @custom:revert ICoupon.CouponRatePending If any coupon's rate status is still PENDING.
      */
     function checkPendingCoupons() internal view {
-        uint256 count = getCouponCount();
-        for (uint256 couponID = 1; couponID <= count; ) {
-            (ICouponTypes.Coupon memory rawCoupon, , bool isDisabled) = getRawCouponData(couponID);
-            if (!isDisabled && rawCoupon.rateStatus == ICouponTypes.RateCalculationStatus.PENDING) {
-                revert ICoupon.CouponRatePending(couponID);
-            }
-            unchecked {
-                ++couponID;
-            }
+        EnumerableSet.UintSet storage pending = _couponStorage().pendingCoupons;
+        if (pending.length() > 0) {
+            revert ICoupon.CouponRatePending(pending.at(0));
         }
     }
 
