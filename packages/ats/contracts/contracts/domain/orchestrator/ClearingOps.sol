@@ -311,8 +311,14 @@ library ClearingOps {
         uint256 _amount
     ) external {
         address spender = EvmAccessors.getMsgSender();
-        TokenCoreOps.decreaseAllowedBalance(_from, spender, _amount);
-        ClearingStorageWrapper.setClearingThirdParty(_partition, _from, _clearingOperationType, _clearingId, spender);
+        if (TokenCoreOps.decreaseAllowedBalance(_from, spender, _amount))
+            ClearingStorageWrapper.setClearingThirdParty(
+                _partition,
+                _from,
+                _clearingOperationType,
+                _clearingId,
+                spender
+            );
     }
 
     /**

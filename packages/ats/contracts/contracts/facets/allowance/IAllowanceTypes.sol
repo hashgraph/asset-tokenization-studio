@@ -20,13 +20,6 @@ interface IAllowanceTypes {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 
     /**
-     * @notice Reverts when an allowance operation references the zero address as the owner.
-     * @dev Defensive guard against mis-wired flows or malformed calldata reaching the
-     *      underlying storage wrappers.
-     */
-    error ZeroOwnerAddress();
-
-    /**
      * @notice Reverts when `spender` attempts to consume more allowance than `from` has
      *         granted.
      * @dev Raised by `transferFrom`-style flows and by {IAllowance.decreaseAllowance} when the

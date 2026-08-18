@@ -1198,6 +1198,32 @@ export function clearingByPartitionTests(getCtx: () => AssetMockCtx): void {
           asset.connect(signer_A).cancelClearingOperationByPartition(identifier),
         ).to.be.revertedWithCustomError(asset, "ExpirationDateReached");
       });
+
+      it("GIVEN an authorized clearing created against an unlimited allowance WHEN cancelClearingOperationByPartition THEN the allowance stays unlimited and unchanged", async () => {
+        await asset.connect(signer_A).approve(signer_B.address, MAX_UINT256);
+
+        const clearingOperationFrom = {
+          clearingOperation: {
+            partition: _DEFAULT_PARTITION,
+            expirationTimestamp: EXPIRATION_TIMESTAMP,
+            data: EMPTY_HEX_BYTES,
+          },
+          from: signer_A.address,
+          operatorData: EMPTY_HEX_BYTES,
+        };
+        await asset.connect(signer_B).clearingRedeemFromByPartition(clearingOperationFrom, _AMOUNT);
+        expect(await asset.allowance(signer_A.address, signer_B.address)).to.equal(MAX_UINT256);
+
+        const identifier = {
+          clearingOperationType: ClearingOperationType.Redeem,
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          clearingId: 1,
+        };
+        await expect(asset.connect(signer_A).cancelClearingOperationByPartition(identifier)).to.not.be.reverted;
+
+        expect(await asset.allowance(signer_A.address, signer_B.address)).to.equal(MAX_UINT256);
+      });
     });
 
     // ─── bug Transfer: clearingRedeemByPartition ────────────────────────────────

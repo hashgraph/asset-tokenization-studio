@@ -899,11 +899,10 @@ library HoldStorageWrapper {
     ) private {
         if (_thirdPartyType != ThirdPartyType.AUTHORIZED) return;
         address owner = _holdIdentifier.tokenHolder;
-        address spender = _holdStorage().holdThirdPartyByAccountPartitionAndId[_holdIdentifier.tokenHolder][
-            _holdIdentifier.partition
-        ][_holdIdentifier.holdId];
+        address spender = _holdStorage().holdThirdPartyByAccountPartitionAndId[owner][_holdIdentifier.partition][
+            _holdIdentifier.holdId
+        ];
         if (spender == address(0)) return;
-        if (ERC20StorageWrapper.isInfiniteAllowance(owner, spender)) return;
         ERC20StorageWrapper.increaseAllowedBalance(owner, spender, _amount);
     }
 

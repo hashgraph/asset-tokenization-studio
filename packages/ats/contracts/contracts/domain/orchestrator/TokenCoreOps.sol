@@ -212,16 +212,16 @@ library TokenCoreOps {
     /// @param _owner Address whose allowed balance is being increased.
     /// @param _spender Address for whom the allowed balance is increased.
     /// @param _amount Amount by which the allowed balance is increased.
-    function increaseAllowedBalance(address _owner, address _spender, uint256 _amount) external {
-        ERC20StorageWrapper.increaseAllowedBalance(_owner, _spender, _amount);
+    function increaseAllowedBalance(address _owner, address _spender, uint256 _amount) external returns (bool) {
+        return ERC20StorageWrapper.increaseAllowedBalance(_owner, _spender, _amount);
     }
 
     /// @notice Decreases the tracked allowed balance for a spender on behalf of an owner.
     /// @param _owner Address whose allowed balance is being decreased.
     /// @param _spender Address for whom the allowed balance is decreased.
     /// @param _amount Amount by which the allowed balance is decreased.
-    function decreaseAllowedBalance(address _owner, address _spender, uint256 _amount) external {
-        ERC20StorageWrapper.decreaseAllowedBalance(_owner, _spender, _amount);
+    function decreaseAllowedBalance(address _owner, address _spender, uint256 _amount) external returns (bool) {
+        return ERC20StorageWrapper.decreaseAllowedBalance(_owner, _spender, _amount);
     }
 
     /// @notice Records the current balance of an account on a partition as a snapshot entry.

@@ -362,17 +362,15 @@ library ClearingLifecycleOps {
         uint256 _amount
     ) private {
         ThirdPartyType operatorType = ClearingStorageWrapper.getClearingThirdPartyType(_id);
-        if (operatorType != ThirdPartyType.AUTHORIZED && operatorType != ThirdPartyType.OPERATOR) return;
-        TokenCoreOps.increaseAllowedBalance(
+        if (operatorType != ThirdPartyType.AUTHORIZED) return;
+        address spender = ClearingStorageWrapper.getClearingThirdParty(
+            _id.partition,
             _id.tokenHolder,
-            ClearingStorageWrapper.getClearingThirdParty(
-                _id.partition,
-                _id.tokenHolder,
-                _id.clearingOperationType,
-                _id.clearingId
-            ),
-            _amount
+            _id.clearingOperationType,
+            _id.clearingId
         );
+        if (spender == address(0)) return;
+        TokenCoreOps.increaseAllowedBalance(_id.tokenHolder, spender, _amount);
     }
 
     /**

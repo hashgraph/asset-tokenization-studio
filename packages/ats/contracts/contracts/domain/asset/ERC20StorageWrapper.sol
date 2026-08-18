@@ -248,9 +248,7 @@ library ERC20StorageWrapper {
     function approve(address owner, address spender, uint256 value) internal returns (bool) {
         _checkUnexpectedError(owner == address(0), KPI_ERC20_APPROVE_OWNER);
 
-        if (spender == address(0)) {
-            revert IAllowanceTypes.SpenderWithZeroAddress();
-        }
+        _checkSpenderWithZeroAddress(spender);
 
         ERC1410StorageWrapper.triggerAndSyncAll(DEFAULT_PARTITION, owner, spender);
         _erc20Storage().allowed[owner][spender] = value;
@@ -260,46 +258,32 @@ library ERC20StorageWrapper {
     }
 
     /**
-     * @notice Increases the ERC-20 allowance of `spender` for `msg.sender` by
-     *         `addedValue`.
+     * @notice Increases the ERC-20 allowance of `spender` for `msg.sender` by `addedValue`.
      * @dev Reverts with `SpenderWithZeroAddress` if `spender` is the zero address.
      *      Delegates to `increaseAllowedBalance` which synchronises ABAF state and
      *      emits an `Approval` event.
      * @param spender    Address whose allowance is increased.
      * @param addedValue Amount to add to the existing allowance.
-     * @return True unconditionally on success; reverts on failure.
+     * @return success_  True unconditionally on success; reverts on failure.
      */
-    function increaseAllowance(address spender, uint256 addedValue) internal returns (bool) {
-        if (spender == address(0)) {
-            revert IAllowanceTypes.SpenderWithZeroAddress();
-        }
-
-        increaseAllowedBalance(EvmAccessors.getMsgSender(), spender, addedValue);
-
-        return true;
+    function increaseAllowance(address spender, uint256 addedValue) internal returns (bool success_) {
+        _checkSpenderWithZeroAddress(spender);
+        success_ = increaseAllowedBalance(EvmAccessors.getMsgSender(), spender, addedValue);
     }
 
     /**
-     * @notice Decreases the ERC-20 allowance of `spender` for `msg.sender` by
-     *         `subtractedValue` and emits an `Approval` event.
+     * @notice Decreases the ERC-20 allowance of `spender` for `msg.sender` by `subtractedValue`.
      * @dev Reverts with `SpenderWithZeroAddress` if `spender` is the zero address.
-     *      Synchronises ABAF state via `beforeAllowanceUpdate` before reducing the
-     *      allowance. Reverts via `decreaseAllowedBalance` if allowance is insufficient.
+     *      Synchronises ABAF state via `beforeAllowanceUpdate` before reducing the allowance.
+     *      Reverts via `decreaseAllowedBalance` if the existing allowance is insufficient.
+     *      Emits an `Approval` event upon success.
      * @param spender         Address whose allowance is decreased.
      * @param subtractedValue Amount to subtract from the existing allowance.
-     * @return True unconditionally on success; reverts on failure.
+     * @return success_       True unconditionally on success; reverts on failure.
      */
-    function decreaseAllowance(address spender, uint256 subtractedValue) internal returns (bool) {
-        if (spender == address(0)) {
-            revert IAllowanceTypes.SpenderWithZeroAddress();
-        }
-        decreaseAllowedBalance(EvmAccessors.getMsgSender(), spender, subtractedValue);
-        emit IAllowanceTypes.Approval(
-            EvmAccessors.getMsgSender(),
-            spender,
-            _erc20Storage().allowed[EvmAccessors.getMsgSender()][spender]
-        );
-        return true;
+    function decreaseAllowance(address spender, uint256 subtractedValue) internal returns (bool success_) {
+        _checkSpenderWithZeroAddress(spender);
+        success_ = decreaseAllowedBalance(EvmAccessors.getMsgSender(), spender, subtractedValue);
     }
 
     /**
@@ -382,50 +366,51 @@ library ERC20StorageWrapper {
     }
 
     /**
-     * @notice Reduces the allowance of `spender` on `from`'s balance by `value`,
-     *         reverting if the existing allowance is insufficient.
-     * @dev Calls `beforeAllowanceUpdate` first to synchronise ABAF state. An allowance of
-     *      `type(uint256).max` is a permanent unlimited-approval sentinel and is never
-     *      decremented, so it cannot be converted into a finite value with a stale LABAF
-     *      checkpoint by a spend; only `approve()` can change it.
-     *      Reverts with `InsufficientAllowance` when `value` exceeds the current
-     *      allowance.
-     * @param owner   Token owner whose allowance is consumed.
-     * @param spender Address whose spending limit is reduced.
-     * @param value   Amount to deduct from the allowance.
-     * @return If current allowance was decreased.
+     * @notice Decreases the spending allowance granted by `owner` to `spender` by `value`.
+     * @dev Synchronises ABAF state via `beforeAllowanceUpdate` before performing any adjustments.
+     *      If the existing allowance is infinite (`type(uint256).max`), the function returns
+     *      `false` without modifying state or emitting an event.
+     *      Reverts with unexpected error `KPI_ERC20_APPROVE_OWNER` if `owner` is the zero address.
+     *      Reverts with `IAllowanceTypes.InsufficientAllowance` if `value` exceeds current allowance.
+     *      Emits an `IAllowanceTypes.Approval` event upon a successful finite allowance deduction.
+     * @param owner Address of the token owner whose allowance is being deducted.
+     * @param spender Address authorised to spend tokens on behalf of `owner`.
+     * @param value Amount to deduct from the current allowance.
+     * @return True if a finite allowance was decremented, false if the allowance is infinite.
      */
     function decreaseAllowedBalance(address owner, address spender, uint256 value) internal returns (bool) {
+        _checkUnexpectedError(owner == address(0), KPI_ERC20_APPROVE_OWNER);
         beforeAllowanceUpdate(owner, spender);
         if (isInfiniteAllowance(owner, spender)) return false;
-
         ERC20Storage storage erc20Stor = _erc20Storage();
         uint256 currentAllowance = erc20Stor.allowed[owner][spender];
         if (value > currentAllowance) revert IAllowanceTypes.InsufficientAllowance(spender, owner);
-
         unchecked {
             erc20Stor.allowed[owner][spender] = currentAllowance - value;
         }
+        emit IAllowanceTypes.Approval(owner, spender, erc20Stor.allowed[owner][spender]);
         return true;
     }
 
     /**
-     * @notice Increases the allowance of `spender` on `from`'s balance by `value`
-     *         and emits an `Approval` event.
-     * @dev Calls `beforeAllowanceUpdate` first to synchronise ABAF state before
-     *      adding `value` to the stored allowance.
-     * @param from    Token owner granting the additional allowance.
-     * @param spender Address whose spending limit is increased.
-     * @param value   Amount to add to the allowance.
+     * @notice Increases the allowance granted to `spender` by `owner` by `value`.
+     * @dev Reverts with `KPI_ERC20_APPROVE_OWNER` if `owner` is the zero address.
+     *      Executes `beforeAllowanceUpdate` hook to synchronise ABAF state prior to mutation.
+     *      Returns `false` without modifying storage if `spender` already has infinite allowance.
+     *      Mutates `ERC20Storage` state and emits an `IAllowanceTypes.Approval` event upon success.
+     * @param owner Address of the token owner granting the allowance increase.
+     * @param spender Address of the spender whose allowance is increased.
+     * @param value Amount of additional tokens allowed to be spent.
+     * @return True if the allowance was increased, false if allowance is infinite.
      */
-    function increaseAllowedBalance(address from, address spender, uint256 value) internal {
-        beforeAllowanceUpdate(from, spender);
-
+    function increaseAllowedBalance(address owner, address spender, uint256 value) internal returns (bool) {
+        _checkUnexpectedError(owner == address(0), KPI_ERC20_APPROVE_OWNER);
+        beforeAllowanceUpdate(owner, spender);
+        if (isInfiniteAllowance(owner, spender)) return false;
         ERC20Storage storage erc20Stor = _erc20Storage();
-
-        erc20Stor.allowed[from][spender] += value;
-
-        emit IAllowanceTypes.Approval(from, spender, _erc20Storage().allowed[from][spender]);
+        erc20Stor.allowed[owner][spender] += value;
+        emit IAllowanceTypes.Approval(owner, spender, _erc20Storage().allowed[owner][spender]);
+        return true;
     }
 
     /**
@@ -568,6 +553,15 @@ library ERC20StorageWrapper {
      */
     function checkFiniteAllowance(address _owner, address _spender) internal view {
         if (isInfiniteAllowance(_owner, _spender)) revert IAllowance.InfiniteAllowance(_owner, _spender);
+    }
+
+    /**
+     * @notice Validates that the specified spender is not the zero address.
+     * @dev Reverts with `IAllowanceTypes.SpenderWithZeroAddress` if `spender` is `address(0)`.
+     * @param spender The address of the spender to validate.
+     */
+    function _checkSpenderWithZeroAddress(address spender) private view {
+        if (spender == address(0)) revert IAllowanceTypes.SpenderWithZeroAddress();
     }
 
     /**
