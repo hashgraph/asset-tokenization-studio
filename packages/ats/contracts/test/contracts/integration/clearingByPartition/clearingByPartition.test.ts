@@ -1258,7 +1258,7 @@ export function clearingByPartitionTests(getCtx: () => AssetMockCtx): void {
         const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
         await asset.grantRole(protectedPartitionRole, signer_A.address);
 
-        const nonce = Number(await asset.nonces(signer_A.address)) + 1;
+        const nonce = Number(await asset.protectedClearingRedeemByPartitionNonce(signer_A.address)) + 1;
 
         const protectedClearingOperation = {
           clearingOperation: {
@@ -1632,7 +1632,7 @@ export function clearingByPartitionTests(getCtx: () => AssetMockCtx): void {
         const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
         await asset.grantRole(protectedPartitionRole, signer_A.address);
 
-        const nonce = Number(await asset.nonces(signer_A.address)) + 1;
+        const nonce = Number(await asset.protectedClearingTransferByPartitionNonce(signer_A.address)) + 1;
 
         const protectedClearingOperation = {
           clearingOperation: {

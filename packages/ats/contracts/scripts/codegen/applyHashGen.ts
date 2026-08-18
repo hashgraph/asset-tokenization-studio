@@ -132,7 +132,7 @@ function scanFile(file: string, result: ScanResult): void {
     if (!isHashKind(kind)) {
       result.errors.push(
         `${rel}:${i + 1}: unknown @custom:hash kind '${kind}'. ` +
-          `Valid: storage, resolverKey, role, corporateAction, scheduledTask.`,
+          `Valid: storage, resolverKey, role, corporateAction, scheduledTask, nonceKey.`,
       );
       continue;
     }

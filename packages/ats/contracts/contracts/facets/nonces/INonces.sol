@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
 // Contract copy-pasted form OZ and extended
-
 pragma solidity >=0.8.0 <0.9.0;
 
 /// @custom:hash resolverKey Nonces
@@ -35,4 +34,51 @@ interface INonces {
      * @return Current nonce value for `owner`.
      */
     function nonces(address _owner) external view returns (uint256);
+
+    /**
+     * @notice Returns the current nonce for `_owner` used in protected partition transfers.
+     * @dev Incremented internally upon consumption of a valid signed
+     *      `protectedTransferFromByPartition` operation.
+     * @param _owner Address whose partition transfer nonce is queried.
+     * @return Current nonce value for `_owner`.
+     */
+    function protectedTransferFromByPartitionNonce(address _owner) external view returns (uint256);
+
+    /**
+     * @notice Returns the current nonce for `_owner` used in protected partition redemptions.
+     * @dev Incremented internally upon consumption of a valid signed
+     *      `protectedRedeemFromByPartition` operation.
+     * @param _owner Address whose partition redemption nonce is queried.
+     * @return Current nonce value for `_owner`.
+     */
+    function protectedRedeemFromByPartitionNonce(address _owner) external view returns (uint256);
+
+    /**
+     * @notice Returns the current nonce for `_owner` used in protected partition hold creations.
+     * @dev Incremented internally upon consumption of a valid signed
+     *      `protectedCreateHoldByPartition` operation.
+     * @param _owner Address whose partition hold creation nonce is queried.
+     * @return Current nonce value for `_owner`.
+     */
+    function protectedClearingCreateHoldByPartitionNonce(address _owner) external view returns (uint256);
+
+    /**
+     * @notice Returns the current nonce for `_owner` used in protected clearing partition
+     *         transfers.
+     * @dev Incremented internally upon consumption of a valid signed
+     *      `protectedClearingTransferByPartition` operation.
+     * @param _owner Address whose clearing partition transfer nonce is queried.
+     * @return Current nonce value for `_owner`.
+     */
+    function protectedClearingTransferByPartitionNonce(address _owner) external view returns (uint256);
+
+    /**
+     * @notice Returns the current nonce for `_owner` used in protected clearing partition
+     *         redemptions.
+     * @dev Incremented internally upon consumption of a valid signed
+     *      `protectedClearingRedeemByPartition` operation.
+     * @param _owner Address whose clearing partition redemption nonce is queried.
+     * @return Current nonce value for `_owner`.
+     */
+    function protectedClearingRedeemByPartitionNonce(address _owner) external view returns (uint256);
 }

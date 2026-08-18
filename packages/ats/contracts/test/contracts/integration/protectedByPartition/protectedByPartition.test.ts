@@ -348,7 +348,8 @@ export function protectedByPartitionTests(getCtx: () => AssetMockCtx): void {
               });
           }
 
-          expect(await asset.nonces(signer_A.address)).to.equal(3);
+          expect(await asset.nonces(signer_A.address)).to.equal(0);
+          expect(await asset.protectedTransferFromByPartitionNonce(signer_A.address)).to.equal(3);
         });
       });
 
@@ -538,7 +539,8 @@ export function protectedByPartitionTests(getCtx: () => AssetMockCtx): void {
             });
           }
 
-          expect(await asset.nonces(signer_A.address)).to.equal(3);
+          expect(await asset.nonces(signer_A.address)).to.equal(0);
+          expect(await asset.protectedRedeemFromByPartitionNonce(signer_A.address)).to.equal(3);
         });
       });
 

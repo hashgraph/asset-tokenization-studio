@@ -7,6 +7,14 @@ import { IProtectedPartitions } from "../protectedPartitions/IProtectedPartition
 // solhint-disable-next-line max-line-length
 bytes32 constant RESOLVER_KEY_PROTECTED_BY_PARTITION = 0x2f9cd983bc92f917e9c55a3f61b8984646d96980224f4712084967ea1d24d62f;
 
+/// @custom:hash nonceKey ProtectedTransferFromByPartition
+// solhint-disable-next-line max-line-length
+bytes32 constant NONCE_KEY_PROTECTED_TRANSFER_FROM_BY_PARTITION = 0x5440e561c55f91f22b6ac88baaebae772528bef8956e755c22eddb300a5defbd;
+
+/// @custom:hash nonceKey ProtectedRedeemFromByPartition
+// solhint-disable-next-line max-line-length
+bytes32 constant NONCE_KEY_PROTECTED_REDEEM_FROM_BY_PARTITION = 0x919cab41dc9ab7b4be8e4972ee1edc08820e92db27c5542a3486edecb2ed077a;
+
 /**
  * @title IProtectedByPartition
  * @author Asset Tokenization Studio Team

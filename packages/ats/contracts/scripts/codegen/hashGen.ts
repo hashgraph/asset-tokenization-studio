@@ -20,6 +20,7 @@ const RESOLVER_KEY = "resolverKey.";
 const ROLE = "role.";
 const CORPORATE_ACTION = "corporateAction.";
 const SCHEDULED_TASK = "scheduledTask.";
+const NONCE_KEY = "nonceKey.";
 
 const k = (s: string): string => keccak256(toUtf8Bytes(s));
 
@@ -32,7 +33,7 @@ const erc7201 = (id: string): string => {
   return "0x" + (BigInt(k(enc)) & mask).toString(16).padStart(64, "0");
 };
 
-export type HashKind = "storage" | "resolverKey" | "role" | "corporateAction" | "scheduledTask";
+export type HashKind = "storage" | "resolverKey" | "role" | "corporateAction" | "scheduledTask" | "nonceKey";
 
 export const HASHES: Readonly<Record<HashKind, (name: string) => string>> = {
   storage: (name) => erc7201(ATS + STORAGE + name),
@@ -40,6 +41,7 @@ export const HASHES: Readonly<Record<HashKind, (name: string) => string>> = {
   role: (name) => k(ATS + ROLE + name),
   corporateAction: (name) => k(ATS + CORPORATE_ACTION + name),
   scheduledTask: (name) => k(ATS + SCHEDULED_TASK + name),
+  nonceKey: (name) => k(ATS + NONCE_KEY + name),
 } as const;
 
 export const HASH_KINDS: readonly HashKind[] = Object.keys(HASHES) as HashKind[];
@@ -65,6 +67,7 @@ const IDENTIFIER_PREFIX: Readonly<Record<HashKind, string>> = {
   role: "ROLE_",
   corporateAction: "CORPORATE_ACTION_TYPE_",
   scheduledTask: "SCHEDULED_TASK_TYPE_",
+  nonceKey: "NONCE_KEY_",
 } as const;
 
 /**
