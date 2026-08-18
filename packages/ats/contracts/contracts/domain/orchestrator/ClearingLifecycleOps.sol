@@ -18,8 +18,10 @@ import { ThirdPartyType } from "../asset/types/ThirdPartyType.sol";
 import { HoldOps } from "./HoldOps.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 import { CLEARING_HOLD_CREATION } from "../../constants/values.sol";
+import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 /**
  * @title ClearingLifecycleOps - Lifecycle path for cleared deferred operations
@@ -268,38 +270,40 @@ library ClearingLifecycleOps {
         // Always restore ABAF-adjusted amount to holder
         transferClearingBalance(_id.partition, _id.tokenHolder, _id.tokenHolder, holdData.amount);
 
-        // Approve: create hold and return holdId
-        if (_actionType == IClearingTypes.ClearingActionType.Approve) {
-            IHoldTypes.Hold memory hold = IHoldTypes.Hold({
-                amount: holdData.amount,
-                expirationTimestamp: holdData.holdExpirationTimestamp,
-                escrow: holdData.holdEscrow,
-                to: holdData.holdTo,
-                data: holdData.holdData
-            });
+        if (_actionType != IClearingTypes.ClearingActionType.Approve) return operationData_;
 
-            (bool success, uint256 holdId) = HoldOps.createHoldByPartition(
+        if (holdData.holdExpirationTimestamp <= TimeTravelStorageWrapper.getBlockTimestamp())
+            revert ICommonErrors.WrongExpirationTimestamp();
+
+        IHoldTypes.Hold memory hold = IHoldTypes.Hold({
+            amount: holdData.amount,
+            expirationTimestamp: holdData.holdExpirationTimestamp,
+            escrow: holdData.holdEscrow,
+            to: holdData.holdTo,
+            data: holdData.holdData
+        });
+
+        (bool success, uint256 holdId) = HoldOps.createHoldByPartition(
+            _id.partition,
+            _id.tokenHolder,
+            hold,
+            holdData.operatorData,
+            holdData.operatorType
+        );
+
+        _checkUnexpectedError(!success, CLEARING_HOLD_CREATION);
+
+        if (holdData.operatorType == ThirdPartyType.AUTHORIZED) {
+            address thirdPartyAddress = ClearingStorageWrapper.getClearingThirdParty(
                 _id.partition,
                 _id.tokenHolder,
-                hold,
-                holdData.operatorData,
-                holdData.operatorType
+                IClearingTypes.ClearingOperationType.HoldCreation,
+                _id.clearingId
             );
-
-            _checkUnexpectedError(!success, CLEARING_HOLD_CREATION);
-
-            if (holdData.operatorType == ThirdPartyType.AUTHORIZED) {
-                address thirdPartyAddress = ClearingStorageWrapper.getClearingThirdParty(
-                    _id.partition,
-                    _id.tokenHolder,
-                    IClearingTypes.ClearingOperationType.HoldCreation,
-                    _id.clearingId
-                );
-                HoldStorageWrapper.setThirdPartyForHold(thirdPartyAddress, _id.partition, _id.tokenHolder, holdId);
-            }
-
-            operationData_ = abi.encode(holdId);
+            HoldStorageWrapper.setThirdPartyForHold(thirdPartyAddress, _id.partition, _id.tokenHolder, holdId);
         }
+
+        operationData_ = abi.encode(holdId);
     }
 
     /**
