@@ -155,6 +155,37 @@ export function lockTests(getCtx: () => AssetMockCtx): void {
           ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
         });
 
+        it("FIND-041 (TDD, expected red) GIVEN an expiration timestamp equal to the current block time WHEN lock THEN transaction fails instead of accepting a lock that is immediately releasable in the same block", async () => {
+          await asset.connect(signer_B).issueByPartition({
+            partition: _DEFAULT_PARTITION,
+            tokenHolder: signer_A.address,
+            value: _AMOUNT,
+            data: "0x",
+          });
+
+          await asset.changeSystemTimestamp(currentTimestamp);
+
+          await expect(
+            asset.connect(signer_C).lock(_AMOUNT, signer_A.address, currentTimestamp),
+          ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
+        });
+
+        it("GIVEN an expiration timestamp one second after the current block time WHEN lock THEN transaction success", async () => {
+          await asset.connect(signer_B).issueByPartition({
+            partition: _DEFAULT_PARTITION,
+            tokenHolder: signer_A.address,
+            value: _AMOUNT,
+            data: "0x",
+          });
+
+          await asset.changeSystemTimestamp(currentTimestamp);
+
+          await expect(asset.connect(signer_C).lock(_AMOUNT, signer_A.address, currentTimestamp + 1)).to.emit(
+            asset,
+            "LockedByPartition",
+          );
+        });
+
         it("GIVEN a valid partition WHEN lock with enough balance THEN transaction success", async () => {
           await asset.connect(signer_B).issueByPartition({
             partition: _DEFAULT_PARTITION,

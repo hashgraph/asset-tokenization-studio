@@ -1283,7 +1283,7 @@ export function holdByPartitionTests(getCtx: () => AssetMockCtx): void {
 
           const hold = {
             amount: _AMOUNT,
-            expirationTimestamp: currentTimestamp + ONE_SECOND,
+            expirationTimestamp: currentTimestamp + 10 * ONE_SECOND,
             escrow: signer_B.address,
             to: ADDRESS_ZERO,
             data: EMPTY_HEX_BYTES,
@@ -1304,10 +1304,12 @@ export function holdByPartitionTests(getCtx: () => AssetMockCtx): void {
           await asset.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals);
 
           // RECLAIM HOLD
-          await asset
-            .connect(signer_A)
-            .changeSystemTimestamp((await ethers.provider.getBlock("latest"))!.timestamp + 2 * ONE_SECOND);
-          await asset.connect(signer_B).reclaimHoldByPartition(holdIdentifier);
+          await asset.connect(signer_A).changeSystemTimestamp(currentTimestamp + 50 * ONE_SECOND);
+          await asset.connect(signer_B).reclaimHoldByPartition({
+            partition: _PARTITION_ID_1,
+            tokenHolder: signer_A.address,
+            holdId: 1,
+          });
 
           const balance_After_Release = await asset.balanceOf(signer_A.address);
           const balance_After_Release_Partition_1 = await asset.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);

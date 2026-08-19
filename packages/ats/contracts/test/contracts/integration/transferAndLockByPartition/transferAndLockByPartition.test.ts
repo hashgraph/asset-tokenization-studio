@@ -178,7 +178,7 @@ export function transferAndLockByPartitionTests(getCtx: () => AssetMockCtx): voi
                 signer_A.address,
                 _AMOUNT,
                 "0x",
-                (await getDltTimestamp()) + 1,
+                (await getDltTimestamp()) + 2,
               ),
           )
             .to.be.revertedWithCustomError(asset, "PartitionNotAllowedInSinglePartitionMode")

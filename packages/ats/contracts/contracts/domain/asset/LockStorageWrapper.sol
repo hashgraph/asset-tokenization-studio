@@ -343,14 +343,14 @@ library LockStorageWrapper {
     }
 
     /**
-     * @notice Reverts unless the supplied expiration timestamp is at or after the active block
-     *         time.
+     * @notice Reverts unless the supplied expiration timestamp is strictly after the active
+     *         block time.
      * @dev Uses `TimeTravelStorageWrapper` for the active time so the guard honours the virtual
      *      clock on test networks. Raises `ICommonErrors.WrongExpirationTimestamp`.
      * @param expirationTimestamp Candidate expiration being validated.
      */
-    function requireValidExpirationTimestamp(uint256 expirationTimestamp) internal view {
-        if (expirationTimestamp < TimeTravelStorageWrapper.getBlockTimestamp())
+    function checkValidExpirationTimestamp(uint256 expirationTimestamp) internal view {
+        if (expirationTimestamp <= TimeTravelStorageWrapper.getBlockTimestamp())
             revert ICommonErrors.WrongExpirationTimestamp();
     }
 
