@@ -2,7 +2,6 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IMaturity, RESOLVER_KEY_MATURITY } from "./IMaturity.sol";
-import { IKyc } from "../kyc/IKyc.sol";
 import { ROLE_MATURITY_MANAGER, ROLE_MATURITY_REDEEMER } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { MaturityDateStorageWrapper } from "../../domain/asset/MaturityDateStorageWrapper.sol";
@@ -41,6 +40,9 @@ abstract contract Maturity is IMaturity, Modifiers {
     }
 
     /// @inheritdoc IMaturity
+    /// @dev Intentionally does not enforce onlyListedAllowed or onlyValidKycStatus on
+    ///      _tokenHolder: this is an issuer-driven mandatory settlement, and the holder's
+    ///      own compliance status must not be able to block redemption of what they are owed.
     function fullRedeemAtMaturity(
         address _tokenHolder
     )
@@ -53,8 +55,6 @@ abstract contract Maturity is IMaturity, Modifiers {
         onlyRole(ROLE_MATURITY_REDEEMER)
         validateAddressNotZero(_tokenHolder)
         onlyUnrecoveredAddress(_tokenHolder)
-        onlyListedAllowed(_tokenHolder)
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
         onlyMaturityReached
     {
         _redeemPartitionsInRange(_tokenHolder, 0, ERC1410StorageWrapper.partitionsLength(_tokenHolder));
@@ -62,6 +62,9 @@ abstract contract Maturity is IMaturity, Modifiers {
     }
 
     /// @inheritdoc IMaturity
+    /// @dev Intentionally does not enforce onlyListedAllowed or onlyValidKycStatus on
+    ///      _tokenHolder: this is an issuer-driven mandatory settlement, and the holder's
+    ///      own compliance status must not be able to block redemption of what they are owed.
     function redeemAtMaturityByPartitionRange(
         address _tokenHolder,
         uint256 _pageIndex,
@@ -76,8 +79,6 @@ abstract contract Maturity is IMaturity, Modifiers {
         onlyRole(ROLE_MATURITY_REDEEMER)
         validateAddressNotZero(_tokenHolder)
         onlyUnrecoveredAddress(_tokenHolder)
-        onlyListedAllowed(_tokenHolder)
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
         onlyMaturityReached
     {
         _redeemAtMaturityByPartitionRange(_tokenHolder, _pageIndex, _pageLength);
