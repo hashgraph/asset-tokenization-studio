@@ -7,24 +7,81 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title MockLoanHolding
+ * @notice Configurable test stand-in for a loan holding asset read by `LoansPortfolio`.
+ * @dev Exposes the two call surfaces the portfolio invokes: `getLoanDetails()`
+ *      and `balanceOfByPartition(...)`. Only fields read by the portfolio are
+ *      configurable; all other struct members return type defaults.
  * @author Asset Tokenization Studio Team
- * @notice Configurable test stand-in for a loan holding asset that the
- *         LoansPortfolio facet reads from at runtime.
- * @dev   Exposes exactly the two call surfaces the portfolio invokes:
- *        `getLoanDetails()` (collateral classification + performance status)
- *        and `balanceOfByPartition(...)` (ownership balance). Only the
- *        fields the portfolio reads are configurable; all other struct
- *        members return their type defaults.
  */
 contract MockLoanHolding is ITransferByPartition {
+    /**
+     * @notice Total collateral backing the mock loan holding.
+     * @dev Populated in the `LoanDetailsData` struct returned by `getLoanDetails()`.
+     */
     uint256 internal _totalCollateralValue;
+
+    /**
+     * @notice Repayment performance status of the mock loan.
+     * @dev Populated in the `LoanPerformanceStatus` sub-struct within `getLoanDetails()`.
+     */
     ILoan.PerformanceStatus internal _performanceStatus;
+
+    /**
+     * @notice Internal mapping storing token balances per partition and holder address.
+     * @dev Looked up by `balanceOfByPartition` and updated during `setBalance` or
+     *      `transferByPartition`.
+     */
     mapping(bytes32 partition => mapping(address holder => uint256)) internal _balances;
 
     /**
-     * @notice Sets the collateral value and performance classification.
-     * @param _newTotalCollateralValue Total collateral backing the loan.
-     * @param _newPerformanceStatus    Current repayment performance category.
+     * @notice Flag determining whether `getLoanDetails()` reverts upon invocation.
+     * @dev When `true`, calls to `getLoanDetails()` revert with `MockLoanDetailsRevert()`.
+     */
+    bool internal _revertOnGetLoanDetails;
+
+    /**
+     * @notice Flag determining whether `balanceOfByPartition(...)` reverts upon invocation.
+     * @dev When `true`, calls to `balanceOfByPartition(...)` revert with
+     *      `MockBalanceOfByPartitionRevert()`.
+     */
+    bool internal _revertOnBalanceOfByPartition;
+
+    /**
+     * @notice Thrown when `getLoanDetails` is configured to simulate an execution revert.
+     * @dev Triggered when `_revertOnGetLoanDetails` is set to `true`.
+     */
+    error MockLoanDetailsRevert();
+
+    /**
+     * @notice Thrown when `balanceOfByPartition` is configured to simulate an execution revert.
+     * @dev Triggered when `_revertOnBalanceOfByPartition` is set to `true`.
+     */
+    error MockBalanceOfByPartitionRevert();
+
+    /**
+     * @notice Configures whether calls to `getLoanDetails()` should revert.
+     * @dev Sets the internal `_revertOnGetLoanDetails` flag.
+     * @param _revert True to cause `getLoanDetails()` to revert with `MockLoanDetailsRevert`.
+     */
+    function setRevertOnGetLoanDetails(bool _revert) external {
+        _revertOnGetLoanDetails = _revert;
+    }
+
+    /**
+     * @notice Configures whether calls to `balanceOfByPartition(...)` should revert.
+     * @dev Sets the internal `_revertOnBalanceOfByPartition` flag.
+     * @param _revert True to cause `balanceOfByPartition(...)` to revert with
+     *                `MockBalanceOfByPartitionRevert`.
+     */
+    function setRevertOnBalanceOfByPartition(bool _revert) external {
+        _revertOnBalanceOfByPartition = _revert;
+    }
+
+    /**
+     * @notice Sets the collateral value and repayment performance classification.
+     * @dev Updates internal state variables returned in `LoanDetailsData` by `getLoanDetails()`.
+     * @param _newTotalCollateralValue Total collateral value backing the loan.
+     * @param _newPerformanceStatus Current repayment performance status.
      */
     function setLoanState(uint256 _newTotalCollateralValue, ILoan.PerformanceStatus _newPerformanceStatus) external {
         _totalCollateralValue = _newTotalCollateralValue;
@@ -32,26 +89,21 @@ contract MockLoanHolding is ITransferByPartition {
     }
 
     /**
-     * @notice Sets the token balance for a given partition and holder.
+     * @notice Sets the token balance for a specified partition and holder.
+     * @dev Directly assigns the raw token balance in the internal `_balances` mapping.
      * @param _partition Partition identifier.
-     * @param _holder    Address of the token holder.
-     * @param _amount    Raw token balance to assign.
+     * @param _holder Address of the token holder.
+     * @param _amount Raw token balance to assign.
      */
     function setBalance(bytes32 _partition, address _holder, uint256 _amount) external {
         _balances[_partition][_holder] = _amount;
     }
 
-    /**
-     * @notice Minimal transfer-by-partition stub for the LoansPortfolio withdraw path.
-     * @dev    Decrements `msg.sender`'s balance and increments the recipient's balance
-     *         in `_partition`. Reverts with `InvalidPartition` when `msg.sender` holds
-     *         fewer tokens than `value`. Intended solely for test scenarios where the
-     *         portfolio withdraws loan holdings.
-     * @param  _partition          Source partition.
-     * @param  _basicTransferInfo  Recipient address and token amount.
-     * @param  _data               Additional data (forwarded to the event, otherwise unused).
-     * @return The partition identifier (`_partition`).
-     */
+    /// @inheritdoc ITransferByPartition
+    /// @dev Minimal transfer stub for testing the `LoansPortfolio` withdrawal path. Decrements
+    ///      the balance of the caller and increments the recipient balance in `_partition`.
+    ///      Reverts with `InvalidPartition` if the caller holds fewer tokens than `value`.
+    ///      Emits a `TransferByPartition` event.
     function transferByPartition(
         bytes32 _partition,
         BasicTransferInfo calldata _basicTransferInfo,
@@ -73,33 +125,37 @@ contract MockLoanHolding is ITransferByPartition {
         return _partition;
     }
 
-    /**
-     * @notice No-op stub required by `ITransferByPartition`.
-     * @dev    The real initialiser is never called on the mock; this exists solely
-     *         to satisfy the interface.
-     */
+    /// @inheritdoc ITransferByPartition
+    /// @dev No-op stub to satisfy the interface requirement in test scenarios.
     function initializeTransferByPartition() external {}
 
     /**
-     * @notice Returns the loan details with configurable fields populated.
-     * @dev    Only `collateral.totalCollateralValue` and
-     *         `loanPerformanceStatus.performanceStatus` carry the values set
-     *         via `setLoanState`; all other struct members return zero / their
-     *         type default, matching the portfolio's read pattern.
-     * @return loanDetailsData_ LoanDetailsData struct.
+     * @notice Retrieves the loan details with configured fields populated.
+     * @dev Returns `collateral.totalCollateralValue` and `loanPerformanceStatus.performanceStatus`
+     *      as configured via `setLoanState`. All other struct fields return default values.
+     *      Reverts with `MockLoanDetailsRevert` if configured to revert.
+     * @return loanDetailsData_ Structured `LoanDetailsData` payload.
      */
     function getLoanDetails() external view returns (ILoan.LoanDetailsData memory loanDetailsData_) {
+        if (_revertOnGetLoanDetails) {
+            revert MockLoanDetailsRevert();
+        }
         loanDetailsData_.collateral.totalCollateralValue = _totalCollateralValue;
         loanDetailsData_.loanPerformanceStatus.performanceStatus = _performanceStatus;
     }
 
     /**
-     * @notice Returns the configured token balance for a partition and holder.
-     * @param  _partition Partition identifier.
-     * @param  _holder    Address of the token holder.
-     * @return The balance previously set via `setBalance`.
+     * @notice Retrieves the configured token balance for a partition and holder.
+     * @dev Reads directly from `_balances`. Reverts with `MockBalanceOfByPartitionRevert`
+     *      if configured to revert.
+     * @param _partition Partition identifier.
+     * @param _holder Address of the token holder.
+     * @return Token balance assigned to the holder in the specified partition.
      */
     function balanceOfByPartition(bytes32 _partition, address _holder) external view returns (uint256) {
+        if (_revertOnBalanceOfByPartition) {
+            revert MockBalanceOfByPartitionRevert();
+        }
         return _balances[_partition][_holder];
     }
 }
