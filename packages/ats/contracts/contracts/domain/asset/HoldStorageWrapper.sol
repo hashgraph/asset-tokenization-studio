@@ -846,7 +846,7 @@ library HoldStorageWrapper {
         address _escrow,
         bytes32 _partition
     ) internal view {
-        LockStorageWrapper.requireValidExpirationTimestamp(_expirationTimestamp);
+        LockStorageWrapper.checkValidExpirationTimestamp(_expirationTimestamp);
         ERC3643StorageWrapper.checkUnrecoveredAddress(_account);
         ERC3643StorageWrapper.checkUnrecoveredAddress(_to);
         ERC3643StorageWrapper.checkUnrecoveredAddress(_from);

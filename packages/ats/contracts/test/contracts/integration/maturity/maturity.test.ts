@@ -281,10 +281,14 @@ export function maturityTests(getCtx: () => AssetMockCtx): void {
       });
 
       it("GIVEN a recovered wallet WHEN redeemAtMaturityByPartitionRange THEN reverts with WalletRecovered", async () => {
-        await asset.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
+        const signers = await ethers.getSigners();
+        const recoveredSigner = signers[11];
+
+        await asset.connect(signer_A).recoveryAddress(recoveredSigner.address, signer_B.address, ADDRESS_ZERO);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_MATURITY_REDEEMER, recoveredSigner.address);
 
         await expect(
-          asset.connect(signer_A).redeemAtMaturityByPartitionRange(signer_A.address, ZERO, 10),
+          asset.connect(recoveredSigner).redeemAtMaturityByPartitionRange(recoveredSigner.address, ZERO, 10),
         ).to.be.revertedWithCustomError(asset, "WalletRecovered");
       });
 

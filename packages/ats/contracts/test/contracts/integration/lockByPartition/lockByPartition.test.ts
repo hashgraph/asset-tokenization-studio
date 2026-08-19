@@ -369,7 +369,7 @@ export function lockByPartitionTests(getCtx: () => AssetMockCtx): void {
 
           await asset
             .connect(signer_A)
-            .lockByPartition(_PARTITION_ID_1, _AMOUNT, signer_A.address, currentTimestamp + ONE_SECOND);
+            .lockByPartition(_PARTITION_ID_1, _AMOUNT, signer_A.address, currentTimestamp + 2 * ONE_SECOND);
           await asset
             .connect(signer_A)
             .lockByPartition(_PARTITION_ID_1, _AMOUNT, signer_A.address, currentTimestamp + 100 * ONE_SECOND);

@@ -751,7 +751,7 @@ library ClearingStorageWrapper {
         address _from,
         bytes32 _partition
     ) internal view {
-        LockStorageWrapper.requireValidExpirationTimestamp(_expirationTimestamp);
+        LockStorageWrapper.checkValidExpirationTimestamp(_expirationTimestamp);
         ERC3643StorageWrapper.checkUnrecoveredAddress(_account);
         ERC3643StorageWrapper.checkUnrecoveredAddress(_to);
         ERC3643StorageWrapper.checkUnrecoveredAddress(_from);
@@ -781,8 +781,8 @@ library ClearingStorageWrapper {
         address _escrow,
         bytes32 _partition
     ) internal view {
-        LockStorageWrapper.requireValidExpirationTimestamp(_holdExpirationTimestamp);
-        LockStorageWrapper.requireValidExpirationTimestamp(_operationExpirationTimestamp);
+        LockStorageWrapper.checkValidExpirationTimestamp(_holdExpirationTimestamp);
+        LockStorageWrapper.checkValidExpirationTimestamp(_operationExpirationTimestamp);
         ERC3643StorageWrapper.checkUnrecoveredAddress(_account);
         ERC3643StorageWrapper.checkUnrecoveredAddress(_to);
         ERC3643StorageWrapper.checkUnrecoveredAddress(_from);
