@@ -147,4 +147,12 @@ interface ICommonErrors {
      * @param max Maximum number of entries permitted in the external list.
      */
     error MaxExternalListSizeReached(uint256 max);
+
+    /**
+     * @notice Emitted when two arrays or collections expected to have matching lengths differ.
+     * @dev Reverts operations that require one-to-one correspondence between input parameters.
+     * @param length1 Length of the first array or collection.
+     * @param length2 Length of the second array or collection.
+     */
+    error DifferentLengths(uint256 length1, uint256 length2);
 }

@@ -41,12 +41,15 @@ struct ProceedRecipientsDataStorage {
  */
 library ProceedRecipientsStorageWrapper {
     /**
-     * @notice Initialises the proceed-recipient list and persists their payload data.
-     * @dev Validates each address before adding it to the external list and writing the
-     *      paired payload. Marks the underlying external list as initialised at the end.
-     *      Caller must ensure `_proceedRecipients.length == _data.length`.
-     * @param _proceedRecipients Addresses to register as proceed recipients.
-     * @param _data Payload bytes associated 1:1 with each recipient.
+     * @notice Initialises the proceed-recipient list and persists associated payload data.
+     * @dev Iterates through `_proceedRecipients`, validating each against the zero address before
+     *      registering the recipient and persisting its paired payload bytes.
+     *      Precondition: `_proceedRecipients.length == _data.length`.
+     *      Reverts via `DefaultValueValidation.checkZeroAddress` if any recipient is `address(0)`.
+     *      Reverts via `ExternalListManagementStorageWrapper.addExternalList` if an address is already
+     *      registered or if the maximum list size is exceeded.
+     * @param _proceedRecipients Array of addresses to register as proceed recipients.
+     * @param _data Array of opaque payload byte sequences mapped 1:1 to each recipient address.
      */
     function initializeProceedRecipients(address[] calldata _proceedRecipients, bytes[] calldata _data) internal {
         uint256 length = _proceedRecipients.length;

@@ -40,4 +40,15 @@ abstract contract DefaultValuesModifiers {
         DefaultValueValidation.checkZeroValue(_value);
         _;
     }
+
+    /**
+     * @notice Reverts if the two supplied lengths are not equal.
+     * @dev Validates collection or array lengths using `DefaultValueValidation.checkWithSameLength`.
+     * @param _length1 The length of the first collection or array.
+     * @param _length2 The length of the second collection or array.
+     */
+    modifier onlyWithSameLength(uint256 _length1, uint256 _length2) {
+        DefaultValueValidation.checkWithSameLength(_length1, _length2);
+        _;
+    }
 }
