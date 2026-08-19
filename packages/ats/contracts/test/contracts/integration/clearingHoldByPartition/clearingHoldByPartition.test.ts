@@ -274,6 +274,29 @@ export function clearingHoldByPartitionTests(getCtx: () => AssetMockCtx): void {
             ).to.be.revertedWithCustomError(asset, "InsufficientBalance");
           });
         });
+
+        describe("FIND-061", () => {
+          it("GIVEN a holdExpirationTimestamp that has already passed by approval time WHEN approveClearingOperationByPartition THEN transaction fails with WrongExpirationTimestamp", async () => {
+            const shortHoldExpiration = currentTimestamp + 100;
+            const hold_shortExpiry = { ...hold, expirationTimestamp: BigInt(shortHoldExpiration) };
+
+            await asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold_shortExpiry);
+
+            // Advance past the hold's own expiration, still within the clearing operation's
+            await asset.changeSystemTimestamp(shortHoldExpiration + 1);
+
+            const identifier = {
+              clearingOperationType: ClearingOperationType.HoldCreation,
+              partition: _DEFAULT_PARTITION,
+              tokenHolder: signer_A.address,
+              clearingId: 1,
+            };
+
+            await expect(
+              asset.connect(signer_A).approveClearingOperationByPartition(identifier),
+            ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
+          });
+        });
       });
 
       // ─────────────────────────────────────────────────────────────────────────
