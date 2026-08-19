@@ -593,7 +593,7 @@ export function clearingHoldByPartitionTests(getCtx: () => AssetMockCtx): void {
           await asset.grantRole(protectedPartitionRole, signer_A.address);
 
           // Get nonce
-          const nonce = Number(await asset.nonces(signer_A.address)) + 1;
+          const nonce = Number(await asset.protectedClearingCreateHoldByPartitionNonce(signer_A.address)) + 1;
 
           const protectedClearingOperation = {
             clearingOperation: {

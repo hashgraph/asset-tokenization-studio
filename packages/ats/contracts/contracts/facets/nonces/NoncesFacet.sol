@@ -21,7 +21,17 @@ contract NoncesFacet is Nonces, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.initializeNonces.selector, this.nonces.selector);
+        return
+            Bytes4Builder.build(
+                this.initializeNonces.selector,
+                this.nonces.selector,
+                this.protectedTransferFromByPartitionNonce.selector,
+                this.protectedRedeemFromByPartitionNonce.selector,
+                this.protectedCreateHoldByPartitionNonce.selector,
+                this.protectedClearingCreateHoldByPartitionNonce.selector,
+                this.protectedClearingTransferByPartitionNonce.selector,
+                this.protectedClearingRedeemByPartitionNonce.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors

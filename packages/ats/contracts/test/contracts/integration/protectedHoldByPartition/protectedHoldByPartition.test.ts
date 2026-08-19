@@ -154,7 +154,7 @@ export function protectedHoldByPartitionTests(getCtx: () => AssetMockCtx): void 
         const protectedHold: ProtectedHoldData = {
           hold: hold,
           deadline: BigInt(MAX_UINT256.toString()),
-          nonce: 1,
+          nonce: Number(await asset.protectedCreateHoldByPartitionNonce(signer_A.address)) + 1,
         };
 
         const message = {
@@ -231,7 +231,7 @@ export function protectedHoldByPartitionTests(getCtx: () => AssetMockCtx): void 
         const protectedHold: ProtectedHoldData = {
           hold: hold,
           deadline: BigInt(MAX_UINT256.toString()),
-          nonce: 1,
+          nonce: Number(await asset.protectedCreateHoldByPartitionNonce(signer_A.address)) + 1,
         };
 
         const message = {

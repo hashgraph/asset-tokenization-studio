@@ -12,7 +12,11 @@ import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { ICompliance } from "../../facets/compliance/externalInterfaces/ICompliance.sol";
 import { IERC3643Types } from "../../facets/commonTypes/IERC3643Types.sol";
-import { IProtectedPartitions } from "../../facets/protectedPartitions/IProtectedPartitions.sol";
+import {
+    IProtectedPartitions,
+    NONCE_KEY_PROTECTED_TRANSFER_FROM_BY_PARTITION,
+    NONCE_KEY_PROTECTED_REDEEM_FROM_BY_PARTITION
+} from "../../facets/protectedByPartition/IProtectedByPartition.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
@@ -476,7 +480,7 @@ library ERC1410StorageWrapper {
         _checkNonceAndDeadline(
             protectionData.nonce,
             from,
-            NonceStorageWrapper.getNonceFor(from),
+            NonceStorageWrapper.getNonceFor(from, NONCE_KEY_PROTECTED_TRANSFER_FROM_BY_PARTITION),
             protectionData.deadline,
             TimeTravelStorageWrapper.getBlockTimestamp()
         );
@@ -490,7 +494,7 @@ library ERC1410StorageWrapper {
             ERC20StorageWrapper.getName()
         );
 
-        NonceStorageWrapper.setNonceFor(from);
+        NonceStorageWrapper.setNonceFor(from, NONCE_KEY_PROTECTED_TRANSFER_FROM_BY_PARTITION);
 
         return
             transferByPartition(
@@ -522,7 +526,7 @@ library ERC1410StorageWrapper {
         _checkNonceAndDeadline(
             protectionData.nonce,
             from,
-            NonceStorageWrapper.getNonceFor(from),
+            NonceStorageWrapper.getNonceFor(from, NONCE_KEY_PROTECTED_REDEEM_FROM_BY_PARTITION),
             protectionData.deadline,
             TimeTravelStorageWrapper.getBlockTimestamp()
         );
@@ -534,7 +538,7 @@ library ERC1410StorageWrapper {
             protectionData,
             ERC20StorageWrapper.getName()
         );
-        NonceStorageWrapper.setNonceFor(from);
+        NonceStorageWrapper.setNonceFor(from, NONCE_KEY_PROTECTED_REDEEM_FROM_BY_PARTITION);
 
         redeemByPartition(partition, from, EvmAccessors.getMsgSender(), amount, "", "");
     }

@@ -3883,7 +3883,7 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
           await asset.grantRole(protectedPartitionRole, signer_A.address);
 
           // Get the nonce for signer_A
-          const nonce = Number(await asset.nonces(signer_A.address)) + 1;
+          const nonce = Number(await asset.protectedClearingTransferByPartitionNonce(signer_A.address)) + 1;
 
           const protectedClearingOperation = {
             clearingOperation: {
@@ -3973,7 +3973,7 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
           await asset.grantRole(protectedPartitionRole, signer_A.address);
 
           // Get the nonce for signer_A
-          const nonce = Number(await asset.nonces(signer_A.address)) + 1;
+          const nonce = Number(await asset.protectedClearingRedeemByPartitionNonce(signer_A.address)) + 1;
 
           const protectedClearingOperation = {
             clearingOperation: {
@@ -4061,7 +4061,7 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
           await asset.grantRole(protectedPartitionRole, signer_A.address);
 
           // Get the nonce for signer_A
-          const nonce = Number(await asset.nonces(signer_A.address)) + 1;
+          const nonce = Number(await asset.protectedClearingCreateHoldByPartitionNonce(signer_A.address)) + 1;
 
           const protectedClearingOperation = {
             clearingOperation: {
@@ -4221,7 +4221,7 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
               const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
               await asset.grantRole(protectedPartitionRole, signer_A.address);
 
-              const nonce = Number(await asset.nonces(signer_A.address)) + 1;
+              const nonce = Number(await asset.protectedClearingTransferByPartitionNonce(signer_A.address)) + 1;
 
               const protectedClearingOp = {
                 clearingOperation: {
@@ -4296,7 +4296,7 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
               const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
               await asset.grantRole(protectedPartitionRole, signer_A.address);
 
-              const nonce = Number(await asset.nonces(signer_A.address)) + 1;
+              const nonce = Number(await asset.protectedClearingTransferByPartitionNonce(signer_A.address)) + 1;
 
               const protectedClearingOp = {
                 clearingOperation: {
@@ -4365,7 +4365,7 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
 
               // Don't grant protectedPartitionRole
 
-              const nonce = Number(await asset.nonces(signer_A.address)) + 1;
+              const nonce = Number(await asset.protectedClearingTransferByPartitionNonce(signer_A.address)) + 1;
 
               const protectedClearingOp = {
                 clearingOperation: {
@@ -4444,7 +4444,7 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
               await asset.activateClearing();
               await asset.deactivateClearing();
 
-              const nonce = Number(await asset.nonces(signer_A.address)) + 1;
+              const nonce = Number(await asset.protectedClearingTransferByPartitionNonce(signer_A.address)) + 1;
 
               const protectedClearingOp = {
                 clearingOperation: {
@@ -4577,7 +4577,7 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
               await asset.activateClearing();
               await asset.deactivateClearing();
 
-              const nonce = Number(await asset.nonces(signer_A.address)) + 1;
+              const nonce = Number(await asset.protectedClearingRedeemByPartitionNonce(signer_A.address)) + 1;
 
               const protectedClearingOp = {
                 clearingOperation: {
@@ -4721,7 +4721,7 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
               await asset.activateClearing();
               await asset.deactivateClearing();
 
-              const nonce = Number(await asset.nonces(signer_A.address)) + 1;
+              const nonce = Number(await asset.protectedClearingCreateHoldByPartitionNonce(signer_A.address)) + 1;
 
               const protectedClearingOp = {
                 clearingOperation: {
@@ -4975,7 +4975,7 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
             data: _DATA,
           });
 
-          const nonce = Number(await asset.nonces(signer_A.address)) + 1;
+          const nonce = Number(await asset.protectedClearingRedeemByPartitionNonce(signer_A.address)) + 1;
 
           const protectedClearingOpExpired = {
             clearingOperation: {
@@ -5009,7 +5009,7 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
             data: _DATA,
           });
 
-          const nonce = Number(await asset.nonces(signer_A.address)) + 1;
+          const nonce = Number(await asset.protectedClearingCreateHoldByPartitionNonce(signer_A.address)) + 1;
 
           const protectedClearingOpExpired = {
             clearingOperation: {
@@ -5054,7 +5054,7 @@ export function erc1410Tests(getCtx: () => AssetMockCtx): void {
           });
 
           // Don't grant the protected partition role for signer_A
-          const nonce = Number(await asset.nonces(signer_A.address)) + 1;
+          const nonce = Number(await asset.protectedClearingCreateHoldByPartitionNonce(signer_A.address)) + 1;
 
           const protectedClearingOp = {
             clearingOperation: {

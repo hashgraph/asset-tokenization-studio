@@ -757,7 +757,6 @@ export function protectedPartitionsTests(getCtx: () => AssetMockCtx): void {
           const receipt = await (await tx).wait();
           expectExactlyOneEvent(receipt!, asset, EVENT_NAMES.PROTECTED_CLEARED_TRANSFER_BY_PARTITION);
           // HOLDS
-          protectedClearingOperation.nonce = 2;
           const messageHold = {
             _protectedClearingOperation: protectedClearingOperation,
             _hold: hold,
@@ -786,7 +785,6 @@ export function protectedPartitionsTests(getCtx: () => AssetMockCtx): void {
           const receiptHold = await (await txHold).wait();
           expectExactlyOneEvent(receiptHold!, asset, EVENT_NAMES.PROTECTED_CLEARED_HOLD_BY_PARTITION);
           // REDEEMS
-          protectedClearingOperation.nonce = 3;
           const messageRedeem = {
             _protectedClearingOperation: protectedClearingOperation,
             _amount: amount,

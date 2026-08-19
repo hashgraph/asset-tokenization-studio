@@ -4,6 +4,9 @@ pragma solidity >=0.8.0 <0.9.0;
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IHoldTypes } from "../../facets/hold/IHoldTypes.sol";
+import {
+    NONCE_KEY_PROTECTED_CREATE_HOLD_BY_PARTITION
+} from "../../facets/protectedHoldByPartition/IProtectedHoldByPartition.sol";
 import { ICompliance } from "../../facets/compliance/externalInterfaces/ICompliance.sol";
 import { IERC3643Types } from "../../facets/commonTypes/IERC3643Types.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
@@ -119,7 +122,7 @@ library HoldStorageWrapper {
         _checkNonceAndDeadline(
             _protectedHold.nonce,
             _from,
-            NonceStorageWrapper.getNonceFor(_from),
+            NonceStorageWrapper.getNonceFor(_from, NONCE_KEY_PROTECTED_CREATE_HOLD_BY_PARTITION),
             _protectedHold.deadline,
             TimeTravelStorageWrapper.getBlockTimestamp()
         );
@@ -132,7 +135,7 @@ library HoldStorageWrapper {
             ERC20StorageWrapper.getName()
         );
 
-        NonceStorageWrapper.setNonceFor(_from);
+        NonceStorageWrapper.setNonceFor(_from, NONCE_KEY_PROTECTED_CREATE_HOLD_BY_PARTITION);
 
         return createHoldByPartition(_partition, _from, _protectedHold.hold, "", ThirdPartyType.PROTECTED);
     }
