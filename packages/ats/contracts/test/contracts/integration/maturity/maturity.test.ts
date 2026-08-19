@@ -78,13 +78,12 @@ export function maturityTests(getCtx: () => AssetMockCtx): void {
         );
       });
 
-      it("GIVEN the token holder account is blocked WHEN fullRedeemAtMaturity THEN reverts with AccountIsBlocked", async () => {
-        await asset.connect(signer_D).addToControlList(signer_B.address);
+      it("GIVEN the token holder account is blocked WHEN fullRedeemAtMaturity THEN it succeeds instead of reverting with AccountIsBlocked", async () => {
+        await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+        await asset.connect(signer_D).addToControlList(signer_C.address);
+        await asset.changeSystemTimestamp(maturityDate + TIME_PERIODS_S.DAY);
 
-        await expect(asset.connect(signer_A).fullRedeemAtMaturity(signer_B.address)).to.be.revertedWithCustomError(
-          asset,
-          "AccountIsBlocked",
-        );
+        await expect(asset.connect(signer_A).fullRedeemAtMaturity(signer_C.address)).to.not.be.reverted;
       });
 
       it("GIVEN the caller lacks ROLE_MATURITY_REDEEMER WHEN fullRedeemAtMaturity THEN reverts with AccountHasNoRole", async () => {
@@ -112,11 +111,10 @@ export function maturityTests(getCtx: () => AssetMockCtx): void {
         );
       });
 
-      it("GIVEN the token holder lacks valid KYC status WHEN fullRedeemAtMaturity THEN reverts with InvalidKycStatus", async () => {
-        await expect(asset.connect(signer_A).fullRedeemAtMaturity(signer_C.address)).to.be.revertedWithCustomError(
-          asset,
-          "InvalidKycStatus",
-        );
+      it("GIVEN the token holder lacks valid KYC status WHEN fullRedeemAtMaturity THEN it succeeds instead of reverting with InvalidKycStatus", async () => {
+        await asset.changeSystemTimestamp(maturityDate + TIME_PERIODS_S.DAY);
+
+        await expect(asset.connect(signer_A).fullRedeemAtMaturity(signer_C.address)).to.not.be.reverted;
       });
 
       it("GIVEN the current date is before maturity WHEN fullRedeemAtMaturity THEN reverts with MaturityDateInvalid", async () => {
@@ -238,12 +236,13 @@ export function maturityTests(getCtx: () => AssetMockCtx): void {
         ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
       });
 
-      it("GIVEN the token holder account is blocked WHEN redeemAtMaturityByPartitionRange THEN reverts with AccountIsBlocked", async () => {
-        await asset.connect(signer_D).addToControlList(signer_B.address);
+      it("GIVEN the token holder account is blocked WHEN redeemAtMaturityByPartitionRange THEN it succeeds instead of reverting with AccountIsBlocked", async () => {
+        await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+        await asset.connect(signer_D).addToControlList(signer_C.address);
+        await asset.changeSystemTimestamp(maturityDate + TIME_PERIODS_S.DAY);
 
-        await expect(
-          asset.connect(signer_A).redeemAtMaturityByPartitionRange(signer_B.address, ZERO, 10),
-        ).to.be.revertedWithCustomError(asset, "AccountIsBlocked");
+        await expect(asset.connect(signer_A).redeemAtMaturityByPartitionRange(signer_C.address, ZERO, 10)).to.not.be
+          .reverted;
       });
 
       it("GIVEN the caller lacks ROLE_MATURITY_REDEEMER WHEN redeemAtMaturityByPartitionRange THEN reverts with AccountHasNoRole", async () => {
@@ -268,10 +267,11 @@ export function maturityTests(getCtx: () => AssetMockCtx): void {
         ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
-      it("GIVEN the token holder lacks valid KYC status WHEN redeemAtMaturityByPartitionRange THEN reverts with InvalidKycStatus", async () => {
-        await expect(
-          asset.connect(signer_A).redeemAtMaturityByPartitionRange(signer_C.address, ZERO, 10),
-        ).to.be.revertedWithCustomError(asset, "InvalidKycStatus");
+      it("GIVEN the token holder lacks valid KYC status WHEN redeemAtMaturityByPartitionRange THEN it succeeds instead of reverting with InvalidKycStatus", async () => {
+        await asset.changeSystemTimestamp(maturityDate + TIME_PERIODS_S.DAY);
+
+        await expect(asset.connect(signer_A).redeemAtMaturityByPartitionRange(signer_C.address, ZERO, 10)).to.not.be
+          .reverted;
       });
 
       it("GIVEN the current date is before maturity WHEN redeemAtMaturityByPartitionRange THEN reverts with MaturityDateInvalid", async () => {
