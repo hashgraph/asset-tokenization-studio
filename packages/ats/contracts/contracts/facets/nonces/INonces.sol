@@ -60,6 +60,16 @@ interface INonces {
      * @param _owner Address whose partition hold creation nonce is queried.
      * @return Current nonce value for `_owner`.
      */
+    function protectedCreateHoldByPartitionNonce(address _owner) external view returns (uint256);
+
+    /**
+     * @notice Returns the current nonce for `_owner` used in protected clearing partition
+     *         hold creations.
+     * @dev Incremented internally upon consumption of a valid signed
+     *      `protectedClearingCreateHoldByPartition` operation.
+     * @param _owner Address whose clearing partition hold creation nonce is queried.
+     * @return Current nonce value for `_owner`.
+     */
     function protectedClearingCreateHoldByPartitionNonce(address _owner) external view returns (uint256);
 
     /**

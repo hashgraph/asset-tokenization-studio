@@ -27,6 +27,7 @@ contract NoncesFacet is Nonces, IStaticFunctionSelectors {
                 this.nonces.selector,
                 this.protectedTransferFromByPartitionNonce.selector,
                 this.protectedRedeemFromByPartitionNonce.selector,
+                this.protectedCreateHoldByPartitionNonce.selector,
                 this.protectedClearingCreateHoldByPartitionNonce.selector,
                 this.protectedClearingTransferByPartitionNonce.selector,
                 this.protectedClearingRedeemByPartitionNonce.selector

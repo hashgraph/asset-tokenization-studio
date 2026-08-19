@@ -7,6 +7,10 @@ import { IHoldTypes } from "../hold/IHoldTypes.sol";
 // solhint-disable-next-line max-line-length
 bytes32 constant RESOLVER_KEY_PROTECTED_HOLD_BY_PARTITION = 0x5b77b995d3e53c3e46f114bbf37642ce3169369548c8135b8b11f5cebd3fb07b;
 
+/// @custom:hash nonceKey ProtectedCreateHoldByPartition
+// solhint-disable-next-line max-line-length
+bytes32 constant NONCE_KEY_PROTECTED_CREATE_HOLD_BY_PARTITION = 0xdae1ad9283fd6e9163aae253086e0019acbc42bce19962adc6e084ffc8da2cfb;
+
 /**
  * @title IProtectedHoldByPartition
  * @author Asset Tokenization Studio Team
