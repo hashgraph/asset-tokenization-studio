@@ -154,8 +154,8 @@ library HoldStorageWrapper {
         uint256 _holdId
     ) internal {
         address thirdPartyAddress = EvmAccessors.getMsgSender();
-        ERC20StorageWrapper.decreaseAllowedBalance(_from, thirdPartyAddress, _amount);
-        setThirdPartyForHold(thirdPartyAddress, _partition, _from, _holdId);
+        if (ERC20StorageWrapper.decreaseAllowedBalance(_from, thirdPartyAddress, _amount))
+            setThirdPartyForHold(thirdPartyAddress, _partition, _from, _holdId);
     }
 
     /**
@@ -898,13 +898,12 @@ library HoldStorageWrapper {
         uint256 _amount
     ) private {
         if (_thirdPartyType != ThirdPartyType.AUTHORIZED) return;
-        ERC20StorageWrapper.increaseAllowedBalance(
-            _holdIdentifier.tokenHolder,
-            _holdStorage().holdThirdPartyByAccountPartitionAndId[_holdIdentifier.tokenHolder][
-                _holdIdentifier.partition
-            ][_holdIdentifier.holdId],
-            _amount
-        );
+        address owner = _holdIdentifier.tokenHolder;
+        address spender = _holdStorage().holdThirdPartyByAccountPartitionAndId[owner][_holdIdentifier.partition][
+            _holdIdentifier.holdId
+        ];
+        if (spender == address(0)) return;
+        ERC20StorageWrapper.increaseAllowedBalance(owner, spender, _amount);
     }
 
     /**

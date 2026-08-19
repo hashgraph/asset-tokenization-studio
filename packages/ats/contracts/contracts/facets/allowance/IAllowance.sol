@@ -20,6 +20,15 @@ interface IAllowance is IAllowanceTypes {
     event AllowanceInitialized();
 
     /**
+     * @notice Raised when an operation encounters an allowance that is effectively unlimited.
+     * @dev Indicates that the owner has granted the spender an infinite allowance, which may
+     *      require special handling to avoid unintended accounting or revocation assumptions.
+     * @param owner The account that granted the allowance.
+     * @param spender The account authorised to spend on behalf of the owner.
+     */
+    error InfiniteAllowance(address owner, address spender);
+
+    /**
      * @notice Initialises the allowance capability on the token.
      * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
      *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.

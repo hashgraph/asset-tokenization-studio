@@ -19,6 +19,7 @@
 import { Signer } from "ethers";
 import {
   GAS_LIMIT,
+  gasLimitOverride,
   hederaGasOverrides,
   gasLimitOverride,
   info,

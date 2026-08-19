@@ -318,6 +318,79 @@ export function allowanceTests(getCtx: () => AssetMockCtx): void {
           ).to.be.revertedWithCustomError(asset, "InsufficientAllowance");
         });
       });
+
+      describe("FIND-066", () => {
+        it("GIVEN an unlimited allowance WHEN a balance adjustment with factor > 1 applies THEN transferFrom still succeeds instead of reverting with an overflow panic", async () => {
+          await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
+          const tokenAmount = 2000n;
+          await asset.connect(signer_B).issue(signer_C.address, tokenAmount, "0x");
+          await assetSignerC.approve(signer_D.address, MAX_UINT256);
+          const currentTimestamp = await asset.blockTimestamp();
+          const ONE_DAY = 86400n;
+          const executionDate = Number(currentTimestamp + ONE_DAY);
+          await asset.setScheduledBalanceAdjustment({
+            executionDate: executionDate.toString(),
+            factor: 2,
+            decimals: 0,
+          });
+          await asset.changeSystemTimestamp(executionDate + 1);
+          await asset.triggerScheduledCrossOrderedTasks(100);
+          await expect(assetSignerD.transferFrom(signer_C.address, signer_D.address, 1n)).to.not.be.reverted;
+        });
+
+        it("GIVEN an unlimited allowance WHEN a balance adjustment with factor > 1 applies THEN allowance() still returns the unlimited amount instead of reverting with an overflow panic", async () => {
+          await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
+          const tokenAmount = 2000n;
+          await asset.connect(signer_B).issue(signer_C.address, tokenAmount, "0x");
+          await assetSignerC.approve(signer_D.address, MAX_UINT256);
+
+          const currentTimestamp = await asset.blockTimestamp();
+          const ONE_DAY = 86400n;
+          const executionDate = Number(currentTimestamp + ONE_DAY);
+          await asset.setScheduledBalanceAdjustment({
+            executionDate: executionDate.toString(),
+            factor: 2,
+            decimals: 0,
+          });
+
+          await asset.changeSystemTimestamp(executionDate + 1);
+          await asset.triggerScheduledCrossOrderedTasks(100);
+
+          expect(await asset.allowance(signer_C.address, signer_D.address)).to.equal(MAX_UINT256);
+        });
+
+        it("GIVEN an unlimited allowance WHEN a balance adjustment with factor > 1 applies THEN a second spend still succeeds instead of reverting with an overflow panic", async () => {
+          await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
+          const tokenAmount = 2000n;
+          await asset.connect(signer_B).issue(signer_C.address, tokenAmount, "0x");
+          await assetSignerC.approve(signer_D.address, MAX_UINT256);
+
+          const currentTimestamp = await asset.blockTimestamp();
+          const ONE_DAY = 86400n;
+          const executionDate = Number(currentTimestamp + ONE_DAY);
+          await asset.setScheduledBalanceAdjustment({
+            executionDate: executionDate.toString(),
+            factor: 2,
+            decimals: 0,
+          });
+
+          await asset.changeSystemTimestamp(executionDate + 1);
+          await asset.triggerScheduledCrossOrderedTasks(100);
+
+          await expect(assetSignerD.transferFrom(signer_C.address, signer_D.address, 1n)).to.not.be.reverted;
+          await expect(assetSignerD.transferFrom(signer_C.address, signer_D.address, 1n)).to.not.be.reverted;
+
+          expect(await asset.allowance(signer_C.address, signer_D.address)).to.equal(MAX_UINT256);
+        });
+
+        it("GIVEN an unlimited allowance WHEN decreaseAllowance THEN reverts with InfiniteAllowance", async () => {
+          await assetSignerC.approve(signer_D.address, MAX_UINT256);
+
+          await expect(assetSignerC.decreaseAllowance(signer_D.address, 1n))
+            .to.be.revertedWithCustomError(asset, "InfiniteAllowance")
+            .withArgs(signer_C.address, signer_D.address);
+        });
+      });
     });
 
     describe("Deactivated", () => {
