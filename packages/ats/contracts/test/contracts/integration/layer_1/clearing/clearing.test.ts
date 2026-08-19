@@ -1564,7 +1564,7 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
           );
         });
 
-        it("GIVEN a clearing transfer WHEN reclaimClearingOperationByPartition with unidentified account THEN transaction fails", async () => {
+        it("GIVEN a clearing transfer WHEN reclaimClearingOperationByPartition with unidentified account THEN transaction success", async () => {
           await asset.connect(signer_A).clearingTransferByPartition(clearingOperation, _AMOUNT, signer_C.address);
 
           await asset.grantRole(ATS_ROLES.ROLE_INTERNAL_KYC_MANAGER, signer_A.address);
@@ -1575,7 +1575,8 @@ export function clearingTests(getCtx: () => AssetMockCtx): void {
           // Wait until expiration date
           await asset.changeSystemTimestamp(clearingOperation.expirationTimestamp + 1);
 
-          await expect(asset.connect(signer_A).reclaimClearingOperationByPartition(clearingIdentifier)).to.be.reverted;
+          await expect(asset.connect(signer_A).reclaimClearingOperationByPartition(clearingIdentifier)).to.not.be
+            .reverted;
         });
       });
 

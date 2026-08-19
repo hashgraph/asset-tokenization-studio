@@ -1459,6 +1459,37 @@ export function clearingByPartitionTests(getCtx: () => AssetMockCtx): void {
           asset.connect(signer_A).reclaimClearingOperationByPartition(identifier),
         ).to.be.revertedWithCustomError(asset, "WrongClearingId");
       });
+
+      it("GIVEN a clearing transfer by partition WHEN reclaimClearingOperationByPartition with unidentified account THEN transaction success", async () => {
+        const balanceBefore = await asset.balanceOf(signer_A.address);
+        const clearingOperation = {
+          partition: _DEFAULT_PARTITION,
+          expirationTimestamp: SHORT_EXPIRATION_TIMESTAMP,
+          data: EMPTY_HEX_BYTES,
+        };
+        await asset.connect(signer_A).clearingRedeemByPartition(clearingOperation, _AMOUNT);
+
+        expect(await asset.balanceOf(signer_A.address)).to.equal(balanceBefore - BigInt(_AMOUNT));
+        expect(await asset.getClearedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(_AMOUNT);
+
+        await asset.changeSystemTimestamp(SHORT_EXPIRATION_TIMESTAMP);
+
+        const identifier = {
+          clearingOperationType: ClearingOperationType.Redeem,
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          clearingId: 1,
+        };
+        await asset.grantRole(ATS_ROLES.ROLE_INTERNAL_KYC_MANAGER, signer_A.address);
+        await asset.activateInternalKyc();
+        // Revoke identity for signer_A
+        await asset.connect(signer_B).revokeKyc(signer_A.address);
+
+        // Wait until expiration date
+        await asset.changeSystemTimestamp(clearingOperation.expirationTimestamp + 1);
+
+        await expect(asset.connect(signer_A).reclaimClearingOperationByPartition(identifier)).to.not.be.reverted;
+      });
     });
 
     // ─── Read functions ────────────────────────────────────────────────────────
