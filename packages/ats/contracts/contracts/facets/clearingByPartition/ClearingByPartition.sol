@@ -92,6 +92,8 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
     }
 
     /// @inheritdoc IClearingByPartition
+    /// @dev Intentional recovery carve-out: exempt from identity/KYC checks because it returns
+    ///      the holder's own locked tokens rather than performing a new regulated transfer.
     function reclaimClearingOperationByPartition(
         IClearingByPartition.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     )
@@ -103,7 +105,6 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
         onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
         onlyWithValidClearingId(_clearingOperationIdentifier)
         onlyValidExpirationTimestampForClearing(_clearingOperationIdentifier, true)
-        onlyIdentifiedAddresses(_clearingOperationIdentifier.tokenHolder, address(0))
         returns (bool success_)
     {
         success_ = ClearingLifecycleOps.reclaimClearingOperationByPartition(_clearingOperationIdentifier);

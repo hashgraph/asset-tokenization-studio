@@ -560,7 +560,7 @@ library ERC20StorageWrapper {
      * @dev Reverts with `IAllowanceTypes.SpenderWithZeroAddress` if `spender` is `address(0)`.
      * @param spender The address of the spender to validate.
      */
-    function _checkSpenderWithZeroAddress(address spender) private view {
+    function _checkSpenderWithZeroAddress(address spender) private pure {
         if (spender == address(0)) revert IAllowanceTypes.SpenderWithZeroAddress();
     }
 
