@@ -123,6 +123,19 @@ export function mintByPartitionTests(getCtx: () => AssetMockCtx): void {
         expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.equal(AMOUNT);
       });
 
+      it("GIVEN disabled issuance WHEN issueByPartition THEN reverts with IssuanceIsDisabled", async () => {
+        await asset.connect(signer_A).disableIssuance();
+
+        await expect(
+          asset.issueByPartition({
+            partition: DEFAULT_PARTITION,
+            tokenHolder: signer_E.address,
+            value: AMOUNT,
+            data: EMPTY_HEX_BYTES,
+          }),
+        ).to.be.revertedWithCustomError(asset, "IssuanceIsDisabled");
+      });
+
       it("GIVEN a recovered caller WHEN issueByPartition THEN reverts with WalletRecovered", async () => {
         await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_C.address);
         await asset.connect(signer_C).recoveryAddress(signer_E.address, signer_D.address, ethers.ZeroAddress);

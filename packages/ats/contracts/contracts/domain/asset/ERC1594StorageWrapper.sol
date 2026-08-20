@@ -13,6 +13,7 @@ import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { IERC1410Types } from "../../facets/commonTypes/IERC1410Types.sol";
 import { ITransfer } from "../../facets/transfer/ITransfer.sol";
 import { IAllowanceTypes } from "../../facets/allowance/IAllowanceTypes.sol";
+import { IMintTypes } from "../../facets/mint/IMintTypes.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
@@ -102,11 +103,29 @@ library ERC1594StorageWrapper {
     }
 
     /**
+     * @notice Disables token issuance permanently.
+     * @dev Sets `issuance` to `false`. The state change is one-way and cannot be undone.
+     */
+    function disableIssuance() internal {
+        _erc1594Storage().issuance = false;
+    }
+
+    /**
      * @notice Returns whether token issuance is currently enabled.
      * @return True if the `issuance` flag is set, otherwise false.
      */
     function isIssuable() internal view returns (bool) {
         return _erc1594Storage().issuance;
+    }
+
+    /**
+     * @notice Reverts with `IMintTypes.IssuanceIsDisabled` if token issuance has been disabled.
+     * @dev Backing implementation of the `onlyIssuable` modifier.
+     */
+    function requireIssuable() internal view {
+        if (!isIssuable()) {
+            revert IMintTypes.IssuanceIsDisabled();
+        }
     }
 
     /**

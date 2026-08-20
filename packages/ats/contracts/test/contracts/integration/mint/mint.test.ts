@@ -43,6 +43,73 @@ export function mintTests(getCtx: () => AssetMockCtx): void {
       });
     });
 
+    describe("disableIssuance and finalizeIssuance", () => {
+      it("GIVEN isIssuable WHEN queried initially THEN returns true", async () => {
+        expect(await asset.isIssuable()).to.be.true;
+      });
+
+      it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN disableIssuance THEN reverts with AccountHasNoRole", async () => {
+        await expect(asset.connect(unknownSigner).disableIssuance())
+          .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+          .withArgs(unknownSigner.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+      });
+
+      it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN finalizeIssuance THEN reverts with AccountHasNoRole", async () => {
+        await expect(asset.connect(unknownSigner).finalizeIssuance())
+          .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+          .withArgs(unknownSigner.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+      });
+
+      it("GIVEN caller with DEFAULT_ADMIN_ROLE WHEN disableIssuance THEN emits IssuanceDisabled and sets isIssuable to false", async () => {
+        await expect(asset.connect(signer_A).disableIssuance())
+          .to.emit(asset, "IssuanceDisabled")
+          .withArgs(signer_A.address);
+        expect(await asset.isIssuable()).to.be.false;
+      });
+
+      it("GIVEN caller with DEFAULT_ADMIN_ROLE WHEN finalizeIssuance THEN emits IssuanceFinalized and sets isIssuable to false", async () => {
+        await expect(asset.connect(signer_A).finalizeIssuance())
+          .to.emit(asset, "IssuanceFinalized")
+          .withArgs(signer_A.address);
+        expect(await asset.isIssuable()).to.be.false;
+      });
+
+      it("GIVEN disabled issuance WHEN disableIssuance or finalizeIssuance called again THEN reverts with IssuanceIsDisabled", async () => {
+        await asset.connect(signer_A).disableIssuance();
+        await expect(asset.connect(signer_A).disableIssuance()).to.be.revertedWithCustomError(
+          asset,
+          "IssuanceIsDisabled",
+        );
+        await expect(asset.connect(signer_A).finalizeIssuance()).to.be.revertedWithCustomError(
+          asset,
+          "IssuanceIsDisabled",
+        );
+      });
+
+      it("GIVEN disabled issuance WHEN issue or mint is called THEN reverts with IssuanceIsDisabled", async () => {
+        await executeRbac(asset, [
+          { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+          { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
+          { role: ATS_ROLES.ROLE_CAP, members: [signer_A.address] },
+          { role: ATS_ROLES.ROLE_ISSUER, members: [signer_A.address] },
+        ]);
+        await asset.addIssuer(signer_A.address);
+        await asset.connect(signer_B).grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+        await asset.connect(signer_A).setMaxSupply(MAX_SUPPLY);
+
+        await asset.connect(signer_A).disableIssuance();
+
+        await expect(asset.connect(signer_A).issue(signer_E.address, AMOUNT, DATA)).to.be.revertedWithCustomError(
+          asset,
+          "IssuanceIsDisabled",
+        );
+        await expect(asset.connect(signer_A).mint(signer_E.address, AMOUNT)).to.be.revertedWithCustomError(
+          asset,
+          "IssuanceIsDisabled",
+        );
+      });
+    });
+
     describe("initializeERC1594 event", () => {
       it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeERC1594 is called THEN emits ERC1594Initialized", async () => {
         await asset.forceFacetNotRegistered(RESOLVER_KEYS.mint);

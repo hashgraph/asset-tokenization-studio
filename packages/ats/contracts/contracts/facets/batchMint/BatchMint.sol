@@ -44,6 +44,7 @@ abstract contract BatchMint is IBatchMint, Modifiers {
         onlyOperational
         onlyActivated
         onlyUnpaused
+        onlyIssuable
         onlyValidInputAmountsArrayLength(_toList, _amounts)
         onlyWithoutMultiPartition
         onlyAnyRole(_buildRoles(ROLE_ISSUER, ROLE_AGENT))

@@ -7,6 +7,7 @@ import { ClearingModifiers } from "./ClearingModifiers.sol";
 import { CouponModifiers } from "./CouponModifiers.sol";
 import { ComplianceModifiers } from "./ComplianceModifiers.sol";
 import { ERC1410Modifiers } from "./ERC1410Modifiers.sol";
+import { ERC1594Modifiers } from "./ERC1594Modifiers.sol";
 import { ERC3643Modifiers } from "./ERC3643Modifiers.sol";
 import { ExpirationModifiers } from "./ExpirationModifiers.sol";
 import { HoldModifiers } from "./HoldModifiers.sol";
@@ -56,6 +57,7 @@ abstract contract AssetModifiers is
     CouponModifiers,
     ComplianceModifiers,
     ERC1410Modifiers,
+    ERC1594Modifiers,
     ERC3643Modifiers,
     ExpirationModifiers,
     HoldModifiers,

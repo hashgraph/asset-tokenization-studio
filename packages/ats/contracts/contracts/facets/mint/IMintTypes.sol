@@ -19,4 +19,21 @@ interface IMintTypes {
      * @param data Arbitrary payload forwarded alongside the issuance.
      */
     event Issued(address indexed operator, address indexed to, uint256 value, bytes data);
+
+    /**
+     * @notice Emitted when token issuance is disabled.
+     * @param operator Account that disabled issuance.
+     */
+    event IssuanceDisabled(address indexed operator);
+
+    /**
+     * @notice Emitted when token issuance is finalized.
+     * @param operator Account that finalized issuance.
+     */
+    event IssuanceFinalized(address indexed operator);
+
+    /**
+     * @notice Thrown when an issuance operation is attempted after issuance has been permanently disabled.
+     */
+    error IssuanceIsDisabled();
 }
