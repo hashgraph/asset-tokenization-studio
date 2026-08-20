@@ -374,7 +374,7 @@ export function loansPortfolioTests(getCtx: () => AssetMockCtx): void {
           .withArgs(signer_C.address, ATS_ROLES.ROLE_LOANS_PORTFOLIO_MANAGER);
       });
 
-      it("GIVEN a registered loan that reverts on getLoanDetails WHEN notifying update THEN reverts with MockLoanDetailsRevert [FIND-026]", async () => {
+      it("GIVEN a registered loan that reverts on getLoanDetails WHEN notifying update THEN skips reclassification without reverting [FIND-026]", async () => {
         const loan = await new MockLoanHolding__factory(signer_A).deploy();
         await loan.waitForDeployment();
         const loanAddress = loan.target;
@@ -385,10 +385,8 @@ export function loansPortfolioTests(getCtx: () => AssetMockCtx): void {
 
         await loan.setRevertOnGetLoanDetails(true);
 
-        await expect(asset.notifyLoanHoldingsAssetUpdate(loanAddress)).to.be.revertedWithCustomError(
-          loan,
-          "MockLoanDetailsRevert",
-        );
+        expect(await asset.notifyLoanHoldingsAssetUpdate.staticCall(loanAddress)).to.equal(false);
+        await expect(asset.notifyLoanHoldingsAssetUpdate(loanAddress)).to.not.emit(asset, "LoanHoldingsAssetUpdated");
       });
     });
 
@@ -654,7 +652,7 @@ export function loansPortfolioTests(getCtx: () => AssetMockCtx): void {
         expect(balances_[0]).to.equal(mintAmount);
       });
 
-      it("GIVEN multiple holdings where one loan reverts on balanceOfByPartition WHEN querying ownership THEN the entire paginated query reverts [FIND-026]", async () => {
+      it("GIVEN multiple holdings where one loan reverts on balanceOfByPartition WHEN querying ownership THEN the failing holding reports zero balance without blocking the page [FIND-026]", async () => {
         const portfolioAddress = await asset.getAddress();
         const loan1 = await new MockLoanHolding__factory(signer_A).deploy();
         await loan1.waitForDeployment();
@@ -675,10 +673,10 @@ export function loansPortfolioTests(getCtx: () => AssetMockCtx): void {
 
         await loan2.setRevertOnBalanceOfByPartition(true);
 
-        await expect(asset.getHoldingsAssetOwnership(0, 10)).to.be.revertedWithCustomError(
-          loan2,
-          "MockBalanceOfByPartitionRevert",
-        );
+        const [assets_, balances_] = await asset.getHoldingsAssetOwnership(0, 10);
+        expect(assets_).to.deep.equal([loan1.target, loan2.target]);
+        expect(balances_[0]).to.equal(1000n);
+        expect(balances_[1]).to.equal(0n);
       });
     });
 

@@ -86,9 +86,10 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
         validateAddressNotZero(_holdingsAssetAddress)
         returns (bool success_)
     {
-        LoansPortfolioStorageWrapper.notifyLoanHoldingsAssetUpdate(_holdingsAssetAddress);
-        emit ILoansPortfolio.LoanHoldingsAssetUpdated(_holdingsAssetAddress);
-        success_ = true;
+        success_ = LoansPortfolioStorageWrapper.notifyLoanHoldingsAssetUpdate(_holdingsAssetAddress);
+        if (success_) {
+            emit ILoansPortfolio.LoanHoldingsAssetUpdated(_holdingsAssetAddress);
+        }
     }
 
     /// @inheritdoc ILoansPortfolio
