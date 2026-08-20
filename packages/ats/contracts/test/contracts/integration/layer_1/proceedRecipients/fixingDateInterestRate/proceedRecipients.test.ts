@@ -3,12 +3,14 @@
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock } from "@contract-types";
-import { dateToUnixTimestamp, ATS_ROLES } from "@scripts";
+import { dateToUnixTimestamp, ATS_ROLES, RESOLVER_KEYS } from "@scripts";
 import { INTEREST_RATE_TYPE, executeRbac } from "@test";
 import type { AssetMockCtx } from "@test";
 
 const PROCEED_RECIPIENT_1 = "0x1234567890123456789012345678901234567890";
+const PROCEED_RECIPIENT_2 = "0xf234567890123456789012345678901234567890";
 const PROCEED_RECIPIENT_1_DATA = "0xabcdef";
+const PROCEED_RECIPIENT_2_DATA = "0xfedcba";
 const referenceDate = dateToUnixTimestamp(`2030-01-01T00:01:00Z`);
 
 export function proceedRecipientsTests(getCtx: () => AssetMockCtx): void {
@@ -42,6 +44,31 @@ export function proceedRecipientsTests(getCtx: () => AssetMockCtx): void {
       ]);
       await asset.updateMaturityDate(dateToUnixTimestamp(`2031-01-01T00:00:00Z`));
       await asset.setCouponRateType(INTEREST_RATE_TYPE.KPI_LINKED); // creates 2 pending tasks on setCoupon
+    });
+
+    describe("initializeProceedRecipients length mismatch", () => {
+      beforeEach(async () => {
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.proceedRecipients);
+      });
+
+      it("FIND-056 (TDD, expected red) GIVEN _data shorter than _proceedRecipients WHEN initializeProceedRecipients is called THEN it reverts with an explicit error instead of a raw array-index panic", async () => {
+        await expect(
+          asset.initializeProceedRecipients([PROCEED_RECIPIENT_1, PROCEED_RECIPIENT_2], [PROCEED_RECIPIENT_1_DATA]),
+        )
+          .to.be.revertedWithCustomError(asset, "DifferentLengths")
+          .withArgs(2, 1);
+      });
+
+      it("FIND-056 (TDD, expected red) GIVEN _data longer than _proceedRecipients WHEN initializeProceedRecipients is called THEN it reverts instead of silently dropping the surplus entry", async () => {
+        await expect(
+          asset.initializeProceedRecipients(
+            [PROCEED_RECIPIENT_1],
+            [PROCEED_RECIPIENT_1_DATA, PROCEED_RECIPIENT_2_DATA],
+          ),
+        )
+          .to.be.revertedWithCustomError(asset, "DifferentLengths")
+          .withArgs(1, 2);
+      });
     });
 
     describe("Add Tests", () => {

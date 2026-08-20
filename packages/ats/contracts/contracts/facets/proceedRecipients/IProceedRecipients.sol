@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
+
 /// @custom:hash resolverKey ProceedRecipients
 bytes32 constant RESOLVER_KEY_PROCEED_RECIPIENTS = 0x63388aa198df5944c611b8fcbfd32945c57864f7125a5f95069040087d2b0bb7;
 
@@ -11,7 +13,7 @@ bytes32 constant RESOLVER_KEY_PROCEED_RECIPIENTS = 0x63388aa198df5944c611b8fcbfd
  * @dev Proceed recipients are addresses entitled to receive token proceeds (e.g. on redemption).
  *      Provides one-shot initialisation, CRUD operations, and paginated read queries.
  */
-interface IProceedRecipients {
+interface IProceedRecipients is ICommonErrors {
     /// @notice Emitted once when the ProceedRecipients capability is initialised on a token.
     /// @dev Fires exclusively from `initializeProceedRecipients` after the storage write succeeds.
     /// @param proceedRecipients Initial array of registered proceed-recipient addresses.
@@ -45,8 +47,11 @@ interface IProceedRecipients {
 
     /**
      * @notice Initialises the proceed-recipients capability with a seed list of recipients.
+     * @dev Callable once during initialisation. Requires `_proceedRecipients` and `_data` arrays
+     *      to be of identical length and contain non-zero addresses. Emits
+     *      `ProceedRecipientsInitialized` upon successful registration.
      * @param _proceedRecipients Initial array of proceed-recipient addresses to register.
-     * @param _data Per-recipient arbitrary data, one entry per address in `_proceedRecipients`.
+     * @param _data Per-recipient arbitrary data, matching each address in `_proceedRecipients`.
      */
     function initializeProceedRecipients(address[] calldata _proceedRecipients, bytes[] calldata _data) external;
 

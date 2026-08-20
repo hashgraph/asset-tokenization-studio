@@ -20,7 +20,13 @@ abstract contract ProceedRecipients is IProceedRecipients, Modifiers {
     function initializeProceedRecipients(
         address[] calldata _proceedRecipients,
         bytes[] calldata _data
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_PROCEED_RECIPIENTS) {
+    )
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_PROCEED_RECIPIENTS)
+        onlyWithSameLength(_proceedRecipients.length, _data.length)
+    {
         ProceedRecipientsStorageWrapper.initializeProceedRecipients(_proceedRecipients, _data);
         InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_PROCEED_RECIPIENTS);
         emit ProceedRecipientsInitialized(_proceedRecipients, _data);
