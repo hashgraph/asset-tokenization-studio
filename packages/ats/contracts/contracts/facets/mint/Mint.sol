@@ -42,6 +42,7 @@ abstract contract Mint is IMint, Modifiers {
         onlyOperational
         onlyActivated
         onlyUnpaused
+        onlyIssuable
         onlyWithoutMultiPartition
         onlyAnyRole(_buildRoles(ROLE_ISSUER, ROLE_AGENT))
         onlyWithinMaxSupply(_value, TimeTravelStorageWrapper.getBlockTimestamp())
@@ -62,6 +63,7 @@ abstract contract Mint is IMint, Modifiers {
         onlyOperational
         onlyActivated
         onlyUnpaused
+        onlyIssuable
         onlyWithoutMultiPartition
         onlyAnyRole(_buildRoles(ROLE_ISSUER, ROLE_AGENT))
         onlyWithinMaxSupply(_amount, TimeTravelStorageWrapper.getBlockTimestamp())
@@ -70,6 +72,34 @@ abstract contract Mint is IMint, Modifiers {
     {
         TokenCoreOps.issue(_to, _amount);
         emit Issued(EvmAccessors.getMsgSender(), _to, _amount, "");
+    }
+
+    /// @inheritdoc IMint
+    function disableIssuance()
+        external
+        override
+        onlyOperational
+        onlyActivated
+        onlyUnpaused
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyIssuable
+    {
+        ERC1594StorageWrapper.disableIssuance();
+        emit IssuanceDisabled(EvmAccessors.getMsgSender());
+    }
+
+    /// @inheritdoc IMint
+    function finalizeIssuance()
+        external
+        override
+        onlyOperational
+        onlyActivated
+        onlyUnpaused
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyIssuable
+    {
+        ERC1594StorageWrapper.disableIssuance();
+        emit IssuanceFinalized(EvmAccessors.getMsgSender());
     }
 
     /// @inheritdoc IMint

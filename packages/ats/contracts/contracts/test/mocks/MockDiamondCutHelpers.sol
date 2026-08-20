@@ -14,6 +14,7 @@ import { ResolverProxyStorageWrapper } from "../../domain/core/ResolverProxyStor
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { DeactivateStorageWrapper } from "../../domain/core/DeactivateStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
+import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.sol";
 import { ERC1644StorageWrapper } from "../../domain/asset/ERC1644StorageWrapper.sol";
 import { ControlListStorageWrapper } from "../../domain/core/ControlListStorageWrapper.sol";
 import { KycStorageWrapper } from "../../domain/core/KycStorageWrapper.sol";
@@ -226,6 +227,7 @@ contract MockDiamondCutHelpers is IStaticFunctionSelectors, IMockDiamondCutHelpe
                 ++index;
             }
         }
+        ERC1594StorageWrapper.initialize();
     }
 
     /// @inheritdoc IMockDiamondCutHelpers

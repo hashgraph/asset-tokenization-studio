@@ -41,6 +41,7 @@ abstract contract MintByPartition is IMintByPartition, Modifiers {
         onlyOperational
         onlyActivated
         onlyUnpaused
+        onlyIssuable
         onlyAnyRole(_buildRoles(ROLE_ISSUER, ROLE_AGENT))
         onlyDefaultPartitionWithSinglePartition(_issueData.partition)
         onlyWithinMaxSupply(_issueData.value, TimeTravelStorageWrapper.getBlockTimestamp())

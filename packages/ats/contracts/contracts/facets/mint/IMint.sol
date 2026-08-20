@@ -52,6 +52,20 @@ interface IMint is IMintTypes {
     function mint(address _to, uint256 _amount) external;
 
     /**
+     * @notice Permanently disables issuance of new tokens.
+     * @dev Restricted to `DEFAULT_ADMIN_ROLE`. Sets the issuance flag to false and emits `IssuanceDisabled`.
+     *      Reverts if issuance has already been disabled.
+     */
+    function disableIssuance() external;
+
+    /**
+     * @notice Permanently finalizes issuance of new tokens.
+     * @dev Restricted to `DEFAULT_ADMIN_ROLE`. Sets the issuance flag to false and emits `IssuanceFinalized`.
+     *      Reverts if issuance has already been disabled.
+     */
+    function finalizeIssuance() external;
+
+    /**
      * @notice Returns whether further issuance is permitted for this security.
      * @dev Once a token returns `false` it must never return `true` again. Implementations read
      *      the issuance flag maintained by `ERC1594StorageWrapper`.

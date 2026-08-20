@@ -122,6 +122,16 @@ export function batchMintTests(getCtx: () => AssetMockCtx): void {
           await expect(asset.batchMint(toList, amounts)).to.be.revertedWithCustomError(asset, "IsPaused");
         });
 
+        it("GIVEN disabled issuance WHEN batchMint THEN transaction fails with IssuanceIsDisabled", async () => {
+          await asset.connect(signer_A).disableIssuance();
+
+          const mintAmount = AMOUNT / 2;
+          const toList = [signer_D.address];
+          const amounts = [mintAmount];
+
+          await expect(asset.batchMint(toList, amounts)).to.be.revertedWithCustomError(asset, "IssuanceIsDisabled");
+        });
+
         it("GIVEN a recovered caller WHEN batchMint THEN transaction fails with WalletRecovered", async () => {
           await asset.recoveryAddress(signer_D.address, signer_B.address, ethers.ZeroAddress);
           await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_AGENT, signer_D.address);
