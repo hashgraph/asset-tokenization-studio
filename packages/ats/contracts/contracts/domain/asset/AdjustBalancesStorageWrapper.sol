@@ -52,6 +52,9 @@ struct AdjustBalancesStorage {
     mapping(address => uint256) labafFrozenAmountByAccount;
     mapping(address => mapping(bytes32 => uint256)) labafFrozenAmountByAccountAndPartition;
     // ─── APPEND-ONLY ZONE BELOW ───
+    // Amortization holds — keyed by corporateActionId, the only aggregate that sums across
+    // multiple accounts rather than living inside a single one.
+    mapping(bytes32 corporateActionId => uint256) labafByAmortizationId;
 }
 
 /**
@@ -207,6 +210,16 @@ library AdjustBalancesStorageWrapper {
      */
     function setTotalHeldLabaf(address _tokenHolder, uint256 _labaf) internal {
         _adjustBalancesStorage().labafHeldAmountByAccount[_tokenHolder] = _labaf;
+    }
+
+    /**
+     * @notice Sets the LABAF anchoring the aggregate hold total for `_corporateActionId`.
+     * @param _corporateActionId Amortization corporate action whose total-hold LABAF is being
+     *                          refreshed.
+     * @param _labaf             LABAF value to record.
+     */
+    function setAmortizationHoldLabaf(bytes32 _corporateActionId, uint256 _labaf) internal {
+        _adjustBalancesStorage().labafByAmortizationId[_corporateActionId] = _labaf;
     }
 
     /**
@@ -444,6 +457,15 @@ library AdjustBalancesStorageWrapper {
      */
     function getTotalHeldLabaf(address _tokenHolder) internal view returns (uint256) {
         return zeroToOne(_adjustBalancesStorage().labafHeldAmountByAccount[_tokenHolder]);
+    }
+
+    /**
+     * @notice Returns the LABAF anchoring the aggregate hold total for `_corporateActionId`.
+     * @param _corporateActionId Amortization corporate action whose total-hold LABAF is requested.
+     * @return Stored LABAF, defaulting to 1 when never anchored.
+     */
+    function getAmortizationHoldLabaf(bytes32 _corporateActionId) internal view returns (uint256) {
+        return zeroToOne(_adjustBalancesStorage().labafByAmortizationId[_corporateActionId]);
     }
 
     /**
