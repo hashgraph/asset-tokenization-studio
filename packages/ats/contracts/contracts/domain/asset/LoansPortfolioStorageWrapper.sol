@@ -133,25 +133,38 @@ library LoansPortfolioStorageWrapper {
      * @notice Updates the classification of a loan holding asset after its details change.
      * @dev Reclassifies the loan based on its current collateral and performance status.
      *      Removes the loan from all collateral and performance subsets before re-adding.
-     *      The calling facet (`LoansPortfolio`) emits `LoanHoldingsAssetUpdated`.
+     *      Fails closed on a misbehaving loan: if `ILoan.getLoanDetails()` reverts, the existing
+     *      classification is left untouched and `false` is returned instead of reverting or
+     *      propagating the external failure (FIND-026). The calling facet (`LoansPortfolio`)
+     *      emits `LoanHoldingsAssetUpdated` only when this returns `true`.
      * @param _holdingsAssetAddress The address of the loan to reclassify.
+     * @return success_ True if the loan responded and its classification was refreshed; false if
+     *         the external call reverted and the previous classification was left intact.
      * @custom:error HoldingAssetNotFound If the asset address is not in the portfolio.
      */
-    function notifyLoanHoldingsAssetUpdate(address _holdingsAssetAddress) internal {
+    function notifyLoanHoldingsAssetUpdate(address _holdingsAssetAddress) internal returns (bool success_) {
         checkHoldingAssetExists(_holdingsAssetAddress);
         LoansPortfolioDataStorage storage loanPortfolioStorage = _loansPortfolioStorage();
-        ILoan.LoanDetailsData memory loanDetails = ILoan(_holdingsAssetAddress).getLoanDetails();
-        loanPortfolioStorage.securedLoanHoldingsAssets.remove(_holdingsAssetAddress);
-        loanPortfolioStorage.nonSecuredLoanHoldingsAssets.remove(_holdingsAssetAddress);
-        _classifyByCollateral(loanPortfolioStorage, _holdingsAssetAddress, loanDetails.collateral.totalCollateralValue);
-        loanPortfolioStorage.performingLoanHoldingsAssets.remove(_holdingsAssetAddress);
-        loanPortfolioStorage.nonPerformingLoanHoldingsAssets.remove(_holdingsAssetAddress);
-        loanPortfolioStorage.defaultedLoanHoldingsAssets.remove(_holdingsAssetAddress);
-        _addLoanHoldingsAssetByPerformanceStatus(
-            loanPortfolioStorage,
-            _holdingsAssetAddress,
-            loanDetails.loanPerformanceStatus.performanceStatus
-        );
+        try ILoan(_holdingsAssetAddress).getLoanDetails() returns (ILoan.LoanDetailsData memory loanDetails) {
+            loanPortfolioStorage.securedLoanHoldingsAssets.remove(_holdingsAssetAddress);
+            loanPortfolioStorage.nonSecuredLoanHoldingsAssets.remove(_holdingsAssetAddress);
+            _classifyByCollateral(
+                loanPortfolioStorage,
+                _holdingsAssetAddress,
+                loanDetails.collateral.totalCollateralValue
+            );
+            loanPortfolioStorage.performingLoanHoldingsAssets.remove(_holdingsAssetAddress);
+            loanPortfolioStorage.nonPerformingLoanHoldingsAssets.remove(_holdingsAssetAddress);
+            loanPortfolioStorage.defaultedLoanHoldingsAssets.remove(_holdingsAssetAddress);
+            _addLoanHoldingsAssetByPerformanceStatus(
+                loanPortfolioStorage,
+                _holdingsAssetAddress,
+                loanDetails.loanPerformanceStatus.performanceStatus
+            );
+            success_ = true;
+        } catch {
+            success_ = false;
+        }
     }
 
     /**
@@ -330,10 +343,12 @@ library LoansPortfolioStorageWrapper {
     /**
      * @notice Returns a paginated list of holding asset addresses along with their token balances.
      * @dev For each asset, retrieves the balance of the `DEFAULT_PARTITION` partition held by this contract.
+     *      Fails closed per holding: if `balanceOfByPartition` reverts on a misbehaving asset, that
+     *      asset's balance is reported as `0` instead of reverting the entire page (FIND-026).
      * @param _pageIndex Zero-based page index.
      * @param _pageLength Number of elements per page.
      * @return assets_ Array of asset addresses for the requested page.
-     * @return tokenBalances_ Array of corresponding token balances.
+     * @return tokenBalances_ Array of corresponding token balances (`0` for an asset that reverted).
      */
     function getHoldingsAssetBalances(
         uint256 _pageIndex,
@@ -343,10 +358,13 @@ library LoansPortfolioStorageWrapper {
         uint256 arraySize = assets_.length;
         tokenBalances_ = new uint256[](arraySize);
         for (uint256 i; i < arraySize; ) {
-            tokenBalances_[i] = IBalanceTrackerByPartition(assets_[i]).balanceOfByPartition(
-                DEFAULT_PARTITION,
-                address(this)
-            );
+            try IBalanceTrackerByPartition(assets_[i]).balanceOfByPartition(DEFAULT_PARTITION, address(this)) returns (
+                uint256 balance
+            ) {
+                tokenBalances_[i] = balance;
+            } catch {
+                tokenBalances_[i] = 0;
+            }
             unchecked {
                 ++i;
             }

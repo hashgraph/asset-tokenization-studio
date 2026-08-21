@@ -272,6 +272,27 @@ export function loansPortfolioTests(getCtx: () => AssetMockCtx): void {
           .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
           .withArgs(signer_C.address, ATS_ROLES.ROLE_LOANS_PORTFOLIO_MANAGER);
       });
+
+      it("GIVEN a registered loan that reverts on getLoanDetails and balanceOfByPartition WHEN removing THEN asset is successfully evicted [FIND-026]", async () => {
+        const loan = await new MockLoanHolding__factory(signer_A).deploy();
+        await loan.waitForDeployment();
+        const holdingsAsset = {
+          assetAddress: loan.target,
+          holdingsAssetType: HoldingsAssetType.LOAN,
+        };
+        await asset.addHoldingsAsset(holdingsAsset);
+        expect(await asset.getNumberOfLoans()).to.equal(1);
+
+        await loan.setRevertOnGetLoanDetails(true);
+        await loan.setRevertOnBalanceOfByPartition(true);
+
+        await expect(asset.removeHoldingsAsset(holdingsAsset))
+          .to.emit(asset, "HoldingsAssetRemoved")
+          .withArgs(Object.values(holdingsAsset));
+
+        expect(await asset.getNumberOfLoans()).to.equal(0);
+        expect(await asset.getNumberOfAssets()).to.equal(0);
+      });
     });
 
     describe("notifyLoanHoldingsAssetUpdate", () => {
@@ -351,6 +372,21 @@ export function loansPortfolioTests(getCtx: () => AssetMockCtx): void {
         await expect(asset.connect(signer_C).notifyLoanHoldingsAssetUpdate(loan.target))
           .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
           .withArgs(signer_C.address, ATS_ROLES.ROLE_LOANS_PORTFOLIO_MANAGER);
+      });
+
+      it("GIVEN a registered loan that reverts on getLoanDetails WHEN notifying update THEN skips reclassification without reverting [FIND-026]", async () => {
+        const loan = await new MockLoanHolding__factory(signer_A).deploy();
+        await loan.waitForDeployment();
+        const loanAddress = loan.target;
+        await asset.addHoldingsAsset({
+          assetAddress: loanAddress,
+          holdingsAssetType: HoldingsAssetType.LOAN,
+        });
+
+        await loan.setRevertOnGetLoanDetails(true);
+
+        expect(await asset.notifyLoanHoldingsAssetUpdate.staticCall(loanAddress)).to.equal(false);
+        await expect(asset.notifyLoanHoldingsAssetUpdate(loanAddress)).to.not.emit(asset, "LoanHoldingsAssetUpdated");
       });
     });
 
@@ -614,6 +650,33 @@ export function loansPortfolioTests(getCtx: () => AssetMockCtx): void {
         expect(assets_.length).to.equal(1);
         expect(assets_[0]).to.equal(loanAddress);
         expect(balances_[0]).to.equal(mintAmount);
+      });
+
+      it("GIVEN multiple holdings where one loan reverts on balanceOfByPartition WHEN querying ownership THEN the failing holding reports zero balance without blocking the page [FIND-026]", async () => {
+        const portfolioAddress = await asset.getAddress();
+        const loan1 = await new MockLoanHolding__factory(signer_A).deploy();
+        await loan1.waitForDeployment();
+        const loan2 = await new MockLoanHolding__factory(signer_A).deploy();
+        await loan2.waitForDeployment();
+
+        await loan1.setBalance(DEFAULT_PARTITION, portfolioAddress, 1000n);
+        await loan2.setBalance(DEFAULT_PARTITION, portfolioAddress, 2000n);
+
+        await asset.addHoldingsAsset({
+          assetAddress: loan1.target,
+          holdingsAssetType: HoldingsAssetType.LOAN,
+        });
+        await asset.addHoldingsAsset({
+          assetAddress: loan2.target,
+          holdingsAssetType: HoldingsAssetType.LOAN,
+        });
+
+        await loan2.setRevertOnBalanceOfByPartition(true);
+
+        const [assets_, balances_] = await asset.getHoldingsAssetOwnership(0, 10);
+        expect(assets_).to.deep.equal([loan1.target, loan2.target]);
+        expect(balances_[0]).to.equal(1000n);
+        expect(balances_[1]).to.equal(0n);
       });
     });
 
