@@ -73,6 +73,10 @@ ATS supports four types of bonds at the smart contract level, each designed for 
 - Must follow the ISO 6166 standard format
 - Required for regulatory compliance and international trading
 
+:::warning ISIN is validated on-chain
+The factory validates the ISIN inside `deployBond` and **reverts with `WrongISIN`** when it fails — including for an **empty string**. The check covers the 12-character structure and the ISO 6166 (Luhn) check digit, not registry membership, so on testnet any structurally valid, checksum-correct ISIN works (for example, one derived deterministically from your own asset identifier). Programmatic integrators calling the factory directly hit this before any UI validation would.
+:::
+
 ### Bond Permissions
 
 Configure administrative permissions for the bond token:
