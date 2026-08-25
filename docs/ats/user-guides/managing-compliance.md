@@ -69,6 +69,16 @@ Before you can validate KYC, you need to designate accounts as issuers. Issuers 
 
 The issuers list shows all accounts authorized to upload VCs for KYC validation.
 
+### Programmatic quick reference (fresh token)
+
+When you drive KYC from the SDK or directly against the contracts, a freshly deployed token needs this exact order — the creator starts with `DEFAULT_ADMIN_ROLE` only:
+
+1. Grant yourself the operational roles: `_SSI_MANAGER_ROLE`, `_KYC_ROLE` (and `_CONTROL_LIST_ROLE` for allowlist-mode tokens). Skipping this reverts with `AccountHasNoRole`.
+2. Register a KYC issuer with `addIssuer(account)` (SSI Manager facet).
+3. Call `grantKyc(account, vcId, validFrom, validTo, issuer)` — the `issuer` argument **must be on the SSI issuer list**, otherwise the call reverts with `AccountIsNotIssuer`. A zero-address issuer always fails; `vcId` may reference an off-chain Verifiable Credential.
+
+The UI performs these steps for you; contract-level callers must perform them explicitly.
+
 ### Step 3: Grant KYC to an Account
 
 Once you have issuers configured, you can validate KYC for specific accounts by uploading their Verifiable Credentials.
