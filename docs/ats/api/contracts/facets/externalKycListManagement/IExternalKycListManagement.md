@@ -268,6 +268,22 @@ Thrown when attempting to add an address already present in the external KYC lis
 | ------- | ------- | ------------------------------------------------- |
 | kycList | address | The duplicate external KYC list contract address. |
 
+### NotAnExternalKycList
+
+```solidity
+error NotAnExternalKycList(address kycList)
+```
+
+Thrown when a candidate address does not answer `IExternalKycList.getKycStatus`.
+
+_Raised at registration time so that a non-conforming list is rejected before it can make every subsequent transfer revert inside `isExternallyGranted`._
+
+#### Parameters
+
+| Name    | Type    | Description                                    |
+| ------- | ------- | ---------------------------------------------- |
+| kycList | address | The address that was offered for registration. |
+
 ### UnlistedKycList
 
 ```solidity

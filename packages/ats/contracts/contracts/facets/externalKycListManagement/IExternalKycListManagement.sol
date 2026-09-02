@@ -69,6 +69,14 @@ interface IExternalKycListManagement {
     error ExternalKycListsNotUpdated(address[] kycList, bool[] actives);
 
     /**
+     * @notice Thrown when a candidate address does not answer `IExternalKycList.getKycStatus`.
+     * @dev Raised at registration time so that a non-conforming list is rejected before it can
+     *      make every subsequent transfer revert inside `isExternallyGranted`.
+     * @param kycList The address that was offered for registration.
+     */
+    error NotAnExternalKycList(address kycList);
+
+    /**
      * @notice One-time initialiser that populates the external KYC list at token deployment.
      * @dev Can only be called once; subsequent calls revert via `onlyFacetNotRegistered`.
      *      The leading-underscore naming convention signals this is an initialiser function.

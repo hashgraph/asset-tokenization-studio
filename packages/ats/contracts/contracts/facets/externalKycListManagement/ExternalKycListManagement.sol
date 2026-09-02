@@ -39,6 +39,17 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
         bool[] calldata _actives
     ) external override onlyOperational onlyActivated onlyUnpaused onlyRole(ROLE_KYC_MANAGER) returns (bool success_) {
         ArrayValidation.checkUniqueValues(_kycLists, _actives);
+        uint256 length = _kycLists.length;
+        for (uint256 index; index < length; ) {
+            // Only entries being activated are probed. A deactivation must keep working on a list
+            // that has stopped answering, because that is the recovery path out of this bug.
+            if (_actives[index]) {
+                ExternalListManagementStorageWrapper.checkIsExternalKycList(_kycLists[index]);
+            }
+            unchecked {
+                ++index;
+            }
+        }
         success_ = ExternalListManagementStorageWrapper.updateExternalLists(
             STORAGE_LOCATION_KYC_MANAGEMENT,
             _kycLists,
@@ -63,6 +74,7 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
         validateAddressNotZero(_kycLists)
         returns (bool success_)
     {
+        ExternalListManagementStorageWrapper.checkIsExternalKycList(_kycLists);
         success_ = ExternalListManagementStorageWrapper.addExternalList(STORAGE_LOCATION_KYC_MANAGEMENT, _kycLists);
         if (!success_) {
             revert ListedKycList(_kycLists);
