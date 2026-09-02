@@ -8,6 +8,7 @@ import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IExternalControlList } from "../../facets/externalControlListManagement/IExternalControlList.sol";
 import { IExternalKycList } from "../../facets/externalKycListManagement/IExternalKycList.sol";
+import { IExternalKycListManagement } from "../../facets/externalKycListManagement/IExternalKycListManagement.sol";
 import { IKyc } from "../../facets/kyc/IKyc.sol";
 
 /// @custom:hash storage ControlListManagement
@@ -143,13 +144,14 @@ library ExternalListManagementStorageWrapper {
 
     /**
      * @notice Initialises the external KYC-list namespace with `_kycLists` and marks it initialised.
-     * @dev Each entry is validated for non-zero before insertion. Gas scales with `_kycLists.length`.
+     * @dev Each entry is validated as a working `IExternalKycList` before insertion, which covers
+     *      the non-zero check. Gas scales with `_kycLists.length`.
      * @param _kycLists External `IExternalKycList` contracts to register.
      */
     function initializeExternalKycLists(address[] calldata _kycLists) internal {
         uint256 length = _kycLists.length;
         for (uint256 index; index < length; ) {
-            DefaultValueValidation.checkZeroAddress(_kycLists[index]);
+            checkIsExternalKycList(_kycLists[index]);
             addExternalList(STORAGE_LOCATION_KYC_MANAGEMENT, _kycLists[index]);
             unchecked {
                 ++index;
@@ -234,6 +236,25 @@ library ExternalListManagementStorageWrapper {
             }
         }
         return true;
+    }
+
+    /**
+     * @notice Reverts unless `_list` answers `IExternalKycList.getKycStatus` with a valid status.
+     * @dev Staticcalls the candidate once, at registration time. Rejects an externally owned
+     *      account, a codeless address, a contract with a silent fallback and a contract that
+     *      implements a different interface: all four are accepted today, and all four make every
+     *      subsequent transfer revert inside `isExternallyGranted`. The zero-address check runs
+     *      first so that a zero address still reports `ZeroAddressNotAllowed`.
+     * @param _list Candidate external KYC list.
+     */
+    function checkIsExternalKycList(address _list) internal view {
+        DefaultValueValidation.checkZeroAddress(_list);
+        (bool answered, bytes memory data) = _list.staticcall(
+            abi.encodeWithSelector(IExternalKycList.getKycStatus.selector, address(this))
+        );
+        if (!answered || data.length != 32 || abi.decode(data, (uint256)) > uint256(type(IKyc.KycStatus).max)) {
+            revert IExternalKycListManagement.NotAnExternalKycList(_list);
+        }
     }
 
     /**

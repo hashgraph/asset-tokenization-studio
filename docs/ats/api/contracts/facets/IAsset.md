@@ -13544,6 +13544,22 @@ error NotAllowedInMultiPartitionMode()
 
 Thrown when a single-partition operation is attempted on a multi-partition token.
 
+### NotAnExternalKycList
+
+```solidity
+error NotAnExternalKycList(address kycList)
+```
+
+Thrown when a candidate address does not answer `IExternalKycList.getKycStatus`.
+
+_Raised at registration time so that a non-conforming list is rejected before it can make every subsequent transfer revert inside `isExternallyGranted`._
+
+#### Parameters
+
+| Name    | Type    | Description                                    |
+| ------- | ------- | ---------------------------------------------- |
+| kycList | address | The address that was offered for registration. |
+
 ### PartitionNotAllowedInSinglePartitionMode
 
 ```solidity
