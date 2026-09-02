@@ -447,10 +447,14 @@ library ERC1594StorageWrapper {
         address to,
         uint256 value
     ) private view returns (bool status, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
-        bytes memory result = address(ERC3643StorageWrapper.getCompliance()).functionStaticCall(
+        address compliance = address(ERC3643StorageWrapper.getCompliance());
+        bytes memory result = compliance.functionStaticCall(
             abi.encodeWithSelector(ICompliance.canTransfer.selector, sender, address(0), 0),
             IERC3643Types.ComplianceCallFailed.selector
         );
+        if (compliance != address(0) && (result.length != 32 || abi.decode(result, (uint256)) > 1)) {
+            LowLevelCall.revertWithData(IERC3643Types.ComplianceCallFailed.selector, result);
+        }
         if (result.length > 0 && !abi.decode(result, (bool))) {
             return (
                 false,
@@ -481,10 +485,14 @@ library ERC1594StorageWrapper {
         address to,
         uint256 value
     ) private view returns (bool status, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
-        bytes memory result = address(ERC3643StorageWrapper.getCompliance()).functionStaticCall(
+        address compliance = address(ERC3643StorageWrapper.getCompliance());
+        bytes memory result = compliance.functionStaticCall(
             abi.encodeWithSelector(ICompliance.canTransfer.selector, from, to, value),
             IERC3643Types.ComplianceCallFailed.selector
         );
+        if (compliance != address(0) && (result.length != 32 || abi.decode(result, (uint256)) > 1)) {
+            LowLevelCall.revertWithData(IERC3643Types.ComplianceCallFailed.selector, result);
+        }
         if (result.length > 0 && !abi.decode(result, (bool))) {
             return (
                 false,
@@ -540,10 +548,14 @@ library ERC1594StorageWrapper {
         if (!KycStorageWrapper.verifyKycStatus(IKyc.KycStatus.GRANTED, account)) {
             return (false, Eip1066.DISALLOWED_OR_STOP, IKyc.InvalidKycStatus.selector, abi.encode(account));
         }
-        bytes memory isVerified = address(ERC3643StorageWrapper.getIdentityRegistry()).functionStaticCall(
+        address identityRegistry = address(ERC3643StorageWrapper.getIdentityRegistry());
+        bytes memory isVerified = identityRegistry.functionStaticCall(
             abi.encodeWithSelector(IIdentityRegistry.isVerified.selector, account),
             IERC3643Types.IdentityRegistryCallFailed.selector
         );
+        if (identityRegistry != address(0) && (isVerified.length != 32 || abi.decode(isVerified, (uint256)) > 1)) {
+            LowLevelCall.revertWithData(IERC3643Types.IdentityRegistryCallFailed.selector, isVerified);
+        }
         if (isVerified.length > 0 && !abi.decode(isVerified, (bool))) {
             return (false, Eip1066.DISALLOWED_OR_STOP, IERC3643Types.AddressNotVerified.selector, abi.encode(account));
         }
