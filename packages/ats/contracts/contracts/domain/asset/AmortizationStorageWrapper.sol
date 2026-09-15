@@ -240,6 +240,38 @@ library AmortizationStorageWrapper {
     }
 
     /**
+     * @notice One-time repair that seeds `totalHoldByAmortizationId` and `labafByAmortizationId`
+     *         for an amortization corporate action that accumulated holds before LABAF tracking
+     *         existed on this aggregate.
+     * @dev Writes `_total` and `_labaf` directly — raw, unsynced values — and deliberately does
+     *      **not** call `_syncTotalHoldByAmortizationId`, since that sync path is exactly the
+     *      corrupting path this migration repairs. Callers (the facet) are expected to enforce
+     *      the idempotency and validation invariants via modifiers before invoking this.
+     * @param _amortizationID The one-based identifier of the amortization to migrate.
+     * @param _total The raw `totalHoldByAmortizationId` value to seed.
+     * @param _labaf The raw `labafByAmortizationId` value to seed.
+     * @return corporateActionId_ The corporate action identifier backing the amortization.
+     * @return previousTotal_ The `totalHoldByAmortizationId` stored before this migration.
+     * @return previousLabaf_ The raw `labafByAmortizationId` stored before this migration.
+     */
+    function migrateAmortizationHoldAccounting(
+        uint256 _amortizationID,
+        uint256 _total,
+        uint256 _labaf
+    ) internal returns (bytes32 corporateActionId_, uint256 previousTotal_, uint256 previousLabaf_) {
+        corporateActionId_ = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
+            CORPORATE_ACTION_TYPE_AMORTIZATION,
+            _amortizationID - 1
+        );
+
+        previousTotal_ = _amortizationStorage().totalHoldByAmortizationId[corporateActionId_];
+        previousLabaf_ = AdjustBalancesStorageWrapper.getRawAmortizationHoldLabaf(corporateActionId_);
+
+        _amortizationStorage().totalHoldByAmortizationId[corporateActionId_] = _total;
+        AdjustBalancesStorageWrapper.setAmortizationHoldLabaf(corporateActionId_, _labaf);
+    }
+
+    /**
      * @notice Returns the registered amortization, its corporate action id and disabled flag.
      * @dev Asserts that the underlying corporate action carries a non-empty payload, then
      *      decodes it into {RegisteredAmortization} and joins the snapshot result, if any.
@@ -480,6 +512,22 @@ library AmortizationStorageWrapper {
     }
 
     /**
+     * @notice Reports whether an amortization corporate action still needs
+     *         `migrateAmortizationHoldAccounting` to be called for it.
+     * @dev Depends only on the raw, non-defaulted `labafByAmortizationId` being `0` — never on
+     *      `totalHoldByAmortizationId`, which may legitimately be non-zero pre-migration.
+     * @param _amortizationID The one-based identifier of the amortization to inspect.
+     * @return True if the raw `labafByAmortizationId` is still `0`; false otherwise.
+     */
+    function isAmortizationHoldAccountingMigrationPending(uint256 _amortizationID) internal view returns (bool) {
+        bytes32 corporateActionId = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
+            CORPORATE_ACTION_TYPE_AMORTIZATION,
+            _amortizationID - 1
+        );
+        return AdjustBalancesStorageWrapper.getRawAmortizationHoldLabaf(corporateActionId) == 0;
+    }
+
+    /**
      * @notice Returns the paginated list of currently active amortization identifiers.
      * @param _pageIndex The zero-based page index used by the pagination helper.
      * @param _pageLength The maximum number of identifiers to return per page.
@@ -517,12 +565,73 @@ library AmortizationStorageWrapper {
     }
 
     /**
+     * @notice Reverts with {AmortizationHoldAccountingAlreadyMigrated} when the target
+     *         amortization's raw, non-defaulted `labafByAmortizationId` is already non-zero.
+     * @dev Reads through {AdjustBalancesStorageWrapper-getRawAmortizationHoldLabaf}, bypassing
+     *      `zeroToOne`, so a genuinely-never-synced amortization (raw `0`) is distinguished from
+     *      one already migrated or regularly synced (raw non-zero).
+     * @param _amortizationID The one-based identifier of the amortization to check.
+     */
+    function checkAmortizationHoldAccountingNotMigrated(uint256 _amortizationID) internal view {
+        bytes32 corporateActionId = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
+            CORPORATE_ACTION_TYPE_AMORTIZATION,
+            _amortizationID - 1
+        );
+        if (AdjustBalancesStorageWrapper.getRawAmortizationHoldLabaf(corporateActionId) != 0) {
+            revert IAmortization.AmortizationHoldAccountingAlreadyMigrated(corporateActionId, _amortizationID);
+        }
+    }
+
+    /**
+     * @notice Reverts with {AmortizationMigrationLabafAboveAbaf} when the supplied migration
+     *         `_labaf` exceeds the current ABAF.
+     * @dev A `_labaf` above the current ABAF would truncate `abaf / labaf` to `0` on the next
+     *      sync, corrupting the aggregate. Compares against {AdjustBalancesStorageWrapper-getAbaf}.
+     * @param _labaf The candidate migration LABAF.
+     * @param _amortizationID The one-based identifier of the amortization for the error context.
+     */
+    function checkMigrationLabafWithinAbaf(uint256 _labaf, uint256 _amortizationID) internal view {
+        uint256 abaf = AdjustBalancesStorageWrapper.getAbaf();
+        if (_labaf > abaf) revert IAmortization.AmortizationMigrationLabafAboveAbaf(_amortizationID, _labaf, abaf);
+    }
+
+    /**
+     * @notice Reverts with {AmortizationMigrationTotalAboveSupply} when the supplied migration
+     *         `_total` exceeds the token's current total supply.
+     * @dev The one-shot idempotency guard means an oversized `_total` can never be corrected by
+     *      calling the migration again; an unbounded `_total` would eventually overflow the checked
+     *      `total *= factor` arithmetic in {_syncTotalHoldByAmortizationId}, permanently bricking
+     *      `setAmortizationHold`/`releaseAmortizationHold` for that corporate action. Compares
+     *      against {ERC20StorageWrapper-totalSupply}, the cheapest available O(1) sanity bound.
+     * @param _total The candidate migration total.
+     * @param _amortizationID The one-based identifier of the amortization for the error context.
+     */
+    function checkAmortizationHoldAccountingTotalWithinSupply(uint256 _total, uint256 _amortizationID) internal view {
+        uint256 totalSupply = ERC20StorageWrapper.totalSupply();
+        if (_total > totalSupply) {
+            revert IAmortization.AmortizationMigrationTotalAboveSupply(_amortizationID, _total, totalSupply);
+        }
+    }
+
+    /**
      * @notice Reverts with {InvalidAmortizationHoldAmount} when the supplied amount is zero.
      * @param _tokenAmount The candidate token amount.
      * @param _amortizationID The one-based identifier of the amortization for the error context.
      */
     function checkPositiveTokenAmount(uint256 _tokenAmount, uint256 _amortizationID) internal pure {
         if (_tokenAmount == 0) revert IAmortization.InvalidAmortizationHoldAmount(_amortizationID);
+    }
+
+    /**
+     * @notice Reverts with {InvalidAmortizationMigrationLabaf} when the supplied migration
+     *         `_labaf` is zero.
+     * @dev A zero `_labaf` would recreate the "never held" ambiguity this migration exists to
+     *      resolve, since the defaulted getter maps a raw `0` to `1` via `zeroToOne`.
+     * @param _labaf The candidate migration LABAF.
+     * @param _amortizationID The one-based identifier of the amortization for the error context.
+     */
+    function checkPositiveMigrationLabaf(uint256 _labaf, uint256 _amortizationID) internal pure {
+        if (_labaf == 0) revert IAmortization.InvalidAmortizationMigrationLabaf(_amortizationID);
     }
 
     /**
@@ -580,17 +689,6 @@ library AmortizationStorageWrapper {
         });
 
         HoldStorageWrapper.removeAndTransferHoldBalance(identifier, _amount);
-
-        emit IERC1410Types.TransferByPartition(
-            DEFAULT_PARTITION,
-            EvmAccessors.getMsgSender(),
-            address(0),
-            _tokenHolder,
-            _amount,
-            "",
-            ""
-        );
-        emit ITransfer.Transfer(address(0), _tokenHolder, _amount);
 
         return true;
     }

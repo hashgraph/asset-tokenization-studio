@@ -116,6 +116,27 @@ interface IAmortization {
     event AmortizationInitialized();
 
     /**
+     * @notice Emitted when the pre-fix hold-accounting state of an amortization corporate
+     *         action is seeded by `migrateAmortizationHoldAccounting`.
+     * @dev Carries both the pre-migration stored values and the newly seeded ones so the
+     *      migration is self-contained for audit purposes.
+     * @param corporateActionId Unique identifier grouping related corporate actions.
+     * @param amortizationID Identifier of the migrated amortization.
+     * @param previousTotal The raw `totalHoldByAmortizationId` stored before migration.
+     * @param previousLabaf The raw `labafByAmortizationId` stored before migration (always `0`).
+     * @param total The `totalHoldByAmortizationId` seeded by this migration.
+     * @param labaf The `labafByAmortizationId` seeded by this migration.
+     */
+    event AmortizationHoldAccountingMigrated(
+        bytes32 indexed corporateActionId,
+        uint256 indexed amortizationID,
+        uint256 previousTotal,
+        uint256 previousLabaf,
+        uint256 total,
+        uint256 labaf
+    );
+
+    /**
      * @notice Amortization creation failed due to an internal failure.
      */
     error AmortizationCreationFailed();
@@ -161,6 +182,45 @@ interface IAmortization {
      * @param amortizationID The amortization ID.
      */
     error InvalidAmortizationHoldAmount(uint256 amortizationID);
+
+    /**
+     * @notice Thrown by `migrateAmortizationHoldAccounting` when the target amortization's raw,
+     *         non-defaulted `labafByAmortizationId` is already non-zero.
+     * @dev The migration is a one-time contingency, not a setter; a non-zero raw LABAF means
+     *      the amortization was already migrated or has already gone through a regular sync.
+     * @param corporateActionId Unique identifier grouping related corporate actions.
+     * @param amortizationID The amortization ID that was already migrated.
+     */
+    error AmortizationHoldAccountingAlreadyMigrated(bytes32 corporateActionId, uint256 amortizationID);
+
+    /**
+     * @notice Thrown by `migrateAmortizationHoldAccounting` when `_labaf` is `0`.
+     * @dev A zero `_labaf` would recreate the very "never held" ambiguity this migration exists
+     *      to resolve, since the getter defaults a raw `0` to `1` via `zeroToOne`.
+     * @param amortizationID The amortization ID being migrated.
+     */
+    error InvalidAmortizationMigrationLabaf(uint256 amortizationID);
+
+    /**
+     * @notice Thrown by `migrateAmortizationHoldAccounting` when `_labaf` exceeds the current ABAF.
+     * @dev A `_labaf` above the current ABAF would truncate `abaf / labaf` to `0` on the next sync.
+     * @param amortizationID The amortization ID being migrated.
+     * @param labaf The invalid, out-of-range `_labaf` supplied by the caller.
+     * @param abaf The current ABAF the supplied `_labaf` was compared against.
+     */
+    error AmortizationMigrationLabafAboveAbaf(uint256 amortizationID, uint256 labaf, uint256 abaf);
+
+    /**
+     * @notice Thrown by `migrateAmortizationHoldAccounting` when `_total` exceeds the token's
+     *         current total supply.
+     * @dev An unbounded `_total` would eventually overflow the checked `total *= factor`
+     *      arithmetic on the next resync, permanently bricking amortization hold operations
+     *      (including release) for that corporate action, since the migration is one-shot.
+     * @param amortizationID The amortization ID being migrated.
+     * @param total The invalid, out-of-range `_total` supplied by the caller.
+     * @param totalSupply The current total supply that `_total` was compared against.
+     */
+    error AmortizationMigrationTotalAboveSupply(uint256 amortizationID, uint256 total, uint256 totalSupply);
 
     /**
      * @notice Initialises the amortization capability on the token.
@@ -219,6 +279,27 @@ interface IAmortization {
         address _tokenHolder,
         uint256 _tokenAmount
     ) external returns (uint256 holdId_);
+
+    /**
+     * @notice One-time, admin-gated repair that seeds `totalHoldByAmortizationId` and
+     *         `labafByAmortizationId` for an amortization corporate action that accumulated
+     *         holds before LABAF tracking existed on this aggregate.
+     * @dev Restricted to `DEFAULT_ADMIN_ROLE`. Deliberately carries no `onlyOperational`,
+     *      `onlyActivated`, or `onlyUnpaused` gate so it can repair state while the token is
+     *      paused. Reverts with {AmortizationHoldAccountingAlreadyMigrated} if the raw,
+     *      non-defaulted `labafByAmortizationId` is already non-zero; with
+     *      {InvalidAmortizationMigrationLabaf} if `_labaf == 0`; with
+     *      {AmortizationMigrationLabafAboveAbaf} if `_labaf` exceeds the current ABAF; with
+     *      {AmortizationMigrationTotalAboveSupply} if `_total` exceeds the token's current total
+     *      supply. Not gated on `disabledAmortizations`: a cancelled action can still reach the
+     *      vulnerable sync path via a later `releaseAmortizationHold` and must stay migratable.
+     *      Emits {AmortizationHoldAccountingMigrated} on success.
+     * @param _amortizationID The one-based identifier of the amortization to migrate.
+     * @param _total The raw `totalHoldByAmortizationId` value to seed (no lower bound, `0` is
+     *        valid; MUST NOT exceed the token's current `totalSupply()`).
+     * @param _labaf The raw `labafByAmortizationId` value to seed; must satisfy `0 < _labaf <= currentAbaf`.
+     */
+    function migrateAmortizationHoldAccounting(uint256 _amortizationID, uint256 _total, uint256 _labaf) external;
 
     /**
      * @notice Retrieves a registered amortization by its ID.
@@ -328,4 +409,17 @@ interface IAmortization {
      * @return The total count of active (non-cancelled) amortization IDs.
      */
     function getTotalActiveAmortizationIds() external view returns (uint256);
+
+    /**
+     * @notice Reports whether an amortization corporate action still needs
+     *         `migrateAmortizationHoldAccounting` to be called for it.
+     * @dev Backed by the same raw-LABAF-read helper as the idempotency guard on the migration
+     *      writer, depending only on `labafByAmortizationId == 0` — never on
+     *      `totalHoldByAmortizationId`. No role gate, matching the read-only nature of
+     *      `getTotalHoldByAmortizationId`.
+     * @param _amortizationID The one-based identifier of the amortization to inspect.
+     * @return True if the raw `labafByAmortizationId` is still `0` (never migrated and never
+     *         regularly synced); false otherwise.
+     */
+    function isAmortizationHoldAccountingMigrationPending(uint256 _amortizationID) external view returns (bool);
 }

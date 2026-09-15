@@ -157,6 +157,27 @@ abstract contract Amortization is IAmortization, Modifiers {
     }
 
     /// @inheritdoc IAmortization
+    /// @dev Restricted to `DEFAULT_ADMIN_ROLE`; carries no `onlyOperational`, `onlyActivated`, or
+    ///      `onlyUnpaused` gate so it can repair state while the token is paused.
+    function migrateAmortizationHoldAccounting(
+        uint256 _amortizationID,
+        uint256 _total,
+        uint256 _labaf
+    )
+        external
+        override
+        onlyWithoutMultiPartition
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_AMORTIZATION, _amortizationID - 1)
+        onlyNotMigratedAmortizationHoldAccounting(_amortizationID)
+        onlyPositiveMigrationLabaf(_labaf, _amortizationID)
+        onlyMigrationLabafWithinAbaf(_labaf, _amortizationID)
+        onlyMigrationTotalWithinSupply(_total, _amortizationID)
+    {
+        _migrateAmortizationHoldAccounting(_amortizationID, _total, _labaf);
+    }
+
+    /// @inheritdoc IAmortization
     function getAmortization(
         uint256 _amortizationID
     )
@@ -297,5 +318,41 @@ abstract contract Amortization is IAmortization, Modifiers {
     /// @inheritdoc IAmortization
     function getTotalActiveAmortizationIds() external view override onlyWithoutMultiPartition returns (uint256) {
         return AmortizationStorageWrapper.getTotalActiveAmortizationIds();
+    }
+
+    /// @inheritdoc IAmortization
+    function isAmortizationHoldAccountingMigrationPending(
+        uint256 _amortizationID
+    )
+        external
+        view
+        override
+        onlyWithoutMultiPartition
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_AMORTIZATION, _amortizationID - 1)
+        returns (bool)
+    {
+        return AmortizationStorageWrapper.isAmortizationHoldAccountingMigrationPending(_amortizationID);
+    }
+
+    /**
+     * @notice Performs the migration write and emits {AmortizationHoldAccountingMigrated}.
+     * @dev Extracted to its own stack frame — `migrateAmortizationHoldAccounting`'s modifier
+     *      list plus this call's local variables exceed Solidity's 16-slot stack window
+     *      (legacy codegen, no viaIR).
+     * @param _amortizationID The one-based identifier of the amortization to migrate.
+     * @param _total The raw `totalHoldByAmortizationId` value to seed.
+     * @param _labaf The raw `labafByAmortizationId` value to seed.
+     */
+    function _migrateAmortizationHoldAccounting(uint256 _amortizationID, uint256 _total, uint256 _labaf) private {
+        (bytes32 corporateActionId_, uint256 previousTotal_, uint256 previousLabaf_) = AmortizationStorageWrapper
+            .migrateAmortizationHoldAccounting(_amortizationID, _total, _labaf);
+        emit IAmortization.AmortizationHoldAccountingMigrated(
+            corporateActionId_,
+            _amortizationID,
+            previousTotal_,
+            previousLabaf_,
+            _total,
+            _labaf
+        );
     }
 }

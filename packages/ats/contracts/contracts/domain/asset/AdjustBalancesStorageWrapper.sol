@@ -469,6 +469,21 @@ library AdjustBalancesStorageWrapper {
     }
 
     /**
+     * @notice Returns the raw, non-defaulted LABAF anchoring the aggregate hold total for
+     *         `_corporateActionId`, bypassing `zeroToOne`.
+     * @dev Unlike {getAmortizationHoldLabaf}, this does not default a stored `0` to `1`. It backs
+     *      the amortization hold-accounting migration's idempotency guard and its
+     *      migration-needed read function, both of which must distinguish "never synced"
+     *      (raw `0`) from "synced/migrated at ABAF `1`" — a distinction the defaulted getter
+     *      cannot express.
+     * @param _corporateActionId Amortization corporate action whose raw total-hold LABAF is requested.
+     * @return The raw stored LABAF, `0` when never anchored.
+     */
+    function getRawAmortizationHoldLabaf(bytes32 _corporateActionId) internal view returns (uint256) {
+        return _adjustBalancesStorage().labafByAmortizationId[_corporateActionId];
+    }
+
+    /**
      * @notice Returns the LABAF anchoring `_tokenHolder`'s held balance in `_partition`.
      * @param _partition   Partition whose held balance LABAF is requested.
      * @param _tokenHolder Account holding the held balance.
@@ -580,21 +595,6 @@ library AdjustBalancesStorageWrapper {
         uint256 partitionIndex
     ) internal view returns (uint256 factor) {
         factor = calculateFactor(abaf, getLabafByUserAndPartitionIndex(partitionIndex, tokenHolder));
-    }
-
-    /**
-     * @notice Computes the projection factor for a holder's locked balance at a historical instant.
-     * @dev Combines the ABAF projected to `timestamp` via `getAbafAdjustedAt` with the holder's
-     *      current total-lock LABAF.
-     * @param tokenHolder Account whose locked balance is being projected.
-     * @param timestamp   Historical timestamp at which to evaluate ABAF.
-     * @return factor Projection factor `abaf(timestamp) / labafLock(tokenHolder)`.
-     */
-    function calculateFactorForLockedAmountByTokenHolderAdjustedAt(
-        address tokenHolder,
-        uint256 timestamp
-    ) internal view returns (uint256 factor) {
-        factor = calculateFactor(getAbafAdjustedAt(timestamp), getTotalLockLabaf(tokenHolder));
     }
 
     /**
