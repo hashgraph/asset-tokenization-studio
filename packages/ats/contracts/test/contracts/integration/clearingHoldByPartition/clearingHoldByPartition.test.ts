@@ -358,6 +358,27 @@ export function clearingHoldByPartitionTests(getCtx: () => AssetMockCtx): void {
           expect(allowanceAfterHoldReleased).to.equal(BigInt(_AMOUNT));
         });
 
+        it("FIND-030: GIVEN an AUTHORIZED hold-creation clearing WHEN the holder cancels it before approval THEN the allowance is restored and no phantom address(0) allowance exists", async () => {
+          const baseAllowance = await asset.allowance(signer_A.address, signer_D.address);
+
+          await asset.connect(signer_A).increaseAllowance(signer_D.address, _AMOUNT);
+
+          await asset.connect(signer_D).clearingCreateHoldFromByPartition(clearingOperationFrom, hold);
+          expect(await asset.allowance(signer_A.address, signer_D.address)).to.equal(0);
+          expect(await asset.allowance(signer_A.address, ethers.ZeroAddress)).to.equal(0);
+
+          const identifier = {
+            clearingOperationType: ClearingOperationType.HoldCreation,
+            partition: _DEFAULT_PARTITION,
+            tokenHolder: signer_A.address,
+            clearingId: 1,
+          };
+
+          await expect(asset.connect(signer_A).cancelClearingOperationByPartition(identifier)).to.not.be.reverted;
+          expect(await asset.allowance(signer_A.address, signer_D.address)).to.equal(baseAllowance + BigInt(_AMOUNT));
+          expect(await asset.allowance(signer_A.address, ethers.ZeroAddress)).to.equal(0);
+        });
+
         describe("onlyUnpaused modifier", () => {
           it("GIVEN a paused Token WHEN clearingCreateHoldFromByPartition THEN transaction fails with IsPaused", async () => {
             await asset.connect(signer_D).pause();
