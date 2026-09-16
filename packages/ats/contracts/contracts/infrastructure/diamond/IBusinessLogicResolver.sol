@@ -123,6 +123,8 @@ interface IBusinessLogicResolver is IDiamondCutManager {
 
     /**
      * @notice Adds a list of selectors to the blacklist
+     * @dev Blacklisted selectors are rejected when future configurations register facet
+     *      selectors for the same configuration.
      * @param _configurationId the configuration key to be checked.
      * @param _selectors list of selectors to be added to the blacklist
      */
@@ -130,6 +132,7 @@ interface IBusinessLogicResolver is IDiamondCutManager {
 
     /**
      * @notice Removes a list of selectors from the blacklist
+     * @dev Removing a selector only affects subsequent validation and does not mutate already activated configurations.
      * @param _configurationId the configuration key to be checked.
      * @param _selectors list of selectors to be removed from the blacklist
      */
