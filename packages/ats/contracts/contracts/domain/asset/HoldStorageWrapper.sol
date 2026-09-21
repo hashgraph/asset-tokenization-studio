@@ -385,6 +385,30 @@ library HoldStorageWrapper {
     }
 
     /**
+     * @notice Releases a hold and transfers the held balance back to the token holder.
+     * @dev Removes the hold before transferring funds. Reverts if hold removal or balance
+     *      transfer validation fails. Emits the hold transfer event after the balance update.
+     *      Decrements the per-account and per-account-partition held-amount aggregates by
+     *      `_amount` directly here, rather than through `decreaseHeldAmount`: that function ties
+     *      the aggregate decrement and the hold-record decrement to the same `_amount`, which
+     *      only holds when neither has drifted from the other — irrelevant here, since the whole
+     *      hold record is about to be deleted by `removeHold`, not decremented in place, and
+     *      `_amount` is the ABAF-adjusted amount, not the raw amount the hold was created with.
+     * @param _holdIdentifier Unique hold data identifying the hold and its token holder.
+     * @param _amount Amount of held balance to transfer back to the token holder.
+     */
+    function removeAndTransferHoldBalance(IHoldTypes.HoldIdentifier memory _holdIdentifier, uint256 _amount) internal {
+        HoldDataStorage storage holdStorageRef = _holdStorage();
+        holdStorageRef.totalHeldAmountByAccount[_holdIdentifier.tokenHolder] -= _amount;
+        holdStorageRef.totalHeldAmountByAccountAndPartition[_holdIdentifier.tokenHolder][
+            _holdIdentifier.partition
+        ] -= _amount;
+        removeHold(_holdIdentifier);
+        _transferHoldBalance(_holdIdentifier, _holdIdentifier.tokenHolder, _amount);
+        _emitHoldTransfer(_holdIdentifier, _holdIdentifier.tokenHolder, _amount);
+    }
+
+    /**
      * @notice Synchronises a holder's aggregate held amounts with the current balance
      *         adjustment factor (ABAF).
      * @dev Compares the global ABAF against the holder's last-applied factors (overall and
@@ -459,7 +483,7 @@ library HoldStorageWrapper {
      * @param _holdIdentifier The triple (partition, tokenHolder, holdId) identifying the hold.
      * @param _to The destination address whose synchronisation is also triggered.
      */
-    function adjustHoldBalances(IHoldTypes.HoldIdentifier calldata _holdIdentifier, address _to) internal {
+    function adjustHoldBalances(IHoldTypes.HoldIdentifier memory _holdIdentifier, address _to) internal {
         ERC1410StorageWrapper.triggerAndSyncAll(_holdIdentifier.partition, _holdIdentifier.tokenHolder, _to);
 
         updateHold(
@@ -524,7 +548,7 @@ library HoldStorageWrapper {
      * @param _holdIdentifier The triple (partition, tokenHolder, holdId) identifying the hold.
      * @param _to The destination address that will receive the executed amount.
      */
-    function beforeExecuteHold(IHoldTypes.HoldIdentifier calldata _holdIdentifier, address _to) internal {
+    function beforeExecuteHold(IHoldTypes.HoldIdentifier memory _holdIdentifier, address _to) internal {
         adjustHoldBalances(_holdIdentifier, _to);
         SnapshotsStorageWrapper.updateAccountSnapshot(_to, _holdIdentifier.partition);
         SnapshotsStorageWrapper.updateAccountHeldBalancesSnapshot(
@@ -540,7 +564,7 @@ library HoldStorageWrapper {
      *      `_holdIdentifier.tokenHolder`.
      * @param _holdIdentifier The triple (partition, tokenHolder, holdId) identifying the hold.
      */
-    function beforeReleaseHold(IHoldTypes.HoldIdentifier calldata _holdIdentifier) internal {
+    function beforeReleaseHold(IHoldTypes.HoldIdentifier memory _holdIdentifier) internal {
         beforeExecuteHold(_holdIdentifier, _holdIdentifier.tokenHolder);
     }
 
@@ -591,6 +615,33 @@ library HoldStorageWrapper {
             AdjustBalancesStorageWrapper.calculateFactor(
                 AdjustBalancesStorageWrapper.getAbafAdjustedAt(_timestamp),
                 AdjustBalancesStorageWrapper.getTotalHeldLabafByPartition(_partition, _tokenHolder)
+            );
+    }
+
+    /**
+     * @notice Returns one specific hold's own amount adjusted to `_timestamp`.
+     * @dev Anchored to the hold's own LABAF (`getHoldLabafById`), not the holder's aggregate
+     *      LABAF — `HoldData.amount` itself is never rebased in place, so this is the only way
+     *      to read a hold's current value without first mutating storage. Used wherever a hold
+     *      is fully consumed (released, replaced) and the amount actually restored/decremented
+     *      must reflect ABAF, not the raw amount the hold was created with.
+     * @param _holdIdentifier The triple (partition, tokenHolder, holdId) identifying the hold.
+     * @param _timestamp Historical timestamp to align the amount with.
+     * @return amount_ The hold's amount, adjusted to `_timestamp`.
+     */
+    function getHoldAmountAdjustedAt(
+        IHoldTypes.HoldIdentifier memory _holdIdentifier,
+        uint256 _timestamp
+    ) internal view returns (uint256 amount_) {
+        return
+            getHold(_holdIdentifier).hold.amount *
+            AdjustBalancesStorageWrapper.calculateFactor(
+                AdjustBalancesStorageWrapper.getAbafAdjustedAt(_timestamp),
+                AdjustBalancesStorageWrapper.getHoldLabafById(
+                    _holdIdentifier.partition,
+                    _holdIdentifier.tokenHolder,
+                    _holdIdentifier.holdId
+                )
             );
     }
 
@@ -1004,7 +1055,7 @@ library HoldStorageWrapper {
      * @param _amount The amount being credited.
      */
     function _transferHoldBalance(
-        IHoldTypes.HoldIdentifier calldata _holdIdentifier,
+        IHoldTypes.HoldIdentifier memory _holdIdentifier,
         address _to,
         uint256 _amount
     ) private {
@@ -1044,11 +1095,7 @@ library HoldStorageWrapper {
      * @param _to The destination address being credited.
      * @param _amount The amount being transferred out of the hold.
      */
-    function _emitHoldTransfer(
-        IHoldTypes.HoldIdentifier calldata _holdIdentifier,
-        address _to,
-        uint256 _amount
-    ) private {
+    function _emitHoldTransfer(IHoldTypes.HoldIdentifier memory _holdIdentifier, address _to, uint256 _amount) private {
         ERC20StorageWrapper.performTransfer(address(0), _to, _amount);
         emit IERC1410Types.TransferByPartition(
             _holdIdentifier.partition,

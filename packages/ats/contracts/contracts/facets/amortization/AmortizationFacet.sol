@@ -27,6 +27,8 @@ import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunc
  *         - `getActiveAmortizationIds`
  *         - `getTotalActiveAmortizationIds`
  *         - `getTotalHoldByAmortizationId`
+ *         - `migrateAmortizationHoldAccounting`
+ *         - `isAmortizationHoldAccountingMigrationPending`
  */
 contract AmortizationFacet is Amortization, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
@@ -36,9 +38,11 @@ contract AmortizationFacet is Amortization, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 17;
+        uint256 selectorIndex = 19;
         staticFunctionSelectors_ = new bytes4[](selectorIndex);
         unchecked {
+            staticFunctionSelectors_[--selectorIndex] = this.isAmortizationHoldAccountingMigrationPending.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.migrateAmortizationHoldAccounting.selector;
             staticFunctionSelectors_[--selectorIndex] = this.getTotalHoldByAmortizationId.selector;
             staticFunctionSelectors_[--selectorIndex] = this.getTotalActiveAmortizationIds.selector;
             staticFunctionSelectors_[--selectorIndex] = this.getActiveAmortizationIds.selector;

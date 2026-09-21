@@ -163,7 +163,7 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   ClearingAtSnapshotFacet: ["clearingReadOps"],
   ClearingAtSnapshotByPartitionFacet: ["clearingReadOps"],
   // Layer 2 facet families — coupon/dividend/voting/amortization reach ClearingReadOps
-  AmortizationFacet: ["clearingReadOps", "scheduledTasksOps"],
+  AmortizationFacet: ["clearingReadOps", "scheduledTasksOps", "holdOps"],
   CouponFacet: ["clearingReadOps"],
   DividendFacet: ["clearingReadOps"],
   VotingFacet: ["clearingReadOps"],

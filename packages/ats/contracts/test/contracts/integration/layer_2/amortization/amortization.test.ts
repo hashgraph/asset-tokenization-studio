@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAssetMock, IAmortization__factory } from "@contract-types";
 import type { IAmortization } from "@contract-types";
-import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES, RESOLVER_KEYS } from "@scripts";
+import { ATS_CORPORATE_ACTION, ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES, RESOLVER_KEYS } from "@scripts";
 import { getDltTimestamp } from "@test";
 import { DEFAULT_SECURITY_PARAMS } from "@test/fixtures/tokens/common.fixture";
 import { ASSET_MOCK_CONFIG_ID } from "../../../../fixtures/deploy/assetMockConfiguration";
@@ -32,6 +32,17 @@ export function amortizationTests(getCtx: () => AssetMockCtx): void {
         executionDate: now + executionOffset,
         tokensToRedeem: TOKENS_TO_REDEEM,
       };
+    }
+
+    async function expectHolderAmortizationAndBalanceState(
+      holder: string,
+      expectedHeldAmount: bigint,
+      expectedBalance: bigint,
+    ): Promise<void> {
+      expect(await asset.getHeldAmountFor(holder)).to.equal(expectedHeldAmount);
+      expect(await asset.getTotalHoldByAmortizationId(1)).to.equal(expectedHeldAmount);
+      expect((await asset.getAmortizationFor(1, holder)).tokenHeldAmount).to.equal(expectedHeldAmount);
+      expect(await asset.balanceOf(holder)).to.equal(expectedBalance);
     }
 
     beforeEach(async () => {
@@ -914,7 +925,7 @@ export function amortizationTests(getCtx: () => AssetMockCtx): void {
           .withArgs("0x0000000000000000000000000000000000000000000000000000000000000001", 1n, deployer.address);
       });
 
-      it("GIVEN active hold WHEN releaseAmortizationHold THEN emits AmortizationHoldReleased and holdActive becomes false", async () => {
+      it("GIVEN active hold with no balance adjustment in between WHEN releaseAmortizationHold THEN emits AmortizationHoldReleased, holdActive becomes false, and the held balance is restored to the holder in full", async () => {
         await expect(amort.connect(user2).releaseAmortizationHold(1, deployer.address))
           .to.emit(asset, "AmortizationHoldReleased")
           .withArgs("0x0000000000000000000000000000000000000000000000000000000000000001", 1n, deployer.address, 1n);
@@ -922,6 +933,47 @@ export function amortizationTests(getCtx: () => AssetMockCtx): void {
         const amortizationFor = await amort.getAmortizationFor(1, deployer.address);
         expect(amortizationFor.holdActive).to.equal(false);
         expect(amortizationFor.tokenHeldAmount).to.equal(0n);
+        expect(await asset.balanceOf(deployer.address)).to.equal(BigInt(TOTAL_UNITS));
+      });
+
+      it("FIND-009 (TDD, expected red) GIVEN a balance adjustment before release WHEN releaseAmortizationHold THEN getHeldAmountFor no longer reports the released amount", async () => {
+        await asset.grantRole(ATS_ROLES.ROLE_ADJUSTMENT_BALANCE, user2.address);
+
+        await expectHolderAmortizationAndBalanceState(deployer.address, holdAmount, holdAmount);
+
+        await asset.connect(user2).adjustBalances(2, 0);
+        const adjustedHoldAmount = holdAmount * 2n;
+        await expectHolderAmortizationAndBalanceState(deployer.address, adjustedHoldAmount, adjustedHoldAmount);
+
+        await amort.connect(user2).releaseAmortizationHold(1, deployer.address);
+        const totalBalance = holdAmount * 4n;
+        await expectHolderAmortizationAndBalanceState(deployer.address, 0n, totalBalance);
+      });
+
+      it("FIND-009 GIVEN deployer's hold predates a balance adjustment and user1's hold under the same amortization is only created after it, so the two holds are anchored to different ABAF snapshots, WHEN both holders release THEN getTotalHoldByAmortizationId tracks each holder's own snapshot correctly instead of rebasing both by the same factor", async () => {
+        await asset.grantRole(ATS_ROLES.ROLE_ADJUSTMENT_BALANCE, user2.address);
+
+        await asset.connect(user2).adjustBalances(2, 0);
+
+        await asset.connect(user2).issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: user1.address,
+          value: TOTAL_UNITS,
+          data: EMPTY_HEX_BYTES,
+        });
+        const secondHoldAmount = BigInt(TOKENS_TO_REDEEM);
+        await amort.connect(user2).setAmortizationHold(1, user1.address, secondHoldAmount);
+
+        const adjustedFirstHoldAmount = holdAmount * 2n;
+        expect(await asset.getTotalHoldByAmortizationId(1)).to.equal(adjustedFirstHoldAmount + secondHoldAmount);
+
+        await amort.connect(user2).releaseAmortizationHold(1, deployer.address);
+        expect(await asset.getTotalHoldByAmortizationId(1)).to.equal(secondHoldAmount);
+        expect(await asset.getHeldAmountFor(deployer.address)).to.equal(0n);
+
+        await amort.connect(user2).releaseAmortizationHold(1, user1.address);
+        expect(await asset.getTotalHoldByAmortizationId(1)).to.equal(0n);
+        expect(await asset.getHeldAmountFor(user1.address)).to.equal(0n);
       });
     });
 
@@ -1398,6 +1450,184 @@ export function amortizationTests(getCtx: () => AssetMockCtx): void {
       });
     });
 
+    describe("migrateAmortizationHoldAccounting", () => {
+      const holdAmount = BigInt(TOKENS_TO_REDEEM);
+
+      beforeEach(async () => {
+        await asset.grantRole(ATS_ROLES.ROLE_AMORTIZATION, user2.address);
+        await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, user2.address);
+        await asset.grantRole(ATS_ROLES.ROLE_ISSUER, user2.address);
+        await asset.grantRole(ATS_ROLES.ROLE_ADJUSTMENT_BALANCE, user2.address);
+
+        const data = await makeAmortizationData();
+
+        await asset.connect(user2).issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: deployer.address,
+          value: TOTAL_UNITS,
+          data: EMPTY_HEX_BYTES,
+        });
+
+        await amort.connect(user2).setAmortization(data);
+        await asset.changeSystemTimestamp(data.recordDate + 1);
+        await asset.triggerPendingScheduledCrossOrderedTasks();
+      });
+
+      it("GIVEN a not-yet-migrated action with a pre-fix total hold WHEN a DEFAULT_ADMIN_ROLE account migrates it with valid parameters THEN storage is seeded to exactly _total/_labaf and AmortizationHoldAccountingMigrated is emitted with the prior stored total and previousLabaf == 0", async () => {
+        await amort.connect(user2).setAmortizationHold(1, deployer.address, holdAmount);
+        expect(await amort.isAmortizationHoldAccountingMigrationPending(1)).to.equal(true);
+
+        const newTotal = holdAmount * 2n;
+        const newLabaf = 1n;
+
+        await expect(amort.migrateAmortizationHoldAccounting(1, newTotal, newLabaf))
+          .to.emit(asset, "AmortizationHoldAccountingMigrated")
+          .withArgs(
+            "0x0000000000000000000000000000000000000000000000000000000000000001",
+            1n,
+            holdAmount,
+            0n,
+            newTotal,
+            newLabaf,
+          );
+
+        expect(await amort.getTotalHoldByAmortizationId(1)).to.equal(newTotal);
+        expect(await amort.isAmortizationHoldAccountingMigrationPending(1)).to.equal(false);
+      });
+
+      it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN migrateAmortizationHoldAccounting THEN reverts with AccountHasNoRole", async () => {
+        await expect(amort.connect(user2).migrateAmortizationHoldAccounting(1, 0, 1))
+          .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+          .withArgs(user2.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+      });
+
+      it("GIVEN an already-migrated action WHEN migrateAmortizationHoldAccounting is called again THEN reverts with AmortizationHoldAccountingAlreadyMigrated", async () => {
+        await amort.migrateAmortizationHoldAccounting(1, 0, 1);
+
+        await expect(amort.migrateAmortizationHoldAccounting(1, 0, 1))
+          .to.be.revertedWithCustomError(asset, "AmortizationHoldAccountingAlreadyMigrated")
+          .withArgs("0x0000000000000000000000000000000000000000000000000000000000000001", 1n);
+      });
+
+      it("GIVEN _labaf == 0 WHEN migrateAmortizationHoldAccounting THEN reverts with InvalidAmortizationMigrationLabaf", async () => {
+        await expect(amort.migrateAmortizationHoldAccounting(1, 0, 0))
+          .to.be.revertedWithCustomError(asset, "InvalidAmortizationMigrationLabaf")
+          .withArgs(1n);
+      });
+
+      it("GIVEN _labaf above the current ABAF WHEN migrateAmortizationHoldAccounting THEN reverts with AmortizationMigrationLabafAboveAbaf", async () => {
+        await asset.connect(user2).adjustBalances(2, 0);
+
+        await expect(amort.migrateAmortizationHoldAccounting(1, 0, 3))
+          .to.be.revertedWithCustomError(asset, "AmortizationMigrationLabafAboveAbaf")
+          .withArgs(1n, 3n, 2n);
+      });
+
+      it("GIVEN _total above the current totalSupply WHEN migrateAmortizationHoldAccounting THEN reverts with AmortizationMigrationTotalAboveSupply", async () => {
+        const totalSupply = await asset.totalSupply();
+
+        await expect(amort.migrateAmortizationHoldAccounting(1, totalSupply + 1n, 1))
+          .to.be.revertedWithCustomError(asset, "AmortizationMigrationTotalAboveSupply")
+          .withArgs(1n, totalSupply + 1n, totalSupply);
+      });
+
+      it("GIVEN _total exactly equal to the current totalSupply WHEN migrateAmortizationHoldAccounting THEN migration succeeds", async () => {
+        const totalSupply = await asset.totalSupply();
+
+        await expect(amort.migrateAmortizationHoldAccounting(1, totalSupply, 1))
+          .to.emit(asset, "AmortizationHoldAccountingMigrated")
+          .withArgs("0x0000000000000000000000000000000000000000000000000000000000000001", 1n, 0n, 0n, totalSupply, 1n);
+      });
+
+      it("GIVEN an invalid _amortizationID WHEN migrateAmortizationHoldAccounting THEN reverts with the typed WrongIndexForAction, not a raw panic", async () => {
+        await expect(amort.migrateAmortizationHoldAccounting(999, 0, 1))
+          .to.be.revertedWithCustomError(asset, "WrongIndexForAction")
+          .withArgs(998n, ATS_CORPORATE_ACTION.AMORTIZATION);
+      });
+
+      it("GIVEN disabledAmortizations is false WHEN migrateAmortizationHoldAccounting THEN migration succeeds", async () => {
+        const [, isDisabled] = await amort.getAmortization(1);
+        expect(isDisabled).to.equal(false);
+
+        await expect(amort.migrateAmortizationHoldAccounting(1, 0, 1))
+          .to.emit(asset, "AmortizationHoldAccountingMigrated")
+          .withArgs("0x0000000000000000000000000000000000000000000000000000000000000001", 1n, 0n, 0n, 0n, 1n);
+      });
+
+      it("GIVEN disabledAmortizations is true (cancelled action) WHEN migrateAmortizationHoldAccounting THEN migration succeeds identically", async () => {
+        await amort.connect(user2).cancelAmortization(1);
+        const [, isDisabled] = await amort.getAmortization(1);
+        expect(isDisabled).to.equal(true);
+
+        await expect(amort.migrateAmortizationHoldAccounting(1, 0, 1))
+          .to.emit(asset, "AmortizationHoldAccountingMigrated")
+          .withArgs("0x0000000000000000000000000000000000000000000000000000000000000001", 1n, 0n, 0n, 0n, 1n);
+      });
+
+      it("GIVEN the token is paused WHEN migrateAmortizationHoldAccounting THEN it still succeeds", async () => {
+        await asset.grantRole(ATS_ROLES.ROLE_PAUSER, user1.address);
+        await asset.connect(user1).pause();
+
+        await expect(amort.migrateAmortizationHoldAccounting(1, 0, 1))
+          .to.emit(asset, "AmortizationHoldAccountingMigrated")
+          .withArgs("0x0000000000000000000000000000000000000000000000000000000000000001", 1n, 0n, 0n, 0n, 1n);
+      });
+    });
+
+    describe("isAmortizationHoldAccountingMigrationPending", () => {
+      const holdAmount = BigInt(TOKENS_TO_REDEEM);
+
+      beforeEach(async () => {
+        await asset.grantRole(ATS_ROLES.ROLE_AMORTIZATION, user2.address);
+        await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, user2.address);
+        await asset.grantRole(ATS_ROLES.ROLE_ISSUER, user2.address);
+        await asset.grantRole(ATS_ROLES.ROLE_ADJUSTMENT_BALANCE, user2.address);
+
+        const data = await makeAmortizationData();
+
+        await asset.connect(user2).issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: deployer.address,
+          value: TOTAL_UNITS,
+          data: EMPTY_HEX_BYTES,
+        });
+
+        await amort.connect(user2).setAmortization(data);
+        await asset.changeSystemTimestamp(data.recordDate + 1);
+        await asset.triggerPendingScheduledCrossOrderedTasks();
+      });
+
+      it("GIVEN an invalid _amortizationID WHEN isAmortizationHoldAccountingMigrationPending THEN reverts with the typed WrongIndexForAction, not a raw panic", async () => {
+        await expect(amort.isAmortizationHoldAccountingMigrationPending(999))
+          .to.be.revertedWithCustomError(asset, "WrongIndexForAction")
+          .withArgs(998n, ATS_CORPORATE_ACTION.AMORTIZATION);
+      });
+
+      it("GIVEN raw labafByAmortizationId == 0 and a pre-fix totalHoldByAmortizationId > 0 WHEN isAmortizationHoldAccountingMigrationPending THEN returns true", async () => {
+        await amort.connect(user2).setAmortizationHold(1, deployer.address, holdAmount);
+
+        expect(await amort.isAmortizationHoldAccountingMigrationPending(1)).to.equal(true);
+      });
+
+      it("GIVEN raw labafByAmortizationId == 0 and totalHoldByAmortizationId == 0 (never held) WHEN isAmortizationHoldAccountingMigrationPending THEN returns true", async () => {
+        expect(await amort.isAmortizationHoldAccountingMigrationPending(1)).to.equal(true);
+      });
+
+      it("GIVEN the action was migrated WHEN isAmortizationHoldAccountingMigrationPending THEN returns false", async () => {
+        await amort.migrateAmortizationHoldAccounting(1, 0, 1);
+
+        expect(await amort.isAmortizationHoldAccountingMigrationPending(1)).to.equal(false);
+      });
+
+      it("GIVEN the action went through a regular sync (no migration) WHEN isAmortizationHoldAccountingMigrationPending THEN returns false", async () => {
+        await amort.connect(user2).setAmortizationHold(1, deployer.address, holdAmount);
+        await asset.connect(user2).adjustBalances(2, 0);
+        await amort.connect(user2).releaseAmortizationHold(1, deployer.address);
+
+        expect(await amort.isAmortizationHoldAccountingMigrationPending(1)).to.equal(false);
+      });
+    });
+
     describe("multiPartition — all amortization functions revert with NotAllowedInMultiPartitionMode", () => {
       beforeEach(async () => {
         await asset.setMultiPartition(true);
@@ -1514,6 +1744,20 @@ export function amortizationTests(getCtx: () => AssetMockCtx): void {
 
       it("GIVEN multiPartition token WHEN forceCancelAmortization THEN reverts with NotAllowedInMultiPartitionMode", async () => {
         await expect(amort.forceCancelAmortization(1)).to.be.revertedWithCustomError(
+          asset,
+          "NotAllowedInMultiPartitionMode",
+        );
+      });
+
+      it("GIVEN multiPartition token WHEN migrateAmortizationHoldAccounting THEN reverts with NotAllowedInMultiPartitionMode", async () => {
+        await expect(amort.migrateAmortizationHoldAccounting(1, 0, 1)).to.be.revertedWithCustomError(
+          asset,
+          "NotAllowedInMultiPartitionMode",
+        );
+      });
+
+      it("GIVEN multiPartition token WHEN isAmortizationHoldAccountingMigrationPending THEN reverts with NotAllowedInMultiPartitionMode", async () => {
+        await expect(amort.isAmortizationHoldAccountingMigrationPending(1)).to.be.revertedWithCustomError(
           asset,
           "NotAllowedInMultiPartitionMode",
         );
