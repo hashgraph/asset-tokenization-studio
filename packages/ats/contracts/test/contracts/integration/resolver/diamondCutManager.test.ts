@@ -27,6 +27,7 @@ const TEST_CONFIG_IDS = {
   PAUSE_TEST: "0x0000000000000000000000000000000000000000000000000000000000000004",
   PAUSE_BATCH_TEST: "0x0000000000000000000000000000000000000000000000000000000000000005",
   BLACKLIST_TEST: "0x0000000000000000000000000000000000000000000000000000000000000006",
+  BLACKLIST_POST_ACTIVATION_TEST: "0x0000000000000000000000000000000000000000000000000000000000000007",
 };
 
 const RESOLVER_PROXY_VERSION_V2 = "0x0000000000000002"; // bytes8
@@ -130,6 +131,7 @@ describe("DiamondCutManager", () => {
       TEST_CONFIG_IDS.PAUSE_TEST,
       TEST_CONFIG_IDS.PAUSE_BATCH_TEST,
       TEST_CONFIG_IDS.BLACKLIST_TEST,
+      TEST_CONFIG_IDS.BLACKLIST_POST_ACTIVATION_TEST,
     ];
 
     for (const configId of configIdsToCleanup) {
@@ -674,6 +676,35 @@ describe("DiamondCutManager", () => {
     )
       .to.be.revertedWithCustomError(diamondCutManager, "SelectorBlacklisted")
       .withArgs(blackListedSelectors[0]);
+  });
+
+  it("GIVEN an active configuration WHEN a selector is blacklisted after activation THEN dispatch for that configuration still resolves", async () => {
+    const configId = TEST_CONFIG_IDS.BLACKLIST_POST_ACTIVATION_TEST;
+    const blackListedSelectors = [PAUSE_SELECTOR];
+
+    // GIVEN — configuration created and active at version 1
+    const facetConfigurations = createFacetConfigurations(equityFacetIdList, equityFacetVersionList);
+    await diamondCutManager
+      .connect(signer_A)
+      .createConfiguration(configId, facetConfigurations, "0x", { gasLimit: 60_000_000 });
+
+    const resolverProxyConfiguration = buildBytes(RESOLVER_PROXY_VERSION_V2, configId, 1, false);
+    const facetAddressBefore = await diamondCutManager["resolveResolverProxyCall(bytes,bytes4)"](
+      resolverProxyConfiguration,
+      PAUSE_SELECTOR,
+    );
+    expect(facetAddressBefore).to.not.equal("0x0000000000000000000000000000000000000000");
+
+    // WHEN — the selector is blacklisted after the configuration is already active
+    await businessLogicResolver.addSelectorsToBlacklist(configId, blackListedSelectors);
+
+    // THEN — dispatch for the already-bound configuration is unaffected
+    const facetAddressAfter = await diamondCutManager["resolveResolverProxyCall(bytes,bytes4)"](
+      resolverProxyConfiguration,
+      PAUSE_SELECTOR,
+    );
+    expect(facetAddressAfter).to.equal(facetAddressBefore);
+    expect(facetAddressAfter).to.not.equal("0x0000000000000000000000000000000000000000");
   });
 
   it("GIVEN a resolver WHEN creating configuration on an ongoing batch THEN fails with OngoingBatchConfigurationNotPermitted", async () => {
