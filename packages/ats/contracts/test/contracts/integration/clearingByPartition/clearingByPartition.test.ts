@@ -1210,6 +1210,36 @@ export function clearingByPartitionTests(getCtx: () => AssetMockCtx): void {
       });
     });
 
+    describe("FIND-030 - authorized finite allowance exact restore", () => {
+      it("R4-FiniteAllowance: GIVEN finite allowance A WHEN authorized clearing redeem AND cancel THEN allowance restored to exactly A", async () => {
+        const finiteAllowance = 500;
+        await asset.connect(signer_A).approve(signer_B.address, finiteAllowance);
+
+        const clearingOperationFrom = {
+          clearingOperation: {
+            partition: _DEFAULT_PARTITION,
+            expirationTimestamp: EXPIRATION_TIMESTAMP,
+            data: EMPTY_HEX_BYTES,
+          },
+          from: signer_A.address,
+          operatorData: EMPTY_HEX_BYTES,
+        };
+
+        await asset.connect(signer_B).clearingRedeemFromByPartition(clearingOperationFrom, _AMOUNT / 2);
+        expect(await asset.allowance(signer_A.address, signer_B.address)).to.equal(finiteAllowance - _AMOUNT / 2);
+
+        const identifier = {
+          clearingOperationType: ClearingOperationType.Redeem,
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          clearingId: 1,
+        };
+
+        await expect(asset.connect(signer_A).cancelClearingOperationByPartition(identifier)).to.not.be.reverted;
+        expect(await asset.allowance(signer_A.address, signer_B.address)).to.equal(finiteAllowance);
+      });
+    });
+
     // ─── bug Transfer: clearingRedeemByPartition ────────────────────────────────
 
     describe("bug Transfer: clearingRedeemByPartition", () => {
@@ -1489,6 +1519,37 @@ export function clearingByPartitionTests(getCtx: () => AssetMockCtx): void {
         await asset.changeSystemTimestamp(clearingOperation.expirationTimestamp + 1);
 
         await expect(asset.connect(signer_A).reclaimClearingOperationByPartition(identifier)).to.not.be.reverted;
+      });
+
+      it("FIND-030: GIVEN an expired AUTHORIZED clearing WHEN reclaimClearingOperationByPartition THEN allowance restored to the exact pre-creation value", async () => {
+        const finiteAllowance = 500;
+        await asset.connect(signer_A).approve(signer_B.address, finiteAllowance);
+
+        const clearingOperationFrom = {
+          clearingOperation: {
+            partition: _DEFAULT_PARTITION,
+            expirationTimestamp: SHORT_EXPIRATION_TIMESTAMP,
+            data: EMPTY_HEX_BYTES,
+          },
+          from: signer_A.address,
+          operatorData: EMPTY_HEX_BYTES,
+        };
+
+        await asset.connect(signer_B).clearingRedeemFromByPartition(clearingOperationFrom, _AMOUNT / 2);
+        expect(await asset.allowance(signer_A.address, signer_B.address)).to.equal(finiteAllowance - _AMOUNT / 2);
+
+        await asset.changeSystemTimestamp(SHORT_EXPIRATION_TIMESTAMP + 1);
+
+        const identifier = {
+          clearingOperationType: ClearingOperationType.Redeem,
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          clearingId: 1,
+        };
+
+        await expect(asset.connect(signer_A).reclaimClearingOperationByPartition(identifier)).to.not.be.reverted;
+        expect(await asset.allowance(signer_A.address, signer_B.address)).to.equal(finiteAllowance);
+        expect(await asset.allowance(signer_A.address, ethers.ZeroAddress)).to.equal(0);
       });
     });
 

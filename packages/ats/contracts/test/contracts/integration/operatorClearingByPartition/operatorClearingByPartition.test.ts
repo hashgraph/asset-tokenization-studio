@@ -26,6 +26,12 @@ interface ClearingOperationFrom {
   operatorData: string;
 }
 
+enum ClearingOperationType {
+  Transfer,
+  Redeem,
+  HoldCreation,
+}
+
 let clearingOperation: ClearingOperation;
 let clearingOperationFrom: ClearingOperationFrom;
 
@@ -275,6 +281,179 @@ export function operatorClearingByPartitionTests(getCtx: () => AssetMockCtx): vo
           await expect(
             asset.connect(signer_B).operatorClearingRedeemByPartition(clearingOperationFrom, 0),
           ).to.be.revertedWithCustomError(asset, "InvalidClearingAmount");
+        });
+      });
+
+      describe("FIND-030 - operator clearing phantom allowance guard", () => {
+        const zeroAllowance = (holder: string) => asset.allowance(holder, ADDRESS_ZERO);
+
+        it("R1-Cancel: GIVEN operator clearing transfer WHEN cancel THEN allowance(address(0)) == 0 and no Approval event", async () => {
+          await asset.connect(signer_A).authorizeOperator(signer_B.address);
+
+          await asset
+            .connect(signer_B)
+            .operatorClearingTransferByPartition(clearingOperationFrom, _AMOUNT, signer_C.address);
+          expect(await zeroAllowance(signer_A.address)).to.equal(0);
+
+          const identifier = {
+            clearingOperationType: ClearingOperationType.Transfer,
+            partition: _DEFAULT_PARTITION,
+            tokenHolder: signer_A.address,
+            clearingId: 1,
+          };
+
+          await expect(asset.connect(signer_A).cancelClearingOperationByPartition(identifier)).to.not.be.reverted;
+          expect(await zeroAllowance(signer_A.address)).to.equal(0);
+        });
+
+        it("R1-Reclaim: GIVEN operator clearing transfer WHEN reclaim at expiry THEN allowance(address(0)) == 0 and balance restored", async () => {
+          await asset.connect(signer_A).authorizeOperator(signer_B.address);
+          const balanceBefore = await asset.balanceOf(signer_A.address);
+
+          await asset
+            .connect(signer_B)
+            .operatorClearingTransferByPartition(clearingOperationFrom, _AMOUNT, signer_C.address);
+          await asset.changeSystemTimestamp(clearingOperation.expirationTimestamp + 1);
+
+          const identifier = {
+            clearingOperationType: ClearingOperationType.Transfer,
+            partition: _DEFAULT_PARTITION,
+            tokenHolder: signer_A.address,
+            clearingId: 1,
+          };
+
+          await expect(asset.connect(signer_A).reclaimClearingOperationByPartition(identifier)).to.not.be.reverted;
+          expect(await zeroAllowance(signer_A.address)).to.equal(0);
+          expect(await asset.balanceOf(signer_A.address)).to.equal(balanceBefore);
+        });
+
+        it("R2-Reclaim: GIVEN operator clearing redeem WHEN reclaim at expiry THEN allowance(address(0)) == 0 and balance restored", async () => {
+          await asset.connect(signer_A).authorizeOperator(signer_B.address);
+          const balanceBefore = await asset.balanceOf(signer_A.address);
+
+          await asset.connect(signer_B).operatorClearingRedeemByPartition(clearingOperationFrom, _AMOUNT);
+          await asset.changeSystemTimestamp(clearingOperation.expirationTimestamp + 1);
+
+          const identifier = {
+            clearingOperationType: ClearingOperationType.Redeem,
+            partition: _DEFAULT_PARTITION,
+            tokenHolder: signer_A.address,
+            clearingId: 1,
+          };
+
+          await expect(asset.connect(signer_A).reclaimClearingOperationByPartition(identifier)).to.not.be.reverted;
+          expect(await zeroAllowance(signer_A.address)).to.equal(0);
+          expect(await asset.balanceOf(signer_A.address)).to.equal(balanceBefore);
+        });
+
+        it("R5-SequentialCancel: GIVEN authorized and operator clearings WHEN both cancelled THEN authorized allowance exactly restored and operator allowance stays 0", async () => {
+          await asset.connect(signer_A).authorizeOperator(signer_B.address);
+          const finiteAllowance = 500;
+          await asset.connect(signer_A).approve(signer_B.address, finiteAllowance);
+
+          const clearingOperationForFrom = {
+            clearingOperation: {
+              partition: _DEFAULT_PARTITION,
+              expirationTimestamp: clearingOperation.expirationTimestamp,
+              data: EMPTY_HEX_BYTES,
+            },
+            from: signer_A.address,
+            operatorData: EMPTY_HEX_BYTES,
+          };
+
+          await asset.connect(signer_B).clearingRedeemFromByPartition(clearingOperationForFrom, _AMOUNT / 2);
+          expect(await asset.allowance(signer_A.address, signer_B.address)).to.equal(finiteAllowance - _AMOUNT / 2);
+
+          await asset
+            .connect(signer_B)
+            .operatorClearingTransferByPartition(clearingOperationFrom, _AMOUNT / 2, signer_C.address);
+          expect(await zeroAllowance(signer_A.address)).to.equal(0);
+
+          const authorizedId = {
+            clearingOperationType: ClearingOperationType.Redeem,
+            partition: _DEFAULT_PARTITION,
+            tokenHolder: signer_A.address,
+            clearingId: 1,
+          };
+          const operatorId = {
+            clearingOperationType: ClearingOperationType.Transfer,
+            partition: _DEFAULT_PARTITION,
+            tokenHolder: signer_A.address,
+            clearingId: 1,
+          };
+
+          await asset.connect(signer_A).cancelClearingOperationByPartition(authorizedId);
+          await asset.connect(signer_A).cancelClearingOperationByPartition(operatorId);
+
+          expect(await asset.allowance(signer_A.address, signer_B.address)).to.equal(finiteAllowance);
+          expect(await zeroAllowance(signer_A.address)).to.equal(0);
+        });
+
+        it("R6-RepeatedCancel: GIVEN operator clearing WHEN cancel THEN new clearing WHEN cancel again THEN allowance stays 0", async () => {
+          await asset.connect(signer_A).authorizeOperator(signer_B.address);
+
+          await asset
+            .connect(signer_B)
+            .operatorClearingTransferByPartition(clearingOperationFrom, _AMOUNT, signer_C.address);
+          const firstId = {
+            clearingOperationType: ClearingOperationType.Transfer,
+            partition: _DEFAULT_PARTITION,
+            tokenHolder: signer_A.address,
+            clearingId: 1,
+          };
+          await asset.connect(signer_A).cancelClearingOperationByPartition(firstId);
+          expect(await zeroAllowance(signer_A.address)).to.equal(0);
+
+          await asset
+            .connect(signer_B)
+            .operatorClearingTransferByPartition(clearingOperationFrom, _AMOUNT, signer_C.address);
+          const secondId = {
+            clearingOperationType: ClearingOperationType.Transfer,
+            partition: _DEFAULT_PARTITION,
+            tokenHolder: signer_A.address,
+            clearingId: 2,
+          };
+          await asset.connect(signer_A).cancelClearingOperationByPartition(secondId);
+          expect(await zeroAllowance(signer_A.address)).to.equal(0);
+        });
+
+        it("R7-ABAF: GIVEN operator clearing WHEN adjustBalances changes the factor THEN cancel THEN allowance(address(0)) stays 0 and no Approval(0x0) event", async () => {
+          const adjustFactor = 2;
+          const adjustDecimals = 1;
+          await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ADJUSTMENT_BALANCE, signer_C.address);
+          await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
+
+          await asset.connect(signer_B).issueByPartition({
+            partition: _DEFAULT_PARTITION,
+            tokenHolder: signer_A.address,
+            value: 7 * _AMOUNT,
+            data: EMPTY_HEX_BYTES,
+          });
+
+          await asset.connect(signer_A).authorizeOperator(signer_B.address);
+
+          await asset
+            .connect(signer_B)
+            .operatorClearingTransferByPartition(clearingOperationFrom, _AMOUNT, signer_C.address);
+          expect(await zeroAllowance(signer_A.address)).to.equal(0);
+
+          await asset.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals);
+
+          // Snapshot the balance AFTER the adjustment, right before the unwind.
+          const balanceAfterAdjust = await asset.balanceOf(signer_A.address);
+
+          await asset.connect(signer_A).cancelClearingOperationByPartition({
+            clearingOperationType: ClearingOperationType.Transfer,
+            partition: _DEFAULT_PARTITION,
+            tokenHolder: signer_A.address,
+            clearingId: 1,
+          });
+
+          expect(await zeroAllowance(signer_A.address)).to.equal(0);
+          // The ABAF-adjusted cleared amount must be credited back to the holder.
+          expect(await asset.balanceOf(signer_A.address)).to.equal(
+            balanceAfterAdjust + BigInt(_AMOUNT) * BigInt(adjustFactor),
+          );
         });
       });
     });

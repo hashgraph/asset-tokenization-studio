@@ -35,6 +35,12 @@ interface Hold {
   data: string;
 }
 
+enum ClearingOperationType {
+  Transfer,
+  Redeem,
+  HoldCreation,
+}
+
 let clearingOperation: ClearingOperation;
 let clearingOperationFrom: ClearingOperationFrom;
 let hold: Hold;
@@ -227,6 +233,33 @@ export function operatorClearingHoldByPartitionTests(getCtx: () => AssetMockCtx)
           await expect(
             asset.connect(signer_A).operatorClearingCreateHoldByPartition(clearingOperationFromB, hold),
           ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+        });
+      });
+
+      describe("FIND-030 - operator hold-creation clearing phantom allowance guard", () => {
+        it("R3-Cancel: GIVEN operator hold-creation clearing WHEN cancel THEN allowance(address(0)) == 0 and no hold created", async () => {
+          await asset.connect(signer_A).authorizeOperator(signer_B.address);
+          const holdForClearing = {
+            ...hold,
+            amount: BigInt(_AMOUNT),
+            expirationTimestamp: BigInt(clearingOperation.expirationTimestamp),
+            escrow: signer_B.address,
+            to: signer_C.address,
+            data: _DATA,
+          };
+
+          await asset.connect(signer_B).operatorClearingCreateHoldByPartition(clearingOperationFrom, holdForClearing);
+          expect(await asset.allowance(signer_A.address, ADDRESS_ZERO)).to.equal(0);
+
+          const identifier = {
+            clearingOperationType: ClearingOperationType.HoldCreation,
+            partition: _DEFAULT_PARTITION,
+            tokenHolder: signer_A.address,
+            clearingId: 1,
+          };
+
+          await expect(asset.connect(signer_A).cancelClearingOperationByPartition(identifier)).to.not.be.reverted;
+          expect(await asset.allowance(signer_A.address, ADDRESS_ZERO)).to.equal(0);
         });
       });
     });
