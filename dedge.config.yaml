@@ -1,0 +1,93 @@
+# yaml-language-server: $schema=https://dedgesecurity.io/schema.v3.json
+version: 3
+
+excluded-paths:
+  - "node_modules/"
+  - "dist/"
+  - "build/"
+  - "coverage/"
+  - "artifacts/"
+  - "cache/"
+  - "target/"
+  - ".git/"
+
+global:
+  config:
+    secrets:
+      enabled: true
+      excluded-paths:
+        - "node_modules/"
+        - "dist/"
+        - "build/"
+        - "coverage/"
+        - "target/"
+    iac:
+      enabled: true
+    dependencies:
+      js:
+        enabled: true
+        excluded-paths:
+          - "node_modules/"
+          - "dist/"
+          - "build/"
+          - "coverage/"
+      rust:
+        enabled: false
+
+workspace:
+  - path: "./packages/ats/contracts"
+    name: "ats-contracts"
+    tasks:
+      setup:
+        - cp .env.example .env
+      install-dependencies:
+        - cd ../../.. && npm ci
+    config:
+      evm:
+        enabled: true
+        solc: "0.8.28"
+        framework: "hardhat"
+        framework-version: "2.28.6"
+        node-version: "24.15.0"
+        package-manager: "npm"
+        package-manager-version: "11.6.1"
+        excluded-paths:
+          - "test/"
+          - "contracts/test/"
+          - "node_modules/"
+          - "artifacts/"
+          - "cache/"
+          - "deployments/"
+          - "scripts/"
+
+      ## Remove the comment from the ai section to enable the AI Security Analyzer for this sub project
+      # ai:
+      #   detection:
+      #     agent-name: "dedge-ai-sentinel-evm"
+
+  - path: "./packages/mass-payout/contracts"
+    name: "mass-payout-contracts"
+    tasks:
+      install-dependencies:
+        - cd ../../.. && npm ci
+    config:
+      evm:
+        enabled: true
+        solc: "0.8.22"
+        framework: "hardhat"
+        framework-version: "2.28.6"
+        node-version: "24.15.0"
+        package-manager: "npm"
+        package-manager-version: "11.6.1"
+        excluded-paths:
+          - "test/"
+          - "contracts/test/"
+          - "node_modules/"
+          - "artifacts/"
+          - "cache/"
+          - "scripts/"
+
+      ## Remove the comment from the ai section to enable the AI Security Analyzer for this sub project
+      # ai:
+      #   detection:
+      #     agent-name: "dedge-ai-sentinel-evm"
