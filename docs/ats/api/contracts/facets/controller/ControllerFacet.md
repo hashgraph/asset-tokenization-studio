@@ -461,6 +461,14 @@ error CannotRecoverWallet()
 
 Thrown when wallet recovery preconditions are not met (e.g. identity mismatch).
 
+### CannotRenounceSoleAdmin
+
+```solidity
+error CannotRenounceSoleAdmin()
+```
+
+Thrown when the sole holder of `DEFAULT_ADMIN_ROLE` attempts to renounce it, which would permanently lock all admin-gated functions.
+
 ### ComplianceCallFailed
 
 ```solidity

@@ -10,6 +10,26 @@ _Registers four selectors: `initializeERC1594`, `isIssuable`, `issue` and `mint`
 
 ## Methods
 
+### disableIssuance
+
+```solidity
+function disableIssuance() external nonpayable
+```
+
+Permanently disables issuance of new tokens.
+
+_Restricted to `DEFAULT_ADMIN_ROLE`. Sets the issuance flag to false and emits `IssuanceDisabled`. Reverts if issuance has already been disabled._
+
+### finalizeIssuance
+
+```solidity
+function finalizeIssuance() external nonpayable
+```
+
+Permanently finalizes issuance of new tokens.
+
+_Restricted to `DEFAULT_ADMIN_ROLE`. Sets the issuance flag to false and emits `IssuanceFinalized`. Reverts if issuance has already been disabled._
+
 ### getStaticFunctionSelectors
 
 ```solidity
@@ -125,6 +145,34 @@ event ERC1594Initialized()
 
 _Fires exclusively from `initializeERC1594` after the storage write succeeds._
 
+### IssuanceDisabled
+
+```solidity
+event IssuanceDisabled(address indexed operator)
+```
+
+Emitted when token issuance is disabled.
+
+#### Parameters
+
+| Name               | Type    | Description                     |
+| ------------------ | ------- | ------------------------------- |
+| operator `indexed` | address | Account that disabled issuance. |
+
+### IssuanceFinalized
+
+```solidity
+event IssuanceFinalized(address indexed operator)
+```
+
+Emitted when token issuance is finalized.
+
+#### Parameters
+
+| Name               | Type    | Description                      |
+| ------------------ | ------- | -------------------------------- |
+| operator `indexed` | address | Account that finalized issuance. |
+
 ### Issued
 
 ```solidity
@@ -219,6 +267,14 @@ error IsPaused()
 ```
 
 Thrown when an operation that requires the token to be unpaused is attempted while the token is paused (own flag or any external pause contract).
+
+### IssuanceIsDisabled
+
+```solidity
+error IssuanceIsDisabled()
+```
+
+Thrown when an issuance operation is attempted after issuance has been permanently disabled.
 
 ### MaxSupplyReached
 

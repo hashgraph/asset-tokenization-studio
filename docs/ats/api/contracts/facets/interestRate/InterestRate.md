@@ -48,7 +48,7 @@ function setCouponRateType(enum IInterestRate.RateType rateType) external nonpay
 
 Sets the coupon rate type discriminator for this asset.
 
-_Protected by `onlyRole(ROLE_INTEREST_RATE_MANAGER)`._
+_Protected by `onlyRole(ROLE_INTEREST_RATE_MANAGER)`. Reverts with `ICoupon.CouponRatePending` if any active coupon still has an unresolved rate, so switching away from `KPI_LINKED` can never strand a pending coupon._
 
 #### Parameters
 
@@ -120,6 +120,22 @@ Raised by `InitializerStorageWrapper.checkOperational` (and the related `isConfi
 | --------- | ------- | ------------------------------------------------------------------ |
 | configId  | bytes32 | Resolver-proxy configuration whose operational status was checked. |
 | versionId | uint256 | Configuration version whose operational status was checked.        |
+
+### CouponRatePending
+
+```solidity
+error CouponRatePending(uint256 couponID)
+```
+
+Reverts when at least one coupon is still awaiting rate resolution.
+
+_Raised by `CouponStorageWrapper.checkPendingCoupons`, used to guard `InterestRate::setCouponRateType` so a KPI-linked coupon cannot be left permanently unresolved by switching the rate type away before its scheduled listing has persisted a resolved rate._
+
+#### Parameters
+
+| Name     | Type    | Description                                               |
+| -------- | ------- | --------------------------------------------------------- |
+| couponID | uint256 | One-indexed identifier of the first pending coupon found. |
 
 ### Deactivated
 

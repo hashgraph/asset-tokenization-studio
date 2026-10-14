@@ -4,7 +4,9 @@ _Asset Tokenization Studio Team_
 
 > IBusinessLogicResolver
 
-Registry for resolving Business Logic (facet) addresses by a bytes32 key and version. All registered Business Logics share a common version counter so consumers can safely target a single version and know it is fully compatible across every registered key. Registering or updating any Business Logic increments the shared latest version by 1.
+Registry for resolving Business Logic (facet) addresses by a bytes32 key and version.
+
+_Each business logic key has its own independent version counter — `registerBusinessLogics()` increments `latestVersionByFacetId` only for the keys included in a given call. Omitting a previously-registered key from a call leaves that key&#39;s counter untouched; it does not advance alongside the keys that were included. Callers intending a full re-registration of every active key must supply all of them in the same call (or across the batches of the same registration operation) — the registry does not enforce this on their behalf, so a partial call is a valid, if incomplete, update rather than a rejected one. `VersionStatus.DEACTIVATED` (see `setVersionStatus`) is unrelated to registration: it does not affect `registerBusinessLogics()` in any way and does not retire a key. It only blocks that one specific `(key, version)` pair from being selected into a new resolver-proxy configuration going forward; other versions of the same key remain selectable, and configurations that already reference the deactivated version are unaffected._
 
 ## Methods
 
@@ -15,6 +17,8 @@ function addSelectorsToBlacklist(bytes32 _configurationId, bytes4[] _selectors) 
 ```
 
 Adds a list of selectors to the blacklist
+
+_Blacklisted selectors are rejected when future configurations register facet selectors for the same configuration._
 
 #### Parameters
 
@@ -553,6 +557,20 @@ Initialises the Business Logic Resolver storage. Must be called once before any 
 | --------- | ---- | ---------------------------------------------------- |
 | success\_ | bool | True when initialisation succeeds without reverting. |
 
+### isBusinessLogicResolver
+
+```solidity
+function isBusinessLogicResolver() external pure returns (bool isBusinessLogicResolver_)
+```
+
+Identity marker used to confirm a candidate address is a genuine `IBusinessLogicResolver`, checked via low-level `call()` rather than a direct interface call (see `DiamondCut::onlyValidBusinessLogicResolver`).
+
+#### Returns
+
+| Name                      | Type | Description                                       |
+| ------------------------- | ---- | ------------------------------------------------- |
+| isBusinessLogicResolver\_ | bool | Always `true` for a real `BusinessLogicResolver`. |
+
 ### isResolverProxyConfigurationRegistered
 
 ```solidity
@@ -607,6 +625,8 @@ function removeSelectorsFromBlacklist(bytes32 _configurationId, bytes4[] _select
 ```
 
 Removes a list of selectors from the blacklist
+
+_Removing a selector only affects subsequent validation and does not mutate already activated configurations._
 
 #### Parameters
 
@@ -726,6 +746,24 @@ _Powers ERC-165 lookups on resolver proxies._
 | Name     | Type | Description                                                       |
 | -------- | ---- | ----------------------------------------------------------------- |
 | exists\_ | bool | True if `_interfaceId` is supported by the configuration version. |
+
+### setVersionStatus
+
+```solidity
+function setVersionStatus(bytes32 _businessLogicKey, uint256 _version, enum IBusinessLogicResolver.VersionStatus _status) external nonpayable
+```
+
+Sets the status of a registered business logic version.
+
+_Restricted to `DEFAULT_ADMIN_ROLE`. Reverts with `InvalidVersionStatus` when `_status` is `VersionStatus.NONE`, and with `BusinessLogicVersionDoesNotExist` when `_version` is zero or has never been registered for `_businessLogicKey`. Marking a version `DEACTIVATED` prevents it from being selected into any new resolver-proxy configuration, but does not affect configurations that already reference it._
+
+#### Parameters
+
+| Name               | Type                                      | Description                                                             |
+| ------------------ | ----------------------------------------- | ----------------------------------------------------------------------- |
+| \_businessLogicKey | bytes32                                   | The bytes32 key identifying the business logic to update.               |
+| \_version          | uint256                                   | The version number to update.                                           |
+| \_status           | enum IBusinessLogicResolver.VersionStatus | The new status (`ACTIVATED` or `DEACTIVATED`) to assign to the version. |
 
 ### updateReplacementAddress
 
@@ -849,6 +887,22 @@ Event emitted when an old address is replaced with a new one
 | replacedAddress `indexed`    | address | old address been replaced.         |
 | replacementAddress `indexed` | address | new address replacing the old one. |
 
+### VersionStatusUpdated
+
+```solidity
+event VersionStatusUpdated(bytes32 indexed businessLogicKey, uint256 version, enum IBusinessLogicResolver.VersionStatus status)
+```
+
+Event emitted when a business logic version&#39;s status is updated.
+
+#### Parameters
+
+| Name                       | Type                                      | Description                                      |
+| -------------------------- | ----------------------------------------- | ------------------------------------------------ |
+| businessLogicKey `indexed` | bytes32                                   | Business logic key whose version status changed. |
+| version                    | uint256                                   | Version number whose status changed.             |
+| status                     | enum IBusinessLogicResolver.VersionStatus | New status assigned to the version.              |
+
 ## Errors
 
 ### BusinessLogicKeyDuplicated
@@ -894,6 +948,21 @@ Thrown when the requested version has never been registered for any business log
 | Name    | Type    | Description                                             |
 | ------- | ------- | ------------------------------------------------------- |
 | version | uint256 | The version number that does not exist in the registry. |
+
+### DeactivatedVersionNotAllowed
+
+```solidity
+error DeactivatedVersionNotAllowed(bytes32 facetId, uint256 version)
+```
+
+Thrown when a configuration selects a facet version whose status has been set to `DEACTIVATED`. Configurations that already reference the version are unaffected; this only blocks the version from being selected into a new configuration.
+
+#### Parameters
+
+| Name    | Type    | Description                                     |
+| ------- | ------- | ----------------------------------------------- |
+| facetId | bytes32 | Facet id whose selected version is deactivated. |
+| version | uint256 | Deactivated version that was selected.          |
 
 ### DefaultValueForConfigurationIdNotPermitted
 
@@ -987,6 +1056,14 @@ Thrown when the provided encoded proxy configuration does not respect the standa
 | Name                         | Type  | Description                        |
 | ---------------------------- | ----- | ---------------------------------- |
 | \_resolverProxyConfiguration | bytes | wrong encoded proxy configuration. |
+
+### InvalidVersionStatus
+
+```solidity
+error InvalidVersionStatus()
+```
+
+Thrown when `setVersionStatus` is called with `VersionStatus.NONE`, which represents an unregistered version rather than a settable lifecycle state.
 
 ### OngoingBatchConfigurationNotPermitted
 

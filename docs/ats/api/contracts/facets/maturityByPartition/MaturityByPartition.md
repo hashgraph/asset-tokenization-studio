@@ -147,6 +147,10 @@ Thrown when an operation that requires the token to be unpaused is attempted whi
 error MaturityDateInvalid()
 ```
 
+Thrown when a maturity date fails validation.
+
+_Reverts when a proposed maturity date is not strictly in the future at the time it is set, or when a maturity-gated action is attempted before the stored maturity date has been reached._
+
 ### PartitionNotAllowedInSinglePartitionMode
 
 ```solidity

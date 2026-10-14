@@ -1489,6 +1489,16 @@ _Returns the delegate that `account` has chosen._
 | ---- | ------- | -------------------------------------------- |
 | \_0  | address | Address of the delegate chosen by `account`. |
 
+### disableIssuance
+
+```solidity
+function disableIssuance() external nonpayable
+```
+
+Permanently disables issuance of new tokens.
+
+_Restricted to `DEFAULT_ADMIN_ROLE`. Sets the issuance flag to false and emits `IssuanceDisabled`. Reverts if issuance has already been disabled._
+
 ### executeHoldByPartition
 
 ```solidity
@@ -1519,6 +1529,16 @@ function finalizeControllable() external nonpayable
 It is used to end the controller feature from the token
 
 _It only be called by the `owner/issuer` of the token_
+
+### finalizeIssuance
+
+```solidity
+function finalizeIssuance() external nonpayable
+```
+
+Permanently finalizes issuance of new tokens.
+
+_Restricted to `DEFAULT_ADMIN_ROLE`. Sets the issuance flag to false and emits `IssuanceFinalized`. Reverts if issuance has already been disabled._
 
 ### forceCancelAmortization
 
@@ -1740,7 +1760,7 @@ function fullRedeemAtMaturity(address _tokenHolder) external nonpayable
 
 Redeems all token partitions held by a token holder at maturity.
 
-_Caller must hold `ROLE_MATURITY_REDEEMER`. Contract must be unpaused and clearing must be disabled. `_tokenHolder` must be on the allowed list, hold granted KYC status, must not be recovered, and the current timestamp must be at or past the maturity date. Iterates every partition owned by `_tokenHolder` and redeems each balance in full. Reverts with an unexpected error if any partition balance is zero.Emits {RedeemedByPartition} for each redeemed partition via `ERC1410StorageWrapper.redeemByPartition`._
+_Caller must hold `ROLE_MATURITY_REDEEMER`. Contract must be unpaused and clearing must be disabled. `_tokenHolder` must be on the allowed list, hold granted KYC status, must not be recovered, and the current timestamp must be at or past the maturity date. Iterates every partition owned by `_tokenHolder` and redeems each balance in full. Reverts with an unexpected error if any partition balance is zero.Emits {TransferByPartition} and {RedeemedByPartition} for each redeemed partition via `ERC1410StorageWrapper.redeemByPartition`, then {FullyRedeemedAtMaturity} once after every partition has been processed._
 
 #### Parameters
 
@@ -2480,7 +2500,7 @@ function getCouponsFor(uint256 _couponID, uint256 _pageIndex, uint256 _pageLengt
 
 Returns coupon information for every holder of a given coupon, paginated.
 
-_Internally resolves the holder page then retrieves per-holder coupon details. The two returned arrays share the same index: `couponFor_[i]` corresponds to `holders_[i]`._
+_Internally resolves the holder page then retrieves per-holder coupon details. The two returned arrays share the same index: `couponFor_[i]`corresponds to`holders*[i]`.*
 
 #### Parameters
 
@@ -5897,12 +5917,14 @@ function initializeProceedRecipients(address[] _proceedRecipients, bytes[] _data
 
 Initialises the proceed-recipients capability with a seed list of recipients.
 
+_Callable once during initialisation. Requires `_proceedRecipients` and `_data` arrays to be of identical length and contain non-zero addresses. Emits `ProceedRecipientsInitialized` upon successful registration._
+
 #### Parameters
 
 | Name                | Type      | Description                                                                  |
 | ------------------- | --------- | ---------------------------------------------------------------------------- |
 | \_proceedRecipients | address[] | Initial array of proceed-recipient addresses to register.                    |
-| \_data              | bytes[]   | Per-recipient arbitrary data, one entry per address in `_proceedRecipients`. |
+| \_data              | bytes[]   | Per-recipient arbitrary data, matching each address in `_proceedRecipients`. |
 
 ### initializeProtectedByPartition
 
@@ -6169,6 +6191,28 @@ _Checks if an account has the agent role._
 | Name | Type | Description                                             |
 | ---- | ---- | ------------------------------------------------------- |
 | \_0  | bool | True if `_agent` holds the agent role, false otherwise. |
+
+### isAmortizationHoldAccountingMigrationPending
+
+```solidity
+function isAmortizationHoldAccountingMigrationPending(uint256 _amortizationID) external view returns (bool)
+```
+
+Reports whether an amortization corporate action still needs `migrateAmortizationHoldAccounting` to be called for it.
+
+_Backed by the same raw-LABAF-read helper as the idempotency guard on the migration writer, depending only on `labafByAmortizationId == 0` — never on `totalHoldByAmortizationId`. No role gate, matching the read-only nature of `getTotalHoldByAmortizationId`._
+
+#### Parameters
+
+| Name             | Type    | Description                                              |
+| ---------------- | ------- | -------------------------------------------------------- |
+| \_amortizationID | uint256 | The one-based identifier of the amortization to inspect. |
+
+#### Returns
+
+| Name | Type | Description                                                                                                        |
+| ---- | ---- | ------------------------------------------------------------------------------------------------------------------ |
+| \_0  | bool | True if the raw `labafByAmortizationId` is still `0` (never migrated and never regularly synced); false otherwise. |
 
 ### isAuthorized
 
@@ -6655,6 +6699,24 @@ Returns the locked balance of a token holder for a given partition at the time o
 | --------- | ------- | ------------------------------------------------------------------------------- |
 | balance\_ | uint256 | The locked balance of `_tokenHolder` in `_partition` recorded at `_snapshotID`. |
 
+### migrateAmortizationHoldAccounting
+
+```solidity
+function migrateAmortizationHoldAccounting(uint256 _amortizationID, uint256 _total, uint256 _labaf) external nonpayable
+```
+
+One-time, admin-gated repair that seeds `totalHoldByAmortizationId` and `labafByAmortizationId` for an amortization corporate action that accumulated holds before LABAF tracking existed on this aggregate.
+
+_Restricted to `DEFAULT_ADMIN_ROLE`. Deliberately carries no `onlyOperational`, `onlyActivated`, or `onlyUnpaused` gate so it can repair state while the token is paused. Reverts with {AmortizationHoldAccountingAlreadyMigrated} if the raw, non-defaulted `labafByAmortizationId` is already non-zero; with {InvalidAmortizationMigrationLabaf} if `_labaf == 0`; with {AmortizationMigrationLabafAboveAbaf} if `_labaf` exceeds the current ABAF; with {AmortizationMigrationTotalAboveSupply} if `_total` exceeds the token&#39;s current total supply. Not gated on `disabledAmortizations`: a cancelled action can still reach the vulnerable sync path via a later `releaseAmortizationHold` and must stay migratable. Emits {AmortizationHoldAccountingMigrated} on success._
+
+#### Parameters
+
+| Name             | Type    | Description                                                                                                                                |
+| ---------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| \_amortizationID | uint256 | The one-based identifier of the amortization to migrate.                                                                                   |
+| \_total          | uint256 | The raw `totalHoldByAmortizationId` value to seed (no lower bound, `0` is valid; MUST NOT exceed the token&#39;s current `totalSupply()`). |
+| \_labaf          | uint256 | The raw `labafByAmortizationId` value to seed; must satisfy `0 &lt; _labaf &lt;= currentAbaf`.                                             |
+
 ### mint
 
 ```solidity
@@ -7061,6 +7123,28 @@ function protectedClearingCreateHoldByPartition(IClearingTypes.ProtectedClearing
 | success\_    | bool    | undefined   |
 | clearingId\_ | uint256 | undefined   |
 
+### protectedClearingCreateHoldByPartitionNonce
+
+```solidity
+function protectedClearingCreateHoldByPartitionNonce(address _owner) external view returns (uint256)
+```
+
+Returns the current nonce for `_owner` used in protected clearing partition hold creations.
+
+_Incremented internally upon consumption of a valid signed `protectedClearingCreateHoldByPartition` operation._
+
+#### Parameters
+
+| Name    | Type    | Description                                                      |
+| ------- | ------- | ---------------------------------------------------------------- |
+| \_owner | address | Address whose clearing partition hold creation nonce is queried. |
+
+#### Returns
+
+| Name | Type    | Description                       |
+| ---- | ------- | --------------------------------- |
+| \_0  | uint256 | Current nonce value for `_owner`. |
+
 ### protectedClearingRedeemByPartition
 
 ```solidity
@@ -7081,6 +7165,28 @@ function protectedClearingRedeemByPartition(IClearingTypes.ProtectedClearingOper
 | ------------ | ------- | ----------- |
 | success\_    | bool    | undefined   |
 | clearingId\_ | uint256 | undefined   |
+
+### protectedClearingRedeemByPartitionNonce
+
+```solidity
+function protectedClearingRedeemByPartitionNonce(address _owner) external view returns (uint256)
+```
+
+Returns the current nonce for `_owner` used in protected clearing partition redemptions.
+
+_Incremented internally upon consumption of a valid signed `protectedClearingRedeemByPartition` operation._
+
+#### Parameters
+
+| Name    | Type    | Description                                                   |
+| ------- | ------- | ------------------------------------------------------------- |
+| \_owner | address | Address whose clearing partition redemption nonce is queried. |
+
+#### Returns
+
+| Name | Type    | Description                       |
+| ---- | ------- | --------------------------------- |
+| \_0  | uint256 | Current nonce value for `_owner`. |
 
 ### protectedClearingTransferByPartition
 
@@ -7104,6 +7210,28 @@ function protectedClearingTransferByPartition(IClearingTypes.ProtectedClearingOp
 | success\_    | bool    | undefined   |
 | clearingId\_ | uint256 | undefined   |
 
+### protectedClearingTransferByPartitionNonce
+
+```solidity
+function protectedClearingTransferByPartitionNonce(address _owner) external view returns (uint256)
+```
+
+Returns the current nonce for `_owner` used in protected clearing partition transfers.
+
+_Incremented internally upon consumption of a valid signed `protectedClearingTransferByPartition` operation._
+
+#### Parameters
+
+| Name    | Type    | Description                                                 |
+| ------- | ------- | ----------------------------------------------------------- |
+| \_owner | address | Address whose clearing partition transfer nonce is queried. |
+
+#### Returns
+
+| Name | Type    | Description                       |
+| ---- | ------- | --------------------------------- |
+| \_0  | uint256 | Current nonce value for `_owner`. |
+
 ### protectedCreateHoldByPartition
 
 ```solidity
@@ -7126,6 +7254,28 @@ function protectedCreateHoldByPartition(bytes32 _partition, address _from, IHold
 | success\_ | bool    | undefined   |
 | holdId\_  | uint256 | undefined   |
 
+### protectedCreateHoldByPartitionNonce
+
+```solidity
+function protectedCreateHoldByPartitionNonce(address _owner) external view returns (uint256)
+```
+
+Returns the current nonce for `_owner` used in protected partition hold creations.
+
+_Incremented internally upon consumption of a valid signed `protectedCreateHoldByPartition` operation._
+
+#### Parameters
+
+| Name    | Type    | Description                                             |
+| ------- | ------- | ------------------------------------------------------- |
+| \_owner | address | Address whose partition hold creation nonce is queried. |
+
+#### Returns
+
+| Name | Type    | Description                       |
+| ---- | ------- | --------------------------------- |
+| \_0  | uint256 | Current nonce value for `_owner`. |
+
 ### protectedRedeemFromByPartition
 
 ```solidity
@@ -7140,6 +7290,28 @@ function protectedRedeemFromByPartition(bytes32 _partition, address _from, uint2
 | \_from           | address                             | undefined   |
 | \_amount         | uint256                             | undefined   |
 | \_protectionData | IProtectedPartitions.ProtectionData | undefined   |
+
+### protectedRedeemFromByPartitionNonce
+
+```solidity
+function protectedRedeemFromByPartitionNonce(address _owner) external view returns (uint256)
+```
+
+Returns the current nonce for `_owner` used in protected partition redemptions.
+
+_Incremented internally upon consumption of a valid signed `protectedRedeemFromByPartition` operation._
+
+#### Parameters
+
+| Name    | Type    | Description                                          |
+| ------- | ------- | ---------------------------------------------------- |
+| \_owner | address | Address whose partition redemption nonce is queried. |
+
+#### Returns
+
+| Name | Type    | Description                       |
+| ---- | ------- | --------------------------------- |
+| \_0  | uint256 | Current nonce value for `_owner`. |
 
 ### protectedTransferFromByPartition
 
@@ -7162,6 +7334,28 @@ function protectedTransferFromByPartition(bytes32 _partition, address _from, add
 | Name | Type    | Description |
 | ---- | ------- | ----------- |
 | \_0  | bytes32 | undefined   |
+
+### protectedTransferFromByPartitionNonce
+
+```solidity
+function protectedTransferFromByPartitionNonce(address _owner) external view returns (uint256)
+```
+
+Returns the current nonce for `_owner` used in protected partition transfers.
+
+_Incremented internally upon consumption of a valid signed `protectedTransferFromByPartition` operation._
+
+#### Parameters
+
+| Name    | Type    | Description                                        |
+| ------- | ------- | -------------------------------------------------- |
+| \_owner | address | Address whose partition transfer nonce is queried. |
+
+#### Returns
+
+| Name | Type    | Description                       |
+| ---- | ------- | --------------------------------- |
+| \_0  | uint256 | Current nonce value for `_owner`. |
 
 ### publishNominalValue
 
@@ -7272,6 +7466,24 @@ _Emits a Transfer event on successful redemption via ERC1410StorageWrapper.redee
 | \_tokenHolder | address | Address of the token holder to redeem. |
 | \_partition   | bytes32 | Partition identifier to redeem from.   |
 | \_amount      | uint256 | Amount of tokens to redeem.            |
+
+### redeemAtMaturityByPartitionRange
+
+```solidity
+function redeemAtMaturityByPartitionRange(address _tokenHolder, uint256 _pageIndex, uint256 _pageLength) external nonpayable
+```
+
+Redeems a bounded page of the token partitions held by a token holder at maturity.
+
+_Caller must hold `ROLE_MATURITY_REDEEMER`. Contract must be unpaused and clearing must be disabled. `_tokenHolder` must be on the allowed list, hold granted KYC status, must not be recovered, and the current timestamp must be at or past the maturity date. Iterates only the partitions in the `[\_pageIndex _ \_pageLength, \_pageIndex _ \_pageLength + \_pageLength)`range of`\_tokenHolder`&#39;s partition list,         clamped to the actual partition count, and redeems each balance in full. Reverts         with an unexpected error if any partition in that range has a zero balance. Exists         so a holder with more partitions than fit in one block&#39;s gas limit can still be         fully redeemed across multiple calls; `fullRedeemAtMaturity`remains available         unchanged for holders within the existing gas budget.Emits {TransferByPartition} and {RedeemedByPartition} for each redeemed partition         via`ERC1410StorageWrapper.redeemByPartition`, then {RedeemedAtMaturityByPartitionRange} once after the page has been processed._
+
+#### Parameters
+
+| Name          | Type    | Description                                                      |
+| ------------- | ------- | ---------------------------------------------------------------- |
+| \_tokenHolder | address | Address of the token holder whose partitions are to be redeemed. |
+| \_pageIndex   | uint256 | Zero-based index of the page of partitions to redeem.            |
+| \_pageLength  | uint256 | Number of partitions per page.                                   |
 
 ### redeemByPartition
 
@@ -7851,7 +8063,7 @@ function setCouponRateType(enum IInterestRate.RateType _rateType) external nonpa
 
 Sets the coupon rate type discriminator for this asset.
 
-_Requires `ROLE_INTEREST_RATE_MANAGER`._
+_Requires `ROLE_INTEREST_RATE_MANAGER`. Reverts if any active coupon still has an unresolved rate, so a coupon issued under the previous type can never be left permanently unresolved by the switch._
 
 #### Parameters
 
@@ -8948,6 +9160,27 @@ Emitted when an admin force-cancels an amortization, bypassing date guards.
 | amortizationId     | uint256 | Identifier of the force-cancelled amortization. |
 | operator `indexed` | address | Address that performed the force-cancellation.  |
 
+### AmortizationHoldAccountingMigrated
+
+```solidity
+event AmortizationHoldAccountingMigrated(bytes32 indexed corporateActionId, uint256 indexed amortizationID, uint256 previousTotal, uint256 previousLabaf, uint256 total, uint256 labaf)
+```
+
+Emitted when the pre-fix hold-accounting state of an amortization corporate action is seeded by `migrateAmortizationHoldAccounting`.
+
+_Carries both the pre-migration stored values and the newly seeded ones so the migration is self-contained for audit purposes._
+
+#### Parameters
+
+| Name                        | Type    | Description                                                           |
+| --------------------------- | ------- | --------------------------------------------------------------------- |
+| corporateActionId `indexed` | bytes32 | Unique identifier grouping related corporate actions.                 |
+| amortizationID `indexed`    | uint256 | Identifier of the migrated amortization.                              |
+| previousTotal               | uint256 | The raw `totalHoldByAmortizationId` stored before migration.          |
+| previousLabaf               | uint256 | The raw `labafByAmortizationId` stored before migration (always `0`). |
+| total                       | uint256 | The `totalHoldByAmortizationId` seeded by this migration.             |
+| labaf                       | uint256 | The `labafByAmortizationId` seeded by this migration.                 |
+
 ### AmortizationHoldReleased
 
 ```solidity
@@ -9587,6 +9820,42 @@ _Fires exclusively from `initializeCompliance`._
 | Name       | Type    | Description                                              |
 | ---------- | ------- | -------------------------------------------------------- |
 | compliance | address | The compliance contract address wired at initialisation. |
+
+### ConfigUpdated
+
+```solidity
+event ConfigUpdated(address indexed caller, bytes32 oldConfigurationId, bytes32 newConfigurationId, uint256 oldConfigurationVersion, uint256 newConfigurationVersion)
+```
+
+Emitted when the active configuration identifier is replaced.
+
+_`updateConfig()` combines an id change and a version change in one call; both get a complete old/new pair here._
+
+#### Parameters
+
+| Name                    | Type    | Description                                  |
+| ----------------------- | ------- | -------------------------------------------- |
+| caller `indexed`        | address | Account that performed the update.           |
+| oldConfigurationId      | bytes32 | Previous configuration identifier.           |
+| newConfigurationId      | bytes32 | New configuration identifier.                |
+| oldConfigurationVersion | uint256 | Previous configuration version.              |
+| newConfigurationVersion | uint256 | Version activated for the new configuration. |
+
+### ConfigVersionUpdated
+
+```solidity
+event ConfigVersionUpdated(address indexed caller, uint256 oldConfigurationVersion, uint256 newConfigurationVersion)
+```
+
+Emitted when the pinned version of the active configuration is replaced.
+
+#### Parameters
+
+| Name                    | Type    | Description                        |
+| ----------------------- | ------- | ---------------------------------- |
+| caller `indexed`        | address | Account that performed the update. |
+| oldConfigurationVersion | uint256 | Previous configuration version.    |
+| newConfigurationVersion | uint256 | New configuration version.         |
 
 ### ControlListInitialized
 
@@ -10292,6 +10561,20 @@ Emitted once when the freeze capability is initialised on a token.
 
 _Fires exclusively from `initializeFreeze`._
 
+### FullyRedeemedAtMaturity
+
+```solidity
+event FullyRedeemedAtMaturity(address indexed tokenHolder)
+```
+
+Emitted once after `fullRedeemAtMaturity` has redeemed every partition held by `tokenHolder`.
+
+#### Parameters
+
+| Name                  | Type    | Description                                          |
+| --------------------- | ------- | ---------------------------------------------------- |
+| tokenHolder `indexed` | address | Token holder whose full partition list was redeemed. |
+
 ### HeldByPartition
 
 ```solidity
@@ -10555,6 +10838,34 @@ Emitted when the internal KYC enforcement status is toggled.
 | ------------------ | ------- | --------------------------------------------- |
 | operator `indexed` | address | The address that triggered the status update. |
 | activated          | bool    | The new activation state of the internal KYC. |
+
+### IssuanceDisabled
+
+```solidity
+event IssuanceDisabled(address indexed operator)
+```
+
+Emitted when token issuance is disabled.
+
+#### Parameters
+
+| Name               | Type    | Description                     |
+| ------------------ | ------- | ------------------------------- |
+| operator `indexed` | address | Account that disabled issuance. |
+
+### IssuanceFinalized
+
+```solidity
+event IssuanceFinalized(address indexed operator)
+```
+
+Emitted when token issuance is finalized.
+
+#### Parameters
+
+| Name               | Type    | Description                      |
+| ------------------ | ------- | -------------------------------- |
+| operator `indexed` | address | Account that finalized issuance. |
 
 ### Issued
 
@@ -11569,6 +11880,22 @@ Emitted when tokens are redeemed from a holder&#39;s balance.
 | value              | uint256 | Amount of tokens redeemed, denominated in base units. |
 | data               | bytes   | Arbitrary payload forwarded alongside the redemption. |
 
+### RedeemedAtMaturityByPartitionRange
+
+```solidity
+event RedeemedAtMaturityByPartitionRange(address indexed tokenHolder, uint256 pageIndex, uint256 pageLength)
+```
+
+Emitted once after `redeemAtMaturityByPartitionRange` has redeemed the requested page of partitions held by `tokenHolder`.
+
+#### Parameters
+
+| Name                  | Type    | Description                                                |
+| --------------------- | ------- | ---------------------------------------------------------- |
+| tokenHolder `indexed` | address | Token holder whose partitions were redeemed.               |
+| pageIndex             | uint256 | Zero-based index of the page that was redeemed.            |
+| pageLength            | uint256 | Number of partitions per page, as requested by the caller. |
+
 ### RedeemedByPartition
 
 ```solidity
@@ -11662,6 +11989,46 @@ Emitted when an issuer is removed from the trusted issuer list.
 | ------------------ | ------- | ------------------------------------------------ |
 | operator `indexed` | address | Address of the caller who performed the removal. |
 | issuer `indexed`   | address | Address of the issuer that was removed.          |
+
+### ReplacementEnabledUpdated
+
+```solidity
+event ReplacementEnabledUpdated(address indexed caller, bool oldReplacementEnabled, bool newReplacementEnabled)
+```
+
+Emitted when the replacement-enabled flag is replaced.
+
+#### Parameters
+
+| Name                  | Type    | Description                        |
+| --------------------- | ------- | ---------------------------------- |
+| caller `indexed`      | address | Account that performed the update. |
+| oldReplacementEnabled | bool    | Previous replacement-enabled flag. |
+| newReplacementEnabled | bool    | New replacement-enabled flag.      |
+
+### ResolverUpdated
+
+```solidity
+event ResolverUpdated(address indexed caller, address oldResolver, address newResolver, bytes32 oldConfigurationId, bytes32 newConfigurationId, uint256 oldConfigurationVersion, uint256 newConfigurationVersion, bool oldReplacementEnabled, bool newReplacementEnabled)
+```
+
+Emitted when the resolver-proxy&#39;s Business Logic Resolver is replaced.
+
+_`updateResolver()` combines four changes in one call; every one of them gets a complete old/new pair here rather than only the fields that happen to differ._
+
+#### Parameters
+
+| Name                    | Type    | Description                                             |
+| ----------------------- | ------- | ------------------------------------------------------- |
+| caller `indexed`        | address | Account that performed the update.                      |
+| oldResolver             | address | Previous Business Logic Resolver address.               |
+| newResolver             | address | New Business Logic Resolver address.                    |
+| oldConfigurationId      | bytes32 | Previous configuration identifier.                      |
+| newConfigurationId      | bytes32 | Configuration identifier activated on the new resolver. |
+| oldConfigurationVersion | uint256 | Previous configuration version.                         |
+| newConfigurationVersion | uint256 | Configuration version activated on the new resolver.    |
+| oldReplacementEnabled   | bool    | Previous replacement-enabled flag.                      |
+| newReplacementEnabled   | bool    | Replacement-enabled flag activated on the new resolver. |
 
 ### RevocationRegistryUpdated
 
@@ -12386,6 +12753,23 @@ Thrown when attempting to cancel an amortization that still has active holds.
 | corporateActionId | bytes32 | The corporate action ID of the amortization.      |
 | amortizationID    | uint256 | The amortization ID that still has pending holds. |
 
+### AmortizationHoldAccountingAlreadyMigrated
+
+```solidity
+error AmortizationHoldAccountingAlreadyMigrated(bytes32 corporateActionId, uint256 amortizationID)
+```
+
+Thrown by `migrateAmortizationHoldAccounting` when the target amortization&#39;s raw, non-defaulted `labafByAmortizationId` is already non-zero.
+
+_The migration is a one-time contingency, not a setter; a non-zero raw LABAF means the amortization was already migrated or has already gone through a regular sync._
+
+#### Parameters
+
+| Name              | Type    | Description                                           |
+| ----------------- | ------- | ----------------------------------------------------- |
+| corporateActionId | bytes32 | Unique identifier grouping related corporate actions. |
+| amortizationID    | uint256 | The amortization ID that was already migrated.        |
+
 ### AmortizationHoldFailed
 
 ```solidity
@@ -12416,6 +12800,42 @@ Thrown when attempting to release a hold that is not active for the given holder
 | corporateActionId | bytes32 | The corporate action ID of the amortization.         |
 | amortizationID    | uint256 | The amortization ID.                                 |
 | tokenHolder       | address | The address of the token holder with no active hold. |
+
+### AmortizationMigrationLabafAboveAbaf
+
+```solidity
+error AmortizationMigrationLabafAboveAbaf(uint256 amortizationID, uint256 labaf, uint256 abaf)
+```
+
+Thrown by `migrateAmortizationHoldAccounting` when `_labaf` exceeds the current ABAF.
+
+_A `_labaf` above the current ABAF would truncate `abaf / labaf` to `0` on the next sync._
+
+#### Parameters
+
+| Name           | Type    | Description                                                  |
+| -------------- | ------- | ------------------------------------------------------------ |
+| amortizationID | uint256 | The amortization ID being migrated.                          |
+| labaf          | uint256 | The invalid, out-of-range `_labaf` supplied by the caller.   |
+| abaf           | uint256 | The current ABAF the supplied `_labaf` was compared against. |
+
+### AmortizationMigrationTotalAboveSupply
+
+```solidity
+error AmortizationMigrationTotalAboveSupply(uint256 amortizationID, uint256 total, uint256 totalSupply)
+```
+
+Thrown by `migrateAmortizationHoldAccounting` when `_total` exceeds the token&#39;s current total supply.
+
+_An unbounded `_total` would eventually overflow the checked `total _= factor` arithmetic on the next resync, permanently bricking amortization hold operations (including release) for that corporate action, since the migration is one-shot.\*
+
+#### Parameters
+
+| Name           | Type    | Description                                                  |
+| -------------- | ------- | ------------------------------------------------------------ |
+| amortizationID | uint256 | The amortization ID being migrated.                          |
+| total          | uint256 | The invalid, out-of-range `_total` supplied by the caller.   |
+| totalSupply    | uint256 | The current total supply that `_total` was compared against. |
 
 ### AmortizationNotActive
 
@@ -12608,6 +13028,22 @@ Reverts when a coupon identifier does not resolve to an existing corporate actio
 | -------- | ------- | ----------------------------------------- |
 | couponID | uint256 | The coupon identifier that was not found. |
 
+### CouponRatePending
+
+```solidity
+error CouponRatePending(uint256 couponID)
+```
+
+Reverts when at least one coupon is still awaiting rate resolution.
+
+_Raised by `CouponStorageWrapper.checkPendingCoupons`, used to guard `InterestRate::setCouponRateType` so a KPI-linked coupon cannot be left permanently unresolved by switching the rate type away before its scheduled listing has persisted a resolved rate._
+
+#### Parameters
+
+| Name     | Type    | Description                                               |
+| -------- | ------- | --------------------------------------------------------- |
+| couponID | uint256 | One-indexed identifier of the first pending coupon found. |
+
 ### Deactivated
 
 ```solidity
@@ -12640,6 +13076,23 @@ _Protects decimals amount difference between current and new not te be greater t
 | --------------- | ----- | ---------------------------- |
 | currentDecimals | uint8 | the current decimals amount. |
 | newDecimals     | uint8 | the new decimals amount.     |
+
+### DifferentLengths
+
+```solidity
+error DifferentLengths(uint256 length1, uint256 length2)
+```
+
+Emitted when two arrays or collections expected to have matching lengths differ.
+
+_Reverts operations that require one-to-one correspondence between input parameters._
+
+#### Parameters
+
+| Name    | Type    | Description                               |
+| ------- | ------- | ----------------------------------------- |
+| length1 | uint256 | Length of the first array or collection.  |
+| length2 | uint256 | Length of the second array or collection. |
 
 ### DividendAlreadyExecuted
 
@@ -12966,6 +13419,23 @@ error IdentityRegistryCallFailed()
 
 Thrown when an external call to the identity registry reverts or returns false.
 
+### InfiniteAllowance
+
+```solidity
+error InfiniteAllowance(address owner, address spender)
+```
+
+Raised when an operation encounters an allowance that is effectively unlimited.
+
+_Indicates that the owner has granted the spender an infinite allowance, which may require special handling to avoid unintended accounting or revocation assumptions._
+
+#### Parameters
+
+| Name    | Type    | Description                                             |
+| ------- | ------- | ------------------------------------------------------- |
+| owner   | address | The account that granted the allowance.                 |
+| spender | address | The account authorised to spend on behalf of the owner. |
+
 ### InputAmountsArrayLengthMismatch
 
 ```solidity
@@ -13086,6 +13556,22 @@ Thrown when attempting to set a hold with a zero token amount.
 | -------------- | ------- | -------------------- |
 | amortizationID | uint256 | The amortization ID. |
 
+### InvalidAmortizationMigrationLabaf
+
+```solidity
+error InvalidAmortizationMigrationLabaf(uint256 amortizationID)
+```
+
+Thrown by `migrateAmortizationHoldAccounting` when `_labaf` is `0`.
+
+_A zero `_labaf` would recreate the very &quot;never held&quot; ambiguity this migration exists to resolve, since the getter defaults a raw `0` to `1` via `zeroToOne`._
+
+#### Parameters
+
+| Name           | Type    | Description                         |
+| -------------- | ------- | ----------------------------------- |
+| amortizationID | uint256 | The amortization ID being migrated. |
+
 ### InvalidBlocknumber
 
 ```solidity
@@ -13099,6 +13585,20 @@ Error thrown when attempting to set an invalid new system block number
 | Name            | Type    | Description                                    |
 | --------------- | ------- | ---------------------------------------------- |
 | newSystemNumber | uint256 | The new system timestamp that caused the error |
+
+### InvalidBusinessLogicResolver
+
+```solidity
+error InvalidBusinessLogicResolver(address invalidResolver)
+```
+
+Thrown when a candidate resolver is the zero address or fails the `isBusinessLogicResolver()` identity check.
+
+#### Parameters
+
+| Name            | Type    | Description                         |
+| --------------- | ------- | ----------------------------------- |
+| invalidResolver | address | The address that failed validation. |
 
 ### InvalidClearingAmount
 
@@ -13253,6 +13753,14 @@ error IsUnpaused()
 
 Thrown when `unpause` is called while the token&#39;s internal pause flag is already cleared.
 
+### IssuanceIsDisabled
+
+```solidity
+error IssuanceIsDisabled()
+```
+
+Thrown when an issuance operation is attempted after issuance has been permanently disabled.
+
 ### KpiDataAlreadyExists
 
 ```solidity
@@ -13358,6 +13866,10 @@ _Used by the `onlyWithLockedExpirationTimestamp` modifier and by `LockStorageWra
 ```solidity
 error MaturityDateInvalid()
 ```
+
+Thrown when a maturity date fails validation.
+
+_Reverts when a proposed maturity date is not strictly in the future at the time it is set, or when a maturity-gated action is attempted before the stored maturity date has been reached._
 
 ### MaxExternalListSizeReached
 
@@ -13945,16 +14457,6 @@ error ZeroAddressNotAllowed()
 Reverts when the zero address is supplied where it is not permitted.
 
 _Prevents invalid account, contract, or recipient references._
-
-### ZeroOwnerAddress
-
-```solidity
-error ZeroOwnerAddress()
-```
-
-Reverts when an allowance operation references the zero address as the owner.
-
-_Defensive guard against mis-wired flows or malformed calldata reaching the underlying storage wrappers._
 
 ### ZeroPartition
 

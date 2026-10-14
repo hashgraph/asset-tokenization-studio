@@ -48,7 +48,7 @@ function setCouponRateType(enum IInterestRate.RateType _rateType) external nonpa
 
 Sets the coupon rate type discriminator for this asset.
 
-_Requires `ROLE_INTEREST_RATE_MANAGER`._
+_Requires `ROLE_INTEREST_RATE_MANAGER`. Reverts if any active coupon still has an unresolved rate, so a coupon issued under the previous type can never be left permanently unresolved by the switch._
 
 #### Parameters
 

@@ -355,7 +355,7 @@ function updateConfig(bytes32 _newConfigurationId, uint256 _newVersion) external
 
 For the current BLR, update its configuration identifier and version.
 
-_Requires `DEFAULT_ADMIN_ROLE` and validates the configuration before storing the new configuration identifier and pinned version._
+_Requires `DEFAULT_ADMIN_ROLE` and validates the configuration before storing the new configuration identifier and pinned version. The admin is responsible for confirming that `_newConfigurationId` is compatible with the currently active configuration before calling this function; no on-chain compatibility check is performed._
 
 #### Parameters
 
@@ -402,7 +402,7 @@ function updateResolver(contract IBusinessLogicResolver _newResolver, bytes32 _n
 
 Replaces the Business Logic Resolver with a new one, setting configuration and version.
 
-_Requires `DEFAULT_ADMIN_ROLE` and validates the target configuration against the new resolver before replacing the resolver pointer, configuration identifier and version._
+_Requires `DEFAULT_ADMIN_ROLE`, validates `_newResolver` is a genuine `IBusinessLogicResolver`, and validates the target configuration against it before replacing the resolver pointer, configuration identifier and version. The admin is responsible for confirming business-key and configuration compatibility across the resolver switch before calling this function; no on-chain compatibility check is performed — `_newResolver`, `_newConfigurationId` and `_newVersion` are trusted as a deliberate, atomic choice by a trusted admin role._
 
 #### Parameters
 
@@ -415,6 +415,42 @@ _Requires `DEFAULT_ADMIN_ROLE` and validates the target configuration against th
 
 ## Events
 
+### ConfigUpdated
+
+```solidity
+event ConfigUpdated(address indexed caller, bytes32 oldConfigurationId, bytes32 newConfigurationId, uint256 oldConfigurationVersion, uint256 newConfigurationVersion)
+```
+
+Emitted when the active configuration identifier is replaced.
+
+_`updateConfig()` combines an id change and a version change in one call; both get a complete old/new pair here._
+
+#### Parameters
+
+| Name                    | Type    | Description                                  |
+| ----------------------- | ------- | -------------------------------------------- |
+| caller `indexed`        | address | Account that performed the update.           |
+| oldConfigurationId      | bytes32 | Previous configuration identifier.           |
+| newConfigurationId      | bytes32 | New configuration identifier.                |
+| oldConfigurationVersion | uint256 | Previous configuration version.              |
+| newConfigurationVersion | uint256 | Version activated for the new configuration. |
+
+### ConfigVersionUpdated
+
+```solidity
+event ConfigVersionUpdated(address indexed caller, uint256 oldConfigurationVersion, uint256 newConfigurationVersion)
+```
+
+Emitted when the pinned version of the active configuration is replaced.
+
+#### Parameters
+
+| Name                    | Type    | Description                        |
+| ----------------------- | ------- | ---------------------------------- |
+| caller `indexed`        | address | Account that performed the update. |
+| oldConfigurationVersion | uint256 | Previous configuration version.    |
+| newConfigurationVersion | uint256 | New configuration version.         |
+
 ### DiamondCutInitialized
 
 ```solidity
@@ -424,6 +460,46 @@ event DiamondCutInitialized()
 Emitted once when the diamond facet is initialised.
 
 _Fires exclusively from `initializeDiamondCut`._
+
+### ReplacementEnabledUpdated
+
+```solidity
+event ReplacementEnabledUpdated(address indexed caller, bool oldReplacementEnabled, bool newReplacementEnabled)
+```
+
+Emitted when the replacement-enabled flag is replaced.
+
+#### Parameters
+
+| Name                  | Type    | Description                        |
+| --------------------- | ------- | ---------------------------------- |
+| caller `indexed`      | address | Account that performed the update. |
+| oldReplacementEnabled | bool    | Previous replacement-enabled flag. |
+| newReplacementEnabled | bool    | New replacement-enabled flag.      |
+
+### ResolverUpdated
+
+```solidity
+event ResolverUpdated(address indexed caller, address oldResolver, address newResolver, bytes32 oldConfigurationId, bytes32 newConfigurationId, uint256 oldConfigurationVersion, uint256 newConfigurationVersion, bool oldReplacementEnabled, bool newReplacementEnabled)
+```
+
+Emitted when the resolver-proxy&#39;s Business Logic Resolver is replaced.
+
+_`updateResolver()` combines four changes in one call; every one of them gets a complete old/new pair here rather than only the fields that happen to differ._
+
+#### Parameters
+
+| Name                    | Type    | Description                                             |
+| ----------------------- | ------- | ------------------------------------------------------- |
+| caller `indexed`        | address | Account that performed the update.                      |
+| oldResolver             | address | Previous Business Logic Resolver address.               |
+| newResolver             | address | New Business Logic Resolver address.                    |
+| oldConfigurationId      | bytes32 | Previous configuration identifier.                      |
+| newConfigurationId      | bytes32 | Configuration identifier activated on the new resolver. |
+| oldConfigurationVersion | uint256 | Previous configuration version.                         |
+| newConfigurationVersion | uint256 | Configuration version activated on the new resolver.    |
+| oldReplacementEnabled   | bool    | Previous replacement-enabled flag.                      |
+| newReplacementEnabled   | bool    | Replacement-enabled flag activated on the new resolver. |
 
 ## Errors
 
@@ -456,6 +532,20 @@ Raised when an initialiser tries to register a facet that already has a non-zero
 | ----------- | ------- | -------------------------------------------------------------- |
 | facetId     | bytes32 | Identifier of the offending facet.                             |
 | lastVersion | uint256 | Last version recorded for that facet at the time of the check. |
+
+### InvalidBusinessLogicResolver
+
+```solidity
+error InvalidBusinessLogicResolver(address invalidResolver)
+```
+
+Thrown when a candidate resolver is the zero address or fails the `isBusinessLogicResolver()` identity check.
+
+#### Parameters
+
+| Name            | Type    | Description                         |
+| --------------- | ------- | ----------------------------------- |
+| invalidResolver | address | The address that failed validation. |
 
 ### UnrecognizedResolverProxyVersion
 

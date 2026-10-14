@@ -52,13 +52,3 @@ error SpenderWithZeroAddress()
 ```
 
 Reverts when the zero address is supplied as `spender` in an allowance update.
-
-### ZeroOwnerAddress
-
-```solidity
-error ZeroOwnerAddress()
-```
-
-Reverts when an allowance operation references the zero address as the owner.
-
-_Defensive guard against mis-wired flows or malformed calldata reaching the underlying storage wrappers._

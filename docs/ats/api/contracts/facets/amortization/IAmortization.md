@@ -278,6 +278,46 @@ Initialises the amortization capability on the token.
 
 _Callable once; subsequent calls revert with `FacetAlreadyRegistered`. Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment._
 
+### isAmortizationHoldAccountingMigrationPending
+
+```solidity
+function isAmortizationHoldAccountingMigrationPending(uint256 _amortizationID) external view returns (bool)
+```
+
+Reports whether an amortization corporate action still needs `migrateAmortizationHoldAccounting` to be called for it.
+
+_Backed by the same raw-LABAF-read helper as the idempotency guard on the migration writer, depending only on `labafByAmortizationId == 0` — never on `totalHoldByAmortizationId`. No role gate, matching the read-only nature of `getTotalHoldByAmortizationId`._
+
+#### Parameters
+
+| Name             | Type    | Description                                              |
+| ---------------- | ------- | -------------------------------------------------------- |
+| \_amortizationID | uint256 | The one-based identifier of the amortization to inspect. |
+
+#### Returns
+
+| Name | Type | Description                                                                                                        |
+| ---- | ---- | ------------------------------------------------------------------------------------------------------------------ |
+| \_0  | bool | True if the raw `labafByAmortizationId` is still `0` (never migrated and never regularly synced); false otherwise. |
+
+### migrateAmortizationHoldAccounting
+
+```solidity
+function migrateAmortizationHoldAccounting(uint256 _amortizationID, uint256 _total, uint256 _labaf) external nonpayable
+```
+
+One-time, admin-gated repair that seeds `totalHoldByAmortizationId` and `labafByAmortizationId` for an amortization corporate action that accumulated holds before LABAF tracking existed on this aggregate.
+
+_Restricted to `DEFAULT_ADMIN_ROLE`. Deliberately carries no `onlyOperational`, `onlyActivated`, or `onlyUnpaused` gate so it can repair state while the token is paused. Reverts with {AmortizationHoldAccountingAlreadyMigrated} if the raw, non-defaulted `labafByAmortizationId` is already non-zero; with {InvalidAmortizationMigrationLabaf} if `_labaf == 0`; with {AmortizationMigrationLabafAboveAbaf} if `_labaf` exceeds the current ABAF; with {AmortizationMigrationTotalAboveSupply} if `_total` exceeds the token&#39;s current total supply. Not gated on `disabledAmortizations`: a cancelled action can still reach the vulnerable sync path via a later `releaseAmortizationHold` and must stay migratable. Emits {AmortizationHoldAccountingMigrated} on success._
+
+#### Parameters
+
+| Name             | Type    | Description                                                                                                                                |
+| ---------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| \_amortizationID | uint256 | The one-based identifier of the amortization to migrate.                                                                                   |
+| \_total          | uint256 | The raw `totalHoldByAmortizationId` value to seed (no lower bound, `0` is valid; MUST NOT exceed the token&#39;s current `totalSupply()`). |
+| \_labaf          | uint256 | The raw `labafByAmortizationId` value to seed; must satisfy `0 &lt; _labaf &lt;= currentAbaf`.                                             |
+
 ### releaseAmortizationHold
 
 ```solidity
@@ -369,6 +409,27 @@ Emitted when an admin force-cancels an amortization, bypassing date guards.
 | ------------------ | ------- | ----------------------------------------------- |
 | amortizationId     | uint256 | Identifier of the force-cancelled amortization. |
 | operator `indexed` | address | Address that performed the force-cancellation.  |
+
+### AmortizationHoldAccountingMigrated
+
+```solidity
+event AmortizationHoldAccountingMigrated(bytes32 indexed corporateActionId, uint256 indexed amortizationID, uint256 previousTotal, uint256 previousLabaf, uint256 total, uint256 labaf)
+```
+
+Emitted when the pre-fix hold-accounting state of an amortization corporate action is seeded by `migrateAmortizationHoldAccounting`.
+
+_Carries both the pre-migration stored values and the newly seeded ones so the migration is self-contained for audit purposes._
+
+#### Parameters
+
+| Name                        | Type    | Description                                                           |
+| --------------------------- | ------- | --------------------------------------------------------------------- |
+| corporateActionId `indexed` | bytes32 | Unique identifier grouping related corporate actions.                 |
+| amortizationID `indexed`    | uint256 | Identifier of the migrated amortization.                              |
+| previousTotal               | uint256 | The raw `totalHoldByAmortizationId` stored before migration.          |
+| previousLabaf               | uint256 | The raw `labafByAmortizationId` stored before migration (always `0`). |
+| total                       | uint256 | The `totalHoldByAmortizationId` seeded by this migration.             |
+| labaf                       | uint256 | The `labafByAmortizationId` seeded by this migration.                 |
 
 ### AmortizationHoldReleased
 
@@ -473,6 +534,23 @@ Thrown when attempting to cancel an amortization that still has active holds.
 | corporateActionId | bytes32 | The corporate action ID of the amortization.      |
 | amortizationID    | uint256 | The amortization ID that still has pending holds. |
 
+### AmortizationHoldAccountingAlreadyMigrated
+
+```solidity
+error AmortizationHoldAccountingAlreadyMigrated(bytes32 corporateActionId, uint256 amortizationID)
+```
+
+Thrown by `migrateAmortizationHoldAccounting` when the target amortization&#39;s raw, non-defaulted `labafByAmortizationId` is already non-zero.
+
+_The migration is a one-time contingency, not a setter; a non-zero raw LABAF means the amortization was already migrated or has already gone through a regular sync._
+
+#### Parameters
+
+| Name              | Type    | Description                                           |
+| ----------------- | ------- | ----------------------------------------------------- |
+| corporateActionId | bytes32 | Unique identifier grouping related corporate actions. |
+| amortizationID    | uint256 | The amortization ID that was already migrated.        |
+
 ### AmortizationHoldFailed
 
 ```solidity
@@ -504,6 +582,42 @@ Thrown when attempting to release a hold that is not active for the given holder
 | amortizationID    | uint256 | The amortization ID.                                 |
 | tokenHolder       | address | The address of the token holder with no active hold. |
 
+### AmortizationMigrationLabafAboveAbaf
+
+```solidity
+error AmortizationMigrationLabafAboveAbaf(uint256 amortizationID, uint256 labaf, uint256 abaf)
+```
+
+Thrown by `migrateAmortizationHoldAccounting` when `_labaf` exceeds the current ABAF.
+
+_A `_labaf` above the current ABAF would truncate `abaf / labaf` to `0` on the next sync._
+
+#### Parameters
+
+| Name           | Type    | Description                                                  |
+| -------------- | ------- | ------------------------------------------------------------ |
+| amortizationID | uint256 | The amortization ID being migrated.                          |
+| labaf          | uint256 | The invalid, out-of-range `_labaf` supplied by the caller.   |
+| abaf           | uint256 | The current ABAF the supplied `_labaf` was compared against. |
+
+### AmortizationMigrationTotalAboveSupply
+
+```solidity
+error AmortizationMigrationTotalAboveSupply(uint256 amortizationID, uint256 total, uint256 totalSupply)
+```
+
+Thrown by `migrateAmortizationHoldAccounting` when `_total` exceeds the token&#39;s current total supply.
+
+_An unbounded `_total` would eventually overflow the checked `total _= factor` arithmetic on the next resync, permanently bricking amortization hold operations (including release) for that corporate action, since the migration is one-shot.\*
+
+#### Parameters
+
+| Name           | Type    | Description                                                  |
+| -------------- | ------- | ------------------------------------------------------------ |
+| amortizationID | uint256 | The amortization ID being migrated.                          |
+| total          | uint256 | The invalid, out-of-range `_total` supplied by the caller.   |
+| totalSupply    | uint256 | The current total supply that `_total` was compared against. |
+
 ### AmortizationNotActive
 
 ```solidity
@@ -532,3 +646,19 @@ Thrown when attempting to set a hold with a zero token amount.
 | Name           | Type    | Description          |
 | -------------- | ------- | -------------------- |
 | amortizationID | uint256 | The amortization ID. |
+
+### InvalidAmortizationMigrationLabaf
+
+```solidity
+error InvalidAmortizationMigrationLabaf(uint256 amortizationID)
+```
+
+Thrown by `migrateAmortizationHoldAccounting` when `_labaf` is `0`.
+
+_A zero `_labaf` would recreate the very &quot;never held&quot; ambiguity this migration exists to resolve, since the getter defaults a raw `0` to `1` via `zeroToOne`._
+
+#### Parameters
+
+| Name           | Type    | Description                         |
+| -------------- | ------- | ----------------------------------- |
+| amortizationID | uint256 | The amortization ID being migrated. |

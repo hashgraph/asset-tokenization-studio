@@ -163,3 +163,13 @@ _Replaces assertions for defensive handling of logically impossible states._
 | Name      | Type   | Description                                        |
 | --------- | ------ | -------------------------------------------------- |
 | \_errorId | bytes4 | Identifier of the unexpected validation condition. |
+
+### WrongExpirationTimestamp
+
+```solidity
+error WrongExpirationTimestamp()
+```
+
+Reverts when an expiration timestamp is invalid.
+
+_Used for expired, past, or otherwise unacceptable expiration values._

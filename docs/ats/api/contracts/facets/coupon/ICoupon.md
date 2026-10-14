@@ -265,6 +265,22 @@ Reverts when a coupon identifier does not resolve to an existing corporate actio
 | -------- | ------- | ----------------------------------------- |
 | couponID | uint256 | The coupon identifier that was not found. |
 
+### CouponRatePending
+
+```solidity
+error CouponRatePending(uint256 couponID)
+```
+
+Reverts when at least one coupon is still awaiting rate resolution.
+
+_Raised by `CouponStorageWrapper.checkPendingCoupons`, used to guard `InterestRate::setCouponRateType` so a KPI-linked coupon cannot be left permanently unresolved by switching the rate type away before its scheduled listing has persisted a resolved rate._
+
+#### Parameters
+
+| Name     | Type    | Description                                               |
+| -------- | ------- | --------------------------------------------------------- |
+| couponID | uint256 | One-indexed identifier of the first pending coupon found. |
+
 ### InterestRateIsKpiLinked
 
 ```solidity

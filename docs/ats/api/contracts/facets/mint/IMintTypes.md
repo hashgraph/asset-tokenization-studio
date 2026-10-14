@@ -10,6 +10,34 @@ _Holds the `Issued` event, emitted from both `Mint` (`issue`/`mint`) and `BatchM
 
 ## Events
 
+### IssuanceDisabled
+
+```solidity
+event IssuanceDisabled(address indexed operator)
+```
+
+Emitted when token issuance is disabled.
+
+#### Parameters
+
+| Name               | Type    | Description                     |
+| ------------------ | ------- | ------------------------------- |
+| operator `indexed` | address | Account that disabled issuance. |
+
+### IssuanceFinalized
+
+```solidity
+event IssuanceFinalized(address indexed operator)
+```
+
+Emitted when token issuance is finalized.
+
+#### Parameters
+
+| Name               | Type    | Description                      |
+| ------------------ | ------- | -------------------------------- |
+| operator `indexed` | address | Account that finalized issuance. |
+
 ### Issued
 
 ```solidity
@@ -26,3 +54,13 @@ Emitted when new tokens are issued to a holder.
 | to `indexed`       | address | Recipient of the newly issued tokens.                |
 | value              | uint256 | Amount of tokens issued, denominated in base units.  |
 | data               | bytes   | Arbitrary payload forwarded alongside the issuance.  |
+
+## Errors
+
+### IssuanceIsDisabled
+
+```solidity
+error IssuanceIsDisabled()
+```
+
+Thrown when an issuance operation is attempted after issuance has been permanently disabled.
