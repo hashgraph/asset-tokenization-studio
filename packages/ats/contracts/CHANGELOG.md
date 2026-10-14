@@ -20,6 +20,8 @@
   **Breaking: `DiamondCutManager` — three functions now require `ROLE_CREATE_CONFIGURATION`**
   `createConfiguration`, `createBatchConfiguration`, and `cancelBatchConfiguration` each have a new `onlyRole(ROLE_CREATE_CONFIGURATION)` modifier. Any account that previously called these functions without holding the role will now revert with `AccountHasNoRole(account, ROLE_CREATE_CONFIGURATION)`. The role must be explicitly granted via `grantRole` before calling these functions.
 
+- bc0d00d: Remove the `SecurityType` enum and the stored `securityType` metadata; `ERC20Metadata` is now the flat `{ name, symbol, decimals }` struct consumed directly by `initializeCore` and `getERC20Metadata`.
+
 ### Minor Changes
 
 - da8bd72: chore(contracts): remove the isolated T-REX (`factory/ERC3643/`) scaffolding wholesale (BBND-1840). Drops the `TREXFactoryAts` stub, its `TRex*` interface clones, the `@tokenysolutions/t-rex` and `@onchain-id/solidity` deps and their typechain exports; the native ERC-3643 facets are unaffected.
@@ -36,6 +38,9 @@
 - 37a4f32: proceed recipient and scheduled crossordered updated.Unused contracts removed.
 - 64e8681: npmrc added blocking install script and new scripts implemented
 - 12d4a25: smart contracts docs automatically updated when merging in any branch and automatically verified when merging in main. Locally, external changes overwritte local ones
+
+- ecced48: Add a paginated redemption entry point for multi-partition maturity.
+- 5995e8a: Enforce the ERC-1594 `isIssuable` flag and finalisation.
 
 ### Patch Changes
 
@@ -99,6 +104,30 @@
 - f5e9915: Remove unused constants
 - a8d246d: Adopt solhint 6.2.1 and clear its recommended-ruleset lint warnings, with no functional, ABI or storage change.
 - 4d4309b: Compose the per-domain deployment facet lists from shared, type-checked facet sets backed by a generated `FacetName` union, so unknown or mis-typed facet names become compile errors instead of runtime lookup misses. No on-chain, ABI, or configuration change — every deployment configuration resolves to the same facet set as before.
+
+- 355fe28: Fix `setOperationalStatus` incorrectly marking a configuration version as fully operational when `initializeInitializer` had never been called (`maxInitializerFacetIndex == 0`). The function now guards against this case and preserves the "not started" (`0`) encoding instead of colliding with the "fully operational" (`1`) sentinel, so `onlyOperational` checks can no longer be bypassed.
+- ab47fcb: Fix FIND-033: the `deactivated` version status was accepted but unimplemented, and `registerBusinessLogics` allowed a partial re-registration that silently desynced the active facet versions.
+- b771a6f: Fix FIND-053: validate the upgrade target in all three diamond-cut update-resolver entrypoints, which previously needed target validation, and emit the missing events.
+- 8d178ca: Fix FIND-060: cancel-batch configuration now clears the facet id position, so a reused batch version no longer returns the wrong facet data.
+- 6189768: Break same-timestamp ties in scheduled tasks by type.
+- c69ba83: Enforce compliance checks on `transferAndLock` recipients.
+- 08b72d3: Use the full lookback window for early KPI fixing dates.
+- 545d41b: Fail closed when the revocation registry reverts.
+- 77ac568: Guard `revokeRole` and `applyRoles` against removing the sole admin.
+- 35ae55f: Reject a coupon rate type switch while a KPI coupon is unresolved.
+- c60dbcd: Enforce pause on self-transfer paths.
+- 975b4b1: Skip the ABAF catch-up multiply for unlimited allowances.
+- 77334ef: Reject lock expiration timestamps equal to the current block time.
+- 7f74e41: Revert the clearing hold-creation approval when `holdExpirationTimestamp` has already elapsed.
+- e420802: Allow mandatory maturity redemption regardless of holder KYC or control-list status.
+- 421945a: Segregate permit and protected-partition nonces into independent counters.
+- f54205e: Exempt an expired clearing reclaim from KYC/identity checks.
+- 2a059f2: Reject mismatched proceed-recipient array lengths at initialization.
+- 48ec8c3: Handle reverting loan contracts in reclassification and balance queries.
+- 8de34f8: Fix FIND-068: document the selector-blacklist registration time scope in the interface NatSpec and add the missing boundary regression test.
+- 4fde86a: Fix FIND-030: operator clearing cancel-reclaim no longer restores a phantom allowance to address `0`, which corrupted allowance bookkeeping.
+- dde36df: Validate the cumulative amount in `batchTransfer`.
+- 058ff08: Restore balance and resync ABAF on amortization hold release.
 
 ## 8.0.0
 
@@ -408,15 +437,9 @@ Highlights — KPI/sustainability rates, ERC20 allowance management, partition-s
 - ad45d49: Fix checkpoint ID format documentation and update step counts in JSDoc comments.
 - fe7032f: Refactor integration test helpers to reduce boilerplate and eliminate magic numbers:.
 
-<<<<<<< HEAD
-
 ## 4.1.1
 
 ### Patch Changes
-
-=======
-
-> > > > > > > 98ce4d2fd (fix: v8.0.0 (#1315))
 
 ## 4.1.0
 
@@ -532,25 +555,14 @@ Highlights — Initial ERC1400+ERC3643 dual-standard architecture, Diamond proxy
 - c62eb6e: Update DEVELOPER_GUIDE.md with current architecture and comprehensive script documentation.
 - c62eb6e: Fix base implementation in TotalBalanceStorageWrapper.
 
-<<<<<<< HEAD
-
 ## 1.17.1
 
 ### Patch Changes
-
-=======
-
-> > > > > > > 98ce4d2fd (fix: v8.0.0 (#1315))
 
 ## 1.17.0
 
 ### Minor Changes
 
 - a36b1c8: Integrate Changesets for version management and implement enterprise-grade release workflow.
-  <<<<<<< HEAD
 
 ### Patch Changes
-
-=======
-
-> > > > > > > 98ce4d2fd (fix: v8.0.0 (#1315))
