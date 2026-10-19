@@ -126,6 +126,7 @@ describe("Bond", () => {
           expect.objectContaining({
             name: createBondRequest.name,
             symbol: createBondRequest.symbol,
+            isin: createBondRequest.isin,
             decimals: createBondRequest.decimals,
             isWhiteList: createBondRequest.isWhiteList,
             isControllable: createBondRequest.isControllable,
@@ -187,6 +188,7 @@ describe("Bond", () => {
           expect.objectContaining({
             name: createBondRequest.name,
             symbol: createBondRequest.symbol,
+            isin: createBondRequest.isin,
             decimals: createBondRequest.decimals,
             isWhiteList: createBondRequest.isWhiteList,
             isControllable: createBondRequest.isControllable,
@@ -249,6 +251,16 @@ describe("Bond", () => {
       createBondRequest = new CreateBondRequest(
         CreateBondRequestFixture.create({
           symbol: "",
+        }),
+      );
+
+      await expect(BondToken.create(createBondRequest)).rejects.toThrow(ValidationError);
+    });
+
+    it("should throw error if isin is invalid", async () => {
+      createBondRequest = new CreateBondRequest(
+        CreateBondRequestFixture.create({
+          isin: "",
         }),
       );
 

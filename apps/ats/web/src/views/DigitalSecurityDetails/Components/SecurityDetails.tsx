@@ -56,6 +56,10 @@ export const SecurityDetails = (props: SecurityDetailsProps) => {
           description: details?.decimals ?? "",
         },
         {
+          title: tProperties("isin"),
+          description: details?.isin ?? "",
+        },
+        {
           title: tProperties("id"),
           description: id ?? "",
         },

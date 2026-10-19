@@ -82,6 +82,10 @@ export const SecurityDetailsExtended = ({
         description: details?.decimals ?? "",
       },
       {
+        title: tProperties("isin"),
+        description: details?.isin ?? "",
+      },
+      {
         title: tProperties("evmAddress"),
         description: details?.evmDiamondAddress ?? "",
         canCopy: true,

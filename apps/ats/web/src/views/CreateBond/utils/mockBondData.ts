@@ -20,6 +20,7 @@ export const getMockBondFormData = (): Partial<ICreateBondFormValues> => {
     name: "Demo Bond 2026",
     symbol: "DCB2026",
     decimals: 6,
+    isin: "US0378331005",
     isControllable: true,
     isBlocklist: true,
     isApproval: false,

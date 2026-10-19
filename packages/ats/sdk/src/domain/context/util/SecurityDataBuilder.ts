@@ -50,6 +50,7 @@ export class SecurityDataBuilder {
       erc20MetadataInfo: {
         name: securityInfo.name,
         symbol: securityInfo.symbol,
+        isin: securityInfo.isin,
         decimals: securityInfo.decimals,
       },
       clearingActive: securityInfo.clearingActive,

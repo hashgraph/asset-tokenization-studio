@@ -51,6 +51,7 @@ export default {
     name: "Name",
     symbol: "Symbol",
     decimal: "Decimal",
+    isin: "ISIN",
     evmAddress: "EVM Address",
     id: "ID",
     compliance: "Compliance",

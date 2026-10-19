@@ -94,6 +94,7 @@ class BondInPort implements IBondInPort {
     const newSecurity: SecurityProps = {
       name: req.name,
       symbol: req.symbol,
+      isin: req.isin,
       decimals: req.decimals,
       isWhiteList: req.isWhiteList,
       erc20VotesActivated: req.erc20VotesActivated,
@@ -163,6 +164,7 @@ class BondInPort implements IBondInPort {
     const newSecurity: SecurityProps = {
       name: req.name,
       symbol: req.symbol,
+      isin: req.isin,
       decimals: req.decimals,
       isWhiteList: req.isWhiteList,
       erc20VotesActivated: req.erc20VotesActivated,
@@ -234,6 +236,7 @@ class BondInPort implements IBondInPort {
     const newSecurity: SecurityProps = {
       name: req.name,
       symbol: req.symbol,
+      isin: req.isin,
       decimals: req.decimals,
       isWhiteList: req.isWhiteList,
       erc20VotesActivated: req.erc20VotesActivated,

@@ -39,6 +39,7 @@ export const useCreateEquity = () => {
         const security = {
           name: data.security.name ?? "",
           symbol: data.security.symbol ?? "",
+          isin: data.security.isin ?? "",
           type: data.security.type,
           address: data.security.diamondAddress?.toString() ?? "",
           evmAddress: data.security.evmDiamondAddress?.toString() ?? "",

@@ -12,6 +12,7 @@ import { Factory } from "@domain/context/factory/Factories";
 export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRequest> {
   name: string;
   symbol: string;
+  isin: string;
   private _decimals: number;
   public get decimals(): number {
     return this._decimals;
@@ -74,6 +75,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
   constructor({
     name,
     symbol,
+    isin,
     decimals,
     isWhiteList,
     erc20VotesActivated,
@@ -110,6 +112,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
   }: {
     name: string;
     symbol: string;
+    isin: string;
     decimals: number | string;
     isWhiteList: boolean;
     erc20VotesActivated: boolean;
@@ -151,6 +154,9 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
       symbol: (val) => {
         return Security.checkSymbol(val);
       },
+      isin: (val) => {
+        return Security.checkISIN(val);
+      },
       decimals: (val) => {
         return Security.checkInteger(val);
       },
@@ -184,6 +190,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     });
     this.name = name;
     this.symbol = symbol;
+    this.isin = isin;
     this.decimals = typeof decimals === "number" ? decimals : parseInt(decimals);
     this.isWhiteList = isWhiteList;
     this.erc20VotesActivated = erc20VotesActivated;
