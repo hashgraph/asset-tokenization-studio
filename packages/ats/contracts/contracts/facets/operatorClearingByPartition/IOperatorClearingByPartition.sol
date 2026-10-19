@@ -9,6 +9,7 @@ bytes32 constant RESOLVER_KEY_OPERATOR_CLEARING_BY_PARTITION = 0xaad3c9e6cb80e4d
 
 /**
  * @title IOperatorClearingByPartition
+ * @author Asset Tokenization Studio Team
  * @notice Interface for operator-initiated clearing operations: redeem and transfer by partition.
  */
 interface IOperatorClearingByPartition is IClearingTypes {
@@ -26,11 +27,12 @@ interface IOperatorClearingByPartition is IClearingTypes {
     function initializeOperatorClearingByPartition() external;
 
     /**
-     * @notice Creates a redeem clearing operation for a partition from a third party
-     * @dev Caller needs to be a token holder operator
-     *
-     * @param _clearingOperationFrom The clearing operation details
-     * @param _amount The amount to redeem
+     * @notice Creates a redeem clearing operation for a partition from a third party.
+     * @dev Caller needs to be a token holder operator.
+     * @param _clearingOperationFrom The clearing operation details.
+     * @param _amount The amount to redeem.
+     * @return success_ True if the clearing operation was created successfully.
+     * @return clearingId_ The identifier assigned to the created clearing operation.
      */
     function operatorClearingRedeemByPartition(
         IClearingTypes.ClearingOperationFrom calldata _clearingOperationFrom,
@@ -38,12 +40,13 @@ interface IOperatorClearingByPartition is IClearingTypes {
     ) external returns (bool success_, uint256 clearingId_);
 
     /**
-     * @notice Creates a transfer clearing operation for a partition from a third party
-     * @dev Caller needs to be a token holder operator
-     *
-     * @param _clearingOperationFrom The clearing operation details
-     * @param _amount The amount to transfer
-     * @param _to The address to transfer the tokens to
+     * @notice Creates a transfer clearing operation for a partition from a third party.
+     * @dev Caller needs to be a token holder operator.
+     * @param _clearingOperationFrom The clearing operation details.
+     * @param _amount The amount to transfer.
+     * @param _to The address to transfer the tokens to.
+     * @return success_ True if the clearing operation was created successfully.
+     * @return clearingId_ The identifier assigned to the created clearing operation.
      */
     function operatorClearingTransferByPartition(
         IClearingTypes.ClearingOperationFrom calldata _clearingOperationFrom,

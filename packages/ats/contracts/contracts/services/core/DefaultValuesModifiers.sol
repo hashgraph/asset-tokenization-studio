@@ -23,7 +23,7 @@ abstract contract DefaultValuesModifiers {
      *
      * @param _address The address to check for
      */
-    modifier notZeroAddress(address _address) virtual {
+    modifier validateAddressNotZero(address _address) {
         DefaultValueValidation.checkZeroAddress(_address);
         _;
     }
@@ -36,8 +36,19 @@ abstract contract DefaultValuesModifiers {
      *
      * @param _value The value to check
      */
-    modifier notZeroValue(uint256 _value) virtual {
+    modifier validateUint256NotZero(uint256 _value) {
         DefaultValueValidation.checkZeroValue(_value);
+        _;
+    }
+
+    /**
+     * @notice Reverts if the two supplied lengths are not equal.
+     * @dev Validates collection or array lengths using `DefaultValueValidation.checkWithSameLength`.
+     * @param _length1 The length of the first collection or array.
+     * @param _length2 The length of the second collection or array.
+     */
+    modifier onlyWithSameLength(uint256 _length1, uint256 _length2) {
+        DefaultValueValidation.checkWithSameLength(_length1, _length2);
         _;
     }
 }

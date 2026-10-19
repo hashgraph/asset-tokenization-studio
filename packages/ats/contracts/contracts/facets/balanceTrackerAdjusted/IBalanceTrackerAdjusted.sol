@@ -7,6 +7,7 @@ bytes32 constant RESOLVER_KEY_BALANCE_TRACKER_ADJUSTED = 0xde8fb5b2c9dd63c753422
 
 /**
  * @title IBalanceTrackerAdjusted
+ * @author Asset Tokenization Studio Team
  * @notice Interface for querying historical token balances at a specific timestamp,
  *         simulating non-triggered balance adjustments up to that point in time.
  * @dev Reads are delegated to `ERC1410StorageWrapper.balanceOfAdjustedAt`.

@@ -7,6 +7,7 @@ import { ClearingModifiers } from "./ClearingModifiers.sol";
 import { CouponModifiers } from "./CouponModifiers.sol";
 import { ComplianceModifiers } from "./ComplianceModifiers.sol";
 import { ERC1410Modifiers } from "./ERC1410Modifiers.sol";
+import { ERC1594Modifiers } from "./ERC1594Modifiers.sol";
 import { ERC3643Modifiers } from "./ERC3643Modifiers.sol";
 import { ExpirationModifiers } from "./ExpirationModifiers.sol";
 import { HoldModifiers } from "./HoldModifiers.sol";
@@ -15,10 +16,10 @@ import { KpisModifiers } from "./KpisModifiers.sol";
 import { LockModifiers } from "./LockModifiers.sol";
 import { MaturityModifiers } from "./MaturityModifiers.sol";
 import { ProceedRecipientModifiers } from "./ProceedRecipientModifiers.sol";
-import { ProtectedPartitionRoleValidatorModifiers } from "./ProtectedPartitionRoleValidatorModifiers.sol";
 import { StateModifiers } from "./StateModifiers.sol";
 import { AmortizationModifiers } from "./AmortizationModifiers.sol";
 import { LoansPortfolioModifiers } from "./LoansPortfolioModifiers.sol";
+import { AllowanceModifiers } from "./AllowanceModifiers.sol";
 
 /**
  * @title AssetModifiers
@@ -30,6 +31,7 @@ import { LoansPortfolioModifiers } from "./LoansPortfolioModifiers.sol";
  * Asset Modifiers:
  * - ActionValidationModifiers: Action validation
  * - AdjustBalancesModifiers: Adjust balances validation
+ * - AllowanceModifiers: Allowance validation
  * - ClearingModifiers: Clearing state validation
  * - CouponModifiers: Coupon date validation
  * - ComplianceModifiers: Compliance validation
@@ -50,10 +52,12 @@ abstract contract AssetModifiers is
     ActionValidationModifiers,
     AdjustBalancesModifiers,
     AmortizationModifiers,
+    AllowanceModifiers,
     ClearingModifiers,
     CouponModifiers,
     ComplianceModifiers,
     ERC1410Modifiers,
+    ERC1594Modifiers,
     ERC3643Modifiers,
     ExpirationModifiers,
     HoldModifiers,
@@ -63,7 +67,6 @@ abstract contract AssetModifiers is
     LoansPortfolioModifiers,
     MaturityModifiers,
     ProceedRecipientModifiers,
-    ProtectedPartitionRoleValidatorModifiers,
     StateModifiers
 {
     // This contract aggregates all asset modifiers through inheritance

@@ -4,9 +4,9 @@
  * Deposit Token configuration module.
  *
  * Registers the deposit token configuration in the BusinessLogicResolver by calling the generic
- * createConfiguration() operation with the deposit-token facet list and configuration id. Every
- * facet listed here is initialised by `Factory._deployDepositToken`, so the set must stay in sync
- * with that function or `setOperationalStatus` will not mark deployed proxies operational.
+ * createConfiguration() operation with the deposit-token facet list and configuration id. The list
+ * defines the resolver configuration a deposit-token proxy resolves against; each facet must be
+ * initialised before `setOperationalStatus` can mark a deployed proxy operational.
  *
  * @module domain/depositToken/createConfiguration
  */
@@ -20,22 +20,26 @@ import {
   RetryOptions,
 } from "@scripts/infrastructure";
 import { BusinessLogicResolver } from "@contract-types";
-import { DEPOSIT_TOKEN_CONFIG_ID } from "../constants";
+import { CONFIG_IDS } from "../constants";
 import { atsRegistry } from "../atsRegistry";
+import type { FacetName } from "../atsRegistry";
+import { buildFacetList } from "../facetEnvironment";
+import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
 
 /**
- * Deposit Token configuration: 43 facets (42 capability facets + InitializerFacet).
+ * Deposit Token configuration: 69 facets (68 capability facets + InitializerFacet).
  *
- * A deposit token is a minimal cash-style asset, so this list omits the facets for capabilities
- * it does not expose (compliance, KYC, external KYC, external pause, protected partitions,
- * identity, snapshots, lock, coupon, maturity, …). Each facet listed here has a matching
- * initialiser in `Factory._deployDepositToken`.
+ * This list still omits the facets for capabilities the deposit token does not expose (KYC,
+ * external KYC, external pause, identity, full compliance, …), but includes the snapshot,
+ * adjusted-balance, lock, per-partition compliance, income-holder, maturity, protected-partition
+ * and voting-holder facets so a deposit-token resolver configuration exposes the full capability
+ * set it needs.
  */
-const DEPOSIT_TOKEN_FACETS = [
+export const DEPOSIT_TOKEN_FACETS: readonly FacetName[] = [
   // Always-on (initializers + diamond infra)
   "AccessControlFacet",
   "DiamondFacet",
-  "InitializerFacet", // required by setOperationalStatus / Factory._deployDepositToken
+  "InitializerFacet", // required by setOperationalStatus
   "ControlListFacet", // also = Eligibility
   "CoreFacet", // also = Core
   "CapFacet", // also = Cap
@@ -106,6 +110,48 @@ const DEPOSIT_TOKEN_FACETS = [
   "CustomDataFacet",
   "NominalValueFacet",
   "PauseFacet",
+
+  // Snapshots
+  "SnapshotsByPartitionFacet",
+  "BalanceTrackerAtSnapshotFacet",
+  "BalanceTrackerAtSnapshotByPartitionFacet",
+  "ClearingAtSnapshotFacet",
+  "ClearingAtSnapshotByPartitionFacet",
+  "CoreAtSnapshotFacet",
+  "FreezeAtSnapshotFacet",
+  "FreezeAtSnapshotByPartitionFacet",
+  "HoldAtSnapshotFacet",
+  "HoldAtSnapshotByPartitionFacet",
+  "LockAtSnapshotByPartitionFacet",
+  "NominalValueAtSnapshotFacet",
+  "SecurityHoldersAtSnapshotFacet",
+
+  // Adjusted balances
+  "BalanceTrackerAdjustedFacet",
+  "CoreAdjustedFacet",
+
+  // Lock
+  "LockByPartitionFacet",
+  "TransferAndLockByPartitionFacet",
+
+  // Compliance
+  "ComplianceByPartitionFacet",
+
+  // Income (coupon / dividend holders)
+  "CouponSecurityHoldersFacet",
+  "DividendSecurityHoldersFacet",
+
+  // Maturity
+  "MaturityByPartitionFacet",
+
+  // Protected partitions
+  "ProtectedByPartitionFacet",
+  "ProtectedHoldByPartitionFacet",
+  "ProtectedClearingByPartitionFacet",
+  "ProtectedClearingHoldByPartitionFacet",
+
+  // Voting
+  "VotingSecurityHoldersFacet",
 ] as const;
 
 /**
@@ -113,8 +159,8 @@ const DEPOSIT_TOKEN_FACETS = [
  *
  * Thin wrapper that calls the generic core operation with deposit-token-specific
  * data:
- * - Configuration ID: DEPOSIT_TOKEN_CONFIG_ID
- * - Facet list: DEPOSIT_TOKEN_FACETS (43 facets)
+ * - Configuration ID: CONFIG_IDS.depositToken
+ * - Facet list: DEPOSIT_TOKEN_FACETS
  *
  * @param blrContract - BusinessLogicResolver contract instance
  * @param facetAddresses - Map of facet names to their deployed addresses
@@ -133,20 +179,13 @@ export async function createDepositTokenConfiguration(
   confirmations: number = 0,
   retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  // When useTimeTravel=true, ALL facets get the TimeTravel suffix (universal mapping)
-  // plus the TimeTravelFacet controller. No filtering needed — simplifies deployment logic.
-  const facetNames = useTimeTravel
-    ? [...DEPOSIT_TOKEN_FACETS.map((name) => `${name}TimeTravel`), "TimeTravelFacet"]
-    : [...DEPOSIT_TOKEN_FACETS];
+  const facetNames = buildFacetList(DEPOSIT_TOKEN_FACETS, useTimeTravel);
 
   // Build facet data with resolver keys from registry
   const facets = facetNames.map((name) => {
-    // Strip "TimeTravel" suffix to get the base name for registry lookup
-    const baseName = name.replace(/TimeTravel$/, "");
-
-    const facetDef = atsRegistry.getFacetDefinition(baseName);
+    const facetDef = atsRegistry.getFacetDefinition(name) ?? getMockFacetDefinition(name);
     if (!facetDef?.resolverKey?.value) {
-      throw new Error(`No resolver key found for facet: ${baseName}`);
+      throw new Error(`No resolver key found for facet: ${name}`);
     }
     return {
       facetName: name,
@@ -156,7 +195,7 @@ export async function createDepositTokenConfiguration(
   });
 
   return createBatchConfiguration(blrContract, {
-    configurationId: DEPOSIT_TOKEN_CONFIG_ID,
+    configurationId: CONFIG_IDS.depositToken,
     facets,
     partialBatchDeploy,
     batchSize,

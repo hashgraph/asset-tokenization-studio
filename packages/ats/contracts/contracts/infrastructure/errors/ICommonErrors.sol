@@ -80,6 +80,14 @@ interface ICommonErrors {
     error InvalidTimestamp();
 
     /**
+     * @notice Reverts when a scheduled timestamp is not strictly in the future.
+     * @dev Used for shared scheduling validation where the current block time is read
+     *      through `TimeTravelStorageWrapper`.
+     * @param timeStamp Timestamp rejected for scheduling.
+     */
+    error WrongTimestamp(uint256 timeStamp);
+
+    /**
      * @notice Reverts when ordered array values contradict expected ordering.
      * @dev Indicates that two indexed values cannot both satisfy the required
      *      monotonic or range invariant.
@@ -139,4 +147,12 @@ interface ICommonErrors {
      * @param max Maximum number of entries permitted in the external list.
      */
     error MaxExternalListSizeReached(uint256 max);
+
+    /**
+     * @notice Emitted when two arrays or collections expected to have matching lengths differ.
+     * @dev Reverts operations that require one-to-one correspondence between input parameters.
+     * @param length1 Length of the first array or collection.
+     * @param length2 Length of the second array or collection.
+     */
+    error DifferentLengths(uint256 length1, uint256 length2);
 }

@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _DEFAULT_PARTITION, KPI_ERC20_APPROVE_OWNER } from "../../constants/values.sol";
+import { DEFAULT_PARTITION, KPI_ERC20_APPROVE_OWNER } from "../../constants/values.sol";
 import { ICore } from "../../facets/core/ICore.sol";
-import { IFactory } from "../../factory/IFactory.sol";
 import { ITransfer } from "../../facets/transfer/ITransfer.sol";
 import { IAllowanceTypes } from "../../facets/allowance/IAllowanceTypes.sol";
-import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
+import { IERC1410Types } from "../../facets/commonTypes/IERC1410Types.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 import { ScheduledTasksOps } from "../orchestrator/ScheduledTasksOps.sol";
+import { IAllowance } from "../../facets/allowance/IAllowance.sol";
 
 /// @custom:hash storage Erc20
 bytes32 constant STORAGE_LOCATION_ERC20 = 0xba2beddc557de36eb4836f4ff1fd9d33a28d780fce70d36cf80b490142788200;
@@ -20,20 +20,18 @@ bytes32 constant STORAGE_LOCATION_ERC20 = 0xba2beddc557de36eb4836f4ff1fd9d33a28d
 /**
  * @title ERC20Storage
  * @notice Backing storage for the ERC-20 metadata, balances, and allowances of an asset.
- * @dev Sole source of truth for name, symbol, ISIN, decimals, security type, total
- *      supply, per-holder balances, and per-spender allowances; mutated only via
- *      `ERC20StorageWrapper` against the deterministic ERC-7201 slot.
+ * @dev Sole source of truth for name, symbol, decimals, total supply, per-holder
+ *      balances, and per-spender allowances; mutated only via `ERC20StorageWrapper`
+ *      against the deterministic ERC-7201 slot.
  * @custom:storage-location erc7201:security.token.standard.storage.Erc20
  */
 struct ERC20Storage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
     // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
     uint8 decimals;
-    IFactory.SecurityType securityType;
     // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     string name;
     string symbol;
-    string isin;
     uint256 totalSupply;
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(address => uint256) balances;
@@ -56,19 +54,16 @@ library ERC20StorageWrapper {
     /**
      * @notice Initialises the ERC-20 storage with metadata from the deployment
      *         configuration and marks the slot as initialised.
-     * @dev Writes name, symbol, ISIN, decimals, and security type from `erc20Metadata`
-     *      then sets `initialized` to `true`. One-shot guarantee is enforced by the
-     *      caller via `onlyNotERC20Initialized`.
-     * @param erc20Metadata The metadata struct containing token info and security type.
+     * @dev Writes name, symbol and decimals from `erc20Metadata`. One-shot
+     *      guarantee is enforced by the caller via `onlyNotERC20Initialized`.
+     * @param erc20Metadata The metadata struct containing the token identity fields.
      */
     function initializeERC20(ICore.ERC20Metadata calldata erc20Metadata) internal {
         ScheduledTasksOps.triggerPendingScheduledCrossOrderedTasks();
-        ERC20Storage storage erc20Stor = erc20Storage();
-        erc20Stor.name = erc20Metadata.info.name;
-        erc20Stor.symbol = erc20Metadata.info.symbol;
-        erc20Stor.isin = erc20Metadata.info.isin;
-        erc20Stor.decimals = erc20Metadata.info.decimals;
-        erc20Stor.securityType = erc20Metadata.securityType;
+        ERC20Storage storage erc20Stor = _erc20Storage();
+        erc20Stor.name = erc20Metadata.name;
+        erc20Stor.symbol = erc20Metadata.symbol;
+        erc20Stor.decimals = erc20Metadata.decimals;
     }
 
     /**
@@ -76,7 +71,7 @@ library ERC20StorageWrapper {
      * @param _name The new token name to store.
      */
     function setName(string calldata _name) internal {
-        erc20Storage().name = _name;
+        _erc20Storage().name = _name;
     }
 
     /**
@@ -84,7 +79,20 @@ library ERC20StorageWrapper {
      * @param _symbol The new token symbol to store.
      */
     function setSymbol(string calldata _symbol) internal {
-        erc20Storage().symbol = _symbol;
+        _erc20Storage().symbol = _symbol;
+    }
+
+    /**
+     * @notice Overwrites the decimal count in the ERC-20 storage slot.
+     * @dev This is a minimal raw-struct setter intended for test scaffolding
+     *      (`MockDiamondCutHelpers.forceDecimals`). It writes only the `decimals`
+     *      field via the private `_erc20Storage()` accessor and does NOT
+     *      trigger `ScheduledTasksOps` or overwrite name/symbol — making it
+     *      safe to use alongside snapshot scheduled-tasks tests.
+     * @param _newDecimals The new decimal count to store.
+     */
+    function setDecimals(uint8 _newDecimals) internal {
+        _erc20Storage().decimals = _newDecimals;
     }
 
     /// @notice Updates ERC-20 balances and emits the EIP-20 Transfer event.
@@ -109,7 +117,7 @@ library ERC20StorageWrapper {
      */
     function increaseBalance(address to, uint256 value) internal {
         unchecked {
-            erc20Storage().balances[to] += value;
+            _erc20Storage().balances[to] += value;
         }
     }
 
@@ -122,7 +130,7 @@ library ERC20StorageWrapper {
      */
     function reduceBalance(address from, uint256 value) internal {
         unchecked {
-            erc20Storage().balances[from] -= value;
+            _erc20Storage().balances[from] -= value;
         }
     }
 
@@ -133,7 +141,7 @@ library ERC20StorageWrapper {
      */
     function increaseTotalSupply(uint256 value) internal {
         unchecked {
-            erc20Storage().totalSupply += value;
+            _erc20Storage().totalSupply += value;
         }
     }
 
@@ -144,7 +152,7 @@ library ERC20StorageWrapper {
      */
     function reduceTotalSupply(uint256 value) internal {
         unchecked {
-            erc20Storage().totalSupply -= value;
+            _erc20Storage().totalSupply -= value;
         }
     }
 
@@ -155,7 +163,7 @@ library ERC20StorageWrapper {
      * @param factor Multiplier to apply to the current total supply.
      */
     function adjustTotalSupply(uint256 factor) internal {
-        erc20Storage().totalSupply *= factor;
+        _erc20Storage().totalSupply *= factor;
     }
 
     /**
@@ -165,7 +173,7 @@ library ERC20StorageWrapper {
      * @param adjustedDecimals Number of decimal places to add.
      */
     function adjustDecimals(uint8 adjustedDecimals) internal {
-        erc20Storage().decimals += adjustedDecimals;
+        _erc20Storage().decimals += adjustedDecimals;
     }
 
     /**
@@ -180,11 +188,11 @@ library ERC20StorageWrapper {
      * @param account Token-holder address whose balance is being adjusted.
      */
     function adjustTotalBalanceFor(uint256 abaf, address account) internal {
-        uint256 oldBalance = erc20Storage().balances[account];
+        uint256 oldBalance = _erc20Storage().balances[account];
         uint256 newBalance = oldBalance *
             AdjustBalancesStorageWrapper.calculateFactorByAbafAndTokenHolder(abaf, account);
         if (newBalance != oldBalance) {
-            erc20Storage().balances[account] = newBalance;
+            _erc20Storage().balances[account] = newBalance;
             unchecked {
                 emit ITransfer.Transfer(address(0), address(0), newBalance - oldBalance);
             }
@@ -202,7 +210,7 @@ library ERC20StorageWrapper {
      * @param spender Spender whose allowance checkpoint is updated.
      */
     function beforeAllowanceUpdate(address owner, address spender) internal {
-        ERC1410StorageWrapper.triggerAndSyncAll(_DEFAULT_PARTITION, owner, address(0));
+        ERC1410StorageWrapper.triggerAndSyncAll(DEFAULT_PARTITION, owner, address(0));
         updateAllowanceAndLabaf(owner, spender);
     }
 
@@ -216,12 +224,13 @@ library ERC20StorageWrapper {
      * @param spender Spender whose allowance is scaled.
      */
     function updateAllowanceAndLabaf(address owner, address spender) internal {
+        if (isInfiniteAllowance(owner, spender)) return;
         uint256 abaf = AdjustBalancesStorageWrapper.getAbaf();
         uint256 labaf = AdjustBalancesStorageWrapper.getAllowanceLabaf(owner, spender);
 
         if (abaf == labaf) return;
 
-        erc20Storage().allowed[owner][spender] *= AdjustBalancesStorageWrapper.calculateFactor(abaf, labaf);
+        _erc20Storage().allowed[owner][spender] *= AdjustBalancesStorageWrapper.calculateFactor(abaf, labaf);
         AdjustBalancesStorageWrapper.updateAllowanceLabaf(owner, spender, abaf);
     }
 
@@ -234,63 +243,47 @@ library ERC20StorageWrapper {
      * @param owner   Address granting the allowance. Must not be the zero address.
      * @param spender Address permitted to spend `value` tokens on behalf of `owner`.
      * @param value   Allowance amount to set.
-     * @return `true` unconditionally on success; reverts on failure.
+     * @return True unconditionally on success; reverts on failure.
      */
     function approve(address owner, address spender, uint256 value) internal returns (bool) {
         _checkUnexpectedError(owner == address(0), KPI_ERC20_APPROVE_OWNER);
 
-        if (spender == address(0)) {
-            revert IAllowanceTypes.SpenderWithZeroAddress();
-        }
+        _checkSpenderWithZeroAddress(spender);
 
-        ERC1410StorageWrapper.triggerAndSyncAll(_DEFAULT_PARTITION, owner, spender);
-        erc20Storage().allowed[owner][spender] = value;
+        ERC1410StorageWrapper.triggerAndSyncAll(DEFAULT_PARTITION, owner, spender);
+        _erc20Storage().allowed[owner][spender] = value;
         AdjustBalancesStorageWrapper.updateAllowanceLabaf(owner, spender, AdjustBalancesStorageWrapper.getAbaf());
         emit IAllowanceTypes.Approval(owner, spender, value);
         return true;
     }
 
     /**
-     * @notice Increases the ERC-20 allowance of `spender` for `msg.sender` by
-     *         `addedValue`.
+     * @notice Increases the ERC-20 allowance of `spender` for `msg.sender` by `addedValue`.
      * @dev Reverts with `SpenderWithZeroAddress` if `spender` is the zero address.
      *      Delegates to `increaseAllowedBalance` which synchronises ABAF state and
      *      emits an `Approval` event.
      * @param spender    Address whose allowance is increased.
      * @param addedValue Amount to add to the existing allowance.
-     * @return `true` unconditionally on success; reverts on failure.
+     * @return success_  True unconditionally on success; reverts on failure.
      */
-    function increaseAllowance(address spender, uint256 addedValue) internal returns (bool) {
-        if (spender == address(0)) {
-            revert IAllowanceTypes.SpenderWithZeroAddress();
-        }
-
-        increaseAllowedBalance(EvmAccessors.getMsgSender(), spender, addedValue);
-
-        return true;
+    function increaseAllowance(address spender, uint256 addedValue) internal returns (bool success_) {
+        _checkSpenderWithZeroAddress(spender);
+        success_ = increaseAllowedBalance(EvmAccessors.getMsgSender(), spender, addedValue);
     }
 
     /**
-     * @notice Decreases the ERC-20 allowance of `spender` for `msg.sender` by
-     *         `subtractedValue` and emits an `Approval` event.
+     * @notice Decreases the ERC-20 allowance of `spender` for `msg.sender` by `subtractedValue`.
      * @dev Reverts with `SpenderWithZeroAddress` if `spender` is the zero address.
-     *      Synchronises ABAF state via `beforeAllowanceUpdate` before reducing the
-     *      allowance. Reverts via `decreaseAllowedBalance` if allowance is insufficient.
+     *      Synchronises ABAF state via `beforeAllowanceUpdate` before reducing the allowance.
+     *      Reverts via `decreaseAllowedBalance` if the existing allowance is insufficient.
+     *      Emits an `Approval` event upon success.
      * @param spender         Address whose allowance is decreased.
      * @param subtractedValue Amount to subtract from the existing allowance.
-     * @return `true` unconditionally on success; reverts on failure.
+     * @return success_       True unconditionally on success; reverts on failure.
      */
-    function decreaseAllowance(address spender, uint256 subtractedValue) internal returns (bool) {
-        if (spender == address(0)) {
-            revert IAllowanceTypes.SpenderWithZeroAddress();
-        }
-        decreaseAllowedBalance(EvmAccessors.getMsgSender(), spender, subtractedValue);
-        emit IAllowanceTypes.Approval(
-            EvmAccessors.getMsgSender(),
-            spender,
-            erc20Storage().allowed[EvmAccessors.getMsgSender()][spender]
-        );
-        return true;
+    function decreaseAllowance(address spender, uint256 subtractedValue) internal returns (bool success_) {
+        _checkSpenderWithZeroAddress(spender);
+        success_ = decreaseAllowedBalance(EvmAccessors.getMsgSender(), spender, subtractedValue);
     }
 
     /**
@@ -302,14 +295,14 @@ library ERC20StorageWrapper {
      * @param from    Source account whose balance is debited.
      * @param to      Destination account whose balance is credited.
      * @param value   Amount of tokens to transfer.
-     * @return `true` unconditionally on success; reverts on failure.
+     * @return True unconditionally on success; reverts on failure.
      */
     function transferFrom(address spender, address from, address to, uint256 value) internal returns (bool) {
         decreaseAllowedBalance(from, spender, value);
         ERC1410StorageWrapper.transferByPartition(
             from,
             IERC1410Types.BasicTransferInfo(to, value),
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             "",
             spender,
             ""
@@ -325,13 +318,13 @@ library ERC20StorageWrapper {
      * @param from  Source account.
      * @param to    Destination account.
      * @param value Amount of tokens to transfer.
-     * @return `true` unconditionally on success; reverts on failure.
+     * @return True unconditionally on success; reverts on failure.
      */
     function transfer(address from, address to, uint256 value) internal returns (bool) {
         ERC1410StorageWrapper.transferByPartition(
             from,
             IERC1410Types.BasicTransferInfo(to, value),
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             "",
             address(0),
             ""
@@ -346,7 +339,7 @@ library ERC20StorageWrapper {
      * @param value Amount of tokens to mint.
      */
     function mint(address to, uint256 value) internal {
-        ERC1410StorageWrapper.issueByPartition(IERC1410Types.IssueData(_DEFAULT_PARTITION, to, value, ""));
+        ERC1410StorageWrapper.issueByPartition(IERC1410Types.IssueData(DEFAULT_PARTITION, to, value, ""));
     }
 
     /**
@@ -356,7 +349,7 @@ library ERC20StorageWrapper {
      * @param value Amount of tokens to burn.
      */
     function burn(address from, uint256 value) internal {
-        ERC1410StorageWrapper.redeemByPartition(_DEFAULT_PARTITION, from, address(0), value, "", "");
+        ERC1410StorageWrapper.redeemByPartition(DEFAULT_PARTITION, from, address(0), value, "", "");
     }
 
     /**
@@ -373,44 +366,51 @@ library ERC20StorageWrapper {
     }
 
     /**
-     * @notice Reduces the allowance of `spender` on `from`'s balance by `value`,
-     *         reverting if the existing allowance is insufficient.
-     * @dev Calls `beforeAllowanceUpdate` first to synchronise ABAF state.
-     *      Reverts with `InsufficientAllowance` when `value` exceeds the current
-     *      allowance.
-     * @param from    Token owner whose allowance is consumed.
-     * @param spender Address whose spending limit is reduced.
-     * @param value   Amount to deduct from the allowance.
+     * @notice Decreases the spending allowance granted by `owner` to `spender` by `value`.
+     * @dev Synchronises ABAF state via `beforeAllowanceUpdate` before performing any adjustments.
+     *      If the existing allowance is infinite (`type(uint256).max`), the function returns
+     *      `false` without modifying state or emitting an event.
+     *      Reverts with unexpected error `KPI_ERC20_APPROVE_OWNER` if `owner` is the zero address.
+     *      Reverts with `IAllowanceTypes.InsufficientAllowance` if `value` exceeds current allowance.
+     *      Emits an `IAllowanceTypes.Approval` event upon a successful finite allowance deduction.
+     * @param owner Address of the token owner whose allowance is being deducted.
+     * @param spender Address authorised to spend tokens on behalf of `owner`.
+     * @param value Amount to deduct from the current allowance.
+     * @return True if a finite allowance was decremented, false if the allowance is infinite.
      */
-    function decreaseAllowedBalance(address from, address spender, uint256 value) internal {
-        beforeAllowanceUpdate(from, spender);
-
-        ERC20Storage storage erc20Stor = erc20Storage();
-
-        if (value > erc20Stor.allowed[from][spender]) {
-            revert IAllowanceTypes.InsufficientAllowance(spender, from);
+    function decreaseAllowedBalance(address owner, address spender, uint256 value) internal returns (bool) {
+        _checkUnexpectedError(owner == address(0), KPI_ERC20_APPROVE_OWNER);
+        beforeAllowanceUpdate(owner, spender);
+        if (isInfiniteAllowance(owner, spender)) return false;
+        ERC20Storage storage erc20Stor = _erc20Storage();
+        uint256 currentAllowance = erc20Stor.allowed[owner][spender];
+        if (value > currentAllowance) revert IAllowanceTypes.InsufficientAllowance(spender, owner);
+        unchecked {
+            erc20Stor.allowed[owner][spender] = currentAllowance - value;
         }
-
-        erc20Stor.allowed[from][spender] -= value;
+        emit IAllowanceTypes.Approval(owner, spender, erc20Stor.allowed[owner][spender]);
+        return true;
     }
 
     /**
-     * @notice Increases the allowance of `spender` on `from`'s balance by `value`
-     *         and emits an `Approval` event.
-     * @dev Calls `beforeAllowanceUpdate` first to synchronise ABAF state before
-     *      adding `value` to the stored allowance.
-     * @param from    Token owner granting the additional allowance.
-     * @param spender Address whose spending limit is increased.
-     * @param value   Amount to add to the allowance.
+     * @notice Increases the allowance granted to `spender` by `owner` by `value`.
+     * @dev Reverts with `KPI_ERC20_APPROVE_OWNER` if `owner` is the zero address.
+     *      Executes `beforeAllowanceUpdate` hook to synchronise ABAF state prior to mutation.
+     *      Returns `false` without modifying storage if `spender` already has infinite allowance.
+     *      Mutates `ERC20Storage` state and emits an `IAllowanceTypes.Approval` event upon success.
+     * @param owner Address of the token owner granting the allowance increase.
+     * @param spender Address of the spender whose allowance is increased.
+     * @param value Amount of additional tokens allowed to be spent.
+     * @return True if the allowance was increased, false if allowance is infinite.
      */
-    function increaseAllowedBalance(address from, address spender, uint256 value) internal {
-        beforeAllowanceUpdate(from, spender);
-
-        ERC20Storage storage erc20Stor = erc20Storage();
-
-        erc20Stor.allowed[from][spender] += value;
-
-        emit IAllowanceTypes.Approval(from, spender, erc20Storage().allowed[from][spender]);
+    function increaseAllowedBalance(address owner, address spender, uint256 value) internal returns (bool) {
+        _checkUnexpectedError(owner == address(0), KPI_ERC20_APPROVE_OWNER);
+        beforeAllowanceUpdate(owner, spender);
+        if (isInfiniteAllowance(owner, spender)) return false;
+        ERC20Storage storage erc20Stor = _erc20Storage();
+        erc20Stor.allowed[owner][spender] += value;
+        emit IAllowanceTypes.Approval(owner, spender, _erc20Storage().allowed[owner][spender]);
+        return true;
     }
 
     /**
@@ -418,7 +418,7 @@ library ERC20StorageWrapper {
      * @return The total number of tokens in circulation.
      */
     function totalSupply() internal view returns (uint256) {
-        return erc20Storage().totalSupply;
+        return _erc20Storage().totalSupply;
     }
 
     /**
@@ -427,7 +427,7 @@ library ERC20StorageWrapper {
      * @return The token balance of `tokenHolder`.
      */
     function balanceOf(address tokenHolder) internal view returns (uint256) {
-        return erc20Storage().balances[tokenHolder];
+        return _erc20Storage().balances[tokenHolder];
     }
 
     /**
@@ -438,7 +438,7 @@ library ERC20StorageWrapper {
      * @return The remaining allowance for `spender` on `owner`'s balance.
      */
     function allowance(address owner, address spender) internal view returns (uint256) {
-        return erc20Storage().allowed[owner][spender];
+        return _erc20Storage().allowed[owner][spender];
     }
 
     /**
@@ -446,7 +446,15 @@ library ERC20StorageWrapper {
      * @return The ERC-20 token name string.
      */
     function getName() internal view returns (string memory) {
-        return erc20Storage().name;
+        return _erc20Storage().name;
+    }
+
+    /**
+     * @notice Returns the stored token symbol.
+     * @return The ERC-20 token symbol string.
+     */
+    function getSymbol() internal view returns (string memory) {
+        return _erc20Storage().symbol;
     }
 
     /**
@@ -454,23 +462,20 @@ library ERC20StorageWrapper {
      * @return The ERC-20 decimals value.
      */
     function decimals() internal view returns (uint8) {
-        return erc20Storage().decimals;
+        return _erc20Storage().decimals;
     }
 
     /**
-     * @notice Returns the full ERC-20 metadata struct including token info and security
-     *         type.
-     * @return erc20Metadata_ The packed `ICore.ERC20Metadata` value read from storage.
+     * @notice Returns the ERC-20 metadata (name, symbol and decimals) read from storage.
+     * @return erc20Metadata_ The `ICore.ERC20Metadata` value read from storage.
      */
     function getERC20Metadata() internal view returns (ICore.ERC20Metadata memory erc20Metadata_) {
-        ERC20Storage storage erc20Stor = erc20Storage();
-        ICore.ERC20MetadataInfo memory erc20Info = ICore.ERC20MetadataInfo({
+        ERC20Storage storage erc20Stor = _erc20Storage();
+        erc20Metadata_ = ICore.ERC20Metadata({
             name: erc20Stor.name,
             symbol: erc20Stor.symbol,
-            isin: erc20Stor.isin,
             decimals: erc20Stor.decimals
         });
-        erc20Metadata_ = ICore.ERC20Metadata({ info: erc20Info, securityType: erc20Stor.securityType });
     }
 
     /**
@@ -489,7 +494,7 @@ library ERC20StorageWrapper {
             false
         );
         erc20Metadata_ = getERC20Metadata();
-        erc20Metadata_.info.decimals += pendingDecimals;
+        erc20Metadata_.decimals += pendingDecimals;
     }
 
     /**
@@ -499,7 +504,7 @@ library ERC20StorageWrapper {
      * @return The projected decimal count.
      */
     function decimalsAdjustedAt(uint256 timestamp) internal view returns (uint8) {
-        return getERC20MetadataAdjustedAt(timestamp).info.decimals;
+        return getERC20MetadataAdjustedAt(timestamp).decimals;
     }
 
     /**
@@ -511,15 +516,52 @@ library ERC20StorageWrapper {
      * @param owner     Address that granted the allowance.
      * @param spender   Address permitted to spend on `owner`'s behalf.
      * @param timestamp Unix timestamp at which to project the allowance.
-     * @return The projected allowance amount.
+     * @return allowance_ The projected allowance amount.
      */
-    function allowanceAdjustedAt(address owner, address spender, uint256 timestamp) internal view returns (uint256) {
+    function allowanceAdjustedAt(
+        address owner,
+        address spender,
+        uint256 timestamp
+    ) internal view returns (uint256 allowance_) {
+        allowance_ = allowance(owner, spender);
         return
-            allowance(owner, spender) *
-            AdjustBalancesStorageWrapper.calculateFactor(
-                AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp),
-                AdjustBalancesStorageWrapper.getAllowanceLabaf(owner, spender)
-            );
+            allowance_ == type(uint256).max
+                ? allowance_
+                : allowance_ *
+                    AdjustBalancesStorageWrapper.calculateFactor(
+                        AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp),
+                        AdjustBalancesStorageWrapper.getAllowanceLabaf(owner, spender)
+                    );
+    }
+
+    /**
+     * @notice Checks whether a spender has an unlimited allowance from an owner.
+     * @dev Treats `type(uint256).max` as an infinite allowance sentinel.
+     * @param _owner Account that granted the allowance.
+     * @param _spender Account authorised to spend the owner's tokens.
+     * @return infinite_ True if the current allowance equals the maximum uint256 value.
+     */
+    function isInfiniteAllowance(address _owner, address _spender) internal view returns (bool infinite_) {
+        infinite_ = allowance(_owner, _spender) == type(uint256).max;
+    }
+
+    /**
+     * @notice Ensures that a spender does not have an infinite allowance from an owner.
+     * @dev Reverts with `InfiniteAllowance` when the allowance equals `type(uint256).max`.
+     * @param _owner Address that granted the allowance.
+     * @param _spender Address authorised to spend the owner's tokens.
+     */
+    function checkFiniteAllowance(address _owner, address _spender) internal view {
+        if (isInfiniteAllowance(_owner, _spender)) revert IAllowance.InfiniteAllowance(_owner, _spender);
+    }
+
+    /**
+     * @notice Validates that the specified spender is not the zero address.
+     * @dev Reverts with `IAllowanceTypes.SpenderWithZeroAddress` if `spender` is `address(0)`.
+     * @param spender The address of the spender to validate.
+     */
+    function _checkSpenderWithZeroAddress(address spender) private pure {
+        if (spender == address(0)) revert IAllowanceTypes.SpenderWithZeroAddress();
     }
 
     /**
@@ -529,7 +571,7 @@ library ERC20StorageWrapper {
      *      through this accessor.
      * @return erc20Storage_ Storage pointer to the ERC-20 data slot.
      */
-    function erc20Storage() internal pure returns (ERC20Storage storage erc20Storage_) {
+    function _erc20Storage() private pure returns (ERC20Storage storage erc20Storage_) {
         bytes32 position = STORAGE_LOCATION_ERC20;
         // solhint-disable-next-line no-inline-assembly
         assembly {

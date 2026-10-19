@@ -4,7 +4,7 @@
  * Unit tests for createFactoryConfiguration.
  *
  * Verifies that the thin wrapper calls createBatchConfiguration with the correct
- * configId (FACTORY_CONFIG_ID), version=1, and single-element resolverKeys array
+ * configId (CONFIG_IDS.factory), version=1, and single-element resolverKeys array
  * (_FACTORY).
  *
  * @module test/scripts/unit/domain/factory/createConfiguration.test
@@ -12,7 +12,7 @@
 
 import { expect } from "chai";
 import sinon from "sinon";
-import { createFactoryConfiguration, FACTORY_CONFIG_ID } from "@scripts/domain";
+import { createFactoryConfiguration, CONFIG_IDS } from "@scripts/domain";
 
 // Known _FACTORY value (keccak256("security.token.standard.factory.resolverKey"))
 const EXPECTED_FACTORY = "0xa5472d34be801f744a73bce4e1851e67767286307e3203726a3261b280a667b3";
@@ -53,7 +53,7 @@ describe("createFactoryConfiguration", () => {
     sinon.restore();
   });
 
-  it("should call with FACTORY_CONFIG_ID as configuration ID", async () => {
+  it("should call with CONFIG_IDS.factory as configuration ID", async () => {
     // Arrange
     const facetAddresses: Record<string, string> = {
       FactoryFacet: MOCK_FACTORY_FACET_ADDRESS,
@@ -66,7 +66,7 @@ describe("createFactoryConfiguration", () => {
     // Assert — the BLR was called (meaning createBatchConfiguration ran)
     // The configId is passed through to BLR's createConfiguration call
     if (result.success) {
-      expect(result.data.configurationId).to.equal(FACTORY_CONFIG_ID);
+      expect(result.data.configurationId).to.equal(CONFIG_IDS.factory);
     }
   });
 
@@ -98,9 +98,9 @@ describe("createFactoryConfiguration", () => {
     }
   });
 
-  it("should use FACTORY_CONFIG_ID constant (bytes32(uint256(8)))", () => {
+  it("should use CONFIG_IDS.factory constant (bytes32(uint256(8)))", () => {
     // Verify the constant value matches the expected encoding
-    expect(FACTORY_CONFIG_ID).to.equal("0x0000000000000000000000000000000000000000000000000000000000000008");
+    expect(CONFIG_IDS.factory).to.equal("0x0000000000000000000000000000000000000000000000000000000000000008");
   });
 
   it("should use the correct factory resolver key", () => {

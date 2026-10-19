@@ -53,10 +53,16 @@ interface IClearingByPartition is IClearingTypes {
     ) external returns (bool success_);
 
     /**
-     * @notice Reclaims a clearing operation returning funds back to the token holder
-     * @dev Callable by the token holder once the operation has expired.
-     * @param _clearingOperationIdentifier Struct containing the parameters that identify the clearing operation
-     * @return success_ True if the operation was reclaimed successfully
+     * @notice Reclaims an expired clearing operation for a partition and returns locked tokens
+     *         to the token holder.
+     * @dev Callable only after the operation has passed its expiration timestamp. Releases the
+     *      locked balance back to the token holder, restores any consumed allowance, and removes
+     *      the clearing record from storage. Emits a `ClearingOperationReclaimed` event.
+     *      Exempt from identity / KYC checks as an intentional recovery carve-out, since reclaiming
+     *      returns the holder's own locked tokens rather than executing a new regulated transfer.
+     * @param _clearingOperationIdentifier Struct containing the partition, token holder address,
+     *        clearing ID, and operation type.
+     * @return success_ True if the clearing operation is successfully reclaimed.
      */
     function reclaimClearingOperationByPartition(
         IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier

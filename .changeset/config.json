@@ -3,11 +3,7 @@
   "changelog": "@changesets/cli/changelog",
   "commit": false,
   "fixed": [
-    [
-      "@hashgraph/asset-tokenization-contracts",
-      "@hashgraph/asset-tokenization-sdk",
-      "@hashgraph/asset-tokenization-dapp"
-    ],
+    ["@hashgraph/asset-tokenization-contracts"],
     [
       "@hashgraph/mass-payout-contracts",
       "@hashgraph/mass-payout-sdk",

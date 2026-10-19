@@ -98,10 +98,10 @@ interface ICap {
      * @dev Can only be called once; subsequent calls revert via `onlyFacetNotRegistered`. The new
      *      cap is validated to be non-zero and at least equal to the current adjusted total
      *      supply. Partition caps in `partitionCap` must each be no greater than `maxSupply`.
-     * @param maxSupply The global maximum token supply to set.
-     * @param partitionCap Array of per-partition cap configurations to initialise.
+     * @param _maxSupply The global maximum token supply to set.
+     * @param _partitionCap Array of per-partition cap configurations to initialise.
      */
-    function initializeCap(uint256 maxSupply, PartitionCap[] calldata partitionCap) external;
+    function initializeCap(uint256 _maxSupply, PartitionCap[] calldata _partitionCap) external;
 
     /**
      * @notice Updates the global maximum supply of the token.

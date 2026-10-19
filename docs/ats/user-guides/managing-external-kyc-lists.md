@@ -24,7 +24,7 @@ External KYC lists verify investor identity and accreditation status:
 
 - **Purpose**: Centralized KYC verification for multiple tokens
 - **Benefits**: Reusable across different securities, easier to maintain
-- **Interface**: Implements `IExternalKycList.isGranted(address)`
+- **Interface**: Implements `IExternalKycList.getKycStatus(address)`
 - **Use case**: When managing multiple tokens with the same investor base
 
 ### Key Difference from Internal KYC
@@ -183,14 +183,12 @@ External KYC list contracts must implement:
 
 ```solidity
 interface IExternalKycList {
-  function isGranted(address account) external view returns (bool);
+  function getKycStatus(address account) external view returns (IKyc.KycStatus);
 }
 ```
 
-Returns:
-
-- `true`: Account is KYC granted
-- `false`: Account is not KYC granted
+Returns an `IKyc.KycStatus` value (e.g. `GRANTED` when the account has passed KYC; a non-granted
+status otherwise).
 
 ## Best Practices
 

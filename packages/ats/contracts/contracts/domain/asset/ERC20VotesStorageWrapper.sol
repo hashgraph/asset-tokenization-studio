@@ -100,7 +100,7 @@ library ERC20VotesStorageWrapper {
      * @param to The account receiving tokens (or address(0) for burns).
      * @param amount The number of tokens transferred.
      */
-    function afterTokenTransfer(bytes32 /*partition*/, address from, address to, uint256 amount) internal {
+    function afterTokenTransfer(bytes32 /* partition */, address from, address to, uint256 amount) internal {
         ERC20VotesStorage storage erc20VotesStorage = erc20VotesStorage_();
 
         if (!isActivated()) return;
@@ -141,6 +141,8 @@ library ERC20VotesStorageWrapper {
 
         erc20VotesStorage_().delegates[delegator] = delegatee;
 
+        // Emitted here, not in the facet: conditional (skipped when the delegate is
+        // unchanged) and depends on the prior delegate read from storage.
         emit IERC20Votes.DelegateChanged(delegator, currentDelegate, delegatee);
 
         moveVotingPower(

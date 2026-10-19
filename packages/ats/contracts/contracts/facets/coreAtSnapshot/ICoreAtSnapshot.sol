@@ -6,6 +6,7 @@ bytes32 constant RESOLVER_KEY_CORE_AT_SNAPSHOT = 0x9f1ab2bcf2a5668b07a2b26155b1c
 
 /**
  * @title ICoreAtSnapshot
+ * @author Asset Tokenization Studio Team
  * @notice Interface for querying core token properties resolved against a previously taken
  *         snapshot identifier.
  * @dev Reads are delegated to `SnapshotsStorageWrapper`. Reverts with `SnapshotIdNull` for

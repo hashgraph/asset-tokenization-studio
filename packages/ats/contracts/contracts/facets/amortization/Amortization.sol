@@ -48,11 +48,18 @@ abstract contract Amortization is IAmortization, Modifiers {
         onlyWithoutMultiPartition
         onlyRole(ROLE_CORPORATE_ACTION)
         onlyValidDates(_amortization.recordDate, _amortization.executionDate)
-        onlyValidTimestamp(_amortization.recordDate)
-        onlyValidDates(_amortization.recordDate, _amortization.executionDate)
+        onlyFutureTimestamp(_amortization.recordDate)
         returns (bool success_, uint256 amortizationID_)
     {
-        (, amortizationID_) = AmortizationStorageWrapper.setAmortization(_amortization);
+        bytes32 corporateActionId_;
+        (corporateActionId_, amortizationID_) = AmortizationStorageWrapper.setAmortization(_amortization);
+        emit IAmortization.AmortizationSet(
+            corporateActionId_,
+            amortizationID_,
+            EvmAccessors.getMsgSender(),
+            _amortization.recordDate,
+            _amortization.executionDate
+        );
         success_ = true;
     }
 
@@ -72,6 +79,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         onlyNoActiveAmortizationHolds(_amortizationID)
     {
         AmortizationStorageWrapper.cancelAmortization(_amortizationID);
+        emit IAmortization.AmortizationCancelled(_amortizationID, EvmAccessors.getMsgSender());
     }
 
     /// @inheritdoc IAmortization
@@ -108,7 +116,11 @@ abstract contract Amortization is IAmortization, Modifiers {
         onlyRole(ROLE_AMORTIZATION)
         onlyMatchingActionType(CORPORATE_ACTION_TYPE_AMORTIZATION, _amortizationID - 1)
     {
-        AmortizationStorageWrapper.releaseAmortizationHold(_amortizationID, _tokenHolder);
+        (bytes32 corporateActionId_, uint256 releasedHoldId_) = AmortizationStorageWrapper.releaseAmortizationHold(
+            _amortizationID,
+            _tokenHolder
+        );
+        emit IAmortization.AmortizationHoldReleased(corporateActionId_, _amortizationID, _tokenHolder, releasedHoldId_);
     }
 
     /// @inheritdoc IAmortization
@@ -129,7 +141,40 @@ abstract contract Amortization is IAmortization, Modifiers {
         onlyPositiveTokenAmount(_tokenAmount, _amortizationID)
         returns (uint256 holdId_)
     {
-        return AmortizationStorageWrapper.setAmortizationHold(_amortizationID, _tokenHolder, _tokenAmount);
+        bytes32 corporateActionId_;
+        (corporateActionId_, holdId_) = AmortizationStorageWrapper.setAmortizationHold(
+            _amortizationID,
+            _tokenHolder,
+            _tokenAmount
+        );
+        emit IAmortization.AmortizationHoldSet(
+            corporateActionId_,
+            _amortizationID,
+            _tokenHolder,
+            holdId_,
+            _tokenAmount
+        );
+    }
+
+    /// @inheritdoc IAmortization
+    /// @dev Restricted to `DEFAULT_ADMIN_ROLE`; carries no `onlyOperational`, `onlyActivated`, or
+    ///      `onlyUnpaused` gate so it can repair state while the token is paused.
+    function migrateAmortizationHoldAccounting(
+        uint256 _amortizationID,
+        uint256 _total,
+        uint256 _labaf
+    )
+        external
+        override
+        onlyWithoutMultiPartition
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_AMORTIZATION, _amortizationID - 1)
+        onlyNotMigratedAmortizationHoldAccounting(_amortizationID)
+        onlyPositiveMigrationLabaf(_labaf, _amortizationID)
+        onlyMigrationLabafWithinAbaf(_labaf, _amortizationID)
+        onlyMigrationTotalWithinSupply(_total, _amortizationID)
+    {
+        _migrateAmortizationHoldAccounting(_amortizationID, _total, _labaf);
     }
 
     /// @inheritdoc IAmortization
@@ -273,5 +318,41 @@ abstract contract Amortization is IAmortization, Modifiers {
     /// @inheritdoc IAmortization
     function getTotalActiveAmortizationIds() external view override onlyWithoutMultiPartition returns (uint256) {
         return AmortizationStorageWrapper.getTotalActiveAmortizationIds();
+    }
+
+    /// @inheritdoc IAmortization
+    function isAmortizationHoldAccountingMigrationPending(
+        uint256 _amortizationID
+    )
+        external
+        view
+        override
+        onlyWithoutMultiPartition
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_AMORTIZATION, _amortizationID - 1)
+        returns (bool)
+    {
+        return AmortizationStorageWrapper.isAmortizationHoldAccountingMigrationPending(_amortizationID);
+    }
+
+    /**
+     * @notice Performs the migration write and emits {AmortizationHoldAccountingMigrated}.
+     * @dev Extracted to its own stack frame — `migrateAmortizationHoldAccounting`'s modifier
+     *      list plus this call's local variables exceed Solidity's 16-slot stack window
+     *      (legacy codegen, no viaIR).
+     * @param _amortizationID The one-based identifier of the amortization to migrate.
+     * @param _total The raw `totalHoldByAmortizationId` value to seed.
+     * @param _labaf The raw `labafByAmortizationId` value to seed.
+     */
+    function _migrateAmortizationHoldAccounting(uint256 _amortizationID, uint256 _total, uint256 _labaf) private {
+        (bytes32 corporateActionId_, uint256 previousTotal_, uint256 previousLabaf_) = AmortizationStorageWrapper
+            .migrateAmortizationHoldAccounting(_amortizationID, _total, _labaf);
+        emit IAmortization.AmortizationHoldAccountingMigrated(
+            corporateActionId_,
+            _amortizationID,
+            previousTotal_,
+            previousLabaf_,
+            _total,
+            _labaf
+        );
     }
 }

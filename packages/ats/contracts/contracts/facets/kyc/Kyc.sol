@@ -59,7 +59,7 @@ abstract contract Kyc is IKyc, Modifiers {
     /// @inheritdoc IKyc
     function grantKyc(
         address _account,
-        string memory _vcId,
+        string calldata _vcId,
         uint256 _validFrom,
         uint256 _validTo,
         address _issuer
@@ -71,7 +71,7 @@ abstract contract Kyc is IKyc, Modifiers {
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_KYC)
-        notZeroAddress(_account)
+        validateAddressNotZero(_account)
         onlyValidKycStatus(KycStatus.NOT_GRANTED, _account)
         onlyThreeValidDates(_validFrom, _validTo, TimeTravelStorageWrapper.getBlockTimestamp())
         onlyValidIssuer(_issuer)
@@ -92,7 +92,7 @@ abstract contract Kyc is IKyc, Modifiers {
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_KYC)
-        notZeroAddress(_account)
+        validateAddressNotZero(_account)
         returns (bool success_)
     {
         success_ = KycStorageWrapper.revokeKyc(_account);

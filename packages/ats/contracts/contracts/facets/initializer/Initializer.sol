@@ -9,6 +9,9 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title Initializer
+ * @author Asset Tokenization Studio Team
+ * @notice Abstract implementation of `IInitializer` that manages facet readiness tracking
+ *         and the token's transition to operational status.
  */
 abstract contract Initializer is IInitializer, Modifiers {
     /// @inheritdoc IInitializer
@@ -17,7 +20,7 @@ abstract contract Initializer is IInitializer, Modifiers {
     )
         external
         override
-        notZeroValue(_maxInitializerFacetIndex)
+        validateUint256NotZero(_maxInitializerFacetIndex)
         onlyFacetNotRegistered(RESOLVER_KEY_INITIALIZER)
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
@@ -29,7 +32,7 @@ abstract contract Initializer is IInitializer, Modifiers {
     /// @inheritdoc IInitializer
     function updateMaxInitializerFacetIndex(
         uint256 _newMaxInitializerFacetIndex
-    ) external override notZeroValue(_newMaxInitializerFacetIndex) onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external override validateUint256NotZero(_newMaxInitializerFacetIndex) onlyRole(DEFAULT_ADMIN_ROLE) {
         InitializerStorageWrapper.setMaxInitializerFacetIndex(_newMaxInitializerFacetIndex);
         emit MaxInitializerFacetIndexUpdated(EvmAccessors.getMsgSender(), _newMaxInitializerFacetIndex);
     }

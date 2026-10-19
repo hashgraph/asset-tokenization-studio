@@ -7,6 +7,7 @@ import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunc
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 /**
  * @title TransferFacet
+ * @author Asset Tokenization Studio Team
  * @notice Diamond facet exposing ERC-20 and ERC-1594 token transfer operations.
  * @dev Registers four selectors: transfer, transferFrom, transferWithData, and
  *      transferFromWithData. Inherits all business logic from the Transfer abstract contract.

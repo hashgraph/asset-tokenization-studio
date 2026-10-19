@@ -90,80 +90,11 @@ jobs:
           path: ./packages/ats/contracts/${{ steps.prepare-package-data.outputs.artifact-name }}
           if-no-files-found: error
 
-  prepare-sdk:
-    name: Prepare ATS SDK
-    runs-on: token-studio-linux-large
-    timeout-minutes: 15
-    # Only run if manual trigger OR tag push (already filtered by v*-ats pattern)
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
-    # needs: contracts  # Commented out for parallel execution
-    outputs:
-      artifact-name: ${{ steps.prepare-package-data.outputs.artifact-name }}
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
-        with:
-          egress-policy: audit
-
-      - name: Checkout repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-        with:
-          ref: ${{ github.ref }}
-          fetch-depth: 0
-
-      - name: Setup NodeJS Environment
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-          node-version-file: .nvmrc
-
-      - name: Setup JQ
-        uses: dcarbone/install-jq-action@b7ef57d46ece78760b4019dbc4080a1ba2a40b45 # v3.2.0
-        with:
-          version: 1.7
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build ATS Contracts and SDK
-        run: |
-          npm run ats:contracts:build
-          npm run ats:sdk:build
-
-      - name: Package ATS SDK
-        id: prepare-package-data
-        run: |
-          echo "::group::Set Artifact Name"
-            VERSION=$(jq -r '.version' './package.json')
-            PKG_NAME="hashgraph-asset-tokenization-sdk-${VERSION}.tgz"
-          echo "::endgroup::"
-
-          echo "::group::Build Package"
-            echo "Building package: ${PKG_NAME}"
-            if ! npm pack; then
-              echo "❌ Failed to build package: ${PKG_NAME}"
-              echo "📋 Package info:" && cat package.json | jq '.name, .version'
-              exit 1
-            fi
-            echo "Verify package ${PKG_NAME} created successfully."
-            ls -lh ${PKG_NAME}
-          echo "::endgroup::"
-
-          echo "artifact-name=${PKG_NAME}" >> "${GITHUB_OUTPUT}"
-        working-directory: packages/ats/sdk
-
-      - name: Upload NPM Package Artifact
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
-        with:
-          name: ats-sdk-package
-          path: ./packages/ats/sdk/${{ steps.prepare-package-data.outputs.artifact-name }}
-          if-no-files-found: error
-
   publish-npm-packages:
     runs-on: token-studio-linux-medium
     timeout-minutes: 15
     needs:
       - prepare-contracts
-      - prepare-sdk
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
@@ -189,11 +120,6 @@ jobs:
         with:
           name: ats-contracts-package
 
-      - name: Download ATS SDK Package Artifact
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
-          name: ats-sdk-package
-
       - name: Publish npm packages
         run: |
           echo "::group::Set publish parameters"
@@ -202,13 +128,6 @@ jobs:
               PUBLISH_ARGS="${PUBLISH_ARGS} --dry-run"
             fi
             echo "::endgroup::"
-
-          echo "::group::Publish ATS SDK Package ${{ needs.prepare-sdk.outputs.artifact-name }} with args: ${PUBLISH_ARGS}"
-            if ! npm publish ./${{ needs.prepare-sdk.outputs.artifact-name }} ${PUBLISH_ARGS}; then
-                echo "❌ Failed to publish ATS SDK package: ${{ needs.prepare-sdk.outputs.artifact-name }}"
-                exit 1
-            fi
-          echo "::endgroup::"
 
           echo "::group::Publish ATS Contracts Package ${{ needs.prepare-contracts.outputs.artifact-name }} with args: ${PUBLISH_ARGS}"
             if ! npm publish ./${{ needs.prepare-contracts.outputs.artifact-name }} ${PUBLISH_ARGS}; then
@@ -224,7 +143,6 @@ jobs:
     timeout-minutes: 5
     needs:
       - prepare-contracts
-      - prepare-sdk
       - publish-npm-packages
     if: ${{ always() }}
     steps:
@@ -239,7 +157,6 @@ jobs:
           echo "| Step | Status |" >> "${GITHUB_STEP_SUMMARY}"
           echo "| --- | --- |" >> "${GITHUB_STEP_SUMMARY}"
           echo "| Package Contracts | ${{ needs.prepare-contracts.result }} |" >> "${GITHUB_STEP_SUMMARY}"
-          echo "| Package SDK | ${{ needs.prepare-sdk.result }} |" >> "${GITHUB_STEP_SUMMARY}"
           echo "| Publish NPM Packages | ${{ needs.publish-npm-packages.result }} |" >> "${GITHUB_STEP_SUMMARY}"
 
           if [[ "${{ inputs.dry-run-enabled }}" == "true" ]]; then

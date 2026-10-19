@@ -7,6 +7,7 @@ import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunc
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 /**
  * @title ComplianceFacet
+ * @author Asset Tokenization Studio Team
  * @notice Diamond facet exposing transfer-eligibility checks and compliance contract management.
  * @dev Registers four selectors: canTransfer, canTransferFrom, setCompliance, and compliance.
  * Inherits business logic from the Compliance abstract contract.

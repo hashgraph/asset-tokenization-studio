@@ -9,6 +9,7 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
 
 /**
  * @title SecurityHolders
+ * @author Asset Tokenization Studio Team
  * @notice Abstract contract implementing token-holder enumeration queries for the
  *         Diamond-based token system.
  * @dev Delegates reader methods to `ERC1410StorageWrapper` and is intended to be

@@ -7,6 +7,7 @@ import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunc
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 /**
  * @title HoldFacet
+ * @author Asset Tokenization Studio Team
  * @notice Diamond facet exposing high-level hold read accessors.
  * @dev Registers two selectors: getHeldAmountFor and getHoldThirdParty. Inherits business logic
  *      from the Hold abstract contract.

@@ -175,7 +175,7 @@ npm run release               # Build and publish
 
 If you encounter issues during migration:
 
-1. Check that you're using Node.js v22.x
+1. Check that you're using Node.js v24.15.0 (see `.nvmrc`)
 2. Ensure you've run `npm ci` from the root directory
 3. Verify your `.env` file is in the correct location
 4. Try the clean and rebuild process described above

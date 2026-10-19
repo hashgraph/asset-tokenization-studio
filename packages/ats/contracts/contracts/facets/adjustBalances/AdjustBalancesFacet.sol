@@ -7,6 +7,7 @@ import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunc
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 /**
  * @title AdjustBalancesFacet
+ * @author Asset Tokenization Studio Team
  * @notice Diamond facet that consolidates the 2 immediate balance-adjustment selectors under a single
  *         `RESOLVER_KEY_BALANCE_ADJUSTMENTS`.
  * @dev Inherits implementation from `AdjustBalances` and satisfies the `IStaticFunctionSelectors`

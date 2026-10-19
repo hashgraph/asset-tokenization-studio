@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.sol";
+import { EMPTY_BYTES } from "../../constants/values.sol";
 
 /**
  * @title ComplianceModifiers
@@ -29,7 +30,7 @@ abstract contract ComplianceModifiers {
      * @param value Transfer amount
      */
     modifier onlyCanTransferFromByPartition(address from, address to, bytes32 partition, uint256 value) {
-        ERC1594StorageWrapper.requireCanTransferFromByPartition(from, to, partition, value);
+        ERC1594StorageWrapper.checkCanTransferFromByPartition(from, to, partition, value, EMPTY_BYTES, EMPTY_BYTES);
         _;
     }
 
@@ -46,7 +47,7 @@ abstract contract ComplianceModifiers {
      * @param value Redeem amount
      */
     modifier onlyCanRedeemFromByPartition(address from, bytes32 partition, uint256 value) {
-        ERC1594StorageWrapper.requireCanRedeemFromByPartition(from, partition, value);
+        ERC1594StorageWrapper.checkCanRedeemFromByPartition(from, partition, value, EMPTY_BYTES, EMPTY_BYTES);
         _;
     }
 

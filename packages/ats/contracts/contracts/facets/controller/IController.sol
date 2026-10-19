@@ -1,65 +1,39 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IERC3643Types } from "../layer_1/ERC3643/IERC3643Types.sol";
+import { IERC3643Types } from "../commonTypes/IERC3643Types.sol";
+import { IControllerTypes } from "./IControllerTypes.sol";
 
 /// @custom:hash resolverKey Controller
 bytes32 constant RESOLVER_KEY_CONTROLLER = 0xf020acbcf895b1f0961c02558f58e8e3f0a254c27f0e6287127ac2f43893df46;
 
 /**
  * @title IController
+ * @author Asset Tokenization Studio Team
  * @notice Interface for the ControllerFacet, grouping all controller and agent management operations.
  * @dev Combines ERC-1644 forced-transfer / controllability lifecycle with ERC-3643 agent role
  *      management. Inherits `AgentAdded` and `AgentRemoved` events from `IERC3643Types`.
  */
-interface IController is IERC3643Types {
+interface IController is IERC3643Types, IControllerTypes {
     /**
      * @notice Emitted when the controller feature is initialised for a token.
      * @dev Fired inside `initializeController` once the facet is marked ready.
+     * @param controllable Whether the token was configured as controllable.
      */
     event ControllerInitialized(bool controllable);
 
-    /// @notice Emitted when the controller feature is permanently disabled for a token.
+    /**
+     * @notice Emitted when the controller feature is permanently disabled for a token.
+     * @param operator Address of the caller who finalised controllability.
+     */
     event FinalizedControllerFeature(address operator);
-
-    /**
-     * @notice Emitted when an authorised controller transfers tokens between two holders.
-     * @param _controller The address of the controller that initiated the transfer.
-     * @param _from The address tokens are transferred from.
-     * @param _to The address tokens are transferred to.
-     * @param _value The amount of tokens transferred.
-     * @param _data Optional data attached to the transfer for validation.
-     * @param _operatorData Optional data attached by the controller for event attribution.
-     */
-    event ControllerTransfer(
-        address _controller,
-        address indexed _from,
-        address indexed _to,
-        uint256 _value,
-        bytes _data,
-        bytes _operatorData
-    );
-    /**
-     * @notice Emitted when an authorised controller redeems (burns) tokens on behalf of a holder.
-     * @param _controller The address of the controller that initiated the redemption.
-     * @param _tokenHolder The account whose tokens are redeemed.
-     * @param _value The amount of tokens redeemed.
-     * @param _data Optional data attached to the redemption for validation.
-     * @param _operatorData Optional data attached by the controller for event attribution.
-     */
-    event ControllerRedemption(
-        address _controller,
-        address indexed _tokenHolder,
-        uint256 _value,
-        bytes _data,
-        bytes _operatorData
-    );
 
     /// @notice Thrown when an operation requires the token to be controllable but it is not.
     error TokenIsNotControllable();
 
     /**
-     * @dev Initial configuration
+     * @notice One-time initialiser that sets whether the token is controllable.
+     * @dev Initial configuration. Can only be called once.
      * @param _isControllable true is controllable, false is not controllable
      */
     function initializeController(bool _isControllable) external;
@@ -97,23 +71,29 @@ interface IController is IERC3643Types {
     ) external;
 
     /**
-     * @dev Performs a forced transfer of `_amount` tokens from `_from` to `_to`.
+     * @notice Performs a forced transfer of `_amount` tokens from `_from` to `_to`.
      * @dev This function should only be callable by an authorized entity.
      * Returns `true` if the transfer was successful.
      * Emits a ControllerTransfer event.
+     * @param _from Address the tokens are transferred from.
+     * @param _to Address the tokens are transferred to.
+     * @param _amount Amount of tokens to transfer.
+     * @return True if the transfer was successful.
      */
     function forcedTransfer(address _from, address _to, uint256 _amount) external returns (bool);
 
     /**
-     * @notice Gives an account the agent role
-     * @notice Granting an agent role allows the account to perform multiple ERC-1400 actions
-     * @dev Can only be called by the role admin
+     * @notice Gives an account the agent role.
+     * @notice Granting an agent role allows the account to perform multiple ERC-1400 actions.
+     * @dev Can only be called by the role admin.
+     * @param _agent Address to be granted the agent role.
      */
     function addAgent(address _agent) external;
 
     /**
-     * @notice Revokes an account the agent role
-     * @dev Can only be called by the role admin
+     * @notice Revokes the agent role from an account.
+     * @dev Can only be called by the role admin.
+     * @param _agent Address whose agent role is revoked.
      */
     function removeAgent(address _agent) external;
 
@@ -131,7 +111,10 @@ interface IController is IERC3643Types {
     function isControllable() external view returns (bool);
 
     /**
-     * @dev Checks if an account has the agent role
+     * @notice Checks whether an account holds the agent role.
+     * @dev Checks if an account has the agent role.
+     * @param _agent Address to query.
+     * @return True if `_agent` holds the agent role, false otherwise.
      */
     function isAgent(address _agent) external view returns (bool);
 }

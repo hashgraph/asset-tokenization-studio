@@ -155,23 +155,10 @@ export const CONTRACT_NAMES = [
   "BatchTransferFacet",
   "FreezeFacet",
   "BatchFreezeFacet",
-  "TREXFactoryAts",
   "ComplianceMock",
   "IdentityRegistryMock",
-  "IdFactory",
-  "ClaimTopicsRegistry",
-  "IdentityRegistryStorage",
-  "IdentityRegistry",
-  "ModularCompliance",
-  "TrustedIssuersRegistry",
-  "TREXImplementationAuthority",
-  "ImplementationAuthority",
-  "Identity",
 ] as const;
 export type ContractName = (typeof CONTRACT_NAMES)[number];
-
-export const LIBRARY_NAMES = [] as const;
-export type LibraryName = (typeof LIBRARY_NAMES)[number];
 
 export const CONTRACT_NAMES_WITH_PROXY = ["Factory", "BusinessLogicResolver"];
 

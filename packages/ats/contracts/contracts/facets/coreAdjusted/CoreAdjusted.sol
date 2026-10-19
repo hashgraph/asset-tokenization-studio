@@ -9,6 +9,7 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
 
 /**
  * @title CoreAdjusted
+ * @author Asset Tokenization Studio Team
  * @notice Abstract implementation of the CoreAdjusted domain, providing time-adjusted decimal
  *         reads that account for pending scheduled balance adjustments (ABAFs).
  * @dev Inherits `ICoreAdjusted` and delegates entirely to `ERC20StorageWrapper.decimalsAdjustedAt`.

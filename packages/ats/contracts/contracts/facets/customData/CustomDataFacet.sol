@@ -27,7 +27,8 @@ contract CustomDataFacet is CustomData, IStaticFunctionSelectors {
             Bytes4Builder.build(
                 this.initializeCustomData.selector,
                 this.getCustomData.selector,
-                this.setCustomData.selector
+                this.setCustomData.selector,
+                this.setCustomDataBatch.selector
             );
     }
 

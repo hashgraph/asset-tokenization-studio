@@ -37,9 +37,7 @@ interface IPartitions {
 
     /**
      * @notice Indicates whether the token operates in multi-partition mode.
-     * @return
-     *  true : the token allows multiple partitions to be set and managed.
-     *  false : the token contains only one partition, the default one.
+     * @return True if the token allows multiple partitions to be set and managed; false otherwise
      */
     function isMultiPartition() external view returns (bool);
 }

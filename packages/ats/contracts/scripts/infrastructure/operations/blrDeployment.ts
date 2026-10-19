@@ -123,6 +123,7 @@ export async function deployBlr(signer: Signer, options: DeployBlrOptions = {}):
       await initTx.wait();
 
       initialized = true;
+
       success("BLR initialized");
     }
 

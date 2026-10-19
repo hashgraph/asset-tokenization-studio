@@ -47,11 +47,10 @@ export function createMockSecurityData(overrides?: Partial<SecurityDataParams>):
     isControllable: true,
     isWhiteList: true,
     maxSupply: TEST_NOMINAL_VALUES.MAX_SUPPLY,
-    erc20MetadataInfo: {
+    erc20Metadata: {
       name: TEST_TOKEN_METADATA.NAME,
       symbol: TEST_TOKEN_METADATA.SYMBOL,
       decimals: TEST_TOKEN_METADATA.DECIMALS,
-      isin: TEST_TOKEN_METADATA.ISIN,
     },
     clearingActive: false,
     internalKycActivated: false,
@@ -61,9 +60,10 @@ export function createMockSecurityData(overrides?: Partial<SecurityDataParams>):
     externalKycLists: [],
     compliance: TEST_ADDRESSES.ZERO,
     identityRegistry: TEST_ADDRESSES.ZERO,
-    resolverProxyConfiguration: {
-      key: TEST_CONFIG_IDS.EQUITY,
-      version: 1,
+    resolverProxyConfigurationV2: {
+      configurationId: TEST_CONFIG_IDS.EQUITY,
+      configurationVersion: 1,
+      replacementEnabled: true,
     },
     rbacs: [],
     ...overrides,
@@ -107,6 +107,8 @@ export function createMockEquityDetails(overrides?: Partial<EquityDetailsDataPar
     currency: TEST_TOKEN_METADATA.CURRENCY,
     nominalValue: TEST_NOMINAL_VALUES.STANDARD,
     nominalValueDecimals: TEST_NOMINAL_VALUES.DECIMALS,
+    effectiveDatetime: Math.floor(Date.now() / 1000) - 3600,
+    isUnitNominalValue: true,
     ...overrides,
   };
 }
@@ -128,6 +130,8 @@ export function createMockBondDetails(overrides?: Partial<BondDetailsDataParams>
     nominalValueDecimals: TEST_NOMINAL_VALUES.DECIMALS,
     startingDate: Math.floor(Date.now() / 1000),
     maturityDate: Math.floor(Date.now() / 1000) + 365 * 24 * 60 * 60, // 1 year
+    effectiveDatetime: Math.floor(Date.now() / 1000) - 3600,
+    isUnitNominalValue: true,
     ...overrides,
   };
 }

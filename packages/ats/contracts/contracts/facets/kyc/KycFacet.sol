@@ -5,11 +5,19 @@ import { IKyc, RESOLVER_KEY_KYC } from "./IKyc.sol";
 import { Kyc } from "./Kyc.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
+/**
+ * @title KycFacet
+ * @author Asset Tokenization Studio Team
+ * @notice Diamond facet that exposes KYC management operations through the `IKyc` interface,
+ *         registered under `RESOLVER_KEY_KYC`.
+ */
 contract KycFacet is Kyc, IStaticFunctionSelectors {
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = RESOLVER_KEY_KYC;
     }
 
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
@@ -26,6 +34,7 @@ contract KycFacet is Kyc, IStaticFunctionSelectors {
             );
     }
 
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
         return Bytes4Builder.build(type(IKyc).interfaceId);
     }
