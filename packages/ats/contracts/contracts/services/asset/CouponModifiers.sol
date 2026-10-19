@@ -24,4 +24,15 @@ abstract contract CouponModifiers {
         CouponStorageWrapper.checkEndDateAgainstMaturity(_endDate);
         _;
     }
+
+    /**
+     * @notice Reverts if any non-cancelled coupon still has an unresolved (PENDING) rate.
+     * @dev Delegates to `CouponStorageWrapper.checkPendingCoupons`. Guards operations that
+     *      change the coupon rate type, so a coupon issued under the previous type cannot be
+     *      left permanently unresolved by the switch.
+     */
+    modifier onlyNoPendingCoupons() {
+        CouponStorageWrapper.checkPendingCoupons();
+        _;
+    }
 }

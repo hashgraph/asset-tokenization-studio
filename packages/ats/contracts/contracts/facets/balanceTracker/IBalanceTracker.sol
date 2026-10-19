@@ -6,6 +6,7 @@ bytes32 constant RESOLVER_KEY_BALANCE_TRACKER = 0xefbff5dcb4e5bf43bf472fd0646991
 
 /**
  * @title IBalanceTracker
+ * @author Asset Tokenization Studio Team
  * @notice Interface for querying token balances and total supply across all partitions,
  *         with support for time-adjusted values that simulate pending balance adjustments.
  * @dev All read operations resolve the current block timestamp via `TimeTravelStorageWrapper`,

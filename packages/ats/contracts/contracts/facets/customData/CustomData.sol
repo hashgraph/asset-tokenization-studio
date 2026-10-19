@@ -20,23 +20,34 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
  */
 abstract contract CustomData is ICustomData, Modifiers {
     /// @inheritdoc ICustomData
-    function initializeCustomData()
-        external
-        override
-        onlyRole(DEFAULT_ADMIN_ROLE)
-        onlyFacetNotRegistered(RESOLVER_KEY_CUSTOM_DATA)
-    {
+    function initializeCustomData(
+        ICustomData.CustomDataEntry[] calldata _entries
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_CUSTOM_DATA) {
         InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_CUSTOM_DATA);
-        emit CustomDataInitialized();
+        CustomDataStorageWrapper.setCustomDataBatch(_entries);
+        emit CustomDataInitialized(_entries);
     }
+
     /// @inheritdoc ICustomData
     /// @dev Requires `ROLE_CUSTOM_DATA_MANAGER` and the token to be unpaused. Delegates persistence
-    ///      to `CustomDataStorageWrapper.setCustomData`, which overwrites any existing array.
+    ///      to `CustomDataStorageWrapper.setCustomData`, which overwrites any existing array, then
+    ///      emits `CustomDataSet`.
     function setCustomData(
         bytes32 _key,
         bytes[] calldata _value
     ) external onlyOperational onlyActivated onlyUnpaused onlyRole(ROLE_CUSTOM_DATA_MANAGER) {
         CustomDataStorageWrapper.setCustomData(_key, _value);
+        emit CustomDataSet(_key, _value);
+    }
+
+    /// @inheritdoc ICustomData
+    /// @dev Delegates all writes to `CustomDataStorageWrapper.setCustomDataBatch`, then emits a
+    ///      single `CustomDataBatchSet` event. An empty `_entries` array is a silent no-op.
+    function setCustomDataBatch(
+        ICustomData.CustomDataEntry[] calldata _entries
+    ) external onlyOperational onlyActivated onlyUnpaused onlyRole(ROLE_CUSTOM_DATA_MANAGER) {
+        CustomDataStorageWrapper.setCustomDataBatch(_entries);
+        emit CustomDataBatchSet(_entries);
     }
 
     /// @inheritdoc ICustomData

@@ -10,8 +10,7 @@
     "test/helpers/**/*",
     "test/fixtures/**/*",
     "test/common.ts",
-    "test/types.d.ts",
-    "test/isin-generator.d.ts"
+    "test/types.d.ts"
   ],
   "exclude": ["node_modules", "test/demo/**/*", "test/integration/**/*", "test/unitTests/**/*", "tasks"]
 }

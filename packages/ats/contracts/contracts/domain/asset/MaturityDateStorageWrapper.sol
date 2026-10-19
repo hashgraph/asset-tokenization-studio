@@ -11,6 +11,7 @@ bytes32 constant STORAGE_LOCATION_MATURITY_DATE = 0x1aa172d1ea72cd83510f1cf656de
  * @title MaturityDateDataStorage
  * @notice Backing storage for the maturity date of any time-bounded token.
  * @param maturityDate Timestamp (Unix epoch, seconds) of the asset maturity date.
+ * @custom:storage-location erc7201:security.token.standard.storage.MaturityDate
  */
 struct MaturityDateDataStorage {
     uint256 maturityDate;
@@ -54,6 +55,7 @@ library MaturityDateStorageWrapper {
      * @param _maturityDate Proposed maturity timestamp (Unix epoch, seconds).
      */
     function checkValidMaturityDate(uint256 _maturityDate) internal view {
+        // solhint-disable-next-line gas-strict-inequalities
         if (_maturityDate <= TimeTravelStorageWrapper.getBlockTimestamp()) {
             revert IMaturity.MaturityDateInvalid();
         }

@@ -5,6 +5,7 @@ import { IResolverProxy } from "../infrastructure/proxy/IResolverProxy.sol";
 import { IBusinessLogicResolver } from "../infrastructure/diamond/IBusinessLogicResolver.sol";
 import { ICore } from "../facets/core/ICore.sol";
 import { FactoryRegulationData, RegulationData, RegulationType, RegulationSubType } from "../constants/regulation.sol";
+import { ICommonErrors } from "../infrastructure/errors/ICommonErrors.sol";
 
 /// @custom:hash resolverKey Factory
 bytes32 constant RESOLVER_KEY_FACTORY = 0x9fc26269cc1cb994e66f269ed6b58a5bb0c344a134b9dabd342ac466d48f95c7;
@@ -12,29 +13,11 @@ bytes32 constant RESOLVER_KEY_FACTORY = 0x9fc26269cc1cb994e66f269ed6b58a5bb0c344
 /**
  * @title Factory Interface
  * @author Asset Tokenization Studio Team
- * @notice Interface for deploying tokenised securities (equity, bonds, loans)
+ * @notice Interface for deploying tokenised securities (equity, bonds, deposit tokens)
  *         through a centralised factory that configures resolver proxies,
  *         business-logic resolvers, and role-based access control.
  */
-interface IFactory {
-    /**
-     * @notice Distinguishes the security variant being deployed.
-     * @dev Used internally to select the correct initialisation path in the factory.
-     */
-    enum SecurityType {
-        /// @notice A bond whose coupon rate floats against an external index.
-        BondVariableRate,
-        /// @notice An equity instrument (shares).
-        Equity,
-        /// @notice A bond with a fixed coupon rate.
-        BondFixedRate,
-        /// @notice A bond whose coupon is tied to KPI performance metrics.
-        BondKpiLinkedRate,
-        /// @notice A loan instrument.
-        Loan,
-        DepositToken
-    }
-
+interface IFactory is ICommonErrors {
     /**
      * @notice Categories of dividend entitlement an equity token may carry.
      */
@@ -45,16 +28,6 @@ interface IFactory {
         PREFERRED,
         /// Ordinary dividend distributed pro-rata across common holders.
         COMMON
-    }
-
-    /**
-     * @notice Identifies the business-logic resolver version to wire into a new proxy.
-     * @param key     Resolver key that maps to the registered BusinessLogicResolver address.
-     * @param version Configuration version to load from the resolver.
-     */
-    struct ResolverProxyConfiguration {
-        bytes32 key;
-        uint256 version;
     }
 
     /**
@@ -69,7 +42,7 @@ interface IFactory {
      * @param isControllable             Whether an operator can forcibly transfer tokens.
      * @param isWhiteList                Whether transfers are gated by a whitelist.
      * @param maxSupply                  Hard cap on total token supply (0 means unlimited).
-     * @param erc20MetadataInfo          ERC-20 name, symbol, and decimals.
+     * @param erc20Metadata              ERC-20 name, symbol, and decimals.
      * @param clearingActive             Whether clearing and settlement is activated.
      * @param internalKycActivated       Whether the internal KYC module is activated.
      * @param externalPauses             External pause contract addresses consulted on transfer.
@@ -82,8 +55,8 @@ interface IFactory {
     struct SecurityData {
         IBusinessLogicResolver resolver;
         uint256 maxSupply;
-        ResolverProxyConfiguration resolverProxyConfiguration;
-        ICore.ERC20MetadataInfo erc20MetadataInfo;
+        IResolverProxy.ResolverProxyConfigurationV2 resolverProxyConfigurationV2;
+        ICore.ERC20Metadata erc20Metadata;
         IResolverProxy.Rbac[] rbacs;
         address[] externalPauses;
         address[] externalControlLists;
@@ -112,6 +85,10 @@ interface IFactory {
      * @param currency             ISO 4217 currency code encoded as `bytes3`.
      * @param nominalValue         Face value of one equity unit (raw integer).
      * @param nominalValueDecimals Number of decimal places applied to `nominalValue`.
+     * @param effectiveDatetime    Timestamp as of which `nominalValue` is effective; must be
+     *                             non-zero and strictly less than `block.timestamp`.
+     * @param isUnitNominalValue   Whether `nominalValue` is a per-unit (true) or aggregate
+     *                             (false) value.
      */
     struct EquityDetailsData {
         bool votingRight;
@@ -124,7 +101,9 @@ interface IFactory {
         DividendType dividendRight;
         bytes3 currency;
         uint256 nominalValue;
-        uint8 nominalValueDecimals;
+        uint256 nominalValueDecimals;
+        uint256 effectiveDatetime;
+        bool isUnitNominalValue;
     }
 
     /**
@@ -140,7 +119,7 @@ interface IFactory {
     /**
      * @notice Input data describing a bond's economic parameters.
      * @dev    Replaces the removed `IBondRead.BondDetailsData` type. Consumed by the Factory
-     *         during `deployBond`, `deployBondFixedRate`, and `deployBondKpiLinkedRate`.
+     *         during `deployBond`.
      * @param currency               ISO 4217 currency code encoded as `bytes3`.
      * @param nominalValue           Face value of one unit of the bond (raw integer).
      * @param nominalValueDecimals   Number of decimals applied to `nominalValue`.
@@ -149,13 +128,19 @@ interface IFactory {
      *                               `BOND_STARTING_DATE_METADATA_KEY`.
      * @param maturityDate           Redemption date timestamp (Unix epoch, seconds). Must be
      *                               strictly greater than `startingDate`.
+     * @param effectiveDatetime      Timestamp as of which `nominalValue` is effective; must be
+     *                               non-zero and strictly less than `block.timestamp`.
+     * @param isUnitNominalValue     Whether `nominalValue` is a per-unit (true) or aggregate
+     *                               (false) value.
      */
     struct BondDetailsData {
         bytes3 currency;
         uint256 nominalValue;
-        uint8 nominalValueDecimals;
+        uint256 nominalValueDecimals;
         uint256 startingDate;
         uint256 maturityDate;
+        uint256 effectiveDatetime;
+        bool isUnitNominalValue;
     }
 
     /**
@@ -170,14 +155,6 @@ interface IFactory {
         BondDetailsData bondDetails;
         address[] proceedRecipients;
         bytes[] proceedRecipientsData;
-    }
-
-    /**
-     * @notice Full configuration for deploying a deposit token.
-     * @param security Core security configuration shared across all security types.
-     */
-    struct DepositTokenData {
-        SecurityData security;
     }
 
     /**
@@ -205,20 +182,6 @@ interface IFactory {
         address indexed deployer,
         address bondAddress,
         BondData bondData,
-        FactoryRegulationData regulationData
-    );
-
-    /**
-     * @notice Emitted when a new deposit token is deployed.
-     * @param deployer Address that initiated the deployment.
-     * @param depositTokenAddress Address of the newly deployed deposit token proxy.
-     * @param depositTokenData Full deposit token configuration.
-     * @param regulationData Regulation data validated for the deposit token.
-     */
-    event DepositTokenDeployed(
-        address indexed deployer,
-        address depositTokenAddress,
-        DepositTokenData depositTokenData,
         FactoryRegulationData regulationData
     );
 
@@ -252,18 +215,6 @@ interface IFactory {
     error NoInitialAdmins();
 
     /**
-     * @notice Raised when the provided ISIN does not meet the expected format or length.
-     * @param isin The invalid ISIN string.
-     */
-    error WrongISIN(string isin);
-
-    /**
-     * @notice Raised when the ISIN checksum is invalid.
-     * @param isin The invalid ISIN string.
-     */
-    error WrongISINChecksum(string isin);
-
-    /**
      * @notice Raised when the requested regulation type and sub-type combination is not permitted.
      * @param regulationType Primary regulation category.
      * @param regulationSubType Sub-category within the regulation.
@@ -273,16 +224,14 @@ interface IFactory {
     /**
      * @notice Deploys a new resolver proxy and initialises its RBAC.
      * @param _resolver Business-logic resolver to attach.
-     * @param _configKey Configuration identifier for the proxy.
-     * @param _version Initial configuration version.
+     * @param _resolverProxyConfigurationV2 Resolver configuration data for the proxy.
      * @param _rbacs Role-based access control entries to seed.
      * @param _data Additional data for the proxy deployment.
      * @return proxyAddress_ Address of the deployed proxy.
      */
     function deployProxy(
         IBusinessLogicResolver _resolver,
-        bytes32 _configKey,
-        uint256 _version,
+        IResolverProxy.ResolverProxyConfigurationV2 memory _resolverProxyConfigurationV2,
         IResolverProxy.Rbac[] memory _rbacs,
         bytes calldata _data
     ) external returns (address proxyAddress_);
@@ -308,19 +257,6 @@ interface IFactory {
         BondData calldata _bondData,
         FactoryRegulationData calldata _factoryRegulationData
     ) external returns (address bondAddress_);
-
-    /**
-     * @notice Deploys a new deposit token from the supplied configuration.
-     * @dev DepositToken is a minimal cash-style asset; the regulation data is validated and
-     *      emitted for indexing but not persisted on-chain.
-     * @param _depositTokenData Deposit token creation data wrapping the shared `SecurityData`.
-     * @param _factoryRegulationData Regulation type and sub-type validated for the deposit token.
-     * @return depositTokenAddress_ Address of the newly deployed deposit token proxy.
-     */
-    function deployDepositToken(
-        DepositTokenData calldata _depositTokenData,
-        FactoryRegulationData calldata _factoryRegulationData
-    ) external returns (address depositTokenAddress_);
 
     /**
      * @notice Returns the regulation data that applies to a given type/sub-type pair.

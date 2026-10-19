@@ -40,7 +40,7 @@ abstract contract Dividend is IDividend, Modifiers {
 
     /// @inheritdoc IDividend
     /// @dev Restricted to `ROLE_CORPORATE_ACTION`; gated by `onlyUnpaused`,
-    ///      `onlyValidDates(recordDate, executionDate)`, and `onlyValidTimestamp(recordDate)`.
+    ///      `onlyValidDates(recordDate, executionDate)`, and `onlyFutureTimestamp(recordDate)`.
     function setDividend(
         IDividendTypes.Dividend calldata newDividend
     )
@@ -51,10 +51,20 @@ abstract contract Dividend is IDividend, Modifiers {
         onlyUnpaused
         onlyRole(ROLE_CORPORATE_ACTION)
         onlyValidDates(newDividend.recordDate, newDividend.executionDate)
-        onlyValidTimestamp(newDividend.recordDate)
+        onlyFutureTimestamp(newDividend.recordDate)
         returns (uint256 dividendId_)
     {
-        (, dividendId_) = DividendStorageWrapper.setDividend(newDividend);
+        bytes32 corporateActionId_;
+        (corporateActionId_, dividendId_) = DividendStorageWrapper.setDividend(newDividend);
+        emit IDividend.DividendSet(
+            corporateActionId_,
+            dividendId_,
+            EvmAccessors.getMsgSender(),
+            newDividend.recordDate,
+            newDividend.executionDate,
+            newDividend.amount,
+            newDividend.amountDecimals
+        );
     }
 
     /// @inheritdoc IDividend
@@ -73,6 +83,7 @@ abstract contract Dividend is IDividend, Modifiers {
         returns (bool success_)
     {
         success_ = DividendStorageWrapper.cancelDividend(dividendId);
+        emit IDividend.DividendCancelled(dividendId, EvmAccessors.getMsgSender());
     }
 
     /// @inheritdoc IDividend

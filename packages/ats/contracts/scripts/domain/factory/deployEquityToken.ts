@@ -4,7 +4,7 @@ import { ethers, type EventLog } from "ethers";
 import type { IFactory, ResolverProxy } from "@contract-types";
 import { ResolverProxy__factory } from "@contract-types";
 import { GAS_LIMIT } from "@scripts/infrastructure";
-import { ATS_ROLES, EQUITY_CONFIG_ID } from "../constants";
+import { ATS_ROLES, CONFIG_IDS } from "../constants";
 import { EquityDetailsDataParams, FactoryRegulationDataParams, Rbac, SecurityDataParams } from "./types";
 
 // ============================================================================
@@ -45,7 +45,6 @@ export interface DeployEquityFromFactoryParams {
  *   name: 'My Equity',
  *   symbol: 'MEQ',
  *   decimals: 18,
- *   isin: 'US0378331005',
  *   votingRight: true,
  *   // ... other params
  *   regulationType: RegulationType.REG_S,
@@ -71,9 +70,10 @@ export async function deployEquityFromFactory(
   ];
 
   // Build resolver proxy configuration
-  const resolverProxyConfiguration = {
-    key: EQUITY_CONFIG_ID,
-    version: 1,
+  const resolverProxyConfigurationV2 = {
+    configurationId: CONFIG_IDS.equity,
+    configurationVersion: 1,
+    replacementEnabled: true,
   };
 
   // Build security data structure
@@ -81,16 +81,15 @@ export async function deployEquityFromFactory(
     arePartitionsProtected: securityDataParams.arePartitionsProtected,
     isMultiPartition: securityDataParams.isMultiPartition,
     resolver: securityDataParams.resolver,
-    resolverProxyConfiguration,
+    resolverProxyConfigurationV2,
     rbacs,
     isControllable: securityDataParams.isControllable,
     isWhiteList: securityDataParams.isWhiteList,
     maxSupply: securityDataParams.maxSupply,
-    erc20MetadataInfo: {
-      name: securityDataParams.erc20MetadataInfo.name,
-      symbol: securityDataParams.erc20MetadataInfo.symbol,
-      isin: securityDataParams.erc20MetadataInfo.isin,
-      decimals: securityDataParams.erc20MetadataInfo.decimals,
+    erc20Metadata: {
+      name: securityDataParams.erc20Metadata.name,
+      symbol: securityDataParams.erc20Metadata.symbol,
+      decimals: securityDataParams.erc20Metadata.decimals,
     },
     clearingActive: securityDataParams.clearingActive,
     internalKycActivated: securityDataParams.internalKycActivated,
@@ -115,6 +114,8 @@ export async function deployEquityFromFactory(
     currency: equityDetailsParams.currency,
     nominalValue: equityDetailsParams.nominalValue,
     nominalValueDecimals: equityDetailsParams.nominalValueDecimals,
+    effectiveDatetime: equityDetailsParams.effectiveDatetime,
+    isUnitNominalValue: equityDetailsParams.isUnitNominalValue,
   };
 
   // Build equity data

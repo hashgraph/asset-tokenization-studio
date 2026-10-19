@@ -27,30 +27,28 @@ interface IKyc {
     /**
      * @notice Emitted once when the KYC capability is initialised on a token.
      * @dev Fires exclusively from `initializeInternalKyc` after the storage write succeeds.
+     * @param internalKycActivated Whether internal KYC enforcement was enabled at initialisation.
      */
     event KycInitialized(bool internalKycActivated);
 
     /**
-     * @dev Emitted when a Kyc is granted
-     *
-     * @param account The address for which the Kyc is granted
-     * @param issuer The address of the issuer of the Kyc
+     * @notice Emitted when KYC is granted to an account.
+     * @param account The address for which the KYC is granted.
+     * @param issuer The address of the issuer of the KYC.
      */
     event KycGranted(address indexed account, address indexed issuer);
 
     /**
-     * @dev Emitted when Internal Kyc is updated
-     *
-     * @param operator The address for which the Kyc is updated
-     * @param activated The status of the internal Kyc
+     * @notice Emitted when the internal KYC enforcement status is toggled.
+     * @param operator The address that triggered the status update.
+     * @param activated The new activation state of the internal KYC.
      */
     event InternalKycStatusUpdated(address indexed operator, bool activated);
 
     /**
-     * @dev Emitted when a Kyc is revoked
-     *
-     * @param account The address for which the Kyc is revoked
-     * @param issuer The address of the issuer of the Kyc
+     * @notice Emitted when KYC is revoked from an account.
+     * @param account The address for which the KYC is revoked.
+     * @param issuer The address of the issuer revoking the KYC.
      */
     event KycRevoked(address indexed account, address indexed issuer);
 
@@ -58,87 +56,81 @@ interface IKyc {
     error KycIsNotGranted();
     error InvalidZeroAddress();
     /**
-     * @dev Initialize Internal Kyc
+     * @notice Initialises the internal KYC capability on the token.
+     * @param _activateInternalKyc Whether to enable internal KYC enforcement immediately.
      */
     function initializeInternalKyc(bool _activateInternalKyc) external;
 
     /**
-     * @dev Activate Internal Kyc
-     * @return success_ true or false
+     * @notice Activates internal KYC enforcement for the token.
+     * @return success_ True when the call succeeds without reverting.
      */
     function activateInternalKyc() external returns (bool success_);
 
     /**
-     * @dev Deactivate Internal Kyc
-     * @return success_ true or false
+     * @notice Deactivates internal KYC enforcement for the token.
+     * @return success_ True when the call succeeds without reverting.
      */
     function deactivateInternalKyc() external returns (bool success_);
 
     /**
-     * @dev Grant kyc to an address
-     *
-     * @param _account user whose Kyc is being granted
-     * @param _vcId credential Id
-     * @param _validFrom start date of the Kyc
-     * @param _validTo end date of the Kyc
-     * @param _issuer issurer of the Kyc
-     * @return success_ true or false
+     * @notice Grants KYC to an account with the supplied verifiable-credential metadata.
+     * @param _account User whose KYC is being granted.
+     * @param _vcId Verifiable-credential identifier issued by the issuer.
+     * @param _validFrom Start timestamp of the KYC validity period.
+     * @param _validTo End timestamp of the KYC validity period.
+     * @param _issuer Address of the entity issuing the KYC.
+     * @return success_ True when the grant succeeds without reverting.
      */
     function grantKyc(
         address _account,
-        string memory _vcId,
+        string calldata _vcId,
         uint256 _validFrom,
         uint256 _validTo,
         address _issuer
     ) external returns (bool success_);
 
     /**
-     * @dev Revoke kyc to an address
-     *
-     * @param _account user whose Kyc is being revoked
-     * @return success_ true or false
+     * @notice Revokes the KYC previously granted to an account.
+     * @param _account User whose KYC is being revoked.
+     * @return success_ True when the revocation succeeds without reverting.
      */
     function revokeKyc(address _account) external returns (bool success_);
 
     /**
-     * @dev Get the status of the Kyc for an account
-     *
-     * @param _account the account to check
-     * @return kycStatus_ GRANTED or NOT_GRANTED
+     * @notice Returns the current KYC status for an account.
+     * @param _account The account to check.
+     * @return kycStatus_ GRANTED or NOT_GRANTED.
      */
     function getKycStatusFor(address _account) external view returns (KycStatus kycStatus_);
 
     /**
-     * @dev Get all the info of the Kyc for an account
-     *
-     * @param _account the account to check
-     * @return kyc_
+     * @notice Returns all KYC metadata recorded for an account.
+     * @param _account The account to query.
+     * @return kyc_ The full `KycData` struct for that account.
      */
     function getKycFor(address _account) external view returns (KycData memory kyc_);
 
     /**
-     * @dev Get the count of accounts with a given Kyc status
-     *
-     * @param _kycStatus GRANTED or NOT_GRANTED
-     * @return kycAccountsCount_ count of accounts with the given Kyc status
+     * @notice Returns the number of accounts with a given KYC status.
+     * @param _kycStatus The status to filter by: GRANTED or NOT_GRANTED.
+     * @return kycAccountsCount_ The count of accounts matching the given status.
      */
     function getKycAccountsCount(KycStatus _kycStatus) external view returns (uint256 kycAccountsCount_);
 
     /**
-     * @dev Get the internal kyc flag
-     *
-     * @return bool true if the internal kyc is activated
+     * @notice Returns whether internal KYC enforcement is currently active.
+     * @return True if internal KYC is activated, false otherwise.
      */
     function isInternalKycActivated() external view returns (bool);
 
     /**
-     * @dev Returns an array with the KYC data from accounts with a given KYC status
-     *
-     * @param _kycStatus GRANTED or NOT_GRANTED
-     * @param _pageIndex members to skip : _pageIndex * _pageLength
-     * @param _pageLength number of members to return
-     * @return accounts_ The array containing the accounts
-     * @return kycData_ The array containing the data from the accounts
+     * @notice Returns a paginated list of accounts and their KYC data for a given KYC status.
+     * @param _kycStatus The status to filter by: GRANTED or NOT_GRANTED.
+     * @param _pageIndex Zero-based page index; skips `_pageIndex * _pageLength` entries.
+     * @param _pageLength Maximum number of entries to return per page.
+     * @return accounts_ The accounts matching the given KYC status in the requested page.
+     * @return kycData_ The KYC data records corresponding to each account in `accounts_`.
      */
     function getKycAccountsData(
         KycStatus _kycStatus,

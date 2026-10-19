@@ -20,7 +20,7 @@ import type {
 } from "../../../../scripts/tools/registry-generator/types";
 import { extractMetadata } from "../../../../scripts/tools/registry-generator/core/extractor";
 import { generateRegistry } from "../../../../scripts/tools/registry-generator/core/generator";
-import { silenceScriptLogging } from "@test";
+import { silenceScriptLogging, TEST_FACET_NAMES } from "@test";
 import { resetLogger } from "@scripts/infrastructure";
 
 // ---------------------------------------------------------------------------
@@ -65,7 +65,6 @@ const makeMetadata = (overrides: Partial<ContractMetadata> = {}): ContractMetada
   sourceFile: "mocks/TestMock.sol",
   layer: 0,
   category: "core",
-  hasTimeTravel: false,
   roles: [],
   methods: [],
   events: [],
@@ -100,7 +99,7 @@ describe("Registry Generator - isDeployable", () => {
         }),
       });
 
-      const metadata = extractMetadata(contract, false);
+      const metadata = extractMetadata(contract);
       expect(metadata.isDeployable).to.be.true;
     });
 
@@ -116,7 +115,7 @@ describe("Registry Generator - isDeployable", () => {
         }),
       });
 
-      const metadata = extractMetadata(contract, false);
+      const metadata = extractMetadata(contract);
       expect(metadata.isDeployable).to.be.false;
     });
 
@@ -131,7 +130,7 @@ describe("Registry Generator - isDeployable", () => {
         }),
       });
 
-      const metadata = extractMetadata(contract, false);
+      const metadata = extractMetadata(contract);
       expect(metadata.isDeployable).to.be.false;
     });
 
@@ -147,7 +146,7 @@ describe("Registry Generator - isDeployable", () => {
         }),
       });
 
-      const metadata = extractMetadata(contract, false);
+      const metadata = extractMetadata(contract);
       expect(metadata.isDeployable).to.be.false;
     });
   });
@@ -235,6 +234,36 @@ describe("Registry Generator - isDeployable", () => {
 
       const entry = entryMatch![0];
       expect(entry).to.not.include("factory:");
+    });
+  });
+
+  // ==========================================================================
+  // generateRegistry - FacetName union type
+  // ==========================================================================
+
+  describe("generateRegistry - FacetName union", () => {
+    it("should emit a sorted FacetName union from the facet names", () => {
+      // Declared out of alphabetical order to prove the generator sorts them
+      // (FACET_A = "FacetA" sorts before FACET_B = "FacetB").
+      const facets = [
+        makeMetadata({ name: TEST_FACET_NAMES.FACET_B, contractName: TEST_FACET_NAMES.FACET_B }),
+        makeMetadata({ name: TEST_FACET_NAMES.FACET_A, contractName: TEST_FACET_NAMES.FACET_A }),
+      ];
+
+      const code = generateRegistry(facets, []);
+
+      expect(code).to.include("export type FacetName =");
+      expect(code).to.include(`| '${TEST_FACET_NAMES.FACET_A}'`);
+      expect(code).to.include(`| '${TEST_FACET_NAMES.FACET_B}'`);
+      expect(code.indexOf(`'${TEST_FACET_NAMES.FACET_A}'`)).to.be.lessThan(
+        code.indexOf(`'${TEST_FACET_NAMES.FACET_B}'`),
+      );
+    });
+
+    it("should emit `never` when there are no facets", () => {
+      const code = generateRegistry([], []);
+
+      expect(code).to.match(/export type FacetName =\s*never/);
     });
   });
 });

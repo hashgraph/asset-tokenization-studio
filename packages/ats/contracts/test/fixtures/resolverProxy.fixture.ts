@@ -140,8 +140,7 @@ export async function deployResolverProxyFixture(): Promise<ResolverProxyFixture
   const initialVersion = 1;
   const resolverProxy = await new ResolverProxy__factory(deployer).deploy(
     blrAddress,
-    TEST_CONFIG_ID,
-    initialVersion,
+    { configurationId: TEST_CONFIG_ID, configurationVersion: initialVersion, replacementEnabled: false },
     [{ role: ZeroHash, members: [deployer.address] }], // Grant DEFAULT_ADMIN_ROLE
   );
   await resolverProxy.waitForDeployment();

@@ -9,6 +9,7 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
 
 /**
  * @title BalanceTrackerAdjusted
+ * @author Asset Tokenization Studio Team
  * @notice Abstract implementation of `IBalanceTrackerAdjusted` providing historical,
  *         timestamp-parameterised balance queries with non-triggered adjustment simulation.
  * @dev Delegates storage reads to `ERC1410StorageWrapper.balanceOfAdjustedAt`.

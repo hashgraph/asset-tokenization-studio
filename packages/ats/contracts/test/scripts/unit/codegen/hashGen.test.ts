@@ -115,9 +115,10 @@ describe("scripts/codegen/hashGen — invariants", () => {
 });
 
 describe("scripts/codegen/hashGen — type surface", () => {
-  it("enumerates exactly the five canonical families", () => {
+  it("enumerates exactly the six canonical families", () => {
     expect([...HASH_KINDS].sort()).to.deep.equal([
       "corporateAction",
+      "nonceKey",
       "resolverKey",
       "role",
       "scheduledTask",

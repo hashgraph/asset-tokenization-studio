@@ -46,5 +46,5 @@ interface INominalValueAtSnapshot {
      * @param  _snapshotID           The snapshot identifier returned by a prior `takeSnapshot` call.
      * @return nominalValueDecimals_ The nominal value decimals recorded at `_snapshotID`.
      */
-    function nominalValueDecimalsAtSnapshot(uint256 _snapshotID) external view returns (uint8 nominalValueDecimals_);
+    function nominalValueDecimalsAtSnapshot(uint256 _snapshotID) external view returns (uint256 nominalValueDecimals_);
 }

@@ -51,11 +51,11 @@ interface IAdjustBalances {
      * @dev Caller must hold `ROLE_ADJUSTMENT_BALANCE`. The token must not be paused and `factor`
      *      must be non-zero. Pending scheduled tasks at index 0 are triggered before the adjustment
      *      is applied, ensuring consistent ordering.
-     * @param factor   Numerator of the multiplier; effective ratio = factor / 10^decimals.
-     * @param decimals Denominator exponent.
+     * @param _factor   Numerator of the multiplier; effective ratio = factor / 10^decimals.
+     * @param _decimals Denominator exponent.
      * @return success_ True if the adjustment was applied without reverting.
      */
-    function adjustBalances(uint256 factor, uint8 decimals) external returns (bool success_);
+    function adjustBalances(uint256 _factor, uint8 _decimals) external returns (bool success_);
 
     /**
      * @notice Triggers pending scheduled tasks and synchronises the balance snapshot for a transfer pair.

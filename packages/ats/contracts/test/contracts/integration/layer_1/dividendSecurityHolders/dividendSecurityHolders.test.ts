@@ -1,53 +1,43 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { expect } from "chai";
-import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { type IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ATS_ROLES, RESOLVER_KEY_DIVIDEND_SECURITY_HOLDERS } from "@scripts";
-import { deployEquityTokenFixture } from "@test";
+import { IAssetMock } from "@contract-types";
+import { ATS_ROLES, RESOLVER_KEYS } from "@scripts";
+import type { AssetMockCtx } from "@test";
 
-describe("DividendSecurityHolders Tests", () => {
-  let diamond: ResolverProxy;
-  let signer_A: HardhatEthersSigner;
-  let signer_C: HardhatEthersSigner;
+export function dividendSecurityHoldersTests(getCtx: () => AssetMockCtx): void {
+  describe("DividendSecurityHolders Tests", () => {
+    let signer_C: HardhatEthersSigner;
 
-  let asset: IAsset;
-  let mockDiamondCut: MockDiamondCut;
+    let asset: IAssetMock;
 
-  async function deploySecurityFixtureSinglePartition() {
-    const base = await deployEquityTokenFixture();
-    diamond = base.diamond;
-    signer_A = base.deployer;
-    signer_C = base.user2;
+    beforeEach(async () => {
+      const ctx = getCtx();
+      signer_C = ctx.user2;
 
-    asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
-    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
-  }
-
-  beforeEach(async () => {
-    await loadFixture(deploySecurityFixtureSinglePartition);
-  });
-
-  describe("initializeDividendSecurityHolders", () => {
-    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeDividendSecurityHolders is called THEN AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeDividendSecurityHolders())
-        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
-        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+      asset = ctx.asset;
     });
 
-    it("GIVEN already-initialised WHEN initializeDividendSecurityHolders is called again THEN FacetAlreadyRegistered", async () => {
-      await expect(asset.initializeDividendSecurityHolders())
-        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(RESOLVER_KEY_DIVIDEND_SECURITY_HOLDERS, 1);
-    });
-  });
+    describe("initializeDividendSecurityHolders", () => {
+      it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeDividendSecurityHolders is called THEN AccountHasNoRole", async () => {
+        await expect(asset.connect(signer_C).initializeDividendSecurityHolders())
+          .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+          .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+      });
 
-  describe("initializeDividendSecurityHolders event", () => {
-    it("GIVEN a fresh deployment WHEN initializeDividendSecurityHolders is called THEN emits DividendSecurityHoldersInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_DIVIDEND_SECURITY_HOLDERS);
-      await expect(asset.initializeDividendSecurityHolders()).to.emit(asset, "DividendSecurityHoldersInitialized");
+      it("GIVEN already-initialised WHEN initializeDividendSecurityHolders is called again THEN FacetAlreadyRegistered", async () => {
+        await expect(asset.initializeDividendSecurityHolders())
+          .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+          .withArgs(RESOLVER_KEYS.dividendSecurityHolders, 1);
+      });
+    });
+
+    describe("initializeDividendSecurityHolders event", () => {
+      it("GIVEN a fresh deployment WHEN initializeDividendSecurityHolders is called THEN emits DividendSecurityHoldersInitialized", async () => {
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.dividendSecurityHolders);
+        await expect(asset.initializeDividendSecurityHolders()).to.emit(asset, "DividendSecurityHoldersInitialized");
+      });
     });
   });
-});
+}

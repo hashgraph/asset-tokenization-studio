@@ -4,7 +4,7 @@
  * Factory deployment module.
  *
  * Deploys the Factory entry point as a ResolverProxy parameterized with
- * FACTORY_CONFIG_ID. The BLR config MUST be registered before calling this
+ * CONFIG_IDS.factory. The BLR config MUST be registered before calling this
  * function — use createFactoryConfiguration() first.
  *
  * Off-chain callers continue to interact via the IFactory ABI on the returned
@@ -15,7 +15,7 @@
 
 import { Signer } from "ethers";
 import { ResolverProxy__factory } from "@contract-types";
-import { FACTORY_CONFIG_ID } from "@scripts/domain";
+import { CONFIG_IDS } from "@scripts/domain";
 import {
   info,
   section,
@@ -56,7 +56,7 @@ export interface DeployFactoryResult {
 /**
  * Deploy Factory as a ResolverProxy.
  *
- * Constructs `new ResolverProxy(blrAddress, FACTORY_CONFIG_ID, factoryVersion, [])`.
+ * Constructs `new ResolverProxy(blrAddress, CONFIG_IDS.factory, factoryVersion, [])`.
  * The FactoryProxy constructor validates that the config exists in BLR and reverts
  * if it does not — ensuring deployment order is enforced at the EVM level.
  *
@@ -92,13 +92,12 @@ export async function deployFactory(signer: Signer, options: DeployFactoryOption
   section("Deploying Factory (ResolverProxy)");
 
   try {
-    info(`Deploying FactoryProxy with BLR=${blrAddress}, configId=${FACTORY_CONFIG_ID}, version=${factoryVersion}...`);
+    info(`Deploying FactoryProxy with BLR=${blrAddress}, configId=${CONFIG_IDS.factory}, version=${factoryVersion}...`);
 
     const resolverProxyFactory = new ResolverProxy__factory(signer);
     const factoryProxy = await resolverProxyFactory.deploy(
       blrAddress,
-      FACTORY_CONFIG_ID,
-      factoryVersion,
+      { configurationId: CONFIG_IDS.factory, configurationVersion: factoryVersion, replacementEnabled: true },
       [], // empty rbacs — Factory is permissionless in v1
       {
         ...gasLimitOverride(GAS_LIMIT.high),
@@ -111,7 +110,7 @@ export async function deployFactory(signer: Signer, options: DeployFactoryOption
 
     success("Factory deployment complete");
     info(`  Factory Proxy:    ${factoryAddress}`);
-    info(`  Config ID:        ${FACTORY_CONFIG_ID}`);
+    info(`  Config ID:        ${CONFIG_IDS.factory}`);
     info(`  Version:          ${factoryVersion}`);
 
     return {

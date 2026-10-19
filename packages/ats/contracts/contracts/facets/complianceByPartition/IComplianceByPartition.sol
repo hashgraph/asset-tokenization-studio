@@ -38,9 +38,9 @@ interface IComplianceByPartition {
      * @param _value The amount of tokens to transfer.
      * @param _data Additional data attached to the transfer check.
      * @param _operatorData Additional data attached by the operator.
-     * @return status True when the transfer is allowed.
-     * @return code EIP-1066 status code describing the result.
-     * @return reason Additional reason data tied to the status code.
+     * @return status_ True when the transfer is allowed.
+     * @return code_ EIP-1066 status code describing the result.
+     * @return reason_ Additional reason data tied to the status code.
      */
     function canTransferByPartition(
         address _from,
@@ -49,7 +49,7 @@ interface IComplianceByPartition {
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    ) external view returns (bool status, bytes1 code, bytes32 reason);
+    ) external view returns (bool status_, bytes1 code_, bytes32 reason_);
 
     /**
      * @notice Checks whether a redemption can be executed on a specific partition.
@@ -60,9 +60,9 @@ interface IComplianceByPartition {
      * @param _value The amount of tokens to redeem.
      * @param _data Additional data attached to the redemption check.
      * @param _operatorData Additional data attached by the operator.
-     * @return status True when the redemption is allowed.
-     * @return code EIP-1066 status code describing the result.
-     * @return reason Additional reason data tied to the status code.
+     * @return status_ True when the redemption is allowed.
+     * @return code_ EIP-1066 status code describing the result.
+     * @return reason_ Additional reason data tied to the status code.
      */
     function canRedeemByPartition(
         address _from,
@@ -70,5 +70,5 @@ interface IComplianceByPartition {
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    ) external view returns (bool status, bytes1 code, bytes32 reason);
+    ) external view returns (bool status_, bytes1 code_, bytes32 reason_);
 }

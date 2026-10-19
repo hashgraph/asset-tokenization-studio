@@ -5,7 +5,8 @@ import { ICommonErrors } from "../errors/ICommonErrors.sol";
 
 /**
  * @title Default Value Validation
- * @notice Utility library for validating that values are not the Solidity default (zero)
+ * @author Asset Tokenization Studio Team
+ * @notice Utility library for validating that values are not the Solidity default (zero).
  */
 library DefaultValueValidation {
     /**
@@ -26,5 +27,15 @@ library DefaultValueValidation {
         if (_value == 0) {
             revert ICommonErrors.ZeroValueNotAllowed();
         }
+    }
+
+    /**
+     * @notice Validates that two collection or array lengths match.
+     * @dev Reverts with `DifferentLengths` if `_length1` and `_length2` are unequal.
+     * @param _length1 Length of the first collection or array.
+     * @param _length2 Length of the second collection or array.
+     */
+    function checkWithSameLength(uint256 _length1, uint256 _length2) internal pure {
+        if (_length1 != _length2) revert ICommonErrors.DifferentLengths(_length1, _length2);
     }
 }

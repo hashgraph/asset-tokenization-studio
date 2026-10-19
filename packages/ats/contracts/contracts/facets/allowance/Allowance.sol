@@ -86,6 +86,7 @@ abstract contract Allowance is IAllowance, Modifiers {
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyCompliant(EvmAccessors.getMsgSender(), spender, false)
+        onlyFiniteAllowance(EvmAccessors.getMsgSender(), spender)
         returns (bool)
     {
         return TokenCoreOps.decreaseAllowance(spender, subtractedValue);

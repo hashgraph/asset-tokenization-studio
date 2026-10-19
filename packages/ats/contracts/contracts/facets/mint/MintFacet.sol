@@ -25,7 +25,9 @@ contract MintFacet is Mint, IStaticFunctionSelectors {
                 this.initializeERC1594.selector,
                 this.isIssuable.selector,
                 this.issue.selector,
-                this.mint.selector
+                this.mint.selector,
+                this.disableIssuance.selector,
+                this.finalizeIssuance.selector
             );
     }
 

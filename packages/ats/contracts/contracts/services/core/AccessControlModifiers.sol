@@ -20,11 +20,6 @@ abstract contract AccessControlModifiers {
     using AccessControlStorageWrapper for RoleDataStorage;
 
     /**
-     * @dev Emitted when a role check fails
-     */
-    error AccessControlRequired(bytes32 role, address sender);
-
-    /**
      * @dev Modifier that validates msg.sender has the specified role
      *
      * Requirements:

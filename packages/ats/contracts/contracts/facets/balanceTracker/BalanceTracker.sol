@@ -11,6 +11,7 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
 
 /**
  * @title BalanceTracker
+ * @author Asset Tokenization Studio Team
  * @notice Abstract implementation of `IBalanceTracker` that consolidates token balance and
  *         total supply queries into a single, time-aware read layer.
  * @dev Delegates all storage reads to `ERC1410StorageWrapper` and `TokenCoreOps`,

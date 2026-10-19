@@ -30,15 +30,10 @@ import { extractAbiDefinitions, extractMethodsFromABI } from "../utils/abiExtrac
  * resolver keys, inheritance chain, and more.
  *
  * @param contract - Contract file information
- * @param hasTimeTravel - Whether TimeTravel variant exists
  * @param allResolverKeys - Optional map of all resolver keys (name -> value)
  * @returns Extracted metadata
  */
-export function extractMetadata(
-  contract: ContractFile,
-  hasTimeTravel: boolean,
-  allResolverKeys?: Map<string, string>,
-): ContractMetadata {
+export function extractMetadata(contract: ContractFile, allResolverKeys?: Map<string, string>): ContractMetadata {
   const name = contract.primaryContract;
   const layer = detectLayer(contract);
   const category = detectCategory(contract, layer);
@@ -91,7 +86,6 @@ export function extractMetadata(
     sourceFile: contract.relativePath,
     layer,
     category,
-    hasTimeTravel,
     roles,
     resolverKey,
     methods,

@@ -26,7 +26,7 @@ abstract contract ExpirationModifiers {
      * @param _expirationTimestamp The expiration timestamp to validate
      */
     modifier onlyWithValidExpirationTimestamp(uint256 _expirationTimestamp) {
-        LockStorageWrapper.requireValidExpirationTimestamp(_expirationTimestamp);
+        LockStorageWrapper.checkValidExpirationTimestamp(_expirationTimestamp);
         _;
     }
 

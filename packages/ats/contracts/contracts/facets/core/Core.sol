@@ -11,6 +11,7 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
 
 /**
  * @title Core
+ * @author Asset Tokenization Studio Team
  * @notice Implementation of the Core domain. Delegates into the existing storage wrappers so
  *         semantics match `ERC20` / `ERC3643Management` / `ERC3643Read` exactly during the
  *         transition period.
@@ -46,12 +47,12 @@ abstract contract Core is ICore, Modifiers {
 
     /// @inheritdoc ICore
     function name() external view override returns (string memory) {
-        return ERC20StorageWrapper.getERC20Metadata().info.name;
+        return ERC20StorageWrapper.getERC20Metadata().name;
     }
 
     /// @inheritdoc ICore
     function symbol() external view override returns (string memory) {
-        return ERC20StorageWrapper.getERC20Metadata().info.symbol;
+        return ERC20StorageWrapper.getERC20Metadata().symbol;
     }
 
     /// @inheritdoc ICore

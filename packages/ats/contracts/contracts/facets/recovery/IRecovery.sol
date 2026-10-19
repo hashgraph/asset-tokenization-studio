@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IERC3643Types } from "../layer_1/ERC3643/IERC3643Types.sol";
+import { IERC3643Types } from "../commonTypes/IERC3643Types.sol";
 
 /// @custom:hash resolverKey Recovery
 bytes32 constant RESOLVER_KEY_RECOVERY = 0x087cb866f812745e77608e4eb4b359ae96b8a0ba2ef9fe8336488e479b72d92a;
@@ -41,6 +41,6 @@ interface IRecovery is IERC3643Types {
 
     /// @notice Returns whether a wallet address has been marked as recovered.
     /// @param _wallet Address to query.
-    /// @return `true` if the address has previously been recovered via {recoveryAddress}.
+    /// @return True if the address has previously been recovered via {recoveryAddress}.
     function isAddressRecovered(address _wallet) external view returns (bool);
 }

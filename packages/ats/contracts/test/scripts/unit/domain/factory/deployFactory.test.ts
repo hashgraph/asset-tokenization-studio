@@ -5,14 +5,14 @@
  *
  * Verifies that deployFactory:
  * - Requires blrAddress, factoryVersion, and factoryFacetAddress
- * - Constructs ResolverProxy with (blr, FACTORY_CONFIG_ID, factoryVersion, [])
+ * - Constructs ResolverProxy with (blr, CONFIG_IDS.factory, factoryVersion, [])
  * - Returns factoryAddress (proxy) and implementationAddress (FactoryFacet)
  *
  * @module test/scripts/unit/domain/factory/deployFactory.test
  */
 
 import { expect } from "chai";
-import { deployFactory, FACTORY_CONFIG_ID } from "@scripts/domain";
+import { deployFactory, CONFIG_IDS } from "@scripts/domain";
 import { TEST_ADDRESSES } from "@test";
 
 const MOCK_BLR_ADDRESS = TEST_ADDRESSES.VALID_0;
@@ -52,9 +52,9 @@ describe("deployFactory (ResolverProxy)", () => {
   });
 
   describe("DeployFactoryOptions contract", () => {
-    it("should use FACTORY_CONFIG_ID (bytes32(uint256(8)))", () => {
+    it("should use CONFIG_IDS.factory (bytes32(uint256(8)))", () => {
       // Verify the config ID matches the documented spec
-      expect(FACTORY_CONFIG_ID).to.equal("0x0000000000000000000000000000000000000000000000000000000000000008");
+      expect(CONFIG_IDS.factory).to.equal("0x0000000000000000000000000000000000000000000000000000000000000008");
     });
 
     it("should accept valid options without throwing before deployment", () => {

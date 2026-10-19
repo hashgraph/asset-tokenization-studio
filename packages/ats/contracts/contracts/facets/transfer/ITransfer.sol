@@ -6,6 +6,7 @@ bytes32 constant RESOLVER_KEY_TRANSFER = 0xdb0637d5ac2d3a8a460b63275e82a566d4b5a
 
 /**
  * @title ITransferFacet
+ * @author Asset Tokenization Studio Team
  * @notice Interface grouping all standard token transfer operations: ERC-20 style and
  *         ERC-1594 data-bearing style. Also owns the `Transfer` event and the
  *         `InsufficientBalance` error that were previously declared in `IERC20`.
@@ -68,20 +69,20 @@ interface ITransfer {
 
     /**
      * @notice Moves `amount` tokens from the caller to `to`.
-     * @param to     Recipient address.
-     * @param amount Number of tokens to transfer.
+     * @param _to     Recipient address.
+     * @param _amount Number of tokens to transfer.
      * @return True if the transfer succeeded.
      */
-    function transfer(address to, uint256 amount) external returns (bool);
+    function transfer(address _to, uint256 _amount) external returns (bool);
 
     /**
      * @notice Moves `amount` tokens from `from` to `to` using the caller's allowance.
-     * @param from   Source address.
-     * @param to     Destination address.
-     * @param amount Number of tokens to transfer.
+     * @param _from   Source address.
+     * @param _to     Destination address.
+     * @param _amount Number of tokens to transfer.
      * @return True if the transfer succeeded.
      */
-    function transferFrom(address from, address to, uint256 amount) external returns (bool);
+    function transferFrom(address _from, address _to, uint256 _amount) external returns (bool);
 
     /**
      * @notice Transfers tokens to `_to` with additional `_data` attached.

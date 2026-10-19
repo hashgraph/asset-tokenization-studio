@@ -7,8 +7,8 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
 import { Modifiers } from "../../services/Modifiers.sol";
 import { CapStorageWrapper } from "../../domain/core/CapStorageWrapper.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
-import { IMint } from "../mint/IMint.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { IMintTypes } from "../mint/IMintTypes.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
@@ -44,10 +44,10 @@ abstract contract BatchMint is IBatchMint, Modifiers {
         onlyOperational
         onlyActivated
         onlyUnpaused
+        onlyIssuable
         onlyValidInputAmountsArrayLength(_toList, _amounts)
         onlyWithoutMultiPartition
         onlyAnyRole(_buildRoles(ROLE_ISSUER, ROLE_AGENT))
-        onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
     {
         uint256 totalAmount;
         uint256 length = _toList.length;
@@ -63,7 +63,7 @@ abstract contract BatchMint is IBatchMint, Modifiers {
         address sender = EvmAccessors.getMsgSender();
         for (uint256 i; i < length; ) {
             TokenCoreOps.issue(_toList[i], _amounts[i]);
-            emit IMint.Issued(sender, _toList[i], _amounts[i], "");
+            emit IMintTypes.Issued(sender, _toList[i], _amounts[i], "");
             unchecked {
                 ++i;
             }

@@ -31,7 +31,7 @@ struct SsiManagementStorage {
  * @notice Internal accessor library for the SSI management ERC-7201 storage namespace.
  * @dev Centralises reads, writes, and presence checks against the issuer set and the
  *      revocation registry pointer. All helpers are `internal` and operate on the
- *      ERC-7201 slot resolved by {ssiManagementStorage}.
+ *      ERC-7201 slot resolved by {_ssiManagementStorage}.
  */
 library SsiManagementStorageWrapper {
     using Pagination for EnumerableSet.AddressSet;
@@ -43,7 +43,7 @@ library SsiManagementStorageWrapper {
      * @return success_ Always true once the write completes.
      */
     function setRevocationRegistryAddress(address _revocationRegistryAddress) internal returns (bool success_) {
-        ssiManagementStorage().revocationRegistry = _revocationRegistryAddress;
+        _ssiManagementStorage().revocationRegistry = _revocationRegistryAddress;
         return true;
     }
 
@@ -53,7 +53,7 @@ library SsiManagementStorageWrapper {
      * @return success_ True if the issuer was newly added; false if already present.
      */
     function addIssuer(address _issuer) internal returns (bool success_) {
-        success_ = ssiManagementStorage().issuerList.add(_issuer);
+        success_ = _ssiManagementStorage().issuerList.add(_issuer);
     }
 
     /**
@@ -62,7 +62,7 @@ library SsiManagementStorageWrapper {
      * @return success_ True if the issuer was removed; false if not present.
      */
     function removeIssuer(address _issuer) internal returns (bool success_) {
-        success_ = ssiManagementStorage().issuerList.remove(_issuer);
+        success_ = _ssiManagementStorage().issuerList.remove(_issuer);
     }
 
     /**
@@ -70,7 +70,7 @@ library SsiManagementStorageWrapper {
      * @return revocationRegistryAddress_ The stored revocation registry address.
      */
     function getRevocationRegistryAddress() internal view returns (address revocationRegistryAddress_) {
-        revocationRegistryAddress_ = ssiManagementStorage().revocationRegistry;
+        revocationRegistryAddress_ = _ssiManagementStorage().revocationRegistry;
     }
 
     /**
@@ -78,7 +78,7 @@ library SsiManagementStorageWrapper {
      * @return issuerListCount_ Cardinality of the issuer set.
      */
     function getIssuerListCount() internal view returns (uint256 issuerListCount_) {
-        issuerListCount_ = ssiManagementStorage().issuerList.length();
+        issuerListCount_ = _ssiManagementStorage().issuerList.length();
     }
 
     /**
@@ -91,7 +91,7 @@ library SsiManagementStorageWrapper {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory members_) {
-        return ssiManagementStorage().issuerList.getFromSet(_pageIndex, _pageLength);
+        return _ssiManagementStorage().issuerList.getFromSet(_pageIndex, _pageLength);
     }
 
     /**
@@ -100,7 +100,7 @@ library SsiManagementStorageWrapper {
      * @return True if the address belongs to the issuer set.
      */
     function isIssuer(address _issuer) internal view returns (bool) {
-        return ssiManagementStorage().issuerList.contains(_issuer);
+        return _ssiManagementStorage().issuerList.contains(_issuer);
     }
 
     /**
@@ -117,7 +117,7 @@ library SsiManagementStorageWrapper {
      * @dev Uses inline assembly to bind the struct to {STORAGE_LOCATION_SSI_MANAGEMENT}.
      * @return ssiManagement_ Storage reference to the {SsiManagementStorage} layout.
      */
-    function ssiManagementStorage() internal pure returns (SsiManagementStorage storage ssiManagement_) {
+    function _ssiManagementStorage() private pure returns (SsiManagementStorage storage ssiManagement_) {
         bytes32 position = STORAGE_LOCATION_SSI_MANAGEMENT;
         // solhint-disable-next-line no-inline-assembly
         assembly {

@@ -4,9 +4,11 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IBatchTransfer, RESOLVER_KEY_BATCH_TRANSFER } from "./IBatchTransfer.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.sol";
+import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
-import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { DEFAULT_PARTITION } from "../../constants/values.sol";
+import { EMPTY_BYTES } from "../../constants/values.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
@@ -46,23 +48,46 @@ abstract contract BatchTransfer is IBatchTransfer, Modifiers {
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
     {
-        uint256 length = _toList.length;
+        address sender = EvmAccessors.getMsgSender();
+        uint256 length = _checkBatchTransferBalances(sender, _toList, _amounts, DEFAULT_PARTITION);
         for (uint256 i; i < length; ) {
-            ERC1594StorageWrapper.requireCanTransferFromByPartition(
-                EvmAccessors.getMsgSender(),
-                _toList[i],
-                _DEFAULT_PARTITION,
-                _amounts[i]
+            address to = _toList[i];
+            uint256 amount = _amounts[i];
+            unchecked {
+                ++i;
+            }
+            if (sender == to) continue;
+            TokenCoreOps.transfer(sender, to, amount);
+        }
+    }
+
+    function _checkBatchTransferBalances(
+        address _from,
+        address[] calldata _toList,
+        uint256[] calldata _amounts,
+        bytes32 _partition
+    ) private returns (uint256 length_) {
+        length_ = _toList.length;
+        uint256 total;
+
+        for (uint256 i; i < length_; ) {
+            address to = _toList[i];
+            uint256 amount = _amounts[i];
+            unchecked {
+                ++i;
+            }
+            if (_from == to) continue;
+            ERC1410StorageWrapper.checkNonZeroTransferAmount(amount);
+            ERC1594StorageWrapper.checkCanTransferFromByPartition(
+                _from,
+                to,
+                _partition,
+                amount,
+                EMPTY_BYTES,
+                EMPTY_BYTES
             );
-            unchecked {
-                ++i;
-            }
+            total += amount;
         }
-        for (uint256 i; i < length; ) {
-            TokenCoreOps.transfer(EvmAccessors.getMsgSender(), _toList[i], _amounts[i]);
-            unchecked {
-                ++i;
-            }
-        }
+        ERC1594StorageWrapper.checkPartitionBalance(_from, total, DEFAULT_PARTITION);
     }
 }

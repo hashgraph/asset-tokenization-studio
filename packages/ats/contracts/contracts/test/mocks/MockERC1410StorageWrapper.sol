@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 /* solhint-disable */
 
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
-import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
+import { IERC1410Types } from "../../facets/commonTypes/IERC1410Types.sol";
 import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 
 /// @dev Test-only mock that exposes internal ERC1410StorageWrapper functions

@@ -8,7 +8,6 @@ import { IOwnership } from "./IOwnership.sol";
  * @dev Must remain stable across upgrades to preserve ownership state for all configurations.
  */
 /// @custom:hash storage Ownership
-// solhint-disable-next-line max-line-length
 bytes32 constant STORAGE_LOCATION_OWNERSHIP = 0x0c49888622360137ef830a76ef93872bc0aefaf60fb012c3941df4da0397c000;
 
 /**
@@ -138,13 +137,13 @@ abstract contract OwnershipWrapper {
      * @notice Returns the ownership storage pointer.
      * @dev Binds the storage pointer to {STORAGE_LOCATION_OWNERSHIP} using the diamond
      *      storage pattern. This function does not read or mutate state by itself.
-     * @return os Storage pointer for the ownership layout.
+     * @return os_ Storage pointer for the ownership layout.
      */
-    function _ownershipStorage() private pure returns (OwnershipStorage storage os) {
+    function _ownershipStorage() private pure returns (OwnershipStorage storage os_) {
         bytes32 position = STORAGE_LOCATION_OWNERSHIP;
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            os.slot := position
+            os_.slot := position
         }
     }
 }

@@ -40,18 +40,36 @@ library CustomDataStorageWrapper {
      * @dev Clears any previously stored array via `delete` and then pushes every element of
      *      `_value` in order, so the resulting state contains exactly `_value`. Passing an empty
      *      array effectively clears the entry. Gas cost scales linearly with `_value.length` and
-     *      with the size of each payload because each element is copied from calldata into
-     *      storage. Access control and pause checks are enforced by the calling facet, not by
-     *      this library.
+     *      with the size of each payload because each element is copied into storage. Access
+     *      control and pause checks are enforced by the calling facet, not by this library.
      * @param _key   The custom data key whose value is being written.
      * @param _value The ordered list of byte payloads to persist under `_key`.
      */
     function setCustomData(bytes32 _key, bytes[] calldata _value) internal {
-        bytes[] storage stored = customDataStorage().customData[_key];
-        delete customDataStorage().customData[_key];
+        bytes[] storage stored = _customDataStorage().customData[_key];
+        delete _customDataStorage().customData[_key];
         uint256 length = _value.length;
         for (uint256 i; i < length; ) {
             stored.push(_value[i]);
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    /**
+     * @notice Persists every key/value pair in `_entries`, replacing any existing array per key.
+     * @dev Loops the entries and delegates each write to `setCustomData`, so the full-overwrite
+     *      semantics and gas profile of the single-key path apply per entry. Emits no events and
+     *      enforces no access control — the calling facet owns both. An empty `_entries` array
+     *      is a silent no-op. If the same key appears more than once, the last write wins.
+     *      Gas scales with the number of entries and the total payload size across all entries.
+     * @param _entries The list of key/value pairs to persist.
+     */
+    function setCustomDataBatch(ICustomData.CustomDataEntry[] calldata _entries) internal {
+        uint256 length = _entries.length;
+        for (uint256 i; i < length; ) {
+            setCustomData(_entries[i].key, _entries[i].value);
             unchecked {
                 ++i;
             }
@@ -68,7 +86,7 @@ library CustomDataStorageWrapper {
      *         unset.
      */
     function getCustomData(bytes32 _key) internal view returns (bytes[] memory value_) {
-        value_ = customDataStorage().customData[_key];
+        value_ = _customDataStorage().customData[_key];
     }
 
     /**
@@ -80,7 +98,7 @@ library CustomDataStorageWrapper {
      * @return customData_ Reference to the `CustomDataDataStorage` struct at the custom data
      *         storage slot.
      */
-    function customDataStorage() internal pure returns (CustomDataDataStorage storage customData_) {
+    function _customDataStorage() private pure returns (CustomDataDataStorage storage customData_) {
         bytes32 position = STORAGE_LOCATION_CUSTOM_DATA;
         // solhint-disable-next-line no-inline-assembly
         assembly {

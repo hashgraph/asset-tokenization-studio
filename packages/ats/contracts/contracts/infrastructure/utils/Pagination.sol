@@ -4,6 +4,12 @@ pragma solidity >=0.8.0 <0.9.0;
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { EnumerableSetBytes4 } from "./EnumerableSetBytes4.sol";
 
+/**
+ * @title Pagination
+ * @author Asset Tokenization Studio Team
+ * @notice Utility library for paginating OpenZeppelin `EnumerableSet` collections by
+ *         computing a start/end slice from a page index and page length.
+ */
 library Pagination {
     using EnumerableSet for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.AddressSet;
@@ -20,8 +26,11 @@ library Pagination {
 
         items_ = new bytes32[](getSize(start, end, listCount));
 
-        for (uint256 i = 0; i < items_.length; i++) {
+        for (uint256 i = 0; i < items_.length; ) {
             items_[i] = _set.at(start + i);
+            unchecked {
+                ++i;
+            }
         }
     }
 
@@ -35,8 +44,11 @@ library Pagination {
 
         items_ = new uint256[](getSize(start, end, listCount));
 
-        for (uint256 i = 0; i < items_.length; i++) {
+        for (uint256 i = 0; i < items_.length; ) {
             items_[i] = _set.at(start + i);
+            unchecked {
+                ++i;
+            }
         }
     }
 
@@ -50,8 +62,11 @@ library Pagination {
 
         items_ = new address[](getSize(start, end, listCount));
 
-        for (uint256 i = 0; i < items_.length; i++) {
+        for (uint256 i = 0; i < items_.length; ) {
             items_[i] = _set.at(start + i);
+            unchecked {
+                ++i;
+            }
         }
     }
 
@@ -65,15 +80,20 @@ library Pagination {
 
         items_ = new bytes4[](getSize(start, end, listCount));
 
-        for (uint256 i = 0; i < items_.length; i++) {
+        for (uint256 i = 0; i < items_.length; ) {
             items_[i] = _set.at(start + i);
+            unchecked {
+                ++i;
+            }
         }
     }
 
     function getSize(uint256 _start, uint256 _end, uint256 _listCount) internal pure returns (uint256) {
+        // solhint-disable-next-line gas-strict-inequalities
         if (_start >= _end) {
             return 0;
         }
+        // solhint-disable-next-line gas-strict-inequalities
         if (_start >= _listCount) {
             return 0;
         }

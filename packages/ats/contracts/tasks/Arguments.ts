@@ -37,12 +37,6 @@ export interface DeployAllArgs extends WithSigner {
   fileName: string;
 }
 
-export interface DeployTrexFactoryArgs extends WithSigner {
-  implementationAuthority?: string;
-  idFactory?: string;
-  resolver?: string;
-}
-
 // * Transparent Upgradeable Proxy
 export interface GetProxyAdminConfigArgs {
   proxyAdmin: string;

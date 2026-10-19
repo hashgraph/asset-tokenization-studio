@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ISnapshotsTypes } from "../snapshot/ISnapshotsTypes.sol";
+import { ISnapshotsTypes } from "../snapshots/ISnapshotsTypes.sol";
 
 /// @custom:hash resolverKey SnapshotsByPartition
 // solhint-disable-next-line max-line-length

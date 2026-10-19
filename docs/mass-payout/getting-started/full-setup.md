@@ -139,13 +139,11 @@ Edit `.env` with your configuration:
 
 ```bash
 # Database
-DATABASE_HOST=localhost
-DATABASE_PORT=5432
-DATABASE_USERNAME=mass_payout_user
-DATABASE_PASSWORD=your_password
-DATABASE_NAME=mass_payout
-DATABASE_SCHEMA=public
-DATABASE_SYNCHRONIZE=true
+POSTGRESQL_HOST=localhost
+POSTGRESQL_PORT=5432
+POSTGRESQL_USER=mass_payout_user
+POSTGRESQL_PASSWORD=your_password
+POSTGRESQL_DB=mass_payout
 
 # Hedera Network
 HEDERA_NETWORK=testnet
@@ -161,7 +159,7 @@ LIFECYCLE_CASH_FLOW_CONTRACT_ID=0.0.87654321
 ATS_FACTORY_CONTRACT_ID=0.0.11111111
 
 # Server
-PORT=3001
+PORT=3000
 API_PREFIX=api
 CORS_ORIGINS=http://localhost:5174,http://localhost:3000
 ```
@@ -187,7 +185,7 @@ Edit `.env`:
 
 ```bash
 # Backend API URL
-VITE_API_URL=http://localhost:3001
+VITE_API_URL=http://localhost:3000
 
 # Frontend Port
 VITE_PORT=5174
@@ -226,8 +224,8 @@ npm run mass-payout:backend:dev -- --watch
 Access the application:
 
 - Frontend: http://localhost:5174
-- Backend API: http://localhost:3001/api
-- API Docs (Swagger): http://localhost:3001/api/docs
+- Backend API: http://localhost:3000/api
+- API Docs (Swagger): http://localhost:3000/api/docs
 
 ## Step 8: Running Tests
 
@@ -349,7 +347,7 @@ npm run mass-payout:build
 
 ```bash
 # Kill process on backend port
-lsof -ti:3001 | xargs kill -9
+lsof -ti:3000 | xargs kill -9
 
 # Kill process on frontend port
 lsof -ti:5174 | xargs kill -9
@@ -375,8 +373,6 @@ npm run typecheck
 ```bash
 # Backend .env
 NODE_ENV=production
-DATABASE_SYNCHRONIZE=false  # NEVER use sync in production
-DATABASE_POOL_SIZE=10
 
 # Use secrets manager for sensitive data
 HEDERA_OPERATOR_PRIVATE_KEY=<from-secrets-manager>

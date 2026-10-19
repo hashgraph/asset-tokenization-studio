@@ -17,7 +17,7 @@ import type { RegistryConfig, RegistryResult, ContractFile, ContractMetadata } f
 import { findSolidityFiles, readFile, writeFile } from "./utils/fileUtils";
 import { extractResolverKeys, extractRoles } from "./utils/solidityParser";
 import { LogLevel, configureLogger, section, info, success, warn, debug, table } from "./utils/logging";
-import { findAllContracts, categorizeContracts, pairTimeTravelVariants } from "./core/scanner";
+import { findAllContracts, categorizeContracts } from "./core/scanner";
 import { extractMetadata } from "./core/extractor";
 import { generateRegistry, generateRolesFile, generateSummary } from "./core/generator";
 import { CacheManager } from "./cache/manager";
@@ -37,7 +37,6 @@ export const DEFAULT_CONFIG: Required<Omit<RegistryConfig, "mockContractPaths">>
   resolverKeyPaths: ["**/I*.sol", "**/constants/resolverKeys.sol"],
   rolesPaths: ["**/constants/roles.sol", "**/interfaces/roles.sol"],
   includeStorageWrappers: true,
-  includeTimeTravel: true,
   extractNatspec: true,
   outputPath: "./generated/registry.data.ts",
   moduleName: "@scripts/infrastructure",
@@ -112,7 +111,6 @@ export async function generateRegistryPipeline(
   const categorized = categorizeContracts(allContracts);
   const categorizationTable: string[][] = [
     ["Facets", categorized.facets.length.toString()],
-    ["TimeTravel variants", categorized.timeTravelFacets.length.toString()],
     ["Infrastructure", categorized.infrastructure.length.toString()],
     ["Test/Mock", categorized.test.length.toString()],
     ["Interfaces", categorized.interfaces.length.toString()],
@@ -121,21 +119,8 @@ export async function generateRegistryPipeline(
   ];
   table(["Type", "Count"], categorizationTable);
 
-  // Step 3: Pair TimeTravel variants
-  let timeTravelPairs = new Map<string, ContractFile | null>();
-  let withTimeTravel = 0;
-
-  if (fullConfig.includeTimeTravel) {
-    info("Step 3: Pairing TimeTravel variants...");
-    timeTravelPairs = pairTimeTravelVariants(categorized.facets, categorized.timeTravelFacets);
-    withTimeTravel = Array.from(timeTravelPairs.values()).filter((v) => v !== null).length;
-    info(`  ${withTimeTravel} facets have TimeTravel variants`);
-  } else {
-    info("Step 3: Skipping TimeTravel variant pairing (disabled)");
-  }
-
-  // Step 4: Extract resolver keys from constants files
-  info("Step 4: Scanning resolver key constants...");
+  // Step 3: Extract resolver keys from constants files
+  info("Step 3: Scanning resolver key constants...");
   const allResolverKeys = new Map<string, string>();
   const allSolidityFiles = findSolidityFiles(contractsDir);
 
@@ -159,8 +144,8 @@ export async function generateRegistryPipeline(
   info(`  Found ${resolverKeyFiles.length} resolver key files`);
   info(`  Total unique resolver keys: ${allResolverKeys.size}`);
 
-  // Step 5: Extract metadata
-  info("Step 5: Extracting contract metadata...");
+  // Step 4: Extract metadata
+  info("Step 4: Extracting contract metadata...");
 
   const contractsMap = new Map<string, ContractFile>();
   for (const contract of allContracts) {
@@ -173,20 +158,19 @@ export async function generateRegistryPipeline(
   let cacheHits = 0;
   let cacheMisses = 0;
 
-  const extractWithCache = (contract: ContractFile, hasTimeTravel: boolean): ContractMetadata => {
+  const extractWithCache = (contract: ContractFile): ContractMetadata => {
     // Check cache first if enabled
     if (cache && !cache.shouldReprocess(contract.filePath)) {
       const cached = cache.getCached(contract.filePath);
       if (cached) {
         cacheHits++;
-        // Update hasTimeTravel since it may have changed based on config
-        return { ...cached, hasTimeTravel };
+        return cached;
       }
     }
 
     // Extract fresh metadata
     cacheMisses++;
-    const metadata = extractMetadata(contract, hasTimeTravel, allResolverKeys);
+    const metadata = extractMetadata(contract, allResolverKeys);
 
     // Cache the result
     if (cache) {
@@ -196,14 +180,11 @@ export async function generateRegistryPipeline(
     return metadata;
   };
 
-  const facetMetadata = categorized.facets.map((contract) => {
-    const hasTimeTravel = fullConfig.includeTimeTravel ? timeTravelPairs.get(contract.primaryContract) !== null : false;
-    return extractWithCache(contract, hasTimeTravel);
-  });
+  const facetMetadata = categorized.facets.map((contract) => extractWithCache(contract));
 
   const infrastructureMetadata = fullConfig.facetsOnly
     ? []
-    : categorized.infrastructure.map((contract) => extractWithCache(contract, false));
+    : categorized.infrastructure.map((contract) => extractWithCache(contract));
 
   info(`  Extracted metadata for ${facetMetadata.length} facets`);
   if (!fullConfig.facetsOnly) {
@@ -223,28 +204,28 @@ export async function generateRegistryPipeline(
     `  Resolver keys: ${facetsWithResolverKeys.length} facets with keys, ${facetsWithoutResolverKeys.length} without`,
   );
 
-  // Step 5.5: Extract Storage Wrapper metadata
+  // Step 4.5: Extract Storage Wrapper metadata
   let storageWrapperMetadata: ContractMetadata[] = [];
 
   if (fullConfig.includeStorageWrappers) {
-    info("Step 5.5: Extracting Storage Wrapper metadata...");
+    info("Step 4.5: Extracting Storage Wrapper metadata...");
     const storageWrapperContracts = allContracts
       .filter((contract) => contract.filePath.endsWith("StorageWrapper.sol"))
       .filter((c): c is NonNullable<typeof c> => c !== null);
 
-    storageWrapperMetadata = storageWrapperContracts.map((contract) => extractWithCache(contract, false));
+    storageWrapperMetadata = storageWrapperContracts.map((contract) => extractWithCache(contract));
 
     info(`  Extracted metadata for ${storageWrapperMetadata.length} storage wrappers`);
   }
 
-  // Step 5.6: Extract mock contracts metadata
+  // Step 4.6: Extract mock contracts metadata
   let mockMetadata: ContractMetadata[] = [];
 
   if (fullConfig.includeMocksInRegistry) {
-    info("Step 5.6: Extracting mock contracts metadata...");
+    info("Step 4.6: Extracting mock contracts metadata...");
     const mockContracts = categorized.test;
     info(`  Found ${mockContracts.length} mock/test contract files`);
-    mockMetadata = mockContracts.map((contract) => extractWithCache(contract, false));
+    mockMetadata = mockContracts.map((contract) => extractWithCache(contract));
     info(`  Extracted metadata for ${mockMetadata.length} mock contracts`);
 
     const missingKeys = mockMetadata.filter((m) => !m.resolverKey);
@@ -254,8 +235,8 @@ export async function generateRegistryPipeline(
     }
   }
 
-  // Step 6: Scan standalone constant files for roles
-  info("Step 6: Scanning standalone role constants...");
+  // Step 5: Scan standalone constant files for roles
+  info("Step 5: Scanning standalone role constants...");
 
   const allRoles = new Map<string, string>();
 
@@ -287,8 +268,8 @@ export async function generateRegistryPipeline(
   info(`  Found ${rolesFiles.length} standalone role files`);
   info(`  Total unique roles: ${allRoles.size}`);
 
-  // Step 7: Generate registry code
-  info("Step 7: Generating TypeScript registry code...");
+  // Step 6: Generate registry code
+  info("Step 6: Generating TypeScript registry code...");
   const registryCode = generateRegistry(
     facetMetadata,
     infrastructureMetadata,
@@ -300,7 +281,7 @@ export async function generateRegistryPipeline(
   );
   info(`  Generated ${registryCode.split("\n").length} lines of code`);
 
-  // Step 8: Generate summary
+  // Step 7: Generate summary
   section("Generation Summary");
   const summary = generateSummary(facetMetadata, infrastructureMetadata);
 
@@ -308,7 +289,6 @@ export async function generateRegistryPipeline(
     ["Total facets", summary.totalFacets.toString()],
     ["Total infrastructure", summary.totalInfrastructure.toString()],
     ["Total mocks", mockMetadata.length.toString()],
-    ["With TimeTravel", summary.withTimeTravel.toString()],
     ["With roles", summary.withRoles.toString()],
   ];
   table(["Metric", "Count"], summaryTable);
@@ -352,7 +332,7 @@ export async function generateRegistryPipeline(
    */
   const rolesOutputPath = path.join(path.dirname(fullConfig.outputPath), "atsRoles.generated.ts");
 
-  // Step 9: Format with Prettier
+  // Step 8: Format with Prettier
   let formattedCode = registryCode;
   let formattedRolesCode = rolesCode;
   try {
@@ -378,7 +358,7 @@ export async function generateRegistryPipeline(
     warn(`Could not apply Prettier formatting: ${error}`);
   }
 
-  // Step 10: Write output
+  // Step 9: Write output
   let outputPath: string | undefined;
 
   if (writeToFile) {
@@ -441,16 +421,16 @@ export async function generateRegistryPipeline(
   }
 
   // Collect warnings
-  const missingResolverKeys = facetsWithoutResolverKeys.filter((f) => f.name !== "TimeTravelFacet");
+  // `IDiamondFacet` is a shared interface (init function/event only), not an actual
+  // facet — its resolver key (`RESOLVER_KEY_DIAMOND`) lives in `IDiamond.sol` and is
+  // already picked up by `DiamondFacet`. Excluded here for the same reason as
+  // `TimeTravelFacet`: matches `isFacetName` by ending in "Facet" but never owns a key.
+  const FACETS_WITHOUT_OWN_RESOLVER_KEY = ["TimeTravelFacet", "IDiamondFacet"];
+  const missingResolverKeys = facetsWithoutResolverKeys.filter(
+    (f) => !FACETS_WITHOUT_OWN_RESOLVER_KEY.includes(f.name),
+  );
   if (missingResolverKeys.length > 0) {
     const warningMsg = `${missingResolverKeys.length} facets missing resolver keys: ${missingResolverKeys.map((f) => f.name).join(", ")}`;
-    warnings.push(warningMsg);
-    warn(warningMsg);
-  }
-
-  const withoutTimeTravel = facetMetadata.filter((f) => !f.hasTimeTravel && f.name !== "TimeTravelFacet");
-  if (fullConfig.includeTimeTravel && withoutTimeTravel.length > 0 && withoutTimeTravel.length < 10) {
-    const warningMsg = `${withoutTimeTravel.length} facets don't have TimeTravel variants: ${withoutTimeTravel.map((f) => f.name).join(", ")}`;
     warnings.push(warningMsg);
     warn(warningMsg);
   }
@@ -478,7 +458,6 @@ export async function generateRegistryPipeline(
       totalMocks: mockMetadata.length,
       totalRoles: allRoles.size,
       totalResolverKeys: allResolverKeys.size,
-      withTimeTravel,
       withRoles: summary.withRoles,
       byCategory: summary.byCategory,
       byLayer: summary.byLayer,

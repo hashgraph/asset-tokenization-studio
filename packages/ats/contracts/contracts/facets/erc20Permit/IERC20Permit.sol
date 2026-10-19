@@ -48,21 +48,21 @@ interface IERC20Permit {
      * @dev Validates the deadline, owner nonce, EIP-712 digest, and recovered signer before
      *      updating allowance. Reverts with `ERC2612ExpiredSignature` or
      *      `ERC2612InvalidSigner` when validation fails.
-     * @param owner Token holder granting the allowance.
-     * @param spender Address authorised to spend `owner` tokens.
-     * @param value Allowance amount approved for `spender`.
-     * @param deadline Last timestamp at which the signature is valid.
-     * @param v Recovery identifier of the ECDSA signature.
-     * @param r First 32-byte word of the ECDSA signature.
-     * @param s Second 32-byte word of the ECDSA signature.
+     * @param _owner Token holder granting the allowance.
+     * @param _spender Address authorised to spend `owner` tokens.
+     * @param _value Allowance amount approved for `spender`.
+     * @param _deadline Last timestamp at which the signature is valid.
+     * @param _v Recovery identifier of the ECDSA signature.
+     * @param _r First 32-byte word of the ECDSA signature.
+     * @param _s Second 32-byte word of the ECDSA signature.
      */
     function permit(
-        address owner,
-        address spender,
-        uint256 value,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
+        address _owner,
+        address _spender,
+        uint256 _value,
+        uint256 _deadline,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
     ) external;
 }

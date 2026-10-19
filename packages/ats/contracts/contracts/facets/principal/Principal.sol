@@ -5,7 +5,6 @@ import { IPrincipal, RESOLVER_KEY_PRINCIPAL } from "./IPrincipal.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { IPrincipal } from "./IPrincipal.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 
 /**
