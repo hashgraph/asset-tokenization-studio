@@ -12,6 +12,8 @@ export default {
   maxExceeded: "The amount exceeds the limit.",
   maxlength: "Too many characters",
   required: "Field is mandatory",
+  isISINValid: "Length should be {{length}}.",
+  isISINValidFormat: "Invalid format",
   isValidHederaId: "Wrong id",
   isValidHex: "Invalid hex format",
 };

@@ -13,6 +13,7 @@ import { InvalidValue } from "../error/InvalidValue";
 export default class CreateBondRequest extends ValidatedRequest<CreateBondRequest> {
   name: string;
   symbol: string;
+  isin: string;
   private _decimals: number;
   public get decimals(): number {
     return this._decimals;
@@ -74,6 +75,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
   constructor({
     name,
     symbol,
+    isin,
     decimals,
     isWhiteList,
     erc20VotesActivated,
@@ -106,6 +108,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
   }: {
     name: string;
     symbol: string;
+    isin: string;
     decimals: number | string;
     isWhiteList: boolean;
     erc20VotesActivated: boolean;
@@ -142,6 +145,9 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
       },
       symbol: (val) => {
         return Security.checkSymbol(val);
+      },
+      isin: (val) => {
+        return Security.checkISIN(val);
       },
       decimals: (val) => {
         return Security.checkInteger(val);
@@ -200,6 +206,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     });
     this.name = name;
     this.symbol = symbol;
+    this.isin = isin;
     this.decimals = typeof decimals === "number" ? decimals : parseInt(decimals);
     this.isWhiteList = isWhiteList;
     this.erc20VotesActivated = erc20VotesActivated;

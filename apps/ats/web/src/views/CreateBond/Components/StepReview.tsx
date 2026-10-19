@@ -41,6 +41,7 @@ export const StepReview = () => {
   const name = getValues("name");
   const symbol = getValues("symbol");
   const decimals = getValues("decimals");
+  const isin = getValues("isin");
   const currency = getValues("currency");
   const numberOfUnits = getValues("numberOfUnits");
   const nominalValue = getValues("nominalValue");
@@ -89,6 +90,7 @@ export const StepReview = () => {
     const request = new CreateBondRequest({
       name,
       symbol,
+      isin,
       decimals,
       isWhiteList: !isBlocklist,
       erc20VotesActivated: false,
@@ -154,6 +156,10 @@ export const StepReview = () => {
     {
       title: t("stepTokenDetails.decimals"),
       value: decimals,
+    },
+    {
+      title: t("stepTokenDetails.isin"),
+      value: isin,
     },
   ];
 

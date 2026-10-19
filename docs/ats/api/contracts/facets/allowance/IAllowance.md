@@ -142,6 +142,23 @@ _Mirrors the ERC-20 `Approval` event. `value` is the resulting, absolute allowan
 
 ## Errors
 
+### InfiniteAllowance
+
+```solidity
+error InfiniteAllowance(address owner, address spender)
+```
+
+Raised when an operation encounters an allowance that is effectively unlimited.
+
+_Indicates that the owner has granted the spender an infinite allowance, which may require special handling to avoid unintended accounting or revocation assumptions._
+
+#### Parameters
+
+| Name    | Type    | Description                                             |
+| ------- | ------- | ------------------------------------------------------- |
+| owner   | address | The account that granted the allowance.                 |
+| spender | address | The account authorised to spend on behalf of the owner. |
+
 ### InsufficientAllowance
 
 ```solidity
@@ -166,13 +183,3 @@ error SpenderWithZeroAddress()
 ```
 
 Reverts when the zero address is supplied as `spender` in an allowance update.
-
-### ZeroOwnerAddress
-
-```solidity
-error ZeroOwnerAddress()
-```
-
-Reverts when an allowance operation references the zero address as the owner.
-
-_Defensive guard against mis-wired flows or malformed calldata reaching the underlying storage wrappers._

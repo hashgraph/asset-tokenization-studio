@@ -237,6 +237,23 @@ Raised when an initialiser tries to register a facet that already has a non-zero
 | facetId     | bytes32 | Identifier of the offending facet.                             |
 | lastVersion | uint256 | Last version recorded for that facet at the time of the check. |
 
+### InfiniteAllowance
+
+```solidity
+error InfiniteAllowance(address owner, address spender)
+```
+
+Raised when an operation encounters an allowance that is effectively unlimited.
+
+_Indicates that the owner has granted the spender an infinite allowance, which may require special handling to avoid unintended accounting or revocation assumptions._
+
+#### Parameters
+
+| Name    | Type    | Description                                             |
+| ------- | ------- | ------------------------------------------------------- |
+| owner   | address | The account that granted the allowance.                 |
+| spender | address | The account authorised to spend on behalf of the owner. |
+
 ### InsufficientAllowance
 
 ```solidity
@@ -299,13 +316,3 @@ error WalletRecovered()
 ```
 
 Thrown when attempting to recover a wallet that has already been recovered.
-
-### ZeroOwnerAddress
-
-```solidity
-error ZeroOwnerAddress()
-```
-
-Reverts when an allowance operation references the zero address as the owner.
-
-_Defensive guard against mis-wired flows or malformed calldata reaching the underlying storage wrappers._

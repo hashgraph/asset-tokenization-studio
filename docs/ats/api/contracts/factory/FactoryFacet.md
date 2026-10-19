@@ -249,6 +249,23 @@ _Protects decimals amount difference between current and new not te be greater t
 | currentDecimals | uint8 | the current decimals amount. |
 | newDecimals     | uint8 | the new decimals amount.     |
 
+### DifferentLengths
+
+```solidity
+error DifferentLengths(uint256 length1, uint256 length2)
+```
+
+Emitted when two arrays or collections expected to have matching lengths differ.
+
+_Reverts operations that require one-to-one correspondence between input parameters._
+
+#### Parameters
+
+| Name    | Type    | Description                               |
+| ------- | ------- | ----------------------------------------- |
+| length1 | uint256 | Length of the first array or collection.  |
+| length2 | uint256 | Length of the second array or collection. |
+
 ### EmptyResolver
 
 ```solidity

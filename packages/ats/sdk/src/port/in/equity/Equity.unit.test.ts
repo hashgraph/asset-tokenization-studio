@@ -139,6 +139,7 @@ describe("Equity", () => {
           expect.objectContaining({
             name: createEquityRequest.name,
             symbol: createEquityRequest.symbol,
+            isin: createEquityRequest.isin,
             decimals: createEquityRequest.decimals,
             isWhiteList: createEquityRequest.isWhiteList,
             isControllable: createEquityRequest.isControllable,
@@ -204,6 +205,7 @@ describe("Equity", () => {
           expect.objectContaining({
             name: createEquityRequest.name,
             symbol: createEquityRequest.symbol,
+            isin: createEquityRequest.isin,
             decimals: createEquityRequest.decimals,
             isWhiteList: createEquityRequest.isWhiteList,
             isControllable: createEquityRequest.isControllable,
@@ -259,6 +261,16 @@ describe("Equity", () => {
       createEquityRequest = new CreateEquityRequest(
         CreateEquityRequestFixture.create({
           symbol: "",
+        }),
+      );
+
+      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(ValidationError);
+    });
+
+    it("should throw error if isin is invalid", async () => {
+      createEquityRequest = new CreateEquityRequest(
+        CreateEquityRequestFixture.create({
+          isin: "",
         }),
       );
 

@@ -532,6 +532,21 @@ Emitted when a configuration is created atomically via {createConfiguration}.
 
 ## Errors
 
+### DeactivatedVersionNotAllowed
+
+```solidity
+error DeactivatedVersionNotAllowed(bytes32 facetId, uint256 version)
+```
+
+Thrown when a configuration selects a facet version whose status has been set to `DEACTIVATED`. Configurations that already reference the version are unaffected; this only blocks the version from being selected into a new configuration.
+
+#### Parameters
+
+| Name    | Type    | Description                                     |
+| ------- | ------- | ----------------------------------------------- |
+| facetId | bytes32 | Facet id whose selected version is deactivated. |
+| version | uint256 | Deactivated version that was selected.          |
+
 ### DefaultValueForConfigurationIdNotPermitted
 
 ```solidity

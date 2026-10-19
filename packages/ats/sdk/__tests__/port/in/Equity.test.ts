@@ -48,6 +48,7 @@ const recordTimestamp = Math.ceil(new Date().getTime() / 1000) + 1000;
 const factor = "1";
 const name = "TEST_SECURITY_TOKEN";
 const symbol = "TEST";
+const isin = "ABCDE123456Z";
 const votingRight = true;
 const informationRight = false;
 const liquidationRight = true;
@@ -127,6 +128,7 @@ describe("🧪 Equity test", () => {
     const requestST = new CreateEquityRequest({
       name: name,
       symbol: symbol,
+      isin: isin,
       decimals: decimals,
       isWhiteList: false,
       erc20VotesActivated: false,

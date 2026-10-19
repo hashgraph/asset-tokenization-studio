@@ -283,6 +283,14 @@ Thrown when an account does not hold or is not associated with the specified par
 | account   | address | Address that was checked.                     |
 | partition | bytes32 | Partition that was not found for the account. |
 
+### IsPaused
+
+```solidity
+error IsPaused()
+```
+
+Thrown when an operation that requires the token to be unpaused is attempted while the token is paused (own flag or any external pause contract).
+
 ### NotAllowedInMultiPartitionMode
 
 ```solidity

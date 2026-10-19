@@ -67,6 +67,7 @@ describe("Info", () => {
         expect.objectContaining({
           name: expectedResponse.security.name,
           symbol: expectedResponse.security.symbol,
+          isin: expectedResponse.security.isin,
           type: expectedResponse.security.type,
           decimals: expectedResponse.security.decimals,
           isWhiteList: expectedResponse.security.isWhiteList,

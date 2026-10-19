@@ -34,6 +34,7 @@ export const StepReview = () => {
 
   const name = getValues("name");
   const symbol = getValues("symbol");
+  const isin = getValues("isin");
   const decimals = getValues("decimals");
   const isControllable = getValues("isControllable");
   const isBlocklist = getValues("isBlocklist");
@@ -72,6 +73,7 @@ export const StepReview = () => {
     const request = new CreateEquityRequest({
       name: name,
       symbol: symbol,
+      isin: isin,
       decimals: decimals,
       isWhiteList: !isBlocklist,
       erc20VotesActivated: false,
@@ -135,6 +137,10 @@ export const StepReview = () => {
     {
       title: t("stepTokenDetails.decimals"),
       value: decimals,
+    },
+    {
+      title: t("stepTokenDetails.isin"),
+      value: isin,
     },
   ];
 

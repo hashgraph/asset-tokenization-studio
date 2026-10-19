@@ -64,6 +64,7 @@ export class FactoryOperations {
       const erc20MetadataInfo: ERC20MetadataInfo = {
         name: securityInfo.name,
         symbol: securityInfo.symbol,
+        isin: securityInfo.isin,
         decimals: securityInfo.decimals,
       };
       const resolverProxyConfiguration: ResolverProxyConfiguration = {
@@ -156,6 +157,7 @@ export class FactoryOperations {
       const erc20MetadataInfo: ERC20MetadataInfo = {
         name: securityInfo.name,
         symbol: securityInfo.symbol,
+        isin: securityInfo.isin,
         decimals: securityInfo.decimals,
       };
       const resolverProxyConfiguration: ResolverProxyConfiguration = {
@@ -246,6 +248,7 @@ export class FactoryOperations {
       const erc20MetadataInfo: ERC20MetadataInfo = {
         name: securityInfo.name,
         symbol: securityInfo.symbol,
+        isin: securityInfo.isin,
         decimals: securityInfo.decimals,
       };
       const resolverProxyConfiguration: ResolverProxyConfiguration = {
@@ -341,6 +344,7 @@ export class FactoryOperations {
       const erc20MetadataInfo: ERC20MetadataInfo = {
         name: securityInfo.name,
         symbol: securityInfo.symbol,
+        isin: securityInfo.isin,
         decimals: securityInfo.decimals,
       };
       const resolverProxyConfiguration: ResolverProxyConfiguration = {

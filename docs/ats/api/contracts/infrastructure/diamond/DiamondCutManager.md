@@ -34,6 +34,8 @@ function addSelectorsToBlacklist(bytes32 _configurationId, bytes4[] _selectors) 
 
 Adds a list of selectors to the blacklist
 
+_Blacklisted selectors are rejected when future configurations register facet selectors for the same configuration._
+
 #### Parameters
 
 | Name              | Type     | Description                                    |
@@ -781,6 +783,20 @@ Initialises the pause capability on the token.
 
 _Callable once; subsequent calls revert with `FacetAlreadyRegistered`. Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment._
 
+### isBusinessLogicResolver
+
+```solidity
+function isBusinessLogicResolver() external pure returns (bool isBusinessLogicResolver_)
+```
+
+Identity marker used to confirm a candidate address is a genuine `IBusinessLogicResolver`, checked via low-level `call()` rather than a direct interface call (see `DiamondCut::onlyValidBusinessLogicResolver`).
+
+#### Returns
+
+| Name                      | Type | Description                                       |
+| ------------------------- | ---- | ------------------------------------------------- |
+| isBusinessLogicResolver\_ | bool | Always `true` for a real `BusinessLogicResolver`. |
+
 ### isResolverProxyConfigurationRegistered
 
 ```solidity
@@ -867,6 +883,8 @@ function removeSelectorsFromBlacklist(bytes32 _configurationId, bytes4[] _select
 ```
 
 Removes a list of selectors from the blacklist
+
+_Removing a selector only affects subsequent validation and does not mutate already activated configurations._
 
 #### Parameters
 
@@ -1031,6 +1049,24 @@ _Requires the token to be unpaused and the caller to hold the admin role of `_ro
 | Name      | Type | Description                                |
 | --------- | ---- | ------------------------------------------ |
 | success\_ | bool | True if the role was successfully revoked. |
+
+### setVersionStatus
+
+```solidity
+function setVersionStatus(bytes32 _businessLogicKey, uint256 _version, enum IBusinessLogicResolver.VersionStatus _status) external nonpayable
+```
+
+Sets the status of a registered business logic version.
+
+_Restricted to `DEFAULT_ADMIN_ROLE`. Reverts with `InvalidVersionStatus` when `_status` is `VersionStatus.NONE`, and with `BusinessLogicVersionDoesNotExist` when `_version` is zero or has never been registered for `_businessLogicKey`. Marking a version `DEACTIVATED` prevents it from being selected into any new resolver-proxy configuration, but does not affect configurations that already reference it._
+
+#### Parameters
+
+| Name               | Type                                      | Description                                                             |
+| ------------------ | ----------------------------------------- | ----------------------------------------------------------------------- |
+| \_businessLogicKey | bytes32                                   | The bytes32 key identifying the business logic to update.               |
+| \_version          | uint256                                   | The version number to update.                                           |
+| \_status           | enum IBusinessLogicResolver.VersionStatus | The new status (`ACTIVATED` or `DEACTIVATED`) to assign to the version. |
 
 ### transferOwnership
 
@@ -1353,6 +1389,22 @@ Emitted when the token&#39;s internal pause flag is cleared to `false`.
 | ------------------ | ------- | ------------------------------------------------ |
 | operator `indexed` | address | Address of the caller who triggered the unpause. |
 
+### VersionStatusUpdated
+
+```solidity
+event VersionStatusUpdated(bytes32 indexed businessLogicKey, uint256 version, enum IBusinessLogicResolver.VersionStatus status)
+```
+
+Event emitted when a business logic version&#39;s status is updated.
+
+#### Parameters
+
+| Name                       | Type                                      | Description                                      |
+| -------------------------- | ----------------------------------------- | ------------------------------------------------ |
+| businessLogicKey `indexed` | bytes32                                   | Business logic key whose version status changed. |
+| version                    | uint256                                   | Version number whose status changed.             |
+| status                     | enum IBusinessLogicResolver.VersionStatus | New status assigned to the version.              |
+
 ## Errors
 
 ### AccountAssignedToRole
@@ -1484,6 +1536,21 @@ _Indicates that two indexed values cannot both satisfy the required monotonic or
 | lowerIndex | uint256 | Lower array index involved in the contradiction. |
 | upperIndex | uint256 | Upper array index involved in the contradiction. |
 
+### DeactivatedVersionNotAllowed
+
+```solidity
+error DeactivatedVersionNotAllowed(bytes32 facetId, uint256 version)
+```
+
+Thrown when a configuration selects a facet version whose status has been set to `DEACTIVATED`. Configurations that already reference the version are unaffected; this only blocks the version from being selected into a new configuration.
+
+#### Parameters
+
+| Name    | Type    | Description                                     |
+| ------- | ------- | ----------------------------------------------- |
+| facetId | bytes32 | Facet id whose selected version is deactivated. |
+| version | uint256 | Deactivated version that was selected.          |
+
 ### DefaultValueForConfigurationIdNotPermitted
 
 ```solidity
@@ -1591,6 +1658,14 @@ Thrown when the provided encoded proxy configuration does not respect the standa
 | Name                         | Type  | Description                        |
 | ---------------------------- | ----- | ---------------------------------- |
 | \_resolverProxyConfiguration | bytes | wrong encoded proxy configuration. |
+
+### InvalidVersionStatus
+
+```solidity
+error InvalidVersionStatus()
+```
+
+Thrown when `setVersionStatus` is called with `VersionStatus.NONE`, which represents an unregistered version rather than a settable lifecycle state.
 
 ### IsPaused
 

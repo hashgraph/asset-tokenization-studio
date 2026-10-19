@@ -26,6 +26,7 @@ import { Factory } from "../factory/Factories";
 import { OptionalField } from "@core/decorator/OptionalDecorator";
 import InvalidSupply from "./error/values/InvalidSupply";
 
+const TWELVE = 12;
 const TEN = 10;
 const ONE_HUNDRED = 100;
 const EIGHTEEN = 18;
@@ -34,6 +35,7 @@ const ZERO = 0;
 export interface SecurityProps {
   name: string;
   symbol: string;
+  isin: string;
   type?: SecurityType;
   decimals: number;
   isWhiteList: boolean;
@@ -60,6 +62,7 @@ export interface SecurityProps {
 export class Security extends ValidatedDomain<Security> implements SecurityProps {
   name: string;
   symbol: string;
+  isin: string;
   type?: SecurityType;
   decimals: number;
   isWhiteList: boolean;
@@ -109,6 +112,7 @@ export class Security extends ValidatedDomain<Security> implements SecurityProps
     const {
       name,
       symbol,
+      isin,
       type,
       decimals,
       isWhiteList,
@@ -133,6 +137,7 @@ export class Security extends ValidatedDomain<Security> implements SecurityProps
     } = params;
     this.name = name;
     this.symbol = symbol;
+    this.isin = isin;
     this.type = type;
     this.decimals = decimals;
     this.isWhiteList = isWhiteList;
@@ -174,6 +179,16 @@ export class Security extends ValidatedDomain<Security> implements SecurityProps
 
     if (!CheckStrings.isNotEmpty(value)) errorList.push(new SymbolEmpty());
     if (!CheckStrings.isLengthUnder(value, maxSymbolLength)) errorList.push(new SymbolLength(value, maxSymbolLength));
+
+    return errorList;
+  }
+
+  public static checkISIN(value: string): BaseError[] {
+    const maxIsinLength = TWELVE;
+    const errorList: BaseError[] = [];
+
+    if (!CheckStrings.isNotEmpty(value)) errorList.push(new NameEmpty());
+    if (!CheckStrings.isLengthUnder(value, maxIsinLength)) errorList.push(new NameLength(value, maxIsinLength));
 
     return errorList;
   }

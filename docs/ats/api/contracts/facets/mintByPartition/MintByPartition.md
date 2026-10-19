@@ -122,6 +122,14 @@ error IsPaused()
 
 Thrown when an operation that requires the token to be unpaused is attempted while the token is paused (own flag or any external pause contract).
 
+### IssuanceIsDisabled
+
+```solidity
+error IssuanceIsDisabled()
+```
+
+Thrown when an issuance operation is attempted after issuance has been permanently disabled.
+
 ### MaxSupplyReached
 
 ```solidity

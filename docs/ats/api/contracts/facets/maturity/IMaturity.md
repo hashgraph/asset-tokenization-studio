@@ -18,7 +18,7 @@ function fullRedeemAtMaturity(address _tokenHolder) external nonpayable
 
 Redeems all token partitions held by a token holder at maturity.
 
-_Caller must hold `ROLE_MATURITY_REDEEMER`. Contract must be unpaused and clearing must be disabled. `_tokenHolder` must be on the allowed list, hold granted KYC status, must not be recovered, and the current timestamp must be at or past the maturity date. Iterates every partition owned by `_tokenHolder` and redeems each balance in full. Reverts with an unexpected error if any partition balance is zero.Emits {RedeemedByPartition} for each redeemed partition via `ERC1410StorageWrapper.redeemByPartition`._
+_Caller must hold `ROLE_MATURITY_REDEEMER`. Contract must be unpaused and clearing must be disabled. `_tokenHolder` must be on the allowed list, hold granted KYC status, must not be recovered, and the current timestamp must be at or past the maturity date. Iterates every partition owned by `_tokenHolder` and redeems each balance in full. Reverts with an unexpected error if any partition balance is zero.Emits {TransferByPartition} and {RedeemedByPartition} for each redeemed partition via `ERC1410StorageWrapper.redeemByPartition`, then {FullyRedeemedAtMaturity} once after every partition has been processed._
 
 #### Parameters
 
@@ -58,6 +58,24 @@ _Called by the Factory immediately after the proxy is deployed. No role gate —
 | -------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | \_maturityDate | uint256 | Maturity timestamp to set (Unix epoch, in seconds). Must be strictly greater than zero and in the future at deployment time. |
 
+### redeemAtMaturityByPartitionRange
+
+```solidity
+function redeemAtMaturityByPartitionRange(address _tokenHolder, uint256 _pageIndex, uint256 _pageLength) external nonpayable
+```
+
+Redeems a bounded page of the token partitions held by a token holder at maturity.
+
+_Caller must hold `ROLE_MATURITY_REDEEMER`. Contract must be unpaused and clearing must be disabled. `_tokenHolder` must be on the allowed list, hold granted KYC status, must not be recovered, and the current timestamp must be at or past the maturity date. Iterates only the partitions in the `[\_pageIndex _ \_pageLength, \_pageIndex _ \_pageLength + \_pageLength)`range of`\_tokenHolder`&#39;s partition list,         clamped to the actual partition count, and redeems each balance in full. Reverts         with an unexpected error if any partition in that range has a zero balance. Exists         so a holder with more partitions than fit in one block&#39;s gas limit can still be         fully redeemed across multiple calls; `fullRedeemAtMaturity`remains available         unchanged for holders within the existing gas budget.Emits {TransferByPartition} and {RedeemedByPartition} for each redeemed partition         via`ERC1410StorageWrapper.redeemByPartition`, then {RedeemedAtMaturityByPartitionRange} once after the page has been processed._
+
+#### Parameters
+
+| Name          | Type    | Description                                                      |
+| ------------- | ------- | ---------------------------------------------------------------- |
+| \_tokenHolder | address | Address of the token holder whose partitions are to be redeemed. |
+| \_pageIndex   | uint256 | Zero-based index of the page of partitions to redeem.            |
+| \_pageLength  | uint256 | Number of partitions per page.                                   |
+
 ### updateMaturityDate
 
 ```solidity
@@ -81,6 +99,20 @@ _Caller must hold `ROLE_MATURITY_MANAGER`. Contract must be unpaused. `_newMatur
 | success\_ | bool | Always `true` on successful execution. |
 
 ## Events
+
+### FullyRedeemedAtMaturity
+
+```solidity
+event FullyRedeemedAtMaturity(address indexed tokenHolder)
+```
+
+Emitted once after `fullRedeemAtMaturity` has redeemed every partition held by `tokenHolder`.
+
+#### Parameters
+
+| Name                  | Type    | Description                                          |
+| --------------------- | ------- | ---------------------------------------------------- |
+| tokenHolder `indexed` | address | Token holder whose full partition list was redeemed. |
 
 ### MaturityDateUpdated
 
@@ -112,6 +144,22 @@ Emitted once when the maturity date is set for the first time via `initializeMat
 | ---------------------- | ------- | ------------------------------------------------- |
 | maturityDate `indexed` | uint256 | Initial maturity timestamp (Unix epoch, seconds). |
 
+### RedeemedAtMaturityByPartitionRange
+
+```solidity
+event RedeemedAtMaturityByPartitionRange(address indexed tokenHolder, uint256 pageIndex, uint256 pageLength)
+```
+
+Emitted once after `redeemAtMaturityByPartitionRange` has redeemed the requested page of partitions held by `tokenHolder`.
+
+#### Parameters
+
+| Name                  | Type    | Description                                                |
+| --------------------- | ------- | ---------------------------------------------------------- |
+| tokenHolder `indexed` | address | Token holder whose partitions were redeemed.               |
+| pageIndex             | uint256 | Zero-based index of the page that was redeemed.            |
+| pageLength            | uint256 | Number of partitions per page, as requested by the caller. |
+
 ## Errors
 
 ### MaturityDateInvalid
@@ -119,3 +167,7 @@ Emitted once when the maturity date is set for the first time via `initializeMat
 ```solidity
 error MaturityDateInvalid()
 ```
+
+Thrown when a maturity date fails validation.
+
+_Reverts when a proposed maturity date is not strictly in the future at the time it is set, or when a maturity-gated action is attempted before the stored maturity date has been reached._

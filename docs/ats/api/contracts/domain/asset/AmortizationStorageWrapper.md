@@ -6,4 +6,4 @@ _Asset Tokenization Studio Team_
 
 Library managing the full lifecycle of amortisation corporate actions: creation, hold placement and release, cancellation, and paginated holder queries.
 
-_All state resides at `_AMORTIZATION_STORAGE_POSITION` via the diamond-storage pattern. Hold management writes directly to `HoldStorageWrapper` storage rather than going through the facet call surface, avoiding calldata-conversion overhead. Snapshot balances are used after the record date; live ERC1410 state is used before it._
+_All state resides at `_AMORTIZATION_STORAGE_POSITION` via the diamond-storage pattern. Hold creation delegates to `HoldOps` (deployed once, invoked via `delegatecall`) to keep this facet&#39;s own bytecode under the EIP-170 limit. Release still writes directly to `HoldStorageWrapper` storage, since it also has to resync `totalHoldByAmortizationId` — bookkeeping `HoldOps` has no notion of — in the same pass as the hold-level resync. Snapshot balances are used after the record date; live ERC1410 state is used before it._
