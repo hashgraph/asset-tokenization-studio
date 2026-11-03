@@ -12,7 +12,10 @@ import {
   TransferEvent,
 } from "@domain/model/blockchain-listener";
 import { BlockchainEventListenerService } from "@domain/ports/blockchain-event-listener.service";
+import { ConfigKeys } from "@config/config-keys";
 import { Injectable, Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { getAllowedMirrorNodeHosts, getMirrorNodeUrlViolation, mirrorNodeHostForLogs } from "@utils/mirrorNodeUrl";
 import axios from "axios";
 import chalk from "chalk";
 import { Interface, LogDescription } from "ethers";
@@ -27,6 +30,7 @@ export class HederaBlockchainListenerService implements BlockchainEventListenerS
   constructor(
     private readonly getConfigUseCase: GetBlockchainEventListenerConfigUseCase,
     private readonly upsertConfigUseCase: UpsertBlockchainEventListenerConfigUseCase,
+    private readonly configService: ConfigService,
   ) {
     this.iface = new Interface(abiERC20);
   }
@@ -34,6 +38,7 @@ export class HederaBlockchainListenerService implements BlockchainEventListenerS
   async fetchNewEvents(): Promise<BlockchainEvent[]> {
     try {
       this.config = await this.getConfigUseCase.execute();
+      this.assertMirrorNodeUrlAllowed(this.config.mirrorNodeUrl);
       const logs: MirrorNodeLog[] = await this.retrieveLogsFromMirrorNode(
         this.config.mirrorNodeUrl,
         this.config.contractId,
@@ -57,7 +62,7 @@ export class HederaBlockchainListenerService implements BlockchainEventListenerS
     this.config = await this.getConfigUseCase.execute();
     if (Number(this.config.startTimestamp) >= Number(newStartTimestamp)) return;
     this.config.startTimestamp = newStartTimestamp;
-    this.logger.verbose(`Updating config: ${chalk.yellow(JSON.stringify(this.config, null, 2))}`);
+    this.logger.verbose(`Updating listener start timestamp: ${chalk.yellow(newStartTimestamp)}`);
     await this.upsertConfigUseCase.execute(this.config);
   }
 
@@ -68,12 +73,31 @@ export class HederaBlockchainListenerService implements BlockchainEventListenerS
   ): Promise<MirrorNodeLog[]> {
     try {
       const query = startTimestamp ? `?limit=100&order=asc&timestamp=gt%3A${startTimestamp.toString()}` : "";
-      const url = `${mirrorNodeUrl}/api/v1/contracts/${contractId}/results/logs${query}`;
-      this.logger.verbose(`Retrieving logs from Mirror Node: "${url}"`);
+      const url = `${mirrorNodeUrl.replace(/\/+$/, "")}/api/v1/contracts/${contractId}/results/logs${query}`;
+      // Log the host and contract only: full mirror URLs can identify private infrastructure.
+      this.logger.verbose(
+        `Retrieving logs from Mirror Node ${mirrorNodeHostForLogs(mirrorNodeUrl)} for contract ${contractId}`,
+      );
       const { data }: { data: MirrorNodeResponse } = await axios.get(url);
       return data.logs || [];
     } catch (error) {
       throw new BlockchainEventListenerError("Error extracting Mirror Node Logs", error);
+    }
+  }
+
+  /**
+   * Re-checks the stored URL on every poll, so a value saved before the allow-list existed (or written
+   * straight to the database) is never fetched. Events from the mirror node trigger payouts, so the
+   * mirror node is the trust root for automated distributions.
+   */
+  private assertMirrorNodeUrlAllowed(mirrorNodeUrl: string): void {
+    const allowedHosts = getAllowedMirrorNodeHosts(
+      this.configService.get<string>(ConfigKeys.BLOCKCHAIN_MIRROR_NODE_ALLOWED_HOSTS),
+      this.configService.get<string>(ConfigKeys.BLOCKCHAIN_MIRROR_NODE_URL),
+    );
+    const violation = getMirrorNodeUrlViolation(mirrorNodeUrl, allowedHosts);
+    if (violation) {
+      throw new BlockchainEventListenerError(`Refusing to poll the configured mirror node: ${violation}`);
     }
   }
 

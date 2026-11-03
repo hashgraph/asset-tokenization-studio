@@ -20,9 +20,9 @@ defaults:
   run:
     shell: bash
 
+# id-token: write is granted only to the job that publishes (npm trusted publishing / provenance).
 permissions:
   contents: read
-  id-token: write
 
 jobs:
   prepare-contracts:
@@ -31,6 +31,8 @@ jobs:
     timeout-minutes: 15
     # Only run if manual trigger OR tag push (already filtered by v*-ats pattern)
     if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
+    permissions:
+      contents: read
     outputs:
       artifact-name: ${{ steps.prepare-package-data.outputs.artifact-name }}
     steps:
@@ -44,11 +46,15 @@ jobs:
         with:
           ref: ${{ github.ref }}
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Setup NodeJS Environment
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version-file: .nvmrc
+          # Publish workflow: never restore a package cache (cache poisoning). v4 has
+          # no automatic cache; this keeps it off if setup-node is bumped to v5+.
+          package-manager-cache: false
 
       - name: Setup JQ
         uses: dcarbone/install-jq-action@b7ef57d46ece78760b4019dbc4080a1ba2a40b45 # v3.2.0
@@ -95,6 +101,9 @@ jobs:
     timeout-minutes: 15
     needs:
       - prepare-contracts
+    permissions:
+      contents: read
+      id-token: write # OIDC for npm trusted publishing / provenance
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
@@ -105,12 +114,15 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: "1"
+          persist-credentials: false
 
       - name: Setup NodeJS Environment
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version-file: .nvmrc
           registry-url: "https://registry.npmjs.org"
+          # Publish job: never restore a package cache (cache poisoning).
+          package-manager-cache: false
 
       - name: Install NPM latest
         run: npm install -g npm@11.7.0
@@ -121,17 +133,22 @@ jobs:
           name: ats-contracts-package
 
       - name: Publish npm packages
+        env:
+          DRY_RUN_ENABLED: ${{ inputs.dry-run-enabled }}
+          ARTIFACT_NAME: ${{ needs.prepare-contracts.outputs.artifact-name }}
         run: |
           echo "::group::Set publish parameters"
             PUBLISH_ARGS="--access=public"
-            if [[ "${{ inputs.dry-run-enabled }}" == "true" ]]; then
+            if [[ "${DRY_RUN_ENABLED}" == "true" ]]; then
               PUBLISH_ARGS="${PUBLISH_ARGS} --dry-run"
             fi
             echo "::endgroup::"
 
-          echo "::group::Publish ATS Contracts Package ${{ needs.prepare-contracts.outputs.artifact-name }} with args: ${PUBLISH_ARGS}"
-            if ! npm publish ./${{ needs.prepare-contracts.outputs.artifact-name }} ${PUBLISH_ARGS}; then
-                echo "❌ Failed to publish ATS Contracts package: ${{ needs.prepare-contracts.outputs.artifact-name }}"
+          echo "::group::Publish ATS Contracts Package ${ARTIFACT_NAME} with args: ${PUBLISH_ARGS}"
+            # PUBLISH_ARGS is intentionally unquoted: it holds several flags.
+            # shellcheck disable=SC2086
+            if ! npm publish "./${ARTIFACT_NAME}" ${PUBLISH_ARGS}; then
+                echo "❌ Failed to publish ATS Contracts package: ${ARTIFACT_NAME}"
                 exit 1
             fi
           echo "::endgroup::"
@@ -145,6 +162,7 @@ jobs:
       - prepare-contracts
       - publish-npm-packages
     if: ${{ always() }}
+    permissions: {}
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
@@ -152,14 +170,18 @@ jobs:
           egress-policy: audit
 
       - name: Report Results
+        env:
+          PREPARE_RESULT: ${{ needs.prepare-contracts.result }}
+          PUBLISH_RESULT: ${{ needs.publish-npm-packages.result }}
+          DRY_RUN_ENABLED: ${{ inputs.dry-run-enabled }}
         run: |
           echo "## ATS Publish Results" >> "${GITHUB_STEP_SUMMARY}"
           echo "| Step | Status |" >> "${GITHUB_STEP_SUMMARY}"
           echo "| --- | --- |" >> "${GITHUB_STEP_SUMMARY}"
-          echo "| Package Contracts | ${{ needs.prepare-contracts.result }} |" >> "${GITHUB_STEP_SUMMARY}"
-          echo "| Publish NPM Packages | ${{ needs.publish-npm-packages.result }} |" >> "${GITHUB_STEP_SUMMARY}"
+          echo "| Package Contracts | ${PREPARE_RESULT} |" >> "${GITHUB_STEP_SUMMARY}"
+          echo "| Publish NPM Packages | ${PUBLISH_RESULT} |" >> "${GITHUB_STEP_SUMMARY}"
 
-          if [[ "${{ inputs.dry-run-enabled }}" == "true" ]]; then
+          if [[ "${DRY_RUN_ENABLED}" == "true" ]]; then
             echo "" >> "${GITHUB_STEP_SUMMARY}"
             echo "🔍 **DRY RUN MODE** - No packages were actually published" >> "${GITHUB_STEP_SUMMARY}"
           fi

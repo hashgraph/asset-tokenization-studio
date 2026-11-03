@@ -55,21 +55,19 @@ export async function deployLifeCycleCashFlowContracts({
 
   console.log(`Deploying ${name} Proxy. please wait...`);
 
+  // The initializer calldata goes to the proxy constructor, so the proxy is deployed and initialized
+  // in one transaction and nobody can call initialize on an uninitialized proxy in between
+  const initializeData = contractResult.contract.interface.encodeFunctionData("initialize", args);
+
   const proxyContractResult = await deployContract(
     new DeployContractCommand({
       name: "TransparentUpgradeableProxy",
       signer,
-      args: [contractResult.address, proxyAdminContractResult.address, "0x"],
+      args: [contractResult.address, proxyAdminContractResult.address, initializeData],
     }),
   );
 
-  console.log(`${name} Proxy deployed at ${proxyContractResult.address}`);
-
-  const lifeCycleCashFlow = (await ethers.getContractAt(name, proxyContractResult.address)).connect(signer);
-
-  const tx = await lifeCycleCashFlow.getFunction("initialize")(...(args as [string, string, []]));
-  const receipt = await tx.wait(); // wait for execution & revert to be caught
-  console.log(`${name} initialize function was successfully executed`);
+  console.log(`${name} Proxy deployed and initialized at ${proxyContractResult.address}`);
 
   return new DeployContractResult({
     name,

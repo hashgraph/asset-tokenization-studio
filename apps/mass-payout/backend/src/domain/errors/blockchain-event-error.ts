@@ -15,3 +15,9 @@ export class BlockchainEventListenerConfigNotValidError extends InvalidDataError
     super(`Invalid Config: ${JSON.stringify(config)}`);
   }
 }
+
+export class BlockchainEventListenerMirrorNodeUrlNotAllowedError extends InvalidDataError {
+  constructor(reason: string) {
+    super(`Mirror node URL rejected: ${reason}`);
+  }
+}

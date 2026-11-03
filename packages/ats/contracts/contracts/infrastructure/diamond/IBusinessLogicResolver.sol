@@ -71,6 +71,18 @@ interface IBusinessLogicResolver is IDiamondCutManager {
     /// @param status New status assigned to the version.
     event VersionStatusUpdated(bytes32 indexed businessLogicKey, uint256 version, VersionStatus status);
 
+    /// @notice Event emitted when selectors are added to a configuration's blacklist.
+    /// @param operator Account that changed the blacklist.
+    /// @param configurationId Configuration whose blacklist changed.
+    /// @param selectors Selectors added to the blacklist.
+    event BlacklistSelectorsAdded(address indexed operator, bytes32 indexed configurationId, bytes4[] selectors);
+
+    /// @notice Event emitted when selectors are removed from a configuration's blacklist.
+    /// @param operator Account that changed the blacklist.
+    /// @param configurationId Configuration whose blacklist changed.
+    /// @param selectors Selectors removed from the blacklist.
+    event BlacklistSelectorsRemoved(address indexed operator, bytes32 indexed configurationId, bytes4[] selectors);
+
     /// @notice Thrown when the requested version has never been registered for any business logic key.
     /// @param version The version number that does not exist in the registry.
     error BusinessLogicVersionDoesNotExist(uint256 version);

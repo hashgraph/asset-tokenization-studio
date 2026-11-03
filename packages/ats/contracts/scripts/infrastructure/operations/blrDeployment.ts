@@ -30,7 +30,11 @@ export interface DeployBlrOptions {
   /** Existing ProxyAdmin contract instance (optional, will deploy new one if not provided) */
   existingProxyAdmin?: ProxyAdmin;
 
-  /** Whether to initialize after deployment */
+  /**
+   * Whether to initialize in the proxy deployment transaction (default true). When false the
+   * proxy is left uninitialized and the first caller of `initializeBusinessLogicResolver`
+   * becomes its admin.
+   */
   initialize?: boolean;
 }
 
@@ -93,11 +97,22 @@ export async function deployBlr(signer: Signer, options: DeployBlrOptions = {}):
     // Create factory for implementation deployment
     const implementationFactory = new BusinessLogicResolver__factory(signer);
 
+    // Initialize through the proxy constructor so deployment and initialization happen in one
+    // transaction. A separate initialize call could be front-run, handing DEFAULT_ADMIN_ROLE to
+    // whoever calls it first.
+    const initData = initialize
+      ? BusinessLogicResolver__factory.createInterface().encodeFunctionData("initializeBusinessLogicResolver")
+      : "0x";
+
+    if (initialize) {
+      info("Initializing BLR atomically in the proxy deployment...");
+    }
+
     const proxyResult = await deployProxy(signer, {
       implementationFactory,
       implementationArgs: [],
       existingProxyAdmin,
-      initData: "0x",
+      initData,
       overrides: {
         ...gasLimitOverride(GAS_LIMIT.high),
         ...hederaGasOverrides(),
@@ -108,22 +123,9 @@ export async function deployBlr(signer: Signer, options: DeployBlrOptions = {}):
     const implementationAddress = proxyResult.implementationAddress;
     const adminAddress = proxyResult.proxyAdminAddress;
 
-    let initialized = false;
+    const initialized = initialize;
 
-    // Initialize if requested
-    if (initialize) {
-      info("Initializing BLR...");
-
-      const blr = BusinessLogicResolver__factory.connect(blrAddress, signer);
-
-      const initTx = await blr.initializeBusinessLogicResolver({
-        ...gasLimitOverride(GAS_LIMIT.initialize.businessLogicResolver),
-        ...hederaGasOverrides(),
-      });
-      await initTx.wait();
-
-      initialized = true;
-
+    if (initialized) {
       success("BLR initialized");
     }
 

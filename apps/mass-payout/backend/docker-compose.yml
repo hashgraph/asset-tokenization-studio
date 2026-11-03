@@ -1,9 +1,13 @@
+# Local development database only. Do not use this file for a shared or production deployment.
+# Credentials come from the shell or from the .env file next to this file (docker compose reads it,
+# and it is the same .env the backend uses: copy .env.example to .env). The fallbacks only apply to a
+# throwaway local database bound to 127.0.0.1.
 services:
   db:
     image: postgres:latest
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
+      POSTGRES_USER: ${POSTGRESQL_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRESQL_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRESQL_DB:-postgres}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:${POSTGRESQL_PORT:-5432}:5432"

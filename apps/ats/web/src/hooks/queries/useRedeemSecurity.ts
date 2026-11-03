@@ -47,7 +47,8 @@ export const useRedeemSecurity = (options: UseMutationOptions<boolean, unknown, 
         },
         [KnownErrors.unknown]: {
           title: t("messages.error"),
-          description: error?.message,
+          // Never show raw SDK/wallet/RPC error text to the user; the detail is logged to the console
+          description: t("messages.descriptionFailed"),
         },
       };
 

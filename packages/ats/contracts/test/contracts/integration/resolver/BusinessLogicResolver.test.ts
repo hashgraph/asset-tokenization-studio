@@ -406,6 +406,18 @@ describe("BusinessLogicResolver", () => {
       expect(await businessLogicResolver.getSelectorsBlacklist(CONFIG_IDS.equity, 0, 100)).to.deep.equal([]);
     });
 
+    it("GIVEN an admin WHEN changing the blacklist THEN BlacklistSelectorsAdded and BlacklistSelectorsRemoved are emitted", async () => {
+      const blackListedSelectors = ["0x8456cb59"]; // pause() selector
+
+      await expect(businessLogicResolver.addSelectorsToBlacklist(CONFIG_IDS.equity, blackListedSelectors))
+        .to.emit(businessLogicResolver, "BlacklistSelectorsAdded")
+        .withArgs(signer_A.address, CONFIG_IDS.equity, blackListedSelectors);
+
+      await expect(businessLogicResolver.removeSelectorsFromBlacklist(CONFIG_IDS.equity, blackListedSelectors))
+        .to.emit(businessLogicResolver, "BlacklistSelectorsRemoved")
+        .withArgs(signer_A.address, CONFIG_IDS.equity, blackListedSelectors);
+    });
+
     it("GIVEN a selector already in blacklist WHEN adding it again THEN it should not be duplicated", async () => {
       const blackListedSelectors = ["0x8456cb59"]; // pause() selector
 

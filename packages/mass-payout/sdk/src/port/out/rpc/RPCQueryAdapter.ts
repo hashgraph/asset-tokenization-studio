@@ -9,6 +9,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { JsonRpcProvider } from "ethers";
 import { LifeCycleCashFlow__factory } from "@hashgraph/mass-payout-contracts";
 import EvmAddress from "@domain/contract/EvmAddress";
+import { redactUrl } from "@core/LogRedaction";
 import NetworkService from "@app/services/network/NetworkService";
 import { MirrorNodeAdapter } from "../mirror/MirrorNodeAdapter";
 
@@ -36,7 +37,10 @@ export class RPCQueryAdapter {
   async init(urlRpcProvider?: string, apiKey?: string): Promise<string> {
     const url = urlRpcProvider ? (apiKey ? urlRpcProvider + apiKey : urlRpcProvider) : LOCAL_JSON_RPC_RELAY_URL;
     this.provider = new JsonRpcProvider(url);
-    this.logger.log("RPC Query Adapter Initialized on: ", url);
+    // Log only the endpoint origin: the API key is part of the URL
+    this.logger.log(
+      `RPC Query Adapter Initialized on: ${redactUrl(urlRpcProvider || LOCAL_JSON_RPC_RELAY_URL)}${apiKey ? " (API key set)" : ""}`,
+    );
 
     return this.networkService.environment;
   }
@@ -60,7 +64,10 @@ export class RPCQueryAdapter {
   async getPaymentTokenDecimals(lifeCycleCashFlow: EvmAddress): Promise<number> {
     this.logger.log(`Getting the payment token decimals for the contract ${lifeCycleCashFlow.toString()}`);
 
-    const decimals = await this.connect(LifeCycleCashFlow__factory, lifeCycleCashFlow.toString()).getPaymentTokenDecimals();
+    const decimals = await this.connect(
+      LifeCycleCashFlow__factory,
+      lifeCycleCashFlow.toString(),
+    ).getPaymentTokenDecimals();
     return Number(decimals);
   }
 }

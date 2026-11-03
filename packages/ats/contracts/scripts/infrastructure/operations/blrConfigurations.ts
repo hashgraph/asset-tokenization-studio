@@ -48,6 +48,9 @@ import {
   RetryOptions,
 } from "@scripts/infrastructure";
 
+// Imported directly (not via the barrel): transaction utils do not pull in typechain
+import { getHardhatNetworkName } from "../utils/transaction";
+
 // Types imported from centralized types module
 import type { BatchFacetConfiguration, ConfigurationData, ConfigurationError, FacetConfigurationData } from "../types";
 
@@ -172,13 +175,8 @@ export async function processFacetLists(
   retryOptions?: RetryOptions,
 ): Promise<void> {
   // Get network name for instant mining check
-  let networkName = "unknown";
-  try {
-    const hre = require("hardhat");
-    networkName = hre?.network?.name || "unknown";
-  } catch {
-    // Not in Hardhat context
-  }
+  // Falls back to "unknown" outside Hardhat; unexpected Hardhat load failures are logged at warn
+  const networkName = getHardhatNetworkName() ?? "unknown";
 
   // On instant-mining networks, use larger batches but cap at 20 to avoid gas limit issues
   // On real networks, use configured batch size (default 15)

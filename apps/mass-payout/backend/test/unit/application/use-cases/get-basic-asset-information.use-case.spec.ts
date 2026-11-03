@@ -7,6 +7,7 @@ import { createMock } from "@golevelup/ts-jest";
 import { faker } from "@faker-js/faker";
 import { fakeHederaAddress } from "@test/shared/utils";
 import { AssetTokenizationStudioService } from "@domain/ports/asset-tokenization-studio.port";
+import { AssetInformationLookupLimitError, AssetNotFoundError } from "@domain/errors/asset.error";
 
 describe(GetBasicAssetInformationUseCase.name, () => {
   let getBasicAssetInformationUseCase: GetBasicAssetInformationUseCase;
@@ -129,6 +130,39 @@ describe(GetBasicAssetInformationUseCase.name, () => {
           expect(result.maturityDate).toBeDefined();
         }
       }
+    });
+
+    it("should throw AssetNotFoundError when the SDK returns no asset info", async () => {
+      const hederaTokenAddress = fakeHederaAddress();
+      assetTokenizationStudioServiceMock.getAssetInfo.mockResolvedValue(null);
+
+      await expect(getBasicAssetInformationUseCase.execute(hederaTokenAddress)).rejects.toThrow(AssetNotFoundError);
+    });
+
+    it("should reject lookups beyond the concurrency limit and accept new ones once they finish", async () => {
+      const limit = GetBasicAssetInformationUseCase.MAX_CONCURRENT_LOOKUPS;
+      const pending: Array<(value: unknown) => void> = [];
+      assetTokenizationStudioServiceMock.getAssetInfo.mockImplementation(
+        () => new Promise((resolve) => pending.push(resolve)) as any,
+      );
+
+      const inFlight = Array.from({ length: limit }, () =>
+        getBasicAssetInformationUseCase.execute(fakeHederaAddress()),
+      );
+
+      await expect(getBasicAssetInformationUseCase.execute(fakeHederaAddress())).rejects.toThrow(
+        AssetInformationLookupLimitError,
+      );
+      expect(assetTokenizationStudioServiceMock.getAssetInfo).toHaveBeenCalledTimes(limit);
+
+      const info = { hederaTokenAddress: "0.0.1", name: "n", symbol: "s", assetType: AssetType.EQUITY };
+      pending.forEach((resolve) => resolve(info));
+      await Promise.all(inFlight);
+
+      assetTokenizationStudioServiceMock.getAssetInfo.mockResolvedValue(info);
+      await expect(getBasicAssetInformationUseCase.execute(fakeHederaAddress())).resolves.toMatchObject({
+        name: "n",
+      });
     });
   });
 });

@@ -782,6 +782,38 @@ Updates the replacement address for a given address
 
 ## Events
 
+### BlacklistSelectorsAdded
+
+```solidity
+event BlacklistSelectorsAdded(address indexed operator, bytes32 indexed configurationId, bytes4[] selectors)
+```
+
+Event emitted when selectors are added to a configuration&#39;s blacklist.
+
+#### Parameters
+
+| Name                      | Type     | Description                            |
+| ------------------------- | -------- | -------------------------------------- |
+| operator `indexed`        | address  | Account that changed the blacklist.    |
+| configurationId `indexed` | bytes32  | Configuration whose blacklist changed. |
+| selectors                 | bytes4[] | Selectors added to the blacklist.      |
+
+### BlacklistSelectorsRemoved
+
+```solidity
+event BlacklistSelectorsRemoved(address indexed operator, bytes32 indexed configurationId, bytes4[] selectors)
+```
+
+Event emitted when selectors are removed from a configuration&#39;s blacklist.
+
+#### Parameters
+
+| Name                      | Type     | Description                            |
+| ------------------------- | -------- | -------------------------------------- |
+| operator `indexed`        | address  | Account that changed the blacklist.    |
+| configurationId `indexed` | bytes32  | Configuration whose blacklist changed. |
+| selectors                 | bytes4[] | Selectors removed from the blacklist.  |
+
 ### BusinessLogicResolverInitialized
 
 ```solidity

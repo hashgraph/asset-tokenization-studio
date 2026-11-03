@@ -54,6 +54,7 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
         bytes4[] calldata _selectors
     ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyUnpaused {
         _addSelectorsToBlacklist(_configurationId, _selectors);
+        emit BlacklistSelectorsAdded(EvmAccessors.getMsgSender(), _configurationId, _selectors);
     }
 
     /// @inheritdoc IBusinessLogicResolver
@@ -64,6 +65,7 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
         bytes4[] calldata _selectors
     ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyUnpaused {
         _removeSelectorsFromBlacklist(_configurationId, _selectors);
+        emit BlacklistSelectorsRemoved(EvmAccessors.getMsgSender(), _configurationId, _selectors);
     }
 
     /// @inheritdoc IBusinessLogicResolver

@@ -16,6 +16,7 @@ import { LogError } from "@core/decorator/LogErrorDecorator";
 import { SetNetworkError } from "./error/SetNetworkError";
 import { ExecuteConnectionError } from "./error/ExecuteConnectionError";
 import ValidatedRequest from "@core/validation/ValidatedArgs";
+import { redactForLog } from "@core/LogRedaction";
 
 import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
 import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
@@ -122,12 +123,13 @@ export class Network implements INetworkInPort {
 
   @LogError
   async connect(req: ConnectRequest): Promise<InitializationData> {
-    this.logger.log("ConnectRequest from network", req);
+    // Never log the raw request: it carries the DFNS service account credentials
+    this.logger.log("ConnectRequest from network", redactForLog(req));
     ValidatedRequest.handleValidation("ConnectRequest", req);
 
     const account = req.account ? RequestMapper.mapAccount(req.account) : undefined;
     const custodialSettings = this.getCustodialSettings(req);
-    this.logger.log("SetNetwork", req.network, req.mirrorNode, req.rpcNode);
+    this.logger.log("SetNetwork", req.network, redactForLog(req.mirrorNode), redactForLog(req.rpcNode));
 
     await this.setNetwork(
       new SetNetworkRequest({
@@ -137,7 +139,7 @@ export class Network implements INetworkInPort {
       }),
     );
 
-    this.logger.log("ConnectRequest", req.wallet, account, custodialSettings);
+    this.logger.log("ConnectRequest", req.wallet, redactForLog(account), redactForLog(custodialSettings));
     const res = await this.executeConnection(req.network, req.wallet, account, custodialSettings);
     return res.payload;
   }

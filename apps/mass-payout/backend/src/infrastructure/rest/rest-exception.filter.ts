@@ -7,11 +7,19 @@ import { ConflictError } from "@domain/errors/shared/conflict-error";
 import { CustomError } from "@domain/errors/shared/custom.error";
 import { DomainError } from "@domain/errors/shared/domain.error";
 import { InvalidDataError } from "@domain/errors/shared/invalid-data.error";
+import { TooManyRequestsError } from "@domain/errors/shared/too-many-requests.error";
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from "@nestjs/common";
 
 @Catch()
 export class RestExceptionFilter implements ExceptionFilter<Error> {
   private readonly logger = new Logger(RestExceptionFilter.name);
+
+  private static readonly GENERIC_MESSAGES: Partial<Record<HttpStatus, string>> = {
+    [HttpStatus.BAD_REQUEST]: "Invalid request",
+    [HttpStatus.NOT_FOUND]: "Resource not found",
+    [HttpStatus.CONFLICT]: "The request conflicts with the current state of the resource",
+    [HttpStatus.TOO_MANY_REQUESTS]: "Too many requests, try again later",
+  };
 
   catch(error: Error, host: ArgumentsHost): any {
     this.logger.error(error.message, error.stack, error.name);
@@ -30,31 +38,11 @@ export class RestExceptionFilter implements ExceptionFilter<Error> {
       return response.status(status).json(payload);
     }
 
-    const messageFromError = this.getHttpMessageFromError(error);
-    const codeFromError = this.getHttpCodeFromError(error);
-    const causeFromError = this.getHttpCauseFromError(error);
-
-    const exception = new HttpException(messageFromError, codeFromError, { cause: causeFromError });
-    const status = exception.getStatus();
-    const safePayload = this.maskIfInternalError(exception);
-
-    response.status(status).json(safePayload);
-  }
-
-  private getHttpMessageFromError(error: Error): string {
-    if (error instanceof CustomError) {
-      return error.toJson();
-    } else {
-      return new CustomError().toJson();
-    }
-  }
-
-  private getHttpCauseFromError(error: Error): string {
-    if (error instanceof CustomError) {
-      return error.toJson().cause;
-    } else {
-      return new CustomError().toJson().cause;
-    }
+    // Domain errors can carry caller input, asset names or token addresses. Keep that detail in the
+    // server log written above and send the client only a generic message for the status code.
+    const rootError = CustomError.getRootError(error);
+    const status = this.getHttpCodeFromError(error);
+    response.status(status).json(this.toSafePayload(status, rootError));
   }
 
   private getHttpCodeFromError(error: Error): HttpStatus {
@@ -72,6 +60,8 @@ export class RestExceptionFilter implements ExceptionFilter<Error> {
         return HttpStatus.BAD_REQUEST;
       case error instanceof ConflictError:
         return HttpStatus.CONFLICT;
+      case error instanceof TooManyRequestsError:
+        return HttpStatus.TOO_MANY_REQUESTS;
       case error instanceof AssetNotFoundError:
       case error instanceof DistributionNotFoundError:
       case error instanceof BlockchainEventListenerConfigNotFoundError:
@@ -81,12 +71,15 @@ export class RestExceptionFilter implements ExceptionFilter<Error> {
     }
   }
 
-  private maskIfInternalError(exc: HttpException): {
+  private toSafePayload(
+    status: HttpStatus,
+    rootError: Error,
+  ): {
     statusCode: number;
     message: string;
-    cause?: unknown;
+    error?: string;
   } {
-    if (exc.getStatus() == HttpStatus.INTERNAL_SERVER_ERROR) {
+    if (status === HttpStatus.INTERNAL_SERVER_ERROR) {
       return {
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: "Internal server error",
@@ -94,9 +87,11 @@ export class RestExceptionFilter implements ExceptionFilter<Error> {
     }
 
     return {
-      statusCode: exc.getStatus(),
-      message: exc.message,
-      cause: exc.cause,
+      statusCode: status,
+      message: RestExceptionFilter.GENERIC_MESSAGES[status] ?? "Request failed",
+      // The error class name (e.g. "AssetPausedError") lets API clients tell cases apart without
+      // exposing any of the values in the original message.
+      error: rootError.name,
     };
   }
 }

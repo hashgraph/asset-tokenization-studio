@@ -24,10 +24,10 @@ _Coming soon_
 
 ## Authentication
 
-_Coming soon_
+The backend has **no built-in authentication or authorization**: every endpoint accepts any request that reaches it. It must run on a private network behind your own API gateway / identity layer, which authenticates callers and authorizes each route. See [Backend > Security and Deployment](../../developer-guides/backend/index.md#security-and-deployment) for the required deployment model and a suggested route policy.
 
 ## Rate Limiting
 
-_Coming soon_
+The backend does not rate-limit clients; configure rate limits in your API gateway. On its own it caps list endpoints at `limit=1000` per page and allows at most 10 concurrent `GET /assets/:hederaTokenAddress/metadata` lookups (further requests get `429`).
 
 _This documentation is under development. Use the Swagger UI for current API reference._

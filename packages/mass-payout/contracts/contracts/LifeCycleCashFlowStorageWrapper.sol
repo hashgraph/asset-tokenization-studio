@@ -24,6 +24,8 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         IERC20 paymentToken;
         mapping(uint256 => mapping(address => bool)) paidAddressesByDistribution;
         mapping(uint256 => mapping(address => bool)) paidAddressesBySnapshot;
+        // Appended for upgrade safety: payment token pool captured on the first paid batch of a percentage snapshot
+        mapping(uint256 => uint256) percentageSnapshotPaymentPool;
     }
 
     modifier isAsset(address _asset) {
@@ -43,6 +45,11 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
 
     modifier onlyValidPaymentToken(address _paymentToken) {
         _checkPaymentToken(_paymentToken);
+        _;
+    }
+
+    modifier onlyValidPercentage(uint256 _percentage) {
+        _checkPercentage(_percentage);
         _;
     }
     /*
@@ -165,6 +172,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
             _snapshotID,
             holders,
             _amount,
+            0,
             _getSnapshotAmountByAmount
         );
         return (failed_, succeeded_, paidAmount_, true);
@@ -192,18 +200,51 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         internal
         returns (address[] memory failed_, address[] memory succeeded_, uint256[] memory paidAmount_, bool executed_)
     {
-        if (_percentage > 100 * 10 ** _PERCENTAGE_DECIMALS_SIZE)
-            revert ILifeCycleCashFlow.InvalidPercentage(_percentage);
         address[] memory holders = _getHoldersBySnapshot(_asset, _snapshotID, _pageIndex, _pageLength);
         if (holders.length == 0) return (failed_, succeeded_, paidAmount_, false);
-        (failed_, succeeded_, paidAmount_) = _executeSnapshotByAddresses(
+        (failed_, succeeded_, paidAmount_) = _executePercentageSnapshotByAddresses(
             _asset,
             _snapshotID,
             holders,
-            _percentage,
-            _getSnapshotAmountByPercentage
+            _percentage
         );
         return (failed_, succeeded_, paidAmount_, true);
+    }
+
+    /*
+     * @dev Pay a percentage of the snapshot payment pool to a list of holders
+     *
+     * The pool is the payment token balance captured on the first batch of the snapshot that pays a holder,
+     * and it is reused by every later batch, so every holder is paid from the same base whatever batch they land in
+     *
+     * @param asset The asset the snapshot belongs to
+     * @param snapshotID The snapshot identifier
+     * @param holders The array of holders addresses who will be paid
+     * @param percentage The payment pool percentage to be paid distributed proportionally among the holders
+     *
+     * @return The array of the holders addresses whose payment were not successful
+     */
+    function _executePercentageSnapshotByAddresses(
+        address _asset,
+        uint256 _snapshotID,
+        address[] memory _holders,
+        uint256 _percentage
+    ) internal returns (address[] memory failed_, address[] memory succeeded_, uint256[] memory paidAmount_) {
+        uint256 capturedPool = _lifeCycleCashFlowStorage().percentageSnapshotPaymentPool[_snapshotID];
+        uint256 paymentPool = capturedPool != 0
+            ? capturedPool
+            : _lifeCycleCashFlowStorage().paymentToken.balanceOf(address(this));
+        (failed_, succeeded_, paidAmount_) = _executeSnapshotByAddresses(
+            _asset,
+            _snapshotID,
+            _holders,
+            _percentage,
+            paymentPool,
+            _getSnapshotAmountByPercentage
+        );
+        if (capturedPool == 0 && succeeded_.length > 0 && succeeded_[0] != address(0)) {
+            _lifeCycleCashFlowStorage().percentageSnapshotPaymentPool[_snapshotID] = paymentPool;
+        }
     }
 
     /*
@@ -213,6 +254,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      * @param snapshotID The snapshot identifier
      * @param holders The array of holders addresses who will be paid * @param snapshotID The snapshot identifier
      * @param amount The fixed amount to be paid distributed proportionally among the holders
+     * @param paymentPool The payment token pool a percentage is applied to (unused for amount payments)
      * @param getSnapshotAmount The function to calculate the amount of payment tokens to pay
      *
      * @return The array of the holders addresses whose payment were not successful
@@ -222,6 +264,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         uint256 _snapshotID,
         address[] memory _holders,
         uint256 _amount,
+        uint256 _paymentPool,
         function(ILifeCycleCashFlow.SnapshotAmountInfo memory) internal returns (uint256) _getSnapshotAmount
     ) internal returns (address[] memory failed_, address[] memory succeeded_, uint256[] memory paidAmount_) {
         address[] memory filteredHolders = _filterZeroAddresses(_holders);
@@ -230,6 +273,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
             filteredHolders,
             _snapshotID,
             _amount,
+            _paymentPool,
             _getSnapshotAmount
         );
     }
@@ -294,9 +338,11 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      * @param rbac The array of RBAC roles and members
      */
     function _assignRbacRoles(ILifeCycleCashFlow.Rbac[] memory _rbac) internal {
-        for (uint256 rbacIndex; rbacIndex < _rbac.length; rbacIndex++) {
-            for (uint256 memberIndex; memberIndex < _rbac[rbacIndex].members.length; memberIndex++) {
-                _grantRole(_rbac[rbacIndex].role, _rbac[rbacIndex].members[memberIndex]);
+        for (uint256 rbacIndex; rbacIndex < _rbac.length; ++rbacIndex) {
+            for (uint256 memberIndex; memberIndex < _rbac[rbacIndex].members.length; ++memberIndex) {
+                if (_grantRole(_rbac[rbacIndex].role, _rbac[rbacIndex].members[memberIndex])) {
+                    emit RoleGranted(_msgSender(), _rbac[rbacIndex].members[memberIndex], _rbac[rbacIndex].role);
+                }
             }
         }
     }
@@ -499,6 +545,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      * @param holders The holders to be paid
      * @param snapshotID The snapshot to be paid to the holders
      * @param amountOrPercentage The amount or percentage to be paid to the holders
+     * @param paymentPool The payment token pool a percentage is applied to (unused for amount payments)
      * @param getSnapshotAmount The function that calculates the amount to be paid to the holders
      *
      * @return The array of the holders addresses whose payment were not successful
@@ -508,6 +555,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         address[] memory _holders,
         uint256 _snapshotID,
         uint256 _amountOrPercentage,
+        uint256 _paymentPool,
         function(ILifeCycleCashFlow.SnapshotAmountInfo memory) internal returns (uint256) _getSnapshotAmount
     )
         private
@@ -516,7 +564,6 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         failedAddresses_ = new address[](_holders.length);
         succeededAddresses_ = new address[](_holders.length);
         paidAmount_ = new uint256[](_holders.length);
-        uint256 paymentTokenBalance = _lifeCycleCashFlowStorage().paymentToken.balanceOf(address(this));
         uint256 assetTotalSupply = _getTotalSupplyAtSnapshot(_asset, _snapshotID);
 
         uint256 failedIndex;
@@ -537,7 +584,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
             amountInfo.snapshotID = _snapshotID;
             amountInfo.holder = holder;
             amountInfo.amountOrPercentage = _amountOrPercentage;
-            amountInfo.paymentTokenBalance = paymentTokenBalance;
+            amountInfo.paymentTokenBalance = _paymentPool;
             amountInfo.totalSupplyAtSnapshot = assetTotalSupply;
             uint256 amount = _getSnapshotAmount(amountInfo);
 
@@ -657,13 +704,9 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         uint256 _amount,
         IERC20 _paymentToken
     ) private returns (bool) {
-        if (_paymentToken.balanceOf(address(this)) < _amount) {
+        // A zero amount pays nothing, so the holder is not marked as paid and can still be paid for the snapshot
+        if (_amount == 0 || _paymentToken.balanceOf(address(this)) < _amount) {
             return false;
-        }
-
-        if (_amount == 0) {
-            _setSnapshotHolderPaid(_snapshotID, _holder);
-            return true;
         }
 
         if (_paymentToken.trySafeTransfer(_holder, _amount)) {
@@ -870,6 +913,17 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
     }
 
     /*
+     * @dev Check that the percentage does not exceed 100
+     *
+     * @param percentage The percentage, with _PERCENTAGE_DECIMALS_SIZE decimals
+     */
+    function _checkPercentage(uint256 _percentage) private pure {
+        if (_percentage > 100 * 10 ** _PERCENTAGE_DECIMALS_SIZE) {
+            revert ILifeCycleCashFlow.InvalidPercentage(_percentage);
+        }
+    }
+
+    /*
      * @dev Check that today is the payment date of a distribution or a bond
      *
      * @param initialDate The payment initialDate
@@ -894,19 +948,19 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
     function _filterZeroAddresses(address[] memory holders) private pure returns (address[] memory) {
         uint256 count;
 
-        for (uint256 i = 0; i < holders.length; i++) {
+        for (uint256 i = 0; i < holders.length; ++i) {
             if (holders[i] != address(0)) {
-                count++;
+                ++count;
             }
         }
 
         address[] memory filtered = new address[](count);
 
         uint256 index;
-        for (uint256 i = 0; i < holders.length; i++) {
+        for (uint256 i = 0; i < holders.length; ++i) {
             if (holders[i] != address(0)) {
                 filtered[index] = holders[i];
-                index++;
+                ++index;
             }
         }
 

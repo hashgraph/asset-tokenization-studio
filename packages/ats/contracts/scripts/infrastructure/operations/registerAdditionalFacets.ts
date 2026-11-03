@@ -175,6 +175,7 @@ export async function registerAdditionalFacets(
     info("\n📋 Querying existing facets from BLR...");
 
     const existingFacetsMap = new Map<string, FacetEntry>();
+    const unresolvedFacetKeys: string[] = [];
 
     // Get total count of registered facets
     const facetCountBN = await blr.getBusinessLogicCount();
@@ -206,12 +207,21 @@ export async function registerAdditionalFacets(
             address: facetAddress,
           });
         } catch (err) {
-          debug(`   Failed to resolve facet ${facetKey}: ${err}`);
+          unresolvedFacetKeys.push(facetKey);
+          warn(`   Failed to resolve existing facet ${facetKey}: ${extractRevertReason(err)}`);
         }
       }
     }
 
-    info(`   Successfully queried ${existingFacetsMap.size} existing facets`);
+    if (unresolvedFacetKeys.length > 0) {
+      warn(
+        `   Partial result: queried ${existingFacetsMap.size} existing facets, ` +
+          `${unresolvedFacetKeys.length} could not be resolved and will be treated as absent: ` +
+          unresolvedFacetKeys.join(", "),
+      );
+    } else {
+      info(`   Successfully queried ${existingFacetsMap.size} existing facets`);
+    }
 
     // ========================================
     // STEP 2: Process new facets

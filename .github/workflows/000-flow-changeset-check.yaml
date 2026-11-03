@@ -38,11 +38,15 @@ jobs:
           fetch-depth: 0
           # Ensure we have the head branch for comparison
           ref: ${{ github.head_ref }}
+          # Nothing in this job pushes; the public repo fetches below need no credentials
+          persist-credentials: false
 
       - name: Fetch base branch
+        env:
+          BASE_REF: ${{ github.base_ref }}
         run: |
-          echo "Base branch: ${{ github.base_ref }}"
-          git fetch origin ${{ github.base_ref }}:${{ github.base_ref }}
+          echo "Base branch: ${BASE_REF}"
+          git fetch origin "${BASE_REF}:${BASE_REF}"
           git fetch origin main:main
           git branch -a
 
@@ -55,8 +59,9 @@ jobs:
         id: bypass
         env:
           GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.number }}
         run: |
-          LABELS=$(gh pr view ${{ github.event.number }} --json labels --jq '.labels[].name' || echo "")
+          LABELS=$(gh pr view "${PR_NUMBER}" --json labels --jq '.labels[].name' || echo "")
           if echo "${LABELS}" | grep -E "(no-changeset|docs-only|hotfix|chore)" > /dev/null; then
             echo "bypass=true" >> "${GITHUB_OUTPUT}"
             echo "✅ Found bypass label. Skipping changeset check."
@@ -138,8 +143,10 @@ jobs:
 
       - name: Success summary
         if: ${{ always() }}
+        env:
+          BYPASS: ${{ steps.bypass.outputs.bypass }}
         run: |
-          if [[ "${{ steps.bypass.outputs.bypass }}" == "true" ]]; then
+          if [[ "${BYPASS}" == "true" ]]; then
             echo "✅ Changeset check bypassed due to label"
           else
             echo "✅ Changeset validation completed successfully"

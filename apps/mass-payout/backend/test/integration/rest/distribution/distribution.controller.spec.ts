@@ -19,6 +19,7 @@ import {
 import { PageOptions } from "@domain/model/page";
 import { createMock } from "@golevelup/ts-jest";
 import { DistributionController } from "@infrastructure/rest/distribution/distribution.controller";
+import { MAX_PAGE_LIMIT } from "@infrastructure/rest/page-options.request";
 import { HttpStatus, INestApplication } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { DistributionUtils } from "@test/shared/distribution.utils";
@@ -222,6 +223,15 @@ describe(DistributionController.name, () => {
       expect(response.body.limit).toBe(5);
       expect(getDistributionsUseCaseMock.execute).toHaveBeenCalledWith(pageOptions);
     });
+
+    it("should reject a page size above the maximum", async () => {
+      await request(app.getHttpServer())
+        .get("/distributions")
+        .query({ page: 1, limit: MAX_PAGE_LIMIT + 1 })
+        .expect(HttpStatus.BAD_REQUEST);
+
+      expect(getDistributionsUseCaseMock.execute).not.toHaveBeenCalled();
+    });
   });
 
   describe("GET /distributions/:distributionId", () => {
@@ -314,8 +324,16 @@ describe(DistributionController.name, () => {
       const distributionId = "non-existent-id";
       getDistributionUseCaseMock.execute.mockRejectedValue(new DistributionNotFoundError(distributionId));
 
-      await request(app.getHttpServer()).get(`/distributions/${distributionId}`).expect(HttpStatus.NOT_FOUND);
+      const response = await request(app.getHttpServer())
+        .get(`/distributions/${distributionId}`)
+        .expect(HttpStatus.NOT_FOUND);
 
+      expect(response.body).toEqual({
+        statusCode: HttpStatus.NOT_FOUND,
+        message: "Resource not found",
+        error: DistributionNotFoundError.name,
+      });
+      expect(JSON.stringify(response.body)).not.toContain(distributionId);
       expect(getDistributionUseCaseMock.execute).toHaveBeenCalledWith(distributionId);
     });
 

@@ -18,14 +18,16 @@ defaults:
     shell: bash
 
 permissions:
-  contents: write # For creating commits and tags
-  id-token: write
+  contents: read
 
 jobs:
   ats-release:
     name: Create ATS Release
     runs-on: token-studio-linux-large
     timeout-minutes: 15
+    permissions:
+      contents: write # For creating commits and tags
+      id-token: write
 
     steps:
       - name: Harden Runner
@@ -39,11 +41,17 @@ jobs:
           # Use GitHub App token to bypass branch protection
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
+          # Kept on purpose: the "Create ... release" step pushes the release tag
+          # with `git push origin`, which relies on these persisted credentials.
+          persist-credentials: true
 
       - name: Setup NodeJS Environment
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version-file: .nvmrc
+          # Release job: never restore a package cache (cache poisoning). v4 has
+          # no automatic cache; this keeps it off if setup-node is bumped to v5+.
+          package-manager-cache: false
 
       - name: Install dependencies
         run: npm ci
@@ -77,8 +85,9 @@ jobs:
 
       - name: Preview ATS release
         if: ${{ inputs.release-type == 'preview' }}
+        env:
+          ATS_VERSION: ${{ steps.validate.outputs.ats-version }}
         run: |
-          ATS_VERSION="${{ steps.validate.outputs.ats-version }}"
           TAG_NAME="v${ATS_VERSION}-ats"
 
           echo "🔍 PREVIEW MODE - What would be released for ATS packages:"
@@ -100,8 +109,8 @@ jobs:
         if: ${{ inputs.release-type == 'release' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ATS_VERSION: ${{ steps.validate.outputs.ats-version }}
         run: |
-          ATS_VERSION="${{ steps.validate.outputs.ats-version }}"
           TAG_NAME="v${ATS_VERSION}-ats"
           echo "📦 Creating ATS release tag: ${TAG_NAME}"
           git tag "${TAG_NAME}"
@@ -121,8 +130,13 @@ jobs:
 
       - name: Release Summary
         if: ${{ always() }}
+        env:
+          RELEASE_TYPE: ${{ inputs.release-type }}
+          JOB_STATUS: ${{ job.status }}
+          ATS_VERSION: ${{ steps.validate.outputs.ats-version }}
+          TAG_NAME: ${{ steps.create-release-tag.outputs.tag-name }}
         run: |
-          if [[ "${{ inputs.release-type }}" == "preview" ]]; then
+          if [[ "${RELEASE_TYPE}" == "preview" ]]; then
             echo "## 🔍 ATS Release Preview Completed" >> "${GITHUB_STEP_SUMMARY}"
             echo "Preview mode was selected. No actual release was created." >> "${GITHUB_STEP_SUMMARY}"
             echo "" >> "${GITHUB_STEP_SUMMARY}"
@@ -131,9 +145,7 @@ jobs:
             echo "2. Review and commit changes with GPG signature: \`git commit -S -m 'chore: release ATS packages'\`" >> "${GITHUB_STEP_SUMMARY}"
             echo "3. Push to remote: \`git push\`" >> "${GITHUB_STEP_SUMMARY}"
             echo "4. Run this workflow again with 'release' option" >> "${GITHUB_STEP_SUMMARY}"
-          elif [[ "${{ job.status }}" == "success" ]]; then
-            ATS_VERSION="${{ steps.validate.outputs.ats-version }}"
-            TAG_NAME="${{ steps.create-release-tag.outputs.tag-name }}"
+          elif [[ "${JOB_STATUS}" == "success" ]]; then
             echo "## ✅ ATS Release ${TAG_NAME} Completed Successfully" >> "${GITHUB_STEP_SUMMARY}"
             echo "| Component | Status |" >> "${GITHUB_STEP_SUMMARY}"
             echo "| --- | --- |" >> "${GITHUB_STEP_SUMMARY}"

@@ -292,6 +292,17 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
       expect(version).to.equal(BLR_VERSIONS.INITIAL);
     });
 
+    it("should initialize BLR in the proxy deployment so the initializer cannot be front-run", async () => {
+      const result = await deployBlr(deployer, {});
+
+      const accessControl = AccessControlFacet__factory.connect(result.blrAddress, deployer);
+      expect(await accessControl.hasRole(ethers.ZeroHash, await deployer.getAddress())).to.be.true;
+
+      const blr = BusinessLogicResolver__factory.connect(result.blrAddress, user);
+      await expect(blr.initializeBusinessLogicResolver()).to.be.revertedWithCustomError(blr, "AlreadyInitialized");
+      expect(await accessControl.hasRole(ethers.ZeroHash, await user.getAddress())).to.be.false;
+    });
+
     it("should deploy ProxyAdmin", async () => {
       const proxyAdmin = await deployProxyAdmin(deployer);
 

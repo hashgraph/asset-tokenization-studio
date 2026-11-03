@@ -43,8 +43,8 @@ export class BlockchainEventListenerConfig {
   id: string;
 
   @ApiProperty({
-    description: "The Hedera mirror node url",
-    example: "https://testnet.mirrornode.hedera.com/api/v1/",
+    description: "The Hedera mirror node base url (without /api/v1)",
+    example: "https://testnet.mirrornode.hedera.com",
   })
   mirrorNodeUrl: string;
 
@@ -61,8 +61,8 @@ export class BlockchainEventListenerConfig {
   tokenDecimals: number;
 
   @ApiProperty({
-    description: "The blockchain listener start date",
-    example: "2025-01-15 13:45:30",
+    description: "The consensus timestamp (seconds since epoch) the listener reads events after",
+    example: "1727191500.000",
   })
   startTimestamp: string;
 }

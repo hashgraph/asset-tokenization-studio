@@ -3,6 +3,7 @@
 import { InvalidDataError } from "@domain/errors/shared/invalid-data.error";
 import { ConflictError } from "@domain/errors/shared/conflict-error";
 import { DomainError } from "@domain/errors/shared/domain.error";
+import { TooManyRequestsError } from "@domain/errors/shared/too-many-requests.error";
 
 export class AssetNameMissingError extends InvalidDataError {
   constructor() {
@@ -55,5 +56,11 @@ export class AssetNotFoundError extends DomainError {
 export class AssetPausedError extends ConflictError {
   constructor(assetName: string, hederaTokenAddress: string) {
     super(`Asset '${assetName}' (${hederaTokenAddress}) is currently paused and cannot be used for distributions`);
+  }
+}
+
+export class AssetInformationLookupLimitError extends TooManyRequestsError {
+  constructor(maxConcurrentLookups: number) {
+    super(`Too many asset information lookups in progress (limit ${maxConcurrentLookups})`);
   }
 }

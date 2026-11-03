@@ -11,6 +11,9 @@ import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// Origins allowed to make cross-origin requests to the local dev/preview server.
+const LOCAL_DEV_ORIGIN = /^https?:\/\/(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/;
+
 export default {
   plugins: [
     react(),
@@ -93,5 +96,18 @@ export default {
   server: {
     port: 5174,
     sourcemap: true, // Source maps are enabled for debugging in browser
+    // Bind to loopback only (pass `--host` explicitly when LAN access is really needed).
+    host: "localhost",
+    // Only pages served from this machine may read dev-server responses cross-origin;
+    // Vite 4.5.5 otherwise answers any origin, so another site open in the browser could read the source.
+    cors: {
+      origin: LOCAL_DEV_ORIGIN,
+    },
+  },
+  preview: {
+    host: "localhost",
+    cors: {
+      origin: LOCAL_DEV_ORIGIN,
+    },
   },
 };

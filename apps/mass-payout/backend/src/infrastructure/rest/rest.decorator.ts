@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { applyDecorators, Controller, UseFilters, UsePipes, ValidationPipe } from "@nestjs/common";
+import { applyDecorators, Controller, UseFilters, UseInterceptors, UsePipes, ValidationPipe } from "@nestjs/common";
+import { AuditLogInterceptor } from "@infrastructure/rest/audit-log.interceptor";
 import { RestExceptionFilter } from "@infrastructure/rest/rest-exception.filter";
 
 export function RestController(prefix?: string) {
@@ -14,5 +15,6 @@ export function RestController(prefix?: string) {
       }),
     ),
     UseFilters(new RestExceptionFilter()),
+    UseInterceptors(new AuditLogInterceptor()),
   );
 }
