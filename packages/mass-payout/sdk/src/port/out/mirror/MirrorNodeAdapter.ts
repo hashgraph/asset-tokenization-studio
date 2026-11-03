@@ -17,6 +17,7 @@ import EvmAddress from "@domain/contract/EvmAddress";
 import { MirrorNode } from "@domain/network/MirrorNode";
 import Account from "@domain/account/Account";
 import { Time } from "@core/Time";
+import { redactUrl } from "@core/LogRedaction";
 import { TransactionNotFound } from "./error/TransactionNotFound";
 import { TransactionResultNotFound } from "./error/TransactionResultNotFound";
 import { ErrorRetrievingEvmAddress } from "./error/ErrorRetrievingEvmAddress";
@@ -43,6 +44,15 @@ export class MirrorNodeAdapter {
       this.instance.defaults.headers.common[this.mirrorNodeConfig.headerName] = this.mirrorNodeConfig.apiKey;
   }
 
+  /**
+   * Returns the request path relative to the configured mirror node base URL,
+   * so logs do not expose the (possibly internal) mirror node endpoint.
+   */
+  private pathForLog(url: string): string {
+    const baseUrl = this.mirrorNodeConfig?.baseUrl;
+    return baseUrl && url.startsWith(baseUrl) ? url.slice(baseUrl.length) : redactUrl(url);
+  }
+
   public async getHederaIdfromContractAddress(contractAddress: string): Promise<string> {
     if (!contractAddress) return "";
     if (contractAddress.length >= 40) return (await this.getContractInfo(contractAddress)).id;
@@ -51,7 +61,7 @@ export class MirrorNodeAdapter {
 
   public async getAccountInfo(accountId: HederaId | string): Promise<Account> {
     try {
-      this.logger.log("Getting account info -> ", this.mirrorNodeConfig.baseUrl + "accounts/" + accountId);
+      this.logger.log("Getting account info -> ", "accounts/" + accountId);
       const res = await this.instance.get<IAccount>(this.mirrorNodeConfig.baseUrl + "accounts/" + accountId.toString());
 
       const account: Account = {
@@ -155,7 +165,7 @@ export class MirrorNodeAdapter {
   public async getContractInfo(contractEvmAddress: string): Promise<ContractViewModel> {
     try {
       const url = `${this.mirrorNodeConfig.baseUrl}contracts/${contractEvmAddress}`;
-      this.logger.log("Getting contract info -> ", url);
+      this.logger.log("Getting contract info -> ", this.pathForLog(url));
 
       const retry = 10;
       let i = 0;
@@ -183,7 +193,7 @@ export class MirrorNodeAdapter {
   public async getTransactionResult(transactionId: string): Promise<TransactionResultViewModel> {
     try {
       const url = this.mirrorNodeConfig.baseUrl + "contracts/results/" + transactionId;
-      this.logger.log(url);
+      this.logger.log(this.pathForLog(url));
       const res = await this.instance.get<ITransactionResult>(url);
       if (!res.data.call_result) throw new TransactionResultNotFound();
 
@@ -204,7 +214,7 @@ export class MirrorNodeAdapter {
         transactionId = transactionId.replace("@", "-").replace(/.([^.]*)$/, "-$1");
 
       const url = this.mirrorNodeConfig.baseUrl + "transactions/" + transactionId;
-      this.logger.log(url);
+      this.logger.log(this.pathForLog(url));
 
       await new Promise((resolve) => setTimeout(resolve, 5000));
       const res = await this.instance.get<ITransactionList>(url);

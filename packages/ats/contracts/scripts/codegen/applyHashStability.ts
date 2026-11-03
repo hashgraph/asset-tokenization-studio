@@ -110,20 +110,31 @@ function parse(file: string, content: string): Entry[] {
   return out;
 }
 
-function collectAtRef(ref: string): Entry[] {
+interface UnreadableFile {
+  file: string;
+  reason: string;
+}
+
+function collectAtRef(ref: string): { entries: Entry[]; unreadable: UnreadableFile[] } {
   const files = listFilesAtRef(ref);
   const all: Entry[] = [];
+  const unreadable: UnreadableFile[] = [];
   for (const f of files) {
     let content: string;
     try {
       content = readFileAtRef(ref, f);
-    } catch {
-      // File may have been added later. Skip silently.
+    } catch (err) {
+      // The file list comes from the same ref, so a read failure is unexpected
+      // (git error, corruption, encoding). Record it so the result is reported
+      // as partial instead of silently passing on incomplete data.
+      const reason = (err instanceof Error ? err.message : String(err)).split("\n")[0];
+      console.warn(`::warning::hash stability: could not read ${f} at ${ref}: ${reason}`);
+      unreadable.push({ file: f, reason });
       continue;
     }
     all.push(...parse(f, content));
   }
-  return all;
+  return { entries: all, unreadable };
 }
 
 function collectOnDisk(): Entry[] {
@@ -205,12 +216,25 @@ function main(): void {
     process.exit(2);
   }
 
-  const baseEntries = collectAtRef(base);
+  const { entries: baseEntries, unreadable } = collectAtRef(base);
   const headEntries = collectOnDisk();
   const diffs = diffEntries(baseEntries, headEntries);
 
+  if (unreadable.length > 0) {
+    const annotation = strict ? "::error::" : "::warning::";
+    console.log(
+      `${annotation}hash stability: partial result, ${unreadable.length} file(s) at ${base} could not be read ` +
+        `and were not compared: ${unreadable.map((u) => u.file).join(", ")}`,
+    );
+  }
+
   if (diffs.length === 0) {
-    console.log(`✅ hash stability: no pre-existing hash changed vs ${base}`);
+    if (unreadable.length === 0) {
+      console.log(`✅ hash stability: no pre-existing hash changed vs ${base}`);
+      return;
+    }
+    console.log(`⚠️  hash stability: no pre-existing hash changed vs ${base} in the files that could be read`);
+    if (strict) process.exit(1);
     return;
   }
 

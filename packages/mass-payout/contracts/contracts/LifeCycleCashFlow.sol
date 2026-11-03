@@ -11,6 +11,11 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 import { _PAYOUT_ROLE, _CASHOUT_ROLE, _TRANSFERER_ROLE, _PAYMENT_TOKEN_MANAGER_ROLE } from "./constants/roles.sol";
 
 contract LifeCycleCashFlow is Initializable, LifeCycleCashFlowStorageWrapper {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     function initialize(
         address _asset,
         address _paymentToken,
@@ -217,6 +222,7 @@ contract LifeCycleCashFlow is Initializable, LifeCycleCashFlowStorageWrapper {
         onlyUnpaused
         onlyRole(_PAYOUT_ROLE)
         isAsset(_asset)
+        onlyValidPercentage(_percentage)
         returns (address[] memory failed_, address[] memory succeeded_, uint256[] memory paidAmount_, bool executed_)
     {
         (failed_, succeeded_, paidAmount_, executed_) = _executePercentageSnapshot(
@@ -267,6 +273,7 @@ contract LifeCycleCashFlow is Initializable, LifeCycleCashFlowStorageWrapper {
             _snapshotID,
             _holders,
             _amount,
+            0,
             _getSnapshotAmountByAmount
         );
 
@@ -295,14 +302,14 @@ contract LifeCycleCashFlow is Initializable, LifeCycleCashFlowStorageWrapper {
         onlyUnpaused
         onlyRole(_PAYOUT_ROLE)
         isAsset(_asset)
+        onlyValidPercentage(_percentage)
         returns (address[] memory failed_, address[] memory succeeded_, uint256[] memory paidAmount_)
     {
-        (failed_, succeeded_, paidAmount_) = _executeSnapshotByAddresses(
+        (failed_, succeeded_, paidAmount_) = _executePercentageSnapshotByAddresses(
             _asset,
             _snapshotID,
             _holders,
-            _percentage,
-            _getSnapshotAmountByPercentage
+            _percentage
         );
 
         emit PercentageSnapshotByAddressesExecuted(

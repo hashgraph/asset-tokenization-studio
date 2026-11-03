@@ -89,21 +89,24 @@ export class HederaServiceImpl implements HederaService {
   private async fetchData<T>(path: string): Promise<T> {
     const url = `${this.mirrorNodeUrl}/api/v1/${path}`;
 
+    // Log the API path only, never the configured base URL: it can identify private infrastructure.
+    const logTarget = `Mirror Node /api/v1/${path.split("?")[0]}`;
+
     for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
       try {
-        this.logger.debug(`Fetching data from: ${url} (attempt ${attempt})`);
+        this.logger.debug(`Fetching data from: ${logTarget} (attempt ${attempt})`);
 
         const { data } = await axios.get(url);
 
-        this.logger.debug(`Successfully fetched data for ${url}`);
+        this.logger.debug(`Successfully fetched data for ${logTarget}`);
         return data;
       } catch (error) {
         const isLastAttempt = attempt === this.maxRetries;
 
         if (error.name === "AbortError") {
-          this.logger.warn(`Request timeout for ${url} (attempt ${attempt})`);
+          this.logger.warn(`Request timeout for ${logTarget} (attempt ${attempt})`);
         } else {
-          this.logger.warn(`Request failed for ${url} (attempt ${attempt}): ${error.message}`);
+          this.logger.warn(`Request failed for ${logTarget} (attempt ${attempt}): ${error.message}`);
         }
 
         if (isLastAttempt) {

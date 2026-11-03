@@ -8,6 +8,7 @@ import { BlockchainEventListenerConfig } from "@domain/model/blockchain-listener
 import { Body, Get, Patch, Post } from "@nestjs/common";
 import { ApiOperation, ApiResponse, ApiTags, ApiExtraModels, ApiBody } from "@nestjs/swagger";
 import { RestController } from "../rest.decorator";
+import { UpsertBlockchainEventListenerConfigRequest } from "./upsert-blockchain-event-listener-config.request";
 
 @ApiTags("Blockchain Event Listener")
 @RestController("blockchain")
@@ -36,12 +37,14 @@ export class BlockchainController {
   @ApiResponse({ status: 401, description: "Unauthorized" })
   @ApiResponse({ status: 404, description: "Not Found" })
   @ApiExtraModels(BlockchainEventListenerConfig)
-  @ApiBody({ type: BlockchainEventListenerConfig, required: false })
+  @ApiBody({ type: UpsertBlockchainEventListenerConfigRequest, required: false })
   @ApiResponse({ status: 201, type: BlockchainEventListenerConfig })
   @Post("/config")
-  async upsertConfig(@Body() body: Partial<BlockchainEventListenerConfig>): Promise<BlockchainEventListenerConfig> {
+  async upsertConfig(
+    @Body() request: UpsertBlockchainEventListenerConfigRequest,
+  ): Promise<BlockchainEventListenerConfig> {
     const config = await this.getBlockchainEventListenerConfigUseCase.execute();
-    return await this.upsertBlockchainEventListenerConfigUseCase.execute({ ...config, ...body });
+    return await this.upsertBlockchainEventListenerConfigUseCase.execute(request.applyTo(config));
   }
 
   @ApiOperation({ summary: "Start the payment token transfers events polling process." })

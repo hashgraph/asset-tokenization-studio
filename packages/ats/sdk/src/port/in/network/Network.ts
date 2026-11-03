@@ -34,6 +34,7 @@ import { FireblocksTransactionAdapter } from "@port/out/hs/custodial/FireblocksT
 import FireblocksSettings from "@core/settings/custodialWalletSettings/FireblocksSettings";
 import { AWSKMSTransactionAdapter } from "@port/out/hs/custodial/AWSKMSTransactionAdapter";
 import LogService from "@service/log/LogService";
+import { redactForLog } from "@service/log/LogRedaction";
 
 export { InitializationData, NetworkData, SupportedWallets };
 
@@ -159,17 +160,25 @@ class NetworkInPort implements INetworkInPort {
 
   @LogError
   async connect(req: ConnectRequest): Promise<InitializationData> {
-    LogService.logInfo("ConnectRequest from network", req);
+    // Never log the raw request: it can carry custodial credentials and private keys
+    LogService.logInfo("ConnectRequest from network", redactForLog(req));
     ValidatedRequest.handleValidation("ConnectRequest", req);
 
     const account = req.account ? RequestMapper.mapAccount(req.account) : undefined;
     const debug = req.debug ?? false;
     const hwcSettings = req.hwcSettings ? RequestMapper.hwcRequestToHWCSettings(req.hwcSettings) : undefined;
     const custodialSettings = this.getCustodialSettings(req);
-    LogService.logTrace("SetNetworkCommand", req.network, req.mirrorNode, req.rpcNode);
+    LogService.logTrace("SetNetworkCommand", req.network, redactForLog(req.mirrorNode), redactForLog(req.rpcNode));
     await this.commandBus.execute(new SetNetworkCommand(req.network, req.mirrorNode, req.rpcNode));
 
-    LogService.logTrace("ConnectRequest", req.wallet, account, hwcSettings, debug, custodialSettings);
+    LogService.logTrace(
+      "ConnectRequest",
+      req.wallet,
+      redactForLog(account),
+      hwcSettings,
+      debug,
+      redactForLog(custodialSettings),
+    );
     const res = await this.commandBus.execute(
       new ConnectCommand(req.network, req.wallet, account, hwcSettings, debug, custodialSettings),
     );

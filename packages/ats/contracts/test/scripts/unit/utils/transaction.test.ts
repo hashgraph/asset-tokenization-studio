@@ -11,6 +11,10 @@
 
 import { expect } from "chai";
 import { extractRevertReason, isNonceTooLowError, isGasError, isNetworkError } from "@scripts/infrastructure";
+import {
+  getHardhatNetworkName,
+  isExpectedHardhatLoadError,
+} from "../../../../scripts/infrastructure/utils/transaction";
 
 describe("Transaction Utilities", () => {
   // ============================================================================
@@ -233,6 +237,42 @@ describe("Transaction Utilities", () => {
     it("should handle error with reason property", () => {
       const error = { reason: "network timeout" };
       expect(isNetworkError(error)).to.be.true;
+    });
+  });
+  // ============================================================================
+  // Hardhat context detection Tests
+  // ============================================================================
+
+  describe("isExpectedHardhatLoadError", () => {
+    it("should treat a missing hardhat package as expected", () => {
+      const error = Object.assign(new Error("Cannot find module 'hardhat'\nRequire stack:\n- x.ts"), {
+        code: "MODULE_NOT_FOUND",
+      });
+      expect(isExpectedHardhatLoadError(error)).to.be.true;
+    });
+
+    it("should treat running outside a Hardhat project (HH1) as expected", () => {
+      expect(isExpectedHardhatLoadError(new Error("HH1: You are not inside a Hardhat project."))).to.be.true;
+    });
+
+    it("should treat a missing hardhat dependency as unexpected", () => {
+      const error = Object.assign(new Error("Cannot find module '@nomicfoundation/edr'"), {
+        code: "MODULE_NOT_FOUND",
+      });
+      expect(isExpectedHardhatLoadError(error)).to.be.false;
+    });
+
+    it("should treat config and other errors as unexpected", () => {
+      expect(isExpectedHardhatLoadError(new Error("HH8: There's one or more errors in your config file"))).to.be.false;
+      expect(isExpectedHardhatLoadError("boom")).to.be.false;
+      expect(isExpectedHardhatLoadError(undefined)).to.be.false;
+    });
+  });
+
+  describe("getHardhatNetworkName", () => {
+    it("should return the Hardhat network name when running inside Hardhat", () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      expect(getHardhatNetworkName()).to.equal(require("hardhat").network.name);
     });
   });
 });

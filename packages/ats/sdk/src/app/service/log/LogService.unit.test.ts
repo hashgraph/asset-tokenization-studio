@@ -82,4 +82,26 @@ describe("LogService", () => {
       other: ["extra"],
     });
   });
+  it("should mask secrets in object parameters when formatting", () => {
+    const info = LogService.defaultFormat.transform({
+      level: LogLevel.INFO,
+      message: "ConnectRequest",
+      timestamp: "now",
+      other: [{ apiKey: "API_KEY_SECRET", account: { accountId: "0.0.1", privateKey: "PK_SECRET" } }],
+    }) as Record<string | symbol, unknown>;
+
+    const output = info[Symbol.for("message")] as string;
+    expect(output).toContain("ConnectRequest");
+    expect(output).toContain("0.0.1");
+    expect(output).not.toContain("API_KEY_SECRET");
+    expect(output).not.toContain("PK_SECRET");
+  });
+  it("should mask secrets in object parameters before they reach the logger", () => {
+    LogService.logInfo("ConnectRequest", { wallet: "DFNS", custodialWalletSettings: { apiSecretKey: "SECRET" } });
+
+    expect(mockLogger.log).toHaveBeenCalledWith(LogLevel.INFO, "ConnectRequest", {
+      timestamp: expect.any(String),
+      other: [{ wallet: "DFNS", custodialWalletSettings: { apiSecretKey: "[REDACTED]" } }],
+    });
+  });
 });

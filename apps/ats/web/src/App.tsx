@@ -22,10 +22,11 @@ function App() {
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const showErrorToast = (error: any) => {
-    const description = error?.message || t("error");
+    // Raw SDK/wallet/RPC errors can reveal internal details: log them, show a generic message
+    console.error("Operation failed: ", error);
     toast.show({
       title: "Error",
-      description,
+      description: t("error"),
       status: "error",
     });
   };

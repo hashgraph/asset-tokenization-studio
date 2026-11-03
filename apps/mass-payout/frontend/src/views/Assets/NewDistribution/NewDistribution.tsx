@@ -76,12 +76,6 @@ export const NewDistribution = () => {
         console.error("Error creating manual payout:", error);
       }
     } else {
-      console.log("Making distribution with data:", {
-        assetId: assetData?.id,
-        assetName: assetData?.name,
-        assetType: assetData?.type,
-        ...data,
-      });
       onOpen();
     }
   };

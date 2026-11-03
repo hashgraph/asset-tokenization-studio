@@ -514,10 +514,11 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
       );
 
       LogService.logInfo("[HWC v2] Transaction signed successfully");
-      LogService.logTrace(`Signature result: ${JSON.stringify(signResult)}`);
 
       const resultAny = signResult as any;
       const base64SigMap = resultAny?.signatureMap;
+      // Never log signature material: only whether a signature map came back
+      LogService.logTrace(`[HWC v2] Sign result received (signatureMap present: ${typeof base64SigMap === "string"})`);
 
       if (!base64SigMap || typeof base64SigMap !== "string") {
         throw new SignatureNotFound("No signatureMap returned from WalletConnect sign");
@@ -539,7 +540,7 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
       const hexSignature = Hex.fromUint8Array(
         signature instanceof Uint8Array ? signature : new Uint8Array(signature),
       );
-      LogService.logTrace(`Final hex signature: ${hexSignature}`);
+      LogService.logTrace(`[HWC v2] Signature extracted (${signature.length} bytes)`);
       return hexSignature;
     } catch (error) {
       throw new SigningError(JSON.stringify(error, null, 2));

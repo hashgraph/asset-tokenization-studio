@@ -65,6 +65,14 @@ describe("RPCQueryAdapter", () => {
       await service.init("http://custom.url/", "apikey123");
       expect(JsonRpcProvider).toHaveBeenCalledWith("http://custom.url/apikey123");
     });
+
+    it("should not log the API key", async () => {
+      const logSpy = jest.spyOn((service as any).logger, "log").mockImplementation(() => undefined);
+      await service.init("https://custom.url/v1/", "apikey123");
+      const logged = JSON.stringify(logSpy.mock.calls);
+      expect(logged).not.toContain("apikey123");
+      expect(logged).toContain("https://custom.url");
+    });
   });
 
   describe("connect", () => {

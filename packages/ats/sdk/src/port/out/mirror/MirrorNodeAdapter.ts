@@ -10,6 +10,7 @@ import TransactionResultViewModel from "@port/in/response/TransactionResultViewM
 import ContractViewModel from "@port/in/response/ContractViewModel";
 import { BYTES_32_LENGTH } from "@core/Constants";
 import LogService from "@service/log/LogService";
+import { redactUrl } from "@service/log/LogRedaction";
 import BigDecimal from "@domain/context/shared/BigDecimal";
 import PublicKey from "@domain/context/account/PublicKey";
 import { HederaId } from "@domain/context/shared/HederaId";
@@ -43,6 +44,15 @@ export class MirrorNodeAdapter {
       this.instance.defaults.headers.common[this.mirrorNodeConfig.headerName] = this.mirrorNodeConfig.apiKey;
   }
 
+  /**
+   * Returns the request path relative to the configured mirror node base URL,
+   * so logs do not expose the (possibly internal) mirror node endpoint.
+   */
+  private pathForLog(url: string): string {
+    const baseUrl = this.mirrorNodeConfig?.baseUrl;
+    return baseUrl && url.startsWith(baseUrl) ? url.slice(baseUrl.length) : redactUrl(url);
+  }
+
   public async getHederaIdfromContractAddress(contractAddress: string): Promise<string> {
     if (!contractAddress) return "";
     if (contractAddress.length >= 40) return (await this.getContractInfo(contractAddress)).id;
@@ -51,7 +61,7 @@ export class MirrorNodeAdapter {
 
   public async getAccountInfo(accountId: HederaId | string): Promise<Account> {
     try {
-      LogService.logTrace("Getting account info -> ", this.mirrorNodeConfig.baseUrl + "accounts/" + accountId);
+      LogService.logTrace("Getting account info -> ", "accounts/" + accountId);
       const res = await this.instance.get<IAccount>(this.mirrorNodeConfig.baseUrl + "accounts/" + accountId.toString());
 
       const account: Account = {
@@ -155,7 +165,7 @@ export class MirrorNodeAdapter {
   public async getContractInfo(contractId: string): Promise<ContractViewModel> {
     try {
       const url = `${this.mirrorNodeConfig.baseUrl}contracts/${contractId}`;
-      LogService.logTrace("Getting contract info -> ", url);
+      LogService.logTrace("Getting contract info -> ", this.pathForLog(url));
 
       const retry = 10;
       let i = 0;
@@ -183,7 +193,7 @@ export class MirrorNodeAdapter {
   public async getTransactionResult(transactionId: string): Promise<TransactionResultViewModel> {
     try {
       const url = this.mirrorNodeConfig.baseUrl + "contracts/results/" + transactionId;
-      LogService.logTrace(url);
+      LogService.logTrace(this.pathForLog(url));
       const res = await this.instance.get<ITransactionResult>(url);
       if (!res.data.call_result) throw new TransactionResultNotFound();
 
@@ -204,7 +214,7 @@ export class MirrorNodeAdapter {
         transactionId = transactionId.replace("@", "-").replace(/.([^.]*)$/, "-$1");
 
       const url = this.mirrorNodeConfig.baseUrl + "transactions/" + transactionId;
-      LogService.logTrace(url);
+      LogService.logTrace(this.pathForLog(url));
 
       await new Promise((resolve) => setTimeout(resolve, 5000));
       const res = await this.instance.get<ITransactionList>(url);
@@ -233,7 +243,7 @@ export class MirrorNodeAdapter {
       transactionId = transactionId.replace("@", "-").replace(/.([^.]*)$/, "-$1");
     }
     const url = this.mirrorNodeConfig.baseUrl + "transactions/" + transactionId;
-    LogService.logTrace(`[MirrorNode] Querying FileCreate transaction: ${url}`);
+    LogService.logTrace(`[MirrorNode] Querying FileCreate transaction: ${this.pathForLog(url)}`);
 
     let remainingTimeout = timeout;
     while (remainingTimeout > 0) {
@@ -296,7 +306,7 @@ export class MirrorNodeAdapter {
   public async getHBARBalance(accountId: HederaId | string): Promise<BigDecimal> {
     try {
       const url = `${this.mirrorNodeConfig.baseUrl}balances?account.id=${accountId.toString()}`;
-      LogService.logTrace(url);
+      LogService.logTrace(this.pathForLog(url));
       const res = await this.instance.get<IBalances>(url);
       if (!res.data.balances) throw new BalanceNotFound();
 

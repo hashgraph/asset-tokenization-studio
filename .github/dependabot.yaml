@@ -5,12 +5,18 @@ updates:
     schedule:
       interval: "daily"
     open-pull-requests-limit: 10
+    # Wait before proposing a freshly published release, as a buffer against
+    # broken or compromised versions being pulled in the moment they ship.
+    cooldown:
+      default-days: 7
   - package-ecosystem: npm
     directory: "/"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
     versioning-strategy: increase
+    cooldown:
+      default-days: 7
     ignore:
       # For all packages, ignore all minor & patch updates
       - dependency-name: "*"

@@ -348,6 +348,7 @@ NODE_ENV=production
 
 ### Security Considerations
 
+- The backend has no built-in authentication: run it on a private network behind your own API gateway / identity layer and never expose it publicly. See [Backend > Security and Deployment](../developer-guides/backend/index.md#security-and-deployment)
 - Store private keys securely (use secrets manager)
 - Enable HTTPS for both frontend and backend
 - Restrict CORS origins to your domain only

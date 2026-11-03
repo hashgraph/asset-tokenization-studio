@@ -39,16 +39,51 @@ export function gasLimitOverride(limit: number): { gasLimit: number } {
  * Hedera without inflating fake ETH costs in Hardhat tests.
  */
 export function hederaGasOverrides(): { gasPrice: bigint } | Record<string, never> {
+  // Not running inside Hardhat (e.g. standalone tsx script) — use Hedera price
+  if (isInstantMiningNetwork(getHardhatNetworkName() ?? "unknown")) {
+    return {};
+  }
+  return { gasPrice: GAS_LIMIT.gasPrice };
+}
+
+/**
+ * Whether an error thrown while loading Hardhat just means "not running inside Hardhat":
+ * the `hardhat` package itself is not installed, or the script is run outside a Hardhat
+ * project (HH1). Anything else (a broken install, a config error) is unexpected.
+ *
+ * @param err - Error thrown by `require("hardhat")`
+ */
+export function isExpectedHardhatLoadError(err: unknown): boolean {
+  if (typeof err !== "object" || err === null) return false;
+  const { code, message } = err as { code?: unknown; message?: unknown };
+  const text = typeof message === "string" ? message : "";
+  if (code === "MODULE_NOT_FOUND" || code === "ERR_MODULE_NOT_FOUND") {
+    // Only the hardhat package itself missing is expected, not one of its dependencies
+    return /['"]hardhat['"]/.test(text);
+  }
+  return /^HH1:/.test(text);
+}
+
+/**
+ * Returns the current Hardhat network name, or `undefined` when not running inside Hardhat.
+ *
+ * The expected "not in Hardhat" case is logged at debug level; any other failure to load
+ * Hardhat is logged at warn level with the error, so it is not silently mistaken for a
+ * standalone run.
+ */
+export function getHardhatNetworkName(): string | undefined {
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const hre = require("hardhat");
-    if (isInstantMiningNetwork(hre?.network?.name ?? "unknown")) {
-      return {};
+    return hre?.network?.name || undefined;
+  } catch (err) {
+    if (isExpectedHardhatLoadError(err)) {
+      debug(`Not running inside Hardhat: ${extractRevertReason(err)}`);
+    } else {
+      warn(`Could not load Hardhat context, continuing as a non-Hardhat run: ${extractRevertReason(err)}`);
     }
-  } catch {
-    // Not running inside Hardhat (e.g. standalone tsx script) — use Hedera price
+    return undefined;
   }
-  return { gasPrice: GAS_LIMIT.gasPrice };
 }
 
 /**

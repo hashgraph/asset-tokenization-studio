@@ -28,21 +28,15 @@ jobs:
     env:
       CONTRACT_SIZER_RUN_ON_COMPILE: "false"
       REPORT_GAS: "false"
-      CLIENT_PRIVATE_KEY_ECDSA_1: ${{ secrets.CLIENT_PRIVATE_KEY_ECDSA_1 }}
-      CLIENT_PUBLIC_KEY_ECDSA_1: ${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_1 }}
       CLIENT_ACCOUNT_ID_ECDSA_1: "0.0.1328"
       CLIENT_EVM_ADDRESS_ECDSA_1_CORRECT: "0x97C50bb12E1C6284cF2855cdba95c5D60AEE44CF"
       CLIENT_EVM_ADDRESS_ECDSA_1: "0x0000000000000000000000000000000000000530"
-      CLIENT_PRIVATE_KEY_ECDSA_2: ${{ secrets.CLIENT_PRIVATE_KEY_ECDSA_2 }}
-      CLIENT_PUBLIC_KEY_ECDSA_2: ${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_2 }}
       CLIENT_ACCOUNT_ID_ECDSA_2: "0.0.2168740"
       CLIENT_EVM_ADDRESS_ECDSA_2: "0x00000000000000000000000000000000002117A4"
       FACTORY_ADDRESS: "0.0.5480051"
       RESOLVER_ADDRESS: "0.0.5479997"
       FIREBLOCKS_HEDERA_ACCOUNT_ID: "0.0.2168740"
-      FIREBLOCKS_HEDERA_PUBLIC_KEY: ${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_2 }}
       DFNS_HEDERA_ACCOUNT_ID: "0.0.2168740"
-      DFNS_WALLET_PUBLIC_KEY: ${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_2 }}
       AWS_KMS_HEDERA_ACCOUNT_ID: "0.0.4394946"
       AWS_KMS_HEDERA_PUBLIC_KEY: "302d300706052b8104000a03220003ee815bb9b5e53f5dbe7264a77e586127dfcb75da8c1246f5aa6ededdb13e6c21"
       REACT_APP_MIRROR_NODE: "https://testnet.mirrornode.hedera.com/api/v1/"
@@ -50,7 +44,6 @@ jobs:
       REACT_APP_RESOLVER: "0.0.5479997"
       REACT_APP_FACTORY: "0.0.5480051"
       REACT_APP_SHOW_DISCLAIMER: "true"
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
     steps:
       - name: Harden Runner
@@ -60,6 +53,8 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
 
       - name: Setup NodeJS Environment
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
@@ -77,4 +72,13 @@ jobs:
         run: npm run mass-payout:build:ci
 
       - name: Test mass-payout
+        # Secrets are only handed to the test step, and never on pull_request
+        # runs (PR code runs here, and fork PRs never get secrets anyway).
+        env:
+          CLIENT_PRIVATE_KEY_ECDSA_1: ${{ github.event_name != 'pull_request' && secrets.CLIENT_PRIVATE_KEY_ECDSA_1 || '' }}
+          CLIENT_PUBLIC_KEY_ECDSA_1: ${{ github.event_name != 'pull_request' && secrets.CLIENT_PUBLIC_KEY_ECDSA_1 || '' }}
+          CLIENT_PRIVATE_KEY_ECDSA_2: ${{ github.event_name != 'pull_request' && secrets.CLIENT_PRIVATE_KEY_ECDSA_2 || '' }}
+          CLIENT_PUBLIC_KEY_ECDSA_2: ${{ github.event_name != 'pull_request' && secrets.CLIENT_PUBLIC_KEY_ECDSA_2 || '' }}
+          FIREBLOCKS_HEDERA_PUBLIC_KEY: ${{ github.event_name != 'pull_request' && secrets.CLIENT_PUBLIC_KEY_ECDSA_2 || '' }}
+          DFNS_WALLET_PUBLIC_KEY: ${{ github.event_name != 'pull_request' && secrets.CLIENT_PUBLIC_KEY_ECDSA_2 || '' }}
         run: npm run mass-payout:test

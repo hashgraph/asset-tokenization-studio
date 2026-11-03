@@ -1,6 +1,13 @@
 name: "001: [FLOW] PR Formatting"
+
+# pull_request_target is kept on purpose so title/assignee checks also run (with a
+# usable token) for PRs from forks. It is safe here because this workflow NEVER
+# checks out or executes PR code: it only reads PR metadata from the event
+# payload / API, passes it through env (never inlined into a script), and uses
+# no repository secrets beyond the job-scoped GITHUB_TOKEN. Do not add an
+# actions/checkout of the PR head, npm install, or any script from the PR here.
 on:
-  pull_request_target:
+  pull_request_target: # zizmor: ignore[dangerous-triggers] no PR code is checked out or run (see above)
     # This covers: new PRs, title edits, new commits, and assignee changes - everything the workflow actually validates
     types:
       - assigned
@@ -14,14 +21,17 @@ defaults:
   run:
     shell: bash
 
-permissions:
-  statuses: write
+# Nothing by default; each job asks for only what it needs.
+permissions: {}
 
 jobs:
   title-check:
     name: Title Check
     runs-on: token-studio-linux-medium
     timeout-minutes: 5
+    permissions:
+      pull-requests: read # read the PR title
+      statuses: write # the action can report a commit status
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
@@ -37,6 +47,7 @@ jobs:
     name: Assignee Check
     runs-on: token-studio-linux-medium
     timeout-minutes: 5
+    permissions: {} # reads the event payload only
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1

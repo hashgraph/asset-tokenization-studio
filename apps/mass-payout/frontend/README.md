@@ -2,6 +2,8 @@
 
 Admin panel for the Scheduler Payment Distribution service built with Vite, React, and Chakra UI.
 
+> **Security:** the frontend sends no credentials and the backend has no built-in authentication, so both must run behind your own API gateway / identity layer on a private network. See the backend [Security and Deployment](../backend/README.md#security-and-deployment) section.
+
 ## Table of Contents
 
 - [Installation](#installation)

@@ -134,6 +134,42 @@ describe("Network", () => {
       expect(service.executeConnection).toHaveBeenCalledWith(req.network, req.wallet, undefined, undefined);
       expect(res).toEqual(execRes.payload);
     });
+
+    it("should never log DFNS credentials or API keys", async () => {
+      const req: any = {
+        network: testnet,
+        mirrorNode: { baseUrl: "https://mirror.example/api/v1/", apiKey: "MIRROR_KEY_SECRET", headerName: "x-api-key" },
+        rpcNode: { baseUrl: "https://rpc.example/", apiKey: "RPC_KEY_SECRET" },
+        wallet: SupportedWallets.DFNS,
+        custodialWalletSettings: {
+          authorizationToken: "DFNS_TOKEN_SECRET",
+          credentialId: "credential-id",
+          serviceAccountPrivateKey: "DFNS_PRIVATE_KEY_SECRET",
+          urlApplicationOrigin: "https://app.example",
+          applicationId: "app-id",
+          baseUrl: "https://api.dfns.example",
+          walletId: "wallet-id",
+          hederaAccountId: "0.0.1234",
+          publicKey: "public-key",
+        },
+      };
+      const logSpy = jest.spyOn((service as any).logger, "log").mockImplementation(() => undefined);
+      jest.spyOn(service, "executeConnection").mockResolvedValue({ payload: {} } as any);
+
+      await service.connect(req);
+
+      // The connection itself still receives the real credentials
+      const custodialSettings = (service.executeConnection as jest.Mock).mock.calls[0][3];
+      expect(custodialSettings.serviceAccountSecretKey).toBe("DFNS_PRIVATE_KEY_SECRET");
+      expect(custodialSettings.serviceAccountAuthToken).toBe("DFNS_TOKEN_SECRET");
+
+      const logged = JSON.stringify(logSpy.mock.calls);
+      ["DFNS_TOKEN_SECRET", "DFNS_PRIVATE_KEY_SECRET", "MIRROR_KEY_SECRET", "RPC_KEY_SECRET"].forEach((secret) =>
+        expect(logged).not.toContain(secret),
+      );
+      expect(logged).toContain("0.0.1234");
+      expect(logged).toContain("wallet-id");
+    });
   });
 
   describe("disconnect", () => {

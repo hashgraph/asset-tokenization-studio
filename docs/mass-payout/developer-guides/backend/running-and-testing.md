@@ -34,7 +34,7 @@ cd apps/mass-payout/backend
 docker-compose up -d
 ```
 
-This starts PostgreSQL on `localhost:5432` with credentials from `docker-compose.yml`.
+This starts a local-only PostgreSQL bound to `127.0.0.1:5432`. Credentials come from `POSTGRESQL_USER`, `POSTGRESQL_PASSWORD` and `POSTGRESQL_DB` in the backend `.env` (or your shell); `docker-compose.yml` only holds throwaway defaults for local development.
 
 **Option B: Local PostgreSQL**:
 
@@ -191,6 +191,13 @@ pm2 startup  # Enable auto-restart on server reboot
 
 ### 5. Production Checklist
 
+The backend has **no built-in authentication or authorization**. Read [Security and Deployment](./index.md#security-and-deployment) before deploying it anywhere other than your own machine.
+
+- [ ] Backend and database reachable only on a private network (no public ingress)
+- [ ] API gateway / identity layer in front of the backend authenticating every request and authorizing each route
+- [ ] `AUDIT_ACTOR_HEADER` set to the identity header your gateway forwards, and `Audit` log lines shipped to your log store
+- [ ] `BLOCKCHAIN_MIRROR_NODE_ALLOWED_HOSTS` reviewed (only the mirror nodes you trust)
+- [ ] `APP_ENV` not set to `local` (keeps Swagger UI off)
 - [ ] Environment variables secured (use secrets manager)
 - [ ] CORS configured for production domain
 - [ ] Database credentials secured

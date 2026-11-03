@@ -123,6 +123,56 @@ describe("Security operations", () => {
             .withArgs(ZeroAddress);
         });
 
+        it("A LifeCycleCashFlow proxy is initialized in its deployment transaction", async () => {
+          const result = await deployLifeCycleCashFlowContracts(
+            new DeployContractCommand({
+              name: "LifeCycleCashFlowTimeTravel",
+              signer: signer_A,
+              args: [await asset_A.getAddress(), await stablecoin.getAddress(), rbacList],
+            }),
+          );
+
+          const events = result
+            .receipt!.logs.filter((log) => log.address.toLowerCase() === result.proxyAddress.toLowerCase())
+            .map((log) => lifeCycleCashFlow.interface.parseLog(log))
+            .filter((event) => event !== null);
+
+          expect(events.map((event) => event.name)).to.include("Initialized");
+
+          const roleGrants = events
+            .filter((event) => event.name === "RoleGranted")
+            .map((event) => [event.args.operator, event.args.account, event.args.role]);
+          const expectedGrants = rbacList.flatMap((rbac) =>
+            rbac.members.map((member) => [signer_A.address, member, rbac.role]),
+          );
+          expect(roleGrants).to.deep.equal(expectedGrants);
+
+          const proxy = await ethers.getContractAt("LifeCycleCashFlowTimeTravel", result.proxyAddress);
+          await expect(
+            proxy.initialize(await asset_A.getAddress(), await stablecoin.getAddress(), rbacList),
+          ).to.be.revertedWithCustomError(proxy, "InvalidInitialization");
+        });
+
+        it("A LifeCycleCashFlow implementation cannot be initialized directly", async () => {
+          const result = await deployLifeCycleCashFlowContracts(
+            new DeployContractCommand({
+              name: "LifeCycleCashFlowTimeTravel",
+              signer: signer_A,
+              args: [await asset_A.getAddress(), await stablecoin.getAddress(), rbacList],
+            }),
+          );
+
+          const implementation = await ethers.getContractAt("LifeCycleCashFlowTimeTravel", result.address);
+          await expect(
+            implementation.connect(signer_B).initialize(await asset_A.getAddress(), await stablecoin.getAddress(), [
+              {
+                role: DEFAULT_ADMIN_ROLE,
+                members: [await signer_B.getAddress()],
+              },
+            ]),
+          ).to.be.revertedWithCustomError(implementation, "InvalidInitialization");
+        });
+
         it("A LifeCycleCashFlow contract cannot be initialized twice", async () => {
           await deployLifeCycleCashFlowContracts(
             new DeployContractCommand({
@@ -1367,6 +1417,48 @@ describe("Security operations", () => {
 
           expect(await stablecoin.balanceOf(await signer_B.getAddress())).to.equal(parseUnits("500", 0));
         });
+
+        it("A zero amount snapshot payment does not mark the holders as paid", async () => {
+          await stablecoin.transfer(lifeCycleCashFlowAddress, parseUnits("1000000", 2));
+
+          await expect(lifeCycleCashFlow.executeAmountSnapshot(await asset_A.getAddress(), 1, 1, 1, 0))
+            .to.emit(lifeCycleCashFlow, "AmountSnapshotExecuted")
+            .withArgs(
+              1,
+              1,
+              1,
+              0,
+              [await signer_B.getAddress(), await signer_A.getAddress()],
+              [ZeroAddress, ZeroAddress],
+              [0, 0],
+            );
+
+          await expect(
+            lifeCycleCashFlow.executeAmountSnapshotByAddresses(
+              await asset_A.getAddress(),
+              1,
+              [await signer_B.getAddress()],
+              0,
+            ),
+          )
+            .to.emit(lifeCycleCashFlow, "AmountSnapshotByAddressesExecuted")
+            .withArgs(1, [await signer_B.getAddress()], 0, [await signer_B.getAddress()], [ZeroAddress], [0]);
+
+          // The real distribution still pays every holder
+          await expect(lifeCycleCashFlow.executeAmountSnapshot(await asset_A.getAddress(), 1, 1, 1, 1000))
+            .to.emit(lifeCycleCashFlow, "AmountSnapshotExecuted")
+            .withArgs(
+              1,
+              1,
+              1,
+              1000,
+              [ZeroAddress, ZeroAddress],
+              [await signer_B.getAddress(), await signer_A.getAddress()],
+              [parseUnits("500", 0), parseUnits("500", 0)],
+            );
+
+          expect(await stablecoin.balanceOf(await signer_B.getAddress())).to.equal(parseUnits("500", 0));
+        });
       });
 
       describe("Pay percentage snapshot", () => {
@@ -1418,12 +1510,93 @@ describe("Security operations", () => {
               1,
               1,
               parseUnits("50", 2),
-              [ZeroAddress, ZeroAddress],
               [await signer_B.getAddress(), await signer_A.getAddress()],
+              [ZeroAddress, ZeroAddress],
               [0, 0],
             );
 
           expect(await stablecoin.balanceOf(await signer_B.getAddress())).to.equal(parseUnits("0", 0));
+        });
+
+        it("A percentage snapshot pays every batch from the payment pool captured on the first paid batch", async () => {
+          await stablecoin.transfer(lifeCycleCashFlowAddress, parseUnits("1000000", 2));
+
+          // First batch: only signer_B, who holds half of the snapshot
+          await expect(
+            lifeCycleCashFlow.executePercentageSnapshotByAddresses(
+              await asset_A.getAddress(),
+              1,
+              [await signer_B.getAddress()],
+              parseUnits("50", 2),
+            ),
+          )
+            .to.emit(lifeCycleCashFlow, "PercentageSnapshotByAddressesExecuted")
+            .withArgs(
+              1,
+              [await signer_B.getAddress()],
+              parseUnits("50", 2),
+              [ZeroAddress],
+              [await signer_B.getAddress()],
+              [parseUnits("250000", 2)],
+            );
+
+          // A top-up between batches does not change the base either
+          await stablecoin.transfer(lifeCycleCashFlowAddress, parseUnits("1000", 2));
+
+          // Second batch by page: signer_B is skipped, signer_A gets the same amount from the original pool
+          await expect(
+            lifeCycleCashFlow.executePercentageSnapshot(await asset_A.getAddress(), 1, 1, 1, parseUnits("50", 2)),
+          )
+            .to.emit(lifeCycleCashFlow, "PercentageSnapshotExecuted")
+            .withArgs(
+              1,
+              1,
+              1,
+              parseUnits("50", 2),
+              [await signer_B.getAddress(), ZeroAddress],
+              [await signer_A.getAddress(), ZeroAddress],
+              [parseUnits("250000", 2), 0],
+            );
+
+          expect(await stablecoin.balanceOf(await signer_B.getAddress())).to.equal(parseUnits("250000", 2));
+          expect(await stablecoin.balanceOf(lifeCycleCashFlowAddress)).to.equal(parseUnits("501000", 2));
+        });
+
+        it("A percentage snapshot batch that pays nobody does not fix the payment pool", async () => {
+          // Nothing funded yet: no holder is paid and no pool is captured
+          await expect(
+            lifeCycleCashFlow.executePercentageSnapshotByAddresses(
+              await asset_A.getAddress(),
+              1,
+              [await signer_B.getAddress()],
+              parseUnits("50", 2),
+            ),
+          )
+            .to.emit(lifeCycleCashFlow, "PercentageSnapshotByAddressesExecuted")
+            .withArgs(
+              1,
+              [await signer_B.getAddress()],
+              parseUnits("50", 2),
+              [await signer_B.getAddress()],
+              [ZeroAddress],
+              [0],
+            );
+
+          await stablecoin.transfer(lifeCycleCashFlowAddress, parseUnits("1000000", 2));
+
+          await expect(
+            lifeCycleCashFlow.executePercentageSnapshot(await asset_A.getAddress(), 1, 1, 1, parseUnits("50", 2)),
+          )
+            .to.emit(lifeCycleCashFlow, "PercentageSnapshotExecuted")
+            .withArgs(
+              1,
+              1,
+              1,
+              parseUnits("50", 2),
+              [ZeroAddress, ZeroAddress],
+              [await signer_B.getAddress(), await signer_A.getAddress()],
+              [parseUnits("250000", 2), parseUnits("250000", 2)],
+            );
         });
 
         it("An account cannot pay a snapshot by percentage if there are no holders", async () => {
@@ -1714,22 +1887,39 @@ describe("Security operations", () => {
             .withArgs(await asset_B.getAddress());
         });
 
+        it("An account cannot pay more than 100 percentage of the contract payment token balance by addresses", async () => {
+          await stablecoin.transfer(lifeCycleCashFlowAddress, parseUnits("1000000", 2));
+
+          await expect(
+            lifeCycleCashFlow.executePercentageSnapshotByAddresses(
+              await asset_A.getAddress(),
+              1,
+              [await signer_B.getAddress()],
+              parseUnits("200", 2),
+            ),
+          )
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "InvalidPercentage")
+            .withArgs(parseUnits("200", 2));
+
+          expect(await stablecoin.balanceOf(await signer_B.getAddress())).to.equal(0);
+        });
+
         it("An account cannot pay a percentage snapshot by addresses to a holder if there is not enough balance", async () => {
           await expect(
             lifeCycleCashFlow.executePercentageSnapshotByAddresses(
               await asset_A.getAddress(),
               1,
               [await signer_B.getAddress()],
-              parseUnits("5000", 2),
+              parseUnits("50", 2),
             ),
           )
             .to.emit(lifeCycleCashFlow, "PercentageSnapshotByAddressesExecuted")
             .withArgs(
               1,
               [await signer_B.getAddress()],
-              parseUnits("5000", 2),
-              [ZeroAddress],
+              parseUnits("50", 2),
               [await signer_B.getAddress()],
+              [ZeroAddress],
               [0],
             );
 
@@ -1742,11 +1932,11 @@ describe("Security operations", () => {
               await asset_A.getAddress(),
               1,
               [ZeroAddress],
-              parseUnits("5000", 2),
+              parseUnits("50", 2),
             ),
           )
             .to.emit(lifeCycleCashFlow, "PercentageSnapshotByAddressesExecuted")
-            .withArgs(1, [ZeroAddress], parseUnits("5000", 2), [], [], []);
+            .withArgs(1, [ZeroAddress], parseUnits("50", 2), [], [], []);
         });
 
         it("An account can pay a percentage snapshot by addresses", async () => {

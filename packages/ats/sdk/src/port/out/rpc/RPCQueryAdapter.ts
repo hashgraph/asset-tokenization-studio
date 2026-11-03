@@ -10,6 +10,7 @@ import { singleton } from "tsyringe";
 import { lazyInject } from "@core/decorator/LazyInjectDecorator";
 import NetworkService from "@service/network/NetworkService";
 import LogService from "@service/log/LogService";
+import { redactUrl } from "@service/log/LogRedaction";
 import EvmAddress from "@domain/context/contract/EvmAddress";
 import { MirrorNodeAdapter } from "../mirror/MirrorNodeAdapter";
 import { Security } from "@domain/context/security/Security";
@@ -85,7 +86,12 @@ export class RPCQueryAdapter {
   async init(urlRpcProvider?: string, apiKey?: string): Promise<string> {
     const url = urlRpcProvider ? (apiKey ? urlRpcProvider + apiKey : urlRpcProvider) : LOCAL_JSON_RPC_RELAY_URL;
     this.provider = new ethers.JsonRpcProvider(url);
-    LogService.logTrace("RPC Query Adapter Initialized on: ", url);
+    // Log only the endpoint origin: the API key is part of the URL
+    LogService.logTrace(
+      "RPC Query Adapter Initialized on: ",
+      redactUrl(urlRpcProvider || LOCAL_JSON_RPC_RELAY_URL),
+      apiKey ? "(API key set)" : "",
+    );
 
     return this.networkService.environment;
   }

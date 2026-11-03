@@ -15,6 +15,8 @@ import { SetNetworkCommand } from "@command/network/setNetwork/SetNetworkCommand
 import { MirrorNode } from "@domain/context/network/MirrorNode";
 import { JsonRpcRelay } from "@domain/context/network/JsonRpcRelay";
 import { HederaIdPropsFixture } from "@test/fixtures/shared/DataFixture";
+import ConnectRequest, { SupportedWallets } from "../request/network/ConnectRequest";
+import { ConnectCommand } from "@command/network/connect/ConnectCommand";
 
 describe("Network", () => {
   let commandBusMock: jest.Mocked<CommandBus>;
@@ -166,6 +168,64 @@ describe("Network", () => {
         ),
       );
       expect(result).toEqual(expectedResponse);
+    });
+  });
+
+  describe("connect", () => {
+    const secrets = {
+      authorizationToken: "dfns-auth-token-SECRET",
+      serviceAccountPrivateKey: "dfns-private-key-SECRET",
+      mirrorApiKey: "mirror-api-key-SECRET",
+      rpcApiKey: "rpc-api-key-SECRET",
+    };
+
+    const buildConnectRequest = (): ConnectRequest =>
+      new ConnectRequest({
+        network: mockEnvironment,
+        mirrorNode: new MirrorNode(
+          "https://internal.mirror.example/api/v1/",
+          "mirror",
+          secrets.mirrorApiKey,
+          "x-api-key",
+        ),
+        rpcNode: new JsonRpcRelay("https://rpc.example/", "rpc", secrets.rpcApiKey),
+        wallet: SupportedWallets.DFNS,
+        custodialWalletSettings: {
+          authorizationToken: secrets.authorizationToken,
+          credentialId: "credential-id",
+          serviceAccountPrivateKey: secrets.serviceAccountPrivateKey,
+          urlApplicationOrigin: "https://app.example",
+          applicationId: "app-id",
+          baseUrl: "https://api.dfns.example",
+          walletId: "wallet-id",
+          hederaAccountId: "0.0.1234",
+          publicKey: "public-key",
+        },
+      });
+
+    it("should execute ConnectCommand and never log custodial secrets or API keys", async () => {
+      const logInfoSpy = jest.spyOn(LogService, "logInfo").mockImplementation(() => {});
+      const logTraceSpy = jest.spyOn(LogService, "logTrace").mockImplementation(() => {});
+      const payload = { account: undefined };
+      commandBusMock.execute.mockResolvedValue({ payload } as any);
+
+      const req = buildConnectRequest();
+      const result = await Network.connect(req);
+
+      expect(result).toBe(payload);
+      expect(commandBusMock.execute).toHaveBeenCalledWith(expect.any(ConnectCommand));
+      const connectCommand = commandBusMock.execute.mock.calls
+        .map(([command]) => command)
+        .find((command) => command instanceof ConnectCommand) as ConnectCommand;
+      // The command itself still receives the real credentials
+      expect(JSON.stringify(connectCommand)).toContain(secrets.serviceAccountPrivateKey);
+
+      const logged = JSON.stringify([...logInfoSpy.mock.calls, ...logTraceSpy.mock.calls]);
+      expect(logInfoSpy).toHaveBeenCalledWith("ConnectRequest from network", expect.anything());
+      Object.values(secrets).forEach((secret) => expect(logged).not.toContain(secret));
+      // Useful, non-secret context is kept
+      expect(logged).toContain("0.0.1234");
+      expect(logged).toContain("wallet-id");
     });
   });
 });

@@ -4,6 +4,7 @@
 import { createLogger, LoggerOptions, transports, format } from "winston";
 import safeStringify from "fast-safe-stringify";
 import BaseError from "@core/error/BaseError";
+import { redactForLog, redactReplacer } from "./LogRedaction";
 
 const { Console } = transports;
 const { printf } = format;
@@ -28,7 +29,8 @@ export default class LogService {
         .map((e) => {
           switch (typeof e) {
             case "object":
-              return safeStringify(e);
+              // Mask secrets (keys, tokens, signatures) in any object passed to the logger
+              return safeStringify(e, redactReplacer);
             default:
               return e;
           }
@@ -60,7 +62,8 @@ export default class LogService {
   public static log(level: LogLevel, message: any, params: any[]): void {
     this.instance.logger.log(level, message, {
       timestamp: new Date().toISOString(),
-      other: params,
+      // Mask secrets before they reach any transport or custom format
+      other: params.map((param) => redactForLog(param)),
     });
   }
 
