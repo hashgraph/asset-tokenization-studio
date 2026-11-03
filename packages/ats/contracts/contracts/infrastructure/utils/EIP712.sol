@@ -203,6 +203,7 @@ function _checkNonceAndDeadline(
 }
 
 function _isDeadlineValid(uint256 _deadline, uint256 _blockTimestamp) pure returns (bool) {
+    // solhint-disable-next-line gas-strict-inequalities
     return _deadline >= _blockTimestamp;
 }
 

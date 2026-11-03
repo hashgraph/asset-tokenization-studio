@@ -10,7 +10,7 @@ Quick guide to deploy the LifeCycle Cash Flow contract.
 
 ## Prerequisites
 
-- Node.js v20.0.0 or newer
+- Node.js v24.15.0 or newer (see `.nvmrc`)
 - Hedera testnet/mainnet account with HBAR
 - Account private key
 

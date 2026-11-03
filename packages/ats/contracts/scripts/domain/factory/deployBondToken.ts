@@ -4,7 +4,7 @@ import { ethers, type EventLog } from "ethers";
 import type { IFactory, IMockFactory, ResolverProxy } from "@contract-types";
 import { ResolverProxy__factory } from "@contract-types";
 import { GAS_LIMIT } from "@scripts/infrastructure";
-import { ATS_ROLES, BOND_CONFIG_ID } from "../constants";
+import { ATS_ROLES, CONFIG_IDS } from "../constants";
 import { BondDetailsDataParams, FactoryRegulationDataParams, Rbac, SecurityDataParams } from "./types";
 
 // ============================================================================
@@ -47,7 +47,6 @@ export interface DeployBondFromFactoryParams {
  *   name: 'My Bond',
  *   symbol: 'MBND',
  *   decimals: 18,
- *   isin: 'US0378331005',
  *   votingRight: true,
  *   // ... other params
  *   regulationType: RegulationType.REG_S,
@@ -80,9 +79,10 @@ export async function deployBondFromFactory(
   ];
 
   // Build resolver proxy configuration
-  const resolverProxyConfiguration = {
-    key: BOND_CONFIG_ID,
-    version: 1,
+  const resolverProxyConfigurationV2 = {
+    configurationId: CONFIG_IDS.bond,
+    configurationVersion: 1,
+    replacementEnabled: true,
   };
 
   // Build security data structure
@@ -90,16 +90,15 @@ export async function deployBondFromFactory(
     arePartitionsProtected: securityDataParams.arePartitionsProtected,
     isMultiPartition: securityDataParams.isMultiPartition,
     resolver: securityDataParams.resolver,
-    resolverProxyConfiguration,
+    resolverProxyConfigurationV2,
     rbacs,
     isControllable: securityDataParams.isControllable,
     isWhiteList: securityDataParams.isWhiteList,
     maxSupply: securityDataParams.maxSupply,
-    erc20MetadataInfo: {
-      name: securityDataParams.erc20MetadataInfo.name,
-      symbol: securityDataParams.erc20MetadataInfo.symbol,
-      isin: securityDataParams.erc20MetadataInfo.isin,
-      decimals: securityDataParams.erc20MetadataInfo.decimals,
+    erc20Metadata: {
+      name: securityDataParams.erc20Metadata.name,
+      symbol: securityDataParams.erc20Metadata.symbol,
+      decimals: securityDataParams.erc20Metadata.decimals,
     },
     clearingActive: securityDataParams.clearingActive,
     internalKycActivated: securityDataParams.internalKycActivated,
@@ -118,6 +117,8 @@ export async function deployBondFromFactory(
     nominalValueDecimals: bondDetailsParams.nominalValueDecimals,
     startingDate: bondDetailsParams.startingDate || Math.floor(Date.now() / 1000),
     maturityDate: bondDetailsParams.maturityDate || 0,
+    effectiveDatetime: bondDetailsParams.effectiveDatetime,
+    isUnitNominalValue: bondDetailsParams.isUnitNominalValue,
   };
 
   // Build bond data

@@ -57,11 +57,11 @@ cp .env.example .env
 
 ```bash
 # Database
-DATABASE_HOST=localhost
-DATABASE_PORT=5432
-DATABASE_USER=postgres
-DATABASE_PASSWORD=postgres
-DATABASE_NAME=mass_payout
+POSTGRESQL_HOST=localhost
+POSTGRESQL_PORT=5432
+POSTGRESQL_USER=postgres
+POSTGRESQL_PASSWORD=postgres
+POSTGRESQL_DB=mass_payout
 
 # Hedera
 HEDERA_NETWORK=testnet
@@ -153,11 +153,11 @@ Create production `.env`:
 
 ```bash
 # Database (use production credentials)
-DATABASE_HOST=your-db-host
-DATABASE_PORT=5432
-DATABASE_USER=mass_payout_prod
-DATABASE_PASSWORD=your-secure-password
-DATABASE_NAME=mass_payout_prod
+POSTGRESQL_HOST=your-db-host
+POSTGRESQL_PORT=5432
+POSTGRESQL_USER=mass_payout_prod
+POSTGRESQL_PASSWORD=your-secure-password
+POSTGRESQL_DB=mass_payout_prod
 
 # Application
 PORT=3000
@@ -450,11 +450,11 @@ npm run typeorm:migration:show
 
 ```bash
 # Database
-DATABASE_HOST=localhost
-DATABASE_PORT=5432
-DATABASE_USER=postgres
-DATABASE_PASSWORD=your_password
-DATABASE_NAME=mass_payout
+POSTGRESQL_HOST=localhost
+POSTGRESQL_PORT=5432
+POSTGRESQL_USER=postgres
+POSTGRESQL_PASSWORD=your_password
+POSTGRESQL_DB=mass_payout
 
 # Hedera
 HEDERA_NETWORK=testnet|mainnet
@@ -620,7 +620,7 @@ export class AssetService {
 **Solutions**:
 
 - Verify PostgreSQL credentials
-- Check `DATABASE_HOST` and `DATABASE_PORT`
+- Check `POSTGRESQL_HOST` and `POSTGRESQL_PORT`
 - Ensure database exists: `psql -l | grep mass_payout`
 - Test connection: `psql -h localhost -U postgres -d mass_payout`
 

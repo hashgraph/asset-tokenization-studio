@@ -26,6 +26,7 @@ import {
 } from "@contract-types";
 import { DividendRight, EquityDetailsDataParams, FactoryRegulationDataParams } from "@scripts/domain";
 import { getRegulationData, getSecurityData } from "./common.fixture";
+import { getDltTimestamp } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 /**
@@ -44,9 +45,13 @@ export const DEFAULT_EQUITY_PARAMS = {
   currency: CURRENCIES.USD,
   nominalValue: 100,
   nominalValueDecimals: 2,
+  isUnitNominalValue: true,
+  effectiveDatetime: async () => {
+    return (await getDltTimestamp()) - 3600; //block.timestamp - 1 hour
+  },
 } as const;
 
-export function makeEquityDetailsData(params?: DeepPartial<EquityDetailsDataParams>) {
+export async function makeEquityDetailsData(params?: DeepPartial<EquityDetailsDataParams>) {
   return {
     votingRight: params?.votingRight ?? DEFAULT_EQUITY_PARAMS.votingRight,
     informationRight: params?.informationRight ?? DEFAULT_EQUITY_PARAMS.informationRight,
@@ -59,6 +64,8 @@ export function makeEquityDetailsData(params?: DeepPartial<EquityDetailsDataPara
     currency: params?.currency ?? DEFAULT_EQUITY_PARAMS.currency,
     nominalValue: params?.nominalValue ?? DEFAULT_EQUITY_PARAMS.nominalValue,
     nominalValueDecimals: params?.nominalValueDecimals ?? DEFAULT_EQUITY_PARAMS.nominalValueDecimals,
+    isUnitNominalValue: params?.isUnitNominalValue ?? DEFAULT_EQUITY_PARAMS.isUnitNominalValue,
+    effectiveDatetime: params?.effectiveDatetime ?? (await DEFAULT_EQUITY_PARAMS.effectiveDatetime()),
   };
 }
 /**
@@ -88,7 +95,7 @@ export async function deployEquityTokenFixture({
     (useLoadFixture ? await loadFixture(deployAtsInfrastructureFixture) : await deployAtsInfrastructureFixture());
   const { factory, blr, deployer } = infrastructure;
   const securityData = getSecurityData(blr, equityDataParams?.securityData);
-  const equityDetails = makeEquityDetailsData(equityDataParams?.equityDetails);
+  const equityDetails = await makeEquityDetailsData(equityDataParams?.equityDetails);
   // Deploy equity token using factory helper
   const diamond = await deployEquityFromFactory(
     {

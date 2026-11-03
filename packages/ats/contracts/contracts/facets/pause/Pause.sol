@@ -31,14 +31,14 @@ abstract contract Pause is PauseRead {
     }
 
     /// @inheritdoc IPause
-    function pause() external override onlyActivated onlyUnpaused onlyRole(ROLE_PAUSER) returns (bool success_) {
+    function pause() external override onlyUnpaused onlyRole(ROLE_PAUSER) returns (bool success_) {
         PauseStorageWrapper.setPause(true);
         emit IPause.Paused(EvmAccessors.getMsgSender());
         success_ = true;
     }
 
     /// @inheritdoc IPause
-    function unpause() external override onlyActivated onlyRole(ROLE_PAUSER) onlyPaused returns (bool success_) {
+    function unpause() external override onlyRole(ROLE_PAUSER) onlyPaused returns (bool success_) {
         PauseStorageWrapper.setPause(false);
         emit IPause.Unpaused(EvmAccessors.getMsgSender());
         success_ = true;

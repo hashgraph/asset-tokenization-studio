@@ -15,7 +15,7 @@ This guide walks you through cloning the repo, building all components, deployin
 
 ## Prerequisites
 
-- **Node.js**: v20.19.4 or newer
+- **Node.js**: v24.15.0 or newer (see `.nvmrc`)
 - **npm**: v10.9.0 or newer
 - **Git**: For cloning the repository
 - **Hedera Account**: Testnet or mainnet account with HBAR
@@ -62,7 +62,7 @@ Create `.env` file:
 cp .env.example .env
 ```
 
-Edit `.env` with your private key and endpoints. See `packages/ats/contracts/.env.example` for all available variables, or the [Contract Deployment Guide](../developer-guides/contracts/deployment.md#2-configure-environment) for a minimal testnet example.
+Edit `.env` with your private key and endpoints. See `packages/ats/contracts/.env.example` for all available variables, or the [Contract Deployment Guide](../developer-guides/contracts/deployment.md#2-configure-the-environment) for a minimal testnet example.
 
 ### Deploy Contracts
 

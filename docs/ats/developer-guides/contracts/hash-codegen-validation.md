@@ -28,7 +28,7 @@ classic copy-paste-and-forget-to-change-the-arg case.
 ```
 ❌ hash codegen validation failed (2 issue(s)):
   Duplicate @custom:hash annotation resolverKey Security appears 2 times:
-    contracts/facets/layer_2/security/ISecurity.sol:7 (RESOLVER_KEY_SECURITY),
+    contracts/facets/securityHolders/ISecurityHolders.sol:7 (RESOLVER_KEY_SECURITY),
     contracts/_demo/d1-duplicate-pair.sol:10 (RESOLVER_KEY_SECURITY_COPY).
     Each (kind, arg) must be unique — likely a copy-paste error.
   contracts/_demo/d1-duplicate-pair.sol:10:

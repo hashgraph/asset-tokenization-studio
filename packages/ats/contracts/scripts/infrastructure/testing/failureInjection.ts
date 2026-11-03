@@ -34,17 +34,7 @@ export interface FailureConfig {
 /**
  * Supported workflow steps for step-level failure injection.
  */
-export const SUPPORTED_STEPS = [
-  "proxyAdmin",
-  "blr",
-  "facets",
-  "register",
-  "equity",
-  "bond",
-  "bondFixedRate",
-  "bondKpiLinkedRate",
-  "factory",
-] as const;
+export const SUPPORTED_STEPS = ["proxyAdmin", "blr", "facets", "register", "equity", "bond", "factory"] as const;
 
 export type SupportedStep = (typeof SUPPORTED_STEPS)[number];
 

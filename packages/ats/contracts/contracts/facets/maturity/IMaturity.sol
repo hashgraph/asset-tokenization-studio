@@ -32,6 +32,28 @@ interface IMaturity {
         uint256 indexed previousMaturityDate
     );
 
+    /**
+     * @notice Emitted once after `fullRedeemAtMaturity` has redeemed every partition held by
+     *         `tokenHolder`.
+     * @param tokenHolder Token holder whose full partition list was redeemed.
+     */
+    event FullyRedeemedAtMaturity(address indexed tokenHolder);
+
+    /**
+     * @notice Emitted once after `redeemAtMaturityByPartitionRange` has redeemed the requested
+     *         page of partitions held by `tokenHolder`.
+     * @param tokenHolder Token holder whose partitions were redeemed.
+     * @param pageIndex   Zero-based index of the page that was redeemed.
+     * @param pageLength  Number of partitions per page, as requested by the caller.
+     */
+    event RedeemedAtMaturityByPartitionRange(address indexed tokenHolder, uint256 pageIndex, uint256 pageLength);
+
+    /**
+     * @notice Thrown when a maturity date fails validation.
+     * @dev Reverts when a proposed maturity date is not strictly in the future at the time it
+     *      is set, or when a maturity-gated action is attempted before the stored maturity
+     *      date has been reached.
+     */
     error MaturityDateInvalid();
 
     /**
@@ -53,11 +75,33 @@ interface IMaturity {
      *         status, must not be recovered, and the current timestamp must be at or past the
      *         maturity date. Iterates every partition owned by `_tokenHolder` and redeems each
      *         balance in full. Reverts with an unexpected error if any partition balance is zero.
-     * @dev    Emits {RedeemedByPartition} for each redeemed partition via
-     *         `ERC1410StorageWrapper.redeemByPartition`.
+     * @dev    Emits {TransferByPartition} and {RedeemedByPartition} for each redeemed partition
+     *         via `ERC1410StorageWrapper.redeemByPartition`, then {FullyRedeemedAtMaturity} once
+     *         after every partition has been processed.
      * @param  _tokenHolder Address of the token holder whose partitions are to be redeemed.
      */
     function fullRedeemAtMaturity(address _tokenHolder) external;
+
+    /**
+     * @notice Redeems a bounded page of the token partitions held by a token holder at maturity.
+     * @dev    Caller must hold `ROLE_MATURITY_REDEEMER`. Contract must be unpaused and clearing
+     *         must be disabled. `_tokenHolder` must be on the allowed list, hold granted KYC
+     *         status, must not be recovered, and the current timestamp must be at or past the
+     *         maturity date. Iterates only the partitions in the `[_pageIndex * _pageLength,
+     *         _pageIndex * _pageLength + _pageLength)` range of `_tokenHolder`'s partition list,
+     *         clamped to the actual partition count, and redeems each balance in full. Reverts
+     *         with an unexpected error if any partition in that range has a zero balance. Exists
+     *         so a holder with more partitions than fit in one block's gas limit can still be
+     *         fully redeemed across multiple calls; `fullRedeemAtMaturity` remains available
+     *         unchanged for holders within the existing gas budget.
+     * @dev    Emits {TransferByPartition} and {RedeemedByPartition} for each redeemed partition
+     *         via `ERC1410StorageWrapper.redeemByPartition`, then
+     *         {RedeemedAtMaturityByPartitionRange} once after the page has been processed.
+     * @param  _tokenHolder Address of the token holder whose partitions are to be redeemed.
+     * @param  _pageIndex   Zero-based index of the page of partitions to redeem.
+     * @param  _pageLength  Number of partitions per page.
+     */
+    function redeemAtMaturityByPartitionRange(address _tokenHolder, uint256 _pageIndex, uint256 _pageLength) external;
 
     /**
      * @notice Updates the token maturity date to a new timestamp.

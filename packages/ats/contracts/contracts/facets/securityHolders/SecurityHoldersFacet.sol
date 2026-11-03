@@ -7,8 +7,9 @@ import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunc
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 /**
  * @title SecurityHoldersFacet
- * @notice Facet for security holder operations
- * @dev Registers function selectors for Diamond routing
+ * @author Asset Tokenization Studio Team
+ * @notice Diamond facet that exposes security-holder operations through the `ISecurityHolders`
+ *         interface, registered under `RESOLVER_KEY_SECURITYHOLDERS`.
  */
 contract SecurityHoldersFacet is SecurityHolders, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors

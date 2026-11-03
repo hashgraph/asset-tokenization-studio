@@ -5,7 +5,6 @@ import { IMaturityByPartition, RESOLVER_KEY_MATURITY_BY_PARTITION } from "./IMat
 import { IKyc } from "../kyc/IKyc.sol";
 import { ROLE_MATURITY_REDEEMER } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
-import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
@@ -42,7 +41,7 @@ abstract contract MaturityByPartition is IMaturityByPartition, Modifiers {
         onlyUnpaused
         onlyClearingDisabled
         onlyRole(ROLE_MATURITY_REDEEMER)
-        onlyValidAddress(_tokenHolder)
+        validateAddressNotZero(_tokenHolder)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnrecoveredAddress(_tokenHolder)
         onlyListedAllowed(_tokenHolder)

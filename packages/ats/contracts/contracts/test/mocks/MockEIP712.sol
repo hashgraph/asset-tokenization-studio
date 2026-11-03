@@ -39,7 +39,7 @@ contract MockEIP712 is ICommonErrors {
      * @param _chainid         The chain ID used in the EIP-712 domain separator.
      * @param _contractAddress The address of the originating contract used in the domain
      *        separator.
-     * @return `true` if the recovered signer matches `_signer`, `false` otherwise.
+     * @return True if the recovered signer matches `_signer`, false otherwise.
      */
     function exposed_verify(
         address _signer,

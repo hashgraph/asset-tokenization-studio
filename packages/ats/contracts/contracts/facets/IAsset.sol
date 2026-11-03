@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 // Layer 1 — Core
-import { IScheduledCrossOrderedTasks } from "./scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
+import { IScheduledCrossOrderedTasks } from "./scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol";
 import { IAccessControl } from "./accessControl/IAccessControl.sol";
 import { IAdjustBalances } from "./adjustBalances/IAdjustBalances.sol";
 import { IAmortization } from "./amortization/IAmortization.sol";
@@ -31,10 +31,9 @@ import { ITransfer } from "./transfer/ITransfer.sol";
 
 // Layer 1 — Remaining facets
 import { IERC20Votes } from "./erc20Votes/IERC20Votes.sol";
-import { IERC3643 } from "./layer_1/ERC3643/IERC3643.sol";
-import { IExternalControlList } from "./layer_1/externalControlList/IExternalControlList.sol";
+import { IExternalControlList } from "./externalControlListManagement/IExternalControlList.sol";
 import { IExternalControlListManagement } from "./externalControlListManagement/IExternalControlListManagement.sol";
-import { IExternalKycList } from "./layer_1/externalKycList/IExternalKycList.sol";
+import { IExternalKycList } from "./externalKycListManagement/IExternalKycList.sol";
 import { IExternalKycListManagement } from "./externalKycListManagement/IExternalKycListManagement.sol";
 import { IExternalPauseManagement } from "./externalPauseManagement/IExternalPauseManagement.sol";
 import { IFixedRate } from "./fixedRate/IFixedRate.sol";
@@ -47,11 +46,11 @@ import { IKyc } from "./kyc/IKyc.sol";
 // IKpiLinkedRate is excluded: it defines getInterestRate() with an incompatible return type
 // (different InterestRate struct), which cannot be reconciled in a single Solidity interface.
 // Use the typed instance directly when testing KPI-linked rate facets.
-import { ILoan } from "./layer_2/loan/ILoan.sol";
-import { INominalValue } from "./layer_2/nominalValue/INominalValue.sol";
+import { ILoan } from "./loan/ILoan.sol";
+import { INominalValue } from "./nominalValue/INominalValue.sol";
 import { INominalValueAtSnapshot } from "./nominalValueAtSnapshot/INominalValueAtSnapshot.sol";
 import { IPause } from "./pause/IPause.sol";
-import { ILoansPortfolio } from "./layer_2/loansPortfolio/ILoansPortfolio.sol";
+import { ILoansPortfolio } from "./loansPortfolio/ILoansPortfolio.sol";
 import { IVoting } from "./voting/IVoting.sol";
 import { IVotingSecurityHolders } from "./votingSecurityHolders/IVotingSecurityHolders.sol";
 
@@ -65,9 +64,9 @@ import { ITransferAndLockByPartition } from "./transferAndLockByPartition/ITrans
 import { ICoupon } from "./coupon/ICoupon.sol";
 import { IDividend } from "./dividend/IDividend.sol";
 import { IDividendSecurityHolders } from "./dividendSecurityHolders/IDividendSecurityHolders.sol";
-import { IKpis } from "./kpi/IKpis.sol";
-import { IProtectedPartitions } from "./protectedPartition/IProtectedPartitions.sol";
-import { IProceedRecipients } from "./proceedRecipient/IProceedRecipients.sol";
+import { IKpis } from "./kpis/IKpis.sol";
+import { IProtectedPartitions } from "./protectedPartitions/IProtectedPartitions.sol";
+import { IProceedRecipients } from "./proceedRecipients/IProceedRecipients.sol";
 import { ICap } from "./cap/ICap.sol";
 import { ICapByPartition } from "./capByPartition/ICapByPartition.sol";
 import { INonces } from "./nonces/INonces.sol";
@@ -92,7 +91,7 @@ import { ILock } from "./lock/ILock.sol";
 import { ILockByPartition } from "./lockByPartition/ILockByPartition.sol";
 import { IFreeze } from "./freeze/IFreeze.sol";
 import { IBatchFreeze } from "./batchFreeze/IBatchFreeze.sol";
-import { ISnapshots } from "./snapshot/ISnapshots.sol";
+import { ISnapshots } from "./snapshots/ISnapshots.sol";
 import { ISnapshotsByPartition } from "./snapshotsByPartition/ISnapshotsByPartition.sol";
 import { ISecurityHoldersAtSnapshot } from "./securityHoldersAtSnapshot/ISecurityHoldersAtSnapshot.sol";
 import { IFreezeAtSnapshot } from "./freezeAtSnapshot/IFreezeAtSnapshot.sol";
@@ -140,7 +139,6 @@ import { IInitializer } from "./initializer/IInitializer.sol";
 /// @custom:hash resolverKey TransferAndLock
 bytes32 constant RESOLVER_KEY_TRANSFER_AND_LOCK = 0xe92a301947f21b973cb1007aeba48f2eecd916d05107b6355fc499b783b8f7d9;
 
-// solhint-disable no-empty-blocks
 /// @custom:hash resolverKey TransferAndLockKpiLinkedRate
 // solhint-disable-next-line max-line-length
 bytes32 constant RESOLVER_KEY_TRANSFER_AND_LOCK_KPI_LINKED_RATE = 0x2fbe9c91ad821641ca83a65f6399878b8419fd717379cd1abfac68f2c82940dd;
@@ -185,7 +183,6 @@ interface IAsset is
     IERC20Votes,
     ITransferByPartition,
     IOperator,
-    IERC3643,
     IRecovery,
     IBurn,
     IScheduledCrossOrderedTasks,

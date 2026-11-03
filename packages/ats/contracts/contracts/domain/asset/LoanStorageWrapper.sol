@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ILoan } from "../../facets/layer_2/loan/ILoan.sol";
+import { ILoan } from "../../facets/loan/ILoan.sol";
 import { ScheduledTasksOps } from "../orchestrator/ScheduledTasksOps.sol";
 
 /// @custom:hash storage Loan
@@ -98,13 +98,13 @@ library LoanStorageWrapper {
     }
 
     /**
-     * @notice Overwrites the loan details and emits `LoanDetailsSet`.
-     * @dev Used for post-initialisation updates; does not toggle the `initialized` flag.
+     * @notice Overwrites the loan details.
+     * @dev Used for post-initialisation updates; does not toggle the `initialized` flag. The
+     *      caller (`Loan` facet) emits `LoanDetailsSet`.
      * @param _loanDetails The new loan details to persist.
      */
     function setLoanDetails(ILoan.LoanDetailsData memory _loanDetails) internal {
         _writeLoanDetails(_loanDetails, _loanStorage());
-        emit ILoan.LoanDetailsSet(_loanDetails);
     }
 
     /**

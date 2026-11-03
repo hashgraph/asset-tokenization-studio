@@ -25,7 +25,14 @@ import {
   getNetworkDeploymentDir,
   type DeploymentOutputType,
 } from "@scripts/infrastructure";
-import { TEST_ADDRESSES, TEST_CONFIG_IDS, TEST_WORKFLOWS, TEST_TIMESTAMPS, removeTestDeployments } from "@test";
+import {
+  TEST_ADDRESSES,
+  TEST_CONFIG_IDS,
+  TEST_WORKFLOWS,
+  TEST_TIMESTAMPS,
+  TEST_BYTES32,
+  removeTestDeployments,
+} from "@test";
 
 describe("Deployment File Utilities", () => {
   const TEST_DEPLOYMENTS_DIR = getDeploymentsDir();
@@ -82,26 +89,26 @@ describe("Deployment File Utilities", () => {
           },
         ],
       },
-      bondFixedRate: {
-        configId: TEST_CONFIG_IDS.BOND_FIXED_RATE,
+      depositToken: {
+        configId: TEST_BYTES32.ALL_FS,
         version: 1,
         facetCount: 43,
         facets: [
           {
             facetName: "AccessControlFacet",
-            key: TEST_CONFIG_IDS.BOND_FIXED_RATE,
+            key: TEST_BYTES32.ALL_FS,
             address: TEST_ADDRESSES.VALID_2,
           },
         ],
       },
-      bondKpiLinkedRate: {
-        configId: TEST_CONFIG_IDS.BOND_KPI_LINKED,
+      factory: {
+        configId: TEST_BYTES32.ALL_FS,
         version: 1,
         facetCount: 43,
         facets: [
           {
             facetName: "AccessControlFacet",
-            key: TEST_CONFIG_IDS.BOND_KPI_LINKED,
+            key: TEST_BYTES32.ALL_FS,
             address: TEST_ADDRESSES.VALID_2,
           },
         ],
@@ -110,7 +117,7 @@ describe("Deployment File Utilities", () => {
     summary: {
       totalContracts: 48,
       totalFacets: 1,
-      totalConfigurations: 4,
+      totalConfigurations: 8,
       deploymentTime: 5000,
       gasUsed: "0",
       success: true,
@@ -118,11 +125,7 @@ describe("Deployment File Utilities", () => {
     helpers: {
       getEquityFacets: () => [],
       getBondFacets: () => [],
-      getBondFixedRateFacets: () => [],
-      getBondKpiLinkedRateFacets: () => [],
-      getLoanFacets: () => [],
       getDepositTokenFacets: () => [],
-      getLoansPortfolioFacets: () => [],
       getFactoryFacets: () => [],
     },
   });

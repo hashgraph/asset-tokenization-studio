@@ -6,6 +6,7 @@ bytes32 constant RESOLVER_KEY_BATCH_FREEZE = 0x6ddbb1869dce32d8e2c9bb2d23fad2167
 
 /**
  * @title IBatchFreeze
+ * @author Asset Tokenization Studio Team
  * @notice Interface for batch freezing and unfreezing addresses and partial tokens.
  * @dev Provides ERC3643-compliant batch freeze operations. Batch functions only work in
  *      single-partition mode. Events are shared with `IFreeze` (TokensFrozen, TokensUnfrozen,

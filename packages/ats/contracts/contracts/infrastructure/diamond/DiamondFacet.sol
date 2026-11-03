@@ -27,12 +27,13 @@ contract DiamondFacet is IDiamond, DiamondBase {
     /// @inheritdoc IStaticFunctionSelectors
     /// @dev The selector count must remain aligned with the number of assigned selectors.
     function getStaticFunctionSelectors() external pure returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorsIndex = 19;
+        uint256 selectorsIndex = 20;
         staticFunctionSelectors_ = new bytes4[](selectorsIndex);
         unchecked {
             staticFunctionSelectors_[--selectorsIndex] = this.initializeDiamondCut.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.updateConfigVersion.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.updateConfig.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.updateReplacementEnabled.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.updateResolver.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.getConfigInfo.selector;
             staticFunctionSelectors_[--selectorsIndex] = this.getFacets.selector;

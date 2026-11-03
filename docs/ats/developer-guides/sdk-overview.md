@@ -164,11 +164,15 @@ await Network.init(initRequest);
 
 // 2. Create equity token
 const createRequest = new CreateEquityRequest({
-  tokenName: "Example Corp Stock",
-  tokenSymbol: "EXPL",
-  tokenDecimals: 0,
-  tokenTotalSupply: 1000000,
-  isin: "US1234567890",
+  name: "Example Corp Stock",
+  symbol: "EXPL",
+  decimals: 0,
+  numberOfShares: "1000000",
+  nominalValue: "100",
+  nominalValueDecimals: 2,
+  // …plus the rights flags (votingRight, dividendRight, …), the resolver config
+  // (configId, configVersion) and regulation fields. See CreateEquityRequest for
+  // the full required set.
 });
 
 const { security } = await Equity.create(createRequest);
@@ -176,16 +180,16 @@ console.log("Token created:", security.tokenId);
 
 // 3. Grant KYC to investor
 const grantKycRequest = new GrantKycRequest({
-  tokenId: security.tokenId,
+  securityId: security.tokenId,
   targetId: "0.0.1234567",
-  vcData: "credential_data",
+  vcBase64: "<base64-encoded VC>",
 });
 
 await Kyc.grantKyc(grantKycRequest);
 
 // 4. Issue tokens to investor
 const issueRequest = new IssueRequest({
-  tokenId: security.tokenId,
+  securityId: security.tokenId,
   targetId: "0.0.1234567",
   amount: 1000,
 });
@@ -199,7 +203,7 @@ await Security.issue(issueRequest);
 import { Security, GetAccountBalanceRequest } from "@hashgraph/asset-tokenization-sdk";
 
 const balanceRequest = new GetAccountBalanceRequest({
-  tokenId: "0.0.1234567",
+  securityId: "0.0.1234567",
   targetId: "0.0.7654321",
 });
 
@@ -213,7 +217,7 @@ console.log("Balance:", balance.amount);
 import { Security, GetSecurityDetailsRequest } from "@hashgraph/asset-tokenization-sdk";
 
 const request = new GetSecurityDetailsRequest({
-  tokenId: "0.0.1234567",
+  securityId: "0.0.1234567",
 });
 
 const tokenDetails = await Security.getInfo(request);
@@ -226,10 +230,10 @@ console.log("Token info:", tokenDetails);
 import { Equity, SetDividendsRequest } from "@hashgraph/asset-tokenization-sdk";
 
 const dividendRequest = new SetDividendsRequest({
-  tokenId: "0.0.1234567",
-  amount: 100000, // Total dividend amount
-  recordDate: Math.floor(Date.now() / 1000) + 86400, // 1 day from now
-  paymentDate: Math.floor(Date.now() / 1000) + 172800, // 2 days from now
+  securityId: "0.0.1234567",
+  amountPerUnitOfSecurity: "5.00", // amount per unit held
+  recordTimestamp: (Math.floor(Date.now() / 1000) + 86400).toString(), // 1 day from now
+  executionTimestamp: (Math.floor(Date.now() / 1000) + 172800).toString(), // 2 days from now
 });
 
 await Equity.setDividend(dividendRequest);
@@ -242,33 +246,33 @@ import { Bond, SetCouponRequest } from "@hashgraph/asset-tokenization-sdk";
 
 const now = Math.floor(Date.now() / 1000);
 const couponRequest = new SetCouponRequest({
-  tokenId: "0.0.1234567",
-  rate: 500, // 5.00% (rate with decimals)
-  rateDecimals: 2,
-  startDate: now - 7776000, // 90 days ago (start of accrual period)
-  endDate: now, // Today (end of accrual period)
-  recordDate: now + 86400, // Tomorrow (snapshot date)
-  executionDate: now + 172800, // Day after tomorrow (payment date)
+  securityId: "0.0.1234567",
+  rate: "5.00", // coupon rate (%)
+  startTimestamp: (now - 7776000).toString(), // start of accrual period
+  endTimestamp: now.toString(), // end of accrual period
+  fixingTimestamp: (now + 43200).toString(), // when the rate is fixed
+  recordTimestamp: (now + 86400).toString(), // snapshot date
+  executionTimestamp: (now + 172800).toString(), // payment date
+  rateStatus: 0,
 });
 
 await Bond.setCoupon(couponRequest);
 ```
 
-> **Note**: The coupon interest is calculated based on the period between `startDate` and `endDate`. The `recordDate` determines which bondholders are eligible, and `executionDate` is when payment is distributed.
+> **Note**: The coupon interest is calculated based on the period between `startTimestamp` and `endTimestamp`. The `recordTimestamp` determines which bondholders are eligible, and `executionTimestamp` is when payment is distributed.
 
 ### Creating Holds
 
 ```typescript
-import { Security, CreateHoldRequest } from "@hashgraph/asset-tokenization-sdk";
+import { Security, CreateHoldByPartitionRequest } from "@hashgraph/asset-tokenization-sdk";
 
-const holdRequest = new CreateHoldRequest({
-  tokenId: "0.0.1234567",
-  holdId: "HOLD123",
-  from: "0.0.1111111",
-  to: "0.0.2222222",
-  notary: "0.0.3333333",
-  amount: 100,
-  expiration: Math.floor(Date.now() / 1000) + 86400, // 1 day expiration
+const holdRequest = new CreateHoldByPartitionRequest({
+  securityId: "0.0.1234567",
+  partitionId: "0x0000000000000000000000000000000000000000000000000000000000000001",
+  amount: "100",
+  escrowId: "0.0.3333333", // account that can release / execute the hold
+  targetId: "0.0.2222222", // destination once executed
+  expirationDate: (Math.floor(Date.now() / 1000) + 86400).toString(), // 1 day
 });
 
 await Security.createHoldByPartition(holdRequest);

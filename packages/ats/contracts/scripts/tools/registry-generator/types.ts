@@ -50,7 +50,6 @@ export interface ContractFile {
  */
 export interface CategorizedContracts {
   facets: ContractFile[];
-  timeTravelFacets: ContractFile[];
   infrastructure: ContractFile[];
   test: ContractFile[];
   interfaces: ContractFile[];
@@ -128,7 +127,6 @@ export interface ContractMetadata {
   sourceFile: string;
   layer: number;
   category: string;
-  hasTimeTravel: boolean;
   roles: RoleDefinition[];
   resolverKey?: { name: string; value: string };
   methods: MethodDefinition[];
@@ -161,8 +159,6 @@ export interface RegistryConfig {
   rolesPaths?: string[];
   /** Include storage wrappers in registry */
   includeStorageWrappers?: boolean;
-  /** Include TimeTravel variant pairing */
-  includeTimeTravel?: boolean;
   /** Extract natspec descriptions from contracts */
   extractNatspec?: boolean;
   /** Output file path */
@@ -195,7 +191,6 @@ export interface RegistryStats {
   totalMocks: number;
   totalRoles: number;
   totalResolverKeys: number;
-  withTimeTravel: number;
   withRoles: number;
   byCategory: Record<string, number>;
   byLayer: Record<number, number>;

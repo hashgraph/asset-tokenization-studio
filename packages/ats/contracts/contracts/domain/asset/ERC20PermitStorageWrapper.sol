@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import { EMPTY_BYTES32 } from "../../constants/values.sol";
 import { IERC20Permit } from "../../facets/erc20Permit/IERC20Permit.sol";
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import { TYPEHASH_ERC20_PERMIT } from "../../constants/eip712.sol";
@@ -50,10 +51,9 @@ library ERC20PermitStorageWrapper {
             revert IERC20Permit.ERC2612ExpiredSignature(deadline);
         }
 
-        uint256 currentNonce = NonceStorageWrapper.getNonceFor(owner);
+        uint256 currentNonce = NonceStorageWrapper.getNonceFor(owner, EMPTY_BYTES32);
 
-        NonceStorageWrapper.setNonceFor(owner);
-        // solhint-disable-next-line func-name-mixedcase
+        NonceStorageWrapper.setNonceFor(owner, EMPTY_BYTES32);
         address signer = ECDSA.recover(
             ECDSA.toTypedDataHash(
                 DOMAIN_SEPARATOR(),
@@ -82,7 +82,7 @@ library ERC20PermitStorageWrapper {
         return
             _getDomainHash(
                 ERC20StorageWrapper.getName(),
-                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
+                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion()),
                 EvmAccessors.getChainId(),
                 address(this)
             );

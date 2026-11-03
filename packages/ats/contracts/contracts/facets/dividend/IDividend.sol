@@ -90,41 +90,41 @@ interface IDividend is IDividendTypes {
      *      project's date-validity modifiers; emits `DividendSet`. Reverts with
      *      `DividendCreationFailed` if the underlying corporate-action store rejects the
      *      insert.
-     * @param newDividend Dividend parameters captured at scheduling time.
+     * @param _newDividend Dividend parameters captured at scheduling time.
      * @return dividendId_ One-indexed identifier assigned to the new dividend.
      */
-    function setDividend(Dividend calldata newDividend) external returns (uint256 dividendId_);
+    function setDividend(Dividend calldata _newDividend) external returns (uint256 dividendId_);
 
     /**
      * @notice Cancels a previously scheduled dividend before its execution date is reached.
      * @dev Restricted to `ROLE_CORPORATE_ACTION` and gated by the unpaused state. Reverts with
      *      `DividendAlreadyExecuted` if the execution date has passed; otherwise marks the
      *      corporate action disabled and emits `DividendCancelled`.
-     * @param dividendId One-indexed identifier of the dividend to cancel.
+     * @param _dividendId One-indexed identifier of the dividend to cancel.
      * @return success_ True if the cancellation was recorded.
      */
-    function cancelDividend(uint256 dividendId) external returns (bool success_);
+    function cancelDividend(uint256 _dividendId) external returns (bool success_);
 
     /**
      * @notice Force-cancels a dividend regardless of its execution date.
      * @dev Restricted to `ROLE_CORPORATE_ACTION_FORCE_CANCEL` and gated by the unpaused state
      *      and `onlyMatchingActionType`. Marks the corporate action disabled unconditionally —
      *      bypasses `DividendAlreadyExecuted` — and emits `DividendForceCancelled`.
-     * @param dividendId One-indexed identifier of the dividend to force-cancel.
+     * @param _dividendId One-indexed identifier of the dividend to force-cancel.
      * @return success_ True if the force-cancellation was recorded.
      */
-    function forceCancelDividend(uint256 dividendId) external returns (bool success_);
+    function forceCancelDividend(uint256 _dividendId) external returns (bool success_);
 
     /**
      * @notice Returns the persisted dividend record together with its cancelled flag.
      * @dev Reverts via `onlyMatchingActionType` if `dividendId` does not resolve to a dividend
      *      corporate action.
-     * @param dividendId One-indexed dividend identifier.
+     * @param _dividendId One-indexed dividend identifier.
      * @return registeredDividend_ Stored dividend parameters bound to their snapshot id.
      * @return isDisabled_ True if the dividend has been cancelled.
      */
     function getDividend(
-        uint256 dividendId
+        uint256 _dividendId
     ) external view returns (RegisteredDividend memory registeredDividend_, bool isDisabled_);
 
     /**
@@ -133,13 +133,13 @@ interface IDividend is IDividendTypes {
      * @dev Reverts via `onlyMatchingActionType` if `dividendId` does not resolve to a dividend
      *      corporate action. Balance and decimals fields are only meaningful once
      *      `recordDateReached` is set on the returned struct.
-     * @param dividendId One-indexed dividend identifier.
-     * @param account Holder address to query.
+     * @param _dividendId One-indexed dividend identifier.
+     * @param _account Holder address to query.
      * @return dividendFor_ Holder-scoped dividend view.
      */
     function getDividendFor(
-        uint256 dividendId,
-        address account
+        uint256 _dividendId,
+        address _account
     ) external view returns (DividendFor memory dividendFor_);
 
     /**
@@ -147,13 +147,13 @@ interface IDividend is IDividendTypes {
      * @dev Reverts via `onlyMatchingActionType` if `dividendId` does not resolve to a dividend
      *      corporate action. Numerator and denominator are only meaningful once
      *      `recordDateReached` is set on the returned struct.
-     * @param dividendId One-indexed dividend identifier.
-     * @param account Holder address to query.
+     * @param _dividendId One-indexed dividend identifier.
+     * @param _account Holder address to query.
      * @return dividendAmountFor_ Fractional payable amount for the holder.
      */
     function getDividendAmountFor(
-        uint256 dividendId,
-        address account
+        uint256 _dividendId,
+        address _account
     ) external view returns (DividendAmountFor memory dividendAmountFor_);
 
     /**

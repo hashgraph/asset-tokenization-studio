@@ -5,14 +5,13 @@ import {
   AtsRoleHash,
   AtsRoleName,
   DeepPartial,
-  EQUITY_CONFIG_ID,
   RegulationSubType,
   RegulationType,
+  CONFIG_IDS,
 } from "@scripts";
 import { FactoryRegulationDataParams, Rbac, SecurityDataParams } from "@scripts/domain";
 import { IAsset, BusinessLogicResolver } from "@contract-types";
 import { MaxUint256, encodeBytes32String, parseUnits, ZeroAddress } from "ethers";
-import { isinGenerator } from "@thomaschaplin/isin-generator";
 
 export const MAX_UINT256 = MaxUint256;
 export const MAX_UINT8 = 255;
@@ -75,11 +74,10 @@ export function getSecurityData(
     isControllable: params?.isControllable ?? DEFAULT_SECURITY_PARAMS.isControllable,
     isWhiteList: params?.isWhiteList ?? DEFAULT_SECURITY_PARAMS.isWhiteList,
     maxSupply: params?.maxSupply ?? DEFAULT_SECURITY_PARAMS.maxSupply,
-    erc20MetadataInfo: {
-      name: params?.erc20MetadataInfo?.name ?? DEFAULT_SECURITY_PARAMS.name,
-      symbol: params?.erc20MetadataInfo?.symbol ?? DEFAULT_SECURITY_PARAMS.symbol,
-      decimals: params?.erc20MetadataInfo?.decimals ?? DEFAULT_SECURITY_PARAMS.decimals,
-      isin: params?.erc20MetadataInfo?.isin ?? isinGenerator(),
+    erc20Metadata: {
+      name: params?.erc20Metadata?.name ?? DEFAULT_SECURITY_PARAMS.name,
+      symbol: params?.erc20Metadata?.symbol ?? DEFAULT_SECURITY_PARAMS.symbol,
+      decimals: params?.erc20Metadata?.decimals ?? DEFAULT_SECURITY_PARAMS.decimals,
     },
     clearingActive: params?.clearingActive ?? DEFAULT_SECURITY_PARAMS.clearingActive,
     internalKycActivated: params?.internalKycActivated ?? DEFAULT_SECURITY_PARAMS.internalKycActivated,
@@ -89,9 +87,10 @@ export function getSecurityData(
     erc20VotesActivated: params?.erc20VotesActivated ?? DEFAULT_SECURITY_PARAMS.erc20VotesActivated,
     compliance: params?.compliance ?? DEFAULT_SECURITY_PARAMS.compliance,
     identityRegistry: params?.identityRegistry ?? DEFAULT_SECURITY_PARAMS.identityRegistry,
-    resolverProxyConfiguration: {
-      key: params?.resolverProxyConfiguration?.key ?? EQUITY_CONFIG_ID,
-      version: params?.resolverProxyConfiguration?.version ?? 1,
+    resolverProxyConfigurationV2: {
+      configurationId: params?.resolverProxyConfigurationV2?.configurationId ?? CONFIG_IDS.equity,
+      configurationVersion: params?.resolverProxyConfigurationV2?.configurationVersion ?? 1,
+      replacementEnabled: params?.resolverProxyConfigurationV2?.replacementEnabled ?? true,
     },
   };
 }

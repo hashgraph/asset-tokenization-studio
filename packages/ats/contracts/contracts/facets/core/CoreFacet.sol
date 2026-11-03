@@ -7,14 +7,17 @@ import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunc
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 /**
  * @title CoreFacet
+ * @author Asset Tokenization Studio Team
  * @notice Diamond facet for the Core domain. Registers the 8 selectors that define the base
  *         identity of the token (ERC20 metadata readers, ERC3643 name/symbol setters and version).
  */
 contract CoreFacet is Core, IStaticFunctionSelectors {
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = RESOLVER_KEY_CORE;
     }
 
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
@@ -29,6 +32,7 @@ contract CoreFacet is Core, IStaticFunctionSelectors {
             );
     }
 
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
         return Bytes4Builder.build(type(ICore).interfaceId);
     }

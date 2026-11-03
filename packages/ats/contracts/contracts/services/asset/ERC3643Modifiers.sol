@@ -25,7 +25,7 @@ abstract contract ERC3643Modifiers {
      * @param _account The address to validate
      */
     modifier onlyUnrecoveredAddress(address _account) {
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_account);
+        ERC3643StorageWrapper.checkUnrecoveredAddress(_account);
         _;
     }
 
@@ -80,7 +80,20 @@ abstract contract ERC3643Modifiers {
      * @param _to The recipient/target address to _verify.
      */
     modifier onlyIdentifiedAddresses(address _from, address _to) {
-        ERC1594StorageWrapper.requireIdentified(_from, _to);
+        ERC1594StorageWrapper.checkIdentity(_from, _to);
+        _;
+    }
+
+    /**
+     * @dev Modifier that rejects a zero-amount unfreeze request.
+     *
+     * Requirements:
+     * - `_amount` must be strictly positive.
+     *
+     * @param _amount The amount being unfrozen.
+     */
+    modifier onlyPositiveUnfreezeAmount(uint256 _amount) {
+        ERC3643StorageWrapper.checkNonZeroFreezeAmount(_amount);
         _;
     }
 }

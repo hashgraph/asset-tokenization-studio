@@ -8,18 +8,20 @@ import { ERC1410StorageWrapper } from "../asset/ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "../asset/ERC20StorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "../asset/SnapshotsStorageWrapper.sol";
 import { HoldStorageWrapper } from "../asset/HoldStorageWrapper.sol";
-import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
+import { IERC1410Types } from "../../facets/commonTypes/IERC1410Types.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { IClearingTypes } from "../../facets/clearing/IClearingTypes.sol";
-import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
-import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
+import { ICompliance } from "../../facets/compliance/externalInterfaces/ICompliance.sol";
+import { IERC3643Types } from "../../facets/commonTypes/IERC3643Types.sol";
 import { IHoldTypes } from "../../facets/hold/IHoldTypes.sol";
 import { ThirdPartyType } from "../asset/types/ThirdPartyType.sol";
 import { HoldOps } from "./HoldOps.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 import { CLEARING_HOLD_CREATION } from "../../constants/values.sol";
+import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 /**
  * @title ClearingLifecycleOps - Lifecycle path for cleared deferred operations
@@ -175,7 +177,7 @@ library ClearingLifecycleOps {
         TokenCoreOps.checkCompliance(_id.tokenHolder, transferData.destination, false);
 
         // Notify compliance module for every partition; zero-target short-circuits in LowLevelCall.
-        (ERC3643StorageWrapper.erc3643Storage().compliance).functionCall(
+        address(ERC3643StorageWrapper.getCompliance()).functionCall(
             abi.encodeWithSelector(
                 ICompliance.transferred.selector,
                 _id.tokenHolder,
@@ -228,7 +230,7 @@ library ClearingLifecycleOps {
         ERC1410StorageWrapper.reduceTotalSupplyByPartition(_id.partition, redeemData.amount);
 
         // Notify compliance module for every partition; zero-target short-circuits in LowLevelCall.
-        (ERC3643StorageWrapper.erc3643Storage().compliance).functionCall(
+        address(ERC3643StorageWrapper.getCompliance()).functionCall(
             abi.encodeWithSelector(ICompliance.destroyed.selector, _id.tokenHolder, redeemData.amount),
             IERC3643Types.ComplianceCallFailed.selector
         );
@@ -268,38 +270,40 @@ library ClearingLifecycleOps {
         // Always restore ABAF-adjusted amount to holder
         transferClearingBalance(_id.partition, _id.tokenHolder, _id.tokenHolder, holdData.amount);
 
-        // Approve: create hold and return holdId
-        if (_actionType == IClearingTypes.ClearingActionType.Approve) {
-            IHoldTypes.Hold memory hold = IHoldTypes.Hold({
-                amount: holdData.amount,
-                expirationTimestamp: holdData.holdExpirationTimestamp,
-                escrow: holdData.holdEscrow,
-                to: holdData.holdTo,
-                data: holdData.holdData
-            });
+        if (_actionType != IClearingTypes.ClearingActionType.Approve) return operationData_;
 
-            (bool success, uint256 holdId) = HoldOps.createHoldByPartition(
+        if (holdData.holdExpirationTimestamp <= TimeTravelStorageWrapper.getBlockTimestamp())
+            revert ICommonErrors.WrongExpirationTimestamp();
+
+        IHoldTypes.Hold memory hold = IHoldTypes.Hold({
+            amount: holdData.amount,
+            expirationTimestamp: holdData.holdExpirationTimestamp,
+            escrow: holdData.holdEscrow,
+            to: holdData.holdTo,
+            data: holdData.holdData
+        });
+
+        (bool success, uint256 holdId) = HoldOps.createHoldByPartition(
+            _id.partition,
+            _id.tokenHolder,
+            hold,
+            holdData.operatorData,
+            holdData.operatorType
+        );
+
+        _checkUnexpectedError(!success, CLEARING_HOLD_CREATION);
+
+        if (holdData.operatorType == ThirdPartyType.AUTHORIZED) {
+            address thirdPartyAddress = ClearingStorageWrapper.getClearingThirdParty(
                 _id.partition,
                 _id.tokenHolder,
-                hold,
-                holdData.operatorData,
-                holdData.operatorType
+                IClearingTypes.ClearingOperationType.HoldCreation,
+                _id.clearingId
             );
-
-            _checkUnexpectedError(!success, CLEARING_HOLD_CREATION);
-
-            if (holdData.operatorType == ThirdPartyType.AUTHORIZED) {
-                address thirdPartyAddress = ClearingStorageWrapper.getClearingThirdParty(
-                    _id.partition,
-                    _id.tokenHolder,
-                    IClearingTypes.ClearingOperationType.HoldCreation,
-                    _id.clearingId
-                );
-                HoldStorageWrapper.setThirdPartyForHold(thirdPartyAddress, _id.partition, _id.tokenHolder, holdId);
-            }
-
-            operationData_ = abi.encode(holdId);
+            HoldStorageWrapper.setThirdPartyForHold(thirdPartyAddress, _id.partition, _id.tokenHolder, holdId);
         }
+
+        operationData_ = abi.encode(holdId);
     }
 
     /**
@@ -362,17 +366,15 @@ library ClearingLifecycleOps {
         uint256 _amount
     ) private {
         ThirdPartyType operatorType = ClearingStorageWrapper.getClearingThirdPartyType(_id);
-        if (operatorType != ThirdPartyType.AUTHORIZED && operatorType != ThirdPartyType.OPERATOR) return;
-        TokenCoreOps.increaseAllowedBalance(
+        if (operatorType != ThirdPartyType.AUTHORIZED) return;
+        address spender = ClearingStorageWrapper.getClearingThirdParty(
+            _id.partition,
             _id.tokenHolder,
-            ClearingStorageWrapper.getClearingThirdParty(
-                _id.partition,
-                _id.tokenHolder,
-                _id.clearingOperationType,
-                _id.clearingId
-            ),
-            _amount
+            _id.clearingOperationType,
+            _id.clearingId
         );
+        if (spender == address(0)) return;
+        TokenCoreOps.increaseAllowedBalance(_id.tokenHolder, spender, _amount);
     }
 
     /**

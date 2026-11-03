@@ -64,7 +64,7 @@ library CorporateActionsStorageWrapper {
         bytes32 _actionType,
         bytes memory _data
     ) internal returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_) {
-        CorporateActionDataStorage storage ca = corporateActionsStorage();
+        CorporateActionDataStorage storage ca = _corporateActionsStorage();
 
         bytes32 contentHash = keccak256(abi.encode(_actionType, _data));
         if (ca.actionsContentHashes[contentHash]) {
@@ -89,7 +89,7 @@ library CorporateActionsStorageWrapper {
      * @param actionId The ID of the action to cancel.
      */
     function cancelCorporateAction(bytes32 actionId) internal {
-        corporateActionsStorage().actionsData[actionId].isDisabled = true;
+        _corporateActionsStorage().actionsData[actionId].isDisabled = true;
     }
 
     /**
@@ -98,7 +98,7 @@ library CorporateActionsStorageWrapper {
      * @param newData The new encoded action payload.
      */
     function updateCorporateActionData(bytes32 actionId, bytes memory newData) internal {
-        corporateActionsStorage().actionsData[actionId].data = newData;
+        _corporateActionsStorage().actionsData[actionId].data = newData;
     }
 
     /**
@@ -111,7 +111,7 @@ library CorporateActionsStorageWrapper {
      * @param newResult The encoded result data.
      */
     function updateCorporateActionResult(bytes32 actionId, uint256 resultId, bytes memory newResult) internal {
-        CorporateActionDataStorage storage ca = corporateActionsStorage();
+        CorporateActionDataStorage storage ca = _corporateActionsStorage();
         bytes[] memory results = ca.actionsData[actionId].results;
         uint256 length = results.length;
         if (length > resultId) {
@@ -135,7 +135,7 @@ library CorporateActionsStorageWrapper {
      * @return True if the action is disabled; false otherwise.
      */
     function isCorporateActionDisabled(bytes32 actionId) internal view returns (bool) {
-        return corporateActionsStorage().actionsData[actionId].isDisabled;
+        return _corporateActionsStorage().actionsData[actionId].isDisabled;
     }
 
     /**
@@ -145,6 +145,7 @@ library CorporateActionsStorageWrapper {
      * @param _index The type-scoped index to validate.
      */
     function requireMatchingActionType(bytes32 _actionType, uint256 _index) internal view {
+        // solhint-disable-next-line gas-strict-inequalities
         if (getCorporateActionCountByType(_actionType) <= _index)
             revert ICorporateActions.WrongIndexForAction(_index, _actionType);
     }
@@ -160,7 +161,7 @@ library CorporateActionsStorageWrapper {
     function getCorporateAction(
         bytes32 _corporateActionId
     ) internal view returns (bytes32 actionType_, uint256 actionTypeId_, bytes memory data_, bool isDisabled_) {
-        CorporateActionDataStorage storage ca = corporateActionsStorage();
+        CorporateActionDataStorage storage ca = _corporateActionsStorage();
         actionType_ = ca.actionsData[_corporateActionId].actionType;
         data_ = ca.actionsData[_corporateActionId].data;
         actionTypeId_ = ca.actionsData[_corporateActionId].actionIdByType;
@@ -172,7 +173,7 @@ library CorporateActionsStorageWrapper {
      * @return corporateActionCount_ The number of distinct corporate actions.
      */
     function getCorporateActionCount() internal view returns (uint256 corporateActionCount_) {
-        return corporateActionsStorage().actions.length();
+        return _corporateActionsStorage().actions.length();
     }
 
     /**
@@ -185,7 +186,7 @@ library CorporateActionsStorageWrapper {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (bytes32[] memory corporateActionIds_) {
-        corporateActionIds_ = corporateActionsStorage().actions.getFromSet(_pageIndex, _pageLength);
+        corporateActionIds_ = _corporateActionsStorage().actions.getFromSet(_pageIndex, _pageLength);
     }
 
     /**
@@ -194,7 +195,7 @@ library CorporateActionsStorageWrapper {
      * @return corporateActionCount_ The number of actions with the given type.
      */
     function getCorporateActionCountByType(bytes32 _actionType) internal view returns (uint256 corporateActionCount_) {
-        return corporateActionsStorage().actionsByType[_actionType].length;
+        return _corporateActionsStorage().actionsByType[_actionType].length;
     }
 
     /**
@@ -207,7 +208,7 @@ library CorporateActionsStorageWrapper {
         bytes32 _actionType,
         uint256 _typeIndex
     ) internal view returns (bytes32 corporateActionId_) {
-        return corporateActionsStorage().actionsByType[_actionType][_typeIndex];
+        return _corporateActionsStorage().actionsByType[_actionType][_typeIndex];
     }
 
     /**
@@ -225,7 +226,7 @@ library CorporateActionsStorageWrapper {
         (uint256 start, uint256 end) = Pagination.getStartAndEnd(_pageIndex, _pageLength);
         uint256 length = Pagination.getSize(start, end, getCorporateActionCountByType(_actionType));
         corporateActionIds_ = new bytes32[](length);
-        CorporateActionDataStorage storage ca = corporateActionsStorage();
+        CorporateActionDataStorage storage ca = _corporateActionsStorage();
         unchecked {
             for (uint256 i; i < length; ++i) {
                 corporateActionIds_[i] = ca.actionsByType[_actionType][start];
@@ -243,7 +244,7 @@ library CorporateActionsStorageWrapper {
      */
     function getCorporateActionResult(bytes32 actionId, uint256 resultId) internal view returns (bytes memory result_) {
         if (getCorporateActionResultCount(actionId) > resultId)
-            result_ = corporateActionsStorage().actionsData[actionId].results[resultId];
+            result_ = _corporateActionsStorage().actionsData[actionId].results[resultId];
     }
 
     /**
@@ -252,7 +253,7 @@ library CorporateActionsStorageWrapper {
      * @return The number of result entries stored for the action.
      */
     function getCorporateActionResultCount(bytes32 actionId) internal view returns (uint256) {
-        return corporateActionsStorage().actionsData[actionId].results.length;
+        return _corporateActionsStorage().actionsData[actionId].results.length;
     }
 
     /**
@@ -261,7 +262,7 @@ library CorporateActionsStorageWrapper {
      * @return data_ The encoded action payload.
      */
     function getCorporateActionData(bytes32 actionId) internal view returns (bytes memory data_) {
-        return corporateActionsStorage().actionsData[actionId].data;
+        return _corporateActionsStorage().actionsData[actionId].data;
     }
 
     /**
@@ -372,7 +373,7 @@ library CorporateActionsStorageWrapper {
      * @return True if the content hash is registered; false otherwise.
      */
     function actionContentHashExists(bytes32 _contentHash) internal view returns (bool) {
-        return corporateActionsStorage().actionsContentHashes[_contentHash];
+        return _corporateActionsStorage().actionsContentHashes[_contentHash];
     }
 
     /**
@@ -381,7 +382,7 @@ library CorporateActionsStorageWrapper {
      *      deterministic address based on STORAGE_LOCATION_CORPORATE_ACTION.
      * @return corporateActions_ The storage struct at the designated location.
      */
-    function corporateActionsStorage() internal pure returns (CorporateActionDataStorage storage corporateActions_) {
+    function _corporateActionsStorage() private pure returns (CorporateActionDataStorage storage corporateActions_) {
         bytes32 position = STORAGE_LOCATION_CORPORATE_ACTION;
         // solhint-disable-next-line no-inline-assembly
         assembly {

@@ -39,11 +39,12 @@ abstract contract ERC20Votes is IERC20Votes, Modifiers {
         return ERC20VotesStorageWrapper.clock();
     }
 
+    /* solhint-disable func-name-mixedcase */
     /// @inheritdoc IERC6372
-    // solhint-disable-next-line func-name-mixedcase
     function CLOCK_MODE() external view override returns (string memory) {
         return ERC20VotesStorageWrapper.CLOCK_MODE();
     }
+    /* solhint-enable func-name-mixedcase */
 
     /// @inheritdoc IVotes
     function getVotes(address _account) external view override returns (uint256) {

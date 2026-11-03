@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ROLE_PROTECTED_PARTITIONS_PARTICIPANT } from "../../constants/roles.sol";
-import { IProtectedPartitions } from "../../facets/protectedPartition/IProtectedPartitions.sol";
+import { IProtectedPartitions } from "../../facets/protectedPartitions/IProtectedPartitions.sol";
 import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 import { IClearingTypes } from "../../facets/clearing/IClearingTypes.sol";
 import { IHoldTypes } from "../../facets/hold/IHoldTypes.sol";
@@ -58,23 +58,18 @@ library ProtectedPartitionsStorageWrapper {
      * @return success_ Always `true`; preserves the facet's API contract.
      */
     function initializeProtectedPartitions(bool _protectPartitions) internal returns (bool success_) {
-        protectedPartitionsStorage().arePartitionsProtected = _protectPartitions;
+        _protectedPartitionsStorage().arePartitionsProtected = _protectPartitions;
         success_ = true;
     }
 
     /**
-     * @notice Sets the partition-protection flag and emits the corresponding state event.
-     * @dev Emits `PartitionsProtected` when the flag is turned on and `PartitionsUnProtected`
-     *      when it is turned off.
+     * @notice Sets the partition-protection flag.
+     * @dev The calling facet (`ProtectedPartitions`) emits `PartitionsProtected` when the flag
+     *      is turned on and `PartitionsUnProtected` when it is turned off.
      * @param _protected New value of the partition-protection flag.
      */
     function setProtectedPartitions(bool _protected) internal {
-        protectedPartitionsStorage().arePartitionsProtected = _protected;
-        if (_protected) {
-            emit IProtectedPartitions.PartitionsProtected(EvmAccessors.getMsgSender());
-            return;
-        }
-        emit IProtectedPartitions.PartitionsUnProtected(EvmAccessors.getMsgSender());
+        _protectedPartitionsStorage().arePartitionsProtected = _protected;
     }
 
     /**
@@ -90,7 +85,7 @@ library ProtectedPartitionsStorageWrapper {
      * @return True when the protection flag is set.
      */
     function arePartitionsProtected() internal view returns (bool) {
-        return protectedPartitionsStorage().arePartitionsProtected;
+        return _protectedPartitionsStorage().arePartitionsProtected;
     }
 
     /**
@@ -162,7 +157,7 @@ library ProtectedPartitionsStorageWrapper {
                 ),
                 _protectionData.signature,
                 _name,
-                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
+                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion()),
                 EvmAccessors.getChainId(),
                 address(this)
             );
@@ -210,7 +205,7 @@ library ProtectedPartitionsStorageWrapper {
                 _getMessageHashRedeem(_partition, _from, _amount, _protectionData.deadline, _protectionData.nonce),
                 _protectionData.signature,
                 _name,
-                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
+                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion()),
                 EvmAccessors.getChainId(),
                 address(this)
             );
@@ -258,7 +253,7 @@ library ProtectedPartitionsStorageWrapper {
                 _getMessageHashCreateHold(_partition, _from, _protectedHold),
                 _signature,
                 _name,
-                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
+                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion()),
                 EvmAccessors.getChainId(),
                 address(this)
             );
@@ -305,7 +300,7 @@ library ProtectedPartitionsStorageWrapper {
                 _getMessageHashClearingCreateHold(_protectedClearingOperation, _hold),
                 _signature,
                 _name,
-                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
+                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion()),
                 EvmAccessors.getChainId(),
                 address(this)
             );
@@ -356,7 +351,7 @@ library ProtectedPartitionsStorageWrapper {
                 _getMessageHashClearingTransfer(_protectedClearingOperation, _to, _amount),
                 _signature,
                 _name,
-                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
+                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion()),
                 EvmAccessors.getChainId(),
                 address(this)
             );
@@ -403,7 +398,7 @@ library ProtectedPartitionsStorageWrapper {
                 _getMessageHashClearingRedeem(_protectedClearingOperation, _amount),
                 _signature,
                 _name,
-                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
+                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyConfigurationVersion()),
                 EvmAccessors.getChainId(),
                 address(this)
             );
@@ -437,8 +432,8 @@ library ProtectedPartitionsStorageWrapper {
      * @return protectedPartitions_ Storage reference to the
      * `ProtectedPartitionsDataStorage` struct.
      */
-    function protectedPartitionsStorage()
-        internal
+    function _protectedPartitionsStorage()
+        private
         pure
         returns (ProtectedPartitionsDataStorage storage protectedPartitions_)
     {

@@ -34,7 +34,7 @@ abstract contract NominalValueAtSnapshot is INominalValueAtSnapshot, Modifiers {
     /// @inheritdoc INominalValueAtSnapshot
     function nominalValueDecimalsAtSnapshot(
         uint256 _snapshotID
-    ) external view override returns (uint8 nominalValueDecimals_) {
+    ) external view override returns (uint256 nominalValueDecimals_) {
         nominalValueDecimals_ = SnapshotsStorageWrapper.nominalValueDecimalsAtSnapshot(_snapshotID);
     }
 }

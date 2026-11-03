@@ -29,11 +29,11 @@ import {
 
 // Domain layer - ATS-specific business logic
 import {
-  EQUITY_CONFIG_ID,
   atsRegistry,
   deployOrchestratorLibraries,
   getFacetLibraryLinks,
   hasOrchestratorLibraryAddresses,
+  CONFIG_IDS,
 } from "@scripts/domain";
 
 // Test helpers
@@ -434,7 +434,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
 
       // Step 5: Create configuration with all facets
       const configResult = await createBatchConfiguration(blrContract, {
-        configurationId: EQUITY_CONFIG_ID,
+        configurationId: CONFIG_IDS.equity,
         facets: [
           {
             facetName: "AccessControlFacet",
@@ -458,7 +458,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
       expect(configResult.success).to.be.true;
       if (configResult.success) {
         expect(configResult.data.facetKeys.length).to.equal(TEST_SIZES.TRIPLE);
-        expect(configResult.data.configurationId).to.equal(EQUITY_CONFIG_ID);
+        expect(configResult.data.configurationId).to.equal(CONFIG_IDS.equity);
 
         // Verify external facet is included
         const externalFacet = configResult.data.facetKeys.find(

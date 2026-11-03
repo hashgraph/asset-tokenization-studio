@@ -1,0 +1,521 @@
+# IProceedRecipients
+
+_Asset Tokenization Studio Team_
+
+> IProceedRecipients
+
+Interface for managing the set of proceed recipients registered on a token.
+
+_Proceed recipients are addresses entitled to receive token proceeds (e.g. on redemption). Provides one-shot initialisation, CRUD operations, and paginated read queries._
+
+## Methods
+
+### addProceedRecipient
+
+```solidity
+function addProceedRecipient(address _proceedRecipient, bytes _data) external nonpayable
+```
+
+Registers a new proceed recipient on the token.
+
+#### Parameters
+
+| Name               | Type    | Description                                         |
+| ------------------ | ------- | --------------------------------------------------- |
+| \_proceedRecipient | address | Address to add as a proceed recipient.              |
+| \_data             | bytes   | Arbitrary data to associate with the new recipient. |
+
+### getProceedRecipientData
+
+```solidity
+function getProceedRecipientData(address _proceedRecipient) external view returns (bytes)
+```
+
+Returns the arbitrary data stored for a registered proceed recipient.
+
+#### Parameters
+
+| Name               | Type    | Description                                |
+| ------------------ | ------- | ------------------------------------------ |
+| \_proceedRecipient | address | Address of the proceed recipient to query. |
+
+#### Returns
+
+| Name | Type  | Description                                   |
+| ---- | ----- | --------------------------------------------- |
+| \_0  | bytes | Arbitrary data associated with the recipient. |
+
+### getProceedRecipients
+
+```solidity
+function getProceedRecipients(uint256 _pageIndex, uint256 _pageLength) external view returns (address[] proceedRecipients_)
+```
+
+Returns a paginated slice of the registered proceed-recipient addresses.
+
+#### Parameters
+
+| Name         | Type    | Description                                     |
+| ------------ | ------- | ----------------------------------------------- |
+| \_pageIndex  | uint256 | Zero-based index of the page to retrieve.       |
+| \_pageLength | uint256 | Maximum number of addresses to return per page. |
+
+#### Returns
+
+| Name                | Type      | Description                                                  |
+| ------------------- | --------- | ------------------------------------------------------------ |
+| proceedRecipients\_ | address[] | Array of proceed-recipient addresses for the requested page. |
+
+### getProceedRecipientsCount
+
+```solidity
+function getProceedRecipientsCount() external view returns (uint256)
+```
+
+Returns the total number of registered proceed recipients.
+
+#### Returns
+
+| Name | Type    | Description                                                          |
+| ---- | ------- | -------------------------------------------------------------------- |
+| \_0  | uint256 | Total count of proceed recipients currently registered on the token. |
+
+### initializeProceedRecipients
+
+```solidity
+function initializeProceedRecipients(address[] _proceedRecipients, bytes[] _data) external nonpayable
+```
+
+Initialises the proceed-recipients capability with a seed list of recipients.
+
+_Callable once during initialisation. Requires `_proceedRecipients` and `_data` arrays to be of identical length and contain non-zero addresses. Emits `ProceedRecipientsInitialized` upon successful registration._
+
+#### Parameters
+
+| Name                | Type      | Description                                                                  |
+| ------------------- | --------- | ---------------------------------------------------------------------------- |
+| \_proceedRecipients | address[] | Initial array of proceed-recipient addresses to register.                    |
+| \_data              | bytes[]   | Per-recipient arbitrary data, matching each address in `_proceedRecipients`. |
+
+### isProceedRecipient
+
+```solidity
+function isProceedRecipient(address _proceedRecipient) external view returns (bool)
+```
+
+Returns whether the given address is a registered proceed recipient.
+
+#### Parameters
+
+| Name               | Type    | Description       |
+| ------------------ | ------- | ----------------- |
+| \_proceedRecipient | address | Address to check. |
+
+#### Returns
+
+| Name | Type | Description                                                             |
+| ---- | ---- | ----------------------------------------------------------------------- |
+| \_0  | bool | True if the address is a registered proceed recipient; false otherwise. |
+
+### removeProceedRecipient
+
+```solidity
+function removeProceedRecipient(address _proceedRecipient) external nonpayable
+```
+
+Removes an existing proceed recipient from the token.
+
+#### Parameters
+
+| Name               | Type    | Description                                       |
+| ------------------ | ------- | ------------------------------------------------- |
+| \_proceedRecipient | address | Address to remove from the proceed-recipient set. |
+
+### updateProceedRecipientData
+
+```solidity
+function updateProceedRecipientData(address _proceedRecipient, bytes _data) external nonpayable
+```
+
+Updates the arbitrary data stored for an existing proceed recipient.
+
+#### Parameters
+
+| Name               | Type    | Description                                            |
+| ------------------ | ------- | ------------------------------------------------------ |
+| \_proceedRecipient | address | Address of the recipient whose data should be updated. |
+| \_data             | bytes   | New arbitrary data to store for the recipient.         |
+
+## Events
+
+### ProceedRecipientAdded
+
+```solidity
+event ProceedRecipientAdded(address indexed operator, address indexed proceedRecipient, bytes data)
+```
+
+Emitted when a new proceed recipient is added to the token.
+
+#### Parameters
+
+| Name                       | Type    | Description                                       |
+| -------------------------- | ------- | ------------------------------------------------- |
+| operator `indexed`         | address | Address that executed the add operation.          |
+| proceedRecipient `indexed` | address | Address added as a proceed recipient.             |
+| data                       | bytes   | Arbitrary data associated with the new recipient. |
+
+### ProceedRecipientDataUpdated
+
+```solidity
+event ProceedRecipientDataUpdated(address indexed operator, address indexed proceedRecipient, bytes newData)
+```
+
+Emitted when the data associated with a proceed recipient is updated.
+
+#### Parameters
+
+| Name                       | Type    | Description                                  |
+| -------------------------- | ------- | -------------------------------------------- |
+| operator `indexed`         | address | Address that executed the update.            |
+| proceedRecipient `indexed` | address | Address whose data was updated.              |
+| newData                    | bytes   | New arbitrary data stored for the recipient. |
+
+### ProceedRecipientRemoved
+
+```solidity
+event ProceedRecipientRemoved(address indexed operator, address indexed proceedRecipient)
+```
+
+Emitted when an existing proceed recipient is removed from the token.
+
+#### Parameters
+
+| Name                       | Type    | Description                                     |
+| -------------------------- | ------- | ----------------------------------------------- |
+| operator `indexed`         | address | Address that executed the remove operation.     |
+| proceedRecipient `indexed` | address | Address removed from the proceed-recipient set. |
+
+### ProceedRecipientsInitialized
+
+```solidity
+event ProceedRecipientsInitialized(address[] proceedRecipients, bytes[] data)
+```
+
+Emitted once when the ProceedRecipients capability is initialised on a token.
+
+_Fires exclusively from `initializeProceedRecipients` after the storage write succeeds._
+
+#### Parameters
+
+| Name              | Type      | Description                                                   |
+| ----------------- | --------- | ------------------------------------------------------------- |
+| proceedRecipients | address[] | Initial array of registered proceed-recipient addresses.      |
+| data              | bytes[]   | Arbitrary per-recipient data supplied at initialisation time. |
+
+## Errors
+
+### AccountIsBlocked
+
+```solidity
+error AccountIsBlocked(address account)
+```
+
+Reverts when an operation targets or is requested by a blocked account.
+
+_The blocking policy is enforced by the domain that performs the check._
+
+#### Parameters
+
+| Name    | Type    | Description                                  |
+| ------- | ------- | -------------------------------------------- |
+| account | address | Account rejected by the blocking validation. |
+
+### AlreadyInitialized
+
+```solidity
+error AlreadyInitialized()
+```
+
+Reverts when an initialisation routine is invoked more than once.
+
+_Used by contracts or facets that must be initialised exactly once._
+
+### ContradictoryValuesInArray
+
+```solidity
+error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex)
+```
+
+Reverts when ordered array values contradict expected ordering.
+
+_Indicates that two indexed values cannot both satisfy the required monotonic or range invariant._
+
+#### Parameters
+
+| Name       | Type    | Description                                      |
+| ---------- | ------- | ------------------------------------------------ |
+| lowerIndex | uint256 | Lower array index involved in the contradiction. |
+| upperIndex | uint256 | Upper array index involved in the contradiction. |
+
+### DecimalsTooLarge
+
+```solidity
+error DecimalsTooLarge(uint8 currentDecimals, uint8 newDecimals)
+```
+
+Reverts when the difference between current decimals and new decimals exceeds the maximum value.
+
+_Protects decimals amount difference between current and new not te be greater than maximum._
+
+#### Parameters
+
+| Name            | Type  | Description                  |
+| --------------- | ----- | ---------------------------- |
+| currentDecimals | uint8 | the current decimals amount. |
+| newDecimals     | uint8 | the new decimals amount.     |
+
+### DifferentLengths
+
+```solidity
+error DifferentLengths(uint256 length1, uint256 length2)
+```
+
+Emitted when two arrays or collections expected to have matching lengths differ.
+
+_Reverts operations that require one-to-one correspondence between input parameters._
+
+#### Parameters
+
+| Name    | Type    | Description                               |
+| ------- | ------- | ----------------------------------------- |
+| length1 | uint256 | Length of the first array or collection.  |
+| length2 | uint256 | Length of the second array or collection. |
+
+### ExpiredDeadline
+
+```solidity
+error ExpiredDeadline(uint256 deadline)
+```
+
+Reverts when a signed payload is submitted after its deadline.
+
+_The caller must provide and validate deadlines before accepting the signed operation._
+
+#### Parameters
+
+| Name     | Type    | Description                                     |
+| -------- | ------- | ----------------------------------------------- |
+| deadline | uint256 | Expired deadline carried by the signed payload. |
+
+### ExponentOverflow
+
+```solidity
+error ExponentOverflow(uint256 exponent)
+```
+
+Reverts when an exponent would cause `10 ** exponent` to overflow `uint256`.
+
+_Thrown by `DecimalsLib.checkExponentOverflow` when `exponent &gt;= 78`._
+
+#### Parameters
+
+| Name     | Type    | Description                                  |
+| -------- | ------- | -------------------------------------------- |
+| exponent | uint256 | The exponent that would produce an overflow. |
+
+### GreaterThanMaxUint256
+
+```solidity
+error GreaterThanMaxUint256(uint256 amount, uint8 decimals)
+```
+
+Reverts when multiplying `amount` by `10 ** decimals` would exceed `uint256` max.
+
+_Thrown by `DecimalsLib.calculateDecimalsAdjustment` when `amount &gt; MAX_UINT256 / 10 ** decimals`._
+
+#### Parameters
+
+| Name     | Type    | Description                                |
+| -------- | ------- | ------------------------------------------ |
+| amount   | uint256 | The token amount that cannot be scaled up. |
+| decimals | uint8   | The exponent that causes the overflow.     |
+
+### InvalidDates
+
+```solidity
+error InvalidDates()
+```
+
+Reverts when a date set is invalid.
+
+_Used when the failing date constraint does not require exposing values._
+
+### InvalidTimestamp
+
+```solidity
+error InvalidTimestamp()
+```
+
+Reverts when a timestamp value is invalid.
+
+_Used for shared timestamp validation that is not tied to expiration._
+
+### MaxExternalListSizeReached
+
+```solidity
+error MaxExternalListSizeReached(uint256 max)
+```
+
+Reverts when adding an entry would grow an external list beyond its maximum size.
+
+_Enforced by `ExternalListManagementStorageWrapper.addExternalList` for the external pause, control and KYC lists. The bound exists because each list is iterated in full on the hot path of token operations, so an unbounded list could exceed the gas limit and brick the token._
+
+#### Parameters
+
+| Name | Type    | Description                                               |
+| ---- | ------- | --------------------------------------------------------- |
+| max  | uint256 | Maximum number of entries permitted in the external list. |
+
+### ProceedRecipientAlreadyExists
+
+```solidity
+error ProceedRecipientAlreadyExists(address proceedRecipient)
+```
+
+Thrown when attempting to add an address that is already registered as a proceed recipient.
+
+#### Parameters
+
+| Name             | Type    | Description                                                   |
+| ---------------- | ------- | ------------------------------------------------------------- |
+| proceedRecipient | address | The address that already exists in the proceed-recipient set. |
+
+### ProceedRecipientNotFound
+
+```solidity
+error ProceedRecipientNotFound(address proceedRecipient)
+```
+
+Thrown when an operation targets an address that is not a registered proceed recipient.
+
+#### Parameters
+
+| Name             | Type    | Description                                                  |
+| ---------------- | ------- | ------------------------------------------------------------ |
+| proceedRecipient | address | The address that was not found in the proceed-recipient set. |
+
+### UnexpectedError
+
+```solidity
+error UnexpectedError(bytes4 _errorId)
+```
+
+Reverts when an unreachable validation state is detected.
+
+_Replaces assertions for defensive handling of logically impossible states._
+
+#### Parameters
+
+| Name      | Type   | Description                                        |
+| --------- | ------ | -------------------------------------------------- |
+| \_errorId | bytes4 | Identifier of the unexpected validation condition. |
+
+### WrongDates
+
+```solidity
+error WrongDates(uint256 firstDate, uint256 secondDate)
+```
+
+Reverts when two date values fail their required ordering constraint.
+
+_The expected relationship between both dates is defined by the caller&#39;s validation context._
+
+#### Parameters
+
+| Name       | Type    | Description                                         |
+| ---------- | ------- | --------------------------------------------------- |
+| firstDate  | uint256 | First date participating in the failed comparison.  |
+| secondDate | uint256 | Second date participating in the failed comparison. |
+
+### WrongExpirationTimestamp
+
+```solidity
+error WrongExpirationTimestamp()
+```
+
+Reverts when an expiration timestamp is invalid.
+
+_Used for expired, past, or otherwise unacceptable expiration values._
+
+### WrongNonce
+
+```solidity
+error WrongNonce(uint256 nonce, address account)
+```
+
+Reverts when a nonce does not match the expected value for an account.
+
+_Protects signed operations against replay and out-of-order execution._
+
+#### Parameters
+
+| Name    | Type    | Description                                     |
+| ------- | ------- | ----------------------------------------------- |
+| nonce   | uint256 | Nonce supplied by the caller or signed payload. |
+| account | address | Account for which the nonce validation failed.  |
+
+### WrongSignature
+
+```solidity
+error WrongSignature()
+```
+
+Reverts when a signature fails verification.
+
+_Applies to shared signature validation flows, including EIP-712 payloads and partition-based signatures._
+
+### WrongSignatureLength
+
+```solidity
+error WrongSignatureLength()
+```
+
+Reverts when a signature payload has an invalid byte length.
+
+_Used before signature recovery or verification to reject malformed input._
+
+### WrongTimestamp
+
+```solidity
+error WrongTimestamp(uint256 timeStamp)
+```
+
+Reverts when a scheduled timestamp is not strictly in the future.
+
+_Used for shared scheduling validation where the current block time is read through `TimeTravelStorageWrapper`._
+
+#### Parameters
+
+| Name      | Type    | Description                        |
+| --------- | ------- | ---------------------------------- |
+| timeStamp | uint256 | Timestamp rejected for scheduling. |
+
+### ZeroAddressNotAllowed
+
+```solidity
+error ZeroAddressNotAllowed()
+```
+
+Reverts when the zero address is supplied where it is not permitted.
+
+_Prevents invalid account, contract, or recipient references._
+
+### ZeroValueNotAllowed
+
+```solidity
+error ZeroValueNotAllowed()
+```
+
+Reverts when zero is supplied where a positive value is required.
+
+_Used for shared validation of amounts, limits, factors, or identifiers._

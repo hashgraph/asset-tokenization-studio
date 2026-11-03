@@ -3,7 +3,7 @@
 /**
  * Contract file discovery for registry generation.
  *
- * Scans the contracts directory, categorizes contracts, and pairs TimeTravel variants.
+ * Scans the contracts directory and categorizes contracts.
  * Self-contained with no external infrastructure dependencies.
  *
  * @module registry-generator/core/scanner
@@ -11,7 +11,7 @@
 
 import * as path from "path";
 import { findSolidityFiles, readFile, getRelativePath } from "../utils/fileUtils";
-import { extractContractNames, isFacetName, isTimeTravelVariant, getBaseName } from "../utils/solidityParser";
+import { extractContractNames, isFacetName } from "../utils/solidityParser";
 import type { ContractFile, CategorizedContracts } from "../types";
 
 /**
@@ -69,8 +69,7 @@ export function findAllContracts(contractsDir: string, artifactDir: string): Con
 /**
  * Categorize contracts by type.
  *
- * Organizes contracts into facets, TimeTravel variants, infrastructure, tests, etc.
- * Ensures test contracts are detected before facet detection to avoid misclassification.
+ * Organizes contracts into facets, infrastructure, tests, etc.
  *
  * @param contracts - Array of contract files
  * @returns Categorized contracts grouped by type
@@ -78,7 +77,6 @@ export function findAllContracts(contractsDir: string, artifactDir: string): Con
 export function categorizeContracts(contracts: ContractFile[]): CategorizedContracts {
   const result: CategorizedContracts = {
     facets: [],
-    timeTravelFacets: [],
     infrastructure: [],
     test: [],
     interfaces: [],
@@ -89,13 +87,7 @@ export function categorizeContracts(contracts: ContractFile[]): CategorizedContr
   for (const contract of contracts) {
     const name = contract.primaryContract;
 
-    // TimeTravel variants (CHECK FIRST - they live in test/ dir but are NOT test contracts)
-    if (isTimeTravelVariant(name)) {
-      result.timeTravelFacets.push(contract);
-      continue;
-    }
-
-    // Test/Mock contracts (after TimeTravel check to avoid misclassification)
+    // Test/Mock contracts (checked before facet detection to avoid misclassification)
     // This ensures MockTreasuryFacet goes to test category, not facets
     if (isTestContract(contract)) {
       result.test.push(contract);
@@ -174,44 +166,4 @@ function isTestContract(contract: ContractFile): boolean {
   }
 
   return false;
-}
-
-/**
- * Find TimeTravel pair for a base facet.
- *
- * Searches for a TimeTravel variant with the naming pattern: BaseFacetNameTimeTravel
- *
- * @param baseFacetName - Base facet name
- * @param allContracts - All discovered contracts
- * @returns TimeTravel variant contract file or null if not found
- */
-export function findTimeTravelPair(baseFacetName: string, allContracts: ContractFile[]): ContractFile | null {
-  const timeTravelName = `${baseFacetName}TimeTravel`;
-  return allContracts.find((c) => c.primaryContract === timeTravelName) || null;
-}
-
-/**
- * Group TimeTravel variants with their base facets.
- *
- * Creates a mapping of base facet names to their TimeTravel variants,
- * using null for facets without TimeTravel variants.
- *
- * @param facets - Base facet contracts
- * @param timeTravelFacets - TimeTravel variant contracts
- * @returns Map of base facet name to TimeTravel variant (or null)
- */
-export function pairTimeTravelVariants(
-  facets: ContractFile[],
-  timeTravelFacets: ContractFile[],
-): Map<string, ContractFile | null> {
-  const pairs = new Map<string, ContractFile | null>();
-
-  for (const facet of facets) {
-    const baseName = facet.primaryContract;
-    const timeTravelVariant = timeTravelFacets.find((tt) => getBaseName(tt.primaryContract) === baseName);
-
-    pairs.set(baseName, timeTravelVariant || null);
-  }
-
-  return pairs;
 }

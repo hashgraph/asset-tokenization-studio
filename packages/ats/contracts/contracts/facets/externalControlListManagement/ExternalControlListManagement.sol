@@ -6,12 +6,14 @@ import {
     RESOLVER_KEY_EXTERNAL_CONTROL_LIST
 } from "./IExternalControlListManagement.sol";
 import { ROLE_CONTROL_LIST_MANAGER, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { EXTERNAL_CONTROL_LIST_UPDATE } from "../../constants/values.sol";
 import { STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT } from "../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { ExternalListManagementStorageWrapper } from "../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { ArrayValidation } from "../../infrastructure/utils/ArrayValidation.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 
 /**
  * @title ExternalControlListManagement
@@ -55,9 +57,7 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
             _controlLists,
             _actives
         );
-        if (!success_) {
-            revert ExternalControlListsNotUpdated(_controlLists, _actives);
-        }
+        _checkUnexpectedError(!success_, EXTERNAL_CONTROL_LIST_UPDATE);
         emit ExternalControlListsUpdated(EvmAccessors.getMsgSender(), _controlLists, _actives);
     }
 
@@ -71,7 +71,7 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_CONTROL_LIST_MANAGER)
-        onlyValidAddress(_controlList)
+        validateAddressNotZero(_controlList)
         returns (bool success_)
     {
         success_ = ExternalListManagementStorageWrapper.addExternalList(

@@ -4,10 +4,13 @@ pragma solidity >=0.8.0 <0.9.0;
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IHoldTypes } from "../../facets/hold/IHoldTypes.sol";
-import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
-import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
+import {
+    NONCE_KEY_PROTECTED_CREATE_HOLD_BY_PARTITION
+} from "../../facets/protectedHoldByPartition/IProtectedHoldByPartition.sol";
+import { ICompliance } from "../../facets/compliance/externalInterfaces/ICompliance.sol";
+import { IERC3643Types } from "../../facets/commonTypes/IERC3643Types.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
-import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
+import { IERC1410Types } from "../../facets/commonTypes/IERC1410Types.sol";
 import { ThirdPartyType } from "./types/ThirdPartyType.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { _checkNonceAndDeadline } from "../../infrastructure/utils/EIP712.sol";
@@ -22,6 +25,7 @@ import { ControlListStorageWrapper } from "../core/ControlListStorageWrapper.sol
 import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { DefaultValueValidation } from "../../infrastructure/utils/DefaultValueValidation.sol";
 
 /// @custom:hash storage Hold
 bytes32 constant STORAGE_LOCATION_HOLD = 0xaee7bac248b1ceeb630aa06b36647d058252989965cf9b4a02eac9b8aec67000;
@@ -118,7 +122,7 @@ library HoldStorageWrapper {
         _checkNonceAndDeadline(
             _protectedHold.nonce,
             _from,
-            NonceStorageWrapper.getNonceFor(_from),
+            NonceStorageWrapper.getNonceFor(_from, NONCE_KEY_PROTECTED_CREATE_HOLD_BY_PARTITION),
             _protectedHold.deadline,
             TimeTravelStorageWrapper.getBlockTimestamp()
         );
@@ -131,7 +135,7 @@ library HoldStorageWrapper {
             ERC20StorageWrapper.getName()
         );
 
-        NonceStorageWrapper.setNonceFor(_from);
+        NonceStorageWrapper.setNonceFor(_from, NONCE_KEY_PROTECTED_CREATE_HOLD_BY_PARTITION);
 
         return createHoldByPartition(_partition, _from, _protectedHold.hold, "", ThirdPartyType.PROTECTED);
     }
@@ -153,8 +157,8 @@ library HoldStorageWrapper {
         uint256 _holdId
     ) internal {
         address thirdPartyAddress = EvmAccessors.getMsgSender();
-        ERC20StorageWrapper.decreaseAllowedBalance(_from, thirdPartyAddress, _amount);
-        setThirdPartyForHold(thirdPartyAddress, _partition, _from, _holdId);
+        if (ERC20StorageWrapper.decreaseAllowedBalance(_from, thirdPartyAddress, _amount))
+            setThirdPartyForHold(thirdPartyAddress, _partition, _from, _holdId);
     }
 
     /**
@@ -172,7 +176,32 @@ library HoldStorageWrapper {
         address _from,
         uint256 _holdId
     ) internal {
-        holdStorage().holdThirdPartyByAccountPartitionAndId[_from][_partition][_holdId] = _thirdPartyAddress;
+        _holdStorage().holdThirdPartyByAccountPartitionAndId[_from][_partition][_holdId] = _thirdPartyAddress;
+    }
+
+    /**
+     * @notice Overwrites the total held amount for a token holder on a specific partition.
+     * @dev Writes directly to `totalHeldAmountByAccountAndPartition[_tokenHolder][_partition]`;
+     *      callers are responsible for ensuring the new value is consistent with the individual
+     *      holds tracked elsewhere in storage.
+     * @param _partition  Partition whose held-amount counter is updated.
+     * @param _tokenHolder Account whose held balance is set.
+     * @param _amount      New total held amount; replaces the previous value unconditionally.
+     */
+    function setHeldAmountForByPartition(bytes32 _partition, address _tokenHolder, uint256 _amount) internal {
+        _holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][_partition] = _amount;
+    }
+
+    /**
+     * @notice Overwrites the total held amount for a token holder across all partitions.
+     * @dev Writes directly to `totalHeldAmountByAccount[_tokenHolder]`; callers are
+     *      responsible for ensuring the new value is consistent with the individual holds
+     *      tracked elsewhere in storage.
+     * @param _tokenHolder Account whose aggregate held balance is set.
+     * @param _amount      New aggregate held amount; replaces the previous value unconditionally.
+     */
+    function setHeldAmountFor(address _tokenHolder, uint256 _amount) internal {
+        _holdStorage().totalHeldAmountByAccount[_tokenHolder] = _amount;
     }
 
     /**
@@ -307,10 +336,10 @@ library HoldStorageWrapper {
      * @return newHoldBalance_ The hold's remaining balance after the decrement.
      */
     function decreaseHeldAmount(
-        IHoldTypes.HoldIdentifier calldata _holdIdentifier,
+        IHoldTypes.HoldIdentifier memory _holdIdentifier,
         uint256 _amount
     ) internal returns (uint256 newHoldBalance_) {
-        HoldDataStorage storage holdStorageRef = holdStorage();
+        HoldDataStorage storage holdStorageRef = _holdStorage();
 
         holdStorageRef.totalHeldAmountByAccount[_holdIdentifier.tokenHolder] -= _amount;
         holdStorageRef.totalHeldAmountByAccountAndPartition[_holdIdentifier.tokenHolder][
@@ -333,8 +362,8 @@ library HoldStorageWrapper {
      *      third-party mappings and clears the adjustment-factor entry for the hold.
      * @param _holdIdentifier The triple (partition, tokenHolder, holdId) identifying the hold.
      */
-    function removeHold(IHoldTypes.HoldIdentifier calldata _holdIdentifier) internal {
-        HoldDataStorage storage holdStorageRef = holdStorage();
+    function removeHold(IHoldTypes.HoldIdentifier memory _holdIdentifier) internal {
+        HoldDataStorage storage holdStorageRef = _holdStorage();
 
         holdStorageRef.holdIdsByAccountAndPartition[_holdIdentifier.tokenHolder][_holdIdentifier.partition].remove(
             _holdIdentifier.holdId
@@ -353,6 +382,30 @@ library HoldStorageWrapper {
             _holdIdentifier.tokenHolder,
             _holdIdentifier.holdId
         );
+    }
+
+    /**
+     * @notice Releases a hold and transfers the held balance back to the token holder.
+     * @dev Removes the hold before transferring funds. Reverts if hold removal or balance
+     *      transfer validation fails. Emits the hold transfer event after the balance update.
+     *      Decrements the per-account and per-account-partition held-amount aggregates by
+     *      `_amount` directly here, rather than through `decreaseHeldAmount`: that function ties
+     *      the aggregate decrement and the hold-record decrement to the same `_amount`, which
+     *      only holds when neither has drifted from the other — irrelevant here, since the whole
+     *      hold record is about to be deleted by `removeHold`, not decremented in place, and
+     *      `_amount` is the ABAF-adjusted amount, not the raw amount the hold was created with.
+     * @param _holdIdentifier Unique hold data identifying the hold and its token holder.
+     * @param _amount Amount of held balance to transfer back to the token holder.
+     */
+    function removeAndTransferHoldBalance(IHoldTypes.HoldIdentifier memory _holdIdentifier, uint256 _amount) internal {
+        HoldDataStorage storage holdStorageRef = _holdStorage();
+        holdStorageRef.totalHeldAmountByAccount[_holdIdentifier.tokenHolder] -= _amount;
+        holdStorageRef.totalHeldAmountByAccountAndPartition[_holdIdentifier.tokenHolder][
+            _holdIdentifier.partition
+        ] -= _amount;
+        removeHold(_holdIdentifier);
+        _transferHoldBalance(_holdIdentifier, _holdIdentifier.tokenHolder, _amount);
+        _emitHoldTransfer(_holdIdentifier, _holdIdentifier.tokenHolder, _amount);
     }
 
     /**
@@ -399,7 +452,7 @@ library HoldStorageWrapper {
      * @param _abaf The ABAF value to record as the new last-applied factor.
      */
     function updateTotalHeldAmountAndLabaf(address _tokenHolder, uint256 _factor, uint256 _abaf) internal {
-        holdStorage().totalHeldAmountByAccount[_tokenHolder] *= _factor;
+        _holdStorage().totalHeldAmountByAccount[_tokenHolder] *= _factor;
         AdjustBalancesStorageWrapper.setTotalHeldLabaf(_tokenHolder, _abaf);
     }
 
@@ -418,7 +471,7 @@ library HoldStorageWrapper {
         uint256 _factor,
         uint256 _abaf
     ) internal {
-        holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][_partition] *= _factor;
+        _holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][_partition] *= _factor;
         AdjustBalancesStorageWrapper.setTotalHeldLabafByPartition(_partition, _tokenHolder, _abaf);
     }
 
@@ -430,7 +483,7 @@ library HoldStorageWrapper {
      * @param _holdIdentifier The triple (partition, tokenHolder, holdId) identifying the hold.
      * @param _to The destination address whose synchronisation is also triggered.
      */
-    function adjustHoldBalances(IHoldTypes.HoldIdentifier calldata _holdIdentifier, address _to) internal {
+    function adjustHoldBalances(IHoldTypes.HoldIdentifier memory _holdIdentifier, address _to) internal {
         ERC1410StorageWrapper.triggerAndSyncAll(_holdIdentifier.partition, _holdIdentifier.tokenHolder, _to);
 
         updateHold(
@@ -473,7 +526,7 @@ library HoldStorageWrapper {
      * @param _factor The multiplier to apply to the stored amount.
      */
     function updateHoldAmountById(bytes32 _partition, uint256 _holdId, address _tokenHolder, uint256 _factor) internal {
-        holdStorage().holdsByAccountPartitionAndId[_tokenHolder][_partition][_holdId].hold.amount *= _factor;
+        _holdStorage().holdsByAccountPartitionAndId[_tokenHolder][_partition][_holdId].hold.amount *= _factor;
     }
 
     /**
@@ -495,7 +548,7 @@ library HoldStorageWrapper {
      * @param _holdIdentifier The triple (partition, tokenHolder, holdId) identifying the hold.
      * @param _to The destination address that will receive the executed amount.
      */
-    function beforeExecuteHold(IHoldTypes.HoldIdentifier calldata _holdIdentifier, address _to) internal {
+    function beforeExecuteHold(IHoldTypes.HoldIdentifier memory _holdIdentifier, address _to) internal {
         adjustHoldBalances(_holdIdentifier, _to);
         SnapshotsStorageWrapper.updateAccountSnapshot(_to, _holdIdentifier.partition);
         SnapshotsStorageWrapper.updateAccountHeldBalancesSnapshot(
@@ -511,7 +564,7 @@ library HoldStorageWrapper {
      *      `_holdIdentifier.tokenHolder`.
      * @param _holdIdentifier The triple (partition, tokenHolder, holdId) identifying the hold.
      */
-    function beforeReleaseHold(IHoldTypes.HoldIdentifier calldata _holdIdentifier) internal {
+    function beforeReleaseHold(IHoldTypes.HoldIdentifier memory _holdIdentifier) internal {
         beforeExecuteHold(_holdIdentifier, _holdIdentifier.tokenHolder);
     }
 
@@ -566,11 +619,38 @@ library HoldStorageWrapper {
     }
 
     /**
+     * @notice Returns one specific hold's own amount adjusted to `_timestamp`.
+     * @dev Anchored to the hold's own LABAF (`getHoldLabafById`), not the holder's aggregate
+     *      LABAF — `HoldData.amount` itself is never rebased in place, so this is the only way
+     *      to read a hold's current value without first mutating storage. Used wherever a hold
+     *      is fully consumed (released, replaced) and the amount actually restored/decremented
+     *      must reflect ABAF, not the raw amount the hold was created with.
+     * @param _holdIdentifier The triple (partition, tokenHolder, holdId) identifying the hold.
+     * @param _timestamp Historical timestamp to align the amount with.
+     * @return amount_ The hold's amount, adjusted to `_timestamp`.
+     */
+    function getHoldAmountAdjustedAt(
+        IHoldTypes.HoldIdentifier memory _holdIdentifier,
+        uint256 _timestamp
+    ) internal view returns (uint256 amount_) {
+        return
+            getHold(_holdIdentifier).hold.amount *
+            AdjustBalancesStorageWrapper.calculateFactor(
+                AdjustBalancesStorageWrapper.getAbafAdjustedAt(_timestamp),
+                AdjustBalancesStorageWrapper.getHoldLabafById(
+                    _holdIdentifier.partition,
+                    _holdIdentifier.tokenHolder,
+                    _holdIdentifier.holdId
+                )
+            );
+    }
+
+    /**
      * @notice Reverts with `WrongHoldId` when `_holdIdentifier` does not match a stored hold.
      * @dev Inverse guard built on top of `isHoldIdValid`.
      * @param _holdIdentifier The triple (partition, tokenHolder, holdId) being validated.
      */
-    function requireValidHoldId(IHoldTypes.HoldIdentifier memory _holdIdentifier) internal view {
+    function requireValidHoldId(IHoldTypes.HoldIdentifier calldata _holdIdentifier) internal view {
         if (!isHoldIdValid(_holdIdentifier)) revert IHoldTypes.WrongHoldId();
     }
 
@@ -581,7 +661,7 @@ library HoldStorageWrapper {
      * @param _holdIdentifier The triple (partition, tokenHolder, holdId) being checked.
      * @return Whether the hold exists in storage.
      */
-    function isHoldIdValid(IHoldTypes.HoldIdentifier memory _holdIdentifier) internal view returns (bool) {
+    function isHoldIdValid(IHoldTypes.HoldIdentifier calldata _holdIdentifier) internal view returns (bool) {
         return getHold(_holdIdentifier).id != 0;
     }
 
@@ -594,9 +674,9 @@ library HoldStorageWrapper {
      */
     function getHold(
         IHoldTypes.HoldIdentifier memory _holdIdentifier
-    ) internal view returns (IHoldTypes.HoldData memory data_) {
+    ) internal view returns (IHoldTypes.HoldData memory) {
         return
-            holdStorage().holdsByAccountPartitionAndId[_holdIdentifier.tokenHolder][_holdIdentifier.partition][
+            _holdStorage().holdsByAccountPartitionAndId[_holdIdentifier.tokenHolder][_holdIdentifier.partition][
                 _holdIdentifier.holdId
             ];
     }
@@ -606,8 +686,8 @@ library HoldStorageWrapper {
      * @param _tokenHolder The holder being queried.
      * @return amount_ The current aggregate held amount.
      */
-    function getHeldAmountFor(address _tokenHolder) internal view returns (uint256 amount_) {
-        return holdStorage().totalHeldAmountByAccount[_tokenHolder];
+    function getHeldAmountFor(address _tokenHolder) internal view returns (uint256) {
+        return _holdStorage().totalHeldAmountByAccount[_tokenHolder];
     }
 
     /**
@@ -616,11 +696,8 @@ library HoldStorageWrapper {
      * @param _tokenHolder The holder being queried.
      * @return amount_ The current per-partition held amount.
      */
-    function getHeldAmountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view returns (uint256 amount_) {
-        return holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][_partition];
+    function getHeldAmountForByPartition(bytes32 _partition, address _tokenHolder) internal view returns (uint256) {
+        return _holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][_partition];
     }
 
     /**
@@ -637,8 +714,24 @@ library HoldStorageWrapper {
         address _tokenHolder,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (uint256[] memory holdsId_) {
-        return holdStorage().holdIdsByAccountAndPartition[_tokenHolder][_partition].getFromSet(_pageIndex, _pageLength);
+    ) internal view returns (uint256[] memory) {
+        return
+            _holdStorage().holdIdsByAccountAndPartition[_tokenHolder][_partition].getFromSet(_pageIndex, _pageLength);
+    }
+
+    /**
+     * @notice Returns the full array of hold ids for `_tokenHolder` on `_partition`.
+     * @dev Use with caution; unbounded array reads can cause OOG errors. Prefer
+     *      `getHoldsIdForByPartition` with pagination for external callers.
+     * @param _tokenHolder The holder whose hold ids are listed.
+     * @param _partition The partition whose hold ids are listed.
+     * @return holdsId_ The full array of hold ids for the specified holder and partition.
+     */
+    function getHoldsIdByAccountAndPartition(
+        address _tokenHolder,
+        bytes32 _partition
+    ) internal view returns (EnumerableSet.UintSet storage) {
+        return _holdStorage().holdIdsByAccountAndPartition[_tokenHolder][_partition];
     }
 
     /**
@@ -737,12 +830,11 @@ library HoldStorageWrapper {
      * @param _holdIdentifier The triple (partition, tokenHolder, holdId) to query.
      * @return thirdParty_ The stored third-party address for the hold.
      */
-    function getHoldThirdParty(
-        IHoldTypes.HoldIdentifier calldata _holdIdentifier
-    ) internal view returns (address thirdParty_) {
-        thirdParty_ = holdStorage().holdThirdPartyByAccountPartitionAndId[_holdIdentifier.tokenHolder][
-            _holdIdentifier.partition
-        ][_holdIdentifier.holdId];
+    function getHoldThirdParty(IHoldTypes.HoldIdentifier memory _holdIdentifier) internal view returns (address) {
+        return
+            _holdStorage().holdThirdPartyByAccountPartitionAndId[_holdIdentifier.tokenHolder][
+                _holdIdentifier.partition
+            ][_holdIdentifier.holdId];
     }
 
     /**
@@ -752,7 +844,7 @@ library HoldStorageWrapper {
      * @return The count of stored hold ids.
      */
     function getHoldCountForByPartition(bytes32 _partition, address _tokenHolder) internal view returns (uint256) {
-        return holdStorage().holdIdsByAccountAndPartition[_tokenHolder][_partition].length();
+        return _holdStorage().holdIdsByAccountAndPartition[_tokenHolder][_partition].length();
     }
 
     /**
@@ -808,12 +900,12 @@ library HoldStorageWrapper {
         address _escrow,
         bytes32 _partition
     ) internal view {
-        LockStorageWrapper.requireValidExpirationTimestamp(_expirationTimestamp);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_account);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_to);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_from);
-        ERC1410StorageWrapper.requireValidAddress(_from);
-        ERC1410StorageWrapper.requireValidAddress(_escrow);
+        LockStorageWrapper.checkValidExpirationTimestamp(_expirationTimestamp);
+        ERC3643StorageWrapper.checkUnrecoveredAddress(_account);
+        ERC3643StorageWrapper.checkUnrecoveredAddress(_to);
+        ERC3643StorageWrapper.checkUnrecoveredAddress(_from);
+        DefaultValueValidation.checkZeroAddress(_from);
+        DefaultValueValidation.checkZeroAddress(_escrow);
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
     }
 
@@ -847,20 +939,6 @@ library HoldStorageWrapper {
     }
 
     /**
-     * @notice Returns the storage pointer to this library's ERC-7201 namespace.
-     * @dev Resolves the slot from the precomputed `STORAGE_LOCATION_HOLD` constant via
-     *      inline assembly; the namespace is `security.token.standard.storage.Hold`.
-     * @return hold_ A storage reference to the `HoldDataStorage` struct.
-     */
-    function holdStorage() internal pure returns (HoldDataStorage storage hold_) {
-        bytes32 position = STORAGE_LOCATION_HOLD;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            hold_.slot := position
-        }
-    }
-
-    /**
      * @notice Restores the ERC-20 allowance consumed when an authorised hold was opened.
      * @dev No-ops for non-`AUTHORIZED` third-party types. Used by release / reclaim paths so
      *      the third party retains the spending power that funded the hold.
@@ -874,13 +952,12 @@ library HoldStorageWrapper {
         uint256 _amount
     ) private {
         if (_thirdPartyType != ThirdPartyType.AUTHORIZED) return;
-        ERC20StorageWrapper.increaseAllowedBalance(
-            _holdIdentifier.tokenHolder,
-            holdStorage().holdThirdPartyByAccountPartitionAndId[_holdIdentifier.tokenHolder][_holdIdentifier.partition][
-                _holdIdentifier.holdId
-            ],
-            _amount
-        );
+        address owner = _holdIdentifier.tokenHolder;
+        address spender = _holdStorage().holdThirdPartyByAccountPartitionAndId[owner][_holdIdentifier.partition][
+            _holdIdentifier.holdId
+        ];
+        if (spender == address(0)) return;
+        ERC20StorageWrapper.increaseAllowedBalance(owner, spender, _amount);
     }
 
     /**
@@ -915,7 +992,7 @@ library HoldStorageWrapper {
         ThirdPartyType _thirdPartyType,
         uint256 abaf
     ) private returns (uint256 holdId_) {
-        HoldDataStorage storage holdStorageRef = holdStorage();
+        HoldDataStorage storage holdStorageRef = _holdStorage();
 
         holdId_ = ++holdStorageRef.nextHoldIdByAccountAndPartition[_from][_partition];
 
@@ -978,7 +1055,7 @@ library HoldStorageWrapper {
      * @param _amount The amount being credited.
      */
     function _transferHoldBalance(
-        IHoldTypes.HoldIdentifier calldata _holdIdentifier,
+        IHoldTypes.HoldIdentifier memory _holdIdentifier,
         address _to,
         uint256 _amount
     ) private {
@@ -1004,7 +1081,7 @@ library HoldStorageWrapper {
     ) private {
         if (_holdIdentifier.tokenHolder == _to) return;
 
-        (ERC3643StorageWrapper.erc3643Storage().compliance).functionCall(
+        address(ERC3643StorageWrapper.getCompliance()).functionCall(
             abi.encodeWithSelector(ICompliance.transferred.selector, _holdIdentifier.tokenHolder, _to, _amount),
             IERC3643Types.ComplianceCallFailed.selector
         );
@@ -1018,11 +1095,7 @@ library HoldStorageWrapper {
      * @param _to The destination address being credited.
      * @param _amount The amount being transferred out of the hold.
      */
-    function _emitHoldTransfer(
-        IHoldTypes.HoldIdentifier calldata _holdIdentifier,
-        address _to,
-        uint256 _amount
-    ) private {
+    function _emitHoldTransfer(IHoldTypes.HoldIdentifier memory _holdIdentifier, address _to, uint256 _amount) private {
         ERC20StorageWrapper.performTransfer(address(0), _to, _amount);
         emit IERC1410Types.TransferByPartition(
             _holdIdentifier.partition,
@@ -1079,7 +1152,7 @@ library HoldStorageWrapper {
         IHoldTypes.HoldData memory holdData,
         address _to
     ) private view {
-        if (!ControlListStorageWrapper.isAbleToAccess(_holdIdentifier.tokenHolder)) {
+        if (!ControlListStorageWrapper.canAccess(_holdIdentifier.tokenHolder)) {
             revert ICommonErrors.AccountIsBlocked(_holdIdentifier.tokenHolder);
         }
 
@@ -1122,6 +1195,20 @@ library HoldStorageWrapper {
 
         if (!isEscrow(holdData.hold, EvmAccessors.getMsgSender())) {
             revert IHoldTypes.IsNotEscrow();
+        }
+    }
+
+    /**
+     * @notice Returns the storage pointer to this library's ERC-7201 namespace.
+     * @dev Resolves the slot from the precomputed `STORAGE_LOCATION_HOLD` constant via
+     *      inline assembly; the namespace is `security.token.standard.storage.Hold`.
+     * @return hold_ A storage reference to the `HoldDataStorage` struct.
+     */
+    function _holdStorage() private pure returns (HoldDataStorage storage hold_) {
+        bytes32 position = STORAGE_LOCATION_HOLD;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            hold_.slot := position
         }
     }
 }

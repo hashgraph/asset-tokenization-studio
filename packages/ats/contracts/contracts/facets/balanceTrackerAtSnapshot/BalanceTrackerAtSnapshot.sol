@@ -3,13 +3,14 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IBalanceTrackerAtSnapshot, RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT } from "./IBalanceTrackerAtSnapshot.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
-import { HolderBalance } from "../snapshot/ISnapshots.sol";
+import { HolderBalance } from "../snapshots/ISnapshots.sol";
 import { SnapshotsStorageWrapper } from "../../domain/asset/SnapshotsStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title BalanceTrackerAtSnapshot
+ * @author Asset Tokenization Studio Team
  * @notice Abstract implementation of `IBalanceTrackerAtSnapshot` providing snapshotted balance
  *         and total-supply queries indexed by a snapshot identifier.
  * @dev Delegates storage reads to `SnapshotsStorageWrapper`. Intended to be inherited by

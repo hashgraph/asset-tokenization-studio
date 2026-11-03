@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { DEFAULT_PARTITION, EMPTY_BYTES } from "../../constants/values.sol";
 import { ROLE_LOCKER } from "../../constants/roles.sol";
 import { ITransferAndLock } from "./ITransferAndLock.sol";
-import { IERC1410Types } from "../layer_1/ERC1400/ERC1410/IERC1410Types.sol";
+import { IERC1410Types } from "../commonTypes/IERC1410Types.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
-import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { LockStorageWrapper } from "../../domain/asset/LockStorageWrapper.sol";
+import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
@@ -49,25 +49,36 @@ abstract contract TransferAndLock is ITransferAndLock, Modifiers {
         onlyWithValidExpirationTimestamp(_expirationTimestamp)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyPositiveTransferAmount(_amount)
         returns (uint256 lockId_)
     {
+        {
+            ERC1594StorageWrapper.checkCanTransferFromByPartition(
+                EvmAccessors.getMsgSender(),
+                _to,
+                DEFAULT_PARTITION,
+                _amount,
+                EMPTY_BYTES,
+                EMPTY_BYTES
+            );
+        }
         TokenCoreOps.transferByPartition(
             EvmAccessors.getMsgSender(),
             IERC1410Types.BasicTransferInfo(_to, _amount),
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             _data,
             EvmAccessors.getMsgSender(),
             ""
         );
         lockId_ = LockStorageWrapper.lockByPartition(
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             _amount,
             _to,
             _expirationTimestamp,
             EvmAccessors.getMsgSender()
         );
         emit PartitionTransferredAndLocked(
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             EvmAccessors.getMsgSender(),
             _to,
             _amount,

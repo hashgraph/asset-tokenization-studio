@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/**
+ * @title IStaticFunctionSelectors
+ * @author Asset Tokenization Studio Team
+ * @notice Interface that every Diamond facet must implement to expose its resolver key,
+ *         function selectors, and interface identifiers for proxy registration.
+ */
 interface IStaticFunctionSelectors {
     /**
      * @notice Gets the static resolver key

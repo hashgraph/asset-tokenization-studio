@@ -7,6 +7,18 @@ import { IClearingTypes } from "../clearing/IClearingTypes.sol";
 // solhint-disable-next-line max-line-length
 bytes32 constant RESOLVER_KEY_PROTECTED_CLEARING_BY_PARTITION = 0x3cbb73b8ee5db791f9534af7a5c9fc09a4cf9adff327a05839f2673a3dc63aae;
 
+/// @custom:hash nonceKey ProtectedClearingTransferByPartition
+// solhint-disable-next-line max-line-length
+bytes32 constant NONCE_KEY_PROTECTED_CLEARING_TRANSFER_BY_PARTITION = 0x0d70bc57fd4033ef9d7ec11f08e702a430fa8b08fbac5343870155985fa2f6cf;
+
+/// @custom:hash nonceKey ProtectedClearingRedeemByPartition
+// solhint-disable-next-line max-line-length
+bytes32 constant NONCE_KEY_PROTECTED_CLEARING_REDEEM_BY_PARTITION = 0x1361df2422906d95b2666325ab49719243ad65d7ab80433ab808534045f2e80e;
+
+/// @custom:hash nonceKey ProtectedClearingCreateHoldByPartition
+// solhint-disable-next-line max-line-length
+bytes32 constant NONCE_KEY_PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION = 0xaec7bbb7e8bd7ee1fc22c03e93d9bcde7b82f076bbebdfbf35727ee585d79abb;
+
 /**
  * @title IProtectedClearingByPartition
  * @author Asset Tokenization Studio Team

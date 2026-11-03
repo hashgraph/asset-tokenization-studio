@@ -20,6 +20,7 @@ interface IExternalPauseManagement {
     /**
      * @notice Emitted once when the external pause capability is initialised on a token.
      * @dev Fires exclusively from `initializeExternalPauses` after the storage write succeeds.
+     * @param pauses The initial array of external pause contract addresses registered at deployment.
      */
     event ExternalPauseInitialized(address[] pauses);
 
@@ -57,13 +58,6 @@ interface IExternalPauseManagement {
      * @param pause The unlisted external pause contract address.
      */
     error UnlistedPause(address pause);
-
-    /**
-     * @notice Thrown when a batch update of external pauses fails to complete.
-     * @param pauses Array of external pause contract addresses that were submitted.
-     * @param actives Corresponding activation flags that were submitted.
-     */
-    error ExternalPausesNotUpdated(address[] pauses, bool[] actives);
 
     /**
      * @notice One-time initialiser that populates the external pause list at token deployment.

@@ -8,6 +8,9 @@ import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 
 /**
  * @title InitializerFacet
+ * @author Asset Tokenization Studio Team
+ * @notice Diamond facet that manages the per-facet initialisation registry and the
+ *         operational status of the token, registered under `RESOLVER_KEY_INITIALIZER`.
  */
 contract InitializerFacet is Initializer, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors

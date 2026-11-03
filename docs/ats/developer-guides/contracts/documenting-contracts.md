@@ -8,6 +8,12 @@ sidebar_label: Documenting Contracts
 
 This guide explains how to properly document Solidity smart contracts using NatSpec (Natural Specification) format and generate API documentation automatically.
 
+:::info Normative reference
+The normative NatSpec rules live in `packages/ats/contracts/conventions/code-quality.md`
+(source of truth, rule IDs `ATS-XXX-NNN`); agent tooling authors NatSpec via the
+`/solidity-natspec` skill. This guide is the human-oriented walkthrough.
+:::
+
 ## Overview
 
 The ATS contracts use **NatSpec** (Ethereum Natural Language Specification Format) for inline documentation. This documentation is automatically extracted and published to the API Documentation section.
@@ -95,6 +101,25 @@ function _calculateCouponAmount(
   // Implementation
 }
 ```
+
+### Private and internal callables require NatSpec too
+
+Solhint's `use-natspec` warning only fires on `external` and `public` elements.
+Every `private` and `internal` function, modifier, and constructor also requires
+a NatSpec block — at minimum `@notice` (intent) and `@dev` (preconditions or
+implementation constraints):
+
+```solidity
+/**
+ * @notice Validates that the corporate action id is non-zero.
+ * @dev Reverts with InvalidCorporateActionId if actionId is bytes32(0).
+ */
+function _checkValidCorporateActionId(bytes32 _actionId) internal view { ... }
+```
+
+> **Rationale:** private/internal logic is where subtle invariants live.
+> Auditors read it; without NatSpec they rely solely on variable names,
+> which is insufficient for non-obvious preconditions.
 
 ### Events Documentation
 
@@ -269,7 +294,7 @@ npm run doc
 This command:
 
 1. Extracts NatSpec comments from all contracts
-2. Generates markdown files in `/docs/references/api/ats-contracts/`
+2. Generates markdown files in `docs/ats/api/contracts/`
 3. Organizes documentation by contract hierarchy
 
 ### Configuration
@@ -279,7 +304,7 @@ The documentation generator is configured in `hardhat.config.ts`:
 ```typescript
 dodoc: {
   runOnCompile: false,         // Don't auto-generate on every compile
-  outputDir: "../../../docs/references/api/ats-contracts",
+  outputDir: "../../../docs/ats/api/contracts",
   freshOutput: true,           // Clear old docs before generating
   include: ["contracts"],      // Include all contracts
   exclude: [
@@ -294,8 +319,8 @@ dodoc: {
 
 After generation, the documentation is available at:
 
-- **Local**: `http://localhost:3000/docs/references/api`
-- **Production**: `https://hashgraph.github.io/asset-tokenization-studio/docs/references/api`
+- **Local**: `http://localhost:3000/ats/api` — under "API Documentation → Smart Contracts"
+- **Production**: the same "API Documentation → Smart Contracts" section of the published docs site
 
 ## Documentation Workflow
 
@@ -315,7 +340,7 @@ After generation, the documentation is available at:
 
 2. **Check for warnings** - fix any NatSpec syntax errors
 
-3. **Review generated output** in `/docs/references/api/`
+3. **Review generated output** in `docs/ats/api/contracts/`
 
 ### In Pull Requests
 

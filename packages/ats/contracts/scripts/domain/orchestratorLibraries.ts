@@ -19,6 +19,7 @@
 import { Signer } from "ethers";
 import {
   GAS_LIMIT,
+  gasLimitOverride,
   hederaGasOverrides,
   info,
   retryTransaction,
@@ -162,15 +163,13 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   ClearingAtSnapshotFacet: ["clearingReadOps"],
   ClearingAtSnapshotByPartitionFacet: ["clearingReadOps"],
   // Layer 2 facet families — coupon/dividend/voting/amortization reach ClearingReadOps
-  AmortizationFacet: ["clearingReadOps", "scheduledTasksOps"],
+  AmortizationFacet: ["clearingReadOps", "scheduledTasksOps", "holdOps"],
   CouponFacet: ["clearingReadOps"],
   DividendFacet: ["clearingReadOps"],
   VotingFacet: ["clearingReadOps"],
   // ScheduledTasksDispatchOps dependencies — ScheduledTasksStorageWrapper uses try/catch delegatecall to this lib
   SnapshotsFacet: ["scheduledTasksDispatchOps"],
   ScheduledCrossOrderedTasksFacet: ["scheduledTasksDispatchOps"],
-  ScheduledCrossOrderedTasksKpiLinkedRateFacet: ["scheduledTasksDispatchOps"],
-  ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet: ["scheduledTasksDispatchOps"],
   // Additional facets with ScheduledTasksOps dependencies
   BatchFreezeFacet: ["scheduledTasksOps"],
   FreezeFacet: ["scheduledTasksOps"],
@@ -178,10 +177,8 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   LockByPartitionFacet: ["scheduledTasksOps"],
   LockFacet: ["scheduledTasksOps"],
   NominalValueFacet: ["scheduledTasksOps"],
-  ProceedRecipientsKpiLinkedRateFacet: ["scheduledTasksOps"],
+  ProceedRecipientsFacet: ["scheduledTasksOps"],
   RecoveryFacet: ["scheduledTasksOps"],
-  TransferAndLockFixedRateFacet: ["scheduledTasksOps"],
-  TransferAndLockKpiLinkedRateFacet: ["scheduledTasksOps"],
 };
 
 /**
@@ -320,8 +317,7 @@ export async function deployOrchestratorLibraries(
     });
 
   // Phase 1: ScheduledTasksDispatchOps and ClearingReadOps have no library dependencies.
-  const gasOverrides = { ...hederaGasOverrides(), gasLimit: GAS_LIMIT.high };
-
+  const gasOverrides = { ...hederaGasOverrides(), ...gasLimitOverride(GAS_LIMIT.max) };
   const scheduledTasksDispatchOpsAddr = await deployLib("ScheduledTasksDispatchOps", () =>
     new ScheduledTasksDispatchOps__factory(signer)
       .deploy(gasOverrides)

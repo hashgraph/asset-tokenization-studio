@@ -20,12 +20,12 @@ interface IBurn {
 
     /**
      * @notice Emitted when tokens are redeemed from a holder's balance.
-     * @param _operator Account that executed the redemption.
-     * @param _from Address from which tokens were burnt.
-     * @param _value Amount of tokens redeemed, denominated in base units.
-     * @param _data Arbitrary payload forwarded alongside the redemption.
+     * @param operator Account that executed the redemption.
+     * @param from Address from which tokens were burnt.
+     * @param value Amount of tokens redeemed, denominated in base units.
+     * @param data Arbitrary payload forwarded alongside the redemption.
      */
-    event Redeemed(address indexed _operator, address indexed _from, uint256 _value, bytes _data);
+    event Redeemed(address indexed operator, address indexed from, uint256 value, bytes data);
 
     /**
      * @notice Initialises the burn capability on the token.

@@ -6,6 +6,7 @@ bytes32 constant RESOLVER_KEY_CORE_ADJUSTED = 0xe190b52312c215f8e240bb53f0aa3e51
 
 /**
  * @title ICoreAdjusted
+ * @author Asset Tokenization Studio Team
  * @notice Interface exposing time-adjusted ERC-20 decimal reads for the CoreAdjusted facet.
  * @dev Complements `ICore.decimals()`, which always resolves to the current block timestamp.
  *      This interface allows callers to query what the effective decimal precision would be at

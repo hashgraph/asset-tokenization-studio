@@ -28,23 +28,6 @@ export {
   makeBondDetailsData as getBondDetails,
 } from "./tokens/bond.fixture";
 
-export { deployBondFixedRateTokenFixture, DEFAULT_BOND_FIXED_RATE_PARAMS } from "./tokens/bondFixedRate.fixture";
-
-export {
-  deployBondKpiLinkedRateTokenFixture,
-  DEFAULT_BOND_KPI_LINKED_RATE_PARAMS,
-} from "./tokens/bondKpiLinkedRate.fixture";
-
-// Loan token fixtures
-export { deployLoanTokenFixture, DEFAULT_LOAN_PARAMS, getLoanDetails } from "./tokens/loan.fixture";
-
-// Loan Portfolio token fixtures
-export {
-  deployLoansPortfolioTokenFixture,
-  DEFAULT_LOANS_PORTFOLIO_PARAMS,
-  getLoansPortfolioDetails,
-} from "./tokens/loansPortfolio.fixture";
-
 // Common token utilities
 export {
   MAX_UINT256,
@@ -66,13 +49,6 @@ export {
   type ResolverProxyFixtureResult,
 } from "./resolverProxy.fixture";
 
-// T-REX fixtures (legacy support)
-export {
-  deployIdentityProxy,
-  deployFullSuiteFixture,
-  deploySuiteWithModularCompliancesFixture,
-} from "./trex/fullSuite.fixture";
-
 // TUP upgrade fixtures
 export {
   deployTupUpgradeTestFixture,
@@ -83,6 +59,12 @@ export {
   type TupInfrastructureOnlyFixture,
   type V2ImplementationResult,
 } from "./upgradeTupProxies.fixture";
+
+// Full-asset infrastructure fixture (test-only, includes AssetMock config)
+export { deploySystemWithNewBlrFullAsset, deployAtsInfrastructureFullAssetFixture } from "./deploy/fullAsset";
+
+// AssetMock context fixture (shared fixture for migrated integration suites)
+export { AssetMockCtx, deployAssetMockCtx, buildAssetMockCtx, assertHandlesBound } from "./ctx/assetCtx";
 
 // Hardhat-dependent test helpers (RBAC, timestamps)
 export { grantRoleAndPauseToken, getDltTimestamp } from "./hardhatHelpers";

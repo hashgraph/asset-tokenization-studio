@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 /**
  * @title IDiamondFacet
+ * @author Asset Tokenization Studio Team
  * @notice Interface for the Diamond facet initialisation function.
  * @dev Separated from IDiamond (EIP-2535 standard) so the standard interface
  *      remains unmodified.

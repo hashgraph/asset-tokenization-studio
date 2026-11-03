@@ -96,13 +96,13 @@ graph TB
   <div className="card-box">
     <h4>Adding Facets</h4>
     <p>Create and integrate new facets</p>
-    <a href="./contracts/adding-facets">View Guide →</a>
+    <a href="./contracts/adding-a-facet">View Guide →</a>
   </div>
 
   <div className="card-box">
     <h4>Upgrading Facets</h4>
     <p>Safely upgrade facets in production</p>
-    <a href="./contracts/upgrading">View Guide →</a>
+    <a href="./contracts/upgrading-configurations">View Guide →</a>
   </div>
 
   <div className="card-box">

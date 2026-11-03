@@ -15,19 +15,6 @@ import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.
  */
 abstract contract ERC1410Modifiers {
     /**
-     * @dev Modifier that validates address is not zero
-     *
-     * Requirements:
-     * - Address must not be the zero address
-     *
-     * @param _account The address to validate
-     */
-    modifier onlyValidAddress(address _account) {
-        ERC1410StorageWrapper.requireValidAddress(_account);
-        _;
-    }
-
-    /**
      * @dev Modifier that validates that an account is the operator for a partition
      *
      * @param _partition The partition
@@ -35,6 +22,19 @@ abstract contract ERC1410Modifiers {
      */
     modifier onlyOperator(bytes32 _partition, address _account) {
         ERC1410StorageWrapper.requireOperator(_partition, _account);
+        _;
+    }
+
+    /**
+     * @dev Modifier that rejects a zero-value partition transfer.
+     *
+     * Requirements:
+     * - `_value` must be strictly positive.
+     *
+     * @param _value The transfer amount.
+     */
+    modifier onlyPositiveTransferAmount(uint256 _value) {
+        ERC1410StorageWrapper.checkNonZeroTransferAmount(_value);
         _;
     }
 }

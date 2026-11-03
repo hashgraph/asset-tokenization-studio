@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { deployAtsInfrastructureFixture } from "../infrastructure.fixture";
-import { ATS_ROLES, CURRENCIES, DeepPartial, TIME_PERIODS_S, BOND_CONFIG_ID } from "../../../scripts";
+import { ATS_ROLES, CURRENCIES, DeepPartial, TIME_PERIODS_S, CONFIG_IDS } from "../../../scripts";
 import {
   AccessControlFacet__factory,
   PauseFacet__factory,
@@ -25,8 +25,12 @@ export const DEFAULT_BOND_PARAMS = {
   nominalValueDecimals: 2,
   proceedRecipients: [] as string[],
   proceedRecipientsData: [] as string[],
+  isUnitNominalValue: true,
   startingDate: async () => {
     return (await getDltTimestamp()) + 3600; //block.timestamp + 1 hour
+  },
+  effectiveDatetime: async () => {
+    return (await getDltTimestamp()) - 3600; //block.timestamp - 1 hour
   },
 } as const;
 
@@ -42,6 +46,8 @@ export async function makeBondDetailsData(params?: DeepPartial<BondDetailsDataPa
     nominalValueDecimals: params?.nominalValueDecimals ?? DEFAULT_BOND_PARAMS.nominalValueDecimals,
     startingDate: params?.startingDate ?? (await DEFAULT_BOND_PARAMS.startingDate()),
     maturityDate: maturityDate,
+    isUnitNominalValue: params?.isUnitNominalValue ?? DEFAULT_BOND_PARAMS.isUnitNominalValue,
+    effectiveDatetime: params?.effectiveDatetime ?? (await DEFAULT_BOND_PARAMS.effectiveDatetime()),
   };
 }
 
@@ -74,9 +80,10 @@ export async function deployBondTokenFixture({
 
   const securityData = getSecurityData(blr, {
     ...bondDataParams?.securityData,
-    resolverProxyConfiguration: {
-      key: BOND_CONFIG_ID,
-      version: 1,
+    resolverProxyConfigurationV2: {
+      configurationId: CONFIG_IDS.bond,
+      configurationVersion: 1,
+      replacementEnabled: true,
     },
   });
   const bondDetails = await makeBondDetailsData(bondDataParams?.bondDetails);

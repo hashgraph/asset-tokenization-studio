@@ -3,17 +3,10 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
-import {
-  ATS_ROLES,
-  ADDRESS_ZERO,
-  EMPTY_HEX_BYTES,
-  EMPTY_STRING,
-  ZERO,
-  RESOLVER_KEY_BALANCE_TRACKER_BY_PARTITION,
-} from "@scripts";
-import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
+import { IAssetMock } from "@contract-types";
+import type { AssetMockCtx } from "@test";
+import { ATS_ROLES, ADDRESS_ZERO, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO, RESOLVER_KEYS } from "@scripts";
+import { executeRbac, MAX_UINT256 } from "@test";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
 const _SECOND_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000002";
@@ -33,370 +26,564 @@ interface ClearingOperation {
   data: string;
 }
 
-describe("Balance Tracker By Partition Tests", () => {
-  let diamond: ResolverProxy;
-  let signer_A: HardhatEthersSigner;
-  let signer_B: HardhatEthersSigner;
-  let signer_C: HardhatEthersSigner;
-  let signer_D: HardhatEthersSigner;
+export function balanceTrackerByPartitionTests(getCtx: () => AssetMockCtx): void {
+  describe("Balance Tracker By Partition Tests", () => {
+    let signer_A: HardhatEthersSigner;
+    let signer_B: HardhatEthersSigner;
+    let signer_C: HardhatEthersSigner;
+    let signer_D: HardhatEthersSigner;
 
-  let asset: IAsset;
-  let mockDiamondCut: MockDiamondCut;
+    let asset: IAssetMock;
 
-  const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
-  let currentTimestamp = 0;
-  let expirationTimestamp = 0;
+    const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
+    let currentTimestamp = 0;
+    let expirationTimestamp = 0;
 
-  async function deployEquity(multiPartition: boolean) {
-    const base = await deployEquityTokenFixture({
-      equityDataParams: {
-        securityData: {
-          isMultiPartition: multiPartition,
-          clearingActive: false,
-        },
-      },
+    beforeEach(async () => {
+      currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
+      expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS;
     });
 
-    diamond = base.diamond;
-    signer_A = base.deployer;
-    signer_B = base.user1;
-    signer_C = base.user2;
-    signer_D = base.user3;
+    describe("balanceOfByPartition", () => {
+      describe("Single partition", () => {
+        beforeEach(async () => {
+          const ctx = getCtx();
+          signer_A = ctx.deployer;
+          signer_B = ctx.user1;
+          signer_C = ctx.user2;
+          signer_D = ctx.user3;
+          asset = ctx.asset;
+          await executeRbac(asset, [
+            {
+              role: ATS_ROLES.ROLE_ISSUER,
+              members: [signer_B.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_LOCKER,
+              members: [signer_C.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_FREEZE_MANAGER,
+              members: [signer_D.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_KYC,
+              members: [signer_B.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_SSI_MANAGER,
+              members: [signer_A.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_CLEARING,
+              members: [signer_A.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_CLEARING_VALIDATOR,
+              members: [signer_A.address],
+            },
+          ]);
 
-    asset = await ethers.getContractAt("IAsset", diamond.target);
-    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
-    await executeRbac(asset, [
-      {
-        role: ATS_ROLES.ROLE_ISSUER,
-        members: [signer_B.address],
-      },
-      {
-        role: ATS_ROLES.ROLE_LOCKER,
-        members: [signer_C.address],
-      },
-      {
-        role: ATS_ROLES.ROLE_FREEZE_MANAGER,
-        members: [signer_D.address],
-      },
-      {
-        role: ATS_ROLES.ROLE_KYC,
-        members: [signer_B.address],
-      },
-      {
-        role: ATS_ROLES.ROLE_SSI_MANAGER,
-        members: [signer_A.address],
-      },
-      {
-        role: ATS_ROLES.ROLE_CLEARING,
-        members: [signer_A.address],
-      },
-      {
-        role: ATS_ROLES.ROLE_CLEARING_VALIDATOR,
-        members: [signer_A.address],
-      },
-    ]);
-
-    await asset.connect(signer_A).addIssuer(signer_A.address);
-    await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-    await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-    await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-  }
-
-  beforeEach(async () => {
-    currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
-    expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS;
-  });
-
-  describe("balanceOfByPartition", () => {
-    describe("Single partition", () => {
-      beforeEach(async () => {
-        await loadFixture(deployEquity.bind(null, false));
-      });
-
-      it("GIVEN a token holder with minted tokens WHEN balanceOfByPartition THEN returns correct balance", async () => {
-        const mintAmount = 1000;
-        await asset.connect(signer_B).issueByPartition({
-          partition: _DEFAULT_PARTITION,
-          tokenHolder: signer_A.address,
-          value: mintAmount,
-          data: EMPTY_HEX_BYTES,
+          await asset.connect(signer_A).addIssuer(signer_A.address);
+          await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+          await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+          await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
         });
 
-        expect(await asset.balanceOfByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(mintAmount);
-      });
+        it("GIVEN a token holder with minted tokens WHEN balanceOfByPartition THEN returns correct balance", async () => {
+          const mintAmount = 1000;
+          await asset.connect(signer_B).issueByPartition({
+            partition: _DEFAULT_PARTITION,
+            tokenHolder: signer_A.address,
+            value: mintAmount,
+            data: EMPTY_HEX_BYTES,
+          });
 
-      it("GIVEN an account with no tokens WHEN balanceOfByPartition THEN returns zero", async () => {
-        expect(await asset.balanceOfByPartition(_DEFAULT_PARTITION, signer_C.address)).to.equal(0);
-      });
-
-      it("GIVEN a token holder after a transfer WHEN balanceOfByPartition THEN returns updated balance", async () => {
-        const mintAmount = 1000;
-        const transferAmount = 300;
-
-        await asset.connect(signer_B).issueByPartition({
-          partition: _DEFAULT_PARTITION,
-          tokenHolder: signer_A.address,
-          value: mintAmount,
-          data: EMPTY_HEX_BYTES,
+          expect(await asset.balanceOfByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(mintAmount);
         });
 
-        await asset.connect(signer_A).transfer(signer_B.address, transferAmount);
+        it("GIVEN an account with no tokens WHEN balanceOfByPartition THEN returns zero", async () => {
+          expect(await asset.balanceOfByPartition(_DEFAULT_PARTITION, signer_C.address)).to.equal(0);
+        });
 
-        expect(await asset.balanceOfByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(
-          mintAmount - transferAmount,
+        it("GIVEN a token holder after a transfer WHEN balanceOfByPartition THEN returns updated balance", async () => {
+          const mintAmount = 1000;
+          const transferAmount = 300;
+
+          await asset.connect(signer_B).issueByPartition({
+            partition: _DEFAULT_PARTITION,
+            tokenHolder: signer_A.address,
+            value: mintAmount,
+            data: EMPTY_HEX_BYTES,
+          });
+
+          await asset.connect(signer_A).transfer(signer_B.address, transferAmount);
+
+          expect(await asset.balanceOfByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(
+            mintAmount - transferAmount,
+          );
+          expect(await asset.balanceOfByPartition(_DEFAULT_PARTITION, signer_B.address)).to.equal(transferAmount);
+        });
+      });
+
+      describe("Multi-partition", () => {
+        beforeEach(async () => {
+          const ctx = getCtx();
+          signer_A = ctx.deployer;
+          signer_B = ctx.user1;
+          signer_C = ctx.user2;
+          signer_D = ctx.user3;
+          asset = ctx.asset;
+          await asset.setMultiPartition(true);
+          await executeRbac(asset, [
+            {
+              role: ATS_ROLES.ROLE_ISSUER,
+              members: [signer_B.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_LOCKER,
+              members: [signer_C.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_FREEZE_MANAGER,
+              members: [signer_D.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_KYC,
+              members: [signer_B.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_SSI_MANAGER,
+              members: [signer_A.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_CLEARING,
+              members: [signer_A.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_CLEARING_VALIDATOR,
+              members: [signer_A.address],
+            },
+          ]);
+
+          await asset.connect(signer_A).addIssuer(signer_A.address);
+          await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+          await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+          await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+        });
+
+        it("GIVEN a token holder with tokens in multiple partitions WHEN balanceOfByPartition THEN returns balance for each partition independently", async () => {
+          const defaultMintAmount = 600;
+          const secondMintAmount = 400;
+
+          await asset.connect(signer_B).issueByPartition({
+            partition: _DEFAULT_PARTITION,
+            tokenHolder: signer_A.address,
+            value: defaultMintAmount,
+            data: EMPTY_HEX_BYTES,
+          });
+          await asset.connect(signer_B).issueByPartition({
+            partition: _SECOND_PARTITION,
+            tokenHolder: signer_A.address,
+            value: secondMintAmount,
+            data: EMPTY_HEX_BYTES,
+          });
+
+          expect(await asset.balanceOfByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(defaultMintAmount);
+          expect(await asset.balanceOfByPartition(_SECOND_PARTITION, signer_A.address)).to.equal(secondMintAmount);
+        });
+      });
+    });
+
+    describe("totalSupplyByPartition", () => {
+      describe("Single partition", () => {
+        beforeEach(async () => {
+          const ctx = getCtx();
+          signer_A = ctx.deployer;
+          signer_B = ctx.user1;
+          signer_C = ctx.user2;
+          signer_D = ctx.user3;
+          asset = ctx.asset;
+          await executeRbac(asset, [
+            {
+              role: ATS_ROLES.ROLE_ISSUER,
+              members: [signer_B.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_LOCKER,
+              members: [signer_C.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_FREEZE_MANAGER,
+              members: [signer_D.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_KYC,
+              members: [signer_B.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_SSI_MANAGER,
+              members: [signer_A.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_CLEARING,
+              members: [signer_A.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_CLEARING_VALIDATOR,
+              members: [signer_A.address],
+            },
+          ]);
+
+          await asset.connect(signer_A).addIssuer(signer_A.address);
+          await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+          await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+          await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+        });
+
+        it("GIVEN no tokens minted WHEN totalSupplyByPartition THEN returns zero", async () => {
+          expect(await asset.totalSupplyByPartition(_DEFAULT_PARTITION)).to.equal(0);
+        });
+
+        it("GIVEN tokens minted WHEN totalSupplyByPartition THEN returns correct total", async () => {
+          const mintAmount = 1000;
+          await asset.connect(signer_B).issueByPartition({
+            partition: _DEFAULT_PARTITION,
+            tokenHolder: signer_A.address,
+            value: mintAmount,
+            data: EMPTY_HEX_BYTES,
+          });
+
+          expect(await asset.totalSupplyByPartition(_DEFAULT_PARTITION)).to.equal(mintAmount);
+        });
+
+        it("GIVEN tokens minted and then burned WHEN totalSupplyByPartition THEN reflects the redemption", async () => {
+          const mintAmount = 1000;
+          const burnAmount = 400;
+
+          await asset.connect(signer_B).issueByPartition({
+            partition: _DEFAULT_PARTITION,
+            tokenHolder: signer_A.address,
+            value: mintAmount,
+            data: EMPTY_HEX_BYTES,
+          });
+
+          await asset.connect(signer_A).redeemByPartition(_DEFAULT_PARTITION, burnAmount, EMPTY_HEX_BYTES);
+
+          expect(await asset.totalSupplyByPartition(_DEFAULT_PARTITION)).to.equal(mintAmount - burnAmount);
+        });
+      });
+
+      describe("Multi-partition", () => {
+        beforeEach(async () => {
+          const ctx = getCtx();
+          signer_A = ctx.deployer;
+          signer_B = ctx.user1;
+          signer_C = ctx.user2;
+          signer_D = ctx.user3;
+          asset = ctx.asset;
+          await asset.setMultiPartition(true);
+          await executeRbac(asset, [
+            {
+              role: ATS_ROLES.ROLE_ISSUER,
+              members: [signer_B.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_LOCKER,
+              members: [signer_C.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_FREEZE_MANAGER,
+              members: [signer_D.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_KYC,
+              members: [signer_B.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_SSI_MANAGER,
+              members: [signer_A.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_CLEARING,
+              members: [signer_A.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_CLEARING_VALIDATOR,
+              members: [signer_A.address],
+            },
+          ]);
+
+          await asset.connect(signer_A).addIssuer(signer_A.address);
+          await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+          await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+          await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+        });
+
+        it("GIVEN tokens minted across multiple partitions WHEN totalSupplyByPartition THEN returns per-partition totals independently", async () => {
+          const defaultMintAmount = 600;
+          const secondMintAmount = 400;
+
+          await asset.connect(signer_B).issueByPartition({
+            partition: _DEFAULT_PARTITION,
+            tokenHolder: signer_A.address,
+            value: defaultMintAmount,
+            data: EMPTY_HEX_BYTES,
+          });
+          await asset.connect(signer_B).issueByPartition({
+            partition: _SECOND_PARTITION,
+            tokenHolder: signer_A.address,
+            value: secondMintAmount,
+            data: EMPTY_HEX_BYTES,
+          });
+
+          expect(await asset.totalSupplyByPartition(_DEFAULT_PARTITION)).to.equal(defaultMintAmount);
+          expect(await asset.totalSupplyByPartition(_SECOND_PARTITION)).to.equal(secondMintAmount);
+        });
+      });
+    });
+
+    describe("getTotalBalanceForByPartition", () => {
+      describe("Multi-partition enabled", () => {
+        beforeEach(async () => {
+          const ctx = getCtx();
+          signer_A = ctx.deployer;
+          signer_B = ctx.user1;
+          signer_C = ctx.user2;
+          signer_D = ctx.user3;
+          asset = ctx.asset;
+          await asset.setMultiPartition(true);
+          await executeRbac(asset, [
+            {
+              role: ATS_ROLES.ROLE_ISSUER,
+              members: [signer_B.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_LOCKER,
+              members: [signer_C.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_FREEZE_MANAGER,
+              members: [signer_D.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_KYC,
+              members: [signer_B.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_SSI_MANAGER,
+              members: [signer_A.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_CLEARING,
+              members: [signer_A.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_CLEARING_VALIDATOR,
+              members: [signer_A.address],
+            },
+          ]);
+
+          await asset.connect(signer_A).addIssuer(signer_A.address);
+          await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+          await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+          await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+        });
+
+        it("GIVEN multi-partition equity with locked, held, and cleared tokens WHEN getTotalBalanceForByPartition THEN returns correct total balance per partition", async () => {
+          const tokenHolder = signer_A.address;
+
+          const defaultMintAmount = 600;
+          const defaultLockAmount = 100;
+          const defaultHoldAmount = 150;
+          const defaultClearAmount = 50;
+
+          const secondMintAmount = 400;
+          const secondLockAmount = 80;
+          const secondHoldAmount = 70;
+          const secondClearAmount = 30;
+
+          await asset.connect(signer_B).issueByPartition({
+            partition: _DEFAULT_PARTITION,
+            tokenHolder,
+            value: defaultMintAmount,
+            data: EMPTY_HEX_BYTES,
+          });
+
+          await asset.connect(signer_B).issueByPartition({
+            partition: _SECOND_PARTITION,
+            tokenHolder,
+            value: secondMintAmount,
+            data: EMPTY_HEX_BYTES,
+          });
+
+          await asset
+            .connect(signer_C)
+            .lockByPartition(_DEFAULT_PARTITION, defaultLockAmount, tokenHolder, expirationTimestamp);
+
+          await asset
+            .connect(signer_C)
+            .lockByPartition(_SECOND_PARTITION, secondLockAmount, tokenHolder, expirationTimestamp);
+
+          const holdDefault: Hold = {
+            amount: BigInt(defaultHoldAmount),
+            expirationTimestamp: BigInt(expirationTimestamp),
+            escrow: signer_B.address,
+            to: ADDRESS_ZERO,
+            data: EMPTY_HEX_BYTES,
+          };
+          await asset.connect(signer_A).createHoldByPartition(_DEFAULT_PARTITION, holdDefault);
+
+          const holdSecond: Hold = {
+            amount: BigInt(secondHoldAmount),
+            expirationTimestamp: BigInt(expirationTimestamp),
+            escrow: signer_B.address,
+            to: ADDRESS_ZERO,
+            data: EMPTY_HEX_BYTES,
+          };
+          await asset.connect(signer_A).createHoldByPartition(_SECOND_PARTITION, holdSecond);
+
+          await asset.connect(signer_A).activateClearing();
+
+          const clearingOperationDefault: ClearingOperation = {
+            partition: _DEFAULT_PARTITION,
+            expirationTimestamp,
+            data: EMPTY_HEX_BYTES,
+          };
+          await asset
+            .connect(signer_A)
+            .clearingTransferByPartition(clearingOperationDefault, defaultClearAmount, signer_B.address);
+
+          const clearingOperationSecond: ClearingOperation = {
+            partition: _SECOND_PARTITION,
+            expirationTimestamp,
+            data: EMPTY_HEX_BYTES,
+          };
+          await asset
+            .connect(signer_A)
+            .clearingTransferByPartition(clearingOperationSecond, secondClearAmount, signer_B.address);
+
+          const totalBalanceDefault = await asset.getTotalBalanceForByPartition(_DEFAULT_PARTITION, tokenHolder);
+          expect(totalBalanceDefault).to.equal(defaultMintAmount);
+
+          const totalBalanceSecond = await asset.getTotalBalanceForByPartition(_SECOND_PARTITION, tokenHolder);
+          expect(totalBalanceSecond).to.equal(secondMintAmount);
+        });
+      });
+
+      describe("Single partition (no multi-partition)", () => {
+        beforeEach(async () => {
+          const ctx = getCtx();
+          signer_A = ctx.deployer;
+          signer_B = ctx.user1;
+          signer_C = ctx.user2;
+          signer_D = ctx.user3;
+          asset = ctx.asset;
+          await executeRbac(asset, [
+            {
+              role: ATS_ROLES.ROLE_ISSUER,
+              members: [signer_B.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_LOCKER,
+              members: [signer_C.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_FREEZE_MANAGER,
+              members: [signer_D.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_KYC,
+              members: [signer_B.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_SSI_MANAGER,
+              members: [signer_A.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_CLEARING,
+              members: [signer_A.address],
+            },
+            {
+              role: ATS_ROLES.ROLE_CLEARING_VALIDATOR,
+              members: [signer_A.address],
+            },
+          ]);
+
+          await asset.connect(signer_A).addIssuer(signer_A.address);
+          await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+          await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+          await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+        });
+
+        it("GIVEN single partition equity with locked, held, cleared, and frozen tokens WHEN getTotalBalanceForByPartition THEN returns correct total balance", async () => {
+          const tokenHolder = signer_A.address;
+          const totalMintAmount = 1000;
+
+          const lockAmount = 100;
+          const holdAmount = 150;
+          const clearAmount = 50;
+          const freezeAmount = 200;
+
+          await asset.connect(signer_B).issueByPartition({
+            partition: _DEFAULT_PARTITION,
+            tokenHolder,
+            value: totalMintAmount,
+            data: EMPTY_HEX_BYTES,
+          });
+
+          await asset
+            .connect(signer_C)
+            .lockByPartition(_DEFAULT_PARTITION, lockAmount, tokenHolder, expirationTimestamp);
+
+          const hold: Hold = {
+            amount: BigInt(holdAmount),
+            expirationTimestamp: BigInt(expirationTimestamp),
+            escrow: signer_B.address,
+            to: ADDRESS_ZERO,
+            data: EMPTY_HEX_BYTES,
+          };
+          await asset.connect(signer_A).createHoldByPartition(_DEFAULT_PARTITION, hold);
+
+          await asset.connect(signer_A).activateClearing();
+
+          const clearingOperation: ClearingOperation = {
+            partition: _DEFAULT_PARTITION,
+            expirationTimestamp,
+            data: EMPTY_HEX_BYTES,
+          };
+          await asset.connect(signer_A).clearingTransferByPartition(clearingOperation, clearAmount, signer_B.address);
+
+          await asset.connect(signer_D).freezePartialTokens(tokenHolder, freezeAmount);
+
+          const totalBalanceByPartition = await asset.getTotalBalanceForByPartition(_DEFAULT_PARTITION, tokenHolder);
+          expect(totalBalanceByPartition).to.equal(totalMintAmount);
+        });
+      });
+    });
+
+    describe("initializeBalanceTrackerByPartition", () => {
+      it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeBalanceTrackerByPartition is called THEN AccountHasNoRole", async () => {
+        await expect(asset.connect(signer_D).initializeBalanceTrackerByPartition())
+          .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+          .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+      });
+
+      it("GIVEN already-initialised WHEN initializeBalanceTrackerByPartition is called again THEN FacetAlreadyRegistered", async () => {
+        await expect(asset.initializeBalanceTrackerByPartition())
+          .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+          .withArgs(RESOLVER_KEYS.balanceTrackerByPartition, 1);
+      });
+    });
+
+    describe("initializeBalanceTrackerByPartition event", () => {
+      it("GIVEN a fresh deployment WHEN initializeBalanceTrackerByPartition is called THEN emits BalanceTrackerByPartitionInitialized", async () => {
+        await asset.forceFacetNotRegistered(RESOLVER_KEYS.balanceTrackerByPartition);
+        await expect(asset.initializeBalanceTrackerByPartition()).to.emit(
+          asset,
+          "BalanceTrackerByPartitionInitialized",
         );
-        expect(await asset.balanceOfByPartition(_DEFAULT_PARTITION, signer_B.address)).to.equal(transferAmount);
-      });
-    });
-
-    describe("Multi-partition", () => {
-      beforeEach(async () => {
-        await loadFixture(deployEquity.bind(null, true));
-      });
-
-      it("GIVEN a token holder with tokens in multiple partitions WHEN balanceOfByPartition THEN returns balance for each partition independently", async () => {
-        const defaultMintAmount = 600;
-        const secondMintAmount = 400;
-
-        await asset.connect(signer_B).issueByPartition({
-          partition: _DEFAULT_PARTITION,
-          tokenHolder: signer_A.address,
-          value: defaultMintAmount,
-          data: EMPTY_HEX_BYTES,
-        });
-        await asset.connect(signer_B).issueByPartition({
-          partition: _SECOND_PARTITION,
-          tokenHolder: signer_A.address,
-          value: secondMintAmount,
-          data: EMPTY_HEX_BYTES,
-        });
-
-        expect(await asset.balanceOfByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(defaultMintAmount);
-        expect(await asset.balanceOfByPartition(_SECOND_PARTITION, signer_A.address)).to.equal(secondMintAmount);
       });
     });
   });
-
-  describe("totalSupplyByPartition", () => {
-    describe("Single partition", () => {
-      beforeEach(async () => {
-        await loadFixture(deployEquity.bind(null, false));
-      });
-
-      it("GIVEN no tokens minted WHEN totalSupplyByPartition THEN returns zero", async () => {
-        expect(await asset.totalSupplyByPartition(_DEFAULT_PARTITION)).to.equal(0);
-      });
-
-      it("GIVEN tokens minted WHEN totalSupplyByPartition THEN returns correct total", async () => {
-        const mintAmount = 1000;
-        await asset.connect(signer_B).issueByPartition({
-          partition: _DEFAULT_PARTITION,
-          tokenHolder: signer_A.address,
-          value: mintAmount,
-          data: EMPTY_HEX_BYTES,
-        });
-
-        expect(await asset.totalSupplyByPartition(_DEFAULT_PARTITION)).to.equal(mintAmount);
-      });
-
-      it("GIVEN tokens minted and then burned WHEN totalSupplyByPartition THEN reflects the redemption", async () => {
-        const mintAmount = 1000;
-        const burnAmount = 400;
-
-        await asset.connect(signer_B).issueByPartition({
-          partition: _DEFAULT_PARTITION,
-          tokenHolder: signer_A.address,
-          value: mintAmount,
-          data: EMPTY_HEX_BYTES,
-        });
-
-        await asset.connect(signer_A).redeemByPartition(_DEFAULT_PARTITION, burnAmount, EMPTY_HEX_BYTES);
-
-        expect(await asset.totalSupplyByPartition(_DEFAULT_PARTITION)).to.equal(mintAmount - burnAmount);
-      });
-    });
-
-    describe("Multi-partition", () => {
-      beforeEach(async () => {
-        await loadFixture(deployEquity.bind(null, true));
-      });
-
-      it("GIVEN tokens minted across multiple partitions WHEN totalSupplyByPartition THEN returns per-partition totals independently", async () => {
-        const defaultMintAmount = 600;
-        const secondMintAmount = 400;
-
-        await asset.connect(signer_B).issueByPartition({
-          partition: _DEFAULT_PARTITION,
-          tokenHolder: signer_A.address,
-          value: defaultMintAmount,
-          data: EMPTY_HEX_BYTES,
-        });
-        await asset.connect(signer_B).issueByPartition({
-          partition: _SECOND_PARTITION,
-          tokenHolder: signer_A.address,
-          value: secondMintAmount,
-          data: EMPTY_HEX_BYTES,
-        });
-
-        expect(await asset.totalSupplyByPartition(_DEFAULT_PARTITION)).to.equal(defaultMintAmount);
-        expect(await asset.totalSupplyByPartition(_SECOND_PARTITION)).to.equal(secondMintAmount);
-      });
-    });
-  });
-
-  describe("getTotalBalanceForByPartition", () => {
-    describe("Multi-partition enabled", () => {
-      beforeEach(async () => {
-        await loadFixture(deployEquity.bind(null, true));
-      });
-
-      it("GIVEN multi-partition equity with locked, held, and cleared tokens WHEN getTotalBalanceForByPartition THEN returns correct total balance per partition", async () => {
-        const tokenHolder = signer_A.address;
-
-        const defaultMintAmount = 600;
-        const defaultLockAmount = 100;
-        const defaultHoldAmount = 150;
-        const defaultClearAmount = 50;
-
-        const secondMintAmount = 400;
-        const secondLockAmount = 80;
-        const secondHoldAmount = 70;
-        const secondClearAmount = 30;
-
-        await asset.connect(signer_B).issueByPartition({
-          partition: _DEFAULT_PARTITION,
-          tokenHolder,
-          value: defaultMintAmount,
-          data: EMPTY_HEX_BYTES,
-        });
-
-        await asset.connect(signer_B).issueByPartition({
-          partition: _SECOND_PARTITION,
-          tokenHolder,
-          value: secondMintAmount,
-          data: EMPTY_HEX_BYTES,
-        });
-
-        await asset
-          .connect(signer_C)
-          .lockByPartition(_DEFAULT_PARTITION, defaultLockAmount, tokenHolder, expirationTimestamp);
-
-        await asset
-          .connect(signer_C)
-          .lockByPartition(_SECOND_PARTITION, secondLockAmount, tokenHolder, expirationTimestamp);
-
-        const holdDefault: Hold = {
-          amount: BigInt(defaultHoldAmount),
-          expirationTimestamp: BigInt(expirationTimestamp),
-          escrow: signer_B.address,
-          to: ADDRESS_ZERO,
-          data: EMPTY_HEX_BYTES,
-        };
-        await asset.connect(signer_A).createHoldByPartition(_DEFAULT_PARTITION, holdDefault);
-
-        const holdSecond: Hold = {
-          amount: BigInt(secondHoldAmount),
-          expirationTimestamp: BigInt(expirationTimestamp),
-          escrow: signer_B.address,
-          to: ADDRESS_ZERO,
-          data: EMPTY_HEX_BYTES,
-        };
-        await asset.connect(signer_A).createHoldByPartition(_SECOND_PARTITION, holdSecond);
-
-        await asset.connect(signer_A).activateClearing();
-
-        const clearingOperationDefault: ClearingOperation = {
-          partition: _DEFAULT_PARTITION,
-          expirationTimestamp,
-          data: EMPTY_HEX_BYTES,
-        };
-        await asset
-          .connect(signer_A)
-          .clearingTransferByPartition(clearingOperationDefault, defaultClearAmount, signer_B.address);
-
-        const clearingOperationSecond: ClearingOperation = {
-          partition: _SECOND_PARTITION,
-          expirationTimestamp,
-          data: EMPTY_HEX_BYTES,
-        };
-        await asset
-          .connect(signer_A)
-          .clearingTransferByPartition(clearingOperationSecond, secondClearAmount, signer_B.address);
-
-        const totalBalanceDefault = await asset.getTotalBalanceForByPartition(_DEFAULT_PARTITION, tokenHolder);
-        expect(totalBalanceDefault).to.equal(defaultMintAmount);
-
-        const totalBalanceSecond = await asset.getTotalBalanceForByPartition(_SECOND_PARTITION, tokenHolder);
-        expect(totalBalanceSecond).to.equal(secondMintAmount);
-      });
-    });
-
-    describe("Single partition (no multi-partition)", () => {
-      beforeEach(async () => {
-        await loadFixture(deployEquity.bind(null, false));
-      });
-
-      it("GIVEN single partition equity with locked, held, cleared, and frozen tokens WHEN getTotalBalanceForByPartition THEN returns correct total balance", async () => {
-        const tokenHolder = signer_A.address;
-        const totalMintAmount = 1000;
-
-        const lockAmount = 100;
-        const holdAmount = 150;
-        const clearAmount = 50;
-        const freezeAmount = 200;
-
-        await asset.connect(signer_B).issueByPartition({
-          partition: _DEFAULT_PARTITION,
-          tokenHolder,
-          value: totalMintAmount,
-          data: EMPTY_HEX_BYTES,
-        });
-
-        await asset.connect(signer_C).lockByPartition(_DEFAULT_PARTITION, lockAmount, tokenHolder, expirationTimestamp);
-
-        const hold: Hold = {
-          amount: BigInt(holdAmount),
-          expirationTimestamp: BigInt(expirationTimestamp),
-          escrow: signer_B.address,
-          to: ADDRESS_ZERO,
-          data: EMPTY_HEX_BYTES,
-        };
-        await asset.connect(signer_A).createHoldByPartition(_DEFAULT_PARTITION, hold);
-
-        await asset.connect(signer_A).activateClearing();
-
-        const clearingOperation: ClearingOperation = {
-          partition: _DEFAULT_PARTITION,
-          expirationTimestamp,
-          data: EMPTY_HEX_BYTES,
-        };
-        await asset.connect(signer_A).clearingTransferByPartition(clearingOperation, clearAmount, signer_B.address);
-
-        await asset.connect(signer_D).freezePartialTokens(tokenHolder, freezeAmount);
-
-        const totalBalanceByPartition = await asset.getTotalBalanceForByPartition(_DEFAULT_PARTITION, tokenHolder);
-        expect(totalBalanceByPartition).to.equal(totalMintAmount);
-      });
-    });
-  });
-  describe("initializeBalanceTrackerByPartition", () => {
-    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeBalanceTrackerByPartition is called THEN AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_D).initializeBalanceTrackerByPartition())
-        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
-        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
-    });
-
-    it("GIVEN already-initialised WHEN initializeBalanceTrackerByPartition is called again THEN FacetAlreadyRegistered", async () => {
-      await expect(asset.initializeBalanceTrackerByPartition())
-        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
-        .withArgs(RESOLVER_KEY_BALANCE_TRACKER_BY_PARTITION, 1);
-    });
-  });
-
-  describe("initializeBalanceTrackerByPartition event", () => {
-    it("GIVEN a fresh deployment WHEN initializeBalanceTrackerByPartition is called THEN emits BalanceTrackerByPartitionInitialized", async () => {
-      await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_BALANCE_TRACKER_BY_PARTITION);
-      await expect(asset.initializeBalanceTrackerByPartition()).to.emit(asset, "BalanceTrackerByPartitionInitialized");
-    });
-  });
-});
+}

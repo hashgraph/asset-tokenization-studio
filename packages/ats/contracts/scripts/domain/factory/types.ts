@@ -20,7 +20,7 @@ export interface SecurityDataParams {
   isWhiteList: boolean;
   /** Maximum supply of tokens */
   maxSupply: ethers.BigNumberish;
-  erc20MetadataInfo: {
+  erc20Metadata: {
     /** ERC20 metadata information */
     /** Token name */
     name: string;
@@ -28,8 +28,6 @@ export interface SecurityDataParams {
     symbol: string;
     /** Token decimals */
     decimals: number;
-    /** ISIN identifier */
-    isin: string;
   };
   /** Enable clearing functionality */
   clearingActive: boolean;
@@ -47,9 +45,10 @@ export interface SecurityDataParams {
   compliance: string;
   /** Identity registry contract address */
   identityRegistry: string;
-  resolverProxyConfiguration: {
-    key: string;
-    version: number;
+  resolverProxyConfigurationV2: {
+    configurationId: string;
+    configurationVersion: number;
+    replacementEnabled: boolean;
   };
   /** RBAC roles and their assigned addresses */
   rbacs: Rbac[];
@@ -61,22 +60,8 @@ export interface BondDetailsDataParams {
   nominalValueDecimals: number;
   startingDate: number;
   maturityDate: number;
-}
-
-export interface LoanDetailsDataParams {
-  currency: string;
-  nominalValue: ethers.BigNumberish;
-  nominalValueDecimals: number;
-  startingDate: number;
-  maturityDate: number;
-}
-
-export interface LoansPortfolioDetailsDataParams {
-  currency: string;
-  nominalValue: ethers.BigNumberish;
-  nominalValueDecimals: number;
-  startingDate: number;
-  maturityDate: number;
+  effectiveDatetime: number;
+  isUnitNominalValue: boolean;
 }
 
 /**
@@ -108,6 +93,8 @@ export interface EquityDetailsDataParams {
   currency: string;
   nominalValue: ethers.BigNumberish;
   nominalValueDecimals: number;
+  effectiveDatetime: number;
+  isUnitNominalValue: boolean;
 }
 
 export interface FactoryRegulationDataParams {
@@ -124,18 +111,4 @@ export interface FactoryRegulationDataParams {
     /** Additional security information */
     info: string;
   };
-}
-
-export interface FixedRateDataParams {
-  rate: number;
-  rateDecimals: number;
-}
-
-export enum SecurityType {
-  BOND_VARIABLE_RATE = 0,
-  EQUITY = 1,
-  BOND_FIXED_RATE = 2,
-  BOND_KPI_LINKED_RATE = 3,
-  LOAN = 4,
-  DEPOSIT_TOKEN = 5,
 }

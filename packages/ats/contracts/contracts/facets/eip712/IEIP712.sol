@@ -33,6 +33,5 @@ interface IEIP712 {
      *         (e.g. after a chain fork or a proxy version upgrade).
      * @return domainSeparator_ The EIP-712 domain separator hash.
      */
-    // solhint-disable-next-line func-name-mixedcase
     function DOMAIN_SEPARATOR() external view returns (bytes32 domainSeparator_);
 }

@@ -34,20 +34,18 @@ import { IClearingByPartition } from "../facets/clearingByPartition/IClearingByP
 import { IClearingHoldByPartition } from "../facets/clearingHoldByPartition/IClearingHoldByPartition.sol";
 import { IERC20Permit } from "../facets/erc20Permit/IERC20Permit.sol";
 import { IIdentity } from "../facets/identity/IIdentity.sol";
-import { IScheduledCrossOrderedTasks } from "../facets/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
-import { ISnapshots } from "../facets/snapshot/ISnapshots.sol";
-import { IProceedRecipients } from "../facets/proceedRecipient/IProceedRecipients.sol";
+import { IScheduledCrossOrderedTasks } from "../facets/scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol";
+import { ISnapshots } from "../facets/snapshots/ISnapshots.sol";
+import { IProceedRecipients } from "../facets/proceedRecipients/IProceedRecipients.sol";
 
-import { INominalValue } from "../facets/layer_2/nominalValue/INominalValue.sol";
-import { ScheduledTasksStorageWrapper } from "../domain/asset/ScheduledTasksStorageWrapper.sol";
-import { IProtectedPartitions } from "../facets/protectedPartition/IProtectedPartitions.sol";
+import { INominalValue } from "../facets/nominalValue/INominalValue.sol";
+import { IProtectedPartitions } from "../facets/protectedPartitions/IProtectedPartitions.sol";
 import { IExternalPauseManagement } from "../facets/externalPauseManagement/IExternalPauseManagement.sol";
 import {
     IExternalControlListManagement
 } from "../facets/externalControlListManagement/IExternalControlListManagement.sol";
 import { IExternalKycListManagement } from "../facets/externalKycListManagement/IExternalKycListManagement.sol";
 import { IKyc } from "../facets/kyc/IKyc.sol";
-import { _validateISIN } from "./isinValidator.sol";
 import { IInterestRate } from "../facets/interestRate/IInterestRate.sol";
 import { EvmAccessors } from "../infrastructure/utils/EvmAccessors.sol";
 import { DatesValidation } from "../infrastructure/utils/DatesValidation.sol";
@@ -161,16 +159,6 @@ abstract contract Factory is IFactory {
     }
 
     /**
-     * @notice Guarantees the provided ISIN satisfies the project validator.
-     * @dev Delegates to `_checkISIN`, which reverts when the identifier is malformed.
-     * @param isin International Securities Identification Number to validate.
-     */
-    modifier onlyValidISIN(string calldata isin) {
-        _checkISIN(isin);
-        _;
-    }
-
-    /**
      * @notice Guarantees the initial RBAC configuration includes at least one admin.
      * @dev Delegates to `_checkAdmins`, which reverts with `NoInitialAdmins` unless a non-zero
      *      `DEFAULT_ADMIN_ROLE` member exists in the supplied RBAC entries.
@@ -209,26 +197,31 @@ abstract contract Factory is IFactory {
      * @dev The resolver must be non-zero and `_rbacs` must include at least one non-zero
      *      `DEFAULT_ADMIN_ROLE` member. Emits `ProxyDeployed`.
      * @param _resolver Business logic resolver used by the proxy.
-     * @param _configKey Resolver configuration key selecting the facet set.
-     * @param _version Resolver configuration version to activate.
+     * @param _resolverProxyConfigurationV2 Resolver configuration data for the proxy.
      * @param _rbacs Initial RBAC assignments applied by the proxy constructor.
      * @param _data Additional data for the proxy deployment.
      * @return proxyAddress_ Address of the deployed resolver proxy.
      */
     function deployProxy(
         IBusinessLogicResolver _resolver,
-        bytes32 _configKey,
-        uint256 _version,
+        IResolverProxy.ResolverProxyConfigurationV2 calldata _resolverProxyConfigurationV2,
         IResolverProxy.Rbac[] calldata _rbacs,
         bytes calldata _data
     ) external onlyValidResolver(_resolver) onlyValidAdmins(_rbacs) returns (address proxyAddress_) {
-        proxyAddress_ = address(new ResolverProxy(_resolver, _configKey, _version, _rbacs));
-        emit ProxyDeployed(proxyAddress_, _resolver, _configKey, _version, _rbacs, _data);
+        proxyAddress_ = address(new ResolverProxy(_resolver, _resolverProxyConfigurationV2, _rbacs));
+        emit ProxyDeployed(
+            proxyAddress_,
+            _resolver,
+            _resolverProxyConfigurationV2.configurationId,
+            _resolverProxyConfigurationV2.configurationVersion,
+            _rbacs,
+            _data
+        );
     }
 
     /**
      * @notice Deploys and initialises an equity security proxy.
-     * @dev Validates resolver, ISIN, admin RBAC and regulation data. Initialises equity,
+     * @dev Validates resolver, admin RBAC and regulation data. Initialises equity,
      *      security, nominal value, dividend, voting and common security facets, marks the
      *      proxy operational, renounces this factory's temporary admin role and emits
      *      `EquityDeployed`.
@@ -242,16 +235,17 @@ abstract contract Factory is IFactory {
     )
         external
         onlyValidResolver(_equityData.security.resolver)
-        onlyValidISIN(_equityData.security.erc20MetadataInfo.isin)
         onlyValidAdmins(_equityData.security.rbacs)
         onlyValidRegulation(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType)
         returns (address equityAddress_)
     {
-        equityAddress_ = _deploySecurity(_equityData.security, SecurityType.Equity);
+        equityAddress_ = _deploySecurity(_equityData.security);
         INominalValue(equityAddress_).initializeNominalValue(
             _equityData.equityDetails.nominalValue,
             _equityData.equityDetails.nominalValueDecimals,
-            _equityData.equityDetails.currency
+            _equityData.equityDetails.currency,
+            _equityData.equityDetails.effectiveDatetime,
+            _equityData.equityDetails.isUnitNominalValue
         );
         IInterestRate(equityAddress_).initializeInterestRateType(IInterestRate.RateType.STANDARD);
         IProceedRecipients(equityAddress_).initializeProceedRecipients(new address[](0), new bytes[](0));
@@ -259,6 +253,8 @@ abstract contract Factory is IFactory {
         IDividendSecurityHolders(equityAddress_).initializeDividendSecurityHolders();
         IVoting(equityAddress_).initializeVoting();
         IVotingSecurityHolders(equityAddress_).initializeVotingSecurityHolders();
+        ICouponSecurityHolders(equityAddress_).initializeCouponSecurityHolders();
+        IMaturityByPartition(equityAddress_).initializeMaturityByPartition();
         (bool isOperational_, ) = IInitializer(equityAddress_).setOperationalStatus();
         _checkUnexpectedError(!isOperational_, FACTORY_OPERATIONAL_STATUS);
         IAccessControl(equityAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
@@ -267,7 +263,7 @@ abstract contract Factory is IFactory {
 
     /**
      * @notice Deploys and initialises a variable-rate bond security proxy.
-     * @dev Validates resolver, ISIN, admin RBAC, regulation data and bond dates. Initialises
+     * @dev Validates resolver, admin RBAC, regulation data and bond dates. Initialises
      *      bond-specific and common facets, sets the rate type to standard, marks the proxy
      *      operational, renounces this factory's temporary admin role and emits `BondDeployed`.
      * @param _bondData Bond deployment data, including common security configuration.
@@ -280,53 +276,20 @@ abstract contract Factory is IFactory {
     )
         external
         onlyValidResolver(_bondData.security.resolver)
-        onlyValidISIN(_bondData.security.erc20MetadataInfo.isin)
         onlyValidAdmins(_bondData.security.rbacs)
         onlyValidRegulation(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType)
         onlyValidBondDates(_bondData.bondDetails.startingDate, _bondData.bondDetails.maturityDate)
         returns (address bondAddress_)
     {
-        bondAddress_ = _deployBond(_bondData, SecurityType.BondVariableRate);
+        bondAddress_ = _deployBond(_bondData);
         IInterestRate(bondAddress_).initializeInterestRateType(IInterestRate.RateType.STANDARD);
         IFixedRate(bondAddress_).initializeFixedRate(IFixedRate.FixedRateData({ rate: 0, rateDecimals: 0 }));
+        IVotingSecurityHolders(bondAddress_).initializeVotingSecurityHolders();
+        IDividendSecurityHolders(bondAddress_).initializeDividendSecurityHolders();
         (bool isOperational_, ) = IInitializer(bondAddress_).setOperationalStatus();
         _checkUnexpectedError(!isOperational_, FACTORY_OPERATIONAL_STATUS);
         IAccessControl(bondAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
         emit BondDeployed(EvmAccessors.getMsgSender(), bondAddress_, _bondData, _factoryRegulationData);
-    }
-
-    /**
-     * @notice Deploys and fully initialises a deposit token proxy.
-     * @dev Creates the proxy and initialises its facets via `_deployDepositToken`, marks the
-     *      proxy operational and renounces this factory's temporary `DEFAULT_ADMIN_ROLE`. The
-     *      deposit token configuration does not include `SecurityFacet`, so
-     *      `_factoryRegulationData` is validated by `onlyValidRegulation` and emitted in
-     *      `DepositTokenDeployed` but not persisted on-chain.
-     * @param _depositTokenData Deposit token creation data wrapping the shared `SecurityData`.
-     * @param _factoryRegulationData Regulation type and sub-type validated for the deposit token.
-     * @return depositTokenAddress_ Address of the newly deployed deposit token proxy.
-     */
-    function deployDepositToken(
-        DepositTokenData calldata _depositTokenData,
-        FactoryRegulationData calldata _factoryRegulationData
-    )
-        external
-        onlyValidResolver(_depositTokenData.security.resolver)
-        onlyValidISIN(_depositTokenData.security.erc20MetadataInfo.isin)
-        onlyValidAdmins(_depositTokenData.security.rbacs)
-        onlyValidRegulation(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType)
-        returns (address depositTokenAddress_)
-    {
-        depositTokenAddress_ = _deployDepositToken(_depositTokenData.security, SecurityType.DepositToken);
-        (bool isOperational_, ) = IInitializer(depositTokenAddress_).setOperationalStatus();
-        _checkUnexpectedError(!isOperational_, FACTORY_OPERATIONAL_STATUS);
-        IAccessControl(depositTokenAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
-        emit DepositTokenDeployed(
-            EvmAccessors.getMsgSender(),
-            depositTokenAddress_,
-            _depositTokenData,
-            _factoryRegulationData
-        );
     }
 
     /**
@@ -350,14 +313,10 @@ abstract contract Factory is IFactory {
      *      nominal-value, coupon, maturity and principal facets. Operational status and
      *      factory admin renouncement are handled by the public deployment functions.
      * @param _bondData Bond deployment data.
-     * @param _securityType Concrete bond security type used in core metadata.
      * @return bondAddress_ Address of the deployed bond proxy.
      */
-    function _deployBond(
-        BondData calldata _bondData,
-        SecurityType _securityType
-    ) internal returns (address bondAddress_) {
-        bondAddress_ = _deploySecurity(_bondData.security, _securityType);
+    function _deployBond(BondData calldata _bondData) internal returns (address bondAddress_) {
+        bondAddress_ = _deploySecurity(_bondData.security);
         IProceedRecipients(bondAddress_).initializeProceedRecipients(
             _bondData.proceedRecipients,
             _bondData.proceedRecipientsData
@@ -365,7 +324,9 @@ abstract contract Factory is IFactory {
         INominalValue(bondAddress_).initializeNominalValue(
             _bondData.bondDetails.nominalValue,
             _bondData.bondDetails.nominalValueDecimals,
-            _bondData.bondDetails.currency
+            _bondData.bondDetails.currency,
+            _bondData.bondDetails.effectiveDatetime,
+            _bondData.bondDetails.isUnitNominalValue
         );
         ICoupon(bondAddress_).initializeCoupon();
         ICouponListing(bondAddress_).initializeCouponListing();
@@ -380,15 +341,11 @@ abstract contract Factory is IFactory {
      * @dev Appends this factory as a temporary `DEFAULT_ADMIN_ROLE` holder to allow facet
      *      initialisation. Callers must later mark the proxy operational and renounce that role.
      * @param _securityData Common security deployment configuration.
-     * @param _securityType Security type recorded in core metadata.
      * @return securityAddress_ Address of the deployed security proxy.
      */
-    function _deploySecurity(
-        SecurityData calldata _securityData,
-        SecurityType _securityType
-    ) internal virtual returns (address securityAddress_) {
+    function _deploySecurity(SecurityData calldata _securityData) internal virtual returns (address securityAddress_) {
         securityAddress_ = _deploySecurityProxy(_securityData);
-        _initializeSecurityMetadata(securityAddress_, _securityData, _securityType);
+        _initializeSecurityMetadata(securityAddress_, _securityData);
         _initializeSecurityCompliance(securityAddress_);
         _initializeCoreFacets(securityAddress_);
         _initializeSnapshotFacets(securityAddress_);
@@ -396,39 +353,6 @@ abstract contract Factory is IFactory {
         _initializeHoldFacets(securityAddress_);
         _initializeClearingFacets(securityAddress_);
         _initializeMiscellaneousFacets(securityAddress_);
-    }
-
-    /**
-     * @notice Deploys a deposit-token proxy and initialises only the facets it exposes.
-     * @dev Initialises exactly the facets registered for the deposit-token resolver
-     *      configuration and no others; in particular it does not call the snapshot, lock,
-     *      transfer-and-lock, corporate-action, identity, recovery, SSI, balance-adjustment,
-     *      scheduled-task, ERC20-permit, ERC20-votes, compliance, KYC, external-pause or
-     *      protected-partition initialisers. Each initialiser invoked here requires its facet to
-     *      be present in the resolver configuration, otherwise `IInitializer.setOperationalStatus`
-     *      cannot mark the proxy operational. The `InitializerFacet` batch size is seeded last so a
-     *      single `setOperationalStatus` pass validates every facet initialised above.
-     * @param _securityData Common security deployment configuration.
-     * @param _securityType Security type recorded in core metadata.
-     * @return securityAddress_ Address of the fully initialised deposit-token proxy.
-     */
-    function _deployDepositToken(
-        SecurityData calldata _securityData,
-        SecurityType _securityType
-    ) internal virtual returns (address securityAddress_) {
-        securityAddress_ = _deploySecurityProxy(_securityData);
-        _initializeBaseConfiguration(securityAddress_, _securityData, _securityType);
-        // DepositToken carries no nominal value; seed the facet with its zero default.
-        INominalValue(securityAddress_).initializeNominalValue(0, 0, bytes3(0));
-        _initializeTransferAndSupply(securityAddress_);
-        _initializeStateControls(securityAddress_);
-        _initializeBalances(securityAddress_);
-        _initializeOperatorsAndControllers(securityAddress_);
-        _initializeBatchOperations(securityAddress_);
-        _initializeClearingAndHold(securityAddress_, _securityData.clearingActive);
-        // Seed the initializer batch size last so a single setOperationalStatus pass
-        // can validate every facet initialised above.
-        IInitializer(securityAddress_).initializeInitializer(_SECURITY_FACETS_MAX);
     }
 
     /**
@@ -453,122 +377,10 @@ abstract contract Factory is IFactory {
         extendedRbacs[rbacsLen].members[0] = address(this);
         ResolverProxy proxy = new ResolverProxy(
             _securityData.resolver,
-            _securityData.resolverProxyConfiguration.key,
-            _securityData.resolverProxyConfiguration.version,
+            _securityData.resolverProxyConfigurationV2,
             extendedRbacs
         );
         securityAddress_ = address(proxy);
-    }
-
-    /**
-     * @notice Initialises a security's metadata, eligibility, supply caps and partition
-     *         configuration.
-     * @dev Covers the always-on infrastructure (access control, diamond cut) plus core metadata,
-     *      control lists, caps, custom data, documentation and the partition and controller flags.
-     *      Nominal value is asset-specific and initialised separately by each deployer.
-     * @param _securityAddress Address of the security proxy being initialised.
-     * @param _securityData Common security deployment configuration.
-     * @param _securityType Security type recorded in core metadata.
-     */
-    function _initializeBaseConfiguration(
-        address _securityAddress,
-        SecurityData calldata _securityData,
-        SecurityType _securityType
-    ) private {
-        IAccessControl(_securityAddress).initializeAccessControl();
-        IDiamondFacet(_securityAddress).initializeDiamondCut();
-
-        ICore.ERC20Metadata memory erc20Metadata = ICore.ERC20Metadata({
-            info: _securityData.erc20MetadataInfo,
-            securityType: _securityType
-        });
-        ICore(_securityAddress).initializeCore(erc20Metadata);
-        IControlList(_securityAddress).initializeControlList(_securityData.isWhiteList);
-        IExternalControlListManagement(_securityAddress).initializeExternalControlLists(
-            _securityData.externalControlLists
-        );
-        ICap(_securityAddress).initializeCap(_securityData.maxSupply, new ICap.PartitionCap[](0));
-        ICapByPartition(_securityAddress).initializeCapByPartition();
-        ICustomData(_securityAddress).initializeCustomData();
-        IDocumentation(_securityAddress).initializeDocumentation();
-
-        IPartitions(_securityAddress).initializePartitions(_securityData.isMultiPartition);
-        IController(_securityAddress).initializeController(_securityData.isControllable);
-    }
-
-    /**
-     * @notice Initialises the transfer, allowance and supply (mint/burn) facets.
-     * @param _securityAddress Address of the security proxy being initialised.
-     */
-    function _initializeTransferAndSupply(address _securityAddress) private {
-        IAllowance(_securityAddress).initializeAllowance();
-        ITransfer(_securityAddress).initializeTransfer();
-        ITransferByPartition(_securityAddress).initializeTransferByPartition();
-        IMint(_securityAddress).initializeERC1594();
-        IMintByPartition(_securityAddress).initializeMintByPartition();
-        IBurn(_securityAddress).initializeBurn();
-        IBurnByPartition(_securityAddress).initializeBurnByPartition();
-    }
-
-    /**
-     * @notice Initialises the state-control facets: freeze, pause and deactivate.
-     * @param _securityAddress Address of the security proxy being initialised.
-     */
-    function _initializeStateControls(address _securityAddress) private {
-        IFreeze(_securityAddress).initializeFreeze();
-        IPause(_securityAddress).initializePause();
-        IDeactivate(_securityAddress).initializeDeactivate();
-    }
-
-    /**
-     * @notice Initialises the balance-tracking and security-holder facets.
-     * @param _securityAddress Address of the security proxy being initialised.
-     */
-    function _initializeBalances(address _securityAddress) private {
-        IBalanceTracker(_securityAddress).initializeBalanceTracker();
-        IBalanceTrackerByPartition(_securityAddress).initializeBalanceTrackerByPartition();
-        ISecurityHolders(_securityAddress).initializeSecurityHolders();
-    }
-
-    /**
-     * @notice Initialises the operator and controller delegation facets.
-     * @param _securityAddress Address of the security proxy being initialised.
-     */
-    function _initializeOperatorsAndControllers(address _securityAddress) private {
-        IOperator(_securityAddress).initializeOperator();
-        IOperatorByPartition(_securityAddress).initializeOperatorByPartition();
-        IOperatorHoldByPartition(_securityAddress).initializeOperatorHoldByPartition();
-        IOperatorClearingByPartition(_securityAddress).initializeOperatorClearingByPartition();
-        IOperatorClearingHoldByPartition(_securityAddress).initializeOperatorClearingHoldByPartition();
-
-        IControllerByPartition(_securityAddress).initializeControllerByPartition();
-        IControllerHoldByPartition(_securityAddress).initializeControllerHoldByPartition();
-    }
-
-    /**
-     * @notice Initialises the batch-operation facets.
-     * @param _securityAddress Address of the security proxy being initialised.
-     */
-    function _initializeBatchOperations(address _securityAddress) private {
-        IBatchController(_securityAddress).initializeBatchController();
-        IBatchBurn(_securityAddress).initializeBatchBurn();
-        IBatchMint(_securityAddress).initializeBatchMint();
-        IBatchTransfer(_securityAddress).initializeBatchTransfer();
-        IBatchFreeze(_securityAddress).initializeBatchFreeze();
-    }
-
-    /**
-     * @notice Initialises the clearing and hold facets.
-     * @param _securityAddress Address of the security proxy being initialised.
-     * @param _clearingActive Whether clearing is initially active.
-     */
-    function _initializeClearingAndHold(address _securityAddress, bool _clearingActive) private {
-        IClearing(_securityAddress).initializeClearing(_clearingActive);
-        IClearingByPartition(_securityAddress).initializeClearingByPartition();
-        IClearingHoldByPartition(_securityAddress).initializeClearingHoldByPartition();
-
-        IHoldFacet(_securityAddress).initializeHold();
-        IHoldByPartition(_securityAddress).initializeHoldByPartition();
     }
 
     /**
@@ -577,13 +389,8 @@ abstract contract Factory is IFactory {
      *      core metadata, caps, clearing, KYC, ERC20 votes and ERC3643 integration.
      * @param _securityAddress Address of the proxy being initialised.
      * @param _securityData Common security deployment configuration.
-     * @param _securityType Security type recorded in core metadata.
      */
-    function _initializeSecurityMetadata(
-        address _securityAddress,
-        SecurityData calldata _securityData,
-        SecurityType _securityType
-    ) private {
+    function _initializeSecurityMetadata(address _securityAddress, SecurityData calldata _securityData) private {
         // configure Control List
         IControlList(_securityAddress).initializeControlList(_securityData.isWhiteList);
         // configure multi partition flag
@@ -591,11 +398,7 @@ abstract contract Factory is IFactory {
         // configure controller flag
         IController(_securityAddress).initializeController(_securityData.isControllable);
         // configure erc20 metadata
-        ICore.ERC20Metadata memory erc20Metadata = ICore.ERC20Metadata({
-            info: _securityData.erc20MetadataInfo,
-            securityType: _securityType
-        });
-        ICore(_securityAddress).initializeCore(erc20Metadata);
+        ICore(_securityAddress).initializeCore(_securityData.erc20Metadata);
         // configure issue flag
         IMint(_securityAddress).initializeERC1594();
         // configure cap
@@ -637,7 +440,7 @@ abstract contract Factory is IFactory {
         // configure core adjusted
         ICoreAdjusted(_securityAddress).initializeCoreAdjusted();
         // configure custom data
-        ICustomData(_securityAddress).initializeCustomData();
+        ICustomData(_securityAddress).initializeCustomData(new ICustomData.CustomDataEntry[](0));
         // configure freeze
         IFreeze(_securityAddress).initializeFreeze();
         // configure batch freeze
@@ -838,7 +641,7 @@ abstract contract Factory is IFactory {
      */
     function _checkBondDates(uint256 startingDate, uint256 maturityDate) private view {
         DatesValidation.checkDates(startingDate, maturityDate);
-        ScheduledTasksStorageWrapper.requireValidTimestamp(maturityDate);
+        DatesValidation.checkFutureTimestamp(maturityDate);
     }
 
     /**
@@ -850,16 +653,6 @@ abstract contract Factory is IFactory {
         if (address(resolver) == address(0)) {
             revert EmptyResolver(resolver);
         }
-    }
-
-    /**
-     * @notice Asserts that the provided ISIN satisfies the project validator.
-     * @dev Forwards to the `_validateISIN` free function, which reverts when the identifier is
-     *      malformed.
-     * @param isin International Securities Identification Number to validate.
-     */
-    function _checkISIN(string calldata isin) private pure {
-        _validateISIN(isin);
     }
 
     /**

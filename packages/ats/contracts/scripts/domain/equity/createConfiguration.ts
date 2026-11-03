@@ -21,23 +21,19 @@ import {
   RetryOptions,
 } from "@scripts/infrastructure";
 import { BusinessLogicResolver } from "@contract-types";
-import { EQUITY_CONFIG_ID } from "../constants";
-import { atsRegistry } from "../atsRegistry";
+import { CONFIG_IDS } from "../constants";
+import { atsRegistry, FacetName } from "../atsRegistry";
 import { buildFacetList } from "../facetEnvironment";
 import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
 
 /**
  * Equity-specific facets list.
  *
- * This is an explicit positive list of all facets required for equity tokens.
- * Includes all common facets plus VotingFacet, DividendFacet, and DividendSecurityHoldersFacet.
- *
- * Note: DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet functionality,
- * so we only include DiamondFacet to avoid selector collisions.
- *
- * Based on origin/develop configuration where equity uses ALL common facets.
+ * The common token tiers plus the equity-specific facets: dividends, voting,
+ * and the supporting interest-rate / proceed-recipients / clearing-hold facets.
  */
-const EQUITY_FACETS = [
+
+export const EQUITY_FACETS: readonly FacetName[] = [
   // Core Functionality (10 - DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet)
   "AccessControlFacet",
   "AllowanceFacet",
@@ -124,6 +120,8 @@ const EQUITY_FACETS = [
   "ScheduledBalanceAdjustmentFacet",
   "DividendFacet",
   "DividendSecurityHoldersFacet",
+  "CouponSecurityHoldersFacet",
+  "MaturityByPartitionFacet",
   "LockFacet",
   "LockByPartitionFacet",
   "NominalValueFacet",
@@ -145,8 +143,8 @@ const EQUITY_FACETS = [
  * Create equity token configuration in BusinessLogicResolver.
  *
  * Thin wrapper that calls the generic core operation with equity-specific data:
- * - Configuration ID: EQUITY_CONFIG_ID
- * - Facet list: EQUITY_FACETS (42 facets)
+ * - Configuration ID: CONFIG_IDS.equity
+ * - Facet list: EQUITY_FACETS
  *
  * All implementation logic is handled by the generic createConfiguration()
  * operation in core/operations/blrConfigurations.ts.
@@ -202,12 +200,9 @@ export async function createEquityConfiguration(
 
   // Build facet data with resolver keys from registry
   const facets = facetNames.map((name) => {
-    // Strip "TimeTravel" suffix to get base name for registry lookup
-    const baseName = name.replace(/TimeTravel$/, "");
-
-    const facetDef = atsRegistry.getFacetDefinition(baseName) ?? getMockFacetDefinition(baseName);
+    const facetDef = atsRegistry.getFacetDefinition(name) ?? getMockFacetDefinition(name);
     if (!facetDef?.resolverKey?.value) {
-      throw new Error(`No resolver key found for facet: ${baseName}`);
+      throw new Error(`No resolver key found for facet: ${name}`);
     }
     return {
       facetName: name,
@@ -217,7 +212,7 @@ export async function createEquityConfiguration(
   });
 
   return createBatchConfiguration(blrContract, {
-    configurationId: EQUITY_CONFIG_ID,
+    configurationId: CONFIG_IDS.equity,
     facets,
     partialBatchDeploy,
     batchSize,

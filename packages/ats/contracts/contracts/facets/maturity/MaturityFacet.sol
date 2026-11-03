@@ -26,6 +26,7 @@ contract MaturityFacet is Maturity, IStaticFunctionSelectors {
             Bytes4Builder.build(
                 this.initializeMaturity.selector,
                 this.fullRedeemAtMaturity.selector,
+                this.redeemAtMaturityByPartitionRange.selector,
                 this.updateMaturityDate.selector,
                 this.getMaturityDate.selector
             );

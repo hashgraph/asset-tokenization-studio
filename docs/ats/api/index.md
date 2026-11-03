@@ -10,9 +10,10 @@ Technical reference for ATS smart contracts and SDK.
 
 ## Smart Contracts
 
-[Smart Contracts API →](./contracts/index.md)
+[Smart Contracts Handbook →](../developer-guides/contracts/index.md)
 
-Auto-generated documentation for all ATS smart contract interfaces, functions, and events.
+Architecture, deployment, and development guides for the ATS contracts. The auto-generated
+interface, function, and event reference is in the **Smart Contracts** category of this API sidebar.
 
 ## SDK
 

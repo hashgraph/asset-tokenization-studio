@@ -38,10 +38,18 @@ abstract contract Voting is IVoting, Modifiers {
         onlyActivated
         onlyUnpaused
         onlyRole(ROLE_CORPORATE_ACTION)
-        onlyValidTimestamp(_newVoting.recordDate)
+        onlyFutureTimestamp(_newVoting.recordDate)
         returns (uint256 voteID_)
     {
-        (, voteID_) = VotingStorageWrapper.setVoting(_newVoting);
+        bytes32 corporateActionId_;
+        (corporateActionId_, voteID_) = VotingStorageWrapper.setVoting(_newVoting);
+        emit IVoting.VotingSet(
+            corporateActionId_,
+            voteID_,
+            EvmAccessors.getMsgSender(),
+            _newVoting.recordDate,
+            _newVoting.data
+        );
     }
 
     /// @inheritdoc IVoting
@@ -58,6 +66,7 @@ abstract contract Voting is IVoting, Modifiers {
         returns (bool success_)
     {
         success_ = VotingStorageWrapper.cancelVoting(_voteId);
+        emit IVoting.VotingCancelled(_voteId, EvmAccessors.getMsgSender());
     }
 
     /// @inheritdoc IVoting

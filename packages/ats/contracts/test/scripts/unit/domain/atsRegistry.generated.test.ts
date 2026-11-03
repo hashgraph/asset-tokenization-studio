@@ -3,11 +3,6 @@
 /**
  * Unit tests for `atsRegistry.generated.ts` factory functions.
  *
- * @remarks
- * Tests the TimeTravel factory branch which is otherwise untested. This
- * achieves 100 % coverage on the `atsRegistry.generated.ts` file by
- * dynamically testing all facets that have TimeTravel variants.
- *
  * @module test/scripts/unit/domain/atsRegistry.generated.test
  */
 
@@ -70,23 +65,6 @@ describe("atsRegistry.generated - Factory Functions", () => {
     return !isLibraryDependentFacet(facetName);
   };
 
-  describe("TimeTravel factory branches (comprehensive)", () => {
-    facetNames.forEach((facetName) => {
-      const facet = FACET_REGISTRY[facetName as keyof typeof FACET_REGISTRY];
-
-      if (typeof facet.timeTravelFactory === "function" && canTestFactory(facetName)) {
-        it(`should create TimeTravel factory for ${facetName}`, () => {
-          expect(facet).to.not.be.undefined;
-          expect(facet.timeTravelFactory).to.be.a("function");
-
-          const timeTravelFactory = facet.timeTravelFactory!(signer);
-          expect(timeTravelFactory).to.not.be.undefined;
-          expect(timeTravelFactory).to.have.property("deploy");
-        });
-      }
-    });
-  });
-
   describe("Normal factory branches (comprehensive)", () => {
     facetNames.forEach((facetName) => {
       const facet = FACET_REGISTRY[facetName as keyof typeof FACET_REGISTRY];
@@ -101,21 +79,6 @@ describe("atsRegistry.generated - Factory Functions", () => {
           expect(normalFactory).to.have.property("deploy");
         });
       }
-    });
-  });
-
-  describe("Factory availability", () => {
-    it("should have both factory and timeTravelFactory when available", () => {
-      const facetWithBoth = facetNames.find((name) => {
-        const facet = FACET_REGISTRY[name as keyof typeof FACET_REGISTRY];
-        return typeof facet.factory === "function" && typeof facet.timeTravelFactory === "function";
-      });
-
-      expect(facetWithBoth).to.not.be.undefined;
-
-      const facet = FACET_REGISTRY[facetWithBoth as keyof typeof FACET_REGISTRY];
-      expect(facet.factory).to.be.a("function");
-      expect(facet.timeTravelFactory).to.be.a("function");
     });
   });
 

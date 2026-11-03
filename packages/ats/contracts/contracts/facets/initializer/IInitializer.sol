@@ -6,6 +6,9 @@ bytes32 constant RESOLVER_KEY_INITIALIZER = 0xe7caa2e00c841ed2a64c4c95e3981f3bfc
 
 /**
  * @title IInitializer
+ * @author Asset Tokenization Studio Team
+ * @notice Interface for the Initializer facet, which tracks per-facet readiness and
+ *         drives the token's transition to operational status.
  */
 interface IInitializer {
     /**

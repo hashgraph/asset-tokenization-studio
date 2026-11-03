@@ -101,16 +101,14 @@ If you're using Docker (from Step 2), use these default values:
 
 ```bash
 # PostgreSQL Connection (Docker defaults)
-DATABASE_HOST=localhost
-DATABASE_PORT=5432
-DATABASE_USERNAME=postgres
-DATABASE_PASSWORD=postgres
-DATABASE_NAME=postgres
-DATABASE_SCHEMA=public
-DATABASE_SYNCHRONIZE=true  # Set to false in production
+POSTGRESQL_HOST=localhost
+POSTGRESQL_PORT=5432
+POSTGRESQL_USER=postgres
+POSTGRESQL_PASSWORD=postgres
+POSTGRESQL_DB=postgres
 ```
 
-If you created a custom database, adjust `DATABASE_NAME` accordingly.
+If you created a custom database, adjust `POSTGRESQL_DB` accordingly.
 
 ##### Blockchain Configuration
 
@@ -275,8 +273,8 @@ sudo systemctl status postgresql
 psql -U postgres -d mass_payout
 
 # Check credentials in .env
-DATABASE_USERNAME=postgres
-DATABASE_PASSWORD=your_correct_password
+POSTGRESQL_USER=postgres
+POSTGRESQL_PASSWORD=your_correct_password
 ```
 
 ### Port Already in Use
@@ -341,12 +339,12 @@ npm run mass-payout:backend:dev
 
 ```bash
 # Backend .env
-DATABASE_SYNCHRONIZE=false  # Never use sync in production
 NODE_ENV=production
-
-# Use connection pooling
-DATABASE_POOL_SIZE=10
 ```
+
+> **Note**: the backend currently auto-creates tables via TypeORM `synchronize` (hardcoded in
+> `postgres.module.ts`); formal migrations are planned for production. There are no
+> `DATABASE_SYNCHRONIZE` / `DATABASE_POOL_SIZE` environment variables.
 
 ### Security Considerations
 

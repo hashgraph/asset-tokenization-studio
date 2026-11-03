@@ -4,6 +4,11 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ClearingOps } from "./ClearingOps.sol";
 import { IClearingTypes } from "../../facets/clearing/IClearingTypes.sol";
 import { IHoldTypes } from "../../facets/hold/IHoldTypes.sol";
+import {
+    NONCE_KEY_PROTECTED_CLEARING_TRANSFER_BY_PARTITION,
+    NONCE_KEY_PROTECTED_CLEARING_REDEEM_BY_PARTITION,
+    NONCE_KEY_PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION
+} from "../../facets/protectedClearingByPartition/IProtectedClearingByPartition.sol";
 import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../asset/ERC1594StorageWrapper.sol";
@@ -43,7 +48,10 @@ library ClearingProtectedOps {
         _checkNonceAndDeadline(
             _protectedClearingOperation.nonce,
             _protectedClearingOperation.from,
-            NonceStorageWrapper.getNonceFor(_protectedClearingOperation.from),
+            NonceStorageWrapper.getNonceFor(
+                _protectedClearingOperation.from,
+                NONCE_KEY_PROTECTED_CLEARING_TRANSFER_BY_PARTITION
+            ),
             _protectedClearingOperation.deadline,
             TimeTravelStorageWrapper.getBlockTimestamp()
         );
@@ -58,7 +66,10 @@ library ClearingProtectedOps {
             ERC20StorageWrapper.getName()
         );
 
-        NonceStorageWrapper.setNonceFor(_protectedClearingOperation.from);
+        NonceStorageWrapper.setNonceFor(
+            _protectedClearingOperation.from,
+            NONCE_KEY_PROTECTED_CLEARING_TRANSFER_BY_PARTITION
+        );
 
         (success_, clearingId_) = ClearingOps.clearingTransferCreation(
             _protectedClearingOperation.clearingOperation,
@@ -88,7 +99,10 @@ library ClearingProtectedOps {
         _checkNonceAndDeadline(
             _protectedClearingOperation.nonce,
             _protectedClearingOperation.from,
-            NonceStorageWrapper.getNonceFor(_protectedClearingOperation.from),
+            NonceStorageWrapper.getNonceFor(
+                _protectedClearingOperation.from,
+                NONCE_KEY_PROTECTED_CLEARING_REDEEM_BY_PARTITION
+            ),
             _protectedClearingOperation.deadline,
             TimeTravelStorageWrapper.getBlockTimestamp()
         );
@@ -102,7 +116,10 @@ library ClearingProtectedOps {
             ERC20StorageWrapper.getName()
         );
 
-        NonceStorageWrapper.setNonceFor(_protectedClearingOperation.from);
+        NonceStorageWrapper.setNonceFor(
+            _protectedClearingOperation.from,
+            NONCE_KEY_PROTECTED_CLEARING_REDEEM_BY_PARTITION
+        );
 
         (success_, clearingId_) = ClearingOps.clearingRedeemCreation(
             _protectedClearingOperation.clearingOperation,
@@ -131,7 +148,10 @@ library ClearingProtectedOps {
         _checkNonceAndDeadline(
             _protectedClearingOperation.nonce,
             _protectedClearingOperation.from,
-            NonceStorageWrapper.getNonceFor(_protectedClearingOperation.from),
+            NonceStorageWrapper.getNonceFor(
+                _protectedClearingOperation.from,
+                NONCE_KEY_PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION
+            ),
             _protectedClearingOperation.deadline,
             TimeTravelStorageWrapper.getBlockTimestamp()
         );
@@ -145,7 +165,10 @@ library ClearingProtectedOps {
             ERC20StorageWrapper.getName()
         );
 
-        NonceStorageWrapper.setNonceFor(_protectedClearingOperation.from);
+        NonceStorageWrapper.setNonceFor(
+            _protectedClearingOperation.from,
+            NONCE_KEY_PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION
+        );
 
         (success_, clearingId_) = ClearingOps.clearingHoldCreationCreation(
             _protectedClearingOperation.clearingOperation,

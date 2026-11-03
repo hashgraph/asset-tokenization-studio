@@ -16,7 +16,7 @@ The backend exposes a RESTful API for managing assets, distributions, and payout
 
 When the backend is running, interactive API documentation is available at:
 
-**http://localhost:3001/api/docs**
+**http://localhost:3000/api/docs**
 
 ## Endpoints
 

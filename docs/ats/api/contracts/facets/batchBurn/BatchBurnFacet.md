@@ -1,0 +1,234 @@
+# BatchBurnFacet
+
+_Asset Tokenization Studio Team_
+
+> BatchBurnFacet
+
+Diamond facet that exposes the batch burn capability through the `IBatchBurn` interface, registered under `RESOLVER_KEY_BATCH_BURN`.
+
+_Inherits burn logic from `BatchBurn` and satisfies the `IStaticFunctionSelectors` contract required by the Diamond proxy for selector registration. Exposes one selector: `batchBurn`._
+
+## Methods
+
+### batchBurn
+
+```solidity
+function batchBurn(address[] _userAddresses, uint256[] _amounts) external nonpayable
+```
+
+Burns tokens from multiple addresses in a single transaction.
+
+_Caller must hold `ROLE_CONTROLLER` or `ROLE_AGENT`. The token must not be paused and must not be configured for multi-partition. Emits `IController.ControllerRedemption` for each address processed._
+
+#### Parameters
+
+| Name            | Type      | Description                                                                       |
+| --------------- | --------- | --------------------------------------------------------------------------------- |
+| \_userAddresses | address[] | Addresses from which tokens will be burnt.                                        |
+| \_amounts       | uint256[] | Corresponding token amounts to burn. Must be the same length as `_userAddresses`. |
+
+### getStaticFunctionSelectors
+
+```solidity
+function getStaticFunctionSelectors() external pure returns (bytes4[])
+```
+
+Gets all function selectors of a facet
+
+#### Returns
+
+| Name | Type     | Description              |
+| ---- | -------- | ------------------------ |
+| \_0  | bytes4[] | Face functions selectors |
+
+### getStaticInterfaceIds
+
+```solidity
+function getStaticInterfaceIds() external pure returns (bytes4[])
+```
+
+Gets all interfaces ids of a facet.
+
+#### Returns
+
+| Name | Type     | Description        |
+| ---- | -------- | ------------------ |
+| \_0  | bytes4[] | Face interface ids |
+
+### getStaticResolverKey
+
+```solidity
+function getStaticResolverKey() external pure returns (bytes32 staticResolverKey_)
+```
+
+Gets the static resolver key
+
+#### Returns
+
+| Name                | Type    | Description         |
+| ------------------- | ------- | ------------------- |
+| staticResolverKey\_ | bytes32 | Static resolver key |
+
+### initializeBatchBurn
+
+```solidity
+function initializeBatchBurn() external nonpayable
+```
+
+Initialises the batch burn capability on the token.
+
+_Callable once; subsequent calls revert with `FacetAlreadyRegistered`. Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment._
+
+## Events
+
+### BatchBurnInitialized
+
+```solidity
+event BatchBurnInitialized()
+```
+
+Emitted once when the batch burn capability is initialised on a token.
+
+_Fires exclusively from `initializeBatchBurn` after the storage write succeeds._
+
+### ControllerRedemption
+
+```solidity
+event ControllerRedemption(address controller, address indexed tokenHolder, uint256 value, bytes data, bytes operatorData)
+```
+
+Emitted when an authorised controller redeems (burns) tokens on behalf of a holder.
+
+#### Parameters
+
+| Name                  | Type    | Description                                                     |
+| --------------------- | ------- | --------------------------------------------------------------- |
+| controller            | address | The address of the controller that initiated the redemption.    |
+| tokenHolder `indexed` | address | The account whose tokens are redeemed.                          |
+| value                 | uint256 | The amount of tokens redeemed.                                  |
+| data                  | bytes   | Optional data attached to the redemption for validation.        |
+| operatorData          | bytes   | Optional data attached by the controller for event attribution. |
+
+## Errors
+
+### AccountHasNoRole
+
+```solidity
+error AccountHasNoRole(address account, bytes32 role)
+```
+
+Thrown when an account does not hold a required role.
+
+#### Parameters
+
+| Name    | Type    | Description                      |
+| ------- | ------- | -------------------------------- |
+| account | address | The account that lacks the role. |
+| role    | bytes32 | The role that is not held.       |
+
+### AccountHasNoRoles
+
+```solidity
+error AccountHasNoRoles(address account, bytes32[] roles)
+```
+
+Thrown when an account does not hold any of the specified roles.
+
+#### Parameters
+
+| Name    | Type      | Description                       |
+| ------- | --------- | --------------------------------- |
+| account | address   | The account that lacks the roles. |
+| roles   | bytes32[] | The roles that are not held.      |
+
+### AssetNotOperational
+
+```solidity
+error AssetNotOperational(bytes32 configId, uint256 versionId)
+```
+
+Raised by `InitializerStorageWrapper.checkOperational` (and the related `isConfigVersionOperational` helper) when an operation is attempted on a configuration version that has not yet been marked operational.
+
+#### Parameters
+
+| Name      | Type    | Description                                                        |
+| --------- | ------- | ------------------------------------------------------------------ |
+| configId  | bytes32 | Resolver-proxy configuration whose operational status was checked. |
+| versionId | uint256 | Configuration version whose operational status was checked.        |
+
+### Deactivated
+
+```solidity
+error Deactivated()
+```
+
+Thrown when an operation guarded by `onlyActivated` is attempted on a token whose deactivation flag has already been set.
+
+### FacetAlreadyRegistered
+
+```solidity
+error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion)
+```
+
+Raised when an initialiser tries to register a facet that already has a non-zero last registered version (i.e. the facet is being re-initialised on a fresh install).
+
+#### Parameters
+
+| Name        | Type    | Description                                                    |
+| ----------- | ------- | -------------------------------------------------------------- |
+| facetId     | bytes32 | Identifier of the offending facet.                             |
+| lastVersion | uint256 | Last version recorded for that facet at the time of the check. |
+
+### InputAmountsArrayLengthMismatch
+
+```solidity
+error InputAmountsArrayLengthMismatch()
+```
+
+Thrown when the lengths of two input amount arrays do not match.
+
+### IsPaused
+
+```solidity
+error IsPaused()
+```
+
+Thrown when an operation that requires the token to be unpaused is attempted while the token is paused (own flag or any external pause contract).
+
+### NotAllowedInMultiPartitionMode
+
+```solidity
+error NotAllowedInMultiPartitionMode()
+```
+
+Thrown when a single-partition operation is attempted on a multi-partition token.
+
+### TokenIsNotControllable
+
+```solidity
+error TokenIsNotControllable()
+```
+
+Thrown when an operation requires the token to be controllable but it is not.
+
+### UnrecognizedResolverProxyVersion
+
+```solidity
+error UnrecognizedResolverProxyVersion(bytes8 _resolverProxyVersion)
+```
+
+Thrown when the provided proxy version does not match any BLR compatible standard.
+
+#### Parameters
+
+| Name                   | Type   | Description                                        |
+| ---------------------- | ------ | -------------------------------------------------- |
+| \_resolverProxyVersion | bytes8 | proxy version that is not compatible with the BLR. |
+
+### WalletRecovered
+
+```solidity
+error WalletRecovered()
+```
+
+Thrown when attempting to recover a wallet that has already been recovered.

@@ -2,6 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IBusinessLogicResolver } from "../../infrastructure/diamond/IBusinessLogicResolver.sol";
+import { IResolverProxy } from "../../infrastructure/proxy/IResolverProxy.sol";
+import { RESOLVER_PROXY_VERSION_V2 } from "../../constants/values.sol";
+import { IDiamondCutManager } from "../../infrastructure/diamond/IDiamondCutManager.sol";
 
 /// @custom:hash storage ResolverProxy
 bytes32 constant STORAGE_LOCATION_RESOLVER_PROXY = 0x688a1184cf65cae3790aef0eb6006209aa488bc22d1dd13eb263813b07a39300;
@@ -17,11 +20,7 @@ struct ResolverProxyStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
     // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
     IBusinessLogicResolver resolver;
-    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
-    bytes32 resolverProxyConfigurationId;
-    uint256 version;
-    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
-    // ─── APPEND-ONLY ZONE BELOW ───
+    bytes resolverProxyConfiguration; //IResolverProxy.ResolverProxyConfigurationGeneric resolverProxyConfiguration;
 }
 
 /**
@@ -34,11 +33,74 @@ struct ResolverProxyStorage {
  */
 library ResolverProxyStorageWrapper {
     /**
+     * @notice Initializes the resolver-proxy storage.
+     * @param _resolver The `BusinessLogicResolver` instance.
+     * @param _resolverProxyConfigurationV2 The V2 configuration struct.
+     */
+    function initResolverProxyStorage(
+        IBusinessLogicResolver _resolver,
+        IResolverProxy.ResolverProxyConfigurationV2 memory _resolverProxyConfigurationV2
+    ) internal {
+        setBusinessLogicResolver(_resolver);
+        setResolverProxyConfigurationV2(_resolverProxyConfigurationV2);
+    }
+
+    function setBusinessLogicResolver(IBusinessLogicResolver _resolver) internal {
+        _resolverProxyStorage().resolver = _resolver;
+    }
+
+    /**
+     * @notice Stores a V2 configuration payload as a version-tagged envelope.
+     * @dev Serialises `_v2` into the generic envelope (`RESOLVER_PROXY_VERSION_V2` + ABI-encoded
+     *      payload) and writes it to the single `bytes` slot consumed by `resolveResolverProxyCall`.
+     * @param _v2 The V2 configuration to persist.
+     */
+    function setResolverProxyConfigurationV2(IResolverProxy.ResolverProxyConfigurationV2 memory _v2) internal {
+        _resolverProxyStorage().resolverProxyConfiguration = abi.encode(
+            IResolverProxy.ResolverProxyConfigurationGeneric({
+                resolverProxyVersion: RESOLVER_PROXY_VERSION_V2,
+                content: abi.encode(_v2)
+            })
+        );
+    }
+
+    /**
      * @notice Returns the `BusinessLogicResolver` contract that supplies the facet selectors.
      * @return The active resolver instance for this proxy.
      */
     function getBusinessLogicResolver() internal view returns (IBusinessLogicResolver) {
-        return resolverProxyStorage().resolver;
+        return _resolverProxyStorage().resolver;
+    }
+
+    /**
+     * @notice Returns the proxy configuration.
+     * @return The proxy configuration.
+     */
+    function getProxyConfiguration() internal view returns (bytes memory) {
+        return _resolverProxyStorage().resolverProxyConfiguration;
+    }
+
+    /**
+     * @notice Returns the pinned resolver proxy version served by the proxy.
+     * @return The resolver proxy version.
+     */
+    function getResolverProxyVersion() internal view returns (bytes8) {
+        return _decodeGeneric().resolverProxyVersion;
+    }
+
+    /**
+     * @notice Returns the configuration identifier selecting the facet set served by the proxy.
+     * @return The configured `bytes32` identifier.
+     * @return The version `uint256` identifier.
+     */
+    function getResolverProxyConfigurationIdAndVersion() internal view returns (bytes32, uint256) {
+        bytes8 resolverProxyVersion = getResolverProxyVersion();
+        if (resolverProxyVersion == RESOLVER_PROXY_VERSION_V2) {
+            IResolverProxy.ResolverProxyConfigurationV2
+                memory resolverProxyConfigurationV2 = getResolverProxyConfigurationV2();
+            return (resolverProxyConfigurationV2.configurationId, resolverProxyConfigurationV2.configurationVersion);
+        }
+        revert IDiamondCutManager.UnrecognizedResolverProxyVersion(resolverProxyVersion);
     }
 
     /**
@@ -46,15 +108,57 @@ library ResolverProxyStorageWrapper {
      * @return The configured `bytes32` identifier.
      */
     function getResolverProxyConfigurationId() internal view returns (bytes32) {
-        return resolverProxyStorage().resolverProxyConfigurationId;
+        bytes8 resolverProxyVersion = getResolverProxyVersion();
+        if (resolverProxyVersion == RESOLVER_PROXY_VERSION_V2) return getResolverProxyConfigurationV2().configurationId;
+        revert IDiamondCutManager.UnrecognizedResolverProxyVersion(resolverProxyVersion);
     }
 
     /**
      * @notice Returns the pinned configuration version served by the proxy.
-     * @return The configuration version, zero when the proxy tracks the latest.
+     * @return The configuration version.
      */
-    function getResolverProxyVersion() internal view returns (uint256) {
-        return resolverProxyStorage().version;
+    function getResolverProxyConfigurationVersion() internal view returns (uint256) {
+        bytes8 resolverProxyVersion = getResolverProxyVersion();
+        if (resolverProxyVersion == RESOLVER_PROXY_VERSION_V2)
+            return getResolverProxyConfigurationV2().configurationVersion;
+        revert IDiamondCutManager.UnrecognizedResolverProxyVersion(resolverProxyVersion);
+    }
+
+    /**
+     * @notice Returns the replacement enabled flag served by the proxy.
+     * @return The replacement enabled flag.
+     */
+    function getResolverProxyReplacementEnabled() internal view returns (bool) {
+        bytes8 resolverProxyVersion = getResolverProxyVersion();
+        if (resolverProxyVersion == RESOLVER_PROXY_VERSION_V2)
+            return getResolverProxyConfigurationV2().replacementEnabled;
+        revert IDiamondCutManager.UnrecognizedResolverProxyVersion(resolverProxyVersion);
+    }
+
+    /**
+     * @notice Returns the full V2 configuration payload served by the proxy.
+     * @return The decoded V2 configuration.
+     */
+    function getResolverProxyConfigurationV2()
+        internal
+        view
+        returns (IResolverProxy.ResolverProxyConfigurationV2 memory)
+    {
+        IResolverProxy.ResolverProxyConfigurationGeneric memory generic = _decodeGeneric();
+        return abi.decode(generic.content, (IResolverProxy.ResolverProxyConfigurationV2));
+    }
+
+    /**
+     * @notice Decodes the version-tagged configuration envelope held in storage.
+     * @dev The outer `ResolverProxyConfigurationGeneric` shape is fixed across versions, so this
+     *      decode succeeds regardless of which payload version `content` carries.
+     * @return generic The decoded generic configuration.
+     */
+    function _decodeGeneric() private view returns (IResolverProxy.ResolverProxyConfigurationGeneric memory generic) {
+        generic = abi.decode(
+            _resolverProxyStorage().resolverProxyConfiguration,
+            (IResolverProxy.ResolverProxyConfigurationGeneric)
+        );
     }
 
     /**
@@ -63,7 +167,7 @@ library ResolverProxyStorageWrapper {
      *      `STORAGE_LOCATION_RESOLVER_PROXY`.
      * @return ds Storage reference to the `ResolverProxyStorage` struct.
      */
-    function resolverProxyStorage() internal pure returns (ResolverProxyStorage storage ds) {
+    function _resolverProxyStorage() private pure returns (ResolverProxyStorage storage ds) {
         bytes32 position = STORAGE_LOCATION_RESOLVER_PROXY;
         // solhint-disable-next-line no-inline-assembly
         assembly {

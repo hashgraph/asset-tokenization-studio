@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IERC1410Types } from "../layer_1/ERC1400/ERC1410/IERC1410Types.sol";
+import { IERC1410Types } from "../commonTypes/IERC1410Types.sol";
 
 /// @custom:hash resolverKey TransferByPartition
 // solhint-disable-next-line max-line-length
@@ -37,6 +37,6 @@ interface ITransferByPartition is IERC1410Types {
     function transferByPartition(
         bytes32 _partition,
         BasicTransferInfo calldata _basicTransferInfo,
-        bytes memory _data
+        bytes calldata _data
     ) external returns (bytes32);
 }

@@ -92,6 +92,8 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
     }
 
     /// @inheritdoc IClearingByPartition
+    /// @dev Intentional recovery carve-out: exempt from identity/KYC checks because it returns
+    ///      the holder's own locked tokens rather than performing a new regulated transfer.
     function reclaimClearingOperationByPartition(
         IClearingByPartition.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     )
@@ -103,7 +105,6 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
         onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
         onlyWithValidClearingId(_clearingOperationIdentifier)
         onlyValidExpirationTimestampForClearing(_clearingOperationIdentifier, true)
-        onlyIdentifiedAddresses(_clearingOperationIdentifier.tokenHolder, address(0))
         returns (bool success_)
     {
         success_ = ClearingLifecycleOps.reclaimClearingOperationByPartition(_clearingOperationIdentifier);
@@ -158,7 +159,7 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
         onlyUnrecoveredAddress(_clearingOperationFrom.from)
         onlyClearingActivated
         onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
-        notZeroAddress(_clearingOperationFrom.from)
+        validateAddressNotZero(_clearingOperationFrom.from)
         onlyDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition)
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 clearingId_)
@@ -195,7 +196,7 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
         onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
         onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyUnrecoveredAddress(_to)
-        notZeroAddress(_to)
+        validateAddressNotZero(_to)
         onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 clearingId_)
@@ -224,8 +225,8 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
         onlyUnpaused
         onlyClearingActivated
         onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
-        notZeroAddress(_clearingOperationFrom.from)
-        notZeroAddress(_to)
+        validateAddressNotZero(_clearingOperationFrom.from)
+        validateAddressNotZero(_to)
         onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyUnrecoveredAddress(_to)
         onlyUnrecoveredAddress(_clearingOperationFrom.from)

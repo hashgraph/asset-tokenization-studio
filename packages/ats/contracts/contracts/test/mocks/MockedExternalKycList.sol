@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IExternalKycList } from "../../facets/layer_1/externalKycList/IExternalKycList.sol";
+import { IExternalKycList } from "../../facets/externalKycListManagement/IExternalKycList.sol";
 import { IKyc } from "../../facets/kyc/IKyc.sol";
 
 contract MockedExternalKycList is IExternalKycList {

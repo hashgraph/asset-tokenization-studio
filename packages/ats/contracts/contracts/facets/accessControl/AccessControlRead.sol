@@ -7,10 +7,12 @@ import { Modifiers } from "../../services/Modifiers.sol";
 
 /**
  * @title AccessControlRead
- * @notice Read-only base for AccessControl and AccessControlOperational.
- *         Implements all view functions of IAccessControl. Write functions are
- *         implemented by subclasses with or without onlyOperational depending on
- *         whether the consumer is a proxy facet or a direct-inheritance contract.
+ * @author Asset Tokenization Studio Team
+ * @notice Read-only base for `AccessControlBase` (and, through it, `AccessControl` and
+ *         `AccessControlOperational`). Implements all view functions of IAccessControl.
+ *         Write functions are implemented once in `AccessControlBase` and exposed by the
+ *         two subclasses with the guard modifiers appropriate to a proxy facet or a
+ *         direct-inheritance contract.
  */
 abstract contract AccessControlRead is IAccessControl, Modifiers {
     /// @inheritdoc IAccessControl

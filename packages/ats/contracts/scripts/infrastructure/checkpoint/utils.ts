@@ -26,10 +26,7 @@ const WORKFLOW_STEPS: Record<string, readonly string[]> = {
     "Register Facets",
     "Equity Configuration",
     "Bond Configuration",
-    "Bond Fixed Rate Configuration",
-    "Bond KpiLinked Rate Configuration",
-    "Loan Configuration",
-    "Loans Portfolio Configuration",
+    "Deposit Token Configuration",
     "Factory",
     // TEST-ONLY: only executed when `useTimeTravel` is enabled; the workflow
     // skips this step otherwise but its slot stays in the list so step indices
@@ -41,11 +38,7 @@ const WORKFLOW_STEPS: Record<string, readonly string[]> = {
     "Register Facets",
     "Equity Configuration",
     "Bond Configuration",
-    "Bond Fixed Rate Configuration",
-    "Bond KpiLinked Rate Configuration",
     "Deposit Token Configuration",
-    "Loan Configuration",
-    "Loans Portfolio Configuration",
     "Factory Configuration",
     "Factory",
   ] as const,
@@ -110,12 +103,7 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
   if (!steps.facets || steps.facets.size === 0) {
     throw new Error("Checkpoint missing facet deployments");
   }
-  if (
-    !steps.configurations?.equity ||
-    !steps.configurations?.bond ||
-    !steps.configurations?.bondFixedRate ||
-    !steps.configurations?.bondKpiLinkedRate
-  ) {
+  if (!steps.configurations?.equity || !steps.configurations?.bond) {
     throw new Error("Checkpoint missing configurations");
   }
 
@@ -179,30 +167,6 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
         facetCount: steps.configurations.bond.facetCount,
         facets: [], // Will be populated in actual workflow
       },
-      bondFixedRate: {
-        configId: steps.configurations.bondFixedRate.configId,
-        version: steps.configurations.bondFixedRate.version,
-        facetCount: steps.configurations.bondFixedRate.facetCount,
-        facets: [], // Will be populated in actual workflow
-      },
-      bondKpiLinkedRate: {
-        configId: steps.configurations.bondKpiLinkedRate.configId,
-        version: steps.configurations.bondKpiLinkedRate.version,
-        facetCount: steps.configurations.bondKpiLinkedRate.facetCount,
-        facets: [], // Will be populated in actual workflow
-      },
-      loan: {
-        configId: steps.configurations.loan?.configId ?? "",
-        version: steps.configurations.loan?.version ?? 0,
-        facetCount: steps.configurations.loan?.facetCount ?? 0,
-        facets: [], // Will be populated in actual workflow
-      },
-      loansPortfolio: {
-        configId: steps.configurations.loansPortfolio?.configId ?? "",
-        version: steps.configurations.loansPortfolio?.version ?? 0,
-        facetCount: steps.configurations.loansPortfolio?.facetCount ?? 0,
-        facets: [], // Will be populated in actual workflow
-      },
       depositToken: {
         configId: steps.configurations.depositToken?.configId ?? "",
         version: steps.configurations.depositToken?.version ?? 0,
@@ -229,11 +193,7 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
     helpers: {
       getEquityFacets: () => [],
       getBondFacets: () => [],
-      getBondFixedRateFacets: () => [],
-      getBondKpiLinkedRateFacets: () => [],
-      getLoanFacets: () => [],
       getDepositTokenFacets: () => [],
-      getLoansPortfolioFacets: () => [],
       getFactoryFacets: () => [],
     },
   };

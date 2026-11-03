@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IERC1410Types } from "../layer_1/ERC1400/ERC1410/IERC1410Types.sol";
+import { IERC1410Types } from "../commonTypes/IERC1410Types.sol";
 
 /// @custom:hash resolverKey ControllerByPartition
 // solhint-disable-next-line max-line-length
@@ -9,6 +9,7 @@ bytes32 constant RESOLVER_KEY_CONTROLLER_BY_PARTITION = 0xa75865ef65a8410651c7bf
 
 /**
  * @title IControllerByPartition
+ * @author Asset Tokenization Studio Team
  * @notice Interface for controller-initiated forced transfers and redemptions on a specific partition.
  * @dev Exposes two write methods that allow an authorised controller or agent to forcibly transfer
  *      or redeem tokens from any token holder's balance on a given partition. Both operations

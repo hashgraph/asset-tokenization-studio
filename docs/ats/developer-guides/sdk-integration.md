@@ -95,11 +95,15 @@ const walletData = await Network.connect(connectRequest);
 import { Equity, CreateEquityRequest } from "@hashgraph/asset-tokenization-sdk";
 
 const request = new CreateEquityRequest({
-  tokenName: "Acme Corporation Common Stock",
-  tokenSymbol: "ACME",
-  tokenDecimals: 0,
-  tokenTotalSupply: 1000000,
-  isin: "US9311421039",
+  name: "Acme Corporation Common Stock",
+  symbol: "ACME",
+  decimals: 0,
+  numberOfShares: "1000000",
+  nominalValue: "100",
+  nominalValueDecimals: 2,
+  // …plus the rights flags (votingRight, dividendRight, …), the resolver config
+  // (configId, configVersion) and regulation fields. See CreateEquityRequest for
+  // the full required set.
 });
 
 const response = await Equity.create(request);
@@ -112,7 +116,7 @@ console.log("Token created:", response.security.tokenId);
 import { Security, TransferRequest } from "@hashgraph/asset-tokenization-sdk";
 
 const transferRequest = new TransferRequest({
-  tokenId: "0.0.1234567",
+  securityId: "0.0.1234567",
   targetId: "0.0.7654321",
   amount: 100,
 });
@@ -126,9 +130,9 @@ const success = await Security.transfer(transferRequest);
 import { Kyc, GrantKycRequest } from "@hashgraph/asset-tokenization-sdk";
 
 const grantKycRequest = new GrantKycRequest({
-  tokenId: "0.0.1234567",
+  securityId: "0.0.1234567",
   targetId: "0.0.7654321",
-  vcData: "verifiable_credential_data",
+  vcBase64: "<base64-encoded VC>",
 });
 
 await Kyc.grantKyc(grantKycRequest);

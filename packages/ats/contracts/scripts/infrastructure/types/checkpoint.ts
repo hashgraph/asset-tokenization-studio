@@ -210,28 +210,19 @@ export interface DeploymentCheckpoint {
     /** Facets registered in BLR (step 3) */
     facetsRegistered?: boolean;
 
-    /** Configurations (steps 4-5) */
+    /** Configurations (steps 4-6) */
     configurations?: {
       /** Equity configuration */
       equity?: ConfigurationResult;
       /** Bond configuration */
       bond?: ConfigurationResult;
-      /** Bond Fixed Rate configuration */
-      bondFixedRate?: ConfigurationResult;
-      /** Bond KpiLinked Rate configuration */
-      bondKpiLinkedRate?: ConfigurationResult;
       /** Deposit Token configuration */
       depositToken?: ConfigurationResult;
-      /** Loan configuration */
-      loan?: ConfigurationResult;
-      /** Loans Portfolio configuration */
-      loansPortfolio?: ConfigurationResult;
       /** Factory configuration */
       factory?: ConfigurationResult;
-      // TEST-ONLY: InitializeMock configuration (gated by `useTimeTravel`).
-      // Records every version minted for the same configId in a single
-      // workflow step — the workflow calls `createInitializeMockConfiguration`
-      // multiple times in a row to mint v1..vN.
+      // TEST-ONLY: InitializeMock configuration. Records every version minted
+      // for the same configId in a single workflow step — the workflow calls
+      // `createInitializeMockConfiguration` multiple times in a row to mint v1..vN.
       initializeMock?: {
         /** Configuration ID (bytes32) */
         configId: string;

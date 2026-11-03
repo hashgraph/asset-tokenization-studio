@@ -3,7 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ROLE_TREX_OWNER, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { IIdentity, RESOLVER_KEY_IDENTITY } from "./IIdentity.sol";
-import { IIdentityRegistry } from "../layer_1/ERC3643/IIdentityRegistry.sol";
+import { IERC3643Types } from "../commonTypes/IERC3643Types.sol";
+import { IIdentityRegistry } from "./externalInterfaces/IIdentityRegistry.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
@@ -26,6 +27,7 @@ abstract contract Identity is IIdentity, Modifiers {
     ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_IDENTITY) {
         ERC3643StorageWrapper.setIdentityRegistry(_identityRegistry);
         InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_IDENTITY);
+        emit IERC3643Types.IdentityRegistryAdded(_identityRegistry);
         emit IdentityInitialized(_identityRegistry);
     }
 
@@ -37,10 +39,13 @@ abstract contract Identity is IIdentity, Modifiers {
     }
 
     /// @inheritdoc IIdentity
+    /// @dev Emits `IdentityRegistryAdded` so off-chain indexers can track which registry vetted
+    ///      holders at any historical block.
     function setIdentityRegistry(
         address _identityRegistry
     ) external override onlyOperational onlyActivated onlyUnpaused onlyRole(ROLE_TREX_OWNER) {
         ERC3643StorageWrapper.setIdentityRegistry(_identityRegistry);
+        emit IERC3643Types.IdentityRegistryAdded(_identityRegistry);
     }
 
     /// @inheritdoc IIdentity

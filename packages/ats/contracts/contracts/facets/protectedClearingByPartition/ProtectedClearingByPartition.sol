@@ -47,7 +47,7 @@ abstract contract ProtectedClearingByPartition is IProtectedClearingByPartition,
         onlyActivated
         onlyUnpaused
         onlyProtectedPartitions
-        onlyValidAddress(_protectedClearingOperation.from)
+        validateAddressNotZero(_protectedClearingOperation.from)
         onlyUnrecoveredAddress(_protectedClearingOperation.from)
         onlyWithValidExpirationTimestamp(_protectedClearingOperation.clearingOperation.expirationTimestamp)
         onlyRole(
@@ -79,8 +79,8 @@ abstract contract ProtectedClearingByPartition is IProtectedClearingByPartition,
         onlyActivated
         onlyUnpaused
         onlyProtectedPartitions
-        notZeroAddress(_protectedClearingOperation.from)
-        notZeroAddress(_to)
+        validateAddressNotZero(_protectedClearingOperation.from)
+        validateAddressNotZero(_to)
         onlyUnrecoveredAddress(_protectedClearingOperation.from)
         onlyUnrecoveredAddress(_to)
         onlyWithValidExpirationTimestamp(_protectedClearingOperation.clearingOperation.expirationTimestamp)

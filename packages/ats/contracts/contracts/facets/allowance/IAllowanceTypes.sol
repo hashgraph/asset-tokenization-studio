@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 /**
  * @title IAllowanceTypes
+ * @author Asset Tokenization Studio Team
  * @notice Events and errors emitted by the ERC-20 allowance surface.
  */
 interface IAllowanceTypes {
@@ -17,13 +18,6 @@ interface IAllowanceTypes {
      * @param value Allowance of `spender` over `owner`'s tokens after the update.
      */
     event Approval(address indexed owner, address indexed spender, uint256 value);
-
-    /**
-     * @notice Reverts when an allowance operation references the zero address as the owner.
-     * @dev Defensive guard against mis-wired flows or malformed calldata reaching the
-     *      underlying storage wrappers.
-     */
-    error ZeroOwnerAddress();
 
     /**
      * @notice Reverts when `spender` attempts to consume more allowance than `from` has

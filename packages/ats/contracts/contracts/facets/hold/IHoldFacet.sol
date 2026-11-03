@@ -8,6 +8,7 @@ bytes32 constant RESOLVER_KEY_HOLD = 0x7c2ef14067e573a8580a580634bd7547099c4b82c
 
 /**
  * @title IHoldFacet
+ * @author Asset Tokenization Studio Team
  * @notice Interface for the high-level, partition-agnostic hold read accessors.
  * @dev Defines the read surface of the `HoldFacet` diamond facet: the aggregate held balance for an
  *      account and the third party registered on a specific hold. Partition-scoped accessors remain on
