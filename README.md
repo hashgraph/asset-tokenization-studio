@@ -6,6 +6,12 @@
 
 </div>
 
+## Documentation
+
+**Official docs:** [docs.tokenization-studio.hedera.com](https://docs.tokenization-studio.hedera.com/)
+
+---
+
 ## Introduction
 
 The **Asset Tokenization Studio (ATS) Monorepo** provides a unified environment to design, deploy, and operate tokenized financial assets on the **Hedera network**, as well as to manage **large-scale payout distributions**.
@@ -109,7 +115,7 @@ For detailed product capabilities, see the [Mass Payout User Guides](docs/mass-p
 └── package.json              # Workspace configuration and root scripts
 ```
 
-## Documentation
+## Local Documentation
 
 **Complete documentation:** [docs/index.md](docs/index.md)
 
