@@ -18,8 +18,8 @@
     "clean:node": "npx --yes rimraf node_modules"
   },
   "dependencies": {
-    "@docusaurus/core": "3.9.2",
-    "@docusaurus/preset-classic": "3.9.2",
+    "@docusaurus/core": "3.10.2",
+    "@docusaurus/preset-classic": "3.10.2",
     "@docusaurus/theme-mermaid": "^3.9.2",
     "@easyops-cn/docusaurus-search-local": "0.52.2",
     "@mdx-js/react": "^3.0.0",
